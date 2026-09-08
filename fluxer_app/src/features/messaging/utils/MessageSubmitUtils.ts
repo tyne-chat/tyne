@@ -62,6 +62,7 @@ export function createOptimisticMessage(data: MessageSubmitData, attachments: Ar
 		message_reference: data.referencedMessage
 			? {channel_id: data.channelId, message_id: data.referencedMessage.id, type: 0}
 			: undefined,
+		referenced_message: data.referencedMessage?.toJSON(),
 		state: MessageStates.SENDING,
 		nonce: data.nonce,
 		attachments,
