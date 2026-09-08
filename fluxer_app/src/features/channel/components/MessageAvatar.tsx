@@ -18,6 +18,7 @@ export const MessageAvatar = observer(
 		size,
 		className,
 		isHovering,
+		ignoreSubprofile,
 	}: {
 		user: User;
 		message: Message;
@@ -26,6 +27,7 @@ export const MessageAvatar = observer(
 		className: string;
 		isHovering: boolean;
 		isPreview: boolean;
+		ignoreSubprofile?: boolean;
 	}) => {
 		const onPopoutToggle = useMaybeMessageViewContext()?.onPopoutToggle;
 		const handlePopoutOpen = useCallback(() => onPopoutToggle?.(true), [onPopoutToggle]);
@@ -69,7 +71,7 @@ export const MessageAvatar = observer(
 				<FocusRing data-flx="channel.message-avatar.focus-ring">
 					<Avatar
 						user={user}
-						avatarUrl={message.subprofile?.avatar ?? undefined}
+						avatarUrl={ignoreSubprofile ? undefined : (message.subprofile?.avatar ?? undefined)}
 						size={size}
 						className={className}
 						forceAnimate={isHovering}
