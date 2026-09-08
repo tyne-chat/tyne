@@ -1,6 +1,43 @@
 {
 	"user_types": [
 		{
+			"name": "message_subprofile",
+			"fields": [
+				{
+					"name": "id",
+					"type": "text"
+				},
+				{
+					"name": "name",
+					"type": "text"
+				},
+				{
+					"name": "avatar",
+					"type": "text"
+				},
+				{
+					"name": "avatar_color",
+					"type": "int"
+				},
+				{
+					"name": "system_name",
+					"type": "text"
+				},
+				{
+					"name": "pronouns",
+					"type": "text"
+				},
+				{
+					"name": "color",
+					"type": "int"
+				},
+				{
+					"name": "bio",
+					"type": "text"
+				}
+			]
+		},
+		{
 			"name": "channel_override",
 			"fields": [
 				{
@@ -6837,6 +6874,10 @@
 				{
 					"name": "version",
 					"type": "int"
+				},
+				{
+					"name": "subprofile",
+					"type": "frozen<message_subprofile>"
 				}
 			],
 			"primary_key": "((channel_id, bucket), message_id)",
