@@ -342,6 +342,10 @@
 	block-size: var(--message-avatar-size);
 }
 
+.messageSubprofileMainAvatar {
+	margin-bottom: 2px;
+}
+
 .messageNoText .messageAvatar,
 .messageNoText.messageGrouped .messageAvatar {
 	margin-block-start: var(--message-spacing-y);
@@ -452,6 +456,18 @@
 	unicode-bidi: plaintext;
 	user-select: text;
 	-webkit-user-select: text;
+}
+
+.messageUsernameSubtle {
+	font-weight: inherit;
+	font-style: italic;
+	font-size: var(--message-reply-font-size);
+}
+
+.messageAuthorSubprofileMarker {
+	color: var(--text-chat-muted);
+	font-style: italic;
+	font-size: var(--message-reply-font-size);
 }
 
 .message,
