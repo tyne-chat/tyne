@@ -68,6 +68,10 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 
+// Fork imports.
+
+import {UsersIcon} from '@phosphor-icons/react';
+
 const WINDOWS_SETTINGS_DESCRIPTOR = msg({
 	message: 'Windows app',
 	comment: 'User settings tab label shown on Windows desktop builds. Refers to the Microsoft Windows OS.',
@@ -83,6 +87,10 @@ const MACOS_SETTINGS_DESCRIPTOR = msg({
 const PROFILE_DESCRIPTOR = msg({
 	message: 'Profile',
 	comment: 'User settings tab for editing the current user profile.',
+});
+const SUBPROFILES_DESCRIPTOR = msg({
+	message: 'Subprofiles',
+	comment: 'User settings tab for subprofiles and personas.',
 });
 
 const CONNECTIONS_DESCRIPTOR = msg({
@@ -154,6 +162,12 @@ const ALL_TABS_DESCRIPTORS: Array<SettingsTabDescriptor> = [
 		label: PROFILE_DESCRIPTOR,
 		icon: UserIcon,
 		isVisible: shouldShowClaimedAccountSettings,
+	},
+	{
+		type: 'subprofiles',
+		category: 'user_settings',
+		label: SUBPROFILES_DESCRIPTOR,
+		icon: UsersIcon,
 	},
 	{
 		type: 'account_security',

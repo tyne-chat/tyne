@@ -51,6 +51,10 @@ import {msg} from '@lingui/core/macro';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 const COULDN_T_RUN_THAT_COMMAND_DESCRIPTOR = msg({
 	message: "Couldn't run that command: {detail}",
 	comment: 'Error message in the use textarea submit hook. Preserve {detail}; it is inserted by code.',
@@ -539,12 +543,18 @@ export const useTextareaSubmit = ({
 			}
 			MessageCommands.confirmPublishedMessageEdit(i18n, editingMessage, () => {
 				finishMobileEdit();
+				const editMatch = PersonaStore.matchEditMessage(resolvedContent, editingMessage.subprofile, {
+					hasAttachments: canSubmitEmptyMessageEdit(editingMessage),
+					originalContent: editingMessage.content,
+				});
 				void MessageCommands.edit(
 					channelId,
 					editingMessage.id,
-					resolvedContent,
+					editMatch.finalContent,
 					undefined,
 					editingMessage._allowedMentions,
+					canSubmitEmptyMessageEdit(editingMessage) ? buildExistingAttachmentEditReferences(editingMessage) : undefined,
+					editMatch.subprofile,
 				);
 			});
 			return;
@@ -558,12 +568,18 @@ export const useTextareaSubmit = ({
 				const newContent = ReplaceCommandUtils.executeReplaceCommand(lastMessage.content, replaceCommand);
 				if (newContent !== lastMessage.content) {
 					MessageCommands.confirmPublishedMessageEdit(i18n, lastMessage, () => {
+						const replaceEditMatch = PersonaStore.matchEditMessage(newContent, lastMessage.subprofile, {
+							hasAttachments: canSubmitEmptyMessageEdit(lastMessage),
+							originalContent: lastMessage.content,
+						});
 						void MessageCommands.edit(
 							lastMessage.channelId,
 							lastMessage.id,
-							newContent,
+							replaceEditMatch.finalContent,
 							undefined,
 							lastMessage._allowedMentions,
+							canSubmitEmptyMessageEdit(lastMessage) ? buildExistingAttachmentEditReferences(lastMessage) : undefined,
+							replaceEditMatch.subprofile,
 						);
 					});
 				}

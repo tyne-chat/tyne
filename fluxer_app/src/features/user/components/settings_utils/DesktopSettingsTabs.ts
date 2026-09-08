@@ -22,8 +22,14 @@ import VoiceVideoTab from '@app/features/user/components/modals/tabs/VoiceVideoT
 import type {UserSettingsTabType} from '@app/features/user/components/settings_utils/SettingsSectionRegistry';
 import type React from 'react';
 
+// Fork imports.
+
+import PersonaSettingsTab from '@app/features/persona/components/settings/PersonaSettingsTab';
+
 const DESKTOP_TAB_COMPONENTS: Partial<Record<UserSettingsTabType, React.ComponentType<Record<string, unknown>>>> = {
 	my_profile: MyProfileTab,
+	personas: PersonaSettingsTab,
+	subprofiles: PersonaSettingsTab,
 	account_security: AccountSecurityTab,
 	plutonium: PlutoniumTab,
 	gift_inventory: GiftInventoryTab,

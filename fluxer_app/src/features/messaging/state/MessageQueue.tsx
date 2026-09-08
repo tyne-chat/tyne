@@ -69,6 +69,10 @@ import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 import {reaction} from 'mobx';
 
+// Fork imports.
+
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+
 const YOUR_MESSAGE_COULD_NOT_BE_DELIVERED_THIS_IS_DESCRIPTOR = msg({
 	message:
 		"Your message could not be delivered. This is usually because you don't share a community with the recipient or the recipient is only accepting direct messages from friends. You may also need to adjust your own direct message privacy settings in {directMessagePrivacySettingsPath}.",
@@ -125,6 +129,7 @@ interface SendMessagePayload extends BaseMessagePayload {
 	favoriteMemeId?: string;
 	stickers?: Array<MessageStickerItem>;
 	tts?: boolean;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 type MessageQueuePayload = SendMessagePayload;
@@ -882,6 +887,7 @@ class MessageQueue extends Queue<MessageQueuePayload, RestResponse<Message> | un
 			favoriteMemeId: payload.favoriteMemeId,
 			stickers: payload.stickers,
 			tts: payload.tts,
+			subprofile: payload.subprofile,
 		});
 		logger.debug(`Sending message to channel ${channelId}`);
 		const outcome = await this.attemptMessageSend(channelId, nonce, requestBody, payload.preparedFiles);
