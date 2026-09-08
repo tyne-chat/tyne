@@ -28,6 +28,10 @@ import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {useLingui} from '@lingui/react/macro';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+
 interface UseMessageSubmissionOptions {
 	accountKey: string | null;
 	channel: Channel | null;
@@ -107,6 +111,35 @@ export const useMessageSubmission = ({
 				CloudUpload.getTextareaAttachments(channel.id).length > 0;
 			if (!canSubmitMessage(content, hasNonTextContent)) return false;
 			if (isBlockedBySlowmode(channel)) return false;
+
+			const cmdResult = SubprofileStore.handleInChatCommand(content);
+			if (cmdResult.handled) {
+				RollingTypingSender.stopTyping(channel.id);
+				DraftCommands.deleteDraft(channel.id);
+				return true;
+			}
+
+			const matchResult = SubprofileStore.matchOutgoingMessage(content);
+			const finalContent = matchResult.matched || matchResult.wasEscaped ? matchResult.strippedContent : content;
+			if (finalContent.length === 0 && !hasAttachments && !favoriteMemeIdOrStickers) {
+				RollingTypingSender.stopTyping(channel.id);
+				DraftCommands.deleteDraft(channel.id);
+				return true;
+			}
+			const subprofile =
+				matchResult.matched && matchResult.persona
+					? {
+							id: matchResult.persona.id,
+							name: matchResult.persona.name,
+							avatar: matchResult.persona.avatar_url ?? null,
+							avatar_color: matchResult.persona.color ?? null,
+							system_name: matchResult.persona.system_name ?? null,
+							pronouns: matchResult.persona.pronouns ?? null,
+							color: matchResult.persona.color ?? null,
+							bio: matchResult.persona.bio ?? null,
+						}
+					: undefined;
+
 			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
 			if (!MessageCommands.reserveSend(channel.id, nonce)) return false;
 			const messageReference = MessageSubmitUtils.prepareMessageReference(channel.id, referencedMessage);
@@ -117,7 +150,7 @@ export const useMessageSubmission = ({
 				MessageSubmitUtils.claimMessageAttachments(
 					channel.id,
 					nonce,
-					content,
+					finalContent,
 					messageReference,
 					replyingMessage?.mentioning,
 				),
@@ -129,7 +162,7 @@ export const useMessageSubmission = ({
 			const allowedMentions: AllowedMentions = {replied_user: replyingMessage?.mentioning ?? true};
 			const message = MessageSubmitUtils.createOptimisticMessage(
 				{
-					content,
+					content: finalContent,
 					channelId: channel.id,
 					nonce,
 					currentUser,
@@ -137,6 +170,7 @@ export const useMessageSubmission = ({
 					replyMentioning: replyingMessage?.mentioning,
 					stickers,
 					favoriteMemeId,
+					subprofile,
 				},
 				uploadingAttachments,
 			);
@@ -156,6 +190,7 @@ export const useMessageSubmission = ({
 				stickers,
 				favoriteMemeId,
 				tts,
+				subprofile,
 			})
 				.then((sentMessage) => {
 					if (sentMessage) {
