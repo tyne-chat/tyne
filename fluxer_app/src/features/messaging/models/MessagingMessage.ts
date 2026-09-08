@@ -349,6 +349,7 @@ export class Message {
 				skipUserCache: true,
 				instanceId: this.instanceId,
 				missingReactions: 'preserve',
+				skipReactionHydration: true,
 			},
 		);
 	}
