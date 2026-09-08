@@ -12,6 +12,10 @@ import type {
 } from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {hasVisibleContent as hasVisibleMessageContent} from '@fluxer/schema/src/primitives/MessageValidators';
 
+// Fork imports.
+
+import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/subprofile/SubprofileSchemas';
+
 const DEFAULT_ALLOWED_MENTIONS: AllowedMentions = {replied_user: true};
 
 export {hasVisibleContent as hasVisibleMessageContent} from '@fluxer/schema/src/primitives/MessageValidators';
@@ -49,6 +53,7 @@ export interface MessageCreateRequest {
 	favorite_meme_id?: string;
 	sticker_ids?: Array<string>;
 	tts?: true;
+	subprofile?: MessageSubprofileRequest | null;
 }
 
 export interface MessageEditRequest {
@@ -56,6 +61,7 @@ export interface MessageEditRequest {
 	attachments?: Array<ApiMessageEditAttachmentMetadata>;
 	allowed_mentions?: AllowedMentions;
 	flags?: number;
+	subprofile?: MessageSubprofileRequest | null;
 }
 
 export interface MessageEditPayload {
@@ -63,6 +69,7 @@ export interface MessageEditPayload {
 	attachments?: Array<ApiMessageEditAttachmentMetadata>;
 	allowedMentions?: AllowedMentions;
 	flags?: number;
+	subprofile?: MessageSubprofileRequest | null;
 }
 
 export interface MessageCreatePayload {
@@ -75,6 +82,7 @@ export interface MessageCreatePayload {
 	favoriteMemeId?: string;
 	stickers?: Array<MessageStickerItem>;
 	tts?: boolean;
+	subprofile?: MessageSubprofileRequest | null;
 }
 
 export interface NormalizedMessageContent {
@@ -158,6 +166,9 @@ export function buildMessageCreateRequest(payload: MessageCreatePayload): Messag
 	if (tts) {
 		requestBody.tts = true;
 	}
+	if (payload.subprofile != null) {
+		requestBody.subprofile = payload.subprofile;
+	}
 	return requestBody;
 }
 
@@ -175,6 +186,9 @@ export function buildMessageEditRequest(payload: MessageEditPayload): MessageEdi
 	}
 	if (flags !== undefined) {
 		requestBody.flags = flags;
+	}
+	if (payload.subprofile !== undefined) {
+		requestBody.subprofile = payload.subprofile;
 	}
 	return requestBody;
 }
