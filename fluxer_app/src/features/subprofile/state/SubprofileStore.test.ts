@@ -1,0 +1,371 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// @vitest-environment happy-dom
+
+import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
+import type {Persona} from '@fluxer/schema/src/gen/fluxer/user/preferences/v1/preferences_pb';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+
+vi.mock('@lingui/core/macro', () => {
+	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
+	return {msg: descriptor, t: descriptor, plural: () => '', select: () => '', selectOrdinal: () => ''};
+});
+vi.mock('@lingui/react/macro', () => ({
+	Trans: () => null,
+	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
+}));
+
+const preferencesMap = new Map<string, unknown>();
+
+vi.mock('@app/features/user/state/UserSettings', () => ({
+	default: {
+		getSubPreference: (field: string) => preferencesMap.get(field),
+		setSubPreference: (field: string, value: unknown) => {
+			preferencesMap.set(field, value);
+			return Promise.resolve();
+		},
+	},
+}));
+
+installVoiceMenuTestBootstrap();
+
+const {SubprofileStoreClass} = await import('./SubprofileStore');
+type SubprofileStoreInstance = InstanceType<typeof SubprofileStoreClass>;
+
+describe('SubprofileStore', () => {
+	let store: SubprofileStoreInstance;
+
+	beforeEach(() => {
+		preferencesMap.clear();
+		store = new SubprofileStoreClass();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it('initializes with empty state', () => {
+		expect(store.personas).toEqual([]);
+		expect(store.activePersonaId).toBeNull();
+		expect(store.autoproxyLatched).toBe(false);
+		expect(store.activePersona).toBeNull();
+		expect(store.rankedPersonas).toEqual([]);
+	});
+
+	it('adds a new persona', async () => {
+		const persona = await store.addPersona({
+			name: 'Alice',
+			system_name: 'Wonderland',
+			pronouns: 'she/her',
+			color: 0xff0000,
+			bio: 'Curiouser and curiouser',
+			proxy_tags: [{prefix: '[', suffix: ']'}],
+		});
+
+		expect(persona.name).toBe('Alice');
+		expect(persona.systemName).toBe('Wonderland');
+		expect(persona.pronouns).toBe('she/her');
+		expect(persona.proxyTags?.length).toBe(1);
+		expect(persona.proxyTags?.[0].prefix).toBe('[');
+		expect(persona.proxyTags?.[0].suffix).toBe(']');
+		expect(store.personas.length).toBe(1);
+	});
+
+	it('finds persona by name with case-insensitivity and prefix matching', async () => {
+		await store.addPersona({name: 'Alice'});
+		await store.addPersona({name: 'Bob'});
+
+		expect(store.findPersonaByName('alice')?.name).toBe('Alice');
+		expect(store.findPersonaByName('ALICE')?.name).toBe('Alice');
+		expect(store.findPersonaByName('Bo')?.name).toBe('Bob');
+		expect(store.findPersonaByName('Unknown')).toBeNull();
+	});
+
+	it('updates a persona', async () => {
+		const persona = await store.addPersona({name: 'Alice'});
+		await store.updatePersona(persona.id, {pronouns: 'they/them'});
+
+		const updated = store.personas.find((p: Persona) => p.id === persona.id);
+		expect(updated?.pronouns).toBe('they/them');
+	});
+
+	it('deletes a persona and unlatches if it was active', async () => {
+		const persona = await store.addPersona({name: 'Alice'});
+		await store.setActivePersona(persona.id, true);
+		expect(store.autoproxyLatched).toBe(true);
+		expect(store.activePersonaId).toBe(persona.id);
+
+		await store.deletePersona(persona.id);
+		expect(store.personas.length).toBe(0);
+		expect(store.autoproxyLatched).toBe(false);
+		expect(store.activePersonaId).toBeNull();
+	});
+
+	it('latches and unlatches active persona', async () => {
+		const persona = await store.addPersona({name: 'Alice'});
+		await store.setActivePersona(persona.id, true);
+		expect(store.autoproxyLatched).toBe(true);
+		expect(store.activePersona?.name).toBe('Alice');
+
+		await store.unlatch();
+		expect(store.autoproxyLatched).toBe(false);
+		expect(store.activePersonaId).toBeNull();
+	});
+
+	it('calculates decay frecency accurately', async () => {
+		await store.addPersona({name: 'P1'});
+		const p2 = await store.addPersona({name: 'P2'});
+
+		// Record use for P2
+		await store.recordPersonaUse(p2.id);
+		expect(store.rankedPersonas[0].name).toBe('P2');
+		expect(store.rankedPersonas[1].name).toBe('P1');
+	});
+
+	it('handles in-chat latch commands', async () => {
+		await store.addPersona({name: 'Alice'});
+		await store.addPersona({name: 'Bob'});
+
+		await store.setActivePersona(store.personas[0].id, true);
+		expect(store.autoproxyLatched).toBe(true);
+
+		// in-chat command "\\" clears latch
+		const res = store.handleInChatCommand('\\\\');
+		expect(res.handled).toBe(true);
+		expect(store.autoproxyLatched).toBe(false);
+		expect(store.activePersonaId).toBeNull();
+	});
+
+	it('matches outgoing messages with proxy tags and updates frecency', async () => {
+		await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: '[', suffix: ']'}],
+		});
+
+		const result = store.matchOutgoingMessage('[Hello from Alice!]');
+		expect(result.matched).toBe(true);
+		expect(result.persona?.name).toBe('Alice');
+		expect(result.strippedContent).toBe('Hello from Alice!');
+	});
+
+	it('preserves latch when escaping with single backslash \\', async () => {
+		const alice = await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: 'a:', suffix: ''}],
+		});
+		await store.setActivePersona(alice.id, true, 'last');
+		expect(store.autoproxyLatched).toBe(true);
+
+		// Single backslash escape: sends as root account, strips slash, PRESERVES latch
+		const result = store.matchOutgoingMessage('\\Hello from root');
+		expect(result.matched).toBe(false);
+		expect(result.wasEscaped).toBe(true);
+		expect(result.strippedContent).toBe('Hello from root');
+		expect(result.clearedLatch).toBeFalsy();
+		expect(store.autoproxyLatched).toBe(true);
+		expect(store.activePersonaId).toBe(alice.id);
+	});
+
+	it('clears latch when escaping with double backslash \\\\ followed by message', async () => {
+		const alice = await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: 'a:', suffix: ''}],
+		});
+		await store.setActivePersona(alice.id, true, 'last');
+		expect(store.autoproxyLatched).toBe(true);
+
+		// Double backslash escape with message: sends as root account, strips slashes, CLEARS latch
+		const result = store.matchOutgoingMessage('\\\\ Hello from root');
+		expect(result.matched).toBe(false);
+		expect(result.wasEscaped).toBe(true);
+		expect(result.strippedContent).toBe('Hello from root');
+		expect(result.clearedLatch).toBe(true);
+		expect(store.autoproxyLatched).toBe(false);
+		expect(store.activePersonaId).toBeNull();
+	});
+
+	it('does not intercept commands or strip slashes when root account is already selected', async () => {
+		await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: '[', suffix: ']'}],
+		});
+		// Ensure root account is active (not latched)
+		await store.unlatch();
+		expect(store.activePersona).toBeNull();
+
+		// Standalone \\ in chat should not be treated as a command
+		const cmdRes = store.handleInChatCommand('\\\\');
+		expect(cmdRes.handled).toBe(false);
+		expect(cmdRes.isCommand).toBe(false);
+
+		// Message starting with single backslash should retain the slash
+		const singleSlashRes = store.matchOutgoingMessage('\\hello world');
+		expect(singleSlashRes.matched).toBe(false);
+		expect(singleSlashRes.wasEscaped).toBeFalsy();
+		expect(singleSlashRes.strippedContent).toBe('\\hello world');
+
+		// Message starting with double backslash should retain the slashes
+		const doubleSlashRes = store.matchOutgoingMessage('\\\\hello world');
+		expect(doubleSlashRes.matched).toBe(false);
+		expect(doubleSlashRes.wasEscaped).toBeFalsy();
+		expect(doubleSlashRes.clearedLatch).toBeFalsy();
+		expect(doubleSlashRes.strippedContent).toBe('\\\\hello world');
+
+		// Standalone \\ message match should retain the slashes
+		const standaloneRes = store.matchOutgoingMessage('\\\\');
+		expect(standaloneRes.matched).toBe(false);
+		expect(standaloneRes.wasEscaped).toBeFalsy();
+		expect(standaloneRes.clearedLatch).toBeFalsy();
+		expect(standaloneRes.strippedContent).toBe('\\\\');
+	});
+
+	it('correctly handles message editing with matchEditMessage', async () => {
+		const alice = await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: '[', suffix: ']'}],
+		});
+		const bob = await store.addPersona({
+			name: 'Bob',
+			proxy_tags: [{prefix: 'B:', suffix: ''}],
+		});
+
+		// 1. Root message edited to include Alice's proxy tag
+		const res1 = store.matchEditMessage('[Hello Alice!]', null);
+		expect(res1.finalContent).toBe('Hello Alice!');
+		expect(res1.subprofile?.id).toBe(alice.id);
+		expect(res1.subprofile?.name).toBe('Alice');
+
+		// 2. Alice message edited to Bob's tag -> switches to Bob and strips B:
+		const currentAliceSubprofile = {
+			id: alice.id,
+			name: 'Alice',
+		};
+		const res2 = store.matchEditMessage('B: Hello Bob!', currentAliceSubprofile);
+		expect(res2.finalContent).toBe('Hello Bob!');
+		expect(res2.subprofile?.id).toBe(bob.id);
+		expect(res2.subprofile?.name).toBe('Bob');
+
+		// 3. Alice message edited without any tags -> preserves Alice
+		const res3 = store.matchEditMessage('Plain edit with no tags', currentAliceSubprofile);
+		expect(res3.finalContent).toBe('Plain edit with no tags');
+		expect(res3.subprofile?.id).toBe(alice.id);
+		expect(res3.subprofile?.name).toBe('Alice');
+
+		// 4. Alice message edited with leading backslash -> escapes and resets to root
+		const res4 = store.matchEditMessage('\\Plain edit meant for root', currentAliceSubprofile);
+		expect(res4.finalContent).toBe('Plain edit meant for root');
+		expect(res4.subprofile).toBeNull();
+
+		// 5. Root message edited without any tags -> remains root (undefined subprofile)
+		const res5 = store.matchEditMessage('Plain root edit', null);
+		expect(res5.finalContent).toBe('Plain root edit');
+		expect(res5.subprofile).toBeUndefined();
+	});
+
+	it('replaces all personas and unlatches if previous active was removed', async () => {
+		const p1 = await store.addPersona({name: 'Alice'});
+		await store.setActivePersona(p1.id, true);
+
+		const newPersona: Persona = {
+			$typeName: 'fluxer.user.preferences.v1.Persona',
+			id: 'new_1',
+			name: 'Bob',
+			proxyTags: [],
+		};
+
+		await store.replaceAllPersonas([newPersona]);
+		expect(store.personas.length).toBe(1);
+		expect(store.personas[0].name).toBe('Bob');
+		expect(store.autoproxyLatched).toBe(false);
+		expect(store.activePersonaId).toBeNull();
+	});
+
+	it('appends personas alongside existing ones', async () => {
+		await store.addPersona({name: 'Alice'});
+
+		const newPersona: Persona = {
+			$typeName: 'fluxer.user.preferences.v1.Persona',
+			id: 'new_2',
+			name: 'Bob',
+			proxyTags: [],
+		};
+
+		await store.appendPersonas([newPersona]);
+		expect(store.personas.length).toBe(2);
+		expect(store.personas[0].name).toBe('Alice');
+		expect(store.personas[1].name).toBe('Bob');
+	});
+
+	it('auto-latches on proxy tag match when autoproxyMode is "last"', async () => {
+		const alice = await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: 'a:', suffix: ''}],
+		});
+		const bob = await store.addPersona({
+			name: 'Bob',
+			proxy_tags: [{prefix: 'b:', suffix: ''}],
+		});
+
+		await store.setAutoproxyMode('last');
+		expect(store.autoproxyMode).toBe('last');
+		expect(store.autoproxyLatched).toBe(true);
+
+		// Initially latched to Alice
+		await store.setActivePersona(alice.id, true, 'last');
+		expect(store.activePersonaId).toBe(alice.id);
+
+		// Bob speaks with prefix => switches activePersona to Bob
+		const result = store.matchOutgoingMessage('b: Hello everyone');
+		expect(result.matched).toBe(true);
+		expect(result.persona?.name).toBe('Bob');
+		expect(result.strippedContent).toBe('Hello everyone');
+		expect(store.activePersonaId).toBe(bob.id);
+
+		// Next untagged message automatically sends as Bob
+		const untagged = store.matchOutgoingMessage('I am speaking without tags');
+		expect(untagged.matched).toBe(true);
+		expect(untagged.persona?.name).toBe('Bob');
+		expect(untagged.strippedContent).toBe('I am speaking without tags');
+	});
+
+	it('does NOT switch activePersona on proxy tag match when autoproxyMode is "manual"', async () => {
+		const alice = await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: 'a:', suffix: ''}],
+		});
+		const bob = await store.addPersona({
+			name: 'Bob',
+			proxy_tags: [{prefix: 'b:', suffix: ''}],
+		});
+
+		await store.setActivePersona(alice.id, true, 'manual');
+		expect(store.autoproxyMode).toBe('manual');
+		expect(store.activePersonaId).toBe(alice.id);
+
+		// Bob speaks with prefix => proxied as Bob, but activePersona remains Alice
+		const result = store.matchOutgoingMessage('b: Quick message from Bob');
+		expect(result.matched).toBe(true);
+		expect(result.persona?.name).toBe('Bob');
+		expect(result.persona?.id).toBe(bob.id);
+		expect(store.activePersonaId).toBe(alice.id);
+
+		// Next untagged message sends as Alice
+		const untagged = store.matchOutgoingMessage('Back to Alice');
+		expect(untagged.matched).toBe(true);
+		expect(untagged.persona?.name).toBe('Alice');
+	});
+
+	it('does NOT proxy untagged messages when autoproxyMode is "off"', async () => {
+		await store.addPersona({
+			name: 'Alice',
+			proxy_tags: [{prefix: 'a:', suffix: ''}],
+		});
+
+		await store.setAutoproxyMode('off');
+		expect(store.autoproxyMode).toBe('off');
+		expect(store.autoproxyLatched).toBe(false);
+
+		const untagged = store.matchOutgoingMessage('Normal message');
+		expect(untagged.matched).toBe(false);
+		expect(untagged.strippedContent).toBe('Normal message');
+	});
+});
