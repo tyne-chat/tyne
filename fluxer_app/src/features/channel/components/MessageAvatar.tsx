@@ -69,6 +69,7 @@ export const MessageAvatar = observer(
 				<FocusRing data-flx="channel.message-avatar.focus-ring">
 					<Avatar
 						user={user}
+						avatarUrl={message.subprofile?.avatar ?? undefined}
 						size={size}
 						className={className}
 						forceAnimate={isHovering}
