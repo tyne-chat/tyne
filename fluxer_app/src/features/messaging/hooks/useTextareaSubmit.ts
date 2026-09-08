@@ -51,6 +51,10 @@ import {msg} from '@lingui/core/macro';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+
 const COULDN_T_RUN_THAT_COMMAND_DESCRIPTOR = msg({
 	message: "Couldn't run that command: {detail}",
 	comment: 'Error message in the use textarea submit hook. Preserve {detail}; it is inserted by code.',
@@ -539,12 +543,15 @@ export const useTextareaSubmit = ({
 			}
 			MessageCommands.confirmPublishedMessageEdit(i18n, editingMessage, () => {
 				finishMobileEdit();
+				const editMatch = SubprofileStore.matchEditMessage(resolvedContent, editingMessage.subprofile);
 				void MessageCommands.edit(
 					channelId,
 					editingMessage.id,
-					resolvedContent,
+					editMatch.finalContent,
 					undefined,
 					editingMessage._allowedMentions,
+					undefined,
+					editMatch.subprofile,
 				);
 			});
 			return;
@@ -558,12 +565,15 @@ export const useTextareaSubmit = ({
 				const newContent = ReplaceCommandUtils.executeReplaceCommand(lastMessage.content, replaceCommand);
 				if (newContent !== lastMessage.content) {
 					MessageCommands.confirmPublishedMessageEdit(i18n, lastMessage, () => {
+						const replaceEditMatch = SubprofileStore.matchEditMessage(newContent, lastMessage.subprofile);
 						void MessageCommands.edit(
 							lastMessage.channelId,
 							lastMessage.id,
-							newContent,
+							replaceEditMatch.finalContent,
 							undefined,
 							lastMessage._allowedMentions,
+							undefined,
+							replaceEditMatch.subprofile,
 						);
 					});
 				}
