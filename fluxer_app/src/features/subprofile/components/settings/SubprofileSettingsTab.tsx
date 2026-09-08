@@ -10,12 +10,13 @@ import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/
 import {AvatarUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/AvatarUploader';
 import Users from '@app/features/user/state/Users';
 import type {Persona} from '@fluxer/schema/src/gen/fluxer/user/preferences/v1/preferences_pb';
-import {Info, LockSimple, LockSimpleOpen, PencilSimple, Plus, Trash} from '@phosphor-icons/react';
+import {Info, LockSimple, LockSimpleOpen, PencilSimple, Plus, Trash, UploadSimple} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useState} from 'react';
 import {type AutoproxyMode, SubprofileStore} from '../../state/SubprofileStore';
+import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
 import styles from './SubprofileSettingsTab.module.css';
 
 const AUTOPROXY_TABS: Array<SegmentedTab<AutoproxyMode>> = [
@@ -513,19 +514,34 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 						linkable={false}
 						actions={
 							!isEditing && (
-								<button
-									type="button"
-									className={styles.primaryButton}
-									onClick={handleStartAdd}
-									data-flx="subprofile.settings.subprofile-settings-tab.primary-button.start-add"
-								>
-									<Plus
-										size={16}
-										style={{marginRight: 6, verticalAlign: 'text-bottom'}}
-										data-flx="subprofile.settings.subprofile-settings-tab.plus--2"
-									/>
-									<span data-flx="subprofile.settings.subprofile-settings-tab.span--4">Add Subprofile</span>
-								</button>
+								<div style={{display: 'flex', gap: 8}} data-flx="subprofile.settings.subprofile-settings-tab.div--6">
+									<button
+										type="button"
+										className={styles.secondaryButton}
+										onClick={openPluralKitImportModal}
+										data-flx="subprofile.settings.subprofile-settings-tab.secondary-button.open-plural-kit-import-modal"
+									>
+										<UploadSimple
+											size={16}
+											style={{marginRight: 6, verticalAlign: 'text-bottom'}}
+											data-flx="subprofile.settings.subprofile-settings-tab.upload-simple"
+										/>
+										<span data-flx="subprofile.settings.subprofile-settings-tab.span--4">Import from PluralKit</span>
+									</button>
+									<button
+										type="button"
+										className={styles.primaryButton}
+										onClick={handleStartAdd}
+										data-flx="subprofile.settings.subprofile-settings-tab.primary-button.start-add"
+									>
+										<Plus
+											size={16}
+											style={{marginRight: 6, verticalAlign: 'text-bottom'}}
+											data-flx="subprofile.settings.subprofile-settings-tab.plus--2"
+										/>
+										<span data-flx="subprofile.settings.subprofile-settings-tab.span--5">Add Subprofile</span>
+									</button>
+								</div>
 							)
 						}
 						data-flx="subprofile.settings.subprofile-settings-tab.subprofiles-list"
@@ -635,7 +651,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 																color="var(--brand-primary)"
 																data-flx="subprofile.settings.subprofile-settings-tab.lock-simple"
 															/>
-															<span data-flx="subprofile.settings.subprofile-settings-tab.span--5">Latched</span>
+															<span data-flx="subprofile.settings.subprofile-settings-tab.span--6">Latched</span>
 														</>
 													) : (
 														<>
@@ -643,7 +659,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 																size={14}
 																data-flx="subprofile.settings.subprofile-settings-tab.lock-simple-open"
 															/>
-															<span data-flx="subprofile.settings.subprofile-settings-tab.span--6">Latch</span>
+															<span data-flx="subprofile.settings.subprofile-settings-tab.span--7">Latch</span>
 														</>
 													)}
 												</button>
@@ -658,7 +674,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 														size={14}
 														data-flx="subprofile.settings.subprofile-settings-tab.pencil-simple"
 													/>
-													<span data-flx="subprofile.settings.subprofile-settings-tab.span--7">Edit</span>
+													<span data-flx="subprofile.settings.subprofile-settings-tab.span--8">Edit</span>
 												</button>
 												<button
 													type="button"
@@ -668,7 +684,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 													data-flx="subprofile.settings.subprofile-settings-tab.action-button.delete-persona"
 												>
 													<Trash size={14} data-flx="subprofile.settings.subprofile-settings-tab.trash--2" />
-													<span data-flx="subprofile.settings.subprofile-settings-tab.span--8">Delete</span>
+													<span data-flx="subprofile.settings.subprofile-settings-tab.span--9">Delete</span>
 												</button>
 											</div>
 										</div>
