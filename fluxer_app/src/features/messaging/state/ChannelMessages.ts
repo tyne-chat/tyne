@@ -96,7 +96,7 @@ function hydrateMessage(
 		MessageReactions.hydrateMessageReactions(wire.id, []);
 	}
 	const current = channelMessages.get(wire.id);
-	const incoming = raw instanceof Message ? raw : new Message(wire, {missingReactions});
+	const incoming = raw instanceof Message ? raw : new Message(wire, {missingReactions, skipReactionHydration: true});
 	return current !== undefined && compareStructural(comparableMessageWire(current), comparableMessageWire(incoming))
 		? current
 		: incoming;
