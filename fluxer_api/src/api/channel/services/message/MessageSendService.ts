@@ -842,6 +842,18 @@ export class MessageSendService {
 			allowEmbeds: canEmbedLinks,
 			dmNsfwContext,
 			threadInsert: authChannel.thread !== undefined,
+			subprofile: data.subprofile
+				? {
+						id: data.subprofile.id,
+						name: data.subprofile.name,
+						avatar: data.subprofile.avatar ?? null,
+						avatar_color: data.subprofile.avatar_color ?? null,
+						system_name: data.subprofile.system_name ?? null,
+						pronouns: data.subprofile.pronouns ?? null,
+						color: data.subprofile.color ?? null,
+						bio: data.subprofile.bio ?? null,
+					}
+				: null,
 		});
 		this.cacheMentionChannels({
 			requestCache,
