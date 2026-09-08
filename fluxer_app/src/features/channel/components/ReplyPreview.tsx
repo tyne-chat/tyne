@@ -22,6 +22,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type CSSProperties, useCallback} from 'react';
 
+// Fork imports.
+
+import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
+
 const ORIGINAL_MESSAGE_WAS_DELETED_DESCRIPTOR = msg({
 	message: 'Original message was deleted',
 	comment: 'Label in the channel and chat reply preview. Keep the tone plain and specific.',
@@ -162,6 +166,13 @@ export const ReplyPreview = observer(
 				</div>
 			);
 		}
+		const repliedName =
+			referencedMessage.subprofile?.name || NicknameUtils.getNickname(referencedMessage.author, resolvedGuildId);
+		const repliedColor =
+			(referencedMessage.subprofile?.color != null
+				? ColorUtils.int2rgb(referencedMessage.subprofile.color)
+				: undefined) ?? GuildMembers.getMember(resolvedGuildId ?? '', referencedMessage.author.id)?.getColorString();
+
 		return (
 			<div
 				className={clsx(styles.repliedMessage, messageDisplayCompact && styles.repliedMessageCompact)}
@@ -181,6 +192,7 @@ export const ReplyPreview = observer(
 					>
 						<Avatar
 							user={referencedMessage.author}
+							avatarUrl={referencedMessage.subprofile?.avatar ?? undefined}
 							size={16}
 							className={styles.repliedAvatar}
 							guildId={resolvedGuildId}
@@ -213,17 +225,14 @@ export const ReplyPreview = observer(
 						className={styles.repliedUsername}
 						style={
 							{
-								'--replied-username-color': GuildMembers.getMember(
-									resolvedGuildId ?? '',
-									referencedMessage.author.id,
-								)?.getColorString(),
+								'--replied-username-color': repliedColor,
 							} as CSSProperties
 						}
 						data-user-id={referencedMessage.author.id}
 						data-guild-id={resolvedGuildId}
 						data-flx="channel.reply-preview.replied-username"
 					>
-						{`${message.mentions.some((mention) => mention.id === referencedMessage.author.id) ? '@' : ''}${NicknameUtils.getNickname(referencedMessage.author, resolvedGuildId)}`}
+						{`${message.mentions.some((mention) => mention.id === referencedMessage.author.id) ? '@' : ''}${repliedName}`}
 					</span>
 				</PreloadableUserPopout>
 				<FocusRing offset={-2} data-flx="channel.reply-preview.focus-ring">
