@@ -23,6 +23,8 @@ export type EmailVerificationRequiredReason =
 	| 'reaction'
 	| 'report';
 
+import {Config} from '../Config';
+
 const ErrorByReason = {
 	direct_message: DirectMessageEmailVerificationRequiredError,
 	friend_request: FriendRequestEmailVerificationRequiredError,
@@ -38,7 +40,7 @@ export function requireEmailVerified(
 	user: {emailVerified: boolean; isBot?: boolean},
 	reason?: EmailVerificationRequiredReason,
 ): void {
-	if (user.isBot || usesUsernameSignIn()) {
+	if (user.isBot || usesUsernameSignIn() || !Config.email.enabled) {
 		return;
 	}
 	if (!user.emailVerified) {
