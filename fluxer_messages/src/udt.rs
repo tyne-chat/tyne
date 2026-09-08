@@ -197,3 +197,19 @@ pub struct MessageSnapshotUdt {
     pub flags: Option<i32>,
     pub edited_timestamp: Option<DateTime<Utc>>,
 }
+
+#[cfg_attr(
+    feature = "scylla",
+    derive(scylla::DeserializeValue, scylla::SerializeValue)
+)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessageSubprofileUdt {
+    pub id: Option<String>,
+    pub name: Option<String>,
+    pub avatar: Option<String>,
+    pub avatar_color: Option<i32>,
+    pub system_name: Option<String>,
+    pub pronouns: Option<String>,
+    pub color: Option<i32>,
+    pub bio: Option<String>,
+}
