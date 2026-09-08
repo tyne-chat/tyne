@@ -66,6 +66,10 @@ import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 
+// Fork imports.
+
+import type {MessageSubprofileRow} from '@app/api/database/types/MessageTypes';
+
 const FORWARD_MEDIA_EMBED_TYPES: ReadonlySet<string> = new Set([
 	MessageEmbedTypes.IMAGE,
 	MessageEmbedTypes.VIDEO,
@@ -148,6 +152,7 @@ interface CreateMessageParams {
 	processedStickerItems?: Array<MessageStickerItem>;
 	skipDeferredEmbeds?: boolean;
 	threadInsert?: boolean;
+	subprofile?: MessageSubprofileRow | null;
 }
 
 export class MessagePersistenceService {
@@ -433,6 +438,7 @@ export class MessagePersistenceService {
 			call: null,
 			has_reaction: false,
 			version: 1,
+			subprofile: params.subprofile ?? null,
 		};
 		const message = await this.channelRepository.messages.upsertMessage(
 			messageRowData,
@@ -625,6 +631,21 @@ export class MessagePersistenceService {
 			const preservedFlags = message.flags & ~SENDABLE_MESSAGE_FLAGS;
 			const newFlags = data.flags & SENDABLE_MESSAGE_FLAGS;
 			updatedRowData.flags = preservedFlags | newFlags;
+			hasChanges = true;
+		}
+		if (data.subprofile !== undefined) {
+			updatedRowData.subprofile = data.subprofile
+				? {
+						id: data.subprofile.id,
+						name: data.subprofile.name,
+						avatar: data.subprofile.avatar ?? null,
+						avatar_color: data.subprofile.avatar_color ?? null,
+						system_name: data.subprofile.system_name ?? null,
+						pronouns: data.subprofile.pronouns ?? null,
+						color: data.subprofile.color ?? null,
+						bio: data.subprofile.bio ?? null,
+					}
+				: null;
 			hasChanges = true;
 		}
 		if (data.attachments !== undefined) {
