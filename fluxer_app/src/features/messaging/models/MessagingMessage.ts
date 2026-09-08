@@ -31,6 +31,10 @@ import type {
 	Message as WireMessage,
 } from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork imports.
+
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/subprofile/SubprofileSchemas';
+
 type MessageInput = Omit<WireMessage, 'mentions' | 'mention_roles' | 'tts'> &
 	Partial<Pick<WireMessage, 'mentions' | 'mention_roles' | 'tts'>>;
 
@@ -168,6 +172,7 @@ export class Message {
 	readonly _allowedMentions?: AllowedMentions;
 	readonly _favoriteMemeId?: string;
 	readonly stickers?: ReadonlyArray<MessageStickerItem>;
+	readonly subprofile?: MessageSubprofileResponse | null;
 
 	constructor(message: MessageInput, options?: MessageRecordOptions) {
 		this.instanceId = options?.instanceId ?? RuntimeConfig.localInstanceDomain;
@@ -238,6 +243,7 @@ export class Message {
 		this._allowedMentions = message._allowedMentions;
 		this._favoriteMemeId = message._favoriteMemeId;
 		this.stickers = message.stickers ? Object.freeze(message.stickers) : undefined;
+		this.subprofile = message.subprofile;
 	}
 
 	hasFlag(flag: number): boolean {
@@ -337,8 +343,13 @@ export class Message {
 				blocked: updates.blocked ?? this.blocked,
 				_allowedMentions: updates._allowedMentions ?? this._allowedMentions,
 				_favoriteMemeId: updates._favoriteMemeId ?? this._favoriteMemeId,
+				subprofile: 'subprofile' in updates ? updates.subprofile : this.subprofile,
 			},
-			{skipUserCache: true, instanceId: this.instanceId},
+			{
+				skipUserCache: true,
+				instanceId: this.instanceId,
+				missingReactions: 'preserve',
+			},
 		);
 	}
 
@@ -475,6 +486,18 @@ export class Message {
 				if (this.call.participants[i] !== other.call.participants[i]) return false;
 			}
 		}
+		if (this.subprofile !== other.subprofile) {
+			if (!this.subprofile || !other.subprofile) return false;
+			if (
+				this.subprofile.id !== other.subprofile.id ||
+				this.subprofile.name !== other.subprofile.name ||
+				this.subprofile.avatar !== other.subprofile.avatar ||
+				this.subprofile.system_name !== other.subprofile.system_name ||
+				this.subprofile.color !== other.subprofile.color
+			) {
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -509,6 +532,7 @@ export class Message {
 			blocked: this.blocked,
 			_allowedMentions: this._allowedMentions,
 			_favoriteMemeId: this._favoriteMemeId,
+			subprofile: this.subprofile,
 		};
 	}
 }

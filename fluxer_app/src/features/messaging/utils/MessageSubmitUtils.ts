@@ -16,6 +16,10 @@ import type {
 	MessageStickerItem,
 } from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork imports.
+
+import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/subprofile/SubprofileSchemas';
+
 interface MessageSubmitData {
 	content: string;
 	channelId: string;
@@ -25,6 +29,7 @@ interface MessageSubmitData {
 	replyMentioning?: boolean;
 	stickers?: Array<MessageStickerItem>;
 	favoriteMemeId?: string;
+	subprofile?: MessageSubprofileRequest | null;
 }
 
 export function createUploadingAttachments(
@@ -61,6 +66,18 @@ export function createOptimisticMessage(data: MessageSubmitData, attachments: Ar
 		nonce: data.nonce,
 		attachments,
 		_allowedMentions: data.referencedMessage ? {replied_user: data.replyMentioning ?? true} : undefined,
+		subprofile: data.subprofile
+			? {
+					id: data.subprofile.id,
+					name: data.subprofile.name,
+					avatar: data.subprofile.avatar ?? null,
+					avatar_color: data.subprofile.avatar_color ?? null,
+					system_name: data.subprofile.system_name ?? null,
+					pronouns: data.subprofile.pronouns ?? null,
+					color: data.subprofile.color ?? null,
+					bio: data.subprofile.bio ?? null,
+				}
+			: null,
 	});
 }
 

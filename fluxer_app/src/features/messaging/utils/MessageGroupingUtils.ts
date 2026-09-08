@@ -68,6 +68,16 @@ export function isNewMessageGroup(
 	if (currentMessage.webhookId && prevMessage.author.username !== currentMessage.author.username) {
 		return true;
 	}
+	const prevSub = prevMessage.subprofile;
+	const currSub = currentMessage.subprofile;
+	if (Boolean(prevSub) !== Boolean(currSub)) {
+		return true;
+	}
+	if (prevSub && currSub) {
+		if (prevSub.id !== currSub.id || prevSub.name !== currSub.name || prevSub.avatar !== currSub.avatar) {
+			return true;
+		}
+	}
 	if (!prevMessage.timestamp || !currentMessage.timestamp) {
 		return true;
 	}
