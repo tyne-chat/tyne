@@ -1,0 +1,203 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.sheetContainer {
+	width: 320px;
+	max-height: 480px;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--background-floating, #2b2d31);
+	border-radius: var(--radius-lg, 8px);
+	box-shadow: var(--elevation-high, 0 8px 16px rgba(0, 0, 0, 0.24));
+	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+	overflow: hidden;
+	color: var(--text-normal, #f2f3f5);
+	font-family: inherit;
+}
+
+.searchHeader {
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+	background-color: var(--background-secondary, #1e1f22);
+	flex-shrink: 0;
+}
+
+.modeTabsWrapper {
+	padding: 6px 10px;
+	background-color: var(--background-secondary, #1e1f22);
+	border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+	flex-shrink: 0;
+}
+
+.searchInputWrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+	background-color: var(--background-tertiary, #111214);
+	border-radius: var(--radius-sm, 4px);
+	padding: 6px 8px;
+	gap: 6px;
+	height: 32px;
+	box-sizing: border-box;
+}
+
+.searchIcon {
+	color: var(--text-muted, #949ba4);
+	width: 16px !important;
+	height: 16px !important;
+	min-width: 16px !important;
+	min-height: 16px !important;
+	max-width: 16px !important;
+	max-height: 16px !important;
+	flex-shrink: 0;
+}
+
+.searchInput {
+	flex: 1;
+	border: none;
+	background: transparent;
+	color: var(--text-normal, #f2f3f5);
+	font-size: 0.8125rem;
+	line-height: 1.25;
+	outline: none;
+}
+
+.searchInput::placeholder {
+	color: var(--text-muted, #949ba4);
+}
+
+.listScrollArea {
+	flex: 1;
+	overflow-y: auto;
+	padding: 6px 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-height: 100px;
+}
+
+.sectionTitle {
+	font-size: 0.6875rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted, #949ba4);
+	padding: 6px 6px 2px;
+}
+
+.recentShelf {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	padding: 2px 4px 6px;
+}
+
+.recentChip {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	background-color: var(--background-secondary, #1e1f22);
+	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+	border-radius: var(--radius-md, 6px);
+	padding: 3px 8px 3px 4px;
+	cursor: pointer;
+	color: var(--text-normal, #f2f3f5);
+	font-size: 0.75rem;
+	transition: background-color 0.1s ease;
+}
+
+.recentChip:hover {
+	background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+}
+
+.personaItem {
+	display: flex;
+	align-items: center;
+	padding: 6px 8px;
+	border-radius: var(--radius-md, 6px);
+	cursor: pointer;
+	gap: 10px;
+	transition: background-color 0.1s ease;
+	user-select: none;
+}
+
+.personaItem:hover {
+	background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+}
+
+.personaItem.active {
+	background-color: var(--background-modifier-selected, rgba(255, 255, 255, 0.12));
+}
+
+.personaDetails {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.personaPrimaryRow {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.personaName {
+	font-size: 0.875rem;
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--text-normal, #f2f3f5);
+}
+
+.personaPronouns {
+	font-size: 0.75rem;
+	color: var(--text-muted, #949ba4);
+}
+
+.tagBadge {
+	font-size: 0.6875rem;
+	font-family: monospace;
+	background-color: var(--background-secondary, #1e1f22);
+	padding: 1px 4px;
+	border-radius: 3px;
+	color: var(--text-muted, #949ba4);
+}
+
+.activeCheck {
+	color: var(--brand-primary, #5865f2);
+	margin-inline-start: auto;
+}
+
+.footer {
+	padding: 8px 12px;
+	border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+	background-color: var(--background-secondary, #1e1f22);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.settingsLink {
+	background: none;
+	border: none;
+	color: var(--text-link, #00a8fc);
+	font-size: 0.75rem;
+	cursor: pointer;
+	padding: 2px 4px;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.settingsLink:hover {
+	text-decoration: underline;
+}
+
+.emptyNotice {
+	padding: 24px 12px;
+	text-align: center;
+	font-size: 0.8125rem;
+	color: var(--text-muted, #949ba4);
+}

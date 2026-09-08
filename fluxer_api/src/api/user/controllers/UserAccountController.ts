@@ -103,6 +103,10 @@ import {
 } from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 import {uint8ArrayToBase64} from 'uint8array-extras';
 
+// Fork imports.
+
+import {ForkUserAccountRoutes} from '@app/api/user/controllers/ForkUserAccountRoutes';
+
 export function UserAccountController(app: HonoApp) {
 	app.get(
 		'/users/@me',
@@ -165,6 +169,7 @@ export function UserAccountController(app: HonoApp) {
 			);
 		},
 	);
+	ForkUserAccountRoutes(app);
 	app.post(
 		'/users/@me/email-change/start',
 		RateLimitMiddleware(RateLimitConfigs.USER_EMAIL_CHANGE_START),
