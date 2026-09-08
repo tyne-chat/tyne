@@ -59,6 +59,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type MouseEvent, useCallback, useMemo} from 'react';
 
+// Fork imports.
+
+import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+
 const JUMP_TO_MESSAGE_FROM_SENT_DESCRIPTOR = msg({
 	message: 'Jump to message from {displayName}, sent {formattedDate}',
 	comment:
@@ -249,7 +253,16 @@ export const UserMessage = observer(() => {
 			}
 			MessageCommands.confirmPublishedMessageEdit(i18n, message, () => {
 				finishEditing();
-				void MessageCommands.edit(channel.id, message.id, content, undefined, message._allowedMentions);
+				const editMatch = SubprofileStore.matchEditMessage(content, message.subprofile);
+				void MessageCommands.edit(
+					channel.id,
+					message.id,
+					editMatch.finalContent,
+					undefined,
+					message._allowedMentions,
+					undefined,
+					editMatch.subprofile,
+				);
 			});
 		},
 		[
@@ -258,6 +271,7 @@ export const UserMessage = observer(() => {
 			handleDelete,
 			message,
 			message.id,
+			message.subprofile,
 			message.messageSnapshots,
 			message._allowedMentions,
 			message.content,

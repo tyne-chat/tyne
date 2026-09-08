@@ -18,6 +18,16 @@ import {
 	NonNegativeSafeIntegerType,
 	SnowflakeStringType,
 } from '@fluxer/schema/src/primitives/SchemaPrimitives';
+
+// Fork imports.
+
+import {
+	type MessageSubprofileResponse,
+	MessageSubprofileResponseSchema,
+} from '@fluxer/schema/src/domains/subprofile/SubprofileSchemas';
+
+export {type MessageSubprofileResponse, MessageSubprofileResponseSchema};
+
 import {z} from 'zod';
 
 export const MessageAttachmentResponse = z.object({
@@ -161,6 +171,7 @@ const MessageBaseResponseSchema = z.object({
 		.lazy(() => ThreadChannelResponse)
 		.optional()
 		.describe('The thread started from this message, when the viewer can see threads'),
+	subprofile: MessageSubprofileResponseSchema.nullish().describe('Optional subprofile persona information'),
 });
 
 type MessageBaseResponse = z.infer<typeof MessageBaseResponseSchema>;
@@ -364,6 +375,7 @@ export interface Message {
 	readonly blocked?: boolean;
 	readonly _allowedMentions?: AllowedMentions;
 	readonly _favoriteMemeId?: string;
+	readonly subprofile?: MessageSubprofileResponse | null;
 }
 
 export const MessagePurgeResponse = z.object({deleted_count: z.number().int().nonnegative()});
