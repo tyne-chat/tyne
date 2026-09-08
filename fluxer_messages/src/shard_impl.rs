@@ -12,7 +12,7 @@ use crate::types::{
     ApiReactionEmojiResponse, ApiUserPartial, Message, MessageAttachment, MessageCall,
     MessageEmbed, MessageEmbedAuthor, MessageEmbedChild, MessageEmbedField, MessageEmbedFooter,
     MessageEmbedMedia, MessageEmbedProvider, MessageReference, MessageRequest, MessageResponse,
-    MessageSnapshot, MessageStickerItem,
+    MessageSnapshot, MessageStickerItem, MessageSubprofile,
 };
 use crate::udt;
 use base64::prelude::{BASE64_STANDARD, Engine};
@@ -120,7 +120,7 @@ const MESSAGE_COLUMNS: &str = "\
     content, edited_timestamp, pinned_timestamp, flags, mention_everyone, \
     mention_users, mention_roles, mention_channels, \
     has_reaction, version, \
-    attachments, embeds, sticker_items, message_reference, call, message_snapshots";
+    attachments, embeds, sticker_items, message_reference, call, message_snapshots, subprofile";
 
 pub struct MessagesShard<T> {
     storage: MessagesStorage,
@@ -246,6 +246,7 @@ struct MessageDbRow {
     message_reference: Option<udt::MessageReferenceUdt>,
     call: Option<udt::MessageCallUdt>,
     message_snapshots: Option<Vec<udt::MessageSnapshotUdt>>,
+    subprofile: Option<udt::MessageSubprofileUdt>,
 }
 
 #[cfg_attr(feature = "scylla", derive(DeserializeRow))]
@@ -1543,6 +1544,7 @@ impl<T: Transport> MessagesShard<T> {
             nonce: options.nonce.clone(),
             call: message.call.as_ref().map(map_call),
             referenced_message,
+            subprofile: message.subprofile.clone(),
         }
     }
 
@@ -3656,7 +3658,21 @@ impl From<MessageDbRow> for Message {
             message_snapshots: row
                 .message_snapshots
                 .map(|v| v.into_iter().map(convert_message_snapshot).collect()),
+            subprofile: row.subprofile.map(convert_subprofile),
         }
+    }
+}
+
+fn convert_subprofile(s: udt::MessageSubprofileUdt) -> MessageSubprofile {
+    MessageSubprofile {
+        id: s.id.unwrap_or_default(),
+        name: s.name.unwrap_or_default(),
+        avatar: s.avatar,
+        avatar_color: s.avatar_color,
+        system_name: s.system_name,
+        pronouns: s.pronouns,
+        color: s.color,
+        bio: s.bio,
     }
 }
 

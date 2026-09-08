@@ -220,6 +220,8 @@ pub struct Message {
     pub call: Option<MessageCall>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message_snapshots: Option<Vec<MessageSnapshot>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subprofile: Option<MessageSubprofile>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -474,6 +476,26 @@ pub struct ApiMessageResponse {
         deserialize_with = "deserialize_double_option"
     )]
     pub referenced_message: Option<Option<Box<ApiMessageResponse>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subprofile: Option<MessageSubprofile>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessageSubprofile {
+    pub id: String,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avatar_color: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub system_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pronouns: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -791,6 +813,7 @@ mod tests {
             nonce: None,
             call: None,
             referenced_message: referenced,
+            subprofile: None,
         }
     }
 
