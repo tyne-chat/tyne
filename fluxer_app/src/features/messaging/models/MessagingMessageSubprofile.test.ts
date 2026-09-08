@@ -32,9 +32,10 @@ vi.mock('@app/features/user/state/Users', () => ({
 		getUser: () => null,
 	},
 }));
+export const mockHydrateMessageReactions = vi.fn();
 vi.mock('@app/features/messaging/state/MessageReactions', () => ({
 	default: {
-		hydrateMessageReactions: () => {},
+		hydrateMessageReactions: (...args: Array<unknown>) => mockHydrateMessageReactions(...args),
 		replaceMessageReactions: () => {},
 		getMessageReactions: () => [],
 	},
@@ -138,5 +139,14 @@ describe('MessagingMessage Subprofile Preservation', () => {
 		const reacted = msg.withReaction({name: '🔥'}, true, false);
 		expect(reacted.subprofile?.id).toBe('sub-alice');
 		expect(reacted.subprofile?.name).toBe('Alice');
+	});
+
+	it('skips reaction hydration during withUpdates', () => {
+		mockHydrateMessageReactions.mockClear();
+		const wire = createWireMessage();
+		const msg = new Message(wire, {skipUserCache: true});
+		mockHydrateMessageReactions.mockClear();
+		msg.withUpdates({});
+		expect(mockHydrateMessageReactions).not.toHaveBeenCalled();
 	});
 });
