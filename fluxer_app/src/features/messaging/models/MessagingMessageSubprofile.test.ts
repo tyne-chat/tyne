@@ -149,4 +149,37 @@ describe('MessagingMessage Subprofile Preservation', () => {
 		msg.withUpdates({});
 		expect(mockHydrateMessageReactions).not.toHaveBeenCalled();
 	});
+
+	it('preserves subprofile on referencedMessage when constructing a reply message', () => {
+		const referencedWire = createWireMessage({
+			id: '1546500000000000099',
+			content: 'Original subprofile message',
+			subprofile: {
+				id: 'sub-bob',
+				name: 'Bob the Fox',
+				avatar: 'https://example.com/bob.png',
+				system_name: 'Foxes',
+				pronouns: 'he/him',
+				color: 0xff8800,
+				bio: 'A cunning fox',
+			},
+		});
+
+		const replyWire = createWireMessage({
+			id: '1546500000000000100',
+			content: 'Replying to bob',
+			referenced_message: referencedWire,
+			message_reference: {
+				channel_id: referencedWire.channel_id,
+				message_id: referencedWire.id,
+				type: 0,
+			},
+		});
+
+		const replyMsg = new Message(replyWire, {skipUserCache: true});
+		expect(replyMsg.referencedMessage).toBeDefined();
+		expect(replyMsg.referencedMessage?.subprofile?.name).toBe('Bob the Fox');
+		expect(replyMsg.referencedMessage?.subprofile?.avatar).toBe('https://example.com/bob.png');
+		expect(replyMsg.referencedMessage?.subprofile?.color).toBe(0xff8800);
+	});
 });
