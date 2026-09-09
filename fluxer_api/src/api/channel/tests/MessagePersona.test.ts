@@ -66,7 +66,7 @@ class FakeConnectionManager implements INatsConnectionManager {
 	}
 }
 
-describe('MessageSubprofile Backend Pipeline', () => {
+describe('MessagePersona Backend Pipeline', () => {
 	it('validates MessageRequest with subprofile', () => {
 		const parsed = MessageRequestSchema.safeParse({
 			content: 'Hello from Alice',
