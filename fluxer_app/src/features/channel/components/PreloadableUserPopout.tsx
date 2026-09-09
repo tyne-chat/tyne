@@ -21,6 +21,13 @@ import {useUserProfileHoverPreload} from '@app/features/user/hooks/useUserProfil
 import type {User} from '@app/features/user/models/User';
 import React, {useCallback, useState} from 'react';
 
+// Fork imports.
+
+import {PersonaProfileModal} from '@app/features/persona/components/PersonaProfileModal';
+import {PersonaProfilePopout} from '@app/features/persona/components/PersonaProfilePopout';
+import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
+import {modal} from '@app/features/ui/commands/ModalCommands';
+
 type PreloadableChildProps = React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>;
 
 export const PreloadableUserPopout = React.forwardRef<
@@ -43,6 +50,7 @@ export const PreloadableUserPopout = React.forwardRef<
 		enableLongPressActions?: boolean;
 		longPressWrapperElement?: 'div' | 'span';
 		profilePopoutAnimationType?: PopoutAnimationType;
+		ignoreSubprofile?: boolean;
 	}
 >(
 	(
@@ -64,6 +72,7 @@ export const PreloadableUserPopout = React.forwardRef<
 			enableLongPressActions = false,
 			longPressWrapperElement = 'div',
 			profilePopoutAnimationType = 'profile-slide',
+			ignoreSubprofile = false,
 		},
 		ref,
 	) => {
@@ -71,6 +80,7 @@ export const PreloadableUserPopout = React.forwardRef<
 		const [showActionsSheet, setShowActionsSheet] = useState(false);
 		const child = React.Children.only(children) as React.ReactElement<PreloadableChildProps>;
 		const member = guildMember ?? (guildId ? GuildMembers.getMember(guildId, user.id) : null);
+		const subprofile = !ignoreSubprofile && message?.subprofile ? message.subprofile : null;
 		const {scheduleProfilePreload, cancelProfilePreload} = useUserProfileHoverPreload({
 			userId: user.id,
 			guildId,
@@ -78,8 +88,23 @@ export const PreloadableUserPopout = React.forwardRef<
 		});
 		const handleMobileClick = useCallback(() => {
 			if (isWebhook) return;
+			if (subprofile) {
+				ModalCommands.push(
+					modal(() => (
+						<PersonaProfileModal
+							subprofile={subprofile}
+							user={user}
+							guildId={guildId}
+							guildMember={member}
+							onClose={ModalCommands.pop}
+							data-flx="channel.preloadable-user-popout.handle-mobile-click.persona-profile-modal"
+						/>
+					)),
+				);
+				return;
+			}
 			UserProfileCommands.openUserProfile(user.id, guildId);
-		}, [user.id, guildId, isWebhook]);
+		}, [user, guildId, isWebhook, subprofile, member]);
 		const isShiftMentionClick = useCallback(
 			(event: React.MouseEvent<HTMLElement>) =>
 				!isWebhook && event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey && event.button === 0,
@@ -241,18 +266,31 @@ export const PreloadableUserPopout = React.forwardRef<
 		return (
 			<Popout
 				ref={ref}
-				render={({popoutKey, onClose}) => (
-					<UserProfilePopout
-						key={`${user.id}:${guildId ?? 'global'}:${isWebhook ? 'webhook' : 'user'}`}
-						popoutKey={popoutKey}
-						user={user}
-						isWebhook={isWebhook}
-						guildId={guildId}
-						guildMember={member}
-						onClose={onClose}
-						data-flx="channel.preloadable-user-popout.user-profile-popout"
-					/>
-				)}
+				render={({popoutKey, onClose}) =>
+					subprofile ? (
+						<PersonaProfilePopout
+							key={`persona:${subprofile.id}:${user.id}`}
+							popoutKey={popoutKey}
+							subprofile={subprofile}
+							user={user}
+							guildId={guildId}
+							guildMember={member}
+							onClose={onClose}
+							data-flx="channel.preloadable-user-popout.persona-profile-popout"
+						/>
+					) : (
+						<UserProfilePopout
+							key={`${user.id}:${guildId ?? 'global'}:${isWebhook ? 'webhook' : 'user'}`}
+							popoutKey={popoutKey}
+							user={user}
+							isWebhook={isWebhook}
+							guildId={guildId}
+							guildMember={member}
+							onClose={onClose}
+							data-flx="channel.preloadable-user-popout.user-profile-popout"
+						/>
+					)
+				}
 				position={position}
 				animationType={profilePopoutAnimationType}
 				constrainHeight={false}
