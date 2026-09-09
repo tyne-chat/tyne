@@ -81,11 +81,14 @@ export class PersonaStoreClass {
 		system_name?: string | null;
 		pronouns?: string | null;
 		color?: number | null;
+		accentColor?: number | null;
+		accent_color?: number | null;
 		bio?: string | null;
 		persona_tags?: Array<{prefix?: string; suffix?: string}>;
 	}): Promise<Persona> {
 		const id = `${SnowflakeUtils.fromTimestamp(Date.now())}_${++personaIdCounter}`;
 		const rawTags = personaData.persona_tags ?? [];
+		const color = personaData.accentColor ?? personaData.accent_color ?? personaData.color ?? undefined;
 		const newPersona: Persona = {
 			$typeName: 'fluxer.user.preferences.v1.Persona',
 			id,
@@ -93,7 +96,7 @@ export class PersonaStoreClass {
 			avatarUrl: personaData.avatar_url ?? undefined,
 			systemName: personaData.system_name ?? undefined,
 			pronouns: personaData.pronouns ?? undefined,
-			color: personaData.color ?? undefined,
+			color: color ?? undefined,
 			bio: personaData.bio ?? undefined,
 			autoTagDisabled: false,
 			useCount: 0,
@@ -110,12 +113,25 @@ export class PersonaStoreClass {
 		return newPersona;
 	}
 
-	async updatePersona(id: string, updates: Partial<Persona>): Promise<void> {
+	async updatePersona(
+		id: string,
+		updates: Partial<Persona> & {accentColor?: number | null; accent_color?: number | null},
+	): Promise<void> {
+		const resolvedColor =
+			updates.accentColor !== undefined
+				? (updates.accentColor ?? undefined)
+				: updates.accent_color !== undefined
+					? (updates.accent_color ?? undefined)
+					: updates.color;
+		const finalUpdates = {
+			...updates,
+			...(resolvedColor !== undefined ? {color: resolvedColor} : {}),
+		};
 		const updatedList = this.personas.map((p) => {
 			if (p.id !== id) return p;
 			return {
 				...p,
-				...updates,
+				...finalUpdates,
 			};
 		});
 		await UserSettings.setSubPreference('personas', updatedList);
