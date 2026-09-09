@@ -16,7 +16,7 @@ import {Info, LockSimple, LockSimpleOpen, PencilSimple, Plus, Trash, UploadSimpl
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {type ActivePersonaMode, PersonaStore} from '../../state/PersonaStore';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
 import styles from './PersonaSettingsTab.module.css';
@@ -55,7 +55,11 @@ const emptyFormState = (): PersonaFormState => ({
 	tags: [{prefix: '', suffix: ''}],
 });
 
-export const PersonaSettingsTab: React.FC = observer(() => {
+export interface PersonaSettingsTabProps {
+	initialSubtab?: string;
+}
+
+export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({initialSubtab}) => {
 	const currentUser = Users.getCurrentUser();
 	const personas = PersonaStore.personas;
 	const activePersonaId = PersonaStore.activePersonaId;
@@ -116,10 +120,26 @@ export const PersonaSettingsTab: React.FC = observer(() => {
 		setIsEditing(true);
 	};
 
+	const editorCardRef = useRef<HTMLDivElement | null>(null);
+	const lastHandledSubtabRef = useRef<string | null>(null);
+
 	const handleCancelEdit = () => {
 		setIsEditing(false);
 		setFormData(emptyFormState());
 	};
+
+	useEffect(() => {
+		if (initialSubtab && lastHandledSubtabRef.current !== initialSubtab) {
+			const target = personas.find((p) => p.id === initialSubtab);
+			if (target) {
+				lastHandledSubtabRef.current = initialSubtab;
+				handleStartEdit(target);
+				requestAnimationFrame(() => {
+					editorCardRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'});
+				});
+			}
+		}
+	}, [initialSubtab, personas]);
 
 	const handleSaveForm = async () => {
 		if (isUploadingAvatar) {
@@ -265,7 +285,11 @@ export const PersonaSettingsTab: React.FC = observer(() => {
 
 					{/* Editor Form */}
 					{isEditing && (
-						<div className={styles.editorCard} data-flx="persona.settings.persona-settings-tab.editor-card">
+						<div
+							ref={editorCardRef}
+							className={styles.editorCard}
+							data-flx="persona.settings.persona-settings-tab.editor-card"
+						>
 							<div className={styles.editorTitle} data-flx="persona.settings.persona-settings-tab.editor-title">
 								{formData.id ? 'Edit Persona' : 'New Persona'}
 							</div>

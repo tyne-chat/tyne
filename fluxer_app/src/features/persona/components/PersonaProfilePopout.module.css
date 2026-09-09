@@ -1,0 +1,75 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.bioContent {
+	max-height: 8.5rem;
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar-thumb-bg) transparent;
+	padding-right: 0.25rem;
+}
+
+.bioContent::-webkit-scrollbar {
+	width: 0.25rem;
+}
+
+.bioContent::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.bioContent::-webkit-scrollbar-thumb {
+	background-color: var(--scrollbar-thumb-bg);
+	border-radius: 0.125rem;
+}
+
+.bioContent::-webkit-scrollbar-thumb:hover {
+	background-color: var(--scrollbar-thumb-bg-hover);
+}
+
+.rootAccountButton {
+	width: 100%;
+	cursor: pointer;
+	text-align: left;
+	font-family: inherit;
+	box-sizing: border-box;
+	gap: 0.5rem;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
+}
+
+:global(:where(html.window-focused, html.unfocused-fully-interactive):not(.window-focus-activation-guard))
+	.rootAccountButton:hover {
+	background-color: var(--background-modifier-hover);
+	border-color: var(--background-modifier-hover);
+}
+
+.rootAccountAvatar {
+	flex-shrink: 0;
+}
+
+.rootAccountInfo {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	flex: 1;
+	gap: 0.125rem;
+}
+
+.rootAccountUsername {
+	font-size: 0.75rem;
+	line-height: 1rem;
+	color: var(--text-secondary);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rootAccountChevron {
+	color: var(--text-tertiary);
+	flex-shrink: 0;
+	width: 1rem;
+	height: 1rem;
+}
