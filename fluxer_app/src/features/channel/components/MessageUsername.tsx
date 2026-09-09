@@ -18,10 +18,6 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useRef} from 'react';
 
-// Fork imports.
-
-import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
-
 export const MessageUsername = observer(
 	({
 		user,
@@ -44,10 +40,8 @@ export const MessageUsername = observer(
 		const usernameRef = useRef<HTMLSpanElement | null>(null);
 		const contextMenuOpen = useContextMenuHoverState(usernameRef);
 		const subprofileName = message.subprofile?.name;
-		const subprofileColor =
-			message.subprofile?.color != null ? ColorUtils.int2rgb(message.subprofile.color) : undefined;
 		const displayName = previewName || subprofileName || NicknameUtils.getNickname(user, guild?.id, message.channelId);
-		const color = previewColor || subprofileColor || member?.getColorString();
+		const color = previewColor || member?.getColorString();
 		const onPopoutToggle = useMaybeMessageViewContext()?.onPopoutToggle;
 		const handlePopoutOpen = useCallback(() => onPopoutToggle?.(true), [onPopoutToggle]);
 		const handlePopoutClose = useCallback(() => onPopoutToggle?.(false), [onPopoutToggle]);
