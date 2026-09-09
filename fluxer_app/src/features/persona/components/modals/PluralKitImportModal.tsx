@@ -12,7 +12,7 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useRef, useState} from 'react';
-import {SubprofileStore} from '../../state/SubprofileStore';
+import {PersonaStore} from '../../state/PersonaStore';
 import styles from './PluralKitImportModal.module.css';
 
 let importIdCounter = 0;
@@ -23,100 +23,96 @@ interface PKProxyTag {
 }
 
 interface PKMember {
-	id?: string;
-	name?: string;
+	id: string;
+	name: string;
 	display_name?: string | null;
-	color?: string | null;
-	pronouns?: string | null;
 	avatar_url?: string | null;
 	webhook_avatar_url?: string | null;
+	color?: string | null;
+	pronouns?: string | null;
 	description?: string | null;
 	proxy_tags?: Array<PKProxyTag>;
 }
 
-interface PKExport {
-	version?: number;
-	name?: string;
-	tag?: string;
+interface PKSystemExport {
+	id?: string;
+	name?: string | null;
+	description?: string | null;
+	tag?: string | null;
+	avatar_url?: string | null;
 	members?: Array<PKMember>;
 }
 
 interface ImportWarning {
 	displayName: string;
-	prefix: string;
+	prefix?: string;
 	reason: string;
 }
 
-interface PluralKitImportModalProps {
-	onClose: () => void;
-}
-
-type Step = 'select' | 'importing' | 'completed';
-type ImportMode = 'replace' | 'append';
-
-export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observer(({onClose}) => {
-	const existingCount = SubprofileStore.personas.length;
-
-	const [step, setStep] = useState<Step>('select');
+export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({onClose}) => {
+	const [step, setStep] = useState<'select' | 'importing' | 'completed'>('select');
+	const [fileName, setFileName] = useState<string | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
-	const [pkData, setPkData] = useState<PKExport | null>(null);
-	const [fileName, setFileName] = useState<string>('');
-	const [importMode, setImportMode] = useState<ImportMode>(existingCount > 0 ? 'replace' : 'append');
+	const [pkData, setPkData] = useState<PKSystemExport | null>(null);
 	const [systemTagOverride, setSystemTagOverride] = useState<string>('');
-
-	const [progress, setProgress] = useState({
+	const [importMode, setImportMode] = useState<'replace' | 'append'>('replace');
+	const [progress, setProgress] = useState<{current: number; total: number; currentName: string; percent: number}>({
 		current: 0,
 		total: 0,
 		currentName: '',
 		percent: 0,
 	});
-
 	const [importResults, setImportResults] = useState<{
 		successCount: number;
 		warnings: Array<ImportWarning>;
 	}>({successCount: 0, warnings: []});
 
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
+	const existingCount = PersonaStore.personas.length;
 
 	const handleFileChosen = (file: File) => {
 		setFileError(null);
 		setFileName(file.name);
+
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			try {
 				const content = e.target?.result as string;
-				const parsed = JSON.parse(content) as PKExport;
-				if (!parsed || !Array.isArray(parsed.members)) {
-					setFileError('Invalid file: PluralKit export must contain a "members" list.');
-					setPkData(null);
+				const parsed = JSON.parse(content) as PKSystemExport;
+
+				if (!parsed || typeof parsed !== 'object') {
+					setFileError('The chosen file is not a valid JSON object.');
 					return;
 				}
+
+				if (!Array.isArray(parsed.members)) {
+					setFileError('No "members" array found in this export file.');
+					return;
+				}
+
 				setPkData(parsed);
-				setSystemTagOverride(parsed.tag?.trim() || parsed.name?.trim() || '');
-			} catch (err: unknown) {
-				const msg = err instanceof Error ? err.message : 'Invalid JSON file';
-				setFileError(`Failed to read file: ${msg}`);
-				setPkData(null);
+				if (parsed.tag) {
+					setSystemTagOverride(parsed.tag);
+				}
+			} catch {
+				setFileError('Failed to parse JSON file. Please ensure it is a valid PluralKit export.');
 			}
 		};
 		reader.onerror = () => {
 			setFileError('Failed to read the selected file.');
-			setPkData(null);
 		};
 		reader.readAsText(file);
 	};
 
-	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+	const handleDrop = (e: React.DragEvent) => {
 		e.preventDefault();
-		e.stopPropagation();
 		if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
 			handleFileChosen(e.dataTransfer.files[0]);
 		}
 	};
 
-	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+	const handleDragOver = (e: React.DragEvent) => {
 		e.preventDefault();
-		e.stopPropagation();
 	};
 
 	const handleStartImport = async () => {
@@ -130,20 +126,13 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 
 		for (let i = 0; i < total; i++) {
 			const member = members[i];
-			const displayName =
-				member.display_name && member.display_name.trim().length > 0
-					? member.display_name.trim()
-					: member.name && member.name.trim().length > 0
-						? member.name.trim()
-						: '';
-
-			const primaryPrefix = member.proxy_tags?.[0]?.prefix?.trim() || '(none)';
+			const displayName = (member.name || member.display_name || '').trim();
+			const primaryPrefix = member.proxy_tags?.[0]?.prefix?.trim() || undefined;
 
 			if (!displayName) {
 				warnings.push({
-					displayName: member.id ? `Member [${member.id}]` : '(Unnamed entry)',
-					prefix: primaryPrefix,
-					reason: 'Skipped: Entry has neither display name nor name.',
+					displayName: `Member #${i + 1}`,
+					reason: 'Skipped member because they have no name configured.',
 				});
 				setProgress({
 					current: i + 1,
@@ -166,7 +155,7 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 
 			if (remoteAvatarUrl) {
 				try {
-					const res = await http.post<{avatar_url: string; message?: string}>(Endpoints.USER_SUBPROFILE_IMPORT_AVATAR, {
+					const res = await http.post<{avatar_url: string; message?: string}>(Endpoints.USER_PERSONA_IMPORT_AVATAR, {
 						body: {url: remoteAvatarUrl},
 					});
 					if (res.ok && res.body?.avatar_url) {
@@ -177,7 +166,7 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 						warnings.push({
 							displayName,
 							prefix: primaryPrefix,
-							reason: `Avatar image failed to download: ${failureReason}. Subprofile was imported without an avatar.`,
+							reason: `Avatar image failed to download: ${failureReason}. Persona was imported without an avatar.`,
 						});
 					}
 				} catch (err: unknown) {
@@ -185,7 +174,7 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 					warnings.push({
 						displayName,
 						prefix: primaryPrefix,
-						reason: `Avatar download failed: ${errorMsg}. Subprofile was imported without an avatar.`,
+						reason: `Avatar download failed: ${errorMsg}. Persona was imported without an avatar.`,
 					});
 				}
 			}
@@ -199,10 +188,10 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 				}
 			}
 
-			const proxyTags = (member.proxy_tags ?? [])
+			const personaTags = (member.proxy_tags ?? [])
 				.filter((t) => t.prefix?.trim() || t.suffix?.trim())
 				.map((t) => ({
-					$typeName: 'fluxer.user.preferences.v1.ProxyTag' as const,
+					$typeName: 'fluxer.user.preferences.v1.PersonaTag' as const,
 					prefix: t.prefix?.trim() || undefined,
 					suffix: t.suffix?.trim() || undefined,
 				}));
@@ -217,19 +206,19 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 				pronouns: member.pronouns?.trim() || undefined,
 				color: colorInt,
 				bio: member.description?.trim() || undefined,
-				autoProxyDisabled: false,
+				autoTagDisabled: false,
 				useCount: 0,
 				lastUsedAtMs: 0n,
-				proxyTags,
+				personaTags,
 			};
 
 			importedPersonas.push(persona);
 		}
 
 		if (importMode === 'replace') {
-			await SubprofileStore.replaceAllPersonas(importedPersonas);
+			await PersonaStore.replaceAllPersonas(importedPersonas);
 		} else {
-			await SubprofileStore.appendPersonas(importedPersonas);
+			await PersonaStore.appendPersonas(importedPersonas);
 		}
 
 		setImportResults({
@@ -240,22 +229,22 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 	};
 
 	const modalTitle =
-		step === 'select' ? 'Import from PluralKit' : step === 'importing' ? 'Importing Subprofiles...' : 'Import Complete';
+		step === 'select' ? 'Import from PluralKit' : step === 'importing' ? 'Importing Personas...' : 'Import Complete';
 
 	return (
 		<Modal.Root
 			size="medium"
 			onClose={step === 'importing' ? () => {} : onClose}
-			data-flx="subprofile.plural-kit-import-modal.modal-root"
+			data-flx="persona.plural-kit-import-modal.modal-root"
 		>
 			<Modal.Header
 				title={modalTitle}
 				hideCloseButton={step === 'importing'}
-				data-flx="subprofile.plural-kit-import-modal.modal-header"
+				data-flx="persona.plural-kit-import-modal.modal-header"
 			/>
 
-			<Modal.Content data-flx="subprofile.plural-kit-import-modal.modal-content">
-				<div className={styles.container} data-flx="subprofile.plural-kit-import-modal.container">
+			<Modal.Content data-flx="persona.plural-kit-import-modal.modal-content">
+				<div className={styles.container} data-flx="persona.plural-kit-import-modal.container">
 					{/* STEP 1: SELECT & CONFIGURE */}
 					{step === 'select' && (
 						<>
@@ -272,17 +261,17 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 										fileInputRef.current?.click();
 									}
 								}}
-								data-flx="subprofile.plural-kit-import-modal.dropzone.click"
+								data-flx="persona.plural-kit-import-modal.dropzone.click"
 							>
 								<UploadSimple
 									size={36}
 									style={{color: 'var(--brand-primary)'}}
-									data-flx="subprofile.plural-kit-import-modal.upload-simple"
+									data-flx="persona.plural-kit-import-modal.upload-simple"
 								/>
-								<div className={styles.dropzoneText} data-flx="subprofile.plural-kit-import-modal.dropzone-text">
+								<div className={styles.dropzoneText} data-flx="persona.plural-kit-import-modal.dropzone-text">
 									{fileName ? fileName : 'Choose a PluralKit export (.json) or drag & drop'}
 								</div>
-								<div className={styles.dropzoneSubtext} data-flx="subprofile.plural-kit-import-modal.dropzone-subtext">
+								<div className={styles.dropzoneSubtext} data-flx="persona.plural-kit-import-modal.dropzone-subtext">
 									Supports PluralKit system export files
 								</div>
 								<input
@@ -295,62 +284,50 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 											handleFileChosen(e.target.files[0]);
 										}
 									}}
-									data-flx="subprofile.plural-kit-import-modal.hidden-file-input"
+									data-flx="persona.plural-kit-import-modal.hidden-file-input"
 								/>
 							</div>
 
 							{fileError && (
-								<div className={styles.errorBanner} data-flx="subprofile.plural-kit-import-modal.error-banner">
+								<div className={styles.errorBanner} data-flx="persona.plural-kit-import-modal.error-banner">
 									{fileError}
 								</div>
 							)}
 
 							{pkData && (
 								<>
-									<div className={styles.summaryBox} data-flx="subprofile.plural-kit-import-modal.summary-box">
-										<div className={styles.summaryTitle} data-flx="subprofile.plural-kit-import-modal.summary-title">
+									<div className={styles.summaryBox} data-flx="persona.plural-kit-import-modal.summary-box">
+										<div className={styles.summaryTitle} data-flx="persona.plural-kit-import-modal.summary-title">
 											Export Summary
 										</div>
-										<div className={styles.summaryRow} data-flx="subprofile.plural-kit-import-modal.summary-row">
-											<span className={styles.summaryLabel} data-flx="subprofile.plural-kit-import-modal.summary-label">
+										<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row">
+											<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label">
 												Detected System Name / Tag
 											</span>
-											<span className={styles.summaryValue} data-flx="subprofile.plural-kit-import-modal.summary-value">
+											<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value">
 												{pkData.name || 'None'} {pkData.tag ? `(${pkData.tag})` : ''}
 											</span>
 										</div>
-										<div className={styles.summaryRow} data-flx="subprofile.plural-kit-import-modal.summary-row--2">
-											<span
-												className={styles.summaryLabel}
-												data-flx="subprofile.plural-kit-import-modal.summary-label--2"
-											>
+										<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--2">
+											<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--2">
 												Total Members
 											</span>
-											<span
-												className={styles.summaryValue}
-												data-flx="subprofile.plural-kit-import-modal.summary-value--2"
-											>
+											<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--2">
 												{pkData.members?.length ?? 0}
 											</span>
 										</div>
-										<div className={styles.summaryRow} data-flx="subprofile.plural-kit-import-modal.summary-row--3">
-											<span
-												className={styles.summaryLabel}
-												data-flx="subprofile.plural-kit-import-modal.summary-label--3"
-											>
+										<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--3">
+											<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--3">
 												Members with Avatars
 											</span>
-											<span
-												className={styles.summaryValue}
-												data-flx="subprofile.plural-kit-import-modal.summary-value--3"
-											>
+											<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--3">
 												{pkData.members?.filter((m) => Boolean(m.avatar_url || m.webhook_avatar_url)).length ?? 0}
 											</span>
 										</div>
 									</div>
 
-									<div className={styles.formField} data-flx="subprofile.plural-kit-import-modal.form-field">
-										<div className={styles.formLabel} data-flx="subprofile.plural-kit-import-modal.form-label">
+									<div className={styles.formField} data-flx="persona.plural-kit-import-modal.form-field">
+										<div className={styles.formLabel} data-flx="persona.plural-kit-import-modal.form-label">
 											System Tag (Applied to imported personas)
 										</div>
 										<input
@@ -360,19 +337,19 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 											onChange={(e) => setSystemTagOverride(e.target.value)}
 											placeholder="Optional system badge, e.g. ⚞Seraphim⚟"
 											maxLength={100}
-											data-flx="subprofile.plural-kit-import-modal.text-input.set-system-tag-override"
+											data-flx="persona.plural-kit-import-modal.text-input.set-system-tag-override"
 										/>
 									</div>
 
 									{existingCount > 0 && (
-										<div className={styles.formField} data-flx="subprofile.plural-kit-import-modal.form-field--2">
-											<div className={styles.formLabel} data-flx="subprofile.plural-kit-import-modal.form-label--2">
+										<div className={styles.formField} data-flx="persona.plural-kit-import-modal.form-field--2">
+											<div className={styles.formLabel} data-flx="persona.plural-kit-import-modal.form-label--2">
 												Import Strategy
 											</div>
-											<div className={styles.optionsGroup} data-flx="subprofile.plural-kit-import-modal.options-group">
+											<div className={styles.optionsGroup} data-flx="persona.plural-kit-import-modal.options-group">
 												<label
 													className={clsx(styles.radioOption, importMode === 'replace' && styles.radioOptionSelected)}
-													data-flx="subprofile.plural-kit-import-modal.radio-option"
+													data-flx="persona.plural-kit-import-modal.radio-option"
 												>
 													<input
 														type="radio"
@@ -380,24 +357,21 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 														checked={importMode === 'replace'}
 														onChange={() => setImportMode('replace')}
 														style={{marginTop: 3}}
-														data-flx="subprofile.plural-kit-import-modal.input.set-import-mode.radio"
+														data-flx="persona.plural-kit-import-modal.input.set-import-mode.radio"
 													/>
-													<div data-flx="subprofile.plural-kit-import-modal.div">
-														<div
-															className={styles.radioTitle}
-															data-flx="subprofile.plural-kit-import-modal.radio-title"
-														>
-															Replace all existing subprofiles
+													<div data-flx="persona.plural-kit-import-modal.div">
+														<div className={styles.radioTitle} data-flx="persona.plural-kit-import-modal.radio-title">
+															Replace all existing personas
 														</div>
-														<div className={styles.radioDesc} data-flx="subprofile.plural-kit-import-modal.radio-desc">
-															Erase all {existingCount} existing subprofile(s) and replace them completely with the
-															imported profiles.
+														<div className={styles.radioDesc} data-flx="persona.plural-kit-import-modal.radio-desc">
+															Erase all {existingCount} existing persona(s) and replace them completely with the
+															imported personas.
 														</div>
 													</div>
 												</label>
 												<label
 													className={clsx(styles.radioOption, importMode === 'append' && styles.radioOptionSelected)}
-													data-flx="subprofile.plural-kit-import-modal.radio-option--2"
+													data-flx="persona.plural-kit-import-modal.radio-option--2"
 												>
 													<input
 														type="radio"
@@ -405,21 +379,18 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 														checked={importMode === 'append'}
 														onChange={() => setImportMode('append')}
 														style={{marginTop: 3}}
-														data-flx="subprofile.plural-kit-import-modal.input.set-import-mode.radio--2"
+														data-flx="persona.plural-kit-import-modal.input.set-import-mode.radio--2"
 													/>
-													<div data-flx="subprofile.plural-kit-import-modal.div--2">
+													<div data-flx="persona.plural-kit-import-modal.div--2">
 														<div
 															className={styles.radioTitle}
-															data-flx="subprofile.plural-kit-import-modal.radio-title--2"
+															data-flx="persona.plural-kit-import-modal.radio-title--2"
 														>
 															Keep existing and add new
 														</div>
-														<div
-															className={styles.radioDesc}
-															data-flx="subprofile.plural-kit-import-modal.radio-desc--2"
-														>
-															Keep your {existingCount} current subprofile(s) and add all {pkData.members?.length ?? 0}{' '}
-															imported profiles alongside them as new entries.
+														<div className={styles.radioDesc} data-flx="persona.plural-kit-import-modal.radio-desc--2">
+															Keep your {existingCount} current persona(s) and add all {pkData.members?.length ?? 0}{' '}
+															imported personas alongside them as new entries.
 														</div>
 													</div>
 												</label>
@@ -433,24 +404,24 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 
 					{/* STEP 2: IMPORTING PROGRESS */}
 					{step === 'importing' && (
-						<div style={{padding: '16px 0'}} data-flx="subprofile.plural-kit-import-modal.div--3">
+						<div style={{padding: '16px 0'}} data-flx="persona.plural-kit-import-modal.div--3">
 							<div
 								className={styles.progressCurrentName}
-								data-flx="subprofile.plural-kit-import-modal.progress-current-name"
+								data-flx="persona.plural-kit-import-modal.progress-current-name"
 							>
 								Processing: {progress.currentName}
 							</div>
 							<div
 								className={styles.progressBarContainer}
-								data-flx="subprofile.plural-kit-import-modal.progress-bar-container"
+								data-flx="persona.plural-kit-import-modal.progress-bar-container"
 							>
 								<div
 									className={styles.progressBarFill}
 									style={{width: `${progress.percent}%`}}
-									data-flx="subprofile.plural-kit-import-modal.progress-bar-fill"
+									data-flx="persona.plural-kit-import-modal.progress-bar-fill"
 								/>
 							</div>
-							<div className={styles.progressDetail} data-flx="subprofile.plural-kit-import-modal.progress-detail">
+							<div className={styles.progressDetail} data-flx="persona.plural-kit-import-modal.progress-detail">
 								{progress.current} of {progress.total} members ({progress.percent}%) &bull; Downloading avatars to local
 								S3
 							</div>
@@ -460,52 +431,52 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 					{/* STEP 3: COMPLETED & WARNINGS */}
 					{step === 'completed' && (
 						<>
-							<div className={styles.successBox} data-flx="subprofile.plural-kit-import-modal.success-box">
+							<div className={styles.successBox} data-flx="persona.plural-kit-import-modal.success-box">
 								<CheckCircle
 									size={36}
 									style={{color: 'var(--accent-success)', marginBottom: 8}}
-									data-flx="subprofile.plural-kit-import-modal.check-circle"
+									data-flx="persona.plural-kit-import-modal.check-circle"
 								/>
-								<div className={styles.successTitle} data-flx="subprofile.plural-kit-import-modal.success-title">
+								<div className={styles.successTitle} data-flx="persona.plural-kit-import-modal.success-title">
 									Import Complete!
 								</div>
-								<div className={styles.successDesc} data-flx="subprofile.plural-kit-import-modal.success-desc">
-									Successfully imported {importResults.successCount} subprofile(s) into your account. All avatar images
-									are safely stored on your local server.
+								<div className={styles.successDesc} data-flx="persona.plural-kit-import-modal.success-desc">
+									Successfully imported {importResults.successCount} persona(s) into your account. All avatar images are
+									safely stored on your local server.
 								</div>
 							</div>
 
 							{importResults.warnings.length > 0 && (
-								<div className={styles.warningBox} data-flx="subprofile.plural-kit-import-modal.warning-box">
-									<div className={styles.warningHeader} data-flx="subprofile.plural-kit-import-modal.warning-header">
-										<Warning size={18} data-flx="subprofile.plural-kit-import-modal.warning" />
-										<span data-flx="subprofile.plural-kit-import-modal.span">
+								<div className={styles.warningBox} data-flx="persona.plural-kit-import-modal.warning-box">
+									<div className={styles.warningHeader} data-flx="persona.plural-kit-import-modal.warning-header">
+										<Warning size={18} data-flx="persona.plural-kit-import-modal.warning" />
+										<span data-flx="persona.plural-kit-import-modal.span">
 											{importResults.warnings.length} notice
 											{importResults.warnings.length > 1 ? 's' : ''} during import
 										</span>
 									</div>
-									<div className={styles.warningList} data-flx="subprofile.plural-kit-import-modal.warning-list">
+									<div className={styles.warningList} data-flx="persona.plural-kit-import-modal.warning-list">
 										{importResults.warnings.map((w, idx) => (
 											<div
 												key={idx}
 												className={styles.warningItem}
-												data-flx="subprofile.plural-kit-import-modal.warning-item"
+												data-flx="persona.plural-kit-import-modal.warning-item"
 											>
 												<div
 													className={styles.warningItemName}
-													data-flx="subprofile.plural-kit-import-modal.warning-item-name"
+													data-flx="persona.plural-kit-import-modal.warning-item-name"
 												>
 													{w.displayName}{' '}
 													<span
 														style={{fontWeight: 400, color: 'var(--text-primary-muted)'}}
-														data-flx="subprofile.plural-kit-import-modal.span--2"
+														data-flx="persona.plural-kit-import-modal.span--2"
 													>
 														(Prefix: {w.prefix})
 													</span>
 												</div>
 												<div
 													className={styles.warningItemDetail}
-													data-flx="subprofile.plural-kit-import-modal.warning-item-detail"
+													data-flx="persona.plural-kit-import-modal.warning-item-detail"
 												>
 													{w.reason}
 												</div>
@@ -519,17 +490,17 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 				</div>
 			</Modal.Content>
 
-			<Modal.Footer data-flx="subprofile.plural-kit-import-modal.modal-footer">
+			<Modal.Footer data-flx="persona.plural-kit-import-modal.modal-footer">
 				{step === 'select' && (
 					<>
-						<Button variant="secondary" onClick={onClose} data-flx="subprofile.plural-kit-import-modal.button.close">
+						<Button variant="secondary" onClick={onClose} data-flx="persona.plural-kit-import-modal.button.close">
 							Cancel
 						</Button>
 						<Button
 							variant="primary"
 							disabled={!pkData?.members || pkData.members.length === 0}
 							onClick={handleStartImport}
-							data-flx="subprofile.plural-kit-import-modal.button.start-import"
+							data-flx="persona.plural-kit-import-modal.button.start-import"
 						>
 							Start Import
 						</Button>
@@ -537,13 +508,13 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 				)}
 
 				{step === 'importing' && (
-					<Button variant="secondary" disabled data-flx="subprofile.plural-kit-import-modal.button">
+					<Button variant="secondary" disabled data-flx="persona.plural-kit-import-modal.button">
 						Importing...
 					</Button>
 				)}
 
 				{step === 'completed' && (
-					<Button variant="primary" onClick={onClose} data-flx="subprofile.plural-kit-import-modal.button.close--2">
+					<Button variant="primary" onClick={onClose} data-flx="persona.plural-kit-import-modal.button.close--2">
 						Done
 					</Button>
 				)}
@@ -559,7 +530,7 @@ export function openPluralKitImportModal(): void {
 		ModalCommands.modal(() => (
 			<PluralKitImportModal
 				onClose={() => ModalCommands.pop()}
-				data-flx="subprofile.plural-kit-import-modal.open-plural-kit-import-modal.plural-kit-import-modal"
+				data-flx="persona.plural-kit-import-modal.open-plural-kit-import-modal.plural-kit-import-modal"
 			/>
 		)),
 	);

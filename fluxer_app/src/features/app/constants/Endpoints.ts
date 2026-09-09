@@ -171,6 +171,8 @@ export const Endpoints = {
 	USER_GUILD_BULK_DELETE_MY_MESSAGES: (guildId: string) => `/users/@me/guilds/${guildId}/messages/bulk-delete-mine`,
 	CHANNEL_BULK_DELETE_MY_MESSAGES: (channelId: string) => `/channels/${channelId}/messages/bulk-delete-mine`,
 	USER_ME: '/users/@me',
+	USER_PERSONA_AVATAR: '/users/@me/personas/avatar',
+	USER_PERSONA_IMPORT_AVATAR: '/users/@me/personas/import-avatar',
 	USER_SUBPROFILE_AVATAR: '/users/@me/subprofiles/avatar',
 	USER_SUBPROFILE_IMPORT_AVATAR: '/users/@me/subprofiles/import-avatar',
 	USER_TERMS_ACCEPTANCE: '/users/@me/terms-acceptance',

@@ -118,7 +118,7 @@ const SHOW_EMOJI_BUTTON_DESCRIPTOR = msg({
 	comment: 'Short label for an advanced message input preference.',
 });
 const SHOW_SUBPROFILES_BUTTON_DESCRIPTOR = msg({
-	message: 'Show subprofiles button',
+	message: 'Show personas button',
 	comment: 'Short label for an advanced message input preference.',
 });
 const SHOW_SEND_BUTTON_DESCRIPTOR = msg({
