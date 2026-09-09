@@ -344,7 +344,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 										<input
 											type="text"
 											className={styles.textInput}
-											placeholder="#5865F2"
+											placeholder="#4641D9"
 											maxLength={7}
 											value={formData.color}
 											onChange={(e) => setFormData({...formData, color: e.target.value})}
@@ -431,15 +431,15 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 										>
 											Proxy Tags (Prefix & Suffix)
 										</div>
-										<button
-											type="button"
-											className={styles.actionButton}
+										<Button
+											variant="secondary"
+											small
+											leftIcon={<Plus size={14} data-flx="subprofile.settings.subprofile-settings-tab.plus" />}
 											onClick={handleAddTagRow}
-											data-flx="subprofile.settings.subprofile-settings-tab.action-button.add-tag-row"
+											data-flx="subprofile.settings.subprofile-settings-tab.button.add-tag-row"
 										>
-											<Plus size={14} data-flx="subprofile.settings.subprofile-settings-tab.plus" />
-											<span data-flx="subprofile.settings.subprofile-settings-tab.span--2">Add Tag Pair</span>
-										</button>
+											Add Tag Pair
+										</Button>
 									</div>
 									{formData.proxyTags.map((tag, idx) => (
 										<div
@@ -456,8 +456,8 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 												data-flx="subprofile.settings.subprofile-settings-tab.tag-input.tag-change.text"
 											/>
 											<span
-												style={{color: 'var(--text-muted)'}}
-												data-flx="subprofile.settings.subprofile-settings-tab.span--3"
+												style={{color: 'var(--text-primary-muted)'}}
+												data-flx="subprofile.settings.subprofile-settings-tab.span--2"
 											>
 												text
 											</span>
@@ -470,14 +470,15 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 												data-flx="subprofile.settings.subprofile-settings-tab.tag-input.tag-change.text--2"
 											/>
 											{formData.proxyTags.length > 1 && (
-												<button
-													type="button"
-													className={clsx(styles.actionButton, styles.deleteButton)}
+												<Button
+													variant="danger"
+													small
+													square
+													icon={<Trash size={14} data-flx="subprofile.settings.subprofile-settings-tab.trash" />}
 													onClick={() => handleRemoveTagRow(idx)}
-													data-flx="subprofile.settings.subprofile-settings-tab.action-button.remove-tag-row"
-												>
-													<Trash size={14} data-flx="subprofile.settings.subprofile-settings-tab.trash" />
-												</button>
+													aria-label="Remove tag pair"
+													data-flx="subprofile.settings.subprofile-settings-tab.remove-tag-pair.remove-tag-row"
+												/>
 											)}
 										</div>
 									))}
@@ -487,23 +488,21 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 								className={styles.editorActions}
 								data-flx="subprofile.settings.subprofile-settings-tab.editor-actions"
 							>
-								<button
-									type="button"
-									className={styles.secondaryButton}
+								<Button
+									variant="secondary"
 									onClick={handleCancelEdit}
-									data-flx="subprofile.settings.subprofile-settings-tab.secondary-button.cancel-edit"
+									data-flx="subprofile.settings.subprofile-settings-tab.button.cancel-edit"
 								>
 									Cancel
-								</button>
-								<button
-									type="button"
-									className={styles.primaryButton}
+								</Button>
+								<Button
+									variant="primary"
 									disabled={!formData.name.trim() || isUploadingAvatar}
 									onClick={handleSaveForm}
-									data-flx="subprofile.settings.subprofile-settings-tab.primary-button.save-form"
+									data-flx="subprofile.settings.subprofile-settings-tab.button.save-form"
 								>
 									{isUploadingAvatar ? 'Uploading avatar...' : 'Save Subprofile'}
-								</button>
+								</Button>
 							</div>
 						</div>
 					)}
@@ -526,7 +525,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 											style={{marginRight: 6, verticalAlign: 'text-bottom'}}
 											data-flx="subprofile.settings.subprofile-settings-tab.upload-simple"
 										/>
-										<span data-flx="subprofile.settings.subprofile-settings-tab.span--4">Import from PluralKit</span>
+										<span data-flx="subprofile.settings.subprofile-settings-tab.span--3">Import from PluralKit</span>
 									</Button>
 									<Button
 										variant="primary"
@@ -538,7 +537,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 											style={{marginRight: 6, verticalAlign: 'text-bottom'}}
 											data-flx="subprofile.settings.subprofile-settings-tab.plus--2"
 										/>
-										<span data-flx="subprofile.settings.subprofile-settings-tab.span--5">Add Subprofile</span>
+										<span data-flx="subprofile.settings.subprofile-settings-tab.span--4">Add Subprofile</span>
 									</Button>
 								</div>
 							)
@@ -649,7 +648,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 																color="var(--brand-primary)"
 																data-flx="subprofile.settings.subprofile-settings-tab.lock-simple"
 															/>
-															<span data-flx="subprofile.settings.subprofile-settings-tab.span--6">Latched</span>
+															<span data-flx="subprofile.settings.subprofile-settings-tab.span--5">Latched</span>
 														</>
 													) : (
 														<>
@@ -657,7 +656,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 																size={14}
 																data-flx="subprofile.settings.subprofile-settings-tab.lock-simple-open"
 															/>
-															<span data-flx="subprofile.settings.subprofile-settings-tab.span--7">Latch</span>
+															<span data-flx="subprofile.settings.subprofile-settings-tab.span--6">Latch</span>
 														</>
 													)}
 												</Button>
@@ -671,7 +670,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 														size={14}
 														data-flx="subprofile.settings.subprofile-settings-tab.pencil-simple"
 													/>
-													<span data-flx="subprofile.settings.subprofile-settings-tab.span--8">Edit</span>
+													<span data-flx="subprofile.settings.subprofile-settings-tab.span--7">Edit</span>
 												</Button>
 												<Button
 													variant="danger"
@@ -680,7 +679,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 													data-flx="subprofile.settings.subprofile-settings-tab.delete-persona"
 												>
 													<Trash size={14} data-flx="subprofile.settings.subprofile-settings-tab.trash--2" />
-													<span data-flx="subprofile.settings.subprofile-settings-tab.span--9">Delete</span>
+													<span data-flx="subprofile.settings.subprofile-settings-tab.span--8">Delete</span>
 												</Button>
 											</div>
 										</div>
