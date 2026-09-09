@@ -66,6 +66,7 @@ export const MessageAvatar = observer(
 				enableLongPressActions={false}
 				onPopoutOpen={handlePopoutOpen}
 				onPopoutClose={handlePopoutClose}
+				ignoreSubprofile={ignoreSubprofile}
 				data-flx="channel.message-avatar.preloadable-user-popout"
 			>
 				<FocusRing data-flx="channel.message-avatar.focus-ring">
