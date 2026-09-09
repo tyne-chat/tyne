@@ -22,140 +22,194 @@ const ACTIVE_PERSONA_TABS: Array<SegmentedTab<ActivePersonaMode>> = [
 
 interface PersonaPickerSheetProps {
 	onClose: () => void;
+	selectedPersonaId?: string;
+	showModes?: boolean;
+	onSelectPersona: (id: string) => void;
+	onSelectAccount: () => void;
 }
 
-export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(({onClose}) => {
-	const [query, setQuery] = useState('');
-	const currentUser = Users.getCurrentUser();
-	const personas = PersonaStore.personas;
-	const activePersonaId = PersonaStore.activePersonaId;
-	const isLatched = PersonaStore.isPersonaLatched;
-	const activePersonaMode = PersonaStore.activePersonaMode;
-	const rankedPersonas = PersonaStore.rankedPersonas;
+export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
+	({onClose, selectedPersonaId, showModes = false, onSelectPersona, onSelectAccount}) => {
+		const [query, setQuery] = useState('');
+		const currentUser = Users.getCurrentUser();
+		const personas = PersonaStore.personas;
+		const activePersonaId = selectedPersonaId || (selectedPersonaId === '' ? null : PersonaStore.activePersonaId);
+		const isLatched = selectedPersonaId ? true : PersonaStore.isPersonaLatched;
+		const activePersonaMode = PersonaStore.activePersonaMode;
+		const rankedPersonas = PersonaStore.rankedPersonas;
 
-	const filteredPersonas = useMemo(() => {
-		const trimmed = query.trim().toLowerCase();
-		if (!trimmed) return personas;
-		return personas.filter((p) => {
-			if (p.name.toLowerCase().includes(trimmed)) return true;
-			if (p.systemName?.toLowerCase().includes(trimmed)) return true;
-			if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
-			return (p.personaTags ?? []).some(
-				(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
+		const filteredPersonas = useMemo(() => {
+			const trimmed = query.trim().toLowerCase();
+			if (!trimmed) return personas;
+			return personas.filter((p) => {
+				if (p.name.toLowerCase().includes(trimmed)) return true;
+				if (p.systemName?.toLowerCase().includes(trimmed)) return true;
+				if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
+				return (p.personaTags ?? []).some(
+					(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
+				);
+			});
+		}, [personas, query]);
+
+		const recentShelfPersonas = useMemo(() => {
+			if (query.trim()) return [];
+			return rankedPersonas.slice(0, 5);
+		}, [rankedPersonas, query]);
+
+		const handleSelectPersona = (id: string) => {
+			onSelectPersona(id);
+			onClose();
+		};
+
+		const handleResetToRoot = () => {
+			onSelectAccount();
+			onClose();
+		};
+
+		const handleOpenSettings = () => {
+			ModalCommands.push(
+				modal(() => (
+					<UserSettingsModal
+						initialTab="personas"
+						data-flx="persona.persona-picker-sheet.handle-open-settings.user-settings-modal"
+					/>
+				)),
 			);
-		});
-	}, [personas, query]);
+			onClose();
+		};
 
-	const recentShelfPersonas = useMemo(() => {
-		if (query.trim()) return [];
-		return rankedPersonas.slice(0, 5);
-	}, [rankedPersonas, query]);
-
-	const handleSelectPersona = (id: string) => {
-		void PersonaStore.setActivePersona(id, true);
-		onClose();
-	};
-
-	const handleResetToRoot = () => {
-		void PersonaStore.unlatch();
-		onClose();
-	};
-
-	const handleOpenSettings = () => {
-		ModalCommands.push(
-			modal(() => (
-				<UserSettingsModal
-					initialTab="personas"
-					data-flx="persona.persona-picker-sheet.handle-open-settings.user-settings-modal"
-				/>
-			)),
-		);
-		onClose();
-	};
-
-	return (
-		<div className={styles.sheetContainer} data-flx="persona.picker-sheet">
-			<div className={styles.searchHeader} data-flx="persona.persona-picker-sheet.search-header">
-				<div className={styles.searchInputWrapper} data-flx="persona.persona-picker-sheet.search-input-wrapper">
-					<MagnifyingGlass
-						className={styles.searchIcon}
-						size={16}
-						weight="bold"
-						data-flx="persona.persona-picker-sheet.search-icon"
-					/>
-					<input
-						type="text"
-						className={styles.searchInput}
-						placeholder="Search personas, tags, pronouns..."
-						value={query}
-						onChange={(e) => setQuery(e.target.value)}
-						data-flx="persona.persona-picker-sheet.search-input.set-query.text"
-					/>
+		return (
+			<div className={styles.sheetContainer} data-flx="persona.picker-sheet">
+				<div className={styles.searchHeader} data-flx="persona.persona-picker-sheet.search-header">
+					<div className={styles.searchInputWrapper} data-flx="persona.persona-picker-sheet.search-input-wrapper">
+						<MagnifyingGlass
+							className={styles.searchIcon}
+							size={16}
+							weight="bold"
+							data-flx="persona.persona-picker-sheet.search-icon"
+						/>
+						<input
+							type="text"
+							className={styles.searchInput}
+							placeholder="Search personas, tags, pronouns..."
+							value={query}
+							onChange={(e) => setQuery(e.target.value)}
+							data-flx="persona.persona-picker-sheet.search-input.set-query.text"
+						/>
+					</div>
 				</div>
-			</div>
 
-			<div className={styles.modeTabsWrapper} data-flx="persona.persona-picker-sheet.mode-tabs-wrapper">
-				<SegmentedTabs<ActivePersonaMode>
-					className={styles.segmentedTabs}
-					tabs={ACTIVE_PERSONA_TABS}
-					selectedTab={activePersonaMode}
-					onTabChange={(mode) => {
-						void PersonaStore.setActivePersonaMode(mode);
-					}}
-					ariaLabel="Active persona mode"
-					data-flx="persona.persona-picker-sheet.segmented-tabs"
-				/>
-			</div>
-
-			<div className={styles.listScrollArea} data-flx="persona.persona-picker-sheet.list-scroll-area">
-				{/* Reset to Root Account */}
-				{currentUser && (
-					<div
-						className={clsx(styles.personaItem, (!isLatched || !activePersonaId) && styles.active)}
-						onClick={handleResetToRoot}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								e.preventDefault();
-								handleResetToRoot();
-							}
-						}}
-						role="button"
-						tabIndex={0}
-						data-flx="persona.persona-picker-sheet.persona-item.reset-to-root"
-					>
-						<Avatar user={currentUser} size={28} data-flx="persona.persona-picker-sheet.avatar" />
-						<div className={styles.personaDetails} data-flx="persona.persona-picker-sheet.persona-details">
-							<div className={styles.personaPrimaryRow} data-flx="persona.persona-picker-sheet.persona-primary-row">
-								<span className={styles.personaName} data-flx="persona.persona-picker-sheet.persona-name">
-									{currentUser.username}
-								</span>
-							</div>
-							<span className={styles.personaPronouns} data-flx="persona.persona-picker-sheet.persona-pronouns">
-								Root Account (Default)
-							</span>
-						</div>
-						{!isLatched || !activePersonaId ? (
-							<Check
-								size={16}
-								weight="bold"
-								className={styles.activeCheck}
-								data-flx="persona.persona-picker-sheet.active-check"
-							/>
-						) : null}
+				{showModes && (
+					<div className={styles.modeTabsWrapper} data-flx="persona.persona-picker-sheet.mode-tabs-wrapper">
+						<SegmentedTabs<ActivePersonaMode>
+							className={styles.segmentedTabs}
+							tabs={ACTIVE_PERSONA_TABS}
+							selectedTab={activePersonaMode}
+							onTabChange={(mode) => {
+								void PersonaStore.setActivePersonaMode(mode);
+							}}
+							ariaLabel="Active persona mode"
+							data-flx="persona.persona-picker-sheet.segmented-tabs"
+						/>
 					</div>
 				)}
 
-				{/* Recent Personas Shelf */}
-				{recentShelfPersonas.length > 0 && (
-					<>
-						<div className={styles.sectionTitle} data-flx="persona.persona-picker-sheet.section-title">
-							Recent Personas
+				<div className={styles.listScrollArea} data-flx="persona.persona-picker-sheet.list-scroll-area">
+					{/* Reset to Root Account */}
+					{currentUser && (
+						<div
+							className={clsx(styles.personaItem, (!isLatched || !activePersonaId) && styles.active)}
+							onClick={handleResetToRoot}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									handleResetToRoot();
+								}
+							}}
+							role="button"
+							tabIndex={0}
+							data-flx="persona.persona-picker-sheet.persona-item.reset-to-root"
+						>
+							<Avatar user={currentUser} size={28} data-flx="persona.persona-picker-sheet.avatar" />
+							<div className={styles.personaDetails} data-flx="persona.persona-picker-sheet.persona-details">
+								<div className={styles.personaPrimaryRow} data-flx="persona.persona-picker-sheet.persona-primary-row">
+									<span className={styles.personaName} data-flx="persona.persona-picker-sheet.persona-name">
+										{currentUser.username}
+									</span>
+								</div>
+								<span className={styles.personaPronouns} data-flx="persona.persona-picker-sheet.persona-pronouns">
+									Root Account (Default)
+								</span>
+							</div>
+							{!isLatched || !activePersonaId ? (
+								<Check
+									size={16}
+									weight="bold"
+									className={styles.activeCheck}
+									data-flx="persona.persona-picker-sheet.active-check"
+								/>
+							) : null}
 						</div>
-						<div className={styles.recentShelf} data-flx="persona.persona-picker-sheet.recent-shelf">
-							{recentShelfPersonas.map((p) => (
+					)}
+
+					{/* Recent Personas Shelf */}
+					{recentShelfPersonas.length > 0 && (
+						<>
+							<div className={styles.sectionTitle} data-flx="persona.persona-picker-sheet.section-title">
+								Recent Personas
+							</div>
+							<div className={styles.recentShelf} data-flx="persona.persona-picker-sheet.recent-shelf">
+								{recentShelfPersonas.map((p) => (
+									<div
+										key={p.id}
+										className={styles.recentChip}
+										onClick={() => handleSelectPersona(p.id)}
+										onKeyDown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												handleSelectPersona(p.id);
+											}
+										}}
+										role="button"
+										tabIndex={0}
+										data-flx="persona.persona-picker-sheet.recent-chip.select-persona"
+									>
+										{currentUser && (
+											<Avatar
+												user={currentUser}
+												avatarUrl={p.avatarUrl}
+												size={18}
+												data-flx="persona.persona-picker-sheet.avatar--2"
+											/>
+										)}
+										<span data-flx="persona.persona-picker-sheet.span">{p.name}</span>
+									</div>
+								))}
+							</div>
+						</>
+					)}
+
+					{/* Full Persona List */}
+					<div className={styles.sectionTitle} data-flx="persona.persona-picker-sheet.section-title--2">
+						{query.trim() ? `Search Results (${filteredPersonas.length})` : 'All Personas'}
+					</div>
+
+					{filteredPersonas.length === 0 ? (
+						<div className={styles.emptyNotice} data-flx="persona.persona-picker-sheet.empty-notice">
+							{personas.length === 0
+								? 'No personas configured yet. Create one in Settings.'
+								: 'No matching personas found.'}
+						</div>
+					) : (
+						filteredPersonas.map((p) => {
+							const isThisActive = isLatched && activePersonaId === p.id;
+							const primaryTag = p.personaTags?.[0];
+							const tagString = primaryTag ? `${primaryTag.prefix ?? ''}text${primaryTag.suffix ?? ''}` : undefined;
+
+							return (
 								<div
 									key={p.id}
-									className={styles.recentChip}
+									className={clsx(styles.personaItem, isThisActive && styles.active)}
 									onClick={() => handleSelectPersona(p.id)}
 									onKeyDown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') {
@@ -165,123 +219,77 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(({
 									}}
 									role="button"
 									tabIndex={0}
-									data-flx="persona.persona-picker-sheet.recent-chip.select-persona"
+									data-flx="persona.persona-picker-sheet.persona-item.select-persona"
 								>
 									{currentUser && (
 										<Avatar
 											user={currentUser}
 											avatarUrl={p.avatarUrl}
-											size={18}
-											data-flx="persona.persona-picker-sheet.avatar--2"
+											size={28}
+											data-flx="persona.persona-picker-sheet.avatar--3"
 										/>
 									)}
-									<span data-flx="persona.persona-picker-sheet.span">{p.name}</span>
+									<div className={styles.personaDetails} data-flx="persona.persona-picker-sheet.persona-details--2">
+										<div
+											className={styles.personaPrimaryRow}
+											data-flx="persona.persona-picker-sheet.persona-primary-row--2"
+										>
+											<span className={styles.personaName} data-flx="persona.persona-picker-sheet.persona-name--2">
+												{p.name}
+											</span>
+											{p.systemName && (
+												<span className={styles.tagBadge} data-flx="persona.persona-picker-sheet.tag-badge">
+													[{p.systemName}]
+												</span>
+											)}
+										</div>
+										<div
+											className={styles.personaPrimaryRow}
+											data-flx="persona.persona-picker-sheet.persona-primary-row--3"
+										>
+											{p.pronouns && (
+												<span
+													className={styles.personaPronouns}
+													data-flx="persona.persona-picker-sheet.persona-pronouns--2"
+												>
+													{p.pronouns}
+												</span>
+											)}
+											{tagString && (
+												<span className={styles.tagBadge} data-flx="persona.persona-picker-sheet.tag-badge--2">
+													{tagString}
+												</span>
+											)}
+										</div>
+									</div>
+									{isThisActive && (
+										<Check
+											size={16}
+											weight="bold"
+											className={styles.activeCheck}
+											data-flx="persona.persona-picker-sheet.active-check--2"
+										/>
+									)}
 								</div>
-							))}
-						</div>
-					</>
-				)}
-
-				{/* Full Persona List */}
-				<div className={styles.sectionTitle} data-flx="persona.persona-picker-sheet.section-title--2">
-					{query.trim() ? `Search Results (${filteredPersonas.length})` : 'All Personas'}
+							);
+						})
+					)}
 				</div>
 
-				{filteredPersonas.length === 0 ? (
-					<div className={styles.emptyNotice} data-flx="persona.persona-picker-sheet.empty-notice">
-						{personas.length === 0
-							? 'No personas configured yet. Create one in Settings.'
-							: 'No matching personas found.'}
-					</div>
-				) : (
-					filteredPersonas.map((p) => {
-						const isThisActive = isLatched && activePersonaId === p.id;
-						const primaryTag = p.personaTags?.[0];
-						const tagString = primaryTag ? `${primaryTag.prefix ?? ''}text${primaryTag.suffix ?? ''}` : undefined;
-
-						return (
-							<div
-								key={p.id}
-								className={clsx(styles.personaItem, isThisActive && styles.active)}
-								onClick={() => handleSelectPersona(p.id)}
-								onKeyDown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										e.preventDefault();
-										handleSelectPersona(p.id);
-									}
-								}}
-								role="button"
-								tabIndex={0}
-								data-flx="persona.persona-picker-sheet.persona-item.select-persona"
-							>
-								{currentUser && (
-									<Avatar
-										user={currentUser}
-										avatarUrl={p.avatarUrl}
-										size={28}
-										data-flx="persona.persona-picker-sheet.avatar--3"
-									/>
-								)}
-								<div className={styles.personaDetails} data-flx="persona.persona-picker-sheet.persona-details--2">
-									<div
-										className={styles.personaPrimaryRow}
-										data-flx="persona.persona-picker-sheet.persona-primary-row--2"
-									>
-										<span className={styles.personaName} data-flx="persona.persona-picker-sheet.persona-name--2">
-											{p.name}
-										</span>
-										{p.systemName && (
-											<span className={styles.tagBadge} data-flx="persona.persona-picker-sheet.tag-badge">
-												[{p.systemName}]
-											</span>
-										)}
-									</div>
-									<div
-										className={styles.personaPrimaryRow}
-										data-flx="persona.persona-picker-sheet.persona-primary-row--3"
-									>
-										{p.pronouns && (
-											<span
-												className={styles.personaPronouns}
-												data-flx="persona.persona-picker-sheet.persona-pronouns--2"
-											>
-												{p.pronouns}
-											</span>
-										)}
-										{tagString && (
-											<span className={styles.tagBadge} data-flx="persona.persona-picker-sheet.tag-badge--2">
-												{tagString}
-											</span>
-										)}
-									</div>
-								</div>
-								{isThisActive && (
-									<Check
-										size={16}
-										weight="bold"
-										className={styles.activeCheck}
-										data-flx="persona.persona-picker-sheet.active-check--2"
-									/>
-								)}
-							</div>
-						);
-					})
-				)}
+				<div className={styles.footer} data-flx="persona.persona-picker-sheet.footer">
+					<button
+						type="button"
+						className={styles.settingsLink}
+						onClick={handleOpenSettings}
+						data-flx="persona.persona-picker-sheet.settings-link.open-settings.button"
+					>
+						<Gear size={14} data-flx="persona.persona-picker-sheet.gear" />
+						<span data-flx="persona.persona-picker-sheet.span--2">Manage Personas</span>
+					</button>
+				</div>
 			</div>
-
-			<div className={styles.footer} data-flx="persona.persona-picker-sheet.footer">
-				<button
-					type="button"
-					className={styles.settingsLink}
-					onClick={handleOpenSettings}
-					data-flx="persona.persona-picker-sheet.settings-link.open-settings.button"
-				>
-					<Gear size={14} data-flx="persona.persona-picker-sheet.gear" />
-					<span data-flx="persona.persona-picker-sheet.span--2">Manage Personas</span>
-				</button>
-			</div>
-		</div>
-	);
-});
+		);
+	},
+);
 
 export const SubprofilePickerSheet = PersonaPickerSheet;
