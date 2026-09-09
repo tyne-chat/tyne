@@ -71,6 +71,8 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
 const CLICK_TO_REACT_DESCRIPTOR = msg({
 	message: 'Click to react',
 	comment: 'Tooltip on the add-reaction button in the inline message hover action bar.',
