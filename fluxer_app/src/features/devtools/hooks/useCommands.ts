@@ -345,25 +345,6 @@ export function useCommands(): Array<Command> {
 					},
 				],
 			},
-			{
-				type: 'action',
-				name: '/subprofile',
-				description: 'Switch the active persona (alias for /persona)',
-				requiresGuild: false,
-				options: [
-					{
-						name: 'subprofile',
-						description: 'The persona to select.',
-						type: 'choice',
-						required: false,
-						allowEmpty: true,
-						choices: PersonaStore.rankedPersonas.map((v) => ({
-							name: v.name,
-							value: v.id,
-						})),
-					},
-				],
-			},
 		],
 		[i18n.locale],
 	);
