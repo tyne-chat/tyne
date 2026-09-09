@@ -4,6 +4,7 @@ import {SettingsSection} from '@app/features/app/components/dialogs/shared/Setti
 import {SettingsTabContainer, SettingsTabContent} from '@app/features/app/components/dialogs/shared/SettingsTabLayout';
 import {Endpoints} from '@app/features/app/constants/Endpoints';
 import {http} from '@app/features/platform/transport/RestTransport';
+import {Button} from '@app/features/ui/button/Button';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
@@ -230,18 +231,18 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 					>
 						<div className={styles.sectionHeader} data-flx="subprofile.settings.subprofile-settings-tab.section-header">
 							<div data-flx="subprofile.settings.subprofile-settings-tab.div">
-								<div
+								<h4
 									className={styles.sectionTitle}
 									data-flx="subprofile.settings.subprofile-settings-tab.section-title"
 								>
 									Autoproxy Mode
-								</div>
-								<div
+								</h4>
+								<p
 									className={styles.sectionDescription}
 									data-flx="subprofile.settings.subprofile-settings-tab.section-description"
 								>
 									Choose how untagged messages and proxy prefixes interact with your active subprofile.
-								</div>
+								</p>
 							</div>
 						</div>
 						<div
@@ -515,11 +516,10 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 						actions={
 							!isEditing && (
 								<div style={{display: 'flex', gap: 8}} data-flx="subprofile.settings.subprofile-settings-tab.div--6">
-									<button
-										type="button"
-										className={styles.secondaryButton}
+									<Button
+										variant="secondary"
 										onClick={openPluralKitImportModal}
-										data-flx="subprofile.settings.subprofile-settings-tab.secondary-button.open-plural-kit-import-modal"
+										data-flx="subprofile.settings.subprofile-settings-tab.button.open-plural-kit-import-modal"
 									>
 										<UploadSimple
 											size={16}
@@ -527,12 +527,11 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 											data-flx="subprofile.settings.subprofile-settings-tab.upload-simple"
 										/>
 										<span data-flx="subprofile.settings.subprofile-settings-tab.span--4">Import from PluralKit</span>
-									</button>
-									<button
-										type="button"
-										className={styles.primaryButton}
+									</Button>
+									<Button
+										variant="primary"
 										onClick={handleStartAdd}
-										data-flx="subprofile.settings.subprofile-settings-tab.primary-button.start-add"
+										data-flx="subprofile.settings.subprofile-settings-tab.button.start-add"
 									>
 										<Plus
 											size={16}
@@ -540,7 +539,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 											data-flx="subprofile.settings.subprofile-settings-tab.plus--2"
 										/>
 										<span data-flx="subprofile.settings.subprofile-settings-tab.span--5">Add Subprofile</span>
-									</button>
+									</Button>
 								</div>
 							)
 						}
@@ -637,12 +636,11 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 												className={styles.cardActions}
 												data-flx="subprofile.settings.subprofile-settings-tab.card-actions"
 											>
-												<button
-													type="button"
-													className={styles.actionButton}
+												<Button
+													variant="secondary"
 													onClick={() => handleToggleActive(persona.id)}
-													title={isThisActive ? 'Unlatch active persona' : 'Latch this persona'}
-													data-flx="subprofile.settings.subprofile-settings-tab.action-button.toggle-active"
+													aria-label={isThisActive ? 'Unlatch active persona' : 'Latch this persona'}
+													data-flx="subprofile.settings.subprofile-settings-tab.button.toggle-active"
 												>
 													{isThisActive ? (
 														<>
@@ -662,30 +660,28 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 															<span data-flx="subprofile.settings.subprofile-settings-tab.span--7">Latch</span>
 														</>
 													)}
-												</button>
-												<button
-													type="button"
-													className={styles.actionButton}
+												</Button>
+												<Button
+													variant="secondary"
 													onClick={() => handleStartEdit(persona)}
-													title="Edit persona"
-													data-flx="subprofile.settings.subprofile-settings-tab.action-button.start-edit"
+													aria-label="Edit persona"
+													data-flx="subprofile.settings.subprofile-settings-tab.edit-persona.start-edit"
 												>
 													<PencilSimple
 														size={14}
 														data-flx="subprofile.settings.subprofile-settings-tab.pencil-simple"
 													/>
 													<span data-flx="subprofile.settings.subprofile-settings-tab.span--8">Edit</span>
-												</button>
-												<button
-													type="button"
-													className={clsx(styles.actionButton, styles.deleteButton)}
+												</Button>
+												<Button
+													variant="danger"
 													onClick={() => handleDeletePersona(persona.id)}
-													title="Delete persona"
-													data-flx="subprofile.settings.subprofile-settings-tab.action-button.delete-persona"
+													aria-label="Delete persona"
+													data-flx="subprofile.settings.subprofile-settings-tab.delete-persona"
 												>
 													<Trash size={14} data-flx="subprofile.settings.subprofile-settings-tab.trash--2" />
 													<span data-flx="subprofile.settings.subprofile-settings-tab.span--9">Delete</span>
-												</button>
+												</Button>
 											</div>
 										</div>
 									);
