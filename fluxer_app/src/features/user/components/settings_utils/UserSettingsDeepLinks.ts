@@ -17,6 +17,7 @@ import {
 const USER_SETTINGS_DEEP_LINK_PATH = '/settings/user';
 
 const USER_SETTINGS_TAB_TYPES = new Set<UserSettingsTabType>([
+	'personas',
 	'my_profile',
 	'account_security',
 	'plutonium',
@@ -43,8 +44,6 @@ const USER_SETTINGS_TAB_TYPES = new Set<UserSettingsTabType>([
 	'language',
 	'keybinds',
 	'linked_accounts',
-	'personas',
-	'subprofiles',
 ]);
 const SAFE_SETTINGS_PARAM_REGEX = /^[A-Za-z0-9_-]+$/;
 
