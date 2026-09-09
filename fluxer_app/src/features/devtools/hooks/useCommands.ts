@@ -6,6 +6,10 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {useMemo} from 'react';
 
+// Fork imports.
+
+import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+
 const APPENDS_TO_YOUR_MESSAGE_DESCRIPTOR = msg({
 	message: 'Appends ¯\\_(ツ)_/¯ to your message.',
 	comment: "Slash-command description for /shrug. Appends a kaomoji to the user's message.",
@@ -319,6 +323,25 @@ export function useCommands(): Array<Command> {
 						required: true,
 						allowEmpty: false,
 						choices: EMPTY_COMMAND_CHOICES,
+					},
+				],
+			},
+			{
+				type: 'action',
+				name: '/subprofile',
+				description: 'Switch the latched subprofile', //i18n._(CHANGE_YOUR_NICKNAME_IN_THIS_COMMUNITY_DESCRIPTOR),
+				requiresGuild: false,
+				options: [
+					{
+						name: 'subprofile',
+						description: 'The subprofile to latch.', //i18n._(COMMAND_NICKNAME_OPTION_DESCRIPTOR),
+						type: 'choice',
+						required: false,
+						allowEmpty: true,
+						choices: SubprofileStore.rankedPersonas.map((v) => ({
+							name: v.name,
+							value: v.id,
+						})),
 					},
 				],
 			},

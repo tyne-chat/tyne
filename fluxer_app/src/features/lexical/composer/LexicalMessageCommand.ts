@@ -230,6 +230,12 @@ function resolveCommand(structure: CommandStructure): Exclude<CommandUtils.Parse
 		if (name === '/spoiler') return {type: 'spoiler', content};
 		return {type: 'tts', content};
 	}
+	if (name === '/subprofile') {
+		if (!hasOnlySlots(slots, ['subprofile'])) return null;
+		const subprofile = readChoiceSlot(slots, 'subprofile');
+		if (subprofile == null) return {type: 'subprofile', subprofile: ''};
+		return {type: 'subprofile', subprofile};
+	}
 	return null;
 }
 
