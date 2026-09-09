@@ -21,6 +21,10 @@ import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+
 const USER_MENTION_REGEX = /<@!?(\d+)>/;
 const logger = new Logger('CommandUtils');
 const localCurrentUserNicknames = new Map<string, string | null>();
@@ -71,6 +75,10 @@ export type ParsedCommand =
 	| {
 			type: 'saved' | 'sticker' | 'gif';
 			query: string;
+	  }
+	| {
+			type: 'subprofile';
+			subprofile: string;
 	  }
 	| {
 			type: 'unknown';
@@ -161,6 +169,13 @@ export function parseCommand(content: string): ParsedCommand {
 			return {type, query};
 		}
 	}
+	if (trimmed === '/subprofile') {
+		return {type: 'subprofile', subprofile: ''};
+	}
+	if (trimmed.startsWith('/subprofile ')) {
+		const subprofile = trimmed.slice(12).trim();
+		return {type: 'subprofile', subprofile};
+	}
 	return {type: 'unknown'};
 }
 
@@ -198,6 +213,7 @@ export function isCommand(content: string): boolean {
 		trimmed.startsWith('/sticker ') ||
 		trimmed === '/gif' ||
 		trimmed.startsWith('/gif ') ||
+		trimmed.startsWith('/subprofile ') ||
 		(trimmed.startsWith('_') && trimmed.endsWith('_') && trimmed.length > 2)
 	);
 }
@@ -360,6 +376,18 @@ export async function executeCommand(
 		case 'gif': {
 			throw new Error(`Select a ${command.type} result before submitting the command`);
 		}
+		case 'subprofile':
+			console.debug('test');
+			if (!command.subprofile) {
+				const systemMessage = createSystemMessage(channelId, 'Subprofile deselected.');
+				SubprofileStore.setActivePersona(null);
+				MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
+			} else if (SubprofileStore.personas.find((v) => v.id === command.subprofile)) {
+				const systemMessage = createSystemMessage(channelId, 'Subprofile selected.');
+				SubprofileStore.setActivePersona(command.subprofile);
+				MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
+			}
+			break;
 		default:
 			break;
 	}
