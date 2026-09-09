@@ -40,7 +40,7 @@ interface PersonaFormState {
 	systemName: string;
 	pronouns: string;
 	avatarUrl: string;
-	color: number | null;
+	accentColor: number | null;
 	bio: string;
 	tags: Array<{prefix: string; suffix: string}>;
 }
@@ -50,7 +50,7 @@ const emptyFormState = (): PersonaFormState => ({
 	systemName: '',
 	pronouns: '',
 	avatarUrl: '',
-	color: null,
+	accentColor: null,
 	bio: '',
 	tags: [{prefix: '', suffix: ''}],
 });
@@ -106,7 +106,7 @@ export const PersonaSettingsTab: React.FC = observer(() => {
 			systemName: persona.systemName ?? '',
 			pronouns: persona.pronouns ?? '',
 			avatarUrl: persona.avatarUrl ?? '',
-			color: persona.color ?? null,
+			accentColor: persona.color ?? null,
 			bio: persona.bio ?? '',
 			tags:
 				(persona.personaTags ?? []).length > 0
@@ -133,7 +133,7 @@ export const PersonaSettingsTab: React.FC = observer(() => {
 		const trimmedName = formData.name.trim();
 		if (!trimmedName) return;
 
-		const parsedColor = formData.color;
+		const parsedColor = formData.accentColor;
 
 		const validTags = formData.tags
 			.map((t) => ({prefix: t.prefix.trim() || undefined, suffix: t.suffix.trim() || undefined}))
@@ -145,7 +145,7 @@ export const PersonaSettingsTab: React.FC = observer(() => {
 				systemName: formData.systemName.trim() || undefined,
 				pronouns: formData.pronouns.trim() || undefined,
 				avatarUrl: formData.avatarUrl.trim() || undefined,
-				color: parsedColor ?? undefined,
+				accentColor: parsedColor ?? undefined,
 				bio: formData.bio.trim() || undefined,
 				personaTags: validTags.map((t) => ({
 					$typeName: 'fluxer.user.preferences.v1.PersonaTag',
@@ -159,7 +159,7 @@ export const PersonaSettingsTab: React.FC = observer(() => {
 				system_name: formData.systemName.trim() || null,
 				pronouns: formData.pronouns.trim() || null,
 				avatar_url: formData.avatarUrl.trim() || null,
-				color: parsedColor,
+				accent_color: parsedColor,
 				bio: formData.bio.trim() || null,
 				persona_tags: validTags,
 			});
@@ -314,14 +314,16 @@ export const PersonaSettingsTab: React.FC = observer(() => {
 								</div>
 								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--4">
 									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--4">
-										Color
+										Accent color
 									</div>
 									<ColorPickerField
-										value={formData.color ?? 0}
-										onChange={(color) => setFormData((prev) => ({...prev, color: color === 0 ? null : color}))}
-										onReset={() => setFormData((prev) => ({...prev, color: null}))}
-										hideHelperText={true}
-										data-flx="user.persona-settings-tab.color-picker-field"
+										description="Customizes the border and banner color on this persona's profile"
+										value={formData.accentColor ?? 0}
+										onChange={(accentColor) =>
+											setFormData((prev) => ({...prev, accentColor: accentColor === 0 ? null : accentColor}))
+										}
+										onReset={() => setFormData((prev) => ({...prev, accentColor: null}))}
+										data-flx="user.persona-settings-tab.accent-color-picker-field"
 									/>
 								</div>
 								<div
