@@ -49,59 +49,50 @@ export const MessagePersonaAccount = observer(
 			(e.currentTarget as HTMLElement).click();
 		}, []);
 		const keyboardModeEnabled = KeyboardMode.keyboardModeEnabled;
+		if (!message.subprofile) return null;
+
 		return (
-			message.subprofile && (
-				<>
+			<PreloadableUserPopout
+				user={user}
+				isWebhook={message.webhookId != null}
+				webhookId={message.webhookId ?? undefined}
+				guildId={guild?.id}
+				guildMember={member}
+				channelId={message.channelId}
+				message={message}
+				enableLongPressActions={true}
+				longPressWrapperElement="span"
+				onPopoutOpen={handlePopoutOpen}
+				onPopoutClose={handlePopoutClose}
+				data-flx="channel.message-username.preloadable-user-popout"
+			>
+				<FocusRing data-flx="channel.message-username-original.focus-ring">
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: the username span is only keyboard-interactive in keyboard mode (role="button"/tabIndex set conditionally); pointer/popout/context-menu interactions are handled by the wrapping PreloadableUserPopout. */}
+					{/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: the username span role is conditionally button */}
 					<span
-						className={styles.messageAuthorSubprofileMarker}
-						data-flx="channel.message-persona-account.message-author-subprofile-marker"
+						data-user-id={user.id}
+						data-guild-id={guild?.id}
+						tabIndex={keyboardModeEnabled ? 0 : undefined}
+						role={keyboardModeEnabled ? 'button' : undefined}
+						ref={usernameRef}
+						onKeyDown={handleKeyDown}
+						data-flx="channel.message-username.context-menu-underline.key-down"
+						aria-label={displayName}
 					>
-						{' '}
-						via{' '}
+						<MessageAvatar
+							user={user}
+							message={message}
+							guildId={guild?.id}
+							size={16}
+							className={clsx(styles.messageAvatarCompact, styles.messageSubprofileMainAvatar, className)}
+							isHovering={/*isHovering*/ false}
+							isPreview={/*!!previewContext*/ false}
+							ignoreSubprofile={true}
+							data-flx="channel.user-message.message-avatar-subprofile-main-account"
+						/>
 					</span>
-					<PreloadableUserPopout
-						user={user}
-						isWebhook={message.webhookId != null}
-						webhookId={message.webhookId ?? undefined}
-						guildId={guild?.id}
-						guildMember={member}
-						channelId={message.channelId}
-						message={message}
-						enableLongPressActions={true}
-						longPressWrapperElement="span"
-						onPopoutOpen={handlePopoutOpen}
-						onPopoutClose={handlePopoutClose}
-						data-flx="channel.message-username.preloadable-user-popout"
-					>
-						<FocusRing data-flx="channel.message-username-original.focus-ring">
-							{/* biome-ignore lint/a11y/noStaticElementInteractions: the username span is only keyboard-interactive in keyboard mode (role="button"/tabIndex set conditionally); pointer/popout/context-menu interactions are handled by the wrapping PreloadableUserPopout. */}
-							{/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: the username span role is conditionally button */}
-							<span
-								data-user-id={user.id}
-								data-guild-id={guild?.id}
-								tabIndex={keyboardModeEnabled ? 0 : undefined}
-								role={keyboardModeEnabled ? 'button' : undefined}
-								ref={usernameRef}
-								onKeyDown={handleKeyDown}
-								data-flx="channel.message-username.context-menu-underline.key-down"
-								aria-label={displayName}
-							>
-								<MessageAvatar
-									user={user}
-									message={message}
-									guildId={guild?.id}
-									size={16}
-									className={clsx(styles.messageAvatarCompact, styles.messageSubprofileMainAvatar, className)}
-									isHovering={/*isHovering*/ false}
-									isPreview={/*!!previewContext*/ false}
-									ignoreSubprofile={true}
-									data-flx="channel.user-message.message-avatar-subprofile-main-account"
-								/>
-							</span>
-						</FocusRing>
-					</PreloadableUserPopout>
-				</>
-			)
+				</FocusRing>
+			</PreloadableUserPopout>
 		);
 	},
 );
