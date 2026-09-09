@@ -24,7 +24,7 @@ import {z} from 'zod';
 
 // Fork imports.
 
-import {MessageSubprofileRequestSchema} from '@fluxer/schema/src/domains/subprofile/SubprofileSchemas';
+import {MessageSubprofileRequestSchema} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const RICH_EMBED_AUTHOR_NAME_MAX_LENGTH = 256 as const;
 const RICH_EMBED_MEDIA_DESCRIPTION_MAX_LENGTH = 4096 as const;
