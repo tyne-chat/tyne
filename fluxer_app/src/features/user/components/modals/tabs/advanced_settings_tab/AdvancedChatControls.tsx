@@ -117,6 +117,10 @@ const SHOW_EMOJI_BUTTON_DESCRIPTOR = msg({
 	message: 'Show emoji button',
 	comment: 'Short label for an advanced message input preference.',
 });
+const SHOW_SUBPROFILES_BUTTON_DESCRIPTOR = msg({
+	message: 'Show subprofiles button',
+	comment: 'Short label for an advanced message input preference.',
+});
 const SHOW_SEND_BUTTON_DESCRIPTOR = msg({
 	message: 'Show send button',
 	comment: 'Short label for an advanced message input preference.',
@@ -435,6 +439,12 @@ const InputButtonsContent = observer(() => {
 				value={Accessibility.showEmojiButton}
 				onChange={(value) => AccessibilityCommands.update({showEmojiButton: value})}
 				data-flx="user.advanced-settings-tab.switch-group-item.emoji-button"
+			/>
+			<SwitchGroupItem
+				label={i18n._(SHOW_SUBPROFILES_BUTTON_DESCRIPTOR)}
+				value={Accessibility.showSubprofilesButton}
+				onChange={(value) => AccessibilityCommands.update({showSubprofilesButton: value})}
+				data-flx="user.advanced-settings-tab.switch-group-item.subprofiles-button"
 			/>
 			<SwitchGroupItem
 				label={i18n._(SHOW_SEND_BUTTON_DESCRIPTOR)}
