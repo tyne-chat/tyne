@@ -71,6 +71,12 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {CHANGE_PERSONA_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {ChangePersonasIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
+
 const MESSAGE_DEBUG_DESCRIPTOR = msg({
 	message: 'Message debug',
 	comment: 'Title of the developer-mode message debug modal opened from the message context menu.',
@@ -132,6 +138,7 @@ export const messageActionMenuItemIds = {
 	crosspost: 'message_crosspost',
 	createThread: 'create_thread',
 	edit: 'edit',
+	changePersona: 'change_persona',
 	pinMessage: 'message_pin',
 	bookmarkMessage: 'message_bookmark',
 	suppressEmbeds: 'suppress_embeds',
@@ -327,6 +334,14 @@ export const useMessageActionMenuData = (
 					onClick: handlers.handleEditMessage,
 					shortcut: <KeybindHint action="message_edit" data-flx="channel.message-action-menu.groups.keybind-hint--5" />,
 				});
+				if (PersonaStore.personas.length)
+					interactionActions.push({
+						id: messageActionMenuItemIds.changePersona,
+						icon: <ChangePersonasIcon size={20} data-flx="channel.message-action-menu.groups.change-personas-icon" />,
+						label: i18n._(CHANGE_PERSONA_DESCRIPTOR),
+						onClick: handlers.handleChangePersona,
+						//shortcut: <KeybindHint action="message_change_persona" data-flx="channel.message-action-menu.groups.keybind-hint--change-persona" />
+					});
 			}
 			if (message.isUserMessage() && permissions?.canPinMessage) {
 				managementActions.push({
