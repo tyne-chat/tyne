@@ -8,11 +8,11 @@ import {type ApiTestHarness, createApiTestHarness} from '../../test/ApiTestHarne
 import {HTTP_STATUS} from '../../test/TestConstants';
 import {createBuilder} from '../../test/TestRequestBuilder';
 
-interface SubprofileAvatarUploadResponse {
+interface PersonaAvatarUploadResponse {
 	avatar_url: string;
 }
 
-describe('Subprofile Avatar Upload', () => {
+describe('Persona Avatar Upload', () => {
 	let harness: ApiTestHarness;
 	beforeAll(async () => {
 		harness = await createApiTestHarness();
@@ -24,12 +24,12 @@ describe('Subprofile Avatar Upload', () => {
 		await harness?.shutdown();
 	});
 
-	it('uploads subprofile avatar and returns cdn url', async () => {
+	it('uploads persona avatar and returns cdn url', async () => {
 		const account = await createTestAccount(harness);
 		await ensureSessionStarted(harness, account.token);
 
-		const result = await createBuilder<SubprofileAvatarUploadResponse>(harness, account.token)
-			.post('/users/@me/subprofiles/avatar')
+		const result = await createBuilder<PersonaAvatarUploadResponse>(harness, account.token)
+			.post('/users/@me/personas/avatar')
 			.body({avatar: getPngDataUrl()})
 			.expect(HTTP_STATUS.OK)
 			.execute();
@@ -43,13 +43,13 @@ describe('Subprofile Avatar Upload', () => {
 		await ensureSessionStarted(harness, account.token);
 
 		await createBuilder(harness, account.token)
-			.post('/users/@me/subprofiles/avatar')
+			.post('/users/@me/personas/avatar')
 			.body({avatar: 'invalid-image-data'})
 			.expect(HTTP_STATUS.BAD_REQUEST)
 			.execute();
 	});
 
-	it('imports subprofile avatar from remote url', async () => {
+	it('imports persona avatar from remote url', async () => {
 		const account = await createTestAccount(harness);
 		await ensureSessionStarted(harness, account.token);
 
@@ -64,8 +64,8 @@ describe('Subprofile Avatar Upload', () => {
 			}),
 		);
 
-		const result = await createBuilder<SubprofileAvatarUploadResponse>(harness, account.token)
-			.post('/users/@me/subprofiles/import-avatar')
+		const result = await createBuilder<PersonaAvatarUploadResponse>(harness, account.token)
+			.post('/users/@me/personas/import-avatar')
 			.body({url: 'https://example.com/avatar.png'})
 			.expect(HTTP_STATUS.OK)
 			.execute();
@@ -87,7 +87,7 @@ describe('Subprofile Avatar Upload', () => {
 		);
 
 		await createBuilder(harness, account.token)
-			.post('/users/@me/subprofiles/import-avatar')
+			.post('/users/@me/personas/import-avatar')
 			.body({url: 'https://example.com/notfound.png'})
 			.expect(HTTP_STATUS.BAD_REQUEST)
 			.execute();
