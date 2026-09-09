@@ -5,6 +5,12 @@ syntax = "proto3";
 package fluxer.user.preferences.v1;
 
 message AccessibilitySettings {
+  // Fork fields. The fork numbers its own fields from 2200 up, in this block; never give a
+  // fork field the next number after upstream's last one. Upstream numbers its fields in
+  // sequence, and the settings are stored by number, so a fork field in that range is read
+  // as upstream's next field once upstream adds it (field 65 did that on 2026-10-16).
+  optional bool show_subprofiles_button = 2221;
+
   optional double saturation_factor = 1;
   bool always_underline_links = 2;
   optional bool enable_text_selection = 3;
