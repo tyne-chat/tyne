@@ -33,6 +33,7 @@ export type UserSettingsTabType =
 	| 'language'
 	| 'keybinds'
 	| 'linked_accounts'
+	| 'personas'
 	| 'subprofiles';
 
 export interface SectionDefinition extends SettingsMetadata {

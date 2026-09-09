@@ -23,7 +23,7 @@ import {msg} from '@lingui/core/macro';
 
 // Fork imports.
 
-import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const USER_MENTION_REGEX = /<@!?(\d+)>/;
 const logger = new Logger('CommandUtils');
@@ -169,11 +169,15 @@ export function parseCommand(content: string): ParsedCommand {
 			return {type, query};
 		}
 	}
-	if (trimmed === '/subprofile') {
+	if (trimmed === '/subprofile' || trimmed === '/persona') {
 		return {type: 'subprofile', subprofile: ''};
 	}
 	if (trimmed.startsWith('/subprofile ')) {
 		const subprofile = trimmed.slice(12).trim();
+		return {type: 'subprofile', subprofile};
+	}
+	if (trimmed.startsWith('/persona ')) {
+		const subprofile = trimmed.slice(9).trim();
 		return {type: 'subprofile', subprofile};
 	}
 	return {type: 'unknown'};
@@ -376,18 +380,21 @@ export async function executeCommand(
 		case 'gif': {
 			throw new Error(`Select a ${command.type} result before submitting the command`);
 		}
-		case 'subprofile':
-			console.debug('test');
+		case 'subprofile': {
 			if (!command.subprofile) {
-				const systemMessage = createSystemMessage(channelId, 'Subprofile deselected.');
-				SubprofileStore.setActivePersona(null);
+				const systemMessage = createSystemMessage(channelId, 'Persona deselected.');
+				PersonaStore.setActivePersona(null);
 				MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
-			} else if (SubprofileStore.personas.find((v) => v.id === command.subprofile)) {
-				const systemMessage = createSystemMessage(channelId, 'Subprofile selected.');
-				SubprofileStore.setActivePersona(command.subprofile);
-				MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
+			} else {
+				const persona = PersonaStore.personas.find((v) => v.id === command.subprofile);
+				if (persona) {
+					const systemMessage = createSystemMessage(channelId, `Persona "${persona.name}" selected.`);
+					PersonaStore.setActivePersona(command.subprofile);
+					MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
+				}
 			}
 			break;
+		}
 		default:
 			break;
 	}
