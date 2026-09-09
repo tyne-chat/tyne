@@ -6,11 +6,11 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. Plus menu submenu toggle that shows the subprofiles selector next to the textarea.
-#. Short label for an advanced message input preference.
-msgid "Show subprofiles button"
-msgstr "Show subprofiles button"
+#. User settings tab for personas.
+msgid "Personas"
+msgstr "Personas"
 
-#. User settings tab for subprofiles and personas.
-msgid "Subprofiles"
-msgstr "Subprofiles"
+#. Plus menu submenu toggle that shows the persona selector next to the textarea.
+#. Short label for an advanced message input preference.
+msgid "Show personas button"
+msgstr "Show personas button"
