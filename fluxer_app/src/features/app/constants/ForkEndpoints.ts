@@ -4,6 +4,8 @@
 // upstream's additions to its own list never meet the fork's.
 
 export const ForkEndpoints = {
+	USER_PERSONA_AVATAR: '/users/@me/personas/avatar',
+	USER_PERSONA_IMPORT_AVATAR: '/users/@me/personas/import-avatar',
 	USER_SUBPROFILE_AVATAR: '/users/@me/subprofiles/avatar',
 	USER_SUBPROFILE_IMPORT_AVATAR: '/users/@me/subprofiles/import-avatar',
 } as const;
