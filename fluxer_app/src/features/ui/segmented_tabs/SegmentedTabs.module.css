@@ -26,6 +26,7 @@
 	background: transparent;
 	transition: color 150ms ease;
 	cursor: pointer;
+	white-space: nowrap;
 }
 
 .tabInactive {
