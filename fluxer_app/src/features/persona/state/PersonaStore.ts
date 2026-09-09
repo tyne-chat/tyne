@@ -2,20 +2,20 @@
 
 import * as Toast from '@app/features/ui/commands/ToastCommands';
 import UserSettings from '@app/features/user/state/UserSettings';
-import {type MatchResult, matchProxy} from '@fluxer/schema/src/domains/subprofile/ProxyMatcher';
+import {type MatchResult, matchPersona} from '@fluxer/schema/src/domains/persona/PersonaMatcher';
 import type {
 	MessageSubprofileRequest,
 	MessageSubprofileResponse,
-} from '@fluxer/schema/src/domains/subprofile/SubprofileSchemas';
+} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import type {Persona} from '@fluxer/schema/src/gen/fluxer/user/preferences/v1/preferences_pb';
 import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {makeAutoObservable} from 'mobx';
 
-export type AutoproxyMode = 'off' | 'manual' | 'last';
+export type ActivePersonaMode = 'off' | 'manual' | 'last';
 
 let personaIdCounter = 0;
 
-export class SubprofileStoreClass {
+export class PersonaStoreClass {
 	constructor() {
 		makeAutoObservable(this);
 	}
@@ -29,16 +29,16 @@ export class SubprofileStoreClass {
 		return id && id.length > 0 ? id : null;
 	}
 
-	get autoproxyMode(): AutoproxyMode {
-		const raw = UserSettings.getSubPreference('autoproxyMode');
+	get activePersonaMode(): ActivePersonaMode {
+		const raw = UserSettings.getSubPreference('activePersonaMode');
 		if (raw === 'off' || raw === 'manual' || raw === 'last') {
 			return raw;
 		}
-		return this.autoproxyLatched ? 'last' : 'off';
+		return this.isPersonaLatched ? 'last' : 'off';
 	}
 
-	get autoproxyLatched(): boolean {
-		return UserSettings.getSubPreference('autoproxyLatched') ?? false;
+	get isPersonaLatched(): boolean {
+		return UserSettings.getSubPreference('activePersonaLatched') ?? false;
 	}
 
 	get activePersona(): Persona | null {
@@ -82,9 +82,10 @@ export class SubprofileStoreClass {
 		pronouns?: string | null;
 		color?: number | null;
 		bio?: string | null;
-		proxy_tags?: Array<{prefix?: string; suffix?: string}>;
+		persona_tags?: Array<{prefix?: string; suffix?: string}>;
 	}): Promise<Persona> {
 		const id = `${SnowflakeUtils.fromTimestamp(Date.now())}_${++personaIdCounter}`;
+		const rawTags = personaData.persona_tags ?? [];
 		const newPersona: Persona = {
 			$typeName: 'fluxer.user.preferences.v1.Persona',
 			id,
@@ -94,11 +95,11 @@ export class SubprofileStoreClass {
 			pronouns: personaData.pronouns ?? undefined,
 			color: personaData.color ?? undefined,
 			bio: personaData.bio ?? undefined,
-			autoProxyDisabled: false,
+			autoTagDisabled: false,
 			useCount: 0,
 			lastUsedAtMs: 0n,
-			proxyTags: (personaData.proxy_tags ?? []).map((t) => ({
-				$typeName: 'fluxer.user.preferences.v1.ProxyTag',
+			personaTags: rawTags.map((t) => ({
+				$typeName: 'fluxer.user.preferences.v1.PersonaTag',
 				prefix: t.prefix ?? undefined,
 				suffix: t.suffix ?? undefined,
 			})),
@@ -140,9 +141,9 @@ export class SubprofileStoreClass {
 		await UserSettings.setSubPreference('personas', updatedList);
 	}
 
-	async setAutoproxyMode(mode: AutoproxyMode): Promise<void> {
-		const p1 = UserSettings.setSubPreference('autoproxyMode', mode);
-		const p2 = UserSettings.setSubPreference('autoproxyLatched', mode !== 'off');
+	async setActivePersonaMode(mode: ActivePersonaMode): Promise<void> {
+		const p1 = UserSettings.setSubPreference('activePersonaMode', mode);
+		const p2 = UserSettings.setSubPreference('activePersonaLatched', mode !== 'off');
 		const promises: Array<Promise<void>> = [p1, p2];
 		if (mode === 'off') {
 			promises.push(UserSettings.setSubPreference('activePersonaId', ''));
@@ -152,22 +153,22 @@ export class SubprofileStoreClass {
 		await Promise.all(promises);
 	}
 
-	async setActivePersona(id: string | null, latch = true, mode?: AutoproxyMode): Promise<void> {
+	async setActivePersona(id: string | null, latch = true, mode?: ActivePersonaMode): Promise<void> {
 		const p1 = UserSettings.setSubPreference('activePersonaId', id ?? '');
-		const p2 = UserSettings.setSubPreference('autoproxyLatched', Boolean(id && latch));
+		const p2 = UserSettings.setSubPreference('activePersonaLatched', Boolean(id && latch));
 		const promises: Array<Promise<void>> = [p1, p2];
 		if (mode) {
-			promises.push(UserSettings.setSubPreference('autoproxyMode', mode));
-		} else if (id && latch && this.autoproxyMode === 'off') {
-			promises.push(UserSettings.setSubPreference('autoproxyMode', 'manual'));
+			promises.push(UserSettings.setSubPreference('activePersonaMode', mode));
+		} else if (id && latch && this.activePersonaMode === 'off') {
+			promises.push(UserSettings.setSubPreference('activePersonaMode', 'manual'));
 		}
 		await Promise.all(promises);
 	}
 
 	async unlatch(): Promise<void> {
-		const p1 = UserSettings.setSubPreference('autoproxyLatched', false);
+		const p1 = UserSettings.setSubPreference('activePersonaLatched', false);
 		const p2 = UserSettings.setSubPreference('activePersonaId', '');
-		const p3 = UserSettings.setSubPreference('autoproxyMode', 'off');
+		const p3 = UserSettings.setSubPreference('activePersonaMode', 'off');
 		await Promise.all([p1, p2, p3]);
 	}
 
@@ -189,7 +190,7 @@ export class SubprofileStoreClass {
 				return {isCommand: false, handled: false};
 			}
 			void this.unlatch();
-			Toast.success('Autoproxy latch cleared');
+			Toast.success('Active persona cleared');
 			return {isCommand: true, handled: true};
 		}
 		return {isCommand: false, handled: false};
@@ -203,23 +204,23 @@ export class SubprofileStoreClass {
 			system_name: p.systemName ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? null,
-			auto_proxy_disabled: p.autoProxyDisabled ?? false,
+			auto_tag_disabled: p.autoTagDisabled ?? false,
 			bio: p.bio ?? null,
-			proxy_tags: (p.proxyTags ?? []).map((t) => ({
+			persona_tags: (p.personaTags ?? []).map((t) => ({
 				prefix: t.prefix ?? null,
 				suffix: t.suffix ?? null,
 			})),
 		}));
 
 		const activeLatchedId = this.activePersona?.id ?? null;
-		const result = matchProxy(content, personasLike, activeLatchedId);
+		const result = matchPersona(content, personasLike, activeLatchedId);
 
 		if (result.clearedLatch) {
 			void this.unlatch();
-			Toast.success('Autoproxy turned off (sending as root account)');
+			Toast.success('Active persona cleared (sending as root account)');
 		} else if (result.matched && result.persona) {
 			void this.recordPersonaUse(result.persona.id);
-			if (this.autoproxyMode === 'last' && this.activePersonaId !== result.persona.id) {
+			if (this.activePersonaMode === 'last' && this.activePersonaId !== result.persona.id) {
 				void this.setActivePersona(result.persona.id, true, 'last');
 			}
 		}
@@ -241,18 +242,18 @@ export class SubprofileStoreClass {
 			system_name: p.systemName ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? null,
-			auto_proxy_disabled: p.autoProxyDisabled ?? false,
+			auto_tag_disabled: p.autoTagDisabled ?? false,
 			bio: p.bio ?? null,
-			proxy_tags: (p.proxyTags ?? []).map((t) => ({
+			persona_tags: (p.personaTags ?? []).map((t) => ({
 				prefix: t.prefix ?? null,
 				suffix: t.suffix ?? null,
 			})),
 		}));
 
-		// Pass currentSubprofile?.id as latched persona so that leading backslash escape works
-		const result = matchProxy(content, personasLike, currentSubprofile?.id ?? null);
+		// Pass currentSubprofile?.id as active persona so that leading backslash escape works
+		const result = matchPersona(content, personasLike, currentSubprofile?.id ?? null);
 
-		// If user typed \ or \\ to explicitly unproxy / escape
+		// If user typed \ or \\ to explicitly clear active persona / escape
 		if (result.wasEscaped && currentSubprofile) {
 			return {
 				finalContent: result.strippedContent,
@@ -260,7 +261,7 @@ export class SubprofileStoreClass {
 			};
 		}
 
-		// If explicit proxy tags matched a persona, adopt that persona
+		// If explicit persona tags matched a persona, adopt that persona
 		if (result.matched && result.persona) {
 			return {
 				finalContent: result.strippedContent,
@@ -301,4 +302,5 @@ export class SubprofileStoreClass {
 	}
 }
 
-export const SubprofileStore = new SubprofileStoreClass();
+export const PersonaStore = new PersonaStoreClass();
+export const SubprofileStore = PersonaStore;
