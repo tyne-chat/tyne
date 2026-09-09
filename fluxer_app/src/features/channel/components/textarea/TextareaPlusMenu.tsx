@@ -51,8 +51,8 @@ const SHOW_MEDIA_BUTTON_DESCRIPTOR = msg({
 	comment: 'Plus menu submenu toggle that shows the saved media (memes) button next to the textarea.',
 });
 const SHOW_SUBPROFILES_BUTTON_DESCRIPTOR = msg({
-	message: 'Show subprofiles button',
-	comment: 'Plus menu submenu toggle that shows the subprofiles selector next to the textarea.',
+	message: 'Show personas button',
+	comment: 'Plus menu submenu toggle that shows the persona selector next to the textarea.',
 });
 const SHOW_STICKERS_BUTTON_DESCRIPTOR = msg({
 	message: 'Show stickers button',
