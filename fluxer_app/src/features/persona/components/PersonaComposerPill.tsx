@@ -44,7 +44,17 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 				tooltip={tooltipText}
 				tooltipPosition="top"
 				render={({onClose}) => (
-					<PersonaPickerSheet onClose={onClose} data-flx="persona.persona-composer-pill.persona-picker-sheet" />
+					<PersonaPickerSheet
+						onClose={onClose}
+						showModes={true}
+						onSelectPersona={(id) => {
+							void PersonaStore.setActivePersona(id, true);
+						}}
+						onSelectAccount={() => {
+							void PersonaStore.unlatch();
+						}}
+						data-flx="persona.persona-composer-pill.persona-picker-sheet"
+					/>
 				)}
 				data-flx="persona.persona-composer-pill.popout"
 			>
