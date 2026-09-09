@@ -17,12 +17,12 @@
 .sectionTitle {
 	font-size: 1rem;
 	font-weight: 600;
-	color: var(--header-primary, #f2f3f5);
+	color: var(--text-primary, #f2f3f5);
 }
 
 .sectionDescription {
 	font-size: 0.875rem;
-	color: var(--text-muted, #949ba4);
+	color: var(--text-primary-muted, #949ba4);
 	margin-top: 4px;
 	margin-bottom: 8px;
 	line-height: 1.4;
@@ -37,9 +37,9 @@
 
 .modeHelperText {
 	font-size: 0.8125rem;
-	color: var(--text-normal, #dbdee1);
-	background-color: var(--background-secondary, #1e1f22);
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+	color: var(--text-primary, #dbdee1);
+	background-color: var(--background-primary, #1e1f22);
+	border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
 	border-radius: var(--radius-md, 6px);
 	padding: 10px 14px;
 	line-height: 1.45;
@@ -65,15 +65,14 @@
 	display: flex;
 	align-items: center;
 	padding: 12px 16px;
-	background-color: var(--background-secondary, #1e1f22);
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+	background-color: var(--background-secondary-alt, #1e1f22);
 	border-radius: var(--radius-lg, 8px);
 	gap: 14px;
 	transition: background-color 0.15s ease;
 }
 
 .personaCard:hover {
-	background-color: var(--background-secondary-alt, #232428);
+	background-color: var(--background-modifier-hover, #232428);
 }
 
 .personaCard.activeCard {
@@ -98,14 +97,14 @@
 .cardName {
 	font-size: 0.9375rem;
 	font-weight: 600;
-	color: var(--header-primary, #f2f3f5);
+	color: var(--text-primary, #f2f3f5);
 }
 
 .cardSystemTag {
 	font-size: 0.6875rem;
 	font-weight: 600;
 	background-color: var(--background-tertiary, #111214);
-	color: var(--text-muted, #949ba4);
+	color: var(--text-primary-muted, #949ba4);
 	padding: 2px 6px;
 	border-radius: 4px;
 	text-transform: uppercase;
@@ -113,7 +112,7 @@
 
 .cardPronouns {
 	font-size: 0.8125rem;
-	color: var(--text-muted, #949ba4);
+	color: var(--text-primary-muted, #949ba4);
 }
 
 .cardSecondaryRow {
@@ -127,15 +126,15 @@
 	font-size: 0.75rem;
 	font-family: monospace;
 	background-color: var(--background-tertiary, #111214);
-	color: var(--text-normal, #dbdee1);
+	color: var(--text-primary, #dbdee1);
 	padding: 2px 6px;
 	border-radius: 4px;
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+	border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
 }
 
 .cardBio {
 	font-size: 0.8125rem;
-	color: var(--text-muted, #949ba4);
+	color: var(--text-primary-muted, #949ba4);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -160,7 +159,7 @@
 	cursor: pointer;
 	border: none;
 	background-color: var(--background-tertiary, #111214);
-	color: var(--text-normal, #f2f3f5);
+	color: var(--text-primary, #f2f3f5);
 	transition:
 		background-color 0.15s ease,
 		color 0.15s ease;
@@ -193,7 +192,7 @@
 .editorTitle {
 	font-size: 1.125rem;
 	font-weight: 600;
-	color: var(--header-primary, #f2f3f5);
+	color: var(--text-primary, #f2f3f5);
 }
 
 .formGrid {
@@ -212,7 +211,7 @@
 	font-size: 0.75rem;
 	font-weight: 700;
 	text-transform: uppercase;
-	color: var(--text-muted, #949ba4);
+	color: var(--text-primary-muted, #949ba4);
 	letter-spacing: 0.04em;
 }
 
@@ -222,7 +221,7 @@
 	border-radius: 4px;
 	padding: 8px 10px;
 	font-size: 0.875rem;
-	color: var(--text-normal, #f2f3f5);
+	color: var(--text-primary, #f2f3f5);
 	outline: none;
 	font-family: inherit;
 }
@@ -246,7 +245,7 @@
 	padding: 6px 8px;
 	font-size: 0.8125rem;
 	font-family: monospace;
-	color: var(--text-normal, #f2f3f5);
+	color: var(--text-primary, #f2f3f5);
 	outline: none;
 }
 
@@ -276,7 +275,7 @@
 
 .secondaryButton {
 	background-color: transparent;
-	color: var(--text-normal, #f2f3f5);
+	color: var(--text-primary, #f2f3f5);
 	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
 	border-radius: 4px;
 	padding: 8px 16px;
@@ -304,6 +303,6 @@
 	background-color: var(--background-secondary, #1e1f22);
 	border-radius: var(--radius-lg, 8px);
 	border: 1px dashed var(--border-subtle, rgba(255, 255, 255, 0.15));
-	color: var(--text-muted, #949ba4);
+	color: var(--text-primary-muted, #949ba4);
 	font-size: 0.875rem;
 }
