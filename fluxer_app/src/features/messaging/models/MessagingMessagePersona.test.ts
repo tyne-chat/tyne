@@ -84,7 +84,7 @@ function createWireMessage(overrides?: Partial<WireMessage>): WireMessage {
 	};
 }
 
-describe('MessagingMessage Subprofile Preservation', () => {
+describe('MessagingMessage Persona Preservation', () => {
 	it('initializes subprofile correctly from wire payload', () => {
 		const wire = createWireMessage();
 		const msg = new Message(wire, {skipUserCache: true});
