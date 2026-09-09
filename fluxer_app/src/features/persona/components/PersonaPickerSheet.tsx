@@ -11,27 +11,27 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useMemo, useState} from 'react';
-import {type AutoproxyMode, SubprofileStore} from '../state/SubprofileStore';
-import styles from './SubprofilePickerSheet.module.css';
+import {type ActivePersonaMode, PersonaStore} from '../state/PersonaStore';
+import styles from './PersonaPickerSheet.module.css';
 
-const AUTOPROXY_TABS: Array<SegmentedTab<AutoproxyMode>> = [
+const ACTIVE_PERSONA_TABS: Array<SegmentedTab<ActivePersonaMode>> = [
 	{id: 'off', label: 'Off'},
 	{id: 'manual', label: 'Manual'},
 	{id: 'last', label: 'Last Used'},
 ];
 
-interface SubprofilePickerSheetProps {
+interface PersonaPickerSheetProps {
 	onClose: () => void;
 }
 
-export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = observer(({onClose}) => {
+export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(({onClose}) => {
 	const [query, setQuery] = useState('');
 	const currentUser = Users.getCurrentUser();
-	const personas = SubprofileStore.personas;
-	const activePersonaId = SubprofileStore.activePersonaId;
-	const isLatched = SubprofileStore.autoproxyLatched;
-	const autoproxyMode = SubprofileStore.autoproxyMode;
-	const rankedPersonas = SubprofileStore.rankedPersonas;
+	const personas = PersonaStore.personas;
+	const activePersonaId = PersonaStore.activePersonaId;
+	const isLatched = PersonaStore.isPersonaLatched;
+	const activePersonaMode = PersonaStore.activePersonaMode;
+	const rankedPersonas = PersonaStore.rankedPersonas;
 
 	const filteredPersonas = useMemo(() => {
 		const trimmed = query.trim().toLowerCase();
@@ -40,7 +40,7 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 			if (p.name.toLowerCase().includes(trimmed)) return true;
 			if (p.systemName?.toLowerCase().includes(trimmed)) return true;
 			if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
-			return (p.proxyTags ?? []).some(
+			return (p.personaTags ?? []).some(
 				(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
 			);
 		});
@@ -52,12 +52,12 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 	}, [rankedPersonas, query]);
 
 	const handleSelectPersona = (id: string) => {
-		void SubprofileStore.setActivePersona(id, true);
+		void PersonaStore.setActivePersona(id, true);
 		onClose();
 	};
 
 	const handleResetToRoot = () => {
-		void SubprofileStore.unlatch();
+		void PersonaStore.unlatch();
 		onClose();
 	};
 
@@ -65,8 +65,8 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 		ModalCommands.push(
 			modal(() => (
 				<UserSettingsModal
-					initialTab="subprofiles"
-					data-flx="subprofile.subprofile-picker-sheet.handle-open-settings.user-settings-modal"
+					initialTab="personas"
+					data-flx="persona.persona-picker-sheet.handle-open-settings.user-settings-modal"
 				/>
 			)),
 		);
@@ -74,14 +74,14 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 	};
 
 	return (
-		<div className={styles.sheetContainer} data-flx="subprofile.picker-sheet">
-			<div className={styles.searchHeader} data-flx="subprofile.subprofile-picker-sheet.search-header">
-				<div className={styles.searchInputWrapper} data-flx="subprofile.subprofile-picker-sheet.search-input-wrapper">
+		<div className={styles.sheetContainer} data-flx="persona.picker-sheet">
+			<div className={styles.searchHeader} data-flx="persona.persona-picker-sheet.search-header">
+				<div className={styles.searchInputWrapper} data-flx="persona.persona-picker-sheet.search-input-wrapper">
 					<MagnifyingGlass
 						className={styles.searchIcon}
 						size={16}
 						weight="bold"
-						data-flx="subprofile.subprofile-picker-sheet.search-icon"
+						data-flx="persona.persona-picker-sheet.search-icon"
 					/>
 					<input
 						type="text"
@@ -89,24 +89,25 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 						placeholder="Search personas, tags, pronouns..."
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
-						data-flx="subprofile.subprofile-picker-sheet.search-input.set-query.text"
+						data-flx="persona.persona-picker-sheet.search-input.set-query.text"
 					/>
 				</div>
 			</div>
 
-			<div className={styles.modeTabsWrapper} data-flx="subprofile.subprofile-picker-sheet.mode-tabs-wrapper">
-				<SegmentedTabs<AutoproxyMode>
-					tabs={AUTOPROXY_TABS}
-					selectedTab={autoproxyMode}
+			<div className={styles.modeTabsWrapper} data-flx="persona.persona-picker-sheet.mode-tabs-wrapper">
+				<SegmentedTabs<ActivePersonaMode>
+					className={styles.segmentedTabs}
+					tabs={ACTIVE_PERSONA_TABS}
+					selectedTab={activePersonaMode}
 					onTabChange={(mode) => {
-						void SubprofileStore.setAutoproxyMode(mode);
+						void PersonaStore.setActivePersonaMode(mode);
 					}}
-					ariaLabel="Autoproxy mode"
-					data-flx="subprofile.subprofile-picker-sheet.segmented-tabs"
+					ariaLabel="Active persona mode"
+					data-flx="persona.persona-picker-sheet.segmented-tabs"
 				/>
 			</div>
 
-			<div className={styles.listScrollArea} data-flx="subprofile.subprofile-picker-sheet.list-scroll-area">
+			<div className={styles.listScrollArea} data-flx="persona.persona-picker-sheet.list-scroll-area">
 				{/* Reset to Root Account */}
 				{currentUser && (
 					<div
@@ -120,20 +121,17 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 						}}
 						role="button"
 						tabIndex={0}
-						data-flx="subprofile.subprofile-picker-sheet.persona-item.reset-to-root"
+						data-flx="persona.persona-picker-sheet.persona-item.reset-to-root"
 					>
-						<Avatar user={currentUser} size={28} data-flx="subprofile.subprofile-picker-sheet.avatar" />
-						<div className={styles.personaDetails} data-flx="subprofile.subprofile-picker-sheet.persona-details">
-							<div
-								className={styles.personaPrimaryRow}
-								data-flx="subprofile.subprofile-picker-sheet.persona-primary-row"
-							>
-								<span className={styles.personaName} data-flx="subprofile.subprofile-picker-sheet.persona-name">
+						<Avatar user={currentUser} size={28} data-flx="persona.persona-picker-sheet.avatar" />
+						<div className={styles.personaDetails} data-flx="persona.persona-picker-sheet.persona-details">
+							<div className={styles.personaPrimaryRow} data-flx="persona.persona-picker-sheet.persona-primary-row">
+								<span className={styles.personaName} data-flx="persona.persona-picker-sheet.persona-name">
 									{currentUser.username}
 								</span>
 							</div>
-							<span className={styles.personaPronouns} data-flx="subprofile.subprofile-picker-sheet.persona-pronouns">
-								Root Account (Unlatched)
+							<span className={styles.personaPronouns} data-flx="persona.persona-picker-sheet.persona-pronouns">
+								Root Account (Default)
 							</span>
 						</div>
 						{!isLatched || !activePersonaId ? (
@@ -141,19 +139,19 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 								size={16}
 								weight="bold"
 								className={styles.activeCheck}
-								data-flx="subprofile.subprofile-picker-sheet.active-check"
+								data-flx="persona.persona-picker-sheet.active-check"
 							/>
 						) : null}
 					</div>
 				)}
 
-				{/* Recent Fronters Shelf */}
+				{/* Recent Personas Shelf */}
 				{recentShelfPersonas.length > 0 && (
 					<>
-						<div className={styles.sectionTitle} data-flx="subprofile.subprofile-picker-sheet.section-title">
-							Recent Fronters
+						<div className={styles.sectionTitle} data-flx="persona.persona-picker-sheet.section-title">
+							Recent Personas
 						</div>
-						<div className={styles.recentShelf} data-flx="subprofile.subprofile-picker-sheet.recent-shelf">
+						<div className={styles.recentShelf} data-flx="persona.persona-picker-sheet.recent-shelf">
 							{recentShelfPersonas.map((p) => (
 								<div
 									key={p.id}
@@ -167,17 +165,17 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 									}}
 									role="button"
 									tabIndex={0}
-									data-flx="subprofile.subprofile-picker-sheet.recent-chip.select-persona"
+									data-flx="persona.persona-picker-sheet.recent-chip.select-persona"
 								>
 									{currentUser && (
 										<Avatar
 											user={currentUser}
 											avatarUrl={p.avatarUrl}
 											size={18}
-											data-flx="subprofile.subprofile-picker-sheet.avatar--2"
+											data-flx="persona.persona-picker-sheet.avatar--2"
 										/>
 									)}
-									<span data-flx="subprofile.subprofile-picker-sheet.span">{p.name}</span>
+									<span data-flx="persona.persona-picker-sheet.span">{p.name}</span>
 								</div>
 							))}
 						</div>
@@ -185,12 +183,12 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 				)}
 
 				{/* Full Persona List */}
-				<div className={styles.sectionTitle} data-flx="subprofile.subprofile-picker-sheet.section-title--2">
+				<div className={styles.sectionTitle} data-flx="persona.persona-picker-sheet.section-title--2">
 					{query.trim() ? `Search Results (${filteredPersonas.length})` : 'All Personas'}
 				</div>
 
 				{filteredPersonas.length === 0 ? (
-					<div className={styles.emptyNotice} data-flx="subprofile.subprofile-picker-sheet.empty-notice">
+					<div className={styles.emptyNotice} data-flx="persona.persona-picker-sheet.empty-notice">
 						{personas.length === 0
 							? 'No personas configured yet. Create one in Settings.'
 							: 'No matching personas found.'}
@@ -198,7 +196,7 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 				) : (
 					filteredPersonas.map((p) => {
 						const isThisActive = isLatched && activePersonaId === p.id;
-						const primaryTag = p.proxyTags?.[0];
+						const primaryTag = p.personaTags?.[0];
 						const tagString = primaryTag ? `${primaryTag.prefix ?? ''}text${primaryTag.suffix ?? ''}` : undefined;
 
 						return (
@@ -214,44 +212,44 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 								}}
 								role="button"
 								tabIndex={0}
-								data-flx="subprofile.subprofile-picker-sheet.persona-item.select-persona"
+								data-flx="persona.persona-picker-sheet.persona-item.select-persona"
 							>
 								{currentUser && (
 									<Avatar
 										user={currentUser}
 										avatarUrl={p.avatarUrl}
 										size={28}
-										data-flx="subprofile.subprofile-picker-sheet.avatar--3"
+										data-flx="persona.persona-picker-sheet.avatar--3"
 									/>
 								)}
-								<div className={styles.personaDetails} data-flx="subprofile.subprofile-picker-sheet.persona-details--2">
+								<div className={styles.personaDetails} data-flx="persona.persona-picker-sheet.persona-details--2">
 									<div
 										className={styles.personaPrimaryRow}
-										data-flx="subprofile.subprofile-picker-sheet.persona-primary-row--2"
+										data-flx="persona.persona-picker-sheet.persona-primary-row--2"
 									>
-										<span className={styles.personaName} data-flx="subprofile.subprofile-picker-sheet.persona-name--2">
+										<span className={styles.personaName} data-flx="persona.persona-picker-sheet.persona-name--2">
 											{p.name}
 										</span>
 										{p.systemName && (
-											<span className={styles.tagBadge} data-flx="subprofile.subprofile-picker-sheet.tag-badge">
+											<span className={styles.tagBadge} data-flx="persona.persona-picker-sheet.tag-badge">
 												[{p.systemName}]
 											</span>
 										)}
 									</div>
 									<div
 										className={styles.personaPrimaryRow}
-										data-flx="subprofile.subprofile-picker-sheet.persona-primary-row--3"
+										data-flx="persona.persona-picker-sheet.persona-primary-row--3"
 									>
 										{p.pronouns && (
 											<span
 												className={styles.personaPronouns}
-												data-flx="subprofile.subprofile-picker-sheet.persona-pronouns--2"
+												data-flx="persona.persona-picker-sheet.persona-pronouns--2"
 											>
 												{p.pronouns}
 											</span>
 										)}
 										{tagString && (
-											<span className={styles.tagBadge} data-flx="subprofile.subprofile-picker-sheet.tag-badge--2">
+											<span className={styles.tagBadge} data-flx="persona.persona-picker-sheet.tag-badge--2">
 												{tagString}
 											</span>
 										)}
@@ -262,7 +260,7 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 										size={16}
 										weight="bold"
 										className={styles.activeCheck}
-										data-flx="subprofile.subprofile-picker-sheet.active-check--2"
+										data-flx="persona.persona-picker-sheet.active-check--2"
 									/>
 								)}
 							</div>
@@ -271,17 +269,19 @@ export const SubprofilePickerSheet: React.FC<SubprofilePickerSheetProps> = obser
 				)}
 			</div>
 
-			<div className={styles.footer} data-flx="subprofile.subprofile-picker-sheet.footer">
+			<div className={styles.footer} data-flx="persona.persona-picker-sheet.footer">
 				<button
 					type="button"
 					className={styles.settingsLink}
 					onClick={handleOpenSettings}
-					data-flx="subprofile.subprofile-picker-sheet.settings-link.open-settings.button"
+					data-flx="persona.persona-picker-sheet.settings-link.open-settings.button"
 				>
-					<Gear size={14} data-flx="subprofile.subprofile-picker-sheet.gear" />
-					<span data-flx="subprofile.subprofile-picker-sheet.span--2">Manage Subprofiles</span>
+					<Gear size={14} data-flx="persona.persona-picker-sheet.gear" />
+					<span data-flx="persona.persona-picker-sheet.span--2">Manage Personas</span>
 				</button>
 			</div>
 		</div>
 	);
 });
+
+export const SubprofilePickerSheet = PersonaPickerSheet;
