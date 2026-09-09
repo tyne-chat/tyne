@@ -53,7 +53,7 @@ import {useCallback} from 'react';
 
 // Fork imports.
 
-import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const COULDN_T_RUN_THAT_COMMAND_DESCRIPTOR = msg({
 	message: "Couldn't run that command: {detail}",
@@ -543,7 +543,7 @@ export const useTextareaSubmit = ({
 			}
 			MessageCommands.confirmPublishedMessageEdit(i18n, editingMessage, () => {
 				finishMobileEdit();
-				const editMatch = SubprofileStore.matchEditMessage(resolvedContent, editingMessage.subprofile);
+				const editMatch = PersonaStore.matchEditMessage(resolvedContent, editingMessage.subprofile);
 				void MessageCommands.edit(
 					channelId,
 					editingMessage.id,
@@ -565,7 +565,7 @@ export const useTextareaSubmit = ({
 				const newContent = ReplaceCommandUtils.executeReplaceCommand(lastMessage.content, replaceCommand);
 				if (newContent !== lastMessage.content) {
 					MessageCommands.confirmPublishedMessageEdit(i18n, lastMessage, () => {
-						const replaceEditMatch = SubprofileStore.matchEditMessage(newContent, lastMessage.subprofile);
+						const replaceEditMatch = PersonaStore.matchEditMessage(newContent, lastMessage.subprofile);
 						void MessageCommands.edit(
 							lastMessage.channelId,
 							lastMessage.id,
