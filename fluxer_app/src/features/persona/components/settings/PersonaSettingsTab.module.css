@@ -224,6 +224,8 @@
 	color: var(--text-primary);
 	outline: none;
 	font-family: inherit;
+	height: 2.75rem;
+	box-sizing: border-box;
 }
 
 .textInput:focus {
