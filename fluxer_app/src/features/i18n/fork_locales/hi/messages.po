@@ -10,6 +10,12 @@ msgstr ""
 msgid "Change persona"
 msgstr "Change persona"
 
+msgid "Edit persona"
+msgstr "Edit persona"
+
+msgid "Main account"
+msgstr "Main account"
+
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
