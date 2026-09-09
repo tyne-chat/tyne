@@ -87,9 +87,9 @@ const PROFILE_DESCRIPTOR = msg({
 	message: 'Profile',
 	comment: 'User settings tab for editing the current user profile.',
 });
-const SUBPROFILES_DESCRIPTOR = msg({
-	message: 'Subprofiles',
-	comment: 'User settings tab for subprofiles and personas.',
+const PERSONAS_DESCRIPTOR = msg({
+	message: 'Personas',
+	comment: 'User settings tab for personas.',
 });
 
 const CONNECTIONS_DESCRIPTOR = msg({
@@ -193,9 +193,9 @@ const ALL_TABS_DESCRIPTORS: Array<SettingsTabDescriptor> = [
 		icon: DevicesIcon,
 	},
 	{
-		type: 'subprofiles',
+		type: 'personas',
 		category: 'user_settings',
-		label: SUBPROFILES_DESCRIPTOR,
+		label: PERSONAS_DESCRIPTOR,
 		icon: UsersIcon,
 	},
 	{

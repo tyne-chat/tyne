@@ -130,7 +130,7 @@ import {useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useStat
 
 // Fork imports.
 
-import {SubprofileComposerPill} from '@app/features/subprofile/components/SubprofileComposerPill';
+import {PersonaComposerPill} from '@app/features/persona/components/PersonaComposerPill';
 
 const PLUS_MENU_DOUBLE_CLICK_MS = 500;
 const MESSAGE_SCROLLER_SELECTOR = '[data-flx="channel.messages.scroller"][data-fluxer-scroll-container="true"]';
@@ -1379,9 +1379,9 @@ export const LexicalChannelTextareaContent = observer(
 										data-flx="channel.lexical-channel-textarea-content.plus-button-above-backdrop.clear-slash-command"
 									/>
 									{showSubprofilesButton && (
-										<SubprofileComposerPill
+										<PersonaComposerPill
 											channelId={channel.id}
-											data-flx="channel.lexical-channel-textarea-content.subprofile-composer-pill"
+											data-flx="channel.lexical-channel-textarea-content.persona-composer-pill"
 										/>
 									)}
 								</flx-channel-textarea-upload-column>
