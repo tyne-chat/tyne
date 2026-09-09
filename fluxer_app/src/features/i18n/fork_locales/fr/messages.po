@@ -6,6 +6,10 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. Generic action label that opens the persona picker.
+msgid "Change persona"
+msgstr "Changer de persona"
+
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
