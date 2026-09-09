@@ -5,7 +5,7 @@
 	flex-direction: column;
 	gap: 16px;
 	padding: 4px 0;
-	color: var(--text-normal);
+	color: var(--text-primary);
 }
 
 .dropzone {
@@ -15,9 +15,9 @@
 	justify-content: center;
 	gap: 8px;
 	padding: 32px 20px;
-	border: 2px dashed var(--interactive-muted);
+	border: 2px dashed var(--border-color);
 	border-radius: 8px;
-	background: var(--background-secondary);
+	background: var(--bg-secondary);
 	cursor: pointer;
 	text-align: center;
 	transition:
@@ -26,24 +26,24 @@
 }
 
 .dropzone:hover {
-	border-color: var(--brand-experiment);
-	background: var(--background-secondary-alt);
+	border-color: var(--brand-primary);
+	background: var(--bg-tertiary);
 }
 
 .dropzoneActive {
-	border-color: var(--brand-experiment);
-	background: var(--background-modifier-hover);
+	border-color: var(--brand-primary);
+	background: var(--bg-hover);
 }
 
 .dropzoneText {
 	font-size: 14px;
 	font-weight: 500;
-	color: var(--text-normal);
+	color: var(--text-primary);
 }
 
 .dropzoneSubtext {
 	font-size: 12px;
-	color: var(--text-muted);
+	color: var(--text-primary-muted);
 }
 
 .hiddenFileInput {
@@ -51,16 +51,16 @@
 }
 
 .summaryBox {
-	background: var(--background-secondary-alt);
+	background: var(--bg-tertiary);
 	border-radius: 8px;
 	padding: 12px 16px;
-	border: 1px solid var(--border-subtle);
+	border: 1px solid var(--border-color);
 }
 
 .summaryTitle {
 	font-size: 13px;
 	font-weight: 600;
-	color: var(--header-secondary);
+	color: var(--text-secondary);
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	margin-bottom: 8px;
@@ -74,12 +74,12 @@
 }
 
 .summaryLabel {
-	color: var(--text-muted);
+	color: var(--text-primary-muted);
 }
 
 .summaryValue {
 	font-weight: 500;
-	color: var(--text-normal);
+	color: var(--text-primary);
 }
 
 .formField {
@@ -92,23 +92,23 @@
 	font-size: 12px;
 	font-weight: 600;
 	text-transform: uppercase;
-	color: var(--header-secondary);
+	color: var(--text-secondary);
 	letter-spacing: 0.04em;
 }
 
 .textInput {
-	background: var(--input-background);
-	border: 1px solid var(--input-border);
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-color);
 	border-radius: 4px;
 	padding: 8px 12px;
-	color: var(--text-normal);
+	color: var(--text-primary);
 	font-size: 14px;
 	outline: none;
 	transition: border-color 0.15s ease;
 }
 
 .textInput:focus {
-	border-color: var(--brand-experiment);
+	border-color: var(--brand-primary);
 }
 
 .optionsGroup {
@@ -125,48 +125,48 @@
 	padding: 12px;
 	border-radius: 6px;
 	cursor: pointer;
-	border: 1px solid var(--border-subtle);
-	background: var(--background-secondary);
+	border: 1px solid var(--border-color);
+	background: var(--bg-secondary);
 	transition:
 		border-color 0.15s ease,
 		background 0.15s ease;
 }
 
 .radioOption:hover {
-	background: var(--background-secondary-alt);
+	background: var(--bg-tertiary);
 }
 
 .radioOptionSelected {
-	border-color: var(--brand-experiment);
-	background: var(--background-modifier-selected);
+	border-color: var(--brand-primary);
+	background: var(--bg-active);
 }
 
 .radioTitle {
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--text-normal);
+	color: var(--text-primary);
 	margin-bottom: 2px;
 }
 
 .radioDesc {
 	font-size: 12px;
-	color: var(--text-muted);
+	color: var(--text-primary-muted);
 	line-height: 1.4;
 }
 
 .progressBarContainer {
 	width: 100%;
-	background: var(--background-secondary-alt);
+	background: var(--bg-tertiary);
 	border-radius: 6px;
 	height: 10px;
 	overflow: hidden;
 	margin: 12px 0 6px;
-	border: 1px solid var(--border-subtle);
+	border: 1px solid var(--border-color);
 }
 
 .progressBarFill {
 	height: 100%;
-	background: var(--brand-experiment);
+	background: var(--brand-primary);
 	transition: width 0.25s ease-out;
 	border-radius: 6px;
 }
@@ -174,7 +174,7 @@
 .progressCurrentName {
 	font-size: 13px;
 	font-weight: 500;
-	color: var(--text-normal);
+	color: var(--text-primary);
 	text-align: center;
 	white-space: nowrap;
 	overflow: hidden;
@@ -183,13 +183,13 @@
 
 .progressDetail {
 	font-size: 12px;
-	color: var(--text-muted);
+	color: var(--text-primary-muted);
 	text-align: center;
 }
 
 .successBox {
-	background: rgba(67, 181, 129, 0.1);
-	border: 1px solid var(--status-positive, #43b581);
+	background: color-mix(in srgb, var(--accent-success) 10%, transparent);
+	border: 1px solid var(--accent-success);
 	border-radius: 8px;
 	padding: 16px;
 	text-align: center;
@@ -198,18 +198,18 @@
 .successTitle {
 	font-size: 16px;
 	font-weight: 600;
-	color: var(--status-positive, #43b581);
+	color: var(--accent-success);
 	margin-bottom: 4px;
 }
 
 .successDesc {
 	font-size: 13px;
-	color: var(--text-normal);
+	color: var(--text-primary);
 }
 
 .warningBox {
-	border: 1px solid var(--status-warning, #faa61a);
-	background: rgba(250, 166, 26, 0.08);
+	border: 1px solid var(--accent-warning);
+	background: color-mix(in srgb, var(--accent-warning) 8%, transparent);
 	border-radius: 8px;
 	padding: 12px 16px;
 	display: flex;
@@ -220,7 +220,7 @@
 .warningHeader {
 	font-size: 13px;
 	font-weight: 600;
-	color: var(--status-warning, #faa61a);
+	color: var(--accent-warning);
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -237,10 +237,10 @@
 
 .warningItem {
 	font-size: 12px;
-	background: var(--background-secondary-alt);
+	background: var(--bg-tertiary);
 	padding: 8px 10px;
 	border-radius: 6px;
-	border: 1px solid var(--border-subtle);
+	border: 1px solid var(--border-color);
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
@@ -248,18 +248,18 @@
 
 .warningItemName {
 	font-weight: 600;
-	color: var(--text-normal);
+	color: var(--text-primary);
 }
 
 .warningItemDetail {
-	color: var(--text-muted);
+	color: var(--text-primary-muted);
 }
 
 .errorBanner {
-	background: rgba(240, 71, 71, 0.1);
-	border: 1px solid var(--status-danger, #f04747);
+	background: color-mix(in srgb, var(--accent-danger) 10%, transparent);
+	border: 1px solid var(--accent-danger);
 	border-radius: 6px;
 	padding: 8px 12px;
 	font-size: 13px;
-	color: var(--status-danger, #f04747);
+	color: var(--accent-danger);
 }
