@@ -16,21 +16,21 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useState} from 'react';
-import {type AutoproxyMode, SubprofileStore} from '../../state/SubprofileStore';
+import {type ActivePersonaMode, PersonaStore} from '../../state/PersonaStore';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
-import styles from './SubprofileSettingsTab.module.css';
+import styles from './PersonaSettingsTab.module.css';
 
-const AUTOPROXY_TABS: Array<SegmentedTab<AutoproxyMode>> = [
+const ACTIVE_PERSONA_TABS: Array<SegmentedTab<ActivePersonaMode>> = [
 	{id: 'off', label: 'Off'},
 	{id: 'manual', label: 'Manual'},
 	{id: 'last', label: 'Last Used'},
 ];
 
-const AUTOPROXY_DESCRIPTIONS: Record<AutoproxyMode, string> = {
-	off: 'Untagged messages always send from your root account. Subprofiles only speak when you type their proxy tags (e.g. [text]).',
+const ACTIVE_PERSONA_DESCRIPTIONS: Record<ActivePersonaMode, string> = {
+	off: 'Untagged messages always send from your root account. Personas only speak when you type their tags (e.g. [text]).',
 	manual:
-		'Untagged messages send as your chosen subprofile. Typing another subprofile’s proxy tags will only send that single message and won’t switch who is active.',
-	last: 'Untagged messages send as the subprofile that spoke most recently. Whenever anyone uses a proxy tag, they automatically become the active subprofile.',
+		'Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active.',
+	last: 'Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona.',
 };
 
 interface PersonaFormState {
@@ -41,7 +41,7 @@ interface PersonaFormState {
 	avatarUrl: string;
 	color: string;
 	bio: string;
-	proxyTags: Array<{prefix: string; suffix: string}>;
+	tags: Array<{prefix: string; suffix: string}>;
 }
 
 const emptyFormState = (): PersonaFormState => ({
@@ -51,14 +51,14 @@ const emptyFormState = (): PersonaFormState => ({
 	avatarUrl: '',
 	color: '',
 	bio: '',
-	proxyTags: [{prefix: '', suffix: ''}],
+	tags: [{prefix: '', suffix: ''}],
 });
 
-export const SubprofileSettingsTab: React.FC = observer(() => {
+export const PersonaSettingsTab: React.FC = observer(() => {
 	const currentUser = Users.getCurrentUser();
-	const personas = SubprofileStore.personas;
-	const activePersonaId = SubprofileStore.activePersonaId;
-	const isLatched = SubprofileStore.autoproxyLatched;
+	const personas = PersonaStore.personas;
+	const activePersonaId = PersonaStore.activePersonaId;
+	const isLatched = PersonaStore.isPersonaLatched;
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<PersonaFormState>(emptyFormState());
@@ -68,7 +68,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 		setFormData((prev) => ({...prev, avatarUrl: base64}));
 		setIsUploadingAvatar(true);
 		try {
-			const res = await http.post<{avatar_url: string}>(Endpoints.USER_SUBPROFILE_AVATAR, {
+			const res = await http.post<{avatar_url: string}>(Endpoints.USER_PERSONA_AVATAR, {
 				body: {avatar: base64},
 			});
 			if (res.ok && res.body?.avatar_url) {
@@ -107,9 +107,9 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 			avatarUrl: persona.avatarUrl ?? '',
 			color: persona.color != null ? `#${persona.color.toString(16).padStart(6, '0')}` : '',
 			bio: persona.bio ?? '',
-			proxyTags:
-				(persona.proxyTags ?? []).length > 0
-					? (persona.proxyTags ?? []).map((t) => ({prefix: t.prefix ?? '', suffix: t.suffix ?? ''}))
+			tags:
+				(persona.personaTags ?? []).length > 0
+					? (persona.personaTags ?? []).map((t) => ({prefix: t.prefix ?? '', suffix: t.suffix ?? ''}))
 					: [{prefix: '', suffix: ''}],
 		});
 		setIsEditing(true);
@@ -141,33 +141,33 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 			}
 		}
 
-		const validTags = formData.proxyTags
+		const validTags = formData.tags
 			.map((t) => ({prefix: t.prefix.trim() || undefined, suffix: t.suffix.trim() || undefined}))
 			.filter((t) => t.prefix || t.suffix);
 
 		if (formData.id) {
-			await SubprofileStore.updatePersona(formData.id, {
+			await PersonaStore.updatePersona(formData.id, {
 				name: trimmedName,
 				systemName: formData.systemName.trim() || undefined,
 				pronouns: formData.pronouns.trim() || undefined,
 				avatarUrl: formData.avatarUrl.trim() || undefined,
 				color: parsedColor ?? undefined,
 				bio: formData.bio.trim() || undefined,
-				proxyTags: validTags.map((t) => ({
-					$typeName: 'fluxer.user.preferences.v1.ProxyTag',
+				personaTags: validTags.map((t) => ({
+					$typeName: 'fluxer.user.preferences.v1.PersonaTag',
 					prefix: t.prefix,
 					suffix: t.suffix,
 				})),
 			});
 		} else {
-			await SubprofileStore.addPersona({
+			await PersonaStore.addPersona({
 				name: trimmedName,
 				system_name: formData.systemName.trim() || null,
 				pronouns: formData.pronouns.trim() || null,
 				avatar_url: formData.avatarUrl.trim() || null,
 				color: parsedColor,
 				bio: formData.bio.trim() || null,
-				proxy_tags: validTags,
+				persona_tags: validTags,
 			});
 		}
 
@@ -177,99 +177,93 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 
 	const handleDeletePersona = async (id: string) => {
 		if (confirm('Are you sure you want to delete this persona?')) {
-			await SubprofileStore.deletePersona(id);
+			await PersonaStore.deletePersona(id);
 		}
 	};
 
-	const autoproxyMode = SubprofileStore.autoproxyMode;
+	const activePersonaMode = PersonaStore.activePersonaMode;
 
-	const handleModeChange = async (mode: AutoproxyMode) => {
-		await SubprofileStore.setAutoproxyMode(mode);
+	const handleModeChange = async (mode: ActivePersonaMode) => {
+		await PersonaStore.setActivePersonaMode(mode);
 	};
 
 	const handleToggleActive = async (personaId: string) => {
 		if (activePersonaId === personaId && isLatched) {
-			await SubprofileStore.unlatch();
+			await PersonaStore.unlatch();
 		} else {
-			await SubprofileStore.setActivePersona(personaId, true);
+			await PersonaStore.setActivePersona(personaId, true);
 		}
 	};
 
 	const handleAddTagRow = () => {
 		setFormData((prev) => ({
 			...prev,
-			proxyTags: [...prev.proxyTags, {prefix: '', suffix: ''}],
+			tags: [...prev.tags, {prefix: '', suffix: ''}],
 		}));
 	};
 
 	const handleRemoveTagRow = (index: number) => {
 		setFormData((prev) => ({
 			...prev,
-			proxyTags: prev.proxyTags.filter((_, i) => i !== index),
+			tags: prev.tags.filter((_, i) => i !== index),
 		}));
 	};
 
 	const handleTagChange = (index: number, field: 'prefix' | 'suffix', value: string) => {
 		setFormData((prev) => {
-			const updated = [...prev.proxyTags];
+			const updated = [...prev.tags];
 			updated[index] = {...updated[index], [field]: value};
-			return {...prev, proxyTags: updated};
+			return {...prev, tags: updated};
 		});
 	};
 
 	return (
-		<SettingsTabContainer data-flx="user.subprofiles-settings-tab.container">
-			<SettingsTabContent data-flx="user.subprofiles-settings-tab.content">
-				<div className={styles.container} data-flx="subprofile.settings.subprofile-settings-tab.container">
+		<SettingsTabContainer data-flx="user.personas-settings-tab.container">
+			<SettingsTabContent data-flx="user.personas-settings-tab.content">
+				<div className={styles.container} data-flx="persona.settings.persona-settings-tab.container">
 					{/* Header section */}
 					<SettingsSection
-						id="subprofiles_general"
-						title="Subprofiles & Personas"
-						description="Configure native subprofiles and personas for plural systems or multiple identities. Messages sent with your proxy tags or while latched will display under the chosen persona while keeping your account verifiable for safety."
+						id="personas_general"
+						title="Personas"
+						description="Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
 						linkable={false}
-						data-flx="subprofile.settings.subprofile-settings-tab.subprofiles-general"
+						data-flx="persona.settings.persona-settings-tab.personas-general"
 					>
-						<div className={styles.sectionHeader} data-flx="subprofile.settings.subprofile-settings-tab.section-header">
-							<div data-flx="subprofile.settings.subprofile-settings-tab.div">
-								<h4
-									className={styles.sectionTitle}
-									data-flx="subprofile.settings.subprofile-settings-tab.section-title"
-								>
-									Autoproxy Mode
+						<div className={styles.sectionHeader} data-flx="persona.settings.persona-settings-tab.section-header">
+							<div data-flx="persona.settings.persona-settings-tab.div">
+								<h4 className={styles.sectionTitle} data-flx="persona.settings.persona-settings-tab.section-title">
+									Active Persona Mode
 								</h4>
 								<p
 									className={styles.sectionDescription}
-									data-flx="subprofile.settings.subprofile-settings-tab.section-description"
+									data-flx="persona.settings.persona-settings-tab.section-description"
 								>
-									Choose how untagged messages and proxy prefixes interact with your active subprofile.
+									Choose how untagged messages and persona tags interact with your active persona.
 								</p>
 							</div>
 						</div>
 						<div
 							className={styles.modeControlWrapper}
-							data-flx="subprofile.settings.subprofile-settings-tab.mode-control-wrapper"
+							data-flx="persona.settings.persona-settings-tab.mode-control-wrapper"
 						>
-							<SegmentedTabs<AutoproxyMode>
-								tabs={AUTOPROXY_TABS}
-								selectedTab={autoproxyMode}
+							<SegmentedTabs<ActivePersonaMode>
+								tabs={ACTIVE_PERSONA_TABS}
+								selectedTab={activePersonaMode}
 								onTabChange={(mode) => {
 									void handleModeChange(mode);
 								}}
-								ariaLabel="Autoproxy mode"
-								data-flx="subprofile.settings.subprofile-settings-tab.segmented-tabs"
+								ariaLabel="Active persona mode"
+								data-flx="persona.settings.persona-settings-tab.segmented-tabs"
 							/>
-							<div
-								className={styles.modeHelperText}
-								data-flx="subprofile.settings.subprofile-settings-tab.mode-helper-text"
-							>
+							<div className={styles.modeHelperText} data-flx="persona.settings.persona-settings-tab.mode-helper-text">
 								<Info
 									size={16}
 									weight="bold"
 									className={styles.modeHelperIcon}
-									data-flx="subprofile.settings.subprofile-settings-tab.mode-helper-icon"
+									data-flx="persona.settings.persona-settings-tab.mode-helper-icon"
 								/>
-								<span data-flx="subprofile.settings.subprofile-settings-tab.span">
-									{AUTOPROXY_DESCRIPTIONS[autoproxyMode]}
+								<span data-flx="persona.settings.persona-settings-tab.span">
+									{ACTIVE_PERSONA_DESCRIPTIONS[activePersonaMode]}
 								</span>
 							</div>
 						</div>
@@ -277,13 +271,13 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 
 					{/* Editor Form */}
 					{isEditing && (
-						<div className={styles.editorCard} data-flx="subprofile.settings.subprofile-settings-tab.editor-card">
-							<div className={styles.editorTitle} data-flx="subprofile.settings.subprofile-settings-tab.editor-title">
-								{formData.id ? 'Edit Subprofile' : 'New Subprofile'}
+						<div className={styles.editorCard} data-flx="persona.settings.persona-settings-tab.editor-card">
+							<div className={styles.editorTitle} data-flx="persona.settings.persona-settings-tab.editor-title">
+								{formData.id ? 'Edit Persona' : 'New Persona'}
 							</div>
-							<div className={styles.formGrid} data-flx="subprofile.settings.subprofile-settings-tab.form-grid">
-								<div className={styles.formField} data-flx="subprofile.settings.subprofile-settings-tab.form-field">
-									<div className={styles.formLabel} data-flx="subprofile.settings.subprofile-settings-tab.form-label">
+							<div className={styles.formGrid} data-flx="persona.settings.persona-settings-tab.form-grid">
+								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label">
 										Name *
 									</div>
 									<input
@@ -293,14 +287,11 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 										maxLength={100}
 										value={formData.name}
 										onChange={(e) => setFormData({...formData, name: e.target.value})}
-										data-flx="subprofile.settings.subprofile-settings-tab.text-input.set-form-data"
+										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data"
 									/>
 								</div>
-								<div className={styles.formField} data-flx="subprofile.settings.subprofile-settings-tab.form-field--2">
-									<div
-										className={styles.formLabel}
-										data-flx="subprofile.settings.subprofile-settings-tab.form-label--2"
-									>
+								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--2">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--2">
 										System Tag
 									</div>
 									<input
@@ -310,14 +301,11 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 										maxLength={100}
 										value={formData.systemName}
 										onChange={(e) => setFormData({...formData, systemName: e.target.value})}
-										data-flx="subprofile.settings.subprofile-settings-tab.text-input.set-form-data--2"
+										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--2"
 									/>
 								</div>
-								<div className={styles.formField} data-flx="subprofile.settings.subprofile-settings-tab.form-field--3">
-									<div
-										className={styles.formLabel}
-										data-flx="subprofile.settings.subprofile-settings-tab.form-label--3"
-									>
+								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--3">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--3">
 										Pronouns
 									</div>
 									<input
@@ -327,19 +315,16 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 										maxLength={100}
 										value={formData.pronouns}
 										onChange={(e) => setFormData({...formData, pronouns: e.target.value})}
-										data-flx="subprofile.settings.subprofile-settings-tab.text-input.set-form-data--3"
+										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--3"
 									/>
 								</div>
-								<div className={styles.formField} data-flx="subprofile.settings.subprofile-settings-tab.form-field--4">
-									<div
-										className={styles.formLabel}
-										data-flx="subprofile.settings.subprofile-settings-tab.form-label--4"
-									>
+								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--4">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--4">
 										Color (Hex)
 									</div>
 									<div
 										style={{display: 'flex', gap: 8, alignItems: 'center'}}
-										data-flx="subprofile.settings.subprofile-settings-tab.div--2"
+										data-flx="persona.settings.persona-settings-tab.div--2"
 									>
 										<input
 											type="text"
@@ -349,13 +334,13 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 											value={formData.color}
 											onChange={(e) => setFormData({...formData, color: e.target.value})}
 											style={{flex: 1}}
-											data-flx="subprofile.settings.subprofile-settings-tab.text-input.set-form-data--4"
+											data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--4"
 										/>
 										{formData.color && (
 											<div
 												className={styles.colorPreview}
 												style={{backgroundColor: formData.color}}
-												data-flx="subprofile.settings.subprofile-settings-tab.color-preview"
+												data-flx="persona.settings.persona-settings-tab.color-preview"
 											/>
 										)}
 									</div>
@@ -363,34 +348,31 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="subprofile.settings.subprofile-settings-tab.form-field--5"
+									data-flx="persona.settings.persona-settings-tab.form-field--5"
 								>
-									<div
-										className={styles.formLabel}
-										data-flx="subprofile.settings.subprofile-settings-tab.form-label--5"
-									>
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--5">
 										Avatar
 									</div>
 									<div
 										style={{display: 'flex', gap: 16, alignItems: 'center'}}
-										data-flx="subprofile.settings.subprofile-settings-tab.div--3"
+										data-flx="persona.settings.persona-settings-tab.div--3"
 									>
 										{currentUser && (
 											<Avatar
 												user={currentUser}
 												avatarUrl={formData.avatarUrl || undefined}
 												size={64}
-												data-flx="subprofile.settings.subprofile-settings-tab.avatar"
+												data-flx="persona.settings.persona-settings-tab.avatar"
 											/>
 										)}
-										<div style={{flex: 1}} data-flx="subprofile.settings.subprofile-settings-tab.div--4">
+										<div style={{flex: 1}} data-flx="persona.settings.persona-settings-tab.div--4">
 											<AvatarUploader
 												hasAvatar={Boolean(formData.avatarUrl)}
 												onAvatarChange={handleAvatarUpload}
 												onAvatarClear={handleAvatarClear}
 												isPerGuildProfile={false}
 												disabled={isUploadingAvatar}
-												data-flx="subprofile.settings.subprofile-settings-tab.avatar-uploader"
+												data-flx="persona.settings.persona-settings-tab.avatar-uploader"
 											/>
 										</div>
 									</div>
@@ -398,12 +380,9 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="subprofile.settings.subprofile-settings-tab.form-field--6"
+									data-flx="persona.settings.persona-settings-tab.form-field--6"
 								>
-									<div
-										className={styles.formLabel}
-										data-flx="subprofile.settings.subprofile-settings-tab.form-label--6"
-									>
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--6">
 										Bio
 									</div>
 									<input
@@ -413,51 +392,44 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 										maxLength={2048}
 										value={formData.bio}
 										onChange={(e) => setFormData({...formData, bio: e.target.value})}
-										data-flx="subprofile.settings.subprofile-settings-tab.text-input.set-form-data--5"
+										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--5"
 									/>
 								</div>
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="subprofile.settings.subprofile-settings-tab.form-field--7"
+									data-flx="persona.settings.persona-settings-tab.form-field--7"
 								>
 									<div
 										style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}
-										data-flx="subprofile.settings.subprofile-settings-tab.div--5"
+										data-flx="persona.settings.persona-settings-tab.div--5"
 									>
-										<div
-											className={styles.formLabel}
-											data-flx="subprofile.settings.subprofile-settings-tab.form-label--7"
-										>
-											Proxy Tags (Prefix & Suffix)
+										<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--7">
+											Persona Tags (Prefix & Suffix)
 										</div>
 										<Button
 											variant="secondary"
 											small
-											leftIcon={<Plus size={14} data-flx="subprofile.settings.subprofile-settings-tab.plus" />}
+											leftIcon={<Plus size={14} data-flx="persona.settings.persona-settings-tab.plus" />}
 											onClick={handleAddTagRow}
-											data-flx="subprofile.settings.subprofile-settings-tab.button.add-tag-row"
+											data-flx="persona.settings.persona-settings-tab.button.add-tag-row"
 										>
 											Add Tag Pair
 										</Button>
 									</div>
-									{formData.proxyTags.map((tag, idx) => (
-										<div
-											key={idx}
-											className={styles.tagRow}
-											data-flx="subprofile.settings.subprofile-settings-tab.tag-row"
-										>
+									{formData.tags.map((tag, idx) => (
+										<div key={idx} className={styles.tagRow} data-flx="persona.settings.persona-settings-tab.tag-row">
 											<input
 												type="text"
 												className={styles.tagInput}
 												placeholder="Prefix (e.g. [)"
 												value={tag.prefix}
 												onChange={(e) => handleTagChange(idx, 'prefix', e.target.value)}
-												data-flx="subprofile.settings.subprofile-settings-tab.tag-input.tag-change.text"
+												data-flx="persona.settings.persona-settings-tab.tag-input.tag-change.text"
 											/>
 											<span
 												style={{color: 'var(--text-primary-muted)'}}
-												data-flx="subprofile.settings.subprofile-settings-tab.span--2"
+												data-flx="persona.settings.persona-settings-tab.span--2"
 											>
 												text
 											</span>
@@ -467,31 +439,28 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 												placeholder="Suffix (e.g. ])"
 												value={tag.suffix}
 												onChange={(e) => handleTagChange(idx, 'suffix', e.target.value)}
-												data-flx="subprofile.settings.subprofile-settings-tab.tag-input.tag-change.text--2"
+												data-flx="persona.settings.persona-settings-tab.tag-input.tag-change.text--2"
 											/>
-											{formData.proxyTags.length > 1 && (
+											{formData.tags.length > 1 && (
 												<Button
 													variant="danger"
 													small
 													square
-													icon={<Trash size={14} data-flx="subprofile.settings.subprofile-settings-tab.trash" />}
+													icon={<Trash size={14} data-flx="persona.settings.persona-settings-tab.trash" />}
 													onClick={() => handleRemoveTagRow(idx)}
 													aria-label="Remove tag pair"
-													data-flx="subprofile.settings.subprofile-settings-tab.remove-tag-pair.remove-tag-row"
+													data-flx="persona.settings.persona-settings-tab.remove-tag-pair.remove-tag-row"
 												/>
 											)}
 										</div>
 									))}
 								</div>
 							</div>
-							<div
-								className={styles.editorActions}
-								data-flx="subprofile.settings.subprofile-settings-tab.editor-actions"
-							>
+							<div className={styles.editorActions} data-flx="persona.settings.persona-settings-tab.editor-actions">
 								<Button
 									variant="secondary"
 									onClick={handleCancelEdit}
-									data-flx="subprofile.settings.subprofile-settings-tab.button.cancel-edit"
+									data-flx="persona.settings.persona-settings-tab.button.cancel-edit"
 								>
 									Cancel
 								</Button>
@@ -499,9 +468,9 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 									variant="primary"
 									disabled={!formData.name.trim() || isUploadingAvatar}
 									onClick={handleSaveForm}
-									data-flx="subprofile.settings.subprofile-settings-tab.button.save-form"
+									data-flx="persona.settings.persona-settings-tab.button.save-form"
 								>
-									{isUploadingAvatar ? 'Uploading avatar...' : 'Save Subprofile'}
+									{isUploadingAvatar ? 'Uploading avatar...' : 'Save Persona'}
 								</Button>
 							</div>
 						</div>
@@ -509,81 +478,67 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 
 					{/* Personas List */}
 					<SettingsSection
-						id="subprofiles_list"
+						id="personas_list"
 						title={`Configured Personas (${personas.length})`}
 						linkable={false}
 						actions={
 							!isEditing && (
-								<div style={{display: 'flex', gap: 8}} data-flx="subprofile.settings.subprofile-settings-tab.div--6">
+								<div style={{display: 'flex', gap: 8}} data-flx="persona.settings.persona-settings-tab.div--6">
 									<Button
 										variant="secondary"
+										leftIcon={<UploadSimple size={16} data-flx="persona.settings.persona-settings-tab.upload-simple" />}
 										onClick={openPluralKitImportModal}
-										data-flx="subprofile.settings.subprofile-settings-tab.button.open-plural-kit-import-modal"
+										data-flx="persona.settings.persona-settings-tab.button.open-plural-kit-import-modal"
 									>
-										<UploadSimple
-											size={16}
-											style={{marginRight: 6, verticalAlign: 'text-bottom'}}
-											data-flx="subprofile.settings.subprofile-settings-tab.upload-simple"
-										/>
-										<span data-flx="subprofile.settings.subprofile-settings-tab.span--3">Import from PluralKit</span>
+										Import from PluralKit
 									</Button>
 									<Button
 										variant="primary"
+										leftIcon={<Plus size={16} data-flx="persona.settings.persona-settings-tab.plus--2" />}
 										onClick={handleStartAdd}
-										data-flx="subprofile.settings.subprofile-settings-tab.button.start-add"
+										data-flx="persona.settings.persona-settings-tab.button.start-add"
 									>
-										<Plus
-											size={16}
-											style={{marginRight: 6, verticalAlign: 'text-bottom'}}
-											data-flx="subprofile.settings.subprofile-settings-tab.plus--2"
-										/>
-										<span data-flx="subprofile.settings.subprofile-settings-tab.span--4">Add Subprofile</span>
+										Add Persona
 									</Button>
 								</div>
 							)
 						}
-						data-flx="subprofile.settings.subprofile-settings-tab.subprofiles-list"
+						data-flx="persona.settings.persona-settings-tab.personas-list"
 					>
 						{personas.length === 0 && !isEditing ? (
-							<div className={styles.emptyState} data-flx="subprofile.settings.subprofile-settings-tab.empty-state">
-								No subprofiles created yet. Click "Add Subprofile" to create your first persona!
+							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state">
+								No personas created yet. Click "Add Persona" to create your first persona!
 							</div>
 						) : (
-							<div className={styles.cardList} data-flx="subprofile.settings.subprofile-settings-tab.card-list">
+							<div className={styles.cardList} data-flx="persona.settings.persona-settings-tab.card-list">
 								{personas.map((persona) => {
 									const isThisActive = activePersonaId === persona.id && isLatched;
 									return (
 										<div
 											key={persona.id}
 											className={clsx(styles.personaCard, isThisActive && styles.activeCard)}
-											data-flx="subprofile.settings.subprofile-settings-tab.persona-card"
+											data-flx="persona.settings.persona-settings-tab.persona-card"
 										>
 											{currentUser && (
 												<Avatar
 													user={currentUser}
 													avatarUrl={persona.avatarUrl}
 													size={40}
-													data-flx="subprofile.settings.subprofile-settings-tab.avatar--2"
+													data-flx="persona.settings.persona-settings-tab.avatar--2"
 												/>
 											)}
-											<div
-												className={styles.cardDetails}
-												data-flx="subprofile.settings.subprofile-settings-tab.card-details"
-											>
+											<div className={styles.cardDetails} data-flx="persona.settings.persona-settings-tab.card-details">
 												<div
 													className={styles.cardPrimaryRow}
-													data-flx="subprofile.settings.subprofile-settings-tab.card-primary-row"
+													data-flx="persona.settings.persona-settings-tab.card-primary-row"
 												>
-													<span
-														className={styles.cardName}
-														data-flx="subprofile.settings.subprofile-settings-tab.card-name"
-													>
+													<span className={styles.cardName} data-flx="persona.settings.persona-settings-tab.card-name">
 														{persona.name}
 													</span>
 													{persona.systemName && (
 														<span
 															className={styles.cardSystemTag}
-															data-flx="subprofile.settings.subprofile-settings-tab.card-system-tag"
+															data-flx="persona.settings.persona-settings-tab.card-system-tag"
 														>
 															[{persona.systemName}]
 														</span>
@@ -591,7 +546,7 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 													{persona.pronouns && (
 														<span
 															className={styles.cardPronouns}
-															data-flx="subprofile.settings.subprofile-settings-tab.card-pronouns"
+															data-flx="persona.settings.persona-settings-tab.card-pronouns"
 														>
 															({persona.pronouns})
 														</span>
@@ -604,82 +559,72 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 																height: 14,
 																backgroundColor: `#${persona.color.toString(16).padStart(6, '0')}`,
 															}}
-															data-flx="subprofile.settings.subprofile-settings-tab.color-preview--2"
+															data-flx="persona.settings.persona-settings-tab.color-preview--2"
 														/>
 													)}
 												</div>
 												<div
 													className={styles.cardSecondaryRow}
-													data-flx="subprofile.settings.subprofile-settings-tab.card-secondary-row"
+													data-flx="persona.settings.persona-settings-tab.card-secondary-row"
 												>
-													{(persona.proxyTags ?? []).map((t, idx) => (
+													{(persona.personaTags ?? []).map((t, idx) => (
 														<span
 															key={idx}
 															className={styles.tagPill}
-															data-flx="subprofile.settings.subprofile-settings-tab.tag-pill"
+															data-flx="persona.settings.persona-settings-tab.tag-pill"
 														>
-															{t.prefix ?? ''}text{t.suffix ?? ''}
+															{`${t.prefix ?? ''}text${t.suffix ?? ''}`}
 														</span>
 													))}
 													{persona.bio && (
-														<span
-															className={styles.cardBio}
-															data-flx="subprofile.settings.subprofile-settings-tab.card-bio"
-														>
+														<span className={styles.cardBio} data-flx="persona.settings.persona-settings-tab.card-bio">
 															{persona.bio}
 														</span>
 													)}
 												</div>
 											</div>
-											<div
-												className={styles.cardActions}
-												data-flx="subprofile.settings.subprofile-settings-tab.card-actions"
-											>
+											<div className={styles.cardActions} data-flx="persona.settings.persona-settings-tab.card-actions">
 												<Button
 													variant="secondary"
 													onClick={() => handleToggleActive(persona.id)}
-													aria-label={isThisActive ? 'Unlatch active persona' : 'Latch this persona'}
-													data-flx="subprofile.settings.subprofile-settings-tab.button.toggle-active"
-												>
-													{isThisActive ? (
-														<>
+													leftIcon={
+														isThisActive ? (
 															<LockSimple
 																size={14}
 																color="var(--brand-primary)"
-																data-flx="subprofile.settings.subprofile-settings-tab.lock-simple"
+																data-flx="persona.settings.persona-settings-tab.lock-simple"
 															/>
-															<span data-flx="subprofile.settings.subprofile-settings-tab.span--5">Latched</span>
-														</>
-													) : (
-														<>
+														) : (
 															<LockSimpleOpen
 																size={14}
-																data-flx="subprofile.settings.subprofile-settings-tab.lock-simple-open"
+																data-flx="persona.settings.persona-settings-tab.lock-simple-open"
 															/>
-															<span data-flx="subprofile.settings.subprofile-settings-tab.span--6">Latch</span>
-														</>
-													)}
+														)
+													}
+													aria-label={isThisActive ? 'Deactivate persona' : 'Set as active persona'}
+													data-flx="persona.settings.persona-settings-tab.button.toggle-active"
+												>
+													{isThisActive ? 'Active' : 'Set Active'}
 												</Button>
 												<Button
 													variant="secondary"
+													leftIcon={
+														<PencilSimple size={14} data-flx="persona.settings.persona-settings-tab.pencil-simple" />
+													}
 													onClick={() => handleStartEdit(persona)}
 													aria-label="Edit persona"
-													data-flx="subprofile.settings.subprofile-settings-tab.edit-persona.start-edit"
+													data-flx="persona.settings.persona-settings-tab.edit-persona.start-edit"
 												>
-													<PencilSimple
-														size={14}
-														data-flx="subprofile.settings.subprofile-settings-tab.pencil-simple"
-													/>
-													<span data-flx="subprofile.settings.subprofile-settings-tab.span--7">Edit</span>
+													Edit
 												</Button>
 												<Button
 													variant="danger"
+													leftIcon={<Trash size={14} data-flx="persona.settings.persona-settings-tab.trash--2" />}
 													onClick={() => handleDeletePersona(persona.id)}
 													aria-label="Delete persona"
-													data-flx="subprofile.settings.subprofile-settings-tab.delete-persona"
+													data-flx="persona.settings.persona-settings-tab.delete-persona"
 												>
-													<Trash size={14} data-flx="subprofile.settings.subprofile-settings-tab.trash--2" />
-													<span data-flx="subprofile.settings.subprofile-settings-tab.span--8">Delete</span>
+													Delete
 												</Button>
 											</div>
 										</div>
@@ -693,4 +638,5 @@ export const SubprofileSettingsTab: React.FC = observer(() => {
 		</SettingsTabContainer>
 	);
 });
-export default SubprofileSettingsTab;
+export default PersonaSettingsTab;
+export const SubprofileSettingsTab = PersonaSettingsTab;

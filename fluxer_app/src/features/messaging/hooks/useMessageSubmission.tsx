@@ -30,7 +30,7 @@ import {useCallback} from 'react';
 
 // Fork imports.
 
-import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 interface UseMessageSubmissionOptions {
 	accountKey: string | null;
@@ -112,14 +112,14 @@ export const useMessageSubmission = ({
 			if (!canSubmitMessage(content, hasNonTextContent)) return false;
 			if (isBlockedBySlowmode(channel)) return false;
 
-			const cmdResult = SubprofileStore.handleInChatCommand(content);
+			const cmdResult = PersonaStore.handleInChatCommand(content);
 			if (cmdResult.handled) {
 				RollingTypingSender.stopTyping(channel.id);
 				DraftCommands.deleteDraft(channel.id);
 				return true;
 			}
 
-			const matchResult = SubprofileStore.matchOutgoingMessage(content);
+			const matchResult = PersonaStore.matchOutgoingMessage(content);
 			const finalContent = matchResult.matched || matchResult.wasEscaped ? matchResult.strippedContent : content;
 			if (finalContent.length === 0 && !hasAttachments && !favoriteMemeIdOrStickers) {
 				RollingTypingSender.stopTyping(channel.id);

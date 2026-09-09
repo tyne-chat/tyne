@@ -8,7 +8,7 @@ import {useMemo} from 'react';
 
 // Fork imports.
 
-import {SubprofileStore} from '@app/features/subprofile/state/SubprofileStore';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const APPENDS_TO_YOUR_MESSAGE_DESCRIPTOR = msg({
 	message: 'Appends ¯\\_(ツ)_/¯ to your message.',
@@ -328,17 +328,36 @@ export function useCommands(): Array<Command> {
 			},
 			{
 				type: 'action',
+				name: '/persona',
+				description: 'Switch the active persona',
+				requiresGuild: false,
+				options: [
+					{
+						name: 'persona',
+						description: 'The persona to select.',
+						type: 'choice',
+						required: false,
+						allowEmpty: true,
+						choices: PersonaStore.rankedPersonas.map((v) => ({
+							name: v.name,
+							value: v.id,
+						})),
+					},
+				],
+			},
+			{
+				type: 'action',
 				name: '/subprofile',
-				description: 'Switch the latched subprofile', //i18n._(CHANGE_YOUR_NICKNAME_IN_THIS_COMMUNITY_DESCRIPTOR),
+				description: 'Switch the active persona (alias for /persona)',
 				requiresGuild: false,
 				options: [
 					{
 						name: 'subprofile',
-						description: 'The subprofile to latch.', //i18n._(COMMAND_NICKNAME_OPTION_DESCRIPTOR),
+						description: 'The persona to select.',
 						type: 'choice',
 						required: false,
 						allowEmpty: true,
-						choices: SubprofileStore.rankedPersonas.map((v) => ({
+						choices: PersonaStore.rankedPersonas.map((v) => ({
 							name: v.name,
 							value: v.id,
 						})),

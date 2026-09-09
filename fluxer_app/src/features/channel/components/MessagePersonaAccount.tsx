@@ -17,7 +17,7 @@ import type React from 'react';
 import {useCallback, useRef} from 'react';
 import {MessageAvatar} from './MessageAvatar';
 
-export const MessageSubprofileAccount = observer(
+export const MessagePersonaAccount = observer(
 	({
 		user,
 		message,
@@ -54,7 +54,7 @@ export const MessageSubprofileAccount = observer(
 				<>
 					<span
 						className={styles.messageAuthorSubprofileMarker}
-						data-flx="channel.message-subprofile-account.message-author-subprofile-marker"
+						data-flx="channel.message-persona-account.message-author-subprofile-marker"
 					>
 						{' '}
 						via{' '}
@@ -105,3 +105,5 @@ export const MessageSubprofileAccount = observer(
 		);
 	},
 );
+
+export const MessageSubprofileAccount = MessagePersonaAccount;
