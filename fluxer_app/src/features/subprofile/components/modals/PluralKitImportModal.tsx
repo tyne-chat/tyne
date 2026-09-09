@@ -276,7 +276,7 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 							>
 								<UploadSimple
 									size={36}
-									style={{color: 'var(--brand-experiment)'}}
+									style={{color: 'var(--brand-primary)'}}
 									data-flx="subprofile.plural-kit-import-modal.upload-simple"
 								/>
 								<div className={styles.dropzoneText} data-flx="subprofile.plural-kit-import-modal.dropzone-text">
@@ -463,7 +463,7 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 							<div className={styles.successBox} data-flx="subprofile.plural-kit-import-modal.success-box">
 								<CheckCircle
 									size={36}
-									style={{color: 'var(--status-positive)', marginBottom: 8}}
+									style={{color: 'var(--accent-success)', marginBottom: 8}}
 									data-flx="subprofile.plural-kit-import-modal.check-circle"
 								/>
 								<div className={styles.successTitle} data-flx="subprofile.plural-kit-import-modal.success-title">
@@ -497,7 +497,7 @@ export const PluralKitImportModal: React.FC<PluralKitImportModalProps> = observe
 												>
 													{w.displayName}{' '}
 													<span
-														style={{fontWeight: 400, color: 'var(--text-muted)'}}
+														style={{fontWeight: 400, color: 'var(--text-primary-muted)'}}
 														data-flx="subprofile.plural-kit-import-modal.span--2"
 													>
 														(Prefix: {w.prefix})
