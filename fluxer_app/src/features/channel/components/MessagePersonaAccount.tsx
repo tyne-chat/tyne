@@ -64,6 +64,7 @@ export const MessagePersonaAccount = observer(
 				longPressWrapperElement="span"
 				onPopoutOpen={handlePopoutOpen}
 				onPopoutClose={handlePopoutClose}
+				ignoreSubprofile={true}
 				data-flx="channel.message-username.preloadable-user-popout"
 			>
 				<FocusRing data-flx="channel.message-username-original.focus-ring">
