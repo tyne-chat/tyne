@@ -3,25 +3,25 @@
 .tag {
 	display: inline-flex;
 	align-items: center;
-	background-color: var(--background-modifier-accent, rgba(255, 255, 255, 0.08));
-	color: var(--text-muted, #949ba4);
+	background-color: var(--background-modifier-accent);
+	color: var(--text-primary-muted);
 	font-size: 0.625rem;
 	font-weight: 600;
 	line-height: 1;
-	padding: 0.125rem 0.35rem;
-	border-radius: 0.25rem;
 	vertical-align: baseline;
-	margin-inline-start: 0.25rem;
+	margin-inline-start: 4px;
+	padding: 1px 4px;
+	border-radius: 3px;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
 	user-select: none;
 	cursor: default;
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+	border: 1px solid var(--border-color);
 }
 
 .tag:hover {
-	background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.12));
-	color: var(--text-normal, #f2f3f5);
+	background-color: var(--background-modifier-hover);
+	color: var(--text-primary);
 }
 
 .text {
