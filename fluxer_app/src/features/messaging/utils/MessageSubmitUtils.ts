@@ -18,7 +18,7 @@ import type {
 
 // Fork imports.
 
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/subprofile/SubprofileSchemas';
+import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 interface MessageSubmitData {
 	content: string;
