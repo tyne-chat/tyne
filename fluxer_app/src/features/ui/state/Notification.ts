@@ -305,7 +305,7 @@ class NotificationState {
 			throw new Error('Notification: i18n not initialized');
 		}
 		const i18n = this.i18n;
-		const {message, user, channel} = data;
+		const {message, messageRecord, user, channel} = data;
 		if (channel.isPrivate()) {
 			NotificationUtils.playDirectMessageNotificationSoundIfEnabled();
 		} else {
@@ -315,13 +315,15 @@ class NotificationState {
 			return;
 		}
 		const useMacOSNotificationPresentation = NotificationUtils.isMacOSDesktopNotification();
-		let title = NicknameUtils.getNickname(user, channel.guildId, channel.id);
+		const persona = messageRecord.subprofile;
+		const authorName = persona?.name || NicknameUtils.getNickname(user, channel.guildId, channel.id);
+		let title = authorName;
 		let subtitle: string | undefined;
 		switch (channel.type) {
 			case ChannelTypes.GUILD_TEXT:
 			case ChannelTypes.GUILD_ANNOUNCEMENT:
 			case ChannelTypes.GUILD_VOICE:
-				if (message.type === MessageTypes.DEFAULT) {
+				if (message.type === MessageTypes.DEFAULT || message.type === MessageTypes.REPLY) {
 					if (useMacOSNotificationPresentation) {
 						const guild = channel.guildId ? Guilds.getGuild(channel.guildId) : null;
 						const channelPrefix = channel.type === ChannelTypes.GUILD_VOICE ? '' : '#';
@@ -382,7 +384,7 @@ class NotificationState {
 				title,
 				subtitle,
 				body,
-				icon: getNotificationIconURL(user, channel.guildId),
+				icon: getNotificationIconURL(user, channel.guildId, persona?.avatar),
 				url: notificationUrl,
 				playSound: false,
 				accountKey: Accounts.currentAccountKey,
