@@ -282,6 +282,7 @@ export const LexicalChannelTextareaContent = observer(
 		const showMemesButton = Accessibility.showMemesButton;
 		const showStickersButton = Accessibility.showStickersButton;
 		const showEmojiButton = Accessibility.showEmojiButton;
+		const showSubprofilesButton = Accessibility.showSubprofilesButton;
 		const showMessageSendButton = Accessibility.showMessageSendButton;
 		const desktopComposerActionCount = [
 			showAllButtons && showGifButton,
@@ -1377,10 +1378,12 @@ export const LexicalChannelTextareaContent = observer(
 										ref={plusButtonRef}
 										data-flx="channel.lexical-channel-textarea-content.plus-button-above-backdrop.clear-slash-command"
 									/>
-									<SubprofileComposerPill
-										channelId={channel.id}
-										data-flx="channel.lexical-channel-textarea-content.subprofile-composer-pill"
-									/>
+									{showSubprofilesButton && (
+										<SubprofileComposerPill
+											channelId={channel.id}
+											data-flx="channel.lexical-channel-textarea-content.subprofile-composer-pill"
+										/>
+									)}
 								</flx-channel-textarea-upload-column>
 							)}
 							<flx-channel-textarea-content
