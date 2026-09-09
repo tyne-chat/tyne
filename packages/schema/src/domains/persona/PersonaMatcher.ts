@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-export interface ProxyTagLike {
+export interface PersonaTagLike {
 	prefix?: string | null;
 	suffix?: string | null;
 }
@@ -9,11 +9,11 @@ export interface PersonaLike {
 	id: string;
 	name: string;
 	avatar_url?: string | null;
-	proxy_tags?: ReadonlyArray<ProxyTagLike> | null;
+	persona_tags?: ReadonlyArray<PersonaTagLike> | null;
 	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
-	auto_proxy_disabled?: boolean | null;
+	auto_tag_disabled?: boolean | null;
 	bio?: string | null;
 }
 
@@ -25,16 +25,16 @@ export interface MatchResult {
 	clearedLatch?: boolean;
 }
 
-export function matchProxy(
+export function matchPersona(
 	text: string,
 	personas: ReadonlyArray<PersonaLike>,
 	activeLatchedPersonaId?: string | null,
 ): MatchResult {
 	const latchedPersona = activeLatchedPersonaId
-		? personas.find((p) => p.id === activeLatchedPersonaId && !p.auto_proxy_disabled)
+		? personas.find((p) => p.id === activeLatchedPersonaId && !p.auto_tag_disabled)
 		: undefined;
 
-	// Only process escape slashes and unlatch commands if a subprofile is currently latched
+	// Only process escape slashes and unlatch commands if a persona is currently latched
 	if (latchedPersona) {
 		// Check unlatch trigger: "\\" clears active latch
 		if (text.trim() === '\\\\') {
@@ -82,10 +82,11 @@ export function matchProxy(
 	const candidates: Array<CandidateMatch> = [];
 
 	for (const persona of personas) {
-		if (persona.auto_proxy_disabled) continue;
-		if (!persona.proxy_tags || persona.proxy_tags.length === 0) continue;
+		if (persona.auto_tag_disabled) continue;
+		const tags = persona.persona_tags;
+		if (!tags || tags.length === 0) continue;
 
-		for (const tag of persona.proxy_tags) {
+		for (const tag of tags) {
 			const prefix = tag.prefix ?? '';
 			const suffix = tag.suffix ?? '';
 			if (!prefix && !suffix) continue;
@@ -134,3 +135,5 @@ export function matchProxy(
 		strippedContent: text,
 	};
 }
+
+export const matchPersonaTags = matchPersona;
