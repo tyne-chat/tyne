@@ -340,6 +340,7 @@
 
 .messageSubprofileMainAvatar {
 	margin-bottom: 2px;
+	margin-inline-start: var(--message-compact-gap);
 }
 
 .messageNoText .messageAvatar,
