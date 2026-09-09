@@ -22,10 +22,6 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type CSSProperties, useCallback} from 'react';
 
-// Fork imports.
-
-import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
-
 const ORIGINAL_MESSAGE_WAS_DELETED_DESCRIPTOR = msg({
 	message: 'Original message was deleted',
 	comment: 'Label in the channel and chat reply preview. Keep the tone plain and specific.',
@@ -168,10 +164,7 @@ export const ReplyPreview = observer(
 		}
 		const repliedName =
 			referencedMessage.subprofile?.name || NicknameUtils.getNickname(referencedMessage.author, resolvedGuildId);
-		const repliedColor =
-			(referencedMessage.subprofile?.color != null
-				? ColorUtils.int2rgb(referencedMessage.subprofile.color)
-				: undefined) ?? GuildMembers.getMember(resolvedGuildId ?? '', referencedMessage.author.id)?.getColorString();
+		const repliedColor = GuildMembers.getMember(resolvedGuildId ?? '', referencedMessage.author.id)?.getColorString();
 
 		return (
 			<div
