@@ -54,6 +54,10 @@ import {TEXT_THREAD_PARENT_CHANNEL_TYPES} from '@fluxer/constants/src/ThreadCons
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
+
 const ARE_YOU_SURE_YOU_WANT_TO_UNPIN_THIS_DESCRIPTOR = msg({
 	message: 'Unpin this message?',
 	comment: 'Body of the confirmation alert shown when unpinning a message.',
@@ -317,6 +321,7 @@ export interface MessageActionHandlers {
 	handleReply: (event?: React.MouseEvent | React.KeyboardEvent) => void;
 	handlePinMessage: (event?: React.MouseEvent | React.KeyboardEvent) => void;
 	handleEditMessage: () => void;
+	handleChangePersona: () => void;
 	handleRetryMessage: () => void;
 	handleFailedMessageDelete: () => void;
 	handleForward: () => void;
@@ -391,6 +396,10 @@ export function createMessageActionHandlers(
 		startMessageEdit(message);
 		onClose?.();
 	};
+	const handleChangePersona = () => {
+		MessageChangePersona.startChangePersona(message.channelId, message.id);
+		onClose?.();
+	};
 	const handleRetryMessage = () => {
 		retryFailedMessage(message);
 		onClose?.();
@@ -435,6 +444,7 @@ export function createMessageActionHandlers(
 		handleReply,
 		handlePinMessage,
 		handleEditMessage,
+		handleChangePersona,
 		handleRetryMessage,
 		handleFailedMessageDelete,
 		handleForward,
