@@ -17,12 +17,12 @@
 .sectionTitle {
 	font-size: 1rem;
 	font-weight: 600;
-	color: var(--text-primary, #f2f3f5);
+	color: var(--text-primary);
 }
 
 .sectionDescription {
 	font-size: 0.875rem;
-	color: var(--text-primary-muted, #949ba4);
+	color: var(--text-primary-muted);
 	margin-top: 4px;
 	margin-bottom: 8px;
 	line-height: 1.4;
@@ -37,9 +37,9 @@
 
 .modeHelperText {
 	font-size: 0.8125rem;
-	color: var(--text-primary, #dbdee1);
-	background-color: var(--background-primary, #1e1f22);
-	border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+	color: var(--text-primary);
+	background-color: var(--bg-primary);
+	border: 1px solid var(--border-color);
 	border-radius: var(--radius-md, 6px);
 	padding: 10px 14px;
 	line-height: 1.45;
@@ -52,7 +52,7 @@
 .modeHelperIcon {
 	flex-shrink: 0;
 	margin-top: 2px;
-	color: var(--brand-primary, #5865f2);
+	color: var(--brand-primary);
 }
 
 .cardList {
@@ -65,18 +65,18 @@
 	display: flex;
 	align-items: center;
 	padding: 12px 16px;
-	background-color: var(--background-secondary-alt, #1e1f22);
+	background-color: var(--bg-secondary);
 	border-radius: var(--radius-lg, 8px);
 	gap: 14px;
 	transition: background-color 0.15s ease;
 }
 
 .personaCard:hover {
-	background-color: var(--background-modifier-hover, #232428);
+	background-color: var(--bg-hover);
 }
 
 .personaCard.activeCard {
-	border-color: var(--brand-primary, #5865f2);
+	border-color: var(--brand-primary);
 }
 
 .cardDetails {
@@ -97,14 +97,14 @@
 .cardName {
 	font-size: 0.9375rem;
 	font-weight: 600;
-	color: var(--text-primary, #f2f3f5);
+	color: var(--text-primary);
 }
 
 .cardSystemTag {
 	font-size: 0.6875rem;
 	font-weight: 600;
-	background-color: var(--background-tertiary, #111214);
-	color: var(--text-primary-muted, #949ba4);
+	background-color: var(--bg-tertiary);
+	color: var(--text-primary-muted);
 	padding: 2px 6px;
 	border-radius: 4px;
 	text-transform: uppercase;
@@ -112,7 +112,7 @@
 
 .cardPronouns {
 	font-size: 0.8125rem;
-	color: var(--text-primary-muted, #949ba4);
+	color: var(--text-primary-muted);
 }
 
 .cardSecondaryRow {
@@ -125,16 +125,16 @@
 .tagPill {
 	font-size: 0.75rem;
 	font-family: monospace;
-	background-color: var(--background-tertiary, #111214);
-	color: var(--text-primary, #dbdee1);
+	background-color: var(--bg-tertiary);
+	color: var(--text-primary);
 	padding: 2px 6px;
 	border-radius: 4px;
-	border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+	border: 1px solid var(--border-color);
 }
 
 .cardBio {
 	font-size: 0.8125rem;
-	color: var(--text-primary-muted, #949ba4);
+	color: var(--text-primary-muted);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -158,8 +158,8 @@
 	font-weight: 500;
 	cursor: pointer;
 	border: none;
-	background-color: var(--background-tertiary, #111214);
-	color: var(--text-primary, #f2f3f5);
+	background-color: var(--bg-tertiary);
+	color: var(--text-primary);
 	transition:
 		background-color 0.15s ease,
 		color 0.15s ease;
@@ -167,20 +167,20 @@
 }
 
 .actionButton:hover {
-	background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.12));
+	background-color: var(--bg-hover);
 }
 
 .deleteButton {
-	color: var(--status-danger, #fa777c);
+	color: var(--accent-danger);
 }
 
 .deleteButton:hover {
-	background-color: var(--status-danger-background, rgba(250, 119, 124, 0.15));
+	background-color: color-mix(in srgb, var(--accent-danger) 15%, transparent);
 }
 
 .editorCard {
-	background-color: var(--background-secondary, #1e1f22);
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+	background-color: var(--bg-secondary);
+	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg, 8px);
 	padding: 20px;
 	display: flex;
@@ -192,7 +192,7 @@
 .editorTitle {
 	font-size: 1.125rem;
 	font-weight: 600;
-	color: var(--text-primary, #f2f3f5);
+	color: var(--text-primary);
 }
 
 .formGrid {
@@ -211,23 +211,23 @@
 	font-size: 0.75rem;
 	font-weight: 700;
 	text-transform: uppercase;
-	color: var(--text-primary-muted, #949ba4);
+	color: var(--text-primary-muted);
 	letter-spacing: 0.04em;
 }
 
 .textInput {
-	background-color: var(--background-tertiary, #111214);
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+	background-color: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
 	border-radius: 4px;
 	padding: 8px 10px;
 	font-size: 0.875rem;
-	color: var(--text-primary, #f2f3f5);
+	color: var(--text-primary);
 	outline: none;
 	font-family: inherit;
 }
 
 .textInput:focus {
-	border-color: var(--brand-primary, #5865f2);
+	border-color: var(--brand-primary);
 }
 
 .tagRow {
@@ -239,13 +239,13 @@
 
 .tagInput {
 	flex: 1;
-	background-color: var(--background-tertiary, #111214);
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+	background-color: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
 	border-radius: 4px;
 	padding: 6px 8px;
 	font-size: 0.8125rem;
 	font-family: monospace;
-	color: var(--text-primary, #f2f3f5);
+	color: var(--text-primary);
 	outline: none;
 }
 
@@ -258,8 +258,8 @@
 }
 
 .primaryButton {
-	background-color: var(--brand-primary, #5865f2);
-	color: #ffffff;
+	background-color: var(--brand-primary);
+	color: var(--brand-primary-fill, #ffffff);
 	border: none;
 	border-radius: 4px;
 	padding: 8px 16px;
@@ -270,13 +270,13 @@
 }
 
 .primaryButton:hover {
-	background-color: var(--brand-primary-hover, #4752c4);
+	background-color: color-mix(in srgb, var(--brand-primary) 86%, black 14%);
 }
 
 .secondaryButton {
 	background-color: transparent;
-	color: var(--text-primary, #f2f3f5);
-	border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15));
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
 	border-radius: 4px;
 	padding: 8px 16px;
 	font-size: 0.875rem;
@@ -286,23 +286,23 @@
 }
 
 .secondaryButton:hover {
-	background-color: var(--background-modifier-hover, rgba(255, 255, 255, 0.08));
+	background-color: var(--bg-hover);
 }
 
 .colorPreview {
 	width: 24px;
 	height: 24px;
 	border-radius: 50%;
-	border: 2px solid var(--border-subtle, rgba(255, 255, 255, 0.2));
+	border: 2px solid var(--border-color);
 	flex-shrink: 0;
 }
 
 .emptyState {
 	text-align: center;
 	padding: 32px 16px;
-	background-color: var(--background-secondary, #1e1f22);
+	background-color: var(--bg-secondary);
 	border-radius: var(--radius-lg, 8px);
-	border: 1px dashed var(--border-subtle, rgba(255, 255, 255, 0.15));
-	color: var(--text-primary-muted, #949ba4);
+	border: 1px dashed var(--border-color);
+	color: var(--text-primary-muted);
 	font-size: 0.875rem;
 }
