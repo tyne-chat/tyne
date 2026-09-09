@@ -612,7 +612,7 @@ export interface AccessibilitySettings {
 	showMemesButton: boolean;
 	showStickersButton: boolean;
 	showEmojiButton: boolean;
-	showSubprofilesButton: boolean;
+	showPersonasButton: boolean;
 	showMediaFavoriteButton: boolean;
 	showMediaDownloadButton: boolean;
 	showMediaDeleteButton: boolean;
@@ -718,7 +718,7 @@ class Accessibility {
 	showMemesButton = true;
 	showStickersButton = true;
 	showEmojiButton = true;
-	showSubprofilesButton = true;
+	showPersonasButton = true;
 	showMediaFavoriteButton = true;
 	showMediaDownloadButton = true;
 	showMediaDeleteButton = true;
@@ -827,7 +827,7 @@ class Accessibility {
 				'showMemesButton',
 				'showStickersButton',
 				'showEmojiButton',
-				'showSubprofilesButton',
+				'showPersonasButton',
 				'showMediaFavoriteButton',
 				'showMediaDownloadButton',
 				'showMediaDeleteButton',
@@ -887,7 +887,7 @@ class Accessibility {
 				showMemesButton: s.showMemesButton,
 				showStickersButton: s.showStickersButton,
 				showEmojiButton: s.showEmojiButton,
-				showSubprofilesButton: s.showSubprofilesButton,
+				showPersonasButton: s.showPersonasButton,
 				showMediaFavoriteButton: s.showMediaFavoriteButton,
 				showMediaDownloadButton: s.showMediaDownloadButton,
 				showMediaDeleteButton: s.showMediaDeleteButton,
@@ -965,7 +965,7 @@ class Accessibility {
 				if (m.showMemesButton !== undefined) s.showMemesButton = m.showMemesButton;
 				if (m.showStickersButton !== undefined) s.showStickersButton = m.showStickersButton;
 				if (m.showEmojiButton !== undefined) s.showEmojiButton = m.showEmojiButton;
-				if (m.showSubprofilesButton !== undefined) s.showSubprofilesButton = m.showSubprofilesButton;
+				if (m.showPersonasButton !== undefined) s.showPersonasButton = m.showPersonasButton;
 				if (m.showMediaFavoriteButton !== undefined) s.showMediaFavoriteButton = m.showMediaFavoriteButton;
 				if (m.showMediaDownloadButton !== undefined) s.showMediaDownloadButton = m.showMediaDownloadButton;
 				if (m.showMediaDeleteButton !== undefined) s.showMediaDeleteButton = m.showMediaDeleteButton;
@@ -1284,7 +1284,7 @@ class Accessibility {
 		if (validated.showMemesButton !== undefined) this.showMemesButton = validated.showMemesButton;
 		if (validated.showStickersButton !== undefined) this.showStickersButton = validated.showStickersButton;
 		if (validated.showEmojiButton !== undefined) this.showEmojiButton = validated.showEmojiButton;
-		if (validated.showSubprofilesButton !== undefined) this.showSubprofilesButton = validated.showSubprofilesButton;
+		if (validated.showPersonasButton !== undefined) this.showPersonasButton = validated.showPersonasButton;
 		if (validated.showMediaFavoriteButton !== undefined)
 			this.showMediaFavoriteButton = validated.showMediaFavoriteButton;
 		if (validated.showMediaDownloadButton !== undefined)
@@ -1405,7 +1405,7 @@ class Accessibility {
 			showMemesButton: data.showMemesButton ?? this.showMemesButton,
 			showStickersButton: data.showStickersButton ?? this.showStickersButton,
 			showEmojiButton: data.showEmojiButton ?? this.showEmojiButton,
-			showSubprofilesButton: data.showSubprofilesButton ?? this.showSubprofilesButton,
+			showPersonasButton: data.showPersonasButton ?? this.showPersonasButton,
 			showMediaFavoriteButton: data.showMediaFavoriteButton ?? this.showMediaFavoriteButton,
 			showMediaDownloadButton: data.showMediaDownloadButton ?? this.showMediaDownloadButton,
 			showMediaDeleteButton: data.showMediaDeleteButton ?? this.showMediaDeleteButton,

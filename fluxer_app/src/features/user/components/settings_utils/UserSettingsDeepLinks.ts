@@ -41,7 +41,6 @@ const USER_SETTINGS_TAB_TYPES = new Set<UserSettingsTabType>([
 	'keybinds',
 	'linked_accounts',
 	'personas',
-	'subprofiles',
 ]);
 const SAFE_SETTINGS_PARAM_REGEX = /^[A-Za-z0-9_-]+$/;
 
