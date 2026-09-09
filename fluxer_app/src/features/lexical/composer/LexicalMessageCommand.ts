@@ -230,12 +230,11 @@ function resolveCommand(structure: CommandStructure): Exclude<CommandUtils.Parse
 		if (name === '/spoiler') return {type: 'spoiler', content};
 		return {type: 'tts', content};
 	}
-	if (name === '/subprofile' || name === '/persona') {
-		const slotName = name === '/persona' ? 'persona' : 'subprofile';
-		if (!hasOnlySlots(slots, [slotName])) return null;
-		const subprofile = readChoiceSlot(slots, slotName);
-		if (subprofile == null) return {type: 'subprofile', subprofile: ''};
-		return {type: 'subprofile', subprofile};
+	if (name === '/persona') {
+		if (!hasOnlySlots(slots, ['persona'])) return null;
+		const persona = readChoiceSlot(slots, 'persona');
+		if (persona == null) return {type: 'persona', persona: ''};
+		return {type: 'persona', persona};
 	}
 	return null;
 }
