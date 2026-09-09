@@ -50,7 +50,7 @@ const SHOW_MEDIA_BUTTON_DESCRIPTOR = msg({
 	message: 'Show media button',
 	comment: 'Plus menu submenu toggle that shows the saved media (memes) button next to the textarea.',
 });
-const SHOW_SUBPROFILES_BUTTON_DESCRIPTOR = msg({
+const SHOW_PERSONAS_BUTTON_DESCRIPTOR = msg({
 	message: 'Show personas button',
 	comment: 'Plus menu submenu toggle that shows the persona selector next to the textarea.',
 });
@@ -92,7 +92,7 @@ export const TextareaPlusMenu = observer(
 		const showMemesButton = Accessibility.showMemesButton;
 		const showStickersButton = Accessibility.showStickersButton;
 		const showEmojiButton = Accessibility.showEmojiButton;
-		const showSubprofilesButton = Accessibility.showSubprofilesButton;
+		const showPersonasButton = Accessibility.showPersonasButton;
 		const showMessageSendButton = Accessibility.showMessageSendButton;
 		const canSendGift = useCanSendGift();
 		const hasTextContent = textareaValue && textareaValue.trim().length > 0;
@@ -209,12 +209,12 @@ export const TextareaPlusMenu = observer(
 									{i18n._(SHOW_EMOJI_BUTTON_DESCRIPTOR)}
 								</CheckboxItem>
 								<CheckboxItem
-									checked={showSubprofilesButton}
-									onCheckedChange={(checked) => AccessibilityCommands.update({showSubprofilesButton: checked})}
+									checked={showPersonasButton}
+									onCheckedChange={(checked) => AccessibilityCommands.update({showPersonasButton: checked})}
 									closeOnChange={false}
 									data-flx="channel.textarea.textarea-plus-menu.checkbox-item--2"
 								>
-									{i18n._(SHOW_SUBPROFILES_BUTTON_DESCRIPTOR)}
+									{i18n._(SHOW_PERSONAS_BUTTON_DESCRIPTOR)}
 								</CheckboxItem>
 								<CheckboxItem
 									checked={showMessageSendButton}
