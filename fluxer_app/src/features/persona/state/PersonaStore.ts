@@ -212,7 +212,7 @@ export class PersonaStoreClass {
 		return {isCommand: false, handled: false};
 	}
 
-	matchOutgoingMessage(content: string): MatchResult {
+	matchOutgoingMessage(content: string, hasAttachments = false): MatchResult {
 		const personasLike = this.personas.map((p) => ({
 			id: p.id,
 			name: p.name,
@@ -229,7 +229,7 @@ export class PersonaStoreClass {
 		}));
 
 		const activeLatchedId = this.activePersona?.id ?? null;
-		const result = matchPersona(content, personasLike, activeLatchedId);
+		const result = matchPersona(content, personasLike, activeLatchedId, hasAttachments);
 
 		if (result.clearedLatch) {
 			void this.unlatch();
