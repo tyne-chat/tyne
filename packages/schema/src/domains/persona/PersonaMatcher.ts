@@ -29,6 +29,7 @@ export function matchPersona(
 	text: string,
 	personas: ReadonlyArray<PersonaLike>,
 	activeLatchedPersonaId?: string | null,
+	hasAttachments?: boolean,
 ): MatchResult {
 	const latchedPersona = activeLatchedPersonaId
 		? personas.find((p) => p.id === activeLatchedPersonaId && !p.auto_tag_disabled)
@@ -104,7 +105,47 @@ export function matchPersona(
 							totalLen: prefix.length + suffix.length,
 							innerContent: inner,
 						});
+					} else if (hasAttachments) {
+						candidates.push({
+							persona,
+							prefixLen: prefix.length,
+							suffixLen: suffix.length,
+							totalLen: prefix.length + suffix.length,
+							innerContent: '',
+						});
 					}
+				} else if (innerEnd === innerStart && hasAttachments) {
+					candidates.push({
+						persona,
+						prefixLen: prefix.length,
+						suffixLen: suffix.length,
+						totalLen: prefix.length + suffix.length,
+						innerContent: '',
+					});
+				}
+			} else if (hasAttachments && prefix.length > 0 && text.startsWith(prefix)) {
+				// When attachments are present, allow matching just the persona's prefix (with no other text)
+				const remainder = text.slice(prefix.length).trim();
+				if (remainder.length === 0) {
+					candidates.push({
+						persona,
+						prefixLen: prefix.length,
+						suffixLen: 0,
+						totalLen: prefix.length,
+						innerContent: '',
+					});
+				}
+			} else if (hasAttachments && suffix.length > 0 && text.endsWith(suffix)) {
+				// When attachments are present, allow matching just the persona's suffix (with no other text)
+				const remainder = text.slice(0, text.length - suffix.length).trim();
+				if (remainder.length === 0) {
+					candidates.push({
+						persona,
+						prefixLen: 0,
+						suffixLen: suffix.length,
+						totalLen: suffix.length,
+						innerContent: '',
+					});
 				}
 			}
 		}
