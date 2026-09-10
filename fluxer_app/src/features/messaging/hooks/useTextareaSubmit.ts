@@ -615,7 +615,7 @@ export const useTextareaSubmit = ({
 						return;
 					}
 					if (!(await checkMentionConfirmation(transformedContent, actualContent))) {
-						sendWithPendingSticker(transformedContent, false);
+						sendWithPendingSticker(transformedContent, uploadAttachmentsLength > 0);
 						return;
 					}
 				} else if (parsedCommand.type === 'tts') {
@@ -624,7 +624,7 @@ export const useTextareaSubmit = ({
 						return;
 					}
 					if (!(await checkMentionConfirmation(ttsContent, actualContent, true))) {
-						sendWithPendingSticker(ttsContent, false, true);
+						sendWithPendingSticker(ttsContent, uploadAttachmentsLength > 0, true);
 						return;
 					}
 				} else {
@@ -659,7 +659,7 @@ export const useTextareaSubmit = ({
 			return;
 		}
 		if (!(await checkMentionConfirmation(resolvedContent, actualContent))) {
-			sendWithPendingSticker(resolvedContent, false);
+			sendWithPendingSticker(resolvedContent, uploadAttachmentsLength > 0);
 		}
 	}, [
 		draftOwner,
