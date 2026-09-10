@@ -436,12 +436,13 @@ export const LexicalChannelTextareaContent = observer(
 			const pendingSticker = ChannelSticker.getPendingSticker(channel.id);
 			const stickerItems = pendingSticker ? [pendingSticker.toJSON()] : undefined;
 			let didSend = false;
+			const hasAttachments = uploadAttachments.length > 0;
 			if (pending.tts) {
-				didSend = handleSendMessageRef.current(pending.content, false, true, stickerItems);
+				didSend = handleSendMessageRef.current(pending.content, hasAttachments, true, stickerItems);
 			} else if (stickerItems) {
-				didSend = handleSendMessageRef.current(pending.content, false, stickerItems);
+				didSend = handleSendMessageRef.current(pending.content, hasAttachments, stickerItems);
 			} else {
-				didSend = handleSendMessageRef.current(pending.content, false);
+				didSend = handleSendMessageRef.current(pending.content, hasAttachments);
 			}
 			if (!didSend) return;
 			sendMentionConfirmationEvent({type: 'mentionConfirmation.confirmed'});
