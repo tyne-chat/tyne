@@ -77,6 +77,49 @@ describe('PersonaMatcher', () => {
 		expect(result2.matched).toBe(false);
 	});
 
+	it('matches just the persona prefix when hasAttachments is true', () => {
+		// Just prefix of Alice ('[')
+		const res1 = matchPersona('[', personas, null, true);
+		expect(res1.matched).toBe(true);
+		expect(res1.persona?.name).toBe('Alice');
+		expect(res1.strippedContent).toBe('');
+
+		// Just prefix of Alice with trailing space ('[ ')
+		const res2 = matchPersona('[ ', personas, null, true);
+		expect(res2.matched).toBe(true);
+		expect(res2.persona?.name).toBe('Alice');
+		expect(res2.strippedContent).toBe('');
+
+		// Just prefix-only tag of Bob ('B:')
+		const res3 = matchPersona('B:', personas, null, true);
+		expect(res3.matched).toBe(true);
+		expect(res3.persona?.name).toBe('Bob');
+		expect(res3.strippedContent).toBe('');
+
+		// Prefix-only tag of Bob with space ('B: ')
+		const res4 = matchPersona('B: ', personas, null, true);
+		expect(res4.matched).toBe(true);
+		expect(res4.persona?.name).toBe('Bob');
+		expect(res4.strippedContent).toBe('');
+
+		// Prefix and suffix with empty inner content ('[]') with attachments
+		const res5 = matchPersona('[]', personas, null, true);
+		expect(res5.matched).toBe(true);
+		expect(res5.persona?.name).toBe('Alice');
+		expect(res5.strippedContent).toBe('');
+
+		// Prefix and suffix with whitespace inner content ('[   ]') with attachments
+		const res6 = matchPersona('[   ]', personas, null, true);
+		expect(res6.matched).toBe(true);
+		expect(res6.persona?.name).toBe('Alice');
+		expect(res6.strippedContent).toBe('');
+
+		// But when hasAttachments is false, prefix-only or empty content does NOT match
+		expect(matchPersona('[', personas, null, false).matched).toBe(false);
+		expect(matchPersona('B:', personas, null, false).matched).toBe(false);
+		expect(matchPersona('[]', personas, null, false).matched).toBe(false);
+	});
+
 	it('escapes persona tag matching when prefixed with backslash \\ while a persona is latched', () => {
 		const result = matchPersona('\\[Hello world!]', personas, 'alice-id');
 		expect(result.matched).toBe(false);
