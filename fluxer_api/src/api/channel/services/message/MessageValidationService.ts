@@ -48,15 +48,32 @@ export class MessageValidationService {
 			isUpdate?: boolean;
 			guildFeatures?: Iterable<string> | null;
 			messageAuthorType?: 'webhook';
+			existingMessage?: Message;
 		},
 	): void {
 		const isUpdate = options?.isUpdate ?? false;
+		const existingMessage = options?.existingMessage;
 		const hasContent = data.content != null && hasVisibleContent(data.content);
 		const hasEmbeds = Boolean(data.embeds && data.embeds.length > 0);
 		const hasAttachments = Boolean(data.attachments && data.attachments.length > 0);
 		const hasFavoriteMeme = Boolean('favorite_meme_id' in data && data.favorite_meme_id != null);
 		const hasStickers = Boolean('sticker_ids' in data && data.sticker_ids != null && data.sticker_ids.length > 0);
 		const hasFlags = data.flags !== undefined && data.flags !== null;
+		const hasSubprofile = 'subprofile' in data && data.subprofile !== undefined;
+
+		const effectiveHasContent =
+			isUpdate && existingMessage && data.content === undefined
+				? existingMessage.content != null && hasVisibleContent(existingMessage.content)
+				: hasContent;
+		const effectiveHasAttachments =
+			isUpdate && existingMessage && data.attachments === undefined
+				? Boolean(existingMessage.attachments && existingMessage.attachments.length > 0)
+				: hasAttachments;
+		const effectiveHasEmbeds =
+			isUpdate && existingMessage && data.embeds === undefined
+				? Boolean(existingMessage.embeds && existingMessage.embeds.length > 0)
+				: hasEmbeds;
+
 		const guildFeatures = options?.guildFeatures ?? null;
 		const hasVoiceMessageFlag = !!(data.flags && data.flags & MessageFlags.VOICE_MESSAGE);
 		if (hasVoiceMessageFlag) {
@@ -70,7 +87,14 @@ export class MessageValidationService {
 				guildFeatures,
 			);
 		}
-		if (!hasContent && !hasEmbeds && !hasAttachments && !hasFavoriteMeme && !hasStickers && (!isUpdate || !hasFlags)) {
+		if (
+			!effectiveHasContent &&
+			!effectiveHasEmbeds &&
+			!effectiveHasAttachments &&
+			!hasFavoriteMeme &&
+			!hasStickers &&
+			(!isUpdate || (!hasFlags && !hasSubprofile))
+		) {
 			throw new CannotSendEmptyMessageError();
 		}
 		this.validateContentLength(data.content, user, guildFeatures, options?.messageAuthorType);
