@@ -119,9 +119,10 @@ export const useMessageSubmission = ({
 				return true;
 			}
 
-			const matchResult = PersonaStore.matchOutgoingMessage(content);
+			const hasPendingAttachments = hasAttachments || CloudUpload.getTextareaAttachments(channel.id).length > 0;
+			const matchResult = PersonaStore.matchOutgoingMessage(content, hasPendingAttachments);
 			const finalContent = matchResult.matched || matchResult.wasEscaped ? matchResult.strippedContent : content;
-			if (finalContent.length === 0 && !hasAttachments && !favoriteMemeIdOrStickers) {
+			if (finalContent.length === 0 && !hasPendingAttachments && !favoriteMemeIdOrStickers) {
 				RollingTypingSender.stopTyping(channel.id);
 				DraftCommands.deleteDraft(channel.id);
 				return true;
