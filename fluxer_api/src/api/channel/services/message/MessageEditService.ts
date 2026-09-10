@@ -115,6 +115,7 @@ export class MessageEditService {
 		this.deps.validationService.validateMessageContent(data, user, {
 			isUpdate: true,
 			guildFeatures: guild?.features ?? null,
+			existingMessage: message,
 		});
 		this.deps.embedAttachmentResolver.validateAttachmentReferences({
 			embeds: data.embeds,
