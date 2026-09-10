@@ -226,7 +226,10 @@ describe('PersonaStore', () => {
 	it('correctly handles message editing with matchEditMessage', async () => {
 		const alice = await store.addPersona({
 			name: 'Alice',
-			persona_tags: [{prefix: '[', suffix: ']'}],
+			persona_tags: [
+				{prefix: '[', suffix: ']'},
+				{prefix: 'A:', suffix: ''},
+			],
 		});
 		const bob = await store.addPersona({
 			name: 'Bob',
@@ -264,6 +267,64 @@ describe('PersonaStore', () => {
 		const res5 = store.matchEditMessage('Plain root edit', null);
 		expect(res5.finalContent).toBe('Plain root edit');
 		expect(res5.subprofile).toBeUndefined();
+
+		// 6. Attachment-only message edited with prefix only (e.g. 'B:') -> sets Bob, empty content
+		const res6 = store.matchEditMessage('B:', null, {hasAttachments: true, originalContent: ''});
+		expect(res6.finalContent).toBe('');
+		expect(res6.subprofile?.id).toBe(bob.id);
+		expect(res6.subprofile?.name).toBe('Bob');
+
+		// 7. Text message edited with prefix only (e.g. 'B:') -> reproxies to Bob, preserves original text
+		const res7 = store.matchEditMessage('B:', currentAliceSubprofile, {
+			hasAttachments: false,
+			originalContent: 'Original message text',
+		});
+		expect(res7.finalContent).toBe('Original message text');
+		expect(res7.subprofile?.id).toBe(bob.id);
+		expect(res7.subprofile?.name).toBe('Bob');
+
+		// 8. Text message edited with escape backslash only -> unproxies, preserves original text
+		const res8 = store.matchEditMessage('\\', currentAliceSubprofile, {
+			hasAttachments: false,
+			originalContent: 'Original message text',
+		});
+		expect(res8.finalContent).toBe('Original message text');
+		expect(res8.subprofile).toBeNull();
+
+		// 9. Attachment-only message currently Alice edited to Bob with 'B:' -> sets Bob, empty content
+		const res9 = store.matchEditMessage('B:', currentAliceSubprofile, {
+			hasAttachments: true,
+			originalContent: '',
+		});
+		expect(res9.finalContent).toBe('');
+		expect(res9.subprofile?.id).toBe(bob.id);
+		expect(res9.subprofile?.name).toBe('Bob');
+
+		// 10. Attachment-only message where content was bugged 'A:' edited to Bob with 'B:' -> strips bugged prefix, sets Bob
+		const res10 = store.matchEditMessage('B:', currentAliceSubprofile, {
+			hasAttachments: true,
+			originalContent: 'A:',
+		});
+		expect(res10.finalContent).toBe('');
+		expect(res10.subprofile?.id).toBe(bob.id);
+		expect(res10.subprofile?.name).toBe('Bob');
+
+		// 11. Attachment-only message currently Alice edited with escape backslash only -> unproxies, empty content
+		const res11 = store.matchEditMessage('\\', currentAliceSubprofile, {
+			hasAttachments: true,
+			originalContent: '',
+		});
+		expect(res11.finalContent).toBe('');
+		expect(res11.subprofile).toBeNull();
+
+		// 12. Captioned attachment message edited to Bob with 'B:' -> sets Bob, preserves caption
+		const res12 = store.matchEditMessage('B:', currentAliceSubprofile, {
+			hasAttachments: true,
+			originalContent: 'Look at my dog',
+		});
+		expect(res12.finalContent).toBe('Look at my dog');
+		expect(res12.subprofile?.id).toBe(bob.id);
+		expect(res12.subprofile?.name).toBe('Bob');
 	});
 
 	it('replaces all personas and unlatches if previous active was removed', async () => {
