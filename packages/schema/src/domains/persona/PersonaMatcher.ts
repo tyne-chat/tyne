@@ -123,9 +123,9 @@ export function matchPersona(
 						innerContent: '',
 					});
 				}
-			} else if (hasAttachments && prefix.length > 0 && text.startsWith(prefix)) {
+			} else if (hasAttachments && prefix.length > 0 && (text.startsWith(prefix) || text.trim() === prefix.trim())) {
 				// When attachments are present, allow matching just the persona's prefix (with no other text)
-				const remainder = text.slice(prefix.length).trim();
+				const remainder = text.startsWith(prefix) ? text.slice(prefix.length).trim() : '';
 				if (remainder.length === 0) {
 					candidates.push({
 						persona,
@@ -135,9 +135,9 @@ export function matchPersona(
 						innerContent: '',
 					});
 				}
-			} else if (hasAttachments && suffix.length > 0 && text.endsWith(suffix)) {
+			} else if (hasAttachments && suffix.length > 0 && (text.endsWith(suffix) || text.trim() === suffix.trim())) {
 				// When attachments are present, allow matching just the persona's suffix (with no other text)
-				const remainder = text.slice(0, text.length - suffix.length).trim();
+				const remainder = text.endsWith(suffix) ? text.slice(0, text.length - suffix.length).trim() : '';
 				if (remainder.length === 0) {
 					candidates.push({
 						persona,
