@@ -543,14 +543,17 @@ export const useTextareaSubmit = ({
 			}
 			MessageCommands.confirmPublishedMessageEdit(i18n, editingMessage, () => {
 				finishMobileEdit();
-				const editMatch = PersonaStore.matchEditMessage(resolvedContent, editingMessage.subprofile);
+				const editMatch = PersonaStore.matchEditMessage(resolvedContent, editingMessage.subprofile, {
+					hasAttachments: canSubmitEmptyMessageEdit(editingMessage),
+					originalContent: editingMessage.content,
+				});
 				void MessageCommands.edit(
 					channelId,
 					editingMessage.id,
 					editMatch.finalContent,
 					undefined,
 					editingMessage._allowedMentions,
-					undefined,
+					canSubmitEmptyMessageEdit(editingMessage) ? buildExistingAttachmentEditReferences(editingMessage) : undefined,
 					editMatch.subprofile,
 				);
 			});
@@ -565,14 +568,17 @@ export const useTextareaSubmit = ({
 				const newContent = ReplaceCommandUtils.executeReplaceCommand(lastMessage.content, replaceCommand);
 				if (newContent !== lastMessage.content) {
 					MessageCommands.confirmPublishedMessageEdit(i18n, lastMessage, () => {
-						const replaceEditMatch = PersonaStore.matchEditMessage(newContent, lastMessage.subprofile);
+						const replaceEditMatch = PersonaStore.matchEditMessage(newContent, lastMessage.subprofile, {
+							hasAttachments: canSubmitEmptyMessageEdit(lastMessage),
+							originalContent: lastMessage.content,
+						});
 						void MessageCommands.edit(
 							lastMessage.channelId,
 							lastMessage.id,
 							replaceEditMatch.finalContent,
 							undefined,
 							lastMessage._allowedMentions,
-							undefined,
+							canSubmitEmptyMessageEdit(lastMessage) ? buildExistingAttachmentEditReferences(lastMessage) : undefined,
 							replaceEditMatch.subprofile,
 						);
 					});
