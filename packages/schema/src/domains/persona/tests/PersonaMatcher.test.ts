@@ -114,6 +114,17 @@ describe('PersonaMatcher', () => {
 		expect(res6.persona?.name).toBe('Alice');
 		expect(res6.strippedContent).toBe('');
 
+		// Prefix-only tag of persona configured with trailing space (e.g. 'P: ')
+		const dave: PersonaLike = {
+			id: 'dave-id',
+			name: 'Dave',
+			persona_tags: [{prefix: 'D: ', suffix: ''}],
+		};
+		const resDave = matchPersona('D:', [dave], null, true);
+		expect(resDave.matched).toBe(true);
+		expect(resDave.persona?.name).toBe('Dave');
+		expect(resDave.strippedContent).toBe('');
+
 		// But when hasAttachments is false, prefix-only or empty content does NOT match
 		expect(matchPersona('[', personas, null, false).matched).toBe(false);
 		expect(matchPersona('B:', personas, null, false).matched).toBe(false);

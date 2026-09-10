@@ -247,10 +247,16 @@ export class PersonaStoreClass {
 	matchEditMessage(
 		content: string,
 		currentSubprofile?: MessageSubprofileResponse | null,
+		options?: {
+			hasAttachments?: boolean;
+			originalContent?: string;
+		},
 	): {
 		finalContent: string;
 		subprofile?: MessageSubprofileRequest | null;
 	} {
+		const originalContent = options?.originalContent;
+
 		const personasLike = this.personas.map((p) => ({
 			id: p.id,
 			name: p.name,
@@ -266,21 +272,44 @@ export class PersonaStoreClass {
 			})),
 		}));
 
-		// Pass currentSubprofile?.id as active persona so that leading backslash escape works
-		const result = matchPersona(content, personasLike, currentSubprofile?.id ?? null);
+		const isJustPersonaTag = (text?: string | null): boolean => {
+			const trimmed = (text ?? '').trim();
+			if (!trimmed) return false;
+			const res = matchPersona(trimmed, personasLike, null, true);
+			return res.matched && res.strippedContent.length === 0;
+		};
+
+		const hasRealOriginalText = Boolean(
+			originalContent && originalContent.trim().length > 0 && !isJustPersonaTag(originalContent),
+		);
 
 		// If user typed \ or \\ to explicitly clear active persona / escape
-		if (result.wasEscaped && currentSubprofile) {
+		if (content.startsWith('\\') && currentSubprofile) {
+			let strippedContent = '';
+			if (content.startsWith('\\\\')) {
+				const rawRest = content.slice(2);
+				strippedContent = rawRest.startsWith(' ') ? rawRest.slice(1) : rawRest;
+			} else {
+				const rawRest = content.slice(1);
+				strippedContent = rawRest.startsWith(' ') ? rawRest.slice(1) : rawRest;
+			}
+			const finalContent =
+				strippedContent.length > 0 ? strippedContent : hasRealOriginalText ? (originalContent ?? '') : '';
 			return {
-				finalContent: result.strippedContent,
+				finalContent,
 				subprofile: null,
 			};
 		}
 
+		// In edit mode, check explicit persona tags. Pass activeLatchedPersonaId as null so it never falls back to latched persona.
+		const result = matchPersona(content, personasLike, null, true);
+
 		// If explicit persona tags matched a persona, adopt that persona
 		if (result.matched && result.persona) {
+			const finalContent =
+				result.strippedContent.length > 0 ? result.strippedContent : hasRealOriginalText ? (originalContent ?? '') : '';
 			return {
-				finalContent: result.strippedContent,
+				finalContent,
 				subprofile: {
 					id: result.persona.id,
 					name: result.persona.name,
