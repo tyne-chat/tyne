@@ -256,4 +256,16 @@ export const UserRateLimitConfigs = {
 		bucket: 'user:entrance_sound:mutate',
 		config: {limit: 20, windowMs: ms('1 minute')},
 	} as RouteRateLimitConfig,
+	USER_PERSONA_LIST: {
+		bucket: 'user:persona:list',
+		config: {limit: 60, windowMs: ms('10 seconds')},
+	} as RouteRateLimitConfig,
+	USER_PERSONA_READ: {
+		bucket: 'user:persona:read',
+		config: {limit: 100, windowMs: ms('10 seconds')},
+	} as RouteRateLimitConfig,
+	USER_PERSONA_MUTATE: {
+		bucket: 'user:persona:mutate',
+		config: {limit: 30, windowMs: ms('1 minute')},
+	} as RouteRateLimitConfig,
 } as const;

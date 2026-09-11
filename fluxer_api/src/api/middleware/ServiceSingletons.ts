@@ -104,6 +104,10 @@ import {NatsConnectionManager} from '@pkgs/nats/src/NatsConnectionManager';
 import {RateLimitService} from '@pkgs/rate_limit/src/RateLimitService';
 import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 
+// Fork imports.
+
+import {PersonaRepository} from '@app/api/persona/PersonaRepository';
+
 export const getUserRepository = singleton(() => new UserRepository(getKVClient()));
 export const getGuildRepository = singleton(() => new GuildRepository());
 export const getChannelRepository = singleton(() => new ChannelRepository());
@@ -111,6 +115,7 @@ export const getInviteRepository = singleton(() => new InviteRepository());
 export const getWebhookRepository = singleton(() => new WebhookRepository());
 export const getReadStateRepository = singleton(() => new ReadStateRepository());
 export const getFavoriteMemeRepository = singleton(() => new FavoriteMemeRepository());
+export const getPersonaRepository = singleton(() => new PersonaRepository());
 export const getConnectionRepository = singleton(() => new ConnectionRepository());
 export const getReportRepository = singleton(() => new ReportRepository());
 export const getEnforcementDecisionRepository = singleton(() => new EnforcementDecisionRepository());
