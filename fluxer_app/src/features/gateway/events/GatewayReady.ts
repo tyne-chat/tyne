@@ -58,6 +58,10 @@ import type {
 } from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 import {runInAction} from 'mobx';
 
+// Fork imports.
+
+import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
+
 const logger = new Logger('READY Handler');
 
 export interface ReadyPayload {
@@ -151,6 +155,9 @@ function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext,
 	Users.handleGatewayReady(accountKey, data.user);
 	Users.cacheUsers(data.users ?? []);
 	syncAccountUserData(accountKey, data.user);
+	void PersonaCommands.fetchPersonas().catch((error) => {
+		logger.warn('Failed to fetch personas after READY', error);
+	});
 	Authentication.handleGatewayReady({user: data.user});
 	Guilds.handleGatewayReady({guilds});
 	UserSettings.handleGatewayReady(data.user_settings);

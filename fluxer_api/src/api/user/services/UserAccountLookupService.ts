@@ -171,8 +171,15 @@ export class UserAccountLookupService {
 		return user2GuildIds.filter((id) => set.has(id.toString()));
 	}
 
-	private async validateProfileAccess(userId: UserID, targetId: UserID, targetUser: User): Promise<void> {
-		if (targetUser.isBot) {
+	async validateProfileAccess(userId: UserID, targetId: UserID, targetUser?: User | null): Promise<void> {
+		if (userId === targetId) {
+			return;
+		}
+		const resolvedTargetUser = targetUser ?? (await this.deps.userAccountRepository.findUnique(targetId));
+		if (!resolvedTargetUser) {
+			throw new UnknownUserError();
+		}
+		if (resolvedTargetUser.isBot) {
 			return;
 		}
 		const friendship = await this.deps.userAccountRepository.getRelationship(
