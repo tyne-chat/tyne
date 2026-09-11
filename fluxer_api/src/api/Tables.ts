@@ -349,6 +349,10 @@ import {ATTACHMENT_DECAY_COLUMNS, type AttachmentDecayRow} from '@app/api/types/
 import {GUILD_VISIT_TTL_SECONDS} from '@fluxer/constants/src/GuildVisitConstants';
 import {seconds} from 'itty-time';
 
+// Fork: used only by the fork's tables at the end of this file.
+
+import {PERSONA_COLUMNS, type PersonaRow} from '@app/api/database/types/PersonaTypes';
+
 export const Users = defineTable<UserRow, 'user_id'>({
 	name: 'users',
 	columns: USER_COLUMNS,
@@ -1504,4 +1508,12 @@ export const VoiceP2pConnectionReports = defineTable<VoiceP2pConnectionReportRow
 	columns: VOICE_P2P_CONNECTION_REPORT_COLUMNS,
 	primaryKey: ['user_id', 'report_id'],
 	defaultTtlSeconds: seconds('180 days'),
+});
+
+// Fork: this fork's tables. They are kept here, away from where upstream adds its own.
+export const Personas = defineTable<PersonaRow, 'user_id' | 'persona_id', 'user_id'>({
+	name: 'personas',
+	columns: PERSONA_COLUMNS,
+	primaryKey: ['user_id', 'persona_id'],
+	partitionKey: ['user_id'],
 });
