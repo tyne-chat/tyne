@@ -2,12 +2,7 @@
 
 import {createStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {z} from 'zod';
-
-export const PersonaTagSchema = z.object({
-	prefix: z.string().max(32).optional(),
-	suffix: z.string().max(32).optional(),
-});
-export type PersonaTag = z.infer<typeof PersonaTagSchema>;
+import {PersonaTagSchema} from './PersonaApiSchemas';
 
 export const PersonaSchema = z.object({
 	id: z.string().min(1).max(64),
@@ -32,7 +27,7 @@ export const MessageSubprofileRequestSchema = z.object({
 	system_name: z.string().max(100).nullish().describe('System name/tag'),
 	pronouns: z.string().max(100).nullish().describe('Pronouns'),
 	color: z.number().int().nullish().describe('Custom color integer'),
-	bio: z.string().max(4096).nullish().describe('Persona bio'),
+	bio: z.string().max(4096).nullish().optional().describe('Persona bio (deprecated on message)'),
 });
 export type MessageSubprofileRequest = z.infer<typeof MessageSubprofileRequestSchema>;
 
@@ -44,7 +39,7 @@ export const MessageSubprofileResponseSchema = z.object({
 	system_name: z.string().nullish().describe('System name/tag'),
 	pronouns: z.string().nullish().describe('Pronouns'),
 	color: z.number().int().nullish().describe('Custom color integer'),
-	bio: z.string().nullish().describe('Persona bio'),
+	bio: z.string().nullish().optional().describe('Persona bio (deprecated on message)'),
 });
 export type MessageSubprofileResponse = z.infer<typeof MessageSubprofileResponseSchema>;
 
@@ -53,3 +48,5 @@ export type MessagePersonaRequest = MessageSubprofileRequest;
 
 export const MessagePersonaResponseSchema = MessageSubprofileResponseSchema;
 export type MessagePersonaResponse = MessageSubprofileResponse;
+
+export * from './PersonaApiSchemas';
