@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import skeletonStyles from '@app/features/app/components/skeleton/Skeleton.module.css';
 import Authentication from '@app/features/auth/state/Authentication';
 import * as PrivateChannelCommands from '@app/features/channel/commands/PrivateChannelCommands';
 import type {GuildMember} from '@app/features/member/models/GuildMember';
 import GuildMembers from '@app/features/member/state/GuildMembers';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
+import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {getUserAccentColor} from '@app/features/theme/utils/AccentColorUtils';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
@@ -29,13 +32,14 @@ import {PROFILE_POPOUT_GEOMETRY_STYLE} from '@app/features/user/constants/UserPr
 import type {User} from '@app/features/user/models/User';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
+import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {Trans} from '@lingui/react/macro';
 import {CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useMemo, useRef} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import styles from './PersonaProfilePopout.module.css';
 
 export interface PersonaProfilePopoutProps {
@@ -51,6 +55,50 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 	({subprofile, user, guildId, guildMember, onClose}) => {
 		const popoutContainerRef = useRef<HTMLDivElement | null>(null);
 		const isCurrentUser = user.id === Authentication.currentUserId;
+		const localPersona = isCurrentUser ? (PersonaStore.personas.find((p) => p.id === subprofile.id) ?? null) : null;
+
+		const [publicPersona, setPublicPersona] = useState<PublicPersonaResponse | null>(null);
+		const [isLoading, setIsLoading] = useState<boolean>(!localPersona);
+
+		useEffect(() => {
+			if (localPersona) {
+				setPublicPersona({
+					id: localPersona.id,
+					name: localPersona.name,
+					avatar_url: localPersona.avatar_url ?? localPersona.avatarUrl ?? null,
+					system_name: localPersona.system_name ?? localPersona.systemName ?? null,
+					pronouns: localPersona.pronouns ?? null,
+					color: localPersona.color ?? localPersona.accentColor ?? null,
+					bio: localPersona.bio ?? null,
+					visibility: localPersona.visibility ?? 'unlisted',
+				});
+				setIsLoading(false);
+				return;
+			}
+
+			let isMounted = true;
+			setIsLoading(true);
+			void PersonaCommands.fetchPublicPersona(user.id, subprofile.id)
+				.then((res) => {
+					if (isMounted) {
+						setPublicPersona(res);
+						setIsLoading(false);
+					}
+				})
+				.catch(() => {
+					if (isMounted) {
+						setIsLoading(false);
+					}
+				});
+
+			return () => {
+				isMounted = false;
+			};
+		}, [user.id, subprofile.id, localPersona]);
+
+		const effectivePronouns = publicPersona?.pronouns ?? localPersona?.pronouns ?? subprofile.pronouns;
+		const effectiveSystemName = publicPersona?.system_name ?? localPersona?.system_name ?? subprofile.system_name;
+		const effectiveBio = publicPersona?.bio ?? localPersona?.bio ?? subprofile.bio;
 
 		const resolvedGuildMember = useMemo(() => {
 			if (guildMember) return guildMember;
@@ -128,13 +176,13 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 								displayName={subprofile.name}
 								displayNameClassName={popoutStyles.profileDisplayName}
 								user={user}
-								pronouns={subprofile.pronouns}
+								pronouns={effectivePronouns}
 								showUsername={false}
 								isClickable={false}
 								actions={
-									subprofile.system_name ? (
+									effectiveSystemName ? (
 										<PersonaTag
-											subprofile={subprofile}
+											subprofile={{...subprofile, system_name: effectiveSystemName}}
 											rootUser={user}
 											data-flx="persona.persona-profile-popout.persona-tag"
 										/>
@@ -142,7 +190,33 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 								}
 								data-flx="persona.persona-profile-popout.profile-card-user-info"
 							/>
-							{subprofile.bio && (
+							{isLoading ? (
+								<section
+									className={sharedStyles.bioContainer}
+									data-flx="persona.persona-profile-popout.bio-container-loading"
+								>
+									<div
+										style={{display: 'flex', flexDirection: 'column', gap: '6px', padding: '4px 0'}}
+										data-flx="persona.persona-profile-popout.div"
+									>
+										<div
+											className={skeletonStyles.skeleton}
+											style={{width: '75%', height: '12px', borderRadius: '4px'}}
+											data-flx="persona.persona-profile-popout.div--2"
+										/>
+										<div
+											className={skeletonStyles.skeleton}
+											style={{width: '90%', height: '12px', borderRadius: '4px'}}
+											data-flx="persona.persona-profile-popout.div--3"
+										/>
+										<div
+											className={skeletonStyles.skeleton}
+											style={{width: '50%', height: '12px', borderRadius: '4px'}}
+											data-flx="persona.persona-profile-popout.div--4"
+										/>
+									</div>
+								</section>
+							) : effectiveBio ? (
 								<section className={sharedStyles.bioContainer} data-flx="persona.persona-profile-popout.bio-container">
 									<div
 										className={clsx(
@@ -154,13 +228,13 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 										data-flx="persona.persona-profile-popout.bio-content"
 									>
 										<SafeMarkdown
-											content={subprofile.bio}
+											content={effectiveBio}
 											options={{context: MarkdownContext.RESTRICTED_USER_BIO, guildId}}
 											data-flx="persona.persona-profile-popout.safe-markdown"
 										/>
 									</div>
 								</section>
-							)}
+							) : null}
 							<div
 								className={sharedStyles.connectionsCompactSeparator}
 								data-flx="persona.persona-profile-popout.separator"
