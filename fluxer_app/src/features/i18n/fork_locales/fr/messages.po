@@ -16,6 +16,10 @@ msgstr "Modifier la persona"
 msgid "Main account"
 msgstr "Compte principal"
 
+#. OAuth scope description shown on the consent screen for the personas.write scope.
+msgid "Manage and create your personas"
+msgstr "Gérez et créez vos personas"
+
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
@@ -24,3 +28,7 @@ msgstr "Personas"
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
 msgstr "Afficher le bouton des personas"
+
+#. OAuth scope description shown on the consent screen for the personas.read scope.
+msgid "View your personas"
+msgstr "Voir vos personas"
