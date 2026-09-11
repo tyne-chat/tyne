@@ -2,8 +2,8 @@
 // @vitest-environment happy-dom
 
 import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
-import type {Persona} from '@fluxer/schema/src/gen/fluxer/user/preferences/v1/preferences_pb';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import type {Persona} from './PersonaStore';
 
 vi.mock('@lingui/core/macro', () => {
 	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
@@ -331,14 +331,13 @@ describe('PersonaStore', () => {
 		const p1 = await store.addPersona({name: 'Alice'});
 		await store.setActivePersona(p1.id, true);
 
-		const newPersona: Persona = {
-			$typeName: 'fluxer.user.preferences.v1.Persona',
+		const newPersona = {
 			id: 'new_1',
 			name: 'Bob',
 			personaTags: [],
 		};
 
-		await store.replaceAllPersonas([newPersona]);
+		await store.replaceAllPersonas([newPersona as any]);
 		expect(store.personas.length).toBe(1);
 		expect(store.personas[0].name).toBe('Bob');
 		expect(store.isPersonaLatched).toBe(false);
@@ -348,14 +347,13 @@ describe('PersonaStore', () => {
 	it('appends personas alongside existing ones', async () => {
 		await store.addPersona({name: 'Alice'});
 
-		const newPersona: Persona = {
-			$typeName: 'fluxer.user.preferences.v1.Persona',
+		const newPersona = {
 			id: 'new_2',
 			name: 'Bob',
 			personaTags: [],
 		};
 
-		await store.appendPersonas([newPersona]);
+		await store.appendPersonas([newPersona as any]);
 		expect(store.personas.length).toBe(2);
 		expect(store.personas[0].name).toBe('Alice');
 		expect(store.personas[1].name).toBe('Bob');
