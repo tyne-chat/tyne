@@ -45,7 +45,12 @@ import {VoiceNodeController} from '@app/api/voice/VoiceNodeController';
 import {VoiceP2pConnectionReportController} from '@app/api/voice/VoiceP2pConnectionReportController';
 import {WebhookController} from '@app/api/webhook/WebhookController';
 
+// Fork imports.
+
+import {registerForkControllers} from '@app/api/app/ForkControllerRegistry';
+
 export function registerControllers(routes: HonoApp, config: APIConfig): void {
+	registerForkControllers(routes);
 	InternalRpcController(routes);
 	OperatorPassInternalController(routes);
 	GatewayController(routes);
