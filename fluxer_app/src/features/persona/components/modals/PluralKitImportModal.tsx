@@ -5,17 +5,16 @@ import {Endpoints} from '@app/features/app/constants/Endpoints';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
-import type {Persona} from '@fluxer/schema/src/gen/fluxer/user/preferences/v1/preferences_pb';
-import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
+import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
+import type {PersonaCreateRequest} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {CheckCircle, UploadSimple, Warning} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useRef, useState} from 'react';
+import * as PersonaCommands from '../../commands/PersonaCommands';
 import {PersonaStore} from '../../state/PersonaStore';
 import styles from './PluralKitImportModal.module.css';
-
-let importIdCounter = 0;
 
 interface PKProxyTag {
 	prefix?: string | null;
@@ -94,7 +93,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				if (parsed.tag) {
 					setSystemTagOverride(parsed.tag);
 				}
-			} catch {
+			} catch (_err: unknown) {
 				setFileError('Failed to parse JSON file. Please ensure it is a valid PluralKit export.');
 			}
 		};
@@ -122,7 +121,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		const members = pkData.members;
 		const total = members.length;
 		const warnings: Array<ImportWarning> = [];
-		const importedPersonas: Array<Persona> = [];
+		const importedPersonas: Array<PersonaCreateRequest> = [];
 
 		for (let i = 0; i < total; i++) {
 			const member = members[i];
@@ -191,41 +190,42 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			const personaTags = (member.proxy_tags ?? [])
 				.filter((t) => t.prefix?.trim() || t.suffix?.trim())
 				.map((t) => ({
-					$typeName: 'fluxer.user.preferences.v1.PersonaTag' as const,
 					prefix: t.prefix?.trim() || undefined,
 					suffix: t.suffix?.trim() || undefined,
 				}));
 
-			const id = `${SnowflakeUtils.fromTimestamp(Date.now())}_${++importIdCounter}`;
-			const persona: Persona = {
-				$typeName: 'fluxer.user.preferences.v1.Persona',
-				id,
+			importedPersonas.push({
 				name: displayName,
-				avatarUrl: localAvatarUrl,
-				systemName: systemTagOverride.trim() || undefined,
+				avatar_url: localAvatarUrl,
+				system_name: systemTagOverride.trim() || undefined,
 				pronouns: member.pronouns?.trim() || undefined,
 				color: colorInt,
 				bio: member.description?.trim() || undefined,
-				autoTagDisabled: false,
-				useCount: 0,
-				lastUsedAtMs: 0n,
-				personaTags,
-			};
-
-			importedPersonas.push(persona);
+				persona_tags: personaTags,
+				visibility: 'unlisted',
+				external_uuid: member.id || undefined,
+			});
 		}
 
 		if (importMode === 'replace') {
-			await PersonaStore.replaceAllPersonas(importedPersonas);
-		} else {
-			await PersonaStore.appendPersonas(importedPersonas);
+			for (const existing of PersonaStore.personas) {
+				await PersonaCommands.deletePersona(existing.id).catch(() => {});
+			}
 		}
 
-		setImportResults({
-			successCount: importedPersonas.length,
-			warnings,
-		});
-		setStep('completed');
+		try {
+			await PersonaCommands.importPersonas(importedPersonas);
+
+			setImportResults({
+				successCount: importedPersonas.length,
+				warnings,
+			});
+			setStep('completed');
+		} catch (err: unknown) {
+			const message = err instanceof Error ? err.message : 'Failed to import personas';
+			ToastCommands.error(message);
+			setStep('select');
+		}
 	};
 
 	const modalTitle =

@@ -144,6 +144,11 @@ import {WebhookService} from '@app/api/webhook/WebhookService';
 import {parseAcceptLanguage} from '@fluxer/i18n/src/locale/resolution/AcceptLanguageNegotiation';
 import {createMiddleware} from 'hono/factory';
 
+// Fork imports.
+
+import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
+import {PersonaService} from '@app/api/persona/PersonaService';
+
 export {initializeServiceSingletons} from '@app/api/middleware/ServiceSingletons';
 
 let _reportService: ReportService | null = null;
@@ -223,6 +228,7 @@ class RequestServices implements RequestScopedServices {
 	private cachedStreamService: StreamService | undefined;
 	private cachedFavoriteMemeService: FavoriteMemeService | undefined;
 	private cachedFavoriteMemeRequestService: FavoriteMemeRequestService | undefined;
+	private cachedPersonaService: PersonaService | undefined;
 	private cachedSingleCommunityService: SingleCommunityService | undefined;
 	private cachedEmailChangeService: EmailChangeService | undefined;
 	private cachedMfaBackupCodesChallengeService: MfaBackupCodesChallengeService | undefined;
@@ -651,6 +657,15 @@ class RequestServices implements RequestScopedServices {
 	get favoriteMemeRequestService(): FavoriteMemeRequestService {
 		this.cachedFavoriteMemeRequestService ??= new FavoriteMemeRequestService(this.favoriteMemeService);
 		return this.cachedFavoriteMemeRequestService;
+	}
+
+	get personaService(): PersonaService {
+		this.cachedPersonaService ??= new PersonaService({
+			personaRepository: getPersonaRepository(),
+			userAccountLookupService: this.userService.accountService.lookupService,
+			gatewayService: this.gatewayService,
+		});
+		return this.cachedPersonaService;
 	}
 
 	get emailChangeService(): EmailChangeService {

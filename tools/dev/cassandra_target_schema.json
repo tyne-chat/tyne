@@ -8199,6 +8199,81 @@
 			"options": "CLUSTERING ORDER BY (connection_type ASC, connection_id DESC)"
 		},
 		{
+			"name": "personas",
+			"columns": [
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "persona_id",
+					"type": "bigint"
+				},
+				{
+					"name": "name",
+					"type": "text"
+				},
+				{
+					"name": "avatar_url",
+					"type": "text"
+				},
+				{
+					"name": "system_name",
+					"type": "text"
+				},
+				{
+					"name": "pronouns",
+					"type": "text"
+				},
+				{
+					"name": "color",
+					"type": "int"
+				},
+				{
+					"name": "bio",
+					"type": "text"
+				},
+				{
+					"name": "auto_tag_disabled",
+					"type": "boolean"
+				},
+				{
+					"name": "persona_tags",
+					"type": "text"
+				},
+				{
+					"name": "use_count",
+					"type": "int"
+				},
+				{
+					"name": "last_used_at_ms",
+					"type": "bigint"
+				},
+				{
+					"name": "visibility",
+					"type": "text"
+				},
+				{
+					"name": "external_uuid",
+					"type": "text"
+				},
+				{
+					"name": "created_at",
+					"type": "timestamp"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				},
+				{
+					"name": "version",
+					"type": "int"
+				}
+			],
+			"primary_key": "((user_id), persona_id)",
+			"options": "CLUSTERING ORDER BY (persona_id DESC)"
+		},
+		{
 			"name": "user_contact_change_logs",
 			"columns": [
 				{
