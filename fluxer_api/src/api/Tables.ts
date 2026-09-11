@@ -1505,3 +1505,6 @@ export const VoiceP2pConnectionReports = defineTable<VoiceP2pConnectionReportRow
 	primaryKey: ['user_id', 'report_id'],
 	defaultTtlSeconds: seconds('180 days'),
 });
+
+// Fork: the fork's tables, in ForkTables.ts.
+export * from '@app/api/ForkTables';
