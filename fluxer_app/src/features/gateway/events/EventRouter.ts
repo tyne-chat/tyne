@@ -79,6 +79,15 @@ import {handleVoiceServerUpdate} from '@app/features/voice/events/VoiceServerUpd
 import {handleVoiceSignal} from '@app/features/voice/events/VoiceSignal';
 import {handleVoiceStateUpdate} from '@app/features/voice/events/VoiceStateUpdate';
 
+// Fork imports.
+
+import {
+	handleUserPersonaCreate,
+	handleUserPersonaDelete,
+	handleUserPersonasUpdate,
+	handleUserPersonaUpdate,
+} from '@app/features/persona/events/PersonaEvents';
+
 export interface GatewayGeoipPayload {
 	country_code?: string;
 	latitude?: string;
@@ -109,6 +118,10 @@ export function createHandlerRegistry(): GatewayHandlerRegistry {
 	registry.set('USER_PINNED_DMS_UPDATE', handleUserPinnedDmsUpdate as GatewayEventHandler);
 	registry.set('USER_NOTE_UPDATE', handleUserNoteUpdate as GatewayEventHandler);
 	registry.set('USER_CONNECTIONS_UPDATE', handleUserConnectionsUpdate as GatewayEventHandler);
+	registry.set('USER_PERSONA_CREATE', handleUserPersonaCreate as GatewayEventHandler);
+	registry.set('USER_PERSONA_UPDATE', handleUserPersonaUpdate as GatewayEventHandler);
+	registry.set('USER_PERSONA_DELETE', handleUserPersonaDelete as GatewayEventHandler);
+	registry.set('USER_PERSONAS_UPDATE', handleUserPersonasUpdate as GatewayEventHandler);
 	registry.set('WEBAUTHN_CREDENTIALS_UPDATE', handleWebAuthnCredentialsUpdate as GatewayEventHandler);
 	registry.set('GUILD_CREATE', handleGuildCreate as GatewayEventHandler);
 	registry.set('GUILD_UPDATE', handleGuildUpdate as GatewayEventHandler);

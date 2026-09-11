@@ -137,7 +137,6 @@ export const useMessageSubmission = ({
 							system_name: matchResult.persona.system_name ?? null,
 							pronouns: matchResult.persona.pronouns ?? null,
 							color: matchResult.persona.color ?? null,
-							bio: matchResult.persona.bio ?? null,
 						}
 					: undefined;
 

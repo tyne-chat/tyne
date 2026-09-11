@@ -82,6 +82,10 @@ import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 import type {IWorkerService} from '@pkgs/worker/src/contracts/IWorkerService';
 import type {Hono} from 'hono';
 
+// Fork imports.
+
+import type {PersonaService} from '@app/api/persona/PersonaService';
+
 export interface HonoEnv {
 	Variables: {
 		apiContext: ApiContext;
@@ -140,6 +144,7 @@ export interface HonoEnv {
 		kvActivityTracker: KVActivityTracker;
 		userActivityBuffer: UserActivityBuffer;
 		reportRequestService: ReportRequestService;
+		personaService: PersonaService;
 		contactChangeLogService: UserContactChangeLogService;
 		requestCache: RequestCache;
 		rpcService: RpcService;
