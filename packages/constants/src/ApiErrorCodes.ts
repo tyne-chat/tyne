@@ -2,6 +2,10 @@
 
 import type {ValueOf} from '@fluxer/constants/src/ValueOf';
 
+// Fork imports.
+
+import {ForkAPIErrorCodes} from '@fluxer/constants/src/ForkApiErrorCodes';
+
 export const APIErrorCodes = {
 	ACCESS_DENIED: 'ACCESS_DENIED',
 	ANNOUNCEMENT_CHANNEL_REQUIRED: 'ANNOUNCEMENT_CHANNEL_REQUIRED',
@@ -318,6 +322,7 @@ export const APIErrorCodes = {
 	UNKNOWN_ORIGIN_HANDOFF: 'UNKNOWN_ORIGIN_HANDOFF',
 	UNKNOWN_PASSKEY_BRIDGE: 'UNKNOWN_PASSKEY_BRIDGE',
 	UNKNOWN_PASSKEY_MIGRATION: 'UNKNOWN_PASSKEY_MIGRATION',
+	...ForkAPIErrorCodes,
 	UNKNOWN_REPORT: 'UNKNOWN_REPORT',
 	UNKNOWN_ROLE: 'UNKNOWN_ROLE',
 	UNKNOWN_STICKER: 'UNKNOWN_STICKER',
