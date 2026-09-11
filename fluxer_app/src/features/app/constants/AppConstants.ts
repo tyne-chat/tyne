@@ -30,6 +30,14 @@ const ADD_A_BOT_TO_A_COMMUNITY_WITH_REQUESTED_DESCRIPTOR = msg({
 	message: 'Add a bot to a community with requested permissions',
 	comment: 'OAuth scope description shown on the consent screen for the bot scope.',
 });
+const VIEW_YOUR_PERSONAS_DESCRIPTOR = msg({
+	message: 'View your personas',
+	comment: 'OAuth scope description shown on the consent screen for the personas.read scope.',
+});
+const MANAGE_YOUR_PERSONAS_DESCRIPTOR = msg({
+	message: 'Manage and create your personas',
+	comment: 'OAuth scope description shown on the consent screen for the personas.write scope.',
+});
 const DO_NOT_DISTURB_DESCRIPTOR = msg({
 	message: 'Do not disturb',
 	comment: 'Short label in the app constants.',
@@ -48,6 +56,8 @@ const OAuth2ScopeDescriptorsInternal: Record<OAuth2Scope, MessageDescriptor> = {
 	guilds: VIEW_THE_COMMUNITIES_YOU_ARE_A_MEMBER_OF_DESCRIPTOR,
 	connections: VIEW_YOUR_CONNECTED_ACCOUNTS_DESCRIPTOR,
 	bot: ADD_A_BOT_TO_A_COMMUNITY_WITH_REQUESTED_DESCRIPTOR,
+	'personas.read': VIEW_YOUR_PERSONAS_DESCRIPTOR,
+	'personas.write': MANAGE_YOUR_PERSONAS_DESCRIPTOR,
 };
 
 export function getOAuth2ScopeDescription(i18n: I18n, scope: OAuth2Scope | string): string | undefined {
