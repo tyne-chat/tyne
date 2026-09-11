@@ -9,15 +9,26 @@ import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {ColorPickerField} from '@app/features/ui/components/form/ColorPickerField';
 import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
+import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import {AvatarUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/AvatarUploader';
 import Users from '@app/features/user/state/Users';
-import type {Persona} from '@fluxer/schema/src/gen/fluxer/user/preferences/v1/preferences_pb';
-import {Info, LockSimple, LockSimpleOpen, PencilSimple, Plus, Trash, UploadSimple} from '@phosphor-icons/react';
+import type {PersonaVisibility} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {
+	GlobeSimple,
+	Info,
+	LockSimple,
+	LockSimpleOpen,
+	PencilSimple,
+	Plus,
+	Trash,
+	UploadSimple,
+} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useRef, useState} from 'react';
-import {type ActivePersonaMode, PersonaStore} from '../../state/PersonaStore';
+import * as PersonaCommands from '../../commands/PersonaCommands';
+import {type ActivePersonaMode, type Persona, PersonaStore} from '../../state/PersonaStore';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
 import styles from './PersonaSettingsTab.module.css';
 
@@ -34,6 +45,20 @@ const ACTIVE_PERSONA_DESCRIPTIONS: Record<ActivePersonaMode, string> = {
 	last: 'Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona.',
 };
 
+const VISIBILITY_TABS: Array<SegmentedTab<PersonaVisibility>> = [
+	{id: 'unlisted', label: 'Unlisted'},
+	{id: 'public', label: 'Public'},
+	{id: 'private', label: 'Private'},
+];
+
+const VISIBILITY_DESCRIPTIONS: Record<PersonaVisibility, string> = {
+	unlisted:
+		'Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list.',
+	public:
+		'Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers.',
+	private: 'Only visible to you. Others cannot view this persona’s full bio or profile details.',
+};
+
 interface PersonaFormState {
 	id?: string;
 	name: string;
@@ -42,6 +67,7 @@ interface PersonaFormState {
 	avatarUrl: string;
 	accentColor: number | null;
 	bio: string;
+	visibility: PersonaVisibility;
 	tags: Array<{prefix: string; suffix: string}>;
 }
 
@@ -52,6 +78,7 @@ const emptyFormState = (): PersonaFormState => ({
 	avatarUrl: '',
 	accentColor: null,
 	bio: '',
+	visibility: 'unlisted',
 	tags: [{prefix: '', suffix: ''}],
 });
 
@@ -107,14 +134,18 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		setFormData({
 			id: persona.id,
 			name: persona.name,
-			systemName: persona.systemName ?? '',
+			systemName: persona.system_name ?? persona.systemName ?? '',
 			pronouns: persona.pronouns ?? '',
-			avatarUrl: persona.avatarUrl ?? '',
+			avatarUrl: persona.avatar_url ?? persona.avatarUrl ?? '',
 			accentColor: persona.color ?? null,
 			bio: persona.bio ?? '',
+			visibility: persona.visibility ?? 'unlisted',
 			tags:
-				(persona.personaTags ?? []).length > 0
-					? (persona.personaTags ?? []).map((t) => ({prefix: t.prefix ?? '', suffix: t.suffix ?? ''}))
+				(persona.persona_tags ?? persona.personaTags ?? []).length > 0
+					? (persona.persona_tags ?? persona.personaTags ?? []).map((t) => ({
+							prefix: t.prefix ?? '',
+							suffix: t.suffix ?? '',
+						}))
 					: [{prefix: '', suffix: ''}],
 		});
 		setIsEditing(true);
@@ -159,39 +190,63 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 			.map((t) => ({prefix: t.prefix.trim() || undefined, suffix: t.suffix.trim() || undefined}))
 			.filter((t) => t.prefix || t.suffix);
 
-		if (formData.id) {
-			await PersonaStore.updatePersona(formData.id, {
-				name: trimmedName,
-				systemName: formData.systemName.trim() || undefined,
-				pronouns: formData.pronouns.trim() || undefined,
-				avatarUrl: formData.avatarUrl.trim() || undefined,
-				accentColor: parsedColor ?? undefined,
-				bio: formData.bio.trim() || undefined,
-				personaTags: validTags.map((t) => ({
-					$typeName: 'fluxer.user.preferences.v1.PersonaTag',
-					prefix: t.prefix,
-					suffix: t.suffix,
-				})),
-			});
-		} else {
-			await PersonaStore.addPersona({
-				name: trimmedName,
-				system_name: formData.systemName.trim() || null,
-				pronouns: formData.pronouns.trim() || null,
-				avatar_url: formData.avatarUrl.trim() || null,
-				accent_color: parsedColor,
-				bio: formData.bio.trim() || null,
-				persona_tags: validTags,
+		try {
+			if (formData.id) {
+				await PersonaCommands.updatePersona(formData.id, {
+					name: trimmedName,
+					system_name: formData.systemName.trim() || null,
+					pronouns: formData.pronouns.trim() || null,
+					avatar_url: formData.avatarUrl.trim() || null,
+					color: parsedColor,
+					bio: formData.bio.trim() || null,
+					visibility: formData.visibility,
+					persona_tags: validTags,
+				});
+				ToastCommands.createToast({
+					type: 'success',
+					children: 'Persona updated',
+				});
+			} else {
+				await PersonaCommands.createPersona({
+					name: trimmedName,
+					system_name: formData.systemName.trim() || null,
+					pronouns: formData.pronouns.trim() || null,
+					avatar_url: formData.avatarUrl.trim() || null,
+					color: parsedColor,
+					bio: formData.bio.trim() || null,
+					visibility: formData.visibility,
+					persona_tags: validTags,
+				});
+				ToastCommands.createToast({
+					type: 'success',
+					children: 'Persona created',
+				});
+			}
+
+			setIsEditing(false);
+			setFormData(emptyFormState());
+		} catch {
+			ToastCommands.createToast({
+				type: 'error',
+				children: 'Failed to save persona',
 			});
 		}
-
-		setIsEditing(false);
-		setFormData(emptyFormState());
 	};
 
 	const handleDeletePersona = async (id: string) => {
 		if (confirm('Are you sure you want to delete this persona?')) {
-			await PersonaStore.deletePersona(id);
+			try {
+				await PersonaCommands.deletePersona(id);
+				ToastCommands.createToast({
+					type: 'success',
+					children: 'Persona deleted',
+				});
+			} catch {
+				ToastCommands.createToast({
+					type: 'error',
+					children: 'Failed to delete persona',
+				});
+			}
 		}
 	};
 
@@ -405,11 +460,42 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									style={{gridColumn: '1 / -1'}}
 									data-flx="persona.settings.persona-settings-tab.form-field--7"
 								>
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--7">
+										Visibility
+									</div>
+									<SegmentedTabs<PersonaVisibility>
+										tabs={VISIBILITY_TABS}
+										selectedTab={formData.visibility}
+										onTabChange={(vis) => setFormData((prev) => ({...prev, visibility: vis}))}
+										ariaLabel="Persona visibility"
+										data-flx="persona.settings.persona-settings-tab.segmented-tabs--2"
+									/>
+									<div
+										className={styles.modeHelperText}
+										style={{marginTop: 6}}
+										data-flx="persona.settings.persona-settings-tab.mode-helper-text--2"
+									>
+										<Info
+											size={16}
+											weight="bold"
+											className={styles.modeHelperIcon}
+											data-flx="persona.settings.persona-settings-tab.mode-helper-icon--2"
+										/>
+										<span data-flx="persona.settings.persona-settings-tab.span--2">
+											{VISIBILITY_DESCRIPTIONS[formData.visibility]}
+										</span>
+									</div>
+								</div>
+								<div
+									className={styles.formField}
+									style={{gridColumn: '1 / -1'}}
+									data-flx="persona.settings.persona-settings-tab.form-field--8"
+								>
 									<div
 										style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}
 										data-flx="persona.settings.persona-settings-tab.div--4"
 									>
-										<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--7">
+										<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--8">
 											Persona Tags (Prefix & Suffix)
 										</div>
 										<Button
@@ -434,7 +520,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 											/>
 											<span
 												style={{color: 'var(--text-primary-muted)'}}
-												data-flx="persona.settings.persona-settings-tab.span--2"
+												data-flx="persona.settings.persona-settings-tab.span--3"
 											>
 												text
 											</span>
@@ -566,6 +652,48 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 															}}
 															data-flx="persona.settings.persona-settings-tab.color-preview"
 														/>
+													)}
+													{persona.visibility === 'public' && (
+														<Tooltip
+															text="Public persona"
+															position="top"
+															data-flx="persona.settings.persona-settings-tab.tooltip"
+														>
+															<span
+																className={styles.visibilityIcon}
+																role="img"
+																aria-label="Public persona"
+																data-flx="persona.settings.persona-settings-tab.visibility-icon"
+															>
+																<GlobeSimple
+																	size={14}
+																	weight="bold"
+																	className={styles.iconPublic}
+																	data-flx="persona.settings.persona-settings-tab.icon-public"
+																/>
+															</span>
+														</Tooltip>
+													)}
+													{persona.visibility === 'private' && (
+														<Tooltip
+															text="Private persona"
+															position="top"
+															data-flx="persona.settings.persona-settings-tab.tooltip--2"
+														>
+															<span
+																className={styles.visibilityIcon}
+																role="img"
+																aria-label="Private persona"
+																data-flx="persona.settings.persona-settings-tab.visibility-icon--2"
+															>
+																<LockSimple
+																	size={14}
+																	weight="bold"
+																	className={styles.iconPrivate}
+																	data-flx="persona.settings.persona-settings-tab.icon-private"
+																/>
+															</span>
+														</Tooltip>
 													)}
 												</div>
 												<div
