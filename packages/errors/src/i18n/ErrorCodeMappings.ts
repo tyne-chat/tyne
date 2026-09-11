@@ -6,6 +6,10 @@ import type {ValidationErrorCode} from '@fluxer/constants/src/ValidationErrorCod
 import {ValidationErrorCodes} from '@fluxer/constants/src/ValidationErrorCodes';
 import type {ErrorI18nKey} from '@fluxer/errors/src/i18n/ErrorI18nMessages';
 
+// Fork imports.
+
+import {ForkErrorCodeToI18nKey} from '@fluxer/errors/src/i18n/ForkErrorCodeMappings';
+
 type AllErrorCodes = APIErrorCode | ValidationErrorCode;
 
 export const ErrorCodeToI18nKey = {
@@ -374,6 +378,7 @@ export const ErrorCodeToI18nKey = {
 	[APIErrorCodes.UNKNOWN_STORE_PURCHASE]: 'store_billing.unknown_purchase',
 	[APIErrorCodes.UNKNOWN_USER_FLAG]: 'unknown_entities.unknown_user_flag',
 	[APIErrorCodes.UNKNOWN_USER]: 'unknown_entities.unknown_user',
+	...ForkErrorCodeToI18nKey,
 	[APIErrorCodes.UNKNOWN_VOICE_REGION]: 'calls_and_voice.unknown_voice_region',
 	[APIErrorCodes.UNKNOWN_VOICE_SERVER]: 'calls_and_voice.unknown_voice_server',
 	[APIErrorCodes.UNKNOWN_WEBAUTHN_CREDENTIAL]: 'mfa_and_passkeys.unknown_webauthn_credential',
