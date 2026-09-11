@@ -308,3 +308,19 @@
 	color: var(--text-primary-muted);
 	font-size: 0.875rem;
 }
+
+.visibilityIcon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+	cursor: default;
+}
+
+.iconPublic {
+	color: var(--status-online, #23a55a);
+}
+
+.iconPrivate {
+	color: var(--text-primary-muted, #949ba4);
+}

@@ -80,6 +80,10 @@ import {handleVoiceServerUpdate} from '@app/features/voice/events/VoiceServerUpd
 import {handleVoiceSignal} from '@app/features/voice/events/VoiceSignal';
 import {handleVoiceStateUpdate} from '@app/features/voice/events/VoiceStateUpdate';
 
+// Fork imports.
+
+import {registerForkGatewayHandlers} from '@app/features/gateway/events/ForkEventRouter';
+
 export interface GatewayGeoipPayload {
 	country_code?: string;
 	latitude?: string;
@@ -182,5 +186,6 @@ export function createHandlerRegistry(): GatewayHandlerRegistry {
 	registry.set('FAVORITE_MEME_UPDATE', handleFavoriteMemeUpdate as GatewayEventHandler);
 	registry.set('FAVORITE_MEME_DELETE', handleFavoriteMemeDelete as GatewayEventHandler);
 	registry.set('SESSIONS_REPLACE', () => {});
+	registerForkGatewayHandlers(registry);
 	return registry;
 }

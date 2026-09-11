@@ -43,6 +43,10 @@ import {UserController} from '@app/api/user/controllers/UserController';
 import {VoiceP2pConnectionReportController} from '@app/api/voice/VoiceP2pConnectionReportController';
 import {WebhookController} from '@app/api/webhook/WebhookController';
 
+// Fork imports.
+
+import {registerForkControllers} from '@app/api/app/ForkControllerRegistry';
+
 export function registerControllers(routes: HonoApp, config: APIConfig): void {
 	InternalRpcController(routes);
 	OperatorPassInternalController(routes);
@@ -88,4 +92,5 @@ export function registerControllers(routes: HonoApp, config: APIConfig): void {
 		OperatorPassController(routes);
 	}
 	StripeController(routes);
+	registerForkControllers(routes);
 }
