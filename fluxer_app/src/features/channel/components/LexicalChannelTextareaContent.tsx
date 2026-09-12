@@ -408,6 +408,7 @@ export const LexicalChannelTextareaContent = observer(
 					handle.clear();
 				}
 				setValue('');
+				setWireValue('');
 				clearSegments();
 				return true;
 			},
@@ -1411,6 +1412,8 @@ export const LexicalChannelTextareaContent = observer(
 									{showPersonasButton && (
 										<PersonaComposerPill
 											channelId={channel.id}
+											text={wireValue}
+											hasAttachments={hasAttachments}
 											data-flx="channel.lexical-channel-textarea-content.persona-composer-pill"
 										/>
 									)}
