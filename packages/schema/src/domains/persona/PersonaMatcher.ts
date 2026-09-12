@@ -23,6 +23,11 @@ export interface MatchResult {
 	strippedContent: string;
 	wasEscaped?: boolean;
 	clearedLatch?: boolean;
+	isFromTag?: boolean;
+}
+
+export interface MatchPersonaOptions {
+	allowEmptyContent?: boolean;
 }
 
 export function matchPersona(
@@ -30,6 +35,7 @@ export function matchPersona(
 	personas: ReadonlyArray<PersonaLike>,
 	activeLatchedPersonaId?: string | null,
 	hasAttachments?: boolean,
+	options?: MatchPersonaOptions,
 ): MatchResult {
 	const latchedPersona = activeLatchedPersonaId
 		? personas.find((p) => p.id === activeLatchedPersonaId && !p.auto_tag_disabled)
@@ -97,7 +103,7 @@ export function matchPersona(
 				const innerEnd = text.length - suffix.length;
 				if (innerEnd > innerStart) {
 					const inner = text.slice(innerStart, innerEnd).trim();
-					if (inner.length > 0) {
+					if (inner.length > 0 || options?.allowEmptyContent) {
 						candidates.push({
 							persona,
 							prefixLen: prefix.length,
@@ -114,7 +120,7 @@ export function matchPersona(
 							innerContent: '',
 						});
 					}
-				} else if (innerEnd === innerStart && hasAttachments) {
+				} else if (innerEnd === innerStart && (hasAttachments || options?.allowEmptyContent)) {
 					candidates.push({
 						persona,
 						prefixLen: prefix.length,
@@ -159,6 +165,7 @@ export function matchPersona(
 			matched: true,
 			persona: best.persona,
 			strippedContent: best.innerContent,
+			isFromTag: true,
 		};
 	}
 
@@ -168,13 +175,36 @@ export function matchPersona(
 			matched: true,
 			persona: latchedPersona,
 			strippedContent: text,
+			isFromTag: false,
 		};
 	}
 
 	return {
 		matched: false,
 		strippedContent: text,
+		isFromTag: false,
 	};
+}
+
+export function previewPersona(
+	text: string,
+	personas: ReadonlyArray<PersonaLike>,
+	activeLatchedPersonaId?: string | null,
+	hasAttachments?: boolean,
+): {persona: PersonaLike | null; isFromTag: boolean} {
+	const result = matchPersona(text, personas, activeLatchedPersonaId, hasAttachments, {
+		allowEmptyContent: true,
+	});
+
+	if (result.wasEscaped || result.clearedLatch) {
+		return {persona: null, isFromTag: false};
+	}
+
+	if (result.matched && result.persona) {
+		return {persona: result.persona, isFromTag: Boolean(result.isFromTag)};
+	}
+
+	return {persona: null, isFromTag: false};
 }
 
 export const matchPersonaTags = matchPersona;
