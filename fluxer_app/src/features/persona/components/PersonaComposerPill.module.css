@@ -33,6 +33,10 @@
 	border-color: var(--brand-primary);
 }
 
+.pillButton.tagMatched {
+	border-color: var(--brand-primary);
+}
+
 .latchBadge {
 	position: absolute;
 	bottom: -2px;

@@ -7,7 +7,7 @@ import type {
 	PersonaTag,
 	PersonaVisibility,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {type MatchResult, matchPersona} from '@fluxer/schema/src/domains/persona/PersonaMatcher';
+import {type MatchResult, matchPersona, previewPersona} from '@fluxer/schema/src/domains/persona/PersonaMatcher';
 import type {
 	MessageSubprofileRequest,
 	MessageSubprofileResponse,
@@ -264,12 +264,26 @@ export class PersonaStoreClass {
 
 	async setActivePersonaMode(mode: ActivePersonaMode): Promise<void> {
 		const p1 = UserSettings.setSubPreference('activePersonaMode', mode);
-		const p2 = UserSettings.setSubPreference('activePersonaLatched', mode !== 'off');
-		const promises: Array<Promise<void>> = [p1, p2];
+		const promises: Array<Promise<void>> = [p1];
 		if (mode === 'off') {
 			promises.push(UserSettings.setSubPreference('activePersonaId', ''));
-		} else if (!this.activePersonaId && this._personas.length > 0) {
-			promises.push(UserSettings.setSubPreference('activePersonaId', this._personas[0].id));
+			promises.push(UserSettings.setSubPreference('activePersonaLatched', false));
+		} else if (mode === 'manual') {
+			const currentId = this.activePersonaId;
+			const targetId =
+				currentId && this._personas.some((p) => p.id === currentId)
+					? currentId
+					: (this.rankedPersonas[0]?.id ?? this._personas[0]?.id ?? '');
+			promises.push(UserSettings.setSubPreference('activePersonaId', targetId));
+			promises.push(UserSettings.setSubPreference('activePersonaLatched', Boolean(targetId)));
+		} else if (mode === 'last') {
+			const currentId = this.activePersonaId;
+			if (currentId && this._personas.some((p) => p.id === currentId)) {
+				promises.push(UserSettings.setSubPreference('activePersonaLatched', true));
+			} else {
+				promises.push(UserSettings.setSubPreference('activePersonaId', ''));
+				promises.push(UserSettings.setSubPreference('activePersonaLatched', false));
+			}
 		}
 		await Promise.all(promises);
 	}
@@ -286,11 +300,15 @@ export class PersonaStoreClass {
 		await Promise.all(promises);
 	}
 
-	async unlatch(): Promise<void> {
+	async unlatch(preserveMode?: boolean): Promise<void> {
+		const shouldPreserve = preserveMode ?? this.activePersonaMode === 'last';
 		const p1 = UserSettings.setSubPreference('activePersonaLatched', false);
 		const p2 = UserSettings.setSubPreference('activePersonaId', '');
-		const p3 = UserSettings.setSubPreference('activePersonaMode', 'off');
-		await Promise.all([p1, p2, p3]);
+		const promises: Array<Promise<void>> = [p1, p2];
+		if (!shouldPreserve) {
+			promises.push(UserSettings.setSubPreference('activePersonaMode', 'off'));
+		}
+		await Promise.all(promises);
 	}
 
 	async recordPersonaUse(id: string): Promise<void> {
@@ -334,7 +352,7 @@ export class PersonaStoreClass {
 		const activeLatchedId = this.activePersona?.id ?? null;
 		const result = matchPersona(content, personasLike, activeLatchedId, hasAttachments);
 
-		if (result.clearedLatch) {
+		if (result.clearedLatch || (result.wasEscaped && this.activePersonaMode === 'last')) {
 			void this.unlatch();
 			Toast.success('Active persona cleared (sending as root account)');
 		} else if (result.matched && result.persona) {
@@ -345,6 +363,36 @@ export class PersonaStoreClass {
 		}
 
 		return result;
+	}
+
+	getEffectivePersonaForText(
+		content: string,
+		hasAttachments = false,
+	): {persona: ClientPersona | null; isFromTag: boolean} {
+		const personasLike = this._personas.map((p) => ({
+			id: p.id,
+			name: p.name,
+			avatar_url: p.avatar_url ?? p.avatarUrl ?? null,
+			system_name: p.system_name ?? p.systemName ?? null,
+			pronouns: p.pronouns ?? null,
+			color: p.color ?? p.accentColor ?? null,
+			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
+			bio: p.bio ?? null,
+			persona_tags: (p.persona_tags ?? p.personaTags ?? []).map((t) => ({
+				prefix: t.prefix ?? null,
+				suffix: t.suffix ?? null,
+			})),
+		}));
+
+		const activeLatchedId = this.isPersonaLatched && this.activePersona ? this.activePersona.id : null;
+		const preview = previewPersona(content, personasLike, activeLatchedId, hasAttachments);
+
+		if (preview.persona) {
+			const found = this._personas.find((p) => p.id === preview.persona!.id) ?? null;
+			return {persona: found, isFromTag: preview.isFromTag};
+		}
+
+		return {persona: null, isFromTag: false};
 	}
 
 	matchEditMessage(
