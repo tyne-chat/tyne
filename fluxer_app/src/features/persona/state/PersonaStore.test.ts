@@ -152,15 +152,16 @@ describe('PersonaStore', () => {
 		expect(result.strippedContent).toBe('Hello from Alice!');
 	});
 
-	it('preserves latch when escaping with single backslash \\', async () => {
+	it('preserves latch when escaping with single backslash \\ in manual mode', async () => {
 		const alice = await store.addPersona({
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
-		await store.setActivePersona(alice.id, true, 'last');
+		await store.setActivePersona(alice.id, true, 'manual');
 		expect(store.isPersonaLatched).toBe(true);
+		expect(store.activePersonaMode).toBe('manual');
 
-		// Single backslash escape: sends as root account, strips slash, PRESERVES latch
+		// Single backslash escape in manual mode: sends as root account, strips slash, PRESERVES latch
 		const result = store.matchOutgoingMessage('\\Hello from root');
 		expect(result.matched).toBe(false);
 		expect(result.wasEscaped).toBe(true);
@@ -168,6 +169,31 @@ describe('PersonaStore', () => {
 		expect(result.clearedLatch).toBeFalsy();
 		expect(store.isPersonaLatched).toBe(true);
 		expect(store.activePersonaId).toBe(alice.id);
+		expect(store.activePersonaMode).toBe('manual');
+	});
+
+	it('unlatches when escaping with single backslash \\ in last-used mode while preserving last mode', async () => {
+		const alice = await store.addPersona({
+			name: 'Alice',
+			persona_tags: [{prefix: 'a:', suffix: ''}],
+		});
+		await store.setActivePersona(alice.id, true, 'last');
+		expect(store.isPersonaLatched).toBe(true);
+		expect(store.activePersonaMode).toBe('last');
+
+		// Single backslash escape in last-used mode: sends as root account, UNLATCHES, keeps mode as 'last'
+		const result = store.matchOutgoingMessage('\\Hello from root');
+		expect(result.matched).toBe(false);
+		expect(result.wasEscaped).toBe(true);
+		expect(result.strippedContent).toBe('Hello from root');
+		expect(store.isPersonaLatched).toBe(false);
+		expect(store.activePersonaId).toBeNull();
+		expect(store.activePersonaMode).toBe('last');
+
+		// Next untagged message continues as root account
+		const untagged = store.matchOutgoingMessage('Still root account');
+		expect(untagged.matched).toBe(false);
+		expect(untagged.strippedContent).toBe('Still root account');
 	});
 
 	it('clears latch when escaping with double backslash \\\\ followed by message', async () => {
@@ -371,11 +397,12 @@ describe('PersonaStore', () => {
 
 		await store.setActivePersonaMode('last');
 		expect(store.activePersonaMode).toBe('last');
-		expect(store.isPersonaLatched).toBe(true);
+		expect(store.isPersonaLatched).toBe(false);
 
 		// Initially active as Alice
 		await store.setActivePersona(alice.id, true, 'last');
 		expect(store.activePersonaId).toBe(alice.id);
+		expect(store.isPersonaLatched).toBe(true);
 
 		// Bob speaks with prefix => switches activePersona to Bob
 		const result = store.matchOutgoingMessage('b: Hello everyone');
@@ -431,5 +458,109 @@ describe('PersonaStore', () => {
 		const untagged = store.matchOutgoingMessage('Normal message');
 		expect(untagged.matched).toBe(false);
 		expect(untagged.strippedContent).toBe('Normal message');
+	});
+
+	it('switching from "off" to "last" starts on root without auto-selecting first persona', async () => {
+		await store.addPersona({
+			name: 'Alice',
+			persona_tags: [{prefix: 'a:', suffix: ''}],
+		});
+		const bob = await store.addPersona({
+			name: 'Bob',
+			persona_tags: [{prefix: 'b:', suffix: ''}],
+		});
+
+		await store.setActivePersonaMode('off');
+		expect(store.activePersonaMode).toBe('off');
+		expect(store.activePersonaId).toBeNull();
+		expect(store.isPersonaLatched).toBe(false);
+
+		// Switch directly to 'last'
+		await store.setActivePersonaMode('last');
+		expect(store.activePersonaMode).toBe('last');
+		// Must NOT auto-select Alice (first persona)
+		expect(store.activePersonaId).toBeNull();
+		expect(store.isPersonaLatched).toBe(false);
+
+		// Untagged message sends as root account
+		const untagged = store.matchOutgoingMessage('Normal message');
+		expect(untagged.matched).toBe(false);
+		expect(untagged.strippedContent).toBe('Normal message');
+
+		// First tagged message latches Bob
+		const tagged = store.matchOutgoingMessage('b: Hello Bob');
+		expect(tagged.matched).toBe(true);
+		expect(tagged.persona?.name).toBe('Bob');
+		expect(store.activePersonaId).toBe(bob.id);
+		expect(store.isPersonaLatched).toBe(true);
+
+		// Subsequent untagged message now sends as Bob
+		const nextUntagged = store.matchOutgoingMessage('Speaking as Bob now');
+		expect(nextUntagged.matched).toBe(true);
+		expect(nextUntagged.persona?.name).toBe('Bob');
+	});
+
+	describe('getEffectivePersonaForText', () => {
+		it('returns tag-matched persona and isFromTag=true on tag match', async () => {
+			const alice = await store.addPersona({
+				name: 'Alice',
+				persona_tags: [{prefix: '[', suffix: ']'}],
+			});
+			const bob = await store.addPersona({
+				name: 'Bob',
+				persona_tags: [{prefix: 'b:', suffix: ''}],
+			});
+
+			// No active persona, off mode
+			await store.setActivePersonaMode('off');
+
+			// Types Alice tag
+			const preview1 = store.getEffectivePersonaForText('[Hello world]');
+			expect(preview1.persona?.id).toBe(alice.id);
+			expect(preview1.isFromTag).toBe(true);
+
+			// Types Bob tag
+			const preview2 = store.getEffectivePersonaForText('b: Speaking as Bob');
+			expect(preview2.persona?.id).toBe(bob.id);
+			expect(preview2.isFromTag).toBe(true);
+
+			// Types incomplete tag -> returns null (root)
+			const preview3 = store.getEffectivePersonaForText('[Hello');
+			expect(preview3.persona).toBeNull();
+			expect(preview3.isFromTag).toBe(false);
+		});
+
+		it('falls back to active latched persona with isFromTag=false when untagged', async () => {
+			const alice = await store.addPersona({
+				name: 'Alice',
+				persona_tags: [{prefix: '[', suffix: ']'}],
+			});
+			const bob = await store.addPersona({
+				name: 'Bob',
+				persona_tags: [{prefix: 'b:', suffix: ''}],
+			});
+
+			await store.setActivePersona(alice.id, true, 'manual');
+
+			// Untagged -> returns Alice (latched)
+			const preview1 = store.getEffectivePersonaForText('Normal message');
+			expect(preview1.persona?.id).toBe(alice.id);
+			expect(preview1.isFromTag).toBe(false);
+
+			// Tagged as Bob -> returns Bob (isFromTag=true)
+			const preview2 = store.getEffectivePersonaForText('b: Hey');
+			expect(preview2.persona?.id).toBe(bob.id);
+			expect(preview2.isFromTag).toBe(true);
+
+			// Tag removed -> reverts to Alice
+			const preview3 = store.getEffectivePersonaForText('Hey');
+			expect(preview3.persona?.id).toBe(alice.id);
+			expect(preview3.isFromTag).toBe(false);
+
+			// Escaped with \ -> returns null (root)
+			const preview4 = store.getEffectivePersonaForText('\\ b: Hey');
+			expect(preview4.persona).toBeNull();
+			expect(preview4.isFromTag).toBe(false);
+		});
 	});
 });
