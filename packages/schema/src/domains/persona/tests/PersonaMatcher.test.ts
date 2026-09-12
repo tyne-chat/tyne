@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {describe, expect, it} from 'vitest';
-import {matchPersona, type PersonaLike, type PersonaTagLike} from '../PersonaMatcher';
+import {matchPersona, type PersonaLike, type PersonaTagLike, previewPersona} from '../PersonaMatcher';
 
 describe('PersonaMatcher', () => {
 	const alice: PersonaLike = {
@@ -209,5 +209,79 @@ describe('PersonaMatcher', () => {
 		expect(result.matched).toBe(true);
 		expect(result.persona?.name).toBe('Alice');
 		expect(result.strippedContent).toBe('Hello via matchPersona');
+	});
+
+	describe('previewPersona', () => {
+		it('matches completed tags even when inner text is empty or just typed', () => {
+			const res1 = previewPersona('[]', personas);
+			expect(res1.persona?.name).toBe('Alice');
+			expect(res1.isFromTag).toBe(true);
+
+			const res2 = previewPersona('[   ]', personas);
+			expect(res2.persona?.name).toBe('Alice');
+			expect(res2.isFromTag).toBe(true);
+
+			const res3 = previewPersona('B:', personas);
+			expect(res3.persona?.name).toBe('Bob');
+			expect(res3.isFromTag).toBe(true);
+
+			const res4 = previewPersona('B: ', personas);
+			expect(res4.persona?.name).toBe('Bob');
+			expect(res4.isFromTag).toBe(true);
+
+			const res5 = previewPersona('[Hello]', personas);
+			expect(res5.persona?.name).toBe('Alice');
+			expect(res5.isFromTag).toBe(true);
+		});
+
+		it('does not match incomplete tags and reverts to active persona or root', () => {
+			// Incomplete prefix without suffix
+			const res1 = previewPersona('[Hello', personas);
+			expect(res1.persona).toBeNull();
+			expect(res1.isFromTag).toBe(false);
+
+			// Incomplete prefix without suffix with active latched persona
+			const res2 = previewPersona('[Hello', personas, 'bob-id');
+			expect(res2.persona?.name).toBe('Bob');
+			expect(res2.isFromTag).toBe(false);
+
+			// Completely untagged message with active latched persona
+			const res3 = previewPersona('Hello there', personas, 'bob-id');
+			expect(res3.persona?.name).toBe('Bob');
+			expect(res3.isFromTag).toBe(false);
+
+			// Completely untagged message without active latched persona (root account)
+			const res4 = previewPersona('Hello there', personas, null);
+			expect(res4.persona).toBeNull();
+			expect(res4.isFromTag).toBe(false);
+		});
+
+		it('switches between personas in real-time as tags change', () => {
+			// Start with Alice tag
+			const res1 = previewPersona('[Hello]', personas);
+			expect(res1.persona?.name).toBe('Alice');
+
+			// Change to Bob tag
+			const res2 = previewPersona('[[Hello]]', personas);
+			expect(res2.persona?.name).toBe('Bob');
+
+			// Change to Charlie tag
+			const res3 = previewPersona('Hello -C', personas);
+			expect(res3.persona?.name).toBe('Charlie');
+
+			// Remove tag entirely
+			const res4 = previewPersona('Hello', personas);
+			expect(res4.persona).toBeNull();
+		});
+
+		it('reverts to root when escaped with backslash', () => {
+			const res1 = previewPersona('\\ [Hello]', personas, 'bob-id');
+			expect(res1.persona).toBeNull();
+			expect(res1.isFromTag).toBe(false);
+
+			const res2 = previewPersona('\\\\', personas, 'bob-id');
+			expect(res2.persona).toBeNull();
+			expect(res2.isFromTag).toBe(false);
+		});
 	});
 });
