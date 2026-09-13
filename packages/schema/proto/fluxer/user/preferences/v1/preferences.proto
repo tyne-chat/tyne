@@ -59,6 +59,8 @@ message SyncedPreferences {
   optional string active_persona_id = 121;
   optional bool active_persona_latched = 122;
   optional string active_persona_mode = 123;
+  optional string display_tag_text = 124;
+  optional string display_tag_icon = 125;
 }
 
 message SpellcheckSettings {
