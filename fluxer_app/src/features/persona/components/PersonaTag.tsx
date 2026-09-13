@@ -3,11 +3,13 @@
 import Authentication from '@app/features/auth/state/Authentication';
 import {MessagePersonaAccount} from '@app/features/channel/components/MessagePersonaAccount';
 import type {Guild} from '@app/features/guild/models/Guild';
+import {isKeyboardActivationKey} from '@app/features/input/utils/KeyboardUtils';
 import type {GuildMember} from '@app/features/member/models/GuildMember';
 import type {Message} from '@app/features/messaging/models/MessagingMessage';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
+import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
 import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -38,31 +40,8 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 		const rawIcon = subprofile.display_tag_icon ?? (isCurrentUser && !message ? PersonaStore.displayTagIcon : null);
 		const tagIcon = rawIcon?.trim() || null;
 
-		// When display tag text is present, render the tag pill markup.
-		if (tagText) {
-			const tooltipText = rootUser?.username ? `Account: @${rootUser.username}` : undefined;
-			const pill = (
-				<span className={clsx(styles.tag, className)} data-flx="persona.tag">
-					{tagIcon && <img src={tagIcon} alt="" className={styles.icon} data-flx="persona.persona-tag.icon" />}
-					<span className={styles.text} data-flx="persona.persona-tag.text">
-						{tagText}
-					</span>
-				</span>
-			);
-
-			if (tooltipText) {
-				return (
-					<Tooltip text={tooltipText} position="top" data-flx="persona.persona-tag.tooltip">
-						{pill}
-					</Tooltip>
-				);
-			}
-			return pill;
-		}
-
-		// When NO display tag text is present:
-		// If custom tagIcon is present, or if neither is set (defaulting to owner account icon):
-		// The icon sits by itself, just like the owner account icon did before.
+		// When message and rootUser are present (standard chat message rendering):
+		// Delegate to MessagePersonaAccount for unified popout, context menu, and tooltip across all variations
 		if (message && rootUser) {
 			return (
 				<MessagePersonaAccount
@@ -71,22 +50,95 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 					guild={guild}
 					member={member}
 					customIconUrl={tagIcon}
+					tagText={tagText || null}
 					className={className}
 					data-flx="persona.persona-tag.message-persona-account"
 				/>
 			);
 		}
 
-		// Fallback for previews or contexts without a full message object:
+		// When no rootUser is available, render static markup if tagText or tagIcon exists
+		if (!rootUser) {
+			if (tagText) {
+				return (
+					<span className={clsx(styles.tag, className)} data-flx="persona.tag">
+						{tagIcon && <img src={tagIcon} alt="" className={styles.icon} data-flx="persona.persona-tag.icon" />}
+						<span className={styles.text} data-flx="persona.persona-tag.text">
+							{tagText}
+						</span>
+					</span>
+				);
+			}
+			if (tagIcon) {
+				return (
+					<img
+						src={tagIcon}
+						alt=""
+						className={clsx(styles.standaloneIcon, className)}
+						data-flx="persona.standalone-icon"
+					/>
+				);
+			}
+			return null;
+		}
+
+		// Fallback for previews or contexts without a full message object (e.g., inside PersonaProfilePopout)
+		const tooltipText = rootUser.username ? `Account: @${rootUser.username}` : undefined;
+		const handleFallbackClick = (e: React.MouseEvent) => {
+			e.stopPropagation();
+			UserProfileCommands.openUserProfile(rootUser.id, guild?.id);
+		};
+		const handleFallbackKeyDown = (e: React.KeyboardEvent) => {
+			if (isKeyboardActivationKey(e.key)) {
+				e.preventDefault();
+				e.stopPropagation();
+				UserProfileCommands.openUserProfile(rootUser.id, guild?.id);
+			}
+		};
+
+		if (tagText) {
+			const pill = (
+				<span
+					className={clsx(styles.tag, className)}
+					data-flx="persona.tag"
+					onClick={handleFallbackClick}
+					onKeyDown={handleFallbackKeyDown}
+					role="button"
+					tabIndex={0}
+				>
+					{tagIcon && <img src={tagIcon} alt="" className={styles.icon} data-flx="persona.persona-tag.icon--2" />}
+					<span className={styles.text} data-flx="persona.persona-tag.text--2">
+						{tagText}
+					</span>
+				</span>
+			);
+
+			return tooltipText ? (
+				<Tooltip text={tooltipText} position="top" data-flx="persona.persona-tag.tooltip">
+					{pill}
+				</Tooltip>
+			) : (
+				pill
+			);
+		}
+
 		if (tagIcon) {
-			const tooltipText = rootUser?.username ? `Account: @${rootUser.username}` : undefined;
 			const iconElement = (
-				<img
-					src={tagIcon}
-					alt=""
-					className={clsx(styles.standaloneIcon, className)}
+				<span
+					onClick={handleFallbackClick}
+					onKeyDown={handleFallbackKeyDown}
+					role="button"
+					tabIndex={0}
+					style={{cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle'}}
 					data-flx="persona.standalone-icon"
-				/>
+				>
+					<img
+						src={tagIcon}
+						alt=""
+						className={clsx(styles.standaloneIcon, className)}
+						data-flx="persona.persona-tag.standalone-icon"
+					/>
+				</span>
 			);
 			return tooltipText ? (
 				<Tooltip text={tooltipText} position="top" data-flx="persona.persona-tag.tooltip--2">
@@ -97,27 +149,31 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 			);
 		}
 
-		if (rootUser) {
-			const tooltipText = rootUser?.username ? `Account: @${rootUser.username}` : undefined;
-			const avatarElement = (
+		const avatarElement = (
+			<span
+				onClick={handleFallbackClick}
+				onKeyDown={handleFallbackKeyDown}
+				role="button"
+				tabIndex={0}
+				style={{cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle'}}
+				data-flx="persona.persona-tag.button.fallback-click"
+			>
 				<Avatar
 					user={rootUser}
 					size={16}
 					className={clsx(styles.standaloneIcon, className)}
 					disableStatusTooltip={true}
-					data-flx="persona.persona-tag.standalone-icon"
+					data-flx="persona.persona-tag.standalone-icon--2"
 				/>
-			);
-			return tooltipText ? (
-				<Tooltip text={tooltipText} position="top" data-flx="persona.persona-tag.tooltip--3">
-					{avatarElement}
-				</Tooltip>
-			) : (
-				avatarElement
-			);
-		}
-
-		return null;
+			</span>
+		);
+		return tooltipText ? (
+			<Tooltip text={tooltipText} position="top" data-flx="persona.persona-tag.tooltip--3">
+				{avatarElement}
+			</Tooltip>
+		) : (
+			avatarElement
+		);
 	},
 );
 

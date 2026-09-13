@@ -6,7 +6,9 @@ import type {Guild} from '@app/features/guild/models/Guild';
 import {isKeyboardActivationKey} from '@app/features/input/utils/KeyboardUtils';
 import type {GuildMember} from '@app/features/member/models/GuildMember';
 import type {Message} from '@app/features/messaging/models/MessagingMessage';
+import tagStyles from '@app/features/persona/components/PersonaTag.module.css';
 import styles from '@app/features/theme/styles/Message.module.css';
+import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import KeyboardMode from '@app/features/ui/state/KeyboardMode';
 import type {User} from '@app/features/user/models/User';
@@ -15,7 +17,6 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useRef} from 'react';
-import {MessageAvatar} from './MessageAvatar';
 
 export const MessagePersonaAccount = observer(
 	({
@@ -25,6 +26,7 @@ export const MessagePersonaAccount = observer(
 		member,
 		className,
 		customIconUrl,
+		tagText,
 	}: {
 		user: User;
 		message: Message;
@@ -35,12 +37,11 @@ export const MessagePersonaAccount = observer(
 		previewColor?: string;
 		previewName?: string;
 		customIconUrl?: string | null;
+		tagText?: string | null;
 	}) => {
 		const usernameRef = useRef<HTMLSpanElement | null>(null);
-		//const contextMenuOpen = useContextMenuHoverState(usernameRef);
-		// const displayName = previewName || NicknameUtils.getNickname(user, guild?.id, message.channelId);
 		const displayName = NicknameUtils.getNickname(user, guild?.id, message.channelId);
-		// const color = previewColor || member?.getColorString();
+		const tooltipText = user.username ? `Account: @${user.username}` : undefined;
 		const onPopoutToggle = useMaybeMessageViewContext()?.onPopoutToggle;
 		const handlePopoutOpen = useCallback(() => onPopoutToggle?.(true), [onPopoutToggle]);
 		const handlePopoutClose = useCallback(() => onPopoutToggle?.(false), [onPopoutToggle]);
@@ -67,6 +68,7 @@ export const MessagePersonaAccount = observer(
 				onPopoutOpen={handlePopoutOpen}
 				onPopoutClose={handlePopoutClose}
 				ignoreSubprofile={true}
+				tooltip={tooltipText}
 				data-flx="channel.message-username.preloadable-user-popout"
 			>
 				<FocusRing data-flx="channel.message-username-original.focus-ring">
@@ -80,26 +82,48 @@ export const MessagePersonaAccount = observer(
 						ref={usernameRef}
 						onKeyDown={handleKeyDown}
 						data-flx="channel.message-username.context-menu-underline.key-down"
-						aria-label={displayName}
+						aria-label={tooltipText || displayName}
+						style={{cursor: 'pointer', display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle'}}
 					>
-						{customIconUrl ? (
+						{tagText ? (
+							<span className={clsx(tagStyles.tag, className)} data-flx="persona.tag">
+								{customIconUrl && (
+									<img
+										src={customIconUrl}
+										alt=""
+										className={tagStyles.icon}
+										data-flx="channel.message-persona-account.img"
+									/>
+								)}
+								<span className={tagStyles.text} data-flx="channel.message-persona-account.span">
+									{tagText}
+								</span>
+							</span>
+						) : customIconUrl ? (
 							<img
 								src={customIconUrl}
 								alt=""
-								className={clsx(styles.messageAvatarCompact, styles.messageSubprofileMainAvatar, className)}
+								className={clsx(
+									styles.messageAvatarCompact,
+									styles.messageSubprofileMainAvatar,
+									tagStyles.standaloneIcon,
+									className,
+								)}
 								style={{width: 16, height: 16, borderRadius: '50%', objectFit: 'cover'}}
 								data-flx="channel.user-message.message-avatar-subprofile-custom-icon"
 							/>
 						) : (
-							<MessageAvatar
+							<Avatar
 								user={user}
-								message={message}
-								guildId={guild?.id}
 								size={16}
-								className={clsx(styles.messageAvatarCompact, styles.messageSubprofileMainAvatar, className)}
-								isHovering={/*isHovering*/ false}
-								isPreview={/*!!previewContext*/ false}
-								ignoreSubprofile={true}
+								className={clsx(
+									styles.messageAvatarCompact,
+									styles.messageSubprofileMainAvatar,
+									tagStyles.standaloneIcon,
+									className,
+								)}
+								guildId={guild?.id}
+								disableStatusTooltip={true}
 								data-flx="channel.user-message.message-avatar-subprofile-main-account"
 							/>
 						)}
