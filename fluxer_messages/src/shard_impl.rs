@@ -3664,12 +3664,15 @@ impl From<MessageDbRow> for Message {
 }
 
 fn convert_subprofile(s: udt::MessageSubprofileUdt) -> MessageSubprofile {
+    let tag_text = s.display_tag_text.clone().or_else(|| s.system_name.clone());
     MessageSubprofile {
         id: s.id.unwrap_or_default(),
         name: s.name.unwrap_or_default(),
         avatar: s.avatar,
         avatar_color: s.avatar_color,
-        system_name: s.system_name,
+        display_tag_text: tag_text.clone(),
+        display_tag_icon: s.display_tag_icon,
+        system_name: s.system_name.or(tag_text),
         pronouns: s.pronouns,
         color: s.color,
         bio: s.bio,
