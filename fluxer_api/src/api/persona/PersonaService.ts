@@ -2,6 +2,7 @@
 
 import type {
 	PersonaCreateRequest,
+	PersonaTag,
 	PersonaUpdateRequest,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
@@ -9,7 +10,12 @@ import type {PersonaID, UserID} from '../BrandedTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
 import type {Persona} from '../models/Persona';
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
-import {PersonaLimitReachedError, PersonaNotFoundError} from './errors/PersonaErrors';
+import {
+	DuplicatePersonaTagError,
+	PersonaLimitReachedError,
+	PersonaNotFoundError,
+	PersonaTagLimitExceededError,
+} from './errors/PersonaErrors';
 import type {IPersonaRepository} from './IPersonaRepository';
 
 export const MAX_PERSONAS_PER_USER = 250;
@@ -20,8 +26,67 @@ export interface PersonaServiceDeps {
 	gatewayService?: IGatewayService;
 }
 
+function normalizeTag(tag: PersonaTag): {prefix: string; suffix: string} {
+	return {
+		prefix: (tag.prefix ?? '').trim(),
+		suffix: (tag.suffix ?? '').trim(),
+	};
+}
+
+function getTagKey(tag: {prefix: string; suffix: string}): string {
+	return `${tag.prefix}:::${tag.suffix}`;
+}
+
+function formatTagDisplay(tag: {prefix: string; suffix: string}): string {
+	return `${tag.prefix || ''}text${tag.suffix || ''}`;
+}
+
 export class PersonaService {
 	constructor(private readonly deps: PersonaServiceDeps) {}
+
+	private async validatePersonaTags(
+		userId: UserID,
+		tags: Array<PersonaTag> | undefined,
+		currentPersonaId?: PersonaID,
+	): Promise<void> {
+		if (!tags || tags.length === 0) return;
+
+		if (tags.length > 5) {
+			throw new PersonaTagLimitExceededError(5);
+		}
+
+		// 1. Check for duplicates within the same persona
+		const seenInRequest = new Set<string>();
+		const normalizedTags = tags.map(normalizeTag).filter((t) => t.prefix || t.suffix);
+
+		for (const tag of normalizedTags) {
+			const key = getTagKey(tag);
+			if (seenInRequest.has(key)) {
+				throw new DuplicatePersonaTagError(
+					`Duplicate tag pair '${formatTagDisplay(tag)}' cannot be listed multiple times on the same persona`,
+				);
+			}
+			seenInRequest.add(key);
+		}
+
+		// 2. Check for collisions across all other personas owned by this user
+		const userPersonas = await this.deps.personaRepository.findByUserId(userId);
+		for (const otherPersona of userPersonas) {
+			if (currentPersonaId && otherPersona.id.toString() === currentPersonaId.toString()) {
+				continue;
+			}
+			for (const otherTag of otherPersona.personaTags) {
+				const normOther = normalizeTag(otherTag);
+				if (!normOther.prefix && !normOther.suffix) continue;
+				const key = getTagKey(normOther);
+				if (seenInRequest.has(key)) {
+					throw new DuplicatePersonaTagError(
+						`Tag pair '${formatTagDisplay(normOther)}' is already in use by persona '${otherPersona.name}'`,
+					);
+				}
+			}
+		}
+	}
 
 	async getPersonas(userId: UserID): Promise<Array<Persona>> {
 		return await this.deps.personaRepository.findByUserId(userId);
@@ -39,6 +104,10 @@ export class PersonaService {
 		const currentCount = await this.deps.personaRepository.count(userId);
 		if (currentCount >= MAX_PERSONAS_PER_USER) {
 			throw new PersonaLimitReachedError(MAX_PERSONAS_PER_USER);
+		}
+
+		if (data.persona_tags) {
+			await this.validatePersonaTags(userId, data.persona_tags);
 		}
 
 		const persona = await this.deps.personaRepository.create({
@@ -60,6 +129,10 @@ export class PersonaService {
 	}
 
 	async updatePersona(userId: UserID, personaId: PersonaID, data: PersonaUpdateRequest): Promise<Persona> {
+		if (data.persona_tags !== undefined) {
+			await this.validatePersonaTags(userId, data.persona_tags, personaId);
+		}
+
 		const updated = await this.deps.personaRepository.update(userId, personaId, {
 			name: data.name,
 			avatar_url: data.avatar_url,
@@ -95,6 +168,46 @@ export class PersonaService {
 		for (const p of existingPersonas) {
 			if (p.externalUuid) {
 				existingByUuid.set(p.externalUuid, p);
+			}
+		}
+
+		// Track tags across existing personas (excluding those updated in this batch) + new imported personas
+		const usedTags = new Map<string, string>(); // tagKey -> persona name
+		for (const existing of existingPersonas) {
+			if (existing.externalUuid && items.some((it) => it.external_uuid === existing.externalUuid)) {
+				continue;
+			}
+			for (const tag of existing.personaTags) {
+				const norm = normalizeTag(tag);
+				if (norm.prefix || norm.suffix) {
+					usedTags.set(getTagKey(norm), existing.name);
+				}
+			}
+		}
+
+		for (const item of items) {
+			if (item.persona_tags) {
+				if (item.persona_tags.length > 5) {
+					throw new PersonaTagLimitExceededError(5);
+				}
+				const seenInItem = new Set<string>();
+				for (const tag of item.persona_tags) {
+					const norm = normalizeTag(tag);
+					if (!norm.prefix && !norm.suffix) continue;
+					const key = getTagKey(norm);
+					if (seenInItem.has(key)) {
+						throw new DuplicatePersonaTagError(
+							`Duplicate tag pair '${formatTagDisplay(norm)}' cannot be listed multiple times on '${item.name}'`,
+						);
+					}
+					seenInItem.add(key);
+					if (usedTags.has(key)) {
+						throw new DuplicatePersonaTagError(
+							`Tag pair '${formatTagDisplay(norm)}' is already in use by persona '${usedTags.get(key)}'`,
+						);
+					}
+					usedTags.set(key, item.name);
+				}
 			}
 		}
 
