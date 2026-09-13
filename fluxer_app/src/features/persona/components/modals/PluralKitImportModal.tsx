@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {Endpoints} from '@app/features/app/constants/Endpoints';
 import {http} from '@app/features/platform/transport/RestTransport';
@@ -7,6 +8,7 @@ import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import type {PersonaCreateRequest} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {Trans} from '@lingui/react/macro';
 import {CheckCircle, UploadSimple, Warning} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
@@ -54,7 +56,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [pkData, setPkData] = useState<PKSystemExport | null>(null);
 	const [systemTagOverride, setSystemTagOverride] = useState<string>('');
-	const [importMode, setImportMode] = useState<'replace' | 'append'>('replace');
+	const [importMode, setImportMode] = useState<'replace' | 'append'>('append');
 	const [progress, setProgress] = useState<{current: number; total: number; currentName: string; percent: number}>({
 		current: 0,
 		total: 0,
@@ -114,7 +116,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		e.preventDefault();
 	};
 
-	const handleStartImport = async () => {
+	const executeImport = async () => {
 		if (!pkData?.members || pkData.members.length === 0) return;
 
 		setStep('importing');
@@ -232,6 +234,36 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			ToastCommands.error(message);
 			setStep('select');
 		}
+	};
+
+	const handleStartImport = () => {
+		if (!pkData?.members || pkData.members.length === 0) return;
+
+		if (importMode === 'replace' && existingCount > 0) {
+			ModalCommands.push(
+				ModalCommands.modal(() => (
+					<ConfirmModal
+						title={<Trans>Replace All Personas</Trans>}
+						description={
+							<Trans>
+								Are you sure you want to replace all{' '}
+								<strong data-flx="persona.plural-kit-import-modal.handle-start-import.strong">{existingCount}</strong>{' '}
+								existing persona(s)? This will permanently delete them from your account and cannot be undone.
+							</Trans>
+						}
+						primaryText={<Trans>Replace All</Trans>}
+						primaryVariant="danger"
+						onPrimary={async () => {
+							await executeImport();
+						}}
+						data-flx="persona.plural-kit-import-modal.handle-start-import.confirm-modal"
+					/>
+				)),
+			);
+			return;
+		}
+
+		void executeImport();
 	};
 
 	const modalTitle =
@@ -354,30 +386,8 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 											</div>
 											<div className={styles.optionsGroup} data-flx="persona.plural-kit-import-modal.options-group">
 												<label
-													className={clsx(styles.radioOption, importMode === 'replace' && styles.radioOptionSelected)}
-													data-flx="persona.plural-kit-import-modal.radio-option"
-												>
-													<input
-														type="radio"
-														name="importMode"
-														checked={importMode === 'replace'}
-														onChange={() => setImportMode('replace')}
-														style={{marginTop: 3}}
-														data-flx="persona.plural-kit-import-modal.input.set-import-mode.radio"
-													/>
-													<div data-flx="persona.plural-kit-import-modal.div">
-														<div className={styles.radioTitle} data-flx="persona.plural-kit-import-modal.radio-title">
-															Replace all existing personas
-														</div>
-														<div className={styles.radioDesc} data-flx="persona.plural-kit-import-modal.radio-desc">
-															Erase all {existingCount} existing persona(s) and replace them completely with the
-															imported personas.
-														</div>
-													</div>
-												</label>
-												<label
 													className={clsx(styles.radioOption, importMode === 'append' && styles.radioOptionSelected)}
-													data-flx="persona.plural-kit-import-modal.radio-option--2"
+													data-flx="persona.plural-kit-import-modal.radio-option"
 												>
 													<input
 														type="radio"
@@ -385,18 +395,52 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 														checked={importMode === 'append'}
 														onChange={() => setImportMode('append')}
 														style={{marginTop: 3}}
+														data-flx="persona.plural-kit-import-modal.input.set-import-mode.radio"
+													/>
+													<div data-flx="persona.plural-kit-import-modal.div">
+														<div className={styles.radioTitle} data-flx="persona.plural-kit-import-modal.radio-title">
+															Keep existing and add new (Recommended)
+														</div>
+														<div className={styles.radioDesc} data-flx="persona.plural-kit-import-modal.radio-desc">
+															Keep your {existingCount} current persona(s) and add all {pkData.members?.length ?? 0}{' '}
+															imported personas alongside them as new entries.
+														</div>
+													</div>
+												</label>
+												<label
+													className={clsx(
+														styles.radioOption,
+														styles.radioOptionDanger,
+														importMode === 'replace' && styles.radioOptionDangerSelected,
+													)}
+													data-flx="persona.plural-kit-import-modal.radio-option--2"
+												>
+													<input
+														type="radio"
+														name="importMode"
+														checked={importMode === 'replace'}
+														onChange={() => setImportMode('replace')}
+														style={{marginTop: 3}}
 														data-flx="persona.plural-kit-import-modal.input.set-import-mode.radio--2"
 													/>
 													<div data-flx="persona.plural-kit-import-modal.div--2">
 														<div
-															className={styles.radioTitle}
-															data-flx="persona.plural-kit-import-modal.radio-title--2"
+															className={styles.radioTitleDanger}
+															data-flx="persona.plural-kit-import-modal.radio-title-danger"
 														>
-															Keep existing and add new
+															<Warning
+																size={16}
+																weight="fill"
+																className={styles.dangerIcon}
+																data-flx="persona.plural-kit-import-modal.danger-icon"
+															/>
+															<span data-flx="persona.plural-kit-import-modal.span">
+																Replace all existing personas (Destructive)
+															</span>
 														</div>
 														<div className={styles.radioDesc} data-flx="persona.plural-kit-import-modal.radio-desc--2">
-															Keep your {existingCount} current persona(s) and add all {pkData.members?.length ?? 0}{' '}
-															imported personas alongside them as new entries.
+															Permanently delete all {existingCount} existing persona(s) and replace them completely
+															with the imported personas.
 														</div>
 													</div>
 												</label>
@@ -456,7 +500,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 								<div className={styles.warningBox} data-flx="persona.plural-kit-import-modal.warning-box">
 									<div className={styles.warningHeader} data-flx="persona.plural-kit-import-modal.warning-header">
 										<Warning size={18} data-flx="persona.plural-kit-import-modal.warning" />
-										<span data-flx="persona.plural-kit-import-modal.span">
+										<span data-flx="persona.plural-kit-import-modal.span--2">
 											{importResults.warnings.length} notice
 											{importResults.warnings.length > 1 ? 's' : ''} during import
 										</span>
@@ -475,7 +519,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 													{w.displayName}{' '}
 													<span
 														style={{fontWeight: 400, color: 'var(--text-primary-muted)'}}
-														data-flx="persona.plural-kit-import-modal.span--2"
+														data-flx="persona.plural-kit-import-modal.span--3"
 													>
 														(Prefix: {w.prefix})
 													</span>
