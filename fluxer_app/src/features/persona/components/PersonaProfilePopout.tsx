@@ -30,6 +30,7 @@ import {ProfileCardLayout} from '@app/features/user/components/profile/profile_c
 import {ProfileCardUserInfo} from '@app/features/user/components/profile/profile_card/ProfileCardUserInfo';
 import {PROFILE_POPOUT_GEOMETRY_STYLE} from '@app/features/user/constants/UserProfileSurfaceGeometry';
 import type {User} from '@app/features/user/models/User';
+import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
@@ -54,7 +55,8 @@ export interface PersonaProfilePopoutProps {
 export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observer(
 	({subprofile, user, guildId, guildMember, onClose}) => {
 		const popoutContainerRef = useRef<HTMLDivElement | null>(null);
-		const isCurrentUser = user.id === Authentication.currentUserId;
+		const currentUserId = Authentication.currentUserId ?? Users.currentUser?.id;
+		const isCurrentUser = Boolean(currentUserId && user?.id && user.id === currentUserId);
 		const localPersona = isCurrentUser ? (PersonaStore.personas.find((p) => p.id === subprofile.id) ?? null) : null;
 
 		const [publicPersona, setPublicPersona] = useState<PublicPersonaResponse | null>(null);
@@ -97,7 +99,10 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 		}, [user.id, subprofile.id, localPersona]);
 
 		const effectivePronouns = publicPersona?.pronouns ?? localPersona?.pronouns ?? subprofile.pronouns;
-		const effectiveSystemName = publicPersona?.system_name ?? localPersona?.system_name ?? subprofile.system_name;
+		const effectiveDisplayTagText = isCurrentUser
+			? PersonaStore.displayTagText
+			: (subprofile.display_tag_text ?? subprofile.system_name ?? publicPersona?.system_name ?? null);
+		const effectiveDisplayTagIcon = isCurrentUser ? PersonaStore.displayTagIcon : (subprofile.display_tag_icon ?? null);
 		const effectiveBio = publicPersona?.bio ?? localPersona?.bio ?? subprofile.bio;
 
 		const resolvedGuildMember = useMemo(() => {
@@ -180,9 +185,13 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 								showUsername={false}
 								isClickable={false}
 								actions={
-									effectiveSystemName ? (
+									effectiveDisplayTagText || effectiveDisplayTagIcon ? (
 										<PersonaTag
-											subprofile={{...subprofile, system_name: effectiveSystemName}}
+											subprofile={{
+												...subprofile,
+												display_tag_text: effectiveDisplayTagText,
+												display_tag_icon: effectiveDisplayTagIcon,
+											}}
 											rootUser={user}
 											data-flx="persona.persona-profile-popout.persona-tag"
 										/>
