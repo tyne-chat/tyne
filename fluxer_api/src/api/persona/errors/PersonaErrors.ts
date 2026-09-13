@@ -18,3 +18,21 @@ export class PersonaLimitReachedError extends BadRequestError {
 		});
 	}
 }
+
+export class DuplicatePersonaTagError extends BadRequestError {
+	constructor(message: string = 'A tag with this prefix and suffix already exists on this account') {
+		super({
+			code: APIErrorCodes.DUPLICATE_PERSONA_TAG,
+			message,
+		});
+	}
+}
+
+export class PersonaTagLimitExceededError extends BadRequestError {
+	constructor(max: number = 5) {
+		super({
+			code: APIErrorCodes.PERSONA_TAG_LIMIT_REACHED,
+			message: `A persona can have at most ${max} tags`,
+		});
+	}
+}
