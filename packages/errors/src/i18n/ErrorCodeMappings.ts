@@ -375,6 +375,8 @@ export const ErrorCodeToI18nKey = {
 	[APIErrorCodes.UNKNOWN_PERSONA]: 'unknown_entities.unknown_user',
 	[APIErrorCodes.PRIVATE_PERSONA]: 'permissions.missing_access',
 	[APIErrorCodes.PERSONA_LIMIT_REACHED]: 'connections.limit_reached',
+	[APIErrorCodes.DUPLICATE_PERSONA_TAG]: 'usernames_and_tags.tag_already_taken',
+	[APIErrorCodes.PERSONA_TAG_LIMIT_REACHED]: 'connections.limit_reached',
 	[APIErrorCodes.UNKNOWN_VOICE_REGION]: 'calls_and_voice.unknown_voice_region',
 	[APIErrorCodes.UNKNOWN_VOICE_SERVER]: 'calls_and_voice.unknown_voice_server',
 	[APIErrorCodes.UNKNOWN_WEBAUTHN_CREDENTIAL]: 'mfa_and_passkeys.unknown_webauthn_credential',
