@@ -563,4 +563,33 @@ describe('PersonaStore', () => {
 			expect(preview4.isFromTag).toBe(false);
 		});
 	});
+
+	describe('display tag settings', () => {
+		it('reads and updates account-level display tag text and icon', async () => {
+			expect(store.displayTagText).toBe('');
+			expect(store.displayTagIcon).toBeNull();
+
+			await store.setDisplayTag('Wonderland', 'https://example.com/icon.png');
+			expect(store.displayTagText).toBe('Wonderland');
+			expect(store.displayTagIcon).toBe('https://example.com/icon.png');
+
+			await store.setDisplayTag('', null);
+			expect(store.displayTagText).toBe('');
+			expect(store.displayTagIcon).toBeNull();
+		});
+
+		it('populates display_tag_text and display_tag_icon on matchEditMessage', async () => {
+			const alice = await store.addPersona({
+				name: 'Alice',
+				persona_tags: [{prefix: '[', suffix: ']'}],
+			});
+			await store.setDisplayTag('Wonderland', 'https://example.com/icon.png');
+
+			const res = store.matchEditMessage('[Hello]');
+			expect(res.subprofile?.id).toBe(alice.id);
+			expect(res.subprofile?.display_tag_text).toBe('Wonderland');
+			expect(res.subprofile?.display_tag_icon).toBe('https://example.com/icon.png');
+			expect(res.subprofile?.system_name).toBe('Wonderland');
+		});
+	});
 });
