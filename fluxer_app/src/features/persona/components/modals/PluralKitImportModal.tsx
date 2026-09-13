@@ -187,12 +187,18 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				}
 			}
 
-			const personaTags = (member.proxy_tags ?? [])
-				.filter((t) => t.prefix?.trim() || t.suffix?.trim())
-				.map((t) => ({
-					prefix: t.prefix?.trim() || undefined,
-					suffix: t.suffix?.trim() || undefined,
-				}));
+			const uniqueMemberTags = new Set<string>();
+			const personaTags: Array<{prefix?: string; suffix?: string}> = [];
+			for (const t of member.proxy_tags ?? []) {
+				const prefix = t.prefix?.trim() || undefined;
+				const suffix = t.suffix?.trim() || undefined;
+				if (!prefix && !suffix) continue;
+				const key = `${prefix ?? ''}:::${suffix ?? ''}`;
+				if (uniqueMemberTags.has(key)) continue;
+				uniqueMemberTags.add(key);
+				personaTags.push({prefix, suffix});
+				if (personaTags.length >= 5) break;
+			}
 
 			importedPersonas.push({
 				name: displayName,
