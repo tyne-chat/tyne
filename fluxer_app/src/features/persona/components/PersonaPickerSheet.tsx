@@ -250,6 +250,7 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 											{p.pronouns && (
 												<span
 													className={styles.personaPronouns}
+													title={p.pronouns}
 													data-flx="persona.persona-picker-sheet.persona-pronouns--2"
 												>
 													{p.pronouns}
