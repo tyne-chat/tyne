@@ -70,6 +70,33 @@ export const ProfileCardUserInfo: React.FC<ProfileCardUserInfoProps> = observer(
 		) : (
 			displayNameButton
 		);
+
+		const pronounsRef = useRef<HTMLDivElement>(null);
+		const isPronounsOverflowing = useTextOverflow(pronounsRef, {
+			content: pronouns ?? '',
+			measureTextRange: true,
+		});
+		const pronounsElement = (
+			<div
+				ref={pronounsRef}
+				className={styles.pronouns}
+				data-flx="user.profile.profile-card.profile-card-user-info.pronouns"
+			>
+				<span className={styles.srOnly} data-flx="user.profile.profile-card.profile-card-user-info.sr-only">
+					<Trans>Pronouns: </Trans>
+				</span>
+				{pronouns}
+			</div>
+		);
+		const pronounsContent =
+			isPronounsOverflowing && pronouns ? (
+				<Tooltip text={pronouns} data-flx="user.profile.profile-card.profile-card-user-info.pronouns-tooltip">
+					{pronounsElement}
+				</Tooltip>
+			) : (
+				pronounsElement
+			);
+
 		return (
 			<div
 				className={styles.userInfoContainer}
@@ -120,14 +147,7 @@ export const ProfileCardUserInfo: React.FC<ProfileCardUserInfoProps> = observer(
 						{usernameActions}
 					</div>
 				)}
-				{pronouns && (
-					<div className={styles.pronouns} data-flx="user.profile.profile-card.profile-card-user-info.pronouns">
-						<span className={styles.srOnly} data-flx="user.profile.profile-card.profile-card-user-info.sr-only">
-							<Trans>Pronouns: </Trans>
-						</span>
-						{pronouns}
-					</div>
-				)}
+				{pronouns && pronounsContent}
 			</div>
 		);
 	},

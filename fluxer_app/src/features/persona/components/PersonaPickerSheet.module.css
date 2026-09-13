@@ -144,6 +144,7 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	min-width: 0;
 }
 
 .personaName {
@@ -158,6 +159,11 @@
 .personaPronouns {
 	font-size: 0.75rem;
 	color: var(--text-primary-muted);
+	min-width: 0;
+	max-width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .tagBadge {
