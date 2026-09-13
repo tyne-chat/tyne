@@ -51,7 +51,7 @@ export const PersonaCreateRequestSchema = z.object({
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	bio: z.string().max(4096).nullish().optional().describe('Optional persona bio'),
 	auto_tag_disabled: z.boolean().optional().describe('Whether auto-tagging is disabled'),
-	persona_tags: z.array(PersonaTagSchema).max(20).optional().describe('Proxy prefix/suffix tags'),
+	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Proxy prefix/suffix tags'),
 	visibility: PersonaVisibilitySchema.optional().describe('Visibility: unlisted (default), public, or private'),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID (e.g. PluralKit)'),
 });
@@ -65,7 +65,7 @@ export const PersonaUpdateRequestSchema = z.object({
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	bio: z.string().max(4096).nullish().optional().describe('Optional persona bio'),
 	auto_tag_disabled: z.boolean().optional().describe('Whether auto-tagging is disabled'),
-	persona_tags: z.array(PersonaTagSchema).max(20).optional().describe('Proxy prefix/suffix tags'),
+	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Proxy prefix/suffix tags'),
 	visibility: z.enum(['unlisted', 'public', 'private']).optional().describe('Visibility setting'),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID'),
 });
