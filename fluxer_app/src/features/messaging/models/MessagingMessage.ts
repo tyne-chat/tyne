@@ -494,6 +494,8 @@ export class Message {
 				this.subprofile.name !== other.subprofile.name ||
 				this.subprofile.avatar !== other.subprofile.avatar ||
 				this.subprofile.system_name !== other.subprofile.system_name ||
+				this.subprofile.display_tag_text !== other.subprofile.display_tag_text ||
+				this.subprofile.display_tag_icon !== other.subprofile.display_tag_icon ||
 				this.subprofile.color !== other.subprofile.color
 			) {
 				return false;
