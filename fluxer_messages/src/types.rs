@@ -489,6 +489,10 @@ pub struct MessageSubprofile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub avatar_color: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_tag_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_tag_icon: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub system_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pronouns: Option<String>,
