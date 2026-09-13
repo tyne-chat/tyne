@@ -15,8 +15,11 @@
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
 	user-select: none;
-	cursor: default;
+	cursor: pointer;
 	border: 1px solid var(--border-color);
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
 }
 
 .tag:hover {
@@ -57,4 +60,9 @@
 	margin-inline-start: var(--message-compact-gap, 0.25rem);
 	flex-shrink: 0;
 	cursor: pointer;
+	transition: opacity 0.15s ease;
+}
+
+.standaloneIcon:hover {
+	opacity: 0.85;
 }
