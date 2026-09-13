@@ -171,6 +171,20 @@ export class PersonaStoreClass {
 		return this._personas.find((p) => p.id === id) ?? null;
 	}
 
+	get displayTagText(): string {
+		return UserSettings.getSubPreference('displayTagText') ?? '';
+	}
+
+	get displayTagIcon(): string | null {
+		const icon = UserSettings.getSubPreference('displayTagIcon');
+		return icon && icon.length > 0 ? icon : null;
+	}
+
+	async setDisplayTag(text: string, icon?: string | null): Promise<void> {
+		await UserSettings.setSubPreference('displayTagText', text.trim());
+		await UserSettings.setSubPreference('displayTagIcon', (icon ?? '').trim());
+	}
+
 	get rankedPersonas(): ReadonlyArray<ClientPersona> {
 		const now = Date.now();
 		return [...this._personas].sort((a, b) => {
@@ -466,7 +480,9 @@ export class PersonaStoreClass {
 					name: result.persona.name,
 					avatar: result.persona.avatar_url ?? null,
 					avatar_color: result.persona.color ?? null,
-					system_name: result.persona.system_name ?? null,
+					display_tag_text: this.displayTagText || null,
+					display_tag_icon: this.displayTagIcon || null,
+					system_name: this.displayTagText || null,
 					pronouns: result.persona.pronouns ?? null,
 					color: result.persona.color ?? null,
 				},
@@ -482,7 +498,9 @@ export class PersonaStoreClass {
 					name: currentSubprofile.name,
 					avatar: currentSubprofile.avatar ?? null,
 					avatar_color: currentSubprofile.avatar_color ?? null,
-					system_name: currentSubprofile.system_name ?? null,
+					display_tag_text: currentSubprofile.display_tag_text ?? currentSubprofile.system_name ?? null,
+					display_tag_icon: currentSubprofile.display_tag_icon ?? null,
+					system_name: currentSubprofile.display_tag_text ?? currentSubprofile.system_name ?? null,
 					pronouns: currentSubprofile.pronouns ?? null,
 					color: currentSubprofile.color ?? null,
 				},
