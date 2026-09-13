@@ -82,6 +82,55 @@ describe('PersonaController', () => {
 				.expect(HTTP_STATUS.BAD_REQUEST)
 				.execute();
 		});
+
+		test('fails validation when persona has more than 5 tags', async () => {
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas')
+				.body({
+					name: 'Tag Heavy',
+					persona_tags: [
+						{prefix: '1:'},
+						{prefix: '2:'},
+						{prefix: '3:'},
+						{prefix: '4:'},
+						{prefix: '5:'},
+						{prefix: '6:'},
+					],
+				})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+		});
+
+		test('fails validation when persona has duplicate tags on the same persona', async () => {
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas')
+				.body({
+					name: 'Duplicate Tags',
+					persona_tags: [{prefix: 'dup:'}, {prefix: 'dup:'}],
+				})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+		});
+
+		test('fails validation when persona tag collides with another persona on the same account', async () => {
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas')
+				.body({
+					name: 'First Persona',
+					persona_tags: [{prefix: '[', suffix: ']'}],
+				})
+				.expect(HTTP_STATUS.CREATED)
+				.execute();
+
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas')
+				.body({
+					name: 'Second Persona',
+					persona_tags: [{prefix: '[', suffix: ']'}],
+				})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+		});
 	});
 
 	describe('GET /users/@me/personas (List Self)', () => {
@@ -195,6 +244,34 @@ describe('PersonaController', () => {
 				.expect(HTTP_STATUS.NOT_FOUND)
 				.execute();
 		});
+
+		test('fails when updating with a tag that collides with another persona, but succeeds when keeping own tags', async () => {
+			const p1 = await createBuilder<PersonaResponse>(harness, account.token)
+				.post('/users/@me/personas')
+				.body({name: 'Persona A', persona_tags: [{prefix: 'a:'}]})
+				.expect(HTTP_STATUS.CREATED)
+				.execute();
+
+			const p2 = await createBuilder<PersonaResponse>(harness, account.token)
+				.post('/users/@me/personas')
+				.body({name: 'Persona B', persona_tags: [{prefix: 'b:'}]})
+				.expect(HTTP_STATUS.CREATED)
+				.execute();
+
+			// Colliding with Persona A's tag should fail
+			await createBuilder(harness, account.token)
+				.patch(`/users/@me/personas/${p2.id}`)
+				.body({persona_tags: [{prefix: 'a:'}]})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// Keeping its own tag on Persona A should succeed
+			await createBuilder(harness, account.token)
+				.patch(`/users/@me/personas/${p1.id}`)
+				.body({name: 'Persona A Renamed', persona_tags: [{prefix: 'a:'}]})
+				.expect(HTTP_STATUS.OK)
+				.execute();
+		});
 	});
 
 	describe('DELETE /users/@me/personas/:persona_id (Delete Self)', () => {
@@ -297,6 +374,19 @@ describe('PersonaController', () => {
 
 			expect(res).toHaveLength(1);
 			expect(res[0]!.name).toBe('Wrapped Import');
+		});
+
+		test('fails when import batch contains duplicate tags across personas', async () => {
+			const batch = [
+				{name: 'Member 1', persona_tags: [{prefix: 'tag:'}]},
+				{name: 'Member 2', persona_tags: [{prefix: 'tag:'}]},
+			];
+
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body(batch)
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
 		});
 	});
 });
