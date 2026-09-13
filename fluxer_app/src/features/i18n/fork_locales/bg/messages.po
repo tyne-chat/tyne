@@ -6,9 +6,16 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. placeholder {0}: persona.name
+msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Change persona"
+
+msgid "Delete Persona"
+msgstr "Delete Persona"
 
 msgid "Edit persona"
 msgstr "Edit persona"
