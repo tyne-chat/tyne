@@ -31,12 +31,24 @@ export async function fetchPersonas(): Promise<Array<PersonaResponse>> {
 	}
 }
 
+function extractErrorMessage(res: {status: number; body: unknown}, fallback: string): string {
+	if (
+		res.body &&
+		typeof res.body === 'object' &&
+		'message' in res.body &&
+		typeof (res.body as {message: unknown}).message === 'string'
+	) {
+		return (res.body as {message: string}).message;
+	}
+	return `${fallback}: status ${res.status}`;
+}
+
 export async function createPersona(data: PersonaCreateRequest): Promise<PersonaResponse> {
 	const res = await http.post<PersonaResponse>(Endpoints.USER_PERSONAS, {
 		body: data,
 	});
 	if (!res.ok || !res.body) {
-		throw new Error(`Failed to create persona: status ${res.status}`);
+		throw new Error(extractErrorMessage(res, 'Failed to create persona'));
 	}
 	PersonaStore.upsertPersona(res.body);
 	return res.body;
@@ -47,7 +59,7 @@ export async function updatePersona(id: string, data: PersonaUpdateRequest): Pro
 		body: data,
 	});
 	if (!res.ok || !res.body) {
-		throw new Error(`Failed to update persona: status ${res.status}`);
+		throw new Error(extractErrorMessage(res, 'Failed to update persona'));
 	}
 	PersonaStore.upsertPersona(res.body);
 	// Invalidate any cached public representation of this persona
@@ -77,7 +89,7 @@ export async function importPersonas(personas: Array<PersonaCreateRequest>): Pro
 		body: personas,
 	});
 	if (!res.ok || !res.body) {
-		throw new Error(`Failed to import personas: status ${res.status}`);
+		throw new Error(extractErrorMessage(res, 'Failed to import personas'));
 	}
 	PersonaStore.upsertPersonas(res.body);
 	return res.body;
