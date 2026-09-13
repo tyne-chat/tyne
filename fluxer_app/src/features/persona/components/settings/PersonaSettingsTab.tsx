@@ -1054,6 +1054,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 													{persona.pronouns && (
 														<span
 															className={styles.cardPronouns}
+															title={persona.pronouns}
 															data-flx="persona.settings.persona-settings-tab.card-pronouns"
 														>
 															({persona.pronouns})
