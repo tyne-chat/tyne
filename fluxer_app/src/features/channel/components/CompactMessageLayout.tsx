@@ -20,6 +20,10 @@ import {clsx} from 'clsx';
 import type React from 'react';
 import {useCallback, useLayoutEffect, useRef} from 'react';
 
+// Fork imports.
+
+import {PersonaTag} from '@app/features/persona/components/PersonaTag';
+
 const COMPACT_TIMESTAMP_WIDTH_CSS_VARIABLE = '--message-compact-measured-timestamp-width';
 const COMPACT_MESSAGE_SELECTOR = '[data-flx-compact="true"]';
 
@@ -226,6 +230,16 @@ export function CompactAuthorPrefix({
 					previewName={previewOverrides?.displayName}
 					data-flx="channel.compact-message-layout.compact-author-prefix.message-username"
 				/>
+				{message.subprofile && (
+					<PersonaTag
+						subprofile={message.subprofile}
+						rootUser={author}
+						message={message}
+						guild={guild}
+						member={member}
+						data-flx="channel.compact-message-layout.compact-author-prefix.persona-tag"
+					/>
+				)}
 			</span>
 			<span className={styles.copyOnly} data-flx="channel.compact-message-layout.compact-author-prefix.copy-only--2">
 				:{' '}
