@@ -212,4 +212,8 @@ pub struct MessageSubprofileUdt {
     pub pronouns: Option<String>,
     pub color: Option<i32>,
     pub bio: Option<String>,
+    #[serde(default)]
+    pub display_tag_text: Option<String>,
+    #[serde(default)]
+    pub display_tag_icon: Option<String>,
 }
