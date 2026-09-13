@@ -60,8 +60,8 @@ import {type MouseEvent, useCallback, useMemo} from 'react';
 
 // Fork imports.
 
+import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import {MessagePersonaAccount} from './MessagePersonaAccount';
 
 const JUMP_TO_MESSAGE_FROM_SENT_DESCRIPTOR = msg({
 	message: 'Jump to message from {displayName}, sent {formattedDate}',
@@ -528,16 +528,16 @@ export const UserMessage = observer(() => {
 						previewName={previewOverrides?.displayName}
 						data-flx="channel.user-message.message-username--2"
 					/>
-					<MessagePersonaAccount
-						user={author}
-						message={message}
-						guild={guild}
-						member={member ?? undefined}
-						isPreview={!!previewContext}
-						previewColor={previewOverrides?.usernameColor}
-						previewName={previewOverrides?.displayName}
-						data-flx="channel.user-message.message-persona-account"
-					/>
+					{message.subprofile && (
+						<PersonaTag
+							subprofile={message.subprofile}
+							rootUser={author}
+							message={message}
+							guild={guild}
+							member={member ?? undefined}
+							data-flx="channel.user-message.persona-tag"
+						/>
+					)}
 					{(author.bot || message.isCrosspostCopy) && (
 						<UserTag
 							className={styles.userTagOffset}
