@@ -131,6 +131,35 @@ describe('PersonaMatcher', () => {
 		expect(matchPersona('[]', personas, null, false).matched).toBe(false);
 	});
 
+	// When a user sends a message with file attachments (e.g. an image or file upload) and only
+	// types the persona's prefix or suffix (like an image captioned '-C' or ']'), PersonaMatcher
+	// matches the persona and strips out the proxy tag so the inner content is empty, allowing
+	// the image to be posted cleanly under that persona.
+	it('matches just the persona suffix when hasAttachments is true', () => {
+		// Just suffix of Charlie ('-C')
+		const res1 = matchPersona('-C', personas, null, true);
+		expect(res1.matched).toBe(true);
+		expect(res1.persona?.name).toBe('Charlie');
+		expect(res1.strippedContent).toBe('');
+
+		// Just suffix of Charlie with whitespace (' -C ')
+		const res2 = matchPersona(' -C ', personas, null, true);
+		expect(res2.matched).toBe(true);
+		expect(res2.persona?.name).toBe('Charlie');
+		expect(res2.strippedContent).toBe('');
+
+		// Just suffix of bracket persona Alice (']')
+		const res3 = matchPersona(']', personas, null, true);
+		expect(res3.matched).toBe(true);
+		expect(res3.persona?.name).toBe('Alice');
+		expect(res3.strippedContent).toBe('');
+
+		// In ordinary text messages without attachments, a lonely suffix alone should NOT trigger
+		// persona proxying (to prevent accidental triggers from punctuation/emoticons).
+		expect(matchPersona('-C', personas, null, false).matched).toBe(false);
+		expect(matchPersona(']', personas, null, false).matched).toBe(false);
+	});
+
 	it('escapes persona tag matching when prefixed with backslash \\ while a persona is latched', () => {
 		const result = matchPersona('\\[Hello world!]', personas, 'alice-id');
 		expect(result.matched).toBe(false);
