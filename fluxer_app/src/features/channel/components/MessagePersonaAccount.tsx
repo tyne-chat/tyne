@@ -24,6 +24,7 @@ export const MessagePersonaAccount = observer(
 		guild,
 		member,
 		className,
+		customIconUrl,
 	}: {
 		user: User;
 		message: Message;
@@ -33,6 +34,7 @@ export const MessagePersonaAccount = observer(
 		isPreview?: boolean;
 		previewColor?: string;
 		previewName?: string;
+		customIconUrl?: string | null;
 	}) => {
 		const usernameRef = useRef<HTMLSpanElement | null>(null);
 		//const contextMenuOpen = useContextMenuHoverState(usernameRef);
@@ -80,17 +82,27 @@ export const MessagePersonaAccount = observer(
 						data-flx="channel.message-username.context-menu-underline.key-down"
 						aria-label={displayName}
 					>
-						<MessageAvatar
-							user={user}
-							message={message}
-							guildId={guild?.id}
-							size={16}
-							className={clsx(styles.messageAvatarCompact, styles.messageSubprofileMainAvatar, className)}
-							isHovering={/*isHovering*/ false}
-							isPreview={/*!!previewContext*/ false}
-							ignoreSubprofile={true}
-							data-flx="channel.user-message.message-avatar-subprofile-main-account"
-						/>
+						{customIconUrl ? (
+							<img
+								src={customIconUrl}
+								alt=""
+								className={clsx(styles.messageAvatarCompact, styles.messageSubprofileMainAvatar, className)}
+								style={{width: 16, height: 16, borderRadius: '50%', objectFit: 'cover'}}
+								data-flx="channel.user-message.message-avatar-subprofile-custom-icon"
+							/>
+						) : (
+							<MessageAvatar
+								user={user}
+								message={message}
+								guildId={guild?.id}
+								size={16}
+								className={clsx(styles.messageAvatarCompact, styles.messageSubprofileMainAvatar, className)}
+								isHovering={/*isHovering*/ false}
+								isPreview={/*!!previewContext*/ false}
+								ignoreSubprofile={true}
+								data-flx="channel.user-message.message-avatar-subprofile-main-account"
+							/>
+						)}
 					</span>
 				</FocusRing>
 			</PreloadableUserPopout>

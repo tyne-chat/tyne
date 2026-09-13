@@ -324,3 +324,108 @@
 .iconPrivate {
 	color: var(--text-primary-muted, #949ba4);
 }
+
+.displayTagControlWrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin-bottom: 24px;
+	background-color: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md, 6px);
+	padding: 16px;
+}
+
+.displayTagInputs {
+	display: flex;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.displayTagTextField {
+	flex: 1;
+	min-width: 200px;
+}
+
+.displayTagIconField {
+	flex: 1;
+	min-width: 240px;
+}
+
+.tagIconRow {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	height: 2.75rem;
+}
+
+.tagIconImage {
+	width: 32px;
+	height: 32px;
+	border-radius: var(--radius-round, 50%);
+	object-fit: cover;
+	border: 1px solid var(--border-color);
+	flex-shrink: 0;
+}
+
+.previewContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 8px;
+	border-top: 1px solid var(--border-color);
+	padding-top: 12px;
+}
+
+.previewLabel {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-primary-muted);
+}
+
+.previewCard {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 12px 14px;
+	background-color: var(--bg-primary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md, 6px);
+}
+
+.previewAvatar {
+	flex-shrink: 0;
+}
+
+.previewMessageContent {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.previewHeader {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.previewName {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.previewTimestamp {
+	font-size: 0.75rem;
+	color: var(--text-primary-muted);
+}
+
+.previewBody {
+	font-size: 0.875rem;
+	color: var(--text-primary);
+	line-height: 1.375;
+}
