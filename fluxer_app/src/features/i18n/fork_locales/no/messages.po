@@ -10,6 +10,9 @@ msgstr ""
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 
+msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Change persona"
@@ -30,6 +33,12 @@ msgstr "Manage and create your personas"
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
+
+msgid "Replace All"
+msgstr "Replace All"
+
+msgid "Replace All Personas"
+msgstr "Replace All Personas"
 
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
