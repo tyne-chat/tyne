@@ -141,10 +141,39 @@
 	background: var(--bg-active);
 }
 
+.radioOptionDanger {
+	border-color: color-mix(in srgb, var(--accent-danger) 35%, var(--border-color));
+}
+
+.radioOptionDanger:hover {
+	background: color-mix(in srgb, var(--accent-danger) 6%, var(--bg-tertiary));
+}
+
+.radioOptionDangerSelected {
+	border-color: var(--accent-danger) !important;
+	background: color-mix(in srgb, var(--accent-danger) 10%, var(--bg-secondary)) !important;
+}
+
+.dangerIcon {
+	color: var(--accent-danger);
+	margin-right: 6px;
+	vertical-align: text-bottom;
+	flex-shrink: 0;
+}
+
 .radioTitle {
 	font-size: 14px;
 	font-weight: 600;
 	color: var(--text-primary);
+	margin-bottom: 2px;
+}
+
+.radioTitleDanger {
+	display: flex;
+	align-items: center;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--accent-danger);
 	margin-bottom: 2px;
 }
 
