@@ -2,9 +2,24 @@
 
 import {SettingsSection} from '@app/features/app/components/dialogs/shared/SettingsSection';
 import {SettingsTabContainer, SettingsTabContent} from '@app/features/app/components/dialogs/shared/SettingsTabLayout';
+import {
+	AVATAR_RECOMMENDED_SIZE_LABEL,
+	IMAGE_MAX_SIZE_LABEL,
+	STATIC_IMAGE_FORMATS,
+} from '@app/features/app/config/I18nDisplayConstants';
 import {Endpoints} from '@app/features/app/constants/Endpoints';
+import {AssetCropModal, AssetType} from '@app/features/expressions/components/modals/AssetCropModal';
+import {openAssetSourceModal} from '@app/features/expressions/components/modals/AssetSourceModal';
+import {isAnimatedFile} from '@app/features/expressions/utils/AnimatedImageUtils';
+import {getAcceptString} from '@app/features/expressions/utils/AssetFormatCopy';
+import {formatImageUploadRecommendedHint} from '@app/features/expressions/utils/AssetUploadHintCopy';
+import {downloadGifAsImageFile} from '@app/features/expressions/utils/GifFileDownload';
+import {isSvgFile, readImageFileAsUploadDataUrl} from '@app/features/expressions/utils/ImageUploadFileUtils';
+import {openFilePicker} from '@app/features/messaging/utils/FilePickerUtils';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Button} from '@app/features/ui/button/Button';
+import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
+import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {ColorPickerField} from '@app/features/ui/components/form/ColorPickerField';
@@ -12,7 +27,9 @@ import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import {AvatarUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/AvatarUploader';
 import Users from '@app/features/user/state/Users';
+import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import type {PersonaVisibility} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {useLingui} from '@lingui/react/macro';
 import {
 	GlobeSimple,
 	Info,
@@ -26,10 +43,11 @@ import {
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
 import {type ActivePersonaMode, type Persona, PersonaStore} from '../../state/PersonaStore';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
+import {PersonaTag} from '../PersonaTag';
 import styles from './PersonaSettingsTab.module.css';
 
 const ACTIVE_PERSONA_TABS: Array<SegmentedTab<ActivePersonaMode>> = [
@@ -62,7 +80,6 @@ const VISIBILITY_DESCRIPTIONS: Record<PersonaVisibility, string> = {
 interface PersonaFormState {
 	id?: string;
 	name: string;
-	systemName: string;
 	pronouns: string;
 	avatarUrl: string;
 	accentColor: number | null;
@@ -73,7 +90,6 @@ interface PersonaFormState {
 
 const emptyFormState = (): PersonaFormState => ({
 	name: '',
-	systemName: '',
 	pronouns: '',
 	avatarUrl: '',
 	accentColor: null,
@@ -87,6 +103,7 @@ export interface PersonaSettingsTabProps {
 }
 
 export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({initialSubtab}) => {
+	const {i18n} = useLingui();
 	const currentUser = Users.getCurrentUser();
 	const personas = PersonaStore.personas;
 	const activePersonaId = PersonaStore.activePersonaId;
@@ -95,6 +112,143 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<PersonaFormState>(emptyFormState());
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+	const [tagText, setTagText] = useState(PersonaStore.displayTagText);
+	const [tagIcon, setTagIcon] = useState(PersonaStore.displayTagIcon);
+	const [isUploadingTagIcon, setIsUploadingTagIcon] = useState(false);
+
+	useEffect(() => {
+		setTagText(PersonaStore.displayTagText);
+	}, [PersonaStore.displayTagText]);
+
+	useEffect(() => {
+		setTagIcon(PersonaStore.displayTagIcon);
+	}, [PersonaStore.displayTagIcon]);
+
+	const handleTagTextChange = (value: string) => {
+		setTagText(value);
+		void PersonaStore.setDisplayTag(value, tagIcon);
+	};
+
+	const handleTagIconUpload = useCallback(
+		async (base64: string) => {
+			setIsUploadingTagIcon(true);
+			try {
+				const res = await http.post<{avatar_url: string}>(Endpoints.USER_PERSONA_AVATAR, {
+					body: {avatar: base64},
+				});
+				if (res.ok && res.body?.avatar_url) {
+					const newIcon = res.body.avatar_url;
+					setTagIcon(newIcon);
+					await PersonaStore.setDisplayTag(tagText, newIcon);
+					ToastCommands.createToast({
+						type: 'success',
+						children: 'Display tag icon updated',
+					});
+				} else {
+					ToastCommands.createToast({
+						type: 'error',
+						children: 'Failed to upload icon to server',
+					});
+				}
+			} catch {
+				ToastCommands.createToast({
+					type: 'error',
+					children: 'Failed to upload icon to server',
+				});
+			} finally {
+				setIsUploadingTagIcon(false);
+			}
+		},
+		[tagText],
+	);
+
+	const handleClearTagIcon = useCallback(async () => {
+		setTagIcon(null);
+		await PersonaStore.setDisplayTag(tagText, null);
+		ToastCommands.createToast({
+			type: 'success',
+			children: 'Display tag icon removed',
+		});
+	}, [tagText]);
+
+	const processTagIconFile = useCallback(
+		async (file: File) => {
+			if (file.size > 10 * 1024 * 1024) {
+				ToastCommands.createToast({
+					type: 'error',
+					children: 'Icon file is too large. Choose an image smaller than 10MB.',
+				});
+				return;
+			}
+			const svg = isSvgFile(file);
+			const animated = svg ? false : await isAnimatedFile(file);
+			const base64 = svg ? await readImageFileAsUploadDataUrl(file) : await AvatarUtils.fileToBase64(file);
+			if (animated || svg) {
+				await handleTagIconUpload(base64);
+				return;
+			}
+			ModalCommands.push(
+				modal(() => (
+					<AssetCropModal
+						assetType={AssetType.AVATAR}
+						imageUrl={base64}
+						sourceMimeType={file.type}
+						onCropComplete={(croppedBlob) => {
+							const reader = new FileReader();
+							reader.onload = () => {
+								const croppedBase64 = reader.result as string;
+								void handleTagIconUpload(croppedBase64);
+							};
+							reader.readAsDataURL(croppedBlob);
+						}}
+						onSkip={() => {
+							void handleTagIconUpload(base64);
+						}}
+						data-flx="user.persona-settings-tab.tag-icon.asset-crop-modal"
+					/>
+				)),
+			);
+		},
+		[handleTagIconUpload],
+	);
+
+	const handleOpenTagIconUpload = useCallback(() => {
+		openAssetSourceModal({
+			title: 'Tag Icon',
+			uploadHint: formatImageUploadRecommendedHint(i18n, {
+				formats: STATIC_IMAGE_FORMATS,
+				maxSize: IMAGE_MAX_SIZE_LABEL,
+				recommendedSize: AVATAR_RECOMMENDED_SIZE_LABEL,
+			}),
+			onPickUpload: async () => {
+				try {
+					const [file] = await openFilePicker({accept: getAcceptString('avatar')});
+					if (!file) return;
+					await processTagIconFile(file);
+				} catch {
+					ToastCommands.createToast({
+						type: 'error',
+						children: 'Failed to select icon image',
+					});
+				}
+			},
+			onSelectGif: (gif) => {
+				void (async () => {
+					try {
+						const file = await downloadGifAsImageFile(gif);
+						await processTagIconFile(file);
+					} catch {
+						ToastCommands.createToast({
+							type: 'error',
+							children: 'Failed to select GIF icon',
+						});
+					}
+				})();
+			},
+			showGifOption: true,
+		});
+	}, [i18n, processTagIconFile]);
 
 	const handleAvatarUpload = async (base64: string) => {
 		setFormData((prev) => ({...prev, avatarUrl: base64}));
@@ -134,7 +288,6 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		setFormData({
 			id: persona.id,
 			name: persona.name,
-			systemName: persona.system_name ?? persona.systemName ?? '',
 			pronouns: persona.pronouns ?? '',
 			avatarUrl: persona.avatar_url ?? persona.avatarUrl ?? '',
 			accentColor: persona.color ?? null,
@@ -194,7 +347,6 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 			if (formData.id) {
 				await PersonaCommands.updatePersona(formData.id, {
 					name: trimmedName,
-					system_name: formData.systemName.trim() || null,
 					pronouns: formData.pronouns.trim() || null,
 					avatar_url: formData.avatarUrl.trim() || null,
 					color: parsedColor,
@@ -209,7 +361,6 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 			} else {
 				await PersonaCommands.createPersona({
 					name: trimmedName,
-					system_name: formData.systemName.trim() || null,
 					pronouns: formData.pronouns.trim() || null,
 					avatar_url: formData.avatarUrl.trim() || null,
 					color: parsedColor,
@@ -336,6 +487,159 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								</span>
 							</div>
 						</div>
+
+						{/* Display Tag section */}
+						<div
+							className={styles.sectionHeader}
+							style={{marginTop: 24}}
+							data-flx="persona.settings.persona-settings-tab.section-header--2"
+						>
+							<div data-flx="persona.settings.persona-settings-tab.div--2">
+								<h4 className={styles.sectionTitle} data-flx="persona.settings.persona-settings-tab.section-title--2">
+									Display Tag
+								</h4>
+								<p
+									className={styles.sectionDescription}
+									data-flx="persona.settings.persona-settings-tab.section-description--2"
+								>
+									Display tag will appear next to all persona names in messages. If no display tag is set, your account
+									profile picture will be shown.
+								</p>
+							</div>
+						</div>
+						<div
+							className={styles.displayTagControlWrapper}
+							data-flx="persona.settings.persona-settings-tab.display-tag-control-wrapper"
+						>
+							<div
+								className={styles.displayTagInputs}
+								data-flx="persona.settings.persona-settings-tab.display-tag-inputs"
+							>
+								<div
+									className={styles.displayTagTextField}
+									data-flx="persona.settings.persona-settings-tab.display-tag-text-field"
+								>
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label">
+										Tag Text
+									</div>
+									<input
+										type="text"
+										className={styles.textInput}
+										placeholder="e.g. Wonderland"
+										maxLength={32}
+										value={tagText}
+										onChange={(e) => handleTagTextChange(e.target.value)}
+										data-flx="persona.settings.persona-settings-tab.text-input.tag-text-change"
+									/>
+								</div>
+								<div
+									className={styles.displayTagIconField}
+									data-flx="persona.settings.persona-settings-tab.display-tag-icon-field"
+								>
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--2">
+										Tag Icon
+									</div>
+									<div className={styles.tagIconRow} data-flx="persona.settings.persona-settings-tab.tag-icon-row">
+										{tagIcon ? (
+											<>
+												<img
+													src={tagIcon}
+													alt="Tag Icon"
+													className={styles.tagIconImage}
+													data-flx="persona.settings.persona-settings-tab.tag-icon-image"
+												/>
+												<Button
+													variant="secondary"
+													small={true}
+													onClick={handleOpenTagIconUpload}
+													disabled={isUploadingTagIcon}
+													data-flx="persona.settings.persona-settings-tab.button.open-tag-icon-upload"
+												>
+													Change icon
+												</Button>
+												<Button
+													variant="secondary"
+													small={true}
+													onClick={handleClearTagIcon}
+													disabled={isUploadingTagIcon}
+													data-flx="persona.settings.persona-settings-tab.button.clear-tag-icon"
+												>
+													Remove icon
+												</Button>
+											</>
+										) : (
+											<Button
+												variant="primary"
+												small={true}
+												onClick={handleOpenTagIconUpload}
+												disabled={isUploadingTagIcon}
+												data-flx="persona.settings.persona-settings-tab.button.open-tag-icon-upload--2"
+											>
+												Upload icon
+											</Button>
+										)}
+									</div>
+								</div>
+							</div>
+							{/* Live Preview Card */}
+							<div
+								className={styles.previewContainer}
+								data-flx="persona.settings.persona-settings-tab.preview-container"
+							>
+								<div className={styles.previewLabel} data-flx="persona.settings.persona-settings-tab.preview-label">
+									Preview
+								</div>
+								<div className={styles.previewCard} data-flx="persona.settings.persona-settings-tab.preview-card">
+									{currentUser && (
+										<Avatar
+											user={currentUser}
+											size={40}
+											className={styles.previewAvatar}
+											data-flx="persona.settings.persona-settings-tab.preview-avatar"
+										/>
+									)}
+									<div
+										className={styles.previewMessageContent}
+										data-flx="persona.settings.persona-settings-tab.preview-message-content"
+									>
+										<div
+											className={styles.previewHeader}
+											data-flx="persona.settings.persona-settings-tab.preview-header"
+										>
+											<span
+												className={styles.previewName}
+												data-flx="persona.settings.persona-settings-tab.preview-name"
+											>
+												Alice
+											</span>
+											{currentUser && (
+												<PersonaTag
+													subprofile={{
+														id: 'preview',
+														name: 'Alice',
+														display_tag_text: tagText.trim(),
+														display_tag_icon: tagIcon,
+													}}
+													rootUser={currentUser}
+													data-flx="persona.settings.persona-settings-tab.persona-tag"
+												/>
+											)}
+											<span
+												className={styles.previewTimestamp}
+												data-flx="persona.settings.persona-settings-tab.preview-timestamp"
+											>
+												— Today at 12:00 PM
+											</span>
+										</div>
+										<div className={styles.previewBody} data-flx="persona.settings.persona-settings-tab.preview-body">
+											{tagText.trim() || tagIcon
+												? 'This is a preview of how your display tag will look in chat.'
+												: 'No display tag configured. Messages will show your account profile picture.'}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</SettingsSection>
 
 					{/* Editor Form */}
@@ -350,7 +654,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 							</div>
 							<div className={styles.formGrid} data-flx="persona.settings.persona-settings-tab.form-grid">
 								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field">
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--3">
 										Name *
 									</div>
 									<input
@@ -364,21 +668,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									/>
 								</div>
 								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--2">
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--2">
-										System Tag
-									</div>
-									<input
-										type="text"
-										className={styles.textInput}
-										placeholder="e.g. Wonderland System"
-										maxLength={100}
-										value={formData.systemName}
-										onChange={(e) => setFormData({...formData, systemName: e.target.value})}
-										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--2"
-									/>
-								</div>
-								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--3">
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--3">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--4">
 										Pronouns
 									</div>
 									<input
@@ -388,11 +678,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 										maxLength={100}
 										value={formData.pronouns}
 										onChange={(e) => setFormData({...formData, pronouns: e.target.value})}
-										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--3"
+										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--2"
 									/>
 								</div>
-								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--4">
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--4">
+								<div className={styles.formField} data-flx="persona.settings.persona-settings-tab.form-field--3">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--5">
 										Accent color
 									</div>
 									<ColorPickerField
@@ -408,14 +698,14 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.settings.persona-settings-tab.form-field--5"
+									data-flx="persona.settings.persona-settings-tab.form-field--4"
 								>
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--5">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--6">
 										Avatar
 									</div>
 									<div
 										style={{display: 'flex', gap: 16, alignItems: 'center'}}
-										data-flx="persona.settings.persona-settings-tab.div--2"
+										data-flx="persona.settings.persona-settings-tab.div--3"
 									>
 										{currentUser && (
 											<Avatar
@@ -425,7 +715,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 												data-flx="persona.settings.persona-settings-tab.avatar"
 											/>
 										)}
-										<div style={{flex: 1}} data-flx="persona.settings.persona-settings-tab.div--3">
+										<div style={{flex: 1}} data-flx="persona.settings.persona-settings-tab.div--4">
 											<AvatarUploader
 												hasAvatar={Boolean(formData.avatarUrl)}
 												onAvatarChange={handleAvatarUpload}
@@ -440,9 +730,9 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.settings.persona-settings-tab.form-field--6"
+									data-flx="persona.settings.persona-settings-tab.form-field--5"
 								>
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--6">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--7">
 										Bio
 									</div>
 									<input
@@ -452,15 +742,15 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 										maxLength={2048}
 										value={formData.bio}
 										onChange={(e) => setFormData({...formData, bio: e.target.value})}
-										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--4"
+										data-flx="persona.settings.persona-settings-tab.text-input.set-form-data--3"
 									/>
 								</div>
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.settings.persona-settings-tab.form-field--7"
+									data-flx="persona.settings.persona-settings-tab.form-field--6"
 								>
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--7">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--8">
 										Visibility
 									</div>
 									<SegmentedTabs<PersonaVisibility>
@@ -489,13 +779,13 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.settings.persona-settings-tab.form-field--8"
+									data-flx="persona.settings.persona-settings-tab.form-field--7"
 								>
 									<div
 										style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}
-										data-flx="persona.settings.persona-settings-tab.div--4"
+										data-flx="persona.settings.persona-settings-tab.div--5"
 									>
-										<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--8">
+										<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--9">
 											Persona Tags (Prefix & Suffix)
 										</div>
 										<Button
@@ -574,7 +864,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 						linkable={false}
 						actions={
 							!isEditing && (
-								<div style={{display: 'flex', gap: 8}} data-flx="persona.settings.persona-settings-tab.div--5">
+								<div style={{display: 'flex', gap: 8}} data-flx="persona.settings.persona-settings-tab.div--6">
 									<Button
 										variant="secondary"
 										leftIcon={<UploadSimple size={16} data-flx="persona.settings.persona-settings-tab.upload-simple" />}
@@ -626,14 +916,6 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 													<span className={styles.cardName} data-flx="persona.settings.persona-settings-tab.card-name">
 														{persona.name}
 													</span>
-													{persona.systemName && (
-														<span
-															className={styles.cardSystemTag}
-															data-flx="persona.settings.persona-settings-tab.card-system-tag"
-														>
-															[{persona.systemName}]
-														</span>
-													)}
 													{persona.pronouns && (
 														<span
 															className={styles.cardPronouns}

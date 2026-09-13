@@ -155,6 +155,8 @@ export interface MessageSubprofileRow {
 	name: string;
 	avatar?: Nullish<string>;
 	avatar_color?: Nullish<number>;
+	display_tag_text?: Nullish<string>;
+	display_tag_icon?: Nullish<string>;
 	pronouns?: Nullish<string>;
 	color?: Nullish<number>;
 	bio?: Nullish<string>;
