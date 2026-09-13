@@ -74,6 +74,8 @@ describe('MessagePersona Backend Pipeline', () => {
 				id: 'persona-1',
 				name: 'Alice',
 				avatar: 'https://example.com/alice.png',
+				display_tag_text: 'Wonderland',
+				display_tag_icon: 'https://example.com/icon.png',
 				system_name: 'The System',
 				pronouns: 'she/her',
 				color: 0xff0000,
@@ -83,6 +85,8 @@ describe('MessagePersona Backend Pipeline', () => {
 		expect(parsed.success).toBe(true);
 		if (parsed.success) {
 			expect(parsed.data.subprofile?.name).toBe('Alice');
+			expect(parsed.data.subprofile?.display_tag_text).toBe('Wonderland');
+			expect(parsed.data.subprofile?.display_tag_icon).toBe('https://example.com/icon.png');
 			expect(parsed.data.subprofile?.system_name).toBe('The System');
 		}
 	});

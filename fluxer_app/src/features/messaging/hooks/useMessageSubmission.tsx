@@ -127,6 +127,8 @@ export const useMessageSubmission = ({
 				DraftCommands.deleteDraft(channel.id);
 				return true;
 			}
+			const displayTagText = PersonaStore.displayTagText;
+			const displayTagIcon = PersonaStore.displayTagIcon;
 			const subprofile =
 				matchResult.matched && matchResult.persona
 					? {
@@ -134,7 +136,9 @@ export const useMessageSubmission = ({
 							name: matchResult.persona.name,
 							avatar: matchResult.persona.avatar_url ?? null,
 							avatar_color: matchResult.persona.color ?? null,
-							system_name: matchResult.persona.system_name ?? null,
+							display_tag_text: displayTagText || null,
+							display_tag_icon: displayTagIcon || null,
+							system_name: displayTagText || null,
 							pronouns: matchResult.persona.pronouns ?? null,
 							color: matchResult.persona.color ?? null,
 						}
