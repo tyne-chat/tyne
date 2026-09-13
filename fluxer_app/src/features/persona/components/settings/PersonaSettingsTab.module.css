@@ -232,6 +232,47 @@
 	border-color: var(--brand-primary);
 }
 
+.textareaInput {
+	background-color: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	padding: 8px 10px;
+	font-size: 0.875rem;
+	color: var(--text-primary);
+	outline: none;
+	font-family: inherit;
+	min-height: 5.5rem;
+	max-height: 14rem;
+	box-sizing: border-box;
+	resize: vertical;
+	overflow-y: auto;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar-thumb-bg) transparent;
+}
+
+.textareaInput:focus {
+	border-color: var(--brand-primary);
+}
+
+.textareaInput::-webkit-scrollbar {
+	width: 8px;
+}
+
+.textareaInput::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.textareaInput::-webkit-scrollbar-thumb {
+	background-color: var(--scrollbar-thumb-bg);
+	border-radius: 4px;
+}
+
+.textareaInput::-webkit-scrollbar-thumb:hover {
+	background-color: var(--scrollbar-thumb-bg-hover);
+}
+
 .tagRow {
 	display: flex;
 	align-items: center;
