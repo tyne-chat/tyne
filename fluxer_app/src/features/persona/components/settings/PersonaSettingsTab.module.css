@@ -292,6 +292,17 @@
 	outline: none;
 }
 
+.tagInputError {
+	border-color: var(--accent-danger) !important;
+}
+
+.tagErrorText {
+	font-size: 0.75rem;
+	color: var(--accent-danger);
+	margin-top: -2px;
+	margin-bottom: 6px;
+}
+
 .editorActions {
 	display: flex;
 	align-items: center;
