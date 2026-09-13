@@ -113,6 +113,7 @@
 .cardPronouns {
 	font-size: 0.8125rem;
 	color: var(--text-primary-muted);
+	overflow-wrap: anywhere;
 }
 
 .cardSecondaryRow {
