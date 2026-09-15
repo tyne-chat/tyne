@@ -93,6 +93,8 @@ import {uint8ArrayToBase64} from 'uint8array-extras';
 
 // Fork imports.
 
+import {validateOutboundEndpointUrl} from '@fluxer/hono/src/security/OutboundEndpoint';
+import {streamText} from 'hono/streaming';
 import {z} from 'zod';
 
 const PersonaAvatarUploadRequest = z.object({
@@ -112,6 +114,11 @@ const PersonaAvatarImportResponse = z.object({
 	avatar_url: z.string().describe('CDN URL of the imported avatar'),
 });
 const SubprofileAvatarImportResponse = PersonaAvatarImportResponse;
+
+const PersonaBatchAvatarImportRequest = z.object({
+	urls: z.array(z.string().url().max(2048)).min(1).max(500).describe('List of remote avatar URLs to import'),
+});
+const SubprofileBatchAvatarImportRequest = PersonaBatchAvatarImportRequest;
 
 export function UserAccountController(app: HonoApp) {
 	app.get(
@@ -187,15 +194,29 @@ export function UserAccountController(app: HonoApp) {
 		return ctx.json({avatar_url: prepared.newCdnUrl ?? ''});
 	};
 
-	const handlePersonaAvatarImport = async (ctx: any) => {
-		const user = ctx.get('user');
-		const body = ctx.req.valid('json');
+	async function processRemoteAvatar(
+		rawUrl: string,
+		userId: string,
+		entityAssetService: any,
+	): Promise<{avatar_url?: string; error?: string}> {
+		try {
+			validateOutboundEndpointUrl(rawUrl, {
+				name: 'Avatar URL',
+				allowHttp: true,
+				allowLocalhost: false,
+				allowPrivateIpLiterals: false,
+				allowQuery: true,
+				allowFragment: true,
+			});
+		} catch (err: unknown) {
+			return {error: err instanceof Error ? err.message : 'Invalid avatar URL'};
+		}
 
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), 12000);
 		let fetchRes: Response;
 		try {
-			fetchRes = await fetch(body.url, {
+			fetchRes = await fetch(rawUrl, {
 				signal: controller.signal,
 				headers: {
 					'User-Agent': 'Fluxer/1.0 (Persona Avatar Importer)',
@@ -205,38 +226,125 @@ export function UserAccountController(app: HonoApp) {
 		} catch (err: unknown) {
 			clearTimeout(timeout);
 			const errorMsg = err instanceof Error ? err.message : 'Network error';
-			return ctx.json({message: `Failed to download image from host: ${errorMsg}`}, 400 as any);
+			return {error: `Failed to download image from host: ${errorMsg}`};
 		} finally {
 			clearTimeout(timeout);
 		}
 
 		if (!fetchRes.ok) {
-			return ctx.json(
-				{message: `Image host responded with HTTP ${fetchRes.status} ${fetchRes.statusText}`},
-				400 as any,
-			);
+			return {error: `Image host responded with HTTP ${fetchRes.status} ${fetchRes.statusText}`};
 		}
 
 		const contentType = fetchRes.headers.get('content-type') || 'image/png';
 		const arrayBuf = await fetchRes.arrayBuffer();
 		if (arrayBuf.byteLength > 10 * 1024 * 1024) {
-			return ctx.json({message: 'Image exceeds maximum 10MB limit'}, 400 as any);
+			return {error: 'Image exceeds maximum 10MB limit'};
 		}
 
 		const base64Data = Buffer.from(arrayBuf).toString('base64');
 		const base64Image = `data:${contentType};base64,${base64Data}`;
 
+		try {
+			const prepared = await entityAssetService.prepareAssetUpload({
+				assetType: 'avatar',
+				entityType: 'user',
+				entityId: userId,
+				previousHash: null,
+				base64Image,
+				errorPath: 'avatar',
+			});
+			await entityAssetService.commitAssetChange({prepared});
+			return {avatar_url: prepared.newCdnUrl ?? ''};
+		} catch (err: unknown) {
+			const errorMsg = err instanceof Error ? err.message : 'Failed to process image';
+			return {error: errorMsg};
+		}
+	}
+
+	const handlePersonaAvatarImport = async (ctx: any) => {
+		const user = ctx.get('user');
+		const body = ctx.req.valid('json');
 		const entityAssetService = ctx.get('entityAssetService');
-		const prepared = await entityAssetService.prepareAssetUpload({
-			assetType: 'avatar',
-			entityType: 'user',
-			entityId: user.id,
-			previousHash: null,
-			base64Image,
-			errorPath: 'avatar',
+
+		const result = await processRemoteAvatar(body.url, user.id, entityAssetService);
+		if (result.error) {
+			return ctx.json({message: result.error}, 400 as any);
+		}
+		return ctx.json({avatar_url: result.avatar_url ?? ''});
+	};
+
+	const handlePersonaBatchAvatarImport = async (ctx: any) => {
+		const user = ctx.get('user');
+		const body = ctx.req.valid('json');
+		const entityAssetService = ctx.get('entityAssetService');
+
+		const rawUrls = body.urls as Array<string>;
+		const uniqueUrls = Array.from(new Set(rawUrls));
+		const total = uniqueUrls.length;
+
+		const res = streamText(ctx, async (stream) => {
+			let aborted = false;
+			stream.onAbort(() => {
+				aborted = true;
+			});
+
+			await stream.writeln(
+				JSON.stringify({
+					type: 'start',
+					total,
+				}),
+			);
+
+			const results: Record<string, {avatar_url?: string; error?: string}> = {};
+			let completedCount = 0;
+			let currentIndex = 0;
+			const CONCURRENCY = 4;
+
+			const worker = async () => {
+				while (currentIndex < uniqueUrls.length && !aborted) {
+					const idx = currentIndex++;
+					const url = uniqueUrls[idx];
+					const r = await processRemoteAvatar(url, user.id, entityAssetService);
+					results[url] = r;
+					completedCount++;
+
+					if (!aborted) {
+						try {
+							await stream.writeln(
+								JSON.stringify({
+									type: 'progress',
+									completed: completedCount,
+									total,
+									url,
+									avatar_url: r.avatar_url,
+									error: r.error,
+								}),
+							);
+						} catch {
+							aborted = true;
+							break;
+						}
+					}
+				}
+			};
+
+			const workerCount = Math.min(CONCURRENCY, total);
+			const workers = Array.from({length: workerCount}, () => worker());
+			await Promise.all(workers);
+
+			if (!aborted) {
+				await stream.writeln(
+					JSON.stringify({
+						type: 'complete',
+						total,
+						results,
+					}),
+				);
+			}
 		});
-		await entityAssetService.commitAssetChange({prepared});
-		return ctx.json({avatar_url: prepared.newCdnUrl ?? ''});
+
+		ctx.header('Content-Type', 'application/x-ndjson');
+		return res;
 	};
 
 	app.post(
@@ -307,6 +415,42 @@ export function UserAccountController(app: HonoApp) {
 			description: 'Downloads an avatar image from an external URL and stores it on the instance CDN/storage.',
 		}),
 		handlePersonaAvatarImport,
+	);
+	app.post(
+		'/users/@me/personas/import-batch-avatars',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_BATCH_AVATAR_IMPORT),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaBatchAvatarImportRequest),
+		OpenAPI({
+			operationId: 'import_persona_batch_avatars',
+			summary: 'Batch import persona avatars from remote URLs with streaming progress',
+			responseSchema: z.any(),
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Users'],
+			description:
+				'Downloads up to 500 avatar images from external URLs and stores them on the instance CDN/storage, streaming NDJSON progress events.',
+		}),
+		handlePersonaBatchAvatarImport,
+	);
+	app.post(
+		'/users/@me/subprofiles/import-batch-avatars',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_BATCH_AVATAR_IMPORT),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', SubprofileBatchAvatarImportRequest),
+		OpenAPI({
+			operationId: 'import_subprofile_batch_avatars',
+			summary: 'Batch import subprofile avatars from remote URLs (legacy alias)',
+			responseSchema: z.any(),
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Users'],
+			description:
+				'Downloads up to 500 avatar images from external URLs and stores them on the instance CDN/storage, streaming NDJSON progress events.',
+		}),
+		handlePersonaBatchAvatarImport,
 	);
 	app.post(
 		'/users/@me/email-change/start',
