@@ -20,6 +20,10 @@ export const UserRateLimitConfigs = {
 		bucket: 'user:update',
 		config: {limit: 20, windowMs: ms('1 minute')},
 	} as RouteRateLimitConfig,
+	USER_PERSONA_BATCH_AVATAR_IMPORT: {
+		bucket: 'user:persona:batch_avatar_import',
+		config: {limit: 5, windowMs: ms('10 minutes')},
+	} as RouteRateLimitConfig,
 	USER_EMAIL_CHANGE_START: {
 		bucket: 'user:email_change:start',
 		config: {limit: 10, windowMs: ms('1 minute')},
