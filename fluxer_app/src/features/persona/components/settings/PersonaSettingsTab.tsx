@@ -5,7 +5,7 @@ import {SettingsSection} from '@app/features/app/components/dialogs/shared/Setti
 import {SettingsTabContainer, SettingsTabContent} from '@app/features/app/components/dialogs/shared/SettingsTabLayout';
 import {
 	AVATAR_RECOMMENDED_SIZE_LABEL,
-	IMAGE_MAX_SIZE_LABEL,
+	IMAGE_MAX_SIZE_BYTES,
 	STATIC_IMAGE_FORMATS,
 } from '@app/features/app/config/I18nDisplayConstants';
 import {Endpoints} from '@app/features/app/constants/Endpoints';
@@ -17,6 +17,7 @@ import {formatImageUploadRecommendedHint} from '@app/features/expressions/utils/
 import {downloadGifAsImageFile} from '@app/features/expressions/utils/GifFileDownload';
 import {isSvgFile, readImageFileAsUploadDataUrl} from '@app/features/expressions/utils/ImageUploadFileUtils';
 import {openFilePicker} from '@app/features/messaging/utils/FilePickerUtils';
+import {formatFileSize} from '@app/features/messaging/utils/FileUtils';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
@@ -267,7 +268,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 			title: 'Tag Icon',
 			uploadHint: formatImageUploadRecommendedHint(i18n, {
 				formats: STATIC_IMAGE_FORMATS,
-				maxSize: IMAGE_MAX_SIZE_LABEL,
+				maxSize: formatFileSize(i18n.locale, IMAGE_MAX_SIZE_BYTES),
 				recommendedSize: AVATAR_RECOMMENDED_SIZE_LABEL,
 			}),
 			onPickUpload: async () => {
