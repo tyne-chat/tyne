@@ -3,7 +3,7 @@
 import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {Endpoints} from '@app/features/app/constants/Endpoints';
-import {http} from '@app/features/platform/transport/RestTransport';
+import SessionManager from '@app/features/platform/state/AuthSession';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
@@ -57,11 +57,18 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 	const [pkData, setPkData] = useState<PKSystemExport | null>(null);
 	const [systemTagOverride, setSystemTagOverride] = useState<string>('');
 	const [importMode, setImportMode] = useState<'replace' | 'append'>('append');
-	const [progress, setProgress] = useState<{current: number; total: number; currentName: string; percent: number}>({
+	const [progress, setProgress] = useState<{
+		current: number;
+		total: number;
+		currentName: string;
+		percent: number;
+		label?: string;
+	}>({
 		current: 0,
 		total: 0,
 		currentName: '',
 		percent: 0,
+		label: 'avatars downloaded',
 	});
 	const [importResults, setImportResults] = useState<{
 		successCount: number;
@@ -121,11 +128,130 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 
 		setStep('importing');
 		const members = pkData.members;
-		const total = members.length;
 		const warnings: Array<ImportWarning> = [];
+
+		// 1. Gather all unique remote avatar URLs
+		const avatarUrls = members
+			.map((m) => (m.avatar_url || m.webhook_avatar_url || '').trim())
+			.filter((url) => url.length > 0 && (url.startsWith('http://') || url.startsWith('https://')));
+		const uniqueAvatarUrls = Array.from(new Set(avatarUrls));
+		const totalAvatars = uniqueAvatarUrls.length;
+
+		const avatarMap = new Map<string, string>();
+		const avatarErrors = new Map<string, string>();
+
+		if (totalAvatars > 0) {
+			setProgress({
+				current: 0,
+				total: totalAvatars,
+				currentName: 'Preparing avatar batch download...',
+				percent: 0,
+				label: 'avatars downloaded',
+			});
+
+			const BATCH_LIMIT = 500;
+			for (let b = 0; b < totalAvatars; b += BATCH_LIMIT) {
+				const batch = uniqueAvatarUrls.slice(b, b + BATCH_LIMIT);
+				const batchStartIndex = b;
+
+				try {
+					const res = await fetch(`/api/v1${Endpoints.USER_PERSONA_IMPORT_BATCH_AVATARS}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							...(SessionManager.token ? {Authorization: SessionManager.token} : {}),
+						},
+						body: JSON.stringify({urls: batch}),
+					});
+
+					if (!res.ok) {
+						let errorMessage = `HTTP ${res.status}`;
+						try {
+							const errorJson = await res.json();
+							if (errorJson.message) errorMessage = errorJson.message;
+						} catch {
+							// fallback
+						}
+						for (const url of batch) {
+							avatarErrors.set(url, errorMessage);
+						}
+						continue;
+					}
+
+					const reader = res.body?.getReader();
+					if (reader) {
+						const decoder = new TextDecoder();
+						let buffer = '';
+						while (true) {
+							const {done, value} = await reader.read();
+							if (done) break;
+							buffer += decoder.decode(value, {stream: true});
+							const lines = buffer.split('\n');
+							buffer = lines.pop() ?? '';
+							for (const line of lines) {
+								const trimmed = line.trim();
+								if (!trimmed) continue;
+								try {
+									const event = JSON.parse(trimmed);
+									if (event.type === 'progress') {
+										if (event.url) {
+											if (event.avatar_url) avatarMap.set(event.url, event.avatar_url);
+											if (event.error) avatarErrors.set(event.url, event.error);
+										}
+										const completedOverall = batchStartIndex + event.completed;
+										setProgress({
+											current: completedOverall,
+											total: totalAvatars,
+											currentName: `Downloading avatar ${completedOverall} of ${totalAvatars}...`,
+											percent: Math.round((completedOverall / totalAvatars) * 100),
+											label: 'avatars downloaded',
+										});
+									} else if (event.type === 'complete' && event.results) {
+										for (const [url, r] of Object.entries(
+											event.results as Record<string, {avatar_url?: string; error?: string}>,
+										)) {
+											if (r.avatar_url) avatarMap.set(url, r.avatar_url);
+											if (r.error) avatarErrors.set(url, r.error);
+										}
+									}
+								} catch {
+									// ignore partial chunk json parse errors
+								}
+							}
+						}
+						if (buffer.trim()) {
+							try {
+								const event = JSON.parse(buffer.trim());
+								if (event.type === 'progress') {
+									if (event.url) {
+										if (event.avatar_url) avatarMap.set(event.url, event.avatar_url);
+										if (event.error) avatarErrors.set(event.url, event.error);
+									}
+								} else if (event.type === 'complete' && event.results) {
+									for (const [url, r] of Object.entries(
+										event.results as Record<string, {avatar_url?: string; error?: string}>,
+									)) {
+										if (r.avatar_url) avatarMap.set(url, r.avatar_url);
+										if (r.error) avatarErrors.set(url, r.error);
+									}
+								}
+							} catch {}
+						}
+					}
+				} catch (err: unknown) {
+					const errorMsg = err instanceof Error ? err.message : 'Network error';
+					for (const url of batch) {
+						avatarErrors.set(url, errorMsg);
+					}
+				}
+			}
+		}
+
+		// 2. Build imported persona objects
+		const totalMembers = members.length;
 		const importedPersonas: Array<PersonaCreateRequest> = [];
 
-		for (let i = 0; i < total; i++) {
+		for (let i = 0; i < totalMembers; i++) {
 			const member = members[i];
 			const displayName = (member.name || member.display_name || '').trim();
 			const primaryPrefix = member.proxy_tags?.[0]?.prefix?.trim() || undefined;
@@ -135,47 +261,28 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 					displayName: `Member #${i + 1}`,
 					reason: 'Skipped member because they have no name configured.',
 				});
-				setProgress({
-					current: i + 1,
-					total,
-					currentName: '(Skipped entry)',
-					percent: Math.round(((i + 1) / total) * 100),
-				});
 				continue;
 			}
 
 			setProgress({
 				current: i + 1,
-				total,
-				currentName: displayName,
-				percent: Math.round(((i + 1) / total) * 100),
+				total: totalMembers,
+				currentName: `Configuring ${displayName}...`,
+				percent: Math.round(((i + 1) / totalMembers) * 100),
+				label: 'personas prepared',
 			});
 
-			const remoteAvatarUrl = member.avatar_url || member.webhook_avatar_url || null;
+			const remoteAvatarUrl = (member.avatar_url || member.webhook_avatar_url || '').trim();
 			let localAvatarUrl: string | undefined;
 
 			if (remoteAvatarUrl) {
-				try {
-					const res = await http.post<{avatar_url: string; message?: string}>(Endpoints.USER_PERSONA_IMPORT_AVATAR, {
-						body: {url: remoteAvatarUrl},
-					});
-					if (res.ok && res.body?.avatar_url) {
-						localAvatarUrl = res.body.avatar_url;
-					} else {
-						const failureReason =
-							res.body?.message || (res.status === 404 ? 'HTTP 404 Not Found' : `HTTP ${res.status || 'Failed'}`);
-						warnings.push({
-							displayName,
-							prefix: primaryPrefix,
-							reason: `Avatar image failed to download: ${failureReason}. Persona was imported without an avatar.`,
-						});
-					}
-				} catch (err: unknown) {
-					const errorMsg = err instanceof Error ? err.message : 'Network error';
+				if (avatarMap.has(remoteAvatarUrl)) {
+					localAvatarUrl = avatarMap.get(remoteAvatarUrl);
+				} else if (avatarErrors.has(remoteAvatarUrl)) {
 					warnings.push({
 						displayName,
 						prefix: primaryPrefix,
-						reason: `Avatar download failed: ${errorMsg}. Persona was imported without an avatar.`,
+						reason: `Avatar image failed to download: ${avatarErrors.get(remoteAvatarUrl)}. Persona was imported without an avatar.`,
 					});
 				}
 			}
@@ -222,6 +329,13 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		}
 
 		try {
+			setProgress({
+				current: totalMembers,
+				total: totalMembers,
+				currentName: 'Saving personas...',
+				percent: 100,
+				label: 'saving personas',
+			});
 			await PersonaCommands.importPersonas(importedPersonas);
 
 			setImportResults({
@@ -472,8 +586,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 								/>
 							</div>
 							<div className={styles.progressDetail} data-flx="persona.plural-kit-import-modal.progress-detail">
-								{progress.current} of {progress.total} members ({progress.percent}%) &bull; Downloading avatars to local
-								S3
+								{progress.current} of {progress.total} {progress.label ?? 'items'} ({progress.percent}%)
 							</div>
 						</div>
 					)}
