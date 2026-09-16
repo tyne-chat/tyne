@@ -129,29 +129,55 @@ export function matchPersona(
 						innerContent: '',
 					});
 				}
-			} else if (hasAttachments && prefix.length > 0 && (text.startsWith(prefix) || text.trim() === prefix.trim())) {
-				// When attachments are present, allow matching just the persona's prefix (with no other text)
-				const remainder = text.startsWith(prefix) ? text.slice(prefix.length).trim() : '';
-				if (remainder.length === 0) {
-					candidates.push({
-						persona,
-						prefixLen: prefix.length,
-						suffixLen: 0,
-						totalLen: prefix.length,
-						innerContent: '',
-					});
-				}
-			} else if (hasAttachments && suffix.length > 0 && (text.endsWith(suffix) || text.trim() === suffix.trim())) {
-				// When attachments are present, allow matching just the persona's suffix (with no other text)
-				const remainder = text.endsWith(suffix) ? text.slice(0, text.length - suffix.length).trim() : '';
-				if (remainder.length === 0) {
-					candidates.push({
-						persona,
-						prefixLen: 0,
-						suffixLen: suffix.length,
-						totalLen: suffix.length,
-						innerContent: '',
-					});
+			} else if (hasAttachments || options?.allowEmptyContent) {
+				const trimmed = text.trim();
+				const hasPrefix = prefix.length > 0;
+				const hasSuffix = suffix.length > 0;
+
+				if (hasPrefix && hasSuffix) {
+					// Two-sided tag: ALWAYS requires both prefix and suffix
+					if (trimmed.startsWith(prefix.trim()) && trimmed.endsWith(suffix.trim())) {
+						const innerStart = prefix.trim().length;
+						const innerEnd = trimmed.length - suffix.trim().length;
+						const inner = innerEnd >= innerStart ? trimmed.slice(innerStart, innerEnd).trim() : '';
+						if (inner.length === 0) {
+							candidates.push({
+								persona,
+								prefixLen: prefix.length,
+								suffixLen: suffix.length,
+								totalLen: prefix.length + suffix.length,
+								innerContent: '',
+							});
+						}
+					}
+				} else if (hasPrefix && !hasSuffix) {
+					// Prefix-only tag
+					if (trimmed === prefix.trim() || trimmed.startsWith(prefix)) {
+						const remainder = trimmed.startsWith(prefix) ? trimmed.slice(prefix.length).trim() : '';
+						if (remainder.length === 0) {
+							candidates.push({
+								persona,
+								prefixLen: prefix.length,
+								suffixLen: 0,
+								totalLen: prefix.length,
+								innerContent: '',
+							});
+						}
+					}
+				} else if (!hasPrefix && hasSuffix) {
+					// Suffix-only tag
+					if (trimmed === suffix.trim() || trimmed.endsWith(suffix)) {
+						const remainder = trimmed.endsWith(suffix) ? trimmed.slice(0, trimmed.length - suffix.length).trim() : '';
+						if (remainder.length === 0) {
+							candidates.push({
+								persona,
+								prefixLen: 0,
+								suffixLen: suffix.length,
+								totalLen: suffix.length,
+								innerContent: '',
+							});
+						}
+					}
 				}
 			}
 		}
