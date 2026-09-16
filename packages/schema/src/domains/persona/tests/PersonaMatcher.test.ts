@@ -77,38 +77,34 @@ describe('PersonaMatcher', () => {
 		expect(result2.matched).toBe(false);
 	});
 
-	it('matches just the persona prefix when hasAttachments is true', () => {
-		// Just prefix of Alice ('[')
+	it('matches complete prefix-only or bracket tags when hasAttachments is true, but requires both sides for two-sided tags', () => {
+		// Half of Alice's two-sided tag ('[') does NOT match even with attachments
 		const res1 = matchPersona('[', personas, null, true);
-		expect(res1.matched).toBe(true);
-		expect(res1.persona?.name).toBe('Alice');
-		expect(res1.strippedContent).toBe('');
+		expect(res1.matched).toBe(false);
 
-		// Just prefix of Alice with trailing space ('[ ')
+		// Half of Alice's tag with space ('[ ') does NOT match
 		const res2 = matchPersona('[ ', personas, null, true);
-		expect(res2.matched).toBe(true);
-		expect(res2.persona?.name).toBe('Alice');
-		expect(res2.strippedContent).toBe('');
+		expect(res2.matched).toBe(false);
 
-		// Just prefix-only tag of Bob ('B:')
+		// Complete prefix-only tag of Bob ('B:') matches
 		const res3 = matchPersona('B:', personas, null, true);
 		expect(res3.matched).toBe(true);
 		expect(res3.persona?.name).toBe('Bob');
 		expect(res3.strippedContent).toBe('');
 
-		// Prefix-only tag of Bob with space ('B: ')
+		// Prefix-only tag of Bob with space ('B: ') matches
 		const res4 = matchPersona('B: ', personas, null, true);
 		expect(res4.matched).toBe(true);
 		expect(res4.persona?.name).toBe('Bob');
 		expect(res4.strippedContent).toBe('');
 
-		// Prefix and suffix with empty inner content ('[]') with attachments
+		// Prefix and suffix with empty inner content ('[]') with attachments matches
 		const res5 = matchPersona('[]', personas, null, true);
 		expect(res5.matched).toBe(true);
 		expect(res5.persona?.name).toBe('Alice');
 		expect(res5.strippedContent).toBe('');
 
-		// Prefix and suffix with whitespace inner content ('[   ]') with attachments
+		// Prefix and suffix with whitespace inner content ('[   ]') with attachments matches
 		const res6 = matchPersona('[   ]', personas, null, true);
 		expect(res6.matched).toBe(true);
 		expect(res6.persona?.name).toBe('Alice');
@@ -131,11 +127,7 @@ describe('PersonaMatcher', () => {
 		expect(matchPersona('[]', personas, null, false).matched).toBe(false);
 	});
 
-	// When a user sends a message with file attachments (e.g. an image or file upload) and only
-	// types the persona's prefix or suffix (like an image captioned '-C' or ']'), PersonaMatcher
-	// matches the persona and strips out the proxy tag so the inner content is empty, allowing
-	// the image to be posted cleanly under that persona.
-	it('matches just the persona suffix when hasAttachments is true', () => {
+	it('matches suffix-only tags when hasAttachments is true, but requires both sides for two-sided tags', () => {
 		// Just suffix of Charlie ('-C')
 		const res1 = matchPersona('-C', personas, null, true);
 		expect(res1.matched).toBe(true);
@@ -148,11 +140,9 @@ describe('PersonaMatcher', () => {
 		expect(res2.persona?.name).toBe('Charlie');
 		expect(res2.strippedContent).toBe('');
 
-		// Just suffix of bracket persona Alice (']')
+		// Just suffix of bracket persona Alice (']') does NOT match because opening bracket is missing
 		const res3 = matchPersona(']', personas, null, true);
-		expect(res3.matched).toBe(true);
-		expect(res3.persona?.name).toBe('Alice');
-		expect(res3.strippedContent).toBe('');
+		expect(res3.matched).toBe(false);
 
 		// In ordinary text messages without attachments, a lonely suffix alone should NOT trigger
 		// persona proxying (to prevent accidental triggers from punctuation/emoticons).
