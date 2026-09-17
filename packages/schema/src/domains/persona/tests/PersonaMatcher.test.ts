@@ -49,6 +49,25 @@ describe('PersonaMatcher', () => {
 		expect(result.strippedContent).toBe('Hello');
 	});
 
+	it('breaks ties by longer prefix when total length is equal', () => {
+		const p1: PersonaLike = {
+			id: 'p_prefix2',
+			name: 'PrefixTwo',
+			persona_tags: [{prefix: '##', suffix: ''}],
+		};
+		const p2: PersonaLike = {
+			id: 'p_wrap1',
+			name: 'WrapOne',
+			persona_tags: [{prefix: '#', suffix: '#'}],
+		};
+		const tiePersonas = [p2, p1];
+
+		const res = matchPersona('##hello#', tiePersonas);
+		expect(res.matched).toBe(true);
+		expect(res.persona?.id).toBe(p1.id);
+		expect(res.strippedContent).toBe('hello#');
+	});
+
 	it('matches prefix-only tags', () => {
 		const result = matchPersona('B: Good morning everyone', personas);
 		expect(result.matched).toBe(true);
