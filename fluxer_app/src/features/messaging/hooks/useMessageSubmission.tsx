@@ -141,6 +141,7 @@ export const useMessageSubmission = ({
 							system_name: displayTagText || null,
 							pronouns: matchResult.persona.pronouns ?? null,
 							color: matchResult.persona.color ?? null,
+							visibility: matchResult.persona.visibility ?? null,
 						}
 					: undefined;
 

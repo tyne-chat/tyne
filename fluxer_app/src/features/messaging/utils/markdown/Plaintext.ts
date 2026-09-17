@@ -42,6 +42,11 @@ import type {ChannelMention} from '@fluxer/schema/src/domains/message/MessageRes
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import Messages from '@app/features/messaging/state/MessagingMessages';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 const logger = new Logger('MarkdownPlaintext');
 
 export interface PlaintextRenderOptions {
@@ -366,6 +371,33 @@ function renderMentionToPlaintext(node: MentionNode, options: PlaintextRenderOpt
 	const {kind} = node;
 	switch (kind.kind) {
 		case MentionKind.User: {
+			if (kind.personaId) {
+				const persona = PersonaStore.getKnownPersona(kind.personaId);
+				if (persona) {
+					return `@${persona.name}`;
+				}
+				if (options.channelId) {
+					const cachedMsgs = Messages.getCachedMessages(options.channelId);
+					if (cachedMsgs) {
+						let foundName: string | null = null;
+						cachedMsgs.forEach(
+							(msg) => {
+								const sub = msg.subprofile;
+								if (sub != null && sub.id === kind.personaId) {
+									foundName = sub.name;
+									return false;
+								}
+								return true;
+							},
+							undefined,
+							true,
+						);
+						if (foundName) {
+							return `@${foundName}`;
+						}
+					}
+				}
+			}
 			const user = Users.getUser(kind.id);
 			if (!user) {
 				return `@${kind.id}`;

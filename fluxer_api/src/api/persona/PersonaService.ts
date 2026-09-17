@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {
+	ChannelPersonaMentionItem,
 	PersonaCreateRequest,
 	PersonaSettingsResponse,
 	PersonaSettingsUpdateRequest,
@@ -348,6 +349,82 @@ export class PersonaService {
 		await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', response);
 
 		return response;
+	}
+
+	async getChannelPersonaMentions({
+		callerUserId,
+		candidateUserIds,
+		query,
+		limit,
+		userMap,
+	}: {
+		callerUserId: UserID;
+		candidateUserIds: Array<UserID>;
+		query?: string;
+		limit?: number;
+		userMap: Map<UserID, {username: string; globalName: string | null; nickname?: string | null}>;
+	}): Promise<Array<ChannelPersonaMentionItem>> {
+		if (candidateUserIds.length === 0) return [];
+		const maxLimit = Math.min(Math.max(limit ?? 25, 1), 50);
+		const normalizedQuery = (query ?? '').trim().toLowerCase();
+
+		const allPersonas = await this.deps.personaRepository.findByUserIds(candidateUserIds);
+
+		// Filter according to privacy model:
+		// - caller can see all of their own personas
+		// - other room members' personas MUST be public
+		const visiblePersonas = allPersonas.filter((persona) => {
+			if (persona.userId === callerUserId) {
+				return true;
+			}
+			return persona.visibility === 'public';
+		});
+
+		// Query matching
+		const matched = visiblePersonas.filter((persona) => {
+			if (!normalizedQuery) return true;
+			const nameMatch = persona.name.toLowerCase().includes(normalizedQuery);
+			const systemMatch = persona.systemName?.toLowerCase().includes(normalizedQuery);
+			const owner = userMap.get(persona.userId);
+			const ownerUserMatch = owner?.username.toLowerCase().includes(normalizedQuery);
+			const ownerNickMatch = owner?.nickname?.toLowerCase().includes(normalizedQuery);
+			return nameMatch || Boolean(systemMatch) || Boolean(ownerUserMatch) || Boolean(ownerNickMatch);
+		});
+
+		// Sort: prefix matches first, then frecency / use count, then alphabetical
+		matched.sort((a, b) => {
+			const aName = a.name.toLowerCase();
+			const bName = b.name.toLowerCase();
+			if (normalizedQuery) {
+				const aStarts = aName.startsWith(normalizedQuery);
+				const bStarts = bName.startsWith(normalizedQuery);
+				if (aStarts && !bStarts) return -1;
+				if (!aStarts && bStarts) return 1;
+			}
+			if (b.useCount !== a.useCount) {
+				return b.useCount - a.useCount;
+			}
+			return aName.localeCompare(bName);
+		});
+
+		const results = matched.slice(0, maxLimit);
+		return results.map((persona) => {
+			const owner = userMap.get(persona.userId);
+			return {
+				id: persona.id.toString(),
+				name: persona.name,
+				avatar_url: persona.avatarUrl,
+				system_name: persona.systemName,
+				pronouns: persona.pronouns,
+				color: persona.color,
+				bio: persona.bio,
+				visibility: persona.visibility,
+				owner_user_id: persona.userId.toString(),
+				owner_username: owner?.username ?? 'unknown',
+				owner_global_name: owner?.globalName ?? null,
+				owner_nickname: owner?.nickname ?? null,
+			};
+		});
 	}
 
 	private async dispatchToUser(
