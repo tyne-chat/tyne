@@ -7,12 +7,16 @@ import {TYPING_ROLLING_EXPIRY_MS} from '@app/features/typing/rolling/TypingSendT
 import Users from '@app/features/user/state/Users';
 import {action, computed, type IComputedValue, makeObservable, type ObservableMap, observable} from 'mobx';
 
+// Fork imports.
+
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+
 type RollingTypingOrigin = 'local' | 'gateway';
 
-type RollingTypingEntry = Readonly<{confirmed: boolean}>;
+type RollingTypingEntry = Readonly<{confirmed: boolean; subprofile?: MessageSubprofileResponse | null}>;
 
-const LOCAL_ENTRY: RollingTypingEntry = Object.freeze({confirmed: false});
-const CONFIRMED_ENTRY: RollingTypingEntry = Object.freeze({confirmed: true});
+const LOCAL_ENTRY: RollingTypingEntry = Object.freeze({confirmed: false, subprofile: null});
+const CONFIRMED_ENTRY: RollingTypingEntry = Object.freeze({confirmed: true, subprofile: null});
 const EMPTY_TYPING_USER_IDS: ReadonlyArray<string> = Object.freeze([]);
 
 function areTypingUserIdsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
@@ -38,7 +42,12 @@ class RollingTypingStore {
 		makeObservable<this, 'expire'>(this, {start: action, remove: action, reset: action, expire: action});
 	}
 
-	start(channelId: string, userId: string, origin: RollingTypingOrigin): void {
+	start(
+		channelId: string,
+		userId: string,
+		origin: RollingTypingOrigin,
+		subprofile?: MessageSubprofileResponse | null,
+	): void {
 		const key = timerKey(channelId, userId);
 		const previousTimer = this.timers.get(key);
 		if (previousTimer !== undefined) {
@@ -49,14 +58,24 @@ class RollingTypingStore {
 		const confirmed = origin === 'gateway';
 		const existingEntries = this.entries.get(channelId);
 		const existing = existingEntries?.get(userId);
-		if (existing !== undefined && (existing.confirmed || !confirmed)) {
+		const normalizedSubprofile = subprofile ?? null;
+		const isSubprofileEqual = (existing?.subprofile ?? null) === normalizedSubprofile;
+		if (existing !== undefined && (existing.confirmed || !confirmed) && isSubprofileEqual) {
 			return;
 		}
 		const channelEntries = existingEntries ?? observable.map<string, RollingTypingEntry>(undefined, {deep: false});
 		if (existingEntries === undefined) {
 			this.entries.set(channelId, channelEntries);
 		}
-		channelEntries.set(userId, confirmed ? CONFIRMED_ENTRY : LOCAL_ENTRY);
+		const nextConfirmed = confirmed || (existing?.confirmed ?? false);
+		channelEntries.set(
+			userId,
+			normalizedSubprofile
+				? {confirmed: nextConfirmed, subprofile: normalizedSubprofile}
+				: nextConfirmed
+					? CONFIRMED_ENTRY
+					: LOCAL_ENTRY,
+		);
 	}
 
 	remove(channelId: string, userId: string): void {
@@ -103,6 +122,10 @@ class RollingTypingStore {
 	}
 	isConfirmedTyping(channelId: string, userId: string): boolean {
 		return this.entries.get(channelId)?.get(userId)?.confirmed ?? false;
+	}
+
+	getSubprofile(channelId: string, userId: string): MessageSubprofileResponse | null | undefined {
+		return this.entries.get(channelId)?.get(userId)?.subprofile;
 	}
 
 	private expire(channelId: string, userId: string, timer: NodeJS.Timeout): void {
