@@ -78,6 +78,7 @@ export function createOptimisticMessage(data: MessageSubmitData, attachments: Ar
 					pronouns: data.subprofile.pronouns ?? null,
 					color: data.subprofile.color ?? null,
 					bio: data.subprofile.bio ?? null,
+					visibility: data.subprofile.visibility ?? null,
 				}
 			: null,
 	});
