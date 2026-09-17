@@ -11,9 +11,14 @@ import {ThreadController} from '@app/api/channel/controllers/ThreadController';
 import {ThreadMemberSettingsController} from '@app/api/channel/controllers/ThreadMemberSettingsController';
 import type {HonoApp} from '@app/api/types/HonoEnv';
 
+// Fork imports.
+
+import {ChannelPersonaMentionController} from '@app/api/channel/controllers/ChannelPersonaMentionController';
+
 export function registerChannelControllers(app: HonoApp) {
 	ChannelController(app);
 	ChannelFollowController(app);
+	ChannelPersonaMentionController(app);
 	MessageInteractionController(app);
 	MessageController(app);
 	CallController(app);
