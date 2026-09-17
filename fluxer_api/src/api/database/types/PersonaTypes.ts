@@ -43,3 +43,25 @@ export const PERSONA_COLUMNS = [
 	'updated_at',
 	'version',
 ] as const;
+
+export interface UserPersonaSettingsRow {
+	user_id: UserID;
+	active_persona_mode: string;
+	active_persona_id: Nullish<string>;
+	is_latched: boolean;
+	display_tag_text: Nullish<string>;
+	display_tag_icon: Nullish<string>;
+	updated_at: Date;
+	version: number;
+}
+
+export const USER_PERSONA_SETTINGS_COLUMNS = [
+	'user_id',
+	'active_persona_mode',
+	'active_persona_id',
+	'is_latched',
+	'display_tag_text',
+	'display_tag_icon',
+	'updated_at',
+	'version',
+] as const satisfies ReadonlyArray<keyof UserPersonaSettingsRow>;
