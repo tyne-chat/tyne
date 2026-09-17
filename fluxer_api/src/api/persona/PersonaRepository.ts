@@ -3,9 +3,9 @@
 import {generateSnowflake} from '@fluxer/snowflake/src/Snowflake';
 import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
 import {fetchMany, fetchOne, upsertOne} from '../database/CassandraQueryExecution';
-import type {PersonaRow} from '../database/types/PersonaTypes';
+import type {PersonaRow, UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import {Persona} from '../models/Persona';
-import {Personas} from '../Tables';
+import {Personas, UserPersonaSettings} from '../Tables';
 import {type CreatePersonaParams, IPersonaRepository, type UpdatePersonaParams} from './IPersonaRepository';
 
 const FETCH_PERSONA_CQL = Personas.selectCql({
@@ -19,6 +19,11 @@ const FETCH_PERSONAS_BY_USER_CQL = Personas.selectCql({
 
 const COUNT_PERSONAS_CQL = Personas.selectCountCql({
 	where: Personas.where.eq('user_id'),
+});
+
+const FETCH_SETTINGS_CQL = UserPersonaSettings.selectCql({
+	where: [UserPersonaSettings.where.eq('user_id')],
+	limit: 1,
 });
 
 export class PersonaRepository extends IPersonaRepository {
@@ -108,5 +113,17 @@ export class PersonaRepository extends IPersonaRepository {
 
 	async deleteAllByUserId(userId: UserID): Promise<void> {
 		await fetchOne(Personas.deletePartition({user_id: userId}));
+	}
+
+	async findSettings(userId: UserID): Promise<UserPersonaSettingsRow | null> {
+		const row = await fetchOne<UserPersonaSettingsRow>(FETCH_SETTINGS_CQL, {
+			user_id: userId,
+		});
+		return row ?? null;
+	}
+
+	async upsertSettings(row: UserPersonaSettingsRow): Promise<UserPersonaSettingsRow> {
+		await upsertOne(UserPersonaSettings.upsertAll(row));
+		return row;
 	}
 }
