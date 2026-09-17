@@ -33,6 +33,10 @@ import {NewConversationsLimitedError} from '@fluxer/errors/src/domains/user/NewC
 import type {ChannelPinResponse, MessageResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {UserPartialResponse} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 
+// Fork imports.
+
+import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+
 export class MessageInteractionService {
 	readonly authService: MessageInteractionAuthService;
 	private pinAuthService: MessageChannelAuthService;
@@ -83,10 +87,12 @@ export class MessageInteractionService {
 		userId,
 		channelId,
 		viewer,
+		subprofile,
 	}: {
 		userId: UserID;
 		viewer: ThreadViewer;
 		channelId: ChannelID;
+		subprofile?: MessageSubprofileRequest | null;
 	}): Promise<AuthenticatedChannel> {
 		const authChannel = await this.authService.getChannelAuthenticated({userId, channelId, viewer});
 		if (authChannel.channel.isThreadOnly()) throw new InvalidChannelTypeError();
@@ -96,7 +102,7 @@ export class MessageInteractionService {
 			assertThreadAllowed(threadWriteBlock('send', authChannel.thread.actor));
 		}
 		if (!authChannel.guild && (await this.startsNewConversation(authChannel.channel, userId))) return authChannel;
-		await this.readStateService.startTyping({authChannel, userId});
+		await this.readStateService.startTyping({authChannel, userId, subprofile});
 		return authChannel;
 	}
 
