@@ -84,6 +84,8 @@ fn yes() -> bool {
 fn json_options(context: &[u8]) -> Option<PlaintextOptions> {
     let context: JsonContext = serde_json::from_slice(context).ok()?;
     Some(PlaintextOptions {
+        // Fork: the persona names of the fork's plaintext options.
+        personas: Names::default(),
         preserve_markdown: context.preserve_markdown,
         hide_spoilers: context.hide_spoilers,
         include_emoji_names: context.include_emoji_names,

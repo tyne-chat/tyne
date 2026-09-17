@@ -10,6 +10,8 @@ const HIDDEN_SPOILER_PLACEHOLDER: &str = "█████";
 
 #[derive(Clone, Debug)]
 pub struct PlaintextOptions {
+    // Fork: names of mentioned personas (`<@user:persona>`), used before the account's name.
+    pub personas: Names,
     pub preserve_markdown: bool,
     pub hide_spoilers: bool,
     pub include_emoji_names: bool,
@@ -58,6 +60,7 @@ pub fn canonical_id(text: &str) -> Option<u64> {
 impl Default for PlaintextOptions {
     fn default() -> Self {
         Self {
+            personas: Names::default(),
             preserve_markdown: false,
             hide_spoilers: false,
             include_emoji_names: true,
@@ -399,10 +402,17 @@ fn render_alert_label(alert_type: AlertType) -> &'static str {
 
 fn render_mention_to_plaintext(kind: &MentionKind, options: &PlaintextOptions) -> String {
     match kind {
-        MentionKind::User { id } => options
-            .users
-            .get(id)
-            .map_or_else(|| format!("@{id}"), |name| format!("@{name}")),
+        MentionKind::User { id, persona_id } => {
+            if let Some(pid) = persona_id
+                && let Some(name) = options.personas.get(pid)
+            {
+                return format!("@{name}");
+            }
+            options
+                .users
+                .get(id)
+                .map_or_else(|| format!("@{id}"), |name| format!("@{name}"))
+        }
         MentionKind::Role { id } => options
             .roles
             .get(id)
