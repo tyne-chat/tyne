@@ -13,6 +13,8 @@ import * as UserProfileCommands from '@app/features/user/commands/UserProfileCom
 import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {msg} from '@lingui/core/macro';
+import {useLingui} from '@lingui/react/macro';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
@@ -29,6 +31,7 @@ interface PersonaTagProps {
 
 export const PersonaTag: React.FC<PersonaTagProps> = observer(
 	({subprofile, rootUser, className, message, guild, member}) => {
+		const {i18n} = useLingui();
 		const currentUserId = Authentication.currentUserId ?? Users.currentUser?.id;
 		const isCurrentUser = Boolean(currentUserId && rootUser?.id && rootUser.id === currentUserId);
 		const tagText = (
@@ -83,7 +86,15 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 		}
 
 		// Fallback for previews or contexts without a full message object (e.g., inside PersonaProfilePopout)
-		const tooltipText = rootUser.username ? `Account: @${rootUser.username}` : undefined;
+		const tooltipText = rootUser.username
+			? i18n._(
+					msg({
+						message: 'Account: @{username}',
+						comment: 'Tooltip showing root account username',
+					}),
+					{username: rootUser.username},
+				)
+			: undefined;
 		const handleFallbackClick = (e: React.MouseEvent) => {
 			e.stopPropagation();
 			UserProfileCommands.openUserProfile(rootUser.id, guild?.id);
