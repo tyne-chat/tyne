@@ -92,6 +92,16 @@ describe('PersonaEvents', () => {
 		expect(stored?.systemName).toBe('Sys 1');
 	});
 
+	it('handles USER_PERSONA_CREATE with wrapped { persona } payload from API', () => {
+		expect(PersonaStore.personas.find((p) => p.id === samplePersona2.id)).toBeUndefined();
+
+		handleUserPersonaCreate({persona: samplePersona2}, mockContext);
+
+		const stored = PersonaStore.personas.find((p) => p.id === samplePersona2.id);
+		expect(stored).toBeDefined();
+		expect(stored?.name).toBe('Gateway Persona 2');
+	});
+
 	// Verifies that a USER_PERSONA_UPDATE gateway dispatch updates the persona in-place
 	// in PersonaStore, updating active UI components reactively.
 	it('handles USER_PERSONA_UPDATE by updating existing persona in store', () => {
@@ -110,6 +120,20 @@ describe('PersonaEvents', () => {
 		expect(stored?.bio).toBe('Updated bio');
 	});
 
+	it('handles USER_PERSONA_UPDATE with wrapped { persona } payload from API', () => {
+		handleUserPersonaCreate(samplePersona, mockContext);
+
+		const updatedPersona: PersonaResponse = {
+			...samplePersona,
+			name: 'Updated Via Wrapped Payload',
+		};
+
+		handleUserPersonaUpdate({persona: updatedPersona}, mockContext);
+
+		const stored = PersonaStore.personas.find((p) => p.id === samplePersona.id);
+		expect(stored?.name).toBe('Updated Via Wrapped Payload');
+	});
+
 	// Verifies that a USER_PERSONA_DELETE gateway dispatch removes the persona and unlatches
 	// it if it was currently selected.
 	it('handles USER_PERSONA_DELETE by removing persona from store', () => {
@@ -121,6 +145,15 @@ describe('PersonaEvents', () => {
 		expect(PersonaStore.personas.find((p) => p.id === samplePersona.id)).toBeUndefined();
 	});
 
+	it('handles USER_PERSONA_DELETE with { persona_id } payload from API', () => {
+		handleUserPersonaCreate(samplePersona, mockContext);
+		expect(PersonaStore.personas.find((p) => p.id === samplePersona.id)).toBeDefined();
+
+		handleUserPersonaDelete({persona_id: samplePersona.id}, mockContext);
+
+		expect(PersonaStore.personas.find((p) => p.id === samplePersona.id)).toBeUndefined();
+	});
+
 	// Verifies that a USER_PERSONAS_UPDATE gateway dispatch (sent after bulk import or mass sync)
 	// atomically replaces the entire personas array in PersonaStore.
 	it('handles USER_PERSONAS_UPDATE by setting the entire list of personas', () => {
@@ -128,6 +161,14 @@ describe('PersonaEvents', () => {
 		expect(PersonaStore.personas).toHaveLength(1);
 
 		handleUserPersonasUpdate([samplePersona, samplePersona2], mockContext);
+
+		expect(PersonaStore.personas).toHaveLength(2);
+		expect(PersonaStore.personas.find((p) => p.id === samplePersona.id)?.name).toBe('Gateway Persona 1');
+		expect(PersonaStore.personas.find((p) => p.id === samplePersona2.id)?.name).toBe('Gateway Persona 2');
+	});
+
+	it('handles USER_PERSONAS_UPDATE with wrapped { personas } payload from API', () => {
+		handleUserPersonasUpdate({personas: [samplePersona, samplePersona2]}, mockContext);
 
 		expect(PersonaStore.personas).toHaveLength(2);
 		expect(PersonaStore.personas.find((p) => p.id === samplePersona.id)?.name).toBe('Gateway Persona 1');
