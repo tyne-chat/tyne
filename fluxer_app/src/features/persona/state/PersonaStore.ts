@@ -93,6 +93,7 @@ export class PersonaStoreClass {
 	private _activePersonaId: string | null = null;
 	private _isPersonaLatched: boolean = false;
 	private _settingsLoaded: boolean = false;
+	private _knownPersonas = new Map<string, MessageSubprofileResponse>();
 
 	constructor() {
 		makeAutoObservable(this);
@@ -100,6 +101,63 @@ export class PersonaStoreClass {
 
 	get personas(): ReadonlyArray<ClientPersona> {
 		return this._personas;
+	}
+
+	getPersona(id: string): ClientPersona | null {
+		return this._personas.find((p) => p.id === id) ?? null;
+	}
+
+	getKnownPersona(personaId: string): MessageSubprofileResponse | null {
+		const own = this.getPersona(personaId);
+		if (own) {
+			return {
+				id: own.id,
+				name: own.name,
+				avatar: own.avatar_url ?? null,
+				avatar_color: own.color ?? null,
+				display_tag_text: own.system_name ?? null,
+				display_tag_icon: null,
+				system_name: own.system_name ?? null,
+				pronouns: own.pronouns ?? null,
+				color: own.color ?? null,
+				bio: own.bio ?? null,
+			};
+		}
+		return this._knownPersonas.get(personaId) ?? null;
+	}
+
+	recordKnownPersona(persona: MessageSubprofileResponse): void {
+		runInAction(() => {
+			this._knownPersonas.set(persona.id, persona);
+		});
+	}
+
+	async fetchPersona(userId: string, personaId: string): Promise<MessageSubprofileResponse | null> {
+		const existing = this.getKnownPersona(personaId);
+		if (existing) return existing;
+		try {
+			const res = await http.get<any>(Endpoints.USER_PUBLIC_PERSONA(userId, personaId));
+			if (res.ok && res.body) {
+				const body = res.body as any;
+				const subprofile: MessageSubprofileResponse = {
+					id: body.id,
+					name: body.name,
+					avatar: body.avatar_url ?? null,
+					avatar_color: body.color ?? null,
+					display_tag_text: body.system_name ?? null,
+					display_tag_icon: null,
+					system_name: body.system_name ?? null,
+					pronouns: body.pronouns ?? null,
+					color: body.color ?? null,
+					bio: body.bio ?? null,
+				};
+				this.recordKnownPersona(subprofile);
+				return subprofile;
+			}
+		} catch {
+			// ignore
+		}
+		return null;
 	}
 
 	setPersonas(

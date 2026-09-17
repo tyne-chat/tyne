@@ -117,7 +117,7 @@ fn collect_mentions_from_node(node: &Node, mentions: &mut MessageMentions) {
 
 fn collect_mention_kind(kind: &MentionKind, mentions: &mut MessageMentions) {
     match kind {
-        MentionKind::User { id } => insert_id(id, &mut mentions.users),
+        MentionKind::User { id, .. } => insert_id(id, &mut mentions.users),
         MentionKind::Role { id } => insert_id(id, &mut mentions.roles),
         MentionKind::Channel { id } => insert_id(id, &mut mentions.channels),
         MentionKind::Everyone => mentions.everyone = true,
@@ -256,9 +256,13 @@ mod tests {
 
     #[test]
     fn extracts_real_user_role_and_channel_mentions() {
-        let mentions = extract_mentions_from_markdown(Some("hi <@123> <@!456> <@&789> <#321>"));
+        let mentions = extract_mentions_from_markdown(Some(
+            "hi <@123> <@!456> <@&789> <#321> <@111:bob_the_fox> <@!222:alice-pk>",
+        ));
         assert!(mentions.users.contains(&123));
         assert!(mentions.users.contains(&456));
+        assert!(mentions.users.contains(&111));
+        assert!(mentions.users.contains(&222));
         assert!(mentions.roles.contains(&789));
         assert!(mentions.channels.contains(&321));
     }

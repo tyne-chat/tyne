@@ -367,6 +367,9 @@ function cleanNode(node: CleanableNode): Node {
 	if (node.type === 'CodeBlock' && !('language' in node)) {
 		node.language = undefined;
 	}
+	if (node.type === 'Mention' && node.kind?.kind === 'User') {
+		if (!('personaId' in node.kind)) node.kind.personaId = undefined;
+	}
 	if (node.type === 'Mention' && node.kind?.kind === 'Command') {
 		if (!('subcommandGroup' in node.kind)) node.kind.subcommandGroup = undefined;
 		if (!('subcommand' in node.kind)) node.kind.subcommand = undefined;
