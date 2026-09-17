@@ -308,6 +308,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 
 	useEffect(() => {
 		void PersonaCommands.fetchPersonas();
+		void PersonaCommands.fetchPersonaSettings();
 	}, []);
 
 	const [isEditing, setIsEditing] = useState(false);
