@@ -108,3 +108,28 @@ export const PersonaSettingsUpdateRequestSchema = z.object({
 	display_tag_icon: z.string().max(256).nullish().optional(),
 });
 export type PersonaSettingsUpdateRequest = z.infer<typeof PersonaSettingsUpdateRequestSchema>;
+
+export const ChannelPersonaMentionItemSchema = z.object({
+	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
+	name: z.string().describe('The persona display name'),
+	avatar_url: z.string().nullish().describe('Avatar asset URL or hash'),
+	system_name: z.string().nullish().describe('Optional system name or tag'),
+	pronouns: z.string().nullish().describe('Optional pronouns'),
+	color: z.number().int().nullish().describe('Optional accent color integer'),
+	bio: z.string().nullish().describe('Optional persona bio'),
+	visibility: PersonaVisibilitySchema.describe('Visibility setting'),
+	owner_user_id: SnowflakeStringType.describe('User ID of the persona owner'),
+	owner_username: z.string().describe('Username of the persona owner'),
+	owner_global_name: z.string().nullish().describe('Global display name of the persona owner'),
+	owner_nickname: z.string().nullish().describe('Guild nickname if applicable'),
+});
+export type ChannelPersonaMentionItem = z.infer<typeof ChannelPersonaMentionItemSchema>;
+
+export const ChannelPersonaMentionsResponseSchema = z.array(ChannelPersonaMentionItemSchema);
+export type ChannelPersonaMentionsResponse = z.infer<typeof ChannelPersonaMentionsResponseSchema>;
+
+export const ChannelPersonaMentionsQuerySchema = z.object({
+	q: z.string().max(100).optional().default(''),
+	limit: z.coerce.number().int().min(1).max(50).optional().default(25),
+});
+export type ChannelPersonaMentionsQuery = z.infer<typeof ChannelPersonaMentionsQuerySchema>;
