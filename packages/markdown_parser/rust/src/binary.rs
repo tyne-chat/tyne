@@ -154,9 +154,15 @@ fn write_node(out: &mut Vec<u8>, node: &Node) {
 
 fn write_mention(out: &mut Vec<u8>, kind: &MentionKind) {
     match kind {
-        MentionKind::User { id } => {
-            out.push(0);
-            write_str(out, id);
+        MentionKind::User { id, persona_id } => {
+            if let Some(persona_id) = persona_id {
+                out.push(7);
+                write_str(out, id);
+                write_str(out, persona_id);
+            } else {
+                out.push(0);
+                write_str(out, id);
+            }
         }
         MentionKind::Channel { id } => {
             out.push(1);
