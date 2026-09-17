@@ -158,6 +158,9 @@ function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext,
 	void PersonaCommands.fetchPersonas().catch((error) => {
 		logger.warn('Failed to fetch personas after READY', error);
 	});
+	void PersonaCommands.fetchPersonaSettings().catch((error) => {
+		logger.warn('Failed to fetch persona settings after READY', error);
+	});
 	Authentication.handleGatewayReady({user: data.user});
 	Guilds.handleGatewayReady({guilds});
 	UserSettings.handleGatewayReady(data.user_settings);
