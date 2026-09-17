@@ -592,4 +592,45 @@ describe('PersonaStore', () => {
 			expect(res.subprofile?.system_name).toBe('Wonderland');
 		});
 	});
+
+	describe('known personas', () => {
+		it('caches and retrieves known personas via recordKnownPersona and getKnownPersona', () => {
+			expect(store.getKnownPersona('p_ext')).toBeNull();
+
+			store.recordKnownPersona({
+				id: 'p_ext',
+				name: 'Fox Persona',
+				avatar: 'https://example.com/fox.png',
+				avatar_color: 0x123456,
+				display_tag_text: 'Fox System',
+				display_tag_icon: null,
+				system_name: 'Fox System',
+				pronouns: 'they/them',
+				color: 0x123456,
+				bio: 'Just a fox',
+			});
+
+			const known = store.getKnownPersona('p_ext');
+			expect(known).not.toBeNull();
+			expect(known?.id).toBe('p_ext');
+			expect(known?.name).toBe('Fox Persona');
+			expect(known?.system_name).toBe('Fox System');
+			expect(known?.pronouns).toBe('they/them');
+		});
+
+		it('retrieves owned persona via getKnownPersona formatted as MessageSubprofileResponse', async () => {
+			const alice = await store.addPersona({
+				name: 'Alice',
+				system_name: 'Wonderland',
+				pronouns: 'she/her',
+			});
+
+			const known = store.getKnownPersona(alice.id);
+			expect(known).not.toBeNull();
+			expect(known?.id).toBe(alice.id);
+			expect(known?.name).toBe('Alice');
+			expect(known?.system_name).toBe('Wonderland');
+			expect(known?.pronouns).toBe('she/her');
+		});
+	});
 });

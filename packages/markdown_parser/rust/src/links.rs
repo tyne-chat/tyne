@@ -1430,6 +1430,7 @@ pub fn count_repeated_byte(text: &str, position: usize, byte: u8) -> usize {
 #[cfg(test)]
 mod tests {
     use super::{extract_escaped_url, has_valid_code_fence_language};
+    use crate::ParserFlags;
 
     #[test]
     fn escaped_url_accepts_paren_immediately_after_destination() {
@@ -1498,5 +1499,66 @@ mod tests {
     fn rejects_invalid_characters_in_primary_token() {
         assert!(!has_valid_code_fence_language("a!b"));
         assert!(!has_valid_code_fence_language("rust!"));
+    }
+
+    #[test]
+    fn parses_user_mention_without_persona_id() {
+        let res = super::parse_mention("<@123456>", ParserFlags::ALL).expect("mention");
+        assert_eq!(res.advance, "<@123456>".len());
+        assert_eq!(
+            res.node,
+            crate::ast::Node::Mention {
+                kind: crate::ast::MentionKind::User {
+                    id: "123456".to_owned(),
+                    persona_id: None,
+                }
+            }
+        );
+    }
+
+    #[test]
+    fn parses_user_persona_mention_numeric_and_slugs() {
+        let res = super::parse_mention("<@123456:789012>", ParserFlags::ALL).expect("mention");
+        assert_eq!(
+            res.node,
+            crate::ast::Node::Mention {
+                kind: crate::ast::MentionKind::User {
+                    id: "123456".to_owned(),
+                    persona_id: Some("789012".to_owned()),
+                }
+            }
+        );
+
+        let res_slug =
+            super::parse_mention("<@!123456:bob_the_fox>", ParserFlags::ALL).expect("mention");
+        assert_eq!(
+            res_slug.node,
+            crate::ast::Node::Mention {
+                kind: crate::ast::MentionKind::User {
+                    id: "123456".to_owned(),
+                    persona_id: Some("bob_the_fox".to_owned()),
+                }
+            }
+        );
+
+        let res_pk =
+            super::parse_mention("<@!123456:alice-pk>", ParserFlags::ALL).expect("mention");
+        assert_eq!(
+            res_pk.node,
+            crate::ast::Node::Mention {
+                kind: crate::ast::MentionKind::User {
+                    id: "123456".to_owned(),
+                    persona_id: Some("alice-pk".to_owned()),
+                }
+            }
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_persona_mentions() {
+        assert!(super::parse_mention("<@123456:>", ParserFlags::ALL).is_none());
+        assert!(super::parse_mention("<@:789012>", ParserFlags::ALL).is_none());
+        assert!(super::parse_mention("<@123456:bad space>", ParserFlags::ALL).is_none());
+        assert!(super::parse_mention("<@123456:inv@lid>", ParserFlags::ALL).is_none());
     }
 }
