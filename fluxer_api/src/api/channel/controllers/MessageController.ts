@@ -46,6 +46,11 @@ import {
 	MessageResponseSchema,
 } from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork imports.
+
+import {requestedPersonaId} from '@app/api/persona/PersonaOwnership';
+import {IndicateTypingRequestSchema} from '@fluxer/schema/src/domains/message/MessageRequestSchemas';
+
 export function MessageController(app: HonoApp) {
 	app.get(
 		'/channels/:channel_id/messages',
@@ -472,6 +477,7 @@ export function MessageController(app: HonoApp) {
 		RateLimitMiddleware(RateLimitConfigs.CHANNEL_TYPING),
 		LoginRequired,
 		Validator('param', ChannelIdParam),
+		Validator('json', IndicateTypingRequestSchema),
 		OpenAPI({
 			operationId: 'indicate_typing',
 			summary: 'Indicate typing activity',
@@ -489,8 +495,14 @@ export function MessageController(app: HonoApp) {
 			if (!isPersonalNotesChannelId({userId: user.id, channelId})) {
 				assertTierAllows(user, TierGatedActions.TYPING, NO_TIER_CONTEXT);
 			}
+			const body = ctx.req.valid('json');
 			const channelService = ctx.get('channelService');
-			const auth = await channelService.interactions.startTyping({viewer, userId: user.id, channelId});
+			const auth = await channelService.interactions.startTyping({
+				viewer,
+				userId: user.id,
+				channelId,
+				personaId: requestedPersonaId(body, user.id),
+			});
 			const cooldown = await channelService.getTypingCooldown({user, viewer, auth});
 			return cooldown ? ctx.json(cooldown, 200) : ctx.body(null, 204);
 		},
