@@ -10,7 +10,8 @@ import {Check, Gear, MagnifyingGlass} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
+import {fetchPersonas} from '../commands/PersonaCommands';
 import {type ActivePersonaMode, PersonaStore} from '../state/PersonaStore';
 import styles from './PersonaPickerSheet.module.css';
 
@@ -30,6 +31,10 @@ interface PersonaPickerSheetProps {
 
 export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 	({onClose, selectedPersonaId, showModes = false, onSelectPersona, onSelectAccount}) => {
+		useEffect(() => {
+			void fetchPersonas();
+		}, []);
+
 		const [query, setQuery] = useState('');
 		const currentUser = Users.getCurrentUser();
 		const personas = PersonaStore.personas;
