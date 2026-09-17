@@ -18,6 +18,12 @@ import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import {type ReactNode, type RefObject, useLayoutEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import type {TypistEntry} from '@app/features/typing/rolling/RollingTypingText';
+import {Avatar} from '@app/features/ui/components/Avatar';
+import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
+
 const AVATAR_THRESHOLD = 5;
 const EMPTY_TYPING_USER_RECORDS: ReadonlyArray<User> = Object.freeze([]);
 
@@ -37,6 +43,22 @@ export const usePresentableTypingUsers = (channel: Channel): ReadonlyArray<User>
 		}
 	}
 	return typingUsers;
+};
+
+export const usePresentableTypists = (channel: Channel): ReadonlyArray<TypistEntry> => {
+	const typingUserIds = RollingTypingStore.getTypingUserIds(channel.id);
+	if (typingUserIds.length === 0) {
+		return [];
+	}
+	const typists: Array<TypistEntry> = [];
+	for (const userId of typingUserIds) {
+		const user = Users.getUser(userId);
+		if (user) {
+			const subprofile = RollingTypingStore.getSubprofile(channel.id, userId);
+			typists.push({user, subprofile});
+		}
+	}
+	return typists;
 };
 
 function getRenderedAvatarStackWidth(row: HTMLElement | null): number {
@@ -61,11 +83,12 @@ interface TypingUsersProps {
 export const TypingUsers = observer(
 	({channel, withText = true, showAvatars = true, overflowContainerRef}: TypingUsersProps) => {
 		const {i18n} = useLingui();
-		const typingUsers = usePresentableTypingUsers(channel);
+		const typists = usePresentableTypists(channel);
+		const typingUsers = typists.map((t) => t.user);
 		const rowRef = useRef<HTMLDivElement>(null);
 		const measureRef = useRef<HTMLSpanElement>(null);
 		const [overflowing, setOverflowing] = useState(false);
-		const measuresOverflow = withText && typingUsers.length > 0 && typingUsers.length <= TYPING_ROLLING_MAX_NAMES;
+		const measuresOverflow = withText && typists.length > 0 && typists.length <= TYPING_ROLLING_MAX_NAMES;
 		useLayoutEffect(() => {
 			const container = overflowContainerRef?.current ?? null;
 			const measure = measureRef.current;
@@ -82,7 +105,7 @@ export const TypingUsers = observer(
 			resizeObserver.observe(measure);
 			return () => resizeObserver.disconnect();
 		}, [measuresOverflow, overflowContainerRef]);
-		if (typingUsers.length === 0) {
+		if (typists.length === 0) {
 			return null;
 		}
 		return (
@@ -112,11 +135,28 @@ export const TypingUsers = observer(
 									users={typingUsers}
 									guildId={channel.guildId}
 									channelId={channel.id}
+									renderAvatar={(user, size, index) => {
+										const typist = typists[index];
+										const avatarUrl = typist?.subprofile?.avatar ?? undefined;
+										return (
+											<Avatar
+												user={user}
+												size={size}
+												avatarUrl={avatarUrl}
+												guildId={channel.guildId ?? undefined}
+												data-flx="channel.typing-users.avatar"
+											/>
+										);
+									}}
+									renderDisplayName={(user, index) => {
+										const typist = typists[index];
+										return typist?.subprofile?.name ?? NicknameUtils.getNickname(user, channel.guildId ?? null);
+									}}
 									data-flx="channel.typing-users.avatar-stack"
 								/>
 							)}
 							<span aria-hidden={true} className={messageStyles.typingText} data-flx="channel.typing-users.span">
-								{getRollingTypingText(i18n, typingUsers, channel, measuresOverflow && overflowing)}
+								{getRollingTypingText(i18n, typists, channel, measuresOverflow && overflowing)}
 							</span>
 							{measuresOverflow && (
 								<span
@@ -125,7 +165,7 @@ export const TypingUsers = observer(
 									className={`${messageStyles.typingText} ${styles.measure}`}
 									data-flx="channel.typing-users.measure"
 								>
-									{getRollingTypingText(i18n, typingUsers, channel, false)}
+									{getRollingTypingText(i18n, typists, channel, false)}
 								</span>
 							)}
 						</>
@@ -138,10 +178,10 @@ export const TypingUsers = observer(
 
 export const TypingAnnouncer = observer(({channel}: {channel: Channel}) => {
 	const {i18n} = useLingui();
-	const typingUsers = usePresentableTypingUsers(channel);
+	const typists = usePresentableTypists(channel);
 	return (
 		<span className={styles.srOnly} aria-live="polite" aria-atomic={true} data-flx="channel.typing-users.announcer">
-			{getRollingTypingAnnouncement(i18n, typingUsers, channel)}
+			{getRollingTypingAnnouncement(i18n, typists, channel)}
 		</span>
 	);
 });

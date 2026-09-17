@@ -33,6 +33,7 @@ export interface AvatarStackProps {
 	guildId?: string | null;
 	channelId?: string | null;
 	renderAvatar?: (user: User, size: number, index: number) => React.ReactNode;
+	renderDisplayName?: (user: User, index: number) => string;
 	enableProfileModal?: boolean;
 	showTooltips?: boolean;
 	remainingContent?: React.ReactNode;
@@ -55,6 +56,7 @@ export const AvatarStack: React.FC<AvatarStackProps> = observer(
 		guildId,
 		channelId,
 		renderAvatar,
+		renderDisplayName,
 		enableProfileModal = true,
 		showTooltips = true,
 		remainingContent,
@@ -84,7 +86,8 @@ export const AvatarStack: React.FC<AvatarStackProps> = observer(
 		const userEntries: Array<AvatarStackEntry> = [];
 		const userKeyCounts = new Map<string, number>();
 		users?.forEach((user, index) => {
-			const displayName = NicknameUtils.getNickname(user, guildId ?? null, channelId ?? undefined);
+			const displayName =
+				renderDisplayName?.(user, index) ?? NicknameUtils.getNickname(user, guildId ?? null, channelId ?? undefined);
 			const avatarNode = renderAvatar?.(user, size, index) ?? (
 				<Avatar user={user} size={size} guildId={guildId ?? undefined} data-flx="ui.avatars.avatar-stack.avatar" />
 			);
