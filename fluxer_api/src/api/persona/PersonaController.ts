@@ -6,6 +6,8 @@ import {
 	PersonaCreateRequestSchema,
 	PersonaIdParam,
 	PersonaResponseSchema,
+	PersonaSettingsResponseSchema,
+	PersonaSettingsUpdateRequestSchema,
 	PersonaUpdateRequestSchema,
 	PublicPersonaResponseSchema,
 	UserIdPersonaIdParam,
@@ -88,6 +90,52 @@ export function PersonaController(app: HonoApp) {
 			const body = ctx.req.valid('json');
 			const personas = await ctx.get('personaService').importPersonas(user.id, body);
 			return ctx.json(personas.map((p) => p.toResponse()));
+		},
+	);
+
+	app.get(
+		'/users/@me/personas/settings',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_READ),
+		requireOAuth2ScopeForBearer('personas.read'),
+		LoginRequired,
+		DefaultUserOnly,
+		OpenAPI({
+			operationId: 'get_my_persona_settings',
+			summary: 'Get own persona settings',
+			responseSchema: PersonaSettingsResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description: 'Retrieves persona settings (active mode, display tag, latch state) for the authenticated user.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const settings = await ctx.get('personaService').getSettings(user.id);
+			return ctx.json(settings);
+		},
+	);
+
+	app.patch(
+		'/users/@me/personas/settings',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaSettingsUpdateRequestSchema),
+		OpenAPI({
+			operationId: 'update_my_persona_settings',
+			summary: 'Update own persona settings',
+			responseSchema: PersonaSettingsResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description: 'Updates persona settings (active mode, display tag, latch state) for the authenticated user.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const body = ctx.req.valid('json');
+			const settings = await ctx.get('personaService').updateSettings(user.id, body);
+			return ctx.json(settings);
 		},
 	);
 
