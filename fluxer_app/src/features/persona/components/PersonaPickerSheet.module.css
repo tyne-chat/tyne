@@ -160,7 +160,7 @@
 	font-size: 0.75rem;
 	color: var(--text-primary-muted);
 	min-width: 0;
-	max-width: 150px;
+	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -173,6 +173,7 @@
 	padding: 1px 4px;
 	border-radius: 3px;
 	color: var(--text-primary-muted);
+	flex-shrink: 0;
 }
 
 .activeCheck {
