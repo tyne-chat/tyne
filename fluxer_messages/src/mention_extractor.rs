@@ -117,7 +117,7 @@ fn collect_mentions_from_node(node: &Node, mentions: &mut MessageMentions) {
 
 fn collect_mention_kind(kind: &MentionKind, mentions: &mut MessageMentions) {
     match kind {
-        MentionKind::User { id } => insert_id(id, &mut mentions.users),
+        MentionKind::User { id, .. } => insert_id(id, &mut mentions.users),
         MentionKind::Role { id } => insert_id(id, &mut mentions.roles),
         MentionKind::Channel { id } => insert_id(id, &mut mentions.channels),
         MentionKind::Everyone => mentions.everyone = true,
