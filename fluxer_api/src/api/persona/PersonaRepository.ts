@@ -17,6 +17,10 @@ const FETCH_PERSONAS_BY_USER_CQL = Personas.selectCql({
 	where: Personas.where.eq('user_id'),
 });
 
+const FETCH_PERSONAS_BY_USER_IDS_CQL = Personas.selectCql({
+	where: Personas.where.in('user_id', 'user_ids'),
+});
+
 const COUNT_PERSONAS_CQL = Personas.selectCountCql({
 	where: Personas.where.eq('user_id'),
 });
@@ -40,6 +44,22 @@ export class PersonaRepository extends IPersonaRepository {
 			user_id: userId,
 		});
 		return rows.map((r) => new Persona(r));
+	}
+
+	async findByUserIds(userIds: Array<UserID>): Promise<Array<Persona>> {
+		if (!userIds || userIds.length === 0) return [];
+		const chunkSize = 100;
+		const results: Array<Persona> = [];
+		for (let i = 0; i < userIds.length; i += chunkSize) {
+			const chunk = userIds.slice(i, i + chunkSize);
+			const rows = await fetchMany<PersonaRow>(FETCH_PERSONAS_BY_USER_IDS_CQL, {
+				user_ids: chunk,
+			});
+			for (const r of rows) {
+				results.push(new Persona(r));
+			}
+		}
+		return results;
 	}
 
 	async count(userId: UserID): Promise<number> {

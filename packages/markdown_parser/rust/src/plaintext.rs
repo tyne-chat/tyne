@@ -14,6 +14,7 @@ pub struct PlaintextOptions {
     pub include_emoji_names: bool,
     pub include_link_urls: bool,
     pub users: HashMap<String, String>,
+    pub personas: HashMap<String, String>,
     pub roles: HashMap<String, String>,
     pub channels: HashMap<String, String>,
 }
@@ -25,6 +26,7 @@ impl Default for PlaintextOptions {
             include_emoji_names: true,
             include_link_urls: false,
             users: HashMap::new(),
+            personas: HashMap::new(),
             roles: HashMap::new(),
             channels: HashMap::new(),
         }
@@ -366,10 +368,17 @@ fn alert_type_name(alert_type: AlertType) -> &'static str {
 
 fn render_mention_to_plaintext(kind: &MentionKind, options: &PlaintextOptions) -> String {
     match kind {
-        MentionKind::User { id } => options
-            .users
-            .get(id)
-            .map_or_else(|| format!("@{id}"), |name| format!("@{name}")),
+        MentionKind::User { id, persona_id } => {
+            if let Some(pid) = persona_id
+                && let Some(name) = options.personas.get(pid)
+            {
+                return format!("@{name}");
+            }
+            options
+                .users
+                .get(id)
+                .map_or_else(|| format!("@{id}"), |name| format!("@{name}"))
+        }
         MentionKind::Role { id } => options
             .roles
             .get(id)
@@ -542,6 +551,8 @@ mod tests {
     fn preserves_notification_markdown_and_resolves_mentions() {
         let mut users = HashMap::new();
         users.insert("1".to_owned(), "Alice".to_owned());
+        let mut personas = HashMap::new();
+        personas.insert("999".to_owned(), "Bob the Fox".to_owned());
         let mut roles = HashMap::new();
         roles.insert("2".to_owned(), "Ops".to_owned());
         let mut channels = HashMap::new();
@@ -549,13 +560,14 @@ mod tests {
         let options = PlaintextOptions {
             preserve_markdown: true,
             users,
+            personas,
             roles,
             channels,
             ..PlaintextOptions::default()
         };
 
         let result = parse_and_render_plaintext(
-            "**hi** <@1> <@&2> <#3> [site](https://fluxer.app)",
+            "**hi** <@1> <@1:999> <@&2> <#3> [site](https://fluxer.app)",
             ParserFlags::ALL,
             "",
             &options,
@@ -564,7 +576,7 @@ mod tests {
 
         assert_eq!(
             result,
-            "**hi** @Alice @Ops #alerts [site](https://fluxer.app)"
+            "**hi** @Alice @Bob the Fox @Ops #alerts [site](https://fluxer.app)"
         );
 
         let empty_blockquote_result = parse_and_render_plaintext(
