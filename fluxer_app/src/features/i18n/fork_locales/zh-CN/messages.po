@@ -6,6 +6,32 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. placeholder {0}: w.prefix
+msgid "(Prefix: {0})"
+msgstr "(Prefix: {0})"
+
+#. Tooltip showing root account username
+msgid "Account: @{username}"
+msgstr "Account: @{username}"
+
+msgid "Active Persona Mode"
+msgstr "Active Persona Mode"
+
+#. Aria label for active persona mode tabs
+#. Aria label for active persona mode tabs
+msgid "Active persona mode"
+msgstr "Active persona mode"
+
+msgid "Add Persona"
+msgstr "Add Persona"
+
+#. placeholder {0}: formData.tags.length
+msgid "Add Tag Pair ({0}/5)"
+msgstr "Add Tag Pair ({0}/5)"
+
+msgid "All Personas"
+msgstr "All Personas"
+
 #. placeholder {0}: persona.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
@@ -13,26 +39,262 @@ msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 
+#. Import warning when avatar fails to download
+msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Change persona"
 
+msgid "Choose a PluralKit export (.json) or drag & drop"
+msgstr "Choose a PluralKit export (.json) or drag & drop"
+
+msgid "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "Choose how untagged messages and persona tags interact with your active persona."
+
+#. Header for configured personas list with count
+msgid "Configured Personas ({count})"
+msgstr "Configured Personas ({count})"
+
+#. Progress status for configuring persona
+msgid "Configuring {name}..."
+msgstr "Configuring {name}..."
+
+#. Description for persona accent color picker
+msgid "Customizes the border and banner color on this persona's profile"
+msgstr "Customizes the border and banner color on this persona's profile"
+
+#. Aria label for deactivating active persona
+msgid "Deactivate persona"
+msgstr "Deactivate persona"
+
 msgid "Delete Persona"
 msgstr "Delete Persona"
 
+#. Aria label for deleting persona
+msgid "Delete persona"
+msgstr "Delete persona"
+
+msgid "Detected System Name / Tag"
+msgstr "Detected System Name / Tag"
+
+msgid "Display Tag"
+msgstr "Display Tag"
+
+#. Toast when display tag icon is removed
+msgid "Display tag icon removed"
+msgstr "Display tag icon removed"
+
+#. Toast when display tag icon is updated
+msgid "Display tag icon updated"
+msgstr "Display tag icon updated"
+
+msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+
+#. Progress status during avatar download
+msgid "Downloading avatar {current} of {total}..."
+msgstr "Downloading avatar {current} of {total}..."
+
+#. Validation error when tag pair is duplicated within the same persona
+msgid "Duplicate tag pair on this persona"
+msgstr "Duplicate tag pair on this persona"
+
+msgid "Edit Persona"
+msgstr "Edit Persona"
+
+#. Aria label for editing persona
 msgid "Edit persona"
 msgstr "Edit persona"
 
+msgid "Export Summary"
+msgstr "Export Summary"
+
+#. Toast when persona deletion fails
+msgid "Failed to delete persona"
+msgstr "Failed to delete persona"
+
+#. Toast error message on persona import failure
+msgid "Failed to import personas"
+msgstr "Failed to import personas"
+
+#. Error message when parsing PluralKit JSON fails
+msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+
+#. Error message when reading uploaded file fails
+msgid "Failed to read the selected file."
+msgstr "Failed to read the selected file."
+
+#. Toast when persona save fails
+msgid "Failed to save persona"
+msgstr "Failed to save persona"
+
+#. Toast when icon upload fails
+msgid "Failed to upload icon to server"
+msgstr "Failed to upload icon to server"
+
+#. Toast when icon file exceeds size limit
+msgid "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Icon file is too large. Choose an image smaller than 10MB."
+
+#. Modal title for PluralKit import step completed
+msgid "Import Complete"
+msgstr "Import Complete"
+
+msgid "Import Complete!"
+msgstr "Import Complete!"
+
+msgid "Import Strategy"
+msgstr "Import Strategy"
+
+#. Modal title for PluralKit import step select
+msgid "Import from PluralKit"
+msgstr "Import from PluralKit"
+
+#. Modal title for PluralKit import step importing
+msgid "Importing Personas..."
+msgstr "Importing Personas..."
+
+msgid "Importing..."
+msgstr "Importing..."
+
+msgid "Keep existing and add new (Recommended)"
+msgstr "Keep existing and add new (Recommended)"
+
+#. placeholder {0}: pkData.members?.length ?? 0
+msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+
+#. Active persona mode last used
+#. Active persona mode last used
+#. Active persona mode last used
+msgid "Last Used"
+msgstr "Last Used"
+
 msgid "Main account"
 msgstr "Main account"
+
+msgid "Manage Personas"
+msgstr "Manage Personas"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "Manage and create your personas"
 
+#. Active persona mode manual
+#. Active persona mode manual
+#. Active persona mode manual
+msgid "Manual"
+msgstr "Manual"
+
+#. Placeholder name for unnamed member in import
+msgid "Member #{index}"
+msgstr "Member #{index}"
+
+msgid "Members with Avatars"
+msgstr "Members with Avatars"
+
+msgid "Name *"
+msgstr "Name *"
+
+msgid "New Persona"
+msgstr "New Persona"
+
+#. Error message when PluralKit export lacks members array
+msgid "No \"members\" array found in this export file."
+msgstr "No \"members\" array found in this export file."
+
+msgid "No display tag configured. Messages will show your account profile picture."
+msgstr "No display tag configured. Messages will show your account profile picture."
+
+msgid "No matching personas found."
+msgstr "No matching personas found."
+
+msgid "No personas configured yet. Create one in Settings."
+msgstr "No personas configured yet. Create one in Settings."
+
+msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+
+#. Helper description for private persona visibility
+msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+
+#. Placeholder for system badge in import modal
+msgid "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+
+msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+
+msgid "Persona Tags (Prefix & Suffix)"
+msgstr "Persona Tags (Prefix & Suffix)"
+
+#. Toast when persona is created
+msgid "Persona created"
+msgstr "Persona created"
+
+#. Toast when persona is deleted
+msgid "Persona deleted"
+msgstr "Persona deleted"
+
+#. Toast when persona is updated
+msgid "Persona updated"
+msgstr "Persona updated"
+
+#. Aria label for persona visibility tabs
+msgid "Persona visibility"
+msgstr "Persona visibility"
+
+#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
+
+#. Placeholder for persona tag prefix
+msgid "Prefix (e.g. [)"
+msgstr "Prefix (e.g. [)"
+
+#. Progress status when preparing avatar batch download
+msgid "Preparing avatar batch download..."
+msgstr "Preparing avatar batch download..."
+
+#. Persona visibility private
+msgid "Private"
+msgstr "Private"
+
+#. Tooltip on private persona badge
+msgid "Private persona"
+msgstr "Private persona"
+
+#. placeholder {0}: progress.currentName
+msgid "Processing: {0}"
+msgstr "Processing: {0}"
+
+#. Helper description for unlisted persona visibility
+msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+
+#. Helper description for public persona visibility
+msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+
+#. Persona visibility public
+msgid "Public"
+msgstr "Public"
+
+#. Tooltip on public persona badge
+msgid "Public persona"
+msgstr "Public persona"
+
+msgid "Recent Personas"
+msgstr "Recent Personas"
+
+#. Aria label for removing a tag pair
+msgid "Remove tag pair"
+msgstr "Remove tag pair"
 
 msgid "Replace All"
 msgstr "Replace All"
@@ -40,11 +302,153 @@ msgstr "Replace All"
 msgid "Replace All Personas"
 msgstr "Replace All Personas"
 
+msgid "Replace all existing personas (Destructive)"
+msgstr "Replace all existing personas (Destructive)"
+
+msgid "Root Account (Default)"
+msgstr "Root Account (Default)"
+
+msgid "Save Persona"
+msgstr "Save Persona"
+
+#. Progress status when saving personas
+msgid "Saving personas..."
+msgstr "Saving personas..."
+
+#. placeholder {0}: filteredPersonas.length
+msgid "Search Results ({0})"
+msgstr "Search Results ({0})"
+
+#. Search placeholder in persona picker sheet
+msgid "Search personas, tags, pronouns..."
+msgstr "Search personas, tags, pronouns..."
+
+#. Description of personas settings section
+msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+
+#. Tooltip when sending as root account with persona mode active
+msgid "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+
+#. Tooltip when sending as a persona matched by proxy tag
+msgid "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+
+msgid "Set Active"
+msgstr "Set Active"
+
+#. Aria label for setting active persona
+msgid "Set as active persona"
+msgstr "Set as active persona"
+
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
 msgstr "Show personas button"
 
+#. Import warning when member has no name
+msgid "Skipped member because they have no name configured."
+msgstr "Skipped member because they have no name configured."
+
+msgid "Start Import"
+msgstr "Start Import"
+
+#. placeholder {0}: importResults.successCount
+msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+
+#. Placeholder for persona tag suffix
+msgid "Suffix (e.g. ])"
+msgstr "Suffix (e.g. ])"
+
+msgid "Supports PluralKit system export files"
+msgstr "Supports PluralKit system export files"
+
+msgid "System Tag (Applied to imported personas)"
+msgstr "System Tag (Applied to imported personas)"
+
+msgid "Tag Icon"
+msgstr "Tag Icon"
+
+msgid "Tag Text"
+msgstr "Tag Text"
+
+#. Validation error when tag pair is already used by another persona
+msgid "Tag pair already in use by persona \"{name}\""
+msgstr "Tag pair already in use by persona \"{name}\""
+
+#. Placeholder for persona bio
+msgid "Tell us about this persona..."
+msgstr "Tell us about this persona..."
+
+#. Error message when uploaded file is not valid JSON
+msgid "The chosen file is not a valid JSON object."
+msgstr "The chosen file is not a valid JSON object."
+
+msgid "This is a preview of how your display tag will look in chat."
+msgstr "This is a preview of how your display tag will look in chat."
+
+msgid "Total Members"
+msgstr "Total Members"
+
+#. Persona visibility unlisted
+msgid "Unlisted"
+msgstr "Unlisted"
+
+#. Helper description for Off persona mode
+msgid "Untagged messages always send from your root account. Personas only speak when you type their tags (e.g. [text])."
+msgstr "Untagged messages always send from your root account. Personas only speak when you type their tags (e.g. [text])."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+
+#. Helper description for Manual persona mode
+msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+
+msgid "Uploading avatar..."
+msgstr "Uploading avatar..."
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "View your personas"
+
+#. Progress label for avatar downloads
+msgid "avatars downloaded"
+msgstr "avatars downloaded"
+
+#. Placeholder for persona name
+msgid "e.g. Alice"
+msgstr "e.g. Alice"
+
+#. Placeholder for persona pronouns
+msgid "e.g. she/her"
+msgstr "e.g. she/her"
+
+#. Progress label for prepared personas
+msgid "personas prepared"
+msgstr "personas prepared"
+
+#. Progress label when saving personas
+msgid "saving personas"
+msgstr "saving personas"
+
+#. placeholder {0}: importResults.warnings.length
+msgid "{0} notice(s) during import"
+msgstr "{0} notice(s) during import"
+
+#. placeholder {0}: progress.current
+#. placeholder {1}: progress.total
+#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {3}: progress.percent
+msgid "{0} of {1} {2} ({3}%)"
+msgstr "{0} of {1} {2} ({3}%)"
+
+#. Tooltip when sending as a latched persona
+msgid "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - Click to switch persona"
+
+msgid "— Today at 12:00 PM"
+msgstr "— Today at 12:00 PM"
