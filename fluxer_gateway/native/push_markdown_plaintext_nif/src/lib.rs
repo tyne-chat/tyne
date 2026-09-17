@@ -24,6 +24,8 @@ struct PushPlaintextContext {
     #[serde(default)]
     users: HashMap<String, String>,
     #[serde(default)]
+    personas: HashMap<String, String>,
+    #[serde(default)]
     roles: HashMap<String, String>,
     #[serde(default)]
     channels: HashMap<String, String>,
@@ -40,6 +42,7 @@ impl From<PushPlaintextContext> for PlaintextOptions {
             include_emoji_names: value.include_emoji_names,
             include_link_urls: value.include_link_urls,
             users: value.users,
+            personas: value.personas,
             roles: value.roles,
             channels: value.channels,
         }
@@ -49,6 +52,7 @@ impl From<PushPlaintextContext> for PlaintextOptions {
 impl PushPlaintextContext {
     fn validate(&self) -> NifResult<()> {
         if self.users.len() > MAX_CONTEXT_NAME_ENTRIES
+            || self.personas.len() > MAX_CONTEXT_NAME_ENTRIES
             || self.roles.len() > MAX_CONTEXT_NAME_ENTRIES
             || self.channels.len() > MAX_CONTEXT_NAME_ENTRIES
         {
