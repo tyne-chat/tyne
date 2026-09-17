@@ -17,6 +17,13 @@ import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import {useContext} from 'react';
 
+// Fork imports.
+
+import Messages from '@app/features/messaging/state/MessagingMessages';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
+const PERSONA_WIRE_RE = /^<@!?(\d+):([a-zA-Z0-9_-]+)>$/;
+
 const FULL_USER_TAG_DESCRIPTOR = msg({
 	message: 'Full user tag: {tag}',
 	comment:
@@ -31,19 +38,29 @@ interface ComposerMentionPillProps {
 	mentionType: ComposerMentionType;
 	mentionId: string;
 	display: string;
+	wire?: string;
+	personaId?: string;
 }
 
-export const ComposerMentionPill = observer(({mentionType, mentionId, display}: ComposerMentionPillProps) => {
+export const ComposerMentionPill = observer(({mentionType, mentionId, display, ...fork}: ComposerMentionPillProps) => {
 	const {guildId, channelId, plainText} = useContext(ComposerMentionContext);
 	const {i18n} = useLingui();
+	const resolvedPersonaId = fork.personaId ?? (fork.wire ? PERSONA_WIRE_RE.exec(fork.wire)?.[2] : undefined);
 	if (plainText) {
+		let text = display;
+		if (resolvedPersonaId) {
+			const persona = PersonaStore.getKnownPersona(resolvedPersonaId);
+			if (persona?.name) {
+				text = `@${persona.name}`;
+			}
+		}
 		return (
 			<span
 				className={styles.plainText}
 				contentEditable={false}
 				data-flx="lexical.composer.nodes.composer-mention-pill.plain-text"
 			>
-				{display}
+				{text}
 			</span>
 		);
 	}
@@ -80,6 +97,68 @@ export const ComposerMentionPill = observer(({mentionType, mentionId, display}: 
 	}
 
 	if (mentionType === 'user') {
+		if (resolvedPersonaId) {
+			let persona = PersonaStore.getKnownPersona(resolvedPersonaId);
+			if (!persona && channelId) {
+				const cachedMsgs = Messages.getCachedMessages(channelId);
+				if (cachedMsgs) {
+					cachedMsgs.forEach(
+						(msg) => {
+							const sub = msg.subprofile;
+							if (sub != null && sub.id === resolvedPersonaId) {
+								persona = sub;
+								PersonaStore.recordKnownPersona(sub);
+								return false;
+							}
+							return true;
+						},
+						undefined,
+						true,
+					);
+				}
+			}
+			if (!persona && mentionId) {
+				void PersonaStore.fetchPersona(mentionId, resolvedPersonaId);
+			}
+			const label = persona?.name ? `@${persona.name}` : display;
+			const user = Users.getUser(mentionId);
+			const fullTag = user ? `@${DisplayNameUtils.formatUserTagForStreamerMode(user)}` : null;
+			const pill = (
+				<span
+					className={markupStyles.mention}
+					contentEditable={false}
+					data-lexical-mention-type="user"
+					data-lexical-persona-id={resolvedPersonaId}
+					data-flx="lexical.composer.nodes.composer-mention-pill.span--persona"
+				>
+					<span
+						className={mentionRendererStyles.label}
+						data-flx="lexical.composer.nodes.composer-mention-pill.span--persona-label"
+					>
+						{label}
+					</span>
+					{fullTag != null && (
+						<span className={styles.srOnly} data-flx="lexical.composer.nodes.composer-mention-pill.sr-only--persona">
+							{i18n._(FULL_USER_TAG_DESCRIPTOR, {tag: fullTag})}
+						</span>
+					)}
+				</span>
+			);
+			if (!user) {
+				return pill;
+			}
+			return (
+				<MentionWithTooltip
+					userId={mentionId}
+					guildId={guildId}
+					channelId={channelId}
+					data-flx="lexical.composer.nodes.composer-mention-pill.mention-with-tooltip--persona"
+				>
+					{pill}
+				</MentionWithTooltip>
+			);
+		}
+
 		const user = Users.getUser(mentionId);
 		const label = user ? `@${DisplayNameUtils.getNickname(user, guildId, channelId)}` : display;
 		const fullTag = user ? `@${DisplayNameUtils.formatUserTagForStreamerMode(user)}` : null;
