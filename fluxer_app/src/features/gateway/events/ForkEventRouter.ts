@@ -4,6 +4,7 @@ import type {GatewayHandlerRegistry} from '@app/features/gateway/events/EventRou
 import {
 	handleUserPersonaCreate,
 	handleUserPersonaDelete,
+	handleUserPersonaSettingsUpdate,
 	handleUserPersonasUpdate,
 	handleUserPersonaUpdate,
 } from '@app/features/persona/events/PersonaEvents';
@@ -17,4 +18,5 @@ export function registerForkGatewayHandlers(registry: GatewayHandlerRegistry): v
 	registry.set('USER_PERSONA_UPDATE', handleUserPersonaUpdate as GatewayEventHandler);
 	registry.set('USER_PERSONA_DELETE', handleUserPersonaDelete as GatewayEventHandler);
 	registry.set('USER_PERSONAS_UPDATE', handleUserPersonasUpdate as GatewayEventHandler);
+	registry.set('USER_PERSONA_SETTINGS_UPDATE', handleUserPersonaSettingsUpdate as GatewayEventHandler);
 }
