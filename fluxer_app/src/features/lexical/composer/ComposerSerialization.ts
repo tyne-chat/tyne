@@ -57,7 +57,7 @@ export interface ComposerProjection {
 
 const CUSTOM_EMOJI_WIRE_RE = /^<(a)?:([A-Za-z0-9_+~-]+):(\d+)>$/;
 const STANDARD_EMOJI_WIRE_RE = /^(?:[0-9#*]\uFE0F?\u20E3|\P{ASCII})+$/u;
-const SLOT_USER_WIRE_RE = /^<@!?(\d+)>$/;
+const SLOT_USER_WIRE_RE = /^<@!?(\d+)(?::([a-zA-Z0-9_-]+))?>$/;
 const SLOT_ROLE_WIRE_RE = /^<@&(\d+)>$/;
 const SLOT_CHANNEL_WIRE_RE = /^<#(\d+)>$/;
 const COMPOSER_SLASH_SLOT_SEGMENT_PREFIX = 'slash-slot:';
