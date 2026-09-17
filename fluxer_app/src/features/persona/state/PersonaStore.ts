@@ -33,48 +33,46 @@ export type Persona = ClientPersona;
 let personaIdCounter = 0;
 
 export function normalizePersona(
-	raw: PersonaResponse | (Partial<ClientPersona> & {id: string; name: string}),
+	raw: PersonaResponse | (Partial<ClientPersona> & {id: string; name: string}) | {persona: PersonaResponse},
 ): ClientPersona {
-	const avatarUrl = (raw as any).avatar_url !== undefined ? (raw as any).avatar_url : ((raw as any).avatarUrl ?? null);
-	const systemName =
-		(raw as any).system_name !== undefined ? (raw as any).system_name : ((raw as any).systemName ?? null);
+	const source: any = (raw as any)?.persona ?? raw;
+	const avatarUrl = source.avatar_url !== undefined ? source.avatar_url : (source.avatarUrl ?? null);
+	const systemName = source.system_name !== undefined ? source.system_name : (source.systemName ?? null);
 	const color =
-		(raw as any).color !== undefined
-			? (raw as any).color
-			: (raw as any).accentColor !== undefined
-				? (raw as any).accentColor
-				: ((raw as any).accent_color ?? null);
-	const rawTags = (raw as any).persona_tags ?? (raw as any).personaTags ?? [];
+		source.color !== undefined
+			? source.color
+			: source.accentColor !== undefined
+				? source.accentColor
+				: (source.accent_color ?? null);
+	const rawTags = source.persona_tags ?? source.personaTags ?? [];
 	const tags: Array<PersonaTag> = rawTags.map((t: any) => ({
 		prefix: t.prefix ?? undefined,
 		suffix: t.suffix ?? undefined,
 	}));
-	const useCount = (raw as any).use_count ?? (raw as any).useCount ?? 0;
-	const lastUsedRaw = (raw as any).last_used_at_ms ?? (raw as any).lastUsedAtMs;
+	const useCount = source.use_count ?? source.useCount ?? 0;
+	const lastUsedRaw = source.last_used_at_ms ?? source.lastUsedAtMs;
 	const lastUsedAtMsStr = lastUsedRaw != null ? String(lastUsedRaw) : null;
 	const lastUsedAtMsBigInt = lastUsedRaw != null ? BigInt(lastUsedRaw) : 0n;
 	const autoTag =
-		(raw as any).auto_tag_disabled !== undefined
-			? Boolean((raw as any).auto_tag_disabled)
-			: Boolean((raw as any).autoTagDisabled);
-	const visibility: PersonaVisibility = (raw as any).visibility ?? 'unlisted';
+		source.auto_tag_disabled !== undefined ? Boolean(source.auto_tag_disabled) : Boolean(source.autoTagDisabled);
+	const visibility: PersonaVisibility = source.visibility ?? 'unlisted';
 
 	return {
-		id: raw.id,
-		name: raw.name,
+		id: source.id ?? '',
+		name: source.name ?? '',
 		avatar_url: avatarUrl,
 		system_name: systemName,
-		pronouns: raw.pronouns ?? null,
+		pronouns: source.pronouns ?? null,
 		color,
-		bio: raw.bio ?? null,
+		bio: source.bio ?? null,
 		auto_tag_disabled: autoTag,
 		persona_tags: tags,
 		use_count: useCount,
 		last_used_at_ms: lastUsedAtMsStr,
 		visibility,
-		external_uuid: (raw as any).external_uuid ?? null,
-		created_at: (raw as any).created_at ?? new Date().toISOString(),
-		updated_at: (raw as any).updated_at ?? new Date().toISOString(),
+		external_uuid: source.external_uuid ?? null,
+		created_at: source.created_at ?? new Date().toISOString(),
+		updated_at: source.updated_at ?? new Date().toISOString(),
 		// CamelCase aliases
 		avatarUrl,
 		systemName,
@@ -97,15 +95,27 @@ export class PersonaStoreClass {
 		return this._personas;
 	}
 
-	setPersonas(personas: Array<PersonaResponse | ClientPersona>): void {
+	setPersonas(
+		personas: Array<PersonaResponse | ClientPersona> | {personas: Array<PersonaResponse | ClientPersona>},
+	): void {
 		runInAction(() => {
-			this._personas = personas.map(normalizePersona);
+			const list = Array.isArray(personas)
+				? personas
+				: Array.isArray((personas as any)?.personas)
+					? (personas as any).personas
+					: [];
+			this._personas = list
+				.filter((p: any) => Boolean((p as any)?.id || (p as any)?.persona?.id))
+				.map(normalizePersona);
 		});
 	}
 
-	upsertPersona(persona: PersonaResponse | ClientPersona): void {
+	upsertPersona(persona: PersonaResponse | ClientPersona | {persona: PersonaResponse}): void {
 		runInAction(() => {
 			const normalized = normalizePersona(persona);
+			if (!normalized.id) {
+				return;
+			}
 			const idx = this._personas.findIndex((p) => p.id === normalized.id);
 			if (idx >= 0) {
 				this._personas[idx] = normalized;
@@ -115,10 +125,20 @@ export class PersonaStoreClass {
 		});
 	}
 
-	upsertPersonas(personas: Array<PersonaResponse | ClientPersona>): void {
+	upsertPersonas(
+		personas: Array<PersonaResponse | ClientPersona> | {personas: Array<PersonaResponse | ClientPersona>},
+	): void {
 		runInAction(() => {
-			for (const p of personas) {
+			const list = Array.isArray(personas)
+				? personas
+				: Array.isArray((personas as any)?.personas)
+					? (personas as any).personas
+					: [];
+			for (const p of list) {
 				const normalized = normalizePersona(p);
+				if (!normalized.id) {
+					continue;
+				}
 				const idx = this._personas.findIndex((item) => item.id === normalized.id);
 				if (idx >= 0) {
 					this._personas[idx] = normalized;
@@ -130,6 +150,9 @@ export class PersonaStoreClass {
 	}
 
 	removePersona(id: string): void {
+		if (!id) {
+			return;
+		}
 		runInAction(() => {
 			this._personas = this._personas.filter((p) => p.id !== id);
 		});
