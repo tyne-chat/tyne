@@ -3,6 +3,7 @@
 import type {PersonaVisibility} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import type {PersonaID, UserID} from '../BrandedTypes';
+import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {Persona} from '../models/Persona';
 
 export interface CreatePersonaParams {
@@ -45,4 +46,6 @@ export abstract class IPersonaRepository {
 	abstract update(userId: UserID, personaId: PersonaID, params: UpdatePersonaParams): Promise<Persona | null>;
 	abstract delete(userId: UserID, personaId: PersonaID): Promise<boolean>;
 	abstract deleteAllByUserId(userId: UserID): Promise<void>;
+	abstract findSettings(userId: UserID): Promise<UserPersonaSettingsRow | null>;
+	abstract upsertSettings(row: UserPersonaSettingsRow): Promise<UserPersonaSettingsRow>;
 }
