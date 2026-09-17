@@ -126,6 +126,10 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const activePersonaId = PersonaStore.activePersonaId;
 	const isLatched = PersonaStore.isPersonaLatched;
 
+	useEffect(() => {
+		void PersonaCommands.fetchPersonas();
+	}, []);
+
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<PersonaFormState>(emptyFormState());
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
