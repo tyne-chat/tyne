@@ -6,6 +6,7 @@ import {Logger} from '@app/features/platform/utils/AppLogger';
 import type {
 	PersonaCreateRequest,
 	PersonaResponse,
+	PersonaSettingsResponse,
 	PersonaUpdateRequest,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
@@ -15,6 +16,20 @@ const logger = new Logger('PersonaCommands');
 
 const publicPersonaCache = new Map<string, {data: PublicPersonaResponse; expiresAt: number}>();
 const PUBLIC_PERSONA_TTL_MS = 60 * 1000;
+
+export async function fetchPersonaSettings(): Promise<PersonaSettingsResponse | null> {
+	try {
+		const res = await http.get<PersonaSettingsResponse>(Endpoints.USER_PERSONA_SETTINGS);
+		if (res.ok && res.body) {
+			PersonaStore.updateSettings(res.body);
+			return res.body;
+		}
+		return null;
+	} catch (err) {
+		logger.error('Error fetching persona settings', err);
+		return null;
+	}
+}
 
 export async function fetchPersonas(): Promise<Array<PersonaResponse>> {
 	try {
