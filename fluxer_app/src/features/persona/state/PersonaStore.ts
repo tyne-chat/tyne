@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-
+import {Endpoints} from '@app/features/app/constants/Endpoints';
+import {http} from '@app/features/platform/transport/RestTransport';
 import * as Toast from '@app/features/ui/commands/ToastCommands';
-import UserSettings from '@app/features/user/state/UserSettings';
 import type {
 	PersonaResponse,
+	PersonaSettingsResponse,
 	PersonaTag,
 	PersonaVisibility,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
@@ -86,6 +87,12 @@ export function normalizePersona(
 
 export class PersonaStoreClass {
 	private _personas: Array<ClientPersona> = [];
+	private _displayTagText: string = '';
+	private _displayTagIcon: string | null = null;
+	private _activePersonaMode: ActivePersonaMode = 'off';
+	private _activePersonaId: string | null = null;
+	private _isPersonaLatched: boolean = false;
+	private _settingsLoaded: boolean = false;
 
 	constructor() {
 		makeAutoObservable(this);
@@ -164,6 +171,12 @@ export class PersonaStoreClass {
 	clear(): void {
 		runInAction(() => {
 			this._personas = [];
+			this._displayTagText = '';
+			this._displayTagIcon = null;
+			this._activePersonaMode = 'off';
+			this._activePersonaId = null;
+			this._isPersonaLatched = false;
+			this._settingsLoaded = false;
 		});
 	}
 
@@ -172,20 +185,15 @@ export class PersonaStoreClass {
 	}
 
 	get activePersonaId(): string | null {
-		const id = UserSettings.getSubPreference('activePersonaId');
-		return id && id.length > 0 ? id : null;
+		return this._activePersonaId && this._activePersonaId.length > 0 ? this._activePersonaId : null;
 	}
 
 	get activePersonaMode(): ActivePersonaMode {
-		const raw = UserSettings.getSubPreference('activePersonaMode');
-		if (raw === 'off' || raw === 'manual' || raw === 'last') {
-			return raw;
-		}
-		return this.isPersonaLatched ? 'last' : 'off';
+		return this._activePersonaMode;
 	}
 
 	get isPersonaLatched(): boolean {
-		return UserSettings.getSubPreference('activePersonaLatched') ?? false;
+		return this._isPersonaLatched;
 	}
 
 	get activePersona(): ClientPersona | null {
@@ -195,17 +203,55 @@ export class PersonaStoreClass {
 	}
 
 	get displayTagText(): string {
-		return UserSettings.getSubPreference('displayTagText') ?? '';
+		return this._displayTagText;
 	}
 
 	get displayTagIcon(): string | null {
-		const icon = UserSettings.getSubPreference('displayTagIcon');
-		return icon && icon.length > 0 ? icon : null;
+		return this._displayTagIcon && this._displayTagIcon.length > 0 ? this._displayTagIcon : null;
+	}
+
+	get isSettingsLoaded(): boolean {
+		return this._settingsLoaded;
+	}
+
+	updateSettings(settings: Partial<PersonaSettingsResponse>): void {
+		runInAction(() => {
+			if (settings.active_persona_mode !== undefined) {
+				this._activePersonaMode = settings.active_persona_mode;
+			}
+			if (settings.active_persona_id !== undefined) {
+				this._activePersonaId = settings.active_persona_id;
+			}
+			if (settings.is_latched !== undefined) {
+				this._isPersonaLatched = settings.is_latched;
+			}
+			if (settings.display_tag_text !== undefined) {
+				this._displayTagText = settings.display_tag_text ?? '';
+			}
+			if (settings.display_tag_icon !== undefined) {
+				this._displayTagIcon = settings.display_tag_icon ?? null;
+			}
+			this._settingsLoaded = true;
+		});
 	}
 
 	async setDisplayTag(text: string, icon?: string | null): Promise<void> {
-		await UserSettings.setSubPreference('displayTagText', text.trim());
-		await UserSettings.setSubPreference('displayTagIcon', (icon ?? '').trim());
+		const newText = text.trim();
+		const newIcon = icon !== undefined ? (icon ? icon.trim() : null) : this._displayTagIcon;
+		runInAction(() => {
+			this._displayTagText = newText;
+			this._displayTagIcon = newIcon;
+		});
+		try {
+			await http.patch(Endpoints.USER_PERSONA_SETTINGS, {
+				body: {
+					display_tag_text: newText,
+					display_tag_icon: newIcon,
+				},
+			});
+		} catch {
+			// Non-blocking
+		}
 	}
 
 	get rankedPersonas(): ReadonlyArray<ClientPersona> {
@@ -300,52 +346,95 @@ export class PersonaStoreClass {
 	}
 
 	async setActivePersonaMode(mode: ActivePersonaMode): Promise<void> {
-		const p1 = UserSettings.setSubPreference('activePersonaMode', mode);
-		const promises: Array<Promise<void>> = [p1];
+		let targetId: string | null = this._activePersonaId;
+		let targetLatched: boolean = this._isPersonaLatched;
+
 		if (mode === 'off') {
-			promises.push(UserSettings.setSubPreference('activePersonaId', ''));
-			promises.push(UserSettings.setSubPreference('activePersonaLatched', false));
+			targetId = null;
+			targetLatched = false;
 		} else if (mode === 'manual') {
-			const currentId = this.activePersonaId;
-			const targetId =
+			const currentId = this._activePersonaId;
+			targetId =
 				currentId && this._personas.some((p) => p.id === currentId)
 					? currentId
-					: (this.rankedPersonas[0]?.id ?? this._personas[0]?.id ?? '');
-			promises.push(UserSettings.setSubPreference('activePersonaId', targetId));
-			promises.push(UserSettings.setSubPreference('activePersonaLatched', Boolean(targetId)));
+					: (this.rankedPersonas[0]?.id ?? this._personas[0]?.id ?? null);
+			targetLatched = Boolean(targetId);
 		} else if (mode === 'last') {
-			const currentId = this.activePersonaId;
+			const currentId = this._activePersonaId;
 			if (currentId && this._personas.some((p) => p.id === currentId)) {
-				promises.push(UserSettings.setSubPreference('activePersonaLatched', true));
+				targetLatched = true;
 			} else {
-				promises.push(UserSettings.setSubPreference('activePersonaId', ''));
-				promises.push(UserSettings.setSubPreference('activePersonaLatched', false));
+				targetId = null;
+				targetLatched = false;
 			}
 		}
-		await Promise.all(promises);
+
+		runInAction(() => {
+			this._activePersonaMode = mode;
+			this._activePersonaId = targetId;
+			this._isPersonaLatched = targetLatched;
+		});
+
+		try {
+			await http.patch(Endpoints.USER_PERSONA_SETTINGS, {
+				body: {
+					active_persona_mode: mode,
+					active_persona_id: targetId,
+					is_latched: targetLatched,
+				},
+			});
+		} catch {
+			// Non-blocking
+		}
 	}
 
 	async setActivePersona(id: string | null, latch = true, mode?: ActivePersonaMode): Promise<void> {
-		const p1 = UserSettings.setSubPreference('activePersonaId', id ?? '');
-		const p2 = UserSettings.setSubPreference('activePersonaLatched', Boolean(id && latch));
-		const promises: Array<Promise<void>> = [p1, p2];
-		if (mode) {
-			promises.push(UserSettings.setSubPreference('activePersonaMode', mode));
-		} else if (id && latch && this.activePersonaMode === 'off') {
-			promises.push(UserSettings.setSubPreference('activePersonaMode', 'manual'));
+		let newMode = mode ?? this._activePersonaMode;
+		if (!mode && id && latch && this._activePersonaMode === 'off') {
+			newMode = 'manual';
 		}
-		await Promise.all(promises);
+		const newLatched = Boolean(id && latch);
+
+		runInAction(() => {
+			this._activePersonaId = id;
+			this._isPersonaLatched = newLatched;
+			this._activePersonaMode = newMode;
+		});
+
+		try {
+			await http.patch(Endpoints.USER_PERSONA_SETTINGS, {
+				body: {
+					active_persona_id: id,
+					is_latched: newLatched,
+					active_persona_mode: newMode,
+				},
+			});
+		} catch {
+			// Non-blocking
+		}
 	}
 
 	async unlatch(preserveMode?: boolean): Promise<void> {
-		const shouldPreserve = preserveMode ?? this.activePersonaMode === 'last';
-		const p1 = UserSettings.setSubPreference('activePersonaLatched', false);
-		const p2 = UserSettings.setSubPreference('activePersonaId', '');
-		const promises: Array<Promise<void>> = [p1, p2];
-		if (!shouldPreserve) {
-			promises.push(UserSettings.setSubPreference('activePersonaMode', 'off'));
+		const shouldPreserve = preserveMode ?? this._activePersonaMode === 'last';
+		const newMode = shouldPreserve ? this._activePersonaMode : 'off';
+
+		runInAction(() => {
+			this._isPersonaLatched = false;
+			this._activePersonaId = null;
+			this._activePersonaMode = newMode;
+		});
+
+		try {
+			await http.patch(Endpoints.USER_PERSONA_SETTINGS, {
+				body: {
+					is_latched: false,
+					active_persona_id: null,
+					active_persona_mode: newMode,
+				},
+			});
+		} catch {
+			// Non-blocking
 		}
-		await Promise.all(promises);
 	}
 
 	async recordPersonaUse(id: string): Promise<void> {
