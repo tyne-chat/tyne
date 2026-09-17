@@ -12,6 +12,10 @@ import {msg} from '@lingui/core/macro';
 import {Trans} from '@lingui/react/macro';
 import type {ReactNode} from 'react';
 
+// Fork imports.
+
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+
 const ONE_TYPIST_DESCRIPTOR = msg({
 	message: '{a} is typing...',
 	comment: 'Screen reader announcement in the composer when one person is typing. {a} is their display name.',
@@ -31,21 +35,51 @@ const MULTIPLE_PEOPLE_ARE_TYPING_DESCRIPTOR = msg({
 	comment: 'Label in the composer typing row when the names of the people typing do not fit.',
 });
 
-function getTypistName(user: User, channel: Channel): string {
-	return NicknameUtils.getNickname(user, channel.guildId ?? null);
+export interface TypistEntry {
+	user: User;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
-function getTypingNames(typingUsers: ReadonlyArray<User>, channel: Channel): ReactNode {
-	const [a, b, c] = typingUsers.slice(0, TYPING_ROLLING_MAX_NAMES).map((user) => (
-		<span
-			key={user.id}
-			className={styles.username}
-			style={{color: GuildMembers.getMember(channel.guildId ?? '', user.id)?.getColorString()}}
-			data-flx="channel.typing-users.get-typing-text.username"
-		>
-			{getTypistName(user, channel)}
-		</span>
-	));
+export type Typist = User | TypistEntry;
+
+function isTypistEntry(item: Typist): item is TypistEntry {
+	return 'user' in item;
+}
+
+export function getTypistName(item: Typist, channel: Channel): string {
+	if (isTypistEntry(item)) {
+		if (item.subprofile?.name) {
+			return item.subprofile.name;
+		}
+		return NicknameUtils.getNickname(item.user, channel.guildId ?? null);
+	}
+	return NicknameUtils.getNickname(item, channel.guildId ?? null);
+}
+
+function getTypistColor(item: Typist, channel: Channel): string | undefined {
+	if (isTypistEntry(item)) {
+		if (item.subprofile?.color != null) {
+			return `#${item.subprofile.color.toString(16).padStart(6, '0')}`;
+		}
+		return GuildMembers.getMember(channel.guildId ?? '', item.user.id)?.getColorString();
+	}
+	return GuildMembers.getMember(channel.guildId ?? '', item.id)?.getColorString();
+}
+
+function getTypingNames(typingUsers: ReadonlyArray<Typist>, channel: Channel): ReactNode {
+	const [a, b, c] = typingUsers.slice(0, TYPING_ROLLING_MAX_NAMES).map((typist) => {
+		const user = isTypistEntry(typist) ? typist.user : typist;
+		return (
+			<span
+				key={user.id}
+				className={styles.username}
+				style={{color: getTypistColor(typist, channel)}}
+				data-flx="channel.typing-users.get-typing-text.username"
+			>
+				{getTypistName(typist, channel)}
+			</span>
+		);
+	});
 	if (typingUsers.length === 1) {
 		return <Trans>{a} is typing...</Trans>;
 	}
@@ -65,7 +99,7 @@ function getTypingNames(typingUsers: ReadonlyArray<User>, channel: Channel): Rea
 
 export function getRollingTypingText(
 	i18n: I18n,
-	typingUsers: ReadonlyArray<User>,
+	typingUsers: ReadonlyArray<Typist>,
 	channel: Channel,
 	overflowing: boolean,
 ): ReactNode {
@@ -81,14 +115,14 @@ export function getRollingTypingText(
 	return getTypingNames(typingUsers, channel);
 }
 
-export function getRollingTypingAnnouncement(i18n: I18n, typingUsers: ReadonlyArray<User>, channel: Channel): string {
+export function getRollingTypingAnnouncement(i18n: I18n, typingUsers: ReadonlyArray<Typist>, channel: Channel): string {
 	if (typingUsers.length === 0) {
 		return '';
 	}
 	if (typingUsers.length > TYPING_ROLLING_MAX_NAMES) {
 		return getTypingTierText(i18n, typingUsers.length);
 	}
-	const [a, b, c] = typingUsers.map((user) => getTypistName(user, channel));
+	const [a, b, c] = typingUsers.map((typist) => getTypistName(typist, channel));
 	if (typingUsers.length === 1) {
 		return i18n._(ONE_TYPIST_DESCRIPTOR, {a});
 	}
