@@ -87,7 +87,7 @@ describe('PersonaService', () => {
 			await expect(service.createPersona(userId, {name: 'Over Limit'})).rejects.toThrow(PersonaLimitReachedError);
 		});
 
-		// Enforces the maximum limit of 5 proxy tag pairs per persona to keep matcher iteration lightweight.
+		// Enforces the maximum limit of 5 persona tag pairs per persona to keep matcher iteration lightweight.
 		it('throws PersonaTagLimitExceededError when more than 5 tags are provided', async () => {
 			vi.mocked(mockRepo.count).mockResolvedValueOnce(0);
 
@@ -111,7 +111,7 @@ describe('PersonaService', () => {
 		});
 
 		// Inter-persona collision check: prevents two different personas of the same user from sharing
-		// identical prefix/suffix tags, ensuring unambiguous in-chat proxy matching.
+		// identical prefix/suffix tags, ensuring unambiguous in-chat persona matching.
 		it('throws DuplicatePersonaTagError when tag is already in use by another persona of the user', async () => {
 			vi.mocked(mockRepo.count).mockResolvedValueOnce(1);
 			const existingPersona = makeMockPersona(userId, defaultPersonaId, 'Existing', {
