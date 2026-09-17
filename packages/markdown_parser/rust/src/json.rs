@@ -165,7 +165,9 @@ fn write_node(out: &mut String, node: &Node) {
 
 fn write_mention_kind(out: &mut String, kind: &MentionKind) {
     match kind {
-        MentionKind::User { id } => write_tagged_id(out, "User", id),
+        MentionKind::User { id, persona_id } => {
+            fork_write_user_mention(out, id, persona_id.as_deref())
+        }
         MentionKind::Channel { id } => write_tagged_id(out, "Channel", id),
         MentionKind::Role { id } => write_tagged_id(out, "Role", id),
         MentionKind::Command {
@@ -308,3 +310,17 @@ fn next_escape(bytes: &[u8], from: usize) -> usize {
 }
 
 const HEX_DIGITS: &[u8; 16] = b"0123456789abcdef";
+
+// Fork: a user mention with the persona it names (`<@user:persona>`), written as serde wrote it
+// before upstream's hand-written JSON: `personaId` after `id`, left out when there is none.
+fn fork_write_user_mention(out: &mut String, id: &str, persona_id: Option<&str>) {
+    let Some(persona_id) = persona_id else {
+        return write_tagged_id(out, "User", id);
+    };
+    out.push_str("{\"kind\":\"User\"");
+    out.push_str(key!("id"));
+    write_str(out, id);
+    out.push_str(key!("personaId"));
+    write_str(out, persona_id);
+    out.push('}');
+}
