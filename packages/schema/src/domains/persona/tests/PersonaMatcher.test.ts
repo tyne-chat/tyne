@@ -164,7 +164,7 @@ describe('PersonaMatcher', () => {
 		expect(res3.matched).toBe(false);
 
 		// In ordinary text messages without attachments, a lonely suffix alone should NOT trigger
-		// persona proxying (to prevent accidental triggers from punctuation/emoticons).
+		// persona tag matching (to prevent accidental triggers from punctuation/emoticons).
 		expect(matchPersona('-C', personas, null, false).matched).toBe(false);
 		expect(matchPersona(']', personas, null, false).matched).toBe(false);
 	});
