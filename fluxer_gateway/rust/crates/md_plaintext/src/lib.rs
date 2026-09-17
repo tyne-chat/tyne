@@ -83,6 +83,8 @@ impl PreviewContext {
 
     pub fn into_options(self) -> PlaintextOptions {
         PlaintextOptions {
+            // Fork: the persona names of the fork's plaintext options; the preview has none yet.
+            personas: Names::default(),
             preserve_markdown: self.preserve_markdown,
             hide_spoilers: self.hide_spoilers,
             include_emoji_names: self.include_emoji_names,

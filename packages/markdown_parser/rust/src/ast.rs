@@ -176,6 +176,8 @@ pub enum TableAlignment {
 pub enum MentionKind {
     User {
         id: String,
+        #[serde(rename = "personaId", skip_serializing_if = "Option::is_none")]
+        persona_id: Option<String>,
     },
     Channel {
         id: String,
