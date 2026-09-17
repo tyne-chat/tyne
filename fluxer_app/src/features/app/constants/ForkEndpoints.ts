@@ -4,6 +4,7 @@
 // upstream's additions to its own list never meet the fork's.
 
 export const ForkEndpoints = {
+	CHANNEL_PERSONA_MENTIONS: (channelId: string) => `/channels/${channelId}/persona-mentions`,
 	USER_PERSONAS: '/users/@me/personas',
 	USER_PERSONA: (personaId: string) => `/users/@me/personas/${personaId}`,
 	USER_PERSONA_IMPORT: '/users/@me/personas/import',
