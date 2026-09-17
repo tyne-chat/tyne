@@ -2,11 +2,14 @@
 
 import type {
 	PersonaCreateRequest,
+	PersonaSettingsResponse,
+	PersonaSettingsUpdateRequest,
 	PersonaTag,
 	PersonaUpdateRequest,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {PersonaID, UserID} from '../BrandedTypes';
+import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
 import type {Persona} from '../models/Persona';
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
@@ -292,9 +295,69 @@ export class PersonaService {
 		return persona.toPublicResponse();
 	}
 
+	async getSettings(userId: UserID): Promise<PersonaSettingsResponse> {
+		const row = await this.deps.personaRepository.findSettings(userId);
+		if (!row) {
+			return {
+				user_id: userId.toString(),
+				active_persona_mode: 'off',
+				active_persona_id: null,
+				is_latched: false,
+				display_tag_text: '',
+				display_tag_icon: null,
+			};
+		}
+		return {
+			user_id: row.user_id.toString(),
+			active_persona_mode: (row.active_persona_mode as 'off' | 'manual' | 'last') ?? 'off',
+			active_persona_id: row.active_persona_id ? row.active_persona_id.toString() : null,
+			is_latched: Boolean(row.is_latched),
+			display_tag_text: row.display_tag_text ?? '',
+			display_tag_icon: row.display_tag_icon ?? null,
+		};
+	}
+
+	async updateSettings(userId: UserID, data: PersonaSettingsUpdateRequest): Promise<PersonaSettingsResponse> {
+		const existing = await this.deps.personaRepository.findSettings(userId);
+		const updatedRow: UserPersonaSettingsRow = {
+			user_id: userId,
+			active_persona_mode:
+				data.active_persona_mode !== undefined ? data.active_persona_mode : (existing?.active_persona_mode ?? 'off'),
+			active_persona_id:
+				data.active_persona_id !== undefined ? data.active_persona_id : (existing?.active_persona_id ?? null),
+			is_latched: data.is_latched !== undefined ? data.is_latched : (existing?.is_latched ?? false),
+			display_tag_text:
+				data.display_tag_text !== undefined ? (data.display_tag_text ?? '') : (existing?.display_tag_text ?? ''),
+			display_tag_icon:
+				data.display_tag_icon !== undefined ? data.display_tag_icon : (existing?.display_tag_icon ?? null),
+			updated_at: new Date(),
+			version: (existing?.version ?? 0) + 1,
+		};
+
+		await this.deps.personaRepository.upsertSettings(updatedRow);
+
+		const response: PersonaSettingsResponse = {
+			user_id: updatedRow.user_id.toString(),
+			active_persona_mode: (updatedRow.active_persona_mode as 'off' | 'manual' | 'last') ?? 'off',
+			active_persona_id: updatedRow.active_persona_id ? updatedRow.active_persona_id.toString() : null,
+			is_latched: Boolean(updatedRow.is_latched),
+			display_tag_text: updatedRow.display_tag_text ?? '',
+			display_tag_icon: updatedRow.display_tag_icon ?? null,
+		};
+
+		await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', response);
+
+		return response;
+	}
+
 	private async dispatchToUser(
 		userId: UserID,
-		event: 'USER_PERSONA_CREATE' | 'USER_PERSONA_UPDATE' | 'USER_PERSONA_DELETE' | 'USER_PERSONAS_UPDATE',
+		event:
+			| 'USER_PERSONA_CREATE'
+			| 'USER_PERSONA_UPDATE'
+			| 'USER_PERSONA_DELETE'
+			| 'USER_PERSONAS_UPDATE'
+			| 'USER_PERSONA_SETTINGS_UPDATE',
 		data: unknown,
 	): Promise<void> {
 		if (!this.deps.gatewayService) return;
