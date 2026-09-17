@@ -199,13 +199,39 @@ pub fn parse_mention(text: &str, flags: u32) -> Option<ParserResult> {
                     return mention(MentionKind::Role { id: id.to_owned() }, end);
                 }
             } else {
-                let id = if starts_with(inner, "@!") {
+                let id_part = if starts_with(inner, "@!") {
                     &inner[2..]
                 } else {
                     &inner[1..]
                 };
-                if ParserFlags::has(flags, ParserFlags::ALLOW_USER_MENTIONS) && is_digit_only(id) {
-                    return mention(MentionKind::User { id: id.to_owned() }, end);
+                if ParserFlags::has(flags, ParserFlags::ALLOW_USER_MENTIONS) {
+                    if let Some(colon_idx) = find_from(id_part, 0, b':') {
+                        let user_id = &id_part[..colon_idx];
+                        let persona_id = &id_part[colon_idx + 1..];
+                        if !user_id.is_empty()
+                            && !persona_id.is_empty()
+                            && is_digit_only(user_id)
+                            && persona_id
+                                .bytes()
+                                .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+                        {
+                            return mention(
+                                MentionKind::User {
+                                    id: user_id.to_owned(),
+                                    persona_id: Some(persona_id.to_owned()),
+                                },
+                                end,
+                            );
+                        }
+                    } else if is_digit_only(id_part) {
+                        return mention(
+                            MentionKind::User {
+                                id: id_part.to_owned(),
+                                persona_id: None,
+                            },
+                            end,
+                        );
+                    }
                 }
             }
         }
