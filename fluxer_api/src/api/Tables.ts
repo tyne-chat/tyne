@@ -341,7 +341,12 @@ import {seconds} from 'itty-time';
 
 // Fork: used only by the fork's tables at the end of this file.
 
-import {PERSONA_COLUMNS, type PersonaRow} from '@app/api/database/types/PersonaTypes';
+import {
+	PERSONA_COLUMNS,
+	type PersonaRow,
+	USER_PERSONA_SETTINGS_COLUMNS,
+	type UserPersonaSettingsRow,
+} from '@app/api/database/types/PersonaTypes';
 
 export const Users = defineTable<UserRow, 'user_id'>({
 	name: 'users',
@@ -1461,4 +1466,9 @@ export const Personas = defineTable<PersonaRow, 'user_id' | 'persona_id', 'user_
 	columns: PERSONA_COLUMNS,
 	primaryKey: ['user_id', 'persona_id'],
 	partitionKey: ['user_id'],
+});
+export const UserPersonaSettings = defineTable<UserPersonaSettingsRow, 'user_id'>({
+	name: 'user_persona_settings',
+	columns: USER_PERSONA_SETTINGS_COLUMNS,
+	primaryKey: ['user_id'],
 });
