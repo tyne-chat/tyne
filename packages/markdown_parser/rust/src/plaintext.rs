@@ -14,6 +14,7 @@ pub struct PlaintextOptions {
     pub include_emoji_names: bool,
     pub include_link_urls: bool,
     pub users: HashMap<String, String>,
+    pub personas: HashMap<String, String>,
     pub roles: HashMap<String, String>,
     pub channels: HashMap<String, String>,
 }
@@ -25,6 +26,7 @@ impl Default for PlaintextOptions {
             include_emoji_names: true,
             include_link_urls: false,
             users: HashMap::new(),
+            personas: HashMap::new(),
             roles: HashMap::new(),
             channels: HashMap::new(),
         }
@@ -358,10 +360,17 @@ fn render_alert_label(alert_type: AlertType) -> &'static str {
 
 fn render_mention_to_plaintext(kind: &MentionKind, options: &PlaintextOptions) -> String {
     match kind {
-        MentionKind::User { id } => options
-            .users
-            .get(id)
-            .map_or_else(|| format!("@{id}"), |name| format!("@{name}")),
+        MentionKind::User { id, persona_id } => {
+            if let Some(pid) = persona_id
+                && let Some(name) = options.personas.get(pid)
+            {
+                return format!("@{name}");
+            }
+            options
+                .users
+                .get(id)
+                .map_or_else(|| format!("@{id}"), |name| format!("@{name}"))
+        }
         MentionKind::Role { id } => options
             .roles
             .get(id)
