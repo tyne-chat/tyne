@@ -29,6 +29,23 @@ export interface AutocompleteMentionRoleOption {
 	role: GuildRole;
 }
 
+export interface AutocompleteMentionPersonaOption {
+	type: 'mention';
+	kind: 'persona';
+	persona: {
+		id: string;
+		name: string;
+		avatar_url?: string | null;
+		color?: number | null;
+		pronouns?: string | null;
+		system_name?: string | null;
+		owner_user_id: string;
+		owner_username: string;
+		owner_global_name?: string | null;
+		owner_nickname?: string | null;
+	};
+}
+
 export interface AutocompleteSpecialMentionOption {
 	type: 'mention';
 	kind: '@everyone' | '@here';
@@ -37,6 +54,7 @@ export interface AutocompleteSpecialMentionOption {
 export type AutocompleteOption =
 	| AutocompleteMentionMemberOption
 	| AutocompleteMentionUserOption
+	| AutocompleteMentionPersonaOption
 	| AutocompleteMentionRoleOption
 	| AutocompleteSpecialMentionOption
 	| {type: 'channel'; channel: Channel}
@@ -67,6 +85,8 @@ export const isMentionMember = (o: AutocompleteOption): o is AutocompleteMention
 	o.type === 'mention' && o.kind === 'member';
 export const isMentionUser = (o: AutocompleteOption): o is AutocompleteMentionUserOption =>
 	o.type === 'mention' && o.kind === 'user';
+export const isMentionPersona = (o: AutocompleteOption): o is AutocompleteMentionPersonaOption =>
+	o.type === 'mention' && o.kind === 'persona';
 export const isMentionRole = (o: AutocompleteOption): o is AutocompleteMentionRoleOption =>
 	o.type === 'mention' && o.kind === 'role';
 export const isSpecialMention = (o: AutocompleteOption): o is AutocompleteSpecialMentionOption =>

@@ -32,6 +32,11 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 
+// Fork imports.
+
+import Messages from '@app/features/messaging/state/MessagingMessages';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 const UNKNOWN_ROLE_DESCRIPTOR = msg({
 	message: 'Unknown role',
 	comment: 'Short label in the messaging mention renderer. Keep it concise.',
@@ -138,9 +143,83 @@ export const MentionRenderer = observer(function MentionRenderer({
 	const shouldDisableInteractions = options.disableInteractions === true;
 	switch (kind.kind) {
 		case MentionKind.User: {
-			const user = kind.id ? Users.getUser(kind.id) : null;
 			const channel = channelId ? Channels.getChannel(channelId) : undefined;
 			const resolvedGuildId = channel?.guildId || options.guildId || '';
+			const user = kind.id ? Users.getUser(kind.id) : null;
+
+			if (kind.personaId) {
+				let persona = PersonaStore.getKnownPersona(kind.personaId);
+				if (!persona && channelId) {
+					const cachedMsgs = Messages.getCachedMessages(channelId);
+					if (cachedMsgs) {
+						cachedMsgs.forEach(
+							(msg) => {
+								const sub = msg.subprofile;
+								if (sub != null && sub.id === kind.personaId) {
+									persona = sub;
+									PersonaStore.recordKnownPersona(sub);
+									return false;
+								}
+								return true;
+							},
+							undefined,
+							true,
+						);
+					}
+				}
+				if (!persona && kind.id) {
+					void PersonaStore.fetchPersona(kind.id, kind.personaId);
+				}
+				const personaName = persona?.name || kind.personaId;
+				const personaMentionLabel = `@${personaName}`;
+
+				if (shouldDisableInteractions || !user) {
+					return (
+						<span
+							key={id}
+							className={markupStyles.mention}
+							data-flx="messaging.markdown.renderers.mention-renderer.span-persona"
+						>
+							<MentionLabel data-flx="messaging.markdown.renderers.mention-renderer.mention-label-persona">
+								{personaMentionLabel}
+							</MentionLabel>
+						</span>
+					);
+				}
+
+				return (
+					<PreloadableUserPopout
+						key={id}
+						user={user}
+						isWebhook={false}
+						guildId={resolvedGuildId}
+						channelId={channelId}
+						subprofileOverride={persona}
+						position="right-start"
+						data-flx="messaging.markdown.renderers.mention-renderer.preloadable-persona-popout"
+					>
+						<FocusRing offset={-2} data-flx="messaging.markdown.renderers.mention-renderer.focus-ring-persona">
+							<span
+								role="button"
+								tabIndex={0}
+								className={clsx(markupStyles.mention, markupStyles.interactive)}
+								onClick={(e) => e.stopPropagation()}
+								onKeyDown={(e) => {
+									if (!isKeyboardActivationKey(e.key)) return;
+									e.preventDefault();
+									e.stopPropagation();
+								}}
+								data-flx="messaging.markdown.renderers.mention-renderer.button.stop-propagation-persona"
+							>
+								<MentionLabel data-flx="messaging.markdown.renderers.mention-renderer.mention-label-persona-interactive">
+									{personaMentionLabel}
+								</MentionLabel>
+							</span>
+						</FocusRing>
+					</PreloadableUserPopout>
+				);
+			}
+
 			const name = user ? NicknameUtils.getNickname(user, resolvedGuildId || null, channelId) : null;
 			const genericMention = (
 				<span key={id} className={markupStyles.mention} data-flx="messaging.markdown.renderers.mention-renderer.span">
