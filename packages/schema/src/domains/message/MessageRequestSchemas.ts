@@ -461,6 +461,14 @@ export const MessageAckRequest = z.object({
 
 export type MessageAckRequest = z.infer<typeof MessageAckRequest>;
 
+export const IndicateTypingRequestSchema = z
+	.object({
+		subprofile: MessageSubprofileRequestSchema.nullish().optional().describe('Optional subprofile persona information'),
+	})
+	.optional();
+
+export type IndicateTypingRequest = z.infer<typeof IndicateTypingRequestSchema>;
+
 export const ChannelPinsQuerySchema = z.object({
 	limit: z.coerce
 		.number()
