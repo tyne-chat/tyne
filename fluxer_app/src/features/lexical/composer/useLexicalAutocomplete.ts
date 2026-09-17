@@ -110,6 +110,15 @@ import {
 	useSyncExternalStore,
 } from 'react';
 
+// Fork imports.
+
+import {
+	type AutocompleteMentionPersonaOption,
+	isMentionPersona,
+} from '@app/features/channel/components/AutocompleteTypes';
+import {useAutocompletePersonaSearch} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 interface UseLexicalAutocompleteParams {
 	channel: Channel | null;
 	handleRef: RefObject<ComposerHandle | null>;
@@ -160,6 +169,66 @@ function buildRecentSpeakerOptions(
 			if (member != null) {
 				options.push({type: 'mention', kind: 'member', member});
 			}
+			return options.length < limit;
+		},
+		undefined,
+		true,
+	);
+	return options;
+}
+
+function buildRecentPersonaOptions(
+	channel: Channel,
+	query: string,
+	currentUserId?: string,
+	limit: number = MENTION_RESULT_LIMIT,
+): Array<AutocompleteMentionPersonaOption> {
+	const messages = Messages.getCachedMessages(channel.id);
+	if (messages == null) {
+		return [];
+	}
+	const queryLower = query.toLowerCase();
+	const seen = new Set<string>();
+	const options: Array<AutocompleteMentionPersonaOption> = [];
+	messages.forEach(
+		(message) => {
+			const sub = message.subprofile;
+			if (sub == null) {
+				return undefined;
+			}
+			if (seen.has(sub.id)) {
+				return undefined;
+			}
+			// Privacy check: If the persona is private and the author is not the current user, skip it
+			if (sub.visibility === 'private' && message.author.id !== currentUserId) {
+				return undefined;
+			}
+			const matches =
+				queryLower.length === 0 ||
+				sub.name.toLowerCase().includes(queryLower) ||
+				sub.system_name?.toLowerCase().includes(queryLower) ||
+				message.author.username.toLowerCase().includes(queryLower);
+			if (!matches) {
+				return undefined;
+			}
+			seen.add(sub.id);
+			const member = channel.guildId ? GuildMembers.getMember(channel.guildId, message.author.id) : null;
+			options.push({
+				type: 'mention',
+				kind: 'persona',
+				persona: {
+					id: sub.id,
+					name: sub.name,
+					avatar_url: sub.avatar ?? null,
+					color: sub.color ?? sub.avatar_color ?? null,
+					pronouns: sub.pronouns ?? null,
+					system_name: sub.system_name ?? sub.display_tag_text ?? null,
+					owner_user_id: message.author.id,
+					owner_username: message.author.username,
+					owner_global_name: message.author.globalName ?? null,
+					owner_nickname: member?.nick ?? null,
+				},
+			});
 			return options.length < limit;
 		},
 		undefined,
@@ -300,6 +369,12 @@ export function useLexicalAutocomplete({
 		setState: setGifState,
 	});
 
+	const personaSearchResults = useAutocompletePersonaSearch({
+		triggerType: autocompleteTriggerType,
+		matchedText: autocompleteTriggerMatchedText,
+		channelId: channel?.id,
+	});
+
 	const canMentionEveryone =
 		allowSpecialMentions !== false && channel != null && Permission.can(Permissions.MENTION_EVERYONE, channel);
 	const specialMentionsAllowed = areSpecialMentionsAllowed(
@@ -385,12 +460,41 @@ export function useLexicalAutocomplete({
 				}
 				const parsedQuery = parseMentionQuery(matchedText);
 				const queryForMatching = parsedQuery.usernameQuery.trim();
+				const currentUserId = Authentication.currentUserId ?? undefined;
+				const recentPersonas = buildRecentPersonaOptions(
+					channel,
+					queryForMatching,
+					currentUserId,
+					MENTION_RESULT_LIMIT,
+				);
+				const seenPersonaIds = new Set(recentPersonas.map((p) => p.persona.id));
+				const otherPersonas: Array<AutocompleteMentionPersonaOption> = personaSearchResults
+					.filter((item) => !seenPersonaIds.has(item.id))
+					.slice(0, MENTION_RESULT_LIMIT)
+					.map((item) => ({
+						type: 'mention' as const,
+						kind: 'persona' as const,
+						persona: {
+							id: item.id,
+							name: item.name,
+							avatar_url: item.avatar_url,
+							color: item.color,
+							pronouns: item.pronouns,
+							system_name: item.system_name,
+							owner_user_id: item.owner_user_id,
+							owner_username: item.owner_username,
+							owner_global_name: item.owner_global_name,
+							owner_nickname: item.owner_nickname,
+						},
+					}));
 				if (channel.guildId == null) {
 					const users = channel.recipientIds
 						.map((id) => Users.getUser(id))
 						.filter((user): user is User => user != null);
 					const userOptions = filterDMUsers(users, parsedQuery);
-					options = specialMentionsAllowed ? [...userOptions, ...SPECIAL_MENTIONS] : userOptions;
+					options = specialMentionsAllowed
+						? [...userOptions, ...recentPersonas, ...otherPersonas, ...SPECIAL_MENTIONS]
+						: [...userOptions, ...recentPersonas, ...otherPersonas];
 				} else {
 					const recentSpeakers =
 						matchedText.length === 0 ? buildRecentSpeakerOptions(channel, MENTION_RESULT_LIMIT) : [];
@@ -424,7 +528,7 @@ export function useLexicalAutocomplete({
 								return mention.kind.slice(1).toLowerCase().includes(queryForMatching.toLowerCase());
 							})
 						: [];
-					options = [...members, ...specialMentions, ...roles];
+					options = [...members, ...recentPersonas, ...otherPersonas, ...specialMentions, ...roles];
 				}
 				break;
 			}
@@ -905,7 +1009,7 @@ function optionToSlotPayload(
 	optionType: SlashSlotAutocompleteContext['optionType'],
 	channel: Channel | null,
 ): ComposerInsertPayload | null {
-	if (optionType === 'user' && (isMentionMember(option) || isMentionUser(option))) {
+	if (optionType === 'user' && (isMentionMember(option) || isMentionUser(option) || isMentionPersona(option))) {
 		return optionToPayload(option, channel);
 	}
 	if (optionType === 'channel' && isChannel(option)) {
@@ -970,6 +1074,28 @@ function optionToPayload(option: AutocompleteOption, channel: Channel | null): C
 			id: option.user.id,
 			display: `@${formatUserTagForStreamerMode(option.user)}`,
 			wire: `<@${option.user.id}>`,
+		};
+	}
+	if (isMentionPersona(option)) {
+		MentionFrecency.recordMention(channelGuildId, option.persona.owner_user_id);
+		PersonaStore.recordKnownPersona({
+			id: option.persona.id,
+			name: option.persona.name,
+			avatar: option.persona.avatar_url,
+			avatar_color: option.persona.color,
+			display_tag_text: option.persona.system_name,
+			display_tag_icon: null,
+			system_name: option.persona.system_name,
+			pronouns: option.persona.pronouns,
+			color: option.persona.color,
+			bio: null,
+		});
+		return {
+			kind: 'mention',
+			mentionType: 'user',
+			id: option.persona.owner_user_id,
+			display: `@${option.persona.name}`,
+			wire: `<@${option.persona.owner_user_id}:${option.persona.id}>`,
 		};
 	}
 	if (isMentionRole(option)) {
