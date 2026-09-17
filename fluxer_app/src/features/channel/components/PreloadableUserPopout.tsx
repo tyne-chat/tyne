@@ -27,6 +27,7 @@ import {PersonaProfileModal} from '@app/features/persona/components/PersonaProfi
 import {PersonaProfilePopout} from '@app/features/persona/components/PersonaProfilePopout';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 type PreloadableChildProps = React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>;
 
@@ -40,6 +41,7 @@ export const PreloadableUserPopout = React.forwardRef<
 		guildMember?: GuildMember;
 		channelId?: string;
 		message?: Message;
+		subprofileOverride?: MessageSubprofileResponse | null;
 		children: React.ReactNode;
 		position?: PopoutPosition;
 		tooltip?: string | (() => React.ReactNode);
@@ -62,6 +64,7 @@ export const PreloadableUserPopout = React.forwardRef<
 			guildMember,
 			channelId,
 			message,
+			subprofileOverride,
 			children,
 			position = 'right-start',
 			tooltip,
@@ -80,7 +83,7 @@ export const PreloadableUserPopout = React.forwardRef<
 		const [showActionsSheet, setShowActionsSheet] = useState(false);
 		const child = React.Children.only(children) as React.ReactElement<PreloadableChildProps>;
 		const member = guildMember ?? (guildId ? GuildMembers.getMember(guildId, user.id) : null);
-		const subprofile = !ignoreSubprofile && message?.subprofile ? message.subprofile : null;
+		const subprofile = !ignoreSubprofile ? (subprofileOverride ?? message?.subprofile ?? null) : null;
 		const {scheduleProfilePreload, cancelProfilePreload} = useUserProfileHoverPreload({
 			userId: user.id,
 			guildId,
