@@ -113,6 +113,52 @@ describe('PersonaCommands', () => {
 		});
 	});
 
+	describe('fetchPersonaSettings', () => {
+		it('fetches persona settings from REST API and updates PersonaStore', async () => {
+			const mockSettings = {
+				user_id: '1540000000000000001',
+				active_persona_mode: 'manual',
+				active_persona_id: '1540000000000000001',
+				is_latched: true,
+				display_tag_text: 'SYS',
+				display_tag_icon: 'https://example.com/icon.png',
+			};
+
+			vi.mocked(http.get).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				body: mockSettings,
+			} as any);
+
+			const result = await PersonaCommands.fetchPersonaSettings();
+			expect(http.get).toHaveBeenCalledWith(Endpoints.USER_PERSONA_SETTINGS);
+			expect(result).toEqual(mockSettings);
+			expect(PersonaStore.activePersonaMode).toBe('manual');
+			expect(PersonaStore.activePersonaId).toBe('1540000000000000001');
+			expect(PersonaStore.isPersonaLatched).toBe(true);
+			expect(PersonaStore.displayTagText).toBe('SYS');
+			expect(PersonaStore.displayTagIcon).toBe('https://example.com/icon.png');
+		});
+
+		it('returns null on failure without crashing', async () => {
+			vi.mocked(http.get).mockResolvedValueOnce({
+				ok: false,
+				status: 500,
+				body: null,
+			} as any);
+
+			const result = await PersonaCommands.fetchPersonaSettings();
+			expect(result).toBeNull();
+		});
+
+		it('returns null when http request throws an error', async () => {
+			vi.mocked(http.get).mockRejectedValueOnce(new Error('Network failure'));
+
+			const result = await PersonaCommands.fetchPersonaSettings();
+			expect(result).toBeNull();
+		});
+	});
+
 	describe('createPersona', () => {
 		it('creates persona via POST and upserts to store', async () => {
 			const request: PersonaCreateRequest = {
