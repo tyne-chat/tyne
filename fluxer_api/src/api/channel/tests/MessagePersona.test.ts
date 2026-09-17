@@ -58,6 +58,25 @@ class FakeConnectionManager implements INatsConnectionManager {
 						),
 					};
 				}
+				if (payload.op === 'ExtractMentions') {
+					const contents = payload.contents as Array<string>;
+					return {
+						data: encoder.encode(
+							JSON.stringify({
+								FoundMentions: contents.map((c) => {
+									const userMatches = [...c.matchAll(/<@!?(\d+)(?::[a-zA-Z0-9_-]+)?>/g)].map((m) => m[1]);
+									return {
+										users: userMatches,
+										roles: [],
+										channels: [],
+										everyone: false,
+										here: false,
+									};
+								}),
+							}),
+						),
+					};
+				}
 				return {
 					data: encoder.encode(JSON.stringify({FoundApi: {id: '2', channel_id: '1'}})),
 				};
@@ -262,5 +281,21 @@ describe('MessagePersona Backend Pipeline', () => {
 			id: 'persona-alice',
 			name: 'Alice',
 		});
+	});
+
+	it('extracts underlying user id from persona mention wire format in extractMentions', async () => {
+		const fakeManager = new FakeConnectionManager();
+		const service = new MessageResponseDataService(fakeManager);
+
+		const result = await service.extractMentions(['Hello <@1481621807877361924:1550229100331794432> and <@123456>']);
+
+		expect(fakeManager.payloads).toHaveLength(1);
+		expect(fakeManager.payloads[0].op).toBe('ExtractMentions');
+		expect(fakeManager.payloads[0].contents).toEqual([
+			'Hello <@1481621807877361924:1550229100331794432> and <@123456>',
+		]);
+
+		expect(result).toHaveLength(1);
+		expect(result[0].users).toEqual(['1481621807877361924', '123456']);
 	});
 });
