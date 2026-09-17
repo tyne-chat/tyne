@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+import type {PersonaVisibility} from './PersonaApiSchemas';
 
 export interface PersonaTagLike {
 	prefix?: string | null;
@@ -15,6 +15,7 @@ export interface PersonaLike {
 	color?: number | null;
 	auto_tag_disabled?: boolean | null;
 	bio?: string | null;
+	visibility?: PersonaVisibility | null;
 }
 
 export interface MatchResult {
