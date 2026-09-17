@@ -28,7 +28,7 @@ const MODE_LAST_DESCRIPTOR = msg({
 });
 const SENDING_AS_TAG_DESCRIPTOR = msg({
 	message: 'Sending as {name} (Matched by tag) - Click to switch persona',
-	comment: 'Tooltip when sending as a persona matched by proxy tag',
+	comment: 'Tooltip when sending as a persona matched by persona tag',
 });
 const SENDING_AS_LATCHED_DESCRIPTOR = msg({
 	message: '{name} ({mode}) - Click to switch persona',
