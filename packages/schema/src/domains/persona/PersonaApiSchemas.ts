@@ -20,8 +20,8 @@ export const PersonaResponseSchema = z.object({
 	pronouns: z.string().nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional accent color integer'),
 	bio: z.string().nullish().describe('Optional persona bio'),
-	auto_tag_disabled: z.boolean().default(false).describe('Whether proxying via auto-tagging is disabled'),
-	persona_tags: z.array(PersonaTagSchema).default([]).describe('Proxy prefix and suffix tags'),
+	auto_tag_disabled: z.boolean().default(false).describe('Whether persona tag matching is disabled'),
+	persona_tags: z.array(PersonaTagSchema).default([]).describe('Persona prefix and suffix tags'),
 	use_count: z.number().int().default(0).describe('Usage counter for frecency ranking'),
 	last_used_at_ms: z.string().nullish().describe('Timestamp in ms when the persona was last used'),
 	visibility: PersonaVisibilitySchema.describe('Visibility setting: unlisted (default), public, or private'),
@@ -51,7 +51,7 @@ export const PersonaCreateRequestSchema = z.object({
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	bio: z.string().max(4096).nullish().optional().describe('Optional persona bio'),
 	auto_tag_disabled: z.boolean().optional().describe('Whether auto-tagging is disabled'),
-	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Proxy prefix/suffix tags'),
+	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Persona prefix/suffix tags'),
 	visibility: PersonaVisibilitySchema.optional().describe('Visibility: unlisted (default), public, or private'),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID (e.g. PluralKit)'),
 });
@@ -65,7 +65,7 @@ export const PersonaUpdateRequestSchema = z.object({
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	bio: z.string().max(4096).nullish().optional().describe('Optional persona bio'),
 	auto_tag_disabled: z.boolean().optional().describe('Whether auto-tagging is disabled'),
-	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Proxy prefix/suffix tags'),
+	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Persona prefix/suffix tags'),
 	visibility: z.enum(['unlisted', 'public', 'private']).optional().describe('Visibility setting'),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID'),
 });
@@ -88,3 +88,23 @@ export const UserIdPersonaIdParam = z.object({
 	user_id: SnowflakeStringType.describe('User Snowflake ID'),
 	persona_id: SnowflakeStringType.describe('Persona Snowflake ID'),
 });
+
+export const PersonaSettingsResponseSchema = z.object({
+	user_id: SnowflakeStringType.describe('User Snowflake ID'),
+	active_persona_mode: z.enum(['off', 'manual', 'last']).default('off'),
+	active_persona_id: SnowflakeStringType.nullish(),
+	is_latched: z.boolean().default(false),
+	display_tag_text: z.string().max(100).nullish(),
+	display_tag_icon: z.string().max(256).nullish(),
+	updated_at: z.string().optional(),
+});
+export type PersonaSettingsResponse = z.infer<typeof PersonaSettingsResponseSchema>;
+
+export const PersonaSettingsUpdateRequestSchema = z.object({
+	active_persona_mode: z.enum(['off', 'manual', 'last']).optional(),
+	active_persona_id: SnowflakeStringType.nullish().optional(),
+	is_latched: z.boolean().optional(),
+	display_tag_text: z.string().max(100).nullish().optional(),
+	display_tag_icon: z.string().max(256).nullish().optional(),
+});
+export type PersonaSettingsUpdateRequest = z.infer<typeof PersonaSettingsUpdateRequestSchema>;
