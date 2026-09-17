@@ -185,7 +185,7 @@ export function matchPersona(
 
 	if (candidates.length > 0) {
 		// Longest match wins
-		candidates.sort((a, b) => b.totalLen - a.totalLen);
+		candidates.sort((a, b) => b.totalLen - a.totalLen || b.prefixLen - a.prefixLen);
 		const best = candidates[0];
 		return {
 			matched: true,
