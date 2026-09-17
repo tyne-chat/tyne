@@ -6,6 +6,32 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. placeholder {0}: w.prefix
+msgid "(Prefix: {0})"
+msgstr "(Préfixe : {0})"
+
+#. Tooltip showing root account username
+msgid "Account: @{username}"
+msgstr "Compte : @{username}"
+
+msgid "Active Persona Mode"
+msgstr "Mode de persona actif"
+
+#. Aria label for active persona mode tabs
+#. Aria label for active persona mode tabs
+msgid "Active persona mode"
+msgstr "Mode de persona actif"
+
+msgid "Add Persona"
+msgstr "Ajouter une persona"
+
+#. placeholder {0}: formData.tags.length
+msgid "Add Tag Pair ({0}/5)"
+msgstr "Ajouter une paire de balises ({0}/5)"
+
+msgid "All Personas"
+msgstr "Toutes les personas"
+
 #. placeholder {0}: persona.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Voulez-vous vraiment supprimer <0>{0}</0> ? Cette action est irréversible."
@@ -13,26 +39,262 @@ msgstr "Voulez-vous vraiment supprimer <0>{0}</0> ? Cette action est irréversib
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 msgstr "Voulez-vous vraiment remplacer l'ensemble des <0>{existingCount}</0> persona(s) existante(s) ? Elles seront définitivement supprimées de votre compte et cette action est irréversible."
 
+#. Import warning when avatar fails to download
+msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Échec du téléchargement de l'avatar : {error}. La persona a été importée sans avatar."
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Changer de persona"
 
+msgid "Choose a PluralKit export (.json) or drag & drop"
+msgstr "Choisissez un export PluralKit (.json) ou glissez-déposez-le"
+
+msgid "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "Choisissez comment les messages sans balise et les balises de persona interagissent avec votre persona active."
+
+#. Header for configured personas list with count
+msgid "Configured Personas ({count})"
+msgstr "Personas configurées ({count})"
+
+#. Progress status for configuring persona
+msgid "Configuring {name}..."
+msgstr "Configuration de {name}…"
+
+#. Description for persona accent color picker
+msgid "Customizes the border and banner color on this persona's profile"
+msgstr "Personnalise la couleur de la bordure et de la bannière sur le profil de cette persona"
+
+#. Aria label for deactivating active persona
+msgid "Deactivate persona"
+msgstr "Désactiver la persona"
+
 msgid "Delete Persona"
 msgstr "Supprimer la persona"
 
+#. Aria label for deleting persona
+msgid "Delete persona"
+msgstr "Supprimer la persona"
+
+msgid "Detected System Name / Tag"
+msgstr "Nom / balise de système détecté"
+
+msgid "Display Tag"
+msgstr "Badge d'affichage"
+
+#. Toast when display tag icon is removed
+msgid "Display tag icon removed"
+msgstr "Icône du badge d'affichage supprimée"
+
+#. Toast when display tag icon is updated
+msgid "Display tag icon updated"
+msgstr "Icône du badge d'affichage mise à jour"
+
+msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "Le badge d'affichage apparaîtra à côté du nom de toutes vos personas dans les messages. Si aucun badge n'est configuré, votre photo de profil de compte sera affichée."
+
+#. Progress status during avatar download
+msgid "Downloading avatar {current} of {total}..."
+msgstr "Téléchargement de l'avatar {current} sur {total}…"
+
+#. Validation error when tag pair is duplicated within the same persona
+msgid "Duplicate tag pair on this persona"
+msgstr "Paire de balises déjà présente sur cette persona"
+
+msgid "Edit Persona"
+msgstr "Modifier la persona"
+
+#. Aria label for editing persona
 msgid "Edit persona"
 msgstr "Modifier la persona"
 
+msgid "Export Summary"
+msgstr "Résumé de l'export"
+
+#. Toast when persona deletion fails
+msgid "Failed to delete persona"
+msgstr "Échec de la suppression de la persona"
+
+#. Toast error message on persona import failure
+msgid "Failed to import personas"
+msgstr "Échec de l'importation des personas"
+
+#. Error message when parsing PluralKit JSON fails
+msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Impossible d'analyser le fichier JSON. Assurez-vous qu'il s'agit d'un export PluralKit valide."
+
+#. Error message when reading uploaded file fails
+msgid "Failed to read the selected file."
+msgstr "Impossible de lire le fichier sélectionné."
+
+#. Toast when persona save fails
+msgid "Failed to save persona"
+msgstr "Échec de l'enregistrement de la persona"
+
+#. Toast when icon upload fails
+msgid "Failed to upload icon to server"
+msgstr "Impossible de téléverser l'icône sur le serveur"
+
+#. Toast when icon file exceeds size limit
+msgid "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Le fichier d'icône est trop volumineux. Choisissez une image de moins de 10 Mo."
+
+#. Modal title for PluralKit import step completed
+msgid "Import Complete"
+msgstr "Importation terminée"
+
+msgid "Import Complete!"
+msgstr "Importation terminée !"
+
+msgid "Import Strategy"
+msgstr "Stratégie d'importation"
+
+#. Modal title for PluralKit import step select
+msgid "Import from PluralKit"
+msgstr "Importer depuis PluralKit"
+
+#. Modal title for PluralKit import step importing
+msgid "Importing Personas..."
+msgstr "Importation des personas…"
+
+msgid "Importing..."
+msgstr "Importation…"
+
+msgid "Keep existing and add new (Recommended)"
+msgstr "Conserver les existantes et ajouter les nouvelles (Recommandé)"
+
+#. placeholder {0}: pkData.members?.length ?? 0
+msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "Conserve vos {existingCount} persona(s) actuelle(s) et ajoute les {0} personas importées comme nouvelles entrées."
+
+#. Active persona mode last used
+#. Active persona mode last used
+#. Active persona mode last used
+msgid "Last Used"
+msgstr "Dernière utilisée"
+
 msgid "Main account"
 msgstr "Compte principal"
+
+msgid "Manage Personas"
+msgstr "Gérer les personas"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "Gérez et créez vos personas"
 
+#. Active persona mode manual
+#. Active persona mode manual
+#. Active persona mode manual
+msgid "Manual"
+msgstr "Manuel"
+
+#. Placeholder name for unnamed member in import
+msgid "Member #{index}"
+msgstr "Membre #{index}"
+
+msgid "Members with Avatars"
+msgstr "Membres avec avatars"
+
+msgid "Name *"
+msgstr "Nom *"
+
+msgid "New Persona"
+msgstr "Nouvelle persona"
+
+#. Error message when PluralKit export lacks members array
+msgid "No \"members\" array found in this export file."
+msgstr "Aucun tableau « members » trouvé dans ce fichier d'export."
+
+msgid "No display tag configured. Messages will show your account profile picture."
+msgstr "Aucun badge d'affichage configuré. Les messages afficheront la photo de profil de votre compte."
+
+msgid "No matching personas found."
+msgstr "Aucune persona correspondante trouvée."
+
+msgid "No personas configured yet. Create one in Settings."
+msgstr "Aucune persona configurée pour l'instant. Créez-en une dans les Paramètres."
+
+msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Aucune persona créée pour le moment. Cliquez sur « Ajouter une persona » pour créer votre première persona !"
+
+#. Helper description for private persona visibility
+msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Visible uniquement par vous. Les autres ne peuvent pas voir la biographie complète ni les détails du profil de cette persona."
+
+#. Placeholder for system badge in import modal
+msgid "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "Badge de système optionnel, ex. ⚞Séraphin⚟"
+
+msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "Supprime définitivement l'ensemble des {existingCount} persona(s) existante(s) et les remplace intégralement par les personas importées."
+
+msgid "Persona Tags (Prefix & Suffix)"
+msgstr "Balises de persona (Préfixe et Suffixe)"
+
+#. Toast when persona is created
+msgid "Persona created"
+msgstr "Persona créée"
+
+#. Toast when persona is deleted
+msgid "Persona deleted"
+msgstr "Persona supprimée"
+
+#. Toast when persona is updated
+msgid "Persona updated"
+msgstr "Persona mise à jour"
+
+#. Aria label for persona visibility tabs
+msgid "Persona visibility"
+msgstr "Visibilité de la persona"
+
+#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
+
+#. Placeholder for persona tag prefix
+msgid "Prefix (e.g. [)"
+msgstr "Préfixe (ex. [)"
+
+#. Progress status when preparing avatar batch download
+msgid "Preparing avatar batch download..."
+msgstr "Préparation du téléchargement par lot des avatars…"
+
+#. Persona visibility private
+msgid "Private"
+msgstr "Privé"
+
+#. Tooltip on private persona badge
+msgid "Private persona"
+msgstr "Persona privée"
+
+#. placeholder {0}: progress.currentName
+msgid "Processing: {0}"
+msgstr "Traitement : {0}"
+
+#. Helper description for unlisted persona visibility
+msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Les fiches de profil ne sont accessibles qu'en cliquant sur les messages envoyés par cette persona. Non listée dans votre liste publique de personas."
+
+#. Helper description for public persona visibility
+msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Les fiches de profil sont accessibles en cliquant sur les messages et visibles dans votre liste publique de personas par vos amis et serveurs en commun."
+
+#. Persona visibility public
+msgid "Public"
+msgstr "Public"
+
+#. Tooltip on public persona badge
+msgid "Public persona"
+msgstr "Persona publique"
+
+msgid "Recent Personas"
+msgstr "Personas récentes"
+
+#. Aria label for removing a tag pair
+msgid "Remove tag pair"
+msgstr "Supprimer la paire de balises"
 
 msgid "Replace All"
 msgstr "Tout remplacer"
@@ -40,11 +302,153 @@ msgstr "Tout remplacer"
 msgid "Replace All Personas"
 msgstr "Remplacer toutes les personas"
 
+msgid "Replace all existing personas (Destructive)"
+msgstr "Remplacer toutes les personas existantes (Destructif)"
+
+msgid "Root Account (Default)"
+msgstr "Compte principal (par défaut)"
+
+msgid "Save Persona"
+msgstr "Enregistrer la persona"
+
+#. Progress status when saving personas
+msgid "Saving personas..."
+msgstr "Enregistrement des personas…"
+
+#. placeholder {0}: filteredPersonas.length
+msgid "Search Results ({0})"
+msgstr "Résultats de recherche ({0})"
+
+#. Search placeholder in persona picker sheet
+msgid "Search personas, tags, pronouns..."
+msgstr "Rechercher des personas, balises, pronoms…"
+
+#. Description of personas settings section
+msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "Envoyez des messages avec des noms et avatars distincts. Les personas peuvent représenter les membres d'un système pluriel, des personnages de jeu de rôle ou toute autre identité."
+
+#. Tooltip when sending as root account with persona mode active
+msgid "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Envoi en tant que @{username} ({mode}) - Cliquer pour changer de persona"
+
+#. Tooltip when sending as a persona matched by proxy tag
+msgid "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Envoi en tant que {name} (Associé par balise) - Cliquer pour changer de persona"
+
+msgid "Set Active"
+msgstr "Définir comme active"
+
+#. Aria label for setting active persona
+msgid "Set as active persona"
+msgstr "Définir comme persona active"
+
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
 msgstr "Afficher le bouton des personas"
 
+#. Import warning when member has no name
+msgid "Skipped member because they have no name configured."
+msgstr "Membre ignoré car aucun nom n'est configuré."
+
+msgid "Start Import"
+msgstr "Lancer l'importation"
+
+#. placeholder {0}: importResults.successCount
+msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "Importation réussie de {0} persona(s) sur votre compte. Toutes les images d'avatar sont stockées en sécurité sur votre serveur local."
+
+#. Placeholder for persona tag suffix
+msgid "Suffix (e.g. ])"
+msgstr "Suffixe (ex. ])"
+
+msgid "Supports PluralKit system export files"
+msgstr "Prend en charge les fichiers d'export de système PluralKit"
+
+msgid "System Tag (Applied to imported personas)"
+msgstr "Balise de système (Appliquée aux personas importées)"
+
+msgid "Tag Icon"
+msgstr "Icône de badge"
+
+msgid "Tag Text"
+msgstr "Texte du badge"
+
+#. Validation error when tag pair is already used by another persona
+msgid "Tag pair already in use by persona \"{name}\""
+msgstr "Paire de balises déjà utilisée par la persona « {name} »"
+
+#. Placeholder for persona bio
+msgid "Tell us about this persona..."
+msgstr "Présentez cette persona…"
+
+#. Error message when uploaded file is not valid JSON
+msgid "The chosen file is not a valid JSON object."
+msgstr "Le fichier sélectionné n'est pas un objet JSON valide."
+
+msgid "This is a preview of how your display tag will look in chat."
+msgstr "Voici un aperçu de l'affichage de votre badge dans la discussion."
+
+msgid "Total Members"
+msgstr "Total des membres"
+
+#. Persona visibility unlisted
+msgid "Unlisted"
+msgstr "Non répertorié"
+
+#. Helper description for Off persona mode
+msgid "Untagged messages always send from your root account. Personas only speak when you type their tags (e.g. [text])."
+msgstr "Les messages sans balise sont toujours envoyés depuis votre compte principal. Les personas ne parlent que lorsque vous tapez leurs balises (ex. [texte])."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "Les messages sans balise sont envoyés sous l'identité de la persona ayant parlé le plus récemment. Dès qu'une balise de persona est utilisée, celle-ci devient automatiquement la persona active."
+
+#. Helper description for Manual persona mode
+msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "Les messages sans balise sont envoyés sous l'identité de la persona choisie. Taper les balises d'une autre persona enverra uniquement ce message sans changer la persona active."
+
+msgid "Uploading avatar..."
+msgstr "Téléversement de l'avatar…"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Voir vos personas"
+
+#. Progress label for avatar downloads
+msgid "avatars downloaded"
+msgstr "avatars téléchargés"
+
+#. Placeholder for persona name
+msgid "e.g. Alice"
+msgstr "ex. Alice"
+
+#. Placeholder for persona pronouns
+msgid "e.g. she/her"
+msgstr "ex. elle / iel"
+
+#. Progress label for prepared personas
+msgid "personas prepared"
+msgstr "personas préparées"
+
+#. Progress label when saving personas
+msgid "saving personas"
+msgstr "enregistrement des personas"
+
+#. placeholder {0}: importResults.warnings.length
+msgid "{0} notice(s) during import"
+msgstr "{0} remarque(s) lors de l'importation"
+
+#. placeholder {0}: progress.current
+#. placeholder {1}: progress.total
+#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {3}: progress.percent
+msgid "{0} of {1} {2} ({3}%)"
+msgstr "{0} sur {1} {2} ({3} %)"
+
+#. Tooltip when sending as a latched persona
+msgid "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - Cliquer pour changer de persona"
+
+msgid "— Today at 12:00 PM"
+msgstr "— Aujourd'hui à 12:00"
