@@ -2,7 +2,7 @@
 
 import {createStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {z} from 'zod';
-import {PersonaTagSchema} from './PersonaApiSchemas';
+import {PersonaTagSchema, PersonaVisibilitySchema} from './PersonaApiSchemas';
 
 export const PersonaSchema = z.object({
 	id: z.string().min(1).max(64),
@@ -30,6 +30,7 @@ export const MessageSubprofileRequestSchema = z.object({
 	pronouns: z.string().max(100).nullish().describe('Pronouns'),
 	color: z.number().int().nullish().describe('Custom color integer'),
 	bio: z.string().max(4096).nullish().optional().describe('Persona bio (deprecated on message)'),
+	visibility: PersonaVisibilitySchema.nullish().optional().describe('Persona visibility setting'),
 });
 export type MessageSubprofileRequest = z.infer<typeof MessageSubprofileRequestSchema>;
 
@@ -44,6 +45,7 @@ export const MessageSubprofileResponseSchema = z.object({
 	pronouns: z.string().nullish().describe('Pronouns'),
 	color: z.number().int().nullish().describe('Custom color integer'),
 	bio: z.string().nullish().optional().describe('Persona bio (deprecated on message)'),
+	visibility: PersonaVisibilitySchema.nullish().optional().describe('Persona visibility setting'),
 });
 export type MessageSubprofileResponse = z.infer<typeof MessageSubprofileResponseSchema>;
 
