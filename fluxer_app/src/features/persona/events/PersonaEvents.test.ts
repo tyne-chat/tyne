@@ -8,6 +8,7 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {
 	handleUserPersonaCreate,
 	handleUserPersonaDelete,
+	handleUserPersonaSettingsUpdate,
 	handleUserPersonasUpdate,
 	handleUserPersonaUpdate,
 } from './PersonaEvents';
@@ -173,5 +174,29 @@ describe('PersonaEvents', () => {
 		expect(PersonaStore.personas).toHaveLength(2);
 		expect(PersonaStore.personas.find((p) => p.id === samplePersona.id)?.name).toBe('Gateway Persona 1');
 		expect(PersonaStore.personas.find((p) => p.id === samplePersona2.id)?.name).toBe('Gateway Persona 2');
+	});
+
+	it('handles USER_PERSONA_SETTINGS_UPDATE by updating persona settings in PersonaStore', () => {
+		expect(PersonaStore.activePersonaMode).toBe('off');
+		expect(PersonaStore.displayTagText).toBe('');
+		expect(PersonaStore.displayTagIcon).toBeNull();
+
+		handleUserPersonaSettingsUpdate(
+			{
+				user_id: '1540000000000000001',
+				active_persona_mode: 'manual',
+				active_persona_id: '1540000000000000001',
+				is_latched: true,
+				display_tag_text: 'SYS',
+				display_tag_icon: 'https://cdn.example.com/badge.png',
+			},
+			mockContext,
+		);
+
+		expect(PersonaStore.activePersonaMode).toBe('manual');
+		expect(PersonaStore.activePersonaId).toBe('1540000000000000001');
+		expect(PersonaStore.isPersonaLatched).toBe(true);
+		expect(PersonaStore.displayTagText).toBe('SYS');
+		expect(PersonaStore.displayTagIcon).toBe('https://cdn.example.com/badge.png');
 	});
 });
