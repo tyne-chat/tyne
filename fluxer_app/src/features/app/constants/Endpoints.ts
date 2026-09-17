@@ -179,6 +179,7 @@ export const Endpoints = {
 	USER_PERSONA_AVATAR: '/users/@me/personas/avatar',
 	USER_PERSONA_IMPORT_AVATAR: '/users/@me/personas/import-avatar',
 	USER_PERSONA_IMPORT_BATCH_AVATARS: '/users/@me/personas/import-batch-avatars',
+	USER_PERSONA_SETTINGS: '/users/@me/personas/settings',
 	USER_SUBPROFILE_AVATAR: '/users/@me/subprofiles/avatar',
 	USER_SUBPROFILE_IMPORT_AVATAR: '/users/@me/subprofiles/import-avatar',
 	USER_SUBPROFILE_IMPORT_BATCH_AVATARS: '/users/@me/subprofiles/import-batch-avatars',

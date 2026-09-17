@@ -331,7 +331,7 @@ msgstr "Envoyez des messages avec des noms et avatars distincts. Les personas pe
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
 msgstr "Envoi en tant que @{username} ({mode}) - Cliquer pour changer de persona"
 
-#. Tooltip when sending as a persona matched by proxy tag
+#. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
 msgstr "Envoi en tant que {name} (Associé par balise) - Cliquer pour changer de persona"
 

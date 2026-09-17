@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {GatewayHandlerContext} from '@app/features/gateway/events/EventRouter';
-import type {PersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {PersonaResponse, PersonaSettingsResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {PersonaStore} from '../state/PersonaStore';
 
 type PersonaPayload = {persona: PersonaResponse} | PersonaResponse;
@@ -37,5 +37,15 @@ export function handleUserPersonasUpdate(data: PersonasPayload, _context: Gatewa
 			: null;
 	if (personas) {
 		PersonaStore.setPersonas(personas);
+	}
+}
+
+export function handleUserPersonaSettingsUpdate(
+	data: PersonaSettingsResponse | {settings: PersonaSettingsResponse},
+	_context: GatewayHandlerContext,
+): void {
+	const settings = data && 'settings' in data && data.settings ? data.settings : (data as PersonaSettingsResponse);
+	if (settings) {
+		PersonaStore.updateSettings(settings);
 	}
 }
