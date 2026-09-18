@@ -44,6 +44,7 @@ export const GuildMembersPage: React.FC<GuildMembersPageProps> = observer(({guil
 	);
 	return (
 		<ChannelViewScaffold
+			hasMemberList={false}
 			header={
 				<ChannelHeader
 					leftContent={headerLeftContent}
