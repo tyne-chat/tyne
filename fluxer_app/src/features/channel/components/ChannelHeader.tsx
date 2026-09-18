@@ -134,6 +134,17 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {
+	HIDE_CHANNELS_DESCRIPTOR,
+	HIDE_SERVER_LIST_DESCRIPTOR,
+	SHOW_CHANNELS_DESCRIPTOR,
+	SHOW_SERVER_LIST_DESCRIPTOR,
+} from '@app/features/channel/components/channel_header/shared';
+import LayoutState from '@app/features/ui/state/LayoutState';
+import {SidebarSimpleIcon, SquaresFourIcon} from '@phosphor-icons/react';
+
 const {VoiceCallButton, VideoCallButton} = CallButtons;
 
 interface ChannelHeaderProps {
@@ -942,7 +953,37 @@ export const ChannelHeader = observer(
 						data-flx="channel.channel-header.header-container"
 					>
 						<div className={styles.headerLeftSection} data-flx="channel.channel-header.header-left-section">
-							{backButton}
+							{isMobile ? (
+								backButton
+							) : (
+								<div className={styles.desktopPanelControls} data-flx="channel.channel-header.desktop-panel-controls">
+									<ChannelHeaderIcon
+										icon={SquaresFourIcon}
+										isSelected={LayoutState.serverListVisible}
+										label={
+											LayoutState.serverListVisible
+												? i18n._(HIDE_SERVER_LIST_DESCRIPTOR)
+												: i18n._(SHOW_SERVER_LIST_DESCRIPTOR)
+										}
+										onClick={LayoutCommands.toggleServerList}
+										aria-pressed={LayoutState.serverListVisible}
+										data-flx="channel.channel-header.toggle-server-list"
+									/>
+									<ChannelHeaderIcon
+										icon={SidebarSimpleIcon}
+										isSelected={LayoutState.channelListVisible}
+										label={
+											LayoutState.channelListVisible
+												? i18n._(HIDE_CHANNELS_DESCRIPTOR)
+												: i18n._(SHOW_CHANNELS_DESCRIPTOR)
+										}
+										onClick={LayoutCommands.toggleChannelList}
+										aria-pressed={LayoutState.channelListVisible}
+										data-flx="channel.channel-header.toggle-channel-list"
+									/>
+								</div>
+							)}
+
 							<div className={styles.leftContentContainer} data-flx="channel.channel-header.left-content-container">
 								{headerTitle}
 							</div>
