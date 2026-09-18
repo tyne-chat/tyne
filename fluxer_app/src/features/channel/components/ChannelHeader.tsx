@@ -139,6 +139,7 @@ import {
 	SHOW_CHANNELS_DESCRIPTOR,
 	SHOW_SERVER_LIST_DESCRIPTOR,
 } from '@app/features/channel/components/channel_header/shared';
+import {useCollapsedPanelBadges} from '@app/features/channel/components/channel_header/useCollapsedPanelBadges';
 import LayoutState from '@app/features/ui/state/LayoutState';
 import {SidebarSimpleIcon, SquaresFourIcon} from '@phosphor-icons/react';
 
@@ -194,7 +195,9 @@ export const ChannelHeader = observer(
 					CallState.hasActiveCall(channel.id),
 			);
 		const isVoiceHeaderActive = isVoiceCallActive || forceVoiceCallStyle;
-		const canFitMemberList = useCanFitMemberList();
+		// Fork: the member list can be toggled at every screen width.
+		const canFitMemberList = useCanFitMemberList() || true;
+		const collapsedBadges = useCollapsedPanelBadges();
 		const memberListChannelId = channel?.id ?? null;
 		const memberListUsesChannelOverride = Boolean(memberListDefaultHiddenForChannel && memberListChannelId);
 		const isMembersToggleOpen = memberListUsesChannelOverride
@@ -642,6 +645,8 @@ export const ChannelHeader = observer(
 									<ChannelHeaderIcon
 										icon={SquaresFourIcon}
 										isSelected={LayoutState.serverListVisible}
+										badgeCount={collapsedBadges.serverListMentionCount}
+										hasUnread={collapsedBadges.serverListHasUnread}
 										label={
 											LayoutState.serverListVisible
 												? i18n._(HIDE_SERVER_LIST_DESCRIPTOR)
@@ -654,6 +659,8 @@ export const ChannelHeader = observer(
 									<ChannelHeaderIcon
 										icon={SidebarSimpleIcon}
 										isSelected={LayoutState.channelListVisible}
+										badgeCount={collapsedBadges.channelListMentionCount}
+										hasUnread={collapsedBadges.channelListHasUnread}
 										label={
 											LayoutState.channelListVisible
 												? i18n._(HIDE_CHANNELS_DESCRIPTOR)
