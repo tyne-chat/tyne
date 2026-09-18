@@ -15,11 +15,19 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect} from 'react';
 
+// Fork imports.
+
+import LayoutState from '@app/features/ui/state/LayoutState';
+import {clsx} from 'clsx';
+
 export const FavoritesLayout = observer(({children}: {children: React.ReactNode}) => {
 	const mobileLayout = MobileLayout;
 	const {channelId} = useParams() as {channelId?: string};
 	const hasAccessibleChannels = Favorites.getFirstAccessibleChannel() !== undefined;
 	const showWelcomeScreen = !channelId && !hasAccessibleChannels;
+	const isChannelListOpen = mobileLayout.enabled || LayoutState.channelListVisible;
+	const isChannelListPeeking =
+		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
 	useEffect(() => {
 		if (!channelId) return;
 		const isStillFavorited = Favorites.getChannel(channelId);
@@ -35,12 +43,28 @@ export const FavoritesLayout = observer(({children}: {children: React.ReactNode}
 	if (showWelcomeScreen && !mobileLayout.enabled) {
 		return (
 			<div className={styles.guildLayoutContainer} data-flx="app.favorites-layout.guild-layout-container">
-				<div className={styles.guildLayoutContent} data-flx="app.favorites-layout.guild-layout-content">
-					<GuildSidebar
-						header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header" />}
-						content={<FavoritesChannelListContent data-flx="app.favorites-layout.favorites-channel-list-content" />}
-						data-flx="app.favorites-layout.guild-sidebar"
-					/>
+				<div
+					className={clsx(styles.guildLayoutContent, !isChannelListOpen && styles.guildLayoutContentCollapsed)}
+					data-flx="app.favorites-layout.guild-layout-content"
+				>
+					{isChannelListOpen && (
+						<GuildSidebar
+							header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header" />}
+							content={<FavoritesChannelListContent data-flx="app.favorites-layout.favorites-channel-list-content" />}
+							data-flx="app.favorites-layout.guild-sidebar"
+						/>
+					)}
+					{isChannelListPeeking && (
+						<div className={styles.guildSidebarOverlay} data-flx="app.favorites-layout.guild-sidebar-overlay">
+							<GuildSidebar
+								header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header--peek" />}
+								content={
+									<FavoritesChannelListContent data-flx="app.favorites-layout.favorites-channel-list-content--peek" />
+								}
+								data-flx="app.favorites-layout.guild-sidebar--peek"
+							/>
+						</div>
+					)}
 					<div className={styles.guildMainContentWithTopDragRegion} data-flx="app.favorites-layout.guild-main-content">
 						<NativeDragRegion
 							className={styles.guildMainTopDragRegion}
@@ -88,12 +112,28 @@ export const FavoritesLayout = observer(({children}: {children: React.ReactNode}
 	}
 	return (
 		<div className={styles.guildLayoutContainer} data-flx="app.favorites-layout.guild-layout-container--4">
-			<div className={styles.guildLayoutContent} data-flx="app.favorites-layout.guild-layout-content--2">
-				<GuildSidebar
-					header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header--3" />}
-					content={<FavoritesChannelListContent data-flx="app.favorites-layout.favorites-channel-list-content--3" />}
-					data-flx="app.favorites-layout.guild-sidebar--3"
-				/>
+			<div
+				className={clsx(styles.guildLayoutContent, !isChannelListOpen && styles.guildLayoutContentCollapsed)}
+				data-flx="app.favorites-layout.guild-layout-content--2"
+			>
+				{isChannelListOpen && (
+					<GuildSidebar
+						header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header--3" />}
+						content={<FavoritesChannelListContent data-flx="app.favorites-layout.favorites-channel-list-content--3" />}
+						data-flx="app.favorites-layout.guild-sidebar--3"
+					/>
+				)}
+				{isChannelListPeeking && (
+					<div className={styles.guildSidebarOverlay} data-flx="app.favorites-layout.guild-sidebar-overlay--2">
+						<GuildSidebar
+							header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header--peek-2" />}
+							content={
+								<FavoritesChannelListContent data-flx="app.favorites-layout.favorites-channel-list-content--peek-2" />
+							}
+							data-flx="app.favorites-layout.guild-sidebar--peek-2"
+						/>
+					</div>
+				)}
 				<div className={styles.guildMainContent} data-flx="app.favorites-layout.guild-main-content--4">
 					{children}
 				</div>

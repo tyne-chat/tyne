@@ -91,6 +91,14 @@
 	overflow: hidden;
 }
 
+.desktopPanelControls {
+	display: flex;
+	align-items: center;
+	gap: 0.125rem;
+	margin-right: var(--spacing-2);
+	flex-shrink: 0;
+}
+
 .backButton {
 	margin-right: var(--channel-header-back-button-gap);
 	flex-shrink: 0;
