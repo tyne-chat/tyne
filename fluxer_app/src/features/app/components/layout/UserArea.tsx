@@ -53,6 +53,8 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {useEffect, useRef} from 'react';
 
+// Fork imports.
+
 const PUSH_TO_TALK_IS_ON_HOLD_TO_SPEAK_DESCRIPTOR = msg({
 	message: 'Push to talk is on. Hold {pushToTalkHint} to speak.',
 	comment:
@@ -215,8 +217,9 @@ const UserAreaInner = observer(
 			isPermissionMuted,
 			muteReason,
 			isPushToTalkEffective,
-			isPushToMuteEffective: Keybind.isPushToMuteEffective(),
+			isPushToTalkHeld: Keybind.pushToTalkHeld,
 			isPushToMuteHeld: Keybind.pushToMuteHeld,
+			isPushToMuteEffective: Keybind.isPushToMuteEffective(),
 		});
 		const effectiveMuted = microphoneState.effectiveMuted;
 		const isMuteToggleLocked = microphoneState.muteToggleLocked;

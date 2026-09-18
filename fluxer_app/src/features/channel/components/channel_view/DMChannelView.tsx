@@ -68,6 +68,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import LayoutState from '@app/features/ui/state/LayoutState';
+
 interface DMChannelViewProps {
 	channelId: string;
 }
@@ -224,6 +228,9 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 		if (currentChannelId) CallCommands.ignoreCall(currentChannelId);
 	}, [currentChannelId]);
 	const shouldRenderMemberList = Boolean(isGroupDM && isMemberListVisible && !isSearchActive);
+	const isMemberListPeeking = Boolean(
+		isGroupDM && !isMemberListVisible && !isMobileLayout && !isSearchActive && LayoutState.isRightHoverPeeking,
+	);
 	const callStatusLabel = useMemo(() => {
 		switch (controlsVariant) {
 			case 'incoming':
@@ -334,6 +341,8 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 					showCallBackground && styles.channelGridVoiceCallActive,
 					showCompactVoiceView && isCompactCallExpanded && styles.channelGridVoiceCallExpanded,
 				)}
+				hasMemberList={Boolean(isGroupDM)}
+				showMemberListDivider={shouldRenderMemberList && !isSearchActive}
 				header={
 					<div
 						ref={voiceCallChromeRef}
@@ -525,6 +534,13 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 						</div>
 					) : shouldRenderMemberList ? (
 						<ChannelMembers channel={channel} data-flx="channel.channel-view.dm-channel-view.channel-members" />
+					) : isMemberListPeeking ? (
+						<div
+							className={styles.memberListOverlay}
+							data-flx="channel.channel-view.dm-channel-view.member-list-overlay"
+						>
+							<ChannelMembers channel={channel} data-flx="channel.channel-view.dm-channel-view.channel-members--peek" />
+						</div>
 					) : null
 				}
 				chatAreaInert={isCompactCallChatSuppressed}
