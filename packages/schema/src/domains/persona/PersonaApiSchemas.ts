@@ -3,10 +3,18 @@
 import {createStringType, SnowflakeStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {z} from 'zod';
 
-export const PersonaTagSchema = z.object({
-	prefix: z.string().max(32).optional(),
-	suffix: z.string().max(32).optional(),
-});
+export const PersonaTagSchema = z
+	.object({
+		prefix: z.string().min(1).max(32).optional(),
+		suffix: z.string().min(1).max(32).optional(),
+	})
+	.refine(
+		(data) =>
+			(data.prefix !== undefined && data.prefix.length > 0) || (data.suffix !== undefined && data.suffix.length > 0),
+		{
+			message: 'At least one of prefix or suffix must be provided',
+		},
+	);
 export type PersonaTag = z.infer<typeof PersonaTagSchema>;
 
 export const PersonaVisibilitySchema = z.enum(['unlisted', 'public', 'private']).default('unlisted');
