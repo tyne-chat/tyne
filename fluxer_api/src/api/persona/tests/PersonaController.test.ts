@@ -272,6 +272,66 @@ describe('PersonaController', () => {
 				.expect(HTTP_STATUS.OK)
 				.execute();
 		});
+
+		test('updates persona with prefix-only or suffix-only tags', async () => {
+			const created = await createBuilder<PersonaResponse>(harness, account.token)
+				.post('/users/@me/personas')
+				.body({name: 'Solo Tag Persona'})
+				.expect(HTTP_STATUS.CREATED)
+				.execute();
+
+			const withPrefix = await createBuilder<PersonaResponse>(harness, account.token)
+				.patch(`/users/@me/personas/${created.id}`)
+				.body({persona_tags: [{prefix: 'B:'}]})
+				.expect(HTTP_STATUS.OK)
+				.execute();
+
+			expect(withPrefix.persona_tags).toEqual([{prefix: 'B:'}]);
+
+			const withSuffix = await createBuilder<PersonaResponse>(harness, account.token)
+				.patch(`/users/@me/personas/${created.id}`)
+				.body({persona_tags: [{suffix: ']'}]})
+				.expect(HTTP_STATUS.OK)
+				.execute();
+
+			expect(withSuffix.persona_tags).toEqual([{suffix: ']'}]);
+		});
+
+		test('rejects updating persona tags with empty objects, empty strings, or null values', async () => {
+			const created = await createBuilder<PersonaResponse>(harness, account.token)
+				.post('/users/@me/personas')
+				.body({name: 'Strict Tag Persona'})
+				.expect(HTTP_STATUS.CREATED)
+				.execute();
+
+			// Empty tag object
+			await createBuilder(harness, account.token)
+				.patch(`/users/@me/personas/${created.id}`)
+				.body({persona_tags: [{}]})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// Empty string prefix
+			await createBuilder(harness, account.token)
+				.patch(`/users/@me/personas/${created.id}`)
+				.body({persona_tags: [{prefix: ''}]})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// Empty string suffix
+			await createBuilder(harness, account.token)
+				.patch(`/users/@me/personas/${created.id}`)
+				.body({persona_tags: [{prefix: 'B:', suffix: ''}]})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// Explicit null suffix
+			await createBuilder(harness, account.token)
+				.patch(`/users/@me/personas/${created.id}`)
+				.body({persona_tags: [{prefix: 'B:', suffix: null}]})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+		});
 	});
 
 	describe('DELETE /users/@me/personas/:persona_id (Delete Self)', () => {
