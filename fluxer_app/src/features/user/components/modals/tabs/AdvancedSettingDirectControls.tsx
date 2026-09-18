@@ -65,6 +65,10 @@ import {
 import type {SearchableSettingItem} from '@app/features/user/components/settings_utils/SettingsSectionRegistry';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import {EdgeHoverPeekControl} from '@app/features/user/components/modals/tabs/advanced_settings_tab/AdvancedAppearanceControls';
+
 export const DIRECT_CONTROL_ITEM_IDS = new Set([
 	'advanced-windows-fluxer-sans',
 	'accessibility-text-selection',
@@ -79,6 +83,7 @@ export const DIRECT_CONTROL_ITEM_IDS = new Set([
 	'appearance-show-help-center-button',
 	'appearance-show-plutonium-button',
 	'appearance-show-download-button',
+	'appearance-edge-hover-peek',
 	'chat-settings-auto-send-gifs',
 	'chat-settings-save-gif-favorites',
 	'chat-settings-message-action-bar',
@@ -134,6 +139,7 @@ export const COMPACT_SWITCH_CONTROL_ITEM_IDS = new Set([
 	'appearance-show-help-center-button',
 	'appearance-show-plutonium-button',
 	'appearance-show-download-button',
+	'appearance-edge-hover-peek',
 	'chat-settings-auto-send-gifs',
 	'chat-settings-save-gif-favorites',
 	'chat-settings-strip-tracking',
@@ -214,6 +220,10 @@ export const AdvancedSettingControl = observer(({item}: {item: SearchableSetting
 		case 'appearance-show-download-button':
 			return (
 				<DownloadButtonControl data-flx="user.advanced-setting-direct-controls.advanced-setting-control.download-button-control" />
+			);
+		case 'appearance-edge-hover-peek':
+			return (
+				<EdgeHoverPeekControl data-flx="user.advanced-setting-direct-controls.advanced-setting-control.edge-hover-peek-control" />
 			);
 		case 'chat-settings-auto-send-gifs':
 			return (
