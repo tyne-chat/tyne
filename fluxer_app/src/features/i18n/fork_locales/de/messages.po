@@ -39,6 +39,15 @@ msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 
+#. Settings search synonym.
+msgid "Auto-hide"
+msgstr "Automatisches Ausblenden"
+
+#. Settings section label in Advanced Settings for edge hover peek preference.
+#. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
+msgid "Auto-peek hidden sidebars"
+msgstr "Ausgeblendete Seitenleisten automatisch einblenden"
+
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
@@ -135,6 +144,18 @@ msgstr "Failed to save persona"
 msgid "Failed to upload icon to server"
 msgstr "Failed to upload icon to server"
 
+#. Tooltip on the channel header channel list toggle when the channel list is currently shown.
+msgid "Hide channel list"
+msgstr "Kanalliste ausblenden"
+
+#. Tooltip on the channel header server list toggle when the server rail is currently shown.
+msgid "Hide server list"
+msgstr "Serverliste ausblenden"
+
+#. Settings section description in Advanced Settings for edge hover peek preference.
+msgid "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Mauszeiger an den Fensterrand bewegen, um ausgeblendete Leisten kurz anzuzeigen."
+
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
 msgstr "Icon file is too large. Choose an image smaller than 10MB."
@@ -225,6 +246,10 @@ msgstr "Only visible to you. Others cannot view this persona’s full bio or pro
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+
+#. Settings search synonym.
+msgid "Peek"
+msgstr "Vorschau"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
@@ -347,6 +372,10 @@ msgstr "Set as active persona"
 msgid "Show personas button"
 msgstr "Show personas button"
 
+#. Tooltip on the channel header server list toggle when the server rail is currently hidden.
+msgid "Show server list"
+msgstr "Serverliste anzeigen"
+
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "Skipped member because they have no name configured."
@@ -377,6 +406,10 @@ msgstr "Tag Text"
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
 msgstr "Tag pair already in use by persona \"{name}\""
+
+#. Settings search synonym.
+msgid "Taskbar"
+msgstr "Taskleiste"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."

@@ -67,6 +67,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useRef} from 'react';
 
+// Fork imports.
+
+import LayoutState from '@app/features/ui/state/LayoutState';
+
 const JOIN_VOICE_CHANNEL_DESCRIPTOR = msg({
 	message: 'Join voice channel',
 	comment: 'Button in the unjoined voice channel call surface. Joins the current voice channel.',
@@ -447,6 +451,8 @@ export const GuildChannelView = observer(({channelId, guildId}: GuildChannelView
 	if (isVoiceChannel) {
 		const isVoiceTextSplitView = isPwaVoiceTextSplitLayout && !isVoiceTextCallExpanded;
 		const shouldRenderMemberList = isMemberListVisible && !isMobileLayout && !isSearchActive;
+		const isMemberListPeeking =
+			!isMemberListVisible && !isMobileLayout && !isSearchActive && LayoutState.isRightHoverPeeking;
 		const compactVoiceCallHeaderSupplement = isConnectedToThisChannel ? (
 			<CompactVoiceCallStreamHeaderInfo
 				channel={channel}
@@ -491,6 +497,19 @@ export const GuildChannelView = observer(({channelId, guildId}: GuildChannelView
 					guild={guild}
 					data-flx="channel.channel-view.guild-channel-view.channel-members--2"
 				/>
+			);
+		} else if (isMemberListPeeking) {
+			sidePanel = (
+				<div
+					className={styles.memberListOverlay}
+					data-flx="channel.channel-view.guild-channel-view.member-list-overlay--voice"
+				>
+					<ChannelMembers
+						channel={channel}
+						guild={guild}
+						data-flx="channel.channel-view.guild-channel-view.channel-members--voice-peek"
+					/>
+				</div>
 			);
 		}
 		return (
@@ -564,6 +583,8 @@ export const GuildChannelView = observer(({channelId, guildId}: GuildChannelView
 		);
 	}
 	const shouldRenderMemberList = isMemberListVisible && !isMobileLayout && !isSearchActive && !threadPanelOpen;
+	const isMemberListPeeking =
+		!isMemberListVisible && !isMobileLayout && !isSearchActive && !threadPanelOpen && LayoutState.isRightHoverPeeking;
 	const isThreadChannel = channel.isThread();
 	let sidePanel: React.ReactNode = null;
 	if (isSearchPanelVisible) {
@@ -590,6 +611,23 @@ export const GuildChannelView = observer(({channelId, guildId}: GuildChannelView
 				guild={guild}
 				data-flx="channel.channel-view.guild-channel-view.channel-members"
 			/>
+		);
+	} else if (isMemberListPeeking) {
+		sidePanel = (
+			<div className={styles.memberListOverlay} data-flx="channel.channel-view.guild-channel-view.member-list-overlay">
+				{isThreadChannel ? (
+					<ThreadMembersPanel
+						thread={channel}
+						data-flx="channel.channel-view.guild-channel-view.thread-members-panel--peek"
+					/>
+				) : (
+					<ChannelMembers
+						channel={channel}
+						guild={guild}
+						data-flx="channel.channel-view.guild-channel-view.channel-members--peek"
+					/>
+				)}
+			</div>
 		);
 	}
 	const scaffold = (
