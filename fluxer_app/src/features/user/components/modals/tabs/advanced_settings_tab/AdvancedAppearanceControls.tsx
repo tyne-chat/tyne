@@ -22,6 +22,10 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import LayoutState from '@app/features/ui/state/LayoutState';
+
 const REQUIRE_DOUBLE_CLICK_TO_JOIN_VOICE_DESCRIPTOR = msg({
 	message: 'Require double-click to join voice channels',
 	comment: 'Short label for an advanced voice-channel navigation preference.',
@@ -150,6 +154,26 @@ export const DownloadButtonControl = observer(() => {
 			}
 			compact
 			data-flx="user.advanced-settings-tab.switch.download-button"
+		/>
+	);
+});
+
+// Fork: edge hover-peek for collapsed sidebars.
+
+const AUTO_PEEK_HIDDEN_SIDEBARS_DESCRIPTOR = msg({
+	message: 'Auto-peek hidden sidebars',
+	comment: 'Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.',
+});
+
+export const EdgeHoverPeekControl = observer(() => {
+	const {i18n} = useLingui();
+	return (
+		<Switch
+			ariaLabel={i18n._(AUTO_PEEK_HIDDEN_SIDEBARS_DESCRIPTOR)}
+			value={LayoutState.edgeHoverPeekEnabled}
+			onChange={(value) => LayoutState.setEdgeHoverPeekEnabled(value)}
+			compact
+			data-flx="user.advanced-settings-tab.switch.edge-hover-peek"
 		/>
 	);
 });
