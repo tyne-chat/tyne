@@ -48,6 +48,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useContext, useEffect, useMemo, useRef} from 'react';
 
+// Fork imports.
+
+import LayoutState from '@app/features/ui/state/LayoutState';
+
 const ENABLE_INVITES_FOR_THIS_COMMUNITY_DESCRIPTOR = msg({
 	message: 'Enable invites for this community',
 	comment: 'Confirmation modal title for re-enabling invite links in the current community.',
@@ -672,6 +676,10 @@ export const GuildLayout = observer(({children}: {children: React.ReactNode}) =>
 			</TopNagbarContext.Provider>
 		);
 	}
+	const isChannelListOpen = mobileLayout.enabled || LayoutState.channelListVisible;
+	const isChannelListPeeking =
+		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
+
 	return (
 		<TopNagbarContext.Provider value={nagbarContextValue}>
 			<div
@@ -679,8 +687,16 @@ export const GuildLayout = observer(({children}: {children: React.ReactNode}) =>
 				data-flx="app.guild-layout.guild-layout-container--7"
 			>
 				{guildNagbars}
-				<div className={styles.guildLayoutContent} data-flx="app.guild-layout.guild-layout-content--6">
-					<GuildNavbar guild={guild!} data-flx="app.guild-layout.guild-navbar--3" />
+				<div
+					className={clsx(styles.guildLayoutContent, !isChannelListOpen && styles.guildLayoutContentCollapsed)}
+					data-flx="app.guild-layout.guild-layout-content--6"
+				>
+					{isChannelListOpen && <GuildNavbar guild={guild!} data-flx="app.guild-layout.guild-navbar--3" />}
+					{isChannelListPeeking && (
+						<div className={styles.guildSidebarOverlay} data-flx="app.guild-layout.guild-sidebar-overlay">
+							<GuildNavbar guild={guild!} data-flx="app.guild-layout.guild-navbar--peek" />
+						</div>
+					)}
 					<div className={styles.guildMainContent} data-flx="app.guild-layout.guild-main-content--8">
 						{children}
 					</div>

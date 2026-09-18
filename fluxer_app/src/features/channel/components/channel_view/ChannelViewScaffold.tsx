@@ -4,25 +4,49 @@ import styles from '@app/features/channel/components/ChannelIndexPage.module.css
 import {clsx} from 'clsx';
 import type React from 'react';
 
+// Fork imports.
+
+import MemberList from '@app/features/member/state/MemberList';
+import LayoutState from '@app/features/ui/state/LayoutState';
+import MobileLayout from '@app/features/ui/state/MobileLayout';
+import {observer} from 'mobx-react-lite';
+import {useEffect} from 'react';
+
 interface ChannelViewScaffoldProps {
 	header: React.ReactNode;
 	chatArea: React.ReactNode;
 	sidePanel?: React.ReactNode | null;
 	showMemberListDivider?: boolean;
+	hasMemberList?: boolean;
 	className?: string;
 	voiceTextSplitView?: boolean;
 	chatAreaInert?: boolean;
 }
 
-export const ChannelViewScaffold: React.FC<ChannelViewScaffoldProps> = ({
+const ChannelViewScaffoldBase: React.FC<ChannelViewScaffoldProps> = ({
 	header,
 	chatArea,
 	sidePanel = null,
 	showMemberListDivider = false,
+	hasMemberList = true,
 	className,
 	voiceTextSplitView = false,
 	chatAreaInert = false,
 }) => {
+	useEffect(() => {
+		LayoutState.setCanRightPeek(hasMemberList);
+		return () => {
+			LayoutState.setCanRightPeek(false);
+		};
+	}, [hasMemberList]);
+
+	const shouldShowPeekStrip =
+		hasMemberList &&
+		LayoutState.edgeHoverPeekEnabled &&
+		!MemberList.isMembersOpen &&
+		!MobileLayout.enabled &&
+		(!sidePanel || LayoutState.isRightHoverPeeking);
+
 	return (
 		<div
 			className={clsx(styles.channelGrid, className)}
@@ -30,7 +54,10 @@ export const ChannelViewScaffold: React.FC<ChannelViewScaffoldProps> = ({
 			data-flx="channel.channel-view.channel-view-scaffold.channel-grid"
 		>
 			<div data-flx="channel.channel-view.channel-view-scaffold.div">{header}</div>
-			<div className={styles.contentGrid} data-flx="channel.channel-view.channel-view-scaffold.content-grid">
+			<div
+				className={clsx(styles.contentGrid, shouldShowPeekStrip && styles.contentGridWithPeekStrip)}
+				data-flx="channel.channel-view.channel-view-scaffold.content-grid"
+			>
 				{showMemberListDivider && (
 					<div
 						className={styles.memberListDivider}
@@ -50,3 +77,6 @@ export const ChannelViewScaffold: React.FC<ChannelViewScaffoldProps> = ({
 		</div>
 	);
 };
+
+// Fork: an observer, so the peek strip follows the layout and member list stores.
+export const ChannelViewScaffold = observer(ChannelViewScaffoldBase);
