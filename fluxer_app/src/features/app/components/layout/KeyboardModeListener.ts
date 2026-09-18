@@ -29,10 +29,35 @@ const FOCUS_TRAPPING_OVERLAY_SELECTOR = [
 
 const isElementInert = (element: Element | null): boolean => element != null && element.closest('[inert]') != null;
 
-const canRedirectTabToComposer = (composer: HTMLTextAreaElement | null): composer is HTMLTextAreaElement => {
-	if (composer == null || composer.disabled || composer.getAttribute('aria-disabled') === 'true') return false;
+export const isAutocompleteActive = (): boolean => {
+	const active = document.activeElement;
+	if (!(active instanceof Element)) return false;
+	const controlsId = active.getAttribute('aria-controls');
+	if (controlsId) {
+		const target = document.getElementById(controlsId);
+		if (target != null && !isElementInert(target) && target.getAttribute('aria-hidden') !== 'true') {
+			return true;
+		}
+	}
+	if (active.getAttribute('aria-activedescendant') != null) {
+		return true;
+	}
+	if (active.getAttribute('aria-expanded') === 'true' && active.getAttribute('aria-autocomplete') === 'list') {
+		return true;
+	}
+	return false;
+};
+
+export const canRedirectTabToComposer = (composer: HTMLElement | null): composer is HTMLElement => {
+	if (
+		composer == null ||
+		(composer as HTMLTextAreaElement).disabled ||
+		composer.getAttribute('aria-disabled') === 'true'
+	)
+		return false;
 	if (isElementInert(composer)) return false;
 	const active = document.activeElement;
+	if (active === composer || (active instanceof Node && composer.contains(active))) return false;
 	if (isEditableElement(active) && !isChannelTextareaElement(active)) return false;
 	return !(active instanceof Element && active.closest(FOCUS_TRAPPING_OVERLAY_SELECTOR) != null);
 };
@@ -63,8 +88,11 @@ export const KeyboardModeListener = observer(() => {
 		};
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (event.key === 'Tab') {
+				if (isAutocompleteActive()) {
+					return;
+				}
 				if (!KeyboardMode.keyboardModeEnabled) {
-					const composer = document.querySelector<HTMLTextAreaElement>(CHANNEL_TEXTAREA_SELECTOR);
+					const composer = document.querySelector<HTMLElement>(CHANNEL_TEXTAREA_SELECTOR);
 					if (canRedirectTabToComposer(composer)) {
 						event.preventDefault();
 						ComponentBus.dispatch('FOCUS_TEXTAREA', {enterKeyboardMode: true});
