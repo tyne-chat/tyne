@@ -66,3 +66,19 @@ export const SHOW_MEMBERS_DESCRIPTOR = msg({
 	message: 'Show members',
 	comment: 'Tooltip on the channel header members toggle when the members panel is currently hidden.',
 });
+export const HIDE_SERVER_LIST_DESCRIPTOR = msg({
+	message: 'Hide server list',
+	comment: 'Tooltip on the channel header server list toggle when the server rail is currently shown.',
+});
+export const SHOW_SERVER_LIST_DESCRIPTOR = msg({
+	message: 'Show server list',
+	comment: 'Tooltip on the channel header server list toggle when the server rail is currently hidden.',
+});
+export const HIDE_CHANNELS_DESCRIPTOR = msg({
+	message: 'Hide channel list',
+	comment: 'Tooltip on the channel header channel list toggle when the channel list is currently shown.',
+});
+export const SHOW_CHANNELS_DESCRIPTOR = msg({
+	message: 'Show channel list',
+	comment: 'Tooltip on the channel header channel list toggle when the channel list is currently hidden.',
+});
