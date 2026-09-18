@@ -10,6 +10,10 @@ import type {Icon, IconWeight} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import React, {useCallback, useRef} from 'react';
 
+// Fork imports.
+
+import {MentionBadge} from '@app/features/ui/components/MentionBadge';
+
 interface ChannelHeaderIconProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
 	icon: Icon;
 	iconWeight?: IconWeight;
@@ -19,6 +23,8 @@ interface ChannelHeaderIconProps extends Omit<React.ButtonHTMLAttributes<HTMLBut
 	onContextMenu?: React.MouseEventHandler<HTMLButtonElement>;
 	disabled?: boolean;
 	keybindAction?: KeybindCommand;
+	badgeCount?: number;
+	hasUnread?: boolean;
 }
 
 export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHeaderIconProps>((props, ref) => {
@@ -31,6 +37,8 @@ export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHead
 		disabled = false,
 		keybindAction,
 		className,
+		badgeCount,
+		hasUnread,
 		...rest
 	} = props;
 	const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -59,7 +67,7 @@ export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHead
 				ref={mergedRef}
 				type="button"
 				className={clsx(isSelected ? styles.iconButtonSelected : styles.iconButtonDefault, className)}
-				aria-label={label}
+				aria-label={badgeCount && badgeCount > 0 ? `${label} (${badgeCount})` : hasUnread ? `${label} (*)` : label}
 				aria-pressed={ariaPressed}
 				onClick={disabled ? undefined : onClick}
 				disabled={disabled}
@@ -70,6 +78,24 @@ export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHead
 					className={styles.buttonIcon}
 					data-flx="channel.channel-header-components.channel-header-icon.button-icon"
 				/>
+				{badgeCount && badgeCount > 0 ? (
+					<div
+						className={styles.headerButtonBadge}
+						data-flx="channel.channel-header-components.channel-header-icon.header-button-badge"
+					>
+						<MentionBadge
+							mentionCount={badgeCount}
+							size="small"
+							data-flx="channel.channel-header-components.channel-header-icon.mention-badge"
+						/>
+					</div>
+				) : hasUnread ? (
+					<span
+						className={styles.headerButtonUnreadDot}
+						aria-hidden="true"
+						data-flx="channel.channel-header-components.channel-header-icon.header-button-unread-dot"
+					/>
+				) : null}
 			</button>
 		</FocusRing>
 	);
