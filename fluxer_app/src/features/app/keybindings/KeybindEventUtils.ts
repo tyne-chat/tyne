@@ -96,6 +96,6 @@ export const shouldAllowLocalShortcutForChannelTextarea = (
 	textareaValue: string,
 ): boolean => {
 	if (entry.editableFocusBehavior === 'allow') return true;
-	if (entry.editableFocusBehavior === 'allow_when_empty') return textareaValue.trim().length === 0;
+	if (entry.editableFocusBehavior === 'allow_when_empty') return textareaValue.length === 0;
 	return false;
 };
