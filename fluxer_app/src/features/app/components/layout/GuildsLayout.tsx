@@ -130,6 +130,11 @@ import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useDrop} from 'react-dnd';
 
+// Fork imports.
+
+import {EdgeProximitySensor} from '@app/features/ui/components/EdgeProximitySensor';
+import LayoutState from '@app/features/ui/state/LayoutState';
+
 const NEW_DESCRIPTOR = msg({
 	message: 'New',
 	context: 'navigation-badge',
@@ -172,6 +177,38 @@ function resolveGuildsLayoutStyle(
 		style['--layout-user-area-overlay-height'] = `${initialOverlayHeightPx}px`;
 	}
 	return Object.keys(style).length === 0 ? undefined : style;
+}
+
+// Fork: collapsible server and channel lists override the sidebar variables.
+interface GuildsLayoutSidebarStyle extends React.CSSProperties {
+	'--layout-sidebar-width'?: string;
+	'--layout-sidebar-restored-width'?: string;
+	'--layout-sidebar-peek-offset'?: string;
+	'--layout-guild-list-width'?: string;
+}
+
+function resolveGuildsLayoutSidebarStyle(
+	mobileEnabled: boolean,
+	sidebarWidth: string | null,
+	serverListVisible: boolean,
+	channelListVisible: boolean,
+): React.CSSProperties | undefined {
+	if (mobileEnabled) return undefined;
+	const style: GuildsLayoutSidebarStyle = {};
+	const actualSidebarWidth = sidebarWidth != null && sidebarWidth !== '' ? sidebarWidth : '20rem';
+	style['--layout-sidebar-restored-width'] = actualSidebarWidth;
+	if (!serverListVisible) {
+		style['--layout-guild-list-width'] = '0px';
+		style['--layout-sidebar-peek-offset'] = '4.5rem';
+	} else {
+		style['--layout-sidebar-peek-offset'] = '0px';
+	}
+	if (!channelListVisible) {
+		style['--layout-sidebar-width'] = '0px';
+	} else if (sidebarWidth != null && sidebarWidth !== '') {
+		style['--layout-sidebar-width'] = sidebarWidth;
+	}
+	return style;
 }
 
 function resolveGuildFolderId(folderId: number | null): number {
@@ -2290,7 +2327,24 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 	useEffect(() => {
 		afterBootReveal(preloadMacPermissionsModal);
 	}, []);
-	const shouldShowSidebarDivider = !mobileLayout.enabled;
+	const isServerListOpen = mobileLayout.enabled ? showGuildListOnMobile : LayoutState.serverListVisible;
+	const isServerListPeeking = !isServerListOpen && LayoutState.isLeftHoverPeeking && !mobileLayout.enabled;
+	const isChannelListPeeking =
+		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
+	const shouldShowSidebarDivider = !mobileLayout.enabled && LayoutState.channelListVisible;
+
+	const isUserAreaHidden =
+		!mobileLayout.enabled &&
+		!LayoutState.serverListVisible &&
+		!LayoutState.channelListVisible &&
+		!LayoutState.isLeftHoverPeeking;
+
+	const isUserAreaCompact =
+		!mobileLayout.enabled &&
+		!LayoutState.channelListVisible &&
+		!LayoutState.isLeftHoverPeeking &&
+		LayoutState.serverListVisible;
+
 	return (
 		<div
 			ref={layoutRef}
@@ -2301,11 +2355,28 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 				shouldReserveUserAreaSpace && styles.guildsLayoutReserveSpace,
 				showBottomNav && styles.guildsLayoutReserveMobileBottomNav,
 			)}
-			style={resolveGuildsLayoutStyle(mobileLayout.enabled, SidebarWidth.cssValue, initialOverlayHeightPx)}
+			style={{
+				...resolveGuildsLayoutStyle(mobileLayout.enabled, SidebarWidth.cssValue, initialOverlayHeightPx),
+				...resolveGuildsLayoutSidebarStyle(
+					mobileLayout.enabled,
+					SidebarWidth.cssValue,
+					LayoutState.serverListVisible,
+					LayoutState.channelListVisible,
+				),
+			}}
 			data-flx="app.guilds-layout.guilds-layout"
 		>
-			{!isVoiceCallFullscreenActive && (!mobileLayout.enabled || showGuildListOnMobile) && (
+			<EdgeProximitySensor data-flx="app.guilds-layout.edge-proximity-sensor" />
+			{!isVoiceCallFullscreenActive && isServerListOpen && (
 				<GuildList key="guild-list" data-flx="app.guilds-layout.guild-list" />
+			)}
+			{!isVoiceCallFullscreenActive && isServerListPeeking && (
+				<div
+					className={clsx(styles.guildListOverlay, isChannelListPeeking && styles.guildListOverlayNoShadow)}
+					data-flx="app.guilds-layout.guild-list-overlay"
+				>
+					<GuildList key="guild-list-peek" data-flx="app.guilds-layout.guild-list" />
+				</div>
 			)}
 			<div
 				key="content"
@@ -2352,7 +2423,16 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 				</TopNagbarContext.Provider>
 			</div>
 			{!isVoiceCallFullscreenActive && !mobileLayout.enabled && user && (
-				<div ref={userAreaWrapperRef} className={styles.userAreaWrapper} data-flx="app.guilds-layout.user-area-wrapper">
+				<div
+					ref={userAreaWrapperRef}
+					className={clsx(
+						styles.userAreaWrapper,
+						isUserAreaHidden && styles.userAreaWrapperHidden,
+						isUserAreaCompact && styles.userAreaWrapperCompact,
+						isChannelListPeeking && styles.userAreaWrapperPeeking,
+					)}
+					data-flx="app.guilds-layout.user-area-wrapper"
+				>
 					<UserArea user={user} data-flx="app.guilds-layout.user-area" />
 				</div>
 			)}
