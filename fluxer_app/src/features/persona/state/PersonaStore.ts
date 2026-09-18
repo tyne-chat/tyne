@@ -99,6 +99,19 @@ export class PersonaStoreClass {
 		makeAutoObservable(this);
 	}
 
+	reset(): void {
+		runInAction(() => {
+			this._personas = [];
+			this._displayTagText = '';
+			this._displayTagIcon = null;
+			this._activePersonaMode = 'off';
+			this._activePersonaId = null;
+			this._isPersonaLatched = false;
+			this._settingsLoaded = false;
+			this._knownPersonas.clear();
+		});
+	}
+
 	get personas(): ReadonlyArray<ClientPersona> {
 		return this._personas;
 	}
