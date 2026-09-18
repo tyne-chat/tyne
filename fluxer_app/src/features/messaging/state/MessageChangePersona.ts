@@ -2,7 +2,7 @@
 
 import type {Channel} from '@app/features/channel/models/Channel';
 import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
-import {comparer, makeAutoObservable, reaction} from 'mobx';
+import {compareStructural, makeAutoObservable, reaction} from 'mobx';
 import * as MessageCommands from '../commands/MessageCommands';
 import type {Message} from '../models/MessagingMessage';
 import {buildExistingAttachmentEditReferences} from '../utils/MessageEditContentUtils';
@@ -58,7 +58,7 @@ class MessageChangePersona {
 		return reaction(
 			() => Object.entries(this.editingMessageIds),
 			() => callback(),
-			{fireImmediately: true, equals: comparer.structural},
+			{fireImmediately: true, equals: compareStructural},
 		);
 	}
 }
