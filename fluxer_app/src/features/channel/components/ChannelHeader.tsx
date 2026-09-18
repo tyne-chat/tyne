@@ -31,7 +31,6 @@ import {
 	OPEN_GROUP_DETAILS_FOR_DESCRIPTOR,
 	OPEN_PROFILE_FOR_DESCRIPTOR,
 	SEARCH_DESCRIPTOR,
-	SHOW_CHANNEL_LIST_DESCRIPTOR,
 	SHOW_MEMBERS_DESCRIPTOR,
 	VIDEO_CALL_DESCRIPTOR,
 } from '@app/features/channel/components/channel_header/shared';
@@ -119,7 +118,6 @@ import {
 	ArrowLeftIcon,
 	CaretRightIcon,
 	EyeSlashIcon,
-	ListIcon,
 	MagnifyingGlassIcon,
 	PencilIcon,
 	PhoneIcon,
@@ -132,6 +130,17 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useRef, useState} from 'react';
+
+// Fork imports.
+
+import {
+	HIDE_CHANNELS_DESCRIPTOR,
+	HIDE_SERVER_LIST_DESCRIPTOR,
+	SHOW_CHANNELS_DESCRIPTOR,
+	SHOW_SERVER_LIST_DESCRIPTOR,
+} from '@app/features/channel/components/channel_header/shared';
+import LayoutState from '@app/features/ui/state/LayoutState';
+import {SidebarSimpleIcon, SquaresFourIcon} from '@phosphor-icons/react';
 
 const {VoiceCallButton, VideoCallButton} = CallButtons;
 
@@ -629,18 +638,34 @@ export const ChannelHeader = observer(
 									</button>
 								</FocusRing>
 							) : (
-								<FocusRing offset={-2} data-flx="channel.channel-header.focus-ring--2">
-									<button
-										type="button"
-										className={styles.backButtonDesktop}
-										aria-label={i18n._(SHOW_CHANNEL_LIST_DESCRIPTOR)}
-										onClick={handleBackClick}
-										data-flx="channel.channel-header.back-button-desktop.back-click"
-									>
-										<ListIcon className={styles.backIcon} data-flx="channel.channel-header.back-icon" />
-									</button>
-								</FocusRing>
+								<div className={styles.desktopPanelControls} data-flx="channel.channel-header.desktop-panel-controls">
+									<ChannelHeaderIcon
+										icon={SquaresFourIcon}
+										isSelected={LayoutState.serverListVisible}
+										label={
+											LayoutState.serverListVisible
+												? i18n._(HIDE_SERVER_LIST_DESCRIPTOR)
+												: i18n._(SHOW_SERVER_LIST_DESCRIPTOR)
+										}
+										onClick={LayoutCommands.toggleServerList}
+										aria-pressed={LayoutState.serverListVisible}
+										data-flx="channel.channel-header.toggle-server-list"
+									/>
+									<ChannelHeaderIcon
+										icon={SidebarSimpleIcon}
+										isSelected={LayoutState.channelListVisible}
+										label={
+											LayoutState.channelListVisible
+												? i18n._(HIDE_CHANNELS_DESCRIPTOR)
+												: i18n._(SHOW_CHANNELS_DESCRIPTOR)
+										}
+										onClick={LayoutCommands.toggleChannelList}
+										aria-pressed={LayoutState.channelListVisible}
+										data-flx="channel.channel-header.toggle-channel-list"
+									/>
+								</div>
 							)}
+
 							<div className={styles.leftContentContainer} data-flx="channel.channel-header.left-content-container">
 								{leftContent ? (
 									leftContent
