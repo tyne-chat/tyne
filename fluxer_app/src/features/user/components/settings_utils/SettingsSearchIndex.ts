@@ -48,6 +48,10 @@ import {themesIndex} from '@app/features/user/components/settings_utils/search_i
 import {voiceVideoIndex} from '@app/features/user/components/settings_utils/search_index/VoiceVideoIndex';
 import type {I18n} from '@lingui/core';
 
+// Fork imports.
+
+import {forkAppearanceIndex} from '@app/features/user/components/settings_utils/search_index/ForkAppearanceIndex';
+
 export interface SettingsSearchResult {
 	tab: SettingsTab;
 	matchedItems: Array<SearchableSettingItem>;
@@ -109,6 +113,7 @@ const ADDITIONAL_SEARCHABLE_ITEMS: Array<SearchableSettingDescriptor> = [
 	...giftInventoryIndex,
 	...paymentsIndex,
 	...appearanceIndex,
+	...forkAppearanceIndex,
 	...themesIndex,
 	...notificationsIndex,
 	...chatSettingsIndex,
