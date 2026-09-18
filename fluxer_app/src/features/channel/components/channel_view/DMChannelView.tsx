@@ -70,6 +70,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import LayoutState from '@app/features/ui/state/LayoutState';
+
 interface DMChannelViewProps {
 	channelId: string;
 }
@@ -226,6 +230,9 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 		if (currentChannelId) CallCommands.ignoreCall(currentChannelId);
 	}, [currentChannelId]);
 	const shouldRenderMemberList = Boolean(isGroupDM && isMemberListVisible && !isSearchActive);
+	const isMemberListPeeking = Boolean(
+		isGroupDM && !isMemberListVisible && !isMobileLayout && !isSearchActive && LayoutState.isRightHoverPeeking,
+	);
 	const callStatusLabel = useMemo(() => {
 		switch (controlsVariant) {
 			case 'incoming':
@@ -524,6 +531,16 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 		);
 	} else if (shouldRenderMemberList) {
 		sidePanel = <ChannelMembers channel={channel} data-flx="channel.channel-view.dm-channel-view.channel-members" />;
+	} else if (isMemberListPeeking) {
+		sidePanel = (
+			<div
+				className={styles.memberListOverlay}
+				data-peek-drawer="right"
+				data-flx="channel.channel-view.dm-channel-view.member-list-overlay"
+			>
+				<ChannelMembers channel={channel} data-flx="channel.channel-view.dm-channel-view.channel-members--peek" />
+			</div>
+		);
 	} else {
 		sidePanel = null;
 	}
@@ -531,6 +548,8 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 		<>
 			<ChannelViewScaffold
 				className={channelGridClassName}
+				hasMemberList={Boolean(isGroupDM)}
+				showMemberListDivider={shouldRenderMemberList && !isSearchActive}
 				header={channelHeader}
 				chatArea={channelChatArea}
 				sidePanel={sidePanel}

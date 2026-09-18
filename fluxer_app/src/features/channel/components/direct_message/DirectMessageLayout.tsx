@@ -19,6 +19,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type {ReactNode} from 'react';
 
+// Fork imports.
+
+import LayoutState from '@app/features/ui/state/LayoutState';
+
 const NO_COMMUNITIES_TITLE_DESCRIPTOR = msg({
 	message: 'No communities yet',
 	comment:
@@ -110,11 +114,29 @@ export const DMLayout = observer(({children}: DMLayoutProps) => {
 			</div>
 		);
 	}
+	const isChannelListOpen = mobileLayout.enabled || LayoutState.channelListVisible;
+	const isChannelListPeeking =
+		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
+
 	return (
-		<div className={styles.dmLayoutContainer} data-flx="channel.direct-message.dm-layout.dm-layout-container">
-			<div className={styles.dmListColumn} data-flx="channel.direct-message.dm-layout.dm-list-column--2">
-				<DMList data-flx="channel.direct-message.dm-layout.dm-list--2" />
-			</div>
+		<div
+			className={clsx(styles.dmLayoutContainer, !isChannelListOpen && styles.dmLayoutContainerCollapsed)}
+			data-flx="channel.direct-message.dm-layout.dm-layout-container"
+		>
+			{isChannelListOpen && (
+				<div className={styles.dmListColumn} data-flx="channel.direct-message.dm-layout.dm-list-column--2">
+					<DMList data-flx="channel.direct-message.dm-layout.dm-list--2" />
+				</div>
+			)}
+			{isChannelListPeeking && (
+				<div
+					className={styles.dmListColumnOverlay}
+					data-peek-drawer="left"
+					data-flx="channel.direct-message.dm-layout.dm-list-column--peek"
+				>
+					<DMList data-flx="channel.direct-message.dm-layout.dm-list--peek" />
+				</div>
+			)}
 			<div className={styles.contentColumn} data-flx="channel.direct-message.dm-layout.content-column--2">
 				<div className={styles.contentInner} data-flx="channel.direct-message.dm-layout.content-inner--2">
 					{renderContent()}
