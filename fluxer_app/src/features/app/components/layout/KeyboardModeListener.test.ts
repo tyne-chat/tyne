@@ -6,6 +6,10 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 installVoiceMenuTestBootstrap();
 vi.mock('@lingui/core/macro', () => ({msg: (descriptor: unknown) => descriptor}));
+vi.mock('@lingui/react/macro', () => ({
+	Trans: () => null,
+	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
+}));
 
 const {canRedirectTabToComposer, isAutocompleteActive} = await import(
 	'@app/features/app/components/layout/KeyboardModeListener'
