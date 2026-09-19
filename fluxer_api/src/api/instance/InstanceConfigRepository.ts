@@ -519,6 +519,7 @@ function getDefaultAppPublicConfig(): InstanceAppPublicConfig {
 			custom_css: null,
 			upload_limit_message: null,
 			trusted_domains: [],
+			desktop_app_prompt_enabled: Config.instance.branding.desktopAppPromptEnabled ?? !Config.instance.selfHosted,
 		},
 		setup: {
 			configured: !Config.instance.selfHosted || Config.instance.setup.configured,
@@ -1010,6 +1011,7 @@ function buildAppPublicConfig(config: z.infer<typeof StoredInstanceAppPublicSche
 			trusted_domains: Config.instance.selfHosted
 				? (branding.trusted_domains ?? defaults.branding.trusted_domains)
 				: defaults.branding.trusted_domains,
+			desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? defaults.branding.desktop_app_prompt_enabled,
 		},
 		setup: {
 			configured: setup.configured ?? defaults.setup.configured,
