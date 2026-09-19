@@ -63,6 +63,7 @@ pub(super) fn build_app_public_update(
                 trusted_domains: form
                     .contains_key(TRUSTED_DOMAINS_FIELD)
                     .then(|| form.list_values(TRUSTED_DOMAINS_FIELD)),
+                desktop_app_prompt_enabled: Some(form.bool_value("app_desktop_app_prompt_enabled")),
                 ..Default::default()
             }),
             setup: Some(AppSetupConfigUpdateRequest {
