@@ -1,5 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-
+import {createTestAccount} from '@app/api/auth/tests/AuthTestUtils';
+import {ensureSessionStarted, getMessages} from '@app/api/message/tests/MessageTestUtils';
+import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHarness';
+import {HTTP_STATUS} from '@app/api/test/TestConstants';
+import {createBuilder} from '@app/api/test/TestRequestBuilder';
 import {MessageTypes} from '@fluxer/constants/src/ChannelConstants';
 import {
 	MessageRequestSchema,
@@ -8,9 +11,10 @@ import {
 import {MessageResponseSchema} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {NatsConnection} from '@nats-io/transport-node';
 import type {INatsConnectionManager} from '@pkgs/nats/src/INatsConnectionManager';
-import {describe, expect, it} from 'vitest';
+import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
 import {createChannelID, createGuildID, createMessageID, createUserID} from '../../BrandedTypes';
 import {Message} from '../../models/Message';
+import {normalizeMessageSubprofile} from '../services/message/MessageHelpers';
 import {MessageResponseDataService} from '../services/message/MessageResponseDataService';
 
 const encoder = new TextEncoder();
@@ -297,5 +301,108 @@ describe('MessagePersona Backend Pipeline', () => {
 
 		expect(result).toHaveLength(1);
 		expect(result[0].users).toEqual(['1481621807877361924', '123456']);
+	});
+
+	describe('normalizeMessageSubprofile', () => {
+		it('returns null for nullish input', () => {
+			expect(normalizeMessageSubprofile(null)).toBeNull();
+			expect(normalizeMessageSubprofile(undefined)).toBeNull();
+		});
+
+		it('normalizes complete subprofile data', () => {
+			const input = {
+				id: 'p-1',
+				name: 'Alice',
+				avatar: 'https://example.com/avatar.png',
+				avatar_color: 0x123456,
+				display_tag_text: 'System Tag',
+				display_tag_icon: 'https://example.com/icon.png',
+				system_name: 'SysName',
+				pronouns: 'she/they',
+				color: 0xff0000,
+				bio: 'Bio text',
+			};
+			expect(normalizeMessageSubprofile(input)).toEqual({
+				id: 'p-1',
+				name: 'Alice',
+				avatar: 'https://example.com/avatar.png',
+				avatar_color: 0x123456,
+				display_tag_text: 'System Tag',
+				display_tag_icon: 'https://example.com/icon.png',
+				system_name: 'SysName',
+				pronouns: 'she/they',
+				color: 0xff0000,
+				bio: 'Bio text',
+			});
+		});
+
+		it('falls back between display_tag_text and system_name', () => {
+			const tagOnly = normalizeMessageSubprofile({
+				id: 'p-1',
+				name: 'Alice',
+				display_tag_text: 'OnlyTag',
+			});
+			expect(tagOnly?.display_tag_text).toBe('OnlyTag');
+			expect(tagOnly?.system_name).toBe('OnlyTag');
+
+			const sysOnly = normalizeMessageSubprofile({
+				id: 'p-1',
+				name: 'Alice',
+				system_name: 'OnlySys',
+			});
+			expect(sysOnly?.display_tag_text).toBe('OnlySys');
+			expect(sysOnly?.system_name).toBe('OnlySys');
+		});
+	});
+});
+
+describe('Personal Notes Persona Integration', () => {
+	let harness: ApiTestHarness;
+
+	beforeAll(async () => {
+		harness = await createApiTestHarness();
+	});
+
+	beforeEach(async () => {
+		await harness.reset();
+	});
+
+	afterAll(async () => {
+		await harness?.shutdown();
+	});
+
+	it('preserves persona subprofile when sending and retrieving a message in personal notes', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+		const personalNotesChannelId = account.userId;
+
+		const subprofile = {
+			id: 'persona-alice',
+			name: 'Alice in Notes',
+			avatar: 'https://example.com/alice.png',
+			display_tag_text: 'Wonderland',
+		};
+
+		const sentMessage = await createBuilder<MessageResponse>(harness, account.token)
+			.post(`/channels/${personalNotesChannelId}/messages`)
+			.body({
+				content: 'Note from Alice',
+				subprofile,
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		expect(sentMessage.content).toBe('Note from Alice');
+		expect(sentMessage.subprofile).toBeDefined();
+		expect(sentMessage.subprofile?.id).toBe('persona-alice');
+		expect(sentMessage.subprofile?.name).toBe('Alice in Notes');
+		expect(sentMessage.subprofile?.avatar).toBe('https://example.com/alice.png');
+		expect(sentMessage.subprofile?.display_tag_text).toBe('Wonderland');
+
+		const messages = await getMessages(harness, account.token, personalNotesChannelId);
+		const fetched = messages.find((m) => m.id === sentMessage.id);
+		expect(fetched).toBeDefined();
+		expect(fetched?.subprofile?.name).toBe('Alice in Notes');
+		expect(fetched?.subprofile?.id).toBe('persona-alice');
 	});
 });
