@@ -736,6 +736,7 @@ const INSTANCE_CONFIG_SECTION_APPLIERS = {
 							sign_in_backdrop_url: readOptionalField(appPublic.branding, 'sign_in_backdrop_url'),
 							custom_css: readOptionalField(appPublic.branding, 'custom_css'),
 							upload_limit_message: readOptionalField(appPublic.branding, 'upload_limit_message'),
+							desktop_app_prompt_enabled: readOptionalField(appPublic.branding, 'desktop_app_prompt_enabled'),
 						})
 					: undefined,
 				legal: appPublic.legal
