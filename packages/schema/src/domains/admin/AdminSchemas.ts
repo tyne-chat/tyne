@@ -619,6 +619,7 @@ const AppPublicConfigResponse = z.object({
 		custom_css: z.string().nullable(),
 		upload_limit_message: z.string().nullable(),
 		trusted_domains: z.array(z.string()),
+		desktop_app_prompt_enabled: z.boolean(),
 	}),
 	setup: z.object({
 		configured: z.boolean(),
@@ -667,6 +668,7 @@ const AppPublicConfigUpdateRequest = z.object({
 			custom_css: z.string().trim().max(32_768).nullish(),
 			upload_limit_message: z.string().trim().max(UPLOAD_LIMIT_MESSAGE_MAX_LENGTH).nullish(),
 			trusted_domains: z.array(z.string().max(255)).max(TRUSTED_DOMAINS_MAX).nullish(),
+			desktop_app_prompt_enabled: z.boolean().optional(),
 		})
 		.register(schemaMetadata, {preserveNullFields: true})
 		.nullish(),
