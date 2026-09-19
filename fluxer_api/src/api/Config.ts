@@ -435,6 +435,7 @@ export function buildAPIConfigFromMaster(master: MasterConfig): APIConfig {
 				themeColor: master.instance.branding.theme_color,
 				statusPageUrl: master.instance.branding.status_page_url,
 				statusPageIncidentHistoryUrl: master.instance.branding.status_page_incident_history_url,
+				desktopAppPromptEnabled: master.instance.branding.desktop_app_prompt_enabled,
 			},
 			setup: {
 				configured: master.instance.setup.configured,

@@ -433,6 +433,7 @@ function getDefaultAppPublicConfig(): InstanceAppPublicConfig {
 			status_page_incident_history_url: normalizeOptionalString(Config.instance.branding.statusPageIncidentHistoryUrl),
 			premium_product_name: getDefaultPremiumProductName(),
 			premium_info_url: null,
+			desktop_app_prompt_enabled: Config.instance.branding.desktopAppPromptEnabled ?? !Config.instance.selfHosted,
 		},
 		setup: {
 			configured: !Config.instance.selfHosted || Config.instance.setup.configured,
@@ -755,6 +756,7 @@ function buildAppPublicConfig(config: z.infer<typeof StoredInstanceAppPublicSche
 			premium_product_name:
 				normalizeOptionalString(branding.premium_product_name) ?? defaults.branding.premium_product_name,
 			premium_info_url: normalizeOptionalPublicString(branding.premium_info_url, defaults.branding.premium_info_url),
+			desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? defaults.branding.desktop_app_prompt_enabled,
 		},
 		setup: {
 			configured: setup.configured ?? defaults.setup.configured,
