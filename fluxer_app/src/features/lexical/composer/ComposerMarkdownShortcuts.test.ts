@@ -25,6 +25,10 @@ vi.mock('@app/features/lexical/composer/nodes/ComposerMentionPill', () => ({Comp
 vi.mock('@app/features/lexical/composer/nodes/ComposerCustomEmoji', () => ({ComposerCustomEmoji: () => null}));
 vi.mock('@app/features/lexical/composer/nodes/ComposerStandardEmoji', () => ({ComposerStandardEmoji: () => null}));
 vi.mock('@lingui/core/macro', () => ({msg: (descriptor: unknown) => descriptor}));
+vi.mock('@lingui/react/macro', () => ({
+	Trans: () => null,
+	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
+}));
 
 const NODES = [
 	ComposerMentionNode,
