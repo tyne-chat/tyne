@@ -517,6 +517,22 @@ export function getEmojiURL({id, animated, isAnimatable}: {id: string; animated?
 	return result;
 }
 
+const EMOJI_ORIGINAL_URL_CACHE = new Map<string, string>();
+
+export function getEmojiOriginalURL({id, animated}: {id: string; animated?: boolean}): string {
+	if (!id) {
+		return '';
+	}
+	const animatedFlag = animated === true;
+	const key = `${RuntimeConfig.mediaEndpoint}:${animatedFlag ? 'a' : 's'}:${id}`;
+	const cached = EMOJI_ORIGINAL_URL_CACHE.get(key);
+	if (cached !== undefined) return cached;
+	const result = animatedFlag ? mediaUrl(`emojis/${id}.gif`, {animated: true}) : mediaUrl(`emojis/${id}.png`);
+	if (EMOJI_ORIGINAL_URL_CACHE.size >= EMOJI_URL_CACHE_LIMIT) EMOJI_ORIGINAL_URL_CACHE.clear();
+	EMOJI_ORIGINAL_URL_CACHE.set(key, result);
+	return result;
+}
+
 type StickerSize = 160 | 320;
 
 const STICKER_URL_CACHE = new Map<string, string>();
