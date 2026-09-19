@@ -89,6 +89,10 @@ import type {GuildMemberResponse} from '@fluxer/schema/src/domains/guild/GuildMe
 import type {GuildResponse} from '@fluxer/schema/src/domains/guild/GuildResponseSchemas';
 import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 
+// Fork imports.
+
+import {normalizeMessageSubprofile} from '@app/api/channel/services/message/MessageHelpers';
+
 interface MessageSendServiceDeps {
 	threadActivity: ThreadMessageActivity;
 	channelRepository: ChannelRepository;
@@ -852,20 +856,7 @@ export class MessageSendService {
 			allowEmbeds: canEmbedLinks,
 			dmNsfwContext,
 			threadInsert: authChannel.thread !== undefined,
-			subprofile: data.subprofile
-				? {
-						id: data.subprofile.id,
-						name: data.subprofile.name,
-						avatar: data.subprofile.avatar ?? null,
-						avatar_color: data.subprofile.avatar_color ?? null,
-						display_tag_text: data.subprofile.display_tag_text ?? data.subprofile.system_name ?? null,
-						display_tag_icon: data.subprofile.display_tag_icon ?? null,
-						system_name: data.subprofile.display_tag_text ?? data.subprofile.system_name ?? null,
-						pronouns: data.subprofile.pronouns ?? null,
-						color: data.subprofile.color ?? null,
-						bio: data.subprofile.bio ?? null,
-					}
-				: null,
+			subprofile: normalizeMessageSubprofile(data.subprofile),
 		});
 		this.cacheMentionChannels({
 			requestCache,
@@ -1283,6 +1274,7 @@ export class MessageSendService {
 			messageSnapshots,
 			guildId: null,
 			channel,
+			subprofile: normalizeMessageSubprofile(data.subprofile),
 		});
 		await dispatchMessageCreateBroadcast({
 			gatewayService: this.deps.gatewayService,
