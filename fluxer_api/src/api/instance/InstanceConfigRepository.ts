@@ -528,6 +528,7 @@ function getDefaultPremiumProductName(): string {
 function getDefaultAppPublicConfig(): InstanceAppPublicConfig {
 	return {
 		branding: {
+			desktop_app_prompt_enabled: Config.instance.branding.desktopAppPromptEnabled ?? !Config.instance.selfHosted,
 			product_name: getDefaultProductName(),
 			icon_url: normalizeOptionalString(Config.instance.branding.iconUrl),
 			symbol_url: normalizeOptionalString(Config.instance.branding.symbolUrl),
@@ -1050,6 +1051,7 @@ function buildAppPublicConfig(config: z.infer<typeof StoredInstanceAppPublicSche
 	const {branding = {}, setup = {}, legal = {}, registration = {}} = config;
 	return {
 		branding: {
+			desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? defaults.branding.desktop_app_prompt_enabled,
 			product_name: normalizeOptionalString(branding.product_name) ?? defaults.branding.product_name,
 			icon_url: normalizeOptionalPublicString(branding.icon_url, defaults.branding.icon_url),
 			symbol_url: normalizeOptionalPublicString(branding.symbol_url, defaults.branding.symbol_url),

@@ -625,6 +625,7 @@ const AppPublicConfigResponse = z.object({
 		custom_css: z.string().nullable(),
 		upload_limit_message: z.string().nullable(),
 		trusted_domains: z.array(z.string()),
+		desktop_app_prompt_enabled: z.boolean(),
 	}),
 	setup: z.object({
 		configured: z.boolean(),
@@ -657,6 +658,7 @@ const HEX_THEME_COLOR_PATTERN = /^(?:#?(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}))?$/;
 const AppPublicConfigUpdateRequest = z.object({
 	branding: z
 		.object({
+			desktop_app_prompt_enabled: z.boolean().optional(),
 			product_name: z.string().trim().min(1).max(80).optional(),
 			icon_url: z.string().trim().max(2048).nullish(),
 			symbol_url: z.string().trim().max(2048).nullish(),
