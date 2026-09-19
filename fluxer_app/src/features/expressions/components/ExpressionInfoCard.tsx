@@ -29,6 +29,13 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect} from 'react';
 
+// Fork imports.
+
+import Emoji from '@app/features/emoji/state/Emoji';
+import type {FlatEmoji} from '@app/features/emoji/types/EmojiTypes';
+import {EmojiContextMenuItems} from '@app/features/ui/action_menu/items/EmojiContextMenuItems';
+import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
+
 const DEFAULT_EMOJI_DESCRIPTION_DESCRIPTOR = msg({
 	message: 'A default emoji. You can use it anywhere on {productName}.',
 	comment: 'Description of a built-in unicode emoji in the emoji info card. productName is the Fluxer product name.',
@@ -416,15 +423,44 @@ export const ExpressionInfoCard = observer(function ExpressionInfoCard(props: Ex
 		}
 		return i18n._(FOREIGN_EXPRESSION_DESCRIPTORS[kind]);
 	};
+	const handleContextMenu = useCallback(
+		(e: React.MouseEvent) => {
+			if (kind !== 'emoji' || !expressionId) return;
+			e.preventDefault();
+			e.stopPropagation();
+			const emojiRecord = Emoji.getEmojiById(expressionId);
+			const isAnimated = Boolean(emojiRecord?.animated);
+			const nameWithoutColons = displayName.replace(/^:|:$/g, '');
+			const emojiForMenu: FlatEmoji = emojiRecord ?? {
+				id: expressionId,
+				guildId: guildId ?? undefined,
+				name: nameWithoutColons,
+				uniqueName: nameWithoutColons,
+				allNamesString: displayName,
+				animated: isAnimated,
+			};
+			ContextMenuCommands.openFromEvent(e, ({onClose: closeMenu}) => (
+				<EmojiContextMenuItems
+					emoji={emojiForMenu}
+					onClose={closeMenu}
+					data-flx="expressions.expression-info-card.handle-context-menu.emoji-context-menu-items"
+				/>
+			));
+		},
+		[kind, expressionId, displayName, guildId],
+	);
+
 	return (
 		<div className={clsx(styles.card, className)} data-flx="expressions.expression-info-card.card">
 			<div className={styles.summarySection} data-flx="expressions.expression-info-card.summary-section">
 				{previewUrl && (
+					// biome-ignore lint/a11y/noStaticElementInteractions: context-menu affordance on the expression preview.
 					<img
 						src={previewUrl}
 						alt=""
 						draggable={false}
 						className={styles.preview}
+						onContextMenu={handleContextMenu}
 						data-flx="expressions.expression-info-card.preview"
 					/>
 				)}
