@@ -78,6 +78,10 @@ export const InstanceBrandingSchema = z
 			.describe(
 				'Extra domains a self-hosted instance trusts, so links to them open without a warning. Each entry is a hostname, or a hostname with a *. prefix that also covers its subdomains',
 			),
+		desktop_app_prompt_enabled: z
+			.boolean()
+			.default(true)
+			.describe('Whether the web app shows prompts to open deep links in the desktop app'),
 	})
 	.describe('Branding values safe to expose to clients');
 export type InstanceBranding = z.infer<typeof InstanceBrandingSchema>;

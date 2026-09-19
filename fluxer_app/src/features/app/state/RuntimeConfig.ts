@@ -854,6 +854,10 @@ class RuntimeConfig {
 		return this.appPublic.branding.product_name;
 	}
 
+	get desktopAppPromptEnabled(): boolean {
+		return this.appPublic.branding.desktop_app_prompt_enabled ?? true;
+	}
+
 	get termsUrl(): string | null {
 		return this.appPublic.legal.terms_url;
 	}

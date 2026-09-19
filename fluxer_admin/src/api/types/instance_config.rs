@@ -446,9 +446,10 @@ pub struct AppBrandingConfigResponse {
     pub sign_in_backdrop_url: Option<String>,
     pub custom_css: Option<String>,
     #[serde(default)]
-    pub upload_limit_message: Option<String>,
     #[serde(default)]
     pub trusted_domains: Vec<String>,
+    #[serde(default = "default_desktop_app_prompt_enabled")]
+    pub desktop_app_prompt_enabled: bool,
 }
 
 impl Default for AppBrandingConfigResponse {
@@ -470,8 +471,13 @@ impl Default for AppBrandingConfigResponse {
             custom_css: None,
             upload_limit_message: None,
             trusted_domains: Vec::new(),
+            desktop_app_prompt_enabled: default_desktop_app_prompt_enabled(),
         }
     }
+}
+
+fn default_desktop_app_prompt_enabled() -> bool {
+    true
 }
 
 fn default_product_name() -> String {
@@ -1151,6 +1157,8 @@ pub struct AppBrandingConfigUpdateRequest {
     pub upload_limit_message: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trusted_domains: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub desktop_app_prompt_enabled: Option<bool>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
