@@ -977,6 +977,13 @@ class RuntimeConfig {
 	get localInstanceDomain(): string {
 		return new URL(this.apiEndpoint).hostname;
 	}
+
+	// Fork: the fork's getters go here, at the end of the class, not among upstream's: upstream adds
+	// its getters next to the ones they belong with, rarely at the end (tyne-chat/tyne#845).
+
+	get desktopAppPromptEnabled(): boolean {
+		return this.appPublic.branding.desktop_app_prompt_enabled ?? true;
+	}
 }
 
 export default new RuntimeConfig();
