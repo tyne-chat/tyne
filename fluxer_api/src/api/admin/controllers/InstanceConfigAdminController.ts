@@ -746,6 +746,7 @@ const INSTANCE_CONFIG_SECTION_APPLIERS = {
 							custom_css: readOptionalField(appPublic.branding, 'custom_css'),
 							upload_limit_message: readOptionalField(appPublic.branding, 'upload_limit_message'),
 							trusted_domains: readTrustedDomains(appPublic.branding),
+							desktop_app_prompt_enabled: readOptionalField(appPublic.branding, 'desktop_app_prompt_enabled'),
 						})
 					: undefined,
 				legal: appPublic.legal
