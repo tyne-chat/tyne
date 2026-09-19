@@ -57,6 +57,7 @@ import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 
 // Fork imports.
 
+import {normalizeMessageSubprofile} from '@app/api/channel/services/message/MessageHelpers';
 import type {MessageSubprofileRow} from '@app/api/database/types/MessageTypes';
 
 function mapAttachmentForEmbedResolution(att: MessageAttachment) {
@@ -453,20 +454,7 @@ export class MessagePersistenceService {
 			hasChanges = true;
 		}
 		if (data.subprofile !== undefined) {
-			updatedRowData.subprofile = data.subprofile
-				? {
-						id: data.subprofile.id,
-						name: data.subprofile.name,
-						avatar: data.subprofile.avatar ?? null,
-						avatar_color: data.subprofile.avatar_color ?? null,
-						display_tag_text: data.subprofile.display_tag_text ?? data.subprofile.system_name ?? null,
-						display_tag_icon: data.subprofile.display_tag_icon ?? null,
-						system_name: data.subprofile.display_tag_text ?? data.subprofile.system_name ?? null,
-						pronouns: data.subprofile.pronouns ?? null,
-						color: data.subprofile.color ?? null,
-						bio: data.subprofile.bio ?? null,
-					}
-				: null;
+			updatedRowData.subprofile = normalizeMessageSubprofile(data.subprofile);
 			hasChanges = true;
 		}
 		if (data.attachments !== undefined) {
