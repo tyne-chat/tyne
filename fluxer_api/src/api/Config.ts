@@ -605,6 +605,7 @@ export function buildAPIConfigFromMaster(master: MasterConfig): APIConfig {
 			visionariesGuildId: master.instance.visionaries_guild_id,
 			visionariesGuildVisionaryRoleId: master.instance.visionaries_guild_visionary_role_id,
 			branding: {
+				desktopAppPromptEnabled: master.instance.branding.desktop_app_prompt_enabled,
 				productName: master.instance.branding.product_name,
 				iconUrl: master.instance.branding.icon_url,
 				symbolUrl: master.instance.branding.symbol_url,
