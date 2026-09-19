@@ -514,6 +514,7 @@ function getDefaultAppPublicConfig(): InstanceAppPublicConfig {
 			sign_in_backdrop_url: normalizeOptionalString(Config.instance.branding.signInBackdropUrl),
 			custom_css: null,
 			upload_limit_message: null,
+			desktop_app_prompt_enabled: Config.instance.branding.desktopAppPromptEnabled ?? !Config.instance.selfHosted,
 		},
 		setup: {
 			configured: !Config.instance.selfHosted || Config.instance.setup.configured,
@@ -982,6 +983,7 @@ function buildAppPublicConfig(config: z.infer<typeof StoredInstanceAppPublicSche
 				branding.upload_limit_message,
 				defaults.branding.upload_limit_message,
 			),
+			desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? defaults.branding.desktop_app_prompt_enabled,
 		},
 		setup: {
 			configured: setup.configured ?? defaults.setup.configured,

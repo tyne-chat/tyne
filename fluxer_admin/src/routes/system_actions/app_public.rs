@@ -58,6 +58,7 @@ pub(super) fn build_app_public_update(
                 upload_limit_message: form
                     .contains_key(UPLOAD_LIMIT_MESSAGE_FIELD)
                     .then(|| form.clean(UPLOAD_LIMIT_MESSAGE_FIELD)),
+                desktop_app_prompt_enabled: Some(form.bool_value("app_desktop_app_prompt_enabled")),
                 ..Default::default()
             }),
             setup: Some(AppSetupConfigUpdateRequest {
