@@ -306,6 +306,10 @@ const NAMED_FLUXER_ENV_OVERRIDES: Record<string, NamedEnvOverride> = {
 	FLUXER_APP_THEME_COLOR: {path: ['instance', 'branding', 'theme_color']},
 	FLUXER_APP_STATUS_PAGE_URL: {path: ['instance', 'branding', 'status_page_url']},
 	FLUXER_APP_STATUS_PAGE_INCIDENT_HISTORY_URL: {path: ['instance', 'branding', 'status_page_incident_history_url']},
+	FLUXER_APP_DESKTOP_APP_PROMPT_ENABLED: {
+		path: ['instance', 'branding', 'desktop_app_prompt_enabled'],
+		parse: parseBoolean,
+	},
 	FLUXER_INSTANCE_SETUP_CONFIGURED: {path: ['instance', 'setup', 'configured'], parse: parseBoolean},
 	FLUXER_SETUP_TOKEN: {path: ['instance', 'setup', 'token']},
 	FLUXER_ACCOUNT_IDENTITY: {path: ['instance', 'account_identity'], parse: parseAccountIdentity},

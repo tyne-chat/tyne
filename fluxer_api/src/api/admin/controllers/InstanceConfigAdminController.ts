@@ -463,6 +463,7 @@ export function InstanceConfigAdminController(app: HonoApp) {
 								),
 								premium_product_name: readOptionalField(data.app_public.branding, 'premium_product_name'),
 								premium_info_url: readOptionalField(data.app_public.branding, 'premium_info_url'),
+								desktop_app_prompt_enabled: readOptionalField(data.app_public.branding, 'desktop_app_prompt_enabled'),
 							})
 						: undefined,
 					legal: data.app_public.legal
