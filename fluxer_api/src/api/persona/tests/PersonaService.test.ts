@@ -247,6 +247,92 @@ describe('PersonaService', () => {
 		});
 	});
 
+	describe('getChannelPersonaMentions', () => {
+		const otherUserId = 3000000000000000001n as UserID;
+		const userMap = new Map([
+			[userId, {username: 'alice_owner', globalName: 'Alice Global', nickname: 'Ali'}],
+			[otherUserId, {username: 'bob_owner', globalName: 'Bob Global', nickname: 'Bobby'}],
+		]);
+
+		it('returns empty array when candidateUserIds is empty', async () => {
+			const results = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [],
+				query: 'alice',
+				userMap,
+			});
+			expect(results).toEqual([]);
+			expect(mockRepo.findByUserIds).not.toHaveBeenCalled();
+		});
+
+		it('allows caller to see their own non-public personas but filters others to public only', async () => {
+			const myUnlisted = makeMockPersona(userId, 1n as PersonaID, 'My Unlisted', {visibility: 'unlisted'});
+			const otherPublic = makeMockPersona(otherUserId, 2n as PersonaID, 'Other Public', {visibility: 'public'});
+			const otherPrivate = makeMockPersona(otherUserId, 3n as PersonaID, 'Other Private', {visibility: 'private'});
+
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([myUnlisted, otherPublic, otherPrivate]);
+
+			const results = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [userId, otherUserId],
+				userMap,
+			});
+
+			const names = results.map((r) => r.name);
+			expect(names).toContain('My Unlisted');
+			expect(names).toContain('Other Public');
+			expect(names).not.toContain('Other Private');
+		});
+
+		it('sorts prefix matches ahead of substring matches and sorts by useCount on ties', async () => {
+			const substringMatch = makeMockPersona(otherUserId, 10n as PersonaID, 'The Cat Alice', {
+				visibility: 'public',
+				use_count: 50,
+			});
+			const prefixLowUse = makeMockPersona(otherUserId, 11n as PersonaID, 'Alice Early', {
+				visibility: 'public',
+				use_count: 1,
+			});
+			const prefixHighUse = makeMockPersona(otherUserId, 12n as PersonaID, 'Alice Prime', {
+				visibility: 'public',
+				use_count: 100,
+			});
+
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([substringMatch, prefixLowUse, prefixHighUse]);
+
+			const results = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [otherUserId],
+				query: 'ali',
+				userMap,
+			});
+
+			expect(results.map((r) => r.name)).toEqual(['Alice Prime', 'Alice Early', 'The Cat Alice']);
+		});
+
+		it('matches by owner username, nickname, or system name', async () => {
+			const personaByOwnerNick = makeMockPersona(otherUserId, 20n as PersonaID, 'Shadow', {
+				visibility: 'public',
+			});
+			const personaBySystem = makeMockPersona(otherUserId, 21n as PersonaID, 'Ghost', {
+				visibility: 'public',
+				system_name: 'BobbySystem',
+			});
+
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([personaByOwnerNick, personaBySystem]);
+
+			const results = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [otherUserId],
+				query: 'bobby',
+				userMap,
+			});
+
+			expect(results).toHaveLength(2);
+			expect(results[0].owner_nickname).toBe('Bobby');
+		});
+	});
+
 	describe('Persona Model', () => {
 		// Database resiliency: Ensures that toRow serializes fields properly and that
 		// corrupted or non-array JSON stored in legacy persona_tags columns safely falls
