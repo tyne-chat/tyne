@@ -819,6 +819,7 @@ fn build_app_public_update(form: &MultiValueForm) -> InstanceConfigUpdateRequest
                 theme_color: optional("app_theme_color"),
                 status_page_url: optional("app_status_page_url"),
                 status_page_incident_history_url: optional("app_status_page_incident_history_url"),
+                desktop_app_prompt_enabled: Some(form.bool_value("app_desktop_app_prompt_enabled")),
                 ..Default::default()
             }),
             setup: Some(AppSetupConfigUpdateRequest {

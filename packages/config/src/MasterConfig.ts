@@ -34,6 +34,7 @@ interface InstanceBrandingConfig {
 	theme_color?: string;
 	status_page_url?: string;
 	status_page_incident_history_url?: string;
+	desktop_app_prompt_enabled?: boolean;
 }
 
 export interface MasterConfig {

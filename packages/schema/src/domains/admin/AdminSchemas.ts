@@ -567,6 +567,7 @@ const AppPublicConfigResponse = z.object({
 		status_page_incident_history_url: z.string().nullable(),
 		premium_product_name: z.string(),
 		premium_info_url: z.string().nullable(),
+		desktop_app_prompt_enabled: z.boolean(),
 	}),
 	setup: z.object({
 		configured: z.boolean(),
@@ -606,6 +607,7 @@ const AppPublicConfigUpdateRequest = z.object({
 			status_page_incident_history_url: z.string().trim().max(2048).nullish(),
 			premium_product_name: z.string().trim().min(1).max(40).nullable().optional(),
 			premium_info_url: z.string().trim().max(2048).refine(isAbsoluteHttpUrl).nullish(),
+			desktop_app_prompt_enabled: z.boolean().optional(),
 		})
 		.register(schemaMetadata, {preserveNullFields: true})
 		.nullish(),
