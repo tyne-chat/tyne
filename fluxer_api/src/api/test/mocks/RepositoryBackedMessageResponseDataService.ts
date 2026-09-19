@@ -258,6 +258,20 @@ export class RepositoryBackedMessageResponseDataService extends MessageResponseD
 			nonce: options.nonce ?? null,
 			call: this.mapCall(message.call),
 			referenced_message: referencedMessage,
+			subprofile: message.subprofile
+				? {
+						id: message.subprofile.id,
+						name: message.subprofile.name,
+						avatar: message.subprofile.avatar ?? null,
+						avatar_color: message.subprofile.avatar_color ?? null,
+						display_tag_text: message.subprofile.display_tag_text ?? null,
+						display_tag_icon: message.subprofile.display_tag_icon ?? null,
+						system_name: message.subprofile.system_name ?? null,
+						pronouns: message.subprofile.pronouns ?? null,
+						color: message.subprofile.color ?? null,
+						bio: message.subprofile.bio ?? null,
+					}
+				: null,
 		};
 	}
 
