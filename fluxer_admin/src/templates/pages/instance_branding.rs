@@ -153,6 +153,19 @@ pub(super) fn branding_section(
                         }.render())
                         p class="text-xs text-neutral-500" { "When this is unchecked, the web app shows the self-host setup wizard." }
                     }
+                    // Fork: the desktop app prompt switch, saved with the rest of this form.
+                    div class="space-y-2" {
+                        (Checkbox {
+                            name: "app_desktop_app_prompt_enabled",
+                            value: "true",
+                            label: "Show desktop app prompt",
+                            checked: app_public.branding.desktop_app_prompt_enabled,
+                            enabled: true,
+                        }.render())
+                        p class="text-xs text-neutral-500" {
+                            "Show prompts on invite and gift pages encouraging desktop web visitors to open the desktop app."
+                        }
+                    }
                     p class="text-xs text-neutral-500" {
                         "Uploads and removals save right away. Use https URLs for images you link to, and save to apply the name, color, links and setup state."
                     }

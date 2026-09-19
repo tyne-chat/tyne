@@ -613,6 +613,7 @@ const AppPublicConfigResponse = z.object({
 		sign_in_backdrop_url: z.string().nullable(),
 		custom_css: z.string().nullable(),
 		upload_limit_message: z.string().nullable(),
+		desktop_app_prompt_enabled: z.boolean(),
 	}),
 	setup: z.object({
 		configured: z.boolean(),
@@ -658,6 +659,7 @@ const AppPublicConfigUpdateRequest = z.object({
 			sign_in_backdrop_url: z.string().trim().max(2048).nullish(),
 			custom_css: z.string().trim().max(32_768).nullish(),
 			upload_limit_message: z.string().trim().max(UPLOAD_LIMIT_MESSAGE_MAX_LENGTH).nullish(),
+			desktop_app_prompt_enabled: z.boolean().optional(),
 		})
 		.register(schemaMetadata, {preserveNullFields: true})
 		.nullish(),
