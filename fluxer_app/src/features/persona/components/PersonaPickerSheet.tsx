@@ -30,7 +30,7 @@ const MODE_LAST_DESCRIPTOR = msg({
 	message: 'Last Used',
 	comment: 'Active persona mode last used',
 });
-const SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR = msg({
+export const SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR = msg({
 	message: 'Search personas, tags, pronouns...',
 	comment: 'Search placeholder in persona picker sheet',
 });
