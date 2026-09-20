@@ -15,6 +15,7 @@ export class Persona {
 	readonly userId: UserID;
 	readonly name: string;
 	readonly avatarUrl: string | null;
+	readonly bannerUrl: string | null;
 	readonly systemName: string | null;
 	readonly pronouns: string | null;
 	readonly color: number | null;
@@ -34,6 +35,7 @@ export class Persona {
 		this.userId = row.user_id;
 		this.name = row.name;
 		this.avatarUrl = row.avatar_url ?? null;
+		this.bannerUrl = row.banner_url ?? null;
 		this.systemName = row.system_name ?? null;
 		this.pronouns = row.pronouns ?? null;
 		this.color = row.color ?? null;
@@ -54,6 +56,7 @@ export class Persona {
 			id: this.id.toString(),
 			name: this.name,
 			avatar_url: this.avatarUrl,
+			banner_url: this.bannerUrl,
 			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
@@ -74,6 +77,7 @@ export class Persona {
 			id: this.id.toString(),
 			name: this.name,
 			avatar_url: this.avatarUrl,
+			banner_url: this.bannerUrl,
 			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
@@ -88,6 +92,7 @@ export class Persona {
 			persona_id: this.id,
 			name: this.name,
 			avatar_url: this.avatarUrl,
+			banner_url: this.bannerUrl,
 			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
