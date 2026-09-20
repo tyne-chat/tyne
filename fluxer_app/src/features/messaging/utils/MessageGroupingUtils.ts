@@ -74,7 +74,13 @@ export function isNewMessageGroup(
 		return true;
 	}
 	if (prevSub && currSub) {
-		if (prevSub.id !== currSub.id || prevSub.name !== currSub.name || prevSub.avatar !== currSub.avatar) {
+		if (
+			prevSub.id !== currSub.id ||
+			prevSub.name !== currSub.name ||
+			prevSub.avatar !== currSub.avatar ||
+			prevSub.display_tag_text !== currSub.display_tag_text ||
+			prevSub.display_tag_icon !== currSub.display_tag_icon
+		) {
 			return true;
 		}
 	}
