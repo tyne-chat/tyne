@@ -809,7 +809,11 @@ export async function edit(
 		});
 		logger.debug(`Message edited successfully: ${messageId} in channel ${channelId}`);
 		if (response.body) {
-			Messages.handleMessageUpdate({message: response.body});
+			const body: WireMessage =
+				subprofile !== undefined && response.body.subprofile === undefined
+					? {...response.body, subprofile}
+					: response.body;
+			Messages.handleMessageUpdate({message: body});
 		}
 		return response.body ?? null;
 	} catch (error) {
