@@ -19,7 +19,7 @@ function getInitialBoolean(key: string, defaultValue: boolean): boolean {
 class LayoutState {
 	serverListVisible: boolean = getInitialBoolean(SERVER_LIST_VISIBLE_STORAGE_KEY, true);
 	channelListVisible: boolean = getInitialBoolean(CHANNEL_LIST_VISIBLE_STORAGE_KEY, true);
-	edgeHoverPeekEnabled: boolean = getInitialBoolean(EDGE_HOVER_PEEK_ENABLED_STORAGE_KEY, false);
+	edgeHoverPeekEnabled: boolean = getInitialBoolean(EDGE_HOVER_PEEK_ENABLED_STORAGE_KEY, true);
 
 	// Transient hover peek states (active during edge proximity, not persisted)
 	isLeftHoverPeeking: boolean = false;
