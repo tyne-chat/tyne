@@ -16,6 +16,7 @@ import {getAcceptString} from '@app/features/expressions/utils/AssetFormatCopy';
 import {formatImageUploadRecommendedHint} from '@app/features/expressions/utils/AssetUploadHintCopy';
 import {downloadGifAsImageFile} from '@app/features/expressions/utils/GifFileDownload';
 import {isSvgFile, readImageFileAsUploadDataUrl} from '@app/features/expressions/utils/ImageUploadFileUtils';
+import {CLEAR_SEARCH_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
 import {openFilePicker} from '@app/features/messaging/utils/FilePickerUtils';
 import {formatFileSize} from '@app/features/messaging/utils/FileUtils';
 import {http} from '@app/features/platform/transport/RestTransport';
@@ -25,6 +26,7 @@ import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {ColorPickerField} from '@app/features/ui/components/form/ColorPickerField';
+import {Input} from '@app/features/ui/components/form/FormInput';
 import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import {AvatarUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/AvatarUploader';
@@ -39,10 +41,12 @@ import {
 	Info,
 	LockSimple,
 	LockSimpleOpen,
+	MagnifyingGlass,
 	PencilSimple,
 	Plus,
 	Trash,
 	UploadSimple,
+	X,
 } from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
@@ -51,6 +55,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
 import {type ActivePersonaMode, type Persona, PersonaStore} from '../../state/PersonaStore';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
+import {SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR} from '../PersonaPickerSheet';
 import {PersonaTag} from '../PersonaTag';
 import styles from './PersonaSettingsTab.module.css';
 
@@ -314,6 +319,22 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<PersonaFormState>(emptyFormState());
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+
+	const filteredPersonas = useMemo(() => {
+		const trimmed = searchQuery.trim().toLowerCase();
+		if (!trimmed) return personas;
+		return personas.filter((p) => {
+			if (p.name.toLowerCase().includes(trimmed)) return true;
+			if (p.system_name?.toLowerCase().includes(trimmed) || p.systemName?.toLowerCase().includes(trimmed)) return true;
+			if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
+			if (p.bio?.toLowerCase().includes(trimmed)) return true;
+			const tags = p.persona_tags ?? p.personaTags ?? [];
+			return tags.some(
+				(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
+			);
+		});
+	}, [personas, searchQuery]);
 
 	const getTagRowError = (idx: number): string | null => {
 		const currentTag = normalizeTag(formData.tags[idx]);
@@ -1186,7 +1207,9 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 					{/* Personas List */}
 					<SettingsSection
 						id="personas_list"
-						title={i18n._(CONFIG_PERSONAS_COUNT_DESCRIPTOR, {count: personas.length})}
+						title={i18n._(CONFIG_PERSONAS_COUNT_DESCRIPTOR, {
+							count: searchQuery.trim() ? filteredPersonas.length : personas.length,
+						})}
 						linkable={false}
 						actions={
 							!isEditing && (
@@ -1212,13 +1235,51 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 						}
 						data-flx="persona.settings.persona-settings-tab.personas-list"
 					>
+						{personas.length > 0 && (
+							<div className={styles.listControls} data-flx="persona.settings.persona-settings-tab.list-controls">
+								<Input
+									type="text"
+									placeholder={i18n._(SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR)}
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+									leftIcon={
+										<MagnifyingGlass
+											size={16}
+											weight="bold"
+											className={styles.searchIcon}
+											data-flx="persona.settings.persona-settings-tab.search-icon"
+										/>
+									}
+									rightElement={
+										searchQuery ? (
+											<button
+												type="button"
+												onClick={() => setSearchQuery('')}
+												className={styles.clearSearchButton}
+												aria-label={i18n._(CLEAR_SEARCH_DESCRIPTOR)}
+												data-flx="persona.settings.persona-settings-tab.clear-search-button.set-search-query"
+											>
+												<X size={14} weight="bold" data-flx="persona.settings.persona-settings-tab.x" />
+											</button>
+										) : undefined
+									}
+									className={styles.searchInput}
+									data-flx="user.persona-settings-tab.search-input"
+								/>
+							</div>
+						)}
+
 						{personas.length === 0 && !isEditing ? (
 							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state">
 								<Trans>No personas created yet. Click "Add Persona" to create your first persona!</Trans>
 							</div>
+						) : filteredPersonas.length === 0 ? (
+							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state--2">
+								<Trans>No matching personas found.</Trans>
+							</div>
 						) : (
 							<div className={styles.cardList} data-flx="persona.settings.persona-settings-tab.card-list">
-								{personas.map((persona) => {
+								{filteredPersonas.map((persona) => {
 									const isThisActive = activePersonaId === persona.id && isLatched;
 									return (
 										<div
