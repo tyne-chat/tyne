@@ -216,4 +216,6 @@ pub struct MessageSubprofileUdt {
     pub display_tag_text: Option<String>,
     #[serde(default)]
     pub display_tag_icon: Option<String>,
+    #[serde(default)]
+    pub banner: Option<String>,
 }
