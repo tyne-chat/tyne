@@ -10,7 +10,7 @@ describe('LayoutState and LayoutCommands', () => {
 	it('has correct default visibility and peek states', () => {
 		expect(LayoutState.serverListVisible).toBe(true);
 		expect(LayoutState.channelListVisible).toBe(true);
-		expect(LayoutState.edgeHoverPeekEnabled).toBe(false);
+		expect(LayoutState.edgeHoverPeekEnabled).toBe(true);
 		expect(LayoutState.isLeftHoverPeeking).toBe(false);
 		expect(LayoutState.isRightHoverPeeking).toBe(false);
 	});
@@ -36,13 +36,13 @@ describe('LayoutState and LayoutCommands', () => {
 	});
 
 	it('toggles and persists edge hover peek preference', () => {
-		LayoutCommands.setEdgeHoverPeekEnabled(true);
-		expect(LayoutState.edgeHoverPeekEnabled).toBe(true);
-		expect(AppStorage.getItem('fluxer:ui:edge-hover-peek-enabled')).toBe('true');
-
 		LayoutCommands.setEdgeHoverPeekEnabled(false);
 		expect(LayoutState.edgeHoverPeekEnabled).toBe(false);
 		expect(AppStorage.getItem('fluxer:ui:edge-hover-peek-enabled')).toBe('false');
+
+		LayoutCommands.setEdgeHoverPeekEnabled(true);
+		expect(LayoutState.edgeHoverPeekEnabled).toBe(true);
+		expect(AppStorage.getItem('fluxer:ui:edge-hover-peek-enabled')).toBe('true');
 	});
 
 	it('updates transient left and right hover peek states', () => {
