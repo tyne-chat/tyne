@@ -1179,19 +1179,23 @@ class Messages {
 	handleMessageUpdate(action: {message: WireMessage}): boolean {
 		const messageId = action.message.id;
 		const channelId = action.message.channel_id;
+		const updatePayload: WireMessage =
+			action.message.author && action.message.subprofile === undefined
+				? {...action.message, subprofile: null}
+				: action.message;
 		const deferredChanged = this.patchDeferredOlderMessages(channelId, (message) => {
 			if (message.id !== messageId) return message;
 			if ('reactions' in action.message) MessageReactions.hydrateMessageReactions(messageId, action.message.reactions);
 			if (action.message.author && !message.webhook_id) Users.cacheUsers([action.message.author]);
-			return {...message, ...action.message};
+			return {...message, ...updatePayload};
 		});
 		const existing = ChannelMessages.get(channelId);
 		if (!existing?.has(messageId)) return deferredChanged;
 		const updated = existing.update(messageId, (message) => {
-			if (message.isEditing && action.message.state === undefined) {
-				return message.withUpdates({...action.message, state: MessageStates.SENT});
+			if (message.isEditing && updatePayload.state === undefined) {
+				return message.withUpdates({...updatePayload, state: MessageStates.SENT});
 			}
-			return message.withUpdates(action.message);
+			return message.withUpdates(updatePayload);
 		});
 		this.commitMessages(updated);
 		this.notifyChange();
