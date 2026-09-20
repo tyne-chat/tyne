@@ -23,10 +23,8 @@ import React, {useCallback, useState} from 'react';
 
 // Fork imports.
 
-import {PersonaProfileModal} from '@app/features/persona/components/PersonaProfileModal';
 import {PersonaProfilePopout} from '@app/features/persona/components/PersonaProfilePopout';
-import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
-import {modal} from '@app/features/ui/commands/ModalCommands';
+import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobile';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 type PreloadableChildProps = React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>;
@@ -92,18 +90,7 @@ export const PreloadableUserPopout = React.forwardRef<
 		const handleMobileClick = useCallback(() => {
 			if (isWebhook) return;
 			if (subprofile) {
-				ModalCommands.push(
-					modal(() => (
-						<PersonaProfileModal
-							subprofile={subprofile}
-							user={user}
-							guildId={guildId}
-							guildMember={member}
-							onClose={ModalCommands.pop}
-							data-flx="channel.preloadable-user-popout.handle-mobile-click.persona-profile-modal"
-						/>
-					)),
-				);
+				PersonaProfileMobile.open(subprofile, user, guildId, member);
 				return;
 			}
 			UserProfileCommands.openUserProfile(user.id, guildId);
