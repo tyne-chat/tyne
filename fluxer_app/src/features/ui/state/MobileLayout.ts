@@ -9,12 +9,20 @@ import {makeAutoObservable, reaction} from 'mobx';
 
 const MOBILE_ENABLE_BREAKPOINT = 640;
 const MOBILE_DISABLE_BREAKPOINT = 768;
-const shouldForceMobileLayout = (): boolean => Platform.isMobileBrowser;
+
+const shouldForceMobileLayout = (): boolean => Platform.isMobileDevice;
+
 const getInitialMobileEnabled = (): boolean => {
-	if (shouldForceMobileLayout()) {
+	// Mobile phones always use mobile layout
+	if (Platform.isMobileDevice) {
 		return true;
 	}
-	return window.innerWidth < MOBILE_ENABLE_BREAKPOINT;
+	// Tablets switch based on viewport width (portrait vs landscape)
+	if (Platform.isTabletDevice) {
+		return typeof window !== 'undefined' && window.innerWidth < MOBILE_ENABLE_BREAKPOINT;
+	}
+	// Desktop computers never use mobile layout regardless of window width
+	return false;
 };
 
 class MobileLayout {
@@ -48,16 +56,32 @@ class MobileLayout {
 	}
 
 	private handleWindowSizeChange(): void {
-		const windowSize = Window.windowSize;
-		const forceMobile = shouldForceMobileLayout();
-		const threshold = this.enabled ? MOBILE_DISABLE_BREAKPOINT : MOBILE_ENABLE_BREAKPOINT;
-		const widthBased = windowSize.width < threshold;
-		const newEnabled = forceMobile || widthBased;
-		if (newEnabled === this.enabled) {
+		// Desktop computers never switch to mobile layout based on window width
+		if (!Platform.isMobileDevice && !Platform.isTabletDevice) {
+			if (this.enabled) {
+				this.enabled = false;
+			}
 			return;
 		}
-		this.enabled = newEnabled;
-		if (newEnabled) {
+
+		// Mobile phones always stay in mobile layout
+		if (Platform.isMobileDevice) {
+			if (!this.enabled) {
+				this.enabled = true;
+				this.navExpanded = this.navExpanded && !this.chatExpanded;
+			}
+			return;
+		}
+
+		// Tablets (portrait vs landscape) use width thresholds
+		const windowSize = Window.windowSize;
+		const threshold = this.enabled ? MOBILE_DISABLE_BREAKPOINT : MOBILE_ENABLE_BREAKPOINT;
+		const widthBased = windowSize.width < threshold;
+		if (widthBased === this.enabled) {
+			return;
+		}
+		this.enabled = widthBased;
+		if (widthBased) {
 			this.navExpanded = this.navExpanded && !this.chatExpanded;
 		}
 	}
