@@ -131,6 +131,10 @@ import {KeybindSettingsSchema} from '@fluxer/schema/src/gen/fluxer/user/preferen
 import type {I18n} from '@lingui/core';
 import {computed, makeAutoObservable, runInAction} from 'mobx';
 
+// Fork imports.
+
+import {TOGGLE_THE_CHANNEL_LIST_DESCRIPTOR} from '@app/features/input/state/input_keybind/shared';
+
 const KEYBIND_STORE_NAME = 'Keybind';
 
 export type {KeybindCommand};
@@ -570,6 +574,14 @@ const getDefaultKeybinds = (
 			label: i18n._(MARK_ALL_INBOX_CHANNELS_AS_READ_DESCRIPTOR),
 			combo: {key: ''},
 			assignable: true,
+			section: 'chat',
+		},
+		{
+			action: 'chat_toggle_channel_list',
+			label: i18n._(TOGGLE_THE_CHANNEL_LIST_DESCRIPTOR),
+			combo: {key: ''},
+			assignable: true,
+			editableFocusBehavior: 'allow',
 			section: 'chat',
 		},
 		{
