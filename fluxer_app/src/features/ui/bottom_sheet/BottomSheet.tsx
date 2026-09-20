@@ -22,6 +22,10 @@ interface BottomSheetProps {
 	trailingAction?: React.ReactNode;
 	containerClassName?: string;
 	contentClassName?: string;
+	role?: 'dialog' | 'alertdialog';
+	ariaLabel?: string;
+	ariaLabelledBy?: string;
+	ariaDescribedBy?: string;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = observer(
@@ -43,6 +47,10 @@ export const BottomSheet: React.FC<BottomSheetProps> = observer(
 		trailingAction,
 		containerClassName,
 		contentClassName,
+		role,
+		ariaLabel,
+		ariaLabelledBy,
+		ariaDescribedBy,
 	}) => {
 		const shouldRenderDefaultHeader =
 			!disableDefaultHeader && (!!title || !!leadingAction || !!trailingAction || showCloseButton);
@@ -78,6 +86,10 @@ export const BottomSheet: React.FC<BottomSheetProps> = observer(
 				surface={surface}
 				zIndex={zIndex}
 				className={containerClassName}
+				role={role}
+				ariaLabel={ariaLabel}
+				ariaLabelledBy={ariaLabelledBy}
+				ariaDescribedBy={ariaDescribedBy}
 				data-flx="ui.bottom-sheet.bottom-sheet.sheet-root"
 			>
 				{showHandle && <Sheet.Handle data-flx="ui.bottom-sheet.bottom-sheet.sheet-handle" />}
