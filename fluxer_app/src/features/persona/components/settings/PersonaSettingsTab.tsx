@@ -20,16 +20,19 @@ import {CLEAR_SEARCH_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDes
 import {openFilePicker} from '@app/features/messaging/utils/FilePickerUtils';
 import {formatFileSize} from '@app/features/messaging/utils/FileUtils';
 import {http} from '@app/features/platform/transport/RestTransport';
+import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
+import * as UnsavedChangesCommands from '@app/features/ui/commands/UnsavedChangesCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {ColorPickerField} from '@app/features/ui/components/form/ColorPickerField';
 import {Input} from '@app/features/ui/components/form/FormInput';
 import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import {AvatarUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/AvatarUploader';
+import {BannerUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/BannerUploader';
 import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import type {PersonaVisibility} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
@@ -264,6 +267,7 @@ interface PersonaFormState {
 	name: string;
 	pronouns: string;
 	avatarUrl: string;
+	bannerUrl: string;
 	accentColor: number | null;
 	bio: string;
 	visibility: PersonaVisibility;
@@ -274,6 +278,7 @@ const emptyFormState = (): PersonaFormState => ({
 	name: '',
 	pronouns: '',
 	avatarUrl: '',
+	bannerUrl: '',
 	accentColor: null,
 	bio: '',
 	visibility: 'unlisted',
@@ -319,6 +324,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<PersonaFormState>(emptyFormState());
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+	const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 
 	const filteredPersonas = useMemo(() => {
@@ -535,17 +541,51 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		setFormData((prev) => ({...prev, avatarUrl: ''}));
 	};
 
+	const handleBannerUpload = async (base64: string) => {
+		setFormData((prev) => ({...prev, bannerUrl: base64}));
+		setIsUploadingBanner(true);
+		try {
+			const res = await http.post<{banner_url: string}>(Endpoints.USER_PERSONA_BANNER, {
+				body: {banner: base64},
+			});
+			if (res.ok && res.body?.banner_url) {
+				setFormData((prev) => ({...prev, bannerUrl: res.body.banner_url}));
+			} else {
+				ToastCommands.createToast({
+					type: 'error',
+					children: 'Failed to upload banner image to server',
+				});
+			}
+		} catch {
+			ToastCommands.createToast({
+				type: 'error',
+				children: 'Failed to upload banner image to server',
+			});
+		} finally {
+			setIsUploadingBanner(false);
+		}
+	};
+
+	const handleBannerClear = () => {
+		setFormData((prev) => ({...prev, bannerUrl: ''}));
+	};
+
+	const initialFormStateRef = useRef<PersonaFormState>(emptyFormState());
+
 	const handleStartAdd = () => {
-		setFormData(emptyFormState());
+		const initial = emptyFormState();
+		initialFormStateRef.current = initial;
+		setFormData(initial);
 		setIsEditing(true);
 	};
 
 	const handleStartEdit = (persona: Persona) => {
-		setFormData({
+		const initial: PersonaFormState = {
 			id: persona.id,
 			name: persona.name,
 			pronouns: persona.pronouns ?? '',
 			avatarUrl: persona.avatar_url ?? persona.avatarUrl ?? '',
+			bannerUrl: persona.banner_url ?? persona.bannerUrl ?? '',
 			accentColor: persona.color ?? null,
 			bio: persona.bio ?? '',
 			visibility: persona.visibility ?? 'unlisted',
@@ -556,17 +596,20 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 							suffix: t.suffix ?? '',
 						}))
 					: [{prefix: '', suffix: ''}],
-		});
+		};
+		initialFormStateRef.current = initial;
+		setFormData(initial);
 		setIsEditing(true);
 	};
 
 	const editorCardRef = useRef<HTMLDivElement | null>(null);
 	const lastHandledSubtabRef = useRef<string | null>(null);
 
-	const handleCancelEdit = () => {
+	const handleCancelEdit = useCallback(() => {
 		setIsEditing(false);
 		setFormData(emptyFormState());
-	};
+		initialFormStateRef.current = emptyFormState();
+	}, []);
 
 	useEffect(() => {
 		if (initialSubtab && lastHandledSubtabRef.current !== initialSubtab) {
@@ -581,11 +624,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		}
 	}, [initialSubtab, personas]);
 
-	const handleSaveForm = async () => {
-		if (isUploadingAvatar) {
+	const handleSaveForm = useCallback(async () => {
+		if (isUploadingAvatar || isUploadingBanner) {
 			ToastCommands.createToast({
 				type: 'info',
-				children: 'Please wait for avatar image to finish uploading',
+				children: 'Please wait for images to finish uploading',
 			});
 			return;
 		}
@@ -648,6 +691,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
 					avatar_url: formData.avatarUrl.trim() || null,
+					banner_url: formData.bannerUrl.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
@@ -662,6 +706,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
 					avatar_url: formData.avatarUrl.trim() || null,
+					banner_url: formData.bannerUrl.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
@@ -675,6 +720,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 
 			setIsEditing(false);
 			setFormData(emptyFormState());
+			initialFormStateRef.current = emptyFormState();
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : i18n._(FAILED_TO_SAVE_PERSONA_DESCRIPTOR);
 			ToastCommands.createToast({
@@ -682,7 +728,64 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 				children: message,
 			});
 		}
-	};
+	}, [formData, isUploadingAvatar, isUploadingBanner, personas, i18n]);
+
+	const hasUnsavedChanges = useMemo(() => {
+		if (!isEditing) return false;
+		const initial = initialFormStateRef.current;
+		if (!formData.id) {
+			const hasNonEmptyTag = formData.tags.some((t) => t.prefix.trim() !== '' || t.suffix.trim() !== '');
+			return (
+				formData.name.trim() !== '' ||
+				formData.pronouns.trim() !== '' ||
+				formData.avatarUrl !== '' ||
+				formData.bannerUrl !== '' ||
+				formData.accentColor !== null ||
+				formData.bio.trim() !== '' ||
+				formData.visibility !== 'unlisted' ||
+				hasNonEmptyTag
+			);
+		}
+		if (formData.name.trim() !== initial.name.trim()) return true;
+		if (formData.pronouns.trim() !== initial.pronouns.trim()) return true;
+		if (formData.avatarUrl !== initial.avatarUrl) return true;
+		if (formData.bannerUrl !== initial.bannerUrl) return true;
+		if (formData.accentColor !== initial.accentColor) return true;
+		if (formData.bio.trim() !== initial.bio.trim()) return true;
+		if (formData.visibility !== initial.visibility) return true;
+
+		const formTags = formData.tags.map(normalizeTag).filter((t) => t.prefix || t.suffix);
+		const initTags = initial.tags.map(normalizeTag).filter((t) => t.prefix || t.suffix);
+		if (formTags.length !== initTags.length) return true;
+		for (let i = 0; i < formTags.length; i++) {
+			if (formTags[i].prefix !== initTags[i].prefix || formTags[i].suffix !== initTags[i].suffix) {
+				return true;
+			}
+		}
+		return false;
+	}, [isEditing, formData]);
+
+	useEffect(() => {
+		UnsavedChangesCommands.setUnsavedChanges('personas', hasUnsavedChanges);
+		UnsavedChangesCommands.setUnsavedChanges('subprofiles', hasUnsavedChanges);
+	}, [hasUnsavedChanges]);
+
+	useEffect(() => {
+		const tabData = {
+			onReset: handleCancelEdit,
+			onSave: handleSaveForm,
+			isSubmitting: isUploadingAvatar || isUploadingBanner,
+		};
+		UnsavedChangesCommands.setTabData('personas', tabData);
+		UnsavedChangesCommands.setTabData('subprofiles', tabData);
+	}, [handleCancelEdit, handleSaveForm, isUploadingAvatar, isUploadingBanner]);
+
+	useEffect(() => {
+		return () => {
+			UnsavedChangesCommands.clearUnsavedChanges('personas');
+			UnsavedChangesCommands.clearUnsavedChanges('subprofiles');
+		};
+	}, []);
 
 	const handleDeletePersona = (persona: Persona) => {
 		ModalCommands.push(
@@ -1062,6 +1165,47 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									data-flx="persona.settings.persona-settings-tab.form-field--5"
 								>
 									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--7">
+										<Trans>Banner</Trans>
+									</div>
+									<div
+										style={{display: 'flex', flexDirection: 'column', gap: 12}}
+										data-flx="persona.settings.persona-settings-tab.div--5"
+									>
+										<div
+											style={{
+												height: '6rem',
+												width: '100%',
+												borderRadius: '0.5rem',
+												overflow: 'hidden',
+												backgroundColor:
+													formData.accentColor != null
+														? ColorUtils.int2hex(formData.accentColor)
+														: 'var(--background-secondary)',
+												backgroundImage: formData.bannerUrl ? `url(${formData.bannerUrl})` : undefined,
+												backgroundSize: 'cover',
+												backgroundPosition: 'center',
+												border: '1px solid var(--border-subtle)',
+											}}
+											data-flx="persona.settings.persona-settings-tab.div--6"
+										/>
+										<BannerUploader
+											hasBanner={Boolean(formData.bannerUrl)}
+											onBannerChange={handleBannerUpload}
+											onBannerClear={handleBannerClear}
+											disabled={isUploadingBanner}
+											disableModeSelection={true}
+											requireBannerEntitlement={false}
+											isPerGuildProfile={false}
+											data-flx="user.persona-settings-tab.banner-uploader"
+										/>
+									</div>
+								</div>
+								<div
+									className={styles.formField}
+									style={{gridColumn: '1 / -1'}}
+									data-flx="persona.settings.persona-settings-tab.form-field--6"
+								>
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--8">
 										<Trans>Bio</Trans>
 									</div>
 									<textarea
@@ -1077,9 +1221,9 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.settings.persona-settings-tab.form-field--6"
+									data-flx="persona.settings.persona-settings-tab.form-field--7"
 								>
-									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--8">
+									<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--9">
 										<Trans>Visibility</Trans>
 									</div>
 									<SegmentedTabs<PersonaVisibility>
@@ -1108,13 +1252,13 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								<div
 									className={styles.formField}
 									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.settings.persona-settings-tab.form-field--7"
+									data-flx="persona.settings.persona-settings-tab.form-field--8"
 								>
 									<div
 										style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}
-										data-flx="persona.settings.persona-settings-tab.div--5"
+										data-flx="persona.settings.persona-settings-tab.div--7"
 									>
-										<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--9">
+										<div className={styles.formLabel} data-flx="persona.settings.persona-settings-tab.form-label--10">
 											<Trans>Persona Tags (Prefix & Suffix)</Trans>
 										</div>
 										<Button
@@ -1131,7 +1275,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									{formData.tags.map((tag, idx) => {
 										const tagError = getTagRowError(idx);
 										return (
-											<div key={idx} style={{marginBottom: 6}} data-flx="persona.settings.persona-settings-tab.div--6">
+											<div key={idx} style={{marginBottom: 6}} data-flx="persona.settings.persona-settings-tab.div--8">
 												<div
 													className={styles.tagRow}
 													style={{marginBottom: tagError ? 2 : 0}}
@@ -1194,7 +1338,8 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								</Button>
 								<Button
 									variant="primary"
-									disabled={!formData.name.trim() || isUploadingAvatar || hasTagErrors}
+									disabled={!formData.name.trim() || isUploadingAvatar || isUploadingBanner || hasTagErrors}
+									submitting={isUploadingAvatar || isUploadingBanner}
 									onClick={handleSaveForm}
 									data-flx="persona.settings.persona-settings-tab.button.save-form"
 								>
@@ -1213,7 +1358,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 						linkable={false}
 						actions={
 							!isEditing && (
-								<div style={{display: 'flex', gap: 8}} data-flx="persona.settings.persona-settings-tab.div--7">
+								<div style={{display: 'flex', gap: 8}} data-flx="persona.settings.persona-settings-tab.div--9">
 									<Button
 										variant="secondary"
 										leftIcon={<UploadSimple size={16} data-flx="persona.settings.persona-settings-tab.upload-simple" />}

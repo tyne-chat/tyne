@@ -106,6 +106,15 @@ const PersonaAvatarUploadResponse = z.object({
 });
 const SubprofileAvatarUploadResponse = PersonaAvatarUploadResponse;
 
+const PersonaBannerUploadRequest = z.object({
+	banner: z.string().describe('Base64 data URI of the banner image'),
+});
+const SubprofileBannerUploadRequest = PersonaBannerUploadRequest;
+const PersonaBannerUploadResponse = z.object({
+	banner_url: z.string().describe('CDN URL of the uploaded banner'),
+});
+const SubprofileBannerUploadResponse = PersonaBannerUploadResponse;
+
 const PersonaAvatarImportRequest = z.object({
 	url: z.string().url().max(2048).describe('Remote URL of the avatar image to import'),
 });
@@ -192,6 +201,22 @@ export function UserAccountController(app: HonoApp) {
 		});
 		await entityAssetService.commitAssetChange({prepared});
 		return ctx.json({avatar_url: prepared.newCdnUrl ?? ''});
+	};
+
+	const handlePersonaBannerUpload = async (ctx: any) => {
+		const user = ctx.get('user');
+		const body = ctx.req.valid('json');
+		const entityAssetService = ctx.get('entityAssetService');
+		const prepared = await entityAssetService.prepareAssetUpload({
+			assetType: 'banner',
+			entityType: 'user',
+			entityId: user.id,
+			previousHash: null,
+			base64Image: body.banner,
+			errorPath: 'banner',
+		});
+		await entityAssetService.commitAssetChange({prepared});
+		return ctx.json({banner_url: prepared.newCdnUrl ?? ''});
 	};
 
 	async function processRemoteAvatar(
@@ -381,6 +406,41 @@ export function UserAccountController(app: HonoApp) {
 				'Uploads and processes an avatar image for a subprofile/persona, hosting it on the instance CDN/storage.',
 		}),
 		handlePersonaAvatarUpload,
+	);
+	app.post(
+		'/users/@me/personas/banner',
+		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaBannerUploadRequest),
+		OpenAPI({
+			operationId: 'upload_persona_banner',
+			summary: 'Upload persona banner',
+			responseSchema: PersonaBannerUploadResponse,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Users'],
+			description: 'Uploads and processes a banner image for a persona, hosting it on the instance CDN/storage.',
+		}),
+		handlePersonaBannerUpload,
+	);
+	app.post(
+		'/users/@me/subprofiles/banner',
+		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', SubprofileBannerUploadRequest),
+		OpenAPI({
+			operationId: 'upload_subprofile_banner',
+			summary: 'Upload subprofile banner (legacy alias)',
+			responseSchema: SubprofileBannerUploadResponse,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Users'],
+			description:
+				'Uploads and processes a banner image for a subprofile/persona, hosting it on the instance CDN/storage.',
+		}),
+		handlePersonaBannerUpload,
 	);
 	app.post(
 		'/users/@me/personas/import-avatar',
