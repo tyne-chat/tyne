@@ -118,6 +118,7 @@ export class PersonaService {
 			user_id: userId,
 			name: data.name,
 			avatar_url: data.avatar_url,
+			banner_url: data.banner_url,
 			system_name: data.system_name,
 			pronouns: data.pronouns,
 			color: data.color,
@@ -128,7 +129,9 @@ export class PersonaService {
 			external_uuid: data.external_uuid,
 		});
 
-		await this.dispatchToUser(userId, 'USER_PERSONA_CREATE', {persona: persona.toResponse()});
+		await this.dispatchToUser(userId, 'USER_PERSONA_CREATE', {
+			persona: {...persona.toResponse(), user_id: userId.toString()},
+		});
 		return persona;
 	}
 
@@ -140,6 +143,7 @@ export class PersonaService {
 		const updated = await this.deps.personaRepository.update(userId, personaId, {
 			name: data.name,
 			avatar_url: data.avatar_url,
+			banner_url: data.banner_url,
 			system_name: data.system_name,
 			pronouns: data.pronouns,
 			color: data.color,
@@ -153,7 +157,9 @@ export class PersonaService {
 			throw new PersonaNotFoundError();
 		}
 
-		await this.dispatchToUser(userId, 'USER_PERSONA_UPDATE', {persona: updated.toResponse()});
+		await this.dispatchToUser(userId, 'USER_PERSONA_UPDATE', {
+			persona: {...updated.toResponse(), user_id: userId.toString()},
+		});
 		return updated;
 	}
 
@@ -163,7 +169,10 @@ export class PersonaService {
 			throw new PersonaNotFoundError();
 		}
 
-		await this.dispatchToUser(userId, 'USER_PERSONA_DELETE', {persona_id: personaId.toString()});
+		await this.dispatchToUser(userId, 'USER_PERSONA_DELETE', {
+			persona_id: personaId.toString(),
+			user_id: userId.toString(),
+		});
 	}
 
 	async importPersonas(userId: UserID, items: Array<PersonaCreateRequest>): Promise<Array<Persona>> {
@@ -224,6 +233,7 @@ export class PersonaService {
 				const updated = await this.deps.personaRepository.update(userId, existing.id, {
 					name: item.name,
 					avatar_url: item.avatar_url,
+					banner_url: item.banner_url,
 					system_name: item.system_name,
 					pronouns: item.pronouns,
 					color: item.color,
@@ -244,6 +254,7 @@ export class PersonaService {
 					user_id: userId,
 					name: item.name,
 					avatar_url: item.avatar_url,
+					banner_url: item.banner_url,
 					system_name: item.system_name,
 					pronouns: item.pronouns,
 					color: item.color,
