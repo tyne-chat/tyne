@@ -23,7 +23,8 @@ COPY . .
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter fluxer_api run build
-RUN pnpm deploy --legacy --filter=fluxer_api --prod --config.allow-unused-patches=true /out
+RUN pnpm deploy --legacy --filter=fluxer_api --prod --config.allow-unused-patches=true /out && \
+	rm -rf /out/pkgs
 
 FROM node:26-trixie-slim
 
@@ -59,12 +60,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN npm install -g pnpm@11.27.0
 
-COPY --from=deploy /out ./
-COPY --from=deploy /usr/src/app/fluxer_api/dist ./dist
-COPY --from=deploy /usr/src/app/tsconfigs /usr/src/app/tsconfigs
-
-RUN rm -rf pkgs && \
+RUN mkdir -p /usr/src/app/fluxer_api && \
 	chown -R 65532:65532 /usr/src/app
+
+COPY --chown=65532:65532 --from=deploy /out ./
+COPY --chown=65532:65532 --from=deploy /usr/src/app/fluxer_api/dist ./dist
+COPY --chown=65532:65532 --from=deploy /usr/src/app/tsconfigs /usr/src/app/tsconfigs
 
 ENV HOME=/usr/src/app
 ENV NODE_ENV=production
