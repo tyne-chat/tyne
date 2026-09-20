@@ -486,3 +486,39 @@
 	color: var(--text-primary);
 	line-height: 1.375;
 }
+
+.listControls {
+	margin-bottom: 12px;
+}
+
+.searchInput {
+	width: 100%;
+}
+
+.searchIcon {
+	color: var(--text-primary-muted);
+	flex-shrink: 0;
+}
+
+.clearSearchButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border: 0.0625rem solid transparent;
+	border-radius: 0.375rem;
+	color: var(--text-tertiary, var(--text-primary-muted));
+	background-color: transparent;
+	transition:
+		background-color 0.12s ease,
+		border-color 0.12s ease,
+		color 0.12s ease;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.clearSearchButton:hover {
+	color: var(--text-primary);
+	background-color: var(--settings-hover-background, var(--surface-interactive-hover-bg, rgba(255, 255, 255, 0.08)));
+}
