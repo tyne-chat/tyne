@@ -203,6 +203,7 @@ export const useNagbarConditions = (): NagbarConditions => {
 	const canShowDesktopDownload = (() => {
 		if (nagbarState.forceHideDesktopDownload) return false;
 		if (nagbarState.forceDesktopDownload) return true;
+		if (!RuntimeConfig.desktopAppPromptEnabled) return false;
 		return isDesktopBrowser && syncedDismissalsLoaded && !nagbarState.desktopDownloadDismissed;
 	})();
 	const androidAppNagbarStarted = useAndroidAppNagbarStarted();
