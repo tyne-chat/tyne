@@ -25,9 +25,9 @@ export const FavoritesLayout = observer(({children}: {children: React.ReactNode}
 	const {channelId} = useParams() as {channelId?: string};
 	const hasAccessibleChannels = Favorites.getFirstAccessibleChannel() !== undefined;
 	const showWelcomeScreen = !channelId && !hasAccessibleChannels;
-	const isChannelListOpen = mobileLayout.enabled || LayoutState.channelListVisible;
+	const isChannelListOpen = mobileLayout.enabled || LayoutState.leftSidebarVisible;
 	const isChannelListPeeking =
-		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
+		!mobileLayout.enabled && !LayoutState.leftSidebarVisible && LayoutState.isLeftHoverPeeking;
 	useEffect(() => {
 		if (!channelId) return;
 		const isStillFavorited = Favorites.getChannel(channelId);
