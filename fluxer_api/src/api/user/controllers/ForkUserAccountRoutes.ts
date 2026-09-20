@@ -7,6 +7,7 @@ import {RateLimitConfigs} from '@app/api/RateLimitConfig';
 import type {HonoApp} from '@app/api/types/HonoEnv';
 import {Validator} from '@app/api/Validator';
 import {validateOutboundEndpointUrl} from '@fluxer/hono/src/security/OutboundEndpoint';
+import {SuccessResponse} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {streamText} from 'hono/streaming';
 import {z} from 'zod';
 
@@ -283,7 +284,7 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		OpenAPI({
 			operationId: 'import_persona_batch_avatars',
 			summary: 'Batch import persona avatars from remote URLs with streaming progress',
-			responseSchema: z.any(),
+			responseSchema: SuccessResponse,
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
@@ -301,7 +302,7 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		OpenAPI({
 			operationId: 'import_subprofile_batch_avatars',
 			summary: 'Batch import subprofile avatars from remote URLs (legacy alias)',
-			responseSchema: z.any(),
+			responseSchema: SuccessResponse,
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
