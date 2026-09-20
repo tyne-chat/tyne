@@ -30,9 +30,9 @@ export const FavoritesLayout = observer(({children}: {children: React.ReactNode}
 	const favorite = channelId ? Favorites.getChannel(channelId) : undefined;
 	const isFavoriteDeleted =
 		favorite != null && Guilds.getGuild(favorite.guildId) != null && Channels.getChannel(favorite.channelId) == null;
-	const isChannelListOpen = mobileLayout.enabled || LayoutState.channelListVisible;
+	const isChannelListOpen = mobileLayout.enabled || LayoutState.leftSidebarVisible;
 	const isChannelListPeeking =
-		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
+		!mobileLayout.enabled && !LayoutState.leftSidebarVisible && LayoutState.isLeftHoverPeeking;
 	useEffect(() => {
 		if (!channelId) return;
 		if (!favorite || isFavoriteDeleted) {
