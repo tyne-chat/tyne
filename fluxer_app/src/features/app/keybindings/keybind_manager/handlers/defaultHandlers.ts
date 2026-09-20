@@ -63,6 +63,10 @@ import {JumpTypes} from '@fluxer/constants/src/JumpConstants';
 import type {I18n} from '@lingui/core';
 import React from 'react';
 
+// Fork imports.
+
+import * as LayoutCommands from '@app/features/ui/commands/LayoutCommands';
+
 function canOpenVoiceMessageComposerForChannel(channelId: string): boolean {
 	const channel = Channels.getChannel(channelId);
 	if (!channel) return false;
@@ -520,6 +524,10 @@ export function registerDefaultKeybindHandlers(host: HandlerHost, i18n: I18n): v
 	host.register('chat_toggle_inbox', ({type}) => {
 		if (type !== 'press') return;
 		ComponentBus.dispatch('INBOX_OPEN');
+	});
+	host.register('chat_toggle_channel_list', ({type}) => {
+		if (type !== 'press') return;
+		LayoutCommands.toggleLeftSidebar();
 	});
 	host.register('chat_toggle_member_list', ({type}) => {
 		if (type !== 'press') return;
