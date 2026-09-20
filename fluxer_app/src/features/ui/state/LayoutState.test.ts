@@ -8,6 +8,7 @@ import {describe, expect, it} from 'vitest';
 
 describe('LayoutState and LayoutCommands', () => {
 	it('has correct default visibility and peek states', () => {
+		expect(LayoutState.leftSidebarVisible).toBe(true);
 		expect(LayoutState.serverListVisible).toBe(true);
 		expect(LayoutState.channelListVisible).toBe(true);
 		expect(LayoutState.edgeHoverPeekEnabled).toBe(true);
@@ -15,24 +16,26 @@ describe('LayoutState and LayoutCommands', () => {
 		expect(LayoutState.isRightHoverPeeking).toBe(false);
 	});
 
-	it('toggles and persists server list visibility', () => {
-		LayoutCommands.toggleServerList();
+	it('toggles and persists left sidebar visibility', () => {
+		LayoutCommands.toggleLeftSidebar();
+		expect(LayoutState.leftSidebarVisible).toBe(false);
 		expect(LayoutState.serverListVisible).toBe(false);
-		expect(AppStorage.getItem('fluxer:ui:server-list-visible')).toBe('false');
+		expect(LayoutState.channelListVisible).toBe(false);
+		expect(AppStorage.getItem('fluxer:ui:left-sidebar-visible')).toBe('false');
 
-		LayoutCommands.toggleServerList();
+		LayoutCommands.toggleLeftSidebar();
+		expect(LayoutState.leftSidebarVisible).toBe(true);
 		expect(LayoutState.serverListVisible).toBe(true);
-		expect(AppStorage.getItem('fluxer:ui:server-list-visible')).toBe('true');
+		expect(LayoutState.channelListVisible).toBe(true);
+		expect(AppStorage.getItem('fluxer:ui:left-sidebar-visible')).toBe('true');
 	});
 
-	it('toggles and persists channel list visibility', () => {
-		LayoutCommands.toggleChannelList();
-		expect(LayoutState.channelListVisible).toBe(false);
-		expect(AppStorage.getItem('fluxer:ui:channel-list-visible')).toBe('false');
+	it('supports legacy toggleServerList and toggleChannelList as forwarding aliases', () => {
+		LayoutCommands.toggleServerList();
+		expect(LayoutState.leftSidebarVisible).toBe(false);
 
 		LayoutCommands.toggleChannelList();
-		expect(LayoutState.channelListVisible).toBe(true);
-		expect(AppStorage.getItem('fluxer:ui:channel-list-visible')).toBe('true');
+		expect(LayoutState.leftSidebarVisible).toBe(true);
 	});
 
 	it('toggles and persists edge hover peek preference', () => {
