@@ -8,7 +8,7 @@ import {
 	MessageRequestSchema,
 	MessageUpdateRequestSchema,
 } from '@fluxer/schema/src/domains/message/MessageRequestSchemas';
-import {MessageResponseSchema} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
+import {type MessageResponse, MessageResponseSchema} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {NatsConnection} from '@nats-io/transport-node';
 import type {INatsConnectionManager} from '@pkgs/nats/src/INatsConnectionManager';
 import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
