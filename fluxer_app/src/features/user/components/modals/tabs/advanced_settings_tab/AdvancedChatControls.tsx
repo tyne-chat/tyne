@@ -60,6 +60,10 @@ const SHOW_QUICK_REACTIONS_DESCRIPTOR = msg({
 	message: 'Show quick reactions',
 	comment: 'Short label for an advanced message action bar preference.',
 });
+const SHOW_COPY_BUTTON_DESCRIPTOR = msg({
+	message: 'Show copy button',
+	comment: 'Short label for an advanced message action bar preference.',
+});
 const ENABLE_SHIFT_TO_EXPAND_DESCRIPTOR = msg({
 	message: 'Enable Shift to expand',
 	comment: 'Short label for an advanced message action bar preference.',
@@ -202,6 +206,13 @@ const MessageActionBarContent = observer(() => {
 				onChange={(value) => AccessibilityCommands.update({showMessageActionBarQuickReactions: value})}
 				disabled={!Accessibility.showMessageActionBar || Accessibility.showMessageActionBarOnlyMoreButton}
 				data-flx="user.advanced-settings-tab.switch-group-item.message-action-bar-reactions"
+			/>
+			<SwitchGroupItem
+				label={i18n._(SHOW_COPY_BUTTON_DESCRIPTOR)}
+				value={Accessibility.showMessageActionBarCopyButton}
+				onChange={(value) => AccessibilityCommands.update({showMessageActionBarCopyButton: value})}
+				disabled={!Accessibility.showMessageActionBar || Accessibility.showMessageActionBarOnlyMoreButton}
+				data-flx="user.advanced-settings-tab.switch-group-item.message-action-bar-copy"
 			/>
 			<SwitchGroupItem
 				label={i18n._(ENABLE_SHIFT_TO_EXPAND_DESCRIPTOR)}
