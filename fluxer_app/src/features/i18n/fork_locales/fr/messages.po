@@ -265,6 +265,14 @@ msgstr "Persona créée"
 msgid "Persona deleted"
 msgstr "Persona supprimée"
 
+#. Fallback screen reader label for the persona profile modal. Keep it concise.
+msgid "Persona profile"
+msgstr "Profil de persona"
+
+#. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
+msgid "Persona profile: {name}"
+msgstr "Profil de persona : {name}"
+
 #. Toast when persona is updated
 msgid "Persona updated"
 msgstr "Persona mise à jour"
