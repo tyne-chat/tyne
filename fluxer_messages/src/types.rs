@@ -499,6 +499,8 @@ pub struct MessageSubprofile {
     pub color: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bio: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub banner: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

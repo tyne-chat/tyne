@@ -11,6 +11,7 @@ export interface CreatePersonaParams {
 	persona_id?: PersonaID;
 	name: string;
 	avatar_url?: string | null;
+	banner_url?: string | null;
 	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
@@ -26,6 +27,7 @@ export interface CreatePersonaParams {
 export interface UpdatePersonaParams {
 	name?: string;
 	avatar_url?: string | null;
+	banner_url?: string | null;
 	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
