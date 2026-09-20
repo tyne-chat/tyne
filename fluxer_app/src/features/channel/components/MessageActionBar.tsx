@@ -71,6 +71,12 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {getEffectiveContent} from '@app/features/channel/components/MessageActionUtils';
+import {COPY_TEXT_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
+import {CopyMessageTextIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
+
 const CLICK_TO_REACT_DESCRIPTOR = msg({
 	message: 'Click to react',
 	comment: 'Tooltip on the add-reaction button in the inline message hover action bar.',
@@ -274,6 +280,7 @@ const MessageActionBarCore: React.FC<MessageActionBarCoreProps> = observer(
 		const showQuickReactions = Accessibility.showMessageActionBarQuickReactions;
 		const showShiftExpand = Accessibility.showMessageActionBarShiftExpand;
 		const onlyMoreButton = Accessibility.showMessageActionBarOnlyMoreButton;
+		const showCopyButton = Accessibility.showMessageActionBarCopyButton;
 		const keyboardModeEnabled = KeyboardMode.keyboardModeEnabled;
 		const shouldListenForShift = showShiftExpand && showMessageActionBar && !onlyMoreButton && !keyboardModeEnabled;
 		const shiftPressed = useShiftKey(shouldListenForShift);
@@ -289,6 +296,7 @@ const MessageActionBarCore: React.FC<MessageActionBarCoreProps> = observer(
 		} = permissions;
 		const showsEditInTail = message.isUserMessage() && !message.messageSnapshots && canEditMessage;
 		const supportsInteractiveActions = useMemo(() => !isClientSystemMessage(message), [message]);
+		const copyableMessageText = useMemo(() => getEffectiveContent(message), [message]);
 		const handlers = useMemo(
 			() => createMessageActionHandlers(message, {i18n, channel: permissions.channel}),
 			[message, i18n.locale, permissions.channel],
@@ -600,6 +608,19 @@ const MessageActionBarCore: React.FC<MessageActionBarCoreProps> = observer(
 											data-flx="channel.message-action-bar.message-action-bar-core.message-action-bar-button"
 										/>
 									</Popout>
+								)}
+								{showCopyButton && Boolean(copyableMessageText) && (
+									<MessageActionBarButton
+										icon={
+											<CopyMessageTextIcon
+												size={20}
+												data-flx="channel.message-action-bar.message-action-bar-core.copy-message-text-icon"
+											/>
+										}
+										label={i18n._(COPY_TEXT_DESCRIPTOR)}
+										onClick={handlers.handleCopyMessage}
+										data-flx="channel.message-action-bar.message-action-bar-core.message-action-bar-button.copy-message"
+									/>
 								)}
 								{showsEditInTail && (
 									<MessageActionBarButton
