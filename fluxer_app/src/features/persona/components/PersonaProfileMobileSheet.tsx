@@ -99,6 +99,7 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 					id: localPersona.id,
 					name: localPersona.name,
 					avatar_url: localPersona.avatar_url ?? localPersona.avatarUrl ?? null,
+					banner_url: localPersona.banner_url ?? localPersona.bannerUrl ?? null,
 					system_name: localPersona.system_name ?? localPersona.systemName ?? null,
 					pronouns: localPersona.pronouns ?? null,
 					color: localPersona.color ?? localPersona.accentColor ?? null,
@@ -129,12 +130,22 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 			};
 		}, [user.id, subprofile.id, localPersona]);
 
-		const effectivePronouns = publicPersona?.pronouns ?? localPersona?.pronouns ?? subprofile.pronouns;
+		const effectivePronouns =
+			publicPersona !== null && publicPersona !== undefined
+				? publicPersona.pronouns
+				: (localPersona?.pronouns ?? subprofile.pronouns);
 		const effectiveDisplayTagText = isCurrentUser
 			? PersonaStore.displayTagText
 			: (subprofile.display_tag_text ?? subprofile.system_name ?? publicPersona?.system_name ?? null);
 		const effectiveDisplayTagIcon = isCurrentUser ? PersonaStore.displayTagIcon : (subprofile.display_tag_icon ?? null);
-		const effectiveBio = publicPersona?.bio ?? localPersona?.bio ?? subprofile.bio;
+		const effectiveBio =
+			publicPersona !== null && publicPersona !== undefined ? publicPersona.bio : (localPersona?.bio ?? subprofile.bio);
+		const effectiveBannerUrl =
+			publicPersona !== null && publicPersona !== undefined
+				? publicPersona.banner_url
+				: localPersona
+					? (localPersona.banner_url ?? localPersona.bannerUrl ?? null)
+					: ((subprofile as any).banner ?? null);
 
 		const resolvedGuildMember = useMemo(() => {
 			if (guildMember) return guildMember;
@@ -227,11 +238,19 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 							data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.div"
 						>
 							<div className={styles.bannerContainer} data-flx="persona.persona-profile-mobile-sheet.banner-container">
-								<div
-									className={styles.bannerColor}
-									style={{backgroundColor: accentColor}}
-									data-flx="persona.persona-profile-mobile-sheet.banner-color"
-								/>
+								{effectiveBannerUrl ? (
+									<div
+										className={styles.bannerImage}
+										style={{backgroundImage: `url(${effectiveBannerUrl})`}}
+										data-flx="persona.persona-profile-mobile-sheet.banner-image"
+									/>
+								) : (
+									<div
+										className={styles.bannerColor}
+										style={{backgroundColor: accentColor}}
+										data-flx="persona.persona-profile-mobile-sheet.banner-color"
+									/>
+								)}
 								<Sheet.Handle
 									className={styles.notchContainer}
 									data-flx="persona.persona-profile-mobile-sheet.notch-container"
