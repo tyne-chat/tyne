@@ -31,11 +31,24 @@ export async function fetchPersonaSettings(): Promise<PersonaSettingsResponse | 
 	}
 }
 
-export async function fetchPersonas(): Promise<Array<PersonaResponse>> {
+let lastFetchTimestamp = 0;
+const FETCH_COOLDOWN_MS = 2000;
+
+export function resetFetchPersonasCooldown(): void {
+	lastFetchTimestamp = 0;
+}
+
+export async function fetchPersonas(force = false): Promise<Array<PersonaResponse>> {
+	const now = Date.now();
+	if (!force && now - lastFetchTimestamp < FETCH_COOLDOWN_MS && PersonaStore.personas.length > 0) {
+		return PersonaStore.personas as unknown as Array<PersonaResponse>;
+	}
+
 	try {
 		const res = await http.get<Array<PersonaResponse>>(Endpoints.USER_PERSONAS);
 		if (res.ok && Array.isArray(res.body)) {
-			PersonaStore.setPersonas(res.body);
+			PersonaStore.upsertPersonas(res.body);
+			lastFetchTimestamp = Date.now();
 			return res.body;
 		}
 		logger.warn(`Failed to fetch personas: status ${res.status}`);
