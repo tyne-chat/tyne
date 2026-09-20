@@ -87,6 +87,13 @@ function isMessageServiceResponse(value: unknown): value is MessageServiceRespon
 	return false;
 }
 
+function normalizeMessageSubprofileResponse(message: MessageResponse): MessageResponse {
+	if (message.subprofile === undefined) {
+		message.subprofile = null;
+	}
+	return message;
+}
+
 export class MessageResponseDataService {
 	private async accessEnvelope(access: MessageResponseAccessContext) {
 		return {
@@ -126,6 +133,9 @@ export class MessageResponseDataService {
 			include_reactions: true,
 		});
 		if (typeof response === 'object' && 'FoundApiMany' in response) {
+			for (const msg of response.FoundApiMany) {
+				normalizeMessageSubprofileResponse(msg);
+			}
 			return response.FoundApiMany;
 		}
 		throw new Error(`[message-response-service] unexpected ListResponses response: ${JSON.stringify(response)}`);
@@ -161,7 +171,7 @@ export class MessageResponseDataService {
 		});
 		if (response === 'NotFound') return null;
 		if (typeof response === 'object' && 'FoundApi' in response) {
-			return response.FoundApi;
+			return normalizeMessageSubprofileResponse(response.FoundApi);
 		}
 		throw new Error(`[message-response-service] unexpected GetResponseById response: ${JSON.stringify(response)}`);
 	}
@@ -184,7 +194,7 @@ export class MessageResponseDataService {
 			tts: params.tts,
 		});
 		if (typeof response === 'object' && 'FoundApi' in response) {
-			return response.FoundApi;
+			return normalizeMessageSubprofileResponse(response.FoundApi);
 		}
 		throw new Error(`[message-response-service] unexpected BuildResponse response: ${JSON.stringify(response)}`);
 	}
@@ -227,6 +237,9 @@ export class MessageResponseDataService {
 			});
 			if (typeof response !== 'object' || !('FoundApiMany' in response)) {
 				throw new Error(`[message-response-service] unexpected BuildResponses response: ${JSON.stringify(response)}`);
+			}
+			for (const msg of response.FoundApiMany) {
+				normalizeMessageSubprofileResponse(msg);
 			}
 			responses.push(...response.FoundApiMany);
 		}
