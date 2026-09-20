@@ -398,20 +398,46 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		}
 
 		if (importMode === 'replace') {
-			for (const existing of PersonaStore.personas) {
-				await PersonaCommands.deletePersona(existing.id).catch(() => {});
+			const existing = [...PersonaStore.personas];
+			const totalExisting = existing.length;
+			let deleteFailures = 0;
+
+			for (let i = 0; i < totalExisting; i++) {
+				setProgress({
+					current: i + 1,
+					total: totalExisting,
+					currentName: i18n._(SAVING_PERSONAS_STATUS),
+					percent: Math.round(((i + 1) / totalExisting) * 100),
+					label: i18n._(SAVING_PERSONAS_LABEL),
+				});
+				try {
+					await PersonaCommands.deletePersona(existing[i].id);
+				} catch {
+					deleteFailures++;
+				}
+			}
+
+			if (deleteFailures > 0) {
+				ToastCommands.error(i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
+				setStep('select');
+				return;
 			}
 		}
 
+		const CHUNK_SIZE = 50;
 		try {
-			setProgress({
-				current: totalMembers,
-				total: totalMembers,
-				currentName: i18n._(SAVING_PERSONAS_STATUS),
-				percent: 100,
-				label: i18n._(SAVING_PERSONAS_LABEL),
-			});
-			await PersonaCommands.importPersonas(importedPersonas);
+			for (let i = 0; i < importedPersonas.length; i += CHUNK_SIZE) {
+				const chunk = importedPersonas.slice(i, i + CHUNK_SIZE);
+				const currentCount = Math.min(i + chunk.length, importedPersonas.length);
+				setProgress({
+					current: currentCount,
+					total: importedPersonas.length,
+					currentName: i18n._(SAVING_PERSONAS_STATUS),
+					percent: Math.round((currentCount / importedPersonas.length) * 100),
+					label: i18n._(SAVING_PERSONAS_LABEL),
+				});
+				await PersonaCommands.importPersonas(chunk);
+			}
 
 			setImportResults({
 				successCount: importedPersonas.length,
