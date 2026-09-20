@@ -6,11 +6,16 @@ import {MediaViewerModal} from '@app/features/messaging/components/modals/MediaV
 import {UserProfileMobileSheet} from '@app/features/user/components/modals/UserProfileMobileSheet';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import {PersonaProfileMobileSheet} from '@app/features/persona/components/PersonaProfileMobileSheet';
+
 export const Modals = observer(() => {
 	return (
 		<div className={styles.modals} data-overlay-pass-through="true" data-flx="app.modals.modals">
 			<MediaViewerModal data-flx="app.modals.media-viewer-modal" />
 			<UserProfileMobileSheet data-flx="app.modals.user-profile-mobile-sheet" />
+			<PersonaProfileMobileSheet data-flx="app.modals.persona-profile-mobile-sheet" />
 			<ModalStack data-flx="app.modals.modal-stack" />
 		</div>
 	);
