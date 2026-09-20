@@ -166,13 +166,6 @@
 	}
 }
 
-.userAreaWrapperCompact {
-	width: 4.5rem;
-	padding: 0 0 var(--user-area-box-inset-block-end);
-	justify-content: center;
-	z-index: var(--z-index-elevated-3, 45);
-}
-
 .userAreaWrapperPeeking {
 	width: calc(4.5rem + var(--layout-sidebar-restored-width, 20rem) + 0.0625rem);
 	z-index: var(--z-index-elevated-3, 45);
@@ -189,18 +182,15 @@
 	top: 0;
 	bottom: 0;
 	left: 0;
-	width: calc(4.5rem + 1px);
+	width: calc(4.5rem + var(--outline-frame-border-width, 0.0625rem));
 	height: 100%;
 	min-height: 0;
 	background-color: var(--background-secondary);
-	z-index: var(--z-index-elevated-3, 40);
-	box-shadow: 4px 0 20px rgba(0, 0, 0, 0.45);
+	border-right: var(--outline-frame-border-width, 0.0625rem) solid var(--user-area-divider-color);
+	box-sizing: border-box;
+	z-index: var(--z-index-elevated-3, 41);
 	animation: slideInLeft 100ms cubic-bezier(0, 0, 0.2, 1) forwards;
 	pointer-events: auto;
-}
-
-.guildListOverlayNoShadow {
-	box-shadow: none;
 }
 
 .guildListItem {
