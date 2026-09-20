@@ -91,16 +91,15 @@ describe('useAutocompletePersonaSearch', () => {
 	it('debounces fetch by 150ms and fetches personas for matching query', async () => {
 		const mockPersonas: Array<ChannelPersonaMentionItem> = [
 			{
-				personaId: 'p1',
-				personaName: 'Alice',
-				personaAvatar: 'hash1',
-				personaColor: 0xff0000,
-				displayTagText: 'Wonderland',
-				systemName: 'Wonderland Sys',
-				ownerUserId: 'u1',
-				ownerUsername: 'alice_owner',
-				ownerDiscriminator: '0001',
-				ownerGlobalName: 'Alice O',
+				id: 'p1',
+				name: 'Alice',
+				avatar_url: 'hash1',
+				color: 0xff0000,
+				system_name: 'Wonderland Sys',
+				visibility: 'public',
+				owner_user_id: 'u1',
+				owner_username: 'alice_owner',
+				owner_global_name: 'Alice O',
 			},
 		];
 
