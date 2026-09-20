@@ -11,17 +11,6 @@
 	background: transparent;
 }
 
-.sensorLeftSeam {
-	position: fixed;
-	top: 0;
-	bottom: 0;
-	left: var(--layout-guild-list-width, 4.5rem);
-	width: 16px;
-	z-index: var(--z-index-elevated-3, 40);
-	pointer-events: auto;
-	background: transparent;
-}
-
 .sensorRightEdge {
 	position: fixed;
 	top: 0;

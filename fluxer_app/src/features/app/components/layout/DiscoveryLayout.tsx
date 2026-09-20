@@ -21,9 +21,9 @@ import {clsx} from 'clsx';
 export const DiscoveryLayout = observer(function DiscoveryLayout() {
 	const mobileLayout = MobileLayout;
 	const available = RuntimeConfig.discoveryAvailable;
-	const isChannelListOpen = mobileLayout.enabled || LayoutState.channelListVisible;
+	const isChannelListOpen = mobileLayout.enabled || LayoutState.leftSidebarVisible;
 	const isChannelListPeeking =
-		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
+		!mobileLayout.enabled && !LayoutState.leftSidebarVisible && LayoutState.isLeftHoverPeeking;
 	useEffect(() => {
 		if (!available) {
 			RouterUtils.replaceWith(getDefaultLandingPath());

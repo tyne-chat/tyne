@@ -426,6 +426,10 @@ msgstr "Le fichier sélectionné n'est pas un objet JSON valide."
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Voici un aperçu de l'affichage de votre badge dans la discussion."
 
+#. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
+msgid "Toggle the channel list"
+msgstr "Afficher/masquer la liste des salons"
+
 msgid "Total Members"
 msgstr "Total des membres"
 
