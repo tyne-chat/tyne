@@ -45,7 +45,7 @@ export const InstanceBrandingSchema = z
 		desktop_app_prompt_enabled: z
 			.boolean()
 			.default(true)
-			.describe('Whether the web app shows prompts to open deep links in the desktop app'),
+			.describe('Whether the web app shows prompts to open deep links or download the desktop app'),
 	})
 	.describe('Branding values safe to expose to clients');
 export type InstanceBranding = z.infer<typeof InstanceBrandingSchema>;
