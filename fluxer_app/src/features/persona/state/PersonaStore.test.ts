@@ -310,22 +310,39 @@ describe('PersonaStore', () => {
 		expect(res6.subprofile?.id).toBe(bob.id);
 		expect(res6.subprofile?.name).toBe('Bob');
 
-		// 7. Text message edited with prefix only (e.g. 'B:') -> reproxies to Bob, preserves original text
+		// 7. Text message edited with prefix only (e.g. 'B:') -> sets Bob, empty content
 		const res7 = store.matchEditMessage('B:', currentAliceSubprofile, {
 			hasAttachments: false,
 			originalContent: 'Original message text',
 		});
-		expect(res7.finalContent).toBe('Original message text');
+		expect(res7.finalContent).toBe('');
 		expect(res7.subprofile?.id).toBe(bob.id);
 		expect(res7.subprofile?.name).toBe('Bob');
 
-		// 8. Text message edited with escape backslash only -> unproxies, preserves original text
+		// 7b. Text message prepended with prefix (e.g. 'B: Original message text') -> sets Bob, preserves text
+		const res7b = store.matchEditMessage('B: Original message text', currentAliceSubprofile, {
+			hasAttachments: false,
+			originalContent: 'Original message text',
+		});
+		expect(res7b.finalContent).toBe('Original message text');
+		expect(res7b.subprofile?.id).toBe(bob.id);
+		expect(res7b.subprofile?.name).toBe('Bob');
+
+		// 8. Text message edited with escape backslash only -> unproxies, empty content
 		const res8 = store.matchEditMessage('\\', currentAliceSubprofile, {
 			hasAttachments: false,
 			originalContent: 'Original message text',
 		});
-		expect(res8.finalContent).toBe('Original message text');
+		expect(res8.finalContent).toBe('');
 		expect(res8.subprofile).toBeNull();
+
+		// 8b. Text message prepended with escape backslash -> unproxies, preserves text
+		const res8b = store.matchEditMessage('\\Original message text', currentAliceSubprofile, {
+			hasAttachments: false,
+			originalContent: 'Original message text',
+		});
+		expect(res8b.finalContent).toBe('Original message text');
+		expect(res8b.subprofile).toBeNull();
 
 		// 9. Attachment-only message currently Alice edited to Bob with 'B:' -> sets Bob, empty content
 		const res9 = store.matchEditMessage('B:', currentAliceSubprofile, {
@@ -353,8 +370,8 @@ describe('PersonaStore', () => {
 		expect(res11.finalContent).toBe('');
 		expect(res11.subprofile).toBeNull();
 
-		// 12. Captioned attachment message edited to Bob with 'B:' -> sets Bob, preserves caption
-		const res12 = store.matchEditMessage('B:', currentAliceSubprofile, {
+		// 12. Captioned attachment message edited to Bob with prepended 'B: Look at my dog' -> sets Bob, preserves caption
+		const res12 = store.matchEditMessage('B: Look at my dog', currentAliceSubprofile, {
 			hasAttachments: true,
 			originalContent: 'Look at my dog',
 		});
