@@ -992,7 +992,7 @@ fn app_public_config_section(
                                 true,
                             ))
                             p class="text-xs text-neutral-500" {
-                                "Show prompts on invite and gift pages encouraging desktop web visitors to open the desktop app."
+                                "Show prompts in the web app and on invite and gift pages encouraging desktop web visitors to open or download the desktop app."
                             }
                         }
                         (form_actions(html! {

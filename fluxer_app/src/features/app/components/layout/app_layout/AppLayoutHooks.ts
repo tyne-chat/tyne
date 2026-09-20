@@ -187,6 +187,7 @@ export const useNagbarConditions = (): NagbarConditions => {
 	const canShowDesktopDownload = (() => {
 		if (nagbarState.forceHideDesktopDownload) return false;
 		if (nagbarState.forceDesktopDownload) return true;
+		if (!RuntimeConfig.desktopAppPromptEnabled) return false;
 		return isDesktopBrowser && !nagbarState.desktopDownloadDismissed;
 	})();
 	const canShowVisionaryMfa = (() => {

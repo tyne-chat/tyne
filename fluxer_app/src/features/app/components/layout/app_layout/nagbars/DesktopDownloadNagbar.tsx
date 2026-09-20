@@ -15,12 +15,19 @@ import {useLingui} from '@lingui/react/macro';
 import {AndroidLogoIcon, AppleLogoIcon, WindowsLogoIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import NagbarState from '@app/features/ui/state/Nagbar';
+
 const DESKTOP_APP_DOWNLOAD_MESSAGE_DESCRIPTOR = msg({
 	message: 'Get the {productName} desktop app for system-wide push-to-talk and a few other goodies.',
 	comment: 'Nagbar body encouraging web users to download the desktop app. productName is the app name.',
 });
 export const DesktopDownloadNagbar = observer(({isMobile}: {isMobile: boolean}) => {
 	const {i18n} = useLingui();
+	if (!NagbarState.forceDesktopDownload && !RuntimeConfig.desktopAppPromptEnabled) {
+		return null;
+	}
 	const handleDownload = () => {
 		openExternalUrl(DESKTOP_DOWNLOAD_URL);
 	};
