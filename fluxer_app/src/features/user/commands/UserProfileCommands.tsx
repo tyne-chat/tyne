@@ -18,6 +18,10 @@ import UserProfileMobile from '@app/features/user/state/UserProfileMobile';
 import Users from '@app/features/user/state/Users';
 import {ME} from '@fluxer/constants/src/AppConstants';
 
+// Fork imports.
+
+import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobile';
+
 const logger = new Logger('UserProfiles');
 const pendingRequests: Map<string, Promise<Profile>> = new Map();
 
@@ -127,6 +131,7 @@ export function closeUserProfileSurfaces(): void {
 	PopoutCommands.closeAll();
 	ContextMenuCommands.close();
 	UserProfileMobile.close();
+	PersonaProfileMobile.close();
 	ModalCommands.popAllByType(UserProfileModal);
 }
 
