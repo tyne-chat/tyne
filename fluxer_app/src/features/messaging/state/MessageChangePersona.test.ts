@@ -1,11 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {Channel} from '@app/features/channel/models/Channel';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import * as MessageCommands from '../commands/MessageCommands';
 import type {Message} from '../models/MessagingMessage';
 import MessageChangePersona from './MessageChangePersona';
+
+vi.mock('@lingui/core/macro', () => {
+	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
+	return {msg: descriptor, t: descriptor, plural: () => '', select: () => '', selectOrdinal: () => ''};
+});
+vi.mock('@lingui/react/macro', () => ({
+	Trans: () => null,
+	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
+}));
 
 vi.mock('../commands/MessageCommands', () => ({
 	edit: vi.fn().mockResolvedValue(null),
@@ -137,6 +147,49 @@ describe('MessageChangePersona', () => {
 				[{id: 'att-1'}, {id: 'att-2'}],
 				null,
 			);
+		});
+	});
+
+	describe('buildSubprofilePayload regression tests', () => {
+		it('includes active displayTagText and displayTagIcon in subprofile payload', () => {
+			(PersonaStore as any)._displayTagText = 'TESTING SYSTEM';
+			(PersonaStore as any)._displayTagIcon = 'https://example.com/icon.png';
+
+			const payload = MessageChangePersona.buildSubprofilePayload({
+				id: 'bob-123',
+				name: 'Bob the Fox',
+				avatarUrl: 'https://example.com/bob.png',
+				color: 123456,
+				bio: 'Fox bio',
+				pronouns: 'he/him',
+			});
+
+			expect(payload).toEqual({
+				id: 'bob-123',
+				name: 'Bob the Fox',
+				avatar: 'https://example.com/bob.png',
+				avatar_color: 123456,
+				color: 123456,
+				display_tag_text: 'TESTING SYSTEM',
+				display_tag_icon: 'https://example.com/icon.png',
+				system_name: 'TESTING SYSTEM',
+				bio: 'Fox bio',
+				pronouns: 'he/him',
+			});
+		});
+
+		it('defaults display tags to null when not configured', () => {
+			(PersonaStore as any)._displayTagText = '';
+			(PersonaStore as any)._displayTagIcon = '';
+
+			const payload = MessageChangePersona.buildSubprofilePayload({
+				id: 'bob-123',
+				name: 'Bob the Fox',
+			});
+
+			expect(payload.display_tag_text).toBeNull();
+			expect(payload.display_tag_icon).toBeNull();
+			expect(payload.system_name).toBeNull();
 		});
 	});
 });
