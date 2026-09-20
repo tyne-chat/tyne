@@ -16,6 +16,7 @@ export type ShouldAnimateKind =
 	| 'custom_status_emoji';
 
 export interface UseShouldAnimateOptions {
+	animatedMediaPlaybackAllowed?: boolean;
 	kind: ShouldAnimateKind;
 	isAnimated?: boolean;
 	isHovering?: boolean;
@@ -80,6 +81,7 @@ function resolveShouldAnimateDecision({
 }
 
 export function useShouldAnimate({
+	animatedMediaPlaybackAllowed: explicitPlaybackAllowed,
 	kind,
 	isAnimated = true,
 	isHovering = false,
@@ -95,6 +97,6 @@ export function useShouldAnimate({
 		keptUnderReducedMotion: isKeptUnderReducedMotion(kind),
 		isInteracting: isHovering || isFocused,
 		saveData,
-		windowActive,
+		windowActive: explicitPlaybackAllowed ?? windowActive,
 	});
 }
