@@ -729,16 +729,11 @@ export const Message: React.FC<MessageProps> = observer((props) => {
 								// TODO: edit the message to use the selected persona
 								const persona = PersonaStore.personas.find((v) => v.id === id);
 								if (!persona) return;
-								MessageChangePersona.changePersona(channel, message, {
-									id: persona.id,
-									name: persona.name,
-									avatar: persona.avatarUrl,
-									avatar_color: persona.color,
-									color: persona.color,
-									system_name: persona.systemName,
-									bio: persona.bio,
-									pronouns: persona.pronouns,
-								});
+								MessageChangePersona.changePersona(
+									channel,
+									message,
+									MessageChangePersona.buildSubprofilePayload(persona),
+								);
 								PersonaStore.recordPersonaUse(persona.id);
 							}}
 							onSelectAccount={() => {
