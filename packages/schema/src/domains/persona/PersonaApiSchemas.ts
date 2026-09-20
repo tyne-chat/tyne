@@ -39,6 +39,9 @@ export const PersonaResponseSchema = z.object({
 });
 export type PersonaResponse = z.infer<typeof PersonaResponseSchema>;
 
+export const PersonaListResponseSchema = z.array(PersonaResponseSchema);
+export type PersonaListResponse = z.infer<typeof PersonaListResponseSchema>;
+
 export const PublicPersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
@@ -50,6 +53,9 @@ export const PublicPersonaResponseSchema = z.object({
 	visibility: PersonaVisibilitySchema.describe('Visibility setting'),
 });
 export type PublicPersonaResponse = z.infer<typeof PublicPersonaResponseSchema>;
+
+export const PublicPersonaListResponseSchema = z.array(PublicPersonaResponseSchema);
+export type PublicPersonaListResponse = z.infer<typeof PublicPersonaListResponseSchema>;
 
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),
