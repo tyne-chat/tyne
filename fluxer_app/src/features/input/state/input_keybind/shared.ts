@@ -174,6 +174,10 @@ export const MARK_ALL_INBOX_CHANNELS_AS_READ_DESCRIPTOR = msg({
 	message: 'Mark all inbox channels as read',
 	comment: 'Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.',
 });
+export const TOGGLE_THE_CHANNEL_LIST_DESCRIPTOR = msg({
+	message: 'Toggle the channel list',
+	comment: 'Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.',
+});
 export const TOGGLE_THE_MEMBER_LIST_OR_VOICE_CHAT_DESCRIPTOR = msg({
 	message: 'Toggle the member list or voice chat',
 	comment: 'Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.',
