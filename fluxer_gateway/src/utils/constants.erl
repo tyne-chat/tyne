@@ -117,7 +117,7 @@ heartbeat_interval() -> 41250.
 heartbeat_timeout() -> 45000.
 
 -spec resume_timeout() -> pos_integer().
-resume_timeout() -> 60000.
+resume_timeout() -> 300000.
 
 -spec random_session_bytes() -> pos_integer().
 random_session_bytes() -> 16.
