@@ -15,8 +15,7 @@ const RETRACT_GRACE_MS = 80;
 
 export const EdgeProximitySensor: React.FC = observer(() => {
 	const isMobile = MobileLayout.enabled;
-	const {edgeHoverPeekEnabled, serverListVisible, channelListVisible, isLeftHoverPeeking, isRightHoverPeeking} =
-		LayoutState;
+	const {edgeHoverPeekEnabled, leftSidebarVisible, isLeftHoverPeeking, isRightHoverPeeking} = LayoutState;
 	const isMembersOpen = MemberList.isMembersOpen;
 
 	const leftTimerRef = useRef<number | null>(null);
@@ -64,7 +63,7 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 			// Left peek monitoring
 			if (LayoutState.isLeftHoverPeeking) {
 				const currentSidebarWidth = SidebarWidth.width ?? SIDEBAR_WIDTH_DEFAULT;
-				const leftDrawerWidth = 72 + (!LayoutState.channelListVisible ? currentSidebarWidth : 0);
+				const leftDrawerWidth = 72 + currentSidebarWidth;
 				const leftThreshold = leftDrawerWidth + CURSOR_WIDTH_PX;
 
 				if (x > Math.max(leftThreshold, 100)) {
@@ -160,8 +159,7 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 		return null;
 	}
 
-	const showLeftEdgeSensor = !serverListVisible && !isLeftHoverPeeking;
-	const showLeftSeamSensor = serverListVisible && !channelListVisible && !isLeftHoverPeeking;
+	const showLeftEdgeSensor = !leftSidebarVisible && !isLeftHoverPeeking;
 	const showRightEdgeSensor = LayoutState.canRightPeek && !isMembersOpen && !isRightHoverPeeking;
 
 	return (
@@ -173,15 +171,6 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 					onMouseLeave={handleLeftSensorLeave}
 					aria-hidden="true"
 					data-flx="ui.edge-proximity-sensor.sensor-left-edge"
-				/>
-			)}
-			{showLeftSeamSensor && (
-				<div
-					className={styles.sensorLeftSeam}
-					onMouseEnter={handleLeftSensorEnter}
-					onMouseLeave={handleLeftSensorLeave}
-					aria-hidden="true"
-					data-flx="ui.edge-proximity-sensor.sensor-left-seam"
 				/>
 			)}
 			{showRightEdgeSensor && (
