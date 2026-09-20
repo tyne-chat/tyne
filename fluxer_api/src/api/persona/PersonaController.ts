@@ -5,14 +5,15 @@ import {
 	PersonaBulkImportRequestSchema,
 	PersonaCreateRequestSchema,
 	PersonaIdParam,
+	PersonaListResponseSchema,
 	PersonaResponseSchema,
 	PersonaSettingsResponseSchema,
 	PersonaSettingsUpdateRequestSchema,
 	PersonaUpdateRequestSchema,
+	PublicPersonaListResponseSchema,
 	PublicPersonaResponseSchema,
 	UserIdPersonaIdParam,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {z} from 'zod';
 import {createPersonaID, createUserID} from '../BrandedTypes';
 import {DefaultUserOnly, LoginRequired} from '../middleware/AuthMiddleware';
 import {requireOAuth2ScopeForBearer} from '../middleware/OAuth2ScopeMiddleware';
@@ -32,7 +33,7 @@ export function PersonaController(app: HonoApp) {
 		OpenAPI({
 			operationId: 'list_my_personas',
 			summary: 'List own personas',
-			responseSchema: z.array(PersonaResponseSchema),
+			responseSchema: PersonaListResponseSchema,
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Personas'],
@@ -79,7 +80,7 @@ export function PersonaController(app: HonoApp) {
 		OpenAPI({
 			operationId: 'import_personas',
 			summary: 'Bulk import personas',
-			responseSchema: z.array(PersonaResponseSchema),
+			responseSchema: PersonaListResponseSchema,
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Personas'],
@@ -222,7 +223,7 @@ export function PersonaController(app: HonoApp) {
 		OpenAPI({
 			operationId: 'list_user_public_personas',
 			summary: 'List user public personas',
-			responseSchema: z.array(PublicPersonaResponseSchema),
+			responseSchema: PublicPersonaListResponseSchema,
 			statusCode: 200,
 			security: ['sessionToken'],
 			tags: ['Personas'],
