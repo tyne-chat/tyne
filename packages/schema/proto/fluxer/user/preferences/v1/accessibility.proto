@@ -10,6 +10,7 @@ message AccessibilitySettings {
   // sequence, and the settings are stored by number, so a fork field in that range is read
   // as upstream's next field once upstream adds it (field 65 did that on 2026-10-16).
   optional bool show_personas_button = 2221;
+  optional bool show_message_action_bar_copy_button = 2222;
   optional bool show_alt_text_on_images = 2223;
   optional double mobile_font_size = 2224;
   optional double mobile_message_group_spacing = 2225;
