@@ -307,6 +307,8 @@ export class PersonaStoreClass {
 	}
 
 	async setDisplayTag(text: string, icon?: string | null): Promise<void> {
+		const prevText = this._displayTagText;
+		const prevIcon = this._displayTagIcon;
 		const newText = text.trim();
 		const newIcon = icon !== undefined ? (icon ? icon.trim() : null) : this._displayTagIcon;
 		runInAction(() => {
@@ -321,7 +323,11 @@ export class PersonaStoreClass {
 				},
 			});
 		} catch {
-			// Non-blocking
+			runInAction(() => {
+				this._displayTagText = prevText;
+				this._displayTagIcon = prevIcon;
+			});
+			Toast.error('Failed to update display tag');
 		}
 	}
 
@@ -417,6 +423,10 @@ export class PersonaStoreClass {
 	}
 
 	async setActivePersonaMode(mode: ActivePersonaMode): Promise<void> {
+		const prevMode = this._activePersonaMode;
+		const prevId = this._activePersonaId;
+		const prevLatched = this._isPersonaLatched;
+
 		let targetId: string | null = this._activePersonaId;
 		let targetLatched: boolean = this._isPersonaLatched;
 
@@ -455,11 +465,20 @@ export class PersonaStoreClass {
 				},
 			});
 		} catch {
-			// Non-blocking
+			runInAction(() => {
+				this._activePersonaMode = prevMode;
+				this._activePersonaId = prevId;
+				this._isPersonaLatched = prevLatched;
+			});
+			Toast.error('Failed to update persona mode');
 		}
 	}
 
 	async setActivePersona(id: string | null, latch = true, mode?: ActivePersonaMode): Promise<void> {
+		const prevId = this._activePersonaId;
+		const prevLatched = this._isPersonaLatched;
+		const prevMode = this._activePersonaMode;
+
 		let newMode = mode ?? this._activePersonaMode;
 		if (!mode && id && latch && this._activePersonaMode === 'off') {
 			newMode = 'manual';
@@ -481,11 +500,20 @@ export class PersonaStoreClass {
 				},
 			});
 		} catch {
-			// Non-blocking
+			runInAction(() => {
+				this._activePersonaId = prevId;
+				this._isPersonaLatched = prevLatched;
+				this._activePersonaMode = prevMode;
+			});
+			Toast.error('Failed to set active persona');
 		}
 	}
 
 	async unlatch(preserveMode?: boolean): Promise<void> {
+		const prevLatched = this._isPersonaLatched;
+		const prevId = this._activePersonaId;
+		const prevMode = this._activePersonaMode;
+
 		const shouldPreserve = preserveMode ?? this._activePersonaMode === 'last';
 		const newMode = shouldPreserve ? this._activePersonaMode : 'off';
 
@@ -504,17 +532,24 @@ export class PersonaStoreClass {
 				},
 			});
 		} catch {
-			// Non-blocking
+			runInAction(() => {
+				this._isPersonaLatched = prevLatched;
+				this._activePersonaId = prevId;
+				this._activePersonaMode = prevMode;
+			});
+			Toast.error('Failed to clear active persona');
 		}
 	}
 
 	async recordPersonaUse(id: string): Promise<void> {
 		const persona = this._personas.find((p) => p.id === id);
 		if (persona) {
-			persona.use_count = (persona.use_count ?? 0) + 1;
-			persona.useCount = persona.use_count;
-			persona.last_used_at_ms = Date.now().toString();
-			persona.lastUsedAtMs = BigInt(persona.last_used_at_ms);
+			runInAction(() => {
+				persona.use_count = (persona.use_count ?? 0) + 1;
+				persona.useCount = persona.use_count;
+				persona.last_used_at_ms = Date.now().toString();
+				persona.lastUsedAtMs = BigInt(persona.last_used_at_ms);
+			});
 		}
 	}
 

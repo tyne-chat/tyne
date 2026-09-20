@@ -26,6 +26,16 @@ vi.mock('@app/features/user/state/UserSettings', () => ({
 	},
 }));
 
+vi.mock('@app/features/platform/transport/RestTransport', () => ({
+	http: {
+		get: vi.fn().mockResolvedValue({ok: true, status: 200, body: {}}),
+		post: vi.fn().mockResolvedValue({ok: true, status: 200, body: {}}),
+		patch: vi.fn().mockResolvedValue({ok: true, status: 200, body: {}}),
+		delete: vi.fn().mockResolvedValue({ok: true, status: 200, body: {}}),
+		configure: vi.fn(),
+	},
+}));
+
 installVoiceMenuTestBootstrap();
 
 const {PersonaStoreClass} = await import('./PersonaStore');
