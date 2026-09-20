@@ -367,6 +367,10 @@ msgstr "Set Active"
 msgid "Set as active persona"
 msgstr "Set as active persona"
 
+#. Short label for an advanced message action bar preference.
+msgid "Show copy button"
+msgstr "Hiện nút sao chép"
+
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
