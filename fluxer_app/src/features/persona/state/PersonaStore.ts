@@ -21,6 +21,7 @@ export type ActivePersonaMode = 'off' | 'manual' | 'last';
 export interface ClientPersona extends PersonaResponse {
 	// CamelCase aliases for backwards compatibility with React components
 	avatarUrl?: string | null;
+	bannerUrl?: string | null;
 	systemName?: string | null;
 	personaTags?: Array<{prefix?: string; suffix?: string}>;
 	accentColor?: number | null;
@@ -38,6 +39,7 @@ export function normalizePersona(
 ): ClientPersona {
 	const source: any = (raw as any)?.persona ?? raw;
 	const avatarUrl = source.avatar_url !== undefined ? source.avatar_url : (source.avatarUrl ?? null);
+	const bannerUrl = source.banner_url !== undefined ? source.banner_url : (source.bannerUrl ?? null);
 	const systemName = source.system_name !== undefined ? source.system_name : (source.systemName ?? null);
 	const color =
 		source.color !== undefined
@@ -62,6 +64,7 @@ export function normalizePersona(
 		id: source.id ?? '',
 		name: source.name ?? '',
 		avatar_url: avatarUrl,
+		banner_url: bannerUrl,
 		system_name: systemName,
 		pronouns: source.pronouns ?? null,
 		color,
@@ -76,6 +79,7 @@ export function normalizePersona(
 		updated_at: source.updated_at ?? new Date().toISOString(),
 		// CamelCase aliases
 		avatarUrl,
+		bannerUrl,
 		systemName,
 		personaTags: tags,
 		accentColor: color,
@@ -128,6 +132,7 @@ export class PersonaStoreClass {
 				name: own.name,
 				avatar: own.avatar_url ?? null,
 				avatar_color: own.color ?? null,
+				banner: own.banner_url ?? own.bannerUrl ?? null,
 				display_tag_text: own.system_name ?? null,
 				display_tag_icon: null,
 				system_name: own.system_name ?? null,
@@ -157,6 +162,7 @@ export class PersonaStoreClass {
 					name: body.name,
 					avatar: body.avatar_url ?? null,
 					avatar_color: body.color ?? null,
+					banner: body.banner_url ?? null,
 					display_tag_text: body.system_name ?? null,
 					display_tag_icon: null,
 					system_name: body.system_name ?? null,
@@ -362,6 +368,7 @@ export class PersonaStoreClass {
 	async addPersona(personaData: {
 		name: string;
 		avatar_url?: string | null;
+		banner_url?: string | null;
 		system_name?: string | null;
 		pronouns?: string | null;
 		color?: number | null;
@@ -377,6 +384,7 @@ export class PersonaStoreClass {
 			id,
 			name: personaData.name,
 			avatar_url: personaData.avatar_url ?? null,
+			banner_url: personaData.banner_url ?? null,
 			system_name: personaData.system_name ?? null,
 			pronouns: personaData.pronouns ?? null,
 			color: personaData.accentColor ?? personaData.accent_color ?? personaData.color ?? null,
@@ -681,6 +689,7 @@ export class PersonaStoreClass {
 					name: result.persona.name,
 					avatar: result.persona.avatar_url ?? null,
 					avatar_color: result.persona.color ?? null,
+					banner: (result.persona as any).banner_url ?? (result.persona as any).bannerUrl ?? null,
 					display_tag_text: this.displayTagText || null,
 					display_tag_icon: this.displayTagIcon || null,
 					system_name: this.displayTagText || null,
@@ -699,6 +708,7 @@ export class PersonaStoreClass {
 					name: currentSubprofile.name,
 					avatar: currentSubprofile.avatar ?? null,
 					avatar_color: currentSubprofile.avatar_color ?? null,
+					banner: currentSubprofile.banner ?? null,
 					display_tag_text: currentSubprofile.display_tag_text ?? currentSubprofile.system_name ?? null,
 					display_tag_icon: currentSubprofile.display_tag_icon ?? null,
 					system_name: currentSubprofile.display_tag_text ?? currentSubprofile.system_name ?? null,
