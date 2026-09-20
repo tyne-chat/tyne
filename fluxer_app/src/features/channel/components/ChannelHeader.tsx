@@ -135,13 +135,11 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 
 import {
 	HIDE_CHANNELS_DESCRIPTOR,
-	HIDE_SERVER_LIST_DESCRIPTOR,
 	SHOW_CHANNELS_DESCRIPTOR,
-	SHOW_SERVER_LIST_DESCRIPTOR,
 } from '@app/features/channel/components/channel_header/shared';
 import {useCollapsedPanelBadges} from '@app/features/channel/components/channel_header/useCollapsedPanelBadges';
 import LayoutState from '@app/features/ui/state/LayoutState';
-import {SidebarSimpleIcon, SquaresFourIcon} from '@phosphor-icons/react';
+import {SidebarSimpleIcon} from '@phosphor-icons/react';
 
 const {VoiceCallButton, VideoCallButton} = CallButtons;
 
@@ -643,32 +641,19 @@ export const ChannelHeader = observer(
 							) : (
 								<div className={styles.desktopPanelControls} data-flx="channel.channel-header.desktop-panel-controls">
 									<ChannelHeaderIcon
-										icon={SquaresFourIcon}
-										isSelected={LayoutState.serverListVisible}
-										badgeCount={collapsedBadges.serverListMentionCount}
-										hasUnread={collapsedBadges.serverListHasUnread}
-										label={
-											LayoutState.serverListVisible
-												? i18n._(HIDE_SERVER_LIST_DESCRIPTOR)
-												: i18n._(SHOW_SERVER_LIST_DESCRIPTOR)
-										}
-										onClick={LayoutCommands.toggleServerList}
-										aria-pressed={LayoutState.serverListVisible}
-										data-flx="channel.channel-header.toggle-server-list"
-									/>
-									<ChannelHeaderIcon
 										icon={SidebarSimpleIcon}
-										isSelected={LayoutState.channelListVisible}
-										badgeCount={collapsedBadges.channelListMentionCount}
-										hasUnread={collapsedBadges.channelListHasUnread}
+										isSelected={LayoutState.leftSidebarVisible}
+										badgeCount={collapsedBadges.mentionCount}
+										hasUnread={collapsedBadges.hasUnread}
 										label={
-											LayoutState.channelListVisible
+											LayoutState.leftSidebarVisible
 												? i18n._(HIDE_CHANNELS_DESCRIPTOR)
 												: i18n._(SHOW_CHANNELS_DESCRIPTOR)
 										}
-										onClick={LayoutCommands.toggleChannelList}
-										aria-pressed={LayoutState.channelListVisible}
-										data-flx="channel.channel-header.toggle-channel-list"
+										onClick={LayoutCommands.toggleLeftSidebar}
+										aria-pressed={LayoutState.leftSidebarVisible}
+										keybindAction="chat_toggle_channel_list"
+										data-flx="channel.channel-header.toggle-channels"
 									/>
 								</div>
 							)}

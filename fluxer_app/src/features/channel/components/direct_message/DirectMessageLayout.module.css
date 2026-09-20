@@ -27,9 +27,11 @@
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	left: calc(var(--layout-sidebar-peek-offset, 0px) - 2px);
+	left: calc(4.5rem - var(--outline-frame-border-width, 0.0625rem));
 	--layout-sidebar-width: var(--layout-sidebar-restored-width, 20rem);
-	width: calc(var(--layout-sidebar-width) + 2px);
+	width: calc(var(--layout-sidebar-width) + var(--outline-frame-border-width, 0.0625rem));
+	padding-left: var(--outline-frame-border-width, 0.0625rem);
+	box-sizing: border-box;
 	height: 100%;
 	min-height: 0;
 	z-index: var(--z-index-elevated-3, 40);
