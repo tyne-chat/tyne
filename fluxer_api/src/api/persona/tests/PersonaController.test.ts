@@ -449,4 +449,37 @@ describe('PersonaController', () => {
 				.execute();
 		});
 	});
+
+	describe('Persona banner support', () => {
+		test('creates and updates a persona with banner_url', async () => {
+			const created = await createBuilder<PersonaResponse>(harness, account.token)
+				.post('/users/@me/personas')
+				.body({
+					name: 'Banner Persona',
+					banner_url: 'https://cdn.example.com/banners/persona_banner.png',
+				})
+				.expect(HTTP_STATUS.CREATED)
+				.execute();
+
+			expect(created.banner_url).toBe('https://cdn.example.com/banners/persona_banner.png');
+
+			const updated = await createBuilder<PersonaResponse>(harness, account.token)
+				.patch(`/users/@me/personas/${created.id}`)
+				.body({
+					banner_url: 'https://cdn.example.com/banners/updated_banner.png',
+				})
+				.expect(HTTP_STATUS.OK)
+				.execute();
+
+			expect(updated.banner_url).toBe('https://cdn.example.com/banners/updated_banner.png');
+
+			// Also verify public endpoint returns banner_url
+			const publicPersona = await createBuilder<PersonaResponse>(harness, account.token)
+				.get(`/users/${account.userId}/personas/${created.id}`)
+				.expect(HTTP_STATUS.OK)
+				.execute();
+
+			expect(publicPersona.banner_url).toBe('https://cdn.example.com/banners/updated_banner.png');
+		});
+	});
 });

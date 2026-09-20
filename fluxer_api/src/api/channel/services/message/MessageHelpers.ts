@@ -103,6 +103,7 @@ export function normalizeMessageSubprofile(
 		name: subprofile.name,
 		avatar: subprofile.avatar ?? null,
 		avatar_color: subprofile.avatar_color ?? null,
+		banner: (subprofile as any).banner ?? null,
 		display_tag_text: subprofile.display_tag_text ?? subprofile.system_name ?? null,
 		display_tag_icon: subprofile.display_tag_icon ?? null,
 		system_name: subprofile.system_name ?? subprofile.display_tag_text ?? null,
