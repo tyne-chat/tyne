@@ -81,6 +81,7 @@ const SECTION_DISPLAY_ORDER: Partial<Record<KeybindSection, ReadonlyArray<Keybin
 		'chat_send_voice_message',
 		'chat_toggle_pins',
 		'chat_toggle_inbox',
+		'chat_toggle_channel_list',
 		'chat_toggle_member_list',
 		'chat_scroll_up',
 		'chat_scroll_down',

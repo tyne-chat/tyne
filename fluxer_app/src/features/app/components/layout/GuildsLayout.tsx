@@ -169,23 +169,18 @@ interface GuildsLayoutSidebarStyle extends React.CSSProperties {
 function resolveGuildsLayoutSidebarStyle(
 	mobileEnabled: boolean,
 	sidebarWidth: string | null,
-	serverListVisible: boolean,
-	channelListVisible: boolean,
+	leftSidebarVisible: boolean,
 ): React.CSSProperties | undefined {
 	if (mobileEnabled) return undefined;
 	const style: GuildsLayoutSidebarStyle = {};
 	const actualSidebarWidth = sidebarWidth != null && sidebarWidth !== '' ? sidebarWidth : '20rem';
 	style['--layout-sidebar-restored-width'] = actualSidebarWidth;
-	if (!serverListVisible) {
+	if (!leftSidebarVisible) {
 		style['--layout-guild-list-width'] = '0px';
-		style['--layout-sidebar-peek-offset'] = '4.5rem';
-	} else {
-		style['--layout-sidebar-peek-offset'] = '0px';
-	}
-	if (!channelListVisible) {
 		style['--layout-sidebar-width'] = '0px';
-	} else if (sidebarWidth != null && sidebarWidth !== '') {
-		style['--layout-sidebar-width'] = sidebarWidth;
+	} else {
+		style['--layout-guild-list-width'] = '4.5rem';
+		style['--layout-sidebar-width'] = actualSidebarWidth;
 	}
 	return style;
 }
@@ -2249,23 +2244,11 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 	useEffect(() => {
 		preloadMacPermissionsModal();
 	}, []);
-	const isServerListOpen = mobileLayout.enabled ? showGuildListOnMobile : LayoutState.serverListVisible;
-	const isServerListPeeking = !isServerListOpen && LayoutState.isLeftHoverPeeking && !mobileLayout.enabled;
-	const isChannelListPeeking =
-		!mobileLayout.enabled && !LayoutState.channelListVisible && LayoutState.isLeftHoverPeeking;
-	const shouldShowSidebarDivider = !mobileLayout.enabled && LayoutState.channelListVisible;
+	const isLeftSidebarOpen = mobileLayout.enabled ? showGuildListOnMobile : LayoutState.leftSidebarVisible;
+	const isLeftSidebarPeeking = !isLeftSidebarOpen && LayoutState.isLeftHoverPeeking && !mobileLayout.enabled;
+	const shouldShowSidebarDivider = !mobileLayout.enabled && LayoutState.leftSidebarVisible;
 
-	const isUserAreaHidden =
-		!mobileLayout.enabled &&
-		!LayoutState.serverListVisible &&
-		!LayoutState.channelListVisible &&
-		!LayoutState.isLeftHoverPeeking;
-
-	const isUserAreaCompact =
-		!mobileLayout.enabled &&
-		!LayoutState.channelListVisible &&
-		!LayoutState.isLeftHoverPeeking &&
-		LayoutState.serverListVisible;
+	const isUserAreaHidden = !mobileLayout.enabled && !LayoutState.leftSidebarVisible && !LayoutState.isLeftHoverPeeking;
 
 	return (
 		<div
@@ -2280,20 +2263,16 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 			style={resolveGuildsLayoutSidebarStyle(
 				mobileLayout.enabled,
 				SidebarWidth.cssValue,
-				LayoutState.serverListVisible,
-				LayoutState.channelListVisible,
+				LayoutState.leftSidebarVisible,
 			)}
 			data-flx="app.guilds-layout.guilds-layout"
 		>
 			<EdgeProximitySensor data-flx="app.guilds-layout.edge-proximity-sensor" />
-			{!isVoiceCallFullscreenActive && isServerListOpen && (
+			{!isVoiceCallFullscreenActive && isLeftSidebarOpen && (
 				<GuildList key="guild-list" data-flx="app.guilds-layout.guild-list" />
 			)}
-			{!isVoiceCallFullscreenActive && isServerListPeeking && (
-				<div
-					className={clsx(styles.guildListOverlay, isChannelListPeeking && styles.guildListOverlayNoShadow)}
-					data-flx="app.guilds-layout.guild-list-overlay"
-				>
+			{!isVoiceCallFullscreenActive && isLeftSidebarPeeking && (
+				<div className={styles.guildListOverlay} data-flx="app.guilds-layout.guild-list-overlay">
 					<GuildList key="guild-list-peek" data-flx="app.guilds-layout.guild-list" />
 				</div>
 			)}
@@ -2337,8 +2316,7 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 					className={clsx(
 						styles.userAreaWrapper,
 						isUserAreaHidden && styles.userAreaWrapperHidden,
-						isUserAreaCompact && styles.userAreaWrapperCompact,
-						isChannelListPeeking && styles.userAreaWrapperPeeking,
+						isLeftSidebarPeeking && styles.userAreaWrapperPeeking,
 					)}
 					data-flx="app.guilds-layout.user-area-wrapper"
 				>
