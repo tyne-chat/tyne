@@ -8,7 +8,25 @@ function brandedLink(rel: string): HTMLLinkElement | null {
 	return document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"][data-fluxer-branding="true"]`);
 }
 
+const defaultDocumentLinks = new Map<string, Array<HTMLLinkElement>>();
+
+function unbrandedLinks(rel: string): Array<HTMLLinkElement> {
+	return Array.from(
+		document.head.querySelectorAll<HTMLLinkElement>(`link[rel="${rel}"]:not([data-fluxer-branding="true"])`),
+	);
+}
+
 function setLink(rel: string, href: string): void {
+	// Stash any unbranded default links (e.g. from index.html) before removing them
+	if (!defaultDocumentLinks.has(rel)) {
+		defaultDocumentLinks.set(rel, unbrandedLinks(rel));
+	}
+
+	// Remove unbranded links from the DOM so there are never competing icons in <head>
+	for (const link of unbrandedLinks(rel)) {
+		link.remove();
+	}
+
 	const existing = brandedLink(rel);
 	const link = existing ?? document.createElement('link');
 	link.rel = rel;
@@ -21,6 +39,13 @@ function setLink(rel: string, href: string): void {
 
 function removeLink(rel: string): void {
 	brandedLink(rel)?.remove();
+
+	// Restore original unbranded links if they were previously stashed
+	for (const link of defaultDocumentLinks.get(rel) ?? []) {
+		if (!link.isConnected) {
+			document.head.appendChild(link);
+		}
+	}
 }
 
 function suspendDefaultLinks(rel: string): void {
@@ -65,10 +90,12 @@ function applyDocumentBranding(productName: string, faviconUrl: string | null, t
 	setMeta('apple-mobile-web-app-title', productName);
 	if (faviconUrl === null) {
 		removeLink('icon');
+		removeLink('apple-touch-icon');
 		restoreDefaultLinks('icon');
 	} else {
 		suspendDefaultLinks('icon');
 		setLink('icon', faviconUrl);
+		setLink('apple-touch-icon', faviconUrl);
 	}
 	if (themeColor === null) {
 		removeMeta('theme-color');
