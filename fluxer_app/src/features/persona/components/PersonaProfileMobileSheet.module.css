@@ -20,6 +20,14 @@
 	border-top-right-radius: 1.5rem;
 }
 
+.bannerImage {
+	height: 100%;
+	width: 100%;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
 .bannerColor {
 	height: 100%;
 	width: 100%;
