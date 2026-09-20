@@ -59,7 +59,6 @@ export class MessageValidationService {
 		const hasFavoriteMeme = Boolean('favorite_meme_id' in data && data.favorite_meme_id != null);
 		const hasStickers = Boolean('sticker_ids' in data && data.sticker_ids != null && data.sticker_ids.length > 0);
 		const hasFlags = data.flags !== undefined && data.flags !== null;
-		const hasSubprofile = 'subprofile' in data && data.subprofile !== undefined;
 
 		const effectiveHasContent =
 			isUpdate && existingMessage && data.content === undefined
@@ -93,7 +92,7 @@ export class MessageValidationService {
 			!effectiveHasAttachments &&
 			!hasFavoriteMeme &&
 			!hasStickers &&
-			(!isUpdate || (!hasFlags && !hasSubprofile))
+			(!isUpdate || !hasFlags)
 		) {
 			throw new CannotSendEmptyMessageError();
 		}
