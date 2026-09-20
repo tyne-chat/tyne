@@ -476,7 +476,6 @@ pub struct ApiMessageResponse {
         deserialize_with = "deserialize_double_option"
     )]
     pub referenced_message: Option<Option<Box<ApiMessageResponse>>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub subprofile: Option<MessageSubprofile>,
 }
 
