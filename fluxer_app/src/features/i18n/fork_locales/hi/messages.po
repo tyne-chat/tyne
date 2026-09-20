@@ -113,6 +113,7 @@ msgstr "Duplicate tag pair on this persona"
 msgid "Edit Persona"
 msgstr "Edit Persona"
 
+#. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
 msgstr "Edit persona"
@@ -266,9 +267,11 @@ msgid "Persona deleted"
 msgstr "Persona deleted"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
+#. Fallback screen reader label for the persona profile modal. Keep it concise.
 msgid "Persona profile"
 msgstr "परसोना प्रोफ़ाइल"
 
+#. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
 #. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
 msgid "Persona profile: {name}"
 msgstr "परसोना प्रोफ़ाइल: {name}"
