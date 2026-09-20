@@ -24,6 +24,10 @@ import type {
 	ProfileBadgeResponse,
 } from '@fluxer/schema/src/domains/user/ProfileBadgeSchemas';
 
+// Fork imports.
+
+import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobile';
+
 const logger = new Logger('UserProfiles');
 const pendingRequests: Map<string, Promise<Profile>> = new Map();
 
@@ -143,6 +147,7 @@ export function closeUserProfileSurfaces(): void {
 	PopoutCommands.closeAll();
 	ContextMenuCommands.close();
 	UserProfileMobile.close();
+	PersonaProfileMobile.close();
 	ModalCommands.popAllByType(UserProfileModal);
 }
 
