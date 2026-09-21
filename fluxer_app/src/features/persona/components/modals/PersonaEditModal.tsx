@@ -15,8 +15,9 @@ import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
-import {ColorPickerField} from '@app/features/ui/components/form/ColorPickerField';
+import {Input, Textarea} from '@app/features/ui/components/form/FormInput';
 import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
+import {AccentColorPicker} from '@app/features/user/components/modals/tabs/my_profile_tab/AccentColorPicker';
 import {AvatarUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/AvatarUploader';
 import {BannerUploader} from '@app/features/user/components/modals/tabs/my_profile_tab/BannerUploader';
 import popoutStyles from '@app/features/user/components/popouts/UserProfilePopout.module.css';
@@ -27,6 +28,7 @@ import {ProfileCardLayout} from '@app/features/user/components/profile/profile_c
 import {ProfileCardUserInfo} from '@app/features/user/components/profile/profile_card/ProfileCardUserInfo';
 import {PROFILE_POPOUT_GEOMETRY_STYLE} from '@app/features/user/constants/UserProfileSurfaceGeometry';
 import Users from '@app/features/user/state/Users';
+import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import type {PersonaVisibility} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
@@ -95,10 +97,6 @@ const VISIBILITY_PUBLIC_DESC = msg({
 const VISIBILITY_PRIVATE_DESC = msg({
 	message: 'Only visible to you. Others cannot view this persona’s full bio or profile details.',
 	comment: 'Helper description for private persona visibility',
-});
-const ACCENT_COLOR_DESCRIPTION_DESCRIPTOR = msg({
-	message: "Customizes the border and banner color on this persona's profile",
-	comment: 'Description for persona accent color picker',
 });
 const NAME_PLACEHOLDER_DESCRIPTOR = msg({
 	message: 'e.g. Alice',
@@ -530,7 +528,6 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	const handleDeletePersona = () => {
 		if (!formData.id) return;
 		const personaId = formData.id;
-		const personaName = formData.name;
 
 		ModalCommands.push(
 			modal(() => (
@@ -539,7 +536,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					description={
 						<Trans>
 							Are you sure you want to delete{' '}
-							<strong data-flx="persona.persona-edit-modal.handle-delete-persona.strong">{personaName}</strong>? This
+							<strong data-flx="persona.persona-edit-modal.handle-delete-persona.strong">{formData.name}</strong>? This
 							action cannot be undone.
 						</Trans>
 					}
@@ -552,7 +549,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								type: 'success',
 								children: i18n._(PERSONA_DELETED_DESCRIPTOR),
 							});
-							onClose();
+							ModalCommands.popWithKey(PERSONA_EDIT_MODAL_KEY);
 						} catch {
 							ToastCommands.createToast({
 								type: 'error',
@@ -668,181 +665,175 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					<div className={styles.layout} data-flx="persona.persona-edit-modal.layout">
 						{/* Left column: Form */}
 						<div className={styles.formColumn} data-flx="persona.persona-edit-modal.form-column">
-							<div className={styles.formGrid} data-flx="persona.persona-edit-modal.form-grid">
-								<div className={styles.formField} data-flx="persona.persona-edit-modal.form-field">
-									<div className={styles.formLabel} data-flx="persona.persona-edit-modal.form-label">
-										<Trans>Name *</Trans>
-									</div>
-									<input
-										type="text"
-										className={styles.textInput}
-										placeholder={i18n._(NAME_PLACEHOLDER_DESCRIPTOR)}
-										maxLength={100}
-										value={formData.name}
-										onChange={(e) => setFormData({...formData, name: e.target.value})}
-										data-flx="persona.persona-edit-modal.text-input.set-form-data"
-									/>
-								</div>
+							{/* 1. Display name */}
+							<Input
+								label={<Trans>Display name</Trans>}
+								placeholder={i18n._(NAME_PLACEHOLDER_DESCRIPTOR)}
+								maxLength={100}
+								value={formData.name}
+								onChange={(e) => setFormData((prev) => ({...prev, name: e.target.value}))}
+								data-flx="persona.persona-edit-modal.input.name"
+							/>
 
-								<div className={styles.formField} data-flx="persona.persona-edit-modal.form-field--2">
-									<div className={styles.formLabel} data-flx="persona.persona-edit-modal.form-label--2">
-										<Trans>Pronouns</Trans>
-									</div>
-									<input
-										type="text"
-										className={styles.textInput}
-										placeholder={i18n._(PRONOUNS_PLACEHOLDER_DESCRIPTOR)}
-										maxLength={100}
-										value={formData.pronouns}
-										onChange={(e) => setFormData({...formData, pronouns: e.target.value})}
-										data-flx="persona.persona-edit-modal.text-input.set-form-data--2"
-									/>
-								</div>
+							{/* 2. Pronouns */}
+							<Input
+								label={<Trans>Pronouns</Trans>}
+								placeholder={i18n._(PRONOUNS_PLACEHOLDER_DESCRIPTOR)}
+								maxLength={100}
+								value={formData.pronouns}
+								onChange={(e) => setFormData((prev) => ({...prev, pronouns: e.target.value}))}
+								data-flx="persona.persona-edit-modal.input.pronouns"
+							/>
 
-								<div className={styles.formField} data-flx="persona.persona-edit-modal.form-field--3">
-									<div className={styles.formLabel} data-flx="persona.persona-edit-modal.form-label--3">
-										<Trans>Accent color</Trans>
-									</div>
-									<ColorPickerField
-										description={i18n._(ACCENT_COLOR_DESCRIPTION_DESCRIPTOR)}
-										value={formData.accentColor ?? 0}
-										onChange={(accentColor) =>
-											setFormData((prev) => ({...prev, accentColor: accentColor === 0 ? null : accentColor}))
-										}
-										onReset={() => setFormData((prev) => ({...prev, accentColor: null}))}
-										data-flx="persona.persona-edit-modal.accent-color-picker-field"
-									/>
-								</div>
+							{/* 3. Avatar */}
+							<AvatarUploader
+								hasAvatar={Boolean(formData.avatarUrl)}
+								onAvatarChange={handleAvatarUpload}
+								onAvatarClear={handleAvatarClear}
+								isPerGuildProfile={false}
+								disabled={isUploadingAvatar}
+								data-flx="persona.persona-edit-modal.avatar-uploader"
+							/>
 
-								<div
-									className={styles.formField}
-									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.persona-edit-modal.form-field--4"
-								>
-									<div className={styles.formLabel} data-flx="persona.persona-edit-modal.form-label--4">
-										<Trans>Bio</Trans>
-									</div>
-									<textarea
-										className={styles.textareaInput}
-										placeholder={i18n._(BIO_PLACEHOLDER_DESCRIPTOR)}
-										maxLength={4096}
-										rows={4}
-										value={formData.bio}
-										onChange={(e) => setFormData({...formData, bio: e.target.value})}
-										data-flx="persona.persona-edit-modal.textarea-input.set-form-data"
-									/>
-								</div>
+							{/* 4. Banner */}
+							<BannerUploader
+								hasBanner={Boolean(formData.bannerUrl)}
+								onBannerChange={handleBannerUpload}
+								onBannerClear={handleBannerClear}
+								disabled={isUploadingBanner}
+								disableModeSelection={true}
+								requireBannerEntitlement={false}
+								isPerGuildProfile={false}
+								data-flx="persona.persona-edit-modal.banner-uploader"
+							/>
 
-								<div
-									className={styles.formField}
-									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.persona-edit-modal.form-field--5"
-								>
-									<div className={styles.formLabel} data-flx="persona.persona-edit-modal.form-label--5">
-										<Trans>Visibility</Trans>
+							{/* 5. Accent color */}
+							<AccentColorPicker
+								value={formData.accentColor}
+								onChange={(accentColor) => setFormData((prev) => ({...prev, accentColor}))}
+								disabled={isSubmitting}
+								data-flx="persona.persona-edit-modal.accent-color-picker"
+							/>
+
+							{/* 6. About me */}
+							<Textarea
+								label={<Trans>About me</Trans>}
+								placeholder={i18n._(BIO_PLACEHOLDER_DESCRIPTOR)}
+								maxLength={4096}
+								minRows={3}
+								maxRows={8}
+								showCharacterCount={true}
+								footer={
+									<div className={styles.inputFooter} data-flx="persona.persona-edit-modal.input-footer">
+										<Trans>You can use links, emoji, and Markdown.</Trans>
 									</div>
-									<SegmentedTabs<PersonaVisibility>
-										tabs={visibilityTabs}
-										selectedTab={formData.visibility}
-										onTabChange={(vis) => setFormData((prev) => ({...prev, visibility: vis}))}
-										ariaLabel={i18n._(PERSONA_VISIBILITY_ARIA_DESCRIPTOR)}
-										data-flx="persona.persona-edit-modal.segmented-tabs"
-									/>
-									<div
-										className={styles.modeHelperText}
-										style={{marginTop: 6}}
-										data-flx="persona.persona-edit-modal.mode-helper-text"
+								}
+								value={formData.bio}
+								onChange={(e) => setFormData((prev) => ({...prev, bio: e.target.value}))}
+								data-flx="persona.persona-edit-modal.textarea.bio"
+							/>
+
+							{/* 7. Persona Tags (Prefix & Suffix) */}
+							<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block">
+								<div className={styles.tagsHeader} data-flx="persona.persona-edit-modal.tags-header">
+									<span className={styles.fieldLabel} data-flx="persona.persona-edit-modal.field-label">
+										<Trans>Persona Tags (Prefix & Suffix)</Trans>
+									</span>
+									<Button
+										variant="secondary"
+										small
+										leftIcon={<Plus size={14} data-flx="persona.persona-edit-modal.plus" />}
+										onClick={handleAddTagRow}
+										disabled={formData.tags.length >= 5}
+										data-flx="persona.persona-edit-modal.button.add-tag-row"
 									>
-										<Info
-											size={16}
-											weight="bold"
-											className={styles.modeHelperIcon}
-											data-flx="persona.persona-edit-modal.mode-helper-icon"
-										/>
-										<span data-flx="persona.persona-edit-modal.span">
-											{visibilityDescriptions[formData.visibility]}
-										</span>
-									</div>
+										<Trans>Add Tag Pair ({formData.tags.length}/5)</Trans>
+									</Button>
 								</div>
-
-								<div
-									className={styles.formField}
-									style={{gridColumn: '1 / -1'}}
-									data-flx="persona.persona-edit-modal.form-field--6"
-								>
-									<div
-										style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}
-										data-flx="persona.persona-edit-modal.div"
-									>
-										<div className={styles.formLabel} data-flx="persona.persona-edit-modal.form-label--6">
-											<Trans>Persona Tags (Prefix & Suffix)</Trans>
-										</div>
-										<Button
-											variant="secondary"
-											small
-											leftIcon={<Plus size={14} data-flx="persona.persona-edit-modal.plus" />}
-											onClick={handleAddTagRow}
-											disabled={formData.tags.length >= 5}
-											data-flx="persona.persona-edit-modal.button.add-tag-row"
-										>
-											<Trans>Add Tag Pair ({formData.tags.length}/5)</Trans>
-										</Button>
-									</div>
-									{formData.tags.map((tag, idx) => {
-										const tagError = getTagRowError(idx);
-										return (
-											<div key={idx} style={{marginBottom: 6}} data-flx="persona.persona-edit-modal.div--2">
-												<div
-													className={styles.tagRow}
-													style={{marginBottom: tagError ? 2 : 0}}
-													data-flx="persona.persona-edit-modal.tag-row"
-												>
-													<input
-														type="text"
-														className={`${styles.tagInput} ${tagError ? styles.tagInputError : ''}`}
-														placeholder={i18n._(PREFIX_PLACEHOLDER_DESCRIPTOR)}
-														value={tag.prefix}
-														onChange={(e) => handleTagChange(idx, 'prefix', e.target.value)}
-														data-flx="persona.persona-edit-modal.tag-input.tag-change.text"
+								{formData.tags.map((tag, idx) => {
+									const tagError = getTagRowError(idx);
+									return (
+										<div key={idx} style={{marginBottom: 6}} data-flx="persona.persona-edit-modal.div">
+											<div
+												className={styles.tagRow}
+												style={{marginBottom: tagError ? 2 : 0}}
+												data-flx="persona.persona-edit-modal.tag-row"
+											>
+												<input
+													type="text"
+													className={`${styles.tagInput} ${tagError ? styles.tagInputError : ''}`}
+													placeholder={i18n._(PREFIX_PLACEHOLDER_DESCRIPTOR)}
+													value={tag.prefix}
+													onChange={(e) => handleTagChange(idx, 'prefix', e.target.value)}
+													data-flx="persona.persona-edit-modal.tag-input.tag-change.text"
+												/>
+												<span style={{color: 'var(--text-primary-muted)'}} data-flx="persona.persona-edit-modal.span">
+													text
+												</span>
+												<input
+													type="text"
+													className={`${styles.tagInput} ${tagError ? styles.tagInputError : ''}`}
+													placeholder={i18n._(SUFFIX_PLACEHOLDER_DESCRIPTOR)}
+													value={tag.suffix}
+													onChange={(e) => handleTagChange(idx, 'suffix', e.target.value)}
+													data-flx="persona.persona-edit-modal.tag-input.tag-change.text--2"
+												/>
+												{formData.tags.length > 1 && (
+													<Button
+														variant="danger"
+														small
+														square
+														icon={<Trash size={14} data-flx="persona.persona-edit-modal.trash" />}
+														onClick={() => handleRemoveTagRow(idx)}
+														aria-label={i18n._(REMOVE_TAG_PAIR_ARIA_DESCRIPTOR)}
+														data-flx="persona.persona-edit-modal.button.remove-tag-row"
 													/>
-													<span
-														style={{color: 'var(--text-primary-muted)'}}
-														data-flx="persona.persona-edit-modal.span--2"
-													>
-														text
-													</span>
-													<input
-														type="text"
-														className={`${styles.tagInput} ${tagError ? styles.tagInputError : ''}`}
-														placeholder={i18n._(SUFFIX_PLACEHOLDER_DESCRIPTOR)}
-														value={tag.suffix}
-														onChange={(e) => handleTagChange(idx, 'suffix', e.target.value)}
-														data-flx="persona.persona-edit-modal.tag-input.tag-change.text--2"
-													/>
-													{formData.tags.length > 1 && (
-														<Button
-															variant="danger"
-															small
-															square
-															icon={<Trash size={14} data-flx="persona.persona-edit-modal.trash" />}
-															onClick={() => handleRemoveTagRow(idx)}
-															aria-label={i18n._(REMOVE_TAG_PAIR_ARIA_DESCRIPTOR)}
-															data-flx="persona.persona-edit-modal.button.remove-tag-row"
-														/>
-													)}
-												</div>
-												{tagError && (
-													<div className={styles.tagErrorText} data-flx="persona.persona-edit-modal.tag-error-text">
-														{tagError}
-													</div>
 												)}
 											</div>
-										);
-									})}
+											{tagError && (
+												<div className={styles.tagErrorText} data-flx="persona.persona-edit-modal.tag-error-text">
+													{tagError}
+												</div>
+											)}
+										</div>
+									);
+								})}
+							</div>
+
+							{/* 8. Visibility */}
+							<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block--2">
+								<div
+									className={styles.fieldLabel}
+									style={{marginBottom: '0.5rem'}}
+									data-flx="persona.persona-edit-modal.field-label--2"
+								>
+									<Trans>Visibility</Trans>
+								</div>
+								<SegmentedTabs<PersonaVisibility>
+									tabs={visibilityTabs}
+									selectedTab={formData.visibility}
+									onTabChange={(vis) => setFormData((prev) => ({...prev, visibility: vis}))}
+									ariaLabel={i18n._(PERSONA_VISIBILITY_ARIA_DESCRIPTOR)}
+									data-flx="persona.persona-edit-modal.segmented-tabs"
+								/>
+								<div
+									className={styles.modeHelperText}
+									style={{marginTop: 6}}
+									data-flx="persona.persona-edit-modal.mode-helper-text"
+								>
+									<Info
+										size={16}
+										weight="bold"
+										className={styles.modeHelperIcon}
+										data-flx="persona.persona-edit-modal.mode-helper-icon"
+									/>
+									<span data-flx="persona.persona-edit-modal.span--2">
+										{visibilityDescriptions[formData.visibility]}
+									</span>
 								</div>
 							</div>
 
-							{/* Bottom actions: Delete button only when editing existing persona */}
+							{/* 9. Bottom actions: Delete button only when editing existing persona */}
 							{formData.id && (
 								<div className={styles.detailBottomActions} data-flx="persona.persona-edit-modal.detail-bottom-actions">
 									<Button
@@ -858,17 +849,15 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 							)}
 						</div>
 
-						{/* Right column: Live Profile Preview + Buttons only for Avatar/Banner */}
+						{/* Right column: Live Profile Preview */}
 						{currentUser && (
 							<div className={styles.previewColumn} data-flx="persona.persona-edit-modal.preview-column">
-								<div className={styles.previewColumnHeader} data-flx="persona.persona-edit-modal.preview-column-header">
-									<Trans>Profile preview</Trans>
-								</div>
 								<div className={styles.liveCardWrapper} data-flx="persona.persona-edit-modal.live-card-wrapper">
 									<ProfileCardLayout
 										borderColor={
 											formData.accentColor != null ? ColorUtils.int2hex(formData.accentColor) : 'var(--border-color)'
 										}
+										showPreviewLabel={true}
 										className={popoutStyles.profilePopoutCard}
 										style={PROFILE_POPOUT_GEOMETRY_STYLE}
 										data-flx="persona.persona-edit-modal.profile-card-layout"
@@ -880,7 +869,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 												formData.accentColor != null ? ColorUtils.int2hex(formData.accentColor) : 'var(--bg-secondary)'
 											}
 											user={currentUser}
-											avatarUrl={formData.avatarUrl || null}
+											avatarUrl={formData.avatarUrl.trim() || AvatarUtils.getUserAvatarURL(currentUser, false)}
 											hoverAvatarUrl={null}
 											disablePresence={true}
 											isClickable={false}
@@ -931,10 +920,10 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 											) : null}
 											<div
 												className={sharedStyles.connectionsCompactSeparator}
-												data-flx="persona.persona-edit-modal.div--3"
+												data-flx="persona.persona-edit-modal.div--2"
 											/>
-											<div className={sharedStyles.connectionsContainer} data-flx="persona.persona-edit-modal.div--4">
-												<div className={sharedStyles.connectionsTitle} data-flx="persona.persona-edit-modal.div--5">
+											<div className={sharedStyles.connectionsContainer} data-flx="persona.persona-edit-modal.div--3">
+												<div className={sharedStyles.connectionsTitle} data-flx="persona.persona-edit-modal.div--4">
 													<Trans>Main account</Trans>
 												</div>
 												<div
@@ -969,33 +958,6 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 										</ProfileCardContent>
 									</ProfileCardLayout>
 								</div>
-
-								{/* Avatar & Banner Controls: Button-only with hideLabel={true} */}
-								<div
-									className={styles.previewUploadersSection}
-									data-flx="persona.persona-edit-modal.preview-uploaders-section"
-								>
-									<AvatarUploader
-										hasAvatar={Boolean(formData.avatarUrl)}
-										onAvatarChange={handleAvatarUpload}
-										onAvatarClear={handleAvatarClear}
-										isPerGuildProfile={false}
-										disabled={isUploadingAvatar}
-										hideLabel={true}
-										data-flx="persona.persona-edit-modal.avatar-uploader"
-									/>
-									<BannerUploader
-										hasBanner={Boolean(formData.bannerUrl)}
-										onBannerChange={handleBannerUpload}
-										onBannerClear={handleBannerClear}
-										disabled={isUploadingBanner}
-										disableModeSelection={true}
-										requireBannerEntitlement={false}
-										isPerGuildProfile={false}
-										hideLabel={true}
-										data-flx="persona.persona-edit-modal.banner-uploader"
-									/>
-								</div>
 							</div>
 						)}
 					</div>
@@ -1007,14 +969,17 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 PersonaEditModal.displayName = 'PersonaEditModal';
 
+export const PERSONA_EDIT_MODAL_KEY = 'persona-edit-modal';
+
 export function openPersonaEditModal(persona?: Persona | null): void {
-	ModalCommands.push(
+	ModalCommands.pushWithKey(
 		ModalCommands.modal(() => (
 			<PersonaEditModal
 				persona={persona}
-				onClose={() => ModalCommands.pop()}
+				onClose={() => ModalCommands.popWithKey(PERSONA_EDIT_MODAL_KEY)}
 				data-flx="persona.persona-edit-modal.open-persona-edit-modal.persona-edit-modal"
 			/>
 		)),
+		PERSONA_EDIT_MODAL_KEY,
 	);
 }
