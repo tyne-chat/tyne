@@ -32,9 +32,8 @@ msgstr "Add Tag Pair ({0}/5)"
 msgid "All Personas"
 msgstr "All Personas"
 
-#. placeholder {0}: persona.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgid "Are you sure you want to delete <0>{personaName}</0>? This action cannot be undone."
+msgstr "Are you sure you want to delete <0>{personaName}</0>? This action cannot be undone."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
@@ -110,6 +109,7 @@ msgstr "Downloading avatar {current} of {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Duplicate tag pair on this persona"
 
+#. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Edit Persona"
 
@@ -221,6 +221,7 @@ msgstr "Members with Avatars"
 msgid "Name *"
 msgstr "Name *"
 
+#. Title for new persona modal
 msgid "New Persona"
 msgstr "New Persona"
 
@@ -344,9 +345,6 @@ msgstr "Replace all existing personas (Destructive)"
 msgid "Root Account (Default)"
 msgstr "Root Account (Default)"
 
-msgid "Save Persona"
-msgstr "Save Persona"
-
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Saving personas..."
@@ -459,9 +457,6 @@ msgstr "Untagged messages send as the persona that spoke most recently. Whenever
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
 msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-
-msgid "Uploading avatar..."
-msgstr "Uploading avatar..."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
