@@ -8,7 +8,12 @@ import type {
 	PersonaTag,
 	PersonaVisibility,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {type MatchResult, matchPersona, previewPersona} from '@fluxer/schema/src/domains/persona/PersonaMatcher';
+import {
+	type MatchPersonaOptions,
+	type MatchResult,
+	matchPersona,
+	previewPersona,
+} from '@fluxer/schema/src/domains/persona/PersonaMatcher';
 import type {
 	MessageSubprofileRequest,
 	MessageSubprofileResponse,
@@ -575,7 +580,7 @@ export class PersonaStoreClass {
 		return {isCommand: false, handled: false};
 	}
 
-	matchOutgoingMessage(content: string, hasAttachments = false): MatchResult {
+	matchOutgoingMessage(content: string, hasAttachments = false, options?: MatchPersonaOptions): MatchResult {
 		const personasLike = this._personas.map((p) => ({
 			id: p.id,
 			name: p.name,
@@ -592,7 +597,7 @@ export class PersonaStoreClass {
 		}));
 
 		const activeLatchedId = this.activePersona?.id ?? null;
-		const result = matchPersona(content, personasLike, activeLatchedId, hasAttachments);
+		const result = matchPersona(content, personasLike, activeLatchedId, hasAttachments, options);
 
 		if (result.clearedLatch || (result.wasEscaped && this.activePersonaMode === 'last')) {
 			void this.unlatch();
