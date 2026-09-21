@@ -29,8 +29,10 @@ interface UseTextareaExpressionHandlersOptions {
 		sendOptions: {
 			hasAttachments: boolean;
 			favoriteMemeId?: string;
+			draftOverride?: string;
 		},
 	) => void;
+	clearComposer?: () => void;
 	enabled?: boolean;
 	channelId?: string;
 }
@@ -40,6 +42,7 @@ export const useTextareaExpressionHandlers = ({
 	previousValueRef,
 	segmentManagerRef,
 	sendOptimisticMessage,
+	clearComposer,
 	enabled = true,
 	channelId,
 }: UseTextareaExpressionHandlersOptions) => {
@@ -69,7 +72,13 @@ export const useTextareaExpressionHandlers = ({
 				: shareUrl;
 			if (channelId != null && !ActiveComposer.accepts(channelId)) return;
 			if (autoSend) {
-				sendOptimisticMessage({content: gifUrl}, {hasAttachments: false});
+				const currentDraft = previousValueRef.current || '';
+				sendOptimisticMessage({content: gifUrl}, {hasAttachments: false, draftOverride: currentDraft});
+				if (clearComposer) {
+					clearComposer();
+				} else {
+					setValue('');
+				}
 			} else {
 				appendText(gifUrl);
 			}
@@ -77,7 +86,7 @@ export const useTextareaExpressionHandlers = ({
 		return ComponentBus.subscribe('GIF_SELECT', (payload) => {
 			void handleGifSelect(payload);
 		});
-	}, [appendText, sendOptimisticMessage, enabled, channelId]);
+	}, [appendText, sendOptimisticMessage, setValue, clearComposer, enabled, previousValueRef, channelId]);
 	useEffect(() => {
 		const handleStickerSelect = (payload?: unknown) => {
 			if (!enabled || (channelId != null && !ActiveComposer.accepts(channelId))) return;
@@ -85,10 +94,19 @@ export const useTextareaExpressionHandlers = ({
 				sticker?: GuildSticker;
 			};
 			if (!sticker) return;
-			sendOptimisticMessage({content: '', stickers: [sticker.toJSON()]}, {hasAttachments: false});
+			const currentDraft = previousValueRef.current || '';
+			sendOptimisticMessage(
+				{content: '', stickers: [sticker.toJSON()]},
+				{hasAttachments: false, draftOverride: currentDraft},
+			);
+			if (clearComposer) {
+				clearComposer();
+			} else {
+				setValue('');
+			}
 		};
 		return ComponentBus.subscribe('STICKER_SELECT', handleStickerSelect);
-	}, [sendOptimisticMessage, enabled, channelId]);
+	}, [sendOptimisticMessage, setValue, clearComposer, enabled, previousValueRef, channelId]);
 	useEffect(() => {
 		const handleFavoriteMemeSelect = (payload?: unknown) => {
 			if (!enabled || (channelId != null && !ActiveComposer.accepts(channelId))) return;
@@ -104,11 +122,18 @@ export const useTextareaExpressionHandlers = ({
 				meme.gifProvider && meme.gifSlug ? GifSlugUtils.buildShareUrl(meme.gifProvider, meme.gifSlug) : null;
 			if (providerShareUrl) {
 				if (autoSend) {
-					sendOptimisticMessage({content: providerShareUrl}, {hasAttachments: false});
+					const currentDraft = previousValueRef.current || '';
+					sendOptimisticMessage({content: providerShareUrl}, {hasAttachments: false, draftOverride: currentDraft});
+					if (clearComposer) {
+						clearComposer();
+					} else {
+						setValue('');
+					}
 				} else {
 					appendText(providerShareUrl);
 				}
 			} else if (autoSend || isApiAttachmentUrl(meme.url)) {
+				const currentDraft = previousValueRef.current || '';
 				const uploadingAttachment = UploadingAttachment.fromDescriptor({
 					filename: meme.filename,
 					title: meme.name,
@@ -117,14 +142,19 @@ export const useTextareaExpressionHandlers = ({
 				}).toJSON();
 				sendOptimisticMessage(
 					{content: '', attachments: [uploadingAttachment]},
-					{hasAttachments: false, favoriteMemeId: meme.id},
+					{hasAttachments: false, favoriteMemeId: meme.id, draftOverride: currentDraft},
 				);
+				if (clearComposer) {
+					clearComposer();
+				} else {
+					setValue('');
+				}
 			} else {
 				void insertMemeUrl();
 			}
 		};
 		return ComponentBus.subscribe('FAVORITE_MEME_SELECT', handleFavoriteMemeSelect);
-	}, [appendText, sendOptimisticMessage, enabled, channelId]);
+	}, [appendText, sendOptimisticMessage, setValue, clearComposer, enabled, previousValueRef, channelId]);
 	useEffect(() => {
 		const handleInsertMention = (payload?: unknown) => {
 			if (!enabled || (channelId != null && !ActiveComposer.accepts(channelId))) return;
