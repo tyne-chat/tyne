@@ -281,6 +281,7 @@ fn policy_config_section(
         html! {
             div class="space-y-8" {
                 (single_community_form(base, csrf_token, policy))
+                (community_creation_form(base, csrf_token, policy))
                 (direct_messages_form(base, csrf_token, policy))
                 (premium_mode_form(base, csrf_token, policy, premium_name, billing_enabled))
                 (community_creation_form(base, csrf_token, policy))
@@ -331,6 +332,41 @@ fn single_community_form(base: &str, csrf_token: &str, policy: &InstancePolicyRe
                 p class="text-sm text-neutral-500" {
                     "Single-community mode is off. It can only be turned on for the first time \
                      from the self-host setup wizard."
+                }
+            }
+        }
+    }
+}
+
+fn community_creation_form(
+    base: &str,
+    csrf_token: &str,
+    policy: &InstancePolicyResponse,
+) -> Markup {
+    html! {
+        div class="space-y-4 border-t border-neutral-200 pt-6" {
+            div class="flex flex-wrap items-center gap-2" {
+                h3 class="text-sm font-semibold text-neutral-900" { "Community creation" }
+                @if policy.community_creation_staff_only {
+                    (badge("Staff only", BadgeVariant::Warning))
+                } @else {
+                    (badge("Everyone", BadgeVariant::Default))
+                }
+            }
+            p class="text-sm text-neutral-500" {
+                "Control who is allowed to create new communities on this instance. When set to \
+                 Staff only, non-staff users can only join existing communities via invite."
+            }
+            form method="post" action={(base) "/instance-config?action=update_policy"} {
+                (csrf_input(csrf_token))
+                div class="space-y-4" {
+                    (select_input("policy_community_creation_staff_only", "Who can create communities", &[
+                        ("false", "Everyone (all registered users)"),
+                        ("true", "Staff only"),
+                    ], if policy.community_creation_staff_only { "true" } else { "false" }))
+                    (form_actions(html! {
+                        (submit_button("Save community creation policy"))
+                    }))
                 }
             }
         }

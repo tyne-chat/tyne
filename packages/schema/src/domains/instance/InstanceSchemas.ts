@@ -226,6 +226,10 @@ export const InstanceCommunitySchema = z
 			.describe(
 				'Whether every account can create communities. When false, only admins and accounts granted the feature_guild_create limit can',
 			),
+		community_creation_staff_only: z
+			.boolean()
+			.default(false)
+			.describe('Whether community creation is restricted to staff members'),
 	})
 	.describe('Community topology and direct-message policy for this instance');
 export type InstanceCommunity = z.infer<typeof InstanceCommunitySchema>;

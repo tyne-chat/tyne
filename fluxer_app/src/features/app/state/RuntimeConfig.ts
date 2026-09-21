@@ -697,6 +697,7 @@ class RuntimeConfig {
 					: null,
 				direct_messages_disabled: config.policy.direct_messages_disabled,
 				guild_create_access: config.policy.guild_create_access,
+				community_creation_staff_only: config.policy.community_creation_staff_only,
 			},
 			services: {
 				gif_enabled: config.policy.services_resolved.gif_enabled,
@@ -834,6 +835,10 @@ class RuntimeConfig {
 
 	get directMessagesDisabled(): boolean {
 		return this.community.direct_messages_disabled;
+	}
+
+	get communityCreationStaffOnly(): boolean {
+		return this.community.community_creation_staff_only;
 	}
 
 	get gifEnabled(): boolean {

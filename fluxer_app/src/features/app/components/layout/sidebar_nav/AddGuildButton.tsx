@@ -20,18 +20,25 @@ import {HouseIcon, LinkIcon, PlusIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 
+// Fork imports.
+
+import {JOIN_A_COMMUNITY_DESCRIPTOR} from '@app/features/guild/components/modals/add_guild_modal/shared';
+import Users from '@app/features/user/state/Users';
+
 const CREATE_OR_JOIN_A_COMMUNITY_DESCRIPTOR = msg({
 	message: 'Create or join a community',
 	comment: 'Short label in the sidebar navigation add guild button.',
 });
 export const AddGuildButton = observer(() => {
 	const {i18n} = useLingui();
-	const buttonLabel = i18n._(CREATE_OR_JOIN_A_COMMUNITY_DESCRIPTOR);
+	const canCreate = !RuntimeConfig.communityCreationStaffOnly || (Users.currentUser?.isStaff() ?? false);
+	const buttonLabel = canCreate ? i18n._(CREATE_OR_JOIN_A_COMMUNITY_DESCRIPTOR) : i18n._(JOIN_A_COMMUNITY_DESCRIPTOR);
 	const handleAddGuild = (view?: AddGuildModalView) => {
+		const targetView = view ?? (canCreate ? 'landing' : 'join_guild');
 		ModalCommands.push(
 			modal(() => (
 				<AddGuildModal
-					initialView={view}
+					initialView={targetView}
 					data-flx="app.sidebar-nav.add-guild-button.handle-add-guild.add-guild-modal"
 				/>
 			)),
@@ -42,21 +49,23 @@ export const AddGuildButton = observer(() => {
 		e.stopPropagation();
 		ContextMenuCommands.openFromEvent(e, ({onClose}) => (
 			<MenuGroup data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-group">
-				<MenuItem
-					icon={
-						<HouseIcon
-							className={styles.menuIcon}
-							data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-icon"
-						/>
-					}
-					onClick={() => {
-						handleAddGuild('create_guild');
-						onClose();
-					}}
-					data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-item.add-guild"
-				>
-					{i18n._(CREATE_COMMUNITY_DESCRIPTOR)}
-				</MenuItem>
+				{canCreate && (
+					<MenuItem
+						icon={
+							<HouseIcon
+								className={styles.menuIcon}
+								data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-icon"
+							/>
+						}
+						onClick={() => {
+							handleAddGuild('create_guild');
+							onClose();
+						}}
+						data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-item.add-guild"
+					>
+						{i18n._(CREATE_COMMUNITY_DESCRIPTOR)}
+					</MenuItem>
+				)}
 				<MenuItem
 					icon={
 						<LinkIcon
