@@ -615,6 +615,7 @@ function parseCommunity(value: unknown): InstanceCommunity | null {
 		single_community_guild_id: readNonEmptyString(source, 'single_community_guild_id'),
 		direct_messages_disabled: directMessagesDisabled,
 		guild_create_access: readBoolean(source, 'guild_create_access') ?? true,
+		community_creation_staff_only: readBoolean(source, 'community_creation_staff_only') ?? false,
 	};
 }
 

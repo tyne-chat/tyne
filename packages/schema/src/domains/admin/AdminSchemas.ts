@@ -634,6 +634,7 @@ const AppPublicConfigUpdateRequest = z.object({
 const InstancePolicyResponse = z.object({
 	single_community_enabled: z.boolean(),
 	single_community_guild_id: z.string().nullable(),
+	community_creation_staff_only: z.boolean(),
 	direct_messages_disabled: z.boolean(),
 	direct_messages_locked: z.boolean(),
 	guild_create_access: z.boolean(),
@@ -762,6 +763,7 @@ export type InstanceConfigResponse = z.infer<typeof InstanceConfigResponse>;
 const InstancePolicyUpdateSchema = z.object({
 	single_community_enabled: z.boolean().optional(),
 	single_community_name: z.string().trim().min(1).max(100).optional(),
+	community_creation_staff_only: z.boolean().optional(),
 	direct_messages_disabled: z.boolean().optional(),
 	direct_messages_locked: z.literal(false).optional(),
 	premium_mode: z.enum(['mirror', 'everyone']).optional(),

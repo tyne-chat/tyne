@@ -159,6 +159,7 @@ async function buildInstanceConfigResponse(): Promise<InstanceConfigResponse> {
 		policy: {
 			single_community_enabled: policy.single_community_enabled,
 			single_community_guild_id: policy.single_community_guild_id,
+			community_creation_staff_only: policy.community_creation_staff_only,
 			direct_messages_disabled: policy.direct_messages_disabled,
 			direct_messages_locked: policy.direct_messages_locked,
 			guild_create_access: policy.guild_create_access,
@@ -842,6 +843,9 @@ function planInstancePolicyPatch(
 		} else {
 			patch.single_community_enabled = false;
 		}
+	}
+	if (policy.community_creation_staff_only !== undefined) {
+		patch.community_creation_staff_only = policy.community_creation_staff_only;
 	}
 	const unlockDirectMessages = policy.direct_messages_locked === false;
 	if (unlockDirectMessages && current.direct_messages_locked) {

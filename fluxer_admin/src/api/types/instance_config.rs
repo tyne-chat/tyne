@@ -115,6 +115,8 @@ pub struct InstancePolicyResponse {
     pub single_community_enabled: bool,
     pub single_community_guild_id: Option<String>,
     #[serde(default)]
+    pub community_creation_staff_only: bool,
+    #[serde(default)]
     pub direct_messages_disabled: bool,
     #[serde(default)]
     pub direct_messages_locked: bool,
@@ -139,6 +141,7 @@ impl Default for InstancePolicyResponse {
         Self {
             single_community_enabled: false,
             single_community_guild_id: None,
+            community_creation_staff_only: false,
             direct_messages_disabled: false,
             direct_messages_locked: false,
             premium_mode: PremiumMode::Everyone,
@@ -893,6 +896,8 @@ pub struct InstancePolicyUpdateRequest {
     pub single_community_enabled: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub single_community_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub community_creation_staff_only: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub direct_messages_disabled: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
