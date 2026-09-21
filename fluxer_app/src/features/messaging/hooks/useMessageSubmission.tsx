@@ -30,6 +30,7 @@ import {useCallback} from 'react';
 
 // Fork imports.
 
+import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 interface UseMessageSubmissionOptions {
@@ -137,9 +138,12 @@ export const useMessageSubmission = ({
 			}
 
 			const hasPendingAttachments = hasAttachments || CloudUpload.getTextareaAttachments(channel.id).length > 0;
-			const matchResult = PersonaStore.matchOutgoingMessage(content, hasPendingAttachments);
+			const hasNonTextMedia = hasPendingAttachments || stickers.length > 0 || favoriteMemeId !== undefined;
+			const matchResult = PersonaStore.matchOutgoingMessage(content, hasPendingAttachments, {
+				allowEmptyContent: hasNonTextMedia,
+			});
 			const finalContent = matchResult.matched || matchResult.wasEscaped ? matchResult.strippedContent : content;
-			if (finalContent.length === 0 && !hasPendingAttachments && !favoriteMemeIdOrStickers) {
+			if (finalContent.length === 0 && !hasNonTextMedia) {
 				RollingTypingSender.stopTyping(channel.id);
 				DraftCommands.deleteDraft(channel.id);
 				return true;
@@ -233,11 +237,48 @@ export const useMessageSubmission = ({
 			sendOptions: {
 				hasAttachments: boolean;
 				favoriteMemeId?: string;
+				draftOverride?: string;
 			},
 		) => {
 			const currentUser = Users.getCurrentUser();
 			if (!channel || !currentUser || !accountOwnsActiveView(accountKey)) return;
 			if (isBlockedBySlowmode(channel)) return;
+
+			const draft =
+				(sendOptions.draftOverride !== undefined ? sendOptions.draftOverride : Drafts.getDraft(channel.id)) || '';
+			const draftMatch = draft
+				? PersonaStore.matchOutgoingMessage(draft, sendOptions.hasAttachments, {allowEmptyContent: true})
+				: null;
+			let matchedPersona = draftMatch?.matched && draftMatch.persona ? draftMatch.persona : null;
+
+			if (!matchedPersona) {
+				const fallbackMatch = PersonaStore.matchOutgoingMessage(messageData.content, sendOptions.hasAttachments, {
+					allowEmptyContent: true,
+				});
+				if (fallbackMatch.matched && fallbackMatch.persona) {
+					matchedPersona = fallbackMatch.persona;
+				}
+			}
+
+			DraftCommands.deleteDraft(channel.id);
+
+			const displayTagText = PersonaStore.displayTagText;
+			const displayTagIcon = PersonaStore.displayTagIcon;
+			const subprofile = matchedPersona
+				? {
+						id: matchedPersona.id,
+						name: matchedPersona.name,
+						avatar: matchedPersona.avatar_url ?? null,
+						avatar_color: matchedPersona.color ?? null,
+						display_tag_text: displayTagText || null,
+						display_tag_icon: displayTagIcon || null,
+						system_name: displayTagText || null,
+						pronouns: matchedPersona.pronouns ?? null,
+						color: matchedPersona.color ?? null,
+						visibility: matchedPersona.visibility ?? null,
+					}
+				: undefined;
+
 			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
 			if (!MessageCommands.reserveSend(channel.id, nonce)) return;
 			RollingTypingSender.handleOwnMessageSent(channel.id);
@@ -261,6 +302,7 @@ export const useMessageSubmission = ({
 				attachments: messageData.attachments || [],
 				stickers: messageData.stickers || [],
 				_allowedMentions: referencedMessage ? {replied_user: replyingMessage?.mentioning ?? true} : undefined,
+				subprofile,
 			});
 			MessageCommands.createOptimistic(channel.id, {
 				...message.toJSON(),
@@ -283,6 +325,7 @@ export const useMessageSubmission = ({
 					flags: 0,
 					stickers: messageData.stickers || [],
 					favoriteMemeId: sendOptions.favoriteMemeId,
+					subprofile,
 				}),
 			);
 			ComponentBus.dispatch('MESSAGE_SENT', {channelId: channel.id});
