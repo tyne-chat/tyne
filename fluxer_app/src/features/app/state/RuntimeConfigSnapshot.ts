@@ -322,6 +322,8 @@ function readCommunity(value: unknown): InstanceCommunity {
 		),
 		direct_messages_disabled: readBoolean(source, 'direct_messages_disabled', 'community.direct_messages_disabled'),
 		guild_create_access: readOptionalBoolean(source, 'guild_create_access', 'community.guild_create_access') ?? true,
+		community_creation_staff_only:
+			readOptionalBoolean(source, 'community_creation_staff_only', 'community.community_creation_staff_only') ?? false,
 	};
 }
 

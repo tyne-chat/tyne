@@ -43,6 +43,11 @@ import {
 	GuildVanityURLResponse,
 } from '@fluxer/schema/src/domains/guild/GuildResponseSchemas';
 
+// Fork imports.
+
+import {UserFlags} from '@fluxer/constants/src/UserConstants';
+import {MissingPermissionsError} from '@fluxer/errors/src/domains/core/MissingPermissionsError';
+
 export function GuildBaseController(app: HonoApp) {
 	app.post(
 		'/guilds',
@@ -65,6 +70,10 @@ export function GuildBaseController(app: HonoApp) {
 			const policy = await ctx.get('instanceConfigRepository').getInstancePolicyConfig();
 			if (policy.single_community_enabled) {
 				throw new SingleCommunityCannotCreateGuildsError();
+			}
+			const isStaff = (user.flags & UserFlags.STAFF) === UserFlags.STAFF;
+			if (policy.community_creation_staff_only && !isStaff) {
+				throw new MissingPermissionsError();
 			}
 			if (!user.isUnclaimedAccount()) {
 				requireEmailVerified(user, 'guild_creation');

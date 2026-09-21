@@ -20,7 +20,7 @@ export const ADD_GUILD_VIEW_ORDER: ReadonlyArray<AddGuildModalView> = [
 
 export interface ModalFooterContextValue {
 	setFooterContent: (content: React.ReactNode) => void;
-	onBack: () => void;
+	onBack?: () => void;
 }
 
 export const ModalFooterContext = React.createContext<ModalFooterContextValue | null>(null);
