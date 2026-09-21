@@ -57,9 +57,9 @@ class MessageChangePersona {
 		await MessageCommands.edit(
 			channel.id,
 			message.id,
-			message.content,
 			undefined,
-			message._allowedMentions,
+			undefined,
+			undefined,
 			message.attachments?.length ? buildExistingAttachmentEditReferences(message) : undefined,
 			subprofile,
 		);
