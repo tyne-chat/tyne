@@ -32,8 +32,9 @@ msgstr "Add Tag Pair ({0}/5)"
 msgid "All Personas"
 msgstr "All Personas"
 
-msgid "Are you sure you want to delete <0>{personaName}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{personaName}</0>? This action cannot be undone."
+#. placeholder {0}: formData.name
+msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
@@ -68,10 +69,6 @@ msgstr "Configured Personas ({count})"
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
 msgstr "Configuring {name}..."
-
-#. Description for persona accent color picker
-msgid "Customizes the border and banner color on this persona's profile"
-msgstr "Customizes the border and banner color on this persona's profile"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -217,9 +214,6 @@ msgstr "Member #{index}"
 
 msgid "Members with Avatars"
 msgstr "Members with Avatars"
-
-msgid "Name *"
-msgstr "Name *"
 
 #. Title for new persona modal
 msgid "New Persona"
