@@ -705,8 +705,22 @@ export const LexicalChannelTextareaContent = observer(
 				handle.focus();
 			}
 		}, [accountKey, textareaInputDisabled, value, channel, uploadAttachments.length, maxAttachments, composerKey]);
+		const clearComposer = useCallback(() => {
+			const handle = handleRef.current;
+			if (handle !== null) {
+				handle.clear();
+			}
+			editorDisplayRef.current = '';
+			if (previousValueRef.current !== undefined && previousValueRef.current !== null) {
+				previousValueRef.current = '';
+			}
+			clearSegments();
+			setValue('');
+			DraftCommands.deleteDraft(accountKey, composerKey);
+		}, [accountKey, composerKey, clearSegments, previousValueRef]);
 		useTextareaExpressionHandlers({
 			setValue,
+			clearComposer,
 			previousValueRef,
 			segmentManagerRef,
 			sendOptimisticMessage: sendExpressionMessage,
