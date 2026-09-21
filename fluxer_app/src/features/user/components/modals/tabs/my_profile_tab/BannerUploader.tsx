@@ -108,6 +108,7 @@ interface BannerUploaderProps {
 	errorMessage?: string;
 	bannerMode?: BannerMode;
 	onBannerModeChange?: (mode: BannerMode) => void;
+	hideLabel?: boolean;
 }
 
 export const BannerUploader = observer(
@@ -123,6 +124,7 @@ export const BannerUploader = observer(
 		errorMessage,
 		bannerMode = 'inherit',
 		onBannerModeChange,
+		hideLabel = false,
 	}: BannerUploaderProps) => {
 		const PREMIUM_PRODUCT_NAME = getPremiumProductName();
 		const {i18n} = useLingui();
@@ -339,9 +341,11 @@ export const BannerUploader = observer(
 		}
 		return (
 			<div data-flx="user.my-profile-tab.banner-uploader.div--2">
-				<div className={styles.label} data-flx="user.my-profile-tab.banner-uploader.label--2">
-					<Trans>Banner</Trans>
-				</div>
+				{!hideLabel && (
+					<div className={styles.label} data-flx="user.my-profile-tab.banner-uploader.label--2">
+						<Trans>Banner</Trans>
+					</div>
+				)}
 				{(showBannerUploadAction || hasBanner) && (
 					<div className={styles.buttonGroup} data-flx="user.my-profile-tab.banner-uploader.button-group--2">
 						{showBannerUploadAction && (

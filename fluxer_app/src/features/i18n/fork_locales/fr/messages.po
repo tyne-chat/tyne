@@ -32,9 +32,8 @@ msgstr "Ajouter une paire de balises ({0}/5)"
 msgid "All Personas"
 msgstr "Toutes les personas"
 
-#. placeholder {0}: persona.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Voulez-vous vraiment supprimer <0>{0}</0> ? Cette action est irréversible."
+msgid "Are you sure you want to delete <0>{personaName}</0>? This action cannot be undone."
+msgstr "Are you sure you want to delete <0>{personaName}</0>? This action cannot be undone."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
 msgstr "Voulez-vous vraiment remplacer l'ensemble des <0>{existingCount}</0> persona(s) existante(s) ? Elles seront définitivement supprimées de votre compte et cette action est irréversible."
@@ -110,6 +109,7 @@ msgstr "Téléchargement de l'avatar {current} sur {total}…"
 msgid "Duplicate tag pair on this persona"
 msgstr "Paire de balises déjà présente sur cette persona"
 
+#. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Modifier la persona"
 
@@ -221,6 +221,7 @@ msgstr "Membres avec avatars"
 msgid "Name *"
 msgstr "Nom *"
 
+#. Title for new persona modal
 msgid "New Persona"
 msgstr "Nouvelle persona"
 
@@ -344,9 +345,6 @@ msgstr "Remplacer toutes les personas existantes (Destructif)"
 msgid "Root Account (Default)"
 msgstr "Compte principal (par défaut)"
 
-msgid "Save Persona"
-msgstr "Enregistrer la persona"
-
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Enregistrement des personas…"
@@ -459,9 +457,6 @@ msgstr "Les messages sans balise sont envoyés sous l'identité de la persona ay
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
 msgstr "Les messages sans balise sont envoyés sous l'identité de la persona choisie. Taper les balises d'une autre persona enverra uniquement ce message sans changer la persona active."
-
-msgid "Uploading avatar..."
-msgstr "Téléversement de l'avatar…"
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
