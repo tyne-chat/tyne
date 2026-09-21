@@ -327,19 +327,22 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 
-	const filteredPersonas = useMemo(() => {
+	const filteredPersonaIds = useMemo(() => {
 		const trimmed = searchQuery.trim().toLowerCase();
-		if (!trimmed) return personas;
-		return personas.filter((p) => {
-			if (p.name.toLowerCase().includes(trimmed)) return true;
-			if (p.system_name?.toLowerCase().includes(trimmed) || p.systemName?.toLowerCase().includes(trimmed)) return true;
-			if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
-			if (p.bio?.toLowerCase().includes(trimmed)) return true;
-			const tags = p.persona_tags ?? p.personaTags ?? [];
-			return tags.some(
-				(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
-			);
-		});
+		if (!trimmed) return personas.map((p) => p.id);
+		return personas
+			.filter((p) => {
+				if (p.name.toLowerCase().includes(trimmed)) return true;
+				if (p.system_name?.toLowerCase().includes(trimmed) || p.systemName?.toLowerCase().includes(trimmed))
+					return true;
+				if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
+				if (p.bio?.toLowerCase().includes(trimmed)) return true;
+				const tags = p.persona_tags ?? p.personaTags ?? [];
+				return tags.some(
+					(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
+				);
+			})
+			.map((p) => p.id);
 	}, [personas, searchQuery]);
 
 	const getTagRowError = (idx: number): string | null => {
@@ -1353,7 +1356,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 					<SettingsSection
 						id="personas_list"
 						title={i18n._(CONFIG_PERSONAS_COUNT_DESCRIPTOR, {
-							count: searchQuery.trim() ? filteredPersonas.length : personas.length,
+							count: searchQuery.trim() ? filteredPersonaIds.length : personas.length,
 						})}
 						linkable={false}
 						actions={
@@ -1418,13 +1421,15 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state">
 								<Trans>No personas created yet. Click "Add Persona" to create your first persona!</Trans>
 							</div>
-						) : filteredPersonas.length === 0 ? (
+						) : filteredPersonaIds.length === 0 ? (
 							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state--2">
 								<Trans>No matching personas found.</Trans>
 							</div>
 						) : (
 							<div className={styles.cardList} data-flx="persona.settings.persona-settings-tab.card-list">
-								{filteredPersonas.map((persona) => {
+								{filteredPersonaIds.map((personaId) => {
+									const persona = PersonaStore.getPersona(personaId);
+									if (!persona) return null;
 									const isThisActive = activePersonaId === persona.id && isLatched;
 									return (
 										<div
