@@ -53,13 +53,15 @@ export const GuildJoinForm = observer(() => {
 		const isCodeEmpty = !codeValue?.trim();
 		modalFooterContext?.setFooterContent(
 			<>
-				<Button
-					onClick={modalFooterContext.onBack}
-					variant="secondary"
-					data-flx="guild.add-guild-modal.guild-join-form.button.back"
-				>
-					<Trans>Back</Trans>
-				</Button>
+				{modalFooterContext?.onBack && (
+					<Button
+						onClick={modalFooterContext.onBack}
+						variant="secondary"
+						data-flx="guild.add-guild-modal.guild-join-form.button.back"
+					>
+						<Trans>Back</Trans>
+					</Button>
+				)}
 				<Button
 					onClick={handleSubmit}
 					submitting={isSubmitting}
