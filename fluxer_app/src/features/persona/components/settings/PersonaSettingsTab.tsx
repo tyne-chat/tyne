@@ -180,15 +180,17 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	// Deep link subtab support
 	const lastHandledSubtabRef = useRef<string | null>(null);
 	useEffect(() => {
-		if (initialSubtab && lastHandledSubtabRef.current !== initialSubtab) {
+		if (!initialSubtab || lastHandledSubtabRef.current === initialSubtab) {
+			return;
+		}
+		if (initialSubtab === 'new') {
 			lastHandledSubtabRef.current = initialSubtab;
-			if (initialSubtab === 'new') {
-				openPersonaEditModal();
-			} else {
-				const target = personas.find((p) => p.id === initialSubtab);
-				if (target) {
-					openPersonaEditModal(target);
-				}
+			openPersonaEditModal();
+		} else {
+			const target = personas.find((p) => p.id === initialSubtab);
+			if (target) {
+				lastHandledSubtabRef.current = initialSubtab;
+				openPersonaEditModal(target);
 			}
 		}
 	}, [initialSubtab, personas]);
@@ -196,23 +198,20 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const activePersonaTabs = useMemo(() => getActivePersonaTabs(i18n), [i18n]);
 	const activePersonaDescriptions = useMemo(() => getActivePersonaDescriptions(i18n), [i18n]);
 
-	const filteredPersonaIds = useMemo(() => {
-		const query = searchQuery.trim().toLowerCase();
-		if (!query) {
-			return personas.map((p) => p.id);
-		}
-		return personas
-			.filter((p) => {
-				const nameMatch = p.name.toLowerCase().includes(query);
-				const pronounsMatch = (p.pronouns ?? '').toLowerCase().includes(query);
-				const tags = p.persona_tags ?? p.personaTags ?? [];
-				const tagMatch = tags.some(
-					(t) => (t.prefix ?? '').toLowerCase().includes(query) || (t.suffix ?? '').toLowerCase().includes(query),
-				);
-				return nameMatch || pronounsMatch || tagMatch;
-			})
-			.map((p) => p.id);
-	}, [personas, searchQuery]);
+	const query = searchQuery.trim().toLowerCase();
+	const filteredPersonaIds = (
+		query
+			? personas.filter((p) => {
+					const nameMatch = p.name.toLowerCase().includes(query);
+					const pronounsMatch = (p.pronouns ?? '').toLowerCase().includes(query);
+					const tags = p.persona_tags ?? p.personaTags ?? [];
+					const tagMatch = tags.some(
+						(t) => (t.prefix ?? '').toLowerCase().includes(query) || (t.suffix ?? '').toLowerCase().includes(query),
+					);
+					return nameMatch || pronounsMatch || tagMatch;
+				})
+			: personas
+	).map((p) => p.id);
 
 	const handleTagTextChange = (value: string) => {
 		setTagText(value);
@@ -658,7 +657,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 											{currentUser && (
 												<Avatar
 													user={currentUser}
-													avatarUrl={persona.avatarUrl}
+													avatarUrl={persona.avatarUrl || AvatarUtils.getUserAvatarURL(currentUser, false)}
 													size={36}
 													data-flx="persona.settings.persona-settings-tab.avatar"
 												/>
