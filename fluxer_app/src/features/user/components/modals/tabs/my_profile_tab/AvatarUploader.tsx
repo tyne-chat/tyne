@@ -114,6 +114,7 @@ interface AvatarUploaderProps {
 	errorMessage?: string;
 	avatarMode?: AvatarMode;
 	onAvatarModeChange?: (mode: AvatarMode) => void;
+	hideLabel?: boolean;
 }
 
 interface ChangeAvatarActionOptions {
@@ -325,6 +326,7 @@ export const AvatarUploader = observer(
 		errorMessage,
 		avatarMode = 'inherit',
 		onAvatarModeChange,
+		hideLabel = false,
 	}: AvatarUploaderProps) => {
 		const {i18n} = useLingui();
 		const {canUploadAnimatedAvatar, openChangeAvatar: handleAvatarUpload} = useChangeAvatarAction({
@@ -416,9 +418,11 @@ export const AvatarUploader = observer(
 		}
 		return (
 			<div data-flx="user.my-profile-tab.avatar-uploader.div--2">
-				<div className={styles.label} data-flx="user.my-profile-tab.avatar-uploader.label--2">
-					<Trans>Avatar</Trans>
-				</div>
+				{!hideLabel && (
+					<div className={styles.label} data-flx="user.my-profile-tab.avatar-uploader.label--2">
+						<Trans>Avatar</Trans>
+					</div>
+				)}
 				<div className={styles.buttonGroup} data-flx="user.my-profile-tab.avatar-uploader.button-group--2">
 					<Button
 						variant="primary"
