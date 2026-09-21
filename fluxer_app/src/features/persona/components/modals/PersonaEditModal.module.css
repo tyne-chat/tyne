@@ -117,86 +117,52 @@
 
 .layout {
 	display: flex;
-	gap: 2rem;
-	align-items: flex-start;
+	flex-direction: column;
+	gap: 1.5rem;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 900px) {
 	.layout {
-		flex-direction: column-reverse;
-		gap: 1.5rem;
+		flex-direction: row;
+		gap: clamp(2rem, 3vw, 3.5rem);
+		align-items: flex-start;
 	}
 }
 
 .formColumn {
-	flex: 1 1 0;
+	display: flex;
+	flex: 2;
 	min-width: 0;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.sectionBlock {
 	display: flex;
 	flex-direction: column;
-	gap: 1.25rem;
 }
 
-.formGrid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-	gap: 16px;
-}
-
-.formField {
+.tagsHeader {
 	display: flex;
-	flex-direction: column;
-	gap: 6px;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 0.5rem;
 }
 
-.formLabel {
-	font-size: 0.75rem;
-	font-weight: 700;
-	text-transform: uppercase;
+.fieldLabel {
+	margin: 0;
+	display: block;
+	padding: 0;
+	font-weight: 500;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: var(--text-primary);
+}
+
+.inputFooter {
 	color: var(--text-primary-muted);
-	letter-spacing: 0.04em;
-}
-
-.textInput {
-	background-color: var(--bg-tertiary);
-	border: 1px solid var(--border-color);
-	border-radius: 4px;
-	padding: 8px 10px;
 	font-size: 0.875rem;
-	color: var(--text-primary);
-	outline: none;
-	font-family: inherit;
-	height: 2.75rem;
-	box-sizing: border-box;
-	transition: border-color 150ms ease;
-}
-
-.textInput:focus {
-	border-color: var(--brand-primary);
-}
-
-.textareaInput {
-	background-color: var(--bg-tertiary);
-	border: 1px solid var(--border-color);
-	border-radius: 4px;
-	padding: 8px 10px;
-	font-size: 0.875rem;
-	color: var(--text-primary);
-	outline: none;
-	font-family: inherit;
-	min-height: 5.5rem;
-	max-height: 14rem;
-	box-sizing: border-box;
-	resize: vertical;
-	overflow-y: auto;
-	line-height: 1.4;
-	white-space: pre-wrap;
-	scrollbar-width: thin;
-	scrollbar-color: var(--scrollbar-thumb-bg) transparent;
-	transition: border-color 150ms ease;
-}
-
-.textareaInput:focus {
-	border-color: var(--brand-primary);
+	margin-top: 0.25rem;
 }
 
 .tagRow {
@@ -230,42 +196,23 @@
 }
 
 .previewColumn {
-	flex: 0 0 320px;
-	width: 320px;
+	display: flex;
+	flex: 1;
+	justify-content: center;
 	position: sticky;
 	top: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 900px) {
 	.previewColumn {
-		flex: none;
-		width: 100%;
-		position: static;
+		justify-content: flex-end;
 	}
-}
-
-.previewColumnHeader {
-	font-size: 0.75rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	color: var(--text-primary-muted);
-	letter-spacing: 0.04em;
 }
 
 .liveCardWrapper {
 	width: 100%;
 	display: flex;
 	justify-content: center;
-}
-
-.previewUploadersSection {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	margin-top: 4px;
 }
 
 .detailBottomActions {
