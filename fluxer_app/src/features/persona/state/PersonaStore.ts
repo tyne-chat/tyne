@@ -203,6 +203,7 @@ export class PersonaStoreClass {
 			} else {
 				this._personas.push(normalized);
 			}
+			this._personas = [...this._personas];
 		});
 	}
 
@@ -224,6 +225,7 @@ export class PersonaStoreClass {
 					this._personas.push(normalized);
 				}
 			}
+			this._personas = [...this._personas];
 		});
 	}
 
