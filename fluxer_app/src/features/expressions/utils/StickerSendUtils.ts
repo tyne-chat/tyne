@@ -5,11 +5,18 @@ import type {GuildSticker} from '@app/features/expressions/models/GuildSticker';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {CloudUpload} from '@app/features/messaging/upload/CloudUpload';
 
-export function shouldSetPendingSticker(channelId: string): boolean {
-	const draft = Drafts.getDraft(channelId);
-	const hasTextContent = draft && draft.trim().length > 0;
+// Fork imports.
+
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
+export function shouldSetPendingSticker(channelId: string, currentContent?: string): boolean {
+	const draft = currentContent ?? Drafts.getDraft(channelId);
 	const hasAttachments = CloudUpload.getTextareaAttachments(channelId).length > 0;
-	return hasTextContent || hasAttachments;
+	if (hasAttachments) return true;
+	if (!draft || draft.trim().length === 0) return false;
+	const match = PersonaStore.matchOutgoingMessage(draft, false, {allowEmptyContent: true});
+	const contentAfterTags = (match.matched || match.wasEscaped ? match.strippedContent : draft).trim();
+	return contentAfterTags.length > 0;
 }
 
 export function setPendingSticker(channelId: string, sticker: GuildSticker): void {
