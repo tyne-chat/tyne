@@ -522,3 +522,48 @@
 	color: var(--text-primary);
 	background-color: var(--settings-hover-background, var(--surface-interactive-hover-bg, rgba(255, 255, 255, 0.08)));
 }
+
+/* Compact persona card styles */
+.compactPersonaCard {
+	display: flex;
+	align-items: center;
+	padding: 10px 14px;
+	background-color: var(--bg-secondary);
+	border-radius: var(--radius-lg, 8px);
+	border: 1px solid transparent;
+	gap: 12px;
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
+}
+
+.compactPersonaCard:hover {
+	background-color: var(--bg-hover);
+}
+
+.compactPersonaCard.activeCard {
+	border-color: var(--brand-primary);
+	background-color: color-mix(in srgb, var(--brand-primary) 6%, var(--bg-secondary));
+}
+
+.chevronButton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--radius-md, 6px);
+	border: none;
+	background: transparent;
+	color: var(--text-primary-muted);
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.chevronButton:hover {
+	background-color: var(--bg-tertiary);
+	color: var(--text-primary);
+}
