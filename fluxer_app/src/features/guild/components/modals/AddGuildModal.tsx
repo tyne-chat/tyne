@@ -24,6 +24,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import Users from '@app/features/user/state/Users';
+
 export type {AddGuildModalView} from '@app/features/guild/components/modals/add_guild_modal/shared';
 
 const footerRevealTransition: Transition = {
@@ -36,10 +40,16 @@ const instantTransition: Transition = {
 	duration: 0,
 };
 
-export const AddGuildModal = observer(({initialView = 'landing'}: {initialView?: AddGuildModalView} = {}) => {
+export const AddGuildModal = observer(({initialView}: {initialView?: AddGuildModalView} = {}) => {
 	const {i18n} = useLingui();
 	const shouldReduceMotion = useReducedMotion();
-	const [view, setView] = useState<AddGuildModalView>(initialView);
+	const canCreate = !RuntimeConfig.communityCreationStaffOnly || (Users.currentUser?.isStaff() ?? false);
+	const defaultView = canCreate ? 'landing' : 'join_guild';
+	const resolvedInitialView =
+		!canCreate && (initialView === 'create_guild' || initialView === 'import_template' || initialView === 'landing')
+			? 'join_guild'
+			: (initialView ?? defaultView);
+	const [view, setView] = useState<AddGuildModalView>(resolvedInitialView);
 	const [footerContent, setFooterContent] = useState<React.ReactNode>(null);
 	const getTitle = (): string => {
 		switch (view) {
@@ -55,12 +65,18 @@ export const AddGuildModal = observer(({initialView = 'landing'}: {initialView?:
 				return i18n._(ADD_A_COMMUNITY_DESCRIPTOR);
 		}
 	};
-	const handleBack = useCallback(() => setView('landing'), []);
-	const contextValue = useMemo(() => ({setFooterContent, onBack: handleBack}), [handleBack]);
+	const handleBack = useCallback(() => setView(canCreate ? 'landing' : 'join_guild'), [canCreate]);
+	const contextValue = useMemo(
+		() => ({setFooterContent, onBack: canCreate ? handleBack : undefined}),
+		[canCreate, handleBack],
+	);
 	if (RuntimeConfig.singleCommunityEnabled) {
 		return null;
 	}
 	const renderView = (): React.ReactNode => {
+		if (!canCreate && (view === 'create_guild' || view === 'import_template')) {
+			return <GuildJoinForm data-flx="guild.add-guild-modal.render-view.guild-join-form" />;
+		}
 		switch (view) {
 			case 'landing':
 				return <LandingView onViewChange={setView} data-flx="guild.add-guild-modal.render-view.landing-view" />;
