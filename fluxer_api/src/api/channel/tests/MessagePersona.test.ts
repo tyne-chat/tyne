@@ -327,6 +327,7 @@ describe('MessagePersona Backend Pipeline', () => {
 				name: 'Alice',
 				avatar: 'https://example.com/avatar.png',
 				avatar_color: 0x123456,
+				banner: null,
 				display_tag_text: 'System Tag',
 				display_tag_icon: 'https://example.com/icon.png',
 				system_name: 'SysName',
