@@ -120,7 +120,7 @@ describe('MessageChangePersona', () => {
 			expect(MessageCommands.edit).toHaveBeenCalledWith(
 				channelId,
 				messageId,
-				'Hello world',
+				undefined,
 				undefined,
 				undefined,
 				undefined,
@@ -141,7 +141,7 @@ describe('MessageChangePersona', () => {
 			expect(MessageCommands.edit).toHaveBeenCalledWith(
 				channelId,
 				messageId,
-				'Look at this picture',
+				undefined,
 				undefined,
 				undefined,
 				[{id: 'att-1'}, {id: 'att-2'}],
