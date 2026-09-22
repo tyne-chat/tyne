@@ -112,6 +112,10 @@ import {normalizeString, SnowflakeType} from '@fluxer/schema/src/primitives/Sche
 import type {IKVProvider} from '@pkgs/kv_client/src/IKVProvider';
 import {z} from 'zod';
 
+// Fork imports.
+
+import {type ServerListButtons, ServerListButtonsSchema} from '@fluxer/schema/src/domains/instance/InstanceSchemas';
+
 const GATEWAY_ROLLOUT_CONFIG_KEY = 'gateway_rollout_config';
 const PUSH_RELAY_CONFIG_KEY = 'push_service_delivery_config';
 const DOMAIN_MIGRATION_CONFIG_KEY = 'domain_migration_config';
@@ -220,6 +224,7 @@ export interface InstancePolicyConfig {
 	gif_enabled: boolean | null;
 	youtube_enabled: boolean | null;
 	bluesky_enabled: boolean | null;
+	server_list_buttons: ServerListButtons;
 }
 
 type InstanceEmailProvider = 'smtp' | 'none';
@@ -789,6 +794,13 @@ const StoredInstancePolicySchema = z.object({
 	gif_enabled: InstancePolicyServiceUpdateSchema.shape.gif_enabled.default(null),
 	youtube_enabled: InstancePolicyServiceUpdateSchema.shape.youtube_enabled.default(null),
 	bluesky_enabled: InstancePolicyServiceUpdateSchema.shape.bluesky_enabled.default(null),
+	server_list_buttons: ServerListButtonsSchema.default({
+		favorites: true,
+		explore: true,
+		create_join: true,
+		download: true,
+		help: true,
+	}),
 }) satisfies z.ZodType<InstancePolicyConfig>;
 
 function decodeInstancePolicyConfig(value: unknown): InstancePolicyConfig {
@@ -2269,6 +2281,7 @@ export class InstanceConfigRepository {
 			direct_messages_disabled: policy.direct_messages_disabled,
 			guild_create_access: policy.guild_create_access,
 			community_creation_staff_only: policy.community_creation_staff_only,
+			server_list_buttons: policy.server_list_buttons,
 		};
 	}
 
