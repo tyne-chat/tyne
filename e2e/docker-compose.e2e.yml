@@ -1,0 +1,398 @@
+name: fluxer-e2e
+
+x-e2e-env: &e2e-env
+  FLUXER_ENV: production
+  NODE_ENV: production
+  LOG_LEVEL: warn
+  FLUXER_SELF_HOSTED: "true"
+  FLUXER_BASE_DOMAIN: "localhost"
+  FLUXER_PUBLIC_SCHEME: "http"
+  FLUXER_PUBLIC_PORT: "9188"
+  FLUXER_PUBLIC_ORIGIN: "http://localhost:9188"
+  FLUXER_TRUST_CLIENT_IP_HEADER: "true"
+  FLUXER_CLIENT_IP_HEADER_NAME: "x-forwarded-for"
+
+  FLUXER_DATABASE_BACKEND: postgres
+  FLUXER_POSTGRES_HOST: postgres
+  FLUXER_POSTGRES_PORT: "5432"
+  FLUXER_POSTGRES_DATABASE: fluxer
+  FLUXER_POSTGRES_USERNAME: fluxer
+  FLUXER_POSTGRES_PASSWORD: e2e-password
+  FLUXER_POSTGRES_SSL: "false"
+
+  FLUXER_KV_URL: redis://valkey:6379/0
+  FLUXER_NATS_URL: nats://nats:4222
+  FLUXER_NATS_JETSTREAM_URL: nats://nats:4222
+  FLUXER_SVC_NATS_URL: nats://nats:4222
+  FLUXER_SVC_SHARD_COUNT: "1"
+
+  FLUXER_SEARCH_ENGINE: meilisearch
+  FLUXER_SEARCH_URL: http://meilisearch:7700
+  FLUXER_SEARCH_API_KEY: e2e-meilisearch-key
+
+  FLUXER_S3_ENDPOINT: http://seaweedfs:8333
+  FLUXER_S3_PUBLIC_ENDPOINT: http://seaweedfs:8333
+  FLUXER_S3_REGION: us-east-1
+  FLUXER_S3_ACCESS_KEY_ID: e2e-s3-key
+  FLUXER_S3_SECRET_ACCESS_KEY: e2e-s3-secret
+  FLUXER_S3_FORCE_PATH_STYLE: "true"
+  FLUXER_S3_BUCKET_CDN: fluxer
+  FLUXER_S3_BUCKET_UPLOADS: fluxer-uploads
+  FLUXER_S3_BUCKET_REPORTS: fluxer-reports
+  FLUXER_S3_BUCKET_HARVESTS: fluxer-harvests
+  AWS_ACCESS_KEY_ID: e2e-s3-key
+  AWS_SECRET_ACCESS_KEY: e2e-s3-secret
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_EC2_METADATA_DISABLED: "true"
+
+  FLUXER_EMAIL_ENABLED: "false"
+  FLUXER_EMAIL_PROVIDER: none
+  FLUXER_CAPTCHA_ENABLED: "false"
+  FLUXER_CAPTCHA_PROVIDER: "none"
+  FLUXER_SMS_ENABLED: "false"
+  FLUXER_STRIPE_ENABLED: "false"
+  FLUXER_NCMEC_ENABLED: "false"
+  FLUXER_CLAMAV_ENABLED: "false"
+  FLUXER_LIVEKIT_ENABLED: "false"
+  FLUXER_DISCOVERY_ENABLED: "true"
+  FLUXER_APP_PROXY_TIME_FREEZE_ENABLED: "false"
+
+  FLUXER_DISABLE_RATE_LIMITS: "true"
+  FLUXER_RELAX_REGISTRATION_RATE_LIMITS: "true"
+  FLUXER_TEST_MODE_ENABLED: "false"
+  FLUXER_INSTANCE_SETUP_CONFIGURED: "true"
+
+  FLUXER_SUDO_MODE_SECRET: "e2e-sudo-mode-secret-minimum-32-chars-long"
+  FLUXER_CONNECTION_INITIATION_SECRET: "e2e-conn-secret-minimum-32-chars-long"
+  FLUXER_VAPID_PUBLIC_KEY: "BB76bTFIuoqmxJtTfZX0yGTn1f_qu9H03B_nkj8OyExJFkN7Y-HBZZzShnHZoEhXKc5ZRy3jFu7OkBbnaQG-4aw"
+  FLUXER_VAPID_PRIVATE_KEY: "Xgi-3P8J-I3Q6U1HlCcXMuc_tKLGAM9nIfznX3Hz68o"
+  FLUXER_VAPID_EMAIL: "admin@localhost"
+  FLUXER_GATEWAY_RPC_AUTH_TOKEN: "e2e-gateway-rpc-auth-token"
+  FLUXER_MEDIA_PROXY_SECRET_KEY: "e2e-media-proxy-secret-key"
+  FLUXER_MEDIA_PROXY_UPLOAD_RELAY_SECRET_BASE64: "dGVzdC1tZWRpYS1wcm94eS11cGxvYWQtcmVsYXktc2VjcmV0"
+  FLUXER_ADMIN_SECRET_KEY_BASE: "e2e-admin-secret-key-base-minimum-64-characters-long-key-string-fluxer"
+  FLUXER_ADMIN_OAUTH_CLIENT_SECRET: "e2e-admin-oauth-client-secret"
+  FLUXER_ERLANG_COOKIE: "4aea5e8056ef51834d552fae5bc07666"
+
+  FLUXER_INTERNAL_API_ENDPOINT: http://api:8080
+  FLUXER_INTERNAL_GATEWAY_ENDPOINT: http://gateway:8080
+  FLUXER_INTERNAL_MEDIA_PROXY_ENDPOINT: http://media-proxy:8080
+  FLUXER_MARKETING_ENDPOINT: http://localhost:9188
+  FLUXER_MEDIA_PROXY_ENDPOINT: http://media-proxy:8080
+  FLUXER_MEDIA_ENDPOINT: http://localhost:9188/media
+  FLUXER_MEDIA_PROXY_UPLOAD_RELAY_ENDPOINT: http://localhost:9188/media
+
+x-e2e-service: &e2e-service
+  restart: "no"
+  networks: [e2e-net]
+
+x-e2e-svc-healthcheck: &e2e-svc-healthcheck
+  test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8090 && printf 'GET /_health HTTP/1.0\\r\\n\\r\\n' >&3 && head -n 1 <&3 | grep -q ' 200 '"]
+  interval: 2s
+  timeout: 3s
+  retries: 30
+  start_period: 15s
+
+services:
+  postgres:
+    <<: *e2e-service
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fluxer
+      POSTGRES_USER: fluxer
+      POSTGRES_PASSWORD: e2e-password
+    tmpfs:
+      - /var/lib/postgresql/data:rw,noexec,nosuid,size=512m
+    ports:
+      - "127.0.0.1:9132:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fluxer -d fluxer"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  valkey:
+    <<: *e2e-service
+    image: valkey/valkey:9.1-alpine
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    tmpfs:
+      - /data:rw,size=128m
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  nats:
+    <<: *e2e-service
+    image: nats:2.14-alpine
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    tmpfs:
+      - /data:rw,size=256m
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8222/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  meilisearch:
+    <<: *e2e-service
+    image: getmeili/meilisearch:v1.53
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_MASTER_KEY: e2e-meilisearch-key
+    tmpfs:
+      - /meili_data:rw,size=256m
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:7700/health"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  seaweedfs:
+    <<: *e2e-service
+    image: chrislusf/seaweedfs:4.47
+    command: ["server", "-s3", "-dir=/data", "-master.telemetry=false"]
+    tmpfs:
+      - /data:rw,size=512m
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8333/healthz"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
+  seaweedfs-init:
+    <<: *e2e-service
+    image: chrislusf/seaweedfs:4.47
+    depends_on:
+      seaweedfs: { condition: service_healthy }
+    environment:
+      FLUXER_S3_ACCESS_KEY: e2e-s3-key
+      FLUXER_S3_SECRET_KEY: e2e-s3-secret
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >
+        buckets="fluxer fluxer-uploads fluxer-reports fluxer-harvests";
+        for attempt in $(seq 1 30); do
+          if ! nc -z seaweedfs 9333 2>/dev/null; then sleep 1; continue; fi;
+          for b in $$buckets; do
+            weed shell -master=seaweedfs:9333 "s3.bucket.create -name $$b" >/dev/null 2>&1 || true;
+          done;
+          weed shell -master=seaweedfs:9333 "s3.configure -user=fluxer -access_key=$$FLUXER_S3_ACCESS_KEY -secret_key=$$FLUXER_S3_SECRET_KEY -actions=Admin,Read,Write,List,Tagging -apply" >/dev/null 2>&1 || true;
+          echo "SeaweedFS buckets ready";
+          exit 0;
+        done;
+        exit 1;
+
+  snowflakes:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-snowflakes:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_SVC_NAME: snowflakes
+      FLUXER_SVC_MODE: router
+    healthcheck: *e2e-svc-healthcheck
+    depends_on:
+      nats: { condition: service_healthy }
+
+  snowflakes-shard:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-snowflakes:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_SVC_NAME: snowflakes
+      FLUXER_SVC_MODE: shard
+      FLUXER_SVC_SHARD_ID: "0"
+    healthcheck: *e2e-svc-healthcheck
+    depends_on:
+      nats: { condition: service_healthy }
+
+  users:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-users:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_SVC_NAME: users
+      FLUXER_SVC_MODE: router
+    healthcheck: *e2e-svc-healthcheck
+    depends_on:
+      nats: { condition: service_healthy }
+
+  users-shard:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-users:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_SVC_NAME: users
+      FLUXER_SVC_MODE: shard
+      FLUXER_SVC_SHARD_ID: "0"
+      FLUXER_POSTGRES_MAX_CONNECTIONS: "10"
+    healthcheck: *e2e-svc-healthcheck
+    depends_on:
+      nats: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+
+  messages:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-messages:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_SVC_NAME: messages
+      FLUXER_SVC_MODE: router
+    healthcheck: *e2e-svc-healthcheck
+    depends_on:
+      nats: { condition: service_healthy }
+
+  messages-shard:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-messages:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_SVC_NAME: messages
+      FLUXER_SVC_MODE: shard
+      FLUXER_SVC_SHARD_ID: "0"
+      FLUXER_POSTGRES_MAX_CONNECTIONS: "10"
+    healthcheck: *e2e-svc-healthcheck
+    depends_on:
+      nats: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+
+  media-proxy:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-media-proxy:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_MEDIA_PROXY_HOST: 0.0.0.0
+      FLUXER_MEDIA_PROXY_PORT: "8080"
+      FLUXER_MEDIA_PROXY_MODE: upload
+      FLUXER_MEDIA_PROXY_STORAGE_BACKEND: s3
+      FLUXER_MEDIA_PROXY_PUBLIC_ENDPOINT: http://localhost:9188/media
+      FLUXER_MEDIA_PROXY_CORS_MODE: off
+      FLUXER_MEDIA_PROXY_ATTACHMENT_SIGNATURE_MODE: off
+      FLUXER_S3_READ_SIGNED: "true"
+    depends_on:
+      seaweedfs-init: { condition: service_completed_successfully }
+      nats: { condition: service_healthy }
+
+  static-proxy:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-static:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_STATIC_PORT: "8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/avatars/0.png"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  gateway:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-gateway:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_GATEWAY_PORT: "8080"
+      FLUXER_GATEWAY_MEDIA_PROXY_ENDPOINT: http://localhost:9188/media
+      FLUXER_GATEWAY_STATIC_CDN_ENDPOINT: http://localhost:9188
+      FLUXER_ERLANG_COOKIE: "4aea5e8056ef51834d552fae5bc07666"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/_health/ready"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+    depends_on:
+      nats: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+
+  api:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-api:bleeding-edge
+    environment:
+      <<: *e2e-env
+      FLUXER_PORT: "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8080/_health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    depends_on:
+      postgres: { condition: service_healthy }
+      nats: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+      snowflakes: { condition: service_healthy }
+      users: { condition: service_healthy }
+      messages: { condition: service_healthy }
+
+  worker:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-api:bleeding-edge
+    command: ["sh", "-c", "if [ -f dist/WorkerEntrypoint.js ]; then exec node dist/WorkerEntrypoint.js; else exec ./node_modules/.bin/tsx src/WorkerEntrypoint.ts; fi"]
+    environment:
+      <<: *e2e-env
+    depends_on:
+      api: { condition: service_healthy }
+
+  app-proxy:
+    <<: *e2e-service
+    image: fluxer-custom/fluxer-app-proxy-self-hosted:bleeding-edge
+    environment:
+      FLUXER_APP_PROXY_HOST: 0.0.0.0
+      FLUXER_APP_PROXY_PORT: "8080"
+      FLUXER_BASE_DOMAIN: "localhost"
+      FLUXER_PUBLIC_SCHEME: "http"
+      FLUXER_PUBLIC_PORT: "9188"
+      FLUXER_PUBLIC_ORIGIN: "http://localhost:9188"
+      FLUXER_SELF_HOSTED: "true"
+      FLUXER_APP_PROXY_TIME_FREEZE_ENABLED: "false"
+      FLUXER_STATIC_CDN_ENDPOINT: ""
+      DISCOVERY_UPSTREAM_URL: http://edge:8088/.well-known/fluxer
+      PUBLIC_BOOTSTRAP_API_ENDPOINT: /api
+      PUBLIC_BOOTSTRAP_API_PUBLIC_ENDPOINT: http://localhost:9188/api
+      FLUXER_CSP_EXTRA_CONNECT_SRC: "http://localhost:9188 http://127.0.0.1:9188 ws://localhost:9188 ws://127.0.0.1:9188"
+    depends_on:
+      api: { condition: service_healthy }
+      edge: { condition: service_healthy }
+
+  edge:
+    <<: *e2e-service
+    image: caddy:2.11-alpine
+    ports:
+      - "127.0.0.1:9188:80"
+      - "[::1]:9188:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:80/_health"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    depends_on:
+      api: { condition: service_healthy }
+      gateway: { condition: service_healthy }
+      media-proxy: { condition: service_healthy }
+      static-proxy: { condition: service_healthy }
+
+  test-runner:
+    image: mcr.microsoft.com/playwright:v1.50.1-noble
+    network_mode: host
+    restart: "no"
+    environment:
+      CI: "true"
+      E2E_BASE_URL: "http://localhost:9188"
+    volumes:
+      - ..:/workspaces/fluxer:ro
+      - .:/e2e
+    working_dir: /e2e
+    entrypoint: ["sh", "-c"]
+    command: ["sleep infinity"]
+    depends_on:
+      edge: { condition: service_healthy }
+
+networks:
+  e2e-net:
+    name: fluxer-e2e-network
