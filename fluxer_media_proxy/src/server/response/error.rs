@@ -163,6 +163,7 @@ mod tests {
 
     #[tokio::test]
     async fn a_very_long_storage_key_cannot_bloat_the_logged_source() {
+        let _tracing_lock = crate::test_fixtures::lock_test_tracing_async().await;
         let key = format!("attachments/1/2/{}.png", "k".repeat(4096));
         let captured = CapturedLog::default();
         let subscriber = tracing_subscriber::fmt()
