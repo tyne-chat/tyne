@@ -30,6 +30,11 @@ import {
 import type React from 'react';
 import {useState} from 'react';
 
+// Fork imports.
+
+import type {SkeletonRailProjection} from '@app/features/app/components/skeleton/SkeletonRailProjection';
+import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
+
 const GUILD_ICON_SIZE = skeletonSurfaceVar('--guild-icon-size');
 const FOLDER_ICON_SIZE = skeletonSurfaceVar('--guild-list-item-box-size');
 const RAIL_ROW_PITCH_REM = 3.375;
@@ -460,7 +465,7 @@ export const GuildRailSkeleton: React.FC<GuildRailSkeletonProps> = ({
 		addGuildVisible,
 		downloadVisible,
 		helpVisible,
-	} = mountState.rail;
+	} = withServerListButtons(mountState.rail);
 	const inlineDmRowCount = inlineDmUnreadFlags.length;
 	const inlineDmPlaceholders = Array.from({length: inlineDmRowCount}, (_, index) => index);
 	const hasGuildItems = outageVisible || organizedItems.length > 0;
@@ -582,3 +587,16 @@ export const GuildRailSkeleton: React.FC<GuildRailSkeletonProps> = ({
 		</flx-app-guild-rail-skeleton>
 	);
 };
+
+// Fork: the instance's server list button settings also hide those buttons in the loading skeleton.
+function withServerListButtons(rail: SkeletonRailProjection): SkeletonRailProjection {
+	const buttons = RuntimeConfig.serverListButtons;
+	return {
+		...rail,
+		favoritesVisible: rail.favoritesVisible && buttons.favorites,
+		discoveryVisible: rail.discoveryVisible && buttons.explore,
+		addGuildVisible: rail.addGuildVisible && buttons.create_join,
+		downloadVisible: rail.downloadVisible && buttons.download,
+		helpVisible: rail.helpVisible && buttons.help,
+	};
+}
