@@ -283,6 +283,7 @@ fn policy_config_section(
                 (single_community_form(base, csrf_token, policy))
                 (community_creation_form(base, csrf_token, policy))
                 (direct_messages_form(base, csrf_token, policy))
+                (server_list_buttons_form(base, csrf_token, policy))
                 (premium_mode_form(base, csrf_token, policy, premium_name, billing_enabled))
                 (community_creation_form(base, csrf_token, policy))
                 (services_form(base, csrf_token, policy))
@@ -338,11 +339,7 @@ fn single_community_form(base: &str, csrf_token: &str, policy: &InstancePolicyRe
     }
 }
 
-fn community_creation_form(
-    base: &str,
-    csrf_token: &str,
-    policy: &InstancePolicyResponse,
-) -> Markup {
+fn community_creation_form(base: &str, csrf_token: &str, policy: &InstancePolicyResponse) -> Markup {
     html! {
         div class="space-y-4 border-t border-neutral-200 pt-6" {
             div class="flex flex-wrap items-center gap-2" {
@@ -406,6 +403,67 @@ fn direct_messages_form(base: &str, csrf_token: &str, policy: &InstancePolicyRes
                             (submit_button("Save direct message policy"))
                         }))
                     }
+                }
+            }
+        }
+    }
+}
+
+fn server_list_buttons_form(
+    base: &str,
+    csrf_token: &str,
+    policy: &InstancePolicyResponse,
+) -> Markup {
+    let buttons = &policy.server_list_buttons;
+    html! {
+        div class="space-y-4 border-t border-neutral-200 pt-6" {
+            div class="flex flex-wrap items-center gap-2" {
+                h3 class="text-sm font-semibold text-neutral-900" { "Server list buttons" }
+            }
+            p class="text-sm text-neutral-500" {
+                "Control which special navigation buttons appear in the left server list column for users on this instance."
+            }
+            form method="post" action={(base) "/instance-config?action=update_server_list_buttons"} {
+                (csrf_input(csrf_token))
+                div class="space-y-3" {
+                    (checkbox(
+                        "server_list_button_favorites",
+                        "true",
+                        "Favorites",
+                        buttons.favorites,
+                        true,
+                    ))
+                    (checkbox(
+                        "server_list_button_explore",
+                        "true",
+                        "Explore communities",
+                        buttons.explore,
+                        true,
+                    ))
+                    (checkbox(
+                        "server_list_button_create_join",
+                        "true",
+                        "Create or join a community",
+                        buttons.create_join,
+                        true,
+                    ))
+                    (checkbox(
+                        "server_list_button_download",
+                        "true",
+                        "Download desktop app",
+                        buttons.download,
+                        true,
+                    ))
+                    (checkbox(
+                        "server_list_button_help",
+                        "true",
+                        "Help center",
+                        buttons.help,
+                        true,
+                    ))
+                    (form_actions(html! {
+                        (submit_button("Save button settings"))
+                    }))
                 }
             }
         }

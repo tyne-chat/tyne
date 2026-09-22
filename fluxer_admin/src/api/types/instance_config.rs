@@ -130,6 +130,39 @@ pub struct InstancePolicyResponse {
     pub services_resolved: InstanceServicesResolved,
     #[serde(default)]
     pub services_available: InstanceServicesAvailable,
+    #[serde(default)]
+    pub server_list_buttons: ServerListButtonsConfig,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ServerListButtonsConfig {
+    #[serde(default = "default_true")]
+    pub favorites: bool,
+    #[serde(default = "default_true")]
+    pub explore: bool,
+    #[serde(default = "default_true")]
+    pub create_join: bool,
+    #[serde(default = "default_true")]
+    pub download: bool,
+    #[serde(default = "default_true")]
+    pub help: bool,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+impl Default for ServerListButtonsConfig {
+    fn default() -> Self {
+        Self {
+            favorites: true,
+            explore: true,
+            create_join: true,
+            download: true,
+            help: true,
+        }
+    }
+}
 }
 
 fn default_guild_create_access() -> bool {
@@ -149,6 +182,7 @@ impl Default for InstancePolicyResponse {
             services: InstanceServicesOverrides::default(),
             services_resolved: InstanceServicesResolved::default(),
             services_available: InstanceServicesAvailable::default(),
+            server_list_buttons: ServerListButtonsConfig::default(),
         }
     }
 }
@@ -906,6 +940,23 @@ pub struct InstancePolicyUpdateRequest {
     pub premium_mode: Option<PremiumMode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub services: Option<InstanceServicesUpdateRequest>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub server_list_buttons: Option<ServerListButtonsUpdateRequest>,
+}
+
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct ServerListButtonsUpdateRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub favorites: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub explore: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub create_join: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub download: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub help: Option<bool>,
+}
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

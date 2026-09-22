@@ -32,6 +32,10 @@ export type {
 	InstanceSso,
 } from '@fluxer/schema/src/domains/instance/InstanceSchemas';
 
+// Fork imports.
+
+export type {ServerListButtons} from '@fluxer/schema/src/domains/instance/InstanceSchemas';
+
 export type InstanceLegal = InstanceAppPublic['legal'];
 export type InstanceDomainMigration = DomainMigrationDiscoveryResponse;
 export type InstanceAppRegistration = InstanceAppPublic['registration'];
