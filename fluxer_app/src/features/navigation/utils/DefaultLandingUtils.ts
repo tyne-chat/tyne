@@ -20,10 +20,11 @@ export function getDirectMessagesFallbackPath(): string {
 	if (firstGuildId) {
 		return Routes.guildChannel(firstGuildId);
 	}
-	if (Accessibility.showFavorites) {
+	const buttons = RuntimeConfig.serverListButtons;
+	if (Accessibility.showFavorites && buttons.favorites) {
 		return Routes.FAVORITES;
 	}
-	if (!RuntimeConfig.singleCommunityEnabled) {
+	if (!RuntimeConfig.singleCommunityEnabled && buttons.explore) {
 		return Routes.DISCOVER;
 	}
 	return Routes.ME;

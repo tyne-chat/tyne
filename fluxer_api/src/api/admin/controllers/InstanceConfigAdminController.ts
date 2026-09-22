@@ -175,6 +175,7 @@ async function buildInstanceConfigResponse(): Promise<InstanceConfigResponse> {
 				youtube: integrations.youtube.effective_available,
 				bluesky: integrations.bluesky.effective_enabled,
 			},
+			server_list_buttons: policy.server_list_buttons,
 		},
 		integrations,
 		media,
@@ -876,6 +877,12 @@ function planInstancePolicyPatch(
 		if (policy.services.bluesky_enabled !== undefined) {
 			patch.bluesky_enabled = policy.services.bluesky_enabled ?? null;
 		}
+	}
+	if (policy.server_list_buttons) {
+		patch.server_list_buttons = {
+			...current.server_list_buttons,
+			...policy.server_list_buttons,
+		};
 	}
 	return {patch, enablesSingleCommunity};
 }

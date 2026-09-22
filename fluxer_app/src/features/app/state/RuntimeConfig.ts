@@ -49,6 +49,10 @@ import type {LimitConfigSnapshot} from '@fluxer/limits/src/LimitTypes';
 import type {InstanceConfigResponse} from '@fluxer/schema/src/domains/admin/AdminSchemas';
 import {makeAutoObservable, observableRef} from 'mobx';
 
+// Fork imports.
+
+import type {ServerListButtons} from '@fluxer/instance_bootstrap/src/Types';
+
 const logger = new Logger('RuntimeConfig');
 
 export {
@@ -698,6 +702,7 @@ class RuntimeConfig {
 				direct_messages_disabled: config.policy.direct_messages_disabled,
 				guild_create_access: config.policy.guild_create_access,
 				community_creation_staff_only: config.policy.community_creation_staff_only,
+				server_list_buttons: config.policy.server_list_buttons,
 			},
 			services: {
 				gif_enabled: config.policy.services_resolved.gif_enabled,
@@ -839,6 +844,10 @@ class RuntimeConfig {
 
 	get communityCreationStaffOnly(): boolean {
 		return this.community.community_creation_staff_only;
+	}
+
+	get serverListButtons(): ServerListButtons {
+		return this.community.server_list_buttons;
 	}
 
 	get gifEnabled(): boolean {
