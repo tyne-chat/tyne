@@ -1,0 +1,48 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: fluxer_api/Dockerfile
+    image: fluxer-custom/fluxer-api:bleeding-edge
+
+  app-proxy:
+    build:
+      context: ..
+      dockerfile: fluxer_app_proxy/Dockerfile
+    image: fluxer-custom/fluxer-app-proxy-self-hosted:bleeding-edge
+
+  messages:
+    build:
+      context: ..
+      dockerfile: fluxer_messages/Dockerfile
+    image: fluxer-custom/fluxer-messages:bleeding-edge
+
+  static-proxy:
+    build:
+      context: ..
+      dockerfile: fluxer_static/Dockerfile
+    image: fluxer-custom/fluxer-static:bleeding-edge
+
+  snowflakes:
+    build:
+      context: ..
+      dockerfile: fluxer_snowflakes/Dockerfile
+    image: fluxer-custom/fluxer-snowflakes:bleeding-edge
+
+  users:
+    build:
+      context: ..
+      dockerfile: fluxer_users/Dockerfile
+    image: fluxer-custom/fluxer-users:bleeding-edge
+
+  media-proxy:
+    build:
+      context: ..
+      dockerfile: fluxer_media_proxy/Dockerfile
+    image: fluxer-custom/fluxer-media-proxy:bleeding-edge
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: fluxer_gateway/Dockerfile
+    image: fluxer-custom/fluxer-gateway:bleeding-edge
