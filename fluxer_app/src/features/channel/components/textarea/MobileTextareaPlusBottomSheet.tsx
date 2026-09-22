@@ -10,6 +10,14 @@ import {GiftIcon, PaperclipIcon, UploadSimpleIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useMemo} from 'react';
 
+// Fork imports.
+
+import {ClockIcon} from '@phosphor-icons/react';
+
+const INSERT_TIMESTAMP_DESCRIPTOR = msg({
+	message: 'Insert timestamp',
+	comment: 'Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.',
+});
 const UPLOAD_FILE_DESCRIPTOR = msg({
 	message: 'Upload file',
 	comment: 'Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.',
@@ -27,12 +35,20 @@ interface MobileTextareaPlusBottomSheetProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onUploadFile: () => void;
+	onInsertTimestamp?: () => void;
 	textareaValue?: string;
 	onUploadAsFile?: () => void;
 }
 
 export const MobileTextareaPlusBottomSheet = observer(
-	({isOpen, onClose, onUploadFile, textareaValue, onUploadAsFile}: MobileTextareaPlusBottomSheetProps) => {
+	({
+		isOpen,
+		onClose,
+		onUploadFile,
+		onInsertTimestamp,
+		textareaValue,
+		onUploadAsFile,
+	}: MobileTextareaPlusBottomSheetProps) => {
 		const {i18n} = useLingui();
 		const canSendGift = useCanSendGift(isOpen);
 		const groups: Array<MenuGroupType> = useMemo(() => {
@@ -51,6 +67,17 @@ export const MobileTextareaPlusBottomSheet = observer(
 					},
 				},
 			];
+			if (onInsertTimestamp) {
+				items.push({
+					icon: (
+						<ClockIcon weight="bold" data-flx="channel.textarea.mobile-textarea-plus-bottom-sheet.groups.clock-icon" />
+					),
+					label: i18n._(INSERT_TIMESTAMP_DESCRIPTOR),
+					onClick: () => {
+						ModalCommands.runAfterBottomSheetClose(onClose, onInsertTimestamp);
+					},
+				});
+			}
 			const hasTextContent = textareaValue && textareaValue.trim().length > 0;
 			if (hasTextContent && onUploadAsFile) {
 				items.push({
@@ -74,7 +101,7 @@ export const MobileTextareaPlusBottomSheet = observer(
 				});
 			}
 			return [{items}];
-		}, [canSendGift, onClose, onUploadFile, textareaValue, onUploadAsFile, i18n.locale]);
+		}, [canSendGift, onClose, onUploadFile, onInsertTimestamp, textareaValue, onUploadAsFile, i18n.locale]);
 		return (
 			<MenuBottomSheet
 				isOpen={isOpen}

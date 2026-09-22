@@ -12,6 +12,10 @@ import {
 } from '@app/features/messaging/utils/ReactionShorthandUtils';
 import {type MentionSegment, TextareaSegmentManager} from '@app/features/messaging/utils/TextareaSegmentManager';
 
+// Fork imports.
+
+import {getTimestampWire, normalizeTimestampFormat} from '@app/features/lexical/composer/nodes/ComposerTimestampUtils';
+
 interface ComposerReplacementPlan {
 	start: number;
 	end: number;
@@ -54,7 +58,13 @@ function normalizeSelection(display: string, selection: ComposerSelectionRange |
 }
 
 function getPayloadDisplay(payload: ComposerInsertPayload): string {
-	return payload.kind === 'text' ? payload.text : payload.display;
+	if (payload.kind === 'text') {
+		return payload.text;
+	}
+	if (payload.kind === 'timestamp') {
+		return getTimestampWire(payload.epoch, normalizeTimestampFormat(payload.format));
+	}
+	return payload.display;
 }
 
 function getPayloadSegment(payload: ComposerInsertPayload): ComposerPayloadSegment | null {
