@@ -295,6 +295,7 @@ async function buildInstanceConfigResponse(): Promise<InstanceConfigResponse> {
 				youtube: integrations.youtube.effective_available,
 				bluesky: integrations.bluesky.effective_enabled,
 			},
+			server_list_buttons: policy.server_list_buttons,
 		},
 		integrations,
 		media,
@@ -1289,6 +1290,12 @@ function planInstancePolicyPatch(
 	for (const field of ['gif_enabled', 'youtube_enabled', 'bluesky_enabled'] as const) {
 		const value = policy.services?.[field];
 		if (value !== undefined) patch[field] = value ?? null;
+	}
+	if (policy.server_list_buttons) {
+		patch.server_list_buttons = {
+			...current.server_list_buttons,
+			...policy.server_list_buttons,
+		};
 	}
 	return {patch, enablesSingleCommunity};
 }
