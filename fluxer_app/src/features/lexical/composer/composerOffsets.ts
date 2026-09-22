@@ -41,11 +41,17 @@ import {
 } from 'lexical';
 import invariant from 'tiny-invariant';
 
+// Fork imports.
+
+import {$createComposerTimestampNode} from '@app/features/lexical/composer/nodes/ComposerTimestampNode';
+import {getTimestampWire, normalizeTimestampFormat} from '@app/features/lexical/composer/nodes/ComposerTimestampUtils';
+
 export type ComposerInsertPayload =
 	| {kind: 'text'; text: string}
 	| {kind: 'mention'; mentionType: ComposerMentionType; id: string; display: string; wire: string}
 	| {kind: 'customEmoji'; emojiId: string; animated: boolean; display: string; wire: string}
-	| {kind: 'standardEmoji'; name: string; surrogate: string; url: string | null; display: string};
+	| {kind: 'standardEmoji'; name: string; surrogate: string; url: string | null; display: string}
+	| {kind: 'timestamp'; epoch: number; format: string};
 
 function $firstParagraph(): ElementNode {
 	const root = $getRoot();
@@ -413,6 +419,11 @@ export function $createComposerInsertNode(payload: ComposerInsertPayload, plainT
 				return $createTextNode(payload.display);
 			}
 			return $createComposerStandardEmojiNode(payload.name, payload.surrogate, payload.url, payload.display);
+		case 'timestamp':
+			if (plainText) {
+				return $createTextNode(getTimestampWire(payload.epoch, normalizeTimestampFormat(payload.format)));
+			}
+			return $createComposerTimestampNode(payload.epoch, payload.format);
 		default:
 			return $createTextNode(payload.text);
 	}
