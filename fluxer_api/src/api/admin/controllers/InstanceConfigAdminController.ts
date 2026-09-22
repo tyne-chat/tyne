@@ -313,6 +313,7 @@ async function buildInstanceConfigResponse(warnings: Array<string> = []): Promis
 		},
 		app_public: appPublic,
 		policy: {
+			server_list_buttons: policy.server_list_buttons,
 			single_community_enabled: policy.single_community_enabled,
 			single_community_guild_id: policy.single_community_guild_id,
 			direct_messages_disabled: policy.direct_messages_disabled,
@@ -1353,6 +1354,12 @@ function planInstancePolicyPatch(
 	for (const field of ['gif_enabled', 'youtube_enabled', 'bluesky_enabled'] as const) {
 		const value = policy.services?.[field];
 		if (value !== undefined) patch[field] = value ?? null;
+	}
+	if (policy.server_list_buttons) {
+		patch.server_list_buttons = {
+			...current.server_list_buttons,
+			...policy.server_list_buttons,
+		};
 	}
 	return {patch, enablesSingleCommunity};
 }
