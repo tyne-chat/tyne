@@ -201,6 +201,7 @@
 		"animejs": "4.5.0",
 		"bowser": "catalog:",
 		"clsx": "catalog:",
+		"chrono-node": "^2.7.5",
 		"codemirror": "^6.0.2",
 		"combokeys": "catalog:",
 		"eventemitter3": "catalog:",
