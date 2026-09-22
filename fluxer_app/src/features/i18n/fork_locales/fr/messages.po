@@ -32,6 +32,10 @@ msgstr "Ajouter une paire de balises ({0}/5)"
 msgid "All Personas"
 msgstr "Toutes les personas"
 
+#. Section header for all time zones in the timestamp modal.
+msgid "All time zones"
+msgstr "Tous les fuseaux horaires"
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Voulez-vous vraiment supprimer <0>{0}</0> ? Cette action est irréversible."
@@ -70,6 +74,10 @@ msgstr "Personas configurées ({count})"
 msgid "Configuring {name}..."
 msgstr "Configuration de {name}…"
 
+#. Context menu action to copy a timestamp markdown tag in the message composer.
+msgid "Copy timestamp"
+msgstr "Copier l'horodatage\\"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "Désactiver la persona"
@@ -80,6 +88,10 @@ msgstr "Supprimer la persona"
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "Supprimer la persona"
+
+#. Context menu action to delete a timestamp from the message composer.
+msgid "Delete timestamp"
+msgstr "Supprimer l'horodatage\\"
 
 msgid "Detected System Name / Tag"
 msgstr "Nom / balise de système détecté"
@@ -98,6 +110,12 @@ msgstr "Icône du badge d'affichage mise à jour"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Le badge d'affichage apparaîtra à côté du nom de toutes vos personas dans les messages. Si aucun badge n'est configuré, votre photo de profil de compte sera affichée."
 
+#. Settings search entry label for double-clicking a message to edit it.
+#. Short label for an advanced message editing preference.
+#. Tooltip hint on timestamp pill in message composer.
+msgid "Double-click to edit"
+msgstr "Double-clic pour modifier"
+
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "Téléchargement de l'avatar {current} sur {total}…"
@@ -114,6 +132,11 @@ msgstr "Modifier la persona"
 #. Aria label for editing persona
 msgid "Edit persona"
 msgstr "Modifier la persona"
+
+#. Context menu action to edit a timestamp in the message composer.
+#. Title of the timestamp modal when editing an existing timestamp.
+msgid "Edit timestamp"
+msgstr "Modifier l'horodatage\\"
 
 msgid "Export Summary"
 msgstr "Résumé de l'export"
@@ -141,6 +164,10 @@ msgstr "Échec de l'enregistrement de la persona"
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
 msgstr "Impossible de téléverser l'icône sur le serveur"
+
+#. Label for format preview selection in timestamp modal.
+msgid "Format preview"
+msgstr "Aperçu du format"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
@@ -178,6 +205,16 @@ msgstr "Importation des personas…"
 
 msgid "Importing..."
 msgstr "Importation…"
+
+#. Button to insert timestamp into message composer.
+msgid "Insert"
+msgstr "Insérer"
+
+#. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Title of the timestamp insertion modal.
+msgid "Insert timestamp"
+msgstr "Insérer un horodatage"
 
 msgid "Keep existing and add new (Recommended)"
 msgstr "Conserver les existantes et ajouter les nouvelles (Recommandé)"
@@ -398,6 +435,10 @@ msgstr "Importation réussie de {0} persona(s) sur votre compte. Toutes les imag
 msgid "Suffix (e.g. ])"
 msgstr "Suffixe (ex. ])"
 
+#. Section header for suggested time zones in the timestamp modal.
+msgid "Suggested"
+msgstr "Suggérées"
+
 msgid "Supports PluralKit system export files"
 msgstr "Prend en charge les fichiers d'export de système PluralKit"
 
@@ -467,6 +508,10 @@ msgstr "ex. Alice"
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "ex. elle / iel"
+
+#. Placeholder text for natural language timestamp input.
+msgid "e.g. tomorrow at 3pm, in 2 hours, now"
+msgstr "ex. demain à 15h, dans 2 heures, maintenant"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
