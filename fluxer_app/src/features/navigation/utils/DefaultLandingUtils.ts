@@ -24,10 +24,11 @@ function getHomeFallbackPath(): string | null {
 	if (!GatewaySessions.foregroundConnection.isReady) {
 		return null;
 	}
-	if (Accessibility.showFavorites) {
+	const buttons = RuntimeConfig.serverListButtons;
+	if (Accessibility.showFavorites && buttons.favorites) {
 		return Routes.FAVORITES;
 	}
-	if (RuntimeConfig.discoveryAvailable) {
+	if (RuntimeConfig.discoveryAvailable && buttons.explore) {
 		return Routes.DISCOVER;
 	}
 	return null;
