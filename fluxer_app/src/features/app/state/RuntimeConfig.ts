@@ -64,6 +64,10 @@ import type {LimitConfigSnapshot} from '@fluxer/limits/src/LimitTypes';
 import type {InstanceConfigResponse} from '@fluxer/schema/src/domains/admin/AdminSchemas';
 import {makeAutoObservable, observableRef} from 'mobx';
 
+// Fork imports.
+
+import type {ServerListButtons} from '@fluxer/instance_bootstrap/src/Types';
+
 const logger = new Logger('RuntimeConfig');
 
 function emailFeaturesForIdentity(
@@ -741,6 +745,7 @@ class RuntimeConfig {
 				friends_disabled: config.policy.friends_disabled,
 				personal_notes_enabled: config.policy.personal_notes_enabled,
 				guild_create_access: config.policy.guild_create_access,
+				server_list_buttons: config.policy.server_list_buttons,
 			},
 			services: {
 				gif_enabled: config.policy.services_resolved.gif_enabled,
@@ -913,6 +918,10 @@ class RuntimeConfig {
 
 	get guildBadges(): ReadonlyArray<InstanceGuildBadge> {
 		return this.activeRuntime?.snapshot.guildBadges ?? [];
+	}
+
+	get serverListButtons(): ServerListButtons {
+		return this.community.server_list_buttons;
 	}
 
 	get gifEnabled(): boolean {

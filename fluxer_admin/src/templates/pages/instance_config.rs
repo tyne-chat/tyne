@@ -41,6 +41,9 @@ mod media;
 mod policy;
 mod sso;
 
+// Fork: the fork's own instance settings (instance_config/fork.rs).
+mod fork;
+
 use self::{
     accounts::{AccountsSectionInput, account_identity_section, accounts_section},
     captcha::captcha_section,
