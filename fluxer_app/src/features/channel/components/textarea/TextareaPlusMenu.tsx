@@ -18,6 +18,14 @@ import {useLingui} from '@lingui/react/macro';
 import {GiftIcon, MicrophoneIcon, PaperclipIcon, UploadSimpleIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import {ClockIcon} from '@phosphor-icons/react';
+
+const INSERT_TIMESTAMP_DESCRIPTOR = msg({
+	message: 'Insert timestamp',
+	comment: 'Plus menu item that opens the dynamic timestamp insertion modal.',
+});
 const YOU_DO_NOT_HAVE_PERMISSION_TO_UPLOAD_FILES_DESCRIPTOR = msg({
 	message: "You can't upload files in this channel.",
 	comment: 'Tooltip on the disabled upload file item when the user lacks Attach Files permission. Calm, factual tone.',
@@ -69,6 +77,7 @@ const SHOW_SEND_BUTTON_DESCRIPTOR = msg({
 
 interface TextareaPlusMenuProps {
 	onUploadFile: () => void;
+	onInsertTimestamp?: () => void;
 	canAttachFiles: boolean;
 	canSendMessages: boolean;
 	textareaValue?: string;
@@ -80,6 +89,7 @@ interface TextareaPlusMenuProps {
 export const TextareaPlusMenu = observer(
 	({
 		onUploadFile,
+		onInsertTimestamp,
 		canAttachFiles,
 		canSendMessages,
 		textareaValue,
@@ -129,6 +139,17 @@ export const TextareaPlusMenu = observer(
 				>
 					{i18n._(UPLOAD_FILE_DESCRIPTOR)}
 				</MenuItem>
+				{onInsertTimestamp && (
+					<MenuItem
+						icon={<ClockIcon weight="bold" data-flx="channel.textarea.textarea-plus-menu.clock-icon" />}
+						onClick={onInsertTimestamp}
+						disabled={!canSendMessages}
+						hint={!canSendMessages ? cannotSendMessagesHint : undefined}
+						data-flx="channel.textarea.textarea-plus-menu.menu-item.insert-timestamp"
+					>
+						{i18n._(INSERT_TIMESTAMP_DESCRIPTOR)}
+					</MenuItem>
+				)}
 				{hasTextContent && onUploadAsFile && (
 					<MenuItem
 						icon={<UploadSimpleIcon data-flx="channel.textarea.textarea-plus-menu.upload-simple-icon" />}

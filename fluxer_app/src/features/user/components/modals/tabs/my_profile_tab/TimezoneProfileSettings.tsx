@@ -7,14 +7,16 @@ import {COMMUNITY_MEMBERS_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessa
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
-import {Combobox, type ComboboxFilterOption, type ComboboxOption} from '@app/features/ui/components/form/FormCombobox';
 import {Switch} from '@app/features/ui/components/form/FormSwitch';
 import {FRIENDS_DESCRIPTOR} from '@app/features/user/components/settings_utils/section_registry/SharedDescriptors';
 import {ProfileFieldPrivacyFlags} from '@fluxer/constants/src/UserConstants';
-import {getTimeZoneDisplayOptions} from '@fluxer/date_utils/src/TimeZoneUtils';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useState} from 'react';
+
+// Fork imports.
+
+import {SearchableTimeZonePicker} from '@app/features/ui/components/form/SearchableTimeZonePicker';
 
 const TIMEZONE_IDENTIFIER_EXAMPLE = 'America/New_York';
 const TIMEZONE_DESCRIPTOR = msg({
@@ -38,10 +40,6 @@ const EDIT_PROFILE_LOCAL_TIME_DESCRIPTOR = msg({
 const SEARCH_TIMEZONES_DESCRIPTOR = msg({
 	message: 'Search time zones',
 	comment: 'Placeholder in the profile timezone picker.',
-});
-const NOT_SET_DESCRIPTOR = msg({
-	message: 'Not set',
-	comment: 'Option in the profile timezone picker. Means no timezone has been selected.',
 });
 const TIMEZONE_HELP_DESCRIPTOR = msg({
 	message: 'Choose the time zone {productName} uses to calculate your UTC offset for profile local time.',
@@ -69,10 +67,6 @@ const COMMUNITY_MEMBERS_DESCRIPTION_DESCRIPTOR = msg({
 	message: "Allow members from communities you're in to see your local time",
 	comment: 'Profile timezone privacy option description for the Community members switch.',
 });
-
-interface TimeZoneSelectOption extends ComboboxOption<string> {
-	readonly searchText: string;
-}
 
 interface TimezoneProfileSettingsProps {
 	readonly timezone: string | null;
@@ -139,8 +133,7 @@ function TimezoneProfileSettingsModal({
 	);
 	const everyoneEnabled = hasFlag(ProfileFieldPrivacyFlags.EVERYONE);
 	const handleTimezoneChange = useCallback(
-		(value: string) => {
-			const nextTimezone = value || null;
+		(nextTimezone: string | null) => {
 			setLocalTimezone(nextTimezone);
 			onTimezoneChange(nextTimezone);
 			if (localTimezone === null && nextTimezone !== null) {
@@ -158,29 +151,6 @@ function TimezoneProfileSettingsModal({
 		},
 		[localTimezonePrivacyFlags, onTimezonePrivacyFlagsChange],
 	);
-	const options = useMemo<ReadonlyArray<TimeZoneSelectOption>>(
-		() => [
-			{
-				value: '',
-				label: i18n._(NOT_SET_DESCRIPTOR),
-				searchText: i18n._(NOT_SET_DESCRIPTOR),
-			},
-			...getTimeZoneDisplayOptions().map((option) => ({
-				value: option.value,
-				label: option.label,
-				searchText: option.searchText,
-			})),
-		],
-		[i18n.locale],
-	);
-	const filterOption = (option: ComboboxFilterOption<TimeZoneSelectOption>, rawInput: string) => {
-		const input = rawInput.trim().toLowerCase();
-		if (!input) {
-			return true;
-		}
-		const data = option.data;
-		return data.label.toLowerCase().includes(input) || data.searchText.toLowerCase().includes(input);
-	};
 	return (
 		<Modal.Root size="small" centered data-flx="user.my-profile-tab.timezone-profile-settings.modal-root">
 			<Modal.Header
@@ -195,15 +165,14 @@ function TimezoneProfileSettingsModal({
 							timezoneIdentifierExample: TIMEZONE_IDENTIFIER_EXAMPLE,
 						})}
 					</Modal.Description>
-					<Combobox<string, TimeZoneSelectOption>
+					<SearchableTimeZonePicker
 						label={i18n._(TIMEZONE_DESCRIPTOR)}
 						description={i18n._(TIMEZONE_HELP_DESCRIPTOR, {productName: RuntimeConfig.productName})}
 						placeholder={i18n._(SEARCH_TIMEZONES_DESCRIPTOR)}
-						value={localTimezone ?? ''}
-						options={options}
+						value={localTimezone}
 						onChange={handleTimezoneChange}
 						disabled={disabled}
-						filterOption={filterOption}
+						allowClear={true}
 						data-flx="user.my-profile-tab.timezone-profile-settings.select.change"
 					/>
 					<Modal.InputGroup data-flx="user.my-profile-tab.timezone-profile-settings.input-group">

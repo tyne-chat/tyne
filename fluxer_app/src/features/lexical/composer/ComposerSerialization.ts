@@ -49,6 +49,17 @@ import {
 } from 'lexical';
 import invariant from 'tiny-invariant';
 
+// Fork imports.
+
+import {
+	$createComposerTimestampNode,
+	$isComposerTimestampNode,
+} from '@app/features/lexical/composer/nodes/ComposerTimestampNode';
+import {
+	normalizeTimestampFormat,
+	parseTimestampWire,
+} from '@app/features/lexical/composer/nodes/ComposerTimestampUtils';
+
 export interface ComposerProjection {
 	display: string;
 	segments: Array<MentionSegment>;
@@ -101,6 +112,9 @@ function isValidSegmentWire(segment: MentionSegment): boolean {
 			return match != null && match[1] === segment.id;
 		}
 		case 'special':
+			if (segment.id.startsWith('timestamp:')) {
+				return parseTimestampWire(segment.actualText) != null;
+			}
 			return (
 				isSpecialMentionKind(segment.id) && segment.actualText === segment.id && segment.displayText === segment.id
 			);
@@ -332,6 +346,20 @@ export function $projectComposer(): ComposerProjection {
 				if (isStandardEmojiSegment(segment)) {
 					segments.push(segment);
 				}
+			} else if ($isComposerTimestampNode(child)) {
+				const start = display.length;
+				const displayText = child.getTextContent();
+				const actualText = child.getWireText();
+				display += displayText;
+				wire += actualText;
+				segments.push({
+					type: 'special',
+					id: child.getSegmentId(),
+					displayText,
+					actualText,
+					start,
+					end: display.length,
+				});
 			} else if ($isSlashSlotNode(child)) {
 				const displayText = child.getTextContent();
 				const start = display.length;
@@ -419,6 +447,19 @@ export function $createComposerSegmentNodes(segment: MentionSegment, plainText: 
 	}
 	if (plainText || segment.id.startsWith(COMPOSER_SLASH_SLOT_SEGMENT_PREFIX)) {
 		return [$createComposerPlainSegmentNode(segment.type, segment.id, segment.displayText, segment.actualText)];
+	}
+	if (segment.id.startsWith('timestamp:')) {
+		const parts = segment.id.split(':');
+		const epoch = Number.parseInt(parts[1] ?? '', 10);
+		const format = normalizeTimestampFormat(parts[2]);
+		if (Number.isFinite(epoch)) {
+			return [$createComposerTimestampNode(epoch, format)];
+		}
+		const parsed = parseTimestampWire(segment.actualText);
+		if (parsed != null) {
+			return [$createComposerTimestampNode(parsed.epoch, parsed.format)];
+		}
+		return [$createTextNode(segment.displayText)];
 	}
 	if (segment.type === 'emoji') {
 		const match = CUSTOM_EMOJI_WIRE_RE.exec(segment.actualText);
