@@ -41,6 +41,10 @@ import {
 } from '@fluxer/instance_bootstrap/src/Types';
 import type {LimitConfigSnapshot, LimitFilter, LimitRule} from '@fluxer/limits/src/LimitTypes';
 
+// Fork imports.
+
+import type {ServerListButtons} from '@fluxer/instance_bootstrap/src/Types';
+
 const LIMIT_KEYS_SET = new Set<string>(LIMIT_KEYS);
 const DEFAULT_PREMIUM_PRODUCT_NAME = 'Plutonium';
 
@@ -365,12 +369,26 @@ function readCommunity(value: unknown): InstanceCommunity {
 		guild_create_access: readOptionalBoolean(source, 'guild_create_access', 'community.guild_create_access') ?? true,
 		personal_notes_enabled:
 			readOptionalBoolean(source, 'personal_notes_enabled', 'community.personal_notes_enabled') ?? true,
+		server_list_buttons: readServerListButtons(source.server_list_buttons),
 	};
 	const friendsDisabled = readOptionalBoolean(source, 'friends_disabled', 'community.friends_disabled');
 	if (friendsDisabled !== undefined) {
 		community.friends_disabled = friendsDisabled;
 	}
 	return community;
+}
+
+function readServerListButtons(value: unknown): ServerListButtons {
+	const path = 'community.server_list_buttons';
+	const source = value === undefined ? {} : readRecord(value, path);
+	const visible = (key: keyof ServerListButtons): boolean => readOptionalBoolean(source, key, `${path}.${key}`) ?? true;
+	return {
+		favorites: visible('favorites'),
+		explore: visible('explore'),
+		create_join: visible('create_join'),
+		download: visible('download'),
+		help: visible('help'),
+	};
 }
 
 function readServices(value: unknown): InstanceServices {

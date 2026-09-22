@@ -89,6 +89,10 @@ import {WebhookTypeSchema} from '@fluxer/schema/src/primitives/WebhookValidators
 import {schemaMetadata} from '@fluxer/schema/src/SchemaMetadata';
 import {z} from 'zod';
 
+// Fork imports.
+
+import {ServerListButtonsSchema} from '@fluxer/schema/src/domains/instance/InstanceSchemas';
+
 const ReportStatusSchema = withOpenApiType(
 	createInt32EnumType(
 		[
@@ -713,6 +717,13 @@ const InstancePolicyResponse = z.object({
 		youtube: z.boolean(),
 		bluesky: z.boolean(),
 	}),
+	server_list_buttons: ServerListButtonsSchema.default({
+		favorites: true,
+		explore: true,
+		create_join: true,
+		download: true,
+		help: true,
+	}),
 });
 
 const EmailProviderSchema = z.enum(['smtp', 'none']).describe('Deprecated, use delivery');
@@ -833,6 +844,15 @@ export const InstanceConfigResponse = z.object({
 
 export type InstanceConfigResponse = z.infer<typeof InstanceConfigResponse>;
 
+export const ServerListButtonsUpdateSchema = z.object({
+	favorites: z.boolean().optional(),
+	explore: z.boolean().optional(),
+	create_join: z.boolean().optional(),
+	download: z.boolean().optional(),
+	help: z.boolean().optional(),
+});
+export type ServerListButtonsUpdate = z.infer<typeof ServerListButtonsUpdateSchema>;
+
 const InstancePolicyUpdateSchema = z.object({
 	single_community_enabled: z.boolean().optional(),
 	single_community_name: z.string().trim().min(1).max(100).optional(),
@@ -864,6 +884,7 @@ const InstancePolicyUpdateSchema = z.object({
 			bluesky_enabled: z.boolean().nullish(),
 		})
 		.nullish(),
+	server_list_buttons: ServerListButtonsUpdateSchema.optional(),
 });
 
 export const InstanceConfigUpdateRequest = z.object({
