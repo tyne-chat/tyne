@@ -36,6 +36,10 @@ import {
 import type React from 'react';
 import {useState} from 'react';
 
+// Fork imports.
+
+import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
+
 const GUILD_ICON_SIZE = skeletonSurfaceVar('--guild-icon-size');
 const FOLDER_ICON_SIZE = skeletonSurfaceVar('--guild-list-item-box-size');
 const SHOWS_DOWNLOAD_ACTION = !Platform.isElectron && !Platform.isPWA;
@@ -465,12 +469,13 @@ export const GuildRailSkeleton: React.FC<GuildRailSkeletonProps> = ({
 	const outageVisible = rememberedLayout?.outageVisible ?? false;
 	const organizedItems = rememberedLayout?.organizedItems ?? SKELETON_GUILD_RAIL_FALLBACK_ITEMS;
 	const selectedItemIndex = rememberedLayout?.selectedItemIndex ?? SKELETON_NO_SELECTED_RAIL_ITEM_INDEX;
+	const buttons = RuntimeConfig.serverListButtons;
 	const fluxerVisible = rememberedLayout?.fluxerVisible ?? !skeletonDirectMessagesDisabled();
-	const favoritesVisible = rememberedLayout?.favoritesVisible ?? true;
-	const discoveryVisible = rememberedLayout?.discoveryVisible ?? communityActionsAvailable;
-	const addGuildVisible = rememberedLayout?.addGuildVisible ?? communityActionsAvailable;
-	const downloadVisible = rememberedLayout?.downloadVisible ?? SHOWS_DOWNLOAD_ACTION;
-	const helpVisible = rememberedLayout?.helpVisible ?? true;
+	const favoritesVisible = (rememberedLayout?.favoritesVisible ?? true) && buttons.favorites;
+	const discoveryVisible = (rememberedLayout?.discoveryVisible ?? communityActionsAvailable) && buttons.explore;
+	const addGuildVisible = (rememberedLayout?.addGuildVisible ?? communityActionsAvailable) && buttons.create_join;
+	const downloadVisible = (rememberedLayout?.downloadVisible ?? SHOWS_DOWNLOAD_ACTION) && buttons.download;
+	const helpVisible = (rememberedLayout?.helpVisible ?? true) && buttons.help;
 	const hasGuildItems = outageVisible || organizedItems.length > 0;
 	const fluxerIsLastTopRow = fluxerVisible && !favoritesVisible && inlineDmRowCount === 0;
 	const hasBottomRailButtons = discoveryVisible || addGuildVisible || downloadVisible || helpVisible;

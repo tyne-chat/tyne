@@ -209,6 +209,23 @@ export const InstanceRegistrationSchema = z
 	.describe('Registration policy for this instance');
 export type InstanceRegistration = z.infer<typeof InstanceRegistrationSchema>;
 
+export const ServerListButtonsSchema = z
+	.object({
+		favorites: z.boolean().default(true).describe('Whether the Favorites button is visible in the server list'),
+		explore: z.boolean().default(true).describe('Whether the Explore communities button is visible in the server list'),
+		create_join: z
+			.boolean()
+			.default(true)
+			.describe('Whether the Create or join a community button is visible in the server list'),
+		download: z
+			.boolean()
+			.default(true)
+			.describe('Whether the Download desktop app button is visible in the server list'),
+		help: z.boolean().default(true).describe('Whether the Help center button is visible in the server list'),
+	})
+	.describe('Visibility configuration for special buttons in the server list column');
+export type ServerListButtons = z.infer<typeof ServerListButtonsSchema>;
+
 export const InstanceCommunitySchema = z
 	.object({
 		single_community: z
@@ -230,6 +247,13 @@ export const InstanceCommunitySchema = z
 			.boolean()
 			.default(false)
 			.describe('Whether community creation is restricted to staff members'),
+		server_list_buttons: ServerListButtonsSchema.default({
+			favorites: true,
+			explore: true,
+			create_join: true,
+			download: true,
+			help: true,
+		}),
 	})
 	.describe('Community topology and direct-message policy for this instance');
 export type InstanceCommunity = z.infer<typeof InstanceCommunitySchema>;
