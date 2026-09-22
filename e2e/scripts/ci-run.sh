@@ -45,11 +45,15 @@ echo "=================================================="
 # ------------------------------------------------------------------------------
 # 1. Image Preparation
 # ------------------------------------------------------------------------------
+BUILD_COMPOSE="$E2E_DIR/docker-compose.e2e-build.yml"
+if [ ! -f "$BUILD_COMPOSE" ] && [ -f "$REPO_DIR/docker-compose.build.yml" ]; then
+  BUILD_COMPOSE="$REPO_DIR/docker-compose.build.yml"
+fi
+
 if [ "$SKIP_BUILD" = false ]; then
   if [ "$BUILD_ALL" = true ]; then
     echo "🔨 Building all 8 custom Fluxer microservices from source..."
-    cd "$REPO_DIR"
-    docker compose -f docker-compose.build.yml build \
+    docker compose -f "$BUILD_COMPOSE" build \
       api app-proxy messages gateway static-proxy snowflakes users media-proxy
   else
     echo "📥 Pulling upstream base images for auxiliary services with no custom changes..."
@@ -60,8 +64,7 @@ if [ "$SKIP_BUILD" = false ]; then
     done
 
     echo "🔨 Building custom subprofile microservices from source (api, app-proxy, messages, static-proxy)..."
-    cd "$REPO_DIR"
-    docker compose -f docker-compose.build.yml build \
+    docker compose -f "$BUILD_COMPOSE" build \
       api app-proxy messages static-proxy
   fi
   echo "✅ Docker images ready."
