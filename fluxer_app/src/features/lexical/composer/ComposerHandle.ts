@@ -28,6 +28,7 @@ export interface ComposerHandle {
 	replaceRange: (start: number, end: number, payload: ComposerInsertPayload, spacing?: ComposerInsertSpacing) => void;
 	insertSlashCommand: (name: string, options: ReadonlyArray<CommandOption>, start: number, end: number) => void;
 	insertTextAtCursor: (text: string) => void;
+	insertTimestamp: (epoch: number, format?: string) => void;
 	wrapSelection: (prefix: string, suffix: string) => void;
 	deleteSelection: () => void;
 	clear: () => void;
