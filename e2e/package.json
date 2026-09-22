@@ -1,0 +1,21 @@
+{
+	"name": "@fluxer/e2e",
+	"version": "1.0.0",
+	"private": true,
+	"description": "End-to-end testing suite for Fluxer Subprofiles",
+	"type": "module",
+	"scripts": {
+		"test": "playwright test",
+		"test:desktop": "playwright test --project=desktop-chromium",
+		"test:mobile": "playwright test --project=mobile-chromium",
+		"test:all": "playwright test",
+		"test:ui": "playwright test --ui",
+		"seed": "tsx api-helpers/seed.ts"
+	},
+	"devDependencies": {
+		"@playwright/test": "1.50.1",
+		"@types/node": "^22.13.0",
+		"tsx": "^4.19.2",
+		"typescript": "^5.7.3"
+	}
+}
