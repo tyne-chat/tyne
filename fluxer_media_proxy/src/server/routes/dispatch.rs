@@ -1030,6 +1030,7 @@ mod tests {
     }
 
     #[tokio::test]
+        let _tracing_lock = crate::test_fixtures::lock_test_tracing();
     async fn off_mode_never_inspects_origin() {
         let tmp = tempfile::tempdir().expect("storage root");
         let root = tmp.path().canonicalize().expect("canonical storage root");
@@ -1863,6 +1864,7 @@ mod tests {
     }
 
     #[tokio::test]
+        let _tracing_lock = crate::test_fixtures::lock_test_tracing();
     async fn off_mode_serves_a_signed_request_unchanged() {
         let tmp = tempfile::tempdir().expect("storage root");
         let root = tmp.path().canonicalize().expect("canonical storage root");
@@ -2010,6 +2012,7 @@ mod tests {
 
     #[tokio::test]
     async fn a_report_burst_bounds_its_log_lines_and_still_counts_every_read() {
+        let _tracing_lock = crate::test_fixtures::lock_test_tracing_async().await;
         const BURST: usize = 50;
         let tmp = tempfile::tempdir().expect("storage root");
         let root = tmp.path().canonicalize().expect("canonical storage root");
