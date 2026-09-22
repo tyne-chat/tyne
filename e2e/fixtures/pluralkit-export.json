@@ -1,0 +1,36 @@
+{
+	"id": "pk_e2e_sys",
+	"name": "E2E Collective",
+	"tag": "COLLECTIVE",
+	"description": "Mock PluralKit export for automated E2E tests",
+	"members": [
+		{
+			"id": "pk_mem_alpha",
+			"name": "Alpha",
+			"display_name": "Alpha (Lead)",
+			"pronouns": "they/them",
+			"description": "System navigator and planner",
+			"color": "4a90e2",
+			"proxy_tags": [
+				{
+					"prefix": "alpha:",
+					"suffix": ""
+				}
+			]
+		},
+		{
+			"id": "pk_mem_beta",
+			"name": "Beta",
+			"display_name": "Beta (Support)",
+			"pronouns": "she/her",
+			"description": "System creative and writer",
+			"color": "e24a90",
+			"proxy_tags": [
+				{
+					"prefix": "beta:",
+					"suffix": ""
+				}
+			]
+		}
+	]
+}
