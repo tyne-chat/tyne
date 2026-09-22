@@ -32,6 +32,10 @@ msgstr "Add Tag Pair ({0}/5)"
 msgid "All Personas"
 msgstr "All Personas"
 
+#. Section header for all time zones in the timestamp modal.
+msgid "All time zones"
+msgstr "Toate fusurile orare"
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
@@ -70,6 +74,10 @@ msgstr "Configured Personas ({count})"
 msgid "Configuring {name}..."
 msgstr "Configuring {name}..."
 
+#. Context menu action to copy a timestamp markdown tag in the message composer.
+msgid "Copy timestamp"
+msgstr "Copiază marcajul de timp\\"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "Deactivate persona"
@@ -80,6 +88,10 @@ msgstr "Delete Persona"
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "Delete persona"
+
+#. Context menu action to delete a timestamp from the message composer.
+msgid "Delete timestamp"
+msgstr "Șterge marcajul de timp\\"
 
 msgid "Detected System Name / Tag"
 msgstr "Detected System Name / Tag"
@@ -98,6 +110,12 @@ msgstr "Display tag icon updated"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 
+#. Settings search entry label for double-clicking a message to edit it.
+#. Short label for an advanced message editing preference.
+#. Tooltip hint on timestamp pill in message composer.
+msgid "Double-click to edit"
+msgstr "Dublu clic pentru editare"
+
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "Downloading avatar {current} of {total}..."
@@ -114,6 +132,11 @@ msgstr "Edit Persona"
 #. Aria label for editing persona
 msgid "Edit persona"
 msgstr "Edit persona"
+
+#. Context menu action to edit a timestamp in the message composer.
+#. Title of the timestamp modal when editing an existing timestamp.
+msgid "Edit timestamp"
+msgstr "Editează marcajul de timp\\"
 
 msgid "Export Summary"
 msgstr "Export Summary"
@@ -141,6 +164,10 @@ msgstr "Failed to save persona"
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
 msgstr "Failed to upload icon to server"
+
+#. Label for format preview selection in timestamp modal.
+msgid "Format preview"
+msgstr "Previzualizare format"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
@@ -178,6 +205,16 @@ msgstr "Importing Personas..."
 
 msgid "Importing..."
 msgstr "Importing..."
+
+#. Button to insert timestamp into message composer.
+msgid "Insert"
+msgstr "Inserează"
+
+#. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Title of the timestamp insertion modal.
+msgid "Insert timestamp"
+msgstr "Inserează marcaj de timp"
 
 msgid "Keep existing and add new (Recommended)"
 msgstr "Keep existing and add new (Recommended)"
@@ -398,6 +435,10 @@ msgstr "Successfully imported {0} persona(s) into your account. All avatar image
 msgid "Suffix (e.g. ])"
 msgstr "Suffix (e.g. ])"
 
+#. Section header for suggested time zones in the timestamp modal.
+msgid "Suggested"
+msgstr "Sugerate"
+
 msgid "Supports PluralKit system export files"
 msgstr "Supports PluralKit system export files"
 
@@ -467,6 +508,10 @@ msgstr "e.g. Alice"
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "e.g. she/her"
+
+#. Placeholder text for natural language timestamp input.
+msgid "e.g. tomorrow at 3pm, in 2 hours, now"
+msgstr "de ex. mâine la ora 15, în 2 ore, acum"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
