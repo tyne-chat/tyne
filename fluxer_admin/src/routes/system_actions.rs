@@ -45,6 +45,9 @@ mod policy;
 mod registration_urls;
 mod sso;
 
+// Fork: the fork's own instance settings (system_actions/fork.rs).
+mod fork;
+
 #[derive(Deserialize)]
 pub(super) struct ActionQuery {
     pub(super) action: Option<String>,
@@ -245,6 +248,7 @@ pub async fn instance_config_post(
                 policy::CommunityAction::Update,
             )),
             "update_notice" => notices::build_notice_update(&form).map_err(FlashData::error),
+            "update_server_list_buttons" => Ok(fork::build_server_list_buttons_update(&form)),
             _ => Err(FlashData::error("Unknown instance config action")),
         };
         let update = match update {
