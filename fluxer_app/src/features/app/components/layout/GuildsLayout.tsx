@@ -215,21 +215,24 @@ interface GuildNavigationVisibility {
 }
 
 function useGuildNavigationVisibility(): GuildNavigationVisibility {
+	const buttons = RuntimeConfig.serverListButtons;
 	const communityActionsVisible = !RuntimeConfig.singleCommunityEnabled;
-	const discoveryVisible = RuntimeConfig.discoveryAvailable;
-	const favoritesVisible = Accessibility.showFavorites;
-	const downloadVisible = !Platform.isElectron && !Platform.isPWA && !HiddenGuildListButtons.downloadButtonHidden;
-	const helpVisible = !HiddenGuildListButtons.helpButtonHidden && Routes.help() != null;
+	const discoveryVisible = RuntimeConfig.discoveryAvailable && buttons.explore;
+	const favoritesVisible = Accessibility.showFavorites && buttons.favorites;
+	const addGuildVisible = communityActionsVisible && (buttons.create_join || (Users.currentUser?.isStaff() ?? false));
+	const downloadVisible =
+		!Platform.isElectron && !Platform.isPWA && !HiddenGuildListButtons.downloadButtonHidden && buttons.download;
+	const helpVisible = !HiddenGuildListButtons.helpButtonHidden && Routes.help() != null && buttons.help;
 	return useMemo(
 		() =>
 			Object.freeze({
 				favoritesVisible,
 				discoveryVisible,
-				addGuildVisible: communityActionsVisible,
+				addGuildVisible,
 				downloadVisible,
 				helpVisible,
 			}),
-		[communityActionsVisible, discoveryVisible, downloadVisible, favoritesVisible, helpVisible],
+		[addGuildVisible, discoveryVisible, downloadVisible, favoritesVisible, helpVisible],
 	);
 }
 
