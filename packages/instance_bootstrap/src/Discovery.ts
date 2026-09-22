@@ -42,6 +42,10 @@ import {
 import type {LimitConfigSnapshot, LimitConfigWireFormat, LimitFilter, LimitRule} from '@fluxer/limits/src/LimitTypes';
 import {EXPERIMENT_BUCKET_RESOLUTION} from '@fluxer/schema/src/domains/experiment/ExperimentBucket';
 
+// Fork imports.
+
+import type {ServerListButtons} from '@fluxer/instance_bootstrap/src/Types';
+
 export const INSTANCE_DISCOVERY_PATH = '/.well-known/fluxer';
 const INSTANCE_DISCOVERY_CONVENTIONAL_ENDPOINT_PATH = '/api';
 export const INSTANCE_DISCOVERY_MAX_BYTES = 1024 * 1024;
@@ -670,6 +674,18 @@ function parseCommunity(value: unknown): InstanceCommunity | null {
 		friends_disabled: readBoolean(source, 'friends_disabled') ?? directMessagesDisabled,
 		personal_notes_enabled: readBoolean(source, 'personal_notes_enabled') ?? true,
 		guild_create_access: readBoolean(source, 'guild_create_access') ?? true,
+		server_list_buttons: parseServerListButtons(source.server_list_buttons),
+	};
+}
+
+function parseServerListButtons(value: unknown): ServerListButtons {
+	const source = asRecord(value) ?? {};
+	return {
+		favorites: readBoolean(source, 'favorites') ?? true,
+		explore: readBoolean(source, 'explore') ?? true,
+		create_join: readBoolean(source, 'create_join') ?? true,
+		download: readBoolean(source, 'download') ?? true,
+		help: readBoolean(source, 'help') ?? true,
 	};
 }
 
