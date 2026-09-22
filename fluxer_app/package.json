@@ -196,6 +196,7 @@
 		"animejs": "4.5.0",
 		"bowser": "catalog:",
 		"clsx": "catalog:",
+		"chrono-node": "^2.7.5",
 		"combokeys": "catalog:",
 		"eventemitter3": "catalog:",
 		"favico.js": "catalog:",
