@@ -1,0 +1,115 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.container {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	width: 100%;
+	min-width: 0;
+}
+
+.label {
+	font-size: 0.75rem;
+	line-height: 1rem;
+	font-weight: 700;
+	color: var(--header-secondary, #b5bac1);
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+
+.description {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: var(--text-secondary, #949ba4);
+}
+
+.trigger {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	min-width: 0;
+	border-radius: 0.5rem;
+	border: 0.0625rem solid var(--background-modifier-accent, #35363c);
+	padding: 0.375rem 0.625rem;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: var(--text-primary, #dbdee1);
+	background-color: var(--form-surface-background, #1e1f22);
+	min-height: 2.25rem;
+	box-sizing: border-box;
+	cursor: pointer;
+	text-align: left;
+	transition: border-color 150ms ease;
+}
+
+.trigger:hover:not(:disabled) {
+	border-color: var(--background-modifier-hover, #4e5058);
+}
+
+.trigger:focus {
+	outline: none;
+	border-color: var(--brand-primary, #5865f2);
+}
+
+.trigger:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+:global(.theme-light) .trigger {
+	background-color: var(--background-modifier-hover, #e3e5e8);
+}
+
+.globeIcon {
+	color: var(--text-secondary, #949ba4);
+	flex-shrink: 0;
+}
+
+.triggerLabel {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.caret {
+	color: var(--text-secondary, #949ba4);
+	flex-shrink: 0;
+}
+
+.popout {
+	width: 100% !important;
+	max-height: 22rem;
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+}
+
+.scroller {
+	max-height: 16rem;
+}
+
+.optionItem {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	min-width: 0;
+	gap: 0.5rem;
+}
+
+.optionLabel {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.875rem;
+}
+
+.checkIcon {
+	color: var(--brand-primary, #5865f2);
+	flex-shrink: 0;
+}
