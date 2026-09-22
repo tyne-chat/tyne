@@ -1,0 +1,31 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.timestamp {
+	background-color: var(--background-modifier-hover);
+	border-radius: 0.1875rem;
+	padding: 0 0.125rem;
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	color: inherit;
+	cursor: pointer;
+	transition: background-color var(--transition-fast);
+	overflow-wrap: anywhere;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+	user-select: none;
+	-webkit-user-select: none;
+	display: inline-block;
+	vertical-align: baseline;
+}
+
+:global(:where(html.window-focused, html.unfocused-fully-interactive):not(.window-focus-activation-guard))
+	.timestamp:hover {
+	background-color: var(--bg-hover);
+}
+
+.tooltipHint {
+	margin-top: 0.25rem;
+	font-size: 0.75rem;
+	color: var(--text-muted);
+}
