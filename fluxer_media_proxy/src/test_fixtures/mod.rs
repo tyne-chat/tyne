@@ -23,5 +23,32 @@ pub use media::{
     fixture_mp4_with_undecodable_video, synthetic_wav,
 };
 
+static TRACING_TEST_LOCK: std::sync::LazyLock<tokio::sync::Mutex<()>> =
+    std::sync::LazyLock::new(|| tokio::sync::Mutex::new(()));
+static INIT_TEST_TRACING: std::sync::Once = std::sync::Once::new();
+
+pub fn init_test_tracing() {
+    INIT_TEST_TRACING.call_once(|| {
+        let subscriber = tracing_subscriber::fmt()
+            .with_writer(std::io::sink)
+            .with_max_level(tracing::Level::TRACE)
+            .finish();
+        let _ = tracing::subscriber::set_global_default(subscriber);
+    });
+}
+
+/// For `#[test]` functions; async tests use [`lock_test_tracing_async`].
+pub fn lock_test_tracing() -> tokio::sync::MutexGuard<'static, ()> {
+    init_test_tracing();
+    TRACING_TEST_LOCK.blocking_lock()
+}
+
+/// For `#[tokio::test]` functions, which hold the lock across awaits.
+pub async fn lock_test_tracing_async() -> tokio::sync::MutexGuard<'static, ()> {
+    init_test_tracing();
+    TRACING_TEST_LOCK.lock().await
+}
+
+
 mod captured_log;
 pub(crate) use captured_log::CapturedLog;

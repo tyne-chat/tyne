@@ -321,6 +321,7 @@ mod tests {
 
     #[test]
     fn a_long_origin_is_clipped_for_logging() {
+        let _tracing_lock = crate::test_fixtures::lock_test_tracing();
         let long = "a".repeat(4096);
         let headers = origin_headers(&[HeaderValue::from_str(&long).expect("ascii origin")]);
         let clipped = "a".repeat(ORIGIN_LOG_BYTES_MAX);
