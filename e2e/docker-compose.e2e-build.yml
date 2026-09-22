@@ -9,6 +9,8 @@ services:
     build:
       context: ..
       dockerfile: fluxer_app_proxy/Dockerfile
+      args:
+        PRECOMPRESS_BROTLI_QUALITY: "4"
     image: fluxer-custom/fluxer-app-proxy-self-hosted:bleeding-edge
 
   messages:
