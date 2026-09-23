@@ -9,13 +9,17 @@ import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import timestampRendererStyles from '@app/features/theme/styles/TimestampRenderer.module.css';
 import Tick from '@app/features/ui/state/Tick';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
-import {getFormattedDateTimeWithSeconds} from '@app/features/user/utils/DateFormatting';
 import {getCurrentLocale} from '@app/features/user/utils/LocaleUtils';
 import {resolveFormattingLocale} from '@fluxer/constants/src/Locales';
 import {DateTime} from 'luxon';
 import {computed} from 'mobx';
 import {observer} from 'mobx-react-lite';
 import React, {type ReactElement, useMemo} from 'react';
+
+// Fork imports.
+
+import Users from '@app/features/user/state/Users';
+import {getFormattedDateTimeWithSecondsInTimeZone} from '@app/features/user/utils/DateFormatting';
 
 interface RelativeLabels {
 	readonly displayTime: string;
@@ -38,8 +42,10 @@ export const TimestampRenderer = observer(function TimestampRenderer({
 	const {timestamp, style} = node;
 	const i18n = options.i18n;
 	const date = getDateFromUnixTimestampSeconds(timestamp);
+	const currentUser = Users.getCurrentUser();
+	const profileTimezone = currentUser?.timezone ?? undefined;
 	const locale = getCurrentLocale();
-	const fullDateTime = date !== null ? getFormattedDateTimeWithSeconds(date) : null;
+	const fullDateTime = date !== null ? getFormattedDateTimeWithSecondsInTimeZone(date, profileTimezone) : null;
 	const isRelativeStyle = style === TimestampStyle.RelativeTime;
 	const relativeLabels = useMemo(
 		() =>
@@ -53,13 +59,13 @@ export const TimestampRenderer = observer(function TimestampRenderer({
 						return {displayTime: '', relativeTime: null};
 					}
 					return {
-						displayTime: formatTimestamp(timestamp, style, i18n),
+						displayTime: formatTimestamp(timestamp, style, i18n, profileTimezone),
 						relativeTime: DateTime.fromJSDate(labelDate).setLocale(resolveFormattingLocale(locale)).toRelative(),
 					};
 				},
 				{equals: areRelativeLabelsEqual},
 			),
-		[isRelativeStyle, timestamp, style, i18n, i18n.locale, locale],
+		[profileTimezone, isRelativeStyle, timestamp, style, i18n, i18n.locale, locale],
 	).get();
 	const relativeTime = relativeLabels.relativeTime;
 	if (date === null || fullDateTime === null) {
