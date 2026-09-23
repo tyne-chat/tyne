@@ -35,6 +35,7 @@ export interface SearchableListPopoutSection {
 	id: string;
 	heading?: ReactNode;
 	items: Array<SearchableListPopoutItem>;
+	showOnlyWhenEmpty?: boolean;
 }
 
 interface SearchableListPopoutProps {
@@ -61,9 +62,12 @@ interface FlattenedOption {
 	option: SearchableListPopoutItem;
 }
 
-function getDefaultActiveIndex(options: Array<FlattenedOption>): number | null {
+function getDefaultActiveIndex(options: Array<FlattenedOption>, hasQuery = false): number | null {
 	if (options.length === 0) {
 		return null;
+	}
+	if (hasQuery) {
+		return 0;
 	}
 	const selectedIndex = options.findIndex((option) => option.option.isSelected);
 	if (selectedIndex >= 0) {
@@ -106,8 +110,12 @@ export function SearchableListPopout({
 		}
 		const nextSections: Array<SearchableListPopoutSection> = [];
 		for (const section of sections) {
+			if (section.showOnlyWhenEmpty) {
+				continue;
+			}
 			const filteredItems = matchSorter(section.items, normalizedSearchQuery, {
 				keys: [(item) => item.searchValues],
+				threshold: matchSorter.rankings.CONTAINS,
 			});
 			if (filteredItems.length > 0) {
 				nextSections.push({...section, items: filteredItems});
@@ -145,12 +153,16 @@ export function SearchableListPopout({
 			if (flattenedOptions.length === 0) {
 				return null;
 			}
+			const hasQuery = Boolean(searchQuery.trim());
+			if (hasQuery) {
+				return 0;
+			}
 			if (currentActiveIndex === null || currentActiveIndex >= flattenedOptions.length) {
-				return getDefaultActiveIndex(flattenedOptions);
+				return getDefaultActiveIndex(flattenedOptions, hasQuery);
 			}
 			return currentActiveIndex;
 		});
-	}, [flattenedOptions]);
+	}, [flattenedOptions, searchQuery]);
 	useEffect(() => {
 		if (!activeOption) {
 			return;
