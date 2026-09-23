@@ -297,6 +297,7 @@ export const SearchableTimeZonePicker: React.FC<SearchableTimeZonePickerProps> =
 					id: 'suggested',
 					heading: i18n._(SUGGESTED_TIMEZONES_DESCRIPTOR),
 					items: suggestedItems,
+					showOnlyWhenEmpty: true,
 				});
 			}
 			res.push({
