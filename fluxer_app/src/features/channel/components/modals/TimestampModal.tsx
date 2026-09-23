@@ -10,9 +10,11 @@ import {SearchableTimeZonePicker} from '@app/features/ui/components/form/Searcha
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {RadioGroup, type RadioOption} from '@app/features/ui/radio_group/RadioGroup';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
+import Users from '@app/features/user/state/Users';
 import {shouldUse12HourFormat} from '@app/features/user/utils/DateFormatting';
 import {getCurrentLocale} from '@app/features/user/utils/LocaleUtils';
 import {formatTimestampWithStyle} from '@fluxer/date_utils/src/DateTimestampStyle';
+import {isSupportedTimeZoneId} from '@fluxer/date_utils/src/TimeZoneUtils';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {LightningIcon} from '@phosphor-icons/react';
@@ -180,13 +182,19 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert}:
 	const dateInputId = useId();
 	const timeInputId = useId();
 
+	const currentUser = Users.getCurrentUser();
+
 	const initialTimeZone = useMemo(() => {
+		const profileTz = currentUser?.timezone;
+		if (profileTz && isSupportedTimeZoneId(profileTz)) {
+			return profileTz;
+		}
 		try {
 			return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 		} catch {
 			return 'UTC';
 		}
-	}, []);
+	}, [currentUser?.timezone]);
 
 	const initialNow = useMemo(() => {
 		if (initialEpoch != null && Number.isFinite(initialEpoch)) {
@@ -256,12 +264,12 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert}:
 	}, [targetDateTime]);
 
 	const formatOptions = useMemo<ReadonlyArray<RadioOption<string>>>(() => {
-		const shortTime = formatTimestampWithStyle(epoch, 'ShortTime', locale, hour12);
-		const longTime = formatTimestampWithStyle(epoch, 'LongTime', locale, hour12);
-		const shortDate = formatTimestampWithStyle(epoch, 'ShortDate', locale, hour12);
-		const longDate = formatTimestampWithStyle(epoch, 'LongDate', locale, hour12);
-		const shortDateTime = formatTimestampWithStyle(epoch, 'ShortDateTime', locale, hour12);
-		const longDateTime = formatTimestampWithStyle(epoch, 'LongDateTime', locale, hour12);
+		const shortTime = formatTimestampWithStyle(epoch, 'ShortTime', locale, hour12, selectedTimeZone);
+		const longTime = formatTimestampWithStyle(epoch, 'LongTime', locale, hour12, selectedTimeZone);
+		const shortDate = formatTimestampWithStyle(epoch, 'ShortDate', locale, hour12, selectedTimeZone);
+		const longDate = formatTimestampWithStyle(epoch, 'LongDate', locale, hour12, selectedTimeZone);
+		const shortDateTime = formatTimestampWithStyle(epoch, 'ShortDateTime', locale, hour12, selectedTimeZone);
+		const longDateTime = formatTimestampWithStyle(epoch, 'LongDateTime', locale, hour12, selectedTimeZone);
 		const relative = formatRelativePreview(epoch, locale);
 
 		return [
@@ -298,7 +306,7 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert}:
 				name: relative,
 			},
 		];
-	}, [epoch, locale, hour12]);
+	}, [epoch, locale, hour12, selectedTimeZone]);
 
 	const comboboxFormatOptions = useMemo<ReadonlyArray<ComboboxOption<string>>>(() => {
 		return formatOptions.map((opt) => ({
