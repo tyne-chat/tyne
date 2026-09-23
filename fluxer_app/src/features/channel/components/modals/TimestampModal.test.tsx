@@ -225,10 +225,16 @@ describe('TimestampModal', () => {
 		expect(searchInput).not.toBeNull();
 		expect(searchInput.placeholder).toBe('Search time zones');
 
+		// Check that Suggested section is visible when search is empty
+		expect(popout?.textContent).toContain('Suggested');
+
 		// Type search query for UTC
 		await act(async () => {
 			setInputValue(searchInput, 'UTC');
 		});
+
+		// Suggested section should be hidden when searching
+		expect(popout?.textContent).not.toContain('Suggested');
 
 		// Find UTC option and click it
 		const options = document.querySelectorAll('[role="option"]');
