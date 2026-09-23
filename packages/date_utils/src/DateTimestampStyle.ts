@@ -93,6 +93,7 @@ export function formatTimestampWithStyle(
 	locale: string,
 	hour12?: boolean,
 	preset: DateFormatPreset | null = null,
+	timeZone?: string,
 ): string {
 	const date = new Date(timestamp * 1000);
 	if (preset !== null) {
@@ -104,5 +105,12 @@ export function formatTimestampWithStyle(
 	const baseOptions = TIMESTAMP_STYLE_OPTIONS[style] ?? DEFAULT_STYLE_OPTIONS;
 	const needsHourCycle = !STYLES_WITHOUT_HOUR_CYCLE.has(style);
 	const options = needsHourCycle ? {...baseOptions, hour12: hour12 ?? localeUses12Hour(locale)} : baseOptions;
+	if (timeZone) {
+		try {
+			return getDateFormatter(locale, {...options, timeZone}).format(date);
+		} catch {
+			// Fall back to runtime default if invalid timeZone
+		}
+	}
 	return getDateFormatter(locale, options).format(date);
 }
