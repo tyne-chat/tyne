@@ -118,3 +118,16 @@ export function getFormattedDateTimeWithSeconds(timestamp: number | Date | strin
 		? getFormattedDateTimeWithSecondsBase(timestamp, locale, hour12)
 		: formatPresetDateTime(timestamp, preset, locale, hour12, true);
 }
+
+// Fork: full date and time in the viewer's profile time zone. Upstream's date-format presets take no
+// time zone, so with a preset selected this falls back to upstream's formatting (tyne-chat/tyne#581).
+export function getFormattedDateTimeWithSecondsInTimeZone(
+	timestamp: number | Date | string,
+	timeZone: string | undefined,
+): string {
+	if (timeZone === undefined || getDateFormatPreset() !== null) {
+		return getFormattedDateTimeWithSeconds(timestamp);
+	}
+	const locale = getFormattingLocale();
+	return getFormattedDateTimeWithSecondsBase(timestamp, locale, shouldUse12HourFormat(locale), timeZone);
+}
