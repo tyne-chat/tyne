@@ -15,6 +15,10 @@ import {DateTime} from 'luxon';
 import {observer} from 'mobx-react-lite';
 import React, {type ReactElement, useMemo} from 'react';
 
+// Fork imports.
+
+import Users from '@app/features/user/state/Users';
+
 export const TimestampRenderer = observer(function TimestampRenderer({
 	node,
 	id,
@@ -22,15 +26,17 @@ export const TimestampRenderer = observer(function TimestampRenderer({
 }: RendererProps<TimestampNode>): ReactElement {
 	const {timestamp, style} = node;
 	const i18n = options.i18n;
+	const currentUser = Users.getCurrentUser();
+	const profileTimezone = currentUser?.timezone ?? undefined;
 	const date = getDateFromUnixTimestampSeconds(timestamp);
 	const isValidTimestamp = date !== null;
 	const locale = getCurrentLocale();
-	const fullDateTime = date !== null ? getFormattedDateTimeWithSeconds(date, locale) : null;
+	const fullDateTime = date !== null ? getFormattedDateTimeWithSeconds(date, locale, undefined, profileTimezone) : null;
 	const isRelativeStyle = style === TimestampStyle.RelativeTime;
 	const tick = isRelativeStyle ? Tick.nowSecond : 0;
 	const relativeDisplayTime = useMemo(() => {
-		return isValidTimestamp ? formatTimestamp(timestamp, style, i18n) : '';
-	}, [tick, isValidTimestamp, timestamp, style, i18n.locale]);
+		return isValidTimestamp ? formatTimestamp(timestamp, style, i18n, profileTimezone) : '';
+	}, [tick, isValidTimestamp, timestamp, style, i18n.locale, profileTimezone]);
 	const relativeTime = date !== null ? DateTime.fromJSDate(date).setLocale(locale).toRelative() : null;
 	if (date === null || fullDateTime === null) {
 		return React.createElement('span', {className: markupStyles.timestamp}, String(timestamp));
@@ -54,7 +60,7 @@ export const TimestampRenderer = observer(function TimestampRenderer({
 			</div>
 		</div>
 	);
-	const displayTime = isRelativeStyle ? relativeDisplayTime : formatTimestamp(timestamp, style, i18n);
+	const displayTime = isRelativeStyle ? relativeDisplayTime : formatTimestamp(timestamp, style, i18n, profileTimezone);
 	return (
 		<Tooltip
 			key={id}
