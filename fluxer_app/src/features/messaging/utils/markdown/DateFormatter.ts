@@ -56,7 +56,7 @@ function formatRelativeTime(date: Date): string {
 	return rtf.format(direction * absSeconds, 'second');
 }
 
-export function formatTimestamp(timestamp: number, style: TimestampStyle, _i18n: I18n): string {
+export function formatTimestamp(timestamp: number, style: TimestampStyle, _i18n: I18n, timeZone?: string): string {
 	const locale = getCurrentLocale();
 	const hour12 = shouldUse12HourFormat(locale);
 	const date = getDateFromUnixTimestampSeconds(timestamp);
@@ -66,5 +66,5 @@ export function formatTimestamp(timestamp: number, style: TimestampStyle, _i18n:
 	if (style === TimestampStyle.RelativeTime) {
 		return formatRelativeTime(date);
 	}
-	return formatTimestampWithStyle(timestamp, style, locale, hour12);
+	return formatTimestampWithStyle(timestamp, style, locale, hour12, timeZone);
 }
