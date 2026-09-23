@@ -67,21 +67,33 @@ export function getFormattedDateTimeWithSeconds(
 	timestamp: DateInput,
 	locale: string = DEFAULT_LOCALE,
 	hour12?: boolean,
+	timeZone?: string,
 ): string {
 	const date = parseDate(timestamp);
 	const use12Hour = resolveHour12(locale, hour12);
-	const datePart = getDateFormatter(locale, {
+	const dateOptions: Intl.DateTimeFormatOptions = {
 		weekday: 'long',
 		month: 'long',
 		day: 'numeric',
 		year: 'numeric',
-	}).format(date);
-	const timePart = getDateFormatter(locale, {
+	};
+	const timeOptions: Intl.DateTimeFormatOptions = {
 		hour: 'numeric',
 		minute: '2-digit',
 		second: '2-digit',
 		hour12: use12Hour,
-	}).format(date);
+	};
+	if (timeZone) {
+		try {
+			const datePart = getDateFormatter(locale, {...dateOptions, timeZone}).format(date);
+			const timePart = getDateFormatter(locale, {...timeOptions, timeZone}).format(date);
+			return `${datePart} ${timePart}`;
+		} catch {
+			// Fall back to default runtime timezone if invalid
+		}
+	}
+	const datePart = getDateFormatter(locale, dateOptions).format(date);
+	const timePart = getDateFormatter(locale, timeOptions).format(date);
 	return `${datePart} ${timePart}`;
 }
 
