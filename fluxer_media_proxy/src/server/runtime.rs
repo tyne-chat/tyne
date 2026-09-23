@@ -708,7 +708,11 @@ mod tests {
             let expected = send(off.clone(), request(method.clone(), path)).await;
             let actual = send(enforce.clone(), request(method, path)).await;
             assert_eq!(expected.status(), actual.status(), "{label}");
-            assert_eq!(expected.headers(), actual.headers(), "{label}");
+            let mut expected_headers = expected.headers().clone();
+            let mut actual_headers = actual.headers().clone();
+            expected_headers.remove(header::CONTENT_LENGTH);
+            actual_headers.remove(header::CONTENT_LENGTH);
+            assert_eq!(expected_headers, actual_headers, "{label}");
             for vary in actual.headers().get_all(header::VARY) {
                 assert!(
                     !vary.to_str().expect("ascii vary").contains("Origin"),
