@@ -47,6 +47,10 @@ import {
 	TextNode,
 } from 'lexical';
 
+// Fork imports.
+
+import {$isComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
+
 const STYLE_BY_BIT: ReadonlyArray<{bit: number; style: string}> = [
 	{
 		bit: MarkdownHl.spoiler,
@@ -208,7 +212,12 @@ function $reconcileLine(
 				node.setPresentation(presentation);
 			}
 		}
-		if (node instanceof TextNode && !$isComposerPlainSegmentNode(node) && !$isComposerCommandNode(node)) {
+		if (
+			node instanceof TextNode &&
+			!$isComposerPlainSegmentNode(node) &&
+			!$isComposerCommandNode(node) &&
+			!$isComposerCaretAnchorNode(node)
+		) {
 			for (const span of spans) {
 				const start = Math.max(sourceOffset, span.start);
 				const end = Math.min(nodeEnd, span.end);
@@ -296,6 +305,9 @@ export function $nodeWireText(node: LexicalNode): string {
 	) {
 		return node.getWireText();
 	}
+	if ($isComposerCaretAnchorNode(node)) {
+		return '';
+	}
 	return node.getTextContent();
 }
 
@@ -357,7 +369,12 @@ function $applyDescriptors(line: Array<LexicalNode>, desired: Array<Desired>): v
 	let lineSegment: Array<LexicalNode> = [];
 	let desiredSegment: Array<BuildableDesired> = [];
 	for (const node of line) {
-		if (node instanceof TextNode && !$isComposerPlainSegmentNode(node) && !$isComposerCommandNode(node)) {
+		if (
+			node instanceof TextNode &&
+			!$isComposerPlainSegmentNode(node) &&
+			!$isComposerCommandNode(node) &&
+			!$isComposerCaretAnchorNode(node)
+		) {
 			lineSegment.push(node);
 		} else {
 			lineSegments.push(lineSegment);
