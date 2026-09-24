@@ -6,6 +6,10 @@ import {isSlashSlotStateSegmentId} from '@app/features/lexical/composer/SlashSlo
 import {mergeRegister} from '@lexical/utils';
 import {$createTextNode, type LexicalEditor, TextNode} from 'lexical';
 
+// Fork imports.
+
+import {$isComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
+
 export function registerComposerPlainText(editor: LexicalEditor): () => void {
 	return mergeRegister(
 		editor.registerNodeTransform(SyntaxMarkerNode, (node) => {
@@ -29,7 +33,7 @@ export function registerComposerPlainText(editor: LexicalEditor): () => void {
 			}
 		}),
 		editor.registerNodeTransform(TextNode, (node) => {
-			if (editor.isComposing() || $isSyntaxMarkerNode(node)) {
+			if (editor.isComposing() || $isSyntaxMarkerNode(node) || $isComposerCaretAnchorNode(node)) {
 				return;
 			}
 			if (node.getFormat() !== 0) {
