@@ -650,10 +650,8 @@ export class User {
 		setOptional('banner_color', this.bannerColor);
 		setOptional('pronouns', this.pronouns);
 		setOptional('accent_color', this.accentColor);
-		if (this.isStaff()) {
-			setOptional('timezone', this.timezone);
-			setOptional('timezone_privacy_flags', this.timezonePrivacyFlags);
-		}
+		setOptional('timezone', this.timezone);
+		setOptional('timezone_privacy_flags', this.timezonePrivacyFlags);
 		setOptional('mfa_enabled', this.mfaEnabled);
 		setOptional('authenticator_types', this.authenticatorTypes);
 		setOptional('verified', this._verified);
