@@ -98,7 +98,8 @@ guild_event_map() ->
         <<"GUILD_ROLE_UPDATE">> => guild_role_update,
         <<"GUILD_ROLE_UPDATE_BULK">> => guild_role_update_bulk,
         <<"GUILD_STICKERS_UPDATE">> => guild_stickers_update,
-        <<"GUILD_UPDATE">> => guild_update
+        <<"GUILD_UPDATE">> => guild_update,
+        <<"GUILD_PERSONAS_DIRTY">> => guild_personas_dirty
     }.
 
 -spec message_event_map() -> #{binary() => atom()}.
@@ -139,6 +140,7 @@ user_voice_event_map() ->
         <<"USER_PERSONA_DELETE">> => user_persona_delete,
         <<"USER_PERSONA_UPDATE">> => user_persona_update,
         <<"USER_PERSONAS_UPDATE">> => user_personas_update,
+        <<"USER_PERSONA_SETTINGS_UPDATE">> => user_persona_settings_update,
         <<"USER_PINNED_DMS_UPDATE">> => user_pinned_dms_update,
         <<"USER_SETTINGS_UPDATE">> => user_settings_update,
         <<"USER_UPDATE">> => user_update,
