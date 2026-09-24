@@ -9,10 +9,11 @@ import type {
 	PersonaUpdateRequest,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import type {PersonaID, UserID} from '../BrandedTypes';
+import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
 import type {Persona} from '../models/Persona';
+import type {UserGuildRepository} from '../user/repositories/account/UserGuildRepository';
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
 import {
 	DuplicatePersonaTagError,
@@ -28,6 +29,7 @@ export interface PersonaServiceDeps {
 	personaRepository: IPersonaRepository;
 	userAccountLookupService?: UserAccountLookupService;
 	gatewayService?: IGatewayService;
+	userGuildRepository?: UserGuildRepository;
 }
 
 function normalizeTag(tag: PersonaTag): {prefix: string; suffix: string} {
@@ -35,6 +37,80 @@ function normalizeTag(tag: PersonaTag): {prefix: string; suffix: string} {
 		prefix: (tag.prefix ?? '').trim(),
 		suffix: (tag.suffix ?? '').trim(),
 	};
+}
+
+export function calculatePersonaFrecencyScore(
+	useCount: number,
+	lastUsedAtMs: bigint | number | null | undefined,
+	now: number = Date.now(),
+): number {
+	const safeCount = Math.max(0, useCount || 0);
+	const countScore = Math.log10(safeCount + 1) * 20;
+
+	const ms = typeof lastUsedAtMs === 'bigint' ? Number(lastUsedAtMs) : (lastUsedAtMs ?? null);
+	if (!ms || ms <= 0) {
+		return countScore;
+	}
+
+	const ageMs = Math.max(0, now - ms);
+	const ageHours = ageMs / (1000 * 60 * 60);
+
+	let recencyBoost = 0;
+	if (ageHours < 0.25) {
+		recencyBoost = 120;
+	} else if (ageHours < 1) {
+		recencyBoost = 90;
+	} else if (ageHours < 24) {
+		recencyBoost = 60;
+	} else if (ageHours < 72) {
+		recencyBoost = 35;
+	} else if (ageHours < 168) {
+		recencyBoost = 15;
+	} else if (ageHours < 720) {
+		recencyBoost = 5;
+	}
+
+	return countScore + recencyBoost;
+}
+
+export function calculatePersonaMatchScore(
+	personaName: string,
+	query: string,
+	systemName?: string | null,
+	ownerUsername?: string | null,
+	ownerNickname?: string | null,
+	ownerGlobalName?: string | null,
+): number {
+	const q = query.trim().toLowerCase();
+	if (!q) return 0;
+
+	const name = personaName.toLowerCase();
+	if (name.startsWith(q)) {
+		return 1000;
+	}
+	if (name.includes(` ${q}`) || name.includes(`-${q}`) || name.includes(`_${q}`)) {
+		return 800;
+	}
+	if (name.includes(q)) {
+		return 500;
+	}
+	const sys = (systemName ?? '').toLowerCase();
+	if (sys.startsWith(q)) {
+		return 350;
+	}
+	if (sys.includes(q)) {
+		return 250;
+	}
+	const user = (ownerUsername ?? '').toLowerCase();
+	const nick = (ownerNickname ?? '').toLowerCase();
+	const global = (ownerGlobalName ?? '').toLowerCase();
+	if (user.startsWith(q) || nick.startsWith(q) || global.startsWith(q)) {
+		return 150;
+	}
+	if (user.includes(q) || nick.includes(q) || global.includes(q)) {
+		return 100;
+	}
+	return -1;
 }
 
 function getTagKey(tag: {prefix: string; suffix: string}): string {
@@ -132,12 +208,20 @@ export class PersonaService {
 		await this.dispatchToUser(userId, 'USER_PERSONA_CREATE', {
 			persona: {...persona.toResponse(), user_id: userId.toString()},
 		});
+		if (persona.visibility === 'public' || persona.visibility === 'unlisted') {
+			await this.dispatchToMutualGuilds(userId);
+		}
 		return persona;
 	}
 
 	async updatePersona(userId: UserID, personaId: PersonaID, data: PersonaUpdateRequest): Promise<Persona> {
 		if (data.persona_tags !== undefined) {
 			await this.validatePersonaTags(userId, data.persona_tags, personaId);
+		}
+
+		const existing = await this.deps.personaRepository.findById(userId, personaId);
+		if (!existing) {
+			throw new PersonaNotFoundError();
 		}
 
 		const updated = await this.deps.personaRepository.update(userId, personaId, {
@@ -160,10 +244,21 @@ export class PersonaService {
 		await this.dispatchToUser(userId, 'USER_PERSONA_UPDATE', {
 			persona: {...updated.toResponse(), user_id: userId.toString()},
 		});
+
+		const wasVisible = existing.visibility === 'public' || existing.visibility === 'unlisted';
+		const isVisible = updated.visibility === 'public' || updated.visibility === 'unlisted';
+		if (wasVisible || isVisible) {
+			await this.dispatchToMutualGuilds(userId);
+		}
 		return updated;
 	}
 
 	async deletePersona(userId: UserID, personaId: PersonaID): Promise<void> {
+		const existing = await this.deps.personaRepository.findById(userId, personaId);
+		if (!existing) {
+			throw new PersonaNotFoundError();
+		}
+
 		const deleted = await this.deps.personaRepository.delete(userId, personaId);
 		if (!deleted) {
 			throw new PersonaNotFoundError();
@@ -173,6 +268,10 @@ export class PersonaService {
 			persona_id: personaId.toString(),
 			user_id: userId.toString(),
 		});
+
+		if (existing.visibility === 'public' || existing.visibility === 'unlisted') {
+			await this.dispatchToMutualGuilds(userId);
+		}
 	}
 
 	async importPersonas(userId: UserID, items: Array<PersonaCreateRequest>): Promise<Array<Persona>> {
@@ -273,6 +372,9 @@ export class PersonaService {
 		await this.dispatchToUser(userId, 'USER_PERSONAS_UPDATE', {
 			personas: allPersonas.map((p) => p.toResponse()),
 		});
+		if (results.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
+			await this.dispatchToMutualGuilds(userId);
+		}
 
 		return results;
 	}
@@ -348,6 +450,15 @@ export class PersonaService {
 
 		await this.deps.personaRepository.upsertSettings(updatedRow);
 
+		if (updatedRow.active_persona_id) {
+			try {
+				const pId = createPersonaID(BigInt(updatedRow.active_persona_id));
+				void this.deps.personaRepository.recordUsage(userId, pId).catch(() => {});
+			} catch {
+				// Ignore invalid persona ID formatting
+			}
+		}
+
 		const response: PersonaSettingsResponse = {
 			user_id: updatedRow.user_id.toString(),
 			active_persona_mode: (updatedRow.active_persona_mode as 'off' | 'manual' | 'last') ?? 'off',
@@ -358,6 +469,7 @@ export class PersonaService {
 		};
 
 		await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', response);
+		await this.dispatchToMutualGuilds(userId);
 
 		return response;
 	}
@@ -405,20 +517,36 @@ export class PersonaService {
 			return nameMatch || Boolean(systemMatch) || Boolean(ownerUserMatch) || Boolean(ownerNickMatch);
 		});
 
-		// Sort: prefix matches first, then frecency / use count, then alphabetical
+		// Sort: match strength tier first, then frecency (recency + frequency), then alphabetical
+		const now = Date.now();
 		matched.sort((a, b) => {
-			const aName = a.name.toLowerCase();
-			const bName = b.name.toLowerCase();
-			if (normalizedQuery) {
-				const aStarts = aName.startsWith(normalizedQuery);
-				const bStarts = bName.startsWith(normalizedQuery);
-				if (aStarts && !bStarts) return -1;
-				if (!aStarts && bStarts) return 1;
+			const aOwner = userMap.get(a.userId);
+			const bOwner = userMap.get(b.userId);
+			const aMatch = calculatePersonaMatchScore(
+				a.name,
+				normalizedQuery,
+				a.systemName,
+				aOwner?.username,
+				aOwner?.nickname,
+				aOwner?.globalName,
+			);
+			const bMatch = calculatePersonaMatchScore(
+				b.name,
+				normalizedQuery,
+				b.systemName,
+				bOwner?.username,
+				bOwner?.nickname,
+				bOwner?.globalName,
+			);
+			if (aMatch !== bMatch) {
+				return bMatch - aMatch;
 			}
-			if (b.useCount !== a.useCount) {
-				return b.useCount - a.useCount;
+			const aFrecency = calculatePersonaFrecencyScore(a.useCount, a.lastUsedAtMs, now);
+			const bFrecency = calculatePersonaFrecencyScore(b.useCount, b.lastUsedAtMs, now);
+			if (Math.abs(bFrecency - aFrecency) > 0.001) {
+				return bFrecency - aFrecency;
 			}
-			return aName.localeCompare(bName);
+			return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
 		});
 
 		const results = matched.slice(0, maxLimit);
@@ -433,6 +561,8 @@ export class PersonaService {
 				color: persona.color,
 				bio: persona.bio,
 				visibility: persona.visibility,
+				use_count: persona.useCount,
+				last_used_at_ms: persona.lastUsedAtMs ? persona.lastUsedAtMs.toString() : null,
 				owner_user_id: persona.userId.toString(),
 				owner_username: owner?.username ?? 'unknown',
 				owner_discriminator: owner?.discriminator ?? null,
@@ -459,6 +589,28 @@ export class PersonaService {
 				event,
 				data,
 			});
+		} catch {
+			// Non-blocking gateway broadcast failure
+		}
+	}
+
+	private async dispatchToMutualGuilds(userId: UserID): Promise<void> {
+		if (!this.deps.gatewayService || !this.deps.userGuildRepository) return;
+		try {
+			const guildIds = await this.deps.userGuildRepository.getUserGuildIds(userId);
+			if (!guildIds || guildIds.length === 0) return;
+			await Promise.all(
+				guildIds.map((guildId) =>
+					this.deps.gatewayService!.dispatchGuild({
+						guildId,
+						event: 'GUILD_PERSONAS_DIRTY',
+						data: {
+							guild_id: guildId.toString(),
+							user_id: userId.toString(),
+						},
+					}),
+				),
+			);
 		} catch {
 			// Non-blocking gateway broadcast failure
 		}
