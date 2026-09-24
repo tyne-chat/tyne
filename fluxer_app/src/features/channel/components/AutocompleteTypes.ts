@@ -41,6 +41,7 @@ export interface AutocompleteMentionPersonaOption {
 		system_name?: string | null;
 		owner_user_id: string;
 		owner_username: string;
+		owner_discriminator?: string | null;
 		owner_global_name?: string | null;
 		owner_nickname?: string | null;
 	};
