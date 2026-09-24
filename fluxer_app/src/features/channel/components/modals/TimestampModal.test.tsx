@@ -281,4 +281,34 @@ describe('TimestampModal', () => {
 		});
 		expect(formatList?.textContent).toContain('(now)');
 	});
+
+	it('interprets absolute natural language times in the selected timezone rather than system timezone', async () => {
+		const onInsert = vi.fn();
+		await act(async () => {
+			root.render(<TimestampModal onInsert={onInsert} data-flx="channel.timestamp-modal-test.timestamp-modal--8" />);
+		});
+
+		const nlpInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+		const timeInput = document.querySelector('input[type="time"]') as HTMLInputElement;
+		expect(nlpInput).not.toBeNull();
+		expect(timeInput).not.toBeNull();
+
+		// Type "7am"
+		await act(async () => {
+			setInputValue(nlpInput, '7am');
+		});
+		expect(timeInput.value).toBe('07:00');
+
+		// Type "3:30pm"
+		await act(async () => {
+			setInputValue(nlpInput, '3:30pm');
+		});
+		expect(timeInput.value).toBe('15:30');
+
+		// Type "tomorrow at 9:15am"
+		await act(async () => {
+			setInputValue(nlpInput, 'tomorrow at 9:15am');
+		});
+		expect(timeInput.value).toBe('09:15');
+	});
 });
