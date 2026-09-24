@@ -30,6 +30,7 @@ import {
 	type AutocompleteMentionPersonaOption,
 	isMentionPersona,
 } from '@app/features/channel/components/AutocompleteTypes';
+import tagStyles from '@app/features/persona/components/PersonaTag.module.css';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {BaseAvatar} from '@app/features/ui/components/BaseAvatar';
 import Users from '@app/features/user/state/Users';
@@ -142,6 +143,17 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 	const renderPersona = (option: AutocompleteMentionPersonaOption, index: number) => {
 		const currentIndex = members.length + users.length + index;
 		const user = Users.getUser(option.persona.owner_user_id);
+		const ownerTag =
+			user != null
+				? DisplayNameUtils.formatUserTagForStreamerMode(user)
+				: DisplayNameUtils.formatTagForStreamerMode(
+						option.persona.owner_discriminator
+							? `${option.persona.owner_username}#${option.persona.owner_discriminator}`
+							: option.persona.owner_username,
+					);
+		const systemTag = option.persona.display_tag_text?.trim();
+		const tagIcon = option.persona.display_tag_icon?.trim();
+		const hasTag = Boolean(systemTag || tagIcon);
 		return (
 			<AutocompleteItem
 				key={`persona-${option.persona.id}`}
@@ -165,8 +177,53 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 						/>
 					)
 				}
-				name={option.persona.name}
-				description={`@${option.persona.owner_username}`}
+				name={
+					<span
+						className={styles.personaNameWrapper}
+						data-flx="channel.autocomplete-mention.render-persona.persona-name-wrapper"
+					>
+						<span className={styles.personaName} data-flx="channel.autocomplete-mention.render-persona.persona-name">
+							{option.persona.name}
+						</span>
+						{hasTag ? (
+							<span className={tagStyles.tag} data-flx="persona.tag">
+								{tagIcon && (
+									<img
+										src={tagIcon}
+										alt=""
+										className={tagStyles.icon}
+										data-flx="channel.autocomplete-mention.render-persona.img"
+									/>
+								)}
+								{systemTag && (
+									<span className={tagStyles.text} data-flx="channel.autocomplete-mention.render-persona.span">
+										{systemTag}
+									</span>
+								)}
+							</span>
+						) : null}
+						{!hasTag && user != null ? (
+							<Avatar
+								user={user}
+								size={16}
+								className={tagStyles.standaloneIcon}
+								guildId={guildId}
+								disableStatusTooltip={true}
+								data-flx="channel.autocomplete-mention.persona-owner-avatar"
+							/>
+						) : null}
+						{!hasTag && user == null ? (
+							<BaseAvatar
+								size={16}
+								avatarUrl={AvatarUtils.getDefaultAvatarURL(option.persona.owner_user_id)}
+								className={tagStyles.standaloneIcon}
+								disableStatusTooltip={true}
+								data-flx="channel.autocomplete-mention.persona-owner-avatar"
+							/>
+						) : null}
+					</span>
+				}
+				description={ownerTag}
 				isKeyboardSelected={currentIndex === keyboardFocusIndex}
 				isHovered={currentIndex === hoverIndex}
 				onSelect={() => onSelect(option)}
