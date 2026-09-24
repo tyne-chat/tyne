@@ -220,10 +220,35 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert}:
 			}
 
 			try {
-				const parsedResults = chrono.parse(text, new Date(), {forwardDate: true});
+				const nowInSelectedZone = DateTime.now().setZone(selectedTimeZone);
+				const ref = {
+					instant: new Date(),
+					timezone: nowInSelectedZone.offset,
+				};
+				const parsedResults = chrono.parse(text, ref, {forwardDate: true});
 				if (parsedResults.length > 0) {
-					const parsedDate = parsedResults[0].date();
-					const dt = DateTime.fromJSDate(parsedDate, {zone: selectedTimeZone});
+					const res = parsedResults[0];
+					const tags = res.tags();
+					const isRelative =
+						tags.has('result/relativeDate') ||
+						tags.has('result/relativeDateAndTime') ||
+						tags.has('casualReference/now');
+
+					let dt: DateTime;
+					if (isRelative || res.start.isCertain('timezoneOffset')) {
+						dt = DateTime.fromJSDate(res.date(), {zone: selectedTimeZone});
+					} else {
+						const year = res.start.get('year') ?? nowInSelectedZone.year;
+						const month = res.start.get('month') ?? nowInSelectedZone.month;
+						const day = res.start.get('day') ?? nowInSelectedZone.day;
+						const hour = res.start.get('hour') ?? 12;
+						const minute = res.start.get('minute') ?? 0;
+						const second = res.start.get('second') ?? 0;
+						const millisecond = res.start.get('millisecond') ?? 0;
+
+						dt = DateTime.fromObject({year, month, day, hour, minute, second, millisecond}, {zone: selectedTimeZone});
+					}
+
 					if (dt.isValid) {
 						setSelectedDate(dt.toFormat('yyyy-MM-dd'));
 						setSelectedTime(dt.toFormat('HH:mm'));
