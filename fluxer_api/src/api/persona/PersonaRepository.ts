@@ -148,4 +148,31 @@ export class PersonaRepository extends IPersonaRepository {
 		await upsertOne(UserPersonaSettings.upsertAll(row));
 		return row;
 	}
+
+	async recordUsage(userId: UserID, personaId: PersonaID): Promise<void> {
+		const existing = await this.findById(userId, personaId);
+		if (!existing) return;
+		const now = new Date();
+		const row: PersonaRow = {
+			user_id: userId,
+			persona_id: personaId,
+			name: existing.name,
+			avatar_url: existing.avatarUrl,
+			banner_url: existing.bannerUrl,
+			system_name: existing.systemName,
+			pronouns: existing.pronouns,
+			color: existing.color,
+			bio: existing.bio,
+			auto_tag_disabled: existing.autoTagDisabled,
+			persona_tags: JSON.stringify(existing.personaTags),
+			use_count: existing.useCount + 1,
+			last_used_at_ms: BigInt(Date.now()),
+			visibility: existing.visibility,
+			external_uuid: existing.externalUuid,
+			created_at: existing.createdAt,
+			updated_at: now,
+			version: existing.version + 1,
+		};
+		await upsertOne(Personas.upsertAll(row));
+	}
 }
