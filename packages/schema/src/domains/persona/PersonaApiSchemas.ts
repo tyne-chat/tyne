@@ -137,6 +137,8 @@ export const ChannelPersonaMentionItemSchema = z.object({
 	color: z.number().int().nullish().describe('Optional accent color integer'),
 	bio: z.string().nullish().describe('Optional persona bio'),
 	visibility: PersonaVisibilitySchema.describe('Visibility setting'),
+	use_count: z.number().int().optional().default(0).describe('Usage counter for frecency ranking'),
+	last_used_at_ms: z.string().nullish().describe('Timestamp in ms when the persona was last used'),
 	owner_user_id: SnowflakeStringType.describe('User ID of the persona owner'),
 	owner_username: z.string().describe('Username of the persona owner'),
 	owner_discriminator: z.string().nullish().describe('Discriminator of the persona owner'),
