@@ -139,6 +139,7 @@ export const ChannelPersonaMentionItemSchema = z.object({
 	visibility: PersonaVisibilitySchema.describe('Visibility setting'),
 	owner_user_id: SnowflakeStringType.describe('User ID of the persona owner'),
 	owner_username: z.string().describe('Username of the persona owner'),
+	owner_discriminator: z.string().nullish().describe('Discriminator of the persona owner'),
 	owner_global_name: z.string().nullish().describe('Global display name of the persona owner'),
 	owner_nickname: z.string().nullish().describe('Guild nickname if applicable'),
 });
@@ -149,6 +150,6 @@ export type ChannelPersonaMentionsResponse = z.infer<typeof ChannelPersonaMentio
 
 export const ChannelPersonaMentionsQuerySchema = z.object({
 	q: z.string().max(100).optional().default(''),
-	limit: z.coerce.number().int().min(1).max(50).optional().default(25),
+	limit: z.coerce.number().int().min(1).max(1000).optional().default(100),
 });
 export type ChannelPersonaMentionsQuery = z.infer<typeof ChannelPersonaMentionsQuerySchema>;
