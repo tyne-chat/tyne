@@ -116,8 +116,12 @@ import {
 	type AutocompleteMentionPersonaOption,
 	isMentionPersona,
 } from '@app/features/channel/components/AutocompleteTypes';
-import {useAutocompletePersonaSearch} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
+import {
+	filterPersonaMentions,
+	useAutocompletePersonaSearch,
+} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import type {ChannelPersonaMentionItem} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 
 interface UseLexicalAutocompleteParams {
 	channel: Channel | null;
@@ -179,17 +183,15 @@ function buildRecentSpeakerOptions(
 
 function buildRecentPersonaOptions(
 	channel: Channel,
-	query: string,
 	currentUserId?: string,
 	limit: number = MENTION_RESULT_LIMIT,
-): Array<AutocompleteMentionPersonaOption> {
+): Array<ChannelPersonaMentionItem> {
 	const messages = Messages.getCachedMessages(channel.id);
 	if (messages == null) {
 		return [];
 	}
-	const queryLower = query.toLowerCase();
 	const seen = new Set<string>();
-	const options: Array<AutocompleteMentionPersonaOption> = [];
+	const items: Array<ChannelPersonaMentionItem> = [];
 	messages.forEach(
 		(message) => {
 			const sub = message.subprofile;
@@ -203,40 +205,31 @@ function buildRecentPersonaOptions(
 			if (sub.visibility === 'private' && message.author.id !== currentUserId) {
 				return undefined;
 			}
-			const matches =
-				queryLower.length === 0 ||
-				sub.name.toLowerCase().includes(queryLower) ||
-				sub.system_name?.toLowerCase().includes(queryLower) ||
-				message.author.username.toLowerCase().includes(queryLower);
-			if (!matches) {
-				return undefined;
-			}
 			seen.add(sub.id);
 			const member = channel.guildId ? GuildMembers.getMember(channel.guildId, message.author.id) : null;
-			options.push({
-				type: 'mention',
-				kind: 'persona',
-				persona: {
-					id: sub.id,
-					name: sub.name,
-					avatar_url: sub.avatar ?? null,
-					color: sub.color ?? sub.avatar_color ?? null,
-					pronouns: sub.pronouns ?? null,
-					system_name: sub.system_name ?? sub.display_tag_text ?? null,
-					owner_user_id: message.author.id,
-					owner_username: message.author.username,
-					owner_discriminator:
-						message.author.discriminator != null ? String(message.author.discriminator).padStart(4, '0') : null,
-					owner_global_name: message.author.globalName ?? null,
-					owner_nickname: member?.nick ?? null,
-				},
+			items.push({
+				id: sub.id,
+				name: sub.name,
+				avatar_url: sub.avatar ?? null,
+				color: sub.color ?? sub.avatar_color ?? null,
+				pronouns: sub.pronouns ?? null,
+				system_name: sub.system_name ?? sub.display_tag_text ?? null,
+				visibility: sub.visibility ?? 'public',
+				use_count: 1,
+				last_used_at_ms: message.timestamp.getTime().toString(),
+				owner_user_id: message.author.id,
+				owner_username: message.author.username,
+				owner_discriminator:
+					message.author.discriminator != null ? String(message.author.discriminator).padStart(4, '0') : null,
+				owner_global_name: message.author.globalName ?? null,
+				owner_nickname: member?.nick ?? null,
 			});
-			return options.length < limit;
+			return items.length < limit;
 		},
 		undefined,
 		true,
 	);
-	return options;
+	return items;
 }
 
 export type {TriggerType} from '@app/features/messaging/utils/AutocompleteTriggerPolicy';
@@ -375,6 +368,7 @@ export function useLexicalAutocomplete({
 		triggerType: autocompleteTriggerType,
 		matchedText: autocompleteTriggerMatchedText,
 		channelId: channel?.id,
+		guildId: channel?.guildId,
 	});
 
 	const canMentionEveryone =
@@ -463,15 +457,26 @@ export function useLexicalAutocomplete({
 				const parsedQuery = parseMentionQuery(matchedText);
 				const queryForMatching = parsedQuery.usernameQuery.trim();
 				const currentUserId = Authentication.currentUserId ?? undefined;
-				const recentPersonas = buildRecentPersonaOptions(
-					channel,
-					queryForMatching,
-					currentUserId,
-					MENTION_RESULT_LIMIT,
-				);
-				const seenPersonaIds = new Set(recentPersonas.map((p) => p.persona.id));
-				const otherPersonas: Array<AutocompleteMentionPersonaOption> = personaSearchResults
-					.filter((item) => !seenPersonaIds.has(item.id))
+				const recentInChannelPersonas = buildRecentPersonaOptions(channel, currentUserId, MENTION_RESULT_LIMIT);
+				const mergedPersonasMap = new Map<string, ChannelPersonaMentionItem>();
+				for (const item of personaSearchResults) {
+					mergedPersonasMap.set(item.id, {...item});
+				}
+				for (const p of recentInChannelPersonas) {
+					const existing = mergedPersonasMap.get(p.id);
+					if (existing) {
+						if (
+							p.last_used_at_ms &&
+							(!existing.last_used_at_ms || Number(p.last_used_at_ms) > Number(existing.last_used_at_ms))
+						) {
+							existing.last_used_at_ms = p.last_used_at_ms;
+						}
+					} else {
+						mergedPersonasMap.set(p.id, p);
+					}
+				}
+				const sortedPersonas = filterPersonaMentions(Array.from(mergedPersonasMap.values()), queryForMatching);
+				const personaOptions: Array<AutocompleteMentionPersonaOption> = sortedPersonas
 					.slice(0, MENTION_RESULT_LIMIT)
 					.map((item) => ({
 						type: 'mention' as const,
@@ -496,8 +501,8 @@ export function useLexicalAutocomplete({
 						.filter((user): user is User => user != null);
 					const userOptions = filterDMUsers(users, parsedQuery);
 					options = specialMentionsAllowed
-						? [...userOptions, ...recentPersonas, ...otherPersonas, ...SPECIAL_MENTIONS]
-						: [...userOptions, ...recentPersonas, ...otherPersonas];
+						? [...userOptions, ...personaOptions, ...SPECIAL_MENTIONS]
+						: [...userOptions, ...personaOptions];
 				} else {
 					const recentSpeakers =
 						matchedText.length === 0 ? buildRecentSpeakerOptions(channel, MENTION_RESULT_LIMIT) : [];
@@ -531,7 +536,7 @@ export function useLexicalAutocomplete({
 								return mention.kind.slice(1).toLowerCase().includes(queryForMatching.toLowerCase());
 							})
 						: [];
-					options = [...members, ...recentPersonas, ...otherPersonas, ...specialMentions, ...roles];
+					options = [...members, ...personaOptions, ...specialMentions, ...roles];
 				}
 				break;
 			}

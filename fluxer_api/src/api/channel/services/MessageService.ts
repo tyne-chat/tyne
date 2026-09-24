@@ -36,6 +36,10 @@ import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 import type {IWorkerService} from '@pkgs/worker/src/contracts/IWorkerService';
 
+// Fork imports.
+
+import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+
 export class MessageService {
 	public readonly validation: MessageValidationService;
 	public readonly mention: MessageMentionService;
@@ -72,6 +76,7 @@ export class MessageService {
 		persistenceService: MessagePersistenceService,
 		attachmentUploadTraceRepository: AttachmentUploadTraceRepository,
 		limitConfigService: LimitConfigService,
+		personaRepository?: IPersonaRepository,
 	) {
 		this.validation = new MessageValidationService(cacheService, limitConfigService);
 		this.writeLock = new MessageWriteLock(cacheService, channelRepository.messages);
@@ -136,6 +141,7 @@ export class MessageService {
 			limitConfigService,
 			messageWriteLock: this.writeLock,
 			crosspostPropagation: this.crosspostPropagation,
+			personaRepository,
 		});
 		this.edit = new MessageEditService({
 			channelRepository,

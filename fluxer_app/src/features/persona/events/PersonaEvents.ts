@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {GatewayHandlerContext} from '@app/features/gateway/events/EventRouter';
-import {clearPersonaMentionCache} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
+import {
+	clearPersonaMentionCache,
+	invalidatePersonaMentionCache,
+} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import type {PersonaResponse, PersonaSettingsResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {PersonaStore} from '../state/PersonaStore';
 
@@ -52,5 +55,13 @@ export function handleUserPersonaSettingsUpdate(
 	const settings = data && 'settings' in data && data.settings ? data.settings : (data as PersonaSettingsResponse);
 	if (settings) {
 		PersonaStore.updateSettings(settings);
+		clearPersonaMentionCache();
 	}
+}
+
+export function handleGuildPersonasDirty(
+	data: {guild_id?: string; user_id?: string} | undefined,
+	_context: GatewayHandlerContext,
+): void {
+	invalidatePersonaMentionCache(data?.guild_id);
 }
