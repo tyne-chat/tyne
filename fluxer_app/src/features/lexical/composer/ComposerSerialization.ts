@@ -51,6 +51,7 @@ import invariant from 'tiny-invariant';
 
 // Fork imports.
 
+import {$isComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
 import {
 	$createComposerTimestampNode,
 	$isComposerTimestampNode,
@@ -400,6 +401,8 @@ export function $projectComposer(): ComposerProjection {
 					}
 				}
 				wire += slotWire;
+			} else if ($isComposerCaretAnchorNode(child)) {
+				// Ephemeral zero-width caret anchor for line-leading inline decorators; ignored in serialization
 			} else {
 				display += child.getTextContent();
 				wire += child.getTextContent();
