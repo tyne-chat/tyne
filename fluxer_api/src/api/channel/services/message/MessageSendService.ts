@@ -91,7 +91,9 @@ import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 
 // Fork imports.
 
+import {createPersonaID} from '@app/api/BrandedTypes';
 import {normalizeMessageSubprofile} from '@app/api/channel/services/message/MessageHelpers';
+import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 
 interface MessageSendServiceDeps {
 	threadActivity: ThreadMessageActivity;
@@ -114,6 +116,7 @@ interface MessageSendServiceDeps {
 	limitConfigService: LimitConfigService;
 	messageWriteLock: MessageWriteLock;
 	crosspostPropagation: CrosspostPropagation;
+	personaRepository?: IPersonaRepository;
 }
 
 interface SendMessageResult {
@@ -945,6 +948,19 @@ export class MessageSendService {
 		if (channel.indexedAt != null && !suppressDmRecipientDelivery) {
 			void this.deps.searchService.indexMessage(message, user.isBot);
 		}
+		if (message.subprofile?.id && this.deps.personaRepository && /^\d+$/.test(message.subprofile.id)) {
+			try {
+				const pId = createPersonaID(BigInt(message.subprofile.id));
+				void this.deps.personaRepository.recordUsage(user.id, pId).catch((error) => {
+					Logger.warn(
+						{error, userId: user.id.toString(), personaId: message.subprofile?.id},
+						'Failed to record persona usage',
+					);
+				});
+			} catch {
+				// Ignore non-numeric test IDs
+			}
+		}
 		return {message, authChannel};
 	}
 
@@ -1292,6 +1308,19 @@ export class MessageSendService {
 		}
 		if (channel.indexedAt != null) {
 			void this.deps.searchService.indexMessage(message, user.isBot);
+		}
+		if (message.subprofile?.id && this.deps.personaRepository && /^\d+$/.test(message.subprofile.id)) {
+			try {
+				const pId = createPersonaID(BigInt(message.subprofile.id));
+				void this.deps.personaRepository.recordUsage(user.id, pId).catch((error) => {
+					Logger.warn(
+						{error, userId: user.id.toString(), personaId: message.subprofile?.id},
+						'Failed to record persona usage',
+					);
+				});
+			} catch {
+				// Ignore non-numeric test IDs
+			}
 		}
 		return message;
 	}
