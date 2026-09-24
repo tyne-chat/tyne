@@ -109,6 +109,7 @@ import {useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, u
 
 import {openTimestampModal} from '@app/features/channel/components/modals/TimestampModal';
 import {registerComposerTimestampTransform} from '@app/features/lexical/composer/ComposerTimestampTransform';
+import {ComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
 import {ComposerTimestampContextMenu} from '@app/features/lexical/composer/nodes/ComposerTimestampContextMenu';
 import {
 	$createComposerTimestampNode,
@@ -116,6 +117,7 @@ import {
 	ComposerTimestampNode,
 } from '@app/features/lexical/composer/nodes/ComposerTimestampNode';
 import {normalizeTimestampFormat} from '@app/features/lexical/composer/nodes/ComposerTimestampUtils';
+import {registerComposerCaretAnchors} from '@app/features/lexical/composer/registerComposerCaretAnchors';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
 import {$createTextNode, $getNodeByKey} from 'lexical';
 
@@ -228,6 +230,7 @@ export const LexicalComposerInput = observer((props: LexicalComposerInputProps) 
 			ComposerCommandNode,
 			SlashSlotNode,
 			SlashSlotPlaceholderNode,
+			ComposerCaretAnchorNode,
 			SlashSeparatorNode,
 			SlashOptionalHintNode,
 			SyntaxMarkerNode,
@@ -568,6 +571,7 @@ const ComposerInner = ({
 				}),
 			);
 			cleanups.push(registerComposerTimestampTransform(editor));
+			cleanups.push(registerComposerCaretAnchors(editor));
 		}
 		const modeChanged = previousPlainTextRef.current !== plainText;
 		if (modeChanged) {
