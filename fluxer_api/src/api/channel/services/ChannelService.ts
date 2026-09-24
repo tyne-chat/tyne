@@ -36,6 +36,10 @@ import {TEXT_THREAD_PARENT_CHANNEL_TYPES} from '@fluxer/constants/src/ThreadCons
 import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 
+// Fork imports.
+
+import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+
 interface TypingCooldown {
 	message_send_cooldown_ms?: number;
 	thread_create_cooldown_ms?: number;
@@ -79,6 +83,7 @@ export class ChannelService {
 		webhookRepository: WebhookRepository,
 		limitConfigService: LimitConfigService,
 		voiceAvailabilityService: VoiceAvailabilityService | null,
+		personaRepository?: IPersonaRepository,
 	) {
 		const {
 			cache: cacheService,
@@ -149,6 +154,7 @@ export class ChannelService {
 			messagePersistenceService,
 			attachmentUploadTraceRepository,
 			limitConfigService,
+			personaRepository,
 		);
 		this.interactions = new MessageInteractionService(
 			channelRepository,
