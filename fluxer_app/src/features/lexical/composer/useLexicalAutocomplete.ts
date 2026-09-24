@@ -225,6 +225,8 @@ function buildRecentPersonaOptions(
 					system_name: sub.system_name ?? sub.display_tag_text ?? null,
 					owner_user_id: message.author.id,
 					owner_username: message.author.username,
+					owner_discriminator:
+						message.author.discriminator != null ? String(message.author.discriminator).padStart(4, '0') : null,
 					owner_global_name: message.author.globalName ?? null,
 					owner_nickname: member?.nick ?? null,
 				},
@@ -483,6 +485,7 @@ export function useLexicalAutocomplete({
 							system_name: item.system_name,
 							owner_user_id: item.owner_user_id,
 							owner_username: item.owner_username,
+							owner_discriminator: item.owner_discriminator ?? null,
 							owner_global_name: item.owner_global_name,
 							owner_nickname: item.owner_nickname,
 						},
