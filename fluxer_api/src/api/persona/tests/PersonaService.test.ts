@@ -265,12 +265,13 @@ describe('PersonaService', () => {
 			expect(mockRepo.findByUserIds).not.toHaveBeenCalled();
 		});
 
-		it('allows caller to see their own non-public personas but filters others to public only', async () => {
+		it('allows caller to see their own non-public personas and other users public and unlisted personas, but filters private', async () => {
 			const myUnlisted = makeMockPersona(userId, 1n as PersonaID, 'My Unlisted', {visibility: 'unlisted'});
 			const otherPublic = makeMockPersona(otherUserId, 2n as PersonaID, 'Other Public', {visibility: 'public'});
-			const otherPrivate = makeMockPersona(otherUserId, 3n as PersonaID, 'Other Private', {visibility: 'private'});
+			const otherUnlisted = makeMockPersona(otherUserId, 3n as PersonaID, 'Other Unlisted', {visibility: 'unlisted'});
+			const otherPrivate = makeMockPersona(otherUserId, 4n as PersonaID, 'Other Private', {visibility: 'private'});
 
-			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([myUnlisted, otherPublic, otherPrivate]);
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([myUnlisted, otherPublic, otherUnlisted, otherPrivate]);
 
 			const results = await service.getChannelPersonaMentions({
 				callerUserId: userId,
@@ -281,6 +282,7 @@ describe('PersonaService', () => {
 			const names = results.map((r) => r.name);
 			expect(names).toContain('My Unlisted');
 			expect(names).toContain('Other Public');
+			expect(names).toContain('Other Unlisted');
 			expect(names).not.toContain('Other Private');
 		});
 
