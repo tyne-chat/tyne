@@ -312,6 +312,33 @@ describe('PersonaService', () => {
 			expect(results.map((r) => r.name)).toEqual(['Alice Prime', 'Alice Early', 'The Cat Alice']);
 		});
 
+		it('boosts recently active personas ahead of older personas with higher usage counts', async () => {
+			const now = Date.now();
+			const olderFrequent = makeMockPersona(otherUserId, 15n as PersonaID, 'Bob Old', {
+				visibility: 'public',
+				use_count: 500,
+				last_used_at_ms: BigInt(now - 14 * 24 * 60 * 60 * 1000), // 14 days ago
+			});
+			const recentRare = makeMockPersona(otherUserId, 16n as PersonaID, 'Bob Recent', {
+				visibility: 'public',
+				use_count: 2,
+				last_used_at_ms: BigInt(now - 5 * 60 * 1000), // 5 minutes ago
+			});
+
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([olderFrequent, recentRare]);
+
+			const results = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [otherUserId],
+				query: 'bob',
+				userMap,
+			});
+
+			expect(results.map((r) => r.name)).toEqual(['Bob Recent', 'Bob Old']);
+			expect(results[0].use_count).toBe(2);
+			expect(results[0].last_used_at_ms).toBeDefined();
+		});
+
 		it('matches by owner username, nickname, or system name', async () => {
 			const personaByOwnerNick = makeMockPersona(otherUserId, 20n as PersonaID, 'Shadow', {
 				visibility: 'public',
@@ -354,6 +381,73 @@ describe('PersonaService', () => {
 			// Malformed invalid JSON tags
 			const malformedInvalidJson = makeMockPersona(userId, 3n as PersonaID, 'P', {persona_tags: '{invalid_json'});
 			expect(malformedInvalidJson.personaTags).toEqual([]);
+		});
+	});
+
+	describe('dispatchToMutualGuilds', () => {
+		it('dispatches GUILD_PERSONAS_DIRTY to user mutual guilds on public persona creation and deletion', async () => {
+			const mockGateway = {
+				dispatchPresence: vi.fn().mockResolvedValue(undefined),
+				dispatchGuild: vi.fn().mockResolvedValue(undefined),
+			};
+			const mockUserGuildRepo = {
+				getUserGuildIds: vi.fn().mockResolvedValue([123n, 456n]),
+			};
+			const serviceWithGuilds = new PersonaService({
+				personaRepository: mockRepo,
+				gatewayService: mockGateway as any,
+				userGuildRepository: mockUserGuildRepo as any,
+			});
+
+			const publicPersona = makeMockPersona(userId, defaultPersonaId, 'Alice Public', {visibility: 'public'});
+			vi.mocked(mockRepo.count).mockResolvedValueOnce(0);
+			vi.mocked(mockRepo.create).mockResolvedValueOnce(publicPersona);
+
+			await serviceWithGuilds.createPersona(userId, {name: 'Alice Public', visibility: 'public'});
+
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledTimes(2);
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
+				guildId: 123n,
+				event: 'GUILD_PERSONAS_DIRTY',
+				data: {guild_id: '123', user_id: userId.toString()},
+			});
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
+				guildId: 456n,
+				event: 'GUILD_PERSONAS_DIRTY',
+				data: {guild_id: '456', user_id: userId.toString()},
+			});
+
+			mockGateway.dispatchGuild.mockClear();
+
+			// Delete public persona
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(publicPersona);
+			vi.mocked(mockRepo.delete).mockResolvedValueOnce(true);
+
+			await serviceWithGuilds.deletePersona(userId, defaultPersonaId);
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledTimes(2);
+		});
+
+		it('does NOT dispatch GUILD_PERSONAS_DIRTY for private persona mutations', async () => {
+			const mockGateway = {
+				dispatchPresence: vi.fn().mockResolvedValue(undefined),
+				dispatchGuild: vi.fn().mockResolvedValue(undefined),
+			};
+			const mockUserGuildRepo = {
+				getUserGuildIds: vi.fn().mockResolvedValue([123n]),
+			};
+			const serviceWithGuilds = new PersonaService({
+				personaRepository: mockRepo,
+				gatewayService: mockGateway as any,
+				userGuildRepository: mockUserGuildRepo as any,
+			});
+
+			const privatePersona = makeMockPersona(userId, defaultPersonaId, 'Alice Private', {visibility: 'private'});
+			vi.mocked(mockRepo.count).mockResolvedValueOnce(0);
+			vi.mocked(mockRepo.create).mockResolvedValueOnce(privatePersona);
+
+			await serviceWithGuilds.createPersona(userId, {name: 'Alice Private', visibility: 'private'});
+
+			expect(mockGateway.dispatchGuild).not.toHaveBeenCalled();
 		});
 	});
 });
