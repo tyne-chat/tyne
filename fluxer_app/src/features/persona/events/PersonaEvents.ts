@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {GatewayHandlerContext} from '@app/features/gateway/events/EventRouter';
+import {clearPersonaMentionCache} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import type {PersonaResponse, PersonaSettingsResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {PersonaStore} from '../state/PersonaStore';
 
@@ -12,6 +13,7 @@ export function handleUserPersonaCreate(data: PersonaPayload, _context: GatewayH
 	const persona = data && 'persona' in data && data.persona ? data.persona : (data as PersonaResponse);
 	if (persona?.id) {
 		PersonaStore.upsertPersona(persona);
+		clearPersonaMentionCache();
 	}
 }
 
@@ -19,6 +21,7 @@ export function handleUserPersonaUpdate(data: PersonaPayload, _context: GatewayH
 	const persona = data && 'persona' in data && data.persona ? data.persona : (data as PersonaResponse);
 	if (persona?.id) {
 		PersonaStore.upsertPersona(persona);
+		clearPersonaMentionCache();
 	}
 }
 
@@ -26,6 +29,7 @@ export function handleUserPersonaDelete(data: PersonaDeletePayload, _context: Ga
 	const id = (data as any)?.persona_id ?? (data as any)?.id;
 	if (id) {
 		PersonaStore.removePersona(id);
+		clearPersonaMentionCache();
 	}
 }
 
@@ -37,6 +41,7 @@ export function handleUserPersonasUpdate(data: PersonasPayload, _context: Gatewa
 			: null;
 	if (personas) {
 		PersonaStore.setPersonas(personas);
+		clearPersonaMentionCache();
 	}
 }
 
