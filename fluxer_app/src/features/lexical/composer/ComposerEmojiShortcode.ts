@@ -19,6 +19,10 @@ import {isReactionShorthandText} from '@app/features/messaging/utils/ReactionSho
 import type {ResolvedTypedEmoji} from '@app/features/messaging/utils/TypedEmojiShortcodeUtils';
 import {$getRoot, type LexicalEditor, TextNode} from 'lexical';
 
+// Fork imports.
+
+import {$isComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
+
 export type ComposerEmojiResolver = (shortcodeName: string) => ResolvedTypedEmoji | null;
 
 export function registerComposerEmojiShortcode(editor: LexicalEditor, resolve: ComposerEmojiResolver): () => void {
@@ -78,7 +82,12 @@ function isEscapedAt(text: string, index: number): boolean {
 }
 
 function $convertEmojiShortcode(node: TextNode, resolve: ComposerEmojiResolver): void {
-	if ($isSyntaxMarkerNode(node) || node.hasFormat('code') || isReactionShorthandText($getRoot().getTextContent())) {
+	if (
+		$isComposerCaretAnchorNode(node) ||
+		$isSyntaxMarkerNode(node) ||
+		node.hasFormat('code') ||
+		isReactionShorthandText($getRoot().getTextContent())
+	) {
 		return;
 	}
 	const parent = node.getParent();

@@ -79,6 +79,10 @@ import {
 	TextNode,
 } from 'lexical';
 
+// Fork imports.
+
+import {$isComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
+
 export interface ComposerLine {
 	nodes: Array<LexicalNode>;
 	lineBreak: LineBreakNode | null;
@@ -345,7 +349,12 @@ export function $syncComposerBlockquoteLines(paragraph: ElementNode, quoted: Rea
 }
 
 function isPlainTextLeaf(node: LexicalNode | undefined): node is TextNode {
-	return node instanceof TextNode && !$isComposerPlainSegmentNode(node) && !$isComposerCommandNode(node);
+	return (
+		node instanceof TextNode &&
+		!$isComposerPlainSegmentNode(node) &&
+		!$isComposerCommandNode(node) &&
+		!$isComposerCaretAnchorNode(node)
+	);
 }
 
 function $spliceLeadingText(
