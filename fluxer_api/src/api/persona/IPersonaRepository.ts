@@ -51,4 +51,5 @@ export abstract class IPersonaRepository {
 	abstract deleteAllByUserId(userId: UserID): Promise<void>;
 	abstract findSettings(userId: UserID): Promise<UserPersonaSettingsRow | null>;
 	abstract upsertSettings(row: UserPersonaSettingsRow): Promise<UserPersonaSettingsRow>;
+	abstract recordUsage(userId: UserID, personaId: PersonaID): Promise<void>;
 }
