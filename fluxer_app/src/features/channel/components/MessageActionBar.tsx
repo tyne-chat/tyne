@@ -73,7 +73,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // Fork imports.
 
-import {getCopyableMessageText} from '@app/features/channel/components/MessageActionUtils';
+import {getEffectiveContent} from '@app/features/channel/components/MessageActionUtils';
 import {COPY_TEXT_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
 import {CopyMessageTextIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
 
@@ -296,7 +296,7 @@ const MessageActionBarCore: React.FC<MessageActionBarCoreProps> = observer(
 		} = permissions;
 		const showsEditInTail = message.isUserMessage() && !message.messageSnapshots && canEditMessage;
 		const supportsInteractiveActions = useMemo(() => !isClientSystemMessage(message), [message]);
-		const copyableMessageText = useMemo(() => getCopyableMessageText(message, i18n), [message, i18n.locale]);
+		const copyableMessageText = useMemo(() => getEffectiveContent(message), [message]);
 		const handlers = useMemo(
 			() => createMessageActionHandlers(message, {i18n, channel: permissions.channel}),
 			[message, i18n.locale, permissions.channel],
