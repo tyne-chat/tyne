@@ -5,6 +5,7 @@ import {
 	$getComposerNodeDisplayStart,
 	$selectComposerRange,
 } from '@app/features/lexical/composer/composerOffsets';
+import {$isComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
 import {$createComposerTimestampNode} from '@app/features/lexical/composer/nodes/ComposerTimestampNode';
 import {
 	type ComposerTimestampFormat,
@@ -71,7 +72,7 @@ function findNextTimestampToken(text: string): TimestampTokenMatch | null {
 }
 
 function $convertTimestampTokens(node: TextNode): void {
-	if (!node.isAttached() || $isSyntaxMarkerNode(node) || node.hasFormat('code')) {
+	if (!node.isAttached() || $isComposerCaretAnchorNode(node) || $isSyntaxMarkerNode(node) || node.hasFormat('code')) {
 		return;
 	}
 	const text = node.getTextContent();
