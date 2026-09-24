@@ -373,22 +373,25 @@ export class PersonaService {
 		candidateUserIds: Array<UserID>;
 		query?: string;
 		limit?: number;
-		userMap: Map<UserID, {username: string; globalName: string | null; nickname?: string | null}>;
+		userMap: Map<
+			UserID,
+			{username: string; discriminator?: string | null; globalName: string | null; nickname?: string | null}
+		>;
 	}): Promise<Array<ChannelPersonaMentionItem>> {
 		if (candidateUserIds.length === 0) return [];
-		const maxLimit = Math.min(Math.max(limit ?? 25, 1), 50);
+		const maxLimit = Math.min(Math.max(limit ?? 100, 1), 1000);
 		const normalizedQuery = (query ?? '').trim().toLowerCase();
 
 		const allPersonas = await this.deps.personaRepository.findByUserIds(candidateUserIds);
 
 		// Filter according to privacy model:
 		// - caller can see all of their own personas
-		// - other room members' personas MUST be public
+		// - other room members' personas can be public or unlisted (private personas are hidden)
 		const visiblePersonas = allPersonas.filter((persona) => {
 			if (persona.userId === callerUserId) {
 				return true;
 			}
-			return persona.visibility === 'public';
+			return persona.visibility === 'public' || persona.visibility === 'unlisted';
 		});
 
 		// Query matching
@@ -432,6 +435,7 @@ export class PersonaService {
 				visibility: persona.visibility,
 				owner_user_id: persona.userId.toString(),
 				owner_username: owner?.username ?? 'unknown',
+				owner_discriminator: owner?.discriminator ?? null,
 				owner_global_name: owner?.globalName ?? null,
 				owner_nickname: owner?.nickname ?? null,
 			};
