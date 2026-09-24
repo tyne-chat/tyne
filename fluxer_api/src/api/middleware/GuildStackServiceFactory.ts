@@ -26,7 +26,12 @@ import type {VoiceAvailabilityService} from '@app/api/voice/VoiceAvailabilitySer
 import type {WebhookRepository} from '@app/api/webhook/WebhookRepository';
 import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 
+// Fork imports.
+
+import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+
 interface GuildStackServiceFactoryDependencies {
+	personaRepository?: IPersonaRepository;
 	apiContext: ApiContext;
 	channelRepository: ChannelRepository;
 	userRepository: UserRepository;
@@ -86,6 +91,7 @@ class LazyGuildStackServices implements GuildStackServices {
 			this.dependencies.webhookRepository,
 			this.dependencies.limitConfigService,
 			this.dependencies.voiceAvailabilityService,
+			this.dependencies.personaRepository,
 		);
 		return this.cachedChannelService;
 	}
