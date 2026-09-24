@@ -51,7 +51,7 @@ describe('Channel Persona Mentions and Privacy Filtering', () => {
 		Config.dev.validateResponses = true;
 	});
 
-	test('strictly filters other users unlisted and private personas from channel mentions', async () => {
+	test('allows other users public and unlisted personas in channel mentions but strictly filters private personas', async () => {
 		// User B creates public, unlisted, and private personas
 		await createPersona(harness, userB.token, {name: 'Bob Public', visibility: 'public'});
 		await createPersona(harness, userB.token, {name: 'Bob Unlisted', visibility: 'unlisted'});
@@ -75,16 +75,22 @@ describe('Channel Persona Mentions and Privacy Filtering', () => {
 		expect(names).toContain('Alice Unlisted');
 		expect(names).toContain('Alice Private');
 
-		// User A can see User B's public persona
+		// User A can see User B's public and unlisted personas
 		expect(names).toContain('Bob Public');
+		expect(names).toContain('Bob Unlisted');
 
-		// User A MUST NOT see User B's unlisted or private personas
-		expect(names).not.toContain('Bob Unlisted');
+		// User A MUST NOT see User B's private personas
 		expect(names).not.toContain('Bob Private');
+
+		// Verify owner_discriminator is populated on mention items
+		const bobPublicItem = results.find((r) => r.name === 'Bob Public');
+		expect(bobPublicItem).toBeDefined();
+		expect(bobPublicItem?.owner_discriminator).toBeDefined();
 	});
 
 	test('filters candidates by search query', async () => {
 		await createPersona(harness, userB.token, {name: 'Bob Public', visibility: 'public'});
+		await createPersona(harness, userB.token, {name: 'Bob Unlisted', visibility: 'unlisted'});
 		await createPersona(harness, userA.token, {name: 'Alice Public', visibility: 'public'});
 		await createPersona(harness, userA.token, {name: 'Alice Unlisted', visibility: 'unlisted'});
 
@@ -94,15 +100,15 @@ describe('Channel Persona Mentions and Privacy Filtering', () => {
 			.expect(HTTP_STATUS.OK)
 			.execute();
 
-		expect(bobResults.map((r) => r.name)).toEqual(['Bob Public']);
+		expect(bobResults.map((r) => r.name).sort()).toEqual(['Bob Public', 'Bob Unlisted'].sort());
 
-		// Query "unlisted" should only find Alice's own unlisted persona, never another user's
+		// Query "unlisted" should find both Alice's and Bob's unlisted personas
 		const unlistedResults = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userA.token)
 			.get(`/channels/${channelId}/persona-mentions?q=unlisted`)
 			.expect(HTTP_STATUS.OK)
 			.execute();
 
-		expect(unlistedResults.map((r) => r.name)).toEqual(['Alice Unlisted']);
+		expect(unlistedResults.map((r) => r.name).sort()).toEqual(['Alice Unlisted', 'Bob Unlisted'].sort());
 	});
 
 	test('rejects queries from users without channel view permission', async () => {
