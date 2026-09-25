@@ -156,6 +156,7 @@ import {createMiddleware} from 'hono/factory';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import {PersonaService} from '@app/api/persona/PersonaService';
 import {UserGuildRepository} from '@app/api/user/repositories/account/UserGuildRepository';
+import {UserChannelRepository} from '@app/api/user/repositories/UserChannelRepository';
 
 export {initializeServiceSingletons} from '@app/api/middleware/ServiceSingletons';
 
@@ -694,6 +695,7 @@ class RequestServices implements RequestScopedServices {
 			userAccountLookupService: this.userService.accountService.lookupService,
 			gatewayService: this.gatewayService,
 			userGuildRepository: new UserGuildRepository(),
+			userChannelRepository: new UserChannelRepository(),
 		});
 		return this.cachedPersonaService;
 	}
