@@ -189,12 +189,12 @@ export const ColorPickerField: React.FC<ColorPickerFieldProps> = observer((props
 			setInputValue(numberToHex(effectiveValue));
 			return;
 		}
-		if (parsed.num !== effectiveValue) {
+		if (parsed.num !== effectiveValue || isDefaultValue) {
 			onChange(parsed.num);
 		}
 		setInputValue(parsed.hex);
 		setShowError(false);
-	}, [inputValue, getEffectiveValue, onChange]);
+	}, [inputValue, getEffectiveValue, onChange, isDefaultValue]);
 	const handleInputBlur = useCallback(() => {
 		commitFromText();
 	}, [commitFromText]);
@@ -311,6 +311,7 @@ export const ColorPickerField: React.FC<ColorPickerFieldProps> = observer((props
 										color={numberToHex(effectiveValue)}
 										onChange={handleColorChange}
 										onReset={handleReset}
+										hasCustomColor={!isDefaultValue}
 										data-flx="ui.form.color-picker-field.color-picker-popover.color-change"
 									/>
 								</Dialog>
