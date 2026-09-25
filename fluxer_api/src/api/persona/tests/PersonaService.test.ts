@@ -552,5 +552,59 @@ describe('PersonaService', () => {
 				data: {guild_id: '456', user_id: userId.toString(), action: 'sync'},
 			});
 		});
+
+		it('dispatches GUILD_PERSONAS_DIRTY to DM recipients via dispatchPresence when personas are updated', async () => {
+			const mockGateway = {
+				dispatchPresence: vi.fn().mockResolvedValue(undefined),
+				dispatchGuild: vi.fn().mockResolvedValue(undefined),
+			};
+			const dmRecipientId1 = 789n;
+			const dmRecipientId2 = 999n;
+			const mockUserChannelRepo = {
+				listPrivateChannels: vi.fn().mockResolvedValue([
+					{
+						id: 111n,
+						recipientIds: new Set([userId, dmRecipientId1]),
+					},
+					{
+						id: 222n,
+						recipientIds: new Set([userId, dmRecipientId2]),
+					},
+				]),
+			};
+			const serviceWithChannels = new PersonaService({
+				personaRepository: mockRepo,
+				gatewayService: mockGateway as any,
+				userChannelRepository: mockUserChannelRepo as any,
+			});
+
+			const existingPersona = makeMockPersona(userId, defaultPersonaId, 'Alice Original');
+			const updatedPersona = makeMockPersona(userId, defaultPersonaId, 'Alice Renamed');
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(existingPersona);
+			vi.mocked(mockRepo.update).mockResolvedValueOnce(updatedPersona);
+
+			await serviceWithChannels.updatePersona(userId, defaultPersonaId, {name: 'Alice Renamed'});
+
+			// 1 for USER_PERSONA_UPDATE to author, 2 for GUILD_PERSONAS_DIRTY to DM recipients
+			expect(mockGateway.dispatchPresence).toHaveBeenCalledTimes(3);
+			expect(mockGateway.dispatchPresence).toHaveBeenCalledWith({
+				userId: dmRecipientId1,
+				event: 'GUILD_PERSONAS_DIRTY',
+				data: {
+					user_id: userId.toString(),
+					action: 'update',
+					persona: updatedPersona.toSubprofileResponse(),
+				},
+			});
+			expect(mockGateway.dispatchPresence).toHaveBeenCalledWith({
+				userId: dmRecipientId2,
+				event: 'GUILD_PERSONAS_DIRTY',
+				data: {
+					user_id: userId.toString(),
+					action: 'update',
+					persona: updatedPersona.toSubprofileResponse(),
+				},
+			});
+		});
 	});
 });
