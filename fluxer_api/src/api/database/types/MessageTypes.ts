@@ -12,6 +12,10 @@ import type {
 	WebhookID,
 } from '@app/api/BrandedTypes';
 
+// Fork imports.
+
+import type {PersonaID} from '@app/api/BrandedTypes';
+
 export interface MessageAttachment {
 	attachment_id: AttachmentID;
 	filename: string;
@@ -147,12 +151,12 @@ export interface MessageRow {
 	call: MessageCall | null;
 	has_reaction: boolean | null;
 	version: number;
-	subprofile?: Nullish<MessageSubprofileRow>;
+	persona_id?: Nullish<PersonaID | string>;
 }
 
 export interface MessageSubprofileRow {
 	id: string;
-	name: string;
+	name?: Nullish<string>;
 	avatar?: Nullish<string>;
 	avatar_color?: Nullish<number>;
 	banner?: Nullish<string>;
@@ -189,7 +193,7 @@ export const MESSAGE_COLUMNS = [
 	'call',
 	'has_reaction',
 	'version',
-	'subprofile',
+	'persona_id',
 ] as const satisfies ReadonlyArray<keyof MessageRow>;
 
 export interface ChannelPinRow {
