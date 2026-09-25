@@ -87,6 +87,10 @@ import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useForm} from 'react-hook-form';
 
+// Fork imports.
+
+import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
+
 const COMMUNITY_PROFILE_UPDATED_DESCRIPTOR = msg({
 	message: 'Community profile updated',
 	comment: 'Short label in the my profile tab. Keep it concise.',
@@ -258,6 +262,20 @@ const MyProfileTabComponent = observer(function MyProfileTabComponent({
 	const isProfileEmailLocked = !profileGate.allowed && profileGate.need === AccountVerificationNeeds.CONFIRM_EMAIL;
 	const isProfileAccountLimited = user?.accountLimited === true;
 	const isProfileCustomizationLocked = !profileGate.allowed || isProfileAccountLimited;
+	const effectiveProfileDefaultColor = useMemo(() => {
+		if (isPerGuildProfile) {
+			if (typeof user?.accentColor === 'number' && user.accentColor !== 0) {
+				return user.accentColor;
+			}
+		}
+		if (!avatarAsset.hasCleared && user && typeof user.avatarColor === 'number' && user.avatarColor !== 0) {
+			return user.avatarColor;
+		}
+		if (user) {
+			return AvatarUtils.getDefaultAvatarPrimaryColor(user.id);
+		}
+		return 0x4641d9;
+	}, [isPerGuildProfile, avatarAsset.hasCleared, user?.accentColor, user?.avatarColor, user?.id, user]);
 	const form = useForm<FormInputs>({
 		defaultValues: {
 			bio: null,
@@ -929,6 +947,7 @@ const MyProfileTabComponent = observer(function MyProfileTabComponent({
 									>
 										<AccentColorPicker
 											value={form.watch('accent_color') ?? null}
+											defaultColor={effectiveProfileDefaultColor}
 											onChange={(value: number | null) => form.setValue('accent_color', value, {shouldDirty: true})}
 											disabled={isProfileCustomizationLocked || isPerGuildProfileCustomizationDisabled}
 											errorMessage={form.formState.errors.accent_color?.message}
