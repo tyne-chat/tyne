@@ -28,6 +28,7 @@ import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
+import {DEFAULT_ACCENT_COLOR} from '@fluxer/constants/src/AppConstants';
 import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {msg} from '@lingui/core/macro';
@@ -103,6 +104,7 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 					system_name: localPersona.system_name ?? localPersona.systemName ?? null,
 					pronouns: localPersona.pronouns ?? null,
 					color: localPersona.color ?? localPersona.accentColor ?? null,
+					avatar_color: localPersona.avatar_color ?? localPersona.avatarColor ?? null,
 					bio: localPersona.bio ?? null,
 					visibility: localPersona.visibility ?? 'unlisted',
 				});
@@ -153,21 +155,58 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 			return null;
 		}, [guildMember, guildId, user.id]);
 
+		const effectiveColor =
+			subprofile.color ?? publicPersona?.color ?? localPersona?.color ?? localPersona?.accentColor ?? null;
+
+		const effectiveAvatarColor =
+			subprofile.avatar_color ??
+			publicPersona?.avatar_color ??
+			localPersona?.avatar_color ??
+			localPersona?.avatarColor ??
+			null;
+
+		const hasCustomPersonaAvatar = Boolean(
+			subprofile.avatar || publicPersona?.avatar_url || localPersona?.avatar_url || localPersona?.avatarUrl,
+		);
+
 		const accentColor = useMemo(() => {
-			if (subprofile.color != null && subprofile.color !== 0) {
-				return ColorUtils.int2hex(subprofile.color);
+			if (effectiveColor != null && effectiveColor !== 0) {
+				return ColorUtils.int2hex(effectiveColor);
 			}
-			try {
-				return getUserAccentColor(user);
-			} catch {
-				return '#5865F2';
+			if (hasCustomPersonaAvatar) {
+				if (effectiveAvatarColor != null && effectiveAvatarColor !== 0) {
+					return ColorUtils.int2hex(effectiveAvatarColor);
+				}
+				if (subprofile.id && /^\d+$/.test(subprofile.id)) {
+					try {
+						return ColorUtils.int2hex(AvatarUtils.getDefaultAvatarPrimaryColor(subprofile.id));
+					} catch {
+						// Fall through to DEFAULT_ACCENT_COLOR
+					}
+				}
+				return DEFAULT_ACCENT_COLOR;
 			}
-		}, [subprofile.color, user]);
+			// Persona has no avatar of its own; inherits root account's avatar and color
+			return getUserAccentColor(user);
+		}, [effectiveColor, hasCustomPersonaAvatar, effectiveAvatarColor, subprofile.id, user]);
+
+		const effectiveNotchBaseColor = useMemo(() => {
+			if (effectiveColor != null && effectiveColor !== 0) {
+				return effectiveColor;
+			}
+			if (hasCustomPersonaAvatar) {
+				if (effectiveAvatarColor != null && effectiveAvatarColor !== 0) {
+					return effectiveAvatarColor;
+				}
+			} else if (user && typeof user.avatarColor === 'number') {
+				return user.avatarColor;
+			}
+			return null;
+		}, [effectiveColor, hasCustomPersonaAvatar, effectiveAvatarColor, user]);
 
 		const notchColor = useMemo(
-			() =>
-				getContrastingNotchColor(subprofile.color != null && subprofile.color !== 0 ? subprofile.color : null, true),
-			[subprofile.color],
+			() => getContrastingNotchColor(effectiveNotchBaseColor, true),
+			[effectiveNotchBaseColor],
 		);
 
 		const rootDisplayName = useMemo(() => {
