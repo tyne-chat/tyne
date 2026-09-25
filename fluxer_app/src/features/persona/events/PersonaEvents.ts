@@ -5,6 +5,7 @@ import {
 	clearPersonaMentionCache,
 	invalidatePersonaMentionCache,
 } from '@app/features/lexical/composer/useAutocompletePersonaSearch';
+import Messages from '@app/features/messaging/state/MessagingMessages';
 import type {PersonaResponse, PersonaSettingsResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {PersonaStore} from '../state/PersonaStore';
 
@@ -25,6 +26,7 @@ export function handleUserPersonaUpdate(data: PersonaPayload, _context: GatewayH
 	if (persona?.id) {
 		PersonaStore.upsertPersona(persona);
 		clearPersonaMentionCache();
+		Messages.handlePersonaUpdate({persona});
 	}
 }
 
@@ -60,8 +62,18 @@ export function handleUserPersonaSettingsUpdate(
 }
 
 export function handleGuildPersonasDirty(
-	data: {guild_id?: string; user_id?: string} | undefined,
+	data:
+		| {
+				guild_id?: string;
+				user_id?: string;
+				persona?: any;
+				action?: 'update' | 'delete' | 'sync';
+		  }
+		| undefined,
 	_context: GatewayHandlerContext,
 ): void {
 	invalidatePersonaMentionCache(data?.guild_id);
+	if (data?.persona && data?.action === 'update') {
+		Messages.handlePersonaUpdate({persona: data.persona});
+	}
 }

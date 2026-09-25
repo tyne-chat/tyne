@@ -12,7 +12,7 @@ use crate::types::{
     ApiReactionEmojiResponse, ApiUserPartial, Message, MessageAttachment, MessageCall,
     MessageEmbed, MessageEmbedAuthor, MessageEmbedChild, MessageEmbedField, MessageEmbedFooter,
     MessageEmbedMedia, MessageEmbedProvider, MessageReference, MessageRequest, MessageResponse,
-    MessageSnapshot, MessageStickerItem, MessageSubprofile,
+    MessageSnapshot, MessageStickerItem,
 };
 use crate::udt;
 use base64::prelude::{BASE64_STANDARD, Engine};
@@ -120,7 +120,7 @@ const MESSAGE_COLUMNS: &str = "\
     content, edited_timestamp, pinned_timestamp, flags, mention_everyone, \
     mention_users, mention_roles, mention_channels, \
     has_reaction, version, \
-    attachments, embeds, sticker_items, message_reference, call, message_snapshots, subprofile";
+    attachments, embeds, sticker_items, message_reference, call, message_snapshots, persona_id";
 
 pub struct MessagesShard<T> {
     storage: MessagesStorage,
@@ -246,7 +246,7 @@ struct MessageDbRow {
     message_reference: Option<udt::MessageReferenceUdt>,
     call: Option<udt::MessageCallUdt>,
     message_snapshots: Option<Vec<udt::MessageSnapshotUdt>>,
-    subprofile: Option<udt::MessageSubprofileUdt>,
+    persona_id: Option<i64>,
 }
 
 #[cfg_attr(feature = "scylla", derive(DeserializeRow))]
@@ -1544,7 +1544,7 @@ impl<T: Transport> MessagesShard<T> {
             nonce: options.nonce.clone(),
             call: message.call.as_ref().map(map_call),
             referenced_message,
-            subprofile: message.subprofile.clone(),
+            persona_id: message.persona_id.map(|id| id.to_string()),
         }
     }
 
@@ -3658,25 +3658,8 @@ impl From<MessageDbRow> for Message {
             message_snapshots: row
                 .message_snapshots
                 .map(|v| v.into_iter().map(convert_message_snapshot).collect()),
-            subprofile: row.subprofile.map(convert_subprofile),
+            persona_id: row.persona_id,
         }
-    }
-}
-
-fn convert_subprofile(s: udt::MessageSubprofileUdt) -> MessageSubprofile {
-    let tag_text = s.display_tag_text.clone().or_else(|| s.system_name.clone());
-    MessageSubprofile {
-        id: s.id.unwrap_or_default(),
-        name: s.name.unwrap_or_default(),
-        avatar: s.avatar,
-        avatar_color: s.avatar_color,
-        display_tag_text: tag_text.clone(),
-        display_tag_icon: s.display_tag_icon,
-        system_name: s.system_name.or(tag_text),
-        pronouns: s.pronouns,
-        color: s.color,
-        bio: s.bio,
-        banner: s.banner,
     }
 }
 
