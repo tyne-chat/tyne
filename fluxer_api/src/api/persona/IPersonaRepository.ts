@@ -43,9 +43,14 @@ export interface UpdatePersonaParams {
 }
 
 export abstract class IPersonaRepository {
-	abstract findById(userId: UserID, personaId: PersonaID): Promise<Persona | null>;
-	abstract findByUserId(userId: UserID): Promise<Array<Persona>>;
-	abstract findByUserIds(userIds: Array<UserID>): Promise<Array<Persona>>;
+	abstract findById(
+		userId: UserID,
+		personaId: PersonaID,
+		options?: {includeDeleted?: boolean},
+	): Promise<Persona | null>;
+	abstract findByUserId(userId: UserID, options?: {includeDeleted?: boolean}): Promise<Array<Persona>>;
+	abstract findByUserIds(userIds: Array<UserID>, options?: {includeDeleted?: boolean}): Promise<Array<Persona>>;
+	abstract findByUserAndPersonaIds(pairs: Array<{userId: UserID; personaId: PersonaID}>): Promise<Map<string, Persona>>;
 	abstract count(userId: UserID): Promise<number>;
 	abstract create(params: CreatePersonaParams): Promise<Persona>;
 	abstract update(userId: UserID, personaId: PersonaID, params: UpdatePersonaParams): Promise<Persona | null>;
