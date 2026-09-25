@@ -21,32 +21,37 @@ const FETCH_PERSONAS_BY_USER_IDS_CQL = Personas.selectCql({
 	where: Personas.where.in('user_id', 'user_ids'),
 });
 
-const COUNT_PERSONAS_CQL = Personas.selectCountCql({
-	where: Personas.where.eq('user_id'),
-});
-
 const FETCH_SETTINGS_CQL = UserPersonaSettings.selectCql({
 	where: [UserPersonaSettings.where.eq('user_id')],
 	limit: 1,
 });
 
 export class PersonaRepository extends IPersonaRepository {
-	async findById(userId: UserID, personaId: PersonaID): Promise<Persona | null> {
+	async findById(userId: UserID, personaId: PersonaID, options?: {includeDeleted?: boolean}): Promise<Persona | null> {
 		const row = await fetchOne<PersonaRow>(FETCH_PERSONA_CQL, {
 			user_id: userId,
 			persona_id: personaId,
 		});
-		return row ? new Persona(row) : null;
+		if (!row) return null;
+		const persona = new Persona(row);
+		if (!options?.includeDeleted && persona.isDeleted) {
+			return null;
+		}
+		return persona;
 	}
 
-	async findByUserId(userId: UserID): Promise<Array<Persona>> {
+	async findByUserId(userId: UserID, options?: {includeDeleted?: boolean}): Promise<Array<Persona>> {
 		const rows = await fetchMany<PersonaRow>(FETCH_PERSONAS_BY_USER_CQL, {
 			user_id: userId,
 		});
-		return rows.map((r) => new Persona(r));
+		const personas = rows.map((r) => new Persona(r));
+		if (options?.includeDeleted) {
+			return personas;
+		}
+		return personas.filter((p) => !p.isDeleted);
 	}
 
-	async findByUserIds(userIds: Array<UserID>): Promise<Array<Persona>> {
+	async findByUserIds(userIds: Array<UserID>, options?: {includeDeleted?: boolean}): Promise<Array<Persona>> {
 		if (!userIds || userIds.length === 0) return [];
 		const chunkSize = 100;
 		const results: Array<Persona> = [];
@@ -56,17 +61,47 @@ export class PersonaRepository extends IPersonaRepository {
 				user_ids: chunk,
 			});
 			for (const r of rows) {
-				results.push(new Persona(r));
+				const persona = new Persona(r);
+				if (options?.includeDeleted || !persona.isDeleted) {
+					results.push(persona);
+				}
+			}
+		}
+		return results;
+	}
+
+	async findByUserAndPersonaIds(pairs: Array<{userId: UserID; personaId: PersonaID}>): Promise<Map<string, Persona>> {
+		if (!pairs || pairs.length === 0) return new Map();
+		const uniquePairs = new Map<string, {userId: UserID; personaId: PersonaID}>();
+		for (const pair of pairs) {
+			uniquePairs.set(`${pair.userId.toString()}:${pair.personaId.toString()}`, pair);
+		}
+		const results = new Map<string, Persona>();
+		const entries = Array.from(uniquePairs.values());
+		const chunkSize = 50;
+		for (let i = 0; i < entries.length; i += chunkSize) {
+			const chunk = entries.slice(i, i + chunkSize);
+			const fetched = await Promise.all(
+				chunk.map(async ({userId, personaId}) => {
+					const row = await fetchOne<PersonaRow>(FETCH_PERSONA_CQL, {
+						user_id: userId,
+						persona_id: personaId,
+					});
+					return row ? new Persona(row) : null;
+				}),
+			);
+			for (const p of fetched) {
+				if (p) {
+					results.set(p.id.toString(), p);
+				}
 			}
 		}
 		return results;
 	}
 
 	async count(userId: UserID): Promise<number> {
-		const result = await fetchOne<{count: bigint}>(COUNT_PERSONAS_CQL, {
-			user_id: userId,
-		});
-		return result ? Number(result.count) : 0;
+		const active = await this.findByUserId(userId);
+		return active.length;
 	}
 
 	async create(params: CreatePersonaParams): Promise<Persona> {
@@ -130,13 +165,28 @@ export class PersonaRepository extends IPersonaRepository {
 
 	async delete(userId: UserID, personaId: PersonaID): Promise<boolean> {
 		const existing = await this.findById(userId, personaId);
-		if (!existing) return false;
-		await fetchOne(Personas.deleteByPk({user_id: userId, persona_id: personaId}));
+		if (!existing || existing.isDeleted) return false;
+		const now = new Date();
+		const row = existing.toRow();
+		row.deleted_at = now;
+		row.updated_at = now;
+		row.version = existing.version + 1;
+		await upsertOne(Personas.upsertAll(row));
 		return true;
 	}
 
 	async deleteAllByUserId(userId: UserID): Promise<void> {
-		await fetchOne(Personas.deletePartition({user_id: userId}));
+		const personas = await this.findByUserId(userId);
+		const now = new Date();
+		await Promise.all(
+			personas.map(async (p) => {
+				const row = p.toRow();
+				row.deleted_at = now;
+				row.updated_at = now;
+				row.version = p.version + 1;
+				await upsertOne(Personas.upsertAll(row));
+			}),
+		);
 	}
 
 	async findSettings(userId: UserID): Promise<UserPersonaSettingsRow | null> {
@@ -153,7 +203,7 @@ export class PersonaRepository extends IPersonaRepository {
 
 	async recordUsage(userId: UserID, personaId: PersonaID): Promise<void> {
 		const existing = await this.findById(userId, personaId);
-		if (!existing) return;
+		if (!existing || existing.isDeleted) return;
 		const now = new Date();
 		const row: PersonaRow = {
 			user_id: userId,

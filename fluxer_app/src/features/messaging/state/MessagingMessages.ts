@@ -23,6 +23,10 @@ import type {GuildMemberData} from '@fluxer/schema/src/domains/guild/GuildMember
 import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {makeAutoObservable, reaction} from 'mobx';
 
+// Fork imports.
+
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+
 const STALE_WINDOW_REFETCH_INTERVAL_MS = 10_000;
 const staleWindowRefetchedAt = new Map<string, number>();
 
@@ -46,16 +50,23 @@ class Messages {
 	private pendingJumpDispatches = new Map<string, PendingJumpDispatch>();
 	private messageRefsByAuthor = new Map<string, Map<string, Set<string>>>();
 	private indexedAuthorsByChannel = new Map<string, Map<string, string>>();
+	private messageRefsByPersona = new Map<string, Map<string, Set<string>>>();
+	private indexedPersonasByChannel = new Map<string, Map<string, string>>();
 	updateCounter = 0;
 	cacheGeneration = 0;
 	private pendingFullHydration = false;
 
 	constructor() {
-		makeAutoObservable<this, 'messageRefsByAuthor' | 'indexedAuthorsByChannel'>(
+		makeAutoObservable<
+			this,
+			'messageRefsByAuthor' | 'indexedAuthorsByChannel' | 'messageRefsByPersona' | 'indexedPersonasByChannel'
+		>(
 			this,
 			{
 				messageRefsByAuthor: false,
 				indexedAuthorsByChannel: false,
+				messageRefsByPersona: false,
+				indexedPersonasByChannel: false,
 			},
 			{autoBind: true},
 		);
@@ -87,6 +98,7 @@ class Messages {
 			return;
 		}
 		const channelIndex = new Map<string, string>();
+		const personaChannelIndex = new Map<string, string>();
 		messages.forEach((message) => {
 			const authorId = message.author.id;
 			channelIndex.set(message.id, authorId);
@@ -101,19 +113,42 @@ class Messages {
 				refsByChannel.set(messages.channelId, messageIds);
 			}
 			messageIds.add(message.id);
+
+			const personaId = message.subprofile?.id;
+			if (personaId) {
+				personaChannelIndex.set(message.id, personaId);
+				let pRefsByChannel = this.messageRefsByPersona.get(personaId);
+				if (!pRefsByChannel) {
+					pRefsByChannel = new Map();
+					this.messageRefsByPersona.set(personaId, pRefsByChannel);
+				}
+				let pMessageIds = pRefsByChannel.get(messages.channelId);
+				if (!pMessageIds) {
+					pMessageIds = new Set();
+					pRefsByChannel.set(messages.channelId, pMessageIds);
+				}
+				pMessageIds.add(message.id);
+			}
 		});
 		this.indexedAuthorsByChannel.set(messages.channelId, channelIndex);
+		this.indexedPersonasByChannel.set(messages.channelId, personaChannelIndex);
 	}
 
 	private unindexChannelMessages(channelId: string): void {
 		const channelIndex = this.indexedAuthorsByChannel.get(channelId);
-		if (!channelIndex) {
-			return;
+		if (channelIndex) {
+			for (const [messageId, authorId] of channelIndex) {
+				this.unindexMessageRef(authorId, channelId, messageId);
+			}
+			this.indexedAuthorsByChannel.delete(channelId);
 		}
-		for (const [messageId, authorId] of channelIndex) {
-			this.unindexMessageRef(authorId, channelId, messageId);
+		const personaIndex = this.indexedPersonasByChannel.get(channelId);
+		if (personaIndex) {
+			for (const [messageId, personaId] of personaIndex) {
+				this.unindexPersonaMessageRef(personaId, channelId, messageId);
+			}
+			this.indexedPersonasByChannel.delete(channelId);
 		}
-		this.indexedAuthorsByChannel.delete(channelId);
 	}
 
 	private unindexMessageRef(authorId: string, channelId: string, messageId: string): void {
@@ -134,8 +169,31 @@ class Messages {
 		}
 	}
 
+	private unindexPersonaMessageRef(personaId: string, channelId: string, messageId: string): void {
+		const refsByChannel = this.messageRefsByPersona.get(personaId);
+		if (!refsByChannel) {
+			return;
+		}
+		const messageIds = refsByChannel.get(channelId);
+		if (!messageIds) {
+			return;
+		}
+		messageIds.delete(messageId);
+		if (messageIds.size === 0) {
+			refsByChannel.delete(channelId);
+		}
+		if (refsByChannel.size === 0) {
+			this.messageRefsByPersona.delete(personaId);
+		}
+	}
+
 	private pruneStaleIndexedChannels(): void {
 		for (const channelId of Array.from(this.indexedAuthorsByChannel.keys())) {
+			if (!ChannelMessages.get(channelId)) {
+				this.unindexChannelMessages(channelId);
+			}
+		}
+		for (const channelId of Array.from(this.indexedPersonasByChannel.keys())) {
 			if (!ChannelMessages.get(channelId)) {
 				this.unindexChannelMessages(channelId);
 			}
@@ -176,6 +234,52 @@ class Messages {
 			for (const messageId of messageIds) {
 				if (!messages.has(messageId, false)) {
 					this.unindexMessageRef(userId, channelId, messageId);
+					continue;
+				}
+				messages = messages.update(messageId, updater);
+			}
+			if (messages !== previous) {
+				this.commitMessages(messages);
+				hasChanges = true;
+			}
+		}
+		return hasChanges;
+	}
+
+	private patchPersonaMessages(
+		personaId: string,
+		updater: (message: Message) => Message,
+		options: {guildId?: string | null; patchMissingChannels?: boolean} = {},
+	): boolean {
+		const refsByChannel = this.messageRefsByPersona.get(personaId);
+		if (!refsByChannel) {
+			return false;
+		}
+		let hasChanges = false;
+		const channelRefs = Array.from(refsByChannel, ([channelId, messageIds]) => ({
+			channelId,
+			messageIds: Array.from(messageIds),
+		}));
+		for (const {channelId, messageIds} of channelRefs) {
+			let messages = ChannelMessages.get(channelId);
+			if (!messages) {
+				this.unindexChannelMessages(channelId);
+				continue;
+			}
+			if (options.guildId != null) {
+				const channel = Channels.getChannel(channelId);
+				if (channel == null) {
+					if (!options.patchMissingChannels) {
+						continue;
+					}
+				} else if (channel.guildId !== options.guildId) {
+					continue;
+				}
+			}
+			const previous = messages;
+			for (const messageId of messageIds) {
+				if (!messages.has(messageId, false)) {
+					this.unindexPersonaMessageRef(personaId, channelId, messageId);
 					continue;
 				}
 				messages = messages.update(messageId, updater);
@@ -607,6 +711,50 @@ class Messages {
 		if (!updatedAuthor) return false;
 		const authorJson = updatedAuthor.toJSON();
 		const hasChanges = this.patchAuthorMessages(userId, (message) => message.withUpdates({author: authorJson}));
+		if (hasChanges) {
+			this.notifyChange();
+		}
+		return hasChanges;
+	}
+
+	handlePersonaUpdate(action: {
+		persona: {
+			id: string;
+			name: string;
+			avatar?: string | null;
+			avatar_color?: number | null;
+			banner?: string | null;
+			display_tag_text?: string | null;
+			display_tag_icon?: string | null;
+			system_name?: string | null;
+			pronouns?: string | null;
+			color?: number | null;
+			bio?: string | null;
+			visibility?: any;
+		};
+	}): boolean {
+		const persona = action.persona;
+		if (!persona?.id) return false;
+		const hasChanges = this.patchPersonaMessages(persona.id, (message) => {
+			if (!message.subprofile || message.subprofile.id !== persona.id) {
+				return message;
+			}
+			const updatedSubprofile: MessageSubprofileResponse = {
+				id: persona.id,
+				name: persona.name,
+				avatar: persona.avatar ?? null,
+				avatar_color: persona.avatar_color ?? null,
+				banner: persona.banner ?? null,
+				display_tag_text: persona.display_tag_text ?? persona.system_name ?? null,
+				display_tag_icon: persona.display_tag_icon ?? null,
+				system_name: persona.system_name ?? persona.display_tag_text ?? null,
+				pronouns: persona.pronouns ?? null,
+				color: persona.color ?? null,
+				bio: persona.bio ?? null,
+				visibility: persona.visibility,
+			};
+			return message.withUpdates({subprofile: updatedSubprofile});
+		});
 		if (hasChanges) {
 			this.notifyChange();
 		}

@@ -23,6 +23,7 @@ export interface PersonaRow {
 	external_uuid: Nullish<string>;
 	created_at: Date;
 	updated_at: Date;
+	deleted_at?: Nullish<Date>;
 	version: number;
 }
 
@@ -45,6 +46,7 @@ export const PERSONA_COLUMNS = [
 	'external_uuid',
 	'created_at',
 	'updated_at',
+	'deleted_at',
 	'version',
 ] as const;
 
