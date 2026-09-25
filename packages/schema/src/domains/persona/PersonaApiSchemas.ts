@@ -38,6 +38,7 @@ export const PersonaResponseSchema = z.object({
 	external_uuid: z.string().nullish().describe('External UUID for idempotent PluralKit imports'),
 	created_at: z.string().describe('ISO timestamp of persona creation'),
 	updated_at: z.string().describe('ISO timestamp of last update'),
+	deleted_at: z.string().datetime().nullish().optional().describe('ISO timestamp if the persona has been soft-deleted'),
 });
 export type PersonaResponse = z.infer<typeof PersonaResponseSchema>;
 
