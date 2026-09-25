@@ -29,13 +29,15 @@ export const ColorPickerPopover = observer(
 		color,
 		onChange,
 		onReset,
+		hasCustomColor: hasCustomColorProp,
 	}: {
 		popoutKey?: string | number;
 		color: string;
 		onChange: (color: string) => void;
 		onReset: () => void;
+		hasCustomColor?: boolean;
 	}) => {
-		const hasCustomColor = color !== null && color !== '#4641D9';
+		const hasCustomColor = hasCustomColorProp ?? (color !== null && color !== '#4641D9');
 		const parsedColor = useMemo(() => {
 			try {
 				return parseColor(color).toFormat('hsb');
