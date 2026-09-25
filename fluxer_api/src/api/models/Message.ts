@@ -12,7 +12,7 @@ import type {MessageTypeValue} from '@fluxer/constants/src/ChannelConstants';
 
 // Fork imports.
 
-import type {MessageSubprofileRow} from '@app/api/database/types/MessageTypes';
+import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
 
 export class Message {
 	readonly channelId: ChannelID;
@@ -39,7 +39,7 @@ export class Message {
 	readonly call: CallInfo | null;
 	readonly hasReaction: boolean | null;
 	readonly version: number;
-	readonly subprofile: MessageSubprofileRow | null;
+	readonly personaId: PersonaID | null;
 
 	constructor(row: MessageRow) {
 		this.channelId = row.channel_id;
@@ -72,7 +72,7 @@ export class Message {
 		this.call = row.call ? new CallInfo(row.call) : null;
 		this.hasReaction = row.has_reaction ?? null;
 		this.version = row.version;
-		this.subprofile = row.subprofile ?? null;
+		this.personaId = row.persona_id ? createPersonaID(BigInt(row.persona_id)) : null;
 	}
 
 	toRow(): MessageRow {
@@ -102,7 +102,7 @@ export class Message {
 			call: this.call?.toMessageCall() ?? null,
 			has_reaction: this.hasReaction ?? null,
 			version: this.version,
-			subprofile: this.subprofile,
+			persona_id: this.personaId,
 		};
 	}
 }
