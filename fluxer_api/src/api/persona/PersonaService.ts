@@ -210,7 +210,7 @@ export class PersonaService {
 			persona: {...persona.toResponse(), user_id: userId.toString()},
 		});
 		if (persona.visibility === 'public' || persona.visibility === 'unlisted') {
-			await this.dispatchToMutualGuilds(userId);
+			await this.dispatchToMutualGuilds(userId, persona, 'update');
 		}
 		return persona;
 	}
@@ -247,11 +247,7 @@ export class PersonaService {
 			persona: {...updated.toResponse(), user_id: userId.toString()},
 		});
 
-		const wasVisible = existing.visibility === 'public' || existing.visibility === 'unlisted';
-		const isVisible = updated.visibility === 'public' || updated.visibility === 'unlisted';
-		if (wasVisible || isVisible) {
-			await this.dispatchToMutualGuilds(userId);
-		}
+		await this.dispatchToMutualGuilds(userId, updated, 'update');
 		return updated;
 	}
 
@@ -271,9 +267,7 @@ export class PersonaService {
 			user_id: userId.toString(),
 		});
 
-		if (existing.visibility === 'public' || existing.visibility === 'unlisted') {
-			await this.dispatchToMutualGuilds(userId);
-		}
+		await this.dispatchToMutualGuilds(userId, existing, 'delete');
 	}
 
 	async importPersonas(userId: UserID, items: Array<PersonaCreateRequest>): Promise<Array<Persona>> {
@@ -604,11 +598,16 @@ export class PersonaService {
 		}
 	}
 
-	private async dispatchToMutualGuilds(userId: UserID): Promise<void> {
+	private async dispatchToMutualGuilds(
+		userId: UserID,
+		persona?: Persona | null,
+		action: 'update' | 'delete' | 'sync' = 'sync',
+	): Promise<void> {
 		if (!this.deps.gatewayService || !this.deps.userGuildRepository) return;
 		try {
 			const guildIds = await this.deps.userGuildRepository.getUserGuildIds(userId);
 			if (!guildIds || guildIds.length === 0) return;
+			const personaData = persona ? persona.toSubprofileResponse() : undefined;
 			await Promise.all(
 				guildIds.map((guildId) =>
 					this.deps.gatewayService!.dispatchGuild({
@@ -617,6 +616,8 @@ export class PersonaService {
 						data: {
 							guild_id: guildId.toString(),
 							user_id: userId.toString(),
+							...(personaData ? {persona: personaData} : {}),
+							action,
 						},
 					}),
 				),
