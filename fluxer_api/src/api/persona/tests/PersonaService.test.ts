@@ -410,12 +410,22 @@ describe('PersonaService', () => {
 			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
 				guildId: 123n,
 				event: 'GUILD_PERSONAS_DIRTY',
-				data: {guild_id: '123', user_id: userId.toString()},
+				data: {
+					guild_id: '123',
+					user_id: userId.toString(),
+					action: 'update',
+					persona: publicPersona.toSubprofileResponse(),
+				},
 			});
 			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
 				guildId: 456n,
 				event: 'GUILD_PERSONAS_DIRTY',
-				data: {guild_id: '456', user_id: userId.toString()},
+				data: {
+					guild_id: '456',
+					user_id: userId.toString(),
+					action: 'update',
+					persona: publicPersona.toSubprofileResponse(),
+				},
 			});
 
 			mockGateway.dispatchGuild.mockClear();
@@ -426,6 +436,16 @@ describe('PersonaService', () => {
 
 			await serviceWithGuilds.deletePersona(userId, defaultPersonaId);
 			expect(mockGateway.dispatchGuild).toHaveBeenCalledTimes(2);
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
+				guildId: 123n,
+				event: 'GUILD_PERSONAS_DIRTY',
+				data: {
+					guild_id: '123',
+					user_id: userId.toString(),
+					action: 'delete',
+					persona: publicPersona.toSubprofileResponse(),
+				},
+			});
 		});
 
 		it('does NOT dispatch GUILD_PERSONAS_DIRTY for private persona mutations', async () => {
@@ -524,12 +544,12 @@ describe('PersonaService', () => {
 			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
 				guildId: 123n,
 				event: 'GUILD_PERSONAS_DIRTY',
-				data: {guild_id: '123', user_id: userId.toString()},
+				data: {guild_id: '123', user_id: userId.toString(), action: 'sync'},
 			});
 			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
 				guildId: 456n,
 				event: 'GUILD_PERSONAS_DIRTY',
-				data: {guild_id: '456', user_id: userId.toString()},
+				data: {guild_id: '456', user_id: userId.toString(), action: 'sync'},
 			});
 		});
 	});
