@@ -13,6 +13,7 @@ export const PersonaSchema = z.object({
 	system_name: z.string().max(100).nullish().describe('Optional system name/tag'),
 	pronouns: z.string().max(100).nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional color integer'),
+	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
 	auto_tag_disabled: z.boolean().optional(),
 	use_count: z.number().int().optional(),
 	last_used_at_ms: z.number().int().optional(),

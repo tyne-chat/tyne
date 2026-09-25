@@ -26,6 +26,7 @@ export type ActivePersonaMode = 'off' | 'manual' | 'last';
 export interface ClientPersona extends PersonaResponse {
 	// CamelCase aliases for backwards compatibility with React components
 	avatarUrl?: string | null;
+	avatarColor?: number | null;
 	bannerUrl?: string | null;
 	systemName?: string | null;
 	personaTags?: Array<{prefix?: string; suffix?: string}>;
@@ -52,6 +53,12 @@ export function normalizePersona(
 			: source.accentColor !== undefined
 				? source.accentColor
 				: (source.accent_color ?? null);
+	const avatarColor =
+		source.avatar_color !== undefined
+			? source.avatar_color
+			: source.avatarColor !== undefined
+				? source.avatarColor
+				: null;
 	const rawTags = source.persona_tags ?? source.personaTags ?? [];
 	const tags: Array<PersonaTag> = rawTags.map((t: any) => ({
 		prefix: t.prefix ?? undefined,
@@ -73,6 +80,7 @@ export function normalizePersona(
 		system_name: systemName,
 		pronouns: source.pronouns ?? null,
 		color,
+		avatar_color: avatarColor,
 		bio: source.bio ?? null,
 		auto_tag_disabled: autoTag,
 		persona_tags: tags,
@@ -84,6 +92,7 @@ export function normalizePersona(
 		updated_at: source.updated_at ?? new Date().toISOString(),
 		// CamelCase aliases
 		avatarUrl,
+		avatarColor,
 		bannerUrl,
 		systemName,
 		personaTags: tags,
