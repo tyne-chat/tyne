@@ -5,13 +5,6 @@ import type {GatewayHandlerContext} from '@app/features/gateway/events/EventRout
 import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
 import type {PersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {
-	handleUserPersonaCreate,
-	handleUserPersonaDelete,
-	handleUserPersonaSettingsUpdate,
-	handleUserPersonasUpdate,
-	handleUserPersonaUpdate,
-} from './PersonaEvents';
 
 vi.mock('@lingui/core/macro', () => {
 	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
@@ -33,6 +26,13 @@ vi.mock('@app/features/user/state/UserSettings', () => ({
 installVoiceMenuTestBootstrap();
 
 const {PersonaStore} = await import('../state/PersonaStore');
+const {
+	handleUserPersonaCreate,
+	handleUserPersonaDelete,
+	handleUserPersonasUpdate,
+	handleUserPersonaSettingsUpdate,
+	handleUserPersonaUpdate,
+} = await import('./PersonaEvents');
 
 const mockContext = {} as GatewayHandlerContext;
 
