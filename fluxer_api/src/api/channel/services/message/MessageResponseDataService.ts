@@ -17,6 +17,15 @@ import type {MessageResponse} from '@fluxer/schema/src/domains/message/MessageRe
 import type {INatsConnectionManager} from '@pkgs/nats/src/INatsConnectionManager';
 import {NatsConnectionManager} from '@pkgs/nats/src/NatsConnectionManager';
 
+// Fork imports.
+
+import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
+import type {UserPersonaSettingsRow} from '@app/api/database/types/PersonaTypes';
+import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
+import type {Persona} from '@app/api/models/Persona';
+import {type IPersonaRepository, personaLookupKey} from '@app/api/persona/IPersonaRepository';
+import {DELETED_USER_USERNAME, UserFlags} from '@fluxer/constants/src/UserConstants';
+
 const MESSAGE_RESPONSE_SERVICE_SUBJECT = 'svc.messages';
 const MESSAGE_RESPONSE_SERVICE_TIMEOUT_MS = 6000;
 export const MESSAGE_BUILD_BATCH_MAX_BYTES = 262_144;
@@ -94,6 +103,19 @@ function normalizeMessageSubprofileResponse(message: MessageResponse): MessageRe
 	return message;
 }
 
+function isDeletedAuthor(author: unknown): boolean {
+	if (!author || typeof author !== 'object') return false;
+	const record = author as Record<string, unknown>;
+	if (record.username === DELETED_USER_USERNAME) return true;
+	if (record.flags !== undefined && record.flags !== null) {
+		try {
+			const flagsBig = BigInt(record.flags as number | string | bigint);
+			if ((flagsBig & UserFlags.DELETED) === UserFlags.DELETED) return true;
+		} catch {}
+	}
+	return false;
+}
+
 export class MessageResponseDataService {
 	private async accessEnvelope(access: MessageResponseAccessContext) {
 		return {
@@ -108,7 +130,98 @@ export class MessageResponseDataService {
 			instance_name: getInstanceProductName(),
 		};
 	}
-	constructor(private readonly connectionManager: INatsConnectionManager) {}
+	constructor(
+		private readonly connectionManager: INatsConnectionManager,
+		private readonly personaRepository?: IPersonaRepository,
+	) {}
+
+	private getPersonaRepository(): IPersonaRepository {
+		return this.personaRepository ?? getPersonaRepository();
+	}
+
+	protected async hydratePersonas(messages: Array<MessageResponse>): Promise<void> {
+		if (!messages || messages.length === 0) return;
+
+		const lookupPairs: Array<{userId: UserID; personaId: PersonaID}> = [];
+		const authorUserIds: Array<UserID> = [];
+
+		for (const msg of messages) {
+			const anyMsg = msg as unknown as Record<string, unknown>;
+			// Case 1: Root user account deleted -> Anonymize message, suppress persona
+			if (isDeletedAuthor(msg.author)) {
+				msg.subprofile = null;
+				delete anyMsg.persona_id;
+				continue;
+			}
+
+			// Case 2: Persona ID present on message
+			const rawPersonaId = anyMsg.persona_id ?? msg.subprofile?.id;
+			const personaIdStr =
+				typeof rawPersonaId === 'string' || typeof rawPersonaId === 'bigint' || typeof rawPersonaId === 'number'
+					? String(rawPersonaId)
+					: null;
+			if (!personaIdStr) {
+				msg.subprofile = null;
+				continue;
+			}
+
+			const authorIdStr = msg.author?.id;
+			if (!authorIdStr || !/^\d+$/.test(authorIdStr) || !/^\d+$/.test(personaIdStr)) {
+				msg.subprofile = null;
+				delete anyMsg.persona_id;
+				continue;
+			}
+
+			const authorUserId = createUserID(BigInt(authorIdStr));
+			lookupPairs.push({
+				userId: authorUserId,
+				personaId: createPersonaID(BigInt(personaIdStr)),
+			});
+			authorUserIds.push(authorUserId);
+		}
+
+		const repo = lookupPairs.length > 0 ? this.getPersonaRepository() : null;
+		const [personasByKey, settingsByUserId] = repo
+			? await Promise.all([repo.findByUserAndPersonaIds(lookupPairs), repo.findSettingsByUserIds(authorUserIds)])
+			: [new Map<string, Persona>(), new Map<string, UserPersonaSettingsRow>()];
+
+		for (const msg of messages) {
+			const anyMsg = msg as unknown as Record<string, unknown>;
+			const rawPersonaId = anyMsg.persona_id ?? msg.subprofile?.id;
+			const personaIdStr =
+				typeof rawPersonaId === 'string' || typeof rawPersonaId === 'bigint' || typeof rawPersonaId === 'number'
+					? String(rawPersonaId)
+					: null;
+			if (!personaIdStr) continue;
+
+			const authorIdStr = msg.author?.id;
+			const persona = authorIdStr ? personasByKey.get(personaLookupKey(authorIdStr, personaIdStr)) : undefined;
+			const userSettings = authorIdStr ? settingsByUserId.get(authorIdStr) : undefined;
+			if (persona) {
+				msg.subprofile = persona.toSubprofileResponse(userSettings);
+			} else {
+				const effectiveTagText =
+					userSettings?.display_tag_text && userSettings.display_tag_text.trim().length > 0
+						? userSettings.display_tag_text.trim()
+						: null;
+				const effectiveTagIcon =
+					userSettings?.display_tag_icon && userSettings.display_tag_icon.trim().length > 0
+						? userSettings.display_tag_icon.trim()
+						: null;
+				msg.subprofile = {
+					id: personaIdStr,
+					name: 'Unknown Persona',
+					avatar: null,
+					avatar_color: null,
+					pronouns: null,
+					color: null,
+					display_tag_text: effectiveTagText,
+					display_tag_icon: effectiveTagIcon,
+				};
+			}
+			delete anyMsg.persona_id;
+		}
+	}
 
 	async listMessages(params: {
 		userId: UserID;
@@ -136,6 +249,7 @@ export class MessageResponseDataService {
 			for (const msg of response.FoundApiMany) {
 				normalizeMessageSubprofileResponse(msg);
 			}
+			await this.hydratePersonas(response.FoundApiMany);
 			return response.FoundApiMany;
 		}
 		throw new Error(`[message-response-service] unexpected ListResponses response: ${JSON.stringify(response)}`);
@@ -171,7 +285,9 @@ export class MessageResponseDataService {
 		});
 		if (response === 'NotFound') return null;
 		if (typeof response === 'object' && 'FoundApi' in response) {
-			return normalizeMessageSubprofileResponse(response.FoundApi);
+			const msg = normalizeMessageSubprofileResponse(response.FoundApi);
+			await this.hydratePersonas([msg]);
+			return msg;
 		}
 		throw new Error(`[message-response-service] unexpected GetResponseById response: ${JSON.stringify(response)}`);
 	}
@@ -194,7 +310,9 @@ export class MessageResponseDataService {
 			tts: params.tts,
 		});
 		if (typeof response === 'object' && 'FoundApi' in response) {
-			return normalizeMessageSubprofileResponse(response.FoundApi);
+			const msg = normalizeMessageSubprofileResponse(response.FoundApi);
+			await this.hydratePersonas([msg]);
+			return msg;
 		}
 		throw new Error(`[message-response-service] unexpected BuildResponse response: ${JSON.stringify(response)}`);
 	}
@@ -241,6 +359,7 @@ export class MessageResponseDataService {
 			for (const msg of response.FoundApiMany) {
 				normalizeMessageSubprofileResponse(msg);
 			}
+			await this.hydratePersonas(response.FoundApiMany);
 			responses.push(...response.FoundApiMany);
 		}
 		return responses;
