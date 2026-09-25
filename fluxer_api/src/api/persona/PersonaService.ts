@@ -10,10 +10,12 @@ import type {
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
+import {SYSTEM_USER_ID} from '../constants/Core';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
 import type {Persona} from '../models/Persona';
 import type {UserGuildRepository} from '../user/repositories/account/UserGuildRepository';
+import type {IUserChannelRepository} from '../user/repositories/IUserChannelRepository';
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
 import {
 	DuplicatePersonaTagError,
@@ -30,6 +32,7 @@ export interface PersonaServiceDeps {
 	userAccountLookupService?: UserAccountLookupService;
 	gatewayService?: IGatewayService;
 	userGuildRepository?: UserGuildRepository;
+	userChannelRepository?: IUserChannelRepository;
 }
 
 function normalizeTag(tag: PersonaTag): {prefix: string; suffix: string} {
@@ -603,25 +606,61 @@ export class PersonaService {
 		persona?: Persona | null,
 		action: 'update' | 'delete' | 'sync' = 'sync',
 	): Promise<void> {
-		if (!this.deps.gatewayService || !this.deps.userGuildRepository) return;
+		if (!this.deps.gatewayService) return;
 		try {
-			const guildIds = await this.deps.userGuildRepository.getUserGuildIds(userId);
-			if (!guildIds || guildIds.length === 0) return;
 			const personaData = persona ? persona.toSubprofileResponse() : undefined;
-			await Promise.all(
-				guildIds.map((guildId) =>
-					this.deps.gatewayService!.dispatchGuild({
-						guildId,
-						event: 'GUILD_PERSONAS_DIRTY',
-						data: {
-							guild_id: guildId.toString(),
-							user_id: userId.toString(),
-							...(personaData ? {persona: personaData} : {}),
-							action,
-						},
-					}),
-				),
-			);
+			const dispatches: Array<Promise<void>> = [];
+
+			if (this.deps.userGuildRepository) {
+				const guildIds = await this.deps.userGuildRepository.getUserGuildIds(userId);
+				if (guildIds && guildIds.length > 0) {
+					for (const guildId of guildIds) {
+						dispatches.push(
+							this.deps.gatewayService.dispatchGuild({
+								guildId,
+								event: 'GUILD_PERSONAS_DIRTY',
+								data: {
+									guild_id: guildId.toString(),
+									user_id: userId.toString(),
+									...(personaData ? {persona: personaData} : {}),
+									action,
+								},
+							}),
+						);
+					}
+				}
+			}
+
+			if (this.deps.userChannelRepository) {
+				const privateChannels = await this.deps.userChannelRepository.listPrivateChannels(userId);
+				const recipientUserIds = new Set<UserID>();
+				for (const channel of privateChannels) {
+					if (channel.recipientIds) {
+						for (const recipientId of channel.recipientIds) {
+							if (recipientId !== userId && recipientId !== SYSTEM_USER_ID) {
+								recipientUserIds.add(recipientId);
+							}
+						}
+					}
+				}
+				for (const recipientId of recipientUserIds) {
+					dispatches.push(
+						this.deps.gatewayService.dispatchPresence({
+							userId: recipientId,
+							event: 'GUILD_PERSONAS_DIRTY',
+							data: {
+								user_id: userId.toString(),
+								...(personaData ? {persona: personaData} : {}),
+								action,
+							},
+						}),
+					);
+				}
+			}
+
+			if (dispatches.length > 0) {
+				await Promise.all(dispatches);
+			}
 		} catch {
 			// Non-blocking gateway broadcast failure
 		}
