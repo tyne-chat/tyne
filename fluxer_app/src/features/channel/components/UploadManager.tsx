@@ -25,6 +25,10 @@ import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 const UPLOAD_DROP_MODAL_KEY = 'upload-drop-modal';
 const hasFileTransfer = (event: DragEvent): boolean => event.dataTransfer?.types?.includes('Files') ?? false;
 
@@ -108,6 +112,25 @@ export const UploadManager = observer(({channel, canAttachFiles, canSendMessages
 					formatMultipleFileLabel: (count) => formatUploadingAttachmentSummary(i18n, count),
 				})?.toJSON();
 				if (!uploadingAttachment) return;
+				const subprofile = PersonaStore.getActiveSubprofileRequest();
+				if (subprofile) {
+					void PersonaStore.recordPersonaUse(subprofile.id);
+				}
+				const optimisticSubprofile = subprofile
+					? {
+							id: subprofile.id,
+							name: subprofile.name,
+							avatar: subprofile.avatar ?? null,
+							avatar_color: subprofile.avatar_color ?? null,
+							display_tag_text: subprofile.display_tag_text ?? subprofile.system_name ?? null,
+							display_tag_icon: subprofile.display_tag_icon ?? null,
+							system_name: subprofile.system_name ?? subprofile.display_tag_text ?? null,
+							pronouns: subprofile.pronouns ?? null,
+							color: subprofile.color ?? null,
+							bio: subprofile.bio ?? null,
+							visibility: subprofile.visibility ?? null,
+						}
+					: null;
 				const message = new Message({
 					id: nonce,
 					channel_id: channel.id,
@@ -122,12 +145,14 @@ export const UploadManager = observer(({channel, canAttachFiles, canSendMessages
 					state: MessageStates.SENDING,
 					nonce,
 					attachments: [uploadingAttachment],
+					subprofile: optimisticSubprofile,
 				});
 				MessageCommands.createOptimistic(channel.id, message.toJSON());
 				MessageCommands.send(channel.id, {
 					content: '',
 					nonce,
 					hasAttachments: true,
+					subprofile: subprofile ?? undefined,
 				});
 			} else {
 				const existingAttachments = CloudUpload.getTextareaAttachments(channel.id);
