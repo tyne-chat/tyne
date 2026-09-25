@@ -472,8 +472,14 @@ export class PersonaService {
 			display_tag_icon: updatedRow.display_tag_icon ?? null,
 		};
 
+		const displayTagChanged =
+			(updatedRow.display_tag_text ?? '') !== (existing?.display_tag_text ?? '') ||
+			(updatedRow.display_tag_icon ?? null) !== (existing?.display_tag_icon ?? null);
+
 		await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', response);
-		await this.dispatchToMutualGuilds(userId);
+		if (displayTagChanged) {
+			await this.dispatchToMutualGuilds(userId);
+		}
 
 		return response;
 	}
