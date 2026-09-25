@@ -19,6 +19,7 @@ export class Persona {
 	readonly systemName: string | null;
 	readonly pronouns: string | null;
 	readonly color: number | null;
+	readonly avatarColor: number | null;
 	readonly bio: string | null;
 	readonly autoTagDisabled: boolean;
 	readonly personaTags: Array<PersonaTag>;
@@ -39,6 +40,7 @@ export class Persona {
 		this.systemName = row.system_name ?? null;
 		this.pronouns = row.pronouns ?? null;
 		this.color = row.color ?? null;
+		this.avatarColor = row.avatar_color ?? null;
 		this.bio = row.bio ?? null;
 		this.autoTagDisabled = row.auto_tag_disabled ?? false;
 		this.personaTags = parsePersonaTags(row.persona_tags);
@@ -60,6 +62,7 @@ export class Persona {
 			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
+			avatar_color: this.avatarColor,
 			bio: this.bio,
 			auto_tag_disabled: this.autoTagDisabled,
 			persona_tags: this.personaTags,
@@ -81,6 +84,7 @@ export class Persona {
 			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
+			avatar_color: this.avatarColor,
 			bio: this.bio,
 			visibility: this.visibility,
 		};
@@ -96,6 +100,7 @@ export class Persona {
 			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
+			avatar_color: this.avatarColor,
 			bio: this.bio,
 			auto_tag_disabled: this.autoTagDisabled,
 			persona_tags: JSON.stringify(this.personaTags),
