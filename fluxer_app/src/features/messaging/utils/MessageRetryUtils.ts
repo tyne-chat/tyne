@@ -6,6 +6,10 @@ import {CloudUpload} from '@app/features/messaging/upload/CloudUpload';
 import {MessageStates} from '@fluxer/constants/src/ChannelConstants';
 import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork imports.
+
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 export function retryFailedMessage(message: Message): boolean {
 	if (!message.nonce) {
 		return false;
@@ -19,6 +23,9 @@ export function retryFailedMessage(message: Message): boolean {
 		attachments: [...message.attachments],
 		reactions: [],
 	};
+	if (message.subprofile?.id) {
+		void PersonaStore.recordPersonaUse(message.subprofile.id);
+	}
 	MessageCommands.retryLocal(message.channelId, message.id);
 	MessageCommands.createOptimistic(message.channelId, optimisticMessage);
 	MessageCommands.send(message.channelId, {
@@ -30,6 +37,7 @@ export function retryFailedMessage(message: Message): boolean {
 		flags: message.flags,
 		favoriteMemeId: message._favoriteMemeId,
 		stickers: [...(message.stickers ?? [])],
+		subprofile: message.subprofile ?? undefined,
 	});
 	return true;
 }
