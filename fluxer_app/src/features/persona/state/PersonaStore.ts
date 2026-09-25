@@ -730,10 +730,28 @@ export class PersonaStoreClass {
 				},
 			};
 		}
-
 		return {
 			finalContent: content,
 			subprofile: undefined,
+		};
+	}
+
+	getActiveSubprofileRequest(): MessageSubprofileRequest | null {
+		if (!this._isPersonaLatched) return null;
+		const active = this.activePersona;
+		if (!active) return null;
+		return {
+			id: active.id,
+			name: active.name,
+			avatar: active.avatar_url ?? active.avatarUrl ?? null,
+			avatar_color: active.color ?? active.accentColor ?? null,
+			color: active.color ?? active.accentColor ?? null,
+			display_tag_text: this._displayTagText || null,
+			display_tag_icon: this._displayTagIcon || null,
+			system_name: this._displayTagText || null,
+			pronouns: active.pronouns ?? null,
+			bio: active.bio ?? null,
+			visibility: active.visibility ?? null,
 		};
 	}
 }
