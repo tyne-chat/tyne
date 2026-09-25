@@ -156,6 +156,7 @@ interface PersonaFormState {
 	name: string;
 	pronouns: string;
 	avatarUrl: string;
+	avatarColor?: number | null;
 	bannerUrl: string;
 	accentColor: number | null;
 	bio: string;
@@ -167,6 +168,7 @@ const emptyFormState = (): PersonaFormState => ({
 	name: '',
 	pronouns: '',
 	avatarUrl: '',
+	avatarColor: null,
 	bannerUrl: '',
 	accentColor: null,
 	bio: '',
@@ -213,6 +215,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			name: persona.name,
 			pronouns: persona.pronouns ?? '',
 			avatarUrl: persona.avatar_url ?? persona.avatarUrl ?? '',
+			avatarColor: persona.avatar_color ?? persona.avatarColor ?? null,
 			bannerUrl: persona.banner_url ?? persona.bannerUrl ?? '',
 			accentColor: persona.color ?? null,
 			bio: persona.bio ?? '',
@@ -240,6 +243,20 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			setFlashBanner(false);
 		}, 300);
 	}, []);
+
+	const effectiveDefaultColor = useMemo<number | null>(() => {
+		if (formData.avatarUrl.trim()) {
+			return formData.avatarColor ?? null;
+		}
+		// Persona has no avatar, inherits root user's avatar and avatar color
+		if (currentUser && typeof currentUser.avatarColor === 'number') {
+			return currentUser.avatarColor;
+		}
+		if (currentUser && !currentUser.avatar) {
+			return AvatarUtils.getDefaultAvatarPrimaryColor(currentUser.id);
+		}
+		return null;
+	}, [formData.avatarUrl, formData.avatarColor, currentUser]);
 
 	const hasUnsavedChanges = useMemo(() => {
 		const initial = initialFormStateRef.current;
@@ -327,11 +344,15 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		setFormData((prev) => ({...prev, avatarUrl: base64}));
 		setIsUploadingAvatar(true);
 		try {
-			const res = await http.post<{avatar_url: string}>(Endpoints.USER_PERSONA_AVATAR, {
+			const res = await http.post<{avatar_url: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_AVATAR, {
 				body: {avatar: base64},
 			});
 			if (res.ok && res.body?.avatar_url) {
-				setFormData((prev) => ({...prev, avatarUrl: res.body.avatar_url}));
+				setFormData((prev) => ({
+					...prev,
+					avatarUrl: res.body.avatar_url,
+					...(res.body.avatar_color !== undefined ? {avatarColor: res.body.avatar_color} : {}),
+				}));
 			} else {
 				ToastCommands.createToast({
 					type: 'error',
@@ -349,7 +370,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	};
 
 	const handleAvatarClear = () => {
-		setFormData((prev) => ({...prev, avatarUrl: ''}));
+		setFormData((prev) => ({...prev, avatarUrl: '', avatarColor: null}));
 	};
 
 	const handleBannerUpload = async (base64: string) => {
@@ -486,6 +507,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
 					avatar_url: formData.avatarUrl.trim() || null,
+					avatar_color: formData.avatarColor ?? null,
 					banner_url: formData.bannerUrl.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
@@ -501,6 +523,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
 					avatar_url: formData.avatarUrl.trim() || null,
+					avatar_color: formData.avatarColor ?? null,
 					banner_url: formData.bannerUrl.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
@@ -710,6 +733,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 							{/* 5. Accent color */}
 							<AccentColorPicker
 								value={formData.accentColor}
+								defaultColor={effectiveDefaultColor}
 								onChange={(accentColor) => setFormData((prev) => ({...prev, accentColor}))}
 								disabled={isSubmitting}
 								data-flx="persona.persona-edit-modal.accent-color-picker"
@@ -855,7 +879,11 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								<div className={styles.liveCardWrapper} data-flx="persona.persona-edit-modal.live-card-wrapper">
 									<ProfileCardLayout
 										borderColor={
-											formData.accentColor != null ? ColorUtils.int2hex(formData.accentColor) : 'var(--border-color)'
+											formData.accentColor != null
+												? ColorUtils.int2hex(formData.accentColor)
+												: effectiveDefaultColor != null
+													? ColorUtils.int2hex(effectiveDefaultColor)
+													: 'var(--border-color)'
 										}
 										showPreviewLabel={true}
 										className={popoutStyles.profilePopoutCard}
@@ -866,7 +894,11 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 											bannerUrl={formData.bannerUrl || null}
 											hoverBannerUrl={null}
 											bannerColor={
-												formData.accentColor != null ? ColorUtils.int2hex(formData.accentColor) : 'var(--bg-secondary)'
+												formData.accentColor != null
+													? ColorUtils.int2hex(formData.accentColor)
+													: effectiveDefaultColor != null
+														? ColorUtils.int2hex(effectiveDefaultColor)
+														: 'var(--bg-secondary)'
 											}
 											user={currentUser}
 											avatarUrl={formData.avatarUrl.trim() || AvatarUtils.getUserAvatarURL(currentUser, false)}
