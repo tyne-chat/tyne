@@ -26,6 +26,10 @@ import {DEFAULT_STOCK_LIMITS} from '@fluxer/limits/src/LimitDefaults';
 import type {UserPartial, UserPrivate, User as WireUser} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 
+// Fork imports.
+
+import {DELETED_USER_USERNAME} from '@fluxer/constants/src/UserConstants';
+
 interface UserRecordOptions {
 	instanceId?: string;
 }
@@ -282,6 +286,10 @@ export class User {
 		this._hasPassword = hasKey(user, 'has_password') ? user.has_password : undefined;
 		this._dateOfBirthRequired = hasKey(user, 'date_of_birth_required') ? user.date_of_birth_required : undefined;
 		this._hasAgeRange = hasKey(user, 'has_age_range') ? user.has_age_range : undefined;
+	}
+
+	get isDeleted(): boolean {
+		return this.username === DELETED_USER_USERNAME;
 	}
 
 	get email(): string | null | undefined {
