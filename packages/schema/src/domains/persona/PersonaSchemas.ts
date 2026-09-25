@@ -24,14 +24,14 @@ export type Persona = z.infer<typeof PersonaSchema>;
 export const MessageSubprofileRequestSchema = z.object({
 	id: z.string().min(1).max(64),
 	name: createStringType(1, 100).describe('Persona display name'),
-	avatar: z.string().max(256).nullish().describe('Avatar asset URL or hash'),
-	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
+	avatar: z.string().max(256).nullish().optional().describe('Avatar asset URL or hash'),
+	avatar_color: z.number().int().nullish().optional().describe('Avatar accent color'),
 	banner: z.string().max(256).nullish().optional().describe('Banner asset URL or hash'),
 	display_tag_text: z.string().max(100).nullish().optional().describe('Display tag text'),
 	display_tag_icon: z.string().max(256).nullish().optional().describe('Display tag icon URL or hash'),
 	system_name: z.string().max(100).nullish().optional().describe('Legacy system name/tag (deprecated)'),
-	pronouns: z.string().max(100).nullish().describe('Pronouns'),
-	color: z.number().int().nullish().describe('Custom color integer'),
+	pronouns: z.string().max(100).nullish().optional().describe('Pronouns'),
+	color: z.number().int().nullish().optional().describe('Custom color integer'),
 	bio: z.string().max(4096).nullish().optional().describe('Persona bio (deprecated on message)'),
 	visibility: PersonaVisibilitySchema.nullish().optional().describe('Persona visibility setting'),
 });
