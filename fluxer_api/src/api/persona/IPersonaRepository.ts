@@ -15,6 +15,7 @@ export interface CreatePersonaParams {
 	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
+	avatar_color?: number | null;
 	bio?: string | null;
 	auto_tag_disabled?: boolean;
 	persona_tags?: Array<PersonaTag>;
@@ -31,6 +32,7 @@ export interface UpdatePersonaParams {
 	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
+	avatar_color?: number | null;
 	bio?: string | null;
 	auto_tag_disabled?: boolean;
 	persona_tags?: Array<PersonaTag>;
