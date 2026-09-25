@@ -56,6 +56,7 @@ describe('PersonaService', () => {
 			findByUserIds: vi.fn().mockResolvedValue([]),
 			findSettings: vi.fn().mockResolvedValue(null),
 			upsertSettings: vi.fn().mockResolvedValue(undefined as any),
+			recordUsage: vi.fn().mockResolvedValue(undefined),
 			create: vi.fn(),
 			update: vi.fn(),
 			delete: vi.fn(),
@@ -448,6 +449,88 @@ describe('PersonaService', () => {
 			await serviceWithGuilds.createPersona(userId, {name: 'Alice Private', visibility: 'private'});
 
 			expect(mockGateway.dispatchGuild).not.toHaveBeenCalled();
+		});
+
+		it('does NOT dispatch GUILD_PERSONAS_DIRTY when active persona or latch settings change', async () => {
+			const mockGateway = {
+				dispatchPresence: vi.fn().mockResolvedValue(undefined),
+				dispatchGuild: vi.fn().mockResolvedValue(undefined),
+			};
+			const mockUserGuildRepo = {
+				getUserGuildIds: vi.fn().mockResolvedValue([123n, 456n]),
+			};
+			const serviceWithGuilds = new PersonaService({
+				personaRepository: mockRepo,
+				gatewayService: mockGateway as any,
+				userGuildRepository: mockUserGuildRepo as any,
+			});
+
+			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
+				user_id: userId,
+				active_persona_mode: 'off',
+				active_persona_id: null,
+				is_latched: false,
+				display_tag_text: 'System Tag',
+				display_tag_icon: null,
+				created_at: new Date(),
+				updated_at: new Date(),
+				version: 1,
+			});
+
+			await serviceWithGuilds.updateSettings(userId, {
+				active_persona_id: defaultPersonaId,
+				is_latched: true,
+				active_persona_mode: 'manual',
+			});
+
+			// Dispatches to user for sync across own tabs/devices
+			expect(mockGateway.dispatchPresence).toHaveBeenCalledTimes(1);
+			// Mutual guilds are NOT dirtied for private composer switches
+			expect(mockGateway.dispatchGuild).not.toHaveBeenCalled();
+		});
+
+		it('dispatches GUILD_PERSONAS_DIRTY when display_tag_text or display_tag_icon changes', async () => {
+			const mockGateway = {
+				dispatchPresence: vi.fn().mockResolvedValue(undefined),
+				dispatchGuild: vi.fn().mockResolvedValue(undefined),
+			};
+			const mockUserGuildRepo = {
+				getUserGuildIds: vi.fn().mockResolvedValue([123n, 456n]),
+			};
+			const serviceWithGuilds = new PersonaService({
+				personaRepository: mockRepo,
+				gatewayService: mockGateway as any,
+				userGuildRepository: mockUserGuildRepo as any,
+			});
+
+			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
+				user_id: userId,
+				active_persona_mode: 'manual',
+				active_persona_id: defaultPersonaId,
+				is_latched: true,
+				display_tag_text: 'Old Tag',
+				display_tag_icon: null,
+				created_at: new Date(),
+				updated_at: new Date(),
+				version: 1,
+			});
+
+			await serviceWithGuilds.updateSettings(userId, {
+				display_tag_text: 'New Tag',
+			});
+
+			expect(mockGateway.dispatchPresence).toHaveBeenCalledTimes(1);
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledTimes(2);
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
+				guildId: 123n,
+				event: 'GUILD_PERSONAS_DIRTY',
+				data: {guild_id: '123', user_id: userId.toString()},
+			});
+			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
+				guildId: 456n,
+				event: 'GUILD_PERSONAS_DIRTY',
+				data: {guild_id: '456', user_id: userId.toString()},
+			});
 		});
 	});
 });
