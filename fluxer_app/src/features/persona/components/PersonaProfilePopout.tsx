@@ -33,6 +33,7 @@ import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
+import {DEFAULT_ACCENT_COLOR} from '@fluxer/constants/src/AppConstants';
 import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {Trans} from '@lingui/react/macro';
@@ -72,6 +73,7 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 					system_name: localPersona.system_name ?? localPersona.systemName ?? null,
 					pronouns: localPersona.pronouns ?? null,
 					color: localPersona.color ?? localPersona.accentColor ?? null,
+					avatar_color: localPersona.avatar_color ?? localPersona.avatarColor ?? null,
 					bio: localPersona.bio ?? null,
 					visibility: localPersona.visibility ?? 'unlisted',
 				});
@@ -122,12 +124,40 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			return null;
 		}, [guildMember, guildId, user.id]);
 
+		const effectiveColor =
+			subprofile.color ?? publicPersona?.color ?? localPersona?.color ?? localPersona?.accentColor ?? null;
+
+		const effectiveAvatarColor =
+			subprofile.avatar_color ??
+			publicPersona?.avatar_color ??
+			localPersona?.avatar_color ??
+			localPersona?.avatarColor ??
+			null;
+
+		const hasCustomPersonaAvatar = Boolean(
+			subprofile.avatar || publicPersona?.avatar_url || localPersona?.avatar_url || localPersona?.avatarUrl,
+		);
+
 		const accentColor = useMemo(() => {
-			if (subprofile.color != null && subprofile.color !== 0) {
-				return ColorUtils.int2hex(subprofile.color);
+			if (effectiveColor != null && effectiveColor !== 0) {
+				return ColorUtils.int2hex(effectiveColor);
 			}
+			if (hasCustomPersonaAvatar) {
+				if (effectiveAvatarColor != null && effectiveAvatarColor !== 0) {
+					return ColorUtils.int2hex(effectiveAvatarColor);
+				}
+				if (subprofile.id && /^\d+$/.test(subprofile.id)) {
+					try {
+						return ColorUtils.int2hex(AvatarUtils.getDefaultAvatarPrimaryColor(subprofile.id));
+					} catch {
+						// Fall through to DEFAULT_ACCENT_COLOR
+					}
+				}
+				return DEFAULT_ACCENT_COLOR;
+			}
+			// Persona has no avatar of its own; inherits root account's avatar and color
 			return getUserAccentColor(user);
-		}, [subprofile.color, user]);
+		}, [effectiveColor, hasCustomPersonaAvatar, effectiveAvatarColor, subprofile.id, user]);
 
 		const rootDisplayName = useMemo(() => {
 			if (resolvedGuildMember?.nick) {
