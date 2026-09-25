@@ -13,6 +13,7 @@ export interface PersonaRow {
 	system_name: Nullish<string>;
 	pronouns: Nullish<string>;
 	color: Nullish<number>;
+	avatar_color: Nullish<number>;
 	bio: Nullish<string>;
 	auto_tag_disabled: boolean;
 	persona_tags: Nullish<string>;
@@ -34,6 +35,7 @@ export const PERSONA_COLUMNS = [
 	'system_name',
 	'pronouns',
 	'color',
+	'avatar_color',
 	'bio',
 	'auto_tag_disabled',
 	'persona_tags',
