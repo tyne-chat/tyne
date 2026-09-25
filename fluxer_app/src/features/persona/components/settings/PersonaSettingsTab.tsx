@@ -281,7 +281,6 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 					<AssetCropModal
 						assetType={AssetType.AVATAR}
 						imageUrl={base64}
-						sourceMimeType={file.type}
 						onCropComplete={(croppedBlob) => {
 							const reader = new FileReader();
 							reader.onload = () => {
