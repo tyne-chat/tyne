@@ -12,7 +12,7 @@ import {type MessageResponse, MessageResponseSchema} from '@fluxer/schema/src/do
 import type {NatsConnection} from '@nats-io/transport-node';
 import type {INatsConnectionManager} from '@pkgs/nats/src/INatsConnectionManager';
 import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
-import {createChannelID, createGuildID, createMessageID, createUserID} from '../../BrandedTypes';
+import {createChannelID, createGuildID, createMessageID, createPersonaID, createUserID} from '../../BrandedTypes';
 import {Message} from '../../models/Message';
 import {normalizeMessageSubprofile} from '../services/message/MessageHelpers';
 import {MessageResponseDataService} from '../services/message/MessageResponseDataService';
@@ -56,7 +56,7 @@ class FakeConnectionManager implements INatsConnectionManager {
 									embeds: [],
 									attachments: [],
 									stickers: [],
-									subprofile: m.subprofile ?? null,
+									persona_id: m.persona_id ?? null,
 								})),
 							}),
 						),
@@ -209,30 +209,15 @@ describe('MessagePersona Backend Pipeline', () => {
 			call: null,
 			has_reaction: null,
 			version: 1,
-			subprofile: {
-				id: 'persona-alice',
-				name: 'Alice',
-				avatar: 'avatar-hash',
-				system_name: 'Sys',
-				pronouns: 'she/her',
-				color: 12345,
-			},
+			persona_id: createPersonaID(12345n),
 		});
 
-		expect(message.subprofile).toEqual({
-			id: 'persona-alice',
-			name: 'Alice',
-			avatar: 'avatar-hash',
-			system_name: 'Sys',
-			pronouns: 'she/her',
-			color: 12345,
-		});
-
+		expect(message.personaId).toBe(createPersonaID(12345n));
 		const row = message.toRow();
-		expect(row.subprofile?.name).toBe('Alice');
+		expect(row.persona_id).toBe(createPersonaID(12345n));
 	});
 
-	it('forwards subprofile to NATS svc.messages in buildMessages', async () => {
+	it('forwards persona_id to NATS svc.messages in buildMessages', async () => {
 		const fakeManager = new FakeConnectionManager();
 		const service = new MessageResponseDataService(fakeManager);
 
@@ -261,10 +246,7 @@ describe('MessagePersona Backend Pipeline', () => {
 			call: null,
 			has_reaction: null,
 			version: 1,
-			subprofile: {
-				id: 'persona-alice',
-				name: 'Alice',
-			},
+			persona_id: createPersonaID(12345n),
 		});
 
 		const results = await service.buildMessages({
@@ -275,16 +257,17 @@ describe('MessagePersona Backend Pipeline', () => {
 
 		expect(results).toHaveLength(1);
 		expect(results[0].subprofile).toEqual({
-			id: 'persona-alice',
-			name: 'Alice',
+			id: '12345',
+			name: 'Unknown Persona',
+			avatar: null,
+			avatar_color: null,
+			pronouns: null,
+			color: null,
 		});
 
 		expect(fakeManager.payloads).toHaveLength(1);
 		const sentMessages = fakeManager.payloads[0].messages as Array<Record<string, unknown>>;
-		expect(sentMessages[0].subprofile).toEqual({
-			id: 'persona-alice',
-			name: 'Alice',
-		});
+		expect(sentMessages[0].persona_id).toBe('12345');
 	});
 
 	it('extracts underlying user id from persona mention wire format in extractMentions', async () => {
@@ -372,16 +355,29 @@ describe('Personal Notes Persona Integration', () => {
 		await harness?.shutdown();
 	});
 
-	it('preserves persona subprofile when sending and retrieving a message in personal notes', async () => {
+	it('preserves and dynamically hydrates persona subprofile when sending and retrieving a message in personal notes', async () => {
 		const account = await createTestAccount(harness);
 		await ensureSessionStarted(harness, account.token);
 		const personalNotesChannelId = account.userId;
 
+		const persona = await createBuilder<{id: string; name: string; avatar_url: string; system_name: string}>(
+			harness,
+			account.token,
+		)
+			.post('/users/@me/personas')
+			.body({
+				name: 'Alice in Notes',
+				avatar_url: 'https://example.com/alice.png',
+				system_name: 'Wonderland',
+			})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+
 		const subprofile = {
-			id: 'persona-alice',
-			name: 'Alice in Notes',
-			avatar: 'https://example.com/alice.png',
-			display_tag_text: 'Wonderland',
+			id: persona.id,
+			name: persona.name,
+			avatar: persona.avatar_url,
+			display_tag_text: persona.system_name,
 		};
 
 		const sentMessage = await createBuilder<MessageResponse>(harness, account.token)
@@ -395,7 +391,7 @@ describe('Personal Notes Persona Integration', () => {
 
 		expect(sentMessage.content).toBe('Note from Alice');
 		expect(sentMessage.subprofile).toBeDefined();
-		expect(sentMessage.subprofile?.id).toBe('persona-alice');
+		expect(sentMessage.subprofile?.id).toBe(persona.id);
 		expect(sentMessage.subprofile?.name).toBe('Alice in Notes');
 		expect(sentMessage.subprofile?.avatar).toBe('https://example.com/alice.png');
 		expect(sentMessage.subprofile?.display_tag_text).toBe('Wonderland');
@@ -404,6 +400,19 @@ describe('Personal Notes Persona Integration', () => {
 		const fetched = messages.find((m) => m.id === sentMessage.id);
 		expect(fetched).toBeDefined();
 		expect(fetched?.subprofile?.name).toBe('Alice in Notes');
-		expect(fetched?.subprofile?.id).toBe('persona-alice');
+		expect(fetched?.subprofile?.id).toBe(persona.id);
+
+		// Dynamic update verification: update persona name and ensure historical message reflects update
+		await createBuilder(harness, account.token)
+			.patch(`/users/@me/personas/${persona.id}`)
+			.body({
+				name: 'Alice Renamed',
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const updatedMessages = await getMessages(harness, account.token, personalNotesChannelId);
+		const fetchedUpdated = updatedMessages.find((m) => m.id === sentMessage.id);
+		expect(fetchedUpdated?.subprofile?.name).toBe('Alice Renamed');
 	});
 });
