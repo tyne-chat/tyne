@@ -32,6 +32,7 @@ export const ColorPickerPopover = observer(
 		onReset,
 		showAlpha = false,
 		children,
+		hasCustomColor: hasCustomColorProp,
 	}: {
 		popoutKey?: string | number;
 		color: string;
@@ -39,8 +40,9 @@ export const ColorPickerPopover = observer(
 		onReset: () => void;
 		showAlpha?: boolean;
 		children?: React.ReactNode;
+		hasCustomColor?: boolean;
 	}) => {
-		const hasCustomColor = color !== null && color !== '#4641D9';
+		const hasCustomColor = hasCustomColorProp ?? (color !== null && color !== '#4641D9');
 		const parsedColor = useMemo(() => {
 			try {
 				return parseColor(color).toFormat('hsb');
