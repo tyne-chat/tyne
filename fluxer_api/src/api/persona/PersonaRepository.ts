@@ -81,6 +81,7 @@ export class PersonaRepository extends IPersonaRepository {
 			system_name: params.system_name ?? null,
 			pronouns: params.pronouns ?? null,
 			color: params.color ?? null,
+			avatar_color: params.avatar_color ?? null,
 			bio: params.bio ?? null,
 			auto_tag_disabled: params.auto_tag_disabled ?? false,
 			persona_tags: params.persona_tags ? JSON.stringify(params.persona_tags) : JSON.stringify([]),
@@ -110,6 +111,7 @@ export class PersonaRepository extends IPersonaRepository {
 			system_name: params.system_name !== undefined ? params.system_name : existing.systemName,
 			pronouns: params.pronouns !== undefined ? params.pronouns : existing.pronouns,
 			color: params.color !== undefined ? params.color : existing.color,
+			avatar_color: params.avatar_color !== undefined ? params.avatar_color : existing.avatarColor,
 			bio: params.bio !== undefined ? params.bio : existing.bio,
 			auto_tag_disabled: params.auto_tag_disabled !== undefined ? params.auto_tag_disabled : existing.autoTagDisabled,
 			persona_tags:
