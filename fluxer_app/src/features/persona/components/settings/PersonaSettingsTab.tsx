@@ -163,31 +163,40 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const [isUploadingTagIcon, setIsUploadingTagIcon] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
+	const syncedStoreTagTextRef = useRef(PersonaStore.displayTagText);
+	const syncedStoreTagIconRef = useRef(PersonaStore.displayTagIcon);
+
+	if (syncedStoreTagTextRef.current !== PersonaStore.displayTagText) {
+		if (tagText === syncedStoreTagTextRef.current) {
+			setTagText(PersonaStore.displayTagText);
+		}
+		syncedStoreTagTextRef.current = PersonaStore.displayTagText;
+	}
+
+	if (syncedStoreTagIconRef.current !== PersonaStore.displayTagIcon) {
+		if (tagIcon === syncedStoreTagIconRef.current) {
+			setTagIcon(PersonaStore.displayTagIcon);
+		}
+		syncedStoreTagIconRef.current = PersonaStore.displayTagIcon;
+	}
+
 	const isTagDirty =
 		(tagText ?? '').trim() !== (PersonaStore.displayTagText ?? '').trim() ||
 		(tagIcon ?? null) !== (PersonaStore.displayTagIcon ?? null);
 
-	useEffect(() => {
-		if (!isTagDirty) {
-			setTagText(PersonaStore.displayTagText);
-		}
-	}, [PersonaStore.displayTagText, isTagDirty]);
-
-	useEffect(() => {
-		if (!isTagDirty) {
-			setTagIcon(PersonaStore.displayTagIcon);
-		}
-	}, [PersonaStore.displayTagIcon, isTagDirty]);
-
 	const handleReset = useCallback(() => {
 		setTagText(PersonaStore.displayTagText);
 		setTagIcon(PersonaStore.displayTagIcon);
+		syncedStoreTagTextRef.current = PersonaStore.displayTagText;
+		syncedStoreTagIconRef.current = PersonaStore.displayTagIcon;
 	}, []);
 
 	const handleSave = useCallback(async () => {
 		setIsSubmitting(true);
 		try {
 			await PersonaStore.setDisplayTag(tagText, tagIcon);
+			syncedStoreTagTextRef.current = tagText;
+			syncedStoreTagIconRef.current = tagIcon;
 		} finally {
 			setIsSubmitting(false);
 		}
