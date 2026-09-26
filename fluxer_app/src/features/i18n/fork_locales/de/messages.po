@@ -99,14 +99,6 @@ msgstr "Detected System Name / Tag"
 msgid "Display Tag"
 msgstr "Display Tag"
 
-#. Toast when display tag icon is removed
-msgid "Display tag icon removed"
-msgstr "Display tag icon removed"
-
-#. Toast when display tag icon is updated
-msgid "Display tag icon updated"
-msgstr "Display tag icon updated"
-
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 
