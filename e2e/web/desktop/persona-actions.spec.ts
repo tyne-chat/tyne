@@ -37,7 +37,6 @@ test.describe('Persona Message Lifecycle & Real-Time Actions', () => {
 		const bobAlpha = await bobClient.createPersona({
 			name: 'Bob-Alpha',
 			pronouns: 'he/him',
-			system_name: 'The Collective',
 			persona_tags: [{prefix: 'a:'}],
 		});
 
