@@ -35,7 +35,6 @@ test.describe('Multi-Account Persona Messaging', () => {
 		const bobAlpha = await bobClient.createPersona({
 			name: 'Bob-Alpha',
 			pronouns: 'he/him',
-			system_name: 'System Alpha',
 			persona_tags: [{prefix: 'a:'}],
 		});
 
