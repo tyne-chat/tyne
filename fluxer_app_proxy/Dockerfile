@@ -15,6 +15,7 @@ ARG PUBLIC_ASSET_BASE_URL
 WORKDIR /usr/src/app
 
 RUN npm install -g pnpm@11.27.0
+ENV PNPM_CONFIG_ALLOW_UNUSED_PATCHES=true
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	curl ca-certificates build-essential clang \
