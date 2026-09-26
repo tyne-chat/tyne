@@ -26,7 +26,6 @@ test.describe('Personal Notes Persona Integration', () => {
 		await client.createPersona({
 			name: 'Notes-Persona',
 			pronouns: 'it/its',
-			system_name: 'Archive System',
 			persona_tags: [{prefix: 'n:'}],
 		});
 
