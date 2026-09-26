@@ -33,7 +33,10 @@ export async function openUserSettings(page: Page): Promise<void> {
 	}
 
 	// Mobile navigation: tap "You" in bottom nav, then tap the settings gear button
-	const youBtn = page.locator('[data-flx*="mobile-bottom-nav"] button, button').filter({hasText: /^You$/i}).first();
+	const youBtn = page
+		.locator('[data-flx*="mobile-bottom-nav.nav-button"], [data-flx*="mobile-bottom-nav"] button, button')
+		.filter({hasText: /You/i})
+		.first();
 	if (await youBtn.isVisible({timeout: 3_000}).catch(() => false)) {
 		await youBtn.click();
 		const mobileSettingsBtn = page
