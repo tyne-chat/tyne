@@ -172,7 +172,6 @@ describe('MessageChangePersona', () => {
 				color: 123456,
 				display_tag_text: 'TESTING SYSTEM',
 				display_tag_icon: 'https://example.com/icon.png',
-				system_name: 'TESTING SYSTEM',
 				bio: 'Fox bio',
 				pronouns: 'he/him',
 			});
@@ -189,7 +188,6 @@ describe('MessageChangePersona', () => {
 
 			expect(payload.display_tag_text).toBeNull();
 			expect(payload.display_tag_icon).toBeNull();
-			expect(payload.system_name).toBeNull();
 		});
 	});
 });
