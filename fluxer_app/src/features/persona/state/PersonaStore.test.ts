@@ -470,14 +470,15 @@ describe('PersonaStore', () => {
 		expect(untagged.persona?.name).toBe('Alice');
 	});
 
-	it('does NOT send as persona for untagged messages when activePersonaMode is "off"', async () => {
+	it('does NOT send as persona for untagged messages when in "manual" mode with root account selected', async () => {
 		await store.addPersona({
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
 
-		await store.setActivePersonaMode('off');
-		expect(store.activePersonaMode).toBe('off');
+		await store.unlatch();
+		expect(store.activePersonaMode).toBe('manual');
+		expect(store.activePersonaId).toBeNull();
 		expect(store.isPersonaLatched).toBe(false);
 
 		const untagged = store.matchOutgoingMessage('Normal message');
@@ -485,7 +486,7 @@ describe('PersonaStore', () => {
 		expect(untagged.strippedContent).toBe('Normal message');
 	});
 
-	it('switching from "off" to "last" starts on root without auto-selecting first persona', async () => {
+	it('switching to "last" while on root starts on root without auto-selecting first persona', async () => {
 		await store.addPersona({
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
@@ -495,8 +496,8 @@ describe('PersonaStore', () => {
 			persona_tags: [{prefix: 'b:', suffix: ''}],
 		});
 
-		await store.setActivePersonaMode('off');
-		expect(store.activePersonaMode).toBe('off');
+		await store.unlatch();
+		expect(store.activePersonaMode).toBe('manual');
 		expect(store.activePersonaId).toBeNull();
 		expect(store.isPersonaLatched).toBe(false);
 
@@ -536,8 +537,8 @@ describe('PersonaStore', () => {
 				persona_tags: [{prefix: 'b:', suffix: ''}],
 			});
 
-			// No active persona, off mode
-			await store.setActivePersonaMode('off');
+			// No active persona, unlatched in manual mode
+			await store.unlatch();
 
 			// Types Alice tag
 			const preview1 = store.getEffectivePersonaForText('[Hello world]');
