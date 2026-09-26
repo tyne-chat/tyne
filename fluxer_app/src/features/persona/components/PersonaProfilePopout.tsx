@@ -70,7 +70,6 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 					name: localPersona.name,
 					avatar_url: localPersona.avatar_url ?? localPersona.avatarUrl ?? null,
 					banner_url: localPersona.banner_url ?? localPersona.bannerUrl ?? null,
-					system_name: localPersona.system_name ?? localPersona.systemName ?? null,
 					pronouns: localPersona.pronouns ?? null,
 					color: localPersona.color ?? localPersona.accentColor ?? null,
 					avatar_color: localPersona.avatar_color ?? localPersona.avatarColor ?? null,
@@ -105,9 +104,7 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			publicPersona !== null && publicPersona !== undefined
 				? publicPersona.pronouns
 				: (localPersona?.pronouns ?? subprofile.pronouns);
-		const effectiveDisplayTagText = isCurrentUser
-			? PersonaStore.displayTagText
-			: (subprofile.display_tag_text ?? subprofile.system_name ?? publicPersona?.system_name ?? null);
+		const effectiveDisplayTagText = isCurrentUser ? PersonaStore.displayTagText : (subprofile.display_tag_text ?? null);
 		const effectiveDisplayTagIcon = isCurrentUser ? PersonaStore.displayTagIcon : (subprofile.display_tag_icon ?? null);
 		const effectiveBio =
 			publicPersona !== null && publicPersona !== undefined ? publicPersona.bio : (localPersona?.bio ?? subprofile.bio);

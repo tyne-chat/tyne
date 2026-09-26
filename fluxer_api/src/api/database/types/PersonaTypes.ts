@@ -10,7 +10,6 @@ export interface PersonaRow {
 	name: string;
 	avatar_url: Nullish<string>;
 	banner_url: Nullish<string>;
-	system_name: Nullish<string>;
 	pronouns: Nullish<string>;
 	color: Nullish<number>;
 	avatar_color: Nullish<number>;
@@ -33,7 +32,6 @@ export const PERSONA_COLUMNS = [
 	'name',
 	'avatar_url',
 	'banner_url',
-	'system_name',
 	'pronouns',
 	'color',
 	'avatar_color',

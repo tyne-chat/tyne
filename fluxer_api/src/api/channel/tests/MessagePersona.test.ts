@@ -99,7 +99,6 @@ describe('MessagePersona Backend Pipeline', () => {
 				avatar: 'https://example.com/alice.png',
 				display_tag_text: 'Wonderland',
 				display_tag_icon: 'https://example.com/icon.png',
-				system_name: 'The System',
 				pronouns: 'she/her',
 				color: 0xff0000,
 			},
@@ -110,7 +109,6 @@ describe('MessagePersona Backend Pipeline', () => {
 			expect(parsed.data.subprofile?.name).toBe('Alice');
 			expect(parsed.data.subprofile?.display_tag_text).toBe('Wonderland');
 			expect(parsed.data.subprofile?.display_tag_icon).toBe('https://example.com/icon.png');
-			expect(parsed.data.subprofile?.system_name).toBe('The System');
 		}
 	});
 
@@ -121,7 +119,6 @@ describe('MessagePersona Backend Pipeline', () => {
 				id: 'persona-2',
 				name: 'Bob',
 				avatar: 'https://example.com/bob.png',
-				system_name: 'The System',
 				pronouns: 'he/him',
 				color: 0x0000ff,
 			},
@@ -169,7 +166,6 @@ describe('MessagePersona Backend Pipeline', () => {
 				id: 'persona-2',
 				name: 'Bob',
 				avatar: null,
-				system_name: 'The System',
 				pronouns: 'he/him',
 				color: 0x0000ff,
 				bio: 'Bob bio',
@@ -261,6 +257,8 @@ describe('MessagePersona Backend Pipeline', () => {
 			name: 'Unknown Persona',
 			avatar: null,
 			avatar_color: null,
+			display_tag_text: null,
+			display_tag_icon: null,
 			pronouns: null,
 			color: null,
 		});
@@ -300,7 +298,6 @@ describe('MessagePersona Backend Pipeline', () => {
 				avatar_color: 0x123456,
 				display_tag_text: 'System Tag',
 				display_tag_icon: 'https://example.com/icon.png',
-				system_name: 'SysName',
 				pronouns: 'she/they',
 				color: 0xff0000,
 				bio: 'Bio text',
@@ -313,29 +310,19 @@ describe('MessagePersona Backend Pipeline', () => {
 				banner: null,
 				display_tag_text: 'System Tag',
 				display_tag_icon: 'https://example.com/icon.png',
-				system_name: 'SysName',
 				pronouns: 'she/they',
 				color: 0xff0000,
 				bio: 'Bio text',
 			});
 		});
 
-		it('falls back between display_tag_text and system_name', () => {
+		it('normalizes display_tag_text', () => {
 			const tagOnly = normalizeMessageSubprofile({
 				id: 'p-1',
 				name: 'Alice',
 				display_tag_text: 'OnlyTag',
 			});
 			expect(tagOnly?.display_tag_text).toBe('OnlyTag');
-			expect(tagOnly?.system_name).toBe('OnlyTag');
-
-			const sysOnly = normalizeMessageSubprofile({
-				id: 'p-1',
-				name: 'Alice',
-				system_name: 'OnlySys',
-			});
-			expect(sysOnly?.display_tag_text).toBe('OnlySys');
-			expect(sysOnly?.system_name).toBe('OnlySys');
 		});
 	});
 });
@@ -360,15 +347,19 @@ describe('Personal Notes Persona Integration', () => {
 		await ensureSessionStarted(harness, account.token);
 		const personalNotesChannelId = account.userId;
 
-		const persona = await createBuilder<{id: string; name: string; avatar_url: string; system_name: string}>(
-			harness,
-			account.token,
-		)
+		await createBuilder(harness, account.token)
+			.patch('/users/@me/personas/settings')
+			.body({
+				display_tag_text: 'Wonderland',
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const persona = await createBuilder<{id: string; name: string; avatar_url: string}>(harness, account.token)
 			.post('/users/@me/personas')
 			.body({
 				name: 'Alice in Notes',
 				avatar_url: 'https://example.com/alice.png',
-				system_name: 'Wonderland',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
@@ -377,7 +368,6 @@ describe('Personal Notes Persona Integration', () => {
 			id: persona.id,
 			name: persona.name,
 			avatar: persona.avatar_url,
-			display_tag_text: persona.system_name,
 		};
 
 		const sentMessage = await createBuilder<MessageResponse>(harness, account.token)
