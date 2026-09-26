@@ -29,7 +29,7 @@ describe('PersonaSettingsController', () => {
 				.execute();
 
 			expect(res.user_id).toBe(account.userId.toString());
-			expect(res.active_persona_mode).toBe('off');
+			expect(res.active_persona_mode).toBe('manual');
 			expect(res.active_persona_id).toBeNull();
 			expect(res.is_latched).toBe(false);
 			expect(res.display_tag_text).toBe('');
@@ -50,7 +50,7 @@ describe('PersonaSettingsController', () => {
 
 			expect(res.display_tag_text).toBe('SYS');
 			expect(res.display_tag_icon).toBe('system_badge.png');
-			expect(res.active_persona_mode).toBe('off');
+			expect(res.active_persona_mode).toBe('manual');
 
 			// Check persistence via subsequent GET
 			const getRes = await createBuilder<PersonaSettingsResponse>(harness, account.token)

@@ -55,10 +55,6 @@ import {SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR} from '../PersonaPickerSheet';
 import {PersonaTag} from '../PersonaTag';
 import styles from './PersonaSettingsTab.module.css';
 
-const MODE_OFF_DESCRIPTOR = msg({
-	message: 'Off',
-	comment: 'Active persona mode off',
-});
 const MODE_MANUAL_DESCRIPTOR = msg({
 	message: 'Manual',
 	comment: 'Active persona mode manual',
@@ -68,11 +64,6 @@ const MODE_LAST_DESCRIPTOR = msg({
 	comment: 'Active persona mode last used',
 });
 
-const ACTIVE_PERSONA_MODE_OFF_DESC = msg({
-	message:
-		'Untagged messages always send from your root account. Personas only speak when you type their tags (e.g. [text]).',
-	comment: 'Helper description for Off persona mode',
-});
 const ACTIVE_PERSONA_MODE_MANUAL_DESC = msg({
 	message:
 		'Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active.',
@@ -132,13 +123,11 @@ const CONFIG_PERSONAS_COUNT_DESCRIPTOR = msg({
 });
 
 const getActivePersonaTabs = (i18n: I18n): Array<SegmentedTab<ActivePersonaMode>> => [
-	{id: 'off', label: i18n._(MODE_OFF_DESCRIPTOR)},
 	{id: 'manual', label: i18n._(MODE_MANUAL_DESCRIPTOR)},
 	{id: 'last', label: i18n._(MODE_LAST_DESCRIPTOR)},
 ];
 
 const getActivePersonaDescriptions = (i18n: I18n): Record<ActivePersonaMode, string> => ({
-	off: i18n._(ACTIVE_PERSONA_MODE_OFF_DESC),
 	manual: i18n._(ACTIVE_PERSONA_MODE_MANUAL_DESC),
 	last: i18n._(ACTIVE_PERSONA_MODE_LAST_DESC),
 });
