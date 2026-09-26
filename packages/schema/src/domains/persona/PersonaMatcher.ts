@@ -10,7 +10,6 @@ export interface PersonaLike {
 	name: string;
 	avatar_url?: string | null;
 	persona_tags?: ReadonlyArray<PersonaTagLike> | null;
-	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
 	auto_tag_disabled?: boolean | null;
