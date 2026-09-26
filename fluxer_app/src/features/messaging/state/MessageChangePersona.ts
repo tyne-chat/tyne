@@ -33,7 +33,6 @@ class MessageChangePersona {
 			color: persona.color ?? null,
 			display_tag_text: PersonaStore.displayTagText || null,
 			display_tag_icon: PersonaStore.displayTagIcon || null,
-			system_name: PersonaStore.displayTagText || null,
 			bio: persona.bio ?? null,
 			pronouns: persona.pronouns ?? null,
 		};
