@@ -186,7 +186,6 @@ export const useTextareaDraftAndTyping = ({
 					avatar_color: effectivePersona.color ?? effectivePersona.accentColor ?? null,
 					display_tag_text: PersonaStore.displayTagText || null,
 					display_tag_icon: PersonaStore.displayTagIcon || null,
-					system_name: PersonaStore.displayTagText || null,
 					pronouns: effectivePersona.pronouns ?? null,
 					color: effectivePersona.color ?? effectivePersona.accentColor ?? null,
 				}
