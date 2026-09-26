@@ -18,7 +18,9 @@ import {NatsConnectionManager} from '@pkgs/nats/src/NatsConnectionManager';
 // Fork imports.
 
 import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
+import type {UserPersonaSettingsRow} from '@app/api/database/types/PersonaTypes';
 import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
+import type {Persona} from '@app/api/models/Persona';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import {DELETED_USER_USERNAME, UserFlags} from '@fluxer/constants/src/UserConstants';
 
@@ -138,6 +140,7 @@ export class MessageResponseDataService {
 		if (!messages || messages.length === 0) return;
 
 		const lookupPairs: Array<{userId: UserID; personaId: PersonaID}> = [];
+		const authorUserIds: Array<UserID> = [];
 
 		for (const msg of messages) {
 			const anyMsg = msg as unknown as Record<string, unknown>;
@@ -168,14 +171,18 @@ export class MessageResponseDataService {
 				continue;
 			}
 
+			const authorUserId = createUserID(BigInt(authorIdStr));
 			lookupPairs.push({
-				userId: createUserID(BigInt(authorIdStr)),
+				userId: authorUserId,
 				personaId: createPersonaID(BigInt(personaIdStr)),
 			});
+			authorUserIds.push(authorUserId);
 		}
 
 		const repo = lookupPairs.length > 0 ? this.getPersonaRepository() : null;
-		const personasById = repo ? await repo.findByUserAndPersonaIds(lookupPairs) : new Map<string, Persona>();
+		const [personasById, settingsByUserId] = repo
+			? await Promise.all([repo.findByUserAndPersonaIds(lookupPairs), repo.findSettingsByUserIds(authorUserIds)])
+			: [new Map<string, Persona>(), new Map<string, UserPersonaSettingsRow>()];
 
 		for (const msg of messages) {
 			const anyMsg = msg as unknown as Record<string, unknown>;
@@ -189,9 +196,19 @@ export class MessageResponseDataService {
 			if (!personaIdStr) continue;
 
 			const persona = personasById.get(personaIdStr);
+			const authorIdStr = msg.author?.id;
+			const userSettings = authorIdStr ? settingsByUserId.get(authorIdStr) : undefined;
 			if (persona) {
-				msg.subprofile = persona.toSubprofileResponse();
+				msg.subprofile = persona.toSubprofileResponse(userSettings);
 			} else {
+				const effectiveTagText =
+					userSettings?.display_tag_text && userSettings.display_tag_text.trim().length > 0
+						? userSettings.display_tag_text.trim()
+						: null;
+				const effectiveTagIcon =
+					userSettings?.display_tag_icon && userSettings.display_tag_icon.trim().length > 0
+						? userSettings.display_tag_icon.trim()
+						: null;
 				msg.subprofile = {
 					id: personaIdStr,
 					name: 'Unknown Persona',
@@ -199,6 +216,8 @@ export class MessageResponseDataService {
 					avatar_color: null,
 					pronouns: null,
 					color: null,
+					...(effectiveTagText ? {display_tag_text: effectiveTagText} : {}),
+					...(effectiveTagIcon ? {display_tag_icon: effectiveTagIcon} : {}),
 				};
 			}
 			delete anyMsg.persona_id;

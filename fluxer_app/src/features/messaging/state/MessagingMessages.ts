@@ -761,6 +761,28 @@ class Messages {
 		return hasChanges;
 	}
 
+	handleAuthorDisplayTagUpdate(action: {
+		userId: string;
+		display_tag_text?: string | null;
+		display_tag_icon?: string | null;
+	}): boolean {
+		const userId = action.userId;
+		if (!userId) return false;
+		const hasChanges = this.patchAuthorMessages(userId, (message) => {
+			if (!message.subprofile) return message;
+			const updatedSubprofile: MessageSubprofileResponse = {
+				...message.subprofile,
+				...(action.display_tag_text !== undefined ? {display_tag_text: action.display_tag_text} : {}),
+				...(action.display_tag_icon !== undefined ? {display_tag_icon: action.display_tag_icon} : {}),
+			};
+			return message.withUpdates({subprofile: updatedSubprofile});
+		});
+		if (hasChanges) {
+			this.notifyChange();
+		}
+		return hasChanges;
+	}
+
 	handleGuildMemberUpdate(action: GuildMemberUpdateAction): boolean {
 		const userId = action.member.user.id;
 		const updatedAuthor = Users.getUser(userId);
