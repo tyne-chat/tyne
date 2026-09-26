@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import Authentication from '@app/features/auth/state/Authentication';
 import type {GatewayHandlerContext} from '@app/features/gateway/events/EventRouter';
 import {
 	clearPersonaMentionCache,
@@ -58,6 +59,14 @@ export function handleUserPersonaSettingsUpdate(
 	if (settings) {
 		PersonaStore.updateSettings(settings);
 		clearPersonaMentionCache();
+		const currentUserId = Authentication.currentUserId;
+		if (currentUserId) {
+			Messages.handleAuthorDisplayTagUpdate({
+				userId: currentUserId,
+				display_tag_text: settings.display_tag_text,
+				display_tag_icon: settings.display_tag_icon,
+			});
+		}
 	}
 }
 
@@ -68,6 +77,8 @@ export function handleGuildPersonasDirty(
 				user_id?: string;
 				persona?: any;
 				action?: 'update' | 'delete' | 'sync';
+				display_tag_text?: string | null;
+				display_tag_icon?: string | null;
 		  }
 		| undefined,
 	_context: GatewayHandlerContext,
@@ -75,5 +86,12 @@ export function handleGuildPersonasDirty(
 	invalidatePersonaMentionCache(data?.guild_id);
 	if (data?.persona && data?.action === 'update') {
 		Messages.handlePersonaUpdate({persona: data.persona});
+	}
+	if (data?.user_id && (data?.display_tag_text !== undefined || data?.display_tag_icon !== undefined)) {
+		Messages.handleAuthorDisplayTagUpdate({
+			userId: data.user_id,
+			display_tag_text: data.display_tag_text,
+			display_tag_icon: data.display_tag_icon,
+		});
 	}
 }
