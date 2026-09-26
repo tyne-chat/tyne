@@ -88,7 +88,6 @@ describe('MessageRetryUtils', () => {
 			color: 0x123456,
 			display_tag_text: 'SYS',
 			display_tag_icon: null,
-			system_name: 'SYS',
 			pronouns: 'she/her',
 			bio: null,
 			visibility: 'unlisted' as const,
