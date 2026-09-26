@@ -79,7 +79,7 @@ export function calculatePersonaFrecencyScore(
 export function calculatePersonaMatchScore(
 	personaName: string,
 	query: string,
-	systemName?: string | null,
+	displayTagText?: string | null,
 	ownerUsername?: string | null,
 	ownerNickname?: string | null,
 	ownerGlobalName?: string | null,
@@ -97,7 +97,7 @@ export function calculatePersonaMatchScore(
 	if (name.includes(q)) {
 		return 500;
 	}
-	const sys = (systemName ?? '').toLowerCase();
+	const sys = (displayTagText ?? '').toLowerCase();
 	if (sys.startsWith(q)) {
 		return 350;
 	}
@@ -128,7 +128,7 @@ export function filterPersonaMentions(
 				const match = calculatePersonaMatchScore(
 					item.name,
 					normalized,
-					item.system_name,
+					item.display_tag_text,
 					item.owner_username,
 					item.owner_nickname,
 					item.owner_global_name,
@@ -142,7 +142,7 @@ export function filterPersonaMentions(
 			const aMatch = calculatePersonaMatchScore(
 				a.name,
 				normalized,
-				a.system_name,
+				a.display_tag_text,
 				a.owner_username,
 				a.owner_nickname,
 				a.owner_global_name,
@@ -150,7 +150,7 @@ export function filterPersonaMentions(
 			const bMatch = calculatePersonaMatchScore(
 				b.name,
 				normalized,
-				b.system_name,
+				b.display_tag_text,
 				b.owner_username,
 				b.owner_nickname,
 				b.owner_global_name,

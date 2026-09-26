@@ -726,7 +726,6 @@ class Messages {
 			banner?: string | null;
 			display_tag_text?: string | null;
 			display_tag_icon?: string | null;
-			system_name?: string | null;
 			pronouns?: string | null;
 			color?: number | null;
 			bio?: string | null;
@@ -745,9 +744,8 @@ class Messages {
 				avatar: persona.avatar ?? null,
 				avatar_color: persona.avatar_color ?? null,
 				banner: persona.banner ?? null,
-				display_tag_text: persona.display_tag_text ?? persona.system_name ?? null,
+				display_tag_text: persona.display_tag_text ?? null,
 				display_tag_icon: persona.display_tag_icon ?? null,
-				system_name: persona.system_name ?? persona.display_tag_text ?? null,
 				pronouns: persona.pronouns ?? null,
 				color: persona.color ?? null,
 				bio: persona.bio ?? null,

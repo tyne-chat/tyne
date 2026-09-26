@@ -35,10 +35,13 @@ test.describe('In-App Composer Tag Auto-Proxying', () => {
 			global_name: 'Bob MultiPersona',
 		});
 
+		await bobClient.updatePersonaSettings({
+			display_tag_text: 'The Collective',
+		});
+
 		await bobClient.createPersona({
 			name: 'Bob-Alpha',
 			pronouns: 'he/him',
-			system_name: 'The Collective',
 			persona_tags: [{prefix: 'a:'}],
 		});
 
