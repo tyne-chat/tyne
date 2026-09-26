@@ -507,7 +507,7 @@ describe('PersonaService', () => {
 
 			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
 				user_id: userId,
-				active_persona_mode: 'off',
+				active_persona_mode: 'manual',
 				active_persona_id: null,
 				is_latched: false,
 				display_tag_text: 'System Tag',
