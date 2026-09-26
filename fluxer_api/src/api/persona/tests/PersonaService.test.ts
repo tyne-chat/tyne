@@ -24,7 +24,6 @@ function makeMockPersona(
 		persona_id: personaId,
 		name,
 		avatar_url: null,
-		system_name: null,
 		pronouns: null,
 		color: null,
 		bio: null,
@@ -55,6 +54,7 @@ describe('PersonaService', () => {
 			findByUserId: vi.fn().mockResolvedValue([]),
 			findByUserIds: vi.fn().mockResolvedValue([]),
 			findSettings: vi.fn().mockResolvedValue(null),
+			findSettingsByUserIds: vi.fn().mockResolvedValue(new Map()),
 			upsertSettings: vi.fn().mockResolvedValue(undefined as any),
 			recordUsage: vi.fn().mockResolvedValue(undefined),
 			create: vi.fn(),
@@ -340,16 +340,30 @@ describe('PersonaService', () => {
 			expect(results[0].last_used_at_ms).toBeDefined();
 		});
 
-		it('matches by owner username, nickname, or system name', async () => {
+		it('matches by owner username, nickname, or display tag', async () => {
 			const personaByOwnerNick = makeMockPersona(otherUserId, 20n as PersonaID, 'Shadow', {
 				visibility: 'public',
 			});
-			const personaBySystem = makeMockPersona(otherUserId, 21n as PersonaID, 'Ghost', {
+			const personaByTag = makeMockPersona(otherUserId, 21n as PersonaID, 'Ghost', {
 				visibility: 'public',
-				system_name: 'BobbySystem',
 			});
 
-			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([personaByOwnerNick, personaBySystem]);
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([personaByOwnerNick, personaByTag]);
+			vi.mocked(mockRepo.findSettingsByUserIds).mockResolvedValueOnce(
+				new Map([
+					[
+						otherUserId.toString(),
+						{
+							user_id: otherUserId,
+							display_tag_text: 'BobbySystem',
+							display_tag_icon: null,
+							version: 1,
+							created_at: new Date(),
+							updated_at: new Date(),
+						},
+					],
+				]),
+			);
 
 			const results = await service.getChannelPersonaMentions({
 				callerUserId: userId,
@@ -414,6 +428,8 @@ describe('PersonaService', () => {
 					guild_id: '123',
 					user_id: userId.toString(),
 					action: 'update',
+					display_tag_text: null,
+					display_tag_icon: null,
 					persona: publicPersona.toSubprofileResponse(),
 				},
 			});
@@ -424,6 +440,8 @@ describe('PersonaService', () => {
 					guild_id: '456',
 					user_id: userId.toString(),
 					action: 'update',
+					display_tag_text: null,
+					display_tag_icon: null,
 					persona: publicPersona.toSubprofileResponse(),
 				},
 			});
@@ -443,6 +461,8 @@ describe('PersonaService', () => {
 					guild_id: '123',
 					user_id: userId.toString(),
 					action: 'delete',
+					display_tag_text: null,
+					display_tag_icon: null,
 					persona: publicPersona.toSubprofileResponse(),
 				},
 			});
@@ -544,12 +564,24 @@ describe('PersonaService', () => {
 			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
 				guildId: 123n,
 				event: 'GUILD_PERSONAS_DIRTY',
-				data: {guild_id: '123', user_id: userId.toString(), action: 'sync'},
+				data: {
+					guild_id: '123',
+					user_id: userId.toString(),
+					action: 'sync',
+					display_tag_text: 'New Tag',
+					display_tag_icon: null,
+				},
 			});
 			expect(mockGateway.dispatchGuild).toHaveBeenCalledWith({
 				guildId: 456n,
 				event: 'GUILD_PERSONAS_DIRTY',
-				data: {guild_id: '456', user_id: userId.toString(), action: 'sync'},
+				data: {
+					guild_id: '456',
+					user_id: userId.toString(),
+					action: 'sync',
+					display_tag_text: 'New Tag',
+					display_tag_icon: null,
+				},
 			});
 		});
 
@@ -593,6 +625,8 @@ describe('PersonaService', () => {
 				data: {
 					user_id: userId.toString(),
 					action: 'update',
+					display_tag_text: null,
+					display_tag_icon: null,
 					persona: updatedPersona.toSubprofileResponse(),
 				},
 			});
@@ -602,6 +636,8 @@ describe('PersonaService', () => {
 				data: {
 					user_id: userId.toString(),
 					action: 'update',
+					display_tag_text: null,
+					display_tag_icon: null,
 					persona: updatedPersona.toSubprofileResponse(),
 				},
 			});

@@ -12,7 +12,7 @@ import {createBuilder} from '../../test/TestRequestBuilder';
 async function createPersona(
 	harness: ApiTestHarness,
 	token: string,
-	data: {name: string; visibility: 'public' | 'unlisted' | 'private'; system_name?: string},
+	data: {name: string; visibility: 'public' | 'unlisted' | 'private'},
 ): Promise<PersonaResponse> {
 	return createBuilder<PersonaResponse>(harness, token)
 		.post('/users/@me/personas')
