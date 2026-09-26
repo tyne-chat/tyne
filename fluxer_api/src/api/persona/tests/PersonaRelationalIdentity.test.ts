@@ -30,13 +30,20 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 		const personaRepo = getPersonaRepository();
 		const userId = createUserID(BigInt(account.userId));
 
-		// 1. Create a persona
+		// 1. Create a persona and set user display tag
+		await createBuilder(harness, account.token)
+			.patch('/users/@me/personas/settings')
+			.body({
+				display_tag_text: 'ArchiveTag',
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
 		const persona = await createBuilder<PersonaResponse>(harness, account.token)
 			.post('/users/@me/personas')
 			.body({
 				name: 'Archived Persona',
 				avatar_url: 'https://example.com/archived.png',
-				system_name: 'ArchiveTag',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
@@ -86,7 +93,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 		expect(fetched?.subprofile?.id).toBe(persona.id);
 		expect(fetched?.subprofile?.name).toBe('Archived Persona');
 		expect(fetched?.subprofile?.avatar).toBe('https://example.com/archived.png');
-		expect(fetched?.subprofile?.system_name).toBe('ArchiveTag');
+		expect(fetched?.subprofile?.display_tag_text).toBe('ArchiveTag');
 	});
 
 	test('anonymizes messages and suppresses subprofile when root account is deleted', async () => {
@@ -127,12 +134,19 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 	});
 
 	test('dynamically updates historical messages when persona attributes change', async () => {
+		await createBuilder(harness, account.token)
+			.patch('/users/@me/personas/settings')
+			.body({
+				display_tag_text: 'InitialTag',
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
 		const persona = await createBuilder<PersonaResponse>(harness, account.token)
 			.post('/users/@me/personas')
 			.body({
 				name: 'Initial Name',
 				avatar_url: 'https://example.com/init.png',
-				system_name: 'InitialTag',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
@@ -148,13 +162,20 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 
 		expect(sentMessage.subprofile?.name).toBe('Initial Name');
 
-		// Update persona attributes
+		// Update persona attributes and user display tag
 		await createBuilder(harness, account.token)
 			.patch(`/users/@me/personas/${persona.id}`)
 			.body({
 				name: 'Evolved Name',
 				avatar_url: 'https://example.com/evolved.png',
-				system_name: 'EvolvedTag',
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		await createBuilder(harness, account.token)
+			.patch('/users/@me/personas/settings')
+			.body({
+				display_tag_text: 'EvolvedTag',
 			})
 			.expect(HTTP_STATUS.OK)
 			.execute();
@@ -165,6 +186,6 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 		expect(fetched).toBeDefined();
 		expect(fetched?.subprofile?.name).toBe('Evolved Name');
 		expect(fetched?.subprofile?.avatar).toBe('https://example.com/evolved.png');
-		expect(fetched?.subprofile?.system_name).toBe('EvolvedTag');
+		expect(fetched?.subprofile?.display_tag_text).toBe('EvolvedTag');
 	});
 });
