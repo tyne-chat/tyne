@@ -28,7 +28,6 @@ export interface ClientPersona extends PersonaResponse {
 	avatarUrl?: string | null;
 	avatarColor?: number | null;
 	bannerUrl?: string | null;
-	systemName?: string | null;
 	personaTags?: Array<{prefix?: string; suffix?: string}>;
 	accentColor?: number | null;
 	autoTagDisabled?: boolean;
@@ -46,7 +45,6 @@ export function normalizePersona(
 	const source: any = (raw as any)?.persona ?? raw;
 	const avatarUrl = source.avatar_url !== undefined ? source.avatar_url : (source.avatarUrl ?? null);
 	const bannerUrl = source.banner_url !== undefined ? source.banner_url : (source.bannerUrl ?? null);
-	const systemName = source.system_name !== undefined ? source.system_name : (source.systemName ?? null);
 	const color =
 		source.color !== undefined
 			? source.color
@@ -77,7 +75,6 @@ export function normalizePersona(
 		name: source.name ?? '',
 		avatar_url: avatarUrl,
 		banner_url: bannerUrl,
-		system_name: systemName,
 		pronouns: source.pronouns ?? null,
 		color,
 		avatar_color: avatarColor,
@@ -94,7 +91,6 @@ export function normalizePersona(
 		avatarUrl,
 		avatarColor,
 		bannerUrl,
-		systemName,
 		personaTags: tags,
 		accentColor: color,
 		autoTagDisabled: autoTag,
@@ -147,9 +143,8 @@ export class PersonaStoreClass {
 				avatar: own.avatar_url ?? null,
 				avatar_color: own.color ?? null,
 				banner: own.banner_url ?? own.bannerUrl ?? null,
-				display_tag_text: own.system_name ?? null,
-				display_tag_icon: null,
-				system_name: own.system_name ?? null,
+				display_tag_text: this.displayTagText || null,
+				display_tag_icon: this.displayTagIcon || null,
 				pronouns: own.pronouns ?? null,
 				color: own.color ?? null,
 				bio: own.bio ?? null,
@@ -177,9 +172,8 @@ export class PersonaStoreClass {
 					avatar: body.avatar_url ?? null,
 					avatar_color: body.color ?? null,
 					banner: body.banner_url ?? null,
-					display_tag_text: body.system_name ?? null,
-					display_tag_icon: null,
-					system_name: body.system_name ?? null,
+					display_tag_text: body.display_tag_text ?? null,
+					display_tag_icon: body.display_tag_icon ?? null,
 					pronouns: body.pronouns ?? null,
 					color: body.color ?? null,
 					bio: body.bio ?? null,
@@ -385,7 +379,6 @@ export class PersonaStoreClass {
 		name: string;
 		avatar_url?: string | null;
 		banner_url?: string | null;
-		system_name?: string | null;
 		pronouns?: string | null;
 		color?: number | null;
 		accentColor?: number | null;
@@ -401,7 +394,6 @@ export class PersonaStoreClass {
 			name: personaData.name,
 			avatar_url: personaData.avatar_url ?? null,
 			banner_url: personaData.banner_url ?? null,
-			system_name: personaData.system_name ?? null,
 			pronouns: personaData.pronouns ?? null,
 			color: personaData.accentColor ?? personaData.accent_color ?? personaData.color ?? null,
 			bio: personaData.bio ?? null,
@@ -594,7 +586,6 @@ export class PersonaStoreClass {
 			id: p.id,
 			name: p.name,
 			avatar_url: p.avatar_url ?? p.avatarUrl ?? null,
-			system_name: p.system_name ?? p.systemName ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? p.accentColor ?? null,
 			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
@@ -629,7 +620,6 @@ export class PersonaStoreClass {
 			id: p.id,
 			name: p.name,
 			avatar_url: p.avatar_url ?? p.avatarUrl ?? null,
-			system_name: p.system_name ?? p.systemName ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? p.accentColor ?? null,
 			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
@@ -666,7 +656,6 @@ export class PersonaStoreClass {
 			id: p.id,
 			name: p.name,
 			avatar_url: p.avatar_url ?? p.avatarUrl ?? null,
-			system_name: p.system_name ?? p.systemName ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? p.accentColor ?? null,
 			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
@@ -708,7 +697,6 @@ export class PersonaStoreClass {
 					banner: (result.persona as any).banner_url ?? (result.persona as any).bannerUrl ?? null,
 					display_tag_text: this.displayTagText || null,
 					display_tag_icon: this.displayTagIcon || null,
-					system_name: this.displayTagText || null,
 					pronouns: result.persona.pronouns ?? null,
 					color: result.persona.color ?? null,
 				},
@@ -725,9 +713,8 @@ export class PersonaStoreClass {
 					avatar: currentSubprofile.avatar ?? null,
 					avatar_color: currentSubprofile.avatar_color ?? null,
 					banner: currentSubprofile.banner ?? null,
-					display_tag_text: currentSubprofile.display_tag_text ?? currentSubprofile.system_name ?? null,
+					display_tag_text: currentSubprofile.display_tag_text ?? null,
 					display_tag_icon: currentSubprofile.display_tag_icon ?? null,
-					system_name: currentSubprofile.display_tag_text ?? currentSubprofile.system_name ?? null,
 					pronouns: currentSubprofile.pronouns ?? null,
 					color: currentSubprofile.color ?? null,
 				},
@@ -751,7 +738,6 @@ export class PersonaStoreClass {
 			color: active.color ?? active.accentColor ?? null,
 			display_tag_text: this._displayTagText || null,
 			display_tag_icon: this._displayTagIcon || null,
-			system_name: this._displayTagText || null,
 			pronouns: active.pronouns ?? null,
 			bio: active.bio ?? null,
 			visibility: active.visibility ?? null,

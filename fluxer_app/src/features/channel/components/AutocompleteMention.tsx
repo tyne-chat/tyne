@@ -151,7 +151,8 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 							? `${option.persona.owner_username}#${option.persona.owner_discriminator}`
 							: option.persona.owner_username,
 					);
-		const systemTag = option.persona.system_name?.trim();
+		const systemTag = option.persona.display_tag_text?.trim();
+		const tagIcon = option.persona.display_tag_icon?.trim();
 		return (
 			<AutocompleteItem
 				key={`persona-${option.persona.id}`}
@@ -183,11 +184,21 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 						<span className={styles.personaName} data-flx="channel.autocomplete-mention.render-persona.persona-name">
 							{option.persona.name}
 						</span>
-						{systemTag ? (
+						{systemTag || tagIcon ? (
 							<span className={tagStyles.tag} data-flx="persona.tag">
-								<span className={tagStyles.text} data-flx="channel.autocomplete-mention.render-persona.span">
-									{systemTag}
-								</span>
+								{tagIcon && (
+									<img
+										src={tagIcon}
+										alt=""
+										className={tagStyles.icon}
+										data-flx="channel.autocomplete-mention.render-persona.img"
+									/>
+								)}
+								{systemTag && (
+									<span className={tagStyles.text} data-flx="channel.autocomplete-mention.render-persona.span">
+										{systemTag}
+									</span>
+								)}
 							</span>
 						) : user != null ? (
 							<Avatar
