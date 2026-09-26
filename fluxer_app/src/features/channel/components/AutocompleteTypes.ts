@@ -39,7 +39,8 @@ export interface AutocompleteMentionPersonaOption {
 		color?: number | null;
 		avatar_color?: number | null;
 		pronouns?: string | null;
-		system_name?: string | null;
+		display_tag_text?: string | null;
+		display_tag_icon?: string | null;
 		owner_user_id: string;
 		owner_username: string;
 		owner_discriminator?: string | null;
