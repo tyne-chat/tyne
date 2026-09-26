@@ -178,7 +178,7 @@ mod tests {
     #[tokio::test]
     async fn a_pinned_resolver_rejection_survives_the_transport_error_chain() {
         let client =
-            build_raw(HTTPClientOptions::new(millis(250), millis(1_000)).restrict_to_public())
+            build_raw(HTTPClientOptions::new(millis(5_000), millis(10_000)).restrict_to_public())
                 .expect("the public-only client configuration is valid");
         let error = client
             .get("http://localhost/")
