@@ -75,7 +75,7 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 			if (!trimmed) return personas;
 			return personas.filter((p) => {
 				if (p.name.toLowerCase().includes(trimmed)) return true;
-				if (p.systemName?.toLowerCase().includes(trimmed)) return true;
+				if (PersonaStore.displayTagText?.toLowerCase().includes(trimmed)) return true;
 				if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
 				return (p.personaTags ?? []).some(
 					(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
@@ -271,9 +271,9 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 											<span className={styles.personaName} data-flx="persona.persona-picker-sheet.persona-name--2">
 												{p.name}
 											</span>
-											{p.systemName && (
+											{PersonaStore.displayTagText && (
 												<span className={styles.tagBadge} data-flx="persona.persona-picker-sheet.tag-badge">
-													[{p.systemName}]
+													[{PersonaStore.displayTagText}]
 												</span>
 											)}
 										</div>
