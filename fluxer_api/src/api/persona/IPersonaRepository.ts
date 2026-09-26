@@ -57,6 +57,16 @@ export abstract class IPersonaRepository {
 	abstract delete(userId: UserID, personaId: PersonaID): Promise<boolean>;
 	abstract deleteAllByUserId(userId: UserID): Promise<void>;
 	abstract findSettings(userId: UserID): Promise<UserPersonaSettingsRow | null>;
+	async findSettingsByUserIds(userIds: Array<UserID>): Promise<Map<string, UserPersonaSettingsRow>> {
+		const results = new Map<string, UserPersonaSettingsRow>();
+		await Promise.all(
+			userIds.map(async (uid) => {
+				const s = await this.findSettings(uid);
+				if (s) results.set(uid.toString(), s);
+			}),
+		);
+		return results;
+	}
 	abstract upsertSettings(row: UserPersonaSettingsRow): Promise<UserPersonaSettingsRow>;
 	abstract recordUsage(userId: UserID, personaId: PersonaID): Promise<void>;
 }
