@@ -28,7 +28,6 @@ test.describe('Persona Wrap & Suffix Tag Proxying with Display Tag', () => {
 		await bobClient.createPersona({
 			name: 'Bob-Bracket',
 			pronouns: 'they/them',
-			system_name: 'BracketSystem',
 			persona_tags: [{prefix: '[', suffix: ']'}],
 		});
 
