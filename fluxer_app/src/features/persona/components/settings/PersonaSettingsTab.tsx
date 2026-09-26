@@ -23,6 +23,7 @@ import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
+import * as UnsavedChangesCommands from '@app/features/ui/commands/UnsavedChangesCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {Input} from '@app/features/ui/components/form/FormInput';
 import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
@@ -97,14 +98,6 @@ const ACTIVE_PERSONA_MODE_ARIA_DESCRIPTOR = msg({
 	comment: 'Aria label for active persona mode tabs',
 });
 
-const DISPLAY_TAG_ICON_UPDATED_DESCRIPTOR = msg({
-	message: 'Display tag icon updated',
-	comment: 'Toast when display tag icon is updated',
-});
-const DISPLAY_TAG_ICON_REMOVED_DESCRIPTOR = msg({
-	message: 'Display tag icon removed',
-	comment: 'Toast when display tag icon is removed',
-});
 const FAILED_TO_UPLOAD_ICON_DESCRIPTOR = msg({
 	message: 'Failed to upload icon to server',
 	comment: 'Toast when icon upload fails',
@@ -168,14 +161,59 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const [tagText, setTagText] = useState(PersonaStore.displayTagText);
 	const [tagIcon, setTagIcon] = useState(PersonaStore.displayTagIcon);
 	const [isUploadingTagIcon, setIsUploadingTagIcon] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	const isTagDirty =
+		(tagText ?? '').trim() !== (PersonaStore.displayTagText ?? '').trim() ||
+		(tagIcon ?? null) !== (PersonaStore.displayTagIcon ?? null);
 
 	useEffect(() => {
+		if (!isTagDirty) {
+			setTagText(PersonaStore.displayTagText);
+		}
+	}, [PersonaStore.displayTagText, isTagDirty]);
+
+	useEffect(() => {
+		if (!isTagDirty) {
+			setTagIcon(PersonaStore.displayTagIcon);
+		}
+	}, [PersonaStore.displayTagIcon, isTagDirty]);
+
+	const handleReset = useCallback(() => {
 		setTagText(PersonaStore.displayTagText);
-	}, [PersonaStore.displayTagText]);
+		setTagIcon(PersonaStore.displayTagIcon);
+	}, []);
+
+	const handleSave = useCallback(async () => {
+		setIsSubmitting(true);
+		try {
+			await PersonaStore.setDisplayTag(tagText, tagIcon);
+		} finally {
+			setIsSubmitting(false);
+		}
+	}, [tagText, tagIcon]);
 
 	useEffect(() => {
-		setTagIcon(PersonaStore.displayTagIcon);
-	}, [PersonaStore.displayTagIcon]);
+		UnsavedChangesCommands.setUnsavedChanges('personas', isTagDirty);
+		UnsavedChangesCommands.setUnsavedChanges('subprofiles', isTagDirty);
+	}, [isTagDirty]);
+
+	useEffect(() => {
+		const data = {
+			onReset: handleReset,
+			onSave: handleSave,
+			isSubmitting,
+		};
+		UnsavedChangesCommands.setTabData('personas', data);
+		UnsavedChangesCommands.setTabData('subprofiles', data);
+	}, [handleReset, handleSave, isSubmitting]);
+
+	useEffect(() => {
+		return () => {
+			UnsavedChangesCommands.clearUnsavedChanges('personas');
+			UnsavedChangesCommands.clearUnsavedChanges('subprofiles');
+		};
+	}, []);
 
 	// Deep link subtab support
 	const lastHandledSubtabRef = useRef<string | null>(null);
@@ -215,7 +253,6 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 
 	const handleTagTextChange = (value: string) => {
 		setTagText(value);
-		void PersonaStore.setDisplayTag(value, tagIcon);
 	};
 
 	const handleTagIconUpload = useCallback(
@@ -228,11 +265,6 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 				if (res.ok && res.body?.avatar_url) {
 					const newIcon = res.body.avatar_url;
 					setTagIcon(newIcon);
-					await PersonaStore.setDisplayTag(tagText, newIcon);
-					ToastCommands.createToast({
-						type: 'success',
-						children: i18n._(DISPLAY_TAG_ICON_UPDATED_DESCRIPTOR),
-					});
 				} else {
 					ToastCommands.createToast({
 						type: 'error',
@@ -248,17 +280,12 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 				setIsUploadingTagIcon(false);
 			}
 		},
-		[tagText, i18n],
+		[i18n],
 	);
 
-	const handleClearTagIcon = useCallback(async () => {
+	const handleClearTagIcon = useCallback(() => {
 		setTagIcon(null);
-		await PersonaStore.setDisplayTag(tagText, null);
-		ToastCommands.createToast({
-			type: 'success',
-			children: i18n._(DISPLAY_TAG_ICON_REMOVED_DESCRIPTOR),
-		});
-	}, [tagText, i18n]);
+	}, []);
 
 	const processTagIconFile = useCallback(
 		async (file: File) => {
