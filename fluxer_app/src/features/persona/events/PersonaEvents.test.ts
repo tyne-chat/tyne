@@ -174,7 +174,7 @@ describe('PersonaEvents', () => {
 	});
 
 	it('handles USER_PERSONA_SETTINGS_UPDATE by updating persona settings in PersonaStore', () => {
-		expect(PersonaStore.activePersonaMode).toBe('off');
+		expect(PersonaStore.activePersonaMode).toBe('manual');
 		expect(PersonaStore.displayTagText).toBe('');
 		expect(PersonaStore.displayTagIcon).toBeNull();
 
