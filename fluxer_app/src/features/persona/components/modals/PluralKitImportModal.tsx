@@ -82,6 +82,7 @@ interface PKMember {
 	color?: string | null;
 	pronouns?: string | null;
 	description?: string | null;
+	system_name?: string | null;
 	proxy_tags?: Array<PKProxyTag>;
 }
 
@@ -90,6 +91,7 @@ interface PKSystemExport {
 	name?: string | null;
 	description?: string | null;
 	tag?: string | null;
+	system_name?: string | null;
 	avatar_url?: string | null;
 	members?: Array<PKMember>;
 }
@@ -150,8 +152,14 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				}
 
 				setPkData(parsed);
-				if (parsed.tag) {
-					setSystemTagOverride(parsed.tag);
+				const candidateTag =
+					parsed.tag?.trim() ||
+					parsed.system_name?.trim() ||
+					parsed.name?.trim() ||
+					parsed.members.find((m) => m.system_name?.trim())?.system_name?.trim() ||
+					'';
+				if (candidateTag) {
+					setSystemTagOverride(candidateTag);
 				}
 			} catch (_err: unknown) {
 				setFileError(i18n._(FILE_PARSE_FAILED_DESCRIPTOR));
@@ -437,6 +445,14 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 					label: i18n._(SAVING_PERSONAS_LABEL),
 				});
 				await PersonaCommands.importPersonas(chunk);
+			}
+
+			if (systemTagOverride.trim()) {
+				try {
+					await PersonaStore.setDisplayTag(systemTagOverride.trim());
+				} catch {
+					// Non-fatal if setting update fails
+				}
 			}
 
 			setImportResults({
