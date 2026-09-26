@@ -8,7 +8,7 @@ import type {
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 import type {PersonaID, UserID} from '../BrandedTypes';
-import type {PersonaRow} from '../database/types/PersonaTypes';
+import type {PersonaRow, UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 
 export class Persona {
 	readonly id: PersonaID;
@@ -97,7 +97,7 @@ export class Persona {
 		};
 	}
 
-	toSubprofileResponse(): {
+	toSubprofileResponse(settings?: UserPersonaSettingsRow | null): {
 		id: string;
 		name: string;
 		avatar: string | null;
@@ -111,15 +111,24 @@ export class Persona {
 		bio?: string | null;
 		visibility?: PersonaVisibility | null;
 	} {
+		const effectiveTagText =
+			settings?.display_tag_text && settings.display_tag_text.trim().length > 0
+				? settings.display_tag_text.trim()
+				: this.systemName;
+		const effectiveTagIcon =
+			settings?.display_tag_icon && settings.display_tag_icon.trim().length > 0
+				? settings.display_tag_icon.trim()
+				: null;
+
 		return {
 			id: this.id.toString(),
 			name: this.name,
 			avatar: this.avatarUrl,
 			avatar_color: this.avatarColor,
 			banner: this.bannerUrl,
-			display_tag_text: this.systemName,
-			display_tag_icon: null,
-			system_name: this.systemName,
+			display_tag_text: effectiveTagText,
+			display_tag_icon: effectiveTagIcon,
+			system_name: effectiveTagText ?? this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
 			bio: this.bio,
