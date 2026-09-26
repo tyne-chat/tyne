@@ -473,10 +473,6 @@ msgstr "Total Members"
 msgid "Unlisted"
 msgstr "Unlisted"
 
-#. Helper description for Off persona mode
-msgid "Untagged messages always send from your root account. Personas only speak when you type their tags (e.g. [text])."
-msgstr "Untagged messages always send from your root account. Personas only speak when you type their tags (e.g. [text])."
-
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
 msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."

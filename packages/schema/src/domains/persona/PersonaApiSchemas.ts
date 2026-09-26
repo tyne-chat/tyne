@@ -108,9 +108,12 @@ export const UserIdPersonaIdParam = z.object({
 	persona_id: SnowflakeStringType.describe('Persona Snowflake ID'),
 });
 
+export const ActivePersonaModeSchema = z.enum(['manual', 'last']);
+export type ActivePersonaMode = z.infer<typeof ActivePersonaModeSchema>;
+
 export const PersonaSettingsResponseSchema = z.object({
 	user_id: SnowflakeStringType.describe('User Snowflake ID'),
-	active_persona_mode: z.enum(['off', 'manual', 'last']).default('off'),
+	active_persona_mode: ActivePersonaModeSchema.default('manual'),
 	active_persona_id: SnowflakeStringType.nullish(),
 	is_latched: z.boolean().default(false),
 	display_tag_text: z.string().max(100).nullish(),
@@ -120,7 +123,7 @@ export const PersonaSettingsResponseSchema = z.object({
 export type PersonaSettingsResponse = z.infer<typeof PersonaSettingsResponseSchema>;
 
 export const PersonaSettingsUpdateRequestSchema = z.object({
-	active_persona_mode: z.enum(['off', 'manual', 'last']).optional(),
+	active_persona_mode: ActivePersonaModeSchema.optional(),
 	active_persona_id: SnowflakeStringType.nullish().optional(),
 	is_latched: z.boolean().optional(),
 	display_tag_text: z.string().max(100).nullish().optional(),
