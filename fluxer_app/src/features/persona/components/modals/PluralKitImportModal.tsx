@@ -395,7 +395,6 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			importedPersonas.push({
 				name: displayName,
 				avatar_url: localAvatarUrl,
-				system_name: systemTagOverride.trim() || undefined,
 				pronouns: member.pronouns?.trim() || undefined,
 				color: colorInt,
 				bio: member.description?.trim() || undefined,
