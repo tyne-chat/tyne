@@ -40,7 +40,6 @@ const samplePersona: PersonaResponse = {
 	id: '1540000000000000001',
 	name: 'Gateway Persona 1',
 	avatar_url: 'https://cdn.example.com/p1.png',
-	system_name: 'Sys 1',
 	pronouns: 'they/them',
 	color: 0x112233,
 	bio: 'Created via gateway',
@@ -58,7 +57,6 @@ const samplePersona2: PersonaResponse = {
 	id: '1540000000000000002',
 	name: 'Gateway Persona 2',
 	avatar_url: null,
-	system_name: null,
 	pronouns: 'she/her',
 	color: null,
 	bio: null,
@@ -90,7 +88,6 @@ describe('PersonaEvents', () => {
 		const stored = PersonaStore.personas.find((p) => p.id === samplePersona.id);
 		expect(stored).toBeDefined();
 		expect(stored?.name).toBe('Gateway Persona 1');
-		expect(stored?.systemName).toBe('Sys 1');
 	});
 
 	it('handles USER_PERSONA_CREATE with wrapped { persona } payload from API', () => {
