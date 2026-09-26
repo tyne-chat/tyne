@@ -196,7 +196,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		const uniqueAvatarUrls = Array.from(new Set(avatarUrls));
 		const totalAvatars = uniqueAvatarUrls.length;
 
-		const avatarMap = new Map<string, string>();
+		const avatarMap = new Map<string, {avatarUrl: string; avatarColor?: number | null}>();
 		const avatarErrors = new Map<string, string>();
 
 		if (totalAvatars > 0) {
@@ -254,7 +254,12 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 									const event = JSON.parse(trimmed);
 									if (event.type === 'progress') {
 										if (event.url) {
-											if (event.avatar_url) avatarMap.set(event.url, event.avatar_url);
+											if (event.avatar_url) {
+												avatarMap.set(event.url, {
+													avatarUrl: event.avatar_url,
+													avatarColor: typeof event.avatar_color === 'number' ? event.avatar_color : null,
+												});
+											}
 											if (event.error) avatarErrors.set(event.url, event.error);
 										}
 										const completedOverall = batchStartIndex + event.completed;
@@ -273,9 +278,17 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 										});
 									} else if (event.type === 'complete' && event.results) {
 										for (const [url, r] of Object.entries(
-											event.results as Record<string, {avatar_url?: string; error?: string}>,
+											event.results as Record<
+												string,
+												{avatar_url?: string; avatar_color?: number | null; error?: string}
+											>,
 										)) {
-											if (r.avatar_url) avatarMap.set(url, r.avatar_url);
+											if (r.avatar_url) {
+												avatarMap.set(url, {
+													avatarUrl: r.avatar_url,
+													avatarColor: typeof r.avatar_color === 'number' ? r.avatar_color : null,
+												});
+											}
 											if (r.error) avatarErrors.set(url, r.error);
 										}
 									}
@@ -289,14 +302,27 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 								const event = JSON.parse(buffer.trim());
 								if (event.type === 'progress') {
 									if (event.url) {
-										if (event.avatar_url) avatarMap.set(event.url, event.avatar_url);
+										if (event.avatar_url) {
+											avatarMap.set(event.url, {
+												avatarUrl: event.avatar_url,
+												avatarColor: typeof event.avatar_color === 'number' ? event.avatar_color : null,
+											});
+										}
 										if (event.error) avatarErrors.set(event.url, event.error);
 									}
 								} else if (event.type === 'complete' && event.results) {
 									for (const [url, r] of Object.entries(
-										event.results as Record<string, {avatar_url?: string; error?: string}>,
+										event.results as Record<
+											string,
+											{avatar_url?: string; avatar_color?: number | null; error?: string}
+										>,
 									)) {
-										if (r.avatar_url) avatarMap.set(url, r.avatar_url);
+										if (r.avatar_url) {
+											avatarMap.set(url, {
+												avatarUrl: r.avatar_url,
+												avatarColor: typeof r.avatar_color === 'number' ? r.avatar_color : null,
+											});
+										}
 										if (r.error) avatarErrors.set(url, r.error);
 									}
 								}
@@ -351,10 +377,13 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 
 			const remoteAvatarUrl = (member.avatar_url || member.webhook_avatar_url || '').trim();
 			let localAvatarUrl: string | undefined;
+			let localAvatarColor: number | undefined;
 
 			if (remoteAvatarUrl) {
-				if (avatarMap.has(remoteAvatarUrl)) {
-					localAvatarUrl = avatarMap.get(remoteAvatarUrl);
+				const avatarData = avatarMap.get(remoteAvatarUrl);
+				if (avatarData) {
+					localAvatarUrl = avatarData.avatarUrl;
+					localAvatarColor = typeof avatarData.avatarColor === 'number' ? avatarData.avatarColor : undefined;
 				} else if (avatarErrors.has(remoteAvatarUrl)) {
 					warnings.push({
 						displayName,
@@ -395,6 +424,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			importedPersonas.push({
 				name: displayName,
 				avatar_url: localAvatarUrl,
+				avatar_color: localAvatarColor,
 				pronouns: member.pronouns?.trim() || undefined,
 				color: colorInt,
 				bio: member.description?.trim() || undefined,
