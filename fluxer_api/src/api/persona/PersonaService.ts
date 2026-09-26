@@ -411,7 +411,7 @@ export class PersonaService {
 		if (!row) {
 			return {
 				user_id: userId.toString(),
-				active_persona_mode: 'off',
+				active_persona_mode: 'manual',
 				active_persona_id: null,
 				is_latched: false,
 				display_tag_text: '',
@@ -420,7 +420,7 @@ export class PersonaService {
 		}
 		return {
 			user_id: row.user_id.toString(),
-			active_persona_mode: (row.active_persona_mode as 'off' | 'manual' | 'last') ?? 'off',
+			active_persona_mode: (row.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
 			active_persona_id: row.active_persona_id ? row.active_persona_id.toString() : null,
 			is_latched: Boolean(row.is_latched),
 			display_tag_text: row.display_tag_text ?? '',
@@ -433,7 +433,11 @@ export class PersonaService {
 		const updatedRow: UserPersonaSettingsRow = {
 			user_id: userId,
 			active_persona_mode:
-				data.active_persona_mode !== undefined ? data.active_persona_mode : (existing?.active_persona_mode ?? 'off'),
+				data.active_persona_mode !== undefined
+					? data.active_persona_mode
+					: (existing?.active_persona_mode as 'manual' | 'last') === 'last'
+						? 'last'
+						: 'manual',
 			active_persona_id:
 				data.active_persona_id !== undefined ? data.active_persona_id : (existing?.active_persona_id ?? null),
 			is_latched: data.is_latched !== undefined ? data.is_latched : (existing?.is_latched ?? false),
@@ -458,7 +462,7 @@ export class PersonaService {
 
 		const response: PersonaSettingsResponse = {
 			user_id: updatedRow.user_id.toString(),
-			active_persona_mode: (updatedRow.active_persona_mode as 'off' | 'manual' | 'last') ?? 'off',
+			active_persona_mode: (updatedRow.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
 			active_persona_id: updatedRow.active_persona_id ? updatedRow.active_persona_id.toString() : null,
 			is_latched: Boolean(updatedRow.is_latched),
 			display_tag_text: updatedRow.display_tag_text ?? '',
