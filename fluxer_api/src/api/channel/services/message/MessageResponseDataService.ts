@@ -216,8 +216,8 @@ export class MessageResponseDataService {
 					avatar_color: null,
 					pronouns: null,
 					color: null,
-					...(effectiveTagText ? {display_tag_text: effectiveTagText} : {}),
-					...(effectiveTagIcon ? {display_tag_icon: effectiveTagIcon} : {}),
+					display_tag_text: effectiveTagText,
+					display_tag_icon: effectiveTagIcon,
 				};
 			}
 			delete anyMsg.persona_id;
