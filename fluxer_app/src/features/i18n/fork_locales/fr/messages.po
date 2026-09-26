@@ -99,14 +99,6 @@ msgstr "Nom / balise de système détecté"
 msgid "Display Tag"
 msgstr "Badge d'affichage"
 
-#. Toast when display tag icon is removed
-msgid "Display tag icon removed"
-msgstr "Icône du badge d'affichage supprimée"
-
-#. Toast when display tag icon is updated
-msgid "Display tag icon updated"
-msgstr "Icône du badge d'affichage mise à jour"
-
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Le badge d'affichage apparaîtra à côté du nom de toutes vos personas dans les messages. Si aucun badge n'est configuré, votre photo de profil de compte sera affichée."
 
