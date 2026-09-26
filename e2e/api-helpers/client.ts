@@ -269,9 +269,8 @@ export class FluxerApiClient {
 					name: sub.name,
 					avatar: sub.avatar ?? sub.avatar_url ?? null,
 					avatar_color: sub.avatar_color ?? sub.color ?? null,
-					display_tag_text: sub.display_tag_text ?? sub.system_name ?? null,
+					display_tag_text: sub.display_tag_text ?? null,
 					display_tag_icon: sub.display_tag_icon ?? null,
-					system_name: sub.system_name ?? sub.display_tag_text ?? null,
 					pronouns: sub.pronouns ?? null,
 					color: sub.color ?? null,
 				};
@@ -307,9 +306,8 @@ export class FluxerApiClient {
 					name: sub.name,
 					avatar: sub.avatar ?? sub.avatar_url ?? null,
 					avatar_color: sub.avatar_color ?? sub.color ?? null,
-					display_tag_text: sub.display_tag_text ?? sub.system_name ?? null,
+					display_tag_text: sub.display_tag_text ?? null,
 					display_tag_icon: sub.display_tag_icon ?? null,
-					system_name: sub.system_name ?? sub.display_tag_text ?? null,
 					pronouns: sub.pronouns ?? null,
 					color: sub.color ?? null,
 				};
