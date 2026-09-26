@@ -26,6 +26,10 @@ const FETCH_SETTINGS_CQL = UserPersonaSettings.selectCql({
 	limit: 1,
 });
 
+const FETCH_SETTINGS_BY_USER_IDS_CQL = UserPersonaSettings.selectCql({
+	where: UserPersonaSettings.where.in('user_id', 'user_ids'),
+});
+
 export class PersonaRepository extends IPersonaRepository {
 	async findById(userId: UserID, personaId: PersonaID, options?: {includeDeleted?: boolean}): Promise<Persona | null> {
 		const row = await fetchOne<PersonaRow>(FETCH_PERSONA_CQL, {
@@ -194,6 +198,22 @@ export class PersonaRepository extends IPersonaRepository {
 			user_id: userId,
 		});
 		return row ?? null;
+	}
+
+	override async findSettingsByUserIds(userIds: Array<UserID>): Promise<Map<string, UserPersonaSettingsRow>> {
+		if (!userIds || userIds.length === 0) return new Map();
+		const chunkSize = 100;
+		const results = new Map<string, UserPersonaSettingsRow>();
+		for (let i = 0; i < userIds.length; i += chunkSize) {
+			const chunk = userIds.slice(i, i + chunkSize);
+			const rows = await fetchMany<UserPersonaSettingsRow>(FETCH_SETTINGS_BY_USER_IDS_CQL, {
+				user_ids: chunk,
+			});
+			for (const r of rows) {
+				results.set(r.user_id.toString(), r);
+			}
+		}
+		return results;
 	}
 
 	async upsertSettings(row: UserPersonaSettingsRow): Promise<UserPersonaSettingsRow> {
