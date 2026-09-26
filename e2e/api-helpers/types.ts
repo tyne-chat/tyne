@@ -31,7 +31,6 @@ export interface CreatePersonaParams {
 	name: string;
 	avatar_url?: string | null;
 	banner_url?: string | null;
-	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
 	bio?: string | null;
@@ -46,7 +45,6 @@ export interface PersonaRecord {
 	name: string;
 	avatar_url?: string | null;
 	banner_url?: string | null;
-	system_name?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
 	bio?: string | null;

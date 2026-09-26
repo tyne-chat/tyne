@@ -48,10 +48,12 @@ export async function seedTestData(baseUrl: string = API_BASE_URL): Promise<Seed
 
 	// Create Bob's personas
 	console.log("[SEED] Creating Bob's personas...");
+	await bobClient.updatePersonaSettings({
+		display_tag_text: 'The Collective',
+	});
 	const bobAlpha = await bobClient.createPersona({
 		name: 'Bob-Alpha',
 		pronouns: 'he/him',
-		system_name: 'The Collective',
 		persona_tags: [{prefix: 'a:'}],
 		bio: 'Primary front persona for testing',
 	});
@@ -59,7 +61,6 @@ export async function seedTestData(baseUrl: string = API_BASE_URL): Promise<Seed
 	const bobBeta = await bobClient.createPersona({
 		name: 'Bob-Beta',
 		pronouns: 'they/them',
-		system_name: 'The Collective',
 		persona_tags: [{prefix: 'b:'}],
 		bio: 'Secondary front persona for testing',
 	});
