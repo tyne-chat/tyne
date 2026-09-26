@@ -16,7 +16,6 @@ export class Persona {
 	readonly name: string;
 	readonly avatarUrl: string | null;
 	readonly bannerUrl: string | null;
-	readonly systemName: string | null;
 	readonly pronouns: string | null;
 	readonly color: number | null;
 	readonly avatarColor: number | null;
@@ -42,7 +41,6 @@ export class Persona {
 		this.name = row.name;
 		this.avatarUrl = row.avatar_url ?? null;
 		this.bannerUrl = row.banner_url ?? null;
-		this.systemName = row.system_name ?? null;
 		this.pronouns = row.pronouns ?? null;
 		this.color = row.color ?? null;
 		this.avatarColor = row.avatar_color ?? null;
@@ -65,7 +63,6 @@ export class Persona {
 			name: this.name,
 			avatar_url: this.avatarUrl,
 			banner_url: this.bannerUrl,
-			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
 			avatar_color: this.avatarColor,
@@ -88,7 +85,6 @@ export class Persona {
 			name: this.name,
 			avatar_url: this.avatarUrl,
 			banner_url: this.bannerUrl,
-			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
 			avatar_color: this.avatarColor,
@@ -105,7 +101,6 @@ export class Persona {
 		banner?: string | null;
 		display_tag_text?: string | null;
 		display_tag_icon?: string | null;
-		system_name?: string | null;
 		pronouns: string | null;
 		color: number | null;
 		bio?: string | null;
@@ -114,7 +109,7 @@ export class Persona {
 		const effectiveTagText =
 			settings?.display_tag_text && settings.display_tag_text.trim().length > 0
 				? settings.display_tag_text.trim()
-				: this.systemName;
+				: null;
 		const effectiveTagIcon =
 			settings?.display_tag_icon && settings.display_tag_icon.trim().length > 0
 				? settings.display_tag_icon.trim()
@@ -128,7 +123,6 @@ export class Persona {
 			banner: this.bannerUrl,
 			display_tag_text: effectiveTagText,
 			display_tag_icon: effectiveTagIcon,
-			system_name: effectiveTagText ?? this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
 			bio: this.bio,
@@ -143,7 +137,6 @@ export class Persona {
 			name: this.name,
 			avatar_url: this.avatarUrl,
 			banner_url: this.bannerUrl,
-			system_name: this.systemName,
 			pronouns: this.pronouns,
 			color: this.color,
 			avatar_color: this.avatarColor,
