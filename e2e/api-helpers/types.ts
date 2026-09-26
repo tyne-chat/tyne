@@ -59,7 +59,7 @@ export interface PersonaRecord {
 
 export interface PersonaSettingsRecord {
 	user_id: string;
-	active_persona_mode: 'off' | 'manual' | 'last';
+	active_persona_mode: 'manual' | 'last';
 	active_persona_id?: string | null;
 	is_latched: boolean;
 	display_tag_text?: string | null;
