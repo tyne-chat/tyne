@@ -18,10 +18,6 @@ import {fetchPersonas} from '../commands/PersonaCommands';
 import {type ActivePersonaMode, PersonaStore} from '../state/PersonaStore';
 import styles from './PersonaPickerSheet.module.css';
 
-const MODE_OFF_DESCRIPTOR = msg({
-	message: 'Off',
-	comment: 'Active persona mode off',
-});
 const MODE_MANUAL_DESCRIPTOR = msg({
 	message: 'Manual',
 	comment: 'Active persona mode manual',
@@ -40,7 +36,6 @@ const ACTIVE_PERSONA_MODE_ARIA_DESCRIPTOR = msg({
 });
 
 const getActivePersonaTabs = (i18n: I18n): Array<SegmentedTab<ActivePersonaMode>> => [
-	{id: 'off', label: i18n._(MODE_OFF_DESCRIPTOR)},
 	{id: 'manual', label: i18n._(MODE_MANUAL_DESCRIPTOR)},
 	{id: 'last', label: i18n._(MODE_LAST_DESCRIPTOR)},
 ];
