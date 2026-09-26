@@ -64,7 +64,6 @@ describe('PersonaStore', () => {
 	it('adds a new persona', async () => {
 		const persona = await store.addPersona({
 			name: 'Alice',
-			system_name: 'Wonderland',
 			pronouns: 'she/her',
 			color: 0xff0000,
 			bio: 'Curiouser and curiouser',
@@ -72,7 +71,6 @@ describe('PersonaStore', () => {
 		});
 
 		expect(persona.name).toBe('Alice');
-		expect(persona.systemName).toBe('Wonderland');
 		expect(persona.pronouns).toBe('she/her');
 		expect(persona.personaTags?.length).toBe(1);
 		expect(persona.personaTags?.[0].prefix).toBe('[');
@@ -616,7 +614,6 @@ describe('PersonaStore', () => {
 			expect(res.subprofile?.id).toBe(alice.id);
 			expect(res.subprofile?.display_tag_text).toBe('Wonderland');
 			expect(res.subprofile?.display_tag_icon).toBe('https://example.com/icon.png');
-			expect(res.subprofile?.system_name).toBe('Wonderland');
 		});
 	});
 
@@ -631,7 +628,6 @@ describe('PersonaStore', () => {
 				avatar_color: 0x123456,
 				display_tag_text: 'Fox System',
 				display_tag_icon: null,
-				system_name: 'Fox System',
 				pronouns: 'they/them',
 				color: 0x123456,
 				bio: 'Just a fox',
@@ -641,14 +637,14 @@ describe('PersonaStore', () => {
 			expect(known).not.toBeNull();
 			expect(known?.id).toBe('p_ext');
 			expect(known?.name).toBe('Fox Persona');
-			expect(known?.system_name).toBe('Fox System');
+			expect(known?.display_tag_text).toBe('Fox System');
 			expect(known?.pronouns).toBe('they/them');
 		});
 
 		it('retrieves owned persona via getKnownPersona formatted as MessageSubprofileResponse', async () => {
+			await store.setDisplayTag('Wonderland', null);
 			const alice = await store.addPersona({
 				name: 'Alice',
-				system_name: 'Wonderland',
 				pronouns: 'she/her',
 			});
 
@@ -656,7 +652,7 @@ describe('PersonaStore', () => {
 			expect(known).not.toBeNull();
 			expect(known?.id).toBe(alice.id);
 			expect(known?.name).toBe('Alice');
-			expect(known?.system_name).toBe('Wonderland');
+			expect(known?.display_tag_text).toBe('Wonderland');
 			expect(known?.pronouns).toBe('she/her');
 		});
 	});
