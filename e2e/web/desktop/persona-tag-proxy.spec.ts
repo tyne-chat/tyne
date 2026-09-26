@@ -130,9 +130,13 @@ test.describe('In-App Composer Tag Auto-Proxying', () => {
 		// Click author name to open persona profile popout
 		await authorHeader.click();
 
-		// Verify persona profile popout shows pronouns and system name
-		await expect(alicePage.getByText('he/him')).toBeVisible({timeout: 10_000});
-		await expect(alicePage.getByText('The Collective')).toBeVisible({timeout: 10_000});
+		// Verify persona profile popout shows pronouns and display tag
+		const profileModalOrPopout = alicePage
+			.locator('[data-flx*="persona-profile-popout"], [data-flx*="persona-profile-mobile-sheet"]')
+			.first();
+		await expect(profileModalOrPopout).toBeVisible({timeout: 10_000});
+		await expect(profileModalOrPopout.getByText('he/him')).toBeVisible({timeout: 10_000});
+		await expect(profileModalOrPopout.getByText('The Collective')).toBeVisible({timeout: 10_000});
 
 		await aliceContext.close();
 	});
