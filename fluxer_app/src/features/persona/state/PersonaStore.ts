@@ -21,7 +21,7 @@ import type {
 import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {makeAutoObservable, runInAction} from 'mobx';
 
-export type ActivePersonaMode = 'off' | 'manual' | 'last';
+export type ActivePersonaMode = 'manual' | 'last';
 
 export interface ClientPersona extends PersonaResponse {
 	// CamelCase aliases for backwards compatibility with React components
@@ -103,7 +103,7 @@ export class PersonaStoreClass {
 	private _personas: Array<ClientPersona> = [];
 	private _displayTagText: string = '';
 	private _displayTagIcon: string | null = null;
-	private _activePersonaMode: ActivePersonaMode = 'off';
+	private _activePersonaMode: ActivePersonaMode = 'manual';
 	private _activePersonaId: string | null = null;
 	private _isPersonaLatched: boolean = false;
 	private _settingsLoaded: boolean = false;
@@ -118,7 +118,7 @@ export class PersonaStoreClass {
 			this._personas = [];
 			this._displayTagText = '';
 			this._displayTagIcon = null;
-			this._activePersonaMode = 'off';
+			this._activePersonaMode = 'manual';
 			this._activePersonaId = null;
 			this._isPersonaLatched = false;
 			this._settingsLoaded = false;
@@ -260,7 +260,7 @@ export class PersonaStoreClass {
 			this._personas = [];
 			this._displayTagText = '';
 			this._displayTagIcon = null;
-			this._activePersonaMode = 'off';
+			this._activePersonaMode = 'manual';
 			this._activePersonaId = null;
 			this._isPersonaLatched = false;
 			this._settingsLoaded = false;
@@ -446,15 +446,9 @@ export class PersonaStoreClass {
 		let targetId: string | null = this._activePersonaId;
 		let targetLatched: boolean = this._isPersonaLatched;
 
-		if (mode === 'off') {
-			targetId = null;
-			targetLatched = false;
-		} else if (mode === 'manual') {
+		if (mode === 'manual') {
 			const currentId = this._activePersonaId;
-			targetId =
-				currentId && this._personas.some((p) => p.id === currentId)
-					? currentId
-					: (this.rankedPersonas[0]?.id ?? this._personas[0]?.id ?? null);
+			targetId = currentId && this._personas.some((p) => p.id === currentId) ? currentId : null;
 			targetLatched = Boolean(targetId);
 		} else if (mode === 'last') {
 			const currentId = this._activePersonaId;
@@ -495,10 +489,7 @@ export class PersonaStoreClass {
 		const prevLatched = this._isPersonaLatched;
 		const prevMode = this._activePersonaMode;
 
-		let newMode = mode ?? this._activePersonaMode;
-		if (!mode && id && latch && this._activePersonaMode === 'off') {
-			newMode = 'manual';
-		}
+		const newMode = mode ?? this._activePersonaMode;
 		const newLatched = Boolean(id && latch);
 
 		runInAction(() => {
@@ -525,13 +516,12 @@ export class PersonaStoreClass {
 		}
 	}
 
-	async unlatch(preserveMode?: boolean): Promise<void> {
+	async unlatch(_preserveMode?: boolean): Promise<void> {
 		const prevLatched = this._isPersonaLatched;
 		const prevId = this._activePersonaId;
 		const prevMode = this._activePersonaMode;
 
-		const shouldPreserve = preserveMode ?? this._activePersonaMode === 'last';
-		const newMode = shouldPreserve ? this._activePersonaMode : 'off';
+		const newMode = this._activePersonaMode;
 
 		runInAction(() => {
 			this._isPersonaLatched = false;
