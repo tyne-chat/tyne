@@ -79,7 +79,7 @@ export function calculatePersonaFrecencyScore(
 export function calculatePersonaMatchScore(
 	personaName: string,
 	query: string,
-	systemName?: string | null,
+	displayTagText?: string | null,
 	ownerUsername?: string | null,
 	ownerNickname?: string | null,
 	ownerGlobalName?: string | null,
@@ -97,11 +97,11 @@ export function calculatePersonaMatchScore(
 	if (name.includes(q)) {
 		return 500;
 	}
-	const sys = (systemName ?? '').toLowerCase();
-	if (sys.startsWith(q)) {
+	const tag = (displayTagText ?? '').toLowerCase();
+	if (tag.startsWith(q)) {
 		return 350;
 	}
-	if (sys.includes(q)) {
+	if (tag.includes(q)) {
 		return 250;
 	}
 	const user = (ownerUsername ?? '').toLowerCase();
@@ -198,7 +198,6 @@ export class PersonaService {
 			name: data.name,
 			avatar_url: data.avatar_url,
 			banner_url: data.banner_url,
-			system_name: data.system_name,
 			pronouns: data.pronouns,
 			color: data.color,
 			avatar_color: data.avatar_color,
@@ -232,7 +231,6 @@ export class PersonaService {
 			name: data.name,
 			avatar_url: data.avatar_url,
 			banner_url: data.banner_url,
-			system_name: data.system_name,
 			pronouns: data.pronouns,
 			color: data.color,
 			avatar_color: data.avatar_color,
@@ -332,7 +330,6 @@ export class PersonaService {
 					name: item.name,
 					avatar_url: item.avatar_url,
 					banner_url: item.banner_url,
-					system_name: item.system_name,
 					pronouns: item.pronouns,
 					color: item.color,
 					avatar_color: item.avatar_color,
@@ -354,7 +351,6 @@ export class PersonaService {
 					name: item.name,
 					avatar_url: item.avatar_url,
 					banner_url: item.banner_url,
-					system_name: item.system_name,
 					pronouns: item.pronouns,
 					color: item.color,
 					avatar_color: item.avatar_color,
@@ -475,7 +471,7 @@ export class PersonaService {
 
 		await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', response);
 		if (displayTagChanged) {
-			await this.dispatchToMutualGuilds(userId);
+			await this.dispatchToMutualGuilds(userId, undefined, 'sync', updatedRow);
 		}
 
 		return response;
@@ -501,7 +497,10 @@ export class PersonaService {
 		const maxLimit = Math.min(Math.max(limit ?? 100, 1), 1000);
 		const normalizedQuery = (query ?? '').trim().toLowerCase();
 
-		const allPersonas = await this.deps.personaRepository.findByUserIds(candidateUserIds);
+		const [allPersonas, settingsMap] = await Promise.all([
+			this.deps.personaRepository.findByUserIds(candidateUserIds),
+			this.deps.personaRepository.findSettingsByUserIds(candidateUserIds),
+		]);
 
 		// Filter according to privacy model:
 		// - caller can see all of their own personas
@@ -517,11 +516,12 @@ export class PersonaService {
 		const matched = visiblePersonas.filter((persona) => {
 			if (!normalizedQuery) return true;
 			const nameMatch = persona.name.toLowerCase().includes(normalizedQuery);
-			const systemMatch = persona.systemName?.toLowerCase().includes(normalizedQuery);
+			const userSettings = settingsMap.get(persona.userId.toString());
+			const tagMatch = userSettings?.display_tag_text?.toLowerCase().includes(normalizedQuery);
 			const owner = userMap.get(persona.userId);
 			const ownerUserMatch = owner?.username.toLowerCase().includes(normalizedQuery);
 			const ownerNickMatch = owner?.nickname?.toLowerCase().includes(normalizedQuery);
-			return nameMatch || Boolean(systemMatch) || Boolean(ownerUserMatch) || Boolean(ownerNickMatch);
+			return nameMatch || Boolean(tagMatch) || Boolean(ownerUserMatch) || Boolean(ownerNickMatch);
 		});
 
 		// Sort: match strength tier first, then frecency (recency + frequency), then alphabetical
@@ -529,10 +529,12 @@ export class PersonaService {
 		matched.sort((a, b) => {
 			const aOwner = userMap.get(a.userId);
 			const bOwner = userMap.get(b.userId);
+			const aSettings = settingsMap.get(a.userId.toString());
+			const bSettings = settingsMap.get(b.userId.toString());
 			const aMatch = calculatePersonaMatchScore(
 				a.name,
 				normalizedQuery,
-				a.systemName,
+				aSettings?.display_tag_text,
 				aOwner?.username,
 				aOwner?.nickname,
 				aOwner?.globalName,
@@ -540,7 +542,7 @@ export class PersonaService {
 			const bMatch = calculatePersonaMatchScore(
 				b.name,
 				normalizedQuery,
-				b.systemName,
+				bSettings?.display_tag_text,
 				bOwner?.username,
 				bOwner?.nickname,
 				bOwner?.globalName,
@@ -559,11 +561,14 @@ export class PersonaService {
 		const results = matched.slice(0, maxLimit);
 		return results.map((persona) => {
 			const owner = userMap.get(persona.userId);
+			const userSettings = settingsMap.get(persona.userId.toString());
 			return {
 				id: persona.id.toString(),
 				name: persona.name,
 				avatar_url: persona.avatarUrl,
-				system_name: persona.systemName,
+				banner_url: persona.bannerUrl,
+				display_tag_text: userSettings?.display_tag_text ?? null,
+				display_tag_icon: userSettings?.display_tag_icon ?? null,
 				pronouns: persona.pronouns,
 				color: persona.color,
 				bio: persona.bio,
@@ -605,10 +610,12 @@ export class PersonaService {
 		userId: UserID,
 		persona?: Persona | null,
 		action: 'update' | 'delete' | 'sync' = 'sync',
+		settings?: UserPersonaSettingsRow | null,
 	): Promise<void> {
 		if (!this.deps.gatewayService) return;
 		try {
-			const personaData = persona ? persona.toSubprofileResponse() : undefined;
+			const effectiveSettings = settings ?? (await this.deps.personaRepository.findSettings(userId));
+			const personaData = persona ? persona.toSubprofileResponse(effectiveSettings) : undefined;
 			const dispatches: Array<Promise<void>> = [];
 
 			if (this.deps.userGuildRepository) {
@@ -623,6 +630,8 @@ export class PersonaService {
 									guild_id: guildId.toString(),
 									user_id: userId.toString(),
 									...(personaData ? {persona: personaData} : {}),
+									display_tag_text: effectiveSettings?.display_tag_text ?? null,
+									display_tag_icon: effectiveSettings?.display_tag_icon ?? null,
 									action,
 								},
 							}),
@@ -651,6 +660,8 @@ export class PersonaService {
 							data: {
 								user_id: userId.toString(),
 								...(personaData ? {persona: personaData} : {}),
+								display_tag_text: effectiveSettings?.display_tag_text ?? null,
+								display_tag_icon: effectiveSettings?.display_tag_icon ?? null,
 								action,
 							},
 						}),

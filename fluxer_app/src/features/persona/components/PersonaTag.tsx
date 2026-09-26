@@ -36,7 +36,6 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 		const isCurrentUser = Boolean(currentUserId && rootUser?.id && rootUser.id === currentUserId);
 		const tagText = (
 			subprofile.display_tag_text ??
-			subprofile.system_name ??
 			(isCurrentUser && !message ? PersonaStore.displayTagText : '') ??
 			''
 		).trim();
