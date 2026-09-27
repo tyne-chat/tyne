@@ -22,6 +22,11 @@ import {makeSyncedField} from '@app/features/user/state/SyncedField';
 import {EmojiPickerStateSchema} from '@fluxer/schema/src/gen/fluxer/user/preferences/v1/pickers_pb';
 import {makeAutoObservable, untracked} from 'mobx';
 
+// Fork imports.
+
+import UnicodeEmojis from '@app/features/expressions/utils/UnicodeEmojis';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 const logger = new Logger('EmojiPicker');
 
 export const UNICODE_EMOJI_USAGE_KEY_PREFIX = 'unicode:';
@@ -76,9 +81,20 @@ class EmojiPicker {
 	private ranking: UsageRanking = EMPTY_USAGE_RANKING;
 	private rankingDirty = true;
 	private rankingVersion = 0;
+	private personaUsageMap: Record<string, Record<string, UsageEntry>> = {};
+	private personaUsageLoaded = false;
 
 	constructor() {
-		makeAutoObservable<EmojiPicker, '_favoriteSet' | '_collapsedSet' | 'ranking' | 'rankingDirty' | 'rankingVersion'>(
+		makeAutoObservable<
+			EmojiPicker,
+			| '_favoriteSet'
+			| '_collapsedSet'
+			| 'ranking'
+			| 'rankingDirty'
+			| 'rankingVersion'
+			| 'personaUsageMap'
+			| 'personaUsageLoaded'
+		>(
 			this,
 			{
 				_favoriteSet: false,
@@ -86,6 +102,8 @@ class EmojiPicker {
 				ranking: false,
 				rankingDirty: false,
 				rankingVersion: false,
+				personaUsageMap: false,
+				personaUsageLoaded: false,
 			},
 			{autoBind: true},
 		);
@@ -138,7 +156,30 @@ class EmojiPicker {
 		return this.ranking;
 	}
 
-	trackEmojiUsage(emojiKey: string): void {
+	private loadPersonaUsage(): void {
+		if (this.personaUsageLoaded || typeof window === 'undefined') return;
+		this.personaUsageLoaded = true;
+		try {
+			const raw = window.localStorage.getItem('fluxer_persona_emoji_usage');
+			if (raw) {
+				this.personaUsageMap = JSON.parse(raw);
+			}
+		} catch {}
+	}
+
+	private savePersonaUsage(): void {
+		if (typeof window === 'undefined') return;
+		try {
+			window.localStorage.setItem('fluxer_persona_emoji_usage', JSON.stringify(this.personaUsageMap));
+		} catch {}
+	}
+
+	getPersonaUsage(personaId: string): Record<string, UsageEntry> | undefined {
+		this.loadPersonaUsage();
+		return this.personaUsageMap[personaId];
+	}
+
+	trackEmojiUsage(emojiKey: string, personaId?: string | null): void {
 		if (!isEmojiUsageKey(emojiKey)) {
 			logger.warn(`Ignored usage tracking for invalid emoji key: ${emojiKey}`);
 			return;
@@ -149,10 +190,18 @@ class EmojiPicker {
 			this.emojiUsage = sanitizeUsageMap(this.emojiUsage, now);
 		}
 		this.rankingDirty = true;
+
+		if (personaId) {
+			this.loadPersonaUsage();
+			const pMap = this.personaUsageMap[personaId] ?? {};
+			pMap[emojiKey] = bumpUsageEntry(pMap[emojiKey], now);
+			this.personaUsageMap[personaId] = pMap;
+			this.savePersonaUsage();
+		}
 	}
 
-	trackEmoji(emoji: FlatEmoji): void {
-		this.trackEmojiUsage(getEmojiUsageKey(emoji));
+	trackEmoji(emoji: FlatEmoji, personaId?: string | null): void {
+		this.trackEmojiUsage(getEmojiUsageKey(emoji), personaId);
 	}
 
 	toggleFavorite(emojiKey: string): void {
@@ -199,24 +248,119 @@ class EmojiPicker {
 	getFrecentEmojiKeys(
 		limit: number = MAX_FRECENT_EMOJIS,
 		ranking: UsageRanking = this.getRanking(),
+		personaId?: string | null,
 	): ReadonlyArray<string> {
-		if (limit > 0 && ranking.rankedKeys.length > limit) {
-			return ranking.rankedKeys.slice(0, limit);
+		if (!personaId) {
+			if (limit > 0 && ranking.rankedKeys.length > limit) {
+				return ranking.rankedKeys.slice(0, limit);
+			}
+			return ranking.rankedKeys;
 		}
-		return ranking.rankedKeys;
+
+		const persona = PersonaStore.personas.find((p) => p.id === personaId);
+		const result: Array<string> = [];
+		const seen = new Set<string>();
+
+		if (persona) {
+			const sigs = persona.signature_emojis ?? persona.signatureEmojis ?? [];
+			for (const sig of sigs) {
+				let key: string | null = null;
+				if (sig.id) {
+					key = `${CUSTOM_EMOJI_USAGE_KEY_PREFIX}:${sig.id}`;
+				} else if (sig.name) {
+					const surrogate = UnicodeEmojis.normalizeEmojiNameToSurrogate(sig.name);
+					const uniqueName = UnicodeEmojis.getSurrogateName(surrogate) || sig.name;
+					key = `${UNICODE_EMOJI_USAGE_KEY_PREFIX}${uniqueName}`;
+				}
+				if (key && !seen.has(key)) {
+					seen.add(key);
+					result.push(key);
+				}
+			}
+		}
+
+		const personaUsage = this.getPersonaUsage(personaId);
+		if (personaUsage) {
+			const rankedPersonaKeys = rankUsageMap(personaUsage, Date.now(), 0).rankedKeys;
+			for (const key of rankedPersonaKeys) {
+				if (!seen.has(key)) {
+					seen.add(key);
+					result.push(key);
+				}
+			}
+		}
+
+		for (const key of ranking.rankedKeys) {
+			if (!seen.has(key)) {
+				seen.add(key);
+				result.push(key);
+			}
+		}
+
+		if (limit > 0 && result.length > limit) {
+			return result.slice(0, limit);
+		}
+		return result;
 	}
 
 	getFrecentEmojis(
 		allEmojis: ReadonlyArray<FlatEmoji>,
 		limit: number = MAX_FRECENT_EMOJIS,
 		ranking: UsageRanking = this.getRanking(),
+		personaId?: string | null,
 	): Array<FlatEmoji> {
 		const index = getEmojiKeyIndex(allEmojis);
 		const result: Array<FlatEmoji> = [];
+		const seenKeys = new Set<string>();
+
+		const addEmoji = (emoji: FlatEmoji | undefined, key?: string) => {
+			if (!emoji) return;
+			const usageKey = key ?? getEmojiUsageKey(emoji);
+			if (seenKeys.has(usageKey)) return;
+			seenKeys.add(usageKey);
+			result.push(emoji);
+		};
+
+		if (personaId) {
+			const persona = PersonaStore.personas.find((p) => p.id === personaId);
+			if (persona) {
+				const sigs = persona.signature_emojis ?? persona.signatureEmojis ?? [];
+				for (const sig of sigs) {
+					if (sig.id) {
+						const match = allEmojis.find((e) => e.id === sig.id);
+						if (match) addEmoji(match);
+					} else if (sig.name) {
+						const surrogate = UnicodeEmojis.normalizeEmojiNameToSurrogate(sig.name);
+						const uniqueName = UnicodeEmojis.getSurrogateName(surrogate) || sig.name;
+						const match = allEmojis.find(
+							(e) =>
+								!e.id &&
+								(e.uniqueName === uniqueName ||
+									e.uniqueName === sig.name ||
+									e.name === sig.name ||
+									e.name === surrogate),
+						);
+						if (match) addEmoji(match);
+					}
+					if (limit > 0 && result.length >= limit) return result;
+				}
+			}
+
+			const personaUsage = this.getPersonaUsage(personaId);
+			if (personaUsage) {
+				const rankedPersonaKeys = rankUsageMap(personaUsage, Date.now(), 0).rankedKeys;
+				for (const key of rankedPersonaKeys) {
+					const emoji = index.get(key);
+					if (emoji) addEmoji(emoji, key);
+					if (limit > 0 && result.length >= limit) return result;
+				}
+			}
+		}
+
 		for (const key of ranking.rankedKeys) {
 			const emoji = index.get(key);
 			if (!emoji) continue;
-			result.push(emoji);
+			addEmoji(emoji, key);
 			if (limit > 0 && result.length >= limit) break;
 		}
 		return result;

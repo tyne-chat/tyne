@@ -22,6 +22,10 @@ msgstr "Active Persona Mode"
 msgid "Active persona mode"
 msgstr "Active persona mode"
 
+#. placeholder {0}: formData.signatureEmojis.length
+msgid "Add Emoji ({0}/{MAX_SIGNATURE_EMOJIS_PER_PERSONA})"
+msgstr "新增表情符號 ({0}/{MAX_SIGNATURE_EMOJIS_PER_PERSONA})"
+
 msgid "Add Persona"
 msgstr "Add Persona"
 
@@ -237,6 +241,10 @@ msgstr "Manage and create your personas"
 msgid "Manual"
 msgstr "Manual"
 
+#. Validation error when signature emoji limit is reached
+msgid "Maximum {max} signature emojis allowed per persona"
+msgstr "每個角色最多允許 {max} 個專屬表情符號"
+
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
 msgstr "Member #{index}"
@@ -349,8 +357,22 @@ msgstr "Public"
 msgid "Public persona"
 msgstr "Public persona"
 
+msgid "Reacting as <0>{reactorName}</0>"
+msgstr "正在以 <0>{reactorName}</0> 身分回應"
+
+#. Tooltip hint showing effective reacting persona or user on quick reaction hover.
+msgid "Reacting as {name}"
+msgstr "以 {name} 的身分回應"
+
+msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
+msgstr "使用專屬表情符號回應時，無論目前啟用的角色是誰，都會一律以此角色身分回應。"
+
 msgid "Recent Personas"
 msgstr "Recent Personas"
+
+#. Aria label for removing signature emoji
+msgid "Remove signature emoji"
+msgstr "移除專屬表情符號"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
@@ -412,6 +434,13 @@ msgstr "Show personas button"
 msgid "Show server list"
 msgstr "Show server list"
 
+msgid "Signature Emojis"
+msgstr "專屬表情符號"
+
+#. Validation error when signature emoji is already used by another persona
+msgid "Signature emoji already in use by persona \"{name}\""
+msgstr "專屬表情符號已由角色「{name}」使用"
+
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "Skipped member because they have no name configured."
@@ -458,6 +487,10 @@ msgstr "Tell us about this persona..."
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "The chosen file is not a valid JSON object."
+
+#. Validation error when signature emoji is duplicated within the same persona
+msgid "This emoji is already added as a signature emoji"
+msgstr "此表情符號已新增為專屬表情符號"
 
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "This is a preview of how your display tag will look in chat."
