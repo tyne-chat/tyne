@@ -182,7 +182,7 @@ export const useTextareaDraftAndTyping = ({
 			? {
 					id: effectivePersona.id,
 					name: effectivePersona.name,
-					avatar: effectivePersona.avatar_url ?? effectivePersona.avatarUrl ?? null,
+					avatar: effectivePersona.avatar_hash ?? effectivePersona.avatarHash ?? null,
 					avatar_color: effectivePersona.color ?? effectivePersona.accentColor ?? null,
 					display_tag_text: PersonaStore.displayTagText || null,
 					display_tag_icon: PersonaStore.displayTagIcon || null,
