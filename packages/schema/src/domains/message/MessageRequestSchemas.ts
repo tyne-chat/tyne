@@ -494,7 +494,7 @@ export const AddReactionBodySchema = z
 	.object({
 		persona_id: SnowflakeStringType.nullish().optional().describe('Persona ID to attribute the reaction to'),
 	})
-	.optional();
+	.nullish();
 
 export type AddReactionBodySchema = z.infer<typeof AddReactionBodySchema>;
 
