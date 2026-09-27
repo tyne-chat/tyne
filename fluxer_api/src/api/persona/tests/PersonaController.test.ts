@@ -448,6 +448,99 @@ describe('PersonaController', () => {
 				.expect(HTTP_STATUS.BAD_REQUEST)
 				.execute();
 		});
+
+		test('rejects malformed import payloads', async () => {
+			// 1. Empty object
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body({})
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// 2. Member with empty name
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body([{name: ''}])
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// 3. Member with oversized name (> 100 chars)
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body([{name: 'a'.repeat(101)}])
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// 4. Member with oversized bio (> 4096 chars)
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body([{name: 'Valid Name', bio: 'b'.repeat(4097)}])
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// 5. Member with more than 5 tags
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body([
+					{
+						name: 'Valid Name',
+						persona_tags: [
+							{prefix: '1:'},
+							{prefix: '2:'},
+							{prefix: '3:'},
+							{prefix: '4:'},
+							{prefix: '5:'},
+							{prefix: '6:'},
+						],
+					},
+				])
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+
+			// 6. Batch exceeding 250 personas
+			const oversizedBatch = Array.from({length: 251}, (_, i) => ({name: `P${i}`}));
+			await createBuilder(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body(oversizedBatch)
+				.expect(HTTP_STATUS.BAD_REQUEST)
+				.execute();
+		});
+
+		test('safely imports personas with Unicode, emojis, surrogate pairs, and HTML strings', async () => {
+			const batch = [
+				{
+					name: '🌸 𝕬𝖑𝖎𝖈𝖊 & 𝕭𝖔𝖇 (She/They) 🌸',
+					bio: '<p>Testing <b>formatting</b> & surrogate pairs: \uD83D\uDC69\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67</p>',
+					pronouns: 'she/they/✨',
+					external_uuid: '00000000-0000-0000-0000-000000000099',
+				},
+				{
+					name: '<script>alert("xss")</script>',
+					bio: 'HTML script tag in name should be stored as plain string',
+					avatar_hash: null,
+					banner_hash: null,
+					pronouns: null,
+					color: null,
+					avatar_color: null,
+				},
+			];
+
+			const res = await createBuilder<Array<PersonaResponse>>(harness, account.token)
+				.post('/users/@me/personas/import')
+				.body(batch)
+				.expect(HTTP_STATUS.OK)
+				.execute();
+
+			expect(res).toHaveLength(2);
+			expect(res[0]!.name).toBe('🌸 𝕬𝖑𝖎𝖈𝖊 & 𝕭𝖔𝖇 (She/They) 🌸');
+			expect(res[0]!.bio).toBe(
+				'<p>Testing <b>formatting</b> & surrogate pairs: \uD83D\uDC69\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67</p>',
+			);
+			expect(res[0]!.pronouns).toBe('she/they/✨');
+			expect(res[1]!.name).toBe('<script>alert("xss")</script>');
+			expect(res[1]!.avatar_hash).toBeNull();
+			expect(res[1]!.banner_hash).toBeNull();
+		});
 	});
 
 	describe('Persona banner support', () => {
