@@ -20,6 +20,15 @@ export type PersonaTag = z.infer<typeof PersonaTagSchema>;
 export const PersonaVisibilitySchema = z.enum(['unlisted', 'public', 'private']).default('unlisted');
 export type PersonaVisibility = z.infer<typeof PersonaVisibilitySchema>;
 
+export const MAX_SIGNATURE_EMOJIS_PER_PERSONA = 20;
+
+export const SignatureEmojiSchema = z.object({
+	id: SnowflakeStringType.nullish().describe('Custom emoji ID (null for Unicode)'),
+	name: z.string().min(1).max(64).describe('Emoji name or Unicode character'),
+	animated: z.boolean().nullish().describe('Whether the emoji is animated'),
+});
+export type SignatureEmoji = z.infer<typeof SignatureEmojiSchema>;
+
 export const PersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
@@ -31,6 +40,7 @@ export const PersonaResponseSchema = z.object({
 	bio: z.string().nullish().describe('Optional persona bio'),
 	auto_tag_disabled: z.boolean().default(false).describe('Whether persona tag matching is disabled'),
 	persona_tags: z.array(PersonaTagSchema).default([]).describe('Persona prefix and suffix tags'),
+	signature_emojis: z.array(SignatureEmojiSchema).optional().default([]).describe('Signature emojis for this persona'),
 	use_count: z.number().int().default(0).describe('Usage counter for frecency ranking'),
 	last_used_at_ms: z.string().nullish().describe('Timestamp in ms when the persona was last used'),
 	visibility: PersonaVisibilitySchema.describe('Visibility setting: unlisted (default), public, or private'),
@@ -70,6 +80,11 @@ export const PersonaCreateRequestSchema = z.object({
 	bio: z.string().max(4096).nullish().optional().describe('Optional persona bio'),
 	auto_tag_disabled: z.boolean().optional().describe('Whether auto-tagging is disabled'),
 	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Persona prefix/suffix tags'),
+	signature_emojis: z
+		.array(SignatureEmojiSchema)
+		.max(MAX_SIGNATURE_EMOJIS_PER_PERSONA)
+		.optional()
+		.describe('Signature emojis for this persona'),
 	visibility: PersonaVisibilitySchema.optional().describe('Visibility: unlisted (default), public, or private'),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID (e.g. PluralKit)'),
 });
@@ -85,6 +100,11 @@ export const PersonaUpdateRequestSchema = z.object({
 	bio: z.string().max(4096).nullish().optional().describe('Optional persona bio'),
 	auto_tag_disabled: z.boolean().optional().describe('Whether auto-tagging is disabled'),
 	persona_tags: z.array(PersonaTagSchema).max(5).optional().describe('Persona prefix/suffix tags'),
+	signature_emojis: z
+		.array(SignatureEmojiSchema)
+		.max(MAX_SIGNATURE_EMOJIS_PER_PERSONA)
+		.optional()
+		.describe('Signature emojis for this persona'),
 	visibility: z.enum(['unlisted', 'public', 'private']).optional().describe('Visibility setting'),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID'),
 });

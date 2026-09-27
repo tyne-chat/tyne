@@ -24,6 +24,7 @@ interface MessageReactionRemovePayload {
 	emoji: ReactionEmojiPayload;
 	guild_id?: string;
 	member?: GuildMemberData;
+	persona_id?: string | null;
 }
 
 export function handleMessageReactionRemove(data: MessageReactionRemovePayload, _context: GatewayHandlerContext): void {
@@ -32,7 +33,7 @@ export function handleMessageReactionRemove(data: MessageReactionRemovePayload, 
 		GuildMembers.hydrateIfMissing(data.guild_id, data.member);
 	}
 	SavedMessages.handleMessageReactionRemove(data.message_id);
-	MessageReactions.handleReactionRemove(data.message_id, data.user_id, emoji);
+	MessageReactions.handleReactionRemove(data.message_id, data.user_id, emoji, undefined, data.persona_id);
 	ChannelPins.handleMessageReactionRemove(data.channel_id, data.message_id);
 	ForumPosts.handleReaction(
 		data.channel_id,
