@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+// @ts-expect-error pg types are not installed in fluxer_api
 import pg from 'pg';
 
 async function main(): Promise<void> {
