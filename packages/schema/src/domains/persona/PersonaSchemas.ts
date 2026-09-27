@@ -7,8 +7,8 @@ import {PersonaTagSchema, PersonaVisibilitySchema} from './PersonaApiSchemas';
 export const PersonaSchema = z.object({
 	id: z.string().min(1).max(64),
 	name: createStringType(1, 100).describe('Persona display name'),
-	avatar_url: z.string().max(256).nullish().describe('Avatar asset URL or hash'),
-	banner_url: z.string().max(256).nullish().describe('Banner asset URL or hash'),
+	avatar_hash: z.string().max(64).nullish().describe('Avatar asset hash'),
+	banner_hash: z.string().max(64).nullish().describe('Banner asset hash'),
 	persona_tags: z.array(PersonaTagSchema).optional(),
 	pronouns: z.string().max(100).nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional color integer'),
