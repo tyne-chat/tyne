@@ -18,10 +18,14 @@ import {
 	transitionReactionUsersSnapshot,
 } from '@app/features/messaging/state/ReactionUsersStateMachine';
 import {getReactionKey, type ReactionEmoji} from '@app/features/messaging/utils/ReactionUtils';
-import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import type {MessageReaction} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {UserPartial} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
+
+// Fork imports.
+
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {User} from '@app/features/user/models/User';
 
 export type {FetchStatus};
 
@@ -205,13 +209,23 @@ class MessageReactionsManager {
 		userId: string,
 		emoji: ReactionEmoji,
 		isCurrentUser = Authentication.currentUserId === userId,
+		personaId?: string | null,
 	): void {
-		this.commitReactionEvent(messageId, {type: 'reaction.add', emoji, userId, isCurrentUser});
+		this.commitReactionEvent(messageId, {type: 'reaction.add', emoji, userId, isCurrentUser, personaId});
 		const user = Users.getUser(userId);
 		if (user) {
+			let reactorUser = user;
+			if (personaId && personaId !== '0') {
+				const persona = PersonaStore.getKnownPersona(personaId);
+				reactorUser = new User({
+					...user,
+					persona_id: personaId,
+					subprofile: persona ?? (user as any).subprofile ?? null,
+				} as any);
+			}
 			this.commitReactorEvent(messageId, emoji, this.getOrCreateReactorEntry(messageId, emoji), {
 				type: 'user.add',
-				user,
+				user: reactorUser,
 			});
 		}
 	}
@@ -221,10 +235,11 @@ class MessageReactionsManager {
 		userId: string,
 		emoji: ReactionEmoji,
 		isCurrentUser = Authentication.currentUserId === userId,
+		personaId?: string | null,
 	): void {
-		this.commitReactionEvent(messageId, {type: 'reaction.remove', emoji, userId, isCurrentUser});
+		this.commitReactionEvent(messageId, {type: 'reaction.remove', emoji, userId, isCurrentUser, personaId});
 		const entry = this.getReactionEntry(messageId, emoji);
-		if (entry) this.commitReactorEvent(messageId, emoji, entry, {type: 'user.remove', userId});
+		if (entry) this.commitReactorEvent(messageId, emoji, entry, {type: 'user.remove', userId, personaId});
 	}
 
 	handleReactionRemoveAll(messageId: string): void {
@@ -335,7 +350,10 @@ class MessageReactionsManager {
 		this.commitReactionEvent(messageId, {
 			type: 'reaction.trackReactors',
 			emoji,
-			userIds: users.map((user) => user.id),
+			userIds: users.map((user) => {
+				const personaId = (user as any).persona_id ?? (user as any).subprofile?.id;
+				return personaId && personaId !== '0' ? `${user.id}:${personaId}` : user.id;
+			}),
 		});
 	}
 

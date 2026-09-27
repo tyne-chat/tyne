@@ -37,6 +37,12 @@ import {AnimatePresence, motion} from 'framer-motion';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import Drafts from '@app/features/messaging/state/MessagingDrafts';
+import {hasPersonaReacted} from '@app/features/messaging/utils/ReactionUtils';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 const PRESS_TO_REMOVE_REACTION_DESCRIPTOR = msg({
 	message: 'press to remove reaction',
 	comment: 'Label in the channel and chat message reactions. Keep the tone plain and specific.',
@@ -87,14 +93,25 @@ const MessageReactionItem = observer(
 			}
 		}, [reaction.count, prevCount]);
 		const isDisabled = isPreview || disableInteraction;
+		const draft = Drafts.getDraft(message.channelId);
+		const effectivePersona = PersonaStore.getEffectiveReactionPersona(reaction.emoji, draft);
+		const effectivePersonaId = effectivePersona?.id ?? null;
+		const hasEffectivePersonaReacted = hasPersonaReacted(reaction, effectivePersonaId);
 		const handleClick = () => {
 			if (isDisabled) {
 				return;
 			}
-			if (reaction.me) {
-				ReactionCommands.removeReaction(i18n, message.channelId, message.id, reaction.emoji);
+			if (hasEffectivePersonaReacted) {
+				ReactionCommands.removeReaction(
+					i18n,
+					message.channelId,
+					message.id,
+					reaction.emoji,
+					undefined,
+					effectivePersonaId,
+				);
 			} else {
-				ReactionCommands.addReaction(i18n, message.channelId, message.id, reaction.emoji);
+				ReactionCommands.addReaction(i18n, message.channelId, message.id, reaction.emoji, effectivePersonaId);
 			}
 		};
 		const handleLongPress = () => {
@@ -147,7 +164,7 @@ const MessageReactionItem = observer(
 				other: '# reactions',
 			},
 		);
-		const actionText = reaction.me
+		const actionText = hasEffectivePersonaReacted
 			? i18n._(PRESS_TO_REMOVE_REACTION_DESCRIPTOR)
 			: i18n._(PRESS_TO_ADD_REACTION_DESCRIPTOR);
 		const ariaLabel = isDisabled
@@ -159,7 +176,7 @@ const MessageReactionItem = observer(
 					type="button"
 					className={clsx(styles.reactionButton, isDisabled && styles.reactionButtonDisabled)}
 					aria-label={ariaLabel}
-					aria-pressed={isDisabled ? undefined : reaction.me}
+					aria-pressed={isDisabled ? undefined : hasEffectivePersonaReacted}
 					aria-disabled={isDisabled || undefined}
 					disabled={disableInteraction}
 					tabIndex={isDisabled ? -1 : undefined}
