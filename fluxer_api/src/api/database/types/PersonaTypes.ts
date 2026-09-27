@@ -16,6 +16,7 @@ export interface PersonaRow {
 	bio: Nullish<string>;
 	auto_tag_disabled: boolean;
 	persona_tags: Nullish<string>;
+	signature_emojis?: Nullish<string>;
 	use_count: number;
 	last_used_at_ms: Nullish<bigint>;
 	visibility: string;
@@ -38,6 +39,7 @@ export const PERSONA_COLUMNS = [
 	'bio',
 	'auto_tag_disabled',
 	'persona_tags',
+	'signature_emojis',
 	'use_count',
 	'last_used_at_ms',
 	'visibility',
