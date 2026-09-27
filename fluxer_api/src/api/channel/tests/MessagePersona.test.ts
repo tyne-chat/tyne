@@ -14,6 +14,7 @@ import type {INatsConnectionManager} from '@pkgs/nats/src/INatsConnectionManager
 import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
 import {createChannelID, createGuildID, createMessageID, createPersonaID, createUserID} from '../../BrandedTypes';
 import {Message} from '../../models/Message';
+import {PersonaRepository} from '../../persona/PersonaRepository';
 import {normalizeMessageSubprofile} from '../services/message/MessageHelpers';
 import {MessageResponseDataService} from '../services/message/MessageResponseDataService';
 
@@ -58,6 +59,62 @@ class FakeConnectionManager implements INatsConnectionManager {
 									stickers: [],
 									persona_id: m.persona_id ?? null,
 								})),
+							}),
+						),
+					};
+				}
+				if (payload.op === 'ListResponses') {
+					return {
+						data: encoder.encode(
+							JSON.stringify({
+								FoundApiMany: [
+									{
+										id: '1001',
+										channel_id: '500',
+										author: {id: '3', username: 'author', discriminator: '0001', avatar: null, flags: 0},
+										type: MessageTypes.DEFAULT,
+										flags: 0,
+										content: 'list message',
+										timestamp: '2026-01-01T00:00:00.000Z',
+										edited_timestamp: null,
+										pinned: false,
+										mention_everyone: false,
+										tts: false,
+										mentions: [],
+										mention_roles: [],
+										embeds: [],
+										attachments: [],
+										stickers: [],
+										persona_id: null,
+									},
+								],
+							}),
+						),
+					};
+				}
+				if (payload.op === 'GetResponseById') {
+					return {
+						data: encoder.encode(
+							JSON.stringify({
+								FoundApi: {
+									id: '1002',
+									channel_id: '500',
+									author: {id: '3', username: 'author', discriminator: '0001', avatar: null, flags: 0},
+									type: MessageTypes.DEFAULT,
+									flags: 0,
+									content: 'single message',
+									timestamp: '2026-01-01T00:00:00.000Z',
+									edited_timestamp: null,
+									pinned: false,
+									mention_everyone: false,
+									tts: false,
+									mentions: [],
+									mention_roles: [],
+									embeds: [],
+									attachments: [],
+									stickers: [],
+									persona_id: null,
+								},
 							}),
 						),
 					};
@@ -404,5 +461,75 @@ describe('Personal Notes Persona Integration', () => {
 		const updatedMessages = await getMessages(harness, account.token, personalNotesChannelId);
 		const fetchedUpdated = updatedMessages.find((m) => m.id === sentMessage.id);
 		expect(fetchedUpdated?.subprofile?.name).toBe('Alice Renamed');
+
+		// Verify persona usage was recorded in PersonaRepository
+		const repo = new PersonaRepository();
+		const refreshed = await repo.findById(createUserID(BigInt(account.userId)), createPersonaID(BigInt(persona.id)));
+		expect(refreshed?.useCount).toBeGreaterThanOrEqual(1);
+	});
+
+	it('updates persona_id on message edit and records usage', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+		const personalNotesChannelId = account.userId;
+
+		const persona1 = await createBuilder<{id: string; name: string}>(harness, account.token)
+			.post('/users/@me/personas')
+			.body({name: 'Persona One'})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+
+		const persona2 = await createBuilder<{id: string; name: string}>(harness, account.token)
+			.post('/users/@me/personas')
+			.body({name: 'Persona Two'})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+
+		const sent = await createBuilder<MessageResponse>(harness, account.token)
+			.post(`/channels/${personalNotesChannelId}/messages`)
+			.body({
+				content: 'Initial message',
+				subprofile: {id: persona1.id, name: persona1.name},
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		expect(sent.subprofile?.id).toBe(persona1.id);
+
+		// Edit message to switch to persona2
+		const edited = await createBuilder<MessageResponse>(harness, account.token)
+			.patch(`/channels/${personalNotesChannelId}/messages/${sent.id}`)
+			.body({
+				content: 'Edited message',
+				subprofile: {id: persona2.id, name: persona2.name},
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		expect(edited.subprofile?.id).toBe(persona2.id);
+		expect(edited.subprofile?.name).toBe('Persona Two');
+	});
+
+	it('handles listMessages and getMessage in MessageResponseDataService', async () => {
+		const fakeNats = new FakeConnectionManager();
+		const service = new MessageResponseDataService(fakeNats);
+
+		const listRes = await service.listMessages({
+			userId: createUserID(3n),
+			channelId: createChannelID(500n),
+			limit: 10,
+			access: {canReadMessageHistory: true} as any,
+		});
+		expect(listRes).toHaveLength(1);
+		expect(listRes[0].content).toBe('list message');
+
+		const singleRes = await service.getMessage({
+			userId: createUserID(3n),
+			channelId: createChannelID(500n),
+			messageId: createMessageID(1002n),
+			access: {canReadMessageHistory: true} as any,
+		});
+		expect(singleRes).toBeDefined();
+		expect(singleRes?.content).toBe('single message');
 	});
 });
