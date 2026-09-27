@@ -100,7 +100,7 @@ describe('useAutocompletePersonaSearch', () => {
 			{
 				id: 'p1',
 				name: 'Alice',
-				avatar_url: 'hash1',
+				avatar_hash: 'hash1',
 				color: 0xff0000,
 				display_tag_text: 'Wonderland Sys',
 				visibility: 'public',
