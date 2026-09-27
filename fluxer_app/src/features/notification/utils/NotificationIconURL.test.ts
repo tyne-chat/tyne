@@ -1,103 +1,125 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// @vitest-environment happy-dom
 
-import {describe, expect, it, vi} from 'vitest';
-import {getNotificationIconURL} from './NotificationIconURL';
+import GuildMembers from '@app/features/member/state/GuildMembers';
+import {
+	getNotificationIconURL,
+	NATIVE_NOTIFICATION_ICON_CSS_SIZE,
+} from '@app/features/notification/utils/NotificationIconURL';
+import {isDesktop} from '@app/features/ui/utils/NativeUtils';
+import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 vi.mock('@app/features/member/state/GuildMembers', () => ({
 	default: {
-		getMember: vi.fn().mockReturnValue(null),
+		getMember: vi.fn(),
 	},
 }));
 
 vi.mock('@app/features/ui/utils/NativeUtils', () => ({
-	isDesktop: vi.fn().mockReturnValue(false),
+	isDesktop: vi.fn(),
 }));
 
 vi.mock('@app/features/user/utils/AvatarUtils', () => ({
-	getUserAvatarURL: vi.fn().mockReturnValue('https://cdn.fluxer.app/avatars/user-fallback.png'),
-	getUserNotificationAvatarURL: vi.fn().mockReturnValue('https://cdn.fluxer.app/avatars/user-native-fallback.png'),
-	getGuildMemberDisplayAvatarURL: vi.fn().mockReturnValue('https://cdn.fluxer.app/avatars/member-fallback.png'),
-	getGuildMemberNotificationAvatarURL: vi
-		.fn()
-		.mockReturnValue('https://cdn.fluxer.app/avatars/member-native-fallback.png'),
+	getGuildMemberNotificationAvatarURL: vi.fn(),
+	getGuildMemberDisplayAvatarURL: vi.fn(),
+	getUserNotificationAvatarURL: vi.fn(),
+	getUserAvatarURL: vi.fn(),
 }));
 
-describe('getNotificationIconURL', () => {
-	const dummyUser = {id: '123456789', avatar: 'sample_avatar_hash'};
+describe('NotificationIconURL', () => {
+	const mockUser = {
+		id: '100000000000000001',
+		avatar: 'user_avatar_hash',
+	};
 
-	it('returns custom avatar URL when provided as an absolute URL', () => {
-		const customUrl = 'https://cdn.custom.com/persona-avatar.png';
-		const result = getNotificationIconURL(dummyUser, 'guild-1', customUrl);
-		expect(result).toBe(customUrl);
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.mocked(isDesktop).mockReturnValue(false);
 	});
 
-	it('resolves relative custom avatar URL against origin', () => {
-		const customUrl = '/avatars/persona-avatar.png';
-		const result = getNotificationIconURL(dummyUser, 'guild-1', customUrl);
-		expect(result).toContain('/avatars/persona-avatar.png');
-		expect(result.startsWith('http')).toBe(true);
-	});
-
-	it('trims custom avatar URL whitespace', () => {
-		const customUrl = '  https://cdn.custom.com/persona-avatar.png  ';
-		const result = getNotificationIconURL(dummyUser, 'guild-1', customUrl);
-		expect(result).toBe('https://cdn.custom.com/persona-avatar.png');
-	});
-
-	it('falls back to user avatar when customAvatarUrl is null, undefined, or empty', () => {
-		expect(getNotificationIconURL(dummyUser, null, null)).toBe('https://cdn.fluxer.app/avatars/user-fallback.png');
-		expect(getNotificationIconURL(dummyUser, null, undefined)).toBe('https://cdn.fluxer.app/avatars/user-fallback.png');
-		expect(getNotificationIconURL(dummyUser, null, '')).toBe('https://cdn.fluxer.app/avatars/user-fallback.png');
-		expect(getNotificationIconURL(dummyUser, null, '   ')).toBe('https://cdn.fluxer.app/avatars/user-fallback.png');
-	});
-
-	// In environments where customAvatarUrl cannot be parsed by URL (such as custom scheme or non-standard URI),
-	// getNotificationIconURL safely falls back to returning the trimmed input without crashing notification toasts.
-	it('returns raw trimmed URL if URL constructor throws an error', () => {
-		const originalURL = globalThis.URL;
-		const mockURL = vi.fn().mockImplementation(() => {
-			throw new Error('Invalid URL');
+	describe('when customAvatarUrl is provided (persona subprofile)', () => {
+		it('returns trimmed absolute URL directly', () => {
+			const url = '  https://cdn.example.com/persona.png  ';
+			expect(getNotificationIconURL(mockUser, 'guild_1', url)).toBe('https://cdn.example.com/persona.png');
 		});
-		globalThis.URL = mockURL as any;
 
-		try {
-			const result = getNotificationIconURL(dummyUser, null, '  malformed-url  ');
-			expect(result).toBe('malformed-url');
-		} finally {
-			globalThis.URL = originalURL;
-		}
+		it('resolves relative URLs against window.location.origin', () => {
+			const relativeUrl = '/assets/personas/avatar123.webp';
+			const result = getNotificationIconURL(mockUser, 'guild_1', relativeUrl);
+			expect(result).toBe(`${window.location.origin}/assets/personas/avatar123.webp`);
+		});
+
+		it('falls back to customAvatarUrl.trim() if URL parsing throws', () => {
+			const weirdUrl = 'invalid://[invalid-url';
+			expect(getNotificationIconURL(mockUser, null, weirdUrl)).toBe(weirdUrl);
+		});
 	});
 
-	// Desktop apps (Electron/Native) require fixed 128px notification icons (NATIVE_NOTIFICATION_ICON_CSS_SIZE)
-	// instead of responsive web dimensions to prevent blurred or clipped OS notification banners.
-	it('resolves native notification avatar when isDesktop is true without member', async () => {
-		const {isDesktop} = await import('@app/features/ui/utils/NativeUtils');
-		vi.mocked(isDesktop).mockReturnValueOnce(true);
+	describe('when no customAvatarUrl is provided', () => {
+		const mockMember = {
+			avatar: 'member_avatar_hash',
+			isAvatarUnset: () => false,
+		} as any;
 
-		const result = getNotificationIconURL(dummyUser, null, null);
-		expect(result).toBe('https://cdn.fluxer.app/avatars/user-native-fallback.png');
-	});
+		it('uses desktop member notification avatar on desktop when member exists', () => {
+			vi.mocked(isDesktop).mockReturnValue(true);
+			vi.mocked(GuildMembers.getMember).mockReturnValue(mockMember);
+			vi.mocked(AvatarUtils.getGuildMemberNotificationAvatarURL).mockReturnValue('https://cdn/member_desktop.png');
 
-	// In web browsers, guild notifications use the responsive web display avatar for the member.
-	it('resolves guild member avatar when member exists and isDesktop is false', async () => {
-		const GuildMembers = (await import('@app/features/member/state/GuildMembers')).default;
-		const mockMember = {avatar: 'guild-avatar-1', isAvatarUnset: () => false};
-		vi.mocked(GuildMembers.getMember).mockReturnValueOnce(mockMember as any);
+			const result = getNotificationIconURL(mockUser, 'guild_1', null);
 
-		const result = getNotificationIconURL(dummyUser, 'guild-123', null);
-		expect(result).toBe('https://cdn.fluxer.app/avatars/member-fallback.png');
-	});
+			expect(result).toBe('https://cdn/member_desktop.png');
+			expect(AvatarUtils.getGuildMemberNotificationAvatarURL).toHaveBeenCalledWith({
+				guildId: 'guild_1',
+				userId: mockUser.id,
+				avatar: mockUser.avatar,
+				memberAvatar: 'member_avatar_hash',
+				avatarUnset: false,
+				size: NATIVE_NOTIFICATION_ICON_CSS_SIZE,
+			});
+		});
 
-	// On desktop apps within a guild channel, notification icons prioritize the guild member avatar
-	// formatted for native desktop notification size (128px).
-	it('resolves guild member native avatar when member exists and isDesktop is true', async () => {
-		const GuildMembers = (await import('@app/features/member/state/GuildMembers')).default;
-		const {isDesktop} = await import('@app/features/ui/utils/NativeUtils');
-		const mockMember = {avatar: 'guild-avatar-1', isAvatarUnset: () => false};
-		vi.mocked(GuildMembers.getMember).mockReturnValueOnce(mockMember as any);
-		vi.mocked(isDesktop).mockReturnValueOnce(true);
+		it('uses web member display avatar on web when member exists', () => {
+			vi.mocked(isDesktop).mockReturnValue(false);
+			vi.mocked(GuildMembers.getMember).mockReturnValue(mockMember);
+			vi.mocked(AvatarUtils.getGuildMemberDisplayAvatarURL).mockReturnValue('https://cdn/member_web.png');
 
-		const result = getNotificationIconURL(dummyUser, 'guild-123', null);
-		expect(result).toBe('https://cdn.fluxer.app/avatars/member-native-fallback.png');
+			const result = getNotificationIconURL(mockUser, 'guild_1', undefined);
+
+			expect(result).toBe('https://cdn/member_web.png');
+			expect(AvatarUtils.getGuildMemberDisplayAvatarURL).toHaveBeenCalledWith({
+				guildId: 'guild_1',
+				user: mockUser,
+				memberAvatar: 'member_avatar_hash',
+				avatarUnset: false,
+				animated: false,
+			});
+		});
+
+		it('uses desktop user notification avatar on desktop when no member or guild', () => {
+			vi.mocked(isDesktop).mockReturnValue(true);
+			vi.mocked(GuildMembers.getMember).mockReturnValue(null);
+			vi.mocked(AvatarUtils.getUserNotificationAvatarURL).mockReturnValue('https://cdn/user_desktop.png');
+
+			const result = getNotificationIconURL(mockUser, null, null);
+
+			expect(result).toBe('https://cdn/user_desktop.png');
+			expect(AvatarUtils.getUserNotificationAvatarURL).toHaveBeenCalledWith(
+				mockUser,
+				NATIVE_NOTIFICATION_ICON_CSS_SIZE,
+			);
+		});
+
+		it('uses web user avatar on web when no member or guild', () => {
+			vi.mocked(isDesktop).mockReturnValue(false);
+			vi.mocked(GuildMembers.getMember).mockReturnValue(null);
+			vi.mocked(AvatarUtils.getUserAvatarURL).mockReturnValue('https://cdn/user_web.png');
+
+			const result = getNotificationIconURL(mockUser, 'guild_1', null);
+
+			expect(result).toBe('https://cdn/user_web.png');
+			expect(AvatarUtils.getUserAvatarURL).toHaveBeenCalledWith(mockUser, false);
+		});
 	});
 });
