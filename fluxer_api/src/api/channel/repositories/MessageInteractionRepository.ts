@@ -12,6 +12,10 @@ import {ChannelPins, MessageReactions, Messages} from '@app/api/Tables';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 
+// Fork imports.
+
+import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
+
 const createFetchChannelPinsQuery = (limit: number) =>
 	ChannelPins.select({
 		where: [ChannelPins.where.eq('channel_id'), ChannelPins.where.lt('pinned_timestamp', 'before_pinned_timestamp')],
@@ -114,6 +118,25 @@ const CHECK_USER_REACTION_EXISTS_QUERY = MessageReactions.selectCql({
 	limit: 1,
 });
 const UNICODE_EMOJI_ID = createEmojiID(0n);
+
+// Fork: persona reactions. A user can react once per persona, so persona_id is part of the key.
+const CHECK_USER_REACTION_EXISTS_WITH_PERSONA_QUERY = MessageReactions.selectCql({
+	columns: ['channel_id', 'bucket', 'message_id', 'user_id', 'emoji_id', 'emoji_name', 'persona_id'],
+	where: [
+		MessageReactions.where.eq('channel_id'),
+		MessageReactions.where.eq('bucket'),
+		MessageReactions.where.eq('message_id'),
+		MessageReactions.where.eq('user_id'),
+		MessageReactions.where.eq('emoji_id'),
+		MessageReactions.where.eq('emoji_name'),
+		MessageReactions.where.eq('persona_id'),
+	],
+	limit: 1,
+});
+
+function reactionUserKey(row: MessageReactionRow): string {
+	return `${row.user_id}:${row.persona_id ?? 0n}`;
+}
 
 export type ReactionEmojiKey = {id: EmojiID; name?: undefined} | {id?: undefined; name: string};
 
@@ -221,9 +244,9 @@ export class MessageInteractionRepository {
 						),
 			),
 		);
-		const byUser = new Map<UserID, MessageReactionRow>();
+		const byUser = new Map<string, MessageReactionRow>();
 		for (const row of pages.flat().sort((a, b) => Number(a.user_id - b.user_id))) {
-			if (!byUser.has(row.user_id)) byUser.set(row.user_id, row);
+			if (!byUser.has(reactionUserKey(row))) byUser.set(reactionUserKey(row), row);
 		}
 		return [...byUser.values()].slice(0, limit).map((row) => new MessageReaction(row));
 	}
@@ -235,8 +258,10 @@ export class MessageInteractionRepository {
 		emojiName: string,
 		emojiId?: EmojiID,
 		emojiAnimated: boolean = false,
+		personaId?: PersonaID | null,
 	): Promise<MessageReaction> {
 		const bucket = BucketUtils.makeBucket(messageId);
+		const normalizedPersonaId = personaId ? personaId : createPersonaID(0n);
 		const reactionData: MessageReactionRow = {
 			channel_id: channelId,
 			bucket,
@@ -246,6 +271,7 @@ export class MessageInteractionRepository {
 			emoji_name: emojiName,
 			emoji_animated: emojiAnimated,
 			created_at: new Date(),
+			persona_id: normalizedPersonaId,
 		};
 		await upsertOne(MessageReactions.upsertAll(reactionData));
 		await this.setHasReaction(channelId, messageId, true);
@@ -257,6 +283,7 @@ export class MessageInteractionRepository {
 		messageId: MessageID,
 		userId: UserID,
 		emoji: ReactionEmojiKey,
+		personaId?: PersonaID | null,
 	): Promise<void> {
 		const bucket = BucketUtils.makeBucket(messageId);
 		const names = await this.listStoredEmojiNames(channelId, bucket, messageId, emoji);
@@ -269,6 +296,7 @@ export class MessageInteractionRepository {
 					user_id: userId,
 					emoji_id: emoji.id ?? UNICODE_EMOJI_ID,
 					emoji_name: emojiName,
+					persona_id: personaId ?? createPersonaID(0n),
 				}),
 			);
 		}
@@ -352,9 +380,13 @@ export class MessageInteractionRepository {
 		messageId: MessageID,
 		userId: UserID,
 		emoji: ReactionEmojiKey,
+		personaId?: PersonaID | null,
 	): Promise<boolean> {
 		const bucket = BucketUtils.makeBucket(messageId);
 		const names = await this.listStoredEmojiNames(channelId, bucket, messageId, emoji);
+		if (personaId !== undefined) {
+			return this.checkPersonaReactionExists(channelId, bucket, messageId, userId, emoji, names, personaId);
+		}
 		for (const emojiName of names) {
 			const reaction = await fetchOne<MessageReactionRow>(CHECK_USER_REACTION_EXISTS_QUERY, {
 				channel_id: channelId,
@@ -403,6 +435,30 @@ export class MessageInteractionRepository {
 			});
 		}
 		return names;
+	}
+
+	private async checkPersonaReactionExists(
+		channelId: ChannelID,
+		bucket: number,
+		messageId: MessageID,
+		userId: UserID,
+		emoji: ReactionEmojiKey,
+		names: Array<string>,
+		personaId: PersonaID | null,
+	): Promise<boolean> {
+		for (const emojiName of names) {
+			const reaction = await fetchOne<MessageReactionRow>(CHECK_USER_REACTION_EXISTS_WITH_PERSONA_QUERY, {
+				channel_id: channelId,
+				bucket,
+				message_id: messageId,
+				user_id: userId,
+				emoji_id: emoji.id ?? UNICODE_EMOJI_ID,
+				emoji_name: emojiName,
+				persona_id: personaId ? personaId : createPersonaID(0n),
+			});
+			if (reaction) return true;
+		}
+		return false;
 	}
 
 	private async messageHasAnyReactions(channelId: ChannelID, messageId: MessageID): Promise<boolean> {

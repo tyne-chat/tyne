@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import type {PersonaVisibility} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {PersonaVisibility, SignatureEmoji} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import type {PersonaID, UserID} from '../BrandedTypes';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
@@ -18,6 +18,7 @@ export interface CreatePersonaParams {
 	bio?: string | null;
 	auto_tag_disabled?: boolean;
 	persona_tags?: Array<PersonaTag>;
+	signature_emojis?: Array<SignatureEmoji>;
 	visibility?: PersonaVisibility;
 	external_uuid?: string | null;
 	use_count?: number;
@@ -34,6 +35,7 @@ export interface UpdatePersonaParams {
 	bio?: string | null;
 	auto_tag_disabled?: boolean;
 	persona_tags?: Array<PersonaTag>;
+	signature_emojis?: Array<SignatureEmoji>;
 	visibility?: PersonaVisibility;
 	external_uuid?: string | null;
 	use_count?: number;
