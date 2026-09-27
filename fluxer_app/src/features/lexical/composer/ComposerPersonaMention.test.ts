@@ -1,4 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// @vitest-environment happy-dom
+
+import {createEditor} from 'lexical';
+import {describe, expect, it, vi} from 'vitest';
+
+await vi.hoisted(async () => {
+	const {installVoiceMenuTestBootstrap} = await import(
+		'@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap'
+	);
+	installVoiceMenuTestBootstrap();
+});
 
 import {
 	$hydrateComposerFromDraft,
@@ -11,13 +22,15 @@ import {
 	ComposerMentionNode,
 } from '@app/features/lexical/composer/nodes/ComposerMentionNode';
 import type {MentionSegment} from '@app/features/messaging/utils/TextareaSegmentManager';
-import {createEditor} from 'lexical';
-import {describe, expect, it, vi} from 'vitest';
 
 vi.mock('@app/features/lexical/composer/nodes/ComposerMentionPill', () => ({ComposerMentionPill: () => null}));
 vi.mock('@app/features/lexical/composer/nodes/ComposerCustomEmoji', () => ({ComposerCustomEmoji: () => null}));
 vi.mock('@app/features/lexical/composer/nodes/ComposerStandardEmoji', () => ({ComposerStandardEmoji: () => null}));
 vi.mock('@lingui/core/macro', () => ({msg: (descriptor: unknown) => descriptor}));
+vi.mock('@lingui/react/macro', () => ({
+	Trans: () => null,
+	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
+}));
 
 describe('ComposerPersonaMention', () => {
 	it('extracts personaId from wire and formats wire and display correctly', () => {
