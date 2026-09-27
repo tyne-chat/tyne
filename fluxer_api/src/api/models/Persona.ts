@@ -14,8 +14,8 @@ export class Persona {
 	readonly id: PersonaID;
 	readonly userId: UserID;
 	readonly name: string;
-	readonly avatarUrl: string | null;
-	readonly bannerUrl: string | null;
+	readonly avatarHash: string | null;
+	readonly bannerHash: string | null;
 	readonly pronouns: string | null;
 	readonly color: number | null;
 	readonly avatarColor: number | null;
@@ -39,8 +39,8 @@ export class Persona {
 		this.id = row.persona_id;
 		this.userId = row.user_id;
 		this.name = row.name;
-		this.avatarUrl = row.avatar_url ?? null;
-		this.bannerUrl = row.banner_url ?? null;
+		this.avatarHash = row.avatar_hash ?? null;
+		this.bannerHash = row.banner_hash ?? null;
 		this.pronouns = row.pronouns ?? null;
 		this.color = row.color ?? null;
 		this.avatarColor = row.avatar_color ?? null;
@@ -61,8 +61,8 @@ export class Persona {
 		return {
 			id: this.id.toString(),
 			name: this.name,
-			avatar_url: this.avatarUrl,
-			banner_url: this.bannerUrl,
+			avatar_hash: this.avatarHash,
+			banner_hash: this.bannerHash,
 			pronouns: this.pronouns,
 			color: this.color,
 			avatar_color: this.avatarColor,
@@ -83,8 +83,8 @@ export class Persona {
 		return {
 			id: this.id.toString(),
 			name: this.name,
-			avatar_url: this.avatarUrl,
-			banner_url: this.bannerUrl,
+			avatar_hash: this.avatarHash,
+			banner_hash: this.bannerHash,
 			pronouns: this.pronouns,
 			color: this.color,
 			avatar_color: this.avatarColor,
@@ -118,9 +118,9 @@ export class Persona {
 		return {
 			id: this.id.toString(),
 			name: this.name,
-			avatar: this.avatarUrl,
+			avatar: this.avatarHash,
 			avatar_color: this.avatarColor,
-			banner: this.bannerUrl,
+			banner: this.bannerHash,
 			display_tag_text: effectiveTagText,
 			display_tag_icon: effectiveTagIcon,
 			pronouns: this.pronouns,
@@ -135,8 +135,8 @@ export class Persona {
 			user_id: this.userId,
 			persona_id: this.id,
 			name: this.name,
-			avatar_url: this.avatarUrl,
-			banner_url: this.bannerUrl,
+			avatar_hash: this.avatarHash,
+			banner_hash: this.bannerHash,
 			pronouns: this.pronouns,
 			color: this.color,
 			avatar_color: this.avatarColor,
