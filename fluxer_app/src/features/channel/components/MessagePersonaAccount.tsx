@@ -12,6 +12,7 @@ import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import KeyboardMode from '@app/features/ui/state/KeyboardMode';
 import type {User} from '@app/features/user/models/User';
+import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
@@ -54,6 +55,12 @@ export const MessagePersonaAccount = observer(
 		const keyboardModeEnabled = KeyboardMode.keyboardModeEnabled;
 		if (!message.subprofile) return null;
 
+		const resolvedIconUrl = customIconUrl
+			? customIconUrl.startsWith('http://') || customIconUrl.startsWith('https://') || customIconUrl.startsWith('data:')
+				? customIconUrl
+				: AvatarUtils.getUserAvatarURL({id: user.id, avatar: customIconUrl}, false, 32)
+			: null;
+
 		return (
 			<PreloadableUserPopout
 				user={user}
@@ -87,9 +94,9 @@ export const MessagePersonaAccount = observer(
 					>
 						{tagText ? (
 							<span className={clsx(tagStyles.tag, className)} data-flx="persona.tag">
-								{customIconUrl && (
+								{resolvedIconUrl && (
 									<img
-										src={customIconUrl}
+										src={resolvedIconUrl}
 										alt=""
 										className={tagStyles.icon}
 										data-flx="channel.message-persona-account.img"
@@ -99,9 +106,9 @@ export const MessagePersonaAccount = observer(
 									{tagText}
 								</span>
 							</span>
-						) : customIconUrl ? (
+						) : resolvedIconUrl ? (
 							<img
-								src={customIconUrl}
+								src={resolvedIconUrl}
 								alt=""
 								className={clsx(
 									styles.messageAvatarCompact,
