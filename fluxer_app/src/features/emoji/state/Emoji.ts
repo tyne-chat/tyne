@@ -385,7 +385,7 @@ class Emoji {
 		return emojiGuildRegistry.getAllEmojis(channel?.guildId);
 	}
 
-	getQuickReactionEmojis(channel: Channel | null, count: number): Array<FlatEmoji> {
+	getQuickReactionEmojis(channel: Channel | null, count: number, personaId?: string | null): Array<FlatEmoji> {
 		const result: Array<FlatEmoji> = [];
 		const seenKeys = new Set<string>();
 		const addEmoji = (emojiKey: string, emoji: FlatEmoji | undefined): void => {
@@ -398,7 +398,7 @@ class Emoji {
 			seenKeys.add(emojiKey);
 			result.push(emoji);
 		};
-		for (const emojiKey of EmojiPicker.getFrecentEmojiKeys(0)) {
+		for (const emojiKey of EmojiPicker.getFrecentEmojiKeys(0, undefined, personaId)) {
 			addEmoji(emojiKey, this.getEmojiByUsageKey(emojiKey));
 			if (result.length >= count) {
 				return result;
