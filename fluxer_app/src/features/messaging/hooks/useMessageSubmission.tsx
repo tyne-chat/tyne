@@ -155,8 +155,9 @@ export const useMessageSubmission = ({
 					? {
 							id: matchResult.persona.id,
 							name: matchResult.persona.name,
-							avatar: matchResult.persona.avatar_url ?? null,
+							avatar: matchResult.persona.avatar_hash ?? null,
 							avatar_color: matchResult.persona.color ?? null,
+							banner: matchResult.persona.banner_hash ?? null,
 							display_tag_text: displayTagText || null,
 							display_tag_icon: displayTagIcon || null,
 							pronouns: matchResult.persona.pronouns ?? null,
@@ -267,8 +268,9 @@ export const useMessageSubmission = ({
 				? {
 						id: matchedPersona.id,
 						name: matchedPersona.name,
-						avatar: matchedPersona.avatar_url ?? null,
+						avatar: matchedPersona.avatar_hash ?? null,
 						avatar_color: matchedPersona.color ?? null,
+						banner: matchedPersona.banner_hash ?? null,
 						display_tag_text: displayTagText || null,
 						display_tag_icon: displayTagIcon || null,
 						pronouns: matchedPersona.pronouns ?? null,

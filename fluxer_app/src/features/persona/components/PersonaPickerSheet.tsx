@@ -204,7 +204,7 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 										{currentUser && (
 											<Avatar
 												user={currentUser}
-												avatarUrl={p.avatarUrl}
+												avatarUrl={p.avatar_hash ?? p.avatarHash}
 												size={18}
 												data-flx="persona.persona-picker-sheet.avatar--2"
 											/>
@@ -253,7 +253,7 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 									{currentUser && (
 										<Avatar
 											user={currentUser}
-											avatarUrl={p.avatarUrl}
+											avatarUrl={p.avatar_hash ?? p.avatarHash}
 											size={28}
 											data-flx="persona.persona-picker-sheet.avatar--3"
 										/>
