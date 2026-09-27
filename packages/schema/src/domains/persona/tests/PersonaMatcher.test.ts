@@ -321,5 +321,40 @@ describe('PersonaMatcher', () => {
 			expect(res2.persona).toBeNull();
 			expect(res2.isFromTag).toBe(false);
 		});
+
+		it('matches two-sided tags with empty inner content when attachments are present or allowEmptyContent is true', () => {
+			// Normal message without attachments should NOT match empty inner content
+			const withoutAtt = matchPersona(' [ ] ', personas, null, false);
+			expect(withoutAtt.matched).toBe(false);
+
+			// With attachments, it matches and yields empty inner content
+			const withAtt = matchPersona(' [ ] ', personas, null, true);
+			expect(withAtt.matched).toBe(true);
+			expect(withAtt.persona?.name).toBe('Alice');
+			expect(withAtt.strippedContent).toBe('');
+
+			// With allowEmptyContent, it matches as well
+			const withAllow = matchPersona(' [ ] ', personas, null, false, {allowEmptyContent: true});
+			expect(withAllow.matched).toBe(true);
+			expect(withAllow.persona?.name).toBe('Alice');
+			expect(withAllow.strippedContent).toBe('');
+		});
+
+		it('gracefully handles empty persona tags or empty prefix/suffix pairs', () => {
+			const emptyPersona: PersonaLike = {
+				id: 'empty-tags',
+				name: 'Empty',
+				persona_tags: [],
+			};
+			const blankTagPersona: PersonaLike = {
+				id: 'blank-tag',
+				name: 'Blank',
+				persona_tags: [{prefix: '', suffix: ''}],
+			};
+
+			const res = matchPersona('Hello', [emptyPersona, blankTagPersona]);
+			expect(res.matched).toBe(false);
+			expect(res.persona).toBeUndefined();
+		});
 	});
 });

@@ -266,7 +266,7 @@ export class RepositoryBackedMessageResponseDataService extends MessageResponseD
 			nonce: options.nonce ?? null,
 			call: this.mapCall(message.call),
 			referenced_message: referencedMessage,
-			persona_id: message.personaId?.toString() ?? null,
+			...({persona_id: message.personaId?.toString() ?? null} as any),
 			subprofile: null,
 		};
 	}
