@@ -155,9 +155,9 @@ interface PersonaFormState {
 	id?: string;
 	name: string;
 	pronouns: string;
-	avatarUrl: string;
+	avatarHash: string;
 	avatarColor?: number | null;
-	bannerUrl: string;
+	bannerHash: string;
 	accentColor: number | null;
 	bio: string;
 	visibility: PersonaVisibility;
@@ -167,9 +167,9 @@ interface PersonaFormState {
 const emptyFormState = (): PersonaFormState => ({
 	name: '',
 	pronouns: '',
-	avatarUrl: '',
+	avatarHash: '',
 	avatarColor: null,
-	bannerUrl: '',
+	bannerHash: '',
 	accentColor: null,
 	bio: '',
 	visibility: 'unlisted',
@@ -214,9 +214,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			id: persona.id,
 			name: persona.name,
 			pronouns: persona.pronouns ?? '',
-			avatarUrl: persona.avatar_url ?? persona.avatarUrl ?? '',
+			avatarHash: persona.avatar_hash ?? persona.avatarHash ?? '',
 			avatarColor: persona.avatar_color ?? persona.avatarColor ?? null,
-			bannerUrl: persona.banner_url ?? persona.bannerUrl ?? '',
+			bannerHash: persona.banner_hash ?? persona.bannerHash ?? '',
 			accentColor: persona.color ?? null,
 			bio: persona.bio ?? '',
 			visibility: persona.visibility ?? 'unlisted',
@@ -245,7 +245,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	}, []);
 
 	const effectiveDefaultColor = useMemo<number | null>(() => {
-		if (formData.avatarUrl.trim()) {
+		if (formData.avatarHash.trim()) {
 			return formData.avatarColor ?? null;
 		}
 		// Persona has no avatar, inherits root user's avatar and avatar color
@@ -256,7 +256,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			return AvatarUtils.getDefaultAvatarPrimaryColor(currentUser.id);
 		}
 		return null;
-	}, [formData.avatarUrl, formData.avatarColor, currentUser]);
+	}, [formData.avatarHash, formData.avatarColor, currentUser]);
 
 	const hasUnsavedChanges = useMemo(() => {
 		const initial = initialFormStateRef.current;
@@ -265,8 +265,8 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			return (
 				formData.name.trim() !== '' ||
 				formData.pronouns.trim() !== '' ||
-				formData.avatarUrl !== '' ||
-				formData.bannerUrl !== '' ||
+				formData.avatarHash !== '' ||
+				formData.bannerHash !== '' ||
 				formData.accentColor !== null ||
 				formData.bio.trim() !== '' ||
 				formData.visibility !== 'unlisted' ||
@@ -275,8 +275,8 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		}
 		if (formData.name.trim() !== initial.name.trim()) return true;
 		if (formData.pronouns.trim() !== initial.pronouns.trim()) return true;
-		if (formData.avatarUrl !== initial.avatarUrl) return true;
-		if (formData.bannerUrl !== initial.bannerUrl) return true;
+		if (formData.avatarHash !== initial.avatarHash) return true;
+		if (formData.bannerHash !== initial.bannerHash) return true;
 		if (formData.accentColor !== initial.accentColor) return true;
 		if (formData.bio.trim() !== initial.bio.trim()) return true;
 		if (formData.visibility !== initial.visibility) return true;
@@ -341,17 +341,18 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	const hasTagErrors = formData.tags.some((_, idx) => Boolean(getTagRowError(idx)));
 
 	const handleAvatarUpload = async (base64: string) => {
-		setFormData((prev) => ({...prev, avatarUrl: base64}));
+		setFormData((prev) => ({...prev, avatarHash: base64}));
 		setIsUploadingAvatar(true);
 		try {
-			const res = await http.post<{avatar_url: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_AVATAR, {
+			const res = await http.post<{avatar_hash?: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_AVATAR, {
 				body: {avatar: base64},
 			});
-			if (res.ok && res.body?.avatar_url) {
+			const newHash = res.body?.avatar_hash;
+			if (res.ok && newHash) {
 				setFormData((prev) => ({
 					...prev,
-					avatarUrl: res.body.avatar_url,
-					...(res.body.avatar_color !== undefined ? {avatarColor: res.body.avatar_color} : {}),
+					avatarHash: newHash,
+					...(res.body?.avatar_color !== undefined ? {avatarColor: res.body.avatar_color} : {}),
 				}));
 			} else {
 				ToastCommands.createToast({
@@ -370,18 +371,19 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	};
 
 	const handleAvatarClear = () => {
-		setFormData((prev) => ({...prev, avatarUrl: '', avatarColor: null}));
+		setFormData((prev) => ({...prev, avatarHash: '', avatarColor: null}));
 	};
 
 	const handleBannerUpload = async (base64: string) => {
-		setFormData((prev) => ({...prev, bannerUrl: base64}));
+		setFormData((prev) => ({...prev, bannerHash: base64}));
 		setIsUploadingBanner(true);
 		try {
-			const res = await http.post<{banner_url: string}>(Endpoints.USER_PERSONA_BANNER, {
+			const res = await http.post<{banner_hash?: string}>(Endpoints.USER_PERSONA_BANNER, {
 				body: {banner: base64},
 			});
-			if (res.ok && res.body?.banner_url) {
-				setFormData((prev) => ({...prev, bannerUrl: res.body.banner_url}));
+			const newHash = res.body?.banner_hash;
+			if (res.ok && newHash) {
+				setFormData((prev) => ({...prev, bannerHash: newHash}));
 			} else {
 				ToastCommands.createToast({
 					type: 'error',
@@ -399,7 +401,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	};
 
 	const handleBannerClear = () => {
-		setFormData((prev) => ({...prev, bannerUrl: ''}));
+		setFormData((prev) => ({...prev, bannerHash: ''}));
 	};
 
 	const handleAddTagRow = () => {
@@ -506,9 +508,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				await PersonaCommands.updatePersona(formData.id, {
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
-					avatar_url: formData.avatarUrl.trim() || null,
+					avatar_hash: formData.avatarHash.trim() || null,
 					avatar_color: formData.avatarColor ?? null,
-					banner_url: formData.bannerUrl.trim() || null,
+					banner_hash: formData.bannerHash.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
@@ -522,9 +524,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				await PersonaCommands.createPersona({
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
-					avatar_url: formData.avatarUrl.trim() || null,
+					avatar_hash: formData.avatarHash.trim() || null,
 					avatar_color: formData.avatarColor ?? null,
-					banner_url: formData.bannerUrl.trim() || null,
+					banner_hash: formData.bannerHash.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
@@ -710,7 +712,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 							{/* 3. Avatar */}
 							<AvatarUploader
-								hasAvatar={Boolean(formData.avatarUrl)}
+								hasAvatar={Boolean(formData.avatarHash)}
 								onAvatarChange={handleAvatarUpload}
 								onAvatarClear={handleAvatarClear}
 								isPerGuildProfile={false}
@@ -720,7 +722,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 							{/* 4. Banner */}
 							<BannerUploader
-								hasBanner={Boolean(formData.bannerUrl)}
+								hasBanner={Boolean(formData.bannerHash)}
 								onBannerChange={handleBannerUpload}
 								onBannerClear={handleBannerClear}
 								disabled={isUploadingBanner}
@@ -891,7 +893,14 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 										data-flx="persona.persona-edit-modal.profile-card-layout"
 									>
 										<ProfileCardBanner
-											bannerUrl={formData.bannerUrl || null}
+											bannerUrl={
+												formData.bannerHash
+													? AvatarUtils.getPersonaBannerURL({
+															userId: currentUser?.id ?? '',
+															banner: formData.bannerHash,
+														})
+													: null
+											}
 											hoverBannerUrl={null}
 											bannerColor={
 												formData.accentColor != null
@@ -901,7 +910,14 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 														: 'var(--bg-secondary)'
 											}
 											user={currentUser}
-											avatarUrl={formData.avatarUrl.trim() || AvatarUtils.getUserAvatarURL(currentUser, false)}
+											avatarUrl={
+												formData.avatarHash.trim()
+													? AvatarUtils.getPersonaAvatarURL({
+															userId: currentUser?.id ?? '',
+															avatar: formData.avatarHash.trim(),
+														})
+													: AvatarUtils.getUserAvatarURL(currentUser, false)
+											}
 											hoverAvatarUrl={null}
 											disablePresence={true}
 											isClickable={false}

@@ -451,35 +451,35 @@ describe('PersonaController', () => {
 	});
 
 	describe('Persona banner support', () => {
-		test('creates and updates a persona with banner_url', async () => {
+		test('creates and updates a persona with banner_hash', async () => {
 			const created = await createBuilder<PersonaResponse>(harness, account.token)
 				.post('/users/@me/personas')
 				.body({
 					name: 'Banner Persona',
-					banner_url: 'https://cdn.example.com/banners/persona_banner.png',
+					banner_hash: 'b_banner123',
 				})
 				.expect(HTTP_STATUS.CREATED)
 				.execute();
 
-			expect(created.banner_url).toBe('https://cdn.example.com/banners/persona_banner.png');
+			expect(created.banner_hash).toBe('b_banner123');
 
 			const updated = await createBuilder<PersonaResponse>(harness, account.token)
 				.patch(`/users/@me/personas/${created.id}`)
 				.body({
-					banner_url: 'https://cdn.example.com/banners/updated_banner.png',
+					banner_hash: 'b_updated123',
 				})
 				.expect(HTTP_STATUS.OK)
 				.execute();
 
-			expect(updated.banner_url).toBe('https://cdn.example.com/banners/updated_banner.png');
+			expect(updated.banner_hash).toBe('b_updated123');
 
-			// Also verify public endpoint returns banner_url
+			// Also verify public endpoint returns banner_hash
 			const publicPersona = await createBuilder<PersonaResponse>(harness, account.token)
 				.get(`/users/${account.userId}/personas/${created.id}`)
 				.expect(HTTP_STATUS.OK)
 				.execute();
 
-			expect(publicPersona.banner_url).toBe('https://cdn.example.com/banners/updated_banner.png');
+			expect(publicPersona.banner_hash).toBe('b_updated123');
 		});
 	});
 });
