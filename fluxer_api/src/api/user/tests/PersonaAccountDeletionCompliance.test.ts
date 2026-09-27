@@ -153,6 +153,49 @@ describe('Persona Account Deletion Compliance', () => {
 			// Distinct topology is maintained:
 			expect(msgA.subprofile?.id).not.toBe(msgB.subprofile?.id);
 		});
+
+		it('handles messages with null author, non-numeric author ID, or deleted author without username match', async () => {
+			const service = new ExposedMessageResponseDataService(mockNatsManager);
+
+			const msgNullAuthor = {
+				id: '103',
+				channel_id: '500',
+				author: null,
+				persona_id: '2000000000000000001',
+			} as unknown as MessageResponse;
+
+			const msgNonNumericAuthor = {
+				id: '104',
+				channel_id: '500',
+				author: {
+					id: 'not_numeric',
+					username: 'User',
+					flags: 0,
+				},
+				persona_id: '2000000000000000001',
+			} as unknown as MessageResponse;
+
+			const msgDeletedFlagOnly = {
+				id: '105',
+				channel_id: '500',
+				author: {
+					id: '999',
+					username: 'OriginalName',
+					flags: UserFlags.DELETED,
+				},
+				persona_id: '2000000000000000001',
+			} as unknown as MessageResponse;
+
+			await service.runHydratePersonas([msgNullAuthor, msgNonNumericAuthor, msgDeletedFlagOnly]);
+
+			expect(msgNullAuthor.subprofile).toBeNull();
+			expect((msgNullAuthor as any).persona_id).toBeUndefined();
+
+			expect(msgNonNumericAuthor.subprofile).toBeNull();
+			expect((msgNonNumericAuthor as any).persona_id).toBeUndefined();
+
+			expect(msgDeletedFlagOnly.subprofile?.name).toBe('Deleted Persona');
+		});
 	});
 
 	describe('Full account deletion orchestration (UserDeletionService.processUserDeletion)', () => {
@@ -171,8 +214,8 @@ describe('Persona Account Deletion Compliance', () => {
 				user_id: userId,
 				persona_id: originalPersonaId1,
 				name: 'Alice',
-				avatar_hash: 'avatar1',
-				banner_hash: 'banner1',
+				avatar_hash: 'a_avatar1',
+				banner_hash: 'a_banner1',
 				pronouns: 'she/her',
 				color: 0xff0000,
 				avatar_color: null,
@@ -210,6 +253,27 @@ describe('Persona Account Deletion Compliance', () => {
 				version: 2,
 			});
 
+			const persona3 = new Persona({
+				user_id: userId,
+				persona_id: createPersonaID(3333333333333333333n),
+				name: 'Error Persona',
+				avatar_hash: 'error_avatar',
+				banner_hash: 'error_banner',
+				pronouns: null,
+				color: null,
+				avatar_color: null,
+				bio: null,
+				auto_tag_disabled: false,
+				persona_tags: '[]',
+				use_count: 0,
+				last_used_at_ms: null,
+				visibility: 'unlisted',
+				external_uuid: null,
+				created_at: new Date(),
+				updated_at: new Date(),
+				version: 1,
+			});
+
 			const tombstonesCreated: Array<{userId: UserID; personaId: PersonaID}> = [];
 			const anonymizedMessages: Array<{
 				channelId: any;
@@ -223,7 +287,7 @@ describe('Persona Account Deletion Compliance', () => {
 			let deletedSettingsUserId: UserID | null = null;
 
 			const mockPersonaRepo: IPersonaRepository = {
-				findByUserId: vi.fn().mockResolvedValue([persona1, persona2]),
+				findByUserId: vi.fn().mockResolvedValue([persona1, persona2, persona3]),
 				createTombstone: vi.fn().mockImplementation(async (uid: UserID, pid: PersonaID) => {
 					tombstonesCreated.push({userId: uid, personaId: pid});
 					return {} as Persona;
@@ -234,7 +298,7 @@ describe('Persona Account Deletion Compliance', () => {
 				deleteSettings: vi.fn().mockImplementation(async (uid: UserID) => {
 					deletedSettingsUserId = uid;
 				}),
-				count: vi.fn().mockResolvedValue(2),
+				count: vi.fn().mockResolvedValue(3),
 				findById: vi.fn().mockResolvedValue(null),
 				findByUserIds: vi.fn().mockResolvedValue([]),
 				findByUserAndPersonaIds: vi.fn().mockResolvedValue(new Map()),
@@ -250,6 +314,9 @@ describe('Persona Account Deletion Compliance', () => {
 
 			const mockStorageService = {
 				deleteAvatar: vi.fn().mockImplementation(async (params: {prefix: string; key: string}) => {
+					if (params.key.includes('error')) {
+						throw new Error('Simulated S3 deletion error');
+					}
 					deletedAvatars.push(params);
 				}),
 				deleteObject: vi.fn().mockResolvedValue(undefined),
@@ -300,8 +367,8 @@ describe('Persona Account Deletion Compliance', () => {
 				}),
 				startDeletion: vi.fn().mockResolvedValue({
 					id: userId,
-					avatarHash: 'user-avatar-hash',
-					bannerHash: null,
+					avatarHash: 'a_user-avatar-hash',
+					bannerHash: 'a_user-banner-hash',
 				}),
 				create: vi.fn().mockResolvedValue(undefined),
 				deleteUserSecondaryIndices: vi.fn().mockResolvedValue(undefined),
@@ -380,7 +447,7 @@ describe('Persona Account Deletion Compliance', () => {
 			expect(mockPersonaRepo.findByUserId).toHaveBeenCalledWith(userId, {includeDeleted: true});
 
 			// 2. Tombstones were created under the new deletedUserId for each persona
-			expect(tombstonesCreated).toHaveLength(2);
+			expect(tombstonesCreated).toHaveLength(3);
 			expect(tombstonesCreated[0]).toEqual({userId: deletedUserId, personaId: anonPersonaId1});
 			expect(tombstonesCreated[1]).toEqual({userId: deletedUserId, personaId: anonPersonaId2});
 
@@ -391,20 +458,47 @@ describe('Persona Account Deletion Compliance', () => {
 			expect(mapping.get(originalPersonaId1.toString())).toBe(anonPersonaId1);
 			expect(mapping.get(originalPersonaId2.toString())).toBe(anonPersonaId2);
 
-			// 4. Surgical S3 media cleanup was performed for persona1 (hash-based)
+			// 4. Surgical S3 media cleanup was performed for persona1 (hash-based) including rawHash
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'avatars',
+				key: `${userId}/a_avatar1`,
+			});
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'avatars',
 				key: `${userId}/avatar1`,
 			});
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'banners',
+				key: `${userId}/a_banner1`,
+			});
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'banners',
 				key: `${userId}/banner1`,
+			});
+			// User animated avatar and banner cleanup
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'avatars',
+				key: `${userId}/a_user-avatar-hash`,
+			});
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'avatars',
+				key: `${userId}/user-avatar-hash`,
+			});
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'banners',
+				key: `${userId}/a_user-banner-hash`,
+			});
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'banners',
+				key: `${userId}/user-banner-hash`,
 			});
 			// persona2 has null hashes, so nothing deleted
 			expect(deletedAvatars.some((a) => a.key.includes('bob'))).toBe(false);
 
 			// Purge queue received CDN URLs
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/a_avatar1`);
 			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/avatar1`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/a_banner1`);
 			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/banner1`);
 
 			// 5. Hard delete of original persona rows and settings was executed
