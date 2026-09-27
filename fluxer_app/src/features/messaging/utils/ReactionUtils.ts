@@ -15,6 +15,18 @@ import {getCurrentLocale} from '@app/features/user/utils/LocaleUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {msg, plural} from '@lingui/core/macro';
 
+// Fork imports.
+
+import type {MessageReaction} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
+
+export function hasPersonaReacted(reaction: MessageReaction | undefined | null, personaId?: string | null): boolean {
+	if (!reaction) return false;
+	if (personaId && personaId !== '0') {
+		return Boolean(reaction.persona_reactions?.some((pr) => pr.persona_id === personaId && pr.me));
+	}
+	return Boolean(reaction.me_root ?? (reaction.me && !reaction.persona_reactions?.some((pr) => pr.me)));
+}
+
 const REACTED_BY_DESCRIPTOR = msg({
 	message: '{reactorCount, plural, one {{emojiName} reacted by {reactors}} other {{emojiName} reacted by {reactors}}}',
 	comment:
@@ -32,7 +44,7 @@ export function getReactionTooltip(message: Message, emoji: ReactionEmoji) {
 	const guildId = Channels.getChannel(message.channelId)?.guildId ?? message.guildId;
 	const users = MessageReactions.getReactions(message.id, emoji)
 		.slice(0, 3)
-		.map((user) => NicknameUtils.getNickname(user, guildId));
+		.map((user) => (user.subprofile ? user.subprofile.name : NicknameUtils.getNickname(user, guildId)));
 	if (users.length === 0) {
 		return '';
 	}

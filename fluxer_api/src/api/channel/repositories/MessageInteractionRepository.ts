@@ -11,6 +11,10 @@ import {MessageReaction} from '@app/api/models/MessageReaction';
 import {ChannelPins, MessageReactions, Messages} from '@app/api/Tables';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 
+// Fork imports.
+
+import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
+
 const createFetchChannelPinsQuery = (limit: number) =>
 	ChannelPins.select({
 		where: [ChannelPins.where.eq('channel_id'), ChannelPins.where.lt('pinned_timestamp', 'before_pinned_timestamp')],
@@ -52,8 +56,21 @@ const createFetchReactionUsersByEmojiQuery = (limit: number, hasAfter: boolean =
 				],
 		limit,
 	});
-const CHECK_USER_REACTION_EXISTS_QUERY = MessageReactions.selectCql({
-	columns: ['channel_id', 'bucket', 'message_id', 'user_id', 'emoji_id', 'emoji_name'],
+const CHECK_USER_REACTION_EXISTS_WITH_PERSONA_QUERY = MessageReactions.selectCql({
+	columns: ['channel_id', 'bucket', 'message_id', 'user_id', 'emoji_id', 'emoji_name', 'persona_id'],
+	where: [
+		MessageReactions.where.eq('channel_id'),
+		MessageReactions.where.eq('bucket'),
+		MessageReactions.where.eq('message_id'),
+		MessageReactions.where.eq('user_id'),
+		MessageReactions.where.eq('emoji_id'),
+		MessageReactions.where.eq('emoji_name'),
+		MessageReactions.where.eq('persona_id'),
+	],
+	limit: 1,
+});
+const CHECK_USER_REACTION_EXISTS_ANY_PERSONA_QUERY = MessageReactions.selectCql({
+	columns: ['channel_id', 'bucket', 'message_id', 'user_id', 'emoji_id', 'emoji_name', 'persona_id'],
 	where: [
 		MessageReactions.where.eq('channel_id'),
 		MessageReactions.where.eq('bucket'),
@@ -168,9 +185,11 @@ export class MessageInteractionRepository {
 		emojiName: string,
 		emojiId?: EmojiID,
 		emojiAnimated: boolean = false,
+		personaId?: PersonaID | null,
 	): Promise<MessageReaction> {
 		const bucket = BucketUtils.makeBucket(messageId);
 		const normalizedEmojiId = emojiId ? emojiId : createEmojiID(0n);
+		const normalizedPersonaId = personaId ? personaId : createPersonaID(0n);
 		const reactionData: MessageReactionRow = {
 			channel_id: channelId,
 			bucket,
@@ -180,6 +199,7 @@ export class MessageInteractionRepository {
 			emoji_name: emojiName,
 			emoji_animated: emojiAnimated,
 			created_at: new Date(),
+			persona_id: normalizedPersonaId,
 		};
 		await upsertOne(MessageReactions.upsertAll(reactionData));
 		await this.setHasReaction(channelId, messageId, true);
@@ -192,19 +212,43 @@ export class MessageInteractionRepository {
 		userId: UserID,
 		emojiName: string,
 		emojiId?: EmojiID,
+		personaId?: PersonaID | null,
 	): Promise<void> {
 		const bucket = BucketUtils.makeBucket(messageId);
 		const normalizedEmojiId = emojiId ?? createEmojiID(0n);
-		await deleteOneOrMany(
-			MessageReactions.deleteByPk({
+		if (personaId !== undefined) {
+			const normalizedPersonaId = personaId ? personaId : createPersonaID(0n);
+			await deleteOneOrMany(
+				MessageReactions.deleteByPk({
+					channel_id: channelId,
+					bucket,
+					message_id: messageId,
+					user_id: userId,
+					emoji_id: normalizedEmojiId,
+					emoji_name: emojiName,
+					persona_id: normalizedPersonaId,
+				}),
+			);
+		} else {
+			const deleteQuery = MessageReactions.deleteCql({
+				where: [
+					MessageReactions.where.eq('channel_id'),
+					MessageReactions.where.eq('bucket'),
+					MessageReactions.where.eq('message_id'),
+					MessageReactions.where.eq('emoji_id'),
+					MessageReactions.where.eq('emoji_name'),
+					MessageReactions.where.eq('user_id'),
+				],
+			});
+			await deleteOneOrMany(deleteQuery, {
 				channel_id: channelId,
 				bucket,
 				message_id: messageId,
-				user_id: userId,
 				emoji_id: normalizedEmojiId,
 				emoji_name: emojiName,
-			}),
-		);
+				user_id: userId,
+			});
+		}
 		const hasReactions = await this.messageHasAnyReactions(channelId, messageId);
 		await this.setHasReaction(channelId, messageId, hasReactions);
 	}
@@ -281,10 +325,24 @@ export class MessageInteractionRepository {
 		userId: UserID,
 		emojiName: string,
 		emojiId?: EmojiID,
+		personaId?: PersonaID | null,
 	): Promise<boolean> {
 		const bucket = BucketUtils.makeBucket(messageId);
 		const normalizedEmojiId = emojiId ?? createEmojiID(0n);
-		const reaction = await fetchOne<MessageReactionRow>(CHECK_USER_REACTION_EXISTS_QUERY, {
+		if (personaId !== undefined) {
+			const normalizedPersonaId = personaId ? personaId : createPersonaID(0n);
+			const reaction = await fetchOne<MessageReactionRow>(CHECK_USER_REACTION_EXISTS_WITH_PERSONA_QUERY, {
+				channel_id: channelId,
+				bucket,
+				message_id: messageId,
+				user_id: userId,
+				emoji_id: normalizedEmojiId,
+				emoji_name: emojiName,
+				persona_id: normalizedPersonaId,
+			});
+			return !!reaction;
+		}
+		const reaction = await fetchOne<MessageReactionRow>(CHECK_USER_REACTION_EXISTS_ANY_PERSONA_QUERY, {
 			channel_id: channelId,
 			bucket,
 			message_id: messageId,
