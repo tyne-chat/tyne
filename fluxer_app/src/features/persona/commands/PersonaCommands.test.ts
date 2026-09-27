@@ -65,7 +65,8 @@ describe('PersonaCommands', () => {
 				{
 					id: '1540000000000000001',
 					name: 'Alice',
-					avatar_url: 'https://example.com/avatar1.png',
+					avatar_hash: '2e2af845',
+					banner_hash: null,
 					pronouns: 'she/her',
 					color: 0x123456,
 					bio: 'Alice bio',
@@ -204,7 +205,8 @@ describe('PersonaCommands', () => {
 			const createdResponse: PersonaResponse = {
 				id: '1540000000000000002',
 				name: 'Bob',
-				avatar_url: null,
+				avatar_hash: null,
+				banner_hash: null,
 				pronouns: null,
 				color: null,
 				bio: null,
@@ -271,7 +273,8 @@ describe('PersonaCommands', () => {
 			const updatedResponse: PersonaResponse = {
 				id: '1540000000000000001',
 				name: 'New Name',
-				avatar_url: null,
+				avatar_hash: null,
+				banner_hash: null,
 				pronouns: null,
 				color: null,
 				bio: null,
@@ -323,7 +326,8 @@ describe('PersonaCommands', () => {
 			const publicData: PublicPersonaResponse = {
 				id: '1540000000000000001',
 				name: 'Old Name',
-				avatar_url: null,
+				avatar_hash: null,
+				banner_hash: null,
 				pronouns: null,
 				color: null,
 				bio: null,
@@ -409,7 +413,8 @@ describe('PersonaCommands', () => {
 			const publicData: PublicPersonaResponse = {
 				id: '1540000000000000001',
 				name: 'To Delete',
-				avatar_url: null,
+				avatar_hash: null,
+				banner_hash: null,
 				pronouns: null,
 				color: null,
 				bio: null,
@@ -444,7 +449,8 @@ describe('PersonaCommands', () => {
 				{
 					id: '1540000000000000010',
 					name: 'Imported 1',
-					avatar_url: null,
+					avatar_hash: null,
+					banner_hash: null,
 					pronouns: null,
 					color: null,
 					bio: null,
@@ -460,7 +466,8 @@ describe('PersonaCommands', () => {
 				{
 					id: '1540000000000000011',
 					name: 'Imported 2',
-					avatar_url: null,
+					avatar_hash: null,
+					banner_hash: null,
 					pronouns: null,
 					color: null,
 					bio: null,
@@ -508,7 +515,8 @@ describe('PersonaCommands', () => {
 			const publicData: PublicPersonaResponse = {
 				id: '1540000000000000099',
 				name: 'Public Alice',
-				avatar_url: null,
+				avatar_hash: null,
+				banner_hash: null,
 				pronouns: 'she/her',
 				color: null,
 				bio: 'Extended biography here',
