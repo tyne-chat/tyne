@@ -23,8 +23,8 @@ export type PersonaVisibility = z.infer<typeof PersonaVisibilitySchema>;
 export const PersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
-	avatar_url: z.string().nullish().describe('Avatar asset URL or hash'),
-	banner_url: z.string().nullish().describe('Banner asset URL or hash'),
+	avatar_hash: z.string().nullish().describe('Avatar asset hash'),
+	banner_hash: z.string().nullish().describe('Banner asset hash'),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional accent color integer'),
 	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
@@ -47,8 +47,8 @@ export type PersonaListResponse = z.infer<typeof PersonaListResponseSchema>;
 export const PublicPersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
-	avatar_url: z.string().nullish().describe('Avatar asset URL or hash'),
-	banner_url: z.string().nullish().describe('Banner asset URL or hash'),
+	avatar_hash: z.string().nullish().describe('Avatar asset hash'),
+	banner_hash: z.string().nullish().describe('Banner asset hash'),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional accent color integer'),
 	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
@@ -62,8 +62,8 @@ export type PublicPersonaListResponse = z.infer<typeof PublicPersonaListResponse
 
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),
-	avatar_url: z.string().max(256).nullish().optional().describe('Avatar asset URL or hash'),
-	banner_url: z.string().max(256).nullish().optional().describe('Banner asset URL or hash'),
+	avatar_hash: z.string().max(64).nullish().optional().describe('Avatar asset hash'),
+	banner_hash: z.string().max(64).nullish().optional().describe('Banner asset hash'),
 	pronouns: z.string().max(100).nullish().optional().describe('Optional pronouns'),
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	avatar_color: z.number().int().nullish().optional().describe('Optional avatar accent color'),
@@ -77,8 +77,8 @@ export type PersonaCreateRequest = z.infer<typeof PersonaCreateRequestSchema>;
 
 export const PersonaUpdateRequestSchema = z.object({
 	name: createStringType(1, 100).optional().describe('Persona display name'),
-	avatar_url: z.string().max(256).nullish().optional().describe('Avatar asset URL or hash'),
-	banner_url: z.string().max(256).nullish().optional().describe('Banner asset URL or hash'),
+	avatar_hash: z.string().max(64).nullish().optional().describe('Avatar asset hash'),
+	banner_hash: z.string().max(64).nullish().optional().describe('Banner asset hash'),
 	pronouns: z.string().max(100).nullish().optional().describe('Optional pronouns'),
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	avatar_color: z.number().int().nullish().optional().describe('Optional avatar accent color'),
@@ -134,8 +134,8 @@ export type PersonaSettingsUpdateRequest = z.infer<typeof PersonaSettingsUpdateR
 export const ChannelPersonaMentionItemSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
-	avatar_url: z.string().nullish().describe('Avatar asset URL or hash'),
-	banner_url: z.string().nullish().describe('Banner asset URL or hash'),
+	avatar_hash: z.string().nullish().describe('Avatar asset hash'),
+	banner_hash: z.string().nullish().describe('Banner asset hash'),
 	display_tag_text: z.string().nullish().describe('Optional display tag text'),
 	display_tag_icon: z.string().nullish().describe('Optional display tag icon'),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
