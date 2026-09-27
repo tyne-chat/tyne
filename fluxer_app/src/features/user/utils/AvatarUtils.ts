@@ -276,6 +276,34 @@ export function getUserBannerURL({id, banner}: BannerOptions, animated = false, 
 	});
 }
 
+export function getPersonaAvatarURL(
+	{userId, avatar}: {userId: string; avatar: string | null | undefined},
+	animated = false,
+	size: MediaProxyImageSize = MEDIA_PROXY_AVATAR_SIZE_DEFAULT,
+): string {
+	if (!avatar) {
+		return '';
+	}
+	if (avatar.startsWith('http://') || avatar.startsWith('https://') || avatar.startsWith('data:')) {
+		return avatar;
+	}
+	return getUserAvatarURL({id: userId, avatar}, animated, size);
+}
+
+export function getPersonaBannerURL(
+	{userId, banner}: {userId: string; banner: string | null | undefined},
+	animated = false,
+	size: MediaProxyImageSize = 1024,
+): string {
+	if (!banner) {
+		return '';
+	}
+	if (banner.startsWith('http://') || banner.startsWith('https://') || banner.startsWith('data:')) {
+		return banner;
+	}
+	return getUserBannerURL({id: userId, banner}, animated, size);
+}
+
 const mediaURLCacheScope = (): string => `${RuntimeConfig.apiEndpoint} ${RuntimeConfig.mediaEndpoint}`;
 
 export function getGuildIconURL({id, icon}: IconOptions, animated = false) {
