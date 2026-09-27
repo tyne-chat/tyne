@@ -27,6 +27,11 @@ import type {UserPartial} from '@fluxer/schema/src/domains/user/UserResponseSche
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import Drafts from '@app/features/messaging/state/MessagingDrafts';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+
 const TooManyReactionsModal_WHOA_THIS_IS_HEAVY_DESCRIPTOR = msg({
 	message: 'Whoa, this is heavy',
 	comment: 'Label in the too many reactions modal.',
@@ -106,6 +111,7 @@ const optimisticUpdate = (
 	messageId: string,
 	emoji: ReactionEmoji,
 	userId?: string,
+	personaId?: string | null,
 ): void => {
 	const actualUserId = userId ?? Authentication.currentUserId;
 	if (!actualUserId) {
@@ -113,9 +119,9 @@ const optimisticUpdate = (
 		return;
 	}
 	if (type === 'MESSAGE_REACTION_ADD') {
-		MessageReactions.handleReactionAdd(messageId, actualUserId, emoji);
+		MessageReactions.handleReactionAdd(messageId, actualUserId, emoji, undefined, personaId);
 	} else if (type === 'MESSAGE_REACTION_REMOVE') {
-		MessageReactions.handleReactionRemove(messageId, actualUserId, emoji);
+		MessageReactions.handleReactionRemove(messageId, actualUserId, emoji, undefined, personaId);
 	} else if (type === 'MESSAGE_REACTION_REMOVE_ALL') {
 		MessageReactions.handleReactionRemoveAll(messageId);
 	} else if (type === 'MESSAGE_REACTION_REMOVE_EMOJI') {
@@ -142,7 +148,7 @@ const optimisticUpdate = (
 	}
 	logger.debug(
 		`Optimistically applied ${type} for message ${messageId} ` +
-			`with emoji ${emoji.name}${emoji.id ? `:${emoji.id}` : ''} by user ${actualUserId}`,
+			`with emoji ${emoji.name}${emoji.id ? `:${emoji.id}` : ''} by user ${actualUserId}${personaId ? ` as persona ${personaId}` : ''}`,
 	);
 };
 const makeUrl = ({
@@ -212,9 +218,15 @@ function applyReactionFetchResult(
 	MessageReactions.handleFetchSuccess(messageId, data, emoji, limit, responseHasMore, totalCount, requestId, nextAfter);
 }
 
-function addReactionRequest(channelId: string, messageId: string, emoji: ReactionEmoji): Promise<unknown> {
+function addReactionRequest(
+	channelId: string,
+	messageId: string,
+	emoji: ReactionEmoji,
+	personaId?: string | null,
+): Promise<unknown> {
 	return http.put(makeUrl({channelId, messageId, emoji, userId: ME}), {
 		query: sessionQuery(),
+		body: personaId ? {persona_id: personaId} : undefined,
 	});
 }
 
@@ -223,9 +235,14 @@ function removeReactionRequest(
 	messageId: string,
 	emoji: ReactionEmoji,
 	userId?: string,
+	personaId?: string | null,
 ): Promise<unknown> {
+	const query: Record<string, string | null | undefined> = {
+		...sessionQuery(),
+		...(personaId !== undefined ? {persona_id: personaId ?? '0'} : {}),
+	};
 	return http.delete(makeUrl({channelId, messageId, emoji, userId: userId || ME}), {
-		query: sessionQuery(),
+		query,
 	});
 }
 
@@ -264,8 +281,9 @@ const performReactionAction = (
 	messageId: string,
 	emoji: ReactionEmoji,
 	userId?: string,
+	personaId?: string | null,
 ): void => {
-	optimisticUpdate(type, channelId, messageId, emoji, userId);
+	optimisticUpdate(type, channelId, messageId, emoji, userId, personaId);
 	retryWithExponentialBackoff(apiFunc).catch((error) => {
 		if (checkReactionResponse(i18n, error)) {
 			logger.debug(`Reverting optimistic update for reaction in message ${messageId}`);
@@ -275,6 +293,7 @@ const performReactionAction = (
 				messageId,
 				emoji,
 				userId,
+				personaId,
 			);
 		}
 	});
@@ -324,11 +343,30 @@ export async function loadMoreReactions(
 	} catch {}
 }
 
-export function addReaction(i18n: I18n, channelId: string, messageId: string, emoji: ReactionEmoji): void {
+export function addReaction(
+	i18n: I18n,
+	channelId: string,
+	messageId: string,
+	emoji: ReactionEmoji,
+	personaId?: string | null,
+): void {
 	if (blockIfAccountLimited()) return;
-	logger.debug(`Adding reaction ${emoji.name} to message ${messageId}`);
-	const apiFunc = () => addReactionRequest(channelId, messageId, emoji);
-	performReactionAction(i18n, 'MESSAGE_REACTION_ADD', apiFunc, channelId, messageId, emoji);
+	const effectivePersonaId =
+		personaId !== undefined
+			? personaId
+			: (PersonaStore.getEffectiveReactionPersona(emoji, Drafts.getDraft(channelId))?.id ?? null);
+	logger.debug(`Adding reaction ${emoji.name} to message ${messageId} as persona ${effectivePersonaId}`);
+	const apiFunc = () => addReactionRequest(channelId, messageId, emoji, effectivePersonaId);
+	performReactionAction(
+		i18n,
+		'MESSAGE_REACTION_ADD',
+		apiFunc,
+		channelId,
+		messageId,
+		emoji,
+		undefined,
+		effectivePersonaId,
+	);
 }
 
 export function removeReaction(
@@ -337,10 +375,24 @@ export function removeReaction(
 	messageId: string,
 	emoji: ReactionEmoji,
 	userId?: string,
+	personaId?: string | null,
 ): void {
-	logger.debug(`Removing reaction ${emoji.name} from message ${messageId}`);
-	const apiFunc = () => removeReactionRequest(channelId, messageId, emoji, userId);
-	performReactionAction(i18n, 'MESSAGE_REACTION_REMOVE', apiFunc, channelId, messageId, emoji, userId);
+	const effectivePersonaId =
+		personaId !== undefined
+			? personaId
+			: (PersonaStore.getEffectiveReactionPersona(emoji, Drafts.getDraft(channelId))?.id ?? null);
+	logger.debug(`Removing reaction ${emoji.name} from message ${messageId} as persona ${effectivePersonaId}`);
+	const apiFunc = () => removeReactionRequest(channelId, messageId, emoji, userId, effectivePersonaId);
+	performReactionAction(
+		i18n,
+		'MESSAGE_REACTION_REMOVE',
+		apiFunc,
+		channelId,
+		messageId,
+		emoji,
+		userId,
+		effectivePersonaId,
+	);
 }
 
 export function removeAllReactions(i18n: I18n, channelId: string, messageId: string): void {
