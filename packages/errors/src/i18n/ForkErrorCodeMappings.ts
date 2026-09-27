@@ -11,4 +11,6 @@ export const ForkErrorCodeToI18nKey = {
 	[APIErrorCodes.PERSONA_LIMIT_REACHED]: 'connections.limit_reached',
 	[APIErrorCodes.DUPLICATE_PERSONA_TAG]: 'usernames_and_tags.tag_already_taken',
 	[APIErrorCodes.PERSONA_TAG_LIMIT_REACHED]: 'connections.limit_reached',
+	[APIErrorCodes.DUPLICATE_SIGNATURE_EMOJI]: 'usernames_and_tags.tag_already_taken',
+	[APIErrorCodes.SIGNATURE_EMOJI_LIMIT_REACHED]: 'connections.limit_reached',
 } as const;
