@@ -23,7 +23,9 @@ function makeMockPersona(
 		user_id: userId,
 		persona_id: personaId,
 		name,
-		avatar_url: null,
+		avatar_hash: null,
+		banner_hash: null,
+		avatar_color: null,
 		pronouns: null,
 		color: null,
 		bio: null,
@@ -53,6 +55,7 @@ describe('PersonaService', () => {
 			findById: vi.fn().mockResolvedValue(null),
 			findByUserId: vi.fn().mockResolvedValue([]),
 			findByUserIds: vi.fn().mockResolvedValue([]),
+			findByUserAndPersonaIds: vi.fn().mockResolvedValue(new Map()),
 			findSettings: vi.fn().mockResolvedValue(null),
 			findSettingsByUserIds: vi.fn().mockResolvedValue(new Map()),
 			upsertSettings: vi.fn().mockResolvedValue(undefined as any),
@@ -61,6 +64,9 @@ describe('PersonaService', () => {
 			update: vi.fn(),
 			delete: vi.fn(),
 			deleteAllByUserId: vi.fn(),
+			hardDeleteAllByUserId: vi.fn(),
+			createTombstone: vi.fn(),
+			deleteSettings: vi.fn(),
 		};
 		service = new PersonaService({personaRepository: mockRepo});
 	});
@@ -641,6 +647,117 @@ describe('PersonaService', () => {
 					persona: updatedPersona.toSubprofileResponse(),
 				},
 			});
+		});
+	});
+
+	describe('Active Persona Cleanup & Resiliency', () => {
+		it('clears active_persona_id in settings and dispatches USER_PERSONA_SETTINGS_UPDATE when active persona is deleted', async () => {
+			const mockGateway = {
+				dispatchPresence: vi.fn().mockResolvedValue(undefined),
+				dispatchGuild: vi.fn().mockResolvedValue(undefined),
+			};
+			const serviceWithGateway = new PersonaService({
+				personaRepository: mockRepo,
+				gatewayService: mockGateway as any,
+			});
+
+			const persona = makeMockPersona(userId, defaultPersonaId, 'Active Persona');
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(persona);
+			vi.mocked(mockRepo.delete).mockResolvedValueOnce(true);
+			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
+				user_id: userId,
+				active_persona_id: defaultPersonaId.toString(),
+				active_persona_mode: 'manual',
+				is_latched: true,
+				display_tag_text: 'TAG',
+				display_tag_icon: null,
+				updated_at: new Date(),
+				version: 1,
+			});
+
+			await serviceWithGateway.deletePersona(userId, defaultPersonaId);
+
+			expect(mockRepo.upsertSettings).toHaveBeenCalledWith(
+				expect.objectContaining({
+					user_id: userId,
+					active_persona_id: null,
+					is_latched: false,
+					display_tag_text: 'TAG',
+				}),
+			);
+
+			expect(mockGateway.dispatchPresence).toHaveBeenCalledWith({
+				userId,
+				event: 'USER_PERSONA_SETTINGS_UPDATE',
+				data: expect.objectContaining({
+					user_id: userId.toString(),
+					active_persona_id: null,
+					is_latched: false,
+					display_tag_text: 'TAG',
+				}),
+			});
+		});
+
+		it('leaves settings unchanged when a non-active persona is deleted', async () => {
+			const otherPersonaId = 9999999999999999999n as PersonaID;
+			const persona = makeMockPersona(userId, defaultPersonaId, 'Non-Active Persona');
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(persona);
+			vi.mocked(mockRepo.delete).mockResolvedValueOnce(true);
+			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
+				user_id: userId,
+				active_persona_id: otherPersonaId.toString(),
+				active_persona_mode: 'manual',
+				is_latched: true,
+				display_tag_text: 'TAG',
+				display_tag_icon: null,
+				updated_at: new Date(),
+				version: 1,
+			});
+
+			await service.deletePersona(userId, defaultPersonaId);
+
+			expect(mockRepo.upsertSettings).not.toHaveBeenCalled();
+		});
+
+		it('returns null active_persona_id in getSettings when referenced persona does not exist', async () => {
+			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
+				user_id: userId,
+				active_persona_id: defaultPersonaId.toString(),
+				active_persona_mode: 'manual',
+				is_latched: true,
+				display_tag_text: 'TAG',
+				display_tag_icon: null,
+				updated_at: new Date(),
+				version: 1,
+			});
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(null);
+
+			const settings = await service.getSettings(userId);
+			expect(settings.active_persona_id).toBeNull();
+			expect(settings.is_latched).toBe(false);
+			expect(settings.display_tag_text).toBe('TAG');
+		});
+
+		it('returns null active_persona_id in getSettings when referenced persona is deleted', async () => {
+			const deletedPersona = makeMockPersona(userId, defaultPersonaId, 'Deleted', {
+				deleted_at: new Date(),
+			});
+			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
+				user_id: userId,
+				active_persona_id: defaultPersonaId.toString(),
+				active_persona_mode: 'manual',
+				is_latched: true,
+				display_tag_text: 'TAG',
+				display_tag_icon: null,
+				updated_at: new Date(),
+				version: 1,
+			});
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(deletedPersona);
+
+			const settings = await service.getSettings(userId);
+			expect(settings.active_persona_id).toBeNull();
+			expect(settings.is_latched).toBe(false);
+			expect(settings.display_tag_text).toBe('TAG');
 		});
 	});
 });

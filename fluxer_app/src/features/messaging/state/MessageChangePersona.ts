@@ -11,7 +11,10 @@ import {buildExistingAttachmentEditReferences} from '../utils/MessageEditContent
 export interface PersonaPayloadSource {
 	id: string;
 	name: string;
-	avatarUrl?: string | null;
+	avatar_hash?: string | null;
+	avatarHash?: string | null;
+	banner_hash?: string | null;
+	bannerHash?: string | null;
 	color?: number | null;
 	bio?: string | null;
 	pronouns?: string | null;
@@ -28,7 +31,8 @@ class MessageChangePersona {
 		return {
 			id: persona.id,
 			name: persona.name,
-			avatar: persona.avatarUrl ?? null,
+			avatar: persona.avatar_hash ?? persona.avatarHash ?? null,
+			banner: persona.banner_hash ?? persona.bannerHash ?? null,
 			avatar_color: persona.color ?? null,
 			color: persona.color ?? null,
 			display_tag_text: PersonaStore.displayTagText || null,
