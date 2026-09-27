@@ -36,7 +36,7 @@ export type ReactionUsersMachineEvent =
 	  }
 	| {type: 'fetch.error'; requestId?: number}
 	| {type: 'user.add'; user: User}
-	| {type: 'user.remove'; userId: string};
+	| {type: 'user.remove'; userId: string; personaId?: string | null};
 
 const EMPTY_USERS: ReadonlyArray<User> = Object.freeze([]);
 
@@ -70,9 +70,21 @@ function freezeUserSnapshot(users: Iterable<User>): ReadonlyArray<User> {
 	return snapshot.length > 0 ? Object.freeze(snapshot) : EMPTY_USERS;
 }
 
+function getReactorKey(
+	userPartial:
+		| {id: string; persona_id?: string | null; personaId?: string | null; subprofile?: {id?: string} | null}
+		| User,
+): string {
+	const personaId =
+		('personaId' in userPartial && userPartial.personaId) ||
+		(userPartial as any).persona_id ||
+		(userPartial as any).subprofile?.id;
+	return personaId && personaId !== '0' ? `${userPartial.id}:${personaId}` : userPartial.id;
+}
+
 function toUserMap(users: ReadonlyArray<UserPartial>): Map<string, User> {
 	const userMap = new Map<string, User>();
-	for (const userPartial of users) userMap.set(userPartial.id, new User(userPartial));
+	for (const userPartial of users) userMap.set(getReactorKey(userPartial), new User(userPartial as any));
 	return userMap;
 }
 
@@ -128,7 +140,7 @@ function mergeInitialUsers(
 		if (user) orderedUsers.push(user);
 	}
 	for (const user of context.userSnapshot) {
-		if (!prefixIdSet.has(user.id)) orderedUsers.push(nextUsers.get(user.id) ?? user);
+		if (!prefixIdSet.has(getReactorKey(user))) orderedUsers.push(nextUsers.get(getReactorKey(user)) ?? user);
 	}
 	const userSnapshot = freezeUserSnapshot(orderedUsers);
 	return {users: nextUsers, userSnapshot, lastUserId: getLastUserId(userSnapshot)};
@@ -144,9 +156,10 @@ function appendUsers(
 	const users = new Map(context.users);
 	const orderedUsers = [...context.userSnapshot];
 	for (const userPartial of fetchedUsers) {
-		const user = new User(userPartial);
-		if (!users.has(userPartial.id)) orderedUsers.push(user);
-		users.set(userPartial.id, user);
+		const user = new User(userPartial as any);
+		const key = getReactorKey(userPartial);
+		if (!users.has(key)) orderedUsers.push(user);
+		users.set(key, user);
 	}
 	return {
 		users,
@@ -211,7 +224,7 @@ function applyFetchSuccess(
 
 function addUser(context: ReactionUsersContext, user: User): ReactionUsersContext {
 	const users = new Map(context.users);
-	users.set(user.id, user);
+	users.set(getReactorKey(user), user);
 	const userSnapshot = freezeUserSnapshot(users.values());
 	return {
 		...context,
@@ -222,9 +235,24 @@ function addUser(context: ReactionUsersContext, user: User): ReactionUsersContex
 	};
 }
 
-function removeUser(context: ReactionUsersContext, userId: string): ReactionUsersContext {
+function removeUser(context: ReactionUsersContext, userId: string, personaId?: string | null): ReactionUsersContext {
 	const users = new Map(context.users);
-	users.delete(userId);
+	const rKey = personaId && personaId !== '0' ? `${userId}:${personaId}` : userId;
+	if (users.has(rKey)) {
+		users.delete(rKey);
+	} else if (!personaId || personaId === '0') {
+		users.delete(userId);
+	} else {
+		for (const [key, user] of users) {
+			if (
+				key === rKey ||
+				(user.id === userId && (user.personaId === personaId || (user as any).subprofile?.id === personaId))
+			) {
+				users.delete(key);
+				break;
+			}
+		}
+	}
 	const userSnapshot = freezeUserSnapshot(users.values());
 	return {
 		...context,
@@ -263,7 +291,7 @@ const reactionUsersStateMachine = setup({
 		),
 		addUser: assign(({context, event}) => (event.type === 'user.add' ? addUser(context, event.user) : context)),
 		removeUser: assign(({context, event}) =>
-			event.type === 'user.remove' ? removeUser(context, event.userId) : context,
+			event.type === 'user.remove' ? removeUser(context, event.userId, event.personaId) : context,
 		),
 	},
 	guards: {
@@ -273,8 +301,25 @@ const reactionUsersStateMachine = setup({
 			if (event.requestId < context.newestSettledRequest) return false;
 			return context.activeRequestId == null || event.requestId === context.activeRequestId;
 		},
-		isUserMissing: ({context, event}) => event.type === 'user.add' && !context.users.has(event.user.id),
-		isUserKnown: ({context, event}) => event.type === 'user.remove' && context.users.has(event.userId),
+		isUserMissing: ({context, event}) => event.type === 'user.add' && !context.users.has(getReactorKey(event.user)),
+		isUserKnown: ({context, event}) => {
+			if (event.type !== 'user.remove') return false;
+			const rKey = event.personaId && event.personaId !== '0' ? `${event.userId}:${event.personaId}` : event.userId;
+			if (context.users.has(rKey)) return true;
+			for (const [key, user] of context.users) {
+				if (
+					user.id === event.userId &&
+					(!event.personaId ||
+						event.personaId === '0' ||
+						user.personaId === event.personaId ||
+						(user as any).subprofile?.id === event.personaId)
+				) {
+					return true;
+				}
+				if (key === rKey || (!event.personaId && key.startsWith(`${event.userId}:`))) return true;
+			}
+			return false;
+		},
 	},
 }).createMachine({
 	id: 'messageReactionUsers',
