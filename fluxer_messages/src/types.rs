@@ -398,11 +398,23 @@ pub struct ApiReactionEmojiResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ApiPersonaReactionEntry {
+    pub persona_id: String,
+    pub count: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub me: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiMessageReactionResponse {
     pub emoji: ApiReactionEmojiResponse,
     pub count: i32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub me: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub me_root: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona_reactions: Option<Vec<ApiPersonaReactionEntry>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

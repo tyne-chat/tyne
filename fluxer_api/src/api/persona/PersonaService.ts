@@ -8,7 +8,9 @@ import type {
 	PersonaTag,
 	PersonaUpdateRequest,
 	PublicPersonaResponse,
+	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {MAX_SIGNATURE_EMOJIS_PER_PERSONA} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
 import {SYSTEM_USER_ID} from '../constants/Core';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
@@ -19,9 +21,11 @@ import type {IUserChannelRepository} from '../user/repositories/IUserChannelRepo
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
 import {
 	DuplicatePersonaTagError,
+	DuplicateSignatureEmojiError,
 	PersonaLimitReachedError,
 	PersonaNotFoundError,
 	PersonaTagLimitExceededError,
+	SignatureEmojiLimitExceededError,
 } from './errors/PersonaErrors';
 import type {IPersonaRepository} from './IPersonaRepository';
 
@@ -171,6 +175,50 @@ export class PersonaService {
 		}
 	}
 
+	private async validateSignatureEmojis(
+		userId: UserID,
+		emojis: Array<SignatureEmoji> | undefined,
+		currentPersonaId?: PersonaID,
+	): Promise<void> {
+		if (!emojis || emojis.length === 0) return;
+
+		if (emojis.length > MAX_SIGNATURE_EMOJIS_PER_PERSONA) {
+			throw new SignatureEmojiLimitExceededError(MAX_SIGNATURE_EMOJIS_PER_PERSONA);
+		}
+
+		const getEmojiKey = (emoji: SignatureEmoji): string => {
+			return emoji.id ? `custom:${emoji.id}` : `unicode:${emoji.name}`;
+		};
+
+		// 1. Check duplicates within the request
+		const seenInRequest = new Set<string>();
+		for (const emoji of emojis) {
+			const key = getEmojiKey(emoji);
+			if (seenInRequest.has(key)) {
+				throw new DuplicateSignatureEmojiError(
+					`Signature emoji '${emoji.name}' cannot be listed multiple times on the same persona`,
+				);
+			}
+			seenInRequest.add(key);
+		}
+
+		// 2. Check collision across other personas owned by this user
+		const userPersonas = await this.deps.personaRepository.findByUserId(userId);
+		for (const otherPersona of userPersonas) {
+			if (currentPersonaId && otherPersona.id.toString() === currentPersonaId.toString()) {
+				continue;
+			}
+			for (const otherEmoji of otherPersona.signatureEmojis) {
+				const key = getEmojiKey(otherEmoji);
+				if (seenInRequest.has(key)) {
+					throw new DuplicateSignatureEmojiError(
+						`Signature emoji '${otherEmoji.name}' is already assigned to persona '${otherPersona.name}'`,
+					);
+				}
+			}
+		}
+	}
+
 	async getPersonas(userId: UserID): Promise<Array<Persona>> {
 		return await this.deps.personaRepository.findByUserId(userId);
 	}
@@ -192,6 +240,9 @@ export class PersonaService {
 		if (data.persona_tags) {
 			await this.validatePersonaTags(userId, data.persona_tags);
 		}
+		if (data.signature_emojis) {
+			await this.validateSignatureEmojis(userId, data.signature_emojis);
+		}
 
 		const persona = await this.deps.personaRepository.create({
 			user_id: userId,
@@ -204,6 +255,7 @@ export class PersonaService {
 			bio: data.bio,
 			auto_tag_disabled: data.auto_tag_disabled,
 			persona_tags: data.persona_tags,
+			signature_emojis: data.signature_emojis,
 			visibility: data.visibility ?? 'unlisted',
 			external_uuid: data.external_uuid,
 		});
@@ -221,6 +273,9 @@ export class PersonaService {
 		if (data.persona_tags !== undefined) {
 			await this.validatePersonaTags(userId, data.persona_tags, personaId);
 		}
+		if (data.signature_emojis !== undefined) {
+			await this.validateSignatureEmojis(userId, data.signature_emojis, personaId);
+		}
 
 		const existing = await this.deps.personaRepository.findById(userId, personaId);
 		if (!existing) {
@@ -237,6 +292,7 @@ export class PersonaService {
 			bio: data.bio,
 			auto_tag_disabled: data.auto_tag_disabled,
 			persona_tags: data.persona_tags,
+			signature_emojis: data.signature_emojis,
 			visibility: data.visibility,
 			external_uuid: data.external_uuid,
 		});

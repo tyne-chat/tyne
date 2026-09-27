@@ -2,7 +2,7 @@
 
 import {createStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {z} from 'zod';
-import {PersonaTagSchema, PersonaVisibilitySchema} from './PersonaApiSchemas';
+import {PersonaTagSchema, PersonaVisibilitySchema, SignatureEmojiSchema} from './PersonaApiSchemas';
 
 export const PersonaSchema = z.object({
 	id: z.string().min(1).max(64),
@@ -10,6 +10,7 @@ export const PersonaSchema = z.object({
 	avatar_hash: z.string().max(64).nullish().describe('Avatar asset hash'),
 	banner_hash: z.string().max(64).nullish().describe('Banner asset hash'),
 	persona_tags: z.array(PersonaTagSchema).optional(),
+	signature_emojis: z.array(SignatureEmojiSchema).optional(),
 	pronouns: z.string().max(100).nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional color integer'),
 	avatar_color: z.number().int().nullish().describe('Avatar accent color'),

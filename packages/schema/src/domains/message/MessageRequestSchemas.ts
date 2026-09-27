@@ -25,6 +25,7 @@ import {z} from 'zod';
 // Fork imports.
 
 import {MessageSubprofileRequestSchema} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {SnowflakeStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 
 const RICH_EMBED_AUTHOR_NAME_MAX_LENGTH = 256 as const;
 const RICH_EMBED_MEDIA_DESCRIPTION_MAX_LENGTH = 4096 as const;
@@ -488,3 +489,18 @@ export const ReactionUsersQuerySchema = z.object({
 });
 
 export type ReactionUsersQuerySchema = z.infer<typeof ReactionUsersQuerySchema>;
+
+export const AddReactionBodySchema = z
+	.object({
+		persona_id: SnowflakeStringType.nullish().optional().describe('Persona ID to attribute the reaction to'),
+	})
+	.optional();
+
+export type AddReactionBodySchema = z.infer<typeof AddReactionBodySchema>;
+
+export const RemoveReactionQuerySchema = z.object({
+	session_id: z.string().optional().describe('Session ID to avoid echo'),
+	persona_id: SnowflakeStringType.nullish().optional().describe('Persona ID whose reaction should be removed'),
+});
+
+export type RemoveReactionQuerySchema = z.infer<typeof RemoveReactionQuerySchema>;
