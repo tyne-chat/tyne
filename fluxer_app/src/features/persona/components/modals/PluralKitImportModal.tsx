@@ -196,7 +196,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		const uniqueAvatarUrls = Array.from(new Set(avatarUrls));
 		const totalAvatars = uniqueAvatarUrls.length;
 
-		const avatarMap = new Map<string, {avatarUrl: string; avatarColor?: number | null}>();
+		const avatarMap = new Map<string, {avatarHash: string; avatarColor?: number | null}>();
 		const avatarErrors = new Map<string, string>();
 
 		if (totalAvatars > 0) {
@@ -254,9 +254,10 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 									const event = JSON.parse(trimmed);
 									if (event.type === 'progress') {
 										if (event.url) {
-											if (event.avatar_url) {
+											const newHash = event.avatar_hash;
+											if (newHash) {
 												avatarMap.set(event.url, {
-													avatarUrl: event.avatar_url,
+													avatarHash: newHash,
 													avatarColor: typeof event.avatar_color === 'number' ? event.avatar_color : null,
 												});
 											}
@@ -280,12 +281,13 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 										for (const [url, r] of Object.entries(
 											event.results as Record<
 												string,
-												{avatar_url?: string; avatar_color?: number | null; error?: string}
+												{avatar_hash?: string; avatar_color?: number | null; error?: string}
 											>,
 										)) {
-											if (r.avatar_url) {
+											const newHash = r.avatar_hash;
+											if (newHash) {
 												avatarMap.set(url, {
-													avatarUrl: r.avatar_url,
+													avatarHash: newHash,
 													avatarColor: typeof r.avatar_color === 'number' ? r.avatar_color : null,
 												});
 											}
@@ -302,9 +304,10 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 								const event = JSON.parse(buffer.trim());
 								if (event.type === 'progress') {
 									if (event.url) {
-										if (event.avatar_url) {
+										const newHash = event.avatar_hash;
+										if (newHash) {
 											avatarMap.set(event.url, {
-												avatarUrl: event.avatar_url,
+												avatarHash: newHash,
 												avatarColor: typeof event.avatar_color === 'number' ? event.avatar_color : null,
 											});
 										}
@@ -314,12 +317,13 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 									for (const [url, r] of Object.entries(
 										event.results as Record<
 											string,
-											{avatar_url?: string; avatar_color?: number | null; error?: string}
+											{avatar_hash?: string; avatar_color?: number | null; error?: string}
 										>,
 									)) {
-										if (r.avatar_url) {
+										const newHash = r.avatar_hash;
+										if (newHash) {
 											avatarMap.set(url, {
-												avatarUrl: r.avatar_url,
+												avatarHash: newHash,
 												avatarColor: typeof r.avatar_color === 'number' ? r.avatar_color : null,
 											});
 										}
@@ -376,13 +380,13 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			});
 
 			const remoteAvatarUrl = (member.avatar_url || member.webhook_avatar_url || '').trim();
-			let localAvatarUrl: string | undefined;
+			let localAvatarHash: string | undefined;
 			let localAvatarColor: number | undefined;
 
 			if (remoteAvatarUrl) {
 				const avatarData = avatarMap.get(remoteAvatarUrl);
 				if (avatarData) {
-					localAvatarUrl = avatarData.avatarUrl;
+					localAvatarHash = avatarData.avatarHash;
 					localAvatarColor = typeof avatarData.avatarColor === 'number' ? avatarData.avatarColor : undefined;
 				} else if (avatarErrors.has(remoteAvatarUrl)) {
 					warnings.push({
@@ -423,7 +427,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 
 			importedPersonas.push({
 				name: displayName,
-				avatar_url: localAvatarUrl,
+				avatar_hash: localAvatarHash,
 				avatar_color: localAvatarColor,
 				pronouns: member.pronouns?.trim() || undefined,
 				color: colorInt,

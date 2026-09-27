@@ -39,7 +39,8 @@ const mockContext = {} as GatewayHandlerContext;
 const samplePersona: PersonaResponse = {
 	id: '1540000000000000001',
 	name: 'Gateway Persona 1',
-	avatar_url: 'https://cdn.example.com/p1.png',
+	avatar_hash: '2e2af845',
+	banner_hash: null,
 	pronouns: 'they/them',
 	color: 0x112233,
 	bio: 'Created via gateway',
@@ -56,7 +57,8 @@ const samplePersona: PersonaResponse = {
 const samplePersona2: PersonaResponse = {
 	id: '1540000000000000002',
 	name: 'Gateway Persona 2',
-	avatar_url: null,
+	avatar_hash: null,
+	banner_hash: null,
 	pronouns: 'she/her',
 	color: null,
 	bio: null,
