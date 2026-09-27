@@ -58,8 +58,8 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 
 		const {persona: effectivePersona, isFromTag} = PersonaStore.getEffectivePersonaForText(text, hasAttachments);
 
-		const avatarUrl = effectivePersona
-			? (effectivePersona.avatarUrl ?? effectivePersona.avatar_url ?? undefined)
+		const avatarHash = effectivePersona
+			? (effectivePersona.avatar_hash ?? effectivePersona.avatarHash ?? undefined)
 			: undefined;
 		const modeLabel = mode === 'last' ? i18n._(MODE_LAST_DESCRIPTOR) : i18n._(MODE_MANUAL_DESCRIPTOR);
 
@@ -107,7 +107,7 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 						>
 							<Avatar
 								user={currentUser}
-								avatarUrl={avatarUrl}
+								avatarUrl={avatarHash}
 								size={24}
 								data-flx="persona.persona-composer-pill.avatar"
 							/>

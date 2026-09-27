@@ -355,11 +355,11 @@ describe('Personal Notes Persona Integration', () => {
 			.expect(HTTP_STATUS.OK)
 			.execute();
 
-		const persona = await createBuilder<{id: string; name: string; avatar_url: string}>(harness, account.token)
+		const persona = await createBuilder<{id: string; name: string; avatar_hash: string}>(harness, account.token)
 			.post('/users/@me/personas')
 			.body({
 				name: 'Alice in Notes',
-				avatar_url: 'https://example.com/alice.png',
+				avatar_hash: 'alice_hash',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
@@ -367,7 +367,7 @@ describe('Personal Notes Persona Integration', () => {
 		const subprofile = {
 			id: persona.id,
 			name: persona.name,
-			avatar: persona.avatar_url,
+			avatar: persona.avatar_hash,
 		};
 
 		const sentMessage = await createBuilder<MessageResponse>(harness, account.token)
@@ -383,7 +383,7 @@ describe('Personal Notes Persona Integration', () => {
 		expect(sentMessage.subprofile).toBeDefined();
 		expect(sentMessage.subprofile?.id).toBe(persona.id);
 		expect(sentMessage.subprofile?.name).toBe('Alice in Notes');
-		expect(sentMessage.subprofile?.avatar).toBe('https://example.com/alice.png');
+		expect(sentMessage.subprofile?.avatar).toBe(persona.avatar_hash);
 		expect(sentMessage.subprofile?.display_tag_text).toBe('Wonderland');
 
 		const messages = await getMessages(harness, account.token, personalNotesChannelId);
