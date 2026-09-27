@@ -197,6 +197,9 @@ export class PersonaStoreClass {
 				.filter((p: any) => Boolean((p as any)?.id || (p as any)?.persona?.id))
 				.map(normalizePersona);
 		});
+		if (this._activePersonaId && !this._personas.some((p) => p.id === this._activePersonaId)) {
+			void this.unlatch();
+		}
 	}
 
 	upsertPersona(persona: PersonaResponse | ClientPersona | {persona: PersonaResponse}): void {
