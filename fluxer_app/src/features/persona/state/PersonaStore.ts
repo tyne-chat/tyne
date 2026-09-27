@@ -7,6 +7,7 @@ import type {
 	PersonaSettingsResponse,
 	PersonaTag,
 	PersonaVisibility,
+	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {
 	type MatchPersonaOptions,
@@ -29,6 +30,7 @@ export interface ClientPersona extends PersonaResponse {
 	avatarColor?: number | null;
 	bannerHash?: string | null;
 	personaTags?: Array<{prefix?: string; suffix?: string}>;
+	signatureEmojis?: Array<SignatureEmoji>;
 	accentColor?: number | null;
 	autoTagDisabled?: boolean;
 	useCount?: number;
@@ -64,6 +66,12 @@ export function normalizePersona(
 		prefix: t.prefix ?? undefined,
 		suffix: t.suffix ?? undefined,
 	}));
+	const rawSigEmojis = source.signature_emojis ?? source.signatureEmojis ?? [];
+	const signatureEmojis: Array<SignatureEmoji> = rawSigEmojis.map((e: any) => ({
+		id: e.id ?? null,
+		name: e.name ?? '',
+		animated: e.animated ?? null,
+	}));
 	const useCount = source.use_count ?? source.useCount ?? 0;
 	const lastUsedRaw = source.last_used_at_ms ?? source.lastUsedAtMs;
 	const lastUsedAtMsStr = lastUsedRaw != null ? String(lastUsedRaw) : null;
@@ -83,6 +91,7 @@ export function normalizePersona(
 		bio: source.bio ?? null,
 		auto_tag_disabled: autoTag,
 		persona_tags: tags,
+		signature_emojis: signatureEmojis,
 		use_count: useCount,
 		last_used_at_ms: lastUsedAtMsStr,
 		visibility,
@@ -94,6 +103,7 @@ export function normalizePersona(
 		avatarColor,
 		bannerHash,
 		personaTags: tags,
+		signatureEmojis,
 		accentColor: color,
 		autoTagDisabled: autoTag,
 		useCount,
@@ -638,6 +648,45 @@ export class PersonaStoreClass {
 		return {persona: null, isFromTag: false};
 	}
 
+	getPersonaBySignatureEmoji(emoji: {
+		id?: string | null;
+		name: string;
+		animated?: boolean;
+		surrogates?: string;
+	}): ClientPersona | null {
+		for (const persona of this._personas) {
+			const sigs = persona.signature_emojis ?? persona.signatureEmojis ?? [];
+			for (const sig of sigs) {
+				if (emoji.id && sig.id) {
+					if (emoji.id === sig.id) return persona;
+				} else if (!emoji.id && !sig.id) {
+					if (emoji.name === sig.name) return persona;
+					if (emoji.surrogates && emoji.surrogates === sig.name) return persona;
+				}
+			}
+		}
+		return null;
+	}
+
+	getEffectiveReactionPersona(
+		emoji?: {id?: string | null; name: string; animated?: boolean; surrogates?: string} | null,
+		composerText?: string | null,
+	): ClientPersona | null {
+		if (emoji) {
+			const sigPersona = this.getPersonaBySignatureEmoji(emoji);
+			if (sigPersona) {
+				return sigPersona;
+			}
+		}
+		if (composerText) {
+			const fromText = this.getEffectivePersonaForText(composerText);
+			if (fromText.isFromTag && fromText.persona) {
+				return fromText.persona;
+			}
+		}
+		return this.activePersona;
+	}
+
 	matchEditMessage(
 		content: string,
 		currentSubprofile?: MessageSubprofileResponse | null,
@@ -746,3 +795,4 @@ export class PersonaStoreClass {
 
 export const PersonaStore = new PersonaStoreClass();
 export const SubprofileStore = PersonaStore;
+export default PersonaStore;

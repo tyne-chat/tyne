@@ -713,12 +713,12 @@ export const MessagesByAuthorV2 = defineTable<MessageByAuthorRow, 'author_id' | 
 });
 export const MessageReactions = defineTable<
 	MessageReactionRow,
-	'channel_id' | 'bucket' | 'message_id' | 'emoji_id' | 'emoji_name' | 'user_id',
+	'channel_id' | 'bucket' | 'message_id' | 'emoji_id' | 'emoji_name' | 'user_id' | 'persona_id',
 	'channel_id' | 'bucket'
 >({
 	name: 'message_reactions',
 	columns: MESSAGE_REACTION_COLUMNS,
-	primaryKey: ['channel_id', 'bucket', 'message_id', 'emoji_id', 'emoji_name', 'user_id'],
+	primaryKey: ['channel_id', 'bucket', 'message_id', 'emoji_id', 'emoji_name', 'user_id', 'persona_id'],
 	partitionKey: ['channel_id', 'bucket'],
 });
 export const AttachmentLookup = defineTable<AttachmentLookupRow, 'channel_id' | 'attachment_id' | 'filename'>({
