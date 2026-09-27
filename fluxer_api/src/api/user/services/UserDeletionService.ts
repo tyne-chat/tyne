@@ -43,12 +43,18 @@ import type {IWorkerService} from '@pkgs/worker/src/contracts/IWorkerService';
 import {ms} from 'itty-time';
 import type Stripe from 'stripe';
 
+// Fork imports.
+
+import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
+import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+
 const CHUNK_SIZE = 100;
 
 interface UserDeletionDependencies {
 	userRepository: UserRepository;
 	guildRepository: GuildRepository;
 	channelRepository: ChannelRepository;
+	personaRepository: IPersonaRepository;
 	favoriteMemeRepository: FavoriteMemeRepository;
 	oauth2TokenRepository: OAuth2TokenRepository;
 	storageService: IStorageService;
@@ -85,6 +91,7 @@ export async function processUserDeletion(
 		userRepository,
 		guildRepository,
 		channelRepository,
+		personaRepository,
 		favoriteMemeRepository,
 		oauth2TokenRepository,
 		storageService,
@@ -406,7 +413,15 @@ export async function processUserDeletion(
 		);
 		Logger.debug({userId, deleted}, 'Deleted messages scheduled for deletion before anonymizing the rest');
 	}
-	Logger.debug({userId}, 'Anonymizing user messages');
+	Logger.debug({userId}, 'Fetching personas for anonymization mapping');
+	const personas = await personaRepository.findByUserId(userId, {includeDeleted: true});
+	const personaIdMapping = new Map<string, PersonaID>();
+	for (const persona of personas) {
+		const anonPersonaId = createPersonaID(await snowflakeService.generate());
+		personaIdMapping.set(persona.id.toString(), anonPersonaId);
+		await personaRepository.createTombstone(deletedUserId, anonPersonaId);
+	}
+	Logger.debug({userId, personaCount: personas.length}, 'Anonymizing user messages');
 	let lastMessageId: MessageID | undefined;
 	let processedCount = 0;
 	while (true) {
@@ -419,7 +434,7 @@ export async function processUserDeletion(
 			break;
 		}
 		for (const {channelId, messageId} of messagesToAnonymize) {
-			await channelRepository.messages.anonymizeMessage(channelId, messageId, deletedUserId);
+			await channelRepository.messages.anonymizeMessage(channelId, messageId, deletedUserId, personaIdMapping);
 		}
 		processedCount += messagesToAnonymize.length;
 		lastMessageId = messagesToAnonymize[messagesToAnonymize.length - 1].messageId;
@@ -432,8 +447,15 @@ export async function processUserDeletion(
 	Logger.debug({userId}, 'Deleting S3 objects');
 	if (user.avatarHash) {
 		try {
+			const rawHash = user.avatarHash.replace(/^a_/, '');
 			await storageService.deleteAvatar({prefix: 'avatars', key: `${userId}/${user.avatarHash}`});
-			await purgeQueue.addUrls([`${Config.endpoints.media}/avatars/${userId}/${user.avatarHash}`]);
+			if (rawHash !== user.avatarHash) {
+				await storageService.deleteAvatar({prefix: 'avatars', key: `${userId}/${rawHash}`});
+			}
+			await purgeQueue.addUrls([
+				`${Config.endpoints.media}/avatars/${userId}/${user.avatarHash}`,
+				`${Config.endpoints.media}/avatars/${userId}/${rawHash}`,
+			]);
 			Logger.debug({userId, avatarHash: user.avatarHash}, 'Deleted avatar');
 		} catch (error) {
 			Logger.error({error, userId}, 'Failed to delete avatar');
@@ -441,13 +463,61 @@ export async function processUserDeletion(
 	}
 	if (user.bannerHash) {
 		try {
+			const rawHash = user.bannerHash.replace(/^a_/, '');
 			await storageService.deleteAvatar({prefix: 'banners', key: `${userId}/${user.bannerHash}`});
-			await purgeQueue.addUrls([`${Config.endpoints.media}/banners/${userId}/${user.bannerHash}`]);
+			if (rawHash !== user.bannerHash) {
+				await storageService.deleteAvatar({prefix: 'banners', key: `${userId}/${rawHash}`});
+			}
+			await purgeQueue.addUrls([
+				`${Config.endpoints.media}/banners/${userId}/${user.bannerHash}`,
+				`${Config.endpoints.media}/banners/${userId}/${rawHash}`,
+			]);
 			Logger.debug({userId, bannerHash: user.bannerHash}, 'Deleted banner');
 		} catch (error) {
 			Logger.error({error, userId}, 'Failed to delete banner');
 		}
 	}
+	for (const persona of personas) {
+		if (persona.avatarHash) {
+			const rawHash = persona.avatarHash.replace(/^a_/, '');
+			try {
+				await storageService.deleteAvatar({prefix: 'avatars', key: `${userId}/${persona.avatarHash}`});
+				if (rawHash !== persona.avatarHash) {
+					await storageService.deleteAvatar({prefix: 'avatars', key: `${userId}/${rawHash}`});
+				}
+				await purgeQueue.addUrls([
+					`${Config.endpoints.media}/avatars/${userId}/${persona.avatarHash}`,
+					`${Config.endpoints.media}/avatars/${userId}/${rawHash}`,
+				]);
+				Logger.debug(
+					{userId, personaId: persona.id, avatarHash: persona.avatarHash, rawHash},
+					'Deleted persona avatar',
+				);
+			} catch (error) {
+				Logger.error({error, userId, personaId: persona.id}, 'Failed to delete persona avatar');
+			}
+		}
+		if (persona.bannerHash) {
+			const rawHash = persona.bannerHash.replace(/^a_/, '');
+			try {
+				await storageService.deleteAvatar({prefix: 'banners', key: `${userId}/${persona.bannerHash}`});
+				if (rawHash !== persona.bannerHash) {
+					await storageService.deleteAvatar({prefix: 'banners', key: `${userId}/${rawHash}`});
+				}
+				await purgeQueue.addUrls([
+					`${Config.endpoints.media}/banners/${userId}/${persona.bannerHash}`,
+					`${Config.endpoints.media}/banners/${userId}/${rawHash}`,
+				]);
+				Logger.debug(
+					{userId, personaId: persona.id, bannerHash: persona.bannerHash, rawHash},
+					'Deleted persona banner',
+				);
+			} catch (error) {
+				Logger.error({error, userId, personaId: persona.id}, 'Failed to delete persona banner');
+			}
+		}
+	}
+
 	const favoriteMemes = await favoriteMemeRepository.findByUserId(userId);
 	for (const meme of favoriteMemes) {
 		try {
@@ -492,6 +562,8 @@ export async function processUserDeletion(
 		userRepository.deleteAllRecentMentions(userId),
 		userRepository.deleteAllAuthorizedIps(userId),
 		userRepository.deletePinnedDmsByUserId(userId),
+		personaRepository.hardDeleteAllByUserId(userId),
+		personaRepository.deleteSettings(userId),
 	]);
 	await userRepository.deleteUserSecondaryIndices(userId);
 	const userForAnonymization = await userRepository.findUniqueAssert(userId);

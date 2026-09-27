@@ -196,8 +196,8 @@ export class PersonaService {
 		const persona = await this.deps.personaRepository.create({
 			user_id: userId,
 			name: data.name,
-			avatar_url: data.avatar_url,
-			banner_url: data.banner_url,
+			avatar_hash: data.avatar_hash,
+			banner_hash: data.banner_hash,
 			pronouns: data.pronouns,
 			color: data.color,
 			avatar_color: data.avatar_color,
@@ -229,8 +229,8 @@ export class PersonaService {
 
 		const updated = await this.deps.personaRepository.update(userId, personaId, {
 			name: data.name,
-			avatar_url: data.avatar_url,
-			banner_url: data.banner_url,
+			avatar_hash: data.avatar_hash,
+			banner_hash: data.banner_hash,
 			pronouns: data.pronouns,
 			color: data.color,
 			avatar_color: data.avatar_color,
@@ -349,8 +349,8 @@ export class PersonaService {
 				const existing = existingByUuid.get(item.external_uuid)!;
 				const updated = await this.deps.personaRepository.update(userId, existing.id, {
 					name: item.name,
-					avatar_url: item.avatar_url,
-					banner_url: item.banner_url,
+					avatar_hash: item.avatar_hash,
+					banner_hash: item.banner_hash,
 					pronouns: item.pronouns,
 					color: item.color,
 					avatar_color: item.avatar_color,
@@ -370,8 +370,8 @@ export class PersonaService {
 				const created = await this.deps.personaRepository.create({
 					user_id: userId,
 					name: item.name,
-					avatar_url: item.avatar_url,
-					banner_url: item.banner_url,
+					avatar_hash: item.avatar_hash,
+					banner_hash: item.banner_hash,
 					pronouns: item.pronouns,
 					color: item.color,
 					avatar_color: item.avatar_color,
@@ -608,8 +608,8 @@ export class PersonaService {
 			return {
 				id: persona.id.toString(),
 				name: persona.name,
-				avatar_url: persona.avatarUrl,
-				banner_url: persona.bannerUrl,
+				avatar_hash: persona.avatarHash,
+				banner_hash: persona.bannerHash,
 				display_tag_text: userSettings?.display_tag_text ?? null,
 				display_tag_icon: userSettings?.display_tag_icon ?? null,
 				pronouns: persona.pronouns,
