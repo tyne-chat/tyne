@@ -8,7 +8,8 @@ export interface PersonaTagLike {
 export interface PersonaLike {
 	id: string;
 	name: string;
-	avatar_url?: string | null;
+	avatar_hash?: string | null;
+	banner_hash?: string | null;
 	persona_tags?: ReadonlyArray<PersonaTagLike> | null;
 	pronouns?: string | null;
 	color?: number | null;

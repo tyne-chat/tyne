@@ -10,6 +10,10 @@ import type {AttachmentLookupRow, MessageRow} from '@app/api/database/types/Mess
 import type {Message} from '@app/api/models/Message';
 import {AttachmentLookup} from '@app/api/Tables';
 
+// Fork imports.
+
+import type {PersonaID} from '@app/api/BrandedTypes';
+
 export interface UpsertMessageOptions {
 	isInsert?: boolean;
 	skipParentLastMessageId?: boolean;
@@ -92,8 +96,13 @@ export class MessageRepository {
 		return this.authorRepo.listMessagesByAuthor(authorId, limit, lastMessageId);
 	}
 
-	async anonymizeMessage(channelId: ChannelID, messageId: MessageID, newAuthorId: UserID): Promise<void> {
-		return this.authorRepo.anonymizeMessage(channelId, messageId, newAuthorId);
+	async anonymizeMessage(
+		channelId: ChannelID,
+		messageId: MessageID,
+		newAuthorId: UserID,
+		personaIdMapping?: ReadonlyMap<string, PersonaID>,
+	): Promise<void> {
+		return this.authorRepo.anonymizeMessage(channelId, messageId, newAuthorId, personaIdMapping);
 	}
 
 	async lookupAttachmentByChannelAndFilename(
