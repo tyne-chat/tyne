@@ -10,8 +10,8 @@ export interface CreatePersonaParams {
 	user_id: UserID;
 	persona_id?: PersonaID;
 	name: string;
-	avatar_url?: string | null;
-	banner_url?: string | null;
+	avatar_hash?: string | null;
+	banner_hash?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
 	avatar_color?: number | null;
@@ -26,8 +26,8 @@ export interface CreatePersonaParams {
 
 export interface UpdatePersonaParams {
 	name?: string;
-	avatar_url?: string | null;
-	banner_url?: string | null;
+	avatar_hash?: string | null;
+	banner_hash?: string | null;
 	pronouns?: string | null;
 	color?: number | null;
 	avatar_color?: number | null;
@@ -54,7 +54,10 @@ export abstract class IPersonaRepository {
 	abstract update(userId: UserID, personaId: PersonaID, params: UpdatePersonaParams): Promise<Persona | null>;
 	abstract delete(userId: UserID, personaId: PersonaID): Promise<boolean>;
 	abstract deleteAllByUserId(userId: UserID): Promise<void>;
+	abstract hardDeleteAllByUserId(userId: UserID): Promise<void>;
+	abstract createTombstone(userId: UserID, personaId: PersonaID): Promise<Persona>;
 	abstract findSettings(userId: UserID): Promise<UserPersonaSettingsRow | null>;
+	abstract deleteSettings(userId: UserID): Promise<void>;
 	async findSettingsByUserIds(userIds: Array<UserID>): Promise<Map<string, UserPersonaSettingsRow>> {
 		const results = new Map<string, UserPersonaSettingsRow>();
 		await Promise.all(
