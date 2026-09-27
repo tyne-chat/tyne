@@ -158,7 +158,8 @@ describe('MessageChangePersona', () => {
 			const payload = MessageChangePersona.buildSubprofilePayload({
 				id: 'bob-123',
 				name: 'Bob the Fox',
-				avatarUrl: 'https://example.com/bob.png',
+				avatar_hash: 'bob_avatar_hash',
+				banner_hash: 'bob_banner_hash',
 				color: 123456,
 				bio: 'Fox bio',
 				pronouns: 'he/him',
@@ -167,7 +168,8 @@ describe('MessageChangePersona', () => {
 			expect(payload).toEqual({
 				id: 'bob-123',
 				name: 'Bob the Fox',
-				avatar: 'https://example.com/bob.png',
+				avatar: 'bob_avatar_hash',
+				banner: 'bob_banner_hash',
 				avatar_color: 123456,
 				color: 123456,
 				display_tag_text: 'TESTING SYSTEM',
