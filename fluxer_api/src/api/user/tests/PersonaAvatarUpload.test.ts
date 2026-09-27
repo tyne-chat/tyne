@@ -94,4 +94,155 @@ describe('Persona Avatar Upload', () => {
 
 		fetchSpy.mockRestore();
 	});
+
+	it('uploads persona banner and returns banner_hash', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+
+		const result = await createBuilder<{banner_hash: string}>(harness, account.token)
+			.post('/users/@me/personas/banner')
+			.body({banner: getPngDataUrl()})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		expect(result.banner_hash).toBeTruthy();
+		expect(result.banner_hash.length).toBeGreaterThanOrEqual(8);
+	});
+
+	it('rejects invalid persona banner payload', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+
+		await createBuilder(harness, account.token)
+			.post('/users/@me/personas/banner')
+			.body({banner: 'invalid-banner-data'})
+			.expect(HTTP_STATUS.BAD_REQUEST)
+			.execute();
+	});
+
+	it('streams batch avatar import progress via NDJSON', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+
+		const fakeBuffer = Buffer.from(
+			'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+			'base64',
+		);
+		const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+			const url = typeof input === 'string' ? input : (input as Request).url;
+			if (url.includes('notfound.png')) {
+				return new Response('Not found', {status: 404, statusText: 'Not Found'});
+			}
+			if (url.includes('corrupted.png')) {
+				return new Response(Buffer.from('corrupted image bytes not valid png'), {
+					status: 200,
+					headers: {'content-type': 'image/png'},
+				});
+			}
+			return new Response(fakeBuffer, {
+				status: 200,
+				headers: {'content-type': 'image/png'},
+			});
+		});
+
+		const res = await harness.requestJson({
+			path: '/users/@me/personas/import-batch-avatars',
+			method: 'POST',
+			body: {
+				urls: [
+					'https://example.com/valid1.png',
+					'https://example.com/notfound.png',
+					'http://127.0.0.1/private.png',
+					'https://example.com/corrupted.png',
+				],
+			},
+			headers: {
+				authorization: account.token,
+			},
+		});
+
+		expect(res.status).toBe(200);
+		expect(res.headers.get('content-type')).toContain('application/x-ndjson');
+
+		const text = await res.text();
+		const lines = text
+			.trim()
+			.split('\n')
+			.filter((l) => l.trim().length > 0);
+		const events = lines.map((l) => JSON.parse(l));
+
+		// First event is 'start'
+		expect(events[0].type).toBe('start');
+		expect(events[0].total).toBe(4);
+
+		// Progress events
+		const progressEvents = events.filter((e) => e.type === 'progress');
+		expect(progressEvents.length).toBe(4);
+
+		const valid1Prog = progressEvents.find((p) => p.url === 'https://example.com/valid1.png');
+		expect(valid1Prog?.avatar_hash).toBeTruthy();
+		expect(valid1Prog?.error).toBeUndefined();
+
+		const notFoundProg = progressEvents.find((p) => p.url === 'https://example.com/notfound.png');
+		expect(notFoundProg?.error).toBeDefined();
+
+		const ssrfProg = progressEvents.find((p) => p.url === 'http://127.0.0.1/private.png');
+		expect(ssrfProg?.error).toBeDefined();
+
+		const corruptProg = progressEvents.find((p) => p.url === 'https://example.com/corrupted.png');
+		expect(corruptProg?.error).toBeDefined();
+
+		// Final event is 'complete'
+		const completeEvent = events.find((e) => e.type === 'complete');
+		expect(completeEvent).toBeDefined();
+		expect(completeEvent.total).toBe(4);
+		expect(completeEvent.results['https://example.com/valid1.png']?.avatar_hash).toBeTruthy();
+		expect(completeEvent.results['https://example.com/notfound.png']?.error).toBeDefined();
+		expect(completeEvent.results['http://127.0.0.1/private.png']?.error).toBeDefined();
+		expect(completeEvent.results['https://example.com/corrupted.png']?.error).toBeDefined();
+
+		fetchSpy.mockRestore();
+	});
+
+	it('rejects batch avatar import exceeding 10MB limit or network failure', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+
+		const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+			const url = typeof input === 'string' ? input : (input as Request).url;
+			if (url.includes('huge.png')) {
+				return new Response(new Uint8Array(11 * 1024 * 1024), {
+					status: 200,
+					headers: {'content-type': 'image/png'},
+				});
+			}
+			throw new Error('Connection refused');
+		});
+
+		const res = await harness.requestJson({
+			path: '/users/@me/personas/import-batch-avatars',
+			method: 'POST',
+			body: {
+				urls: ['https://example.com/huge.png', 'https://example.com/networkerror.png'],
+			},
+			headers: {
+				authorization: account.token,
+			},
+		});
+
+		expect(res.status).toBe(200);
+		const text = await res.text();
+		const events = text
+			.trim()
+			.split('\n')
+			.filter((l) => l.trim().length > 0)
+			.map((l) => JSON.parse(l));
+
+		const completeEvent = events.find((e) => e.type === 'complete');
+		expect(completeEvent).toBeDefined();
+		expect(completeEvent.results['https://example.com/huge.png']?.error).toContain('10MB limit');
+		expect(completeEvent.results['https://example.com/networkerror.png']?.error).toContain('Failed to download');
+
+		fetchSpy.mockRestore();
+	});
 });
