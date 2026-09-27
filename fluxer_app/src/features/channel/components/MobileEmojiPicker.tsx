@@ -138,6 +138,7 @@ export const MobileEmojiPicker = observer(
 		const {customEmojisByGuildId, unicodeEmojisByCategory, favoriteEmojis, frequentlyUsedEmojis} = useEmojiCategories(
 			allUpsell.accessibleItems,
 			renderedEmojis,
+			channelId,
 		);
 		const showFrequentlyUsedButton = frequentlyUsedEmojis.length > 0 && !normalizedSearchTerm;
 		const zoomLevel = Accessibility.zoomLevel;
