@@ -374,7 +374,7 @@ export function UserAccountController(app: HonoApp) {
 			}
 		});
 
-		ctx.header('Content-Type', 'application/x-ndjson');
+		res.headers.set('Content-Type', 'application/x-ndjson');
 		return res;
 	};
 
