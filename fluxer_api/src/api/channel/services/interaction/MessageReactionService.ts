@@ -30,9 +30,16 @@ import {FeatureTemporarilyDisabledError} from '@fluxer/errors/src/domains/core/F
 import {InputValidationError} from '@fluxer/errors/src/domains/core/InputValidationError';
 import {MissingPermissionsError} from '@fluxer/errors/src/domains/core/MissingPermissionsError';
 import {resolveLimit} from '@fluxer/limits/src/LimitResolver';
-import type {UserPartialResponse} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 import {isValidSingleUnicodeEmoji} from '@fluxer/schema/src/primitives/EmojiValidators';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
+
+// Fork imports.
+
+import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
+import {PersonaNotFoundError} from '@app/api/persona/errors/PersonaErrors';
+import {type IPersonaRepository, personaLookupKey} from '@app/api/persona/IPersonaRepository';
+import type {ReactionUserItemResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 interface ParsedEmoji {
 	id?: string;
@@ -58,6 +65,7 @@ export class MessageReactionService {
 		private userRepository: UserRepository,
 		private guildRepository: GuildRepository,
 		private limitConfigService: LimitConfigService,
+		private personaRepository?: IPersonaRepository,
 	) {}
 
 	private resolveLimitForUser(params: {
@@ -109,7 +117,7 @@ export class MessageReactionService {
 		after?: UserID;
 		userId: UserID;
 	}): Promise<{
-		users: Array<UserPartialResponse>;
+		users: Array<ReactionUserItemResponse>;
 		has_more: boolean;
 		next_after: string | null;
 	}> {
@@ -148,12 +156,44 @@ export class MessageReactionService {
 		const userIds = pageReactions.map((reaction: MessageReaction) => reaction.userId);
 		const users = await this.userRepository.listUsers(userIds);
 		const usersById = new Map(users.map((user) => [user.id.toString(), user]));
-		const orderedUsers = pageReactions.flatMap((reaction) => {
+
+		const personaPairs: Array<{userId: UserID; personaId: PersonaID}> = [];
+		for (const reaction of pageReactions) {
+			if (reaction.personaId) {
+				personaPairs.push({userId: reaction.userId, personaId: reaction.personaId});
+			}
+		}
+		const personasByKey =
+			this.personaRepository && personaPairs.length > 0
+				? await this.personaRepository.findByUserAndPersonaIds(personaPairs)
+				: new Map();
+		const userSettingsByUserId =
+			this.personaRepository && personaPairs.length > 0
+				? await this.personaRepository.findSettingsByUserIds(personaPairs.map((p) => p.userId))
+				: new Map();
+
+		const orderedUsers: Array<ReactionUserItemResponse> = pageReactions.flatMap((reaction) => {
 			const user = usersById.get(reaction.userId.toString());
-			return user ? [user] : [];
+			if (!user) return [];
+			const base = mapUserToPartialResponse(user);
+			let subprofile: MessageSubprofileResponse | null = null;
+			if (reaction.personaId) {
+				const persona = personasByKey.get(personaLookupKey(reaction.userId, reaction.personaId));
+				if (persona) {
+					const settings = userSettingsByUserId.get(reaction.userId.toString());
+					subprofile = persona.toSubprofileResponse(settings);
+				}
+			}
+			return [
+				{
+					...base,
+					subprofile,
+					persona_id: reaction.personaId ? reaction.personaId.toString() : null,
+				},
+			];
 		});
 		return {
-			users: orderedUsers.map((user) => mapUserToPartialResponse(user)),
+			users: orderedUsers,
 			has_more: hasMore,
 			next_after: nextAfter,
 		};
@@ -165,12 +205,14 @@ export class MessageReactionService {
 		emoji,
 		userId,
 		sessionId,
+		personaId,
 	}: {
 		authChannel: AuthenticatedChannel;
 		messageId: MessageID;
 		emoji: string;
 		userId: UserID;
 		sessionId?: string;
+		personaId?: PersonaID | string | null;
 	}): Promise<void> {
 		const channel = authChannel.channel;
 		const {guild, hasPermission, checkPermission} = authChannel;
@@ -187,6 +229,21 @@ export class MessageReactionService {
 		if (requestingUser) {
 			assertAccountNotLimited(requestingUser);
 		}
+
+		let validatedPersonaId: PersonaID | null = null;
+		let subprofile: MessageSubprofileResponse | null = null;
+		if (personaId !== undefined && personaId !== null && personaId !== '' && personaId !== '0') {
+			validatedPersonaId = createPersonaID(BigInt(personaId));
+			if (this.personaRepository) {
+				const persona = await this.personaRepository.findById(userId, validatedPersonaId);
+				if (!persona || persona.isDeleted) {
+					throw new PersonaNotFoundError();
+				}
+				const settings = await this.personaRepository.findSettings(userId);
+				subprofile = persona.toSubprofileResponse(settings);
+			}
+		}
+
 		const guildFeatures = guild?.features ?? null;
 		const maxUsersPerReaction = this.resolveLimitForUser({
 			user: requestingUser ?? null,
@@ -208,6 +265,7 @@ export class MessageReactionService {
 			userId,
 			parsedEmojiBasic.name,
 			emojiId,
+			validatedPersonaId,
 		);
 		if (userReactionExists) {
 			return;
@@ -251,6 +309,7 @@ export class MessageReactionService {
 			parsedEmoji.name,
 			emojiId,
 			parsedEmoji.animated ?? false,
+			validatedPersonaId,
 		);
 		await this.dispatchMessageReactionAdd({
 			channel,
@@ -258,6 +317,8 @@ export class MessageReactionService {
 			emoji: parsedEmoji,
 			userId,
 			sessionId,
+			personaId: validatedPersonaId,
+			subprofile,
 		});
 	}
 
@@ -268,6 +329,7 @@ export class MessageReactionService {
 		targetId,
 		sessionId,
 		actorId,
+		personaId,
 	}: {
 		authChannel: AuthenticatedChannel;
 		messageId: MessageID;
@@ -275,6 +337,7 @@ export class MessageReactionService {
 		targetId: UserID;
 		sessionId?: string;
 		actorId: UserID;
+		personaId?: PersonaID | string | null;
 	}): Promise<void> {
 		const channel = authChannel.channel;
 		const {hasPermission} = authChannel;
@@ -287,12 +350,20 @@ export class MessageReactionService {
 			await this.assertCanModerateMessageReactions({channel, hasPermission});
 		}
 		const emojiId = parsedEmoji.id ? createEmojiID(BigInt(parsedEmoji.id)) : undefined;
+		let normalizedPersonaId: PersonaID | undefined;
+		if (personaId === null) {
+			normalizedPersonaId = createPersonaID(0n);
+		} else if (personaId !== undefined && personaId !== '') {
+			normalizedPersonaId = createPersonaID(BigInt(personaId));
+		}
+
 		await this.channelRepository.messageInteractions.removeReaction(
 			channel.id,
 			messageId,
 			targetId,
 			parsedEmoji.name,
 			emojiId,
+			normalizedPersonaId,
 		);
 		await this.dispatchMessageReactionRemove({
 			channel,
@@ -300,6 +371,7 @@ export class MessageReactionService {
 			emoji: parsedEmoji,
 			userId: targetId,
 			sessionId,
+			personaId: normalizedPersonaId,
 		});
 	}
 
@@ -433,6 +505,8 @@ export class MessageReactionService {
 		emoji: ParsedEmoji;
 		userId: UserID;
 		sessionId?: string;
+		personaId?: PersonaID | null;
+		subprofile?: MessageSubprofileResponse | null;
 	}): Promise<void> {
 		await dispatchChannelEvent({
 			gatewayService: this.gatewayService,
@@ -444,6 +518,8 @@ export class MessageReactionService {
 				emoji: params.emoji,
 				user_id: params.userId.toString(),
 				session_id: params.sessionId,
+				persona_id: params.personaId != null && params.personaId !== 0n ? params.personaId.toString() : undefined,
+				subprofile: params.subprofile ?? undefined,
 			},
 		});
 	}
@@ -454,6 +530,7 @@ export class MessageReactionService {
 		emoji: ParsedEmoji;
 		userId: UserID;
 		sessionId?: string;
+		personaId?: PersonaID | null;
 	}): Promise<void> {
 		await dispatchChannelEvent({
 			gatewayService: this.gatewayService,
@@ -465,6 +542,7 @@ export class MessageReactionService {
 				emoji: params.emoji,
 				user_id: params.userId.toString(),
 				session_id: params.sessionId,
+				persona_id: params.personaId != null && params.personaId !== 0n ? params.personaId.toString() : undefined,
 			},
 		});
 	}
