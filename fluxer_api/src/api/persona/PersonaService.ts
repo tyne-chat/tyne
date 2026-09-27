@@ -268,6 +268,27 @@ export class PersonaService {
 			user_id: userId.toString(),
 		});
 
+		const settings = await this.deps.personaRepository.findSettings(userId);
+		if (settings?.active_persona_id && settings.active_persona_id.toString() === personaId.toString()) {
+			const updatedSettingsRow: UserPersonaSettingsRow = {
+				...settings,
+				active_persona_id: null,
+				is_latched: false,
+				updated_at: new Date(),
+				version: (settings.version ?? 0) + 1,
+			};
+			await this.deps.personaRepository.upsertSettings(updatedSettingsRow);
+			const settingsResponse: PersonaSettingsResponse = {
+				user_id: userId.toString(),
+				active_persona_mode: (settings.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
+				active_persona_id: null,
+				is_latched: false,
+				display_tag_text: settings.display_tag_text ?? '',
+				display_tag_icon: settings.display_tag_icon ?? null,
+			};
+			await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', settingsResponse);
+		}
+
 		await this.dispatchToMutualGuilds(userId, existing, 'delete');
 	}
 
@@ -418,11 +439,29 @@ export class PersonaService {
 				display_tag_icon: null,
 			};
 		}
+
+		let activePersonaId: string | null = row.active_persona_id ? row.active_persona_id.toString() : null;
+		let isLatched = Boolean(row.is_latched);
+
+		if (activePersonaId) {
+			try {
+				const pId = createPersonaID(BigInt(activePersonaId));
+				const persona = await this.deps.personaRepository.findById(userId, pId);
+				if (!persona || persona.isDeleted) {
+					activePersonaId = null;
+					isLatched = false;
+				}
+			} catch {
+				activePersonaId = null;
+				isLatched = false;
+			}
+		}
+
 		return {
 			user_id: row.user_id.toString(),
 			active_persona_mode: (row.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
-			active_persona_id: row.active_persona_id ? row.active_persona_id.toString() : null,
-			is_latched: Boolean(row.is_latched),
+			active_persona_id: activePersonaId,
+			is_latched: isLatched,
 			display_tag_text: row.display_tag_text ?? '',
 			display_tag_icon: row.display_tag_icon ?? null,
 		};
