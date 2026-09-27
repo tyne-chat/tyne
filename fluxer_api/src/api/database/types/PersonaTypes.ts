@@ -8,8 +8,8 @@ export interface PersonaRow {
 	user_id: UserID;
 	persona_id: PersonaID;
 	name: string;
-	avatar_url: Nullish<string>;
-	banner_url: Nullish<string>;
+	avatar_hash: Nullish<string>;
+	banner_hash: Nullish<string>;
 	pronouns: Nullish<string>;
 	color: Nullish<number>;
 	avatar_color: Nullish<number>;
@@ -30,8 +30,8 @@ export const PERSONA_COLUMNS = [
 	'user_id',
 	'persona_id',
 	'name',
-	'avatar_url',
-	'banner_url',
+	'avatar_hash',
+	'banner_hash',
 	'pronouns',
 	'color',
 	'avatar_color',
