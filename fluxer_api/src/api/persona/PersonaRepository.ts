@@ -123,6 +123,7 @@ export class PersonaRepository extends IPersonaRepository {
 			bio: params.bio ?? null,
 			auto_tag_disabled: params.auto_tag_disabled ?? false,
 			persona_tags: params.persona_tags ? JSON.stringify(params.persona_tags) : JSON.stringify([]),
+			signature_emojis: params.signature_emojis ? JSON.stringify(params.signature_emojis) : JSON.stringify([]),
 			use_count: params.use_count ?? 0,
 			last_used_at_ms: params.last_used_at_ms ?? null,
 			visibility: params.visibility ?? 'unlisted',
@@ -153,6 +154,10 @@ export class PersonaRepository extends IPersonaRepository {
 			auto_tag_disabled: params.auto_tag_disabled !== undefined ? params.auto_tag_disabled : existing.autoTagDisabled,
 			persona_tags:
 				params.persona_tags !== undefined ? JSON.stringify(params.persona_tags) : JSON.stringify(existing.personaTags),
+			signature_emojis:
+				params.signature_emojis !== undefined
+					? JSON.stringify(params.signature_emojis)
+					: JSON.stringify(existing.signatureEmojis),
 			use_count: params.use_count !== undefined ? params.use_count : existing.useCount,
 			last_used_at_ms: params.last_used_at_ms !== undefined ? params.last_used_at_ms : existing.lastUsedAtMs,
 			visibility: params.visibility !== undefined ? params.visibility : existing.visibility,
