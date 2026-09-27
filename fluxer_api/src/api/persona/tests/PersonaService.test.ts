@@ -11,7 +11,12 @@ import {
 	PersonaTagLimitExceededError,
 } from '../errors/PersonaErrors';
 import type {IPersonaRepository} from '../IPersonaRepository';
-import {MAX_PERSONAS_PER_USER, PersonaService} from '../PersonaService';
+import {
+	calculatePersonaFrecencyScore,
+	calculatePersonaMatchScore,
+	MAX_PERSONAS_PER_USER,
+	PersonaService,
+} from '../PersonaService';
 
 function makeMockPersona(
 	userId: UserID,
@@ -361,10 +366,12 @@ describe('PersonaService', () => {
 						otherUserId.toString(),
 						{
 							user_id: otherUserId,
+							active_persona_id: null,
+							active_persona_mode: 'manual',
+							is_latched: false,
 							display_tag_text: 'BobbySystem',
 							display_tag_icon: null,
 							version: 1,
-							created_at: new Date(),
 							updated_at: new Date(),
 						},
 					],
@@ -518,13 +525,12 @@ describe('PersonaService', () => {
 				is_latched: false,
 				display_tag_text: 'System Tag',
 				display_tag_icon: null,
-				created_at: new Date(),
 				updated_at: new Date(),
 				version: 1,
 			});
 
 			await serviceWithGuilds.updateSettings(userId, {
-				active_persona_id: defaultPersonaId,
+				active_persona_id: defaultPersonaId.toString(),
 				is_latched: true,
 				active_persona_mode: 'manual',
 			});
@@ -552,11 +558,10 @@ describe('PersonaService', () => {
 			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
 				user_id: userId,
 				active_persona_mode: 'manual',
-				active_persona_id: defaultPersonaId,
+				active_persona_id: defaultPersonaId.toString(),
 				is_latched: true,
 				display_tag_text: 'Old Tag',
 				display_tag_icon: null,
-				created_at: new Date(),
 				updated_at: new Date(),
 				version: 1,
 			});
@@ -758,6 +763,171 @@ describe('PersonaService', () => {
 			expect(settings.active_persona_id).toBeNull();
 			expect(settings.is_latched).toBe(false);
 			expect(settings.display_tag_text).toBe('TAG');
+		});
+
+		it('handles error in findById gracefully in getSettings by resetting active persona', async () => {
+			vi.mocked(mockRepo.findSettings).mockResolvedValueOnce({
+				user_id: userId,
+				active_persona_id: defaultPersonaId.toString(),
+				active_persona_mode: 'manual',
+				is_latched: true,
+				display_tag_text: 'TAG',
+				display_tag_icon: null,
+				updated_at: new Date(),
+				version: 1,
+			});
+			vi.mocked(mockRepo.findById).mockRejectedValueOnce(new Error('Cassandra timeout'));
+
+			const settings = await service.getSettings(userId);
+			expect(settings.active_persona_id).toBeNull();
+			expect(settings.is_latched).toBe(false);
+		});
+	});
+
+	describe('Scoring and Ranking Functions', () => {
+		it('calculates frecency score across all recency boost brackets', () => {
+			const now = 1000000000000;
+			const hour = 3600 * 1000;
+
+			// null or 0 lastUsedAtMs returns countScore only
+			const countOnly = calculatePersonaFrecencyScore(10, null, now);
+			expect(countOnly).toBeCloseTo(Math.log10(11) * 20, 2);
+
+			// < 0.25h (10m ago) -> +120
+			const boost120 = calculatePersonaFrecencyScore(0, now - 10 * 60 * 1000, now);
+			expect(boost120).toBe(120);
+
+			// < 1h (30m ago) -> +90
+			const boost90 = calculatePersonaFrecencyScore(0, now - 30 * 60 * 1000, now);
+			expect(boost90).toBe(90);
+
+			// < 24h (5h ago) -> +60
+			const boost60 = calculatePersonaFrecencyScore(0, now - 5 * hour, now);
+			expect(boost60).toBe(60);
+
+			// < 72h (48h ago) -> +35
+			const boost35 = calculatePersonaFrecencyScore(0, now - 48 * hour, now);
+			expect(boost35).toBe(35);
+
+			// < 168h (100h ago) -> +15
+			const boost15 = calculatePersonaFrecencyScore(0, now - 100 * hour, now);
+			expect(boost15).toBe(15);
+
+			// < 720h (300h ago) -> +5
+			const boost5 = calculatePersonaFrecencyScore(0, now - 300 * hour, now);
+			expect(boost5).toBe(5);
+
+			// >= 720h (800h ago) -> +0
+			const boost0 = calculatePersonaFrecencyScore(0, now - 800 * hour, now);
+			expect(boost0).toBe(0);
+		});
+
+		it('calculates persona match score with exact tiers', () => {
+			expect(calculatePersonaMatchScore('Alice', '')).toBe(0);
+			expect(calculatePersonaMatchScore('Alice', '   ')).toBe(0);
+
+			// Name prefix -> 1000
+			expect(calculatePersonaMatchScore('Alice', 'al')).toBe(1000);
+
+			// Word break in name -> 800
+			expect(calculatePersonaMatchScore('Bob-The-Fox', 'the')).toBe(800);
+			expect(calculatePersonaMatchScore('Bob The Fox', 'fox')).toBe(800);
+			expect(calculatePersonaMatchScore('Bob_The_Fox', 'fox')).toBe(800);
+
+			// Name substring -> 500
+			expect(calculatePersonaMatchScore('Alice', 'lic')).toBe(500);
+
+			// Tag prefix -> 350
+			expect(calculatePersonaMatchScore('Alice', 'sys', 'System Tag')).toBe(350);
+
+			// Tag substring -> 250
+			expect(calculatePersonaMatchScore('Alice', 'tem', 'System Tag')).toBe(250);
+
+			// Owner prefix -> 150
+			expect(calculatePersonaMatchScore('Persona', 'bob', null, 'BobUsername')).toBe(150);
+			expect(calculatePersonaMatchScore('Persona', 'bob', null, null, 'BobbyNickname')).toBe(150);
+			expect(calculatePersonaMatchScore('Persona', 'bob', null, null, null, 'BobGlobal')).toBe(150);
+
+			// Owner substring -> 100
+			expect(calculatePersonaMatchScore('Persona', 'use', null, 'BobUsername')).toBe(100);
+			expect(calculatePersonaMatchScore('Persona', 'ick', null, null, 'BobbyNickname')).toBe(100);
+			expect(calculatePersonaMatchScore('Persona', 'lob', null, null, null, 'BobGlobal')).toBe(100);
+
+			// No match -> -1
+			expect(calculatePersonaMatchScore('Alice', 'zebra')).toBe(-1);
+		});
+
+		it('rejects importPersonas when a tag conflicts with an existing persona', async () => {
+			const existing = makeMockPersona(userId, defaultPersonaId, 'Existing Fox', {
+				persona_tags: JSON.stringify([{prefix: '[f]', suffix: '[/f]'}]),
+			});
+			vi.mocked(mockRepo.findByUserId).mockResolvedValueOnce([existing]);
+
+			await expect(
+				service.importPersonas(userId, [
+					{
+						name: 'New Wolf',
+						persona_tags: [{prefix: '[f]', suffix: '[/f]'}],
+					},
+				]),
+			).rejects.toThrow(DuplicatePersonaTagError);
+		});
+
+		it('ignores blank prefix and suffix tags in importPersonas', async () => {
+			vi.mocked(mockRepo.findByUserId).mockResolvedValueOnce([]);
+			const created = makeMockPersona(userId, defaultPersonaId, 'Blank Tags');
+			vi.mocked(mockRepo.create).mockResolvedValueOnce(created);
+
+			const results = await service.importPersonas(userId, [
+				{
+					name: 'Blank Tags',
+					persona_tags: [{prefix: '', suffix: ''}],
+				},
+			]);
+			expect(results).toHaveLength(1);
+		});
+
+		it('throws PersonaNotFoundError when updatePersona repository update returns null', async () => {
+			const existing = makeMockPersona(userId, defaultPersonaId, 'Old');
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(existing);
+			vi.mocked(mockRepo.findByUserId).mockResolvedValueOnce([existing]);
+			vi.mocked(mockRepo.update).mockResolvedValueOnce(null);
+
+			await expect(service.updatePersona(userId, defaultPersonaId, {name: 'New'})).rejects.toThrow(
+				PersonaNotFoundError,
+			);
+		});
+
+		it('throws PersonaNotFoundError when deletePersona repository delete returns false', async () => {
+			const existing = makeMockPersona(userId, defaultPersonaId, 'Existing');
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(existing);
+			vi.mocked(mockRepo.delete).mockResolvedValueOnce(false);
+
+			await expect(service.deletePersona(userId, defaultPersonaId)).rejects.toThrow(PersonaNotFoundError);
+		});
+
+		it('skips validation when persona_tags is empty array or undefined and skips blank tags on other personas', async () => {
+			const existing = makeMockPersona(userId, defaultPersonaId, 'My Persona');
+			const otherWithBlankTag = makeMockPersona(userId, (defaultPersonaId + 1n) as PersonaID, 'Other Persona', {
+				persona_tags: JSON.stringify([{prefix: '', suffix: ''}]),
+			});
+			vi.mocked(mockRepo.findById).mockResolvedValue(existing);
+			vi.mocked(mockRepo.findByUserId).mockResolvedValue([existing, otherWithBlankTag]);
+			vi.mocked(mockRepo.update).mockImplementation(async (_u: any, _p: any, params: any) =>
+				makeMockPersona(userId, defaultPersonaId, params.name ?? 'My Persona', {
+					persona_tags: params.persona_tags ? JSON.stringify(params.persona_tags) : '[]',
+				}),
+			);
+
+			// 1. Update with empty tags array (hits line 135)
+			const resEmpty = await service.updatePersona(userId, defaultPersonaId, {persona_tags: []});
+			expect(resEmpty).toBeDefined();
+
+			// 2. Update with valid tag while other persona has blank tag (hits line 163)
+			const resWithTag = await service.updatePersona(userId, defaultPersonaId, {
+				persona_tags: [{prefix: '[test]', suffix: '[/test]'}],
+			});
+			expect(resWithTag).toBeDefined();
 		});
 	});
 });
