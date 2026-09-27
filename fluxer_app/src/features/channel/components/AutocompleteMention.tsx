@@ -152,7 +152,12 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 							: option.persona.owner_username,
 					);
 		const systemTag = option.persona.display_tag_text?.trim();
-		const tagIcon = option.persona.display_tag_icon?.trim();
+		const rawTagIcon = option.persona.display_tag_icon?.trim();
+		const tagIcon = rawTagIcon
+			? rawTagIcon.startsWith('http://') || rawTagIcon.startsWith('https://') || rawTagIcon.startsWith('data:')
+				? rawTagIcon
+				: AvatarUtils.getUserAvatarURL({id: option.persona.owner_user_id, avatar: rawTagIcon}, false, 32)
+			: null;
 		return (
 			<AutocompleteItem
 				key={`persona-${option.persona.id}`}
@@ -162,7 +167,7 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 						<Avatar
 							user={user}
 							size={24}
-							avatarUrl={option.persona.avatar_url}
+							avatarUrl={option.persona.avatar_hash}
 							showOffline={false}
 							disableStatusTooltip={true}
 							data-flx="channel.autocomplete-mention.persona-avatar"
@@ -170,7 +175,14 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 					) : (
 						<BaseAvatar
 							size={24}
-							avatarUrl={option.persona.avatar_url || AvatarUtils.getDefaultAvatarURL(option.persona.id)}
+							avatarUrl={
+								(option.persona.avatar_hash
+									? AvatarUtils.getPersonaAvatarURL({
+											userId: option.persona.owner_user_id,
+											avatar: option.persona.avatar_hash,
+										})
+									: null) ?? AvatarUtils.getDefaultAvatarURL(option.persona.id)
+							}
 							disableStatusTooltip={true}
 							data-flx="channel.autocomplete-mention.persona-avatar"
 						/>

@@ -25,9 +25,9 @@ export type ActivePersonaMode = 'manual' | 'last';
 
 export interface ClientPersona extends PersonaResponse {
 	// CamelCase aliases for backwards compatibility with React components
-	avatarUrl?: string | null;
+	avatarHash?: string | null;
 	avatarColor?: number | null;
-	bannerUrl?: string | null;
+	bannerHash?: string | null;
 	personaTags?: Array<{prefix?: string; suffix?: string}>;
 	accentColor?: number | null;
 	autoTagDisabled?: boolean;
@@ -43,8 +43,10 @@ export function normalizePersona(
 	raw: PersonaResponse | (Partial<ClientPersona> & {id: string; name: string}) | {persona: PersonaResponse},
 ): ClientPersona {
 	const source: any = (raw as any)?.persona ?? raw;
-	const avatarUrl = source.avatar_url !== undefined ? source.avatar_url : (source.avatarUrl ?? null);
-	const bannerUrl = source.banner_url !== undefined ? source.banner_url : (source.bannerUrl ?? null);
+	const avatarHash =
+		source.avatar_hash !== undefined ? source.avatar_hash : source.avatarHash !== undefined ? source.avatarHash : null;
+	const bannerHash =
+		source.banner_hash !== undefined ? source.banner_hash : source.bannerHash !== undefined ? source.bannerHash : null;
 	const color =
 		source.color !== undefined
 			? source.color
@@ -73,8 +75,8 @@ export function normalizePersona(
 	return {
 		id: source.id ?? '',
 		name: source.name ?? '',
-		avatar_url: avatarUrl,
-		banner_url: bannerUrl,
+		avatar_hash: avatarHash,
+		banner_hash: bannerHash,
 		pronouns: source.pronouns ?? null,
 		color,
 		avatar_color: avatarColor,
@@ -88,9 +90,9 @@ export function normalizePersona(
 		created_at: source.created_at ?? new Date().toISOString(),
 		updated_at: source.updated_at ?? new Date().toISOString(),
 		// CamelCase aliases
-		avatarUrl,
+		avatarHash,
 		avatarColor,
-		bannerUrl,
+		bannerHash,
 		personaTags: tags,
 		accentColor: color,
 		autoTagDisabled: autoTag,
@@ -140,9 +142,9 @@ export class PersonaStoreClass {
 			return {
 				id: own.id,
 				name: own.name,
-				avatar: own.avatar_url ?? null,
+				avatar: own.avatar_hash ?? own.avatarHash ?? null,
 				avatar_color: own.color ?? null,
-				banner: own.banner_url ?? own.bannerUrl ?? null,
+				banner: own.banner_hash ?? own.bannerHash ?? null,
 				display_tag_text: this.displayTagText || null,
 				display_tag_icon: this.displayTagIcon || null,
 				pronouns: own.pronouns ?? null,
@@ -169,9 +171,9 @@ export class PersonaStoreClass {
 				const subprofile: MessageSubprofileResponse = {
 					id: body.id,
 					name: body.name,
-					avatar: body.avatar_url ?? null,
+					avatar: body.avatar_hash ?? body.avatar ?? null,
 					avatar_color: body.color ?? null,
-					banner: body.banner_url ?? null,
+					banner: body.banner_hash ?? body.banner ?? null,
 					display_tag_text: body.display_tag_text ?? null,
 					display_tag_icon: body.display_tag_icon ?? null,
 					pronouns: body.pronouns ?? null,
@@ -380,8 +382,8 @@ export class PersonaStoreClass {
 
 	async addPersona(personaData: {
 		name: string;
-		avatar_url?: string | null;
-		banner_url?: string | null;
+		avatar_hash?: string | null;
+		banner_hash?: string | null;
 		pronouns?: string | null;
 		color?: number | null;
 		accentColor?: number | null;
@@ -395,8 +397,8 @@ export class PersonaStoreClass {
 		const normalized = normalizePersona({
 			id,
 			name: personaData.name,
-			avatar_url: personaData.avatar_url ?? null,
-			banner_url: personaData.banner_url ?? null,
+			avatar_hash: personaData.avatar_hash ?? null,
+			banner_hash: personaData.banner_hash ?? null,
 			pronouns: personaData.pronouns ?? null,
 			color: personaData.accentColor ?? personaData.accent_color ?? personaData.color ?? null,
 			bio: personaData.bio ?? null,
@@ -578,7 +580,8 @@ export class PersonaStoreClass {
 		const personasLike = this._personas.map((p) => ({
 			id: p.id,
 			name: p.name,
-			avatar_url: p.avatar_url ?? p.avatarUrl ?? null,
+			avatar_hash: p.avatar_hash ?? p.avatarHash ?? null,
+			banner_hash: p.banner_hash ?? p.bannerHash ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? p.accentColor ?? null,
 			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
@@ -612,7 +615,8 @@ export class PersonaStoreClass {
 		const personasLike = this._personas.map((p) => ({
 			id: p.id,
 			name: p.name,
-			avatar_url: p.avatar_url ?? p.avatarUrl ?? null,
+			avatar_hash: p.avatar_hash ?? p.avatarHash ?? null,
+			banner_hash: p.banner_hash ?? p.bannerHash ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? p.accentColor ?? null,
 			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
@@ -648,7 +652,8 @@ export class PersonaStoreClass {
 		const personasLike = this._personas.map((p) => ({
 			id: p.id,
 			name: p.name,
-			avatar_url: p.avatar_url ?? p.avatarUrl ?? null,
+			avatar_hash: p.avatar_hash ?? p.avatarHash ?? null,
+			banner_hash: p.banner_hash ?? p.bannerHash ?? null,
 			pronouns: p.pronouns ?? null,
 			color: p.color ?? p.accentColor ?? null,
 			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
@@ -685,9 +690,9 @@ export class PersonaStoreClass {
 				subprofile: {
 					id: result.persona.id,
 					name: result.persona.name,
-					avatar: result.persona.avatar_url ?? null,
+					avatar: result.persona.avatar_hash ?? null,
 					avatar_color: result.persona.color ?? null,
-					banner: (result.persona as any).banner_url ?? (result.persona as any).bannerUrl ?? null,
+					banner: result.persona.banner_hash ?? null,
 					display_tag_text: this.displayTagText || null,
 					display_tag_icon: this.displayTagIcon || null,
 					pronouns: result.persona.pronouns ?? null,
@@ -726,8 +731,9 @@ export class PersonaStoreClass {
 		return {
 			id: active.id,
 			name: active.name,
-			avatar: active.avatar_url ?? active.avatarUrl ?? null,
+			avatar: active.avatar_hash ?? active.avatarHash ?? null,
 			avatar_color: active.color ?? active.accentColor ?? null,
+			banner: active.banner_hash ?? active.bannerHash ?? null,
 			color: active.color ?? active.accentColor ?? null,
 			display_tag_text: this._displayTagText || null,
 			display_tag_icon: this._displayTagIcon || null,
