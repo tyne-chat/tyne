@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import {createTestAccount} from '@app/api/auth/tests/AuthTestUtils';
+import {createTestAccount, setUserACLs} from '@app/api/auth/tests/AuthTestUtils';
 import {getInstanceConfigRepository} from '@app/api/middleware/ServiceSingletons';
 import type {ApiTestHarness} from '@app/api/test/ApiTestHarness';
 import {createApiTestHarness} from '@app/api/test/ApiTestHarness';
 import {HTTP_STATUS} from '@app/api/test/TestConstants';
 import {createBuilder} from '@app/api/test/TestRequestBuilder';
+import {AdminACLs} from '@fluxer/constants/src/AdminACLs';
 import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import {UserFlags} from '@fluxer/constants/src/UserConstants';
+import type {InstanceConfigResponse} from '@fluxer/schema/src/domains/admin/AdminSchemas';
 import type {GuildResponse} from '@fluxer/schema/src/domains/guild/GuildResponseSchemas';
 import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
 
@@ -79,5 +81,25 @@ describe('Community creation staff only policy', () => {
 			.execute();
 
 		expect(response.name).toBe('Staff Community');
+	});
+
+	it('updates community_creation_staff_only via admin PATCH', async () => {
+		const admin = await setUserACLs(harness, await createTestAccount(harness), [
+			AdminACLs.AUTHENTICATE,
+			AdminACLs.INSTANCE_CONFIG_VIEW,
+			AdminACLs.INSTANCE_CONFIG_UPDATE,
+		]);
+
+		const updated = await createBuilder<InstanceConfigResponse>(harness, admin.token)
+			.patch('/admin/instance/config')
+			.body({
+				policy: {
+					community_creation_staff_only: true,
+				},
+			})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		expect(updated.policy.community_creation_staff_only).toBe(true);
 	});
 });
