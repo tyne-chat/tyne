@@ -245,4 +245,89 @@ describe('Persona Avatar Upload', () => {
 
 		fetchSpy.mockRestore();
 	});
+
+	it('rejects invalid batch avatar import request payloads', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+
+		// 1. Empty urls array
+		const emptyRes = await harness.requestJson({
+			path: '/users/@me/personas/import-batch-avatars',
+			method: 'POST',
+			body: {urls: []},
+			headers: {authorization: account.token},
+		});
+		expect(emptyRes.status).toBe(HTTP_STATUS.BAD_REQUEST);
+
+		// 2. Invalid URL string
+		const invalidUrlRes = await harness.requestJson({
+			path: '/users/@me/personas/import-batch-avatars',
+			method: 'POST',
+			body: {urls: ['not-a-url']},
+			headers: {authorization: account.token},
+		});
+		expect(invalidUrlRes.status).toBe(HTTP_STATUS.BAD_REQUEST);
+
+		// 3. Exceeds 500 URLs
+		const tooManyUrls = Array.from({length: 501}, (_, i) => `https://example.com/avatar${i}.png`);
+		const oversizedRes = await harness.requestJson({
+			path: '/users/@me/personas/import-batch-avatars',
+			method: 'POST',
+			body: {urls: tooManyUrls},
+			headers: {authorization: account.token},
+		});
+		expect(oversizedRes.status).toBe(HTTP_STATUS.BAD_REQUEST);
+	});
+
+	it('deduplicates duplicate URLs during batch avatar import', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+
+		const fakeBuffer = Buffer.from(
+			'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+			'base64',
+		);
+		let fetchCallCount = 0;
+		const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+			fetchCallCount++;
+			return new Response(fakeBuffer, {
+				status: 200,
+				headers: {'content-type': 'image/png'},
+			});
+		});
+
+		const res = await harness.requestJson({
+			path: '/users/@me/personas/import-batch-avatars',
+			method: 'POST',
+			body: {
+				urls: [
+					'https://example.com/duplicate.png',
+					'https://example.com/duplicate.png',
+					'https://example.com/duplicate.png',
+				],
+			},
+			headers: {authorization: account.token},
+		});
+
+		expect(res.status).toBe(HTTP_STATUS.OK);
+		const text = await res.text();
+		const events = text
+			.trim()
+			.split('\n')
+			.filter((l) => l.trim().length > 0)
+			.map((l) => JSON.parse(l));
+
+		const startEvent = events.find((e) => e.type === 'start');
+		expect(startEvent?.total).toBe(1);
+
+		const progressEvents = events.filter((e) => e.type === 'progress');
+		expect(progressEvents.length).toBe(1);
+
+		const completeEvent = events.find((e) => e.type === 'complete');
+		expect(completeEvent?.total).toBe(1);
+		expect(Object.keys(completeEvent?.results ?? {})).toHaveLength(1);
+		expect(fetchCallCount).toBe(1);
+
+		fetchSpy.mockRestore();
+	});
 });
