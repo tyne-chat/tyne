@@ -268,6 +268,16 @@ mod tests {
     }
 
     #[test]
+    fn extracts_persona_user_mention() {
+        let mentions = extract_mentions_from_markdown(Some(
+            "hello <@123456789:987654321> and <@!111222333:444555666>",
+        ));
+        assert!(mentions.users.contains(&123456789));
+        assert!(mentions.users.contains(&111222333));
+        assert_eq!(mentions.users.len(), 2);
+    }
+
+    #[test]
     fn ignores_mentions_inside_inline_and_block_code() {
         let mentions = extract_mentions_from_markdown(Some(
             "`<@111>` <@222>\n```txt\n<@333> <#444>\n```\n<#555>",
