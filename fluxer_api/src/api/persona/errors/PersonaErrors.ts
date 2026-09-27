@@ -36,3 +36,21 @@ export class PersonaTagLimitExceededError extends BadRequestError {
 		});
 	}
 }
+
+export class DuplicateSignatureEmojiError extends BadRequestError {
+	constructor(message: string = 'A signature emoji with this name or identifier already exists on this account') {
+		super({
+			code: APIErrorCodes.DUPLICATE_SIGNATURE_EMOJI,
+			message,
+		});
+	}
+}
+
+export class SignatureEmojiLimitExceededError extends BadRequestError {
+	constructor(max: number = 20) {
+		super({
+			code: APIErrorCodes.SIGNATURE_EMOJI_LIMIT_REACHED,
+			message: `A persona can have at most ${max} signature emojis`,
+		});
+	}
+}
