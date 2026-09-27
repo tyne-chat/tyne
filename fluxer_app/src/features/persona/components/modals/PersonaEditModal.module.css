@@ -268,3 +268,52 @@
 	font-size: 0.75rem;
 	color: var(--text-primary-muted);
 }
+
+.signatureEmojiGrid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	margin-top: 6px;
+}
+
+.signatureEmojiChip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 8px;
+	border-radius: var(--radius-md, 6px);
+	background-color: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	font-size: 0.8125rem;
+	color: var(--text-primary);
+}
+
+.signatureEmojiImg {
+	width: 20px;
+	height: 20px;
+	object-fit: contain;
+	vertical-align: middle;
+}
+
+.signatureEmojiRemove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: var(--text-primary-muted);
+	cursor: pointer;
+	border-radius: 50%;
+	transition:
+		color 150ms ease,
+		background-color 150ms ease;
+}
+
+.signatureEmojiRemove:hover {
+	color: var(--text-primary);
+	background-color: rgba(255, 255, 255, 0.1);
+}

@@ -128,7 +128,7 @@ export const MessageReactionsSheet = observer(
 					return;
 				}
 				const isOwnReaction = Authentication.currentUserId != null && reactor.id === Authentication.currentUserId;
-				const reactorName = NicknameUtils.getNickname(reactor, guildId, channelId);
+				const reactorName = reactor.subprofile?.name ?? NicknameUtils.getNickname(reactor, guildId, channelId);
 				ModalCommands.push(
 					modal(() => (
 						<ConfirmModal
@@ -145,6 +145,7 @@ export const MessageReactionsSheet = observer(
 									messageId,
 									selectedReaction.emoji,
 									isOwnReaction ? undefined : reactor.id,
+									reactor.personaId ?? reactor.subprofile?.id ?? null,
 								)
 							}
 							data-flx="channel.message-reactions-sheet.handle-remove-reactor.confirm-modal"
