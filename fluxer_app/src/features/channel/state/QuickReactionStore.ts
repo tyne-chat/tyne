@@ -60,22 +60,31 @@ function loadQuickReactionDependencies(): Promise<QuickReactionDependencies> {
 	return dependenciesPromise;
 }
 
-function getCacheKey(channel: Channel | null, count: number, rankingVersion: number): string {
+function getCacheKey(
+	channel: Channel | null,
+	count: number,
+	rankingVersion: number,
+	personaId?: string | null,
+): string {
 	const channelScope = channel ? `${channel.guildId ?? 'dm'}:${channel.id}` : 'global';
-	return `${rankingVersion}:${cacheEpoch}:${channelScope}:${count}`;
+	return `${rankingVersion}:${cacheEpoch}:${channelScope}:${count}:${personaId ?? ''}`;
 }
 
-function computeQuickReactions(channel: Channel | null, count: number): QuickReactionSnapshot {
+function computeQuickReactions(
+	channel: Channel | null,
+	count: number,
+	personaId?: string | null,
+): QuickReactionSnapshot {
 	if (!dependencies || count <= 0) {
 		return EMPTY_QUICK_REACTIONS;
 	}
 	const rankingVersion = dependencies.EmojiPicker.getRanking().version;
-	const key = getCacheKey(channel, count, rankingVersion);
+	const key = getCacheKey(channel, count, rankingVersion, personaId);
 	const cached = snapshotCache.get(key);
 	if (cached) {
 		return cached;
 	}
-	const snapshot = Object.freeze(dependencies.Emoji.getQuickReactionEmojis(channel, count));
+	const snapshot = Object.freeze(dependencies.Emoji.getQuickReactionEmojis(channel, count, personaId));
 	snapshotCache.set(key, snapshot);
 	while (snapshotCache.size > MAX_CACHE_ENTRIES) {
 		const oldestKey = snapshotCache.keys().next().value;
@@ -89,6 +98,7 @@ export function useQuickReactionEmojis(
 	channel: Channel | null,
 	count: number,
 	enabled: boolean,
+	personaId?: string | null,
 ): QuickReactionSnapshot {
 	const [ready, setReady] = useState(dependencies != null);
 	useEffect(() => {
@@ -107,12 +117,12 @@ export function useQuickReactionEmojis(
 	}, [enabled, ready]);
 	const normalizedCount = Math.max(0, Math.floor(count));
 	const active = enabled && ready && normalizedCount > 0;
-	const pinKey = `${active}:${channel?.id ?? ''}:${normalizedCount}`;
+	const pinKey = `${active}:${channel?.id ?? ''}:${normalizedCount}:${personaId ?? ''}`;
 	const pinned = useRef<{key: string; value: QuickReactionSnapshot} | null>(null);
 	if (pinned.current?.key !== pinKey) {
 		pinned.current = {
 			key: pinKey,
-			value: active ? computeQuickReactions(channel, normalizedCount) : EMPTY_QUICK_REACTIONS,
+			value: active ? computeQuickReactions(channel, normalizedCount, personaId) : EMPTY_QUICK_REACTIONS,
 		};
 	}
 	return pinned.current.value;
