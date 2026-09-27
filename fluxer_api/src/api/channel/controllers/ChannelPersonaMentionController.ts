@@ -47,7 +47,10 @@ export function ChannelPersonaMentionController(app: HonoApp) {
 				channelId,
 			});
 
-			const userMap = new Map<any, {username: string; globalName: string | null; nickname?: string | null}>();
+			const userMap = new Map<
+				any,
+				{username: string; discriminator?: string | null; globalName: string | null; nickname?: string | null}
+			>();
 			const candidateUserIds: Array<any> = [];
 
 			if (authChannel.channel.guildId) {

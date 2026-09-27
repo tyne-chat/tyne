@@ -4,7 +4,7 @@ import type {ChannelPersonaMentionItem, PersonaResponse} from '@fluxer/schema/sr
 import {afterEach, beforeEach, describe, expect, test} from 'vitest';
 import {createTestAccount, type TestAccount} from '../../auth/tests/AuthTestUtils';
 import {Config} from '../../Config';
-import {createChannel, createGuild} from '../../channel/tests/ChannelTestUtils';
+import {createChannel, createDmChannel, createGuild} from '../../channel/tests/ChannelTestUtils';
 import {type ApiTestHarness, createApiTestHarness} from '../../test/ApiTestHarness';
 import {HTTP_STATUS} from '../../test/TestConstants';
 import {createBuilder} from '../../test/TestRequestBuilder';
@@ -117,5 +117,54 @@ describe('Channel Persona Mentions and Privacy Filtering', () => {
 			.get(`/channels/${channelId}/persona-mentions`)
 			.expect(HTTP_STATUS.FORBIDDEN)
 			.execute();
+	});
+
+	test('returns persona mentions in 1-on-1 DM channel', async () => {
+		const dmChannel = await createDmChannel(harness, userA.token, userB.userId);
+
+		await createPersona(harness, userB.token, {name: 'Bob DM Public', visibility: 'public'});
+		await createPersona(harness, userB.token, {name: 'Bob DM Private', visibility: 'private'});
+		await createPersona(harness, userA.token, {name: 'Alice DM Public', visibility: 'public'});
+
+		const results = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userA.token)
+			.get(`/channels/${dmChannel.id}/persona-mentions`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const names = results.map((r) => r.name);
+		expect(names).toContain('Alice DM Public');
+		expect(names).toContain('Bob DM Public');
+		expect(names).not.toContain('Bob DM Private');
+	});
+
+	test('returns persona mentions in personal notes channel', async () => {
+		await createPersona(harness, userA.token, {name: 'Alice Notes Only', visibility: 'private'});
+
+		const results = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userA.token)
+			.get(`/channels/${userA.userId}/persona-mentions`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const names = results.map((r) => r.name);
+		expect(names).toContain('Alice Notes Only');
+	});
+
+	test('ensures caller is included in candidates when caller is not in channel candidate repository', async () => {
+		// User C joins guild but has never spoken in channel
+		const invite = await createBuilder<{code: string}>(harness, userA.token)
+			.post(`/channels/${channelId}/invites`)
+			.body({})
+			.execute();
+		await createBuilder(harness, userC.token).post(`/invites/${invite.code}`).execute();
+
+		await createPersona(harness, userC.token, {name: 'Charlie Lurker', visibility: 'public'});
+
+		const results = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userC.token)
+			.get(`/channels/${channelId}/persona-mentions`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const names = results.map((r) => r.name);
+		expect(names).toContain('Charlie Lurker');
 	});
 });
