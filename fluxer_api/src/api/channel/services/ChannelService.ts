@@ -166,6 +166,7 @@ export class ChannelService {
 			messagePersistenceService,
 			guildAuditLogService,
 			limitConfigService,
+			personaRepository,
 		);
 		this.attachments = new AttachmentUploadService(
 			channelRepository,
