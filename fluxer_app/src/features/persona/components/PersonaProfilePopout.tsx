@@ -68,8 +68,8 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 				setPublicPersona({
 					id: localPersona.id,
 					name: localPersona.name,
-					avatar_url: localPersona.avatar_url ?? localPersona.avatarUrl ?? null,
-					banner_url: localPersona.banner_url ?? localPersona.bannerUrl ?? null,
+					avatar_hash: localPersona.avatar_hash ?? localPersona.avatarHash ?? null,
+					banner_hash: localPersona.banner_hash ?? localPersona.bannerHash ?? null,
 					pronouns: localPersona.pronouns ?? null,
 					color: localPersona.color ?? localPersona.accentColor ?? null,
 					avatar_color: localPersona.avatar_color ?? localPersona.avatarColor ?? null,
@@ -108,12 +108,15 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 		const effectiveDisplayTagIcon = isCurrentUser ? PersonaStore.displayTagIcon : (subprofile.display_tag_icon ?? null);
 		const effectiveBio =
 			publicPersona !== null && publicPersona !== undefined ? publicPersona.bio : (localPersona?.bio ?? subprofile.bio);
-		const effectiveBannerUrl =
+		const rawBanner =
 			publicPersona !== null && publicPersona !== undefined
-				? publicPersona.banner_url
+				? publicPersona.banner_hash
 				: localPersona
-					? (localPersona.banner_url ?? localPersona.bannerUrl ?? null)
+					? (localPersona.banner_hash ?? localPersona.bannerHash ?? null)
 					: ((subprofile as any).banner ?? null);
+		const effectiveBannerUrl = useMemo(() => {
+			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner});
+		}, [user.id, rawBanner]);
 
 		const resolvedGuildMember = useMemo(() => {
 			if (guildMember) return guildMember;
@@ -132,7 +135,7 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			null;
 
 		const hasCustomPersonaAvatar = Boolean(
-			subprofile.avatar || publicPersona?.avatar_url || localPersona?.avatar_url || localPersona?.avatarUrl,
+			subprofile.avatar || publicPersona?.avatar_hash || localPersona?.avatar_hash || localPersona?.avatarHash,
 		);
 
 		const accentColor = useMemo(() => {
@@ -191,7 +194,9 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 		}, [user.id, onClose]);
 
 		const personaAvatarUrl = useMemo(() => {
-			return subprofile.avatar ?? AvatarUtils.getUserAvatarURL(user, false);
+			return subprofile.avatar
+				? AvatarUtils.getPersonaAvatarURL({userId: user.id, avatar: subprofile.avatar})
+				: AvatarUtils.getUserAvatarURL(user, false);
 		}, [subprofile.avatar, user]);
 
 		return (
