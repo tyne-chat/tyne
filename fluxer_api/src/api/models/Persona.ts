@@ -4,6 +4,7 @@ import type {
 	PersonaResponse,
 	PersonaVisibility,
 	PublicPersonaResponse,
+	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
@@ -22,6 +23,7 @@ export class Persona {
 	readonly bio: string | null;
 	readonly autoTagDisabled: boolean;
 	readonly personaTags: Array<PersonaTag>;
+	readonly signatureEmojis: Array<SignatureEmoji>;
 	readonly useCount: number;
 	readonly lastUsedAtMs: bigint | null;
 	readonly visibility: PersonaVisibility;
@@ -47,6 +49,7 @@ export class Persona {
 		this.bio = row.bio ?? null;
 		this.autoTagDisabled = row.auto_tag_disabled ?? false;
 		this.personaTags = parsePersonaTags(row.persona_tags);
+		this.signatureEmojis = parseSignatureEmojis(row.signature_emojis);
 		this.useCount = row.use_count ?? 0;
 		this.lastUsedAtMs = row.last_used_at_ms ?? null;
 		this.visibility = (row.visibility as PersonaVisibility) || 'unlisted';
@@ -69,6 +72,7 @@ export class Persona {
 			bio: this.bio,
 			auto_tag_disabled: this.autoTagDisabled,
 			persona_tags: this.personaTags,
+			signature_emojis: this.signatureEmojis,
 			use_count: this.useCount,
 			last_used_at_ms: this.lastUsedAtMs ? this.lastUsedAtMs.toString() : null,
 			visibility: this.visibility,
@@ -143,6 +147,7 @@ export class Persona {
 			bio: this.bio,
 			auto_tag_disabled: this.autoTagDisabled,
 			persona_tags: JSON.stringify(this.personaTags),
+			signature_emojis: JSON.stringify(this.signatureEmojis),
 			use_count: this.useCount,
 			last_used_at_ms: this.lastUsedAtMs,
 			visibility: this.visibility,
@@ -156,6 +161,17 @@ export class Persona {
 }
 
 function parsePersonaTags(raw: string | null | undefined): Array<PersonaTag> {
+	if (!raw) return [];
+	try {
+		const parsed = JSON.parse(raw);
+		if (Array.isArray(parsed)) return parsed;
+		return [];
+	} catch {
+		return [];
+	}
+}
+
+function parseSignatureEmojis(raw: string | null | undefined): Array<SignatureEmoji> {
 	if (!raw) return [];
 	try {
 		const parsed = JSON.parse(raw);
