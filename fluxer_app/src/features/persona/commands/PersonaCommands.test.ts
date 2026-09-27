@@ -110,6 +110,41 @@ describe('PersonaCommands', () => {
 			const result = await PersonaCommands.fetchPersonas();
 			expect(result).toEqual([]);
 		});
+
+		it('replaces existing personas and clears them when server returns an empty array', async () => {
+			PersonaCommands.resetFetchPersonasCooldown();
+			PersonaStore.upsertPersona({
+				id: 'old_persona',
+				name: 'Old Persona',
+			} as any);
+			expect(PersonaStore.personas.length).toBe(1);
+
+			vi.mocked(http.get).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				body: [],
+			} as any);
+
+			const result = await PersonaCommands.fetchPersonas(true);
+			expect(result).toEqual([]);
+			expect(PersonaStore.personas.length).toBe(0);
+		});
+
+		it('bypasses cooldown when force is true', async () => {
+			vi.mocked(http.get).mockResolvedValue({
+				ok: true,
+				status: 200,
+				body: [],
+			} as any);
+
+			// First call
+			await PersonaCommands.fetchPersonas(true);
+			expect(http.get).toHaveBeenCalledTimes(1);
+
+			// Immediate second call with force=true should call http.get again despite cooldown
+			await PersonaCommands.fetchPersonas(true);
+			expect(http.get).toHaveBeenCalledTimes(2);
+		});
 	});
 
 	describe('fetchPersonaSettings', () => {
