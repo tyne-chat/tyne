@@ -274,6 +274,27 @@ describe('Persona Account Deletion Compliance', () => {
 				version: 1,
 			});
 
+			const persona4 = new Persona({
+				user_id: userId,
+				persona_id: createPersonaID(4444444444444444444n),
+				name: 'Static Persona',
+				avatar_hash: 'static_avatar4',
+				banner_hash: 'static_banner4',
+				pronouns: 'they/them',
+				color: null,
+				avatar_color: null,
+				bio: null,
+				auto_tag_disabled: false,
+				persona_tags: '[]',
+				use_count: 1,
+				last_used_at_ms: null,
+				visibility: 'unlisted',
+				external_uuid: null,
+				created_at: new Date(),
+				updated_at: new Date(),
+				version: 1,
+			});
+
 			const tombstonesCreated: Array<{userId: UserID; personaId: PersonaID}> = [];
 			const anonymizedMessages: Array<{
 				channelId: any;
@@ -287,7 +308,7 @@ describe('Persona Account Deletion Compliance', () => {
 			let deletedSettingsUserId: UserID | null = null;
 
 			const mockPersonaRepo: IPersonaRepository = {
-				findByUserId: vi.fn().mockResolvedValue([persona1, persona2, persona3]),
+				findByUserId: vi.fn().mockResolvedValue([persona1, persona2, persona3, persona4]),
 				createTombstone: vi.fn().mockImplementation(async (uid: UserID, pid: PersonaID) => {
 					tombstonesCreated.push({userId: uid, personaId: pid});
 					return {} as Persona;
@@ -335,7 +356,9 @@ describe('Persona Account Deletion Compliance', () => {
 					snowflakeCount++;
 					if (snowflakeCount === 1) return deletedUserId;
 					if (snowflakeCount === 2) return anonPersonaId1;
-					return anonPersonaId2;
+					if (snowflakeCount === 3) return anonPersonaId2;
+					if (snowflakeCount === 4) return createPersonaID(7777777777777777777n);
+					return createPersonaID(8888888888888888888n);
 				}),
 			};
 
@@ -447,7 +470,7 @@ describe('Persona Account Deletion Compliance', () => {
 			expect(mockPersonaRepo.findByUserId).toHaveBeenCalledWith(userId, {includeDeleted: true});
 
 			// 2. Tombstones were created under the new deletedUserId for each persona
-			expect(tombstonesCreated).toHaveLength(3);
+			expect(tombstonesCreated).toHaveLength(4);
 			expect(tombstonesCreated[0]).toEqual({userId: deletedUserId, personaId: anonPersonaId1});
 			expect(tombstonesCreated[1]).toEqual({userId: deletedUserId, personaId: anonPersonaId2});
 
@@ -495,11 +518,34 @@ describe('Persona Account Deletion Compliance', () => {
 			// persona2 has null hashes, so nothing deleted
 			expect(deletedAvatars.some((a) => a.key.includes('bob'))).toBe(false);
 
+			// persona4 (static hash-based without a_ prefix): single deletion each
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'avatars',
+				key: `${userId}/static_avatar4`,
+			});
+			expect(deletedAvatars).toContainEqual({
+				prefix: 'banners',
+				key: `${userId}/static_banner4`,
+			});
+
+			// persona3 avatar/banner threw S3 deletion errors, yet deletion completed without aborting
+			expect(mockStorageService.deleteAvatar).toHaveBeenCalledWith({
+				prefix: 'avatars',
+				key: `${userId}/error_avatar`,
+			});
+			expect(mockStorageService.deleteAvatar).toHaveBeenCalledWith({
+				prefix: 'banners',
+				key: `${userId}/error_banner`,
+			});
+			expect(deletedAvatars.some((a) => a.key.includes('error'))).toBe(false);
+
 			// Purge queue received CDN URLs
 			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/a_avatar1`);
 			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/avatar1`);
 			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/a_banner1`);
 			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/banner1`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/static_avatar4`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/static_banner4`);
 
 			// 5. Hard delete of original persona rows and settings was executed
 			expect(hardDeletedUserId).toBe(userId);
