@@ -127,6 +127,7 @@ export const MessageReactionsModal = observer(
 					messageId,
 					selectedReaction.emoji,
 					isOwnReaction ? undefined : reactor.id,
+					reactor.personaId ?? reactor.subprofile?.id ?? null,
 				);
 			},
 			[channelId, i18n, messageId, selectedReaction],
