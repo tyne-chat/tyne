@@ -395,6 +395,18 @@ describe('PersonaStore', () => {
 		expect(store.activePersonaId).toBeNull();
 	});
 
+	it('setPersonas unlatches if active persona is not in new persona set', async () => {
+		const persona = await store.addPersona({name: 'Alice'});
+		await store.setActivePersona(persona.id, true);
+		expect(store.isPersonaLatched).toBe(true);
+		expect(store.activePersonaId).toBe(persona.id);
+
+		store.setPersonas([]);
+		expect(store.personas.length).toBe(0);
+		expect(store.isPersonaLatched).toBe(false);
+		expect(store.activePersonaId).toBeNull();
+	});
+
 	it('appends personas alongside existing ones', async () => {
 		await store.addPersona({name: 'Alice'});
 
