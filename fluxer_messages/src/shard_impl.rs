@@ -37,6 +37,9 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use url::Url;
 
+// Fork imports.
+use crate::types::ApiPersonaReactionEntry;
+
 const BUCKET_DURATION_MS: i64 = 864_000_000;
 const FLUXER_EPOCH_MS: i64 = 1_420_070_400_000;
 const SERVICE_REQUEST_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
@@ -250,13 +253,14 @@ struct MessageDbRow {
 }
 
 #[cfg_attr(feature = "scylla", derive(DeserializeRow))]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct MessageReactionDbRow {
     user_id: i64,
     emoji_id: i64,
     emoji_name: String,
     emoji_animated: Option<bool>,
     created_at: Option<DateTime<Utc>>,
+    persona_id: Option<i64>,
 }
 
 #[cfg(feature = "scylla")]
@@ -274,6 +278,7 @@ struct BatchedMessageReactionDbRow {
     emoji_name: String,
     emoji_animated: Option<bool>,
     created_at: Option<DateTime<Utc>>,
+    persona_id: Option<i64>,
 }
 
 #[cfg(feature = "scylla")]
@@ -296,6 +301,8 @@ struct MessageReactionKvRow {
     emoji_name: String,
     emoji_animated: Option<bool>,
     created_at: Option<i64>,
+    #[serde(default)]
+    persona_id: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -2445,6 +2452,7 @@ impl ScyllaMessagesStorage {
                     emoji_name: row.emoji_name,
                     emoji_animated: row.emoji_animated,
                     created_at: row.created_at,
+                    persona_id: row.persona_id,
                 });
         }
         by_message
@@ -2819,6 +2827,7 @@ fn decode_postgres_reaction(row: serde_json::Value) -> anyhow::Result<(i64, Mess
             emoji_name: row.emoji_name,
             emoji_animated: row.emoji_animated,
             created_at,
+            persona_id: row.persona_id,
         },
     ))
 }
@@ -3182,7 +3191,9 @@ fn map_reactions(
         animated: bool,
         count: i32,
         me: bool,
+        me_root: bool,
         min_created_at: i64,
+        persona_counts: HashMap<i64, (i32, bool)>,
     }
     let mut groups: HashMap<String, Group> = HashMap::new();
     for reaction in reactions {
@@ -3196,22 +3207,41 @@ fn map_reactions(
             .created_at
             .map(|dt| dt.timestamp_millis())
             .unwrap_or_default();
+        let is_viewer = reaction.user_id == viewer_user_id;
+        let is_root = reaction.persona_id.map(|id| id == 0).unwrap_or(true);
+        let is_viewer_root = is_viewer && is_root;
+        let persona_id = reaction.persona_id.filter(|&id| id != 0);
+
         groups
             .entry(key)
             .and_modify(|group| {
                 group.count += 1;
-                group.me = group.me || reaction.user_id == viewer_user_id;
+                group.me = group.me || is_viewer;
+                group.me_root = group.me_root || is_viewer_root;
                 if created_at < group.min_created_at {
                     group.min_created_at = created_at;
                 }
+                if let Some(pid) = persona_id {
+                    let entry = group.persona_counts.entry(pid).or_insert((0, false));
+                    entry.0 += 1;
+                    entry.1 = entry.1 || is_viewer;
+                }
             })
-            .or_insert_with(|| Group {
-                emoji_id: is_custom.then_some(reaction.emoji_id),
-                emoji_name: reaction.emoji_name,
-                animated: reaction.emoji_animated.unwrap_or(false),
-                count: 1,
-                me: reaction.user_id == viewer_user_id,
-                min_created_at: created_at,
+            .or_insert_with(|| {
+                let mut persona_counts = HashMap::new();
+                if let Some(pid) = persona_id {
+                    persona_counts.insert(pid, (1, is_viewer));
+                }
+                Group {
+                    emoji_id: is_custom.then_some(reaction.emoji_id),
+                    emoji_name: reaction.emoji_name,
+                    animated: reaction.emoji_animated.unwrap_or(false),
+                    count: 1,
+                    me: is_viewer,
+                    me_root: is_viewer_root,
+                    min_created_at: created_at,
+                    persona_counts,
+                }
             });
     }
     let mut groups: Vec<Group> = groups.into_values().collect();
@@ -3223,14 +3253,38 @@ fn map_reactions(
     });
     groups
         .into_iter()
-        .map(|group| ApiMessageReactionResponse {
-            emoji: ApiReactionEmojiResponse {
-                id: group.emoji_id.map(|id| id.to_string()),
-                name: group.emoji_name,
-                animated: group.animated.then_some(true),
-            },
-            count: group.count,
-            me: group.me.then_some(true),
+        .map(|group| {
+            let persona_reactions = if group.persona_counts.is_empty() {
+                None
+            } else {
+                let mut list: Vec<ApiPersonaReactionEntry> = group
+                    .persona_counts
+                    .into_iter()
+                    .map(|(pid, (count, me))| ApiPersonaReactionEntry {
+                        persona_id: pid.to_string(),
+                        count,
+                        me: me.then_some(true),
+                    })
+                    .collect();
+                list.sort_by(|a, b| {
+                    b.count
+                        .cmp(&a.count)
+                        .then_with(|| a.persona_id.cmp(&b.persona_id))
+                });
+                Some(list)
+            };
+
+            ApiMessageReactionResponse {
+                emoji: ApiReactionEmojiResponse {
+                    id: group.emoji_id.map(|id| id.to_string()),
+                    name: group.emoji_name,
+                    animated: group.animated.then_some(true),
+                },
+                count: group.count,
+                me: group.me.then_some(true),
+                me_root: group.me_root.then_some(true),
+                persona_reactions,
+            }
         })
         .collect()
 }
@@ -3708,6 +3762,7 @@ mod tests {
             emoji_name: emoji_name.to_owned(),
             emoji_animated: Some(false),
             created_at: DateTime::<Utc>::from_timestamp_millis(created_at_ms),
+            persona_id: None,
         }
     }
 
@@ -4013,6 +4068,40 @@ mod tests {
         assert_eq!(mapped[1].count, 2);
         assert_eq!(mapped[1].me, Some(true));
         assert_eq!(mapped[2].emoji.name, "z");
+    }
+
+    #[test]
+    fn reactions_include_persona_breakdowns() {
+        let mut r1 = reaction(10, 0, "heart", 100);
+        r1.persona_id = Some(101);
+        let mut r2 = reaction(11, 0, "heart", 200);
+        r2.persona_id = Some(102);
+        let mut r3 = reaction(10, 0, "heart", 300);
+        r3.persona_id = Some(103);
+        let mut r4 = reaction(12, 0, "heart", 400);
+        r4.persona_id = None;
+
+        let mapped = map_reactions(vec![r1.clone(), r2.clone(), r3.clone(), r4.clone()], 10);
+        assert_eq!(mapped.len(), 1);
+        assert_eq!(mapped[0].count, 4);
+        assert_eq!(mapped[0].me, Some(true));
+        assert_eq!(mapped[0].me_root, None);
+        let personas = mapped[0].persona_reactions.as_ref().unwrap();
+        assert_eq!(personas.len(), 3);
+        let p101 = personas.iter().find(|p| p.persona_id == "101").unwrap();
+        assert_eq!(p101.count, 1);
+        assert_eq!(p101.me, Some(true));
+        let p102 = personas.iter().find(|p| p.persona_id == "102").unwrap();
+        assert_eq!(p102.count, 1);
+        assert_eq!(p102.me, None);
+        let p103 = personas.iter().find(|p| p.persona_id == "103").unwrap();
+        assert_eq!(p103.count, 1);
+        assert_eq!(p103.me, Some(true));
+
+        let mut r5 = reaction(10, 0, "heart", 500);
+        r5.persona_id = None;
+        let mapped2 = map_reactions(vec![r1, r2, r3, r4, r5], 10);
+        assert_eq!(mapped2[0].me_root, Some(true));
     }
 
     #[test]

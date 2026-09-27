@@ -57,6 +57,9 @@ import {msg} from '@lingui/core/macro';
 // Fork imports.
 
 import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
+import Drafts from '@app/features/messaging/state/MessagingDrafts';
+import {hasPersonaReacted} from '@app/features/messaging/utils/ReactionUtils';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const ARE_YOU_SURE_YOU_WANT_TO_UNPIN_THIS_DESCRIPTOR = msg({
 	message: 'Unpin this message?',
@@ -340,10 +343,21 @@ export function createMessageActionHandlers(
 			return;
 		}
 		const reactionEmoji = toReactionEmoji(emoji);
-		if (message.getReaction(reactionEmoji)?.me) {
-			ReactionCommands.removeReaction(i18n, message.channelId, message.id, reactionEmoji);
+		const draft = Drafts.getDraft(message.channelId);
+		const effectivePersona = PersonaStore.getEffectiveReactionPersona(reactionEmoji, draft);
+		const effectivePersonaId = effectivePersona?.id ?? null;
+		const hasEffectivePersonaReacted = hasPersonaReacted(message.getReaction(reactionEmoji), effectivePersonaId);
+		if (hasEffectivePersonaReacted) {
+			ReactionCommands.removeReaction(
+				i18n,
+				message.channelId,
+				message.id,
+				reactionEmoji,
+				undefined,
+				effectivePersonaId,
+			);
 		} else {
-			ReactionCommands.addReaction(i18n, message.channelId, message.id, reactionEmoji);
+			ReactionCommands.addReaction(i18n, message.channelId, message.id, reactionEmoji, effectivePersonaId);
 		}
 	};
 	const handleCopyMessageId = () => {

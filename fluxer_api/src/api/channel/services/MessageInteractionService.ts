@@ -31,10 +31,11 @@ import {threadWriteBlock} from '@fluxer/constants/src/ThreadPermissionUtils';
 import {InvalidChannelTypeError} from '@fluxer/errors/src/domains/channel/InvalidChannelTypeError';
 import {NewConversationsLimitedError} from '@fluxer/errors/src/domains/user/NewConversationsLimitedError';
 import type {ChannelPinResponse, MessageResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
-import type {UserPartialResponse} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 
 // Fork imports.
 
+import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+import type {ReactionUserItemResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 export class MessageInteractionService {
@@ -53,6 +54,7 @@ export class MessageInteractionService {
 		messagePersistenceService: MessagePersistenceService,
 		guildAuditLogService: GuildAuditLogService,
 		limitConfigService: LimitConfigService,
+		personaRepository?: IPersonaRepository,
 	) {
 		this.authService = new MessageInteractionAuthService(
 			channelRepository,
@@ -80,6 +82,7 @@ export class MessageInteractionService {
 			userRepository,
 			guildRepository,
 			limitConfigService,
+			personaRepository,
 		);
 	}
 
@@ -201,7 +204,7 @@ export class MessageInteractionService {
 		limit?: number;
 		after?: UserID;
 	}): Promise<{
-		users: Array<UserPartialResponse>;
+		users: Array<ReactionUserItemResponse>;
 		has_more: boolean;
 		next_after: string | null;
 	}> {
@@ -216,6 +219,7 @@ export class MessageInteractionService {
 		channelId,
 		messageId,
 		emoji,
+		personaId,
 	}: {
 		userId: UserID;
 		viewer: ThreadViewer;
@@ -224,12 +228,13 @@ export class MessageInteractionService {
 		messageId: MessageID;
 		emoji: string;
 		requestCache: RequestCache;
+		personaId?: string | null;
 	}): Promise<void> {
 		const authChannel = await this.authService.getChannelAuthenticated({userId, channelId, viewer});
 		if (!authChannel.guild) {
 			await this.assertConversationAllowed(authChannel.channel, userId);
 		}
-		await this.reactionService.addReaction({authChannel, messageId, emoji, userId, sessionId});
+		await this.reactionService.addReaction({authChannel, messageId, emoji, userId, sessionId, personaId});
 	}
 
 	private async startsNewConversation(channel: Channel, userId: UserID): Promise<boolean> {
@@ -264,6 +269,7 @@ export class MessageInteractionService {
 		messageId,
 		emoji,
 		targetId,
+		personaId,
 	}: {
 		userId: UserID;
 		viewer: ThreadViewer;
@@ -273,9 +279,18 @@ export class MessageInteractionService {
 		emoji: string;
 		targetId: UserID;
 		requestCache: RequestCache;
+		personaId?: string | null;
 	}): Promise<void> {
 		const authChannel = await this.authService.getChannelAuthenticated({userId, channelId, viewer});
-		await this.reactionService.removeReaction({authChannel, messageId, emoji, targetId, sessionId, actorId: userId});
+		await this.reactionService.removeReaction({
+			authChannel,
+			messageId,
+			emoji,
+			targetId,
+			sessionId,
+			actorId: userId,
+			personaId,
+		});
 	}
 
 	async removeOwnReaction({
@@ -286,6 +301,7 @@ export class MessageInteractionService {
 		messageId,
 		emoji,
 		requestCache,
+		personaId,
 	}: {
 		userId: UserID;
 		viewer: ThreadViewer;
@@ -294,8 +310,19 @@ export class MessageInteractionService {
 		messageId: MessageID;
 		emoji: string;
 		requestCache: RequestCache;
+		personaId?: string | null;
 	}): Promise<void> {
-		await this.removeReaction({userId, viewer, sessionId, channelId, messageId, emoji, targetId: userId, requestCache});
+		await this.removeReaction({
+			userId,
+			viewer,
+			sessionId,
+			channelId,
+			messageId,
+			emoji,
+			targetId: userId,
+			requestCache,
+			personaId,
+		});
 	}
 
 	async removeAllReactionsForEmoji({
