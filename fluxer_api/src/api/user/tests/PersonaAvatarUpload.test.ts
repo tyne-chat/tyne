@@ -9,7 +9,7 @@ import {HTTP_STATUS} from '../../test/TestConstants';
 import {createBuilder} from '../../test/TestRequestBuilder';
 
 interface PersonaAvatarUploadResponse {
-	avatar_url: string;
+	avatar_hash: string;
 }
 
 describe('Persona Avatar Upload', () => {
@@ -34,8 +34,8 @@ describe('Persona Avatar Upload', () => {
 			.expect(HTTP_STATUS.OK)
 			.execute();
 
-		expect(result.avatar_url).toBeTruthy();
-		expect(result.avatar_url).toContain('avatars');
+		expect(result.avatar_hash).toBeTruthy();
+		expect(result.avatar_hash.length).toBeGreaterThanOrEqual(8);
 	});
 
 	it('rejects invalid avatar payload', async () => {
@@ -70,8 +70,8 @@ describe('Persona Avatar Upload', () => {
 			.expect(HTTP_STATUS.OK)
 			.execute();
 
-		expect(result.avatar_url).toBeTruthy();
-		expect(result.avatar_url).toContain('avatars');
+		expect(result.avatar_hash).toBeTruthy();
+		expect(result.avatar_hash.length).toBeGreaterThanOrEqual(8);
 		fetchSpy.mockRestore();
 	});
 
