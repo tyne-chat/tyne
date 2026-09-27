@@ -2,7 +2,7 @@
 
 import {generateSnowflake} from '@fluxer/snowflake/src/Snowflake';
 import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
-import {fetchMany, fetchOne, upsertOne} from '../database/CassandraQueryExecution';
+import {deleteOneOrMany, fetchMany, fetchOne, upsertOne} from '../database/CassandraQueryExecution';
 import type {PersonaRow, UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import {Persona} from '../models/Persona';
 import {Personas, UserPersonaSettings} from '../Tables';
@@ -115,8 +115,8 @@ export class PersonaRepository extends IPersonaRepository {
 			user_id: params.user_id,
 			persona_id: personaId,
 			name: params.name,
-			avatar_url: params.avatar_url ?? null,
-			banner_url: params.banner_url ?? null,
+			avatar_hash: params.avatar_hash ?? null,
+			banner_hash: params.banner_hash ?? null,
 			pronouns: params.pronouns ?? null,
 			color: params.color ?? null,
 			avatar_color: params.avatar_color ?? null,
@@ -144,8 +144,8 @@ export class PersonaRepository extends IPersonaRepository {
 			user_id: userId,
 			persona_id: personaId,
 			name: params.name !== undefined ? params.name : existing.name,
-			avatar_url: params.avatar_url !== undefined ? params.avatar_url : existing.avatarUrl,
-			banner_url: params.banner_url !== undefined ? params.banner_url : existing.bannerUrl,
+			avatar_hash: params.avatar_hash !== undefined ? params.avatar_hash : existing.avatarHash,
+			banner_hash: params.banner_hash !== undefined ? params.banner_hash : existing.bannerHash,
 			pronouns: params.pronouns !== undefined ? params.pronouns : existing.pronouns,
 			color: params.color !== undefined ? params.color : existing.color,
 			avatar_color: params.avatar_color !== undefined ? params.avatar_color : existing.avatarColor,
@@ -191,11 +191,60 @@ export class PersonaRepository extends IPersonaRepository {
 		);
 	}
 
+	async hardDeleteAllByUserId(userId: UserID): Promise<void> {
+		const personas = await this.findByUserId(userId, {includeDeleted: true});
+		await Promise.all(
+			personas.map(async (p) => {
+				await deleteOneOrMany(
+					Personas.deleteByPk({
+						user_id: userId,
+						persona_id: p.id,
+					}),
+				);
+			}),
+		);
+	}
+
+	async createTombstone(userId: UserID, personaId: PersonaID): Promise<Persona> {
+		const now = new Date();
+		const row: PersonaRow = {
+			user_id: userId,
+			persona_id: personaId,
+			name: 'Deleted Persona',
+			avatar_hash: null,
+			banner_hash: null,
+			pronouns: null,
+			color: null,
+			avatar_color: null,
+			bio: null,
+			auto_tag_disabled: true,
+			persona_tags: JSON.stringify([]),
+			use_count: 0,
+			last_used_at_ms: null,
+			visibility: 'unlisted',
+			external_uuid: null,
+			created_at: now,
+			updated_at: now,
+			deleted_at: now,
+			version: 1,
+		};
+		await upsertOne(Personas.upsertAll(row));
+		return new Persona(row);
+	}
+
 	async findSettings(userId: UserID): Promise<UserPersonaSettingsRow | null> {
 		const row = await fetchOne<UserPersonaSettingsRow>(FETCH_SETTINGS_CQL, {
 			user_id: userId,
 		});
 		return row ?? null;
+	}
+
+	async deleteSettings(userId: UserID): Promise<void> {
+		await deleteOneOrMany(
+			UserPersonaSettings.deleteByPk({
+				user_id: userId,
+			}),
+		);
 	}
 
 	override async findSettingsByUserIds(userIds: Array<UserID>): Promise<Map<string, UserPersonaSettingsRow>> {
@@ -227,8 +276,8 @@ export class PersonaRepository extends IPersonaRepository {
 			user_id: userId,
 			persona_id: personaId,
 			name: existing.name,
-			avatar_url: existing.avatarUrl,
-			banner_url: existing.bannerUrl,
+			avatar_hash: existing.avatarHash,
+			banner_hash: existing.bannerHash,
 			pronouns: existing.pronouns,
 			color: existing.color,
 			avatar_color: existing.avatarColor,
