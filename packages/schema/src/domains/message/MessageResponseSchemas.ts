@@ -72,10 +72,19 @@ const ReactionEmojiResponse = z.object({
 	animated: z.boolean().nullish().describe('Whether the emoji is animated'),
 });
 
+export const MessageReactionPersonaEntry = z.object({
+	persona_id: SnowflakeStringType.describe('The persona ID that reacted'),
+	count: Int32Type.describe('Count of reactions by this persona'),
+	me: z.boolean().nullish().describe('Whether the current user reacted as this persona'),
+});
+export type MessageReactionPersonaEntry = z.infer<typeof MessageReactionPersonaEntry>;
+
 export const MessageReactionResponse = z.object({
 	emoji: ReactionEmojiResponse.describe('The emoji used for the reaction'),
 	count: Int32Type.describe('The total number of times this reaction has been used'),
 	me: z.boolean().nullish().describe('Whether the current user has reacted with this emoji'),
+	me_root: z.boolean().nullish().describe('Whether the current user reacted as root account'),
+	persona_reactions: z.array(MessageReactionPersonaEntry).nullish().describe('Breakdown of persona reactions'),
 });
 
 export type MessageReactionResponse = z.infer<typeof MessageReactionResponse>;
@@ -203,12 +212,23 @@ export const ChannelPinsResponse = z.object({
 
 export type ChannelPinsResponse = z.infer<typeof ChannelPinsResponse>;
 
-export const ReactionUsersListResponse = z.array(z.lazy(() => UserPartialResponse));
+export const ReactionUserItemResponse = z.lazy(() =>
+	UserPartialResponse.extend({
+		subprofile: MessageSubprofileResponseSchema.nullish().describe('Persona subprofile who reacted, if any'),
+		persona_id: SnowflakeStringType.nullish().optional().describe('Persona ID who reacted, if any'),
+	}),
+);
+export type ReactionUserItemResponse = UserPartial & {
+	subprofile?: MessageSubprofileResponse | null;
+	persona_id?: string | null;
+};
+
+export const ReactionUsersListResponse = z.array(ReactionUserItemResponse);
 
 export type ReactionUsersListResponse = z.infer<typeof ReactionUsersListResponse>;
 
 export const ReactionUsersPageResponse = z.object({
-	items: z.array(z.lazy(() => UserPartialResponse)).describe('Users who reacted with the requested emoji'),
+	items: z.array(ReactionUserItemResponse).describe('Users who reacted with the requested emoji'),
 	has_more: z.boolean().describe('Whether more reaction users can be fetched'),
 	next_after: SnowflakeStringType.nullable().describe('Cursor for the next page, or null when there are no more users'),
 });
@@ -275,15 +295,23 @@ export interface ReactionEmoji {
 	readonly url?: string | null;
 }
 
+export interface MessageReactionPersonaDetail {
+	readonly persona_id: string;
+	readonly count: number;
+	readonly me?: boolean;
+}
+
 export interface MessageReaction {
 	readonly emoji: ReactionEmoji;
 	readonly count: number;
 	readonly me?: true;
 	readonly me_burst?: boolean;
+	readonly me_root?: boolean;
 	readonly count_details?: {
 		readonly burst: number;
 		readonly normal: number;
 	};
+	readonly persona_reactions?: ReadonlyArray<MessageReactionPersonaDetail>;
 }
 
 export interface MessageAttachment {
