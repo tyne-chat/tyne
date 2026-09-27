@@ -35,7 +35,7 @@ export interface AutocompleteMentionPersonaOption {
 	persona: {
 		id: string;
 		name: string;
-		avatar_url?: string | null;
+		avatar_hash?: string | null;
 		color?: number | null;
 		pronouns?: string | null;
 		display_tag_text?: string | null;
