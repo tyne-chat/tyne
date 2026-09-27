@@ -210,7 +210,7 @@ function buildRecentPersonaOptions(
 			items.push({
 				id: sub.id,
 				name: sub.name,
-				avatar_url: sub.avatar ?? null,
+				avatar_hash: sub.avatar ?? null,
 				color: sub.color ?? sub.avatar_color ?? null,
 				pronouns: sub.pronouns ?? null,
 				display_tag_text: sub.display_tag_text ?? null,
@@ -485,7 +485,7 @@ export function useLexicalAutocomplete({
 						persona: {
 							id: item.id,
 							name: item.name,
-							avatar_url: item.avatar_url,
+							avatar_hash: item.avatar_hash,
 							color: item.color,
 							pronouns: item.pronouns,
 							display_tag_text: item.display_tag_text,
@@ -1091,7 +1091,7 @@ function optionToPayload(option: AutocompleteOption, channel: Channel | null): C
 		PersonaStore.recordKnownPersona({
 			id: option.persona.id,
 			name: option.persona.name,
-			avatar: option.persona.avatar_url,
+			avatar: option.persona.avatar_hash,
 			avatar_color: option.persona.color,
 			display_tag_text: option.persona.display_tag_text ?? null,
 			display_tag_icon: option.persona.display_tag_icon ?? null,
