@@ -40,6 +40,10 @@ import {MentionReplyPreferencesSchema} from '@fluxer/schema/src/primitives/UserS
 import {PasswordType} from '@fluxer/schema/src/primitives/UserValidators';
 import {z} from 'zod';
 
+// Fork imports.
+
+import {MAX_BIO_LENGTH} from '@fluxer/constants/src/LimitConstants';
+
 function coerceBlankStringToNull(value: unknown): unknown {
 	if (typeof value === 'string' && value.trim().length === 0) {
 		return null;
@@ -139,7 +143,9 @@ export const GuildMemberUpdateRequest = z.object({
 		.describe(`Array of role IDs to assign to the member (max ${MAX_GUILD_ROLES})`),
 	avatar: createBase64ImageType().nullish().describe('Base64-encoded image data for the member guild avatar'),
 	banner: createBase64ImageType().nullish().describe('Base64-encoded image data for the member guild banner'),
-	bio: createStringType(1, 320).nullish().describe('The member guild profile bio (1-320 characters)'),
+	bio: createStringType(1, MAX_BIO_LENGTH)
+		.nullish()
+		.describe(`The member guild profile bio (1-${MAX_BIO_LENGTH} characters)`),
 	pronouns: createStringType(1, 40).nullish().describe('The member guild profile pronouns (1-40 characters)'),
 	accent_color: ColorType.nullish().describe('The accent color for the member guild profile as an integer'),
 	profile_flags: createBitflagInt32Type(
