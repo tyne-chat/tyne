@@ -73,6 +73,10 @@ import type {GuildMemberUpdateRequest} from '@fluxer/schema/src/domains/guild/Gu
 import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 import {ms} from 'itty-time';
 
+// Fork imports.
+
+import {MAX_BIO_LENGTH} from '@fluxer/constants/src/LimitConstants';
+
 const MEMBERSHIP_METADATA_TTL_SECONDS = 365 * 24 * 60 * 60;
 
 function isMemberCurrentlyTimedOut(member: GuildMember): boolean {
@@ -780,6 +784,17 @@ export class GuildMemberOperationsService {
 				if (!bioRateLimit.allowed) {
 					const minutes = Math.ceil((bioRateLimit.retryAfter || 0) / 60);
 					throw InputValidationError.fromCode('bio', ValidationErrorCodes.BIO_CHANGED_TOO_MANY_TIMES, {minutes});
+				}
+				const maxBioLength = resolveLimitSafe(
+					this.limitConfigService.getConfigSnapshot(),
+					ctx,
+					'max_bio_length',
+					MAX_BIO_LENGTH,
+				);
+				if (data.bio && data.bio.length > maxBioLength) {
+					throw InputValidationError.fromCode('bio', ValidationErrorCodes.CONTENT_EXCEEDS_MAX_LENGTH, {
+						maxLength: maxBioLength,
+					});
 				}
 				this.enforceProfileSubstringBlocklist(targetUser, 'bio', data.bio);
 				updateData.bio = data.bio;
