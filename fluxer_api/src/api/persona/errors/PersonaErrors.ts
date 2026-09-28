@@ -47,7 +47,7 @@ export class DuplicateSignatureEmojiError extends BadRequestError {
 }
 
 export class SignatureEmojiLimitExceededError extends BadRequestError {
-	constructor(max: number = 20) {
+	constructor(max: number = 10000) {
 		super({
 			code: APIErrorCodes.SIGNATURE_EMOJI_LIMIT_REACHED,
 			message: `A persona can have at most ${max} signature emojis`,
