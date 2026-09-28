@@ -6,6 +6,7 @@ import {
 	clearPersonaMentionCache,
 	invalidatePersonaMentionCache,
 } from '@app/features/lexical/composer/useAutocompletePersonaSearch';
+import MessageReactions from '@app/features/messaging/state/MessageReactions';
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import type {PersonaResponse, PersonaSettingsResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {PersonaStore} from '../state/PersonaStore';
@@ -28,6 +29,7 @@ export function handleUserPersonaUpdate(data: PersonaPayload, _context: GatewayH
 		PersonaStore.upsertPersona(persona);
 		clearPersonaMentionCache();
 		Messages.handlePersonaUpdate({persona});
+		MessageReactions.handlePersonaUpdate(persona);
 	}
 }
 
@@ -45,6 +47,10 @@ export function handleUserPersonasUpdate(data: PersonasPayload, _context: Gatewa
 	if (personas) {
 		PersonaStore.setPersonas(personas);
 		clearPersonaMentionCache();
+		for (const p of personas) {
+			Messages.handlePersonaUpdate({persona: p});
+			MessageReactions.handlePersonaUpdate(p);
+		}
 	}
 }
 
@@ -59,6 +65,11 @@ export function handleUserPersonaSettingsUpdate(
 		const currentUserId = Authentication.currentUserId;
 		if (currentUserId) {
 			Messages.handleAuthorDisplayTagUpdate({
+				userId: currentUserId,
+				display_tag_text: settings.display_tag_text,
+				display_tag_icon: settings.display_tag_icon,
+			});
+			MessageReactions.handleAuthorDisplayTagUpdate({
 				userId: currentUserId,
 				display_tag_text: settings.display_tag_text,
 				display_tag_icon: settings.display_tag_icon,
@@ -82,10 +93,17 @@ export function handleGuildPersonasDirty(
 ): void {
 	invalidatePersonaMentionCache(data?.guild_id);
 	if (data?.persona && data?.action === 'update') {
+		PersonaStore.recordKnownPersona(data.persona);
 		Messages.handlePersonaUpdate({persona: data.persona});
+		MessageReactions.handlePersonaUpdate(data.persona);
 	}
 	if (data?.user_id && (data?.display_tag_text !== undefined || data?.display_tag_icon !== undefined)) {
 		Messages.handleAuthorDisplayTagUpdate({
+			userId: data.user_id,
+			display_tag_text: data.display_tag_text,
+			display_tag_icon: data.display_tag_icon,
+		});
+		MessageReactions.handleAuthorDisplayTagUpdate({
 			userId: data.user_id,
 			display_tag_text: data.display_tag_text,
 			display_tag_icon: data.display_tag_icon,
