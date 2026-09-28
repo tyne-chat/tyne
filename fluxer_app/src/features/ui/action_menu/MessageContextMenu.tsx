@@ -57,6 +57,11 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {EmojiContextMenuItems} from '@app/features/ui/action_menu/items/EmojiContextMenuItems';
+import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
+
 const OTHER_REACTION_DESCRIPTOR = msg({
 	message: 'Other reaction…',
 	comment: 'Message action that opens the full reaction picker.',
@@ -232,7 +237,19 @@ const AddReactionSubmenuItem = observer(
 AddReactionSubmenuItem.displayName = 'AddReactionSubmenuItem';
 
 const QuickReactionContextMenuItem = observer(
-	({emoji, shortcut, onReact}: {emoji: FlatEmoji; shortcut: string; onReact: (emoji: FlatEmoji) => void}) => {
+	({
+		emoji,
+		shortcut,
+		onReact,
+		channelId,
+		messageId,
+	}: {
+		emoji: FlatEmoji;
+		shortcut: string;
+		onReact: (emoji: FlatEmoji) => void;
+		channelId?: string;
+		messageId?: string;
+	}) => {
 		const {i18n} = useLingui();
 		const shouldShowShortcut = Accessibility.showContextMenuShortcuts;
 		const emojiShortcode = useMemo(() => getEmojiNameWithColons(toReactionEmoji(emoji)), [emoji]);
@@ -255,6 +272,22 @@ const QuickReactionContextMenuItem = observer(
 			),
 			[emojiShortcode, shortcutHint],
 		);
+		const handleContextMenu = useCallback(
+			(event: React.MouseEvent) => {
+				event.preventDefault();
+				event.stopPropagation();
+				ContextMenuCommands.openFromEvent(event, (props) => (
+					<EmojiContextMenuItems
+						emoji={emoji}
+						channelId={channelId}
+						messageId={messageId}
+						onClose={props.onClose}
+						data-flx="ui.action-menu.message-context-menu.quick-reaction-context-menu-item.emoji-context-menu-items"
+					/>
+				));
+			},
+			[channelId, emoji, messageId],
+		);
 		return (
 			<Tooltip
 				text={tooltipContent}
@@ -264,6 +297,7 @@ const QuickReactionContextMenuItem = observer(
 				<BaseContextMenu.Item
 					className={contextMenuStyles.quickReactionItem}
 					onClick={() => onReact(emoji)}
+					onContextMenu={handleContextMenu}
 					label={emojiShortcode}
 					aria-label={label}
 					aria-keyshortcuts={shortcut}
@@ -541,6 +575,8 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = observer(
 								<QuickReactionContextMenuItem
 									key={emoji.name}
 									emoji={emoji}
+									channelId={message.channelId}
+									messageId={message.id}
 									shortcut={QUICK_REACTION_SHORTCUTS[index] ?? ''}
 									onReact={handleQuickReact}
 									data-flx="ui.action-menu.message-context-menu.render-reactions-header.quick-reaction-context-menu-item"
