@@ -171,6 +171,12 @@ export class PersonaStoreClass {
 		});
 	}
 
+	removeKnownPersona(personaId: string): void {
+		runInAction(() => {
+			this._knownPersonas.delete(personaId);
+		});
+	}
+
 	async fetchPersona(userId: string, personaId: string): Promise<MessageSubprofileResponse | null> {
 		const existing = this.getKnownPersona(personaId);
 		if (existing) return existing;
@@ -230,6 +236,20 @@ export class PersonaStoreClass {
 				this._personas.push(normalized);
 			}
 			this._personas = [...this._personas];
+			if (this._knownPersonas.has(normalized.id)) {
+				this._knownPersonas.set(normalized.id, {
+					id: normalized.id,
+					name: normalized.name,
+					avatar: normalized.avatar_hash ?? normalized.avatarHash ?? null,
+					avatar_color: normalized.color ?? null,
+					banner: normalized.banner_hash ?? normalized.bannerHash ?? null,
+					display_tag_text: this.displayTagText || null,
+					display_tag_icon: this.displayTagIcon || null,
+					pronouns: normalized.pronouns ?? null,
+					color: normalized.color ?? null,
+					bio: normalized.bio ?? null,
+				});
+			}
 		});
 	}
 
@@ -264,6 +284,7 @@ export class PersonaStoreClass {
 		}
 		runInAction(() => {
 			this._personas = this._personas.filter((p) => p.id !== id);
+			this._knownPersonas.delete(id);
 		});
 		if (this.activePersonaId === id) {
 			void this.unlatch();

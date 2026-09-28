@@ -26,6 +26,7 @@ import type {UserPartial} from '@fluxer/schema/src/domains/user/UserResponseSche
 
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {User} from '@app/features/user/models/User';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 export type {FetchStatus};
 
@@ -210,13 +211,14 @@ class MessageReactionsManager {
 		emoji: ReactionEmoji,
 		isCurrentUser = Authentication.currentUserId === userId,
 		personaId?: string | null,
+		subprofile?: MessageSubprofileResponse | null,
 	): void {
 		this.commitReactionEvent(messageId, {type: 'reaction.add', emoji, userId, isCurrentUser, personaId});
 		const user = Users.getUser(userId);
 		if (user) {
 			let reactorUser = user;
 			if (personaId && personaId !== '0') {
-				const persona = PersonaStore.getKnownPersona(personaId);
+				const persona = subprofile ?? PersonaStore.getKnownPersona(personaId);
 				reactorUser = new User({
 					...user,
 					persona_id: personaId,
@@ -228,6 +230,66 @@ class MessageReactionsManager {
 				user: reactorUser,
 			});
 		}
+	}
+
+	handlePersonaUpdate(persona: {
+		id: string;
+		name: string;
+		avatar?: string | null;
+		avatar_hash?: string | null;
+		avatar_color?: number | null;
+		banner?: string | null;
+		banner_hash?: string | null;
+		display_tag_text?: string | null;
+		display_tag_icon?: string | null;
+		pronouns?: string | null;
+		color?: number | null;
+		bio?: string | null;
+		visibility?: any;
+	}): boolean {
+		if (!persona?.id) return false;
+		let hasChanges = false;
+		this.batch(() => {
+			for (const [key, entry] of this.reactors) {
+				const previousVersion = entry.snapshot.context.version;
+				const nextSnapshot = transitionReactionUsersSnapshot(entry.snapshot, {
+					type: 'persona.update',
+					persona,
+				});
+				if (nextSnapshot !== entry.snapshot && nextSnapshot.context.version !== previousVersion) {
+					entry.snapshot = nextSnapshot;
+					this.queueReactionNotify(key);
+					hasChanges = true;
+				}
+			}
+		});
+		return hasChanges;
+	}
+
+	handleAuthorDisplayTagUpdate(action: {
+		userId: string;
+		display_tag_text?: string | null;
+		display_tag_icon?: string | null;
+	}): boolean {
+		if (!action.userId) return false;
+		let hasChanges = false;
+		this.batch(() => {
+			for (const [key, entry] of this.reactors) {
+				const previousVersion = entry.snapshot.context.version;
+				const nextSnapshot = transitionReactionUsersSnapshot(entry.snapshot, {
+					type: 'displayTag.update',
+					userId: action.userId,
+					display_tag_text: action.display_tag_text,
+					display_tag_icon: action.display_tag_icon,
+				});
+				if (nextSnapshot !== entry.snapshot && nextSnapshot.context.version !== previousVersion) {
+					entry.snapshot = nextSnapshot;
+					this.queueReactionNotify(key);
+					hasChanges = true;
+				}
+			}
+		});
+		return hasChanges;
 	}
 
 	handleReactionRemove(
