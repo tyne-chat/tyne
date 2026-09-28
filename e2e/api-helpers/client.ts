@@ -326,4 +326,18 @@ export class FluxerApiClient {
 			method: 'DELETE',
 		});
 	}
+
+	public async addReaction(
+		channelId: string,
+		messageId: string,
+		emoji: string,
+		personaId?: string | null,
+	): Promise<void> {
+		await this.ensureGatewaySession();
+		const emojiCode = encodeURIComponent(emoji);
+		await this.request<void>(`/api/v1/channels/${channelId}/messages/${messageId}/reactions/${emojiCode}/@me`, {
+			method: 'PUT',
+			body: personaId ? JSON.stringify({persona_id: personaId}) : undefined,
+		});
+	}
 }
