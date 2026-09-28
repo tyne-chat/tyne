@@ -134,4 +134,75 @@ describe('ReactionUsersStateMachine: persona support', () => {
 		expect(snapshot.context.users.size).toBe(1);
 		expect(snapshot.context.userSnapshot.map((u) => u.subprofile?.name)).toEqual(['Bob']);
 	});
+
+	it('updates persona name and metadata on matching reactors via persona.update and increments version', () => {
+		let snapshot = createReactionUsersSnapshot();
+		const rootReactor = makeUserPartial(null);
+		const persona1Reactor = makeUserPartial(PERSONA_1_ID, 'Kenoma WyldFlower');
+		const persona2Reactor = makeUserPartial(PERSONA_2_ID, 'Bob');
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [rootReactor, persona1Reactor, persona2Reactor],
+		});
+
+		const initialVersion = snapshot.context.version;
+		expect(snapshot.context.userSnapshot[1].subprofile?.name).toBe('Kenoma WyldFlower');
+
+		// Renaming persona 1: remove surname to 'Kenoma'
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'persona.update',
+			persona: {
+				id: PERSONA_1_ID,
+				name: 'Kenoma',
+				avatar: 'new_avatar_hash',
+				color: 0x990000,
+			},
+		});
+
+		expect(snapshot.context.version).toBeGreaterThan(initialVersion);
+		expect(snapshot.context.userSnapshot.length).toBe(3);
+		expect(snapshot.context.userSnapshot[1].subprofile?.name).toBe('Kenoma');
+		expect(snapshot.context.userSnapshot[1].subprofile?.avatar).toBe('new_avatar_hash');
+		expect(snapshot.context.userSnapshot[1].subprofile?.color).toBe(0x990000);
+
+		// Order is strictly preserved
+		const names = snapshot.context.userSnapshot.map((u) => u.subprofile?.name ?? u.globalName);
+		expect(names).toEqual(['Chiara', 'Kenoma', 'Bob']);
+
+		// Updating a non-existent persona does not increment version
+		const versionBeforeNoop = snapshot.context.version;
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'persona.update',
+			persona: {
+				id: '9999999999999999999',
+				name: 'Non Existent',
+			},
+		});
+		expect(snapshot.context.version).toBe(versionBeforeNoop);
+	});
+
+	it('updates author display tags on matching reactor subprofiles via displayTag.update', () => {
+		let snapshot = createReactionUsersSnapshot();
+		const persona1Reactor = makeUserPartial(PERSONA_1_ID, 'Kenoma');
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [persona1Reactor],
+		});
+
+		expect(snapshot.context.userSnapshot[0].subprofile?.display_tag_text).toBe('SYS');
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'displayTag.update',
+			userId: ROOT_USER_ID,
+			display_tag_text: 'SERAPHIM HYPERSYSTEM',
+			display_tag_icon: 'https://cdn.example.com/icon.png',
+		});
+
+		expect(snapshot.context.userSnapshot[0].subprofile?.display_tag_text).toBe('SERAPHIM HYPERSYSTEM');
+		expect(snapshot.context.userSnapshot[0].subprofile?.display_tag_icon).toBe('https://cdn.example.com/icon.png');
+	});
 });

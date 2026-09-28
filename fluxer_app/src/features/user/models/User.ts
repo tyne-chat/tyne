@@ -205,7 +205,9 @@ export class User {
 		this.accentColor = hasKey(user, 'accent_color') ? (user.accent_color ?? null) : undefined;
 		this.personaId = hasKey(user, 'persona_id')
 			? ((user as any).persona_id ?? null)
-			: ((user as any).subprofile?.id ?? undefined);
+			: hasKey(user, 'personaId')
+				? ((user as any).personaId ?? null)
+				: ((user as any).subprofile?.id ?? undefined);
 		this.subprofile = hasKey(user, 'subprofile') ? ((user as any).subprofile ?? null) : undefined;
 		this.timezone = hasKey(user, 'timezone') ? (user.timezone ?? null) : undefined;
 		this.timezonePrivacyFlags = hasKey(user, 'timezone_privacy_flags')
@@ -502,6 +504,10 @@ export class User {
 		if (termsAgreedAt !== undefined) result.terms_agreed_at = dateToIsoOrNull(termsAgreedAt);
 		const privacyAgreedAt = pickDateField(this._privacyAgreedAt, u, 'privacy_agreed_at', opts);
 		if (privacyAgreedAt !== undefined) result.privacy_agreed_at = dateToIsoOrNull(privacyAgreedAt);
+		const personaId = pickField(this.personaId, u as any, 'persona_id' as any, opts);
+		if (personaId !== undefined) (result as any).persona_id = personaId;
+		const subprofile = pickField(this.subprofile, u as any, 'subprofile' as any, opts);
+		if (subprofile !== undefined) (result as any).subprofile = subprofile;
 		result.traits = mergeTraitsArray(this._traits, u, opts);
 		return result;
 	}
@@ -635,6 +641,8 @@ export class User {
 			this._ageVerifiedAdult === other._ageVerifiedAdult &&
 			datesEqual(this._termsAgreedAt, other._termsAgreedAt) &&
 			datesEqual(this._privacyAgreedAt, other._privacyAgreedAt) &&
+			this.personaId === other.personaId &&
+			subprofilesEqual(this.subprofile, other.subprofile) &&
 			arraysShallowEqual(this._traits, other._traits)
 		);
 	}
@@ -734,4 +742,24 @@ function datesEqual(a: Date | null | undefined, b: Date | null | undefined): boo
 	const tb = b.getTime();
 	if (Number.isNaN(ta) || Number.isNaN(tb)) return Number.isNaN(ta) && Number.isNaN(tb);
 	return ta === tb;
+}
+
+function subprofilesEqual(
+	a: MessageSubprofileResponse | null | undefined,
+	b: MessageSubprofileResponse | null | undefined,
+): boolean {
+	if (a === b) return true;
+	if (!a || !b) return a === b;
+	return (
+		a.id === b.id &&
+		a.name === b.name &&
+		a.avatar === b.avatar &&
+		a.avatar_color === b.avatar_color &&
+		a.banner === b.banner &&
+		a.display_tag_text === b.display_tag_text &&
+		a.display_tag_icon === b.display_tag_icon &&
+		a.pronouns === b.pronouns &&
+		a.color === b.color &&
+		a.bio === b.bio
+	);
 }
