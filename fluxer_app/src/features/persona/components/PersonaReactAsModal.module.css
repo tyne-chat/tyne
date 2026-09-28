@@ -1,0 +1,153 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.modalRoot {
+	width: 100%;
+	max-width: 24rem;
+	overflow: hidden;
+}
+
+.emojiPreview {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	flex-shrink: 0;
+}
+
+.emojiPreviewImage {
+	width: 22px;
+	height: 22px;
+	object-fit: contain;
+}
+
+.emojiSurrogate {
+	font-size: 1.25rem;
+	line-height: 1;
+}
+
+.searchInputWrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+	background-color: var(--background-tertiary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md, 6px);
+	padding: 6px 10px;
+	gap: 8px;
+	height: 36px;
+	box-sizing: border-box;
+	margin-top: 4px;
+}
+
+.searchInputWrapper:focus-within {
+	border-color: var(--brand-primary);
+}
+
+.searchIcon {
+	color: var(--text-primary-muted);
+	width: 16px !important;
+	height: 16px !important;
+	flex-shrink: 0;
+}
+
+.searchInput {
+	flex: 1;
+	border: none;
+	background: transparent;
+	color: var(--text-primary);
+	font-size: 0.8125rem;
+	line-height: 1.25;
+	outline: none;
+}
+
+.searchInput::placeholder {
+	color: var(--text-primary-muted);
+}
+
+.modalContent {
+	max-height: clamp(18rem, 48vh, 25rem);
+	min-height: 8rem;
+}
+
+.listContainer {
+	padding: 8px 10px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.sectionTitle {
+	font-size: 0.6875rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-primary-muted);
+	padding: 8px 8px 4px;
+	margin-top: 4px;
+}
+
+.personaItem {
+	display: flex;
+	align-items: center;
+	padding: 6px 10px;
+	border-radius: var(--radius-md, 6px);
+	cursor: pointer;
+	gap: 12px;
+	transition: background-color 0.1s ease;
+	user-select: none;
+}
+
+.personaItem:hover,
+.personaItem.keyboardSelected {
+	background-color: var(--background-modifier-hover);
+}
+
+.personaItem.active {
+	background-color: var(--background-modifier-selected);
+}
+
+.personaDetails {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.personaPrimaryRow {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.personaName {
+	font-size: 0.875rem;
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--text-primary);
+}
+
+.personaPronouns {
+	font-size: 0.75rem;
+	color: var(--text-primary-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.activeCheck {
+	color: var(--brand-primary);
+	margin-inline-start: auto;
+	flex-shrink: 0;
+}
+
+.emptyNotice {
+	padding: 24px 12px;
+	text-align: center;
+	font-size: 0.8125rem;
+	color: var(--text-primary-muted);
+}
