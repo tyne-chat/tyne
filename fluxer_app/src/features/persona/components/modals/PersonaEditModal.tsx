@@ -11,6 +11,7 @@ import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
 import {toReactionEmoji, useEmojiURL} from '@app/features/messaging/utils/ReactionUtils';
 import {http} from '@app/features/platform/transport/RestTransport';
+import {ComponentBus} from '@app/features/platform/utils/ComponentBus';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
 import {Button} from '@app/features/ui/button/Button';
@@ -426,6 +427,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 	const hasTagErrors = formData.tags.some((_, idx) => Boolean(getTagRowError(idx)));
 
+	const signatureEmojisRef = useRef(formData.signatureEmojis);
+	signatureEmojisRef.current = formData.signatureEmojis;
+
 	const handleAddSignatureEmoji = useCallback(
 		(selectedEmoji: FlatEmoji) => {
 			const reactionEmoji = toReactionEmoji(selectedEmoji as any);
@@ -435,7 +439,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				animated: reactionEmoji.animated ?? null,
 			};
 
-			const isDuplicate = formData.signatureEmojis.some(
+			const currentSigs = signatureEmojisRef.current;
+
+			const isDuplicate = currentSigs.some(
 				(s) => (s.id && s.id === newSig.id) || (!s.id && !newSig.id && s.name === newSig.name),
 			);
 			if (isDuplicate) {
@@ -461,7 +467,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				}
 			}
 
-			if (formData.signatureEmojis.length >= MAX_SIGNATURE_EMOJIS_PER_PERSONA) {
+			if (currentSigs.length >= MAX_SIGNATURE_EMOJIS_PER_PERSONA) {
 				ToastCommands.createToast({
 					type: 'error',
 					children: i18n._(SIGNATURE_EMOJIS_LIMIT_DESCRIPTOR, {max: MAX_SIGNATURE_EMOJIS_PER_PERSONA}),
@@ -469,19 +475,34 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				return;
 			}
 
+			const nextSigs = [...currentSigs, newSig];
+			signatureEmojisRef.current = nextSigs;
 			setFormData((prev) => ({
 				...prev,
-				signatureEmojis: [...prev.signatureEmojis, newSig],
+				signatureEmojis: nextSigs,
 			}));
+			ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
 		},
-		[formData.signatureEmojis, formData.id, personas, i18n],
+		[formData.id, personas, i18n],
 	);
 
+	const filterEmoji = useCallback((emoji: FlatEmoji) => {
+		const reaction = toReactionEmoji(emoji as any);
+		return !signatureEmojisRef.current.some((sig) =>
+			sig.id ? sig.id === reaction.id : !reaction.id && sig.name === reaction.name,
+		);
+	}, []);
+
 	const handleRemoveSignatureEmoji = useCallback((idx: number) => {
-		setFormData((prev) => ({
-			...prev,
-			signatureEmojis: prev.signatureEmojis.filter((_, i) => i !== idx),
-		}));
+		setFormData((prev) => {
+			const nextSigs = prev.signatureEmojis.filter((_, i) => i !== idx);
+			signatureEmojisRef.current = nextSigs;
+			return {
+				...prev,
+				signatureEmojis: nextSigs,
+			};
+		});
+		ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
 	}, []);
 
 	const handleAvatarUpload = async (base64: string) => {
@@ -988,8 +1009,8 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 												channelId={null}
 												handleSelect={(selectedEmoji) => {
 													handleAddSignatureEmoji(selectedEmoji);
-													onClose();
 												}}
+												filterEmoji={filterEmoji}
 												onClose={onClose}
 												data-flx="persona.persona-edit-modal.signature-emoji-picker"
 											/>
@@ -1005,9 +1026,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 											disabled={formData.signatureEmojis.length >= MAX_SIGNATURE_EMOJIS_PER_PERSONA}
 											data-flx="persona.persona-edit-modal.add-signature-emoji-button"
 										>
-											<Trans>
-												Add Emoji ({formData.signatureEmojis.length}/{MAX_SIGNATURE_EMOJIS_PER_PERSONA})
-											</Trans>
+											<Trans>Add Emoji ({formData.signatureEmojis.length})</Trans>
 										</Button>
 									</Popout>
 								</div>
