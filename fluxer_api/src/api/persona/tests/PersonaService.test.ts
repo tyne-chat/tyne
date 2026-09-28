@@ -6,9 +6,11 @@ import type {PersonaRow} from '../../database/types/PersonaTypes';
 import {Persona} from '../../models/Persona';
 import {
 	DuplicatePersonaTagError,
+	DuplicateSignatureEmojiError,
 	PersonaLimitReachedError,
 	PersonaNotFoundError,
 	PersonaTagLimitExceededError,
+	SignatureEmojiLimitExceededError,
 } from '../errors/PersonaErrors';
 import type {IPersonaRepository} from '../IPersonaRepository';
 import {
@@ -928,6 +930,98 @@ describe('PersonaService', () => {
 				persona_tags: [{prefix: '[test]', suffix: '[/test]'}],
 			});
 			expect(resWithTag).toBeDefined();
+		});
+
+		describe('signature_emojis validation', () => {
+			it('creates and updates persona with valid signature emojis', async () => {
+				vi.mocked(mockRepo.findByUserId).mockResolvedValueOnce([]);
+				const persona = makeMockPersona(userId, defaultPersonaId, 'Emoji Persona', {
+					signature_emojis: JSON.stringify([{name: '🦊'}, {id: '123456789', name: 'custom_fox'}]),
+				});
+				vi.mocked(mockRepo.create).mockResolvedValueOnce(persona);
+
+				const created = await service.createPersona(userId, {
+					name: 'Emoji Persona',
+					signature_emojis: [{name: '🦊'}, {id: '123456789', name: 'custom_fox'}],
+				});
+				expect(created).toBeDefined();
+
+				// Update signature emojis
+				vi.mocked(mockRepo.findById).mockResolvedValueOnce(persona);
+				vi.mocked(mockRepo.findByUserId).mockResolvedValueOnce([persona]);
+				vi.mocked(mockRepo.update).mockResolvedValueOnce(persona);
+
+				const updated = await service.updatePersona(userId, defaultPersonaId, {
+					signature_emojis: [{name: '🦊'}],
+				});
+				expect(updated).toBeDefined();
+			});
+
+			it('rejects duplicate signature emojis within the same request', async () => {
+				await expect(
+					service.createPersona(userId, {
+						name: 'Dupes',
+						signature_emojis: [{name: '🦊'}, {name: '🦊'}],
+					}),
+				).rejects.toThrow(DuplicateSignatureEmojiError);
+
+				await expect(
+					service.createPersona(userId, {
+						name: 'Dupes Custom',
+						signature_emojis: [
+							{id: '123', name: 'custom'},
+							{id: '123', name: 'custom'},
+						],
+					}),
+				).rejects.toThrow(DuplicateSignatureEmojiError);
+			});
+
+			it('rejects signature emojis that collide with another persona owned by the same user', async () => {
+				const existingOther = makeMockPersona(userId, (defaultPersonaId + 1n) as PersonaID, 'Existing Persona', {
+					signature_emojis: JSON.stringify([{name: '🦊'}, {id: '999', name: 'cat'}]),
+				});
+				vi.mocked(mockRepo.findByUserId).mockResolvedValue([existingOther]);
+
+				await expect(
+					service.createPersona(userId, {
+						name: 'Colliding',
+						signature_emojis: [{name: '🦊'}],
+					}),
+				).rejects.toThrow(DuplicateSignatureEmojiError);
+
+				await expect(
+					service.createPersona(userId, {
+						name: 'Colliding Custom',
+						signature_emojis: [{id: '999', name: 'cat'}],
+					}),
+				).rejects.toThrow(DuplicateSignatureEmojiError);
+			});
+
+			it('allows a persona to keep its own signature emojis during update', async () => {
+				const selfPersona = makeMockPersona(userId, defaultPersonaId, 'Self Persona', {
+					signature_emojis: JSON.stringify([{name: '🦊'}]),
+				});
+				vi.mocked(mockRepo.findById).mockResolvedValue(selfPersona);
+				vi.mocked(mockRepo.findByUserId).mockResolvedValue([selfPersona]);
+				vi.mocked(mockRepo.update).mockResolvedValue(selfPersona);
+
+				const updated = await service.updatePersona(userId, defaultPersonaId, {
+					signature_emojis: [{name: '🦊'}, {name: '🐺'}],
+				});
+				expect(updated).toBeDefined();
+			});
+
+			it('rejects signature emojis exceeding the maximum limit', async () => {
+				const tooMany = Array.from({length: 10001}, (_, i) => ({
+					name: `e${i}`,
+				}));
+				await expect(
+					service.createPersona(userId, {
+						name: 'Too Many',
+						signature_emojis: tooMany,
+					}),
+				).rejects.toThrow(SignatureEmojiLimitExceededError);
+			});
 		});
 	});
 });
