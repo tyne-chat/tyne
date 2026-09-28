@@ -59,6 +59,10 @@ import {
 } from '@fluxer/schema/src/primitives/UserValidators';
 import {z} from 'zod';
 
+// Fork imports.
+
+import {MAX_BIO_LENGTH} from '@fluxer/constants/src/LimitConstants';
+
 export const UserUpdateRequest = z
 	.object({
 		username: UsernameType.describe('The username for the account (1-32 characters)'),
@@ -69,7 +73,9 @@ export const UserUpdateRequest = z
 		password: PasswordType.describe('The current password for verification'),
 		avatar: createBase64ImageType().nullish().describe('Base64-encoded avatar image'),
 		banner: createBase64ImageType().nullish().describe('Base64-encoded profile banner image'),
-		bio: createStringType(1, 320).nullish().describe('User biography text (max 320 characters)'),
+		bio: createStringType(1, MAX_BIO_LENGTH)
+			.nullish()
+			.describe(`User biography text (max ${MAX_BIO_LENGTH} characters)`),
 		pronouns: createStringType(1, 40).nullish().describe('User pronouns (max 40 characters)'),
 		accent_color: ColorType.nullish().describe('Profile accent color as integer'),
 		timezone: createStringType(1, 128).nullish().describe('IANA timezone identifier saved for profile local time'),

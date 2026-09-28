@@ -415,7 +415,7 @@ export const LIMIT_KEY_METADATA: Record<LimitKey, LimitKeyMetadata> = {
 		scope: 'user',
 		isToggle: false,
 		unit: 'count',
-		min: 0,
+		min: 1,
 		max: MAX_BIO_LENGTH,
 	},
 	max_bookmarks: {
