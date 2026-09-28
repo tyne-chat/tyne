@@ -8,12 +8,16 @@ import {useCallback} from 'react';
 export const EmojiPickerPopout = observer(
 	({
 		channelId,
+		messageId,
 		handleSelect,
 		onClose,
+		filterEmoji,
 	}: {
 		channelId: string | null;
+		messageId?: string;
 		handleSelect: (emoji: FlatEmoji, shiftKey?: boolean) => void;
 		onClose?: () => void;
+		filterEmoji?: (emoji: FlatEmoji) => boolean;
 	}) => {
 		const handleEmojiSelect = useCallback(
 			(emoji: FlatEmoji, shiftKey?: boolean) => {
@@ -27,9 +31,11 @@ export const EmojiPickerPopout = observer(
 		return (
 			<ExpressionPickerPopout
 				channelId={channelId ?? undefined}
+				messageId={messageId}
 				onEmojiSelect={handleEmojiSelect}
 				onClose={onClose}
 				visibleTabs={['emojis']}
+				filterEmoji={filterEmoji}
 				data-flx="emoji.emoji-picker-popout.expression-picker-popout"
 			/>
 		);
