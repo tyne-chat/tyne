@@ -205,10 +205,11 @@ export const Autocomplete = observer(
 				offset({mainAxis: resolvedMainAxisOffset, crossAxis: resolvedCrossAxisOffset}),
 				flip({padding: 16}),
 				size({
-					apply({rects, elements}) {
+					apply({rects, elements, availableHeight}) {
 						const width = rects.reference.width;
 						Object.assign(elements.floating.style, {
 							width: `${width}px`,
+							maxHeight: `${Math.min(availableHeight, 490)}px`,
 						});
 					},
 					padding: 16,
@@ -342,6 +343,7 @@ export const Autocomplete = observer(
 						<Scroller
 							ref={scrollerRef}
 							className={styles.scroller}
+							fade={false}
 							key="autocomplete-scroller"
 							data-flx="channel.autocomplete.scroller"
 						>
