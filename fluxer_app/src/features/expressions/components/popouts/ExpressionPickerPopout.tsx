@@ -113,8 +113,10 @@ interface ExpressionPickerCategory {
 	renderComponent: (props: {
 		channelId?: string;
 		roleIconGuildId?: string;
+		messageId?: string;
 		onSelect: (emoji: FlatEmoji, shiftKey?: boolean) => void;
 		onClose?: () => void;
+		filterEmoji?: (emoji: FlatEmoji) => boolean;
 	}) => React.ReactNode;
 }
 
@@ -161,11 +163,13 @@ const createAllCategories = (i18n: I18n): Array<ExpressionPickerCategory> => [
 	{
 		type: 'emojis' as const,
 		label: i18n._(EMOJIS_DESCRIPTOR),
-		renderComponent: ({channelId, roleIconGuildId, onSelect}) => (
+		renderComponent: ({channelId, roleIconGuildId, messageId, onSelect, filterEmoji}) => (
 			<EmojiPicker
 				channelId={channelId}
 				roleIconGuildId={roleIconGuildId}
+				messageId={messageId}
 				handleSelect={onSelect}
+				filterEmoji={filterEmoji}
 				data-flx="expressions.expression-picker-popout.render-component.emoji-picker"
 			/>
 		),
@@ -175,9 +179,11 @@ const createAllCategories = (i18n: I18n): Array<ExpressionPickerCategory> => [
 interface ExpressionPickerPopoutProps {
 	channelId?: string;
 	roleIconGuildId?: string;
+	messageId?: string;
 	onEmojiSelect: (emoji: FlatEmoji, shiftKey?: boolean) => void;
 	onClose?: () => void;
 	visibleTabs?: Array<ExpressionPickerTabType>;
+	filterEmoji?: (emoji: FlatEmoji) => boolean;
 }
 
 const RESIZE_HANDLE_LABELS: ResizablePaneHandleLabels = {
@@ -195,9 +201,11 @@ export const ExpressionPickerPopout = observer(
 	({
 		channelId,
 		roleIconGuildId,
+		messageId,
 		onEmojiSelect,
 		onClose,
 		visibleTabs = ['gifs', 'memes', 'stickers', 'emojis'],
+		filterEmoji,
 	}: ExpressionPickerPopoutProps) => {
 		const {i18n} = useLingui();
 		const categories = useMemo(() => {
@@ -334,7 +342,14 @@ export const ExpressionPickerPopout = observer(
 						/>
 					</div>
 					<div className={styles.content} data-flx="expressions.expression-picker-popout.content">
-						{selectedCategory.renderComponent({channelId, roleIconGuildId, onSelect: handleEmojiSelect, onClose})}
+						{selectedCategory.renderComponent({
+							channelId,
+							roleIconGuildId,
+							messageId,
+							onSelect: handleEmojiSelect,
+							onClose,
+							filterEmoji,
+						})}
 					</div>
 					{!isRoleIconPicker && (
 						<ResizablePaneHandles
