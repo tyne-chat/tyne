@@ -38,7 +38,7 @@ vi.mock('@app/features/platform/transport/RestTransport', () => ({
 
 installVoiceMenuTestBootstrap();
 
-const {PersonaStoreClass} = await import('./PersonaStore');
+const {PersonaStoreClass, normalizePersona} = await import('./PersonaStore');
 type PersonaStoreInstance = InstanceType<typeof PersonaStoreClass>;
 
 describe('PersonaStore', () => {
@@ -667,6 +667,80 @@ describe('PersonaStore', () => {
 			expect(known?.name).toBe('Alice');
 			expect(known?.display_tag_text).toBe('Wonderland');
 			expect(known?.pronouns).toBe('she/her');
+		});
+	});
+
+	describe('signature emojis & reaction persona resolution', () => {
+		it('normalizes persona with signature emojis', () => {
+			const normalized = normalizePersona({
+				id: 'p_sig',
+				name: 'Sig Persona',
+				signature_emojis: [{name: '🦊'}, {id: '12345', name: 'custom_fox', animated: true}],
+			});
+
+			expect(normalized.signatureEmojis).toEqual([
+				{id: null, name: '🦊', animated: null},
+				{id: '12345', name: 'custom_fox', animated: true},
+			]);
+			expect(normalized.signature_emojis).toEqual([
+				{id: null, name: '🦊', animated: null},
+				{id: '12345', name: 'custom_fox', animated: true},
+			]);
+		});
+
+		it('finds persona by signature emoji (unicode, surrogate, and custom ID)', () => {
+			store.setPersonas([
+				{
+					id: 'p_fox',
+					name: 'Fox Persona',
+					signatureEmojis: [
+						{id: null, name: '🦊'},
+						{id: 'custom_100', name: 'custom_fox'},
+					],
+				} as any,
+				{
+					id: 'p_cat',
+					name: 'Cat Persona',
+					signatureEmojis: [{id: null, name: '🐱'}],
+				} as any,
+			]);
+
+			// Matches unicode by name
+			expect(store.getPersonaBySignatureEmoji({name: '🦊'})?.id).toBe('p_fox');
+			// Matches unicode by surrogates
+			expect(store.getPersonaBySignatureEmoji({name: 'fox', surrogates: '🦊'})?.id).toBe('p_fox');
+			// Matches custom emoji by ID
+			expect(store.getPersonaBySignatureEmoji({id: 'custom_100', name: 'whatever'})?.id).toBe('p_fox');
+			// Returns null for non-matching emoji
+			expect(store.getPersonaBySignatureEmoji({name: '🐶'})).toBeNull();
+		});
+
+		it('resolves effective reaction persona by signature emoji, then draft text, then active persona', () => {
+			store.setPersonas([
+				{
+					id: 'p_fox',
+					name: 'Fox Persona',
+					personaTags: [{prefix: 'f:'}],
+					signatureEmojis: [{id: null, name: '🦊'}],
+				} as any,
+				{
+					id: 'p_active',
+					name: 'Active Persona',
+				} as any,
+			]);
+			store.setActivePersona('p_active');
+
+			// 1. Signature emoji takes precedence
+			const forEmoji = store.getEffectiveReactionPersona({name: '🦊'}, 'unrelated text');
+			expect(forEmoji?.id).toBe('p_fox');
+
+			// 2. Draft text tag match when emoji is not signature emoji
+			const forText = store.getEffectiveReactionPersona({name: '⭐'}, 'f: hello world');
+			expect(forText?.id).toBe('p_fox');
+
+			// 3. Fallback to active persona
+			const forFallback = store.getEffectiveReactionPersona({name: '⭐'}, 'plain text without tag');
+			expect(forFallback?.id).toBe('p_active');
 		});
 	});
 });

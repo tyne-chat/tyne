@@ -321,4 +321,39 @@ describe('PersonaEditModal Component', () => {
 		// ModalCommands.push should have been called with confirmation modal
 		expect(ModalCommands.push).toHaveBeenCalledTimes(1);
 	});
+
+	it('renders signature emoji chips from existing persona and allows removal', async () => {
+		const onClose = vi.fn();
+		const existingPersona = {
+			id: '100000000000000099',
+			name: 'Fox Persona',
+			signatureEmojis: [{name: '🦊'}, {name: '⭐'}],
+		} as any;
+
+		await act(async () => {
+			root.render(
+				<PersonaEditModal
+					persona={existingPersona}
+					onClose={onClose}
+					data-flx="persona.persona-edit-modal-test.persona-edit-modal--5"
+				/>,
+			);
+		});
+
+		// Verify signature emoji chips are rendered
+		expect(document.body.textContent).toContain('🦊');
+		expect(document.body.textContent).toContain('⭐');
+
+		const removeBtns = document.body.querySelectorAll('[aria-label="Remove signature emoji"]');
+		expect(removeBtns.length).toBe(2);
+
+		// Remove the first emoji (🦊)
+		await act(async () => {
+			(removeBtns[0] as HTMLElement).click();
+		});
+
+		// Only ⭐ should remain
+		const remainingRemoveBtns = document.body.querySelectorAll('[aria-label="Remove signature emoji"]');
+		expect(remainingRemoveBtns.length).toBe(1);
+	});
 });
