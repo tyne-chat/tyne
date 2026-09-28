@@ -19,6 +19,11 @@ import {isFirefoxBrowser} from '@app/features/ui/utils/NativeUtils';
 import {clsx} from 'clsx';
 import React, {useEffect, useImperativeHandle, useMemo, useRef} from 'react';
 
+// Fork imports.
+
+import {EmojiPickerReactionContext} from '@app/features/channel/components/EmojiPicker';
+import {useContext} from 'react';
+
 type PickerEmojiImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
 	src: string;
 	alt: string;
@@ -103,6 +108,7 @@ export const EmojiRenderer = React.forwardRef<HTMLButtonElement, EmojiRendererPr
 		forwardedRef,
 	) => {
 		const emojiRef = useRef<HTMLButtonElement | null>(null);
+		const reactionContext = useContext(EmojiPickerReactionContext);
 		useImperativeHandle(forwardedRef, () => emojiRef.current!);
 		useEffect(() => {
 			if (shouldScrollIntoView && emojiRef.current) {
@@ -143,6 +149,8 @@ export const EmojiRenderer = React.forwardRef<HTMLButtonElement, EmojiRendererPr
 			ContextMenuCommands.openFromEvent(e, (props) => (
 				<EmojiContextMenuItems
 					emoji={emoji}
+					channelId={reactionContext?.channelId ?? channel?.id}
+					messageId={reactionContext?.messageId}
 					onClose={props.onClose}
 					data-flx="channel.emoji-picker.emoji-renderer.handle-context-menu.emoji-context-menu-items"
 				/>
