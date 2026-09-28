@@ -19,7 +19,14 @@ vi.mock('@app/features/user/state/UserSettings', () => ({
 	default: {
 		getSubPreference: () => undefined,
 		setSubPreference: () => Promise.resolve(),
-		isHydrated: true,
+		isHydrated: () => true,
+	},
+}));
+
+vi.mock('@app/features/messaging/state/MessagingMessages', () => ({
+	default: {
+		handlePersonaUpdate: vi.fn(),
+		handleAuthorDisplayTagUpdate: vi.fn(),
 	},
 }));
 
@@ -27,12 +34,15 @@ installVoiceMenuTestBootstrap();
 
 const {PersonaStore} = await import('../state/PersonaStore');
 const {
+	handleGuildPersonasDirty,
 	handleUserPersonaCreate,
 	handleUserPersonaDelete,
 	handleUserPersonasUpdate,
 	handleUserPersonaSettingsUpdate,
 	handleUserPersonaUpdate,
 } = await import('./PersonaEvents');
+const MessageReactions = (await import('@app/features/messaging/state/MessageReactions')).default;
+const Messages = (await import('@app/features/messaging/state/MessagingMessages')).default;
 
 const mockContext = {} as GatewayHandlerContext;
 
@@ -199,5 +209,59 @@ describe('PersonaEvents', () => {
 		expect(PersonaStore.isPersonaLatched).toBe(true);
 		expect(PersonaStore.displayTagText).toBe('SYS');
 		expect(PersonaStore.displayTagIcon).toBe('https://cdn.example.com/badge.png');
+	});
+
+	it('notifies MessageReactions and Messages on USER_PERSONA_UPDATE', () => {
+		const reactionsSpy = vi.spyOn(MessageReactions, 'handlePersonaUpdate');
+		const messagesSpy = vi.spyOn(Messages, 'handlePersonaUpdate');
+
+		handleUserPersonaUpdate(samplePersona, mockContext);
+
+		expect(reactionsSpy).toHaveBeenCalledWith(samplePersona);
+		expect(messagesSpy).toHaveBeenCalledWith({persona: samplePersona});
+	});
+
+	it('handles GUILD_PERSONAS_DIRTY action update by recording known persona and notifying Messages and MessageReactions', () => {
+		const reactionsSpy = vi.spyOn(MessageReactions, 'handlePersonaUpdate');
+		const messagesSpy = vi.spyOn(Messages, 'handlePersonaUpdate');
+
+		handleGuildPersonasDirty(
+			{
+				guild_id: 'guild-1',
+				action: 'update',
+				persona: samplePersona,
+			},
+			mockContext,
+		);
+
+		expect(PersonaStore.getKnownPersona(samplePersona.id)).toEqual(samplePersona);
+		expect(reactionsSpy).toHaveBeenCalledWith(samplePersona);
+		expect(messagesSpy).toHaveBeenCalledWith({persona: samplePersona});
+	});
+
+	it('handles GUILD_PERSONAS_DIRTY author display tag update by notifying Messages and MessageReactions', () => {
+		const reactionsSpy = vi.spyOn(MessageReactions, 'handleAuthorDisplayTagUpdate');
+		const messagesSpy = vi.spyOn(Messages, 'handleAuthorDisplayTagUpdate');
+
+		handleGuildPersonasDirty(
+			{
+				guild_id: 'guild-1',
+				user_id: 'user-123',
+				display_tag_text: 'SYS',
+				display_tag_icon: 'https://cdn.example.com/icon.png',
+			},
+			mockContext,
+		);
+
+		expect(reactionsSpy).toHaveBeenCalledWith({
+			userId: 'user-123',
+			display_tag_text: 'SYS',
+			display_tag_icon: 'https://cdn.example.com/icon.png',
+		});
+		expect(messagesSpy).toHaveBeenCalledWith({
+			userId: 'user-123',
+			display_tag_text: 'SYS',
+			display_tag_icon: 'https://cdn.example.com/icon.png',
+		});
 	});
 });
