@@ -148,6 +148,8 @@ const MessageReactionItem = observer(
 				<EmojiContextMenuItems
 					emoji={emojiForMenu}
 					onClose={onClose}
+					channelId={message.channelId}
+					messageId={message.id}
 					data-flx="channel.message-reactions.handle-context-menu.emoji-context-menu-items"
 				/>
 			));
@@ -366,6 +368,7 @@ export const MessageReactions = observer(
 							render={({onClose}) => (
 								<EmojiPickerPopout
 									channelId={message.channelId}
+									messageId={message.id}
 									handleSelect={handlers.handleEmojiSelect}
 									onClose={onClose}
 									data-flx="channel.message-reactions.emoji-picker-popout"
