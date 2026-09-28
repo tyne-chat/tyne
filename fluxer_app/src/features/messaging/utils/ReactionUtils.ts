@@ -17,6 +17,7 @@ import {msg, plural} from '@lingui/core/macro';
 
 // Fork imports.
 
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import type {MessageReaction} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
 export function hasPersonaReacted(reaction: MessageReaction | undefined | null, personaId?: string | null): boolean {
@@ -44,7 +45,14 @@ export function getReactionTooltip(message: Message, emoji: ReactionEmoji) {
 	const guildId = Channels.getChannel(message.channelId)?.guildId ?? message.guildId;
 	const users = MessageReactions.getReactions(message.id, emoji)
 		.slice(0, 3)
-		.map((user) => (user.subprofile ? user.subprofile.name : NicknameUtils.getNickname(user, guildId)));
+		.map((user) => {
+			if (user.subprofile?.name) return user.subprofile.name;
+			if (user.personaId && user.personaId !== '0') {
+				const known = PersonaStore.getKnownPersona(user.personaId);
+				if (known?.name) return known.name;
+			}
+			return NicknameUtils.getNickname(user, guildId);
+		});
 	if (users.length === 0) {
 		return '';
 	}
