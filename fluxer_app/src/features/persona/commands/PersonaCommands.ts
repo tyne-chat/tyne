@@ -2,6 +2,8 @@
 
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import {ResettableStates} from '@app/features/app/state/ResettableStates';
+import MessageReactions from '@app/features/messaging/state/MessageReactions';
+import Messages from '@app/features/messaging/state/MessagingMessages';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Logger} from '@app/features/platform/utils/AppLogger';
 import type {
@@ -91,6 +93,8 @@ export async function updatePersona(id: string, data: PersonaUpdateRequest): Pro
 		throw new Error(extractErrorMessage(res, 'Failed to update persona'));
 	}
 	PersonaStore.upsertPersona(res.body);
+	Messages.handlePersonaUpdate({persona: res.body});
+	MessageReactions.handlePersonaUpdate(res.body);
 	// Invalidate any cached public representation of this persona
 	for (const key of publicPersonaCache.keys()) {
 		if (key.endsWith(`:${id}`)) {
