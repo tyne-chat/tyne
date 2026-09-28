@@ -6,9 +6,30 @@ import {
 	PersonaCreateRequestSchema,
 	PersonaTagSchema,
 	PersonaUpdateRequestSchema,
+	SignatureEmojiSchema,
 } from '../PersonaApiSchemas';
 
 describe('PersonaApiSchemas', () => {
+	it('validates SignatureEmojiSchema for unicode and custom emojis', () => {
+		// Valid unicode emoji (no id)
+		const unicodeResult = SignatureEmojiSchema.safeParse({name: '🦊'});
+		expect(unicodeResult.success).toBe(true);
+
+		// Valid custom emoji (with snowflake id and animated flag)
+		const customResult = SignatureEmojiSchema.safeParse({
+			id: '123456789012345678',
+			name: 'custom_fox',
+			animated: true,
+		});
+		expect(customResult.success).toBe(true);
+
+		// Rejects empty name
+		expect(SignatureEmojiSchema.safeParse({name: ''}).success).toBe(false);
+
+		// Rejects name over 64 characters
+		expect(SignatureEmojiSchema.safeParse({name: 'a'.repeat(65)}).success).toBe(false);
+	});
+
 	it('validates PersonaTagSchema with prefix, suffix, or both, and rejects empty tags', () => {
 		expect(PersonaTagSchema.safeParse({prefix: '['}).success).toBe(true);
 		expect(PersonaTagSchema.safeParse({suffix: ']'}).success).toBe(true);
@@ -56,6 +77,7 @@ describe('PersonaApiSchemas', () => {
 			color: 0xff0000,
 			visibility: 'public',
 			persona_tags: [{prefix: 'A:'}],
+			signature_emojis: [{name: '🦊'}, {id: '123456789012345678', name: 'custom'}],
 		});
 		expect(validCreate.success).toBe(true);
 
@@ -63,6 +85,7 @@ describe('PersonaApiSchemas', () => {
 			name: 'Alice Updated',
 			auto_tag_disabled: true,
 			visibility: 'private',
+			signature_emojis: [{name: '🐺'}],
 		});
 		expect(validUpdate.success).toBe(true);
 	});
