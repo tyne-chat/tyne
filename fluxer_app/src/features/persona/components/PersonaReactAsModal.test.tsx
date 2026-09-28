@@ -244,4 +244,165 @@ describe('PersonaReactAsModal', () => {
 		expect(mockOnClose).toHaveBeenCalled();
 		expect(PopoutCommands.closeAll).toHaveBeenCalled();
 	});
+
+	it('supports keyboard navigation with ArrowDown, ArrowUp, and Enter', async () => {
+		await act(async () => {
+			root.render(
+				<PersonaReactAsModal
+					emoji={mockEmoji}
+					channelId="c1"
+					messageId="m1"
+					onClose={mockOnClose}
+					data-flx="persona.persona-react-as-modal-test.persona-react-as-modal--5"
+				/>,
+			);
+		});
+
+		const input = document.querySelector('input')!;
+		expect(input).not.toBeNull();
+
+		// Press ArrowDown to navigate from root (0) to Alice (1)
+		await act(async () => {
+			input.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
+		});
+
+		// Press ArrowUp to navigate back from Alice (1) to root (0)
+		await act(async () => {
+			input.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowUp', bubbles: true}));
+		});
+
+		// Press ArrowDown to navigate back to Alice (1)
+		await act(async () => {
+			input.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
+		});
+
+		// Press Enter to select Alice (1)
+		await act(async () => {
+			input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+		});
+
+		expect(ReactionCommands.addReaction).toHaveBeenCalledWith(
+			expect.anything(),
+			'c1',
+			'm1',
+			expect.objectContaining({name: '⭐'}),
+			'p1',
+		);
+		expect(mockOnClose).toHaveBeenCalled();
+	});
+
+	it('supports keyboard navigation to select root account via Enter', async () => {
+		await act(async () => {
+			root.render(
+				<PersonaReactAsModal
+					emoji={mockEmoji}
+					channelId="c1"
+					messageId="m1"
+					onClose={mockOnClose}
+					data-flx="persona.persona-react-as-modal-test.persona-react-as-modal--6"
+				/>,
+			);
+		});
+
+		const input = document.querySelector('input')!;
+
+		// selectedIndex starts at 0 (root account). Press Enter immediately.
+		await act(async () => {
+			input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+		});
+
+		expect(ReactionCommands.addReaction).toHaveBeenCalledWith(
+			expect.anything(),
+			'c1',
+			'm1',
+			expect.objectContaining({name: '⭐'}),
+			null,
+		);
+		expect(mockOnClose).toHaveBeenCalled();
+	});
+
+	it('shows empty notice when no personas match search query', async () => {
+		await act(async () => {
+			root.render(
+				<PersonaReactAsModal
+					emoji={mockEmoji}
+					channelId="c1"
+					messageId="m1"
+					onClose={mockOnClose}
+					data-flx="persona.persona-react-as-modal-test.persona-react-as-modal--7"
+				/>,
+			);
+		});
+
+		const input = document.querySelector('input')!;
+		await act(async () => {
+			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+			nativeInputValueSetter?.call(input, 'NonexistentPersonaXYZ');
+			input.dispatchEvent(new Event('input', {bubbles: true}));
+		});
+
+		expect(document.body.textContent).toContain('No matching personas found.');
+	});
+
+	it('updates selectedIndex on mouseEnter for root and persona items', async () => {
+		await act(async () => {
+			root.render(
+				<PersonaReactAsModal
+					emoji={mockEmoji}
+					channelId="c1"
+					messageId="m1"
+					onClose={mockOnClose}
+					data-flx="persona.persona-react-as-modal-test.persona-react-as-modal--8"
+				/>,
+			);
+		});
+
+		const rootItem = document.querySelector(
+			'[data-flx="persona.persona-react-as-modal.root-account-item"]',
+		) as HTMLElement;
+		const personaItems = document.querySelectorAll('[data-flx="persona.persona-react-as-modal.persona-item"]');
+
+		await act(async () => {
+			personaItems[1].dispatchEvent(new MouseEvent('mouseenter', {bubbles: true}));
+		});
+
+		await act(async () => {
+			rootItem.dispatchEvent(new MouseEvent('mouseenter', {bubbles: true}));
+		});
+	});
+
+	it('supports custom emojis with id and animated properties', async () => {
+		const customEmoji: FlatEmoji = {
+			id: '998877665544332211',
+			name: 'blob_dance',
+			uniqueName: 'blob_dance:998877665544332211',
+			allNamesString: ':blob_dance:',
+			animated: true,
+		};
+
+		await act(async () => {
+			root.render(
+				<PersonaReactAsModal
+					emoji={customEmoji}
+					channelId="c1"
+					messageId="m1"
+					onClose={mockOnClose}
+					data-flx="persona.persona-react-as-modal-test.persona-react-as-modal--9"
+				/>,
+			);
+		});
+
+		const personaItems = document.querySelectorAll('[data-flx="persona.persona-react-as-modal.persona-item"]');
+		await act(async () => {
+			(personaItems[0] as HTMLElement).click();
+		});
+
+		expect(ReactionCommands.addReaction).toHaveBeenCalledWith(
+			expect.anything(),
+			'c1',
+			'm1',
+			expect.objectContaining({id: '998877665544332211'}),
+			'p1',
+		);
+	});
 });
