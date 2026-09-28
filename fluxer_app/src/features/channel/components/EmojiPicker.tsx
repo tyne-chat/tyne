@@ -60,13 +60,30 @@ import {useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncEx
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {toReactionEmoji} from '@app/features/messaging/utils/ReactionUtils';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {createContext} from 'react';
+
+export interface EmojiPickerReactionContextValue {
+	channelId?: string;
+	messageId?: string;
+}
+
+export const EmojiPickerReactionContext = createContext<EmojiPickerReactionContextValue | null>(null);
 
 const NO_EMOJIS_MATCH_YOUR_SEARCH_DESCRIPTOR = msg({
 	message: 'No emojis match that search',
 	comment: 'Empty-state text in the channel and chat emoji picker.',
 });
-export const EmojiPicker = observer(
-	({channelId, handleSelect}: {channelId?: string; handleSelect: (emoji: FlatEmoji, shiftKey?: boolean) => void}) => {
+const EmojiPickerBase = observer(
+	({
+		channelId,
+		handleSelect,
+		filterEmoji,
+	}: {
+		channelId?: string;
+		messageId?: string;
+		handleSelect: (emoji: FlatEmoji, shiftKey?: boolean) => void;
+		filterEmoji?: (emoji: FlatEmoji) => boolean;
+	}) => {
 		const PREMIUM_PRODUCT_NAME = getPremiumProductName();
 		const headerContext = useContext(ExpressionPickerHeaderContext);
 		if (!headerContext) {
@@ -106,17 +123,20 @@ export const EmojiPicker = observer(
 			return ComponentBus.subscribe('EMOJI_PICKER_RERENDER', handleEmojiDataUpdated);
 		}, []);
 		useSearchInputAutofocus(searchInputRef);
-		const searchItems = useMemo(
-			() => Emoji.search(channel, normalizedSearchTerm).slice(),
-			[channel, normalizedSearchTerm, emojiDataVersion],
-		);
+		const searchItems = useMemo(() => {
+			const items = Emoji.search(channel, normalizedSearchTerm).slice();
+			return filterEmoji ? items.filter(filterEmoji) : items;
+		}, [channel, normalizedSearchTerm, emojiDataVersion, filterEmoji]);
 		const searchUpsell = usePremiumUpsellData({
 			items: searchItems,
 			getAvailability: getEmojiAvailability,
 			getGuildId: getEmojiGuildId,
 		});
 		const renderedEmojis = searchUpsell.accessibleItems;
-		const allItems = useMemo(() => Emoji.getAllEmojis(channel).slice(), [channel, emojiDataVersion]);
+		const allItems = useMemo(() => {
+			const items = Emoji.getAllEmojis(channel).slice();
+			return filterEmoji ? items.filter(filterEmoji) : items;
+		}, [channel, emojiDataVersion, filterEmoji]);
 		const allUpsell = usePremiumUpsellData({
 			items: allItems,
 			getAvailability: getEmojiAvailability,
@@ -336,3 +356,15 @@ export const EmojiPicker = observer(
 		);
 	},
 );
+
+// Fork: gives the picker's emojis, and the context menus opened from them, the message being
+// reacted to. A wrapper, so upstream's markup is not nested under the provider.
+export const EmojiPicker = (props: React.ComponentProps<typeof EmojiPickerBase>) => {
+	const {channelId, messageId} = props;
+	const value = useMemo(() => ({channelId, messageId}), [channelId, messageId]);
+	return (
+		<EmojiPickerReactionContext.Provider value={value}>
+			<EmojiPickerBase data-flx="channel.emoji-picker.emoji-picker-base" {...props} />
+		</EmojiPickerReactionContext.Provider>
+	);
+};
