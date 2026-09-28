@@ -44,6 +44,10 @@ vi.mock('@app/features/messaging/state/MessageReactions', () => ({
 installVoiceMenuTestBootstrap();
 
 const {Message} = await import('@app/features/messaging/models/MessagingMessage');
+const {default: MessageReferences, MessageReferenceState} = await import(
+	'@app/features/messaging/state/MessageReferences'
+);
+const {ChannelMessages} = await import('@app/features/messaging/state/ChannelMessages');
 
 import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
@@ -229,5 +233,117 @@ describe('MessagingMessage Persona Preservation', () => {
 		const msg1 = new Message(wire1, {skipUserCache: true});
 		const msg2 = new Message(wire2, {skipUserCache: true});
 		expect(msg1.equals(msg2)).toBe(false);
+	});
+
+	describe('MessageReferences persona integration', () => {
+		it('preserves existing subprofile when unhydrated referenced_message arrives', () => {
+			const channelId = '1546500000000000002';
+			const refMsgId = '1546500000000000010';
+			const replyMsgId = '1546500000000000020';
+
+			const initialReferencedWire = createWireMessage({
+				id: refMsgId,
+				channel_id: channelId,
+				subprofile: {
+					id: 'sub-sneaks',
+					name: 'Sneaks',
+					avatar: 'https://example.com/sneaks.png',
+					display_tag_text: 'SERAPHIM',
+					display_tag_icon: null,
+					pronouns: null,
+					color: null,
+					bio: null,
+				},
+			});
+
+			const optimisticReply = createWireMessage({
+				id: replyMsgId,
+				channel_id: channelId,
+				referenced_message: initialReferencedWire,
+				message_reference: {
+					channel_id: channelId,
+					message_id: refMsgId,
+					type: 0,
+				},
+			});
+
+			MessageReferences.handleMessageCreate(optimisticReply, true);
+
+			let resolution = MessageReferences.getMessageReference(channelId, refMsgId);
+			expect(resolution.state).toBe(MessageReferenceState.LOADED);
+			if (resolution.state === MessageReferenceState.LOADED) {
+				expect(resolution.message.subprofile?.name).toBe('Sneaks');
+			}
+
+			// Finalized message arrives with subprofile: null
+			const finalizedReply = createWireMessage({
+				id: replyMsgId,
+				channel_id: channelId,
+				referenced_message: {
+					...initialReferencedWire,
+					subprofile: null,
+				},
+				message_reference: {
+					channel_id: channelId,
+					message_id: refMsgId,
+					type: 0,
+				},
+			});
+
+			MessageReferences.handleMessageCreate(finalizedReply, false);
+
+			resolution = MessageReferences.getMessageReference(channelId, refMsgId);
+			expect(resolution.state).toBe(MessageReferenceState.LOADED);
+			if (resolution.state === MessageReferenceState.LOADED) {
+				expect(resolution.message.subprofile?.name).toBe('Sneaks');
+			}
+		});
+
+		it('prioritizes live Messages store message over cache in getMessageReference', () => {
+			const channelId = '1546500000000000002';
+			const refMsgId = '1546500000000000030';
+			const replyMsgId = '1546500000000000040';
+
+			const liveWire = createWireMessage({
+				id: refMsgId,
+				channel_id: channelId,
+				subprofile: {
+					id: 'sub-bob',
+					name: 'Bob the Fox',
+					avatar: 'https://example.com/bob.png',
+					display_tag_text: null,
+					display_tag_icon: null,
+					pronouns: null,
+					color: null,
+					bio: null,
+				},
+			});
+			const liveMsg = new Message(liveWire, {skipUserCache: true});
+			vi.spyOn(ChannelMessages, 'getOrCreate').mockReturnValue({
+				get: (mId: string) => (mId === refMsgId ? liveMsg : undefined),
+			} as any);
+
+			const reply = createWireMessage({
+				id: replyMsgId,
+				channel_id: channelId,
+				referenced_message: createWireMessage({
+					id: refMsgId,
+					channel_id: channelId,
+					subprofile: null,
+				}),
+				message_reference: {
+					channel_id: channelId,
+					message_id: refMsgId,
+					type: 0,
+				},
+			});
+			MessageReferences.handleMessageCreate(reply, false);
+
+			const resolution = MessageReferences.getMessageReference(channelId, refMsgId);
+			expect(resolution.state).toBe(MessageReferenceState.LOADED);
+			if (resolution.state === MessageReferenceState.LOADED) {
+				expect(resolution.message.subprofile?.name).toBe('Bob the Fox');
+			}
+		});
 	});
 });

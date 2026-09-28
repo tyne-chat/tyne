@@ -98,7 +98,32 @@ function normalizeMessageSubprofileResponse(message: MessageResponse): MessageRe
 	if (message.subprofile === undefined) {
 		message.subprofile = null;
 	}
+	if (message.referenced_message) {
+		normalizeMessageSubprofileResponse(message.referenced_message);
+	}
 	return message;
+}
+
+function collectMessagesAndReferences(messages: Array<MessageResponse>): Array<MessageResponse> {
+	const result: Array<MessageResponse> = [];
+	const visited = new Set<unknown>();
+
+	function traverse(msg: MessageResponse) {
+		if (visited.has(msg)) return;
+		visited.add(msg);
+		if (msg.id) {
+			visited.add(msg.id);
+		}
+		result.push(msg);
+		if (msg.referenced_message) {
+			traverse(msg.referenced_message);
+		}
+	}
+
+	for (const msg of messages) {
+		if (msg) traverse(msg);
+	}
+	return result;
 }
 
 function isDeletedAuthor(author: unknown): boolean {
@@ -139,10 +164,11 @@ export class MessageResponseDataService {
 	protected async hydratePersonas(messages: Array<MessageResponse>): Promise<void> {
 		if (!messages || messages.length === 0) return;
 
+		const targetMessages = collectMessagesAndReferences(messages);
 		const lookupPairs: Array<{userId: UserID; personaId: PersonaID}> = [];
 		const authorUserIds: Array<UserID> = [];
 
-		for (const msg of messages) {
+		for (const msg of targetMessages) {
 			const anyMsg = msg as unknown as Record<string, unknown>;
 			// Case 1: Root user account deleted -> Render as Deleted Persona if persona was used, else null
 			if (isDeletedAuthor(msg.author)) {
@@ -204,7 +230,7 @@ export class MessageResponseDataService {
 			? await Promise.all([repo.findByUserAndPersonaIds(lookupPairs), repo.findSettingsByUserIds(authorUserIds)])
 			: [new Map<string, Persona>(), new Map<string, UserPersonaSettingsRow>()];
 
-		for (const msg of messages) {
+		for (const msg of targetMessages) {
 			if (isDeletedAuthor(msg.author)) continue;
 			const anyMsg = msg as unknown as Record<string, unknown>;
 			const rawPersonaId = anyMsg.persona_id ?? msg.subprofile?.id;
