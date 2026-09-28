@@ -20,7 +20,7 @@ export type PersonaTag = z.infer<typeof PersonaTagSchema>;
 export const PersonaVisibilitySchema = z.enum(['unlisted', 'public', 'private']).default('unlisted');
 export type PersonaVisibility = z.infer<typeof PersonaVisibilitySchema>;
 
-export const MAX_SIGNATURE_EMOJIS_PER_PERSONA = 20;
+export const MAX_SIGNATURE_EMOJIS_PER_PERSONA = 10000;
 
 export const SignatureEmojiSchema = z.object({
 	id: SnowflakeStringType.nullish().describe('Custom emoji ID (null for Unicode)'),

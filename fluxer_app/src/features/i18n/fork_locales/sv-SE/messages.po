@@ -23,8 +23,8 @@ msgid "Active persona mode"
 msgstr "Active persona mode"
 
 #. placeholder {0}: formData.signatureEmojis.length
-msgid "Add Emoji ({0}/{MAX_SIGNATURE_EMOJIS_PER_PERSONA})"
-msgstr "Lägg till emoji ({0}/{MAX_SIGNATURE_EMOJIS_PER_PERSONA})"
+msgid "Add Emoji ({0})"
+msgstr "Lägg till emoji ({0})"
 
 msgid "Add Persona"
 msgstr "Add Persona"
@@ -357,6 +357,10 @@ msgstr "Public"
 msgid "Public persona"
 msgstr "Public persona"
 
+#. Title of the modal and context menu item to react as a persona.
+msgid "React as..."
+msgstr "Reagera som..."
+
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "Reagerar som <0>{reactorName}</0>"
 
@@ -398,6 +402,7 @@ msgstr "Saving personas..."
 msgid "Search Results ({0})"
 msgstr "Search Results ({0})"
 
+#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Search personas, tags, pronouns..."
