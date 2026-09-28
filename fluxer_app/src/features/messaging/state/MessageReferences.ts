@@ -66,7 +66,12 @@ class MessageReferences {
 
 	private setCachedMessage(refChannelId: string, refMessageId: string, message: MessageInput): boolean {
 		const key = this.getKey(refChannelId, refMessageId);
-		const nextMessage = new MessageRecord(toWireMessage(message), {missingReactions: 'preserve'});
+		const wire = toWireMessage(message);
+		const existingSubprofile =
+			this.cachedMessages.get(key)?.subprofile ?? Messages.getMessage(refChannelId, refMessageId)?.subprofile;
+		const effectiveWire =
+			wire.subprofile == null && existingSubprofile != null ? {...wire, subprofile: existingSubprofile} : wire;
+		const nextMessage = new MessageRecord(effectiveWire, {missingReactions: 'preserve'});
 		const currentMessage = this.cachedMessages.get(key);
 		if (this.deletedMessageIds.has(key)) {
 			this.deletedMessageIds.delete(key);
@@ -220,13 +225,13 @@ class MessageReferences {
 		if (this.deletedMessageIds.has(key)) {
 			return DELETED_RESOLUTION;
 		}
-		const cachedMessage = this.cachedMessages.get(key);
-		if (cachedMessage) {
-			return {state: MessageReferenceState.LOADED, message: cachedMessage};
-		}
 		const message = Messages.getMessage(channelId, messageId);
 		if (message) {
 			return {state: MessageReferenceState.LOADED, message};
+		}
+		const cachedMessage = this.cachedMessages.get(key);
+		if (cachedMessage) {
+			return {state: MessageReferenceState.LOADED, message: cachedMessage};
 		}
 		return NOT_LOADED_RESOLUTION;
 	}
