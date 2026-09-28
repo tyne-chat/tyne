@@ -222,9 +222,13 @@ export class User {
 		this.bannerColor = hasKey(user, 'banner_color') ? (user.banner_color ?? null) : undefined;
 		this.pronouns = hasKey(user, 'pronouns') ? (user.pronouns ?? null) : undefined;
 		this.accentColor = hasKey(user, 'accent_color') ? (user.accent_color ?? null) : undefined;
-		this.personaId = hasKey(user, 'persona_id')
-			? ((user as any).persona_id ?? null)
-			: ((user as any).subprofile?.id ?? undefined);
+		let personaId: string | null | undefined = (user as any).subprofile?.id ?? undefined;
+		if (hasKey(user, 'persona_id')) {
+			personaId = (user as any).persona_id ?? null;
+		} else if (hasKey(user, 'personaId')) {
+			personaId = (user as any).personaId ?? null;
+		}
+		this.personaId = personaId;
 		this.subprofile = hasKey(user, 'subprofile') ? ((user as any).subprofile ?? null) : undefined;
 		this.timezone = hasKey(user, 'timezone') ? (user.timezone ?? null) : undefined;
 		this.timezonePrivacyFlags = hasKey(user, 'timezone_privacy_flags')
@@ -560,6 +564,10 @@ export class User {
 		if (termsAgreedAt !== undefined) result.terms_agreed_at = dateToIsoOrNull(termsAgreedAt);
 		const privacyAgreedAt = pickDateField(this._privacyAgreedAt, u, 'privacy_agreed_at', opts);
 		if (privacyAgreedAt !== undefined) result.privacy_agreed_at = dateToIsoOrNull(privacyAgreedAt);
+		const personaId = pickField(this.personaId, u as any, 'persona_id' as any, opts);
+		if (personaId !== undefined) (result as any).persona_id = personaId;
+		const subprofile = pickField(this.subprofile, u as any, 'subprofile' as any, opts);
+		if (subprofile !== undefined) (result as any).subprofile = subprofile;
 		result.traits = mergeTraitsArray(this._traits, u, opts);
 		const claimed = pickField(this._claimed, u, 'claimed', opts);
 		if (claimed !== undefined) result.claimed = claimed;
@@ -766,6 +774,8 @@ export class User {
 			this._ageVerifiedAdult === other._ageVerifiedAdult &&
 			datesEqual(this._termsAgreedAt, other._termsAgreedAt) &&
 			datesEqual(this._privacyAgreedAt, other._privacyAgreedAt) &&
+			this.personaId === other.personaId &&
+			subprofilesEqual(this.subprofile, other.subprofile) &&
 			arraysShallowEqual(this._traits, other._traits) &&
 			this._claimed === other._claimed &&
 			this._accountTier === other._accountTier &&
@@ -882,4 +892,22 @@ function datesEqual(a: Date | null | undefined, b: Date | null | undefined): boo
 	const tb = b.getTime();
 	if (Number.isNaN(ta) || Number.isNaN(tb)) return Number.isNaN(ta) && Number.isNaN(tb);
 	return ta === tb;
+}
+
+function subprofilesEqual(
+	a: MessageSubprofileResponse | null | undefined,
+	b: MessageSubprofileResponse | null | undefined,
+): boolean {
+	if (a === b) return true;
+	if (!a || !b) return a === b;
+	return (
+		a.id === b.id &&
+		a.name === b.name &&
+		a.avatar === b.avatar &&
+		a.avatar_color === b.avatar_color &&
+		a.display_tag_text === b.display_tag_text &&
+		a.display_tag_icon === b.display_tag_icon &&
+		a.pronouns === b.pronouns &&
+		a.color === b.color
+	);
 }
