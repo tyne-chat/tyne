@@ -110,7 +110,11 @@ export const AutocompleteEmoji = observer(
 						{emojis.map((option, index) => {
 							return (
 								<AutocompleteItem
-									key={option.emoji.name}
+									key={
+										option.emoji.id
+											? `${option.emoji.guildId}:${option.emoji.id}:${index}`
+											: `${option.emoji.uniqueName ?? option.emoji.name}:${index}`
+									}
 									id={getOptionId?.(index)}
 									name={`:${option.emoji.name}:`}
 									description={
