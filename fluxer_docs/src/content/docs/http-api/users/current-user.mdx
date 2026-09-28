@@ -69,7 +69,7 @@ Modifies the current account and returns the resulting [user](/http-api/users/#u
 | password? | string | Current password (8-256 characters), used as [sudo verification](/http-api/users/mfa/#sudo-mode) proof |
 | avatar?<sup>6</sup> | ?string | Base64-encoded avatar image, or null to clear |
 | banner?<sup>6</sup> <sup>7</sup> | ?string | Base64-encoded banner image, or null to clear |
-| bio?<sup>8</sup> | ?string | Biography (1-320 characters), or null to clear |
+| bio?<sup>8</sup> | ?string | Biography (1-10000 characters), or null to clear |
 | pronouns?<sup>9</sup> | ?string | Pronouns (1-40 characters), or null to clear |
 | accent_color? | ?integer | Packed 24-bit RGB colour (0-16777215), or null to clear |
 | timezone?<sup>10</sup> | ?string | Supported IANA timezone identifier (1-128 characters), or null to clear |
