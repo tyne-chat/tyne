@@ -23,6 +23,7 @@ import {matchSorter} from 'match-sorter';
 
 export const MEMBER_SEARCH_LIMIT = 25;
 export const MENTION_RESULT_LIMIT = 10;
+export const AUTOCOMPLETE_EMOJI_RESULT_LIMIT = 50;
 
 function firstDisplayText(...values: Array<string | null | undefined>): string {
 	for (const value of values) {
@@ -261,9 +262,11 @@ export function buildEmojiReactionOptions(ctx: EmojiReactionContext): Array<Auto
 		return emojiReactionOptionsCache.options;
 	}
 	const hasQuery = query.length > 0;
-	const allEmojis = hasQuery ? Emoji.search(channel, query, 10) : allUnfilteredEmojis;
+	const allEmojis = hasQuery ? Emoji.search(channel, query, AUTOCOMPLETE_EMOJI_RESULT_LIMIT) : allUnfilteredEmojis;
 	const filteredEmojis = filterEmojisForAutocomplete(ctx.i18n, allEmojis, channel);
-	const emojis = hasQuery ? filteredEmojis : EmojiPicker.getFrecentEmojis(filteredEmojis, 10, ranking);
+	const emojis = hasQuery
+		? filteredEmojis
+		: EmojiPicker.getFrecentEmojis(filteredEmojis, AUTOCOMPLETE_EMOJI_RESULT_LIMIT, ranking);
 	const options = emojis.map((emoji) => ({
 		type: 'emoji' as const,
 		emoji,
@@ -329,7 +332,11 @@ function buildEmojiAutocompleteEmojiOptions(
 		return emojiAutocompleteOptionsCache.options;
 	}
 	const allEmojis =
-		showDefaultEmojis || showCustomEmojis ? (hasQuery ? Emoji.search(channel, query, 10) : allUnfilteredEmojis) : [];
+		showDefaultEmojis || showCustomEmojis
+			? hasQuery
+				? Emoji.search(channel, query, AUTOCOMPLETE_EMOJI_RESULT_LIMIT)
+				: allUnfilteredEmojis
+			: [];
 	const permissionFiltered = filterEmojisForAutocomplete(ctx.i18n, allEmojis, channel);
 	const filteredEmojis = permissionFiltered.filter((emoji) => {
 		const isCustom = !!emoji.guildId;
@@ -338,7 +345,7 @@ function buildEmojiAutocompleteEmojiOptions(
 	const emojiResults =
 		hasQuery || !(showDefaultEmojis || showCustomEmojis)
 			? filteredEmojis
-			: EmojiPicker.getFrecentEmojis(filteredEmojis, 5, ranking);
+			: EmojiPicker.getFrecentEmojis(filteredEmojis, AUTOCOMPLETE_EMOJI_RESULT_LIMIT, ranking);
 	const options: Array<AutocompleteOption> = emojiResults.map((emoji) => ({
 		type: 'emoji' as const,
 		emoji,
