@@ -4,6 +4,7 @@ import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHa
 import {HTTP_STATUS} from '@app/api/test/TestConstants';
 import {createBuilder} from '@app/api/test/TestRequestBuilder';
 import {MessageTypes} from '@fluxer/constants/src/ChannelConstants';
+import {DELETED_USER_USERNAME} from '@fluxer/constants/src/UserConstants';
 import {
 	MessageRequestSchema,
 	MessageUpdateRequestSchema,
@@ -11,9 +12,10 @@ import {
 import {type MessageResponse, MessageResponseSchema} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {NatsConnection} from '@nats-io/transport-node';
 import type {INatsConnectionManager} from '@pkgs/nats/src/INatsConnectionManager';
-import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
+import {afterAll, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
 import {createChannelID, createGuildID, createMessageID, createPersonaID, createUserID} from '../../BrandedTypes';
 import {Message} from '../../models/Message';
+import {Persona} from '../../models/Persona';
 import {PersonaRepository} from '../../persona/PersonaRepository';
 import {normalizeMessageSubprofile} from '../services/message/MessageHelpers';
 import {MessageResponseDataService} from '../services/message/MessageResponseDataService';
@@ -23,6 +25,7 @@ const decoder = new TextDecoder();
 
 class FakeConnectionManager implements INatsConnectionManager {
 	readonly payloads: Array<Record<string, unknown>> = [];
+	customResponse?: unknown;
 
 	async connect(): Promise<void> {}
 	async drain(): Promise<void> {}
@@ -35,6 +38,11 @@ class FakeConnectionManager implements INatsConnectionManager {
 			request: async (_subject: string, data: Uint8Array) => {
 				const payload = JSON.parse(decoder.decode(data)) as Record<string, unknown>;
 				this.payloads.push(payload);
+				if (this.customResponse !== undefined) {
+					return {
+						data: encoder.encode(JSON.stringify(this.customResponse)),
+					};
+				}
 				if (payload.op === 'BuildResponses') {
 					const messages = payload.messages as Array<Record<string, unknown>>;
 					return {
@@ -531,5 +539,223 @@ describe('Personal Notes Persona Integration', () => {
 		});
 		expect(singleRes).toBeDefined();
 		expect(singleRes?.content).toBe('single message');
+	});
+
+	it('hydrates persona on referenced_message in buildMessages and listMessages', async () => {
+		const fakeManager = new FakeConnectionManager();
+		const mockPersona = new Persona({
+			user_id: createUserID(30n),
+			persona_id: createPersonaID(999n),
+			name: 'Sneaks',
+			avatar_hash: 'sneaks_hash',
+			banner_hash: null,
+			pronouns: 'they/them',
+			color: 0x123456,
+			avatar_color: null,
+			bio: null,
+			auto_tag_disabled: false,
+			persona_tags: '[]',
+			signature_emojis: '[]',
+			use_count: 5,
+			last_used_at_ms: null,
+			visibility: 'public',
+			external_uuid: null,
+			created_at: new Date(),
+			updated_at: new Date(),
+			deleted_at: null,
+			version: 1,
+		});
+
+		const mockRepo = {
+			findByUserAndPersonaIds: vi
+				.fn()
+				.mockImplementation(async (pairs: Array<{userId: unknown; personaId: unknown}>) => {
+					const map = new Map<string, Persona>();
+					for (const p of pairs) {
+						if (String(p.personaId) === '999') {
+							map.set('999', mockPersona);
+						}
+					}
+					return map;
+				}),
+			findSettingsByUserIds: vi.fn().mockResolvedValue(new Map()),
+		} as unknown as PersonaRepository;
+
+		const service = new MessageResponseDataService(fakeManager, mockRepo);
+
+		fakeManager.customResponse = {
+			FoundApiMany: [
+				{
+					id: '2001',
+					channel_id: '500',
+					author: {id: '40', username: 'replier', discriminator: '0001', avatar: null, flags: 0},
+					type: MessageTypes.DEFAULT,
+					flags: 0,
+					content: 'reply text',
+					timestamp: '2026-01-01T00:00:00.000Z',
+					edited_timestamp: null,
+					pinned: false,
+					mention_everyone: false,
+					tts: false,
+					mentions: [],
+					mention_roles: [],
+					embeds: [],
+					attachments: [],
+					stickers: [],
+					persona_id: null,
+					referenced_message: {
+						id: '1001',
+						channel_id: '500',
+						author: {id: '30', username: 'root_user', discriminator: '0001', avatar: null, flags: 0},
+						type: MessageTypes.DEFAULT,
+						flags: 0,
+						content: 'original text',
+						timestamp: '2026-01-01T00:00:00.000Z',
+						edited_timestamp: null,
+						pinned: false,
+						mention_everyone: false,
+						tts: false,
+						mentions: [],
+						mention_roles: [],
+						embeds: [],
+						attachments: [],
+						stickers: [],
+						persona_id: '999',
+					},
+				},
+			],
+		};
+
+		const messages = await service.listMessages({
+			userId: createUserID(40n),
+			channelId: createChannelID(500n),
+			limit: 10,
+			access: {canReadMessageHistory: true} as any,
+		});
+
+		expect(messages).toHaveLength(1);
+		expect(messages[0].subprofile).toBeNull();
+		expect(messages[0].referenced_message).toBeDefined();
+		expect(messages[0].referenced_message?.subprofile).toEqual(
+			expect.objectContaining({
+				id: '999',
+				name: 'Sneaks',
+				pronouns: 'they/them',
+				color: 0x123456,
+			}),
+		);
+		expect((messages[0].referenced_message as any).persona_id).toBeUndefined();
+	});
+
+	it('hydrates deleted persona and deleted author on referenced_message', async () => {
+		const fakeManager = new FakeConnectionManager();
+		const mockRepo = {
+			findByUserAndPersonaIds: vi.fn().mockResolvedValue(new Map()),
+			findSettingsByUserIds: vi.fn().mockResolvedValue(new Map()),
+		} as unknown as PersonaRepository;
+
+		const service = new MessageResponseDataService(fakeManager, mockRepo);
+
+		fakeManager.customResponse = {
+			FoundApiMany: [
+				{
+					id: '3001',
+					channel_id: '500',
+					author: {id: '40', username: 'replier', discriminator: '0001', avatar: null, flags: 0},
+					type: MessageTypes.DEFAULT,
+					flags: 0,
+					content: 'reply to unknown persona',
+					timestamp: '2026-01-01T00:00:00.000Z',
+					edited_timestamp: null,
+					pinned: false,
+					mention_everyone: false,
+					tts: false,
+					mentions: [],
+					mention_roles: [],
+					embeds: [],
+					attachments: [],
+					stickers: [],
+					persona_id: null,
+					referenced_message: {
+						id: '1002',
+						channel_id: '500',
+						author: {id: '30', username: 'author', discriminator: '0001', avatar: null, flags: 0},
+						type: MessageTypes.DEFAULT,
+						flags: 0,
+						content: 'msg',
+						timestamp: '2026-01-01T00:00:00.000Z',
+						edited_timestamp: null,
+						pinned: false,
+						mention_everyone: false,
+						tts: false,
+						mentions: [],
+						mention_roles: [],
+						embeds: [],
+						attachments: [],
+						stickers: [],
+						persona_id: '888',
+					},
+				},
+				{
+					id: '3002',
+					channel_id: '500',
+					author: {id: '40', username: 'replier', discriminator: '0001', avatar: null, flags: 0},
+					type: MessageTypes.DEFAULT,
+					flags: 0,
+					content: 'reply to deleted author',
+					timestamp: '2026-01-01T00:00:00.000Z',
+					edited_timestamp: null,
+					pinned: false,
+					mention_everyone: false,
+					tts: false,
+					mentions: [],
+					mention_roles: [],
+					embeds: [],
+					attachments: [],
+					stickers: [],
+					persona_id: null,
+					referenced_message: {
+						id: '1003',
+						channel_id: '500',
+						author: {id: '31', username: DELETED_USER_USERNAME, discriminator: '0000', avatar: null, flags: 0},
+						type: MessageTypes.DEFAULT,
+						flags: 0,
+						content: 'msg from deleted user',
+						timestamp: '2026-01-01T00:00:00.000Z',
+						edited_timestamp: null,
+						pinned: false,
+						mention_everyone: false,
+						tts: false,
+						mentions: [],
+						mention_roles: [],
+						embeds: [],
+						attachments: [],
+						stickers: [],
+						persona_id: '777',
+					},
+				},
+			],
+		};
+
+		const messages = await service.listMessages({
+			userId: createUserID(40n),
+			channelId: createChannelID(500n),
+			limit: 10,
+			access: {canReadMessageHistory: true} as any,
+		});
+
+		expect(messages).toHaveLength(2);
+		expect(messages[0].referenced_message?.subprofile).toEqual(
+			expect.objectContaining({
+				id: '888',
+				name: 'Unknown Persona',
+			}),
+		);
+		expect(messages[1].referenced_message?.subprofile).toEqual(
+			expect.objectContaining({
+				id: '777',
+				name: 'Deleted Persona',
+			}),
+		);
 	});
 });
