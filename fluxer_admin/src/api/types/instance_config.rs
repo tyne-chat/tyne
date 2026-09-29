@@ -163,7 +163,6 @@ impl Default for ServerListButtonsConfig {
         }
     }
 }
-}
 
 fn default_guild_create_access() -> bool {
     true
@@ -956,7 +955,6 @@ pub struct ServerListButtonsUpdateRequest {
     pub download: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub help: Option<bool>,
-}
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
