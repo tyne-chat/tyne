@@ -10,10 +10,11 @@ import EmojiPicker from '@app/features/emoji/state/EmojiPicker';
 import ExpressionPicker from '@app/features/emoji/state/ExpressionPicker';
 import Guilds from '@app/features/guild/state/Guilds';
 import {LINK_COPIED_TO_CLIPBOARD_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
+import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import {createDownloadHandler} from '@app/features/messaging/utils/FileDownloadUtils';
 import {PersonaReactAsModal, REACT_AS_DESCRIPTOR} from '@app/features/persona/components/PersonaReactAsModal';
-import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {type ClientPersona, PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {
 	CopyLinkIcon,
 	CopyMediaIcon,
@@ -35,10 +36,26 @@ import {openExternalUrl} from '@app/features/ui/utils/NativeUtils';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
-import {ClipboardIcon, Smiley, StarIcon} from '@phosphor-icons/react';
+import {ClipboardIcon, PushPinIcon, PushPinSlashIcon, Smiley, StarIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useContext} from 'react';
 
+const PIN_EMOJI_DESCRIPTOR = msg({
+	message: 'Pin emoji',
+	comment: 'Emoji context menu action that pins the emoji.',
+});
+const UNPIN_EMOJI_DESCRIPTOR = msg({
+	message: 'Unpin emoji',
+	comment: 'Emoji context menu action that unpins the emoji.',
+});
+const PIN_FOR_PERSONA_DESCRIPTOR = msg({
+	message: 'Pin for this persona',
+	comment: 'Emoji context menu action that pins the emoji for the active persona.',
+});
+const UNPIN_FOR_PERSONA_DESCRIPTOR = msg({
+	message: 'Unpin for this persona',
+	comment: 'Emoji context menu action that unpins the emoji for the active persona.',
+});
 const UNFAVORITE_EMOJI_DESCRIPTOR = msg({
 	message: 'Unfavorite emoji',
 	comment: 'Emoji context menu action that removes the emoji from favorites.',
@@ -95,10 +112,12 @@ interface EmojiContextMenuItemsProps {
 	messageId?: string;
 }
 
-const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void) => {
+const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void, activePersona?: ClientPersona | null) => {
 	const {i18n} = useLingui();
 	const canFavorite = !emoji.id || Boolean(emoji.guildId && Guilds.getGuild(emoji.guildId));
 	const isFavorite = canFavorite ? EmojiPicker.isFavorite(emoji) : false;
+	const isGloballyPinned = EmojiPicker.isGloballyPinned(emoji);
+	const isPersonaPinned = activePersona ? EmojiPicker.isPersonaPinned(emoji, activePersona.id) : false;
 	const originalUrl = emoji.id
 		? AvatarUtils.getEmojiOriginalURL({id: emoji.id, animated: emoji.animated})
 		: (emoji.url ?? null);
@@ -111,6 +130,15 @@ const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void) => {
 	const handleToggleFavorite = useCallback(() => {
 		EmojiPickerCommands.toggleFavorite(emoji);
 	}, [emoji]);
+
+	const handleToggleGlobalPin = useCallback(() => {
+		EmojiPickerCommands.togglePinned(emoji);
+	}, [emoji]);
+
+	const handleTogglePersonaPin = useCallback(() => {
+		if (!activePersona) return;
+		EmojiPickerCommands.togglePinned(emoji, activePersona.id);
+	}, [emoji, activePersona]);
 
 	const handleCopyId = useCallback(() => {
 		if (!emoji.id) return;
@@ -158,12 +186,16 @@ const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void) => {
 	return {
 		canFavorite,
 		isFavorite,
+		isGloballyPinned,
+		isPersonaPinned,
 		originalUrl,
 		copyLabel,
 		downloadLabel,
 		copyLinkLabel,
 		openLinkLabel,
 		handleToggleFavorite,
+		handleToggleGlobalPin,
+		handleTogglePersonaPin,
 		handleCopyId,
 		handleCopyImage,
 		handleDownloadImage,
@@ -184,6 +216,8 @@ export const EmojiContextMenuItems = observer(
 
 		const hasPersonas = PersonaStore.personas.length > 0;
 		const canReactAs = hasPersonas && Boolean(resolvedChannelId && resolvedMessageId);
+		const draft = resolvedChannelId ? Drafts.getDraft(resolvedChannelId) : undefined;
+		const activePersona = PersonaStore.getEffectiveReactionPersona(null, draft);
 
 		const handleReactAs = useCallback(() => {
 			if (!resolvedChannelId || !resolvedMessageId) return;
@@ -204,20 +238,22 @@ export const EmojiContextMenuItems = observer(
 		const {
 			canFavorite,
 			isFavorite,
+			isGloballyPinned,
+			isPersonaPinned,
 			originalUrl,
 			copyLabel,
 			downloadLabel,
 			copyLinkLabel,
 			openLinkLabel,
 			handleToggleFavorite,
+			handleToggleGlobalPin,
+			handleTogglePersonaPin,
 			handleCopyId,
 			handleCopyImage,
 			handleDownloadImage,
 			handleCopyUrl,
 			handleOpenInBrowser,
-		} = useEmojiHandlers(emoji, onClose);
-
-		const shouldShowSecondaryGroup = canFavorite || Boolean(emoji.id);
+		} = useEmojiHandlers(emoji, onClose, activePersona);
 
 		return (
 			<>
@@ -282,46 +318,88 @@ export const EmojiContextMenuItems = observer(
 						</MenuItem>
 					</MenuGroup>
 				)}
-				{shouldShowSecondaryGroup && (
-					<MenuGroup data-flx="ui.action-menu.items.emoji-context-menu-items.menu-group">
-						{canFavorite && (
-							<MenuItem
-								icon={
-									<StarIcon
+				<MenuGroup data-flx="ui.action-menu.items.emoji-context-menu-items.menu-group">
+					<MenuItem
+						icon={
+							isGloballyPinned ? (
+								<PushPinSlashIcon
+									className={styles.iconSmall}
+									weight="bold"
+									data-flx="ui.action-menu.items.emoji-context-menu-items.icon-unpin"
+								/>
+							) : (
+								<PushPinIcon
+									className={styles.iconSmall}
+									weight="bold"
+									data-flx="ui.action-menu.items.emoji-context-menu-items.icon-pin"
+								/>
+							)
+						}
+						onClick={handleToggleGlobalPin}
+						data-flx="ui.action-menu.items.emoji-context-menu-items.menu-item.toggle-pin"
+					>
+						{isGloballyPinned ? i18n._(UNPIN_EMOJI_DESCRIPTOR) : i18n._(PIN_EMOJI_DESCRIPTOR)}
+					</MenuItem>
+					{hasPersonas && activePersona && (
+						<MenuItem
+							icon={
+								isPersonaPinned ? (
+									<PushPinSlashIcon
 										className={styles.iconSmall}
-										weight={isFavorite ? 'fill' : 'bold'}
-										data-flx="ui.action-menu.items.emoji-context-menu-items.icon-small"
+										weight="bold"
+										data-flx="ui.action-menu.items.emoji-context-menu-items.icon-unpin-persona"
 									/>
-								}
-								onClick={handleToggleFavorite}
-								data-flx="ui.action-menu.items.emoji-context-menu-items.menu-item.toggle-favorite"
-							>
-								{isFavorite ? i18n._(UNFAVORITE_EMOJI_DESCRIPTOR) : i18n._(FAVORITE_EMOJI_DESCRIPTOR)}
-							</MenuItem>
-						)}
-						{emoji.id && (
-							<CloneEmojiMenuItem
-								emoji={emoji}
-								onClose={onClose}
-								data-flx="ui.action-menu.items.emoji-context-menu-items.clone-emoji-menu-item"
-							/>
-						)}
-						{emoji.id && (
-							<MenuItem
-								icon={
-									<ClipboardIcon
+								) : (
+									<PushPinIcon
 										className={styles.iconSmall}
-										data-flx="ui.action-menu.items.emoji-context-menu-items.icon-small--2"
+										weight="bold"
+										data-flx="ui.action-menu.items.emoji-context-menu-items.icon-pin-persona"
 									/>
-								}
-								onClick={handleCopyId}
-								data-flx="ui.action-menu.items.emoji-context-menu-items.menu-item.copy-id"
-							>
-								{i18n._(COPY_EMOJI_ID_DESCRIPTOR)}
-							</MenuItem>
-						)}
-					</MenuGroup>
-				)}
+								)
+							}
+							onClick={handleTogglePersonaPin}
+							data-flx="ui.action-menu.items.emoji-context-menu-items.menu-item.toggle-pin-persona"
+						>
+							{isPersonaPinned ? i18n._(UNPIN_FOR_PERSONA_DESCRIPTOR) : i18n._(PIN_FOR_PERSONA_DESCRIPTOR)}
+						</MenuItem>
+					)}
+					{canFavorite && (
+						<MenuItem
+							icon={
+								<StarIcon
+									className={styles.iconSmall}
+									weight={isFavorite ? 'fill' : 'bold'}
+									data-flx="ui.action-menu.items.emoji-context-menu-items.icon-small"
+								/>
+							}
+							onClick={handleToggleFavorite}
+							data-flx="ui.action-menu.items.emoji-context-menu-items.menu-item.toggle-favorite"
+						>
+							{isFavorite ? i18n._(UNFAVORITE_EMOJI_DESCRIPTOR) : i18n._(FAVORITE_EMOJI_DESCRIPTOR)}
+						</MenuItem>
+					)}
+					{emoji.id && (
+						<CloneEmojiMenuItem
+							emoji={emoji}
+							onClose={onClose}
+							data-flx="ui.action-menu.items.emoji-context-menu-items.clone-emoji-menu-item"
+						/>
+					)}
+					{emoji.id && (
+						<MenuItem
+							icon={
+								<ClipboardIcon
+									className={styles.iconSmall}
+									data-flx="ui.action-menu.items.emoji-context-menu-items.icon-small--2"
+								/>
+							}
+							onClick={handleCopyId}
+							data-flx="ui.action-menu.items.emoji-context-menu-items.menu-item.copy-id"
+						>
+							{i18n._(COPY_EMOJI_ID_DESCRIPTOR)}
+						</MenuItem>
+					)}
+				</MenuGroup>
 				{originalUrl && (
 					<ReverseImageSearchMenuItems
 						imageUrl={originalUrl}
@@ -350,6 +428,8 @@ export const EmojiInlineMenuItems = observer(
 
 		const hasPersonas = PersonaStore.personas.length > 0;
 		const canReactAs = hasPersonas && Boolean(resolvedChannelId && resolvedMessageId);
+		const draft = resolvedChannelId ? Drafts.getDraft(resolvedChannelId) : undefined;
+		const activePersona = PersonaStore.getEffectiveReactionPersona(null, draft);
 
 		const handleReactAs = useCallback(() => {
 			if (!resolvedChannelId || !resolvedMessageId) return;
@@ -370,22 +450,22 @@ export const EmojiInlineMenuItems = observer(
 		const {
 			canFavorite,
 			isFavorite,
+			isGloballyPinned,
+			isPersonaPinned,
 			originalUrl,
 			copyLabel,
 			downloadLabel,
 			copyLinkLabel,
 			openLinkLabel,
 			handleToggleFavorite,
+			handleToggleGlobalPin,
+			handleTogglePersonaPin,
 			handleCopyId,
 			handleCopyImage,
 			handleDownloadImage,
 			handleCopyUrl,
 			handleOpenInBrowser,
-		} = useEmojiHandlers(emoji, onClose);
-
-		if (!canFavorite && !emoji.id && !originalUrl && !canReactAs) {
-			return null;
-		}
+		} = useEmojiHandlers(emoji, onClose, activePersona);
 
 		const showSubmenu = Boolean(emoji.id) || Boolean(originalUrl);
 
@@ -429,6 +509,20 @@ export const EmojiInlineMenuItems = observer(
 						data-flx="ui.action-menu.items.emoji-context-menu-items.emoji-inline-menu-items.menu-item.open-in-browser"
 					>
 						{openLinkLabel}
+					</MenuItem>
+				)}
+				<MenuItem
+					onClick={handleToggleGlobalPin}
+					data-flx="ui.action-menu.items.emoji-context-menu-items.emoji-inline-menu-items.menu-item.toggle-pin"
+				>
+					{isGloballyPinned ? i18n._(UNPIN_EMOJI_DESCRIPTOR) : i18n._(PIN_EMOJI_DESCRIPTOR)}
+				</MenuItem>
+				{hasPersonas && activePersona && (
+					<MenuItem
+						onClick={handleTogglePersonaPin}
+						data-flx="ui.action-menu.items.emoji-context-menu-items.emoji-inline-menu-items.menu-item.toggle-pin-persona"
+					>
+						{isPersonaPinned ? i18n._(UNPIN_FOR_PERSONA_DESCRIPTOR) : i18n._(PIN_FOR_PERSONA_DESCRIPTOR)}
 					</MenuItem>
 				)}
 				{canFavorite && (
