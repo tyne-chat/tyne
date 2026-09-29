@@ -398,12 +398,34 @@ class Emoji {
 			seenKeys.add(emojiKey);
 			result.push(emoji);
 		};
+
+		// 1. Globally pinned emojis (highest priority)
+		for (const emojiKey of EmojiPicker.getGloballyPinnedEmojiKeys()) {
+			addEmoji(emojiKey, this.getEmojiByUsageKey(emojiKey));
+			if (result.length >= count) {
+				return result;
+			}
+		}
+
+		// 2. Active persona pinned emojis
+		if (personaId) {
+			for (const emojiKey of EmojiPicker.getPersonaPinnedEmojiKeys(personaId)) {
+				addEmoji(emojiKey, this.getEmojiByUsageKey(emojiKey));
+				if (result.length >= count) {
+					return result;
+				}
+			}
+		}
+
+		// 3. Frequently used emojis
 		for (const emojiKey of EmojiPicker.getFrecentEmojiKeys(0, undefined, personaId)) {
 			addEmoji(emojiKey, this.getEmojiByUsageKey(emojiKey));
 			if (result.length >= count) {
 				return result;
 			}
 		}
+
+		// 4. Default fallback emojis
 		const needed = count - result.length;
 		for (const emojiName of EmojiPicker.getDefaultQuickEmojiNames(needed)) {
 			const emojiKey = `${UNICODE_EMOJI_USAGE_KEY_PREFIX}${emojiName}`;
