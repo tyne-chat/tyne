@@ -254,6 +254,7 @@ export function CompactAuthorPrefix({
 						message={message}
 						guild={guild}
 						member={member}
+						isHovering={isHovering}
 						data-flx="channel.compact-message-layout.compact-author-prefix.persona-tag"
 					/>
 				)}
