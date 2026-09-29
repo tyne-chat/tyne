@@ -280,6 +280,10 @@ msgstr "Only visible to you. Others cannot view this persona’s full bio or pro
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
 
+#. Textarea right-click context menu item that pastes clipboard contents without formatting.
+msgid "Paste as plain text"
+msgstr "Als Nur-Text einfügen"
+
 #. Settings search synonym.
 msgid "Peek"
 msgstr "Vorschau"
