@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import skeletonStyles from '@app/features/app/components/skeleton/Skeleton.module.css';
+import {useAnimatedImageUrl} from '@app/features/app/hooks/useAnimatedImageUrl';
 import Authentication from '@app/features/auth/state/Authentication';
 import * as PrivateChannelCommands from '@app/features/channel/commands/PrivateChannelCommands';
 import type {GuildMember} from '@app/features/member/models/GuildMember';
@@ -145,9 +146,19 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 				: localPersona
 					? (localPersona.banner_hash ?? localPersona.bannerHash ?? null)
 					: ((subprofile as any).banner ?? null);
-		const effectiveBannerUrl = useMemo(() => {
-			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner});
+		const staticBannerUrl = useMemo(() => {
+			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner}, false);
 		}, [user.id, rawBanner]);
+
+		const hoverBannerUrl = useMemo(() => {
+			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner}, true);
+		}, [user.id, rawBanner]);
+
+		const {hoverRef: bannerHoverRef, imageUrl: effectiveBannerUrl} = useAnimatedImageUrl({
+			staticUrl: staticBannerUrl,
+			animatedUrl: hoverBannerUrl,
+			kind: 'gif',
+		});
 
 		const resolvedGuildMember = useMemo(() => {
 			if (guildMember) return guildMember;
@@ -218,8 +229,14 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 
 		const personaAvatarUrl = useMemo(() => {
 			return subprofile.avatar
-				? AvatarUtils.getPersonaAvatarURL({userId: user.id, avatar: subprofile.avatar})
-				: AvatarUtils.getUserAvatarURL(user, false);
+				? AvatarUtils.getPersonaAvatarURL({userId: user.id, avatar: subprofile.avatar}, false, 80)
+				: AvatarUtils.getUserAvatarURL(user, false, 80);
+		}, [subprofile.avatar, user]);
+
+		const hoverPersonaAvatarUrl = useMemo(() => {
+			return subprofile.avatar
+				? AvatarUtils.getPersonaAvatarURL({userId: user.id, avatar: subprofile.avatar}, true, 80)
+				: AvatarUtils.getUserAvatarURL(user, true, 80);
 		}, [subprofile.avatar, user]);
 
 		const handleOpenRootProfile = useCallback(() => {
@@ -278,7 +295,11 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 							style={{paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)'}}
 							data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.div"
 						>
-							<div className={styles.bannerContainer} data-flx="persona.persona-profile-mobile-sheet.banner-container">
+							<div
+								ref={bannerHoverRef}
+								className={styles.bannerContainer}
+								data-flx="persona.persona-profile-mobile-sheet.banner-container"
+							>
 								{effectiveBannerUrl ? (
 									<div
 										className={styles.bannerImage}
@@ -316,6 +337,7 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 										<Avatar
 											user={user}
 											avatarUrl={personaAvatarUrl}
+											hoverAvatarUrl={hoverPersonaAvatarUrl}
 											size={80}
 											disableStatusTooltip
 											data-flx="persona.persona-profile-mobile-sheet.avatar"
