@@ -34,6 +34,10 @@ import {$addUpdateTag, COMMAND_PRIORITY_HIGH, PASTE_COMMAND, PASTE_TAG} from 'le
 import type React from 'react';
 import {useCallback, useEffect} from 'react';
 
+// Fork imports.
+
+import {clearShiftPaste, isShiftPasteActive} from '@app/features/messaging/utils/PlainPasteUtils';
+
 interface UseChannelComposerPasteParams {
 	channel: Channel;
 	attachmentKey: string;
@@ -178,22 +182,28 @@ export function useChannelComposerPaste({
 			}
 			const clipboardData = event.clipboardData;
 			if (clipboardData === null) return false;
+			const isPlainPaste = isShiftPasteActive();
+			const rawPastedText = clipboardData.getData('text/plain');
 			const pastedFiles = getClipboardDataFiles(clipboardData);
-			if (pastedFiles.length > 0) {
+			if (!isPlainPaste && pastedFiles.length > 0) {
 				event.preventDefault();
 				void handlePasteFiles(pastedFiles);
 				return true;
 			}
-			const rawPastedText = clipboardData.getData('text/plain');
 			if (!rawPastedText) {
-				void readClipboardImageFiles().then((files) => {
-					if (files.length > 0) {
-						void handlePasteFiles(files);
-					}
-				});
-				return false;
+				if (!isPlainPaste) {
+					void readClipboardImageFiles().then((files) => {
+						if (files.length > 0) {
+							void handlePasteFiles(files);
+						}
+					});
+					return false;
+				}
+				clearShiftPaste();
+				event.preventDefault();
+				return true;
 			}
-			const serializedComposerSlice = clipboardData.getData(FLUXER_COMPOSER_CLIPBOARD_MIME);
+			const serializedComposerSlice = !isPlainPaste ? clipboardData.getData(FLUXER_COMPOSER_CLIPBOARD_MIME) : '';
 			if (serializedComposerSlice) {
 				const composerSlice = parseComposerClipboardSlice(serializedComposerSlice);
 				const composerWire = composerSlice == null ? null : getComposerClipboardTextPlain(composerSlice);
@@ -201,8 +211,10 @@ export function useChannelComposerPaste({
 					if (composerWire.length > maxMessageLength) {
 						event.preventDefault();
 						void handlePasteExceedsLimit(composerWire);
+						clearShiftPaste();
 						return true;
 					}
+					clearShiftPaste();
 					return false;
 				}
 			}
@@ -210,12 +222,15 @@ export function useChannelComposerPaste({
 			if (pastedText.length > maxMessageLength) {
 				event.preventDefault();
 				void handlePasteExceedsLimit(pastedText);
+				clearShiftPaste();
 				return true;
 			}
 			if (!insertPastedText(pastedText)) {
+				clearShiftPaste();
 				return false;
 			}
 			$addUpdateTag(PASTE_TAG);
+			clearShiftPaste();
 			event.preventDefault();
 			return true;
 		};
@@ -243,7 +258,8 @@ export function useChannelComposerPaste({
 			if (clipboardData === null) {
 				return;
 			}
-			if (getClipboardDataFiles(clipboardData).length > 0) {
+			const isPlainPaste = isShiftPasteActive();
+			if (!isPlainPaste && getClipboardDataFiles(clipboardData).length > 0) {
 				return;
 			}
 			if (!clipboardData.getData('text/plain')) {
