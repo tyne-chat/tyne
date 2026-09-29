@@ -6,7 +6,8 @@ import type {PersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaAp
 import {afterEach, beforeEach, describe, expect, test} from 'vitest';
 import {createTestAccount, type TestAccount} from '../../auth/tests/AuthTestUtils';
 import {createPersonaID, createUserID} from '../../BrandedTypes';
-import {ensureSessionStarted, getMessages} from '../../message/tests/MessageTestUtils';
+import {createFriendship} from '../../channel/tests/ChannelTestUtils';
+import {createDMChannel, ensureSessionStarted, getMessages} from '../../message/tests/MessageTestUtils';
 import {getPersonaRepository, getUserRepository} from '../../middleware/ServiceSingletons';
 import {type ApiTestHarness, createApiTestHarness} from '../../test/ApiTestHarness';
 import {HTTP_STATUS} from '../../test/TestConstants';
@@ -97,6 +98,11 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 	});
 
 	test('anonymizes messages and renders tombstone as Deleted Persona when root account is deleted', async () => {
+		const observer = await createTestAccount(harness);
+		await ensureSessionStarted(harness, observer.token);
+		await createFriendship(harness, account, observer);
+		const dmChannel = await createDMChannel(harness, account.token, observer.userId);
+
 		const persona = await createBuilder<PersonaResponse>(harness, account.token)
 			.post('/users/@me/personas')
 			.body({
@@ -107,7 +113,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 			.execute();
 
 		const sentMessage = await createBuilder<MessageResponse>(harness, account.token)
-			.post(`/channels/${account.userId}/messages`)
+			.post(`/channels/${dmChannel.id}/messages`)
 			.body({
 				content: 'Message before account deletion',
 				subprofile: {id: persona.id, name: persona.name},
@@ -126,7 +132,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 		});
 
 		// Retrieve messages: subprofile must render as Deleted Persona with all PII nulled
-		const messages = await getMessages(harness, account.token, account.userId);
+		const messages = await getMessages(harness, observer.token, dmChannel.id);
 		const fetched = messages.find((m) => m.id === sentMessage.id);
 		expect(fetched).toBeDefined();
 		expect(fetched?.author.username).toBe(DELETED_USER_USERNAME);
