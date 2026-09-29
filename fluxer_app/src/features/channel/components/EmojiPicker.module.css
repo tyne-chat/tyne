@@ -311,6 +311,30 @@
 	border: none;
 	padding: 0;
 	outline: none;
+	position: relative;
+}
+
+.pinnedBadge {
+	position: absolute;
+	top: 0.1875rem;
+	right: 0.1875rem;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	line-height: 0;
+	color: var(--text-secondary);
+	filter: drop-shadow(0 0.0625rem 0.125rem rgba(0, 0, 0, 0.6));
+	pointer-events: none;
+	z-index: 1;
+}
+
+.emojiRenderer:hover .pinnedBadge,
+.emojiRenderer.selectedEmojiRenderer .pinnedBadge {
+	display: flex;
+}
+
+.emojiRenderer:hover .pinnedBadge {
+	color: var(--text-primary);
 }
 
 .emojiRenderer:hover,
