@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import skeletonStyles from '@app/features/app/components/skeleton/Skeleton.module.css';
+import {useHover} from '@app/features/app/hooks/useHover';
 import Authentication from '@app/features/auth/state/Authentication';
 import * as PrivateChannelCommands from '@app/features/channel/commands/PrivateChannelCommands';
 import type {GuildMember} from '@app/features/member/models/GuildMember';
@@ -193,28 +194,51 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			}
 		}, [user.id, onClose]);
 
+		const [cardHoverRef, isCardHovering] = useHover();
+
 		const personaAvatarUrl = useMemo(() => {
 			return subprofile.avatar
-				? AvatarUtils.getPersonaAvatarURL({userId: user.id, avatar: subprofile.avatar})
+				? AvatarUtils.getPersonaAvatarURL({userId: user.id, avatar: subprofile.avatar}, false)
 				: AvatarUtils.getUserAvatarURL(user, false);
 		}, [subprofile.avatar, user]);
+
+		const hoverPersonaAvatarUrl = useMemo(() => {
+			return subprofile.avatar
+				? AvatarUtils.getPersonaAvatarURL({userId: user.id, avatar: subprofile.avatar}, true)
+				: AvatarUtils.getUserAvatarURL(user, true);
+		}, [subprofile.avatar, user]);
+
+		const personaBannerUrl = useMemo(() => {
+			if (subprofile.banner) {
+				return AvatarUtils.getUserBannerURL({id: user.id, banner: subprofile.banner}, false);
+			}
+			return effectiveBannerUrl;
+		}, [subprofile.banner, user.id, effectiveBannerUrl]);
+
+		const hoverPersonaBannerUrl = useMemo(() => {
+			if (subprofile.banner) {
+				return AvatarUtils.getUserBannerURL({id: user.id, banner: subprofile.banner}, true);
+			}
+			return effectiveBannerUrl;
+		}, [subprofile.banner, user.id, effectiveBannerUrl]);
 
 		return (
 			<FocusRingScope containerRef={popoutContainerRef} data-flx="persona.persona-profile-popout.focus-ring-scope">
 				<div ref={popoutContainerRef} data-flx="persona.persona-profile-popout.container">
 					<ProfileCardLayout
 						borderColor={accentColor}
+						hoverRef={cardHoverRef}
 						className={popoutStyles.profilePopoutCard}
 						style={PROFILE_POPOUT_GEOMETRY_STYLE}
 						data-flx="persona.persona-profile-popout.profile-card-layout"
 					>
 						<ProfileCardBanner
-							bannerUrl={effectiveBannerUrl}
-							hoverBannerUrl={null}
+							bannerUrl={personaBannerUrl}
+							hoverBannerUrl={hoverPersonaBannerUrl}
 							bannerColor={accentColor}
 							user={user}
 							avatarUrl={personaAvatarUrl}
-							hoverAvatarUrl={null}
+							hoverAvatarUrl={hoverPersonaAvatarUrl}
 							disablePresence={true}
 							isClickable={false}
 							data-flx="persona.persona-profile-popout.profile-card-banner"
@@ -236,6 +260,7 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 												display_tag_icon: effectiveDisplayTagIcon,
 											}}
 											rootUser={user}
+											isHovering={isCardHovering}
 											data-flx="persona.persona-profile-popout.persona-tag"
 										/>
 									) : undefined
