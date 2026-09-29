@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {useHover} from '@app/features/app/hooks/useHover';
+import {useMergeRefs} from '@app/features/app/hooks/useMergeRefs';
+import {useShouldAnimate} from '@app/features/app/hooks/useShouldAnimate';
 import {useMaybeMessageViewContext} from '@app/features/channel/components/MessageViewContext';
 import {PreloadableUserPopout} from '@app/features/channel/components/PreloadableUserPopout';
 import type {Guild} from '@app/features/guild/models/Guild';
@@ -28,6 +31,7 @@ export const MessagePersonaAccount = observer(
 		className,
 		customIconUrl,
 		tagText,
+		isHovering: forceAnimate,
 	}: {
 		user: User;
 		message: Message;
@@ -39,8 +43,11 @@ export const MessagePersonaAccount = observer(
 		previewName?: string;
 		customIconUrl?: string | null;
 		tagText?: string | null;
+		isHovering?: boolean;
 	}) => {
 		const usernameRef = useRef<HTMLSpanElement | null>(null);
+		const [tagHoverRef, isTagHovering] = useHover();
+		const mergedRef = useMergeRefs([usernameRef, tagHoverRef]);
 		const displayName = NicknameUtils.getNickname(user, guild?.id, message.channelId);
 		const tooltipText = user.username ? `Account: @${user.username}` : undefined;
 		const onPopoutToggle = useMaybeMessageViewContext()?.onPopoutToggle;
@@ -55,11 +62,25 @@ export const MessagePersonaAccount = observer(
 		const keyboardModeEnabled = KeyboardMode.keyboardModeEnabled;
 		if (!message.subprofile) return null;
 
-		const resolvedIconUrl = customIconUrl
+		const staticIconUrl = customIconUrl
 			? customIconUrl.startsWith('http://') || customIconUrl.startsWith('https://') || customIconUrl.startsWith('data:')
 				? customIconUrl
 				: AvatarUtils.getUserAvatarURL({id: user.id, avatar: customIconUrl}, false, 32)
 			: null;
+
+		const hoverIconUrl = customIconUrl
+			? customIconUrl.startsWith('http://') || customIconUrl.startsWith('https://') || customIconUrl.startsWith('data:')
+				? customIconUrl
+				: AvatarUtils.getUserAvatarURL({id: user.id, avatar: customIconUrl}, true, 32)
+			: null;
+
+		const hasDistinctHover = Boolean(hoverIconUrl && hoverIconUrl !== staticIconUrl);
+		const shouldAnimate = useShouldAnimate({
+			kind: 'avatar',
+			isAnimated: hasDistinctHover,
+			isHovering: hasDistinctHover && (isTagHovering || Boolean(forceAnimate)),
+		});
+		const resolvedIconUrl = shouldAnimate ? hoverIconUrl : staticIconUrl;
 
 		return (
 			<PreloadableUserPopout
@@ -86,7 +107,7 @@ export const MessagePersonaAccount = observer(
 						data-guild-id={guild?.id}
 						tabIndex={keyboardModeEnabled ? 0 : undefined}
 						role={keyboardModeEnabled ? 'button' : undefined}
-						ref={usernameRef}
+						ref={mergedRef}
 						onKeyDown={handleKeyDown}
 						data-flx="channel.message-username.context-menu-underline.key-down"
 						aria-label={tooltipText || displayName}
@@ -130,6 +151,7 @@ export const MessagePersonaAccount = observer(
 									className,
 								)}
 								guildId={guild?.id}
+								forceAnimate={Boolean(forceAnimate)}
 								disableStatusTooltip={true}
 								data-flx="channel.user-message.message-avatar-subprofile-main-account"
 							/>
