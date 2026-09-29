@@ -77,9 +77,11 @@ import {getEffectiveContent} from '@app/features/channel/components/MessageActio
 import {COPY_TEXT_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import {CopyMessageTextIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
 import {EmojiContextMenuItems} from '@app/features/ui/action_menu/items/EmojiContextMenuItems';
 import Users from '@app/features/user/state/Users';
+import {PushPinIcon} from '@phosphor-icons/react';
 
 const CLICK_TO_REACT_DESCRIPTOR = msg({
 	message: 'Click to react',
@@ -232,16 +234,30 @@ const QuickReactionButton = observer(
 		const reactorName = hasPersonas
 			? (effectivePersona?.name ?? Users.currentUser?.displayName ?? Users.currentUser?.username)
 			: null;
+		const isPinned = EmojiPicker.isPinned(emoji, effectivePersona?.id);
 		const tooltipContent = useCallback(
 			() => (
 				<div className={styles.tooltipContent} data-flx="channel.message-action-bar.tooltip-content.tooltip-content">
+					{isPinned && (
+						<div
+							className={styles.tooltipPinnedBadge}
+							aria-hidden={true}
+							data-flx="channel.message-action-bar.tooltip-pinned-badge"
+						>
+							<PushPinIcon
+								size={remFromPx(11)}
+								weight="fill"
+								data-flx="channel.message-action-bar.tooltip-content.push-pin-icon"
+							/>
+						</div>
+					)}
 					<span data-flx="channel.message-action-bar.tooltip-content.span">{emojiNameWithColons}</span>
 					<span className={styles.tooltipHint} data-flx="channel.message-action-bar.tooltip-content.tooltip-hint">
 						{reactorName ? i18n._(REACTING_AS_DESCRIPTOR, {name: reactorName}) : i18n._(CLICK_TO_REACT_DESCRIPTOR)}
 					</span>
 				</div>
 			),
-			[reactorName, emojiNameWithColons, i18n],
+			[reactorName, emojiNameWithColons, isPinned, i18n],
 		);
 		const ariaLabel = useMemo(
 			() => i18n._(REACT_WITH_EMOJI_DESCRIPTOR, {emojiShortcode: emojiNameWithColons}),
