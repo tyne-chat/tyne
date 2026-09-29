@@ -679,6 +679,10 @@ export const PINNED_DM_DESCRIPTOR = msg({
 	message: 'Pinned DM',
 	comment: 'Generic short toast / status label confirming a DM was pinned.',
 });
+export const PINNED_EMOJI_INDICATOR_DESCRIPTOR = msg({
+	message: '(pinned)',
+	comment: 'Short indicator shown next to pinned emoji text, for example: :heart: (pinned).',
+});
 export const REACTIONS_DESCRIPTOR = msg({
 	message: 'Reactions',
 	comment: 'Generic short section / tab / aria label for emoji reactions.',
