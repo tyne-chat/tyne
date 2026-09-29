@@ -695,7 +695,7 @@ const getDefaultKeybinds = (
 			action: 'voice_toggle_compact_call_view',
 			label: i18n._(EXPAND_OR_COLLAPSE_COMPACT_CALL_VIEW_DESCRIPTOR),
 			combo: {key: 'v', code: 'KeyV', ctrlOrMeta: true, shift: true},
-			preventDefaultInEditable: true,
+			ignoreWhileTyping: true,
 			assignable: true,
 			section: 'voice_and_video',
 		},

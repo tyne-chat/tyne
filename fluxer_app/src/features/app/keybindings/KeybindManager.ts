@@ -1962,15 +1962,16 @@ class KeybindManager {
 		const target = event.target ?? null;
 		if (shouldSuppressLocalShortcutForModalFocus(entry, target)) return true;
 		if (!isEditableElement(target)) return false;
+		if (entry.ignoreWhileTyping) return true;
 		if (this.shouldAllowLocalShortcutFromEditable(entry, target)) {
 			return false;
 		}
 		if (!hasModifier) return true;
-		if (entry.ignoreWhileTyping) return true;
 		return false;
 	}
 
 	private shouldAllowLocalShortcutFromEditable(entry: RuntimeKeybind, target: HTMLElement): boolean {
+		if (entry.ignoreWhileTyping) return false;
 		if (entry.section === 'voice_and_video') return true;
 		return (
 			isChannelTextareaElement(target) &&
