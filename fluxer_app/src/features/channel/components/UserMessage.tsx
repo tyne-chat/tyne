@@ -535,6 +535,7 @@ export const UserMessage = observer(() => {
 							message={message}
 							guild={guild}
 							member={member ?? undefined}
+							isHovering={isHovering}
 							data-flx="channel.user-message.persona-tag"
 						/>
 					)}
