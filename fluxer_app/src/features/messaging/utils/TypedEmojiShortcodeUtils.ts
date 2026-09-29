@@ -89,10 +89,17 @@ export function resolveTypedEmojiShortcodes({
 			return null;
 		}
 		const emoji = Emoji.findCustomEmojiForShortcode(channel, shortcodeName, guildIdFallback);
-		if (!emoji || !isCustomEmoji(emoji) || !isAvailable(i18n, emoji, channel, guildIdFallback)) {
-			return null;
+		if (emoji && isCustomEmoji(emoji) && isAvailable(i18n, emoji, channel, guildIdFallback)) {
+			return Emoji.getEmojiMarkdown(emoji);
 		}
-		return Emoji.getEmojiMarkdown(emoji);
+		const lowerName = shortcodeName.toLowerCase();
+		if (lowerName !== shortcodeName) {
+			const fallbackUnicode = UnicodeEmojis.findEmojiByShortcodeName(lowerName);
+			if (fallbackUnicode) {
+				return fallbackUnicode.surrogates;
+			}
+		}
+		return null;
 	});
 }
 
@@ -102,25 +109,39 @@ export function resolveTypedEmojiToken(
 	guildIdFallback: string | null,
 	i18n: I18n,
 ): ResolvedTypedEmoji | null {
-	if (UnicodeEmojis.findEmojiByShortcodeName(shortcodeName)) {
-		const emoji = UnicodeEmojis.findEmojiByShortcodeName(shortcodeName);
-		if (!emoji) return null;
+	const exactUnicode = UnicodeEmojis.findEmojiByShortcodeName(shortcodeName);
+	if (exactUnicode) {
 		return {
 			kind: 'standard',
-			name: emoji.uniqueName,
-			surrogate: emoji.surrogates,
-			url: EmojiUtils.getEmojiURL(emoji.surrogates),
-			display: `:${emoji.uniqueName}:`,
+			name: exactUnicode.uniqueName,
+			surrogate: exactUnicode.surrogates,
+			url: EmojiUtils.getEmojiURL(exactUnicode.surrogates),
+			display: `:${exactUnicode.uniqueName}:`,
 		};
 	}
 	if (!CUSTOM_EMOJI_SHORTCODE_NAME_PATTERN.test(shortcodeName)) return null;
 	const emoji = Emoji.findCustomEmojiForShortcode(channel, shortcodeName, guildIdFallback);
-	if (!emoji || !isCustomEmoji(emoji) || !emoji.id || !isAvailable(i18n, emoji, channel, guildIdFallback)) return null;
-	return {
-		kind: 'custom',
-		emojiId: emoji.id,
-		animated: Boolean(emoji.animated),
-		display: `:${shortcodeName}:`,
-		wire: Emoji.getEmojiMarkdown(emoji),
-	};
+	if (emoji && isCustomEmoji(emoji) && emoji.id && isAvailable(i18n, emoji, channel, guildIdFallback)) {
+		return {
+			kind: 'custom',
+			emojiId: emoji.id,
+			animated: Boolean(emoji.animated),
+			display: `:${shortcodeName}:`,
+			wire: Emoji.getEmojiMarkdown(emoji),
+		};
+	}
+	const lowerName = shortcodeName.toLowerCase();
+	if (lowerName !== shortcodeName) {
+		const fallbackUnicode = UnicodeEmojis.findEmojiByShortcodeName(lowerName);
+		if (fallbackUnicode) {
+			return {
+				kind: 'standard',
+				name: fallbackUnicode.uniqueName,
+				surrogate: fallbackUnicode.surrogates,
+				url: EmojiUtils.getEmojiURL(fallbackUnicode.surrogates),
+				display: `:${fallbackUnicode.uniqueName}:`,
+			};
+		}
+	}
+	return null;
 }
