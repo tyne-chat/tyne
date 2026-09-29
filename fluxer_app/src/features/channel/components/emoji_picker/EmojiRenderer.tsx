@@ -24,6 +24,12 @@ import React, {useEffect, useImperativeHandle, useMemo, useRef} from 'react';
 // Fork imports.
 
 import {EmojiPickerReactionContext} from '@app/features/channel/components/EmojiPicker';
+import ExpressionPicker from '@app/features/emoji/state/ExpressionPicker';
+import Drafts from '@app/features/messaging/state/MessagingDrafts';
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
+import {PushPinIcon} from '@phosphor-icons/react';
+import {observer} from 'mobx-react-lite';
 import {useContext} from 'react';
 
 type PickerEmojiImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
@@ -94,7 +100,7 @@ interface EmojiRendererProps {
 	shouldScrollIntoView?: boolean;
 }
 
-export const EmojiRenderer = React.forwardRef<HTMLButtonElement, EmojiRendererProps>(
+const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps>(
 	(
 		{
 			emoji,
@@ -112,6 +118,10 @@ export const EmojiRenderer = React.forwardRef<HTMLButtonElement, EmojiRendererPr
 		const emojiRef = useRef<HTMLButtonElement | null>(null);
 		const {i18n} = useLingui();
 		const reactionContext = useContext(EmojiPickerReactionContext);
+		const resolvedChannelId = reactionContext?.channelId ?? channel?.id ?? ExpressionPicker.channelId ?? undefined;
+		const draft = resolvedChannelId ? Drafts.getDraft(resolvedChannelId) : undefined;
+		const effectivePersona = PersonaStore.getEffectiveReactionPersona(null, draft);
+		const isPinned = EmojiPicker.isPinned(emoji, effectivePersona?.id);
 		useImperativeHandle(forwardedRef, () => emojiRef.current!);
 		useEffect(() => {
 			if (shouldScrollIntoView && emojiRef.current) {
@@ -184,6 +194,19 @@ export const EmojiRenderer = React.forwardRef<HTMLButtonElement, EmojiRendererPr
 						{...props}
 					>
 						{children}
+						{isPinned && (
+							<div
+								className={styles.pinnedBadge}
+								aria-hidden={true}
+								data-flx="channel.emoji-picker.emoji-renderer.pinned-badge"
+							>
+								<PushPinIcon
+									size={remFromPx(10)}
+									weight="fill"
+									data-flx="channel.emoji-picker.emoji-renderer.render-button.push-pin-icon"
+								/>
+							</div>
+						)}
 					</button>
 				</FocusRing>
 			);
@@ -241,5 +264,8 @@ export const EmojiRenderer = React.forwardRef<HTMLButtonElement, EmojiRendererPr
 		);
 	},
 );
+
+// Fork: an observer, so the pin and drag state and the reacting persona stay current.
+export const EmojiRenderer = observer(EmojiRendererBase);
 
 EmojiRenderer.displayName = 'EmojiRenderer';
