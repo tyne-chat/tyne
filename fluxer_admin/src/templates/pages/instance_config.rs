@@ -339,7 +339,11 @@ fn single_community_form(base: &str, csrf_token: &str, policy: &InstancePolicyRe
     }
 }
 
-fn community_creation_form(base: &str, csrf_token: &str, policy: &InstancePolicyResponse) -> Markup {
+fn community_creation_form(
+    base: &str,
+    csrf_token: &str,
+    policy: &InstancePolicyResponse,
+) -> Markup {
     html! {
         div class="space-y-4 border-t border-neutral-200 pt-6" {
             div class="flex flex-wrap items-center gap-2" {
