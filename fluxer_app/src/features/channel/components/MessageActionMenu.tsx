@@ -74,6 +74,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 // Fork imports.
 
 import {CHANGE_PERSONA_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
+import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {ChangePersonasIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
 
@@ -186,7 +187,14 @@ export const useMessageActionMenuData = (
 	const channel = permissions?.channel ?? sourceChannel ?? null;
 	const shouldBuildQuickReactions = permissions?.canAddReactions === true && message.state === MessageStates.SENT;
 	const reactionEmojiLimit = Math.max(quickReactionCount, submenuReactionCount);
-	const reactionEmojis = useQuickReactionEmojis(channel, reactionEmojiLimit, shouldBuildQuickReactions);
+	const draft = channel ? Drafts.getDraft(channel.id) : undefined;
+	const effectivePersona = PersonaStore.getEffectiveReactionPersona(null, draft);
+	const reactionEmojis = useQuickReactionEmojis(
+		channel,
+		reactionEmojiLimit,
+		shouldBuildQuickReactions,
+		effectivePersona?.id,
+	);
 	const quickReactionEmojis = useMemo(
 		() => reactionEmojis.slice(0, quickReactionCount),
 		[reactionEmojis, quickReactionCount],
