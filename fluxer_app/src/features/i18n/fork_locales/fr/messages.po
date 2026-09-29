@@ -10,6 +10,10 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Préfixe : {0})"
 
+#. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
+msgid "(pinned)"
+msgstr "(épinglé)"
+
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "Compte : @{username}"
@@ -325,6 +329,14 @@ msgstr "Visibilité de la persona"
 msgid "Personas"
 msgstr "Personas"
 
+#. Emoji context menu action that pins the emoji.
+msgid "Pin emoji"
+msgstr "Épingler l'émoji"
+
+#. Emoji context menu action that pins the emoji for the active persona.
+msgid "Pin for this persona"
+msgstr "Épingler pour cette persona"
+
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
 msgstr "Préfixe (ex. [)"
@@ -514,6 +526,14 @@ msgstr "Total des membres"
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Non répertorié"
+
+#. Emoji context menu action that unpins the emoji.
+msgid "Unpin emoji"
+msgstr "Désépingler l'émoji"
+
+#. Emoji context menu action that unpins the emoji for the active persona.
+msgid "Unpin for this persona"
+msgstr "Désépingler pour cette persona"
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."

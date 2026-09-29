@@ -101,6 +101,7 @@ export function useQuickReactionEmojis(
 	personaId?: string | null,
 ): QuickReactionSnapshot {
 	const [ready, setReady] = useState(dependencies != null);
+	const [epoch, setEpoch] = useState(cacheEpoch);
 	useEffect(() => {
 		if (!enabled || ready) {
 			return undefined;
@@ -115,9 +116,17 @@ export function useQuickReactionEmojis(
 			live = false;
 		};
 	}, [enabled, ready]);
+	useEffect(() => {
+		if (!ready || !dependencies) {
+			return undefined;
+		}
+		return dependencies.ComponentBus.subscribe('EMOJI_PICKER_RERENDER', () => {
+			setEpoch((e) => e + 1);
+		});
+	}, [ready]);
 	const normalizedCount = Math.max(0, Math.floor(count));
 	const active = enabled && ready && normalizedCount > 0;
-	const pinKey = `${active}:${channel?.id ?? ''}:${normalizedCount}:${personaId ?? ''}`;
+	const pinKey = `${active}:${channel?.id ?? ''}:${normalizedCount}:${personaId ?? ''}:${cacheEpoch}:${epoch}`;
 	const pinned = useRef<{key: string; value: QuickReactionSnapshot} | null>(null);
 	if (pinned.current?.key !== pinKey) {
 		pinned.current = {
