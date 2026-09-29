@@ -208,12 +208,21 @@ class EmojiGuildRegistry {
 	}
 
 	getCustomEmojiByShortcodeName(guildId: string | null | undefined, emojiName: string): GuildEmoji | undefined {
-		const lowerName = emojiName.toLowerCase();
-		const {baseName, disambiguationIndex} = parseCustomEmojiShortcodeName(lowerName);
-		const orderedMatches = this.getCustomEmojiNameMatches(guildId, baseName);
+		const {baseName, disambiguationIndex} = parseCustomEmojiShortcodeName(emojiName);
+		const lowerBaseName = baseName.toLowerCase();
+		const orderedMatches = this.getCustomEmojiNameMatches(guildId, lowerBaseName);
 		if (orderedMatches.length === 0) return undefined;
-		const unicodeNameCount = getBaseUnicodeEmojiIndex().nameCounts.get(baseName) ?? 0;
-		const targetIndex = disambiguationIndex === null ? -unicodeNameCount : disambiguationIndex - unicodeNameCount;
+
+		if (disambiguationIndex === null) {
+			const exactMatch = orderedMatches.find((emoji) => emoji.name === baseName);
+			if (exactMatch) return exactMatch;
+		}
+
+		const hasUnicodeCollision =
+			baseName === lowerBaseName && (getBaseUnicodeEmojiIndex().nameCounts.get(lowerBaseName) ?? 0) > 0;
+		const unicodeOffset = hasUnicodeCollision ? 1 : 0;
+		const targetIndex =
+			disambiguationIndex === null ? (hasUnicodeCollision ? -1 : 0) : disambiguationIndex - unicodeOffset;
 		return targetIndex >= 0 ? orderedMatches[targetIndex] : undefined;
 	}
 
