@@ -59,7 +59,7 @@ if [ "$SKIP_BUILD" = false ]; then
 
   if [ "$BUILD_ALL" = true ]; then
     echo "🔨 Building all ${#ALL_SERVICES[@]} custom Fluxer microservices from source (${ALL_SERVICES[*]})..."
-    docker compose -f "$BUILD_COMPOSE" build "${ALL_SERVICES[@]}"
+    COMPOSE_BAKE=true docker compose -f "$BUILD_COMPOSE" build "${ALL_SERVICES[@]}"
   else
     UPSTREAM_REF="upstream/main"
     if ! git rev-parse --verify "$UPSTREAM_REF" >/dev/null 2>&1; then
@@ -108,7 +108,7 @@ if [ "$SKIP_BUILD" = false ]; then
 
     if [ ${#SERVICES_TO_BUILD[@]} -gt 0 ]; then
       echo "🔨 Building custom Fluxer microservices from source (${SERVICES_TO_BUILD[*]})..."
-      docker compose -f "$BUILD_COMPOSE" build "${SERVICES_TO_BUILD[@]}"
+      COMPOSE_BAKE=true docker compose -f "$BUILD_COMPOSE" build "${SERVICES_TO_BUILD[@]}"
     fi
   fi
   echo "✅ Docker images ready."
