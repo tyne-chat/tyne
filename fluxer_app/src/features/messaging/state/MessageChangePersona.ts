@@ -1,24 +1,34 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {Channel} from '@app/features/channel/models/Channel';
-import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
+import {type ClientPersona, normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
+import type {PersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {
+	MessageSubprofileRequest,
+	MessageSubprofileResponse,
+} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
 import {compareStructural, makeAutoObservable, reaction} from 'mobx';
 import * as MessageCommands from '../commands/MessageCommands';
 import type {Message} from '../models/MessagingMessage';
 import {buildExistingAttachmentEditReferences} from '../utils/MessageEditContentUtils';
 
-export interface PersonaPayloadSource {
-	id: string;
-	name: string;
-	avatar_hash?: string | null;
-	avatarHash?: string | null;
-	banner_hash?: string | null;
-	bannerHash?: string | null;
-	color?: number | null;
-	bio?: string | null;
-	pronouns?: string | null;
-}
+export type PersonaPayloadSource =
+	| PersonaResponse
+	| ClientPersona
+	| MessageSubprofileResponse
+	| {
+			id: string;
+			name: string;
+			avatar_hash?: string | null;
+			avatarHash?: string | null;
+			avatar_color?: number | null;
+			avatarColor?: number | null;
+			banner_hash?: string | null;
+			bannerHash?: string | null;
+			color?: number | null;
+			bio?: string | null;
+			pronouns?: string | null;
+	  };
 
 class MessageChangePersona {
 	private editingMessageIds: Record<string, string> = {};
@@ -28,18 +38,10 @@ class MessageChangePersona {
 	}
 
 	buildSubprofilePayload(persona: PersonaPayloadSource): MessageSubprofileRequest {
-		return {
-			id: persona.id,
-			name: persona.name,
-			avatar: persona.avatar_hash ?? persona.avatarHash ?? null,
-			banner: persona.banner_hash ?? persona.bannerHash ?? null,
-			avatar_color: persona.color ?? null,
-			color: persona.color ?? null,
+		return normalizeSubprofile(persona as any, {
 			display_tag_text: PersonaStore.displayTagText || null,
 			display_tag_icon: PersonaStore.displayTagIcon || null,
-			bio: persona.bio ?? null,
-			pronouns: persona.pronouns ?? null,
-		};
+		});
 	}
 
 	startChangePersona(channelId: string, messageId: string): void {
