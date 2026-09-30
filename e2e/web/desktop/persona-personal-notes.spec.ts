@@ -32,7 +32,7 @@ test.describe('Personal Notes Persona Integration', () => {
 		// 2. Log in and navigate to Personal Notes (@me/userId)
 		await loginAs(page, email, password);
 
-		const personalNotesUrl = `/channels/@me/${auth.user.id}`;
+		const personalNotesUrl = `/channels/@me/${auth.user!.id}`;
 		await page.goto(personalNotesUrl);
 
 		// Verify Personal Notes channel is loaded
