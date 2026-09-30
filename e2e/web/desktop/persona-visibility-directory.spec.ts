@@ -55,7 +55,7 @@ test.describe('Persona Visibility & Public Directory Integration', () => {
 		});
 
 		// Stranger should be rejected with 403 Forbidden due to lack of mutual context
-		await expect(strangerClient.getPublicPersonas(bobAuth.user.id)).rejects.toThrow(/403/);
+		await expect(strangerClient.getPublicPersonas(bobAuth.user!.id)).rejects.toThrow(/403/);
 
 		// 3. Create Alice (Mutual Guild Member with Bob)
 		const aliceEmail = `vis_alice_${timestamp}@test.local`;
@@ -93,7 +93,7 @@ test.describe('Persona Visibility & Public Directory Integration', () => {
 		}
 
 		// 4. Test Public Directory (Alice querying Bob's directory)
-		const publicDirectory = await aliceClient.getPublicPersonas(bobAuth.user.id);
+		const publicDirectory = await aliceClient.getPublicPersonas(bobAuth.user!.id);
 		// Only 'public' personas should appear in directory
 		expect(publicDirectory.some((p) => p.id === bobPublic.id)).toBe(true);
 		expect(publicDirectory.some((p) => p.id === bobUnlisted.id)).toBe(false);
@@ -101,17 +101,17 @@ test.describe('Persona Visibility & Public Directory Integration', () => {
 
 		// 5. Test Direct Card Lookup by Persona ID
 		// Public: Accessible with bio
-		const publicCard = await aliceClient.getPublicPersona(bobAuth.user.id, bobPublic.id);
+		const publicCard = await aliceClient.getPublicPersona(bobAuth.user!.id, bobPublic.id);
 		expect(publicCard.name).toBe('Bob-Public');
 		expect(publicCard.bio).toBe(`Public bio [${timestamp}]`);
 
 		// Unlisted: Accessible via direct link/lookup (e.g. clicking a chat message)
-		const unlistedCard = await aliceClient.getPublicPersona(bobAuth.user.id, bobUnlisted.id);
+		const unlistedCard = await aliceClient.getPublicPersona(bobAuth.user!.id, bobUnlisted.id);
 		expect(unlistedCard.name).toBe('Bob-Unlisted');
 		expect(unlistedCard.bio).toBe(`Unlisted bio [${timestamp}]`);
 
 		// Private: Completely hidden from other users (returns 404)
-		await expect(aliceClient.getPublicPersona(bobAuth.user.id, bobPrivate.id)).rejects.toThrow(/404/);
+		await expect(aliceClient.getPublicPersona(bobAuth.user!.id, bobPrivate.id)).rejects.toThrow(/404/);
 
 		// Owner (Bob) can still access their private persona via self-endpoint
 		const ownerPersonas = await bobClient.getPersonas();
