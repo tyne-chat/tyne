@@ -7,6 +7,15 @@ export function shouldAutoAck(c: {
 	textChatVisible: boolean;
 	manualAck: boolean;
 	blockingModalOpen: boolean;
+	afk?: boolean;
 }): boolean {
-	return c.channelActive && c.windowFocused && c.atBottom && c.textChatVisible && !c.manualAck && !c.blockingModalOpen;
+	return (
+		c.channelActive &&
+		c.windowFocused &&
+		c.atBottom &&
+		c.textChatVisible &&
+		!c.manualAck &&
+		!c.blockingModalOpen &&
+		!c.afk
+	);
 }
