@@ -1,9 +1,35 @@
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
 import {expect, test} from '@playwright/test';
 import {FluxerApiClient} from '../../api-helpers/client.js';
 import {loginAs} from '../support/auth.js';
 
+function readSeed(): Record<string, string> {
+	const content = readFileSync(resolve(process.cwd(), '.env.test'), 'utf-8');
+	const seed: Record<string, string> = {};
+	for (const line of content.split('\n')) {
+		const match = /^([A-Z0-9_]+)=(.*)$/.exec(line.trim());
+		if (match) seed[match[1]] = match[2];
+	}
+	return seed;
+}
+
 test.describe('Personal Notes Persona Integration', () => {
 	const baseURL = process.env.E2E_BASE_URL || 'http://localhost:9188';
+	const seed = readSeed();
+
+	// Personal notes are off by default on a self-hosted instance (upstream's #3634), which the e2e
+	// stack is; Alice, the seed's first account, is its admin.
+	const setPersonalNotes = async (enabled: boolean) => {
+		const response = await fetch(`${baseURL}/api/v1/admin/instance/config`, {
+			method: 'PATCH',
+			headers: {'Content-Type': 'application/json', Authorization: seed.E2E_ALICE_TOKEN},
+			body: JSON.stringify({policy: {personal_notes_enabled: enabled}}),
+		});
+		if (!response.ok) throw new Error(`Setting personal notes failed (${response.status}): ${await response.text()}`);
+	};
+	test.beforeAll(() => setPersonalNotes(true));
+	test.afterAll(() => setPersonalNotes(false));
 
 	test('user can send and manage persona-attributed messages in personal notes self-channel', async ({
 		page,
@@ -32,7 +58,7 @@ test.describe('Personal Notes Persona Integration', () => {
 		// 2. Log in and navigate to Personal Notes (@me/userId)
 		await loginAs(page, email, password);
 
-		const personalNotesUrl = `/channels/@me/${auth.user.id}`;
+		const personalNotesUrl = `/channels/@me/${auth.user!.id}`;
 		await page.goto(personalNotesUrl);
 
 		// Verify Personal Notes channel is loaded
