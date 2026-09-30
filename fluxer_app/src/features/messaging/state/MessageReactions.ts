@@ -232,21 +232,7 @@ class MessageReactionsManager {
 		}
 	}
 
-	handlePersonaUpdate(persona: {
-		id: string;
-		name: string;
-		avatar?: string | null;
-		avatar_hash?: string | null;
-		avatar_color?: number | null;
-		banner?: string | null;
-		banner_hash?: string | null;
-		display_tag_text?: string | null;
-		display_tag_icon?: string | null;
-		pronouns?: string | null;
-		color?: number | null;
-		bio?: string | null;
-		visibility?: any;
-	}): boolean {
+	handlePersonaUpdate(persona: MessageSubprofileResponse): boolean {
 		if (!persona?.id) return false;
 		let hasChanges = false;
 		this.batch(() => {
