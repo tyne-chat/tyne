@@ -18,6 +18,7 @@ interface TrustedClientIpHeaderOptions {
 
 const defaultExemptPaths: Array<string> = [
 	'/_health',
+	'/.well-known',
 	'/webhooks/livekit',
 	'/test',
 	'/connections/bluesky/client-metadata.json',
