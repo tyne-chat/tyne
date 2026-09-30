@@ -717,39 +717,29 @@ class Messages {
 		return hasChanges;
 	}
 
-	handlePersonaUpdate(action: {
-		persona: {
-			id: string;
-			name: string;
-			avatar?: string | null;
-			avatar_color?: number | null;
-			banner?: string | null;
-			display_tag_text?: string | null;
-			display_tag_icon?: string | null;
-			pronouns?: string | null;
-			color?: number | null;
-			bio?: string | null;
-			visibility?: any;
-		};
-	}): boolean {
+	handlePersonaUpdate(action: {persona: MessageSubprofileResponse}): boolean {
 		const persona = action.persona;
 		if (!persona?.id) return false;
+
 		const hasChanges = this.patchPersonaMessages(persona.id, (message) => {
 			if (!message.subprofile || message.subprofile.id !== persona.id) {
 				return message;
 			}
+			const current = message.subprofile;
 			const updatedSubprofile: MessageSubprofileResponse = {
 				id: persona.id,
 				name: persona.name,
-				avatar: persona.avatar ?? null,
-				avatar_color: persona.avatar_color ?? null,
-				banner: persona.banner ?? null,
-				display_tag_text: persona.display_tag_text ?? null,
-				display_tag_icon: persona.display_tag_icon ?? null,
-				pronouns: persona.pronouns ?? null,
-				color: persona.color ?? null,
-				bio: persona.bio ?? null,
-				visibility: persona.visibility,
+				avatar: persona.avatar !== undefined ? persona.avatar : (current.avatar ?? null),
+				avatar_color: persona.avatar_color !== undefined ? persona.avatar_color : (current.avatar_color ?? null),
+				banner: persona.banner !== undefined ? persona.banner : (current.banner ?? null),
+				display_tag_text:
+					persona.display_tag_text !== undefined ? persona.display_tag_text : (current.display_tag_text ?? null),
+				display_tag_icon:
+					persona.display_tag_icon !== undefined ? persona.display_tag_icon : (current.display_tag_icon ?? null),
+				pronouns: persona.pronouns !== undefined ? persona.pronouns : (current.pronouns ?? null),
+				color: persona.color !== undefined ? persona.color : (current.color ?? null),
+				bio: persona.bio !== undefined ? persona.bio : (current.bio ?? null),
+				visibility: persona.visibility !== undefined ? persona.visibility : current.visibility,
 			};
 			return message.withUpdates({subprofile: updatedSubprofile});
 		});

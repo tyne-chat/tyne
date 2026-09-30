@@ -39,6 +39,62 @@ export interface ClientPersona extends PersonaResponse {
 
 export type Persona = ClientPersona;
 
+/**
+ * Normalizes any persona representation (API PersonaResponse, MobX ClientPersona,
+ * or existing snapshot) into a canonical MessageSubprofileResponse snapshot.
+ */
+export function normalizeSubprofile(
+	input: PersonaResponse | ClientPersona | MessageSubprofileResponse,
+	overrides?: {display_tag_text?: string | null; display_tag_icon?: string | null},
+): MessageSubprofileResponse {
+	const source = input as any;
+	// Avatar hash:
+	// - avatar_hash: REST API PersonaResponse schema
+	// - avatarHash: MobX ClientPersona camelCase alias
+	// - avatar: MessageSubprofileResponse snapshot schema
+	const avatar =
+		source.avatar_hash !== undefined
+			? source.avatar_hash
+			: source.avatarHash !== undefined
+				? source.avatarHash
+				: source.avatar;
+
+	// Banner hash:
+	// - banner_hash: REST API PersonaResponse schema
+	// - bannerHash: MobX ClientPersona camelCase alias
+	// - banner: MessageSubprofileResponse snapshot schema
+	const banner =
+		source.banner_hash !== undefined
+			? source.banner_hash
+			: source.bannerHash !== undefined
+				? source.bannerHash
+				: source.banner;
+
+	// Avatar dominant color:
+	// - avatar_color: REST API PersonaResponse & MessageSubprofileResponse
+	// - avatarColor: MobX ClientPersona camelCase alias
+	const avatarColor = source.avatar_color !== undefined ? source.avatar_color : source.avatarColor;
+
+	// Persona accent/profile color:
+	// - color: REST API PersonaResponse & MessageSubprofileResponse
+	// - accentColor: MobX ClientPersona camelCase alias
+	const color = source.color !== undefined ? source.color : source.accentColor;
+
+	return {
+		id: source.id,
+		name: source.name,
+		avatar,
+		avatar_color: avatarColor,
+		banner,
+		display_tag_text: overrides?.display_tag_text !== undefined ? overrides.display_tag_text : source.display_tag_text,
+		display_tag_icon: overrides?.display_tag_icon !== undefined ? overrides.display_tag_icon : source.display_tag_icon,
+		pronouns: source.pronouns,
+		color,
+		bio: source.bio,
+		visibility: source.visibility,
+	};
+}
+
 let personaIdCounter = 0;
 
 export function normalizePersona(
@@ -149,18 +205,10 @@ export class PersonaStoreClass {
 	getKnownPersona(personaId: string): MessageSubprofileResponse | null {
 		const own = this.getPersona(personaId);
 		if (own) {
-			return {
-				id: own.id,
-				name: own.name,
-				avatar: own.avatar_hash ?? own.avatarHash ?? null,
-				avatar_color: own.color ?? null,
-				banner: own.banner_hash ?? own.bannerHash ?? null,
+			return normalizeSubprofile(own, {
 				display_tag_text: this.displayTagText || null,
 				display_tag_icon: this.displayTagIcon || null,
-				pronouns: own.pronouns ?? null,
-				color: own.color ?? null,
-				bio: own.bio ?? null,
-			};
+			});
 		}
 		return this._knownPersonas.get(personaId) ?? null;
 	}
@@ -183,19 +231,7 @@ export class PersonaStoreClass {
 		try {
 			const res = await http.get<any>(Endpoints.USER_PUBLIC_PERSONA(userId, personaId));
 			if (res.ok && res.body) {
-				const body = res.body as any;
-				const subprofile: MessageSubprofileResponse = {
-					id: body.id,
-					name: body.name,
-					avatar: body.avatar_hash ?? body.avatar ?? null,
-					avatar_color: body.color ?? null,
-					banner: body.banner_hash ?? body.banner ?? null,
-					display_tag_text: body.display_tag_text ?? null,
-					display_tag_icon: body.display_tag_icon ?? null,
-					pronouns: body.pronouns ?? null,
-					color: body.color ?? null,
-					bio: body.bio ?? null,
-				};
+				const subprofile = normalizeSubprofile(res.body);
 				this.recordKnownPersona(subprofile);
 				return subprofile;
 			}
@@ -237,18 +273,13 @@ export class PersonaStoreClass {
 			}
 			this._personas = [...this._personas];
 			if (this._knownPersonas.has(normalized.id)) {
-				this._knownPersonas.set(normalized.id, {
-					id: normalized.id,
-					name: normalized.name,
-					avatar: normalized.avatar_hash ?? normalized.avatarHash ?? null,
-					avatar_color: normalized.color ?? null,
-					banner: normalized.banner_hash ?? normalized.bannerHash ?? null,
-					display_tag_text: this.displayTagText || null,
-					display_tag_icon: this.displayTagIcon || null,
-					pronouns: normalized.pronouns ?? null,
-					color: normalized.color ?? null,
-					bio: normalized.bio ?? null,
-				});
+				this._knownPersonas.set(
+					normalized.id,
+					normalizeSubprofile(normalized, {
+						display_tag_text: this.displayTagText || null,
+						display_tag_icon: this.displayTagIcon || null,
+					}),
+				);
 			}
 		});
 	}
@@ -757,17 +788,10 @@ export class PersonaStoreClass {
 		if (result.matched && result.persona) {
 			return {
 				finalContent: result.strippedContent,
-				subprofile: {
-					id: result.persona.id,
-					name: result.persona.name,
-					avatar: result.persona.avatar_hash ?? null,
-					avatar_color: result.persona.color ?? null,
-					banner: result.persona.banner_hash ?? null,
+				subprofile: normalizeSubprofile(result.persona as any, {
 					display_tag_text: this.displayTagText || null,
 					display_tag_icon: this.displayTagIcon || null,
-					pronouns: result.persona.pronouns ?? null,
-					color: result.persona.color ?? null,
-				},
+				}),
 			};
 		}
 
@@ -775,17 +799,7 @@ export class PersonaStoreClass {
 		if (currentSubprofile) {
 			return {
 				finalContent: content,
-				subprofile: {
-					id: currentSubprofile.id,
-					name: currentSubprofile.name,
-					avatar: currentSubprofile.avatar ?? null,
-					avatar_color: currentSubprofile.avatar_color ?? null,
-					banner: currentSubprofile.banner ?? null,
-					display_tag_text: currentSubprofile.display_tag_text ?? null,
-					display_tag_icon: currentSubprofile.display_tag_icon ?? null,
-					pronouns: currentSubprofile.pronouns ?? null,
-					color: currentSubprofile.color ?? null,
-				},
+				subprofile: normalizeSubprofile(currentSubprofile),
 			};
 		}
 		return {
@@ -798,19 +812,10 @@ export class PersonaStoreClass {
 		if (!this._isPersonaLatched) return null;
 		const active = this.activePersona;
 		if (!active) return null;
-		return {
-			id: active.id,
-			name: active.name,
-			avatar: active.avatar_hash ?? active.avatarHash ?? null,
-			avatar_color: active.color ?? active.accentColor ?? null,
-			banner: active.banner_hash ?? active.bannerHash ?? null,
-			color: active.color ?? active.accentColor ?? null,
-			display_tag_text: this._displayTagText || null,
-			display_tag_icon: this._displayTagIcon || null,
-			pronouns: active.pronouns ?? null,
-			bio: active.bio ?? null,
-			visibility: active.visibility ?? null,
-		};
+		return normalizeSubprofile(active, {
+			display_tag_text: this.displayTagText || null,
+			display_tag_icon: this.displayTagIcon || null,
+		});
 	}
 }
 
