@@ -51,21 +51,65 @@ if [ ! -f "$BUILD_COMPOSE" ] && [ -f "$REPO_DIR/docker-compose.build.yml" ]; the
 fi
 
 if [ "$SKIP_BUILD" = false ]; then
+  ALL_SERVICES=($(docker compose -f "$BUILD_COMPOSE" config --services 2>/dev/null || true))
+  if [ ${#ALL_SERVICES[@]} -eq 0 ]; then
+    # Fallback to standard services if compose query fails
+    ALL_SERVICES=(api app-proxy messages gateway static-proxy snowflakes users media-proxy)
+  fi
+
   if [ "$BUILD_ALL" = true ]; then
-    echo "🔨 Building all 8 custom Fluxer microservices from source..."
-    docker compose -f "$BUILD_COMPOSE" build \
-      api app-proxy messages gateway static-proxy snowflakes users media-proxy
+    echo "🔨 Building all ${#ALL_SERVICES[@]} custom Fluxer microservices from source (${ALL_SERVICES[*]})..."
+    docker compose -f "$BUILD_COMPOSE" build "${ALL_SERVICES[@]}"
   else
-    echo "📥 Pulling upstream base images for auxiliary services with no custom changes..."
-    for svc in snowflakes users media-proxy gateway; do
-      echo "  Checking / pulling ghcr.io/fluxerapp/fluxer-${svc}:v1..."
-      docker pull "ghcr.io/fluxerapp/fluxer-${svc}:v1" --quiet || true
-      docker tag "ghcr.io/fluxerapp/fluxer-${svc}:v1" "fluxer-custom/fluxer-${svc}:bleeding-edge" || true
+    UPSTREAM_REF="upstream/main"
+    if ! git rev-parse --verify "$UPSTREAM_REF" >/dev/null 2>&1; then
+      UPSTREAM_REF="origin/main"
+    fi
+
+    # Core subprofile services are always built from source
+    CORE_SERVICES="api app-proxy messages static-proxy"
+    SERVICES_TO_BUILD=()
+    SERVICES_TO_PULL=()
+
+    echo "🔍 Inspecting microservices for local changes against $UPSTREAM_REF..."
+    for svc in "${ALL_SERVICES[@]}"; do
+      if [[ " $CORE_SERVICES " =~ " $svc " ]]; then
+        SERVICES_TO_BUILD+=("$svc")
+        continue
+      fi
+
+      src_dir="fluxer_${svc//-/_}"
+      if [ "$svc" = "static-proxy" ]; then
+        src_dir="fluxer_static"
+      fi
+
+      if git rev-parse --verify "$UPSTREAM_REF" >/dev/null 2>&1 && ! git diff --quiet "$UPSTREAM_REF...HEAD" -- "$src_dir" 2>/dev/null; then
+        echo "  ⚡ Service '$svc': changes detected in $src_dir vs $UPSTREAM_REF -> building from source."
+        SERVICES_TO_BUILD+=("$svc")
+      else
+        SERVICES_TO_PULL+=("$svc")
+      fi
     done
 
-    echo "🔨 Building custom subprofile microservices from source (api, app-proxy, messages, static-proxy)..."
-    docker compose -f "$BUILD_COMPOSE" build \
-      api app-proxy messages static-proxy
+    if [ ${#SERVICES_TO_PULL[@]} -gt 0 ]; then
+      echo "📥 Pulling upstream base images for services without local modifications (${SERVICES_TO_PULL[*]})..."
+      for svc in "${SERVICES_TO_PULL[@]}"; do
+        upstream_img="ghcr.io/fluxerapp/fluxer-${svc}:v1"
+        target_img="fluxer-custom/fluxer-${svc}:bleeding-edge"
+        echo "  Checking / pulling $upstream_img..."
+        if docker pull "$upstream_img" --quiet; then
+          docker tag "$upstream_img" "$target_img"
+        else
+          echo "  ⚠️ Upstream image $upstream_img pull failed; falling back to building '$svc' from source."
+          SERVICES_TO_BUILD+=("$svc")
+        fi
+      done
+    fi
+
+    if [ ${#SERVICES_TO_BUILD[@]} -gt 0 ]; then
+      echo "🔨 Building custom Fluxer microservices from source (${SERVICES_TO_BUILD[*]})..."
+      docker compose -f "$BUILD_COMPOSE" build "${SERVICES_TO_BUILD[@]}"
+    fi
   fi
   echo "✅ Docker images ready."
 else
