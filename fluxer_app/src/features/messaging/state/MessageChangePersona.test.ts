@@ -160,6 +160,7 @@ describe('MessageChangePersona', () => {
 				name: 'Bob the Fox',
 				avatar_hash: 'bob_avatar_hash',
 				banner_hash: 'bob_banner_hash',
+				avatar_color: 654321,
 				color: 123456,
 				bio: 'Fox bio',
 				pronouns: 'he/him',
@@ -170,12 +171,13 @@ describe('MessageChangePersona', () => {
 				name: 'Bob the Fox',
 				avatar: 'bob_avatar_hash',
 				banner: 'bob_banner_hash',
-				avatar_color: 123456,
+				avatar_color: 654321,
 				color: 123456,
 				display_tag_text: 'TESTING SYSTEM',
 				display_tag_icon: 'https://example.com/icon.png',
 				bio: 'Fox bio',
 				pronouns: 'he/him',
+				visibility: undefined,
 			});
 		});
 
