@@ -21,6 +21,10 @@ import Window from '@app/features/window/state/Window';
 import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {makeAutoObservable, reaction} from 'mobx';
 
+// Fork imports.
+
+import LocalPresence from '@app/features/presence/state/LocalPresence';
+
 const logger = new Logger('AutoAck');
 
 class AutoAck {
@@ -64,7 +68,8 @@ class AutoAck {
 						activeVoiceCallFullscreenScopeKey: VoiceCallFullscreen.activeScopeKey,
 					});
 					const isMediaViewerOpen = MediaViewer.isOpen;
-					const canAutoAck = !ackedManually && isWindowFocused && isTextChatVisible && !isMediaViewerOpen;
+					const isAfk = LocalPresence.afk;
+					const canAutoAck = !ackedManually && isWindowFocused && !isAfk && isTextChatVisible && !isMediaViewerOpen;
 					return {windowId, channelId, isAtBottom, canAutoAck};
 				},
 				(conditions) => {
