@@ -73,6 +73,10 @@ import {observer, useLocalObservable} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 
+// Fork imports.
+
+import LocalPresence from '@app/features/presence/state/LocalPresence';
+
 const MESSAGE_LIST_FOR_DESCRIPTOR = msg({
 	message: 'Message list for {channelName}',
 	comment: 'Label in the channel and chat messages. Preserve {channelName}; it is inserted by code.',
@@ -210,6 +214,7 @@ const CachedMessages = observer(function CachedMessages({channel, allowAutoAck =
 		textChatVisible: true,
 		manualAck: state.ackedManually,
 		blockingModalOpen: isModalOpen || MediaViewer.isOpen,
+		afk: LocalPresence.afk,
 	});
 	const jumpHighlightTimeoutRef = useRef<number | null>(null);
 	const lastJumpSequenceKeyRef = useRef<string | null>(null);
