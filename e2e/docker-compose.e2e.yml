@@ -59,7 +59,7 @@ x-e2e-env: &e2e-env
 
   FLUXER_DISABLE_RATE_LIMITS: "true"
   FLUXER_RELAX_REGISTRATION_RATE_LIMITS: "true"
-  FLUXER_TEST_MODE_ENABLED: "false"
+  FLUXER_TEST_MODE_ENABLED: "true"
   FLUXER_INSTANCE_SETUP_CONFIGURED: "true"
 
   FLUXER_SUDO_MODE_SECRET: "e2e-sudo-mode-secret-minimum-32-chars-long"
