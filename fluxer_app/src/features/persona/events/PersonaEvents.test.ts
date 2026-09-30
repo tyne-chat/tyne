@@ -32,7 +32,7 @@ vi.mock('@app/features/messaging/state/MessagingMessages', () => ({
 
 installVoiceMenuTestBootstrap();
 
-const {PersonaStore} = await import('../state/PersonaStore');
+const {normalizeSubprofile, PersonaStore} = await import('../state/PersonaStore');
 const {
 	handleGuildPersonasDirty,
 	handleUserPersonaCreate,
@@ -217,8 +217,9 @@ describe('PersonaEvents', () => {
 
 		handleUserPersonaUpdate(samplePersona, mockContext);
 
-		expect(reactionsSpy).toHaveBeenCalledWith(samplePersona);
-		expect(messagesSpy).toHaveBeenCalledWith({persona: samplePersona});
+		const expectedSubprofile = normalizeSubprofile(samplePersona);
+		expect(reactionsSpy).toHaveBeenCalledWith(expectedSubprofile);
+		expect(messagesSpy).toHaveBeenCalledWith({persona: expectedSubprofile});
 	});
 
 	it('handles GUILD_PERSONAS_DIRTY action update by recording known persona and notifying Messages and MessageReactions', () => {
@@ -234,9 +235,10 @@ describe('PersonaEvents', () => {
 			mockContext,
 		);
 
-		expect(PersonaStore.getKnownPersona(samplePersona.id)).toEqual(samplePersona);
-		expect(reactionsSpy).toHaveBeenCalledWith(samplePersona);
-		expect(messagesSpy).toHaveBeenCalledWith({persona: samplePersona});
+		const expectedSubprofile = normalizeSubprofile(samplePersona);
+		expect(PersonaStore.getKnownPersona(samplePersona.id)).toEqual(expectedSubprofile);
+		expect(reactionsSpy).toHaveBeenCalledWith(expectedSubprofile);
+		expect(messagesSpy).toHaveBeenCalledWith({persona: expectedSubprofile});
 	});
 
 	it('handles GUILD_PERSONAS_DIRTY author display tag update by notifying Messages and MessageReactions', () => {
