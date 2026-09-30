@@ -38,7 +38,7 @@ vi.mock('@app/features/platform/transport/RestTransport', () => ({
 
 installVoiceMenuTestBootstrap();
 
-const {PersonaStoreClass, normalizePersona} = await import('./PersonaStore');
+const {PersonaStoreClass, normalizePersona, normalizeSubprofile} = await import('./PersonaStore');
 type PersonaStoreInstance = InstanceType<typeof PersonaStoreClass>;
 
 describe('PersonaStore', () => {
@@ -741,6 +741,120 @@ describe('PersonaStore', () => {
 			// 3. Fallback to active persona
 			const forFallback = store.getEffectiveReactionPersona({name: '⭐'}, 'plain text without tag');
 			expect(forFallback?.id).toBe('p_active');
+		});
+	});
+
+	describe('normalizeSubprofile', () => {
+		it('normalizes REST API PersonaResponse with snake_case hashes', () => {
+			const subprofile = normalizeSubprofile({
+				id: 'persona_api_1',
+				name: 'Alice Api',
+				avatar_hash: 'api_avatar_hash_123',
+				banner_hash: 'api_banner_hash_456',
+				avatar_color: 0x112233,
+				color: 0x445566,
+				bio: 'Api bio',
+				pronouns: 'she/her',
+				visibility: 'public',
+			} as any);
+
+			expect(subprofile).toEqual({
+				id: 'persona_api_1',
+				name: 'Alice Api',
+				avatar: 'api_avatar_hash_123',
+				avatar_color: 0x112233,
+				banner: 'api_banner_hash_456',
+				display_tag_text: undefined,
+				display_tag_icon: undefined,
+				pronouns: 'she/her',
+				color: 0x445566,
+				bio: 'Api bio',
+				visibility: 'public',
+			});
+		});
+
+		it('normalizes MobX ClientPersona with camelCase aliases (avatarColor and accentColor)', () => {
+			const subprofile = normalizeSubprofile({
+				id: 'persona_client_1',
+				name: 'Bob Client',
+				avatarHash: 'client_avatar_hash_789',
+				bannerHash: 'client_banner_hash_012',
+				avatarColor: 0x112233,
+				accentColor: 0x778899,
+				bio: 'Client bio',
+				pronouns: 'he/him',
+				visibility: 'unlisted',
+			} as any);
+
+			expect(subprofile).toEqual({
+				id: 'persona_client_1',
+				name: 'Bob Client',
+				avatar: 'client_avatar_hash_789',
+				avatar_color: 0x112233,
+				banner: 'client_banner_hash_012',
+				display_tag_text: undefined,
+				display_tag_icon: undefined,
+				pronouns: 'he/him',
+				color: 0x778899,
+				bio: 'Client bio',
+				visibility: 'unlisted',
+			});
+		});
+
+		it('normalizes wire MessageSubprofileResponse snapshot and applies display tag overrides', () => {
+			const subprofile = normalizeSubprofile(
+				{
+					id: 'persona_snapshot_1',
+					name: 'Charlie Snapshot',
+					avatar: 'snapshot_avatar_val',
+					banner: 'snapshot_banner_val',
+					avatar_color: 0x990011,
+					color: 0x223344,
+					display_tag_text: 'OLD_TAG',
+					display_tag_icon: 'https://cdn.example.com/old.png',
+					pronouns: 'they/them',
+					bio: 'Snapshot bio',
+					visibility: 'private',
+				},
+				{
+					display_tag_text: 'NEW_TAG',
+					display_tag_icon: null,
+				},
+			);
+
+			expect(subprofile).toEqual({
+				id: 'persona_snapshot_1',
+				name: 'Charlie Snapshot',
+				avatar: 'snapshot_avatar_val',
+				avatar_color: 0x990011,
+				banner: 'snapshot_banner_val',
+				display_tag_text: 'NEW_TAG',
+				display_tag_icon: null,
+				pronouns: 'they/them',
+				color: 0x223344,
+				bio: 'Snapshot bio',
+				visibility: 'private',
+			});
+		});
+
+		it('preserves undefined for unprovided fields to prevent stomping existing message properties', () => {
+			const subprofile = normalizeSubprofile({
+				id: 'partial_1',
+				name: 'Partial Persona',
+				avatar_hash: 'new_hash_only',
+			} as any);
+
+			expect(subprofile.id).toBe('partial_1');
+			expect(subprofile.name).toBe('Partial Persona');
+			expect(subprofile.avatar).toBe('new_hash_only');
+			expect(subprofile.avatar_color).toBeUndefined();
+			expect(subprofile.banner).toBeUndefined();
+			expect(subprofile.display_tag_text).toBeUndefined();
+			expect(subprofile.display_tag_icon).toBeUndefined();
+			expect(subprofile.pronouns).toBeUndefined();
+			expect(subprofile.color).toBeUndefined();
+			expect(subprofile.bio).toBeUndefined();
+			expect(subprofile.visibility).toBeUndefined();
 		});
 	});
 });
