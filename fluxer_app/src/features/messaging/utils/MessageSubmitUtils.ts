@@ -18,6 +18,7 @@ import type {
 
 // Fork imports.
 
+import {normalizeSubprofile} from '@app/features/persona/state/PersonaStore';
 import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 interface MessageSubmitData {
@@ -67,20 +68,7 @@ export function createOptimisticMessage(data: MessageSubmitData, attachments: Ar
 		nonce: data.nonce,
 		attachments,
 		_allowedMentions: data.referencedMessage ? {replied_user: data.replyMentioning ?? true} : undefined,
-		subprofile: data.subprofile
-			? {
-					id: data.subprofile.id,
-					name: data.subprofile.name,
-					avatar: data.subprofile.avatar ?? null,
-					avatar_color: data.subprofile.avatar_color ?? null,
-					display_tag_text: data.subprofile.display_tag_text ?? null,
-					display_tag_icon: data.subprofile.display_tag_icon ?? null,
-					pronouns: data.subprofile.pronouns ?? null,
-					color: data.subprofile.color ?? null,
-					bio: data.subprofile.bio ?? null,
-					visibility: data.subprofile.visibility ?? null,
-				}
-			: null,
+		subprofile: data.subprofile ? normalizeSubprofile(data.subprofile) : null,
 	});
 }
 

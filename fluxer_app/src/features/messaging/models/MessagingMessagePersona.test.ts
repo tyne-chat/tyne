@@ -319,7 +319,7 @@ describe('MessagingMessage Persona Preservation', () => {
 				},
 			});
 			const liveMsg = new Message(liveWire, {skipUserCache: true});
-			vi.spyOn(ChannelMessages, 'getOrCreate').mockReturnValue({
+			const spy = vi.spyOn(ChannelMessages, 'getOrCreate').mockReturnValue({
 				get: (mId: string) => (mId === refMsgId ? liveMsg : undefined),
 			} as any);
 
@@ -344,6 +344,113 @@ describe('MessagingMessage Persona Preservation', () => {
 			if (resolution.state === MessageReferenceState.LOADED) {
 				expect(resolution.message.subprofile?.name).toBe('Bob the Fox');
 			}
+			spy.mockRestore();
+		});
+	});
+
+	describe('Messages.handlePersonaUpdate & normalizeSubprofile', () => {
+		const channelId = '1546500000000000002';
+		const messageId = '1546500000000000099';
+		const personaId = 'sub-test-persona';
+
+		it('normalizes API PersonaResponse (avatar_hash) and updates message subprofile', async () => {
+			const {default: Messages} = await import('@app/features/messaging/state/MessagingMessages');
+			const {normalizeSubprofile} = await import('@app/features/persona/state/PersonaStore');
+			const wire = createWireMessage({
+				id: messageId,
+				channel_id: channelId,
+				subprofile: {
+					id: personaId,
+					name: 'Original Name',
+					avatar: 'orig_hash',
+					display_tag_text: 'ORIG_TAG',
+					pronouns: 'they/them',
+					color: 0x112233,
+					bio: 'bio text',
+				},
+			});
+			(Messages as any).commitMessages(ChannelMessages.getOrCreate(channelId).applyIncomingMessage(wire, false));
+
+			const subprofile = normalizeSubprofile({
+				id: personaId,
+				name: 'Updated Name',
+				avatar_hash: 'new_api_avatar_hash',
+			} as any);
+
+			expect(subprofile.avatar).toBe('new_api_avatar_hash');
+
+			const updated = Messages.handlePersonaUpdate({persona: subprofile});
+
+			expect(updated).toBe(true);
+			const channelMessages = ChannelMessages.get(channelId);
+			const msg = channelMessages?.get(messageId);
+			expect(msg?.subprofile?.name).toBe('Updated Name');
+			expect(msg?.subprofile?.avatar).toBe('new_api_avatar_hash');
+			expect(msg?.subprofile?.display_tag_text).toBe('ORIG_TAG');
+			expect(msg?.subprofile?.pronouns).toBe('they/them');
+		});
+
+		it('normalizes client ClientPersona (avatarHash) and updates message subprofile', async () => {
+			const {default: Messages} = await import('@app/features/messaging/state/MessagingMessages');
+			const {normalizeSubprofile} = await import('@app/features/persona/state/PersonaStore');
+			const wire = createWireMessage({
+				id: messageId,
+				channel_id: channelId,
+				subprofile: {
+					id: personaId,
+					name: 'Original Name',
+					avatar: 'orig_hash',
+					display_tag_text: 'ORIG_TAG',
+				},
+			});
+			(Messages as any).commitMessages(ChannelMessages.getOrCreate(channelId).applyIncomingMessage(wire, false));
+
+			const subprofile = normalizeSubprofile({
+				id: personaId,
+				name: 'Client Updated',
+				avatarHash: 'new_client_avatar_hash',
+			} as any);
+
+			expect(subprofile.avatar).toBe('new_client_avatar_hash');
+
+			const updated = Messages.handlePersonaUpdate({persona: subprofile});
+
+			expect(updated).toBe(true);
+			const channelMessages = ChannelMessages.get(channelId);
+			const msg = channelMessages?.get(messageId);
+			expect(msg?.subprofile?.name).toBe('Client Updated');
+			expect(msg?.subprofile?.avatar).toBe('new_client_avatar_hash');
+		});
+
+		it('updates message subprofile from snapshot MessageSubprofileResponse directly', async () => {
+			const {default: Messages} = await import('@app/features/messaging/state/MessagingMessages');
+			const wire = createWireMessage({
+				id: messageId,
+				channel_id: channelId,
+				subprofile: {
+					id: personaId,
+					name: 'Original Name',
+					avatar: 'orig_hash',
+				},
+			});
+			(Messages as any).commitMessages(ChannelMessages.getOrCreate(channelId).applyIncomingMessage(wire, false));
+
+			const updated = Messages.handlePersonaUpdate({
+				persona: {
+					id: personaId,
+					name: 'Snapshot Updated',
+					avatar: 'new_snapshot_avatar',
+					avatar_color: null,
+					pronouns: null,
+					color: null,
+				},
+			});
+
+			expect(updated).toBe(true);
+			const channelMessages = ChannelMessages.get(channelId);
+			const msg = channelMessages?.get(messageId);
+			expect(msg?.subprofile?.name).toBe('Snapshot Updated');
+			expect(msg?.subprofile?.avatar).toBe('new_snapshot_avatar');
 		});
 	});
 });
