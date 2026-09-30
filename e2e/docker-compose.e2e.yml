@@ -354,6 +354,12 @@ services:
       PUBLIC_BOOTSTRAP_API_ENDPOINT: /api
       PUBLIC_BOOTSTRAP_API_PUBLIC_ENDPOINT: http://localhost:9188/api
       FLUXER_CSP_EXTRA_CONNECT_SRC: "http://localhost:9188 http://127.0.0.1:9188 ws://localhost:9188 ws://127.0.0.1:9188"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/_ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+      start_period: 5s
     depends_on:
       api: { condition: service_healthy }
       edge: { condition: service_healthy }
