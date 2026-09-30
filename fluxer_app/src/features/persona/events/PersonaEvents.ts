@@ -9,7 +9,7 @@ import {
 import MessageReactions from '@app/features/messaging/state/MessageReactions';
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import type {PersonaResponse, PersonaSettingsResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {PersonaStore} from '../state/PersonaStore';
+import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 
 type PersonaPayload = {persona: PersonaResponse} | PersonaResponse;
 type PersonaDeletePayload = {persona_id: string} | {id: string};
@@ -28,8 +28,9 @@ export function handleUserPersonaUpdate(data: PersonaPayload, _context: GatewayH
 	if (persona?.id) {
 		PersonaStore.upsertPersona(persona);
 		clearPersonaMentionCache();
-		Messages.handlePersonaUpdate({persona});
-		MessageReactions.handlePersonaUpdate(persona);
+		const subprofile = normalizeSubprofile(persona);
+		Messages.handlePersonaUpdate({persona: subprofile});
+		MessageReactions.handlePersonaUpdate(subprofile);
 	}
 }
 
@@ -51,8 +52,9 @@ export function handleUserPersonasUpdate(data: PersonasPayload, _context: Gatewa
 		PersonaStore.setPersonas(personas);
 		clearPersonaMentionCache();
 		for (const p of personas) {
-			Messages.handlePersonaUpdate({persona: p});
-			MessageReactions.handlePersonaUpdate(p);
+			const subprofile = normalizeSubprofile(p);
+			Messages.handlePersonaUpdate({persona: subprofile});
+			MessageReactions.handlePersonaUpdate(subprofile);
 		}
 	}
 }
@@ -94,11 +96,15 @@ export function handleGuildPersonasDirty(
 		| undefined,
 	_context: GatewayHandlerContext,
 ): void {
+	if (data?.user_id && data.user_id === Authentication.currentUserId) {
+		return;
+	}
 	invalidatePersonaMentionCache(data?.guild_id);
 	if (data?.persona && data?.action === 'update') {
-		PersonaStore.recordKnownPersona(data.persona);
-		Messages.handlePersonaUpdate({persona: data.persona});
-		MessageReactions.handlePersonaUpdate(data.persona);
+		const subprofile = normalizeSubprofile(data.persona);
+		PersonaStore.recordKnownPersona(subprofile);
+		Messages.handlePersonaUpdate({persona: subprofile});
+		MessageReactions.handlePersonaUpdate(subprofile);
 	}
 	if (data?.user_id && (data?.display_tag_text !== undefined || data?.display_tag_icon !== undefined)) {
 		Messages.handleAuthorDisplayTagUpdate({
