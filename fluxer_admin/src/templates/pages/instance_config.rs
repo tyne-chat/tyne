@@ -281,7 +281,7 @@ fn policy_config_section(
         html! {
             div class="space-y-8" {
                 (single_community_form(base, csrf_token, policy))
-                (community_creation_form(base, csrf_token, policy))
+                (community_creation_staff_only_form(base, csrf_token, policy))
                 (direct_messages_form(base, csrf_token, policy))
                 (server_list_buttons_form(base, csrf_token, policy))
                 (premium_mode_form(base, csrf_token, policy, premium_name, billing_enabled))
@@ -339,7 +339,7 @@ fn single_community_form(base: &str, csrf_token: &str, policy: &InstancePolicyRe
     }
 }
 
-fn community_creation_form(
+fn community_creation_staff_only_form(
     base: &str,
     csrf_token: &str,
     policy: &InstancePolicyResponse,
@@ -347,7 +347,7 @@ fn community_creation_form(
     html! {
         div class="space-y-4 border-t border-neutral-200 pt-6" {
             div class="flex flex-wrap items-center gap-2" {
-                h3 class="text-sm font-semibold text-neutral-900" { "Community creation" }
+                h3 class="text-sm font-semibold text-neutral-900" { "Community creation (Staff only)" }
                 @if policy.community_creation_staff_only {
                     (badge("Staff only", BadgeVariant::Warning))
                 } @else {
