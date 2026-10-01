@@ -80,11 +80,12 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		// Wait for the message to load
 		const messageLocator = page.locator('[data-flx*="message-content"]').filter({hasText: messageText}).first();
 		await expect(messageLocator).toBeVisible({timeout: 20_000});
+		const messageArticle = page.locator('role=article').filter({has: messageLocator}).first();
 
 		// 6. Hover over the message to reveal the message action bar
 		await messageLocator.hover();
 
-		const quickReactionBtn = page.locator('button[aria-label*="React with" i]').first();
+		const quickReactionBtn = messageArticle.locator('button[aria-label*="React with" i]').first();
 		await expect(quickReactionBtn).toBeVisible({timeout: 10_000});
 
 		// 7. Right-click the quick reaction button to open the EmojiContextMenu
@@ -109,7 +110,7 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		await expect(reactAsModal).toBeHidden({timeout: 5_000});
 
 		// 11. Verify reaction button appears on the message
-		const reactionButton = page
+		const reactionButton = messageArticle
 			.locator('button[data-flx*="channel.message-reactions.message-reaction-item.reaction-button"]')
 			.first();
 		await expect(reactionButton).toBeVisible({timeout: 10_000});
@@ -124,8 +125,8 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		// 13. React as Bob-Beta using second quick reaction button
 		await page.mouse.move(0, 0);
 		await messageLocator.hover();
-		const secondQuickReactionBtn = page.locator('button[aria-label*="React with" i]').nth(1);
-		await expect(secondQuickReactionBtn).toBeVisible({timeout: 5_000});
+		const secondQuickReactionBtn = messageArticle.locator('button[aria-label*="React with" i]').nth(1);
+		await expect(secondQuickReactionBtn).toBeVisible({timeout: 10_000});
 		await secondQuickReactionBtn.click({button: 'right'});
 
 		await expect(reactAsMenuItem).toBeVisible({timeout: 5_000});
@@ -137,7 +138,7 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		await expect(reactAsModal).toBeHidden({timeout: 5_000});
 
 		// 14. Verify second reaction appears
-		const allReactionButtons = page.locator(
+		const allReactionButtons = messageArticle.locator(
 			'button[data-flx*="channel.message-reactions.message-reaction-item.reaction-button"]',
 		);
 		await expect(allReactionButtons).toHaveCount(2, {timeout: 10_000});
