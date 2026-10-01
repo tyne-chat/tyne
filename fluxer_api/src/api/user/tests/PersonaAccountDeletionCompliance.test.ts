@@ -402,6 +402,8 @@ describe('Persona Account Deletion Compliance', () => {
 				deleteAllReadStates: vi.fn().mockResolvedValue(undefined),
 				deleteAllSavedMessages: vi.fn().mockResolvedValue(undefined),
 				deleteAllAuthSessions: vi.fn().mockResolvedValue(undefined),
+				listAuthSessions: vi.fn().mockResolvedValue([]),
+				deleteAuthSessionsByIdHash: vi.fn().mockResolvedValue(undefined),
 				deleteAllMfaBackupCodes: vi.fn().mockResolvedValue(undefined),
 				deleteAllWebAuthnCredentials: vi.fn().mockResolvedValue(undefined),
 				deleteAllPushSubscriptions: vi.fn().mockResolvedValue(undefined),
@@ -462,6 +464,7 @@ describe('Persona Account Deletion Compliance', () => {
 				applicationRepository: mockAppRepo,
 				workerService: mockWorkerService,
 				connectionRepository: mockConnectionRepo,
+				storeEntitlementService: {stopBillingForDeletedUser: vi.fn()},
 			};
 
 			await processUserDeletion(userId, scheduledAt, 1, deps);
