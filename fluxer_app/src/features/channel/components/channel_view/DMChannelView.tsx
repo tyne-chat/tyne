@@ -537,6 +537,7 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 					) : isMemberListPeeking ? (
 						<div
 							className={styles.memberListOverlay}
+							data-peek-drawer="right"
 							data-flx="channel.channel-view.dm-channel-view.member-list-overlay"
 						>
 							<ChannelMembers channel={channel} data-flx="channel.channel-view.dm-channel-view.channel-members--peek" />
