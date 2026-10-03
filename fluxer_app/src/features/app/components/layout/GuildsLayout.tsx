@@ -2276,7 +2276,11 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 				<GuildList key="guild-list" data-flx="app.guilds-layout.guild-list" />
 			)}
 			{!isVoiceCallFullscreenActive && isLeftSidebarPeeking && (
-				<div className={styles.guildListOverlay} data-flx="app.guilds-layout.guild-list-overlay">
+				<div
+					className={styles.guildListOverlay}
+					data-peek-drawer="left"
+					data-flx="app.guilds-layout.guild-list-overlay"
+				>
 					<GuildList key="guild-list-peek" data-flx="app.guilds-layout.guild-list" />
 				</div>
 			)}
@@ -2322,6 +2326,7 @@ export const GuildsLayout = observer(({children}: {children: React.ReactNode}) =
 						isUserAreaHidden && styles.userAreaWrapperHidden,
 						isLeftSidebarPeeking && styles.userAreaWrapperPeeking,
 					)}
+					data-peek-drawer={isLeftSidebarPeeking ? 'left' : undefined}
 					data-flx="app.guilds-layout.user-area-wrapper"
 				>
 					<UserArea user={user} data-flx="app.guilds-layout.user-area" />

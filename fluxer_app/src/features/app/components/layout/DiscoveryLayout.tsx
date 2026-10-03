@@ -45,7 +45,11 @@ export const DiscoveryLayout = observer(function DiscoveryLayout() {
 					/>
 				)}
 				{isChannelListPeeking && (
-					<div className={styles.guildSidebarOverlay} data-flx="app.discovery-layout.guild-sidebar-overlay">
+					<div
+						className={styles.guildSidebarOverlay}
+						data-peek-drawer="left"
+						data-flx="app.discovery-layout.guild-sidebar-overlay"
+					>
 						<GuildSidebar
 							header={<DiscoveryGuildHeader data-flx="app.discovery-layout.discovery-guild-header--peek" />}
 							content={<DiscoverySidebar data-flx="app.discovery-layout.discovery-sidebar--peek" />}
