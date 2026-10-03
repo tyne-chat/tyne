@@ -693,7 +693,11 @@ export const GuildLayout = observer(({children}: {children: React.ReactNode}) =>
 				>
 					{isChannelListOpen && <GuildNavbar guild={guild!} data-flx="app.guild-layout.guild-navbar--3" />}
 					{isChannelListPeeking && (
-						<div className={styles.guildSidebarOverlay} data-flx="app.guild-layout.guild-sidebar-overlay">
+						<div
+							className={styles.guildSidebarOverlay}
+							data-peek-drawer="left"
+							data-flx="app.guild-layout.guild-sidebar-overlay"
+						>
 							<GuildNavbar guild={guild!} data-flx="app.guild-layout.guild-navbar--peek" />
 						</div>
 					)}
