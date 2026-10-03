@@ -2,9 +2,11 @@
 
 import MemberList from '@app/features/member/state/MemberList';
 import styles from '@app/features/ui/components/EdgeProximitySensor.module.css';
+import ContextMenuState from '@app/features/ui/state/ContextMenu';
+import LayerManager from '@app/features/ui/state/LayerManager';
 import LayoutState from '@app/features/ui/state/LayoutState';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
-import SidebarWidth, {SIDEBAR_WIDTH_DEFAULT} from '@app/features/ui/state/SidebarWidth';
+import {canUseWindowFocusedHoverControls} from '@app/features/ui/utils/WindowFocusInteractionGuard';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useRef} from 'react';
@@ -12,6 +14,38 @@ import {useCallback, useEffect, useRef} from 'react';
 const INTENT_DELAY_MS = 60;
 const CURSOR_WIDTH_PX = 18;
 const RETRACT_GRACE_MS = 80;
+
+/**
+ * Returns true if the pointer is over (or within CURSOR_WIDTH_PX of) any element tagged
+ * `data-peek-drawer="<side>"`. Uses live DOM measurement so it is correct at any zoom level,
+ * sidebar width, or theme without hardcoded layout dimensions.
+ *
+ * @param targetEl The pointer event target when available. When omitted (e.g. on timer expiry,
+ *   where the drawer may have animated under a stationary cursor) a fresh hit test is performed.
+ */
+function isPointerWithinDrawer(side: 'left' | 'right', x: number, y: number, targetEl?: Element | null): boolean {
+	const selector = `[data-peek-drawer="${side}"]`;
+
+	// Fast path: the element under the pointer is inside a drawer.
+	const hitEl = targetEl !== undefined ? targetEl : document.elementFromPoint?.(x, y);
+	if (hitEl?.closest(selector)) {
+		return true;
+	}
+
+	// Geometry check: measured drawer edge + cursor slack, ignoring collapsed (zero-width) elements.
+	let edge: number | null = null;
+	for (const el of document.querySelectorAll<HTMLElement>(selector)) {
+		const rect = el.getBoundingClientRect();
+		if (rect.width <= 0) continue;
+		if (side === 'left') {
+			edge = edge === null ? rect.right : Math.max(edge, rect.right);
+		} else {
+			edge = edge === null ? rect.left : Math.min(edge, rect.left);
+		}
+	}
+	if (edge === null) return false;
+	return side === 'left' ? x <= edge + CURSOR_WIDTH_PX : x >= edge - CURSOR_WIDTH_PX;
+}
 
 export const EdgeProximitySensor: React.FC = observer(() => {
 	const isMobile = MobileLayout.enabled;
@@ -22,6 +56,7 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 	const rightTimerRef = useRef<number | null>(null);
 	const leftRetractTimerRef = useRef<number | null>(null);
 	const rightRetractTimerRef = useRef<number | null>(null);
+	const lastPointerCoordsRef = useRef<{x: number; y: number} | null>(null);
 
 	const clearLeftTimers = useCallback(() => {
 		if (leftTimerRef.current !== null) {
@@ -57,20 +92,41 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 		if (!edgeHoverPeekEnabled || isMobile) return;
 
 		const handlePointerMove = (e: PointerEvent) => {
+			if (!LayoutState.isLeftHoverPeeking && !LayoutState.isRightHoverPeeking) {
+				return;
+			}
+
+			lastPointerCoordsRef.current = {x: e.clientX, y: e.clientY};
+
+			// If a modal, popout, or context menu is active, don't retract the peeking drawer
+			if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) {
+				if (leftRetractTimerRef.current !== null) {
+					window.clearTimeout(leftRetractTimerRef.current);
+					leftRetractTimerRef.current = null;
+				}
+				if (rightRetractTimerRef.current !== null) {
+					window.clearTimeout(rightRetractTimerRef.current);
+					rightRetractTimerRef.current = null;
+				}
+				return;
+			}
+
 			const x = e.clientX;
-			const windowWidth = window.innerWidth;
+			const y = e.clientY;
+			const targetEl = e.target instanceof Element ? e.target : null;
 
 			// Left peek monitoring
 			if (LayoutState.isLeftHoverPeeking) {
-				const currentSidebarWidth = SidebarWidth.width ?? SIDEBAR_WIDTH_DEFAULT;
-				const leftDrawerWidth = 72 + currentSidebarWidth;
-				const leftThreshold = leftDrawerWidth + CURSOR_WIDTH_PX;
-
-				if (x > Math.max(leftThreshold, 100)) {
+				if (!isPointerWithinDrawer('left', x, y, targetEl)) {
 					if (leftRetractTimerRef.current === null) {
 						leftRetractTimerRef.current = window.setTimeout(() => {
-							LayoutState.setLeftHoverPeeking(false);
 							leftRetractTimerRef.current = null;
+							if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) return;
+							const coords = lastPointerCoordsRef.current;
+							if (coords && isPointerWithinDrawer('left', coords.x, coords.y)) {
+								return;
+							}
+							LayoutState.setLeftHoverPeeking(false);
 						}, RETRACT_GRACE_MS);
 					}
 				} else {
@@ -83,13 +139,16 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 
 			// Right peek monitoring
 			if (LayoutState.isRightHoverPeeking) {
-				const rightThreshold = windowWidth - 264 - CURSOR_WIDTH_PX;
-
-				if (x < rightThreshold) {
+				if (!isPointerWithinDrawer('right', x, y, targetEl)) {
 					if (rightRetractTimerRef.current === null) {
 						rightRetractTimerRef.current = window.setTimeout(() => {
-							LayoutState.setRightHoverPeeking(false);
 							rightRetractTimerRef.current = null;
+							if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) return;
+							const coords = lastPointerCoordsRef.current;
+							if (coords && isPointerWithinDrawer('right', coords.x, coords.y)) {
+								return;
+							}
+							LayoutState.setRightHoverPeeking(false);
 						}, RETRACT_GRACE_MS);
 					}
 				} else {
@@ -102,10 +161,11 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 		};
 
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				LayoutState.setLeftHoverPeeking(false);
-				LayoutState.setRightHoverPeeking(false);
-			}
+			if (e.key !== 'Escape' || e.defaultPrevented) return;
+			// Let Escape dismiss an open modal/popout/context menu first without collapsing the drawer behind it.
+			if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) return;
+			LayoutState.setLeftHoverPeeking(false);
+			LayoutState.setRightHoverPeeking(false);
 		};
 
 		window.addEventListener('pointermove', handlePointerMove, {passive: true});
@@ -121,10 +181,13 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 			window.clearTimeout(leftRetractTimerRef.current);
 			leftRetractTimerRef.current = null;
 		}
+		if (!canUseWindowFocusedHoverControls()) return;
 		if (leftTimerRef.current !== null) return;
 		leftTimerRef.current = window.setTimeout(() => {
-			LayoutState.setLeftHoverPeeking(true);
 			leftTimerRef.current = null;
+			// Re-check: the window may have lost focus during the intent delay.
+			if (!canUseWindowFocusedHoverControls()) return;
+			LayoutState.setLeftHoverPeeking(true);
 		}, INTENT_DELAY_MS);
 	}, []);
 
@@ -141,10 +204,12 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 			window.clearTimeout(rightRetractTimerRef.current);
 			rightRetractTimerRef.current = null;
 		}
+		if (!canUseWindowFocusedHoverControls()) return;
 		if (rightTimerRef.current !== null) return;
 		rightTimerRef.current = window.setTimeout(() => {
-			LayoutState.setRightHoverPeeking(true);
 			rightTimerRef.current = null;
+			if (!canUseWindowFocusedHoverControls()) return;
+			LayoutState.setRightHoverPeeking(true);
 		}, INTENT_DELAY_MS);
 	}, []);
 

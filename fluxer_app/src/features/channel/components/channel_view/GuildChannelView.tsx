@@ -502,6 +502,7 @@ export const GuildChannelView = observer(({channelId, guildId}: GuildChannelView
 			sidePanel = (
 				<div
 					className={styles.memberListOverlay}
+					data-peek-drawer="right"
 					data-flx="channel.channel-view.guild-channel-view.member-list-overlay--voice"
 				>
 					<ChannelMembers
@@ -614,7 +615,11 @@ export const GuildChannelView = observer(({channelId, guildId}: GuildChannelView
 		);
 	} else if (isMemberListPeeking) {
 		sidePanel = (
-			<div className={styles.memberListOverlay} data-flx="channel.channel-view.guild-channel-view.member-list-overlay">
+			<div
+				className={styles.memberListOverlay}
+				data-peek-drawer="right"
+				data-flx="channel.channel-view.guild-channel-view.member-list-overlay"
+			>
 				{isThreadChannel ? (
 					<ThreadMembersPanel
 						thread={channel}
