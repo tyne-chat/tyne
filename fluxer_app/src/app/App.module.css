@@ -98,3 +98,10 @@
 	transition-duration: 0s !important;
 	transition-delay: 0s !important;
 }
+/*
+ * Hover-peek drawers use a short one-shot slide-in. If the window loses focus mid-slide, let it finish
+ * rather than freezing a half-visible drawer. (Higher specificity than the `*` rule above.)
+ */
+:global(html:not(.window-focused):not(.unfocused-fully-interactive)) :local(.appContainer) [data-peek-drawer] {
+	animation-play-state: running !important;
+}
