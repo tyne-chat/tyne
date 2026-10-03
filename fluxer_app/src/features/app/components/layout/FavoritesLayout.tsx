@@ -55,7 +55,11 @@ export const FavoritesLayout = observer(({children}: {children: React.ReactNode}
 						/>
 					)}
 					{isChannelListPeeking && (
-						<div className={styles.guildSidebarOverlay} data-flx="app.favorites-layout.guild-sidebar-overlay">
+						<div
+							className={styles.guildSidebarOverlay}
+							data-peek-drawer="left"
+							data-flx="app.favorites-layout.guild-sidebar-overlay"
+						>
 							<GuildSidebar
 								header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header--peek" />}
 								content={
@@ -124,7 +128,11 @@ export const FavoritesLayout = observer(({children}: {children: React.ReactNode}
 					/>
 				)}
 				{isChannelListPeeking && (
-					<div className={styles.guildSidebarOverlay} data-flx="app.favorites-layout.guild-sidebar-overlay--2">
+					<div
+						className={styles.guildSidebarOverlay}
+						data-peek-drawer="left"
+						data-flx="app.favorites-layout.guild-sidebar-overlay--2"
+					>
 						<GuildSidebar
 							header={<FavoritesGuildHeader data-flx="app.favorites-layout.favorites-guild-header--peek-2" />}
 							content={
