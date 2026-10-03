@@ -533,7 +533,11 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 		sidePanel = <ChannelMembers channel={channel} data-flx="channel.channel-view.dm-channel-view.channel-members" />;
 	} else if (isMemberListPeeking) {
 		sidePanel = (
-			<div className={styles.memberListOverlay} data-flx="channel.channel-view.dm-channel-view.member-list-overlay">
+			<div
+				className={styles.memberListOverlay}
+				data-peek-drawer="right"
+				data-flx="channel.channel-view.dm-channel-view.member-list-overlay"
+			>
 				<ChannelMembers channel={channel} data-flx="channel.channel-view.dm-channel-view.channel-members--peek" />
 			</div>
 		);
