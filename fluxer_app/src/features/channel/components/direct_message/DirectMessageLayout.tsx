@@ -129,7 +129,11 @@ export const DMLayout = observer(({children}: DMLayoutProps) => {
 				</div>
 			)}
 			{isChannelListPeeking && (
-				<div className={styles.dmListColumnOverlay} data-flx="channel.direct-message.dm-layout.dm-list-column--peek">
+				<div
+					className={styles.dmListColumnOverlay}
+					data-peek-drawer="left"
+					data-flx="channel.direct-message.dm-layout.dm-list-column--peek"
+				>
 					<DMList data-flx="channel.direct-message.dm-layout.dm-list--peek" />
 				</div>
 			)}
