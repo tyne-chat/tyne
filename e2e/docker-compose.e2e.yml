@@ -72,7 +72,7 @@ x-e2e-env: &e2e-env
   FLUXER_MEDIA_PROXY_UPLOAD_RELAY_SECRET_BASE64: "dGVzdC1tZWRpYS1wcm94eS11cGxvYWQtcmVsYXktc2VjcmV0"
   FLUXER_ADMIN_SECRET_KEY_BASE: "e2e-admin-secret-key-base-minimum-64-characters-long-key-string-fluxer"
   FLUXER_ADMIN_OAUTH_CLIENT_SECRET: "e2e-admin-oauth-client-secret"
-  FLUXER_ERLANG_COOKIE: "4aea5e8056ef51834d552fae5bc07666"
+  FLUXER_ERLANG_COOKIE: "e2e-erlang-cookie-do-not-use-in-production"
 
   FLUXER_INTERNAL_API_ENDPOINT: http://api:8080
   FLUXER_INTERNAL_GATEWAY_ENDPOINT: http://gateway:8080
@@ -297,7 +297,6 @@ services:
       FLUXER_GATEWAY_PORT: "8080"
       FLUXER_GATEWAY_MEDIA_PROXY_ENDPOINT: http://localhost:9188/media
       FLUXER_GATEWAY_STATIC_CDN_ENDPOINT: http://localhost:9188
-      FLUXER_ERLANG_COOKIE: "4aea5e8056ef51834d552fae5bc07666"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/_health/ready"]
       interval: 2s
