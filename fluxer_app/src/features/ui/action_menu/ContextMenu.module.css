@@ -23,6 +23,10 @@
 	--context-menu-danger-border: color-mix(in srgb, var(--status-danger) 32%, transparent);
 	--context-menu-danger-control-border: color-mix(in srgb, var(--status-danger) 46%, transparent);
 	pointer-events: auto;
+	/* Keep clicks on menu labels from moving the document selection out of the
+	   composer; Chromium's replaceMisspelling() acts on the current selection. */
+	user-select: none;
+	-webkit-user-select: none;
 	min-width: min(13rem, var(--context-menu-viewport-max-width));
 	max-width: min(21.5rem, var(--context-menu-viewport-max-width), var(--available-width, 21.5rem));
 	width: max-content;
