@@ -433,6 +433,20 @@ class EmojiPicker {
 		ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
 	}
 
+	reorderFavorite(sourceKey: string, targetKey: string, position: 'before' | 'after' = 'before'): void {
+		const fromIndex = this.favoriteEmojis.indexOf(sourceKey);
+		const targetIndex = this.favoriteEmojis.indexOf(targetKey);
+		if (fromIndex === -1 || targetIndex === -1 || fromIndex === targetIndex) return;
+
+		this.favoriteEmojis.splice(fromIndex, 1);
+		let newTargetIndex = this.favoriteEmojis.indexOf(targetKey);
+		if (position === 'after') {
+			newTargetIndex += 1;
+		}
+		this.favoriteEmojis.splice(newTargetIndex, 0, sourceKey);
+		ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
+	}
+
 	toggleCategory(category: string): void {
 		if (this._collapsedSet.has(category)) {
 			this._collapsedSet.delete(category);
@@ -638,9 +652,17 @@ class EmojiPicker {
 	}
 
 	getFavoriteEmojis(allEmojis: ReadonlyArray<FlatEmoji>): Array<FlatEmoji> {
-		const favorites: Array<FlatEmoji> = [];
+		const emojiByKey = new Map<string, FlatEmoji>();
 		for (const emoji of allEmojis) {
-			if (this.isFavorite(emoji)) {
+			const key = getEmojiUsageKey(emoji);
+			if (this._favoriteSet.has(key)) {
+				emojiByKey.set(key, emoji);
+			}
+		}
+		const favorites: Array<FlatEmoji> = [];
+		for (const key of this.favoriteEmojis) {
+			const emoji = emojiByKey.get(key);
+			if (emoji) {
 				favorites.push(emoji);
 			}
 		}

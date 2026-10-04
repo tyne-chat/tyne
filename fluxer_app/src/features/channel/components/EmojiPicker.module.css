@@ -379,3 +379,39 @@
 	position: relative;
 	height: 100%;
 }
+
+.favoriteEmoji {
+	cursor: grab;
+}
+
+.favoriteEmoji:active {
+	cursor: grabbing;
+}
+
+.emojiDragging {
+	opacity: 0.35;
+}
+
+.favoriteDropIndicatorLeft {
+	position: absolute;
+	left: -0.125rem;
+	top: 0.125rem;
+	bottom: 0.125rem;
+	width: 0.25rem;
+	background-color: var(--brand-primary);
+	border-radius: 0.125rem;
+	z-index: 10;
+	pointer-events: none;
+}
+
+.favoriteDropIndicatorRight {
+	position: absolute;
+	right: -0.125rem;
+	top: 0.125rem;
+	bottom: 0.125rem;
+	width: 0.25rem;
+	background-color: var(--brand-primary);
+	border-radius: 0.125rem;
+	z-index: 10;
+	pointer-events: none;
+}
