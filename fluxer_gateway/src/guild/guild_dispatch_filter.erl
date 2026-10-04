@@ -104,6 +104,7 @@ is_channel_scoped_event(message_reaction_remove) -> true;
 is_channel_scoped_event(message_reaction_remove_all) -> true;
 is_channel_scoped_event(message_reaction_remove_emoji) -> true;
 is_channel_scoped_event(typing_start) -> true;
+is_channel_scoped_event(channel_signal_update) -> true;
 is_channel_scoped_event(channel_pins_update) -> true;
 is_channel_scoped_event(webhooks_update) -> true;
 is_channel_scoped_event(_) -> false.
