@@ -16,7 +16,14 @@ import React from 'react';
 
 export type VirtualRow =
 	| {type: 'header'; category: string; name: string; guildId?: string; index: number}
-	| {type: 'emoji-row'; emojis: Array<FlatEmoji>; index: number; isCustomEmoji?: boolean; guildId?: string};
+	| {
+			type: 'emoji-row';
+			emojis: Array<FlatEmoji>;
+			index: number;
+			isCustomEmoji?: boolean;
+			guildId?: string;
+			category?: string;
+	  };
 
 interface VirtualRowRendererProps {
 	row: VirtualRow;
@@ -92,6 +99,7 @@ const VirtualRowRenderer: React.FC<VirtualRowRendererProps> = React.memo(
 								channel={channel}
 								shouldAnimate={shouldAnimate}
 								isHighlighted={shouldHighlight}
+								isFavoriteRow={row.category === 'favorites'}
 								shouldScrollIntoView={isSelected && shouldScrollOnSelection}
 								ref={(node) => {
 									const key = `${emojiRowIndex}-${colIndex}`;
