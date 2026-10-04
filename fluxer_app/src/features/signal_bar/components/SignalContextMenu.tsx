@@ -18,7 +18,7 @@ const NOBODY_DESCRIPTOR = msg({
 const TURN_OFF_DESCRIPTOR = msg({
 	message: 'Turn off {name}',
 	comment:
-		'Signal bar right-click menu action that turns your own signal off. {name} is the persona or account name it is currently shown as.',
+		"Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.",
 });
 const RESET_DESCRIPTOR = msg({
 	message: 'Reset signal for everyone',
@@ -37,8 +37,6 @@ export const SignalContextMenu = observer(({channelId, guildId, signal, canReset
 	const {i18n} = useLingui();
 	const entries = SignalBarStore.getEntries(channelId, signal.id);
 	const currentUserId = Authentication.currentUserId;
-	const own = entries.filter((entry) => entry.user.id === currentUserId);
-	const others = entries.filter((entry) => entry.user.id !== currentUserId);
 	return (
 		<>
 			<MenuGroup data-flx="signal-bar.signal-context-menu.members">
@@ -47,17 +45,16 @@ export const SignalContextMenu = observer(({channelId, guildId, signal, canReset
 						{i18n._(NOBODY_DESCRIPTOR)}
 					</MenuItem>
 				)}
-				{others.map((entry) => (
-					<MenuItem disabled key={getSignalEntryKey(entry)} data-flx="signal-bar.signal-context-menu.member">
-						{getSignalEntryName(entry, guildId)}
-					</MenuItem>
-				))}
-				{own.map((entry) => (
+				{entries.map((entry) => (
 					<MenuItem
 						key={getSignalEntryKey(entry)}
 						onClick={() => {
 							onClose();
-							void SignalBarStore.deactivate(channelId, signal.id);
+							if (entry.user.id === currentUserId) {
+								void SignalBarStore.deactivate(channelId, signal.id);
+							} else {
+								void SignalBarStore.removeUser(channelId, signal.id, entry.user.id);
+							}
 						}}
 						data-flx="signal-bar.signal-context-menu.turn-off"
 					>
