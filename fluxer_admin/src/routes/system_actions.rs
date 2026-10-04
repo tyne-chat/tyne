@@ -217,6 +217,10 @@ pub async fn instance_config_post(
             let update = build_server_list_buttons_update(&form);
             instance_config_result(client.update_instance_config(&update).await)
         }
+        "update_signal_bar" => {
+            let update = build_signal_bar_update(&form);
+            instance_config_result(client.update_instance_config(&update).await)
+        }
         "update_integrations" => {
             let update = build_integrations_update(&form);
             instance_config_result(client.update_instance_config(&update).await)
@@ -896,6 +900,22 @@ fn build_policy_update(form: &MultiValueForm) -> InstanceConfigUpdateRequest {
             premium_mode,
             services,
             server_list_buttons: None,
+            signal_bar_guild_id: None,
+        }),
+        ..Default::default()
+    }
+}
+
+fn build_signal_bar_update(form: &MultiValueForm) -> InstanceConfigUpdateRequest {
+    let guild_id = form
+        .first("signal_bar_guild_id")
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned);
+    InstanceConfigUpdateRequest {
+        policy: Some(InstancePolicyUpdateRequest {
+            signal_bar_guild_id: Some(guild_id),
+            ..Default::default()
         }),
         ..Default::default()
     }
