@@ -127,6 +127,18 @@
 	line-height: 1;
 }
 
+/* One name per line: tiny badges alone do not always identify people. */
+.tooltip {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.tooltipLabel {
+	font-weight: 600;
+}
+
 .caret {
 	display: flex;
 	align-items: center;
