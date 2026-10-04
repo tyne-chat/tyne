@@ -156,6 +156,7 @@ import {createMiddleware} from 'hono/factory';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import {PersonaService} from '@app/api/persona/PersonaService';
 import {SignalBarService} from '@app/api/signal_bar/SignalBarService';
+import {SignalBarSettingsRepository} from '@app/api/signal_bar/SignalBarSettingsRepository';
 import {UserGuildRepository} from '@app/api/user/repositories/account/UserGuildRepository';
 import {UserChannelRepository} from '@app/api/user/repositories/UserChannelRepository';
 
@@ -718,6 +719,8 @@ class RequestServices implements RequestScopedServices {
 			personaRepository: getPersonaRepository(),
 			findUser: (userId) => getUserRepository().findUnique(userId),
 			findChannel: (channelId) => this.channelRepository.findUnique(channelId),
+			settingsRepository: new SignalBarSettingsRepository(),
+			listGuildChannels: (guildId) => this.channelRepository.listGuildChannels(guildId, 'enrolled'),
 		});
 		return this.cachedSignalBarService;
 	}

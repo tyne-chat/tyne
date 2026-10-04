@@ -65,6 +65,7 @@ core_event_map() ->
         <<"SESSIONS_REPLACE">> => sessions_replace,
         <<"SIGNAL_BAR_UPDATE">> => signal_bar_update,
         <<"CHANNEL_SIGNAL_UPDATE">> => channel_signal_update,
+        <<"CHANNEL_SIGNAL_BAR_UPDATE">> => channel_signal_bar_update,
         <<"TYPING_START">> => typing_start
     }.
 
