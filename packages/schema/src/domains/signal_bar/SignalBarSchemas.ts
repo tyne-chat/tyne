@@ -3,6 +3,7 @@
 import {MessageSubprofileResponseSchema} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {UserPartialResponse} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 import {SnowflakeStringType, SnowflakeType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
+import {schemaMetadata} from '@fluxer/schema/src/SchemaMetadata';
 import {z} from 'zod';
 
 export const MAX_SIGNAL_BAR_SIGNALS = 12;
@@ -58,6 +59,7 @@ export const ChannelSignalEntrySchema = z.object({
 export type ChannelSignalEntry = z.infer<typeof ChannelSignalEntrySchema>;
 
 export const ChannelSignalsResponseSchema = z.object({
+	enabled: z.boolean().describe('Whether the signal bar is switched on in this channel'),
 	bar_version: z.number().int(),
 	entries: z.array(ChannelSignalEntrySchema),
 });
@@ -92,3 +94,45 @@ export const SignalBarUpdateEventSchema = z.object({
 	version: z.number().int(),
 });
 export type SignalBarUpdateEvent = z.infer<typeof SignalBarUpdateEventSchema>;
+
+const SignalBarFlagMapSchema = z
+	.record(z.string().max(20), z.boolean())
+	.register(schemaMetadata, {preserveEmptyValues: true});
+
+export const GuildSignalBarSettingsSchema = z.object({
+	default: z.boolean().describe('Whether channels without a category or channel setting show the signal bar'),
+	categories: SignalBarFlagMapSchema,
+	channels: SignalBarFlagMapSchema,
+});
+export type GuildSignalBarSettings = z.infer<typeof GuildSignalBarSettingsSchema>;
+
+export const EMPTY_GUILD_SIGNAL_BAR_SETTINGS: GuildSignalBarSettings = {default: false, categories: {}, channels: {}};
+
+export function resolveSignalBarEnabled(
+	settings: GuildSignalBarSettings,
+	channelId: string,
+	categoryId: string | null,
+): boolean {
+	const channel = settings.channels[channelId];
+	if (channel !== undefined) return channel;
+	const category = categoryId === null ? undefined : settings.categories[categoryId];
+	if (category !== undefined) return category;
+	return settings.default;
+}
+
+export const ChannelSignalBarEnabledRequestSchema = z.object({
+	enabled: z.boolean(),
+});
+export type ChannelSignalBarEnabledRequest = z.infer<typeof ChannelSignalBarEnabledRequestSchema>;
+
+export const ChannelSignalUserParam = z.object({
+	channel_id: SnowflakeType.describe('The ID of the channel'),
+	signal_id: SignalIdSchema,
+	user_id: SnowflakeType.describe('The ID of the user whose signal is turned off'),
+});
+
+export const ChannelSignalBarUpdateEventSchema = z.object({
+	channel_id: SnowflakeStringType,
+	enabled: z.boolean(),
+});
+export type ChannelSignalBarUpdateEvent = z.infer<typeof ChannelSignalBarUpdateEventSchema>;
