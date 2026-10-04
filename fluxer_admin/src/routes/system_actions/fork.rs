@@ -24,3 +24,18 @@ pub(super) fn build_server_list_buttons_update(form: &MultiValueForm) -> Instanc
         ..Default::default()
     }
 }
+
+pub(super) fn build_signal_bar_update(form: &MultiValueForm) -> InstanceConfigUpdateRequest {
+    let guild_id = form
+        .first("signal_bar_guild_id")
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned);
+    InstanceConfigUpdateRequest {
+        policy: Some(InstancePolicyUpdateRequest {
+            signal_bar_guild_id: Some(guild_id),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }
+}
