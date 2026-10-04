@@ -89,7 +89,11 @@ import {
 	handleUserPersonasUpdate,
 	handleUserPersonaUpdate,
 } from '@app/features/persona/events/PersonaEvents';
-import {handleChannelSignalUpdate, handleSignalBarUpdate} from '@app/features/signal_bar/events/SignalBarEvents';
+import {
+	handleChannelSignalBarUpdate,
+	handleChannelSignalUpdate,
+	handleSignalBarUpdate,
+} from '@app/features/signal_bar/events/SignalBarEvents';
 
 export interface GatewayGeoipPayload {
 	country_code?: string;
@@ -178,6 +182,7 @@ export function createHandlerRegistry(): GatewayHandlerRegistry {
 	registry.set('TYPING_START', handleTypingStart as GatewayEventHandler);
 	registry.set('CHANNEL_SIGNAL_UPDATE', handleChannelSignalUpdate as GatewayEventHandler);
 	registry.set('SIGNAL_BAR_UPDATE', handleSignalBarUpdate as GatewayEventHandler);
+	registry.set('CHANNEL_SIGNAL_BAR_UPDATE', handleChannelSignalBarUpdate as GatewayEventHandler);
 	registry.set('RECENT_MENTION_DELETE', handleRecentMentionDelete as GatewayEventHandler);
 	registry.set('SAVED_MESSAGE_CREATE', handleSavedMessageCreate as GatewayEventHandler);
 	registry.set('SAVED_MESSAGE_DELETE', handleSavedMessageDelete as GatewayEventHandler);
