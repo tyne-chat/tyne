@@ -139,6 +139,7 @@ function registerCronJobs(cron: CronScheduler, jobsStreamMaxAgeMs: number, kvCli
 		Config.instance.selfHosted ? '0 * * * * *' : '*/10 * * * * *',
 		{ledger: false},
 	);
+	cron.upsert('sweepSignalBar', 'sweepSignalBar', {}, '30 * * * * *', {ledger: false});
 	cron.upsert('drainActivitySpool', 'drainActivitySpool', {}, '*/5 * * * * *', {
 		ledger: false,
 		enabled: activityEventsPublishing,
