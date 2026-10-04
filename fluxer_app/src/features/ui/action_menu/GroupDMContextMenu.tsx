@@ -62,6 +62,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo} from 'react';
 
+// Fork imports.
+
+import {SignalBarDMMenuItem} from '@app/features/signal_bar/components/SignalBarDMMenuItem';
+
 const REMOVE_FROM_GROUP_DESCRIPTOR = msg({
 	message: 'Remove from group',
 	comment: 'Group DM action that removes the selected member from the group.',
@@ -127,6 +131,11 @@ export const GroupDMContextMenu: React.FC<GroupDMContextMenuProps> = observer(({
 					channel={channel}
 					onClose={onClose}
 					data-flx="ui.action-menu.group-dm-context-menu.mute-dm-menu-item"
+				/>
+				<SignalBarDMMenuItem
+					channel={channel}
+					onClose={onClose}
+					data-flx="ui.action-menu.group-dm-context-menu.signal-bar-dm-menu-item"
 				/>
 			</MenuGroup>
 		</>
