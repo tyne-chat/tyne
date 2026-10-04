@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import {createChannelID} from '@app/api/BrandedTypes';
+import {createChannelID, createGuildID, createUserID} from '@app/api/BrandedTypes';
 import {DefaultUserOnly, LoginRequired} from '@app/api/middleware/AuthMiddleware';
 import {RateLimitMiddleware} from '@app/api/middleware/RateLimitMiddleware';
 import {OpenAPI} from '@app/api/middleware/ResponseTypeMiddleware';
 import {RateLimitConfigs} from '@app/api/RateLimitConfig';
 import type {HonoApp} from '@app/api/types/HonoEnv';
 import {Validator} from '@app/api/Validator';
-import {ChannelIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
+import {ChannelIdParam, GuildIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {
+	ChannelSignalBarEnabledRequestSchema,
 	ChannelSignalParam,
 	ChannelSignalsResponseSchema,
 	ChannelSignalToggleRequestSchema,
+	ChannelSignalUserParam,
+	GuildSignalBarSettingsSchema,
 	SignalBarResponseSchema,
 	SignalBarUpdateRequestSchema,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
@@ -161,6 +164,111 @@ export function SignalBarController(app: HonoApp) {
 				.interactions.authService.getChannelAuthenticated({userId, channelId: createChannelID(channel_id)});
 			await ctx.get('signalBarService').reset({authChannel, userId, signalId: signal_id});
 			return ctx.body(null, 204);
+		},
+	);
+
+	app.delete(
+		'/channels/:channel_id/signals/:signal_id/users/:user_id',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_MUTATE),
+		LoginRequired,
+		Validator('param', ChannelSignalUserParam),
+		OpenAPI({
+			operationId: 'remove_channel_signal_user',
+			summary: "Turn off someone's signal",
+			responseSchema: null,
+			statusCode: 204,
+			security: ['botToken', 'bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				"Turns one account's signal off. Requires Manage Community in a community channel, or ownership of a group DM.",
+		}),
+		async (ctx) => {
+			const userId = ctx.get('user').id;
+			const {channel_id, signal_id, user_id} = ctx.req.valid('param');
+			const authChannel = await ctx
+				.get('channelService')
+				.interactions.authService.getChannelAuthenticated({userId, channelId: createChannelID(channel_id)});
+			await ctx.get('signalBarService').removeUserSignal({
+				authChannel,
+				userId,
+				signalId: signal_id,
+				targetUserId: createUserID(user_id),
+			});
+			return ctx.body(null, 204);
+		},
+	);
+
+	app.put(
+		'/channels/:channel_id/signal-bar',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_MUTATE),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', ChannelIdParam),
+		Validator('json', ChannelSignalBarEnabledRequestSchema),
+		OpenAPI({
+			operationId: 'set_dm_signal_bar_enabled',
+			summary: 'Switch the signal bar on or off in a DM',
+			responseSchema: null,
+			statusCode: 204,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				'Switches the signal bar on or off in a direct message. Either participant of a one-on-one DM or the owner of a group DM may do this. Community channels are configured through the community endpoint.',
+		}),
+		async (ctx) => {
+			const userId = ctx.get('user').id;
+			const channelId = createChannelID(ctx.req.valid('param').channel_id);
+			const authChannel = await ctx
+				.get('channelService')
+				.interactions.authService.getChannelAuthenticated({userId, channelId});
+			await ctx.get('signalBarService').setDmEnabled(authChannel, userId, ctx.req.valid('json').enabled);
+			return ctx.body(null, 204);
+		},
+	);
+
+	app.get(
+		'/guilds/:guild_id/signal-bar/channels',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_READ),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', GuildIdParam),
+		OpenAPI({
+			operationId: 'get_guild_signal_bar_channels',
+			summary: 'Get where the signal bar is switched on in a community',
+			responseSchema: GuildSignalBarSettingsSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				'Retrieves the community default, per-category defaults and per-channel exceptions. Requires Manage Community.',
+		}),
+		async (ctx) => {
+			const guildId = createGuildID(ctx.req.valid('param').guild_id);
+			return ctx.json(await ctx.get('signalBarService').getGuildSettings(guildId, ctx.get('user').id));
+		},
+	);
+
+	app.put(
+		'/guilds/:guild_id/signal-bar/channels',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_MUTATE),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', GuildIdParam),
+		Validator('json', GuildSignalBarSettingsSchema),
+		OpenAPI({
+			operationId: 'update_guild_signal_bar_channels',
+			summary: 'Choose where the signal bar is switched on in a community',
+			responseSchema: GuildSignalBarSettingsSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				'Replaces the community default, per-category defaults and per-channel exceptions. Channels without their own setting inherit from their category, then from the community. Requires Manage Community.',
+		}),
+		async (ctx) => {
+			const guildId = createGuildID(ctx.req.valid('param').guild_id);
+			const body = ctx.req.valid('json');
+			return ctx.json(await ctx.get('signalBarService').updateGuildSettings(guildId, ctx.get('user').id, body));
 		},
 	);
 }
