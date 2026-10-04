@@ -112,6 +112,7 @@ const LANE_CONFIG = {
 			'operatorPassRemovalExpiry',
 			'operatorPassOfferCompletion',
 			'operatorPassWallRetention',
+			'sweepSignalBar',
 		] as const,
 		retiredTasks: [],
 		concurrency: 12,

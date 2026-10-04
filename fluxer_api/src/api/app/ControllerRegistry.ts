@@ -45,6 +45,7 @@ import {WebhookController} from '@app/api/webhook/WebhookController';
 // Fork: this fork's controllers.
 
 import {PersonaController} from '@app/api/persona/PersonaController';
+import {SignalBarController} from '@app/api/signal_bar/SignalBarController';
 
 export function registerControllers(routes: HonoApp, config: APIConfig): void {
 	InternalRpcController(routes);
@@ -92,4 +93,5 @@ export function registerControllers(routes: HonoApp, config: APIConfig): void {
 	StripeController(routes);
 	// Fork: this fork's controllers.
 	PersonaController(routes);
+	SignalBarController(routes);
 }
