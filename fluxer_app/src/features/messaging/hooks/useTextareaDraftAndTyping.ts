@@ -9,6 +9,7 @@ import {useEffect, useRef} from 'react';
 // Fork imports.
 
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
+import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 interface UseTextareaDraftAndTypingOptions {
@@ -155,6 +156,9 @@ export const useTextareaDraftAndTyping = ({
 			flushDraftRef.current();
 		};
 	}, [channelId, isEditingMessageInComposer]);
+	useEffect(() => {
+		return () => SignalBarStore.clearComposerPersona(channelId);
+	}, [channelId]);
 	const activePersonaId = PersonaStore.activePersonaId;
 	const isPersonaLatched = PersonaStore.isPersonaLatched;
 	useEffect(() => {
@@ -184,6 +188,9 @@ export const useTextareaDraftAndTyping = ({
 					display_tag_icon: PersonaStore.displayTagIcon || null,
 				})
 			: null;
+		if (!isEditingMessageInComposerRef.current) {
+			SignalBarStore.setComposerPersona(channelId, subprofile);
+		}
 
 		RollingTypingSender.handleComposerChange({
 			channelId,
