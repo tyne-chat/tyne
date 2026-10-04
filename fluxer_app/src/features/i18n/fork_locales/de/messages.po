@@ -168,6 +168,10 @@ msgstr "Failed to save persona"
 msgid "Failed to save the signal bar. Try again."
 msgstr "Die Signalleiste konnte nicht gespeichert werden. Versuche es erneut."
 
+#. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
+msgid "Failed to save where the signal bar appears. Try again."
+msgstr "Es konnte nicht gespeichert werden, wo die Signalleiste erscheint. Versuche es erneut."
+
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
 msgstr "Failed to upload icon to server"
@@ -558,6 +562,9 @@ msgstr "Tell us about this persona..."
 msgid "The chosen file is not a valid JSON object."
 msgstr "The chosen file is not a valid JSON object."
 
+msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
+msgstr "Die Signalleiste ist aus, bis du hier einen Kanal ankreuzt. Wenn du eine Kategorie oder die ganze Community ankreuzt, gilt das auch für Kanäle, die dort später erstellt werden."
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "Dieses Emoji wurde bereits als Signatur-Emoji hinzugefügt"
@@ -572,9 +579,17 @@ msgstr "Kanalliste ein-/ausblenden"
 msgid "Total Members"
 msgstr "Total Members"
 
-#. Signal bar right-click menu action that turns your own signal off. {name} is the persona or account name it is currently shown as.
+#. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
+msgid "Turn off signal bar"
+msgstr "Signalleiste ausschalten"
+
+#. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
 msgid "Turn off {name}"
 msgstr "{name} ausschalten"
+
+#. Direct message right-click menu action that shows the signal bar above the message box in this DM.
+msgid "Turn on signal bar"
+msgstr "Signalleiste einschalten"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
@@ -599,6 +614,9 @@ msgstr "Untagged messages send as your chosen persona. Typing another persona’
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "View your personas"
+
+msgid "Where the signal bar appears"
+msgstr "Wo die Signalleiste erscheint"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"

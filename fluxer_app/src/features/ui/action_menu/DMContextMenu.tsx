@@ -15,6 +15,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useMemo} from 'react';
 
+// Fork imports.
+
+import {SignalBarDMMenuItem} from '@app/features/signal_bar/components/SignalBarDMMenuItem';
+
 interface DMContextMenuProps {
 	channel: Channel;
 	recipient?: User | null;
@@ -43,6 +47,11 @@ export const DMContextMenu: React.FC<DMContextMenuProps> = observer(({channel, r
 					channel={channel}
 					onClose={onClose}
 					data-flx="ui.action-menu.dm-context-menu.mute-dm-menu-item"
+				/>
+				<SignalBarDMMenuItem
+					channel={channel}
+					onClose={onClose}
+					data-flx="ui.action-menu.dm-context-menu.signal-bar-dm-menu-item"
 				/>
 			</MenuGroup>
 		</>
