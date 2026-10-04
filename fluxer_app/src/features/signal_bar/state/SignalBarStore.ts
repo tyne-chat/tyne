@@ -9,9 +9,11 @@ import {Logger} from '@app/features/platform/utils/AppLogger';
 import Users from '@app/features/user/state/Users';
 import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import type {
+	ChannelSignalBarUpdateEvent,
 	ChannelSignalEntry,
 	ChannelSignalsResponse,
 	ChannelSignalUpdateEvent,
+	GuildSignalBarSettings,
 	SignalBarResponse,
 	SignalBarSignal,
 	SignalBarUpdateRequest,
@@ -45,6 +47,7 @@ class SignalBarStore {
 	private readonly entriesByChannel = observable.map<string, ReadonlyArray<ChannelSignalEntry>>(undefined, {
 		deep: false,
 	});
+	private readonly enabledByChannel = observable.map<string, boolean>();
 	private readonly composerPersonas = observable.map<string, MessageSubprofileRequest | null>(undefined, {
 		deep: false,
 	});
@@ -112,6 +115,11 @@ class SignalBarStore {
 		}
 	}
 
+	/** Whether the bar is switched on in a channel. Unknown channels count as off. */
+	isEnabled(channelId: string): boolean {
+		return this.enabledByChannel.get(channelId) ?? false;
+	}
+
 	getEntries(channelId: string, signalId: string): ReadonlyArray<ChannelSignalEntry> {
 		const entries = this.entriesByChannel.get(channelId);
 		if (!entries) return EMPTY_ENTRIES;
@@ -127,6 +135,7 @@ class SignalBarStore {
 
 	invalidate(): void {
 		this.entriesByChannel.clear();
+		this.enabledByChannel.clear();
 		this.epoch += 1;
 		void this.fetchConfig();
 	}
@@ -162,9 +171,12 @@ class SignalBarStore {
 		try {
 			const res = await http.get<ChannelSignalsResponse>(Endpoints.CHANNEL_SIGNALS(channelId));
 			if (!res.ok || !res.body) return;
-			const {entries, bar_version} = res.body;
+			const {entries, bar_version, enabled} = res.body;
 			this.rememberEntries(entries);
-			runInAction(() => this.entriesByChannel.set(channelId, entries));
+			runInAction(() => {
+				this.entriesByChannel.set(channelId, entries);
+				this.enabledByChannel.set(channelId, enabled);
+			});
 			this.ensureVersion(bar_version);
 		} catch (err) {
 			logger.error('Error fetching channel signals', err);
@@ -196,6 +208,54 @@ class SignalBarStore {
 			}
 		}
 		this.entriesByChannel.set(event.channel_id, next);
+	}
+
+	handleEnabledUpdate(event: ChannelSignalBarUpdateEvent): void {
+		this.enabledByChannel.set(event.channel_id, event.enabled);
+		if (!event.enabled || !this.entriesByChannel.has(event.channel_id)) {
+			this.entriesByChannel.set(event.channel_id, EMPTY_ENTRIES);
+		}
+	}
+
+	async setDmEnabled(channelId: string, enabled: boolean): Promise<void> {
+		try {
+			await http.put(Endpoints.CHANNEL_SIGNAL_BAR(channelId), {body: {enabled}});
+		} catch (err) {
+			logger.error('Error switching the signal bar', err);
+			void this.fetchChannel(channelId);
+		}
+	}
+
+	async removeUser(channelId: string, signalId: string, userId: string): Promise<void> {
+		this.removeLocal(channelId, signalId, userId);
+		try {
+			await http.delete(Endpoints.CHANNEL_SIGNAL_USER(channelId, signalId, userId));
+		} catch (err) {
+			logger.error("Error turning off someone's signal", err);
+			void this.fetchChannel(channelId);
+		}
+	}
+
+	async fetchGuildSettings(guildId: string): Promise<GuildSignalBarSettings | null> {
+		try {
+			const res = await http.get<GuildSignalBarSettings>(Endpoints.GUILD_SIGNAL_BAR_CHANNELS(guildId));
+			return res.ok && res.body ? res.body : null;
+		} catch (err) {
+			logger.error('Error fetching signal bar channels', err);
+			return null;
+		}
+	}
+
+	async saveGuildSettings(guildId: string, settings: GuildSignalBarSettings): Promise<GuildSignalBarSettings | null> {
+		try {
+			const res = await http.put<GuildSignalBarSettings>(Endpoints.GUILD_SIGNAL_BAR_CHANNELS(guildId), {
+				body: settings,
+			});
+			return res.ok && res.body ? res.body : null;
+		} catch (err) {
+			logger.error('Error saving signal bar channels', err);
+			return null;
+		}
 	}
 
 	handleBarUpdate(version: number): void {
