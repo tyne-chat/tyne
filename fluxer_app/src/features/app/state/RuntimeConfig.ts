@@ -703,6 +703,7 @@ class RuntimeConfig {
 				guild_create_access: config.policy.guild_create_access,
 				community_creation_staff_only: config.policy.community_creation_staff_only,
 				server_list_buttons: config.policy.server_list_buttons,
+				signal_bar_guild_id: config.policy.signal_bar_guild_id,
 			},
 			services: {
 				gif_enabled: config.policy.services_resolved.gif_enabled,
@@ -844,6 +845,10 @@ class RuntimeConfig {
 
 	get communityCreationStaffOnly(): boolean {
 		return this.community.community_creation_staff_only;
+	}
+
+	get signalBarGuildId(): string | null {
+		return this.community.signal_bar_guild_id;
 	}
 
 	get serverListButtons(): ServerListButtons {

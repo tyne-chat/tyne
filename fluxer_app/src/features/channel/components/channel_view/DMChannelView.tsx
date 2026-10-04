@@ -70,6 +70,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {SignalBar} from '@app/features/signal_bar/components/SignalBar';
 import LayoutState from '@app/features/ui/state/LayoutState';
 
 interface DMChannelViewProps {
@@ -88,6 +89,11 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 	const isDM = channel?.type === ChannelTypes.DM;
 	const isGroupDM = channel?.type === ChannelTypes.GROUP_DM;
 	const isPersonalNotes = channel?.type === ChannelTypes.DM_PERSONAL_NOTES;
+	const showsSignalBarAboveBarrier =
+		!isSystemDm &&
+		((isDM && isRecipientBlocked && recipient != null) ||
+			(isCurrentUserLimited && !isPersonalNotes) ||
+			(isCurrentUserUnclaimed && isDM && !isPersonalNotes && !isGroupDM));
 	const currentChannelId = channel?.id ?? null;
 	const mediaConnected = MediaEngine.connected;
 	const mediaChannelId = MediaEngine.channelId;
@@ -497,25 +503,30 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 							<Messages key={channel.id} channel={channel} data-flx="channel.channel-view.dm-channel-view.messages" />
 						}
 						textarea={
-							isSystemDm ? (
-								<SystemDmBarrier data-flx="channel.channel-view.dm-channel-view.system-dm-barrier" />
-							) : isDM && isRecipientBlocked && recipient ? (
-								<BlockedUserBarrier
-									userId={recipient.id}
-									username={NicknameUtils.getNickname(recipient, null)}
-									data-flx="channel.channel-view.dm-channel-view.blocked-user-barrier"
-								/>
-							) : isCurrentUserLimited && !isPersonalNotes ? (
-								<AccountLimitedBarrier data-flx="channel.channel-view.dm-channel-view.account-limited-barrier" />
-							) : isCurrentUserUnclaimed && isDM && !isPersonalNotes && !isGroupDM ? (
-								<UnclaimedDMBarrier data-flx="channel.channel-view.dm-channel-view.unclaimed-dm-barrier" />
-							) : (
-								<ChannelTextarea
-									channel={channel}
-									inputSuppressed={isCompactCallChatSuppressed}
-									data-flx="channel.channel-view.dm-channel-view.channel-textarea"
-								/>
-							)
+							<>
+								{showsSignalBarAboveBarrier && (
+									<SignalBar channel={channel} data-flx="channel.channel-view.dm-channel-view.signal-bar" />
+								)}
+								{isSystemDm ? (
+									<SystemDmBarrier data-flx="channel.channel-view.dm-channel-view.system-dm-barrier" />
+								) : isDM && isRecipientBlocked && recipient ? (
+									<BlockedUserBarrier
+										userId={recipient.id}
+										username={NicknameUtils.getNickname(recipient, null)}
+										data-flx="channel.channel-view.dm-channel-view.blocked-user-barrier"
+									/>
+								) : isCurrentUserLimited && !isPersonalNotes ? (
+									<AccountLimitedBarrier data-flx="channel.channel-view.dm-channel-view.account-limited-barrier" />
+								) : isCurrentUserUnclaimed && isDM && !isPersonalNotes && !isGroupDM ? (
+									<UnclaimedDMBarrier data-flx="channel.channel-view.dm-channel-view.unclaimed-dm-barrier" />
+								) : (
+									<ChannelTextarea
+										channel={channel}
+										inputSuppressed={isCompactCallChatSuppressed}
+										data-flx="channel.channel-view.dm-channel-view.channel-textarea"
+									/>
+								)}
+							</>
 						}
 						data-flx="channel.channel-view.dm-channel-view.channel-chat-layout"
 					/>

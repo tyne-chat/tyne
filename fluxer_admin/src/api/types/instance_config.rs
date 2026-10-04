@@ -115,6 +115,8 @@ pub struct InstancePolicyResponse {
     pub single_community_enabled: bool,
     pub single_community_guild_id: Option<String>,
     #[serde(default)]
+    pub signal_bar_guild_id: Option<String>,
+    #[serde(default)]
     pub community_creation_staff_only: bool,
     #[serde(default)]
     pub direct_messages_disabled: bool,
@@ -173,6 +175,7 @@ impl Default for InstancePolicyResponse {
         Self {
             single_community_enabled: false,
             single_community_guild_id: None,
+            signal_bar_guild_id: None,
             community_creation_staff_only: false,
             direct_messages_disabled: false,
             direct_messages_locked: false,
@@ -941,6 +944,8 @@ pub struct InstancePolicyUpdateRequest {
     pub services: Option<InstanceServicesUpdateRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub server_list_buttons: Option<ServerListButtonsUpdateRequest>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub signal_bar_guild_id: Option<Option<String>>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

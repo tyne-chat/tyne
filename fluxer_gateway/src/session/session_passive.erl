@@ -67,6 +67,8 @@ should_receive_event(Event, EventData, GuildId, SessionData, State) ->
 -spec bypasses_passive_filter(event(), map(), session_data()) -> boolean().
 bypasses_passive_filter(guild_update, _EventData, _SessionData) ->
     true;
+bypasses_passive_filter(signal_bar_update, _EventData, _SessionData) ->
+    true;
 bypasses_passive_filter(guild_role_update, _EventData, _SessionData) ->
     true;
 bypasses_passive_filter(guild_role_update_bulk, _EventData, _SessionData) ->
