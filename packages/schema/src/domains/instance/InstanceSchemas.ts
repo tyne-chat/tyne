@@ -235,6 +235,11 @@ export const InstanceCommunitySchema = z
 			.string()
 			.nullable()
 			.describe('The stock community guild ID when single-community mode is enabled'),
+		signal_bar_guild_id: z
+			.string()
+			.nullable()
+			.default(null)
+			.describe('The home community whose managers configure the instance-wide signal bar'),
 		direct_messages_disabled: z
 			.boolean()
 			.describe('Whether direct messages and friend requests are disabled instance-wide'),

@@ -159,6 +159,7 @@ async function buildInstanceConfigResponse(): Promise<InstanceConfigResponse> {
 		policy: {
 			single_community_enabled: policy.single_community_enabled,
 			single_community_guild_id: policy.single_community_guild_id,
+			signal_bar_guild_id: policy.signal_bar_guild_id,
 			community_creation_staff_only: policy.community_creation_staff_only,
 			direct_messages_disabled: policy.direct_messages_disabled,
 			direct_messages_locked: policy.direct_messages_locked,
@@ -877,6 +878,9 @@ function planInstancePolicyPatch(
 		if (policy.services.bluesky_enabled !== undefined) {
 			patch.bluesky_enabled = policy.services.bluesky_enabled ?? null;
 		}
+	}
+	if (policy.signal_bar_guild_id !== undefined) {
+		patch.signal_bar_guild_id = policy.signal_bar_guild_id;
 	}
 	if (policy.server_list_buttons) {
 		patch.server_list_buttons = {
