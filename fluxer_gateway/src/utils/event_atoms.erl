@@ -63,6 +63,8 @@ core_event_map() ->
         <<"SAVED_MESSAGE_CREATE">> => saved_message_create,
         <<"SAVED_MESSAGE_DELETE">> => saved_message_delete,
         <<"SESSIONS_REPLACE">> => sessions_replace,
+        <<"SIGNAL_BAR_UPDATE">> => signal_bar_update,
+        <<"CHANNEL_SIGNAL_UPDATE">> => channel_signal_update,
         <<"TYPING_START">> => typing_start
     }.
 
