@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {SignalBarService} from '@app/api/signal_bar/SignalBarService';
+import {SignalBarSettingsRepository} from '@app/api/signal_bar/SignalBarSettingsRepository';
 import {getWorkerDependencies} from '@app/api/worker/WorkerContext';
 import type {WorkerTaskHandler} from '@pkgs/worker/src/contracts/WorkerTask';
 
@@ -14,6 +15,8 @@ const sweepSignalBar: WorkerTaskHandler = async (_payload, helpers) => {
 		personaRepository: deps.personaRepository,
 		findUser: (userId) => deps.userRepository.findUnique(userId),
 		findChannel: (channelId) => deps.channelRepository.findUnique(channelId),
+		settingsRepository: new SignalBarSettingsRepository(),
+		listGuildChannels: (guildId) => deps.channelRepository.listGuildChannels(guildId),
 	});
 	const {cleared} = await service.sweep();
 	if (cleared > 0) {

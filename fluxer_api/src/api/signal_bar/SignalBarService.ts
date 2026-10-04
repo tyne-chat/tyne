@@ -21,6 +21,7 @@ import type {Channel} from '@app/api/models/Channel';
 import type {User} from '@app/api/models/User';
 import {PersonaNotFoundError} from '@app/api/persona/errors/PersonaErrors';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+import type {SignalBarSettingsRepository} from '@app/api/signal_bar/SignalBarSettingsRepository';
 import {UnknownSignalError} from '@app/api/signal_bar/UnknownSignalError';
 import {mapUserToPartialResponse} from '@app/api/user/UserMappers';
 import {assertGuildMemberCanCommunicate} from '@app/api/utils/GuildCommunicationUtils';
@@ -32,6 +33,8 @@ import {
 	ChannelSignalEntrySchema,
 	type ChannelSignalsResponse,
 	type ChannelSignalUpdateEvent,
+	type GuildSignalBarSettings,
+	resolveSignalBarEnabled,
 	type SignalBarConfig,
 	SignalBarConfigSchema,
 	type SignalBarResponse,
@@ -67,8 +70,10 @@ interface SignalBarServiceDeps {
 	gatewayService: IGatewayService;
 	guildRepository: IGuildRepositoryAggregate;
 	personaRepository: IPersonaRepository;
+	settingsRepository: SignalBarSettingsRepository;
 	findUser: (userId: UserID) => Promise<User | null>;
 	findChannel: (channelId: ChannelID) => Promise<Channel | null>;
+	listGuildChannels: (guildId: GuildID) => Promise<Array<Channel>>;
 }
 
 function parseStoredConfig(raw: string | null): SignalBarConfig {
@@ -198,15 +203,130 @@ export class SignalBarService {
 		return entries.sort((a, b) => a.activated_at - b.activated_at);
 	}
 
+	/** Whether the bar is switched on for a channel. Off unless a manager turned it on. */
+	async isChannelEnabled(channel: Channel): Promise<boolean> {
+		if (!channel.guildId) return this.deps.settingsRepository.isDmEnabled(channel.id);
+		const settings = await this.deps.settingsRepository.getGuildSettings(channel.guildId);
+		return resolveSignalBarEnabled(settings, channel.id.toString(), channel.parentId?.toString() ?? null);
+	}
+
 	async getChannelSignals(authChannel: AuthenticatedChannel): Promise<ChannelSignalsResponse> {
 		this.ensureTextChannel(authChannel.channel);
 		const config = await this.getConfig();
+		if (!(await this.isChannelEnabled(authChannel.channel))) {
+			return {enabled: false, bar_version: config.version, entries: []};
+		}
 		const signalIds = new Set(config.signals.map((signal) => signal.id));
 		const entries = await this.readChannelEntries(authChannel.channel.id.toString());
 		return {
+			enabled: true,
 			bar_version: config.version,
 			entries: entries.filter((entry) => signalIds.has(entry.signal_id)).map(toEntry),
 		};
+	}
+
+	/** Managers are community managers, either person in a 1:1 DM, or a group DM's owner. */
+	private async assertCanManageChannel(authChannel: AuthenticatedChannel, userId: UserID): Promise<void> {
+		const {channel} = authChannel;
+		if (channel.guildId) {
+			await authChannel.checkPermission(Permissions.MANAGE_GUILD);
+		} else if (channel.type === ChannelTypes.GROUP_DM && channel.ownerId !== userId) {
+			throw new MissingPermissionsError();
+		}
+	}
+
+	private async assertCanManageGuild(guildId: GuildID, userId: UserID): Promise<void> {
+		const allowed = await this.deps.gatewayService
+			.checkPermission({guildId, userId, permission: Permissions.MANAGE_GUILD})
+			.catch(() => false);
+		if (!allowed) throw new MissingPermissionsError();
+	}
+
+	async getGuildSettings(guildId: GuildID, userId: UserID): Promise<GuildSignalBarSettings> {
+		await this.assertCanManageGuild(guildId, userId);
+		return this.deps.settingsRepository.getGuildSettings(guildId);
+	}
+
+	async updateGuildSettings(
+		guildId: GuildID,
+		userId: UserID,
+		requested: GuildSignalBarSettings,
+	): Promise<GuildSignalBarSettings> {
+		await this.assertCanManageGuild(guildId, userId);
+		const channels = await this.deps.listGuildChannels(guildId);
+		const categoryIds = new Set<string>();
+		const textChannels: Array<Channel> = [];
+		for (const channel of channels) {
+			if (channel.type === ChannelTypes.GUILD_CATEGORY) categoryIds.add(channel.id.toString());
+			else if (channel.type === ChannelTypes.GUILD_TEXT || channel.type === ChannelTypes.GUILD_ANNOUNCEMENT) {
+				textChannels.push(channel);
+			}
+		}
+		const textChannelIds = new Set(textChannels.map((channel) => channel.id.toString()));
+		const next: GuildSignalBarSettings = {
+			default: requested.default,
+			categories: Object.fromEntries(Object.entries(requested.categories).filter(([id]) => categoryIds.has(id))),
+			channels: Object.fromEntries(Object.entries(requested.channels).filter(([id]) => textChannelIds.has(id))),
+		};
+		const previous = await this.deps.settingsRepository.getGuildSettings(guildId);
+		await this.deps.settingsRepository.setGuildSettings(guildId, next);
+		for (const channel of textChannels) {
+			const channelId = channel.id.toString();
+			const categoryId = channel.parentId?.toString() ?? null;
+			const enabled = resolveSignalBarEnabled(next, channelId, categoryId);
+			if (enabled !== resolveSignalBarEnabled(previous, channelId, categoryId)) {
+				await this.announceEnabled(channel, enabled);
+			}
+		}
+		return next;
+	}
+
+	async setDmEnabled(authChannel: AuthenticatedChannel, userId: UserID, enabled: boolean): Promise<void> {
+		const {channel} = authChannel;
+		this.ensureTextChannel(channel);
+		if (channel.guildId) throw new MissingPermissionsError();
+		await this.assertCanManageChannel(authChannel, userId);
+		if ((await this.deps.settingsRepository.isDmEnabled(channel.id)) === enabled) return;
+		await this.deps.settingsRepository.setDmEnabled(channel.id, enabled);
+		await this.announceEnabled(channel, enabled);
+	}
+
+	/** Tells the channel its bar was switched on or off; switching off clears lit signals. */
+	private async announceEnabled(channel: Channel, enabled: boolean): Promise<void> {
+		const channelId = channel.id.toString();
+		if (!enabled) {
+			const entries = await this.readChannelEntries(channelId);
+			await this.removeEntries(entries.map((entry) => ({channelId, signalId: entry.signal_id, userId: entry.user.id})));
+		}
+		await dispatchChannelEvent({
+			gatewayService: this.deps.gatewayService,
+			channel,
+			event: 'CHANNEL_SIGNAL_BAR_UPDATE',
+			data: {channel_id: channelId, enabled},
+		});
+	}
+
+	/** A manager turns one account's signal off. */
+	async removeUserSignal({
+		authChannel,
+		userId,
+		signalId,
+		targetUserId,
+	}: {
+		authChannel: AuthenticatedChannel;
+		userId: UserID;
+		signalId: string;
+		targetUserId: UserID;
+	}): Promise<void> {
+		await this.assertCanManageChannel(authChannel, userId);
+		const {channel} = authChannel;
+		const removed = await this.removeEntries([
+			{channelId: channel.id.toString(), signalId, userId: targetUserId.toString()},
+		]);
+		if (removed.length > 0) {
+			const config = await this.getConfig();
+			await this.dispatchChannelUpdate(channel, config.version, [], removed);
+		}
 	}
 
 	async activate({
@@ -226,6 +346,7 @@ export class SignalBarService {
 		if (channel.guildId) await authChannel.checkPermission(Permissions.SEND_MESSAGES);
 		const config = await this.getConfig();
 		if (!config.signals.some((signal) => signal.id === signalId)) throw new UnknownSignalError();
+		if (!(await this.isChannelEnabled(channel))) throw new MissingPermissionsError();
 		const user = await this.deps.findUser(userId);
 		if (!user) throw new MissingPermissionsError();
 		let subprofile: ChannelSignalEntry['subprofile'] = null;
@@ -288,11 +409,7 @@ export class SignalBarService {
 		signalId: string;
 	}): Promise<void> {
 		const {channel} = authChannel;
-		if (channel.guildId) {
-			await authChannel.checkPermission(Permissions.MANAGE_GUILD);
-		} else if (channel.type === ChannelTypes.GROUP_DM && channel.ownerId !== userId) {
-			throw new MissingPermissionsError();
-		}
+		await this.assertCanManageChannel(authChannel, userId);
 		const channelId = channel.id.toString();
 		const entries = (await this.readChannelEntries(channelId)).filter((entry) => entry.signal_id === signalId);
 		const removed = await this.removeEntries(entries.map((entry) => ({channelId, signalId, userId: entry.user.id})));
