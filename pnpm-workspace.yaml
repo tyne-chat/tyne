@@ -193,6 +193,8 @@ overrides:
   semver: 7.8.5
   typed-css-modules@0.9.1>glob: 13.0.6
 
+allowUnusedPatches: true
+
 patchedDependencies:
   '@phosphor-icons/react@2.1.10': patches/@phosphor-icons__react@2.1.10.patch
   emscripten-wasm-loader@3.0.3: patches/emscripten-wasm-loader@3.0.3.patch
