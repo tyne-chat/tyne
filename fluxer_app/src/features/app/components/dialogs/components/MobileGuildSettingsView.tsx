@@ -49,6 +49,7 @@ export const MobileGuildSettingsView: React.FC<MobileGuildSettingsViewProps> = o
 			expressions: getGuildSettingsCategoryLabel(i18n, 'expressions'),
 			community: getGuildSettingsCategoryLabel(i18n, 'community'),
 			integrations: getGuildSettingsCategoryLabel(i18n, 'integrations'),
+			message_tools: getGuildSettingsCategoryLabel(i18n, 'message_tools'),
 			user_management: getGuildSettingsCategoryLabel(i18n, 'user_management'),
 		};
 		const handleDeleteGuild = useCallback(() => {
