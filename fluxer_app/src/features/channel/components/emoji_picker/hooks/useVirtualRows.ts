@@ -28,43 +28,51 @@ export function useVirtualRows(
 ) {
 	const {i18n} = useLingui();
 	const collapsedCategories = EmojiPicker.collapsedCategories;
-	return useMemo(
-		() =>
-			buildPickerRows({
-				searchTerm,
-				rendered: renderedEmojis,
-				favorites: favoriteEmojis,
-				frequent: frequentlyUsedEmojis,
-				byGuild: customEmojisByGuildId,
-				perRow: emojisPerRow,
-				isCollapsed: (category) => EmojiPicker.isCategoryCollapsed(category),
-				favoritesLabel: i18n._(FAVORITED_DESCRIPTOR),
-				frequentLabel: i18n._(FREQUENTLY_USED_DESCRIPTOR),
-				extraSections: Array.from(unicodeEmojisByCategory, ([category, items]) => ({
-					category,
-					name: UnicodeEmojis.getCategoryLabel(category, i18n),
-					items,
-				})),
-				createRow: (emojis, index, guildId): Exclude<VirtualRow, {type: 'header'}> => ({
-					type: 'emoji-row',
-					emojis,
-					index,
-					isCustomEmoji: Boolean(guildId),
-					guildId,
-				}),
-			}),
-		[
+	return useMemo(() => {
+		const rows = buildPickerRows({
 			searchTerm,
-			renderedEmojis,
-			favoriteEmojis,
-			frequentlyUsedEmojis,
-			customEmojisByGuildId,
-			unicodeEmojisByCategory,
-			emojisPerRow,
-			collapsedCategories,
-			i18n.locale,
-		],
-	);
+			rendered: renderedEmojis,
+			favorites: favoriteEmojis,
+			frequent: frequentlyUsedEmojis,
+			byGuild: customEmojisByGuildId,
+			perRow: emojisPerRow,
+			isCollapsed: (category) => EmojiPicker.isCategoryCollapsed(category),
+			favoritesLabel: i18n._(FAVORITED_DESCRIPTOR),
+			frequentLabel: i18n._(FREQUENTLY_USED_DESCRIPTOR),
+			extraSections: Array.from(unicodeEmojisByCategory, ([category, items]) => ({
+				category,
+				name: UnicodeEmojis.getCategoryLabel(category, i18n),
+				items,
+			})),
+			createRow: (emojis, index, guildId): Exclude<VirtualRow, {type: 'header'}> => ({
+				type: 'emoji-row',
+				emojis,
+				index,
+				isCustomEmoji: Boolean(guildId),
+				guildId,
+			}),
+		});
+		// Fork: rows of the favourites section say so, so that favourites can be reordered by dragging.
+		let inFavorites = false;
+		for (const row of rows) {
+			if (row.type === 'header') {
+				inFavorites = row.category === 'favorites';
+			} else if (inFavorites) {
+				row.category = 'favorites';
+			}
+		}
+		return rows;
+	}, [
+		searchTerm,
+		renderedEmojis,
+		favoriteEmojis,
+		frequentlyUsedEmojis,
+		customEmojisByGuildId,
+		unicodeEmojisByCategory,
+		emojisPerRow,
+		collapsedCategories,
+		i18n.locale,
+	]);
 }
 
 export const getPickerRowItems = (row: VirtualRow) => (row.type === 'header' ? null : row.emojis);
