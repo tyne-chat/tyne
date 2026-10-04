@@ -653,7 +653,7 @@ msgstr "{0} notice(s) during import"
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} of {1} {2} ({3}%)"
 
-#. Tooltip on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
+#. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
 msgstr "{label}：{names}"
 
