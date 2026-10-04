@@ -38,7 +38,7 @@ export const GuildSettingsModal: React.FC<GuildSettingsModalProps> = observer(
 		const [selectedTab, setSelectedTab] = useState<GuildSettingsTabType>(initialTabProp ?? 'overview');
 		const discoveryEnabled = RuntimeConfig.discoveryEnabled;
 		const availableTabs = useMemo(() => {
-			const guildSettingsTabs = getGuildSettingsTabs(i18n);
+			const guildSettingsTabs = getGuildSettingsTabs(i18n, guildId);
 			if (!guild) return guildSettingsTabs;
 			return guildSettingsTabs.filter((tab) => {
 				if (tab.permission) {
