@@ -46,7 +46,7 @@ const HIDE_SIGNAL_BAR_DESCRIPTOR = msg({
 const SIGNAL_WITH_NAMES_DESCRIPTOR = msg({
 	message: '{label}: {names}',
 	comment:
-		'Tooltip on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.',
+		'Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.',
 });
 
 const MAX_BADGES = 3;
@@ -81,7 +81,21 @@ const SignalButton = observer(
 		const imageUrl = getSignalImageUrl(signal, lit && shouldAnimate);
 		const label = getSignalLabel(signal);
 		const names = entries.map((entry) => getSignalEntryName(entry, guildId));
-		const tooltip = lit ? i18n._(SIGNAL_WITH_NAMES_DESCRIPTOR, {label, names: names.join(', ')}) : label;
+		const ariaLabel = lit ? i18n._(SIGNAL_WITH_NAMES_DESCRIPTOR, {label, names: names.join(', ')}) : label;
+		const tooltip = lit
+			? () => (
+					<div className={styles.tooltip} data-flx="signal-bar.signal-button.tooltip-content">
+						<div className={styles.tooltipLabel} data-flx="signal-bar.signal-button.tooltip-label">
+							{label}
+						</div>
+						{entries.map((entry, i) => (
+							<div key={entry.user.id} data-flx="signal-bar.signal-button.tooltip-name">
+								{names[i]}
+							</div>
+						))}
+					</div>
+				)
+			: label;
 		const buttonRef = useRef<HTMLButtonElement | null>(null);
 		const [{isDragging}, dragRef] = useDrag(
 			() => ({
@@ -151,7 +165,7 @@ const SignalButton = observer(
 						canManage && styles.signalDraggable,
 						isDragging && styles.signalDragging,
 					)}
-					aria-label={tooltip}
+					aria-label={ariaLabel}
 					aria-pressed={mine}
 					onClick={handleClick}
 					onContextMenu={canReset ? openMenu : suppressMenu}
