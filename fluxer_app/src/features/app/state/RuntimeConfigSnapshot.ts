@@ -367,6 +367,9 @@ function readCommunity(value: unknown): InstanceCommunity {
 			'single_community_guild_id',
 			'community.single_community_guild_id',
 		),
+		signal_bar_guild_id: Object.hasOwn(source, 'signal_bar_guild_id')
+			? readNullableNonEmptyString(source, 'signal_bar_guild_id', 'community.signal_bar_guild_id')
+			: null,
 		direct_messages_disabled: readBoolean(source, 'direct_messages_disabled', 'community.direct_messages_disabled'),
 		guild_create_access: readOptionalBoolean(source, 'guild_create_access', 'community.guild_create_access') ?? true,
 		personal_notes_enabled:
