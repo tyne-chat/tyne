@@ -129,6 +129,9 @@ const SignalButton = observer(
 			},
 			[channel.id, guildId, signal, canReset],
 		);
+		const suppressMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
+			event.preventDefault();
+		}, []);
 		const handleClick = useCallback(() => {
 			if (!canToggle) return;
 			if (mine) {
@@ -151,7 +154,7 @@ const SignalButton = observer(
 					aria-label={tooltip}
 					aria-pressed={mine}
 					onClick={handleClick}
-					onContextMenu={openMenu}
+					onContextMenu={canReset ? openMenu : suppressMenu}
 					data-flx="signal-bar.signal-button.button"
 				>
 					{imageUrl ? (
@@ -228,7 +231,7 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 		if (!next) return;
 		void SignalBarStore.saveSignals(next).finally(() => setDraft(null));
 	}, []);
-	if (!hasSignals) return null;
+	if (!hasSignals || !SignalBarStore.isEnabled(channel.id)) return null;
 	const isGuildChannel = channel.guildId != null;
 	const canToggle = !isGuildChannel || Permission.can(Permissions.SEND_MESSAGES, channel);
 	const canReset = isGuildChannel
