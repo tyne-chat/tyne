@@ -94,6 +94,10 @@ import userProcessPendingDeletions from '@app/api/worker/tasks/UserProcessPendin
 import type {WorkerTaskName} from '@app/api/worker/WorkerLaneConfig';
 import type {WorkerTaskHandler} from '@pkgs/worker/src/contracts/WorkerTask';
 
+// Fork imports.
+
+import sweepSignalBar from '@app/api/worker/tasks/SweepSignalBar';
+
 export const workerTasks: Record<WorkerTaskName, WorkerTaskHandler> = {
 	applicationProcessDeletion,
 	archiveInactiveThreads,
@@ -181,6 +185,7 @@ export const workerTasks: Record<WorkerTaskName, WorkerTaskHandler> = {
 	syncCrosspostCopies,
 	syncCrosspostedMessage,
 	flushUserActivityBuffer,
+	sweepSignalBar,
 	userProcessPendingDeletion,
 	userProcessPendingDeletions,
 };

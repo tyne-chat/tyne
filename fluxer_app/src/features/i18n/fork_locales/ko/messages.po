@@ -37,6 +37,9 @@ msgstr "Add Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Add Tag Pair ({0}/5)"
 
+msgid "Add signal"
+msgstr "시그널 추가"
+
 msgid "All Personas"
 msgstr "All Personas"
 
@@ -161,6 +164,10 @@ msgstr "Failed to read the selected file."
 msgid "Failed to save persona"
 msgstr "Failed to save persona"
 
+#. Error toast in the community Message Tools settings tab when saving the signal bar fails.
+msgid "Failed to save the signal bar. Try again."
+msgstr "시그널 바를 저장하지 못했어요. 다시 시도해 주세요."
+
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
 msgstr "Failed to upload icon to server"
@@ -176,6 +183,10 @@ msgstr "Hide channel list"
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
 msgstr "Hide server list"
+
+#. Tooltip for the small arrow button that collapses the signal bar above the message box.
+msgid "Hide signal bar"
+msgstr "시그널 바 숨기기"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
@@ -256,6 +267,10 @@ msgstr "Member #{index}"
 msgid "Members with Avatars"
 msgstr "Members with Avatars"
 
+#. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
+msgid "Message Tools"
+msgstr "메시지 도구"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "New Persona"
@@ -275,6 +290,13 @@ msgstr "No personas configured yet. Create one in Settings."
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+
+msgid "No signals yet. The bar stays hidden until you add one."
+msgstr "아직 시그널이 없어요. 하나를 추가할 때까지 바는 숨겨져 있어요."
+
+#. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
+msgid "Nobody has this signal on"
+msgstr "이 시그널을 켠 사람이 없어요"
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
@@ -407,6 +429,10 @@ msgstr "Replace All Personas"
 msgid "Replace all existing personas (Destructive)"
 msgstr "Replace all existing personas (Destructive)"
 
+#. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
+msgid "Reset signal for everyone"
+msgstr "모두의 시그널 초기화"
+
 msgid "Root Account (Default)"
 msgstr "Root Account (Default)"
 
@@ -454,6 +480,29 @@ msgstr "Show personas button"
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
 msgstr "Show server list"
+
+#. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
+msgid "Show signal bar"
+msgstr "시그널 바 표시"
+
+msgid "Signal Bar"
+msgstr "시그널 바"
+
+#. Community settings tab for choosing the toggleable signal icons shown above the message box.
+msgctxt "community-settings-tab"
+msgid "Signal Bar"
+msgstr "시그널 바"
+
+#. Accessible label for the row of toggleable signal icons above the message box.
+msgid "Signal bar"
+msgstr "시그널 바"
+
+#. Accessible label for the text field that names a signal in the Message Tools settings tab.
+msgid "Signal label"
+msgstr "시그널 라벨"
+
+msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
+msgstr "시그널은 메시지 입력창 위에 표시되는 아이콘으로, 누구나 켜고 끌 수 있으며 대화에 있는 모두가 누가 켰는지 볼 수 있어요. 이 바는 이 인스턴스의 모든 커뮤니티와 다이렉트 메시지에서 공유돼요. 드래그해서 순서를 바꾸세요."
 
 msgid "Signature Emojis"
 msgstr "시그니처 이모지"
@@ -523,6 +572,10 @@ msgstr "채널 목록 전환"
 msgid "Total Members"
 msgstr "Total Members"
 
+#. Signal bar right-click menu action that turns your own signal off. {name} is the persona or account name it is currently shown as.
+msgid "Turn off {name}"
+msgstr "{name} 끄기"
+
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Unlisted"
@@ -581,6 +634,10 @@ msgstr "{0} notice(s) during import"
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} of {1} {2} ({3}%)"
+
+#. Tooltip on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
+msgid "{label}: {names}"
+msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
