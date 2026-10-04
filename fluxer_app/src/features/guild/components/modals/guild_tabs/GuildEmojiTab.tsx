@@ -35,7 +35,6 @@ import {getAcceptString} from '@fluxer/constants/src/AssetFormatPolicy';
 import {Permissions} from '@fluxer/constants/src/ChannelConstants';
 import {EMOJI_MAX_SIZE, MAX_GUILD_EMOJIS} from '@fluxer/constants/src/LimitConstants';
 import type {GuildEmojiWithUser} from '@fluxer/schema/src/domains/guild/GuildEmojiSchemas';
-import {sortBySnowflakeDesc} from '@fluxer/snowflake/src/SnowflakeUtils';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
 import {MagnifyingGlassIcon, WarningCircleIcon} from '@phosphor-icons/react';
@@ -44,6 +43,10 @@ import {matchSorter} from 'match-sorter';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
+
+// Fork imports.
+
+import {compareEmojisByName} from '@app/features/emoji/utils/EmojiSortingUtils';
 
 const NO_EMOJI_SLOTS_AVAILABLE_DESCRIPTOR = msg({
 	message: 'No emoji slots available',
@@ -133,7 +136,7 @@ const GuildEmojiTab: React.FC<{guildId: string}> = observer(function GuildEmojiT
 					typeof updater === 'function'
 						? (updater as (previous: ReadonlyArray<GuildEmojiWithUser>) => ReadonlyArray<GuildEmojiWithUser>)(prev)
 						: updater;
-				const frozen = Object.freeze(sortBySnowflakeDesc(next));
+				const frozen = Object.freeze(next.slice().sort(compareEmojisByName));
 				seedGuildEmojiCache(guildId, frozen);
 				return frozen;
 			});
