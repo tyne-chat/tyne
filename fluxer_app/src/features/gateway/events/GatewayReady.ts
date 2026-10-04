@@ -63,6 +63,7 @@ import {runInAction} from 'mobx';
 
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 
 const logger = new Logger('READY Handler');
 
@@ -130,6 +131,7 @@ function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext,
 		PersonaCommands.resetFetchPersonasCooldown();
 	}
 	context.setPreviousSessionId(currentSessionId);
+	SignalBarStore.invalidate();
 	const guilds = data.guilds;
 	const channels: Array<WireChannel> = [];
 	for (const channel of data.private_channels ?? []) {

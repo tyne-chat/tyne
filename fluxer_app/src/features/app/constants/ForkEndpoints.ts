@@ -4,6 +4,10 @@
 // upstream's additions to its own list never meet the fork's.
 
 export const ForkEndpoints = {
+	CHANNEL_SIGNALS: (channelId: string) => `/channels/${channelId}/signals`,
+	CHANNEL_SIGNAL: (channelId: string, signalId: string) => `/channels/${channelId}/signals/${signalId}`,
+	CHANNEL_SIGNAL_ME: (channelId: string, signalId: string) => `/channels/${channelId}/signals/${signalId}/@me`,
+	INSTANCE_SIGNAL_BAR: '/instance/signal-bar',
 	CHANNEL_PERSONA_MENTIONS: (channelId: string) => `/channels/${channelId}/persona-mentions`,
 	USER_PERSONAS: '/users/@me/personas',
 	USER_PERSONA: (personaId: string) => `/users/@me/personas/${personaId}`,
