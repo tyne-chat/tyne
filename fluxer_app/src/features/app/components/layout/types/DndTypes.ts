@@ -12,6 +12,7 @@ export const DragItemType = Object.freeze({
 	CONNECTION: 'connection',
 	FAVORITES_CHANNEL: 'favorites-channel',
 	FAVORITES_CATEGORY: 'favorites-category',
+	SIGNAL: 'signal',
 } as const);
 
 export type DragItemType = (typeof DragItemType)[keyof typeof DragItemType];

@@ -148,6 +148,7 @@ import {createMiddleware} from 'hono/factory';
 
 import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
 import {PersonaService} from '@app/api/persona/PersonaService';
+import {SignalBarService} from '@app/api/signal_bar/SignalBarService';
 import {UserGuildRepository} from '@app/api/user/repositories/account/UserGuildRepository';
 import {UserChannelRepository} from '@app/api/user/repositories/UserChannelRepository';
 
@@ -231,6 +232,7 @@ class RequestServices implements RequestScopedServices {
 	private cachedFavoriteMemeService: FavoriteMemeService | undefined;
 	private cachedFavoriteMemeRequestService: FavoriteMemeRequestService | undefined;
 	private cachedPersonaService: PersonaService | undefined;
+	private cachedSignalBarService: SignalBarService | undefined;
 	private cachedSingleCommunityService: SingleCommunityService | undefined;
 	private cachedEmailChangeService: EmailChangeService | undefined;
 	private cachedMfaBackupCodesChallengeService: MfaBackupCodesChallengeService | undefined;
@@ -671,6 +673,19 @@ class RequestServices implements RequestScopedServices {
 			userChannelRepository: new UserChannelRepository(),
 		});
 		return this.cachedPersonaService;
+	}
+
+	get signalBarService(): SignalBarService {
+		this.cachedSignalBarService ??= new SignalBarService({
+			instanceConfigRepository: getInstanceConfigRepository(),
+			cacheService: getCacheService(),
+			gatewayService: this.gatewayService,
+			guildRepository: this.requestGuildRepository,
+			personaRepository: getPersonaRepository(),
+			findUser: (userId) => getUserRepository().findUnique(userId),
+			findChannel: (channelId) => this.channelRepository.findUnique(channelId),
+		});
+		return this.cachedSignalBarService;
 	}
 
 	get emailChangeService(): EmailChangeService {
