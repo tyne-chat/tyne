@@ -9,7 +9,11 @@ import {
 	handleUserPersonasUpdate,
 	handleUserPersonaUpdate,
 } from '@app/features/persona/events/PersonaEvents';
-import {handleChannelSignalUpdate, handleSignalBarUpdate} from '@app/features/signal_bar/events/SignalBarEvents';
+import {
+	handleChannelSignalBarUpdate,
+	handleChannelSignalUpdate,
+	handleSignalBarUpdate,
+} from '@app/features/signal_bar/events/SignalBarEvents';
 
 type GatewayEventHandler = Parameters<GatewayHandlerRegistry['set']>[1];
 
@@ -24,4 +28,5 @@ export function registerForkGatewayHandlers(registry: GatewayHandlerRegistry): v
 	registry.set('GUILD_PERSONAS_DIRTY', handleGuildPersonasDirty as GatewayEventHandler);
 	registry.set('CHANNEL_SIGNAL_UPDATE', handleChannelSignalUpdate as GatewayEventHandler);
 	registry.set('SIGNAL_BAR_UPDATE', handleSignalBarUpdate as GatewayEventHandler);
+	registry.set('CHANNEL_SIGNAL_BAR_UPDATE', handleChannelSignalBarUpdate as GatewayEventHandler);
 }
