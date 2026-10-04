@@ -9,6 +9,10 @@ import type {
 import type {UserPartial} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 import {sortBySnowflakeDesc} from '@fluxer/snowflake/src/SnowflakeUtils';
 
+// Fork imports.
+
+import {compareEmojisByName} from '@app/features/emoji/utils/EmojiSortingUtils';
+
 type EmojiUpdateListener = (emojis: ReadonlyArray<GuildEmojiWithUser>) => void;
 type StickerUpdateListener = (stickers: ReadonlyArray<GuildStickerWithUser>) => void;
 
@@ -37,6 +41,10 @@ function notifyListeners<T>(
 	}
 }
 
+function sortEmojisByName<T extends {name: string; id: string}>(items: ReadonlyArray<T>): Array<T> {
+	return [...items].sort(compareEmojisByName);
+}
+
 function setCache<
 	T extends {
 		id: string;
@@ -48,8 +56,9 @@ function setCache<
 	guildId: string,
 	value: ReadonlyArray<T>,
 	shouldNotify: boolean,
+	sortFn: (items: ReadonlyArray<T>) => ReadonlyArray<T> = sortBySnowflakeDesc,
 ) {
-	const frozen = freezeList(sortBySnowflakeDesc(value));
+	const frozen = freezeList(sortFn(value));
 	cache.set(guildId, frozen);
 	accessSequence.delete(guildId);
 	accessSequence.add(guildId);
@@ -76,11 +85,11 @@ function evictCacheIfNeeded<T>(cache: Map<string, T>, accessSequence: Set<string
 }
 
 export function seedGuildEmojiCache(guildId: string, emojis: ReadonlyArray<GuildEmojiWithUser>): void {
-	setCache(emojiCache, emojiAccessSequence, emojiListeners, guildId, emojis, false);
+	setCache(emojiCache, emojiAccessSequence, emojiListeners, guildId, emojis, false, sortEmojisByName);
 }
 
 export function seedGuildStickerCache(guildId: string, stickers: ReadonlyArray<GuildStickerWithUser>): void {
-	setCache(stickerCache, stickerAccessSequence, stickerListeners, guildId, stickers, false);
+	setCache(stickerCache, stickerAccessSequence, stickerListeners, guildId, stickers, false, sortBySnowflakeDesc);
 }
 
 function subscribe<T>(
@@ -106,6 +115,8 @@ function patchFromGateway<T extends {id: string; user?: UserPartial}>(
 	listeners: Map<string, Set<(items: ReadonlyArray<T & {user: UserPartial}>) => void>>,
 	guildId: string,
 	updates: ReadonlyArray<T>,
+	// Fork: the order the cached list is kept in.
+	sortFn?: (items: ReadonlyArray<T & {user: UserPartial}>) => ReadonlyArray<T & {user: UserPartial}>,
 ): void {
 	const previous = cache.get(guildId) ?? [];
 	const previousUserById = new Map(previous.map((item) => [item.id, item.user]));
@@ -115,7 +126,7 @@ function patchFromGateway<T extends {id: string; user?: UserPartial}>(
 			return user ? {...item, user} : null;
 		})
 		.filter((entry): entry is T & {user: UserPartial} => Boolean(entry));
-	setCache(cache, accessSequence, listeners, guildId, next, true);
+	setCache(cache, accessSequence, listeners, guildId, next, true, sortFn);
 }
 
 export function subscribeToGuildEmojiUpdates(guildId: string, listener: EmojiUpdateListener): () => void {
@@ -125,7 +136,7 @@ export function subscribeToGuildStickerUpdates(guildId: string, listener: Sticke
 	return subscribe(stickerListeners, guildId, listener);
 }
 export function patchGuildEmojiCacheFromGateway(guildId: string, updates: ReadonlyArray<GuildEmoji>): void {
-	patchFromGateway(emojiCache, emojiAccessSequence, emojiListeners, guildId, updates);
+	patchFromGateway(emojiCache, emojiAccessSequence, emojiListeners, guildId, updates, sortEmojisByName);
 }
 export function patchGuildStickerCacheFromGateway(guildId: string, updates: ReadonlyArray<GuildSticker>): void {
 	patchFromGateway(stickerCache, stickerAccessSequence, stickerListeners, guildId, updates);

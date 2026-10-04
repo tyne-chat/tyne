@@ -11,6 +11,7 @@ import {useMemo, useRef} from 'react';
 
 // Fork imports.
 
+import {compareEmojisByName} from '@app/features/emoji/utils/EmojiSortingUtils';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
@@ -31,10 +32,14 @@ export function useEmojiCategories(
 		() => EmojiPicker.getFrecentEmojis(allEmojis as ReadonlyArray<FlatEmoji>, 42, pinnedRanking, effectivePersona?.id),
 		[allEmojis, pinnedRanking, effectivePersona?.id],
 	);
-	const customEmojisByGuildId = useMemo(
-		() => groupByGuildInGuildListOrder(allEmojis),
-		[allEmojis, guilds, selectedGuildId],
-	);
+	const customEmojisByGuildId = useMemo(() => {
+		const byGuild = groupByGuildInGuildListOrder(allEmojis);
+		// Fork: custom emojis are listed A-Z within each community.
+		for (const guildList of byGuild.values()) {
+			guildList.sort(compareEmojisByName);
+		}
+		return byGuild;
+	}, [allEmojis, guilds, selectedGuildId]);
 	const unicodeEmojisByCategory = useMemo(() => {
 		const unicodeEmojis = allEmojis.filter((emoji) => emoji.guildId == null);
 		const unicodeEmojisByCategory = new Map<string, Array<FlatEmoji>>();
