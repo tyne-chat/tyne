@@ -272,4 +272,16 @@ export const UserRateLimitConfigs = {
 		bucket: 'user:persona:mutate',
 		config: {limit: 30, windowMs: ms('1 minute')},
 	} as RouteRateLimitConfig,
+	SIGNAL_BAR_READ: {
+		bucket: 'signal_bar:read',
+		config: {limit: 60, windowMs: ms('10 seconds')},
+	} as RouteRateLimitConfig,
+	SIGNAL_BAR_TOGGLE: {
+		bucket: 'signal_bar:toggle',
+		config: {limit: 30, windowMs: ms('10 seconds')},
+	} as RouteRateLimitConfig,
+	SIGNAL_BAR_MUTATE: {
+		bucket: 'signal_bar:mutate',
+		config: {limit: 30, windowMs: ms('1 minute')},
+	} as RouteRateLimitConfig,
 } as const;

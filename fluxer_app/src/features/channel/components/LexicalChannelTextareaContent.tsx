@@ -132,6 +132,7 @@ import {useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useStat
 
 import {openTimestampModal} from '@app/features/channel/components/modals/TimestampModal';
 import {PersonaComposerPill} from '@app/features/persona/components/PersonaComposerPill';
+import {SignalBar} from '@app/features/signal_bar/components/SignalBar';
 
 const PLUS_MENU_DOUBLE_CLICK_MS = 500;
 const MESSAGE_SCROLLER_SELECTOR = '[data-flx="channel.messages.scroller"][data-fluxer-scroll-container="true"]';
@@ -1350,6 +1351,7 @@ export const LexicalChannelTextareaContent = observer(
 							)}
 						</flx-channel-textarea-status-rail>
 					)}
+					<SignalBar channel={channel} attached={true} data-flx="channel.lexical-channel-textarea-content.signal-bar" />
 					{hasLeadingStatusContent && (
 						<div className={wrapperStyles.composerActionStack} data-flx="channel.textarea.composer-action-stack">
 							{topBarContent !== null && (
