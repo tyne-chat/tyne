@@ -198,6 +198,8 @@ overrides:
   typed-css-modules@0.9.1>glob: 13.0.6
   zod@^4: 'catalog:'
 
+allowUnusedPatches: true
+
 patchedDependencies:
   '@electron/universal@3.0.4': patches/@electron__universal@3.0.4.patch
   '@phosphor-icons/react@2.1.10': patches/@phosphor-icons__react@2.1.10.patch
