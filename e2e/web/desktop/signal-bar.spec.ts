@@ -31,6 +31,13 @@ test.describe('Signal Bar', () => {
 		}
 	};
 
+	const setEverywhere = (enabled: boolean) =>
+		api(seed.E2E_ALICE_TOKEN, 'PUT', `/guilds/${seed.E2E_GUILD_ID}/signal-bar/channels`, {
+			default: enabled,
+			categories: {},
+			channels: {},
+		});
+
 	const signal = (page: Page, label: string) =>
 		page.getByRole('toolbar', {name: 'Signal bar'}).locator(`button[aria-label^="${label}"]`);
 
@@ -44,13 +51,16 @@ test.describe('Signal Bar', () => {
 				{emoji_name: '✅', label: 'Done'},
 			],
 		});
+		// The bar is off in every channel until a community manager switches it on.
+		await setEverywhere(true);
 	});
 
 	test.afterAll(async () => {
+		await setEverywhere(false);
 		await api(seed.E2E_ALICE_TOKEN, 'PUT', '/instance/signal-bar', {signals: []});
 	});
 
-	test('signals toggle in real time, follow the active persona, and can be reset by a manager', async ({
+	test('signals toggle in real time, follow the active persona, and are managed per channel', async ({
 		page,
 		browser,
 	}) => {
@@ -97,13 +107,36 @@ test.describe('Signal Bar', () => {
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading');
 			await expect(signal(bobPage, 'Reading')).toHaveAttribute('aria-pressed', 'false');
 
-			// Alice manages the community, so she can reset a signal for everyone.
+			// Only managers get the signal menu. Bob's right-click opens nothing.
+			await signal(bobPage, 'Reading').click();
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+			await signal(bobPage, 'Reading').click({button: 'right'});
+			await expect(bobPage.getByText('Reset signal for everyone')).toHaveCount(0);
+
+			// Alice manages the community, so she can turn Bob's signal off...
+			await signal(page, 'Reading').click({button: 'right'});
+			await page.getByText(/^Turn off Bob Multi/).click();
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading');
+			await expect(signal(bobPage, 'Reading')).toHaveAttribute('aria-pressed', 'false');
+
+			// ...or reset the signal for everyone.
 			await signal(bobPage, 'Reading').click();
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
 			await signal(page, 'Reading').click({button: 'right'});
 			await page.getByText('Reset signal for everyone').click();
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading');
 			await expect(signal(bobPage, 'Reading')).toHaveAttribute('aria-label', 'Reading');
+
+			// Switching the bar off for the community hides it for everyone straight away,
+			// and switching it back on brings it back with nothing lit.
+			await signal(bobPage, 'Reading').click();
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+			await setEverywhere(false);
+			await expect(signal(bobPage, 'Reading')).toHaveCount(0);
+			await expect(signal(page, 'Reading')).toHaveCount(0);
+			await setEverywhere(true);
+			await expect(signal(bobPage, 'Reading')).toBeVisible();
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading');
 		} finally {
 			await bobContext.close();
 		}
