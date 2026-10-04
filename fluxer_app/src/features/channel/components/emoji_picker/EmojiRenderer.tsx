@@ -23,6 +23,7 @@ import React, {useEffect, useImperativeHandle, useMemo, useRef} from 'react';
 
 // Fork imports.
 
+import {useMergeRefs} from '@app/features/app/hooks/useMergeRefs';
 import {EmojiPickerReactionContext} from '@app/features/channel/components/EmojiPicker';
 import ExpressionPicker from '@app/features/emoji/state/ExpressionPicker';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
@@ -30,7 +31,8 @@ import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import {PushPinIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
-import {useContext} from 'react';
+import {useCallback, useContext, useState} from 'react';
+import {useDrag, useDrop} from 'react-dnd';
 
 type PickerEmojiImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
 	src: string;
@@ -89,6 +91,12 @@ const PickerEmojiImage = ({src, alt, ...props}: PickerEmojiImageProps) => {
 	);
 };
 
+const FAVORITE_EMOJI_DND_TYPE = 'FAVORITE_EMOJI';
+
+interface FavoriteEmojiDragItem {
+	key: string;
+}
+
 interface EmojiRendererProps {
 	emoji: FlatEmoji;
 	handleHover: (emoji: FlatEmoji | null) => void;
@@ -98,6 +106,7 @@ interface EmojiRendererProps {
 	shouldAnimate: boolean;
 	isHighlighted?: boolean;
 	shouldScrollIntoView?: boolean;
+	isFavoriteRow?: boolean;
 }
 
 const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps>(
@@ -111,6 +120,7 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 			shouldAnimate,
 			isHighlighted = false,
 			shouldScrollIntoView = false,
+			isFavoriteRow = false,
 			...props
 		},
 		forwardedRef,
@@ -142,6 +152,94 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 					: (emoji.url ?? ''),
 			[emoji.id, emoji.animated, emoji.url, shouldAnimate],
 		);
+
+		const emojiUsageKey = useMemo(() => getEmojiUsageKey(emoji), [emoji]);
+		const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null);
+
+		const [{isDragging}, dragRef] = useDrag(
+			() => ({
+				type: FAVORITE_EMOJI_DND_TYPE,
+				item: (): FavoriteEmojiDragItem => ({key: emojiUsageKey}),
+				canDrag: () => Boolean(isFavoriteRow),
+				collect: (monitor) => ({
+					isDragging: monitor.isDragging(),
+				}),
+			}),
+			[emojiUsageKey, isFavoriteRow],
+		);
+
+		const [{isOver}, dropRef] = useDrop(
+			() => ({
+				accept: FAVORITE_EMOJI_DND_TYPE,
+				canDrop: (item: FavoriteEmojiDragItem) => Boolean(isFavoriteRow) && item.key !== emojiUsageKey,
+				hover: (item: FavoriteEmojiDragItem, monitor) => {
+					if (!isFavoriteRow || item.key === emojiUsageKey) {
+						setDropPosition(null);
+						return;
+					}
+					const button = emojiRef.current;
+					if (!button) return;
+					const boundingRect = button.getBoundingClientRect();
+					const clientOffset = monitor.getClientOffset();
+					if (!clientOffset) return;
+					const hoverMiddleX = (boundingRect.right - boundingRect.left) / 2;
+					const hoverClientX = clientOffset.x - boundingRect.left;
+					const pos = hoverClientX < hoverMiddleX ? 'before' : 'after';
+					setDropPosition(pos);
+				},
+				drop: (item: FavoriteEmojiDragItem, monitor) => {
+					if (!isFavoriteRow || item.key === emojiUsageKey) return;
+					const button = emojiRef.current;
+					let position: 'before' | 'after' = 'before';
+					if (button) {
+						const boundingRect = button.getBoundingClientRect();
+						const clientOffset = monitor.getClientOffset();
+						if (clientOffset) {
+							const hoverMiddleX = (boundingRect.right - boundingRect.left) / 2;
+							const hoverClientX = clientOffset.x - boundingRect.left;
+							position = hoverClientX < hoverMiddleX ? 'before' : 'after';
+						}
+					}
+					EmojiPicker.reorderFavorite(item.key, emojiUsageKey, position);
+					setDropPosition(null);
+				},
+				collect: (monitor) => ({
+					isOver: monitor.isOver({shallow: true}) && monitor.canDrop(),
+				}),
+			}),
+			[emojiUsageKey, isFavoriteRow],
+		);
+
+		useEffect(() => {
+			if (!isOver) {
+				setDropPosition(null);
+			}
+		}, [isOver]);
+
+		const dragConnectorRef = useCallback(
+			(node: HTMLButtonElement | null) => {
+				if (isFavoriteRow) {
+					dragRef(node);
+				} else {
+					dragRef(null);
+				}
+			},
+			[isFavoriteRow, dragRef],
+		);
+
+		const dropConnectorRef = useCallback(
+			(node: HTMLButtonElement | null) => {
+				if (isFavoriteRow) {
+					dropRef(node);
+				} else {
+					dropRef(null);
+				}
+			},
+			[isFavoriteRow, dropRef],
+		);
+
+		const mergedButtonRef = useMergeRefs([emojiRef, dragConnectorRef, dropConnectorRef]);
+
 		const handleClick = (e: React.MouseEvent) => {
 			if (!availability.canUse) {
 				e.preventDefault();
@@ -171,17 +269,21 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 		};
 		const renderButton = (children: React.ReactNode) => {
 			const isDisabled = !availability.canUse;
+			const showLeftIndicator = isOver && dropPosition === 'before';
+			const showRightIndicator = isOver && dropPosition === 'after';
 			const className = clsx(
 				styles.emojiRenderer,
+				isFavoriteRow && styles.favoriteEmoji,
 				isHighlighted && styles.selectedEmojiRenderer,
 				isDisabled && 'cursor-not-allowed',
+				isDragging && styles.emojiDragging,
 			);
 			return (
 				<FocusRing offset={-2} data-flx="channel.emoji-picker.emoji-renderer.render-button.focus-ring">
 					<button
 						type="button"
 						tabIndex={-1}
-						ref={emojiRef}
+						ref={mergedButtonRef}
 						onMouseEnter={() => handleHover(emoji)}
 						onMouseLeave={() => handleHover(null)}
 						onClick={handleClick}
@@ -193,6 +295,20 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 						data-flx="channel.emoji-picker.emoji-renderer.render-button.option.click.button"
 						{...props}
 					>
+						{showLeftIndicator && (
+							<div
+								className={styles.favoriteDropIndicatorLeft}
+								aria-hidden={true}
+								data-flx="channel.emoji-picker.emoji-renderer.favorite-drop-indicator-left"
+							/>
+						)}
+						{showRightIndicator && (
+							<div
+								className={styles.favoriteDropIndicatorRight}
+								aria-hidden={true}
+								data-flx="channel.emoji-picker.emoji-renderer.favorite-drop-indicator-right"
+							/>
+						)}
 						{children}
 						{isPinned && (
 							<div
