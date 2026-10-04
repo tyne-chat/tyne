@@ -29,7 +29,14 @@ vi.mock('react-dnd', () => ({
 	useDrop: () => [{}, (node: unknown) => node],
 }));
 vi.mock('@app/features/ui/tooltip/Tooltip', () => ({
-	Tooltip: ({children}: {children?: React.ReactNode}) => children,
+	Tooltip: ({children, text}: {children?: React.ReactNode; text: string | (() => React.ReactNode)}) => (
+		<>
+			{children}
+			<span data-testid="tooltip" data-flx="signal-bar.signal-bar-test.tooltip.tooltip">
+				{typeof text === 'function' ? text() : text}
+			</span>
+		</>
+	),
 }));
 vi.mock('@app/features/ui/components/Avatar', () => ({
 	Avatar: () => <span data-testid="badge-avatar" data-flx="signal-bar.signal-bar-test.avatar.badge-avatar" />,
@@ -121,6 +128,8 @@ describe('SignalBar', () => {
 		const reading = button('Reading');
 		const done = button('✅');
 		expect(reading?.getAttribute('aria-label')).toBe('Reading: alice, bob');
+		const lines = Array.from(reading?.nextElementSibling?.querySelectorAll(`.${styles.tooltip} > div`) ?? []);
+		expect(lines.map((line) => line.textContent)).toEqual(['Reading', 'alice', 'bob']);
 		expect(reading?.querySelector(`.${styles.emojiOff}`)).toBeNull();
 		expect(reading?.querySelectorAll('[data-testid="badge-avatar"]')).toHaveLength(2);
 		expect(done?.getAttribute('aria-label')).toBe('✅');
