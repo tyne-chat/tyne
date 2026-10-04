@@ -54,7 +54,7 @@ describe('SignalBarStore', () => {
 	it('keeps one entry per account and replaces it in place when its persona changes', async () => {
 		getMock.mockResolvedValue({
 			ok: true,
-			body: {bar_version: 3, entries: [entry('a', '1'), entry('a', '2')]},
+			body: {enabled: true, bar_version: 3, entries: [entry('a', '1'), entry('a', '2')]},
 		} as never);
 		await SignalBarStore.fetchChannel('c');
 		expect(SignalBarStore.getEntries('c', 'a')).toHaveLength(2);
@@ -81,7 +81,7 @@ describe('SignalBarStore', () => {
 		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
 		getMock.mockResolvedValue({
 			ok: true,
-			body: {bar_version: 3, entries: [entry('a', '1'), entry('b', '2')]},
+			body: {enabled: true, bar_version: 3, entries: [entry('a', '1'), entry('b', '2')]},
 		} as never);
 		await SignalBarStore.fetchChannel('sync');
 		expect(putMock).not.toHaveBeenCalled();
@@ -96,7 +96,7 @@ describe('SignalBarStore', () => {
 	it('updates the own badge locally as soon as the composer reports a new persona', async () => {
 		Authentication.setUserId('1');
 		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
-		getMock.mockResolvedValue({ok: true, body: {bar_version: 3, entries: [entry('a', '1')]}} as never);
+		getMock.mockResolvedValue({ok: true, body: {enabled: true, bar_version: 3, entries: [entry('a', '1')]}} as never);
 		SignalBarStore.setComposerPersona('live', null);
 		await SignalBarStore.fetchChannel('live');
 
