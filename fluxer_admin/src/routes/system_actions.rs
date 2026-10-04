@@ -249,6 +249,7 @@ pub async fn instance_config_post(
             )),
             "update_notice" => notices::build_notice_update(&form).map_err(FlashData::error),
             "update_server_list_buttons" => Ok(fork::build_server_list_buttons_update(&form)),
+            "update_signal_bar" => Ok(fork::build_signal_bar_update(&form)),
             _ => Err(FlashData::error("Unknown instance config action")),
         };
         let update = match update {
