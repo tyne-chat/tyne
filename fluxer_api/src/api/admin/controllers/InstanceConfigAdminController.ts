@@ -279,6 +279,7 @@ async function buildInstanceConfigResponse(): Promise<InstanceConfigResponse> {
 		policy: {
 			single_community_enabled: policy.single_community_enabled,
 			single_community_guild_id: policy.single_community_guild_id,
+			signal_bar_guild_id: policy.signal_bar_guild_id,
 			direct_messages_disabled: policy.direct_messages_disabled,
 			direct_messages_locked: policy.direct_messages_locked,
 			friends_disabled: policy.friends_disabled,
@@ -1290,6 +1291,9 @@ function planInstancePolicyPatch(
 	for (const field of ['gif_enabled', 'youtube_enabled', 'bluesky_enabled'] as const) {
 		const value = policy.services?.[field];
 		if (value !== undefined) patch[field] = value ?? null;
+	}
+	if (policy.signal_bar_guild_id !== undefined) {
+		patch.signal_bar_guild_id = policy.signal_bar_guild_id;
 	}
 	if (policy.server_list_buttons) {
 		patch.server_list_buttons = {
