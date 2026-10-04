@@ -666,6 +666,7 @@ function parseCommunity(value: unknown): InstanceCommunity | null {
 	return {
 		single_community: singleCommunity,
 		single_community_guild_id: readNonEmptyString(source, 'single_community_guild_id'),
+		signal_bar_guild_id: readNonEmptyString(source, 'signal_bar_guild_id'),
 		direct_messages_disabled: directMessagesDisabled,
 		friends_disabled: readBoolean(source, 'friends_disabled') ?? directMessagesDisabled,
 		personal_notes_enabled: readBoolean(source, 'personal_notes_enabled') ?? true,

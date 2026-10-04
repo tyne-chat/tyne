@@ -744,6 +744,7 @@ class RuntimeConfig {
 				personal_notes_enabled: config.policy.personal_notes_enabled,
 				guild_create_access: config.policy.guild_create_access,
 				server_list_buttons: config.policy.server_list_buttons,
+				signal_bar_guild_id: config.policy.signal_bar_guild_id,
 			},
 			services: {
 				gif_enabled: config.policy.services_resolved.gif_enabled,
@@ -912,6 +913,10 @@ class RuntimeConfig {
 
 	get instanceNotice(): InstanceNotice | null {
 		return this.activeRuntime?.snapshot.notice ?? null;
+	}
+
+	get signalBarGuildId(): string | null {
+		return this.community.signal_bar_guild_id;
 	}
 
 	get serverListButtons(): ServerListButtons {

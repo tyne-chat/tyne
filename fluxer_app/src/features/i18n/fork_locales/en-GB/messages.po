@@ -37,6 +37,9 @@ msgstr "Add Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Add Tag Pair ({0}/5)"
 
+msgid "Add signal"
+msgstr "Add signal"
+
 msgid "All Personas"
 msgstr "All Personas"
 
@@ -161,6 +164,10 @@ msgstr "Failed to read the selected file."
 msgid "Failed to save persona"
 msgstr "Failed to save persona"
 
+#. Error toast in the community Message Tools settings tab when saving the signal bar fails.
+msgid "Failed to save the signal bar. Try again."
+msgstr "Failed to save the signal bar. Try again."
+
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
 msgstr "Failed to upload icon to server"
@@ -176,6 +183,10 @@ msgstr "Hide channel list"
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
 msgstr "Hide server list"
+
+#. Tooltip for the small arrow button that collapses the signal bar above the message box.
+msgid "Hide signal bar"
+msgstr "Hide signal bar"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
@@ -256,6 +267,10 @@ msgstr "Member #{index}"
 msgid "Members with Avatars"
 msgstr "Members with Avatars"
 
+#. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
+msgid "Message Tools"
+msgstr "Message Tools"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "New Persona"
@@ -275,6 +290,13 @@ msgstr "No personas configured yet. Create one in Settings."
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+
+msgid "No signals yet. The bar stays hidden until you add one."
+msgstr "No signals yet. The bar stays hidden until you add one."
+
+#. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
+msgid "Nobody has this signal on"
+msgstr "Nobody has this signal on"
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
@@ -407,6 +429,10 @@ msgstr "Replace All Personas"
 msgid "Replace all existing personas (Destructive)"
 msgstr "Replace all existing personas (Destructive)"
 
+#. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
+msgid "Reset signal for everyone"
+msgstr "Reset signal for everyone"
+
 msgid "Root Account (Default)"
 msgstr "Root Account (Default)"
 
@@ -454,6 +480,29 @@ msgstr "Show personas button"
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
 msgstr "Show server list"
+
+#. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
+msgid "Show signal bar"
+msgstr "Show signal bar"
+
+msgid "Signal Bar"
+msgstr "Signal Bar"
+
+#. Community settings tab for choosing the toggleable signal icons shown above the message box.
+msgctxt "community-settings-tab"
+msgid "Signal Bar"
+msgstr "Signal Bar"
+
+#. Accessible label for the row of toggleable signal icons above the message box.
+msgid "Signal bar"
+msgstr "Signal bar"
+
+#. Accessible label for the text field that names a signal in the Message Tools settings tab.
+msgid "Signal label"
+msgstr "Signal label"
+
+msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
+msgstr "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
 
 msgid "Signature Emojis"
 msgstr "Signature Emojis"
@@ -523,6 +572,10 @@ msgstr "Toggle the channel list"
 msgid "Total Members"
 msgstr "Total Members"
 
+#. Signal bar right-click menu action that turns your own signal off. {name} is the persona or account name it is currently shown as.
+msgid "Turn off {name}"
+msgstr "Turn off {name}"
+
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Unlisted"
@@ -581,6 +634,10 @@ msgstr "{0} notice(s) during import"
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} of {1} {2} ({3}%)"
+
+#. Tooltip on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
+msgid "{label}: {names}"
+msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
