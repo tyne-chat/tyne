@@ -27,7 +27,6 @@ import {
 
 // Fork imports.
 
-import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import {LightbulbIcon} from '@phosphor-icons/react';
 
 const EMOJI_DESCRIPTOR = msg({
@@ -278,10 +277,8 @@ export function formatGuildSettingsPath(i18n: I18n, tabType: GuildSettingsTabTyp
 	return [i18n._(GUILD_SETTINGS_LABEL_DESCRIPTOR), getGuildSettingsTabLabel(i18n, tabType)].filter(Boolean).join(' > ');
 }
 
-export const getGuildSettingsTabs = (i18n: I18n, guildId?: string): Array<GuildSettingsTab> => {
-	return GUILD_SETTINGS_TABS_DESCRIPTORS.filter(
-		(tab) => tab.type !== 'signal_bar' || (guildId != null && guildId === RuntimeConfig.signalBarGuildId),
-	).map((tab) => ({
+export const getGuildSettingsTabs = (i18n: I18n, _guildId?: string): Array<GuildSettingsTab> => {
+	return GUILD_SETTINGS_TABS_DESCRIPTORS.map((tab) => ({
 		...tab,
 		label: getGuildSettingsTabLabel(i18n, tab.type),
 	}));
