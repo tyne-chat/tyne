@@ -7,6 +7,10 @@ export const ForkEndpoints = {
 	CHANNEL_SIGNALS: (channelId: string) => `/channels/${channelId}/signals`,
 	CHANNEL_SIGNAL: (channelId: string, signalId: string) => `/channels/${channelId}/signals/${signalId}`,
 	CHANNEL_SIGNAL_ME: (channelId: string, signalId: string) => `/channels/${channelId}/signals/${signalId}/@me`,
+	CHANNEL_SIGNAL_USER: (channelId: string, signalId: string, userId: string) =>
+		`/channels/${channelId}/signals/${signalId}/users/${userId}`,
+	CHANNEL_SIGNAL_BAR: (channelId: string) => `/channels/${channelId}/signal-bar`,
+	GUILD_SIGNAL_BAR_CHANNELS: (guildId: string) => `/guilds/${guildId}/signal-bar/channels`,
 	INSTANCE_SIGNAL_BAR: '/instance/signal-bar',
 	CHANNEL_PERSONA_MENTIONS: (channelId: string) => `/channels/${channelId}/persona-mentions`,
 	USER_PERSONAS: '/users/@me/personas',
