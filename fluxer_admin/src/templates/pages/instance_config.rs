@@ -284,6 +284,7 @@ fn policy_config_section(
                 (community_creation_staff_only_form(base, csrf_token, policy))
                 (direct_messages_form(base, csrf_token, policy))
                 (server_list_buttons_form(base, csrf_token, policy))
+                (signal_bar_form(base, csrf_token, policy))
                 (premium_mode_form(base, csrf_token, policy, premium_name, billing_enabled))
                 (community_creation_form(base, csrf_token, policy))
                 (services_form(base, csrf_token, policy))
@@ -407,6 +408,35 @@ fn direct_messages_form(base: &str, csrf_token: &str, policy: &InstancePolicyRes
                             (submit_button("Save direct message policy"))
                         }))
                     }
+                }
+            }
+        }
+    }
+}
+
+fn signal_bar_form(base: &str, csrf_token: &str, policy: &InstancePolicyResponse) -> Markup {
+    html! {
+        div class="space-y-4 border-t border-neutral-200 pt-6" {
+            div class="flex flex-wrap items-center gap-2" {
+                h3 class="text-sm font-semibold text-neutral-900" { "Signal bar" }
+            }
+            p class="text-sm text-neutral-500" {
+                "The signal bar is shown above the message box in every channel and DM on this \
+                 instance. Members with Manage Community in the home community choose its signals \
+                 from that community's Message Tools settings. Leave empty to turn the bar off."
+            }
+            form method="post" action={(base) "/instance-config?action=update_signal_bar"} {
+                (csrf_input(csrf_token))
+                div class="space-y-3" {
+                    (text_input(
+                        "signal_bar_guild_id",
+                        "Home community ID",
+                        policy.signal_bar_guild_id.as_deref().unwrap_or(""),
+                        "Community ID",
+                    ))
+                    (form_actions(html! {
+                        (submit_button("Save signal bar settings"))
+                    }))
                 }
             }
         }

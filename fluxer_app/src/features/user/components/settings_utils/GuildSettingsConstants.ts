@@ -25,6 +25,11 @@ import {
 	WebhooksLogoIcon,
 } from '@phosphor-icons/react';
 
+// Fork imports.
+
+import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
+import {LightbulbIcon} from '@phosphor-icons/react';
+
 const EMOJI_DESCRIPTOR = msg({
 	message: 'Emoji',
 	context: 'community-settings-tab',
@@ -65,6 +70,11 @@ const VANITY_URL_DESCRIPTOR = msg({
 	context: 'community-settings-tab',
 	comment: 'Community settings tab for the community vanity/custom invite link.',
 });
+const SIGNAL_BAR_DESCRIPTOR = msg({
+	message: 'Signal Bar',
+	context: 'community-settings-tab',
+	comment: 'Community settings tab for choosing the toggleable signal icons shown above the message box.',
+});
 const DISCOVERY_DESCRIPTOR = msg({
 	message: 'Discovery',
 	context: 'community-settings-tab',
@@ -98,12 +108,14 @@ export type GuildSettingsTabType =
 	| 'discovery'
 	| 'members'
 	| 'invites'
-	| 'bans';
+	| 'bans'
+	| 'signal_bar';
 export type GuildSettingsTabCategories =
 	| 'guild_settings'
 	| 'expressions'
 	| 'community'
 	| 'integrations'
+	| 'message_tools'
 	| 'user_management';
 
 export interface GuildSettingsTab {
@@ -170,6 +182,13 @@ const GUILD_SETTINGS_TABS_DESCRIPTORS: Array<GuildSettingsTabDescriptor> = [
 		permission: [Permissions.CREATE_EXPRESSIONS, Permissions.MANAGE_EXPRESSIONS],
 	},
 	{
+		type: 'signal_bar',
+		category: 'message_tools',
+		label: SIGNAL_BAR_DESCRIPTOR,
+		icon: LightbulbIcon,
+		permission: Permissions.MANAGE_GUILD,
+	},
+	{
 		type: 'discovery',
 		category: 'community',
 		label: DISCOVERY_DESCRIPTOR,
@@ -223,6 +242,11 @@ const COMMUNITY_CATEGORY_DESCRIPTOR = msg({
 	message: 'Community',
 	comment: 'Community settings sidebar category grouping discovery and the vanity URL.',
 });
+const MESSAGE_TOOLS_CATEGORY_DESCRIPTOR = msg({
+	message: 'Message Tools',
+	comment:
+		'Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.',
+});
 const PEOPLE_CATEGORY_DESCRIPTOR = msg({
 	message: 'People',
 	comment: 'Community settings sidebar category grouping members, invites, and bans.',
@@ -238,6 +262,8 @@ export function getGuildSettingsCategoryLabel(i18n: I18n, category: GuildSetting
 			return i18n._(COMMUNITY_CATEGORY_DESCRIPTOR);
 		case 'integrations':
 			return i18n._(INTEGRATIONS_CATEGORY_DESCRIPTOR);
+		case 'message_tools':
+			return i18n._(MESSAGE_TOOLS_CATEGORY_DESCRIPTOR);
 		case 'user_management':
 			return i18n._(PEOPLE_CATEGORY_DESCRIPTOR);
 	}
@@ -252,8 +278,10 @@ export function formatGuildSettingsPath(i18n: I18n, tabType: GuildSettingsTabTyp
 	return [i18n._(GUILD_SETTINGS_LABEL_DESCRIPTOR), getGuildSettingsTabLabel(i18n, tabType)].filter(Boolean).join(' > ');
 }
 
-export const getGuildSettingsTabs = (i18n: I18n): Array<GuildSettingsTab> => {
-	return GUILD_SETTINGS_TABS_DESCRIPTORS.map((tab) => ({
+export const getGuildSettingsTabs = (i18n: I18n, guildId?: string): Array<GuildSettingsTab> => {
+	return GUILD_SETTINGS_TABS_DESCRIPTORS.filter(
+		(tab) => tab.type !== 'signal_bar' || (guildId != null && guildId === RuntimeConfig.signalBarGuildId),
+	).map((tab) => ({
 		...tab,
 		label: getGuildSettingsTabLabel(i18n, tab.type),
 	}));
