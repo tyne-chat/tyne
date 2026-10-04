@@ -86,7 +86,7 @@ describe('SignalBar', () => {
 			SignalBarStore.collapsed = false;
 		});
 	const render = async (target: Channel, entries: Array<ChannelSignalEntry> = []) => {
-		getMock.mockResolvedValue({ok: true, body: {bar_version: 1, entries}} as never);
+		getMock.mockResolvedValue({ok: true, body: {enabled: true, bar_version: 1, entries}} as never);
 		await act(async () => {
 			root.render(<SignalBar channel={target} attached={true} data-flx="signal-bar.signal-bar-test.signal-bar" />);
 		});
@@ -167,6 +167,21 @@ describe('SignalBar', () => {
 		await render(channel({id: 'c', guildId: 'g'} as Partial<Channel>));
 		await act(async () => button('Reading')?.click());
 		expect(putMock).not.toHaveBeenCalled();
+	});
+
+	it('renders nothing in a channel where the bar is switched off', async () => {
+		setSignals([READING]);
+		getMock.mockResolvedValue({ok: true, body: {enabled: false, bar_version: 1, entries: []}} as never);
+		await act(async () => {
+			root.render(
+				<SignalBar
+					channel={channel({id: 'off'} as Partial<Channel>)}
+					attached={true}
+					data-flx="signal-bar.signal-bar-test.signal-bar--2"
+				/>,
+			);
+		});
+		expect(container.innerHTML).toBe('');
 	});
 
 	it('hides the signals when collapsed and keeps the caret', async () => {
