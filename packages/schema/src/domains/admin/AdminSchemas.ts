@@ -693,6 +693,7 @@ const AppPublicConfigUpdateRequest = z.object({
 const InstancePolicyResponse = z.object({
 	single_community_enabled: z.boolean(),
 	single_community_guild_id: z.string().nullable(),
+	signal_bar_guild_id: z.string().nullable().default(null),
 	direct_messages_disabled: z.boolean(),
 	direct_messages_locked: z.boolean(),
 	friends_disabled: z.boolean().describe('Whether friend requests are disabled instance-wide'),
@@ -876,6 +877,7 @@ const InstancePolicyUpdateSchema = z.object({
 		})
 		.nullish(),
 	server_list_buttons: ServerListButtonsUpdateSchema.optional(),
+	signal_bar_guild_id: SnowflakeStringType.nullish(),
 });
 
 export const InstanceConfigUpdateRequest = z.object({

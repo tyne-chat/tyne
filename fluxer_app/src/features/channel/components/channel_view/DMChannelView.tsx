@@ -72,6 +72,7 @@ import {type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 
 
 // Fork imports.
 
+import {SignalBar} from '@app/features/signal_bar/components/SignalBar';
 import LayoutState from '@app/features/ui/state/LayoutState';
 
 interface DMChannelViewProps {
@@ -506,6 +507,20 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 				inputSuppressed={isCompactCallChatSuppressed}
 				data-flx="channel.channel-view.dm-channel-view.channel-textarea"
 			/>
+		);
+	}
+	// Fork: the composer shows the signal bar itself; a barrier that replaces the composer keeps it above.
+	const showsSignalBarAboveBarrier =
+		!isSystemDm &&
+		((isDM && isRecipientBlocked && recipient != null) ||
+			(isCurrentUserLimited && !isPersonalNotes) ||
+			(!directMessageGate.allowed && isDM));
+	if (showsSignalBarAboveBarrier) {
+		channelTextarea = (
+			<>
+				<SignalBar channel={channel} data-flx="channel.channel-view.dm-channel-view.signal-bar" />
+				{channelTextarea}
+			</>
 		);
 	}
 	const channelChatArea = (
