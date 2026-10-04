@@ -751,6 +751,8 @@ class RuntimeConfig {
 				admin_registration_urls_enabled: config.registration.admin_registration_urls_enabled,
 			},
 			community: {
+				server_list_buttons: config.policy.server_list_buttons,
+				signal_bar_guild_id: config.policy.signal_bar_guild_id,
 				single_community: config.policy.single_community_enabled,
 				single_community_guild_id: config.policy.single_community_enabled
 					? config.policy.single_community_guild_id
@@ -759,7 +761,6 @@ class RuntimeConfig {
 				friends_disabled: config.policy.friends_disabled,
 				personal_notes_enabled: config.policy.personal_notes_enabled,
 				guild_create_access: config.policy.guild_create_access,
-				server_list_buttons: config.policy.server_list_buttons,
 			},
 			services: {
 				gif_enabled: config.policy.services_resolved.gif_enabled,
@@ -953,6 +954,10 @@ class RuntimeConfig {
 
 	get hiddenBuiltInGuildBadges(): InstanceHiddenBuiltInGuildBadges {
 		return this.activeRuntime?.snapshot.hiddenBuiltInGuildBadges ?? [];
+	}
+
+	get signalBarGuildId(): string | null {
+		return this.community.signal_bar_guild_id;
 	}
 
 	get serverListButtons(): ServerListButtons {
