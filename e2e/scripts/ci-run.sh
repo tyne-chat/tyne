@@ -51,6 +51,12 @@ if [ ! -f "$BUILD_COMPOSE" ] && [ -f "$REPO_DIR/docker-compose.build.yml" ]; the
 fi
 
 if [ "$SKIP_BUILD" = false ]; then
+  # On hosts that also serve traffic, a throttled buildx builder named "lowprio" may
+  # exist. Use it when present so builds do not starve running services.
+  if [ -z "${BUILDX_BUILDER:-}" ] && docker buildx inspect lowprio >/dev/null 2>&1; then
+    export BUILDX_BUILDER=lowprio
+    echo "🐢 Building at low priority through the 'lowprio' builder."
+  fi
   ALL_SERVICES=($(docker compose -f "$BUILD_COMPOSE" config --services 2>/dev/null || true))
   if [ ${#ALL_SERVICES[@]} -eq 0 ]; then
     # Fallback to standard services if compose query fails
