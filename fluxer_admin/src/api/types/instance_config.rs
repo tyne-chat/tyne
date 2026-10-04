@@ -195,8 +195,12 @@ pub struct InstanceAccountIdentityDiscoveryFeatures {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct InstancePolicyResponse {
     #[serde(default)]
+    pub server_list_buttons: ServerListButtonsConfig,
+    #[serde(default)]
     pub single_community_enabled: bool,
     pub single_community_guild_id: Option<String>,
+    #[serde(default)]
+    pub signal_bar_guild_id: Option<String>,
     #[serde(default)]
     pub direct_messages_disabled: bool,
     #[serde(default)]
@@ -215,8 +219,6 @@ pub struct InstancePolicyResponse {
     pub services_resolved: InstanceServicesResolved,
     #[serde(default)]
     pub services_available: InstanceServicesAvailable,
-    #[serde(default)]
-    pub server_list_buttons: ServerListButtonsConfig,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -256,8 +258,10 @@ fn default_guild_create_access() -> bool {
 impl Default for InstancePolicyResponse {
     fn default() -> Self {
         Self {
+            server_list_buttons: ServerListButtonsConfig::default(),
             single_community_enabled: false,
             single_community_guild_id: None,
+            signal_bar_guild_id: None,
             direct_messages_disabled: false,
             direct_messages_locked: false,
             friends_disabled: false,
@@ -267,7 +271,6 @@ impl Default for InstancePolicyResponse {
             services: InstanceServicesOverrides::default(),
             services_resolved: InstanceServicesResolved::default(),
             services_available: InstanceServicesAvailable::default(),
-            server_list_buttons: ServerListButtonsConfig::default(),
         }
     }
 }
@@ -1109,6 +1112,10 @@ pub struct InstanceConfigUpdateRequest {
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct InstancePolicyUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub server_list_buttons: Option<ServerListButtonsUpdateRequest>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub signal_bar_guild_id: Option<Option<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub single_community_enabled: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub single_community_name: Option<String>,
@@ -1130,8 +1137,6 @@ pub struct InstancePolicyUpdateRequest {
     pub premium_mode: Option<PremiumMode>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub services: Option<InstanceServicesUpdateRequest>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub server_list_buttons: Option<ServerListButtonsUpdateRequest>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
