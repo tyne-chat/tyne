@@ -29,6 +29,7 @@ pub(super) fn policy_config_section(
                 (single_community_form(base, config_form, policy))
                 (direct_messages_form(base, config_form, policy))
                 (super::fork::server_list_buttons_form(base, config_form, policy))
+                (super::fork::signal_bar_form(base, config_form, policy))
                 (premium_mode_form(base, config_form, policy, premium_name, billing_enabled))
                 (community_creation_form(base, config_form, policy))
                 (services_form(base, config_form, policy))
