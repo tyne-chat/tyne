@@ -36,6 +36,13 @@ import {FeatureTemporarilyDisabledError} from '@fluxer/errors/src/domains/core/F
 import {MissingPermissionsError} from '@fluxer/errors/src/domains/core/MissingPermissionsError';
 import type {AllowedMentionsRequest} from '@fluxer/schema/src/domains/message/SharedMessageSchemas';
 
+// Fork imports.
+
+import type {PersonaID} from '@app/api/BrandedTypes';
+import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
+import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+import {resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
+
 interface EditMessageResult {
 	message: Message;
 	authChannel: AuthenticatedChannel;
@@ -54,6 +61,7 @@ interface MessageEditServiceDeps {
 	mentionService: MessageMentionService;
 	messageWriteLock: MessageWriteLock;
 	crosspostPropagation: CrosspostPropagation;
+	personaRepository?: IPersonaRepository;
 }
 
 export class MessageEditService {
@@ -178,6 +186,20 @@ export class MessageEditService {
 		}
 		const isBugHunterBot = !!user?.isBot && (user.flags & UserFlags.BUG_HUNTER) !== 0n;
 		const dmNsfwContext = guild ? undefined : await this.deps.persistenceService.resolveDmNsfwContext(channel, userId);
+		let personaId: PersonaID | null | undefined;
+		if (data.subprofile === null) {
+			personaId = null;
+		} else if (data.subprofile !== undefined) {
+			// Re-sending the persona the message already has is not a change, so it stays editable after that persona is deleted.
+			personaId =
+				message.personaId != null && data.subprofile.id === message.personaId.toString()
+					? message.personaId
+					: await resolveOwnedPersonaId(
+							this.deps.personaRepository ?? getPersonaRepository(),
+							userId,
+							data.subprofile.id,
+						);
+		}
 		const updateResult = await this.deps.messageWriteLock.withFreshMessage(channelId, messageId, async (fresh) => {
 			if (!fresh) throw new UnknownMessageError();
 			return this.deps.crosspostPropagation.withPublishedEditBudget({fresh, actor: 'author'}, () =>
@@ -194,6 +216,7 @@ export class MessageEditService {
 					isBugHunterBot,
 					locale: user?.locale,
 					dmNsfwContext,
+					personaId,
 				}),
 			);
 		});
