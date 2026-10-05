@@ -8,7 +8,7 @@ msgstr ""
 
 #. placeholder {0}: w.prefix
 msgid "(Prefix: {0})"
-msgstr "(Prefix: {0})"
+msgstr "(Tiền tố: {0})"
 
 #. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
 msgid "(pinned)"
@@ -16,32 +16,32 @@ msgstr "(đã ghim)"
 
 #. Tooltip showing root account username
 msgid "Account: @{username}"
-msgstr "Account: @{username}"
+msgstr "Tài khoản: @{username}"
 
 msgid "Active Persona Mode"
-msgstr "Active Persona Mode"
+msgstr "Chế độ persona đang hoạt động"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
 msgid "Active persona mode"
-msgstr "Active persona mode"
+msgstr "Chế độ persona đang hoạt động"
 
 #. placeholder {0}: formData.signatureEmojis.length
 msgid "Add Emoji ({0})"
 msgstr "Thêm biểu tượng cảm xúc ({0})"
 
 msgid "Add Persona"
-msgstr "Add Persona"
+msgstr "Thêm persona"
 
 #. placeholder {0}: formData.tags.length
 msgid "Add Tag Pair ({0}/5)"
-msgstr "Add Tag Pair ({0}/5)"
+msgstr "Thêm cặp thẻ ({0}/5)"
 
 msgid "Add signal"
 msgstr "Thêm tín hiệu"
 
 msgid "All Personas"
-msgstr "All Personas"
+msgstr "Tất cả persona"
 
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
@@ -49,41 +49,41 @@ msgstr "Tất cả múi giờ"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Bạn có chắc muốn xóa <0>{0}</0> không? Không thể hoàn tác hành động này."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "Bạn có chắc muốn thay thế toàn bộ <0>{existingCount}</0> persona hiện có không? Chúng sẽ bị xóa vĩnh viễn khỏi tài khoản của bạn và không thể hoàn tác."
 
 #. Settings search synonym.
 msgid "Auto-hide"
-msgstr "Auto-hide"
+msgstr "Tự động ẩn"
 
 #. Settings section label in Advanced Settings for edge hover peek preference.
 #. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
 msgid "Auto-peek hidden sidebars"
-msgstr "Auto-peek hidden sidebars"
+msgstr "Tự động hiện các thanh bên đã ẩn"
 
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
-msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Không tải được ảnh đại diện: {error}. Persona đã được nhập mà không có ảnh đại diện."
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
-msgstr "Change persona"
+msgstr "Đổi persona"
 
 msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Choose a PluralKit export (.json) or drag & drop"
+msgstr "Chọn tệp xuất PluralKit (.json) hoặc kéo và thả"
 
 msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "Chọn cách tin nhắn không gắn thẻ và thẻ persona tương tác với persona đang hoạt động của bạn."
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
-msgstr "Configured Personas ({count})"
+msgstr "Persona đã cấu hình ({count})"
 
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
-msgstr "Configuring {name}..."
+msgstr "Đang cấu hình {name}..."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -91,27 +91,27 @@ msgstr "Sao chép dấu thời gian\\"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
-msgstr "Deactivate persona"
+msgstr "Tắt persona"
 
 msgid "Delete Persona"
-msgstr "Delete Persona"
+msgstr "Xóa persona"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
-msgstr "Delete persona"
+msgstr "Xóa persona"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "Xóa dấu thời gian\\"
 
 msgid "Detected System Name / Tag"
-msgstr "Detected System Name / Tag"
+msgstr "Tên / thẻ hệ thống đã phát hiện"
 
 msgid "Display Tag"
-msgstr "Display Tag"
+msgstr "Thẻ hiển thị"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
-msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "Thẻ hiển thị sẽ xuất hiện cạnh tất cả tên persona trong tin nhắn. Nếu không có thẻ hiển thị, ảnh đại diện tài khoản của bạn sẽ được hiển thị."
 
 #. Settings search entry label for double-clicking a message to edit it.
 #. Short label for an advanced message editing preference.
@@ -121,20 +121,20 @@ msgstr "Nhấp đúp để chỉnh sửa"
 
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
-msgstr "Downloading avatar {current} of {total}..."
+msgstr "Đang tải ảnh đại diện {current} trên {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
-msgstr "Duplicate tag pair on this persona"
+msgstr "Cặp thẻ bị trùng trên persona này"
 
 #. Title for edit persona modal
 msgid "Edit Persona"
-msgstr "Edit Persona"
+msgstr "Chỉnh sửa persona"
 
 #. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
-msgstr "Edit persona"
+msgstr "Chỉnh sửa persona"
 
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
@@ -142,27 +142,27 @@ msgid "Edit timestamp"
 msgstr "Chỉnh sửa dấu thời gian\\"
 
 msgid "Export Summary"
-msgstr "Export Summary"
+msgstr "Tóm tắt tệp xuất"
 
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
-msgstr "Failed to delete persona"
+msgstr "Không xóa được persona"
 
 #. Toast error message on persona import failure
 msgid "Failed to import personas"
-msgstr "Failed to import personas"
+msgstr "Không nhập được persona"
 
 #. Error message when parsing PluralKit JSON fails
 msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
-msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Không phân tích được tệp JSON. Hãy đảm bảo đó là tệp xuất PluralKit hợp lệ."
 
 #. Error message when reading uploaded file fails
 msgid "Failed to read the selected file."
-msgstr "Failed to read the selected file."
+msgstr "Không đọc được tệp đã chọn."
 
 #. Toast when persona save fails
 msgid "Failed to save persona"
-msgstr "Failed to save persona"
+msgstr "Không lưu được persona"
 
 #. Error toast in the community Message Tools settings tab when saving the signal bar fails.
 msgid "Failed to save the signal bar. Try again."
@@ -174,7 +174,7 @@ msgstr "Không thể lưu nơi hiển thị thanh tín hiệu. Hãy thử lại.
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
-msgstr "Failed to upload icon to server"
+msgstr "Không tải được biểu tượng lên máy chủ"
 
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
@@ -182,11 +182,11 @@ msgstr "Xem trước định dạng"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
-msgstr "Hide channel list"
+msgstr "Ẩn danh sách kênh"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
-msgstr "Hide server list"
+msgstr "Ẩn danh sách máy chủ"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -194,32 +194,32 @@ msgstr "Ẩn thanh tín hiệu"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
-msgstr "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Di chuột gần mép cửa sổ để tạm thời hiện các bảng đã thu gọn."
 
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
-msgstr "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Tệp biểu tượng quá lớn. Hãy chọn ảnh nhỏ hơn 10 MB."
 
 #. Modal title for PluralKit import step completed
 msgid "Import Complete"
-msgstr "Import Complete"
+msgstr "Nhập hoàn tất"
 
 msgid "Import Complete!"
-msgstr "Import Complete!"
+msgstr "Nhập hoàn tất!"
 
 msgid "Import Strategy"
-msgstr "Import Strategy"
+msgstr "Chiến lược nhập"
 
 #. Modal title for PluralKit import step select
 msgid "Import from PluralKit"
-msgstr "Import from PluralKit"
+msgstr "Nhập từ PluralKit"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
-msgstr "Importing Personas..."
+msgstr "Đang nhập persona..."
 
 msgid "Importing..."
-msgstr "Importing..."
+msgstr "Đang nhập..."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -232,33 +232,33 @@ msgid "Insert timestamp"
 msgstr "Chèn dấu thời gian"
 
 msgid "Keep existing and add new (Recommended)"
-msgstr "Keep existing and add new (Recommended)"
+msgstr "Giữ persona hiện có và thêm mới (Khuyên dùng)"
 
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "Giữ {existingCount} persona hiện tại của bạn và thêm toàn bộ {0} persona đã nhập bên cạnh chúng dưới dạng mục mới."
 
 #. Active persona mode last used
 #. Active persona mode last used
 #. Active persona mode last used
 msgid "Last Used"
-msgstr "Last Used"
+msgstr "Sử dụng lần cuối"
 
 msgid "Main account"
-msgstr "Main account"
+msgstr "Tài khoản chính"
 
 msgid "Manage Personas"
-msgstr "Manage Personas"
+msgstr "Quản lý persona"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
-msgstr "Manage and create your personas"
+msgstr "Quản lý và tạo persona của bạn"
 
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
 msgid "Manual"
-msgstr "Manual"
+msgstr "Thủ công"
 
 #. Validation error when signature emoji limit is reached
 msgid "Maximum {max} signature emojis allowed per persona"
@@ -266,10 +266,10 @@ msgstr "Tối đa {max} biểu tượng cảm xúc đặc trưng cho mỗi nhân
 
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
-msgstr "Member #{index}"
+msgstr "Thành viên #{index}"
 
 msgid "Members with Avatars"
-msgstr "Members with Avatars"
+msgstr "Thành viên có ảnh đại diện"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -277,23 +277,23 @@ msgstr "Công cụ tin nhắn"
 
 #. Title for new persona modal
 msgid "New Persona"
-msgstr "New Persona"
+msgstr "Persona mới"
 
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
-msgstr "No \"members\" array found in this export file."
+msgstr "Không tìm thấy mảng \"members\" trong tệp xuất này."
 
 msgid "No display tag configured. Messages will show your account profile picture."
-msgstr "No display tag configured. Messages will show your account profile picture."
+msgstr "Chưa cấu hình thẻ hiển thị. Tin nhắn sẽ hiển thị ảnh hồ sơ tài khoản của bạn."
 
 msgid "No matching personas found."
-msgstr "No matching personas found."
+msgstr "Không tìm thấy persona nào phù hợp."
 
 msgid "No personas configured yet. Create one in Settings."
-msgstr "No personas configured yet. Create one in Settings."
+msgstr "Chưa cấu hình persona nào. Hãy tạo một persona trong Cài đặt."
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
-msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Chưa tạo persona nào. Nhấp \"Thêm persona\" để tạo persona đầu tiên của bạn!"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Chưa có tín hiệu nào. Thanh sẽ được ẩn cho đến khi bạn thêm một tín hiệu."
@@ -304,11 +304,11 @@ msgstr "Chưa ai bật tín hiệu này"
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
-msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Chỉ bạn nhìn thấy. Người khác không thể xem tiểu sử đầy đủ hay chi tiết hồ sơ của persona này."
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "Huy hiệu hệ thống tùy chọn, vd: ⚞Seraphim⚟"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -316,21 +316,21 @@ msgstr "Dán dưới dạng văn bản thuần túy"
 
 #. Settings search synonym.
 msgid "Peek"
-msgstr "Peek"
+msgstr "Xem nhanh"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "Xóa vĩnh viễn toàn bộ {existingCount} persona hiện có và thay thế hoàn toàn bằng các persona đã nhập."
 
 msgid "Persona Tags (Prefix & Suffix)"
-msgstr "Persona Tags (Prefix & Suffix)"
+msgstr "Thẻ persona (tiền tố và hậu tố)"
 
 #. Toast when persona is created
 msgid "Persona created"
-msgstr "Persona created"
+msgstr "Đã tạo persona"
 
 #. Toast when persona is deleted
 msgid "Persona deleted"
-msgstr "Persona deleted"
+msgstr "Đã xóa persona"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -344,16 +344,16 @@ msgstr "Hồ sơ persona: {name}"
 
 #. Toast when persona is updated
 msgid "Persona updated"
-msgstr "Persona updated"
+msgstr "Đã cập nhật persona"
 
 #. Aria label for persona visibility tabs
 msgid "Persona visibility"
-msgstr "Persona visibility"
+msgstr "Chế độ hiển thị của persona"
 
 #. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
-msgstr "Personas"
+msgstr "Persona"
 
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
@@ -365,39 +365,39 @@ msgstr "Ghim cho nhân vật này"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
-msgstr "Prefix (e.g. [)"
+msgstr "Tiền tố (vd: [)"
 
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
-msgstr "Preparing avatar batch download..."
+msgstr "Đang chuẩn bị tải hàng loạt ảnh đại diện..."
 
 #. Persona visibility private
 msgid "Private"
-msgstr "Private"
+msgstr "Riêng tư"
 
 #. Tooltip on private persona badge
 msgid "Private persona"
-msgstr "Private persona"
+msgstr "Persona riêng tư"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
-msgstr "Processing: {0}"
+msgstr "Đang xử lý: {0}"
 
 #. Helper description for unlisted persona visibility
 msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
-msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Thẻ hồ sơ chỉ truy cập được khi nhấp vào tin nhắn do persona này gửi. Không được liệt kê trong danh sách persona công khai của bạn."
 
 #. Helper description for public persona visibility
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
-msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Thẻ hồ sơ truy cập được khi nhấp vào tin nhắn và hiển thị trong danh sách persona công khai của bạn với bạn bè và máy chủ chung."
 
 #. Persona visibility public
 msgid "Public"
-msgstr "Public"
+msgstr "Công khai"
 
 #. Tooltip on public persona badge
 msgid "Public persona"
-msgstr "Public persona"
+msgstr "Persona công khai"
 
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
@@ -414,7 +414,7 @@ msgid "Reacting with a signature emoji will always react as this persona, regard
 msgstr "Bày tỏ cảm xúc bằng biểu tượng đặc trưng sẽ luôn phản hồi dưới tư cách nhân cách này, bất kể nhân cách đang hoạt động là gì."
 
 msgid "Recent Personas"
-msgstr "Recent Personas"
+msgstr "Persona gần đây"
 
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
@@ -422,55 +422,55 @@ msgstr "Xóa biểu tượng cảm xúc đặc trưng"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
-msgstr "Remove tag pair"
+msgstr "Xóa cặp thẻ"
 
 msgid "Replace All"
-msgstr "Replace All"
+msgstr "Thay thế tất cả"
 
 msgid "Replace All Personas"
-msgstr "Replace All Personas"
+msgstr "Thay thế tất cả persona"
 
 msgid "Replace all existing personas (Destructive)"
-msgstr "Replace all existing personas (Destructive)"
+msgstr "Thay thế toàn bộ persona hiện có (không thể khôi phục)"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Đặt lại tín hiệu cho mọi người"
 
 msgid "Root Account (Default)"
-msgstr "Root Account (Default)"
+msgstr "Tài khoản gốc (Mặc định)"
 
 #. Progress status when saving personas
 msgid "Saving personas..."
-msgstr "Saving personas..."
+msgstr "Đang lưu persona..."
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
-msgstr "Search Results ({0})"
+msgstr "Kết quả tìm kiếm ({0})"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
-msgstr "Search personas, tags, pronouns..."
+msgstr "Tìm kiếm persona, thẻ, đại từ..."
 
 #. Description of personas settings section
 msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "Gửi tin nhắn với tên và ảnh đại diện riêng. Persona có thể đại diện cho thành viên hệ thống đa nhân cách, nhân vật nhập vai hoặc bất kỳ danh tính nào khác."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
-msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Đang gửi với tư cách @{username} ({mode}) - Nhấp để đổi persona"
 
 #. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
-msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Đang gửi với tư cách {name} (khớp theo thẻ) - Nhấp để đổi persona"
 
 msgid "Set Active"
-msgstr "Set Active"
+msgstr "Đặt làm hoạt động"
 
 #. Aria label for setting active persona
 msgid "Set as active persona"
-msgstr "Set as active persona"
+msgstr "Đặt làm persona đang hoạt động"
 
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
@@ -479,11 +479,11 @@ msgstr "Hiện nút sao chép"
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
-msgstr "Show personas button"
+msgstr "Hiện nút persona"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
-msgstr "Show server list"
+msgstr "Hiện danh sách máy chủ"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
@@ -517,50 +517,50 @@ msgstr "Biểu tượng cảm xúc đặc trưng đã được nhân cách \"{na
 
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
-msgstr "Skipped member because they have no name configured."
+msgstr "Đã bỏ qua thành viên vì chưa cấu hình tên."
 
 msgid "Start Import"
-msgstr "Start Import"
+msgstr "Bắt đầu nhập"
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "Đã nhập thành công {0} persona vào tài khoản của bạn. Tất cả ảnh đại diện được lưu an toàn trên máy chủ cục bộ của bạn."
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
-msgstr "Suffix (e.g. ])"
+msgstr "Hậu tố (vd: ])"
 
 #. Section header for suggested time zones in the timestamp modal.
 msgid "Suggested"
 msgstr "Được gợi ý"
 
 msgid "Supports PluralKit system export files"
-msgstr "Supports PluralKit system export files"
+msgstr "Hỗ trợ tệp xuất hệ thống PluralKit"
 
 msgid "System Tag (Applied to imported personas)"
-msgstr "System Tag (Applied to imported personas)"
+msgstr "Thẻ hệ thống (áp dụng cho các persona đã nhập)"
 
 msgid "Tag Icon"
-msgstr "Tag Icon"
+msgstr "Biểu tượng thẻ"
 
 msgid "Tag Text"
-msgstr "Tag Text"
+msgstr "Văn bản thẻ"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
-msgstr "Tag pair already in use by persona \"{name}\""
+msgstr "Cặp thẻ đã được persona \"{name}\" sử dụng"
 
 #. Settings search synonym.
 msgid "Taskbar"
-msgstr "Taskbar"
+msgstr "Thanh tác vụ"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."
-msgstr "Tell us about this persona..."
+msgstr "Hãy cho chúng tôi biết về persona này..."
 
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
-msgstr "The chosen file is not a valid JSON object."
+msgstr "Tệp đã chọn không phải là đối tượng JSON hợp lệ."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Thanh tín hiệu sẽ tắt cho đến khi bạn đánh dấu một kênh ở đây. Đánh dấu một danh mục hoặc cả cộng đồng cũng áp dụng cho các kênh được tạo ở đó sau này."
@@ -570,14 +570,14 @@ msgid "This emoji is already added as a signature emoji"
 msgstr "Biểu tượng cảm xúc này đã được thêm làm biểu tượng đặc trưng"
 
 msgid "This is a preview of how your display tag will look in chat."
-msgstr "This is a preview of how your display tag will look in chat."
+msgstr "Đây là bản xem trước thẻ hiển thị của bạn trong cuộc trò chuyện."
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Bật/tắt danh sách kênh"
 
 msgid "Total Members"
-msgstr "Total Members"
+msgstr "Tổng số thành viên"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -593,7 +593,7 @@ msgstr "Bật thanh tín hiệu"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
-msgstr "Unlisted"
+msgstr "Không được liệt kê"
 
 #. Emoji context menu action that unpins the emoji.
 msgid "Unpin emoji"
@@ -605,30 +605,30 @@ msgstr "Bỏ ghim cho nhân vật này"
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "Tin nhắn không gắn thẻ được gửi với tư cách persona vừa nói gần nhất. Mỗi khi ai đó dùng thẻ persona, persona đó tự động trở thành persona đang hoạt động."
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "Tin nhắn không gắn thẻ được gửi với tư cách persona bạn đã chọn. Gõ thẻ của persona khác chỉ gửi riêng tin nhắn đó và không đổi persona đang hoạt động."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
-msgstr "View your personas"
+msgstr "Xem persona của bạn"
 
 msgid "Where the signal bar appears"
 msgstr "Nơi hiển thị thanh tín hiệu"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
-msgstr "avatars downloaded"
+msgstr "ảnh đại diện đã tải"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
-msgstr "e.g. Alice"
+msgstr "vd: Alice"
 
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
-msgstr "e.g. she/her"
+msgstr "vd: cô ấy"
 
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
@@ -636,22 +636,22 @@ msgstr "ví dụ: ngày mai lúc 15h, trong 2 giờ nữa, bây giờ"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
-msgstr "personas prepared"
+msgstr "persona đã chuẩn bị"
 
 #. Progress label when saving personas
 msgid "saving personas"
-msgstr "saving personas"
+msgstr "persona đã lưu"
 
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
-msgstr "{0} notice(s) during import"
+msgstr "{0} thông báo trong khi nhập"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
 #. placeholder {2}: progress.label ?? 'items'
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
-msgstr "{0} of {1} {2} ({3}%)"
+msgstr "{0} trên {1} {2} ({3}%)"
 
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
@@ -659,7 +659,7 @@ msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
-msgstr "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - Nhấp để đổi persona"
 
 msgid "— Today at 12:00 PM"
-msgstr "— Today at 12:00 PM"
+msgstr "— Hôm nay lúc 12:00"
