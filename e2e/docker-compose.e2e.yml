@@ -189,7 +189,7 @@ services:
 
   snowflakes:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-snowflakes:bleeding-edge
+    image: fluxer-e2e/fluxer-snowflakes:local
     environment:
       <<: *e2e-env
       FLUXER_SVC_NAME: snowflakes
@@ -200,7 +200,7 @@ services:
 
   snowflakes-shard:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-snowflakes:bleeding-edge
+    image: fluxer-e2e/fluxer-snowflakes:local
     environment:
       <<: *e2e-env
       FLUXER_SVC_NAME: snowflakes
@@ -212,7 +212,7 @@ services:
 
   users:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-users:bleeding-edge
+    image: fluxer-e2e/fluxer-users:local
     environment:
       <<: *e2e-env
       FLUXER_SVC_NAME: users
@@ -223,7 +223,7 @@ services:
 
   users-shard:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-users:bleeding-edge
+    image: fluxer-e2e/fluxer-users:local
     environment:
       <<: *e2e-env
       FLUXER_SVC_NAME: users
@@ -237,7 +237,7 @@ services:
 
   messages:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-messages:bleeding-edge
+    image: fluxer-e2e/fluxer-messages:local
     environment:
       <<: *e2e-env
       FLUXER_SVC_NAME: messages
@@ -248,7 +248,7 @@ services:
 
   messages-shard:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-messages:bleeding-edge
+    image: fluxer-e2e/fluxer-messages:local
     environment:
       <<: *e2e-env
       FLUXER_SVC_NAME: messages
@@ -262,7 +262,7 @@ services:
 
   media-proxy:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-media-proxy:bleeding-edge
+    image: fluxer-e2e/fluxer-media-proxy:local
     environment:
       <<: *e2e-env
       FLUXER_MEDIA_PROXY_HOST: 0.0.0.0
@@ -279,7 +279,7 @@ services:
 
   static-proxy:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-static:bleeding-edge
+    image: fluxer-e2e/fluxer-static:local
     environment:
       <<: *e2e-env
       FLUXER_STATIC_PORT: "8080"
@@ -291,7 +291,7 @@ services:
 
   gateway:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-gateway:bleeding-edge
+    image: fluxer-e2e/fluxer-gateway:local
     environment:
       <<: *e2e-env
       FLUXER_GATEWAY_PORT: "8080"
@@ -309,7 +309,7 @@ services:
 
   api:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-api:bleeding-edge
+    image: fluxer-e2e/fluxer-api:local
     environment:
       <<: *e2e-env
       FLUXER_PORT: "8080"
@@ -329,7 +329,7 @@ services:
 
   worker:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-api:bleeding-edge
+    image: fluxer-e2e/fluxer-api:local
     command: ["sh", "-c", "if [ -f dist/WorkerEntrypoint.js ]; then exec node dist/WorkerEntrypoint.js; else exec ./node_modules/.bin/tsx src/WorkerEntrypoint.ts; fi"]
     environment:
       <<: *e2e-env
@@ -338,7 +338,7 @@ services:
 
   app-proxy:
     <<: *e2e-service
-    image: fluxer-custom/fluxer-app-proxy-self-hosted:bleeding-edge
+    image: fluxer-e2e/fluxer-app-proxy-self-hosted:local
     environment:
       FLUXER_APP_PROXY_HOST: 0.0.0.0
       FLUXER_APP_PROXY_PORT: "8080"
