@@ -1,10 +1,27 @@
 // @vitest-environment happy-dom
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {describe, expect, it, vi} from 'vitest';
+
+await vi.hoisted(async () => {
+	const {installVoiceMenuTestBootstrap} = await import(
+		'@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap'
+	);
+	installVoiceMenuTestBootstrap();
+});
+
 import AppStorage from '@app/features/platform/state/PersistentStorage';
 import * as LayoutCommands from '@app/features/ui/commands/LayoutCommands';
 import LayoutState from '@app/features/ui/state/LayoutState';
-import {describe, expect, it} from 'vitest';
+
+vi.mock('@lingui/core/macro', () => {
+	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
+	return {msg: descriptor, t: descriptor, plural: () => '', select: () => '', selectOrdinal: () => ''};
+});
+vi.mock('@lingui/react/macro', () => ({
+	Trans: ({children}: {children?: unknown}) => children ?? null,
+	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
+}));
 
 describe('LayoutState and LayoutCommands', () => {
 	it('has correct default visibility and peek states', () => {
