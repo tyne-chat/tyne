@@ -51,6 +51,8 @@ const SECURITY_SCHEMES: Record<string, OpenAPISecurityScheme> = {
 					email: 'Read the user email address.',
 					guilds: 'Read guild membership information for the current user.',
 					connections: 'Read linked third-party account connections for the current user.',
+					'personas.read': 'Read the personas on the user account.',
+					'personas.write': 'Create, edit and delete personas on the user account.',
 					bot: 'Add a bot user to a guild.',
 				},
 			},
