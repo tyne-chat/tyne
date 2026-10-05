@@ -8,7 +8,7 @@ msgstr ""
 
 #. placeholder {0}: w.prefix
 msgid "(Prefix: {0})"
-msgstr "(Prefix: {0})"
+msgstr "(Πρόθεμα: {0})"
 
 #. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
 msgid "(pinned)"
@@ -16,32 +16,32 @@ msgstr "(καρφιτσωμένο)"
 
 #. Tooltip showing root account username
 msgid "Account: @{username}"
-msgstr "Account: @{username}"
+msgstr "Λογαριασμός: @{username}"
 
 msgid "Active Persona Mode"
-msgstr "Active Persona Mode"
+msgstr "Λειτουργία ενεργής persona"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
 msgid "Active persona mode"
-msgstr "Active persona mode"
+msgstr "Λειτουργία ενεργής persona"
 
 #. placeholder {0}: formData.signatureEmojis.length
 msgid "Add Emoji ({0})"
 msgstr "Προσθήκη emoji ({0})"
 
 msgid "Add Persona"
-msgstr "Add Persona"
+msgstr "Προσθήκη persona"
 
 #. placeholder {0}: formData.tags.length
 msgid "Add Tag Pair ({0}/5)"
-msgstr "Add Tag Pair ({0}/5)"
+msgstr "Προσθήκη ζεύγους ετικετών ({0}/5)"
 
 msgid "Add signal"
 msgstr "Προσθήκη σήματος"
 
 msgid "All Personas"
-msgstr "All Personas"
+msgstr "Όλες οι persona"
 
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
@@ -49,41 +49,41 @@ msgstr "Όλες οι ζώνες ώρας"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Θέλετε σίγουρα να διαγράψετε το <0>{0}</0>; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "Θέλετε σίγουρα να αντικαταστήσετε και τις <0>{existingCount}</0> υπάρχουσες persona; Θα διαγραφούν οριστικά από τον λογαριασμό σας και αυτό δεν μπορεί να αναιρεθεί."
 
 #. Settings search synonym.
 msgid "Auto-hide"
-msgstr "Auto-hide"
+msgstr "Αυτόματη απόκρυψη"
 
 #. Settings section label in Advanced Settings for edge hover peek preference.
 #. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
 msgid "Auto-peek hidden sidebars"
-msgstr "Auto-peek hidden sidebars"
+msgstr "Αυτόματη εμφάνιση κρυφών πλαϊνών γραμμών"
 
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
-msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Η λήψη της εικόνας avatar απέτυχε: {error}. Η persona εισήχθη χωρίς avatar."
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
-msgstr "Change persona"
+msgstr "Αλλαγή persona"
 
 msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Choose a PluralKit export (.json) or drag & drop"
+msgstr "Επιλέξτε μια εξαγωγή PluralKit (.json) ή σύρετε και αποθέστε"
 
 msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "Επιλέξτε πώς τα μηνύματα χωρίς ετικέτα και οι ετικέτες persona αλληλεπιδρούν με την ενεργή persona σας."
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
-msgstr "Configured Personas ({count})"
+msgstr "Ρυθμισμένες persona ({count})"
 
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
-msgstr "Configuring {name}..."
+msgstr "Ρύθμιση {name}..."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -91,27 +91,27 @@ msgstr "Αντιγραφή χρονικής σήμανσης\\"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
-msgstr "Deactivate persona"
+msgstr "Απενεργοποίηση persona"
 
 msgid "Delete Persona"
-msgstr "Delete Persona"
+msgstr "Διαγραφή persona"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
-msgstr "Delete persona"
+msgstr "Διαγραφή persona"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "Διαγραφή χρονικής σήμανσης\\"
 
 msgid "Detected System Name / Tag"
-msgstr "Detected System Name / Tag"
+msgstr "Εντοπισμένο όνομα / ετικέτα συστήματος"
 
 msgid "Display Tag"
-msgstr "Display Tag"
+msgstr "Ετικέτα εμφάνισης"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
-msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "Η ετικέτα εμφάνισης θα εμφανίζεται δίπλα σε όλα τα ονόματα persona στα μηνύματα. Αν δεν οριστεί ετικέτα εμφάνισης, θα εμφανίζεται η εικόνα προφίλ του λογαριασμού σας."
 
 #. Settings search entry label for double-clicking a message to edit it.
 #. Short label for an advanced message editing preference.
@@ -121,20 +121,20 @@ msgstr "Διπλό κλικ για επεξεργασία"
 
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
-msgstr "Downloading avatar {current} of {total}..."
+msgstr "Λήψη avatar {current} από {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
-msgstr "Duplicate tag pair on this persona"
+msgstr "Διπλό ζεύγος ετικετών σε αυτήν την persona"
 
 #. Title for edit persona modal
 msgid "Edit Persona"
-msgstr "Edit Persona"
+msgstr "Επεξεργασία persona"
 
 #. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
-msgstr "Edit persona"
+msgstr "Επεξεργασία persona"
 
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
@@ -142,27 +142,27 @@ msgid "Edit timestamp"
 msgstr "Επεξεργασία χρονικής σήμανσης\\"
 
 msgid "Export Summary"
-msgstr "Export Summary"
+msgstr "Σύνοψη εξαγωγής"
 
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
-msgstr "Failed to delete persona"
+msgstr "Η διαγραφή της persona απέτυχε"
 
 #. Toast error message on persona import failure
 msgid "Failed to import personas"
-msgstr "Failed to import personas"
+msgstr "Η εισαγωγή των persona απέτυχε"
 
 #. Error message when parsing PluralKit JSON fails
 msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
-msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Η ανάλυση του αρχείου JSON απέτυχε. Βεβαιωθείτε ότι είναι έγκυρη εξαγωγή PluralKit."
 
 #. Error message when reading uploaded file fails
 msgid "Failed to read the selected file."
-msgstr "Failed to read the selected file."
+msgstr "Η ανάγνωση του επιλεγμένου αρχείου απέτυχε."
 
 #. Toast when persona save fails
 msgid "Failed to save persona"
-msgstr "Failed to save persona"
+msgstr "Η αποθήκευση της persona απέτυχε"
 
 #. Error toast in the community Message Tools settings tab when saving the signal bar fails.
 msgid "Failed to save the signal bar. Try again."
@@ -174,7 +174,7 @@ msgstr "Δεν ήταν δυνατή η αποθήκευση του πού εμ�
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
-msgstr "Failed to upload icon to server"
+msgstr "Η μεταφόρτωση του εικονιδίου στον διακομιστή απέτυχε"
 
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
@@ -182,11 +182,11 @@ msgstr "Προεπισκόπηση μορφής"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
-msgstr "Hide channel list"
+msgstr "Απόκρυψη λίστας καναλιών"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
-msgstr "Hide server list"
+msgstr "Απόκρυψη λίστας διακομιστών"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -194,32 +194,32 @@ msgstr "Απόκρυψη γραμμής σημάτων"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
-msgstr "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Μετακινήστε τον δείκτη κοντά στις άκρες του παραθύρου για να εμφανίσετε προσωρινά τα συμπτυγμένα πλαίσια."
 
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
-msgstr "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Το αρχείο εικονιδίου είναι πολύ μεγάλο. Επιλέξτε μια εικόνα μικρότερη από 10 MB."
 
 #. Modal title for PluralKit import step completed
 msgid "Import Complete"
-msgstr "Import Complete"
+msgstr "Η εισαγωγή ολοκληρώθηκε"
 
 msgid "Import Complete!"
-msgstr "Import Complete!"
+msgstr "Η εισαγωγή ολοκληρώθηκε!"
 
 msgid "Import Strategy"
-msgstr "Import Strategy"
+msgstr "Στρατηγική εισαγωγής"
 
 #. Modal title for PluralKit import step select
 msgid "Import from PluralKit"
-msgstr "Import from PluralKit"
+msgstr "Εισαγωγή από το PluralKit"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
-msgstr "Importing Personas..."
+msgstr "Εισαγωγή persona..."
 
 msgid "Importing..."
-msgstr "Importing..."
+msgstr "Εισαγωγή..."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -232,33 +232,33 @@ msgid "Insert timestamp"
 msgstr "Εισαγωγή χρονικής σήμανσης"
 
 msgid "Keep existing and add new (Recommended)"
-msgstr "Keep existing and add new (Recommended)"
+msgstr "Διατήρηση των υπαρχουσών και προσθήκη νέων (συνιστάται)"
 
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "Διατηρήστε τις {existingCount} τρέχουσες persona σας και προσθέστε και τις {0} εισαγόμενες persona δίπλα τους ως νέες καταχωρίσεις."
 
 #. Active persona mode last used
 #. Active persona mode last used
 #. Active persona mode last used
 msgid "Last Used"
-msgstr "Last Used"
+msgstr "Τελευταία χρήση"
 
 msgid "Main account"
-msgstr "Main account"
+msgstr "Κύριος λογαριασμός"
 
 msgid "Manage Personas"
-msgstr "Manage Personas"
+msgstr "Διαχείριση persona"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
-msgstr "Manage and create your personas"
+msgstr "Διαχειριστείτε και δημιουργήστε τις persona σας"
 
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
 msgid "Manual"
-msgstr "Manual"
+msgstr "Μη αυτόματα"
 
 #. Validation error when signature emoji limit is reached
 msgid "Maximum {max} signature emojis allowed per persona"
@@ -266,10 +266,10 @@ msgstr "Επιτρέπονται το πολύ {max} χαρακτηριστικ�
 
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
-msgstr "Member #{index}"
+msgstr "Μέλος #{index}"
 
 msgid "Members with Avatars"
-msgstr "Members with Avatars"
+msgstr "Μέλη με avatar"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -277,23 +277,23 @@ msgstr "Εργαλεία μηνυμάτων"
 
 #. Title for new persona modal
 msgid "New Persona"
-msgstr "New Persona"
+msgstr "Νέα persona"
 
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
-msgstr "No \"members\" array found in this export file."
+msgstr "Δεν βρέθηκε πίνακας «members» σε αυτό το αρχείο εξαγωγής."
 
 msgid "No display tag configured. Messages will show your account profile picture."
-msgstr "No display tag configured. Messages will show your account profile picture."
+msgstr "Δεν έχει ρυθμιστεί ετικέτα εμφάνισης. Τα μηνύματα θα δείχνουν την εικόνα προφίλ του λογαριασμού σας."
 
 msgid "No matching personas found."
-msgstr "No matching personas found."
+msgstr "Δεν βρέθηκαν αντίστοιχες persona."
 
 msgid "No personas configured yet. Create one in Settings."
-msgstr "No personas configured yet. Create one in Settings."
+msgstr "Δεν έχουν ρυθμιστεί ακόμη persona. Δημιουργήστε μία στις Ρυθμίσεις."
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
-msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Δεν έχουν δημιουργηθεί ακόμη persona. Κάντε κλικ στο «Προσθήκη persona» για να δημιουργήσετε την πρώτη σας!"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Δεν υπάρχουν σήματα ακόμα. Η γραμμή μένει κρυφή μέχρι να προσθέσεις ένα."
@@ -304,11 +304,11 @@ msgstr "Κανείς δεν έχει ενεργό αυτό το σήμα"
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
-msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Ορατό μόνο σε εσάς. Οι άλλοι δεν μπορούν να δουν το πλήρες βιογραφικό ή τα στοιχεία προφίλ αυτής της persona."
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "Προαιρετικό σήμα συστήματος, π.χ. ⚞Seraphim⚟"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -316,21 +316,21 @@ msgstr "Επικόλληση ως απλό κείμενο"
 
 #. Settings search synonym.
 msgid "Peek"
-msgstr "Peek"
+msgstr "Γρήγορη ματιά"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "Διαγράψτε οριστικά και τις {existingCount} υπάρχουσες persona και αντικαταστήστε τις πλήρως με τις εισαγόμενες."
 
 msgid "Persona Tags (Prefix & Suffix)"
-msgstr "Persona Tags (Prefix & Suffix)"
+msgstr "Ετικέτες persona (πρόθεμα και επίθημα)"
 
 #. Toast when persona is created
 msgid "Persona created"
-msgstr "Persona created"
+msgstr "Η persona δημιουργήθηκε"
 
 #. Toast when persona is deleted
 msgid "Persona deleted"
-msgstr "Persona deleted"
+msgstr "Η persona διαγράφηκε"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -344,16 +344,16 @@ msgstr "Προφίλ persona: {name}"
 
 #. Toast when persona is updated
 msgid "Persona updated"
-msgstr "Persona updated"
+msgstr "Η persona ενημερώθηκε"
 
 #. Aria label for persona visibility tabs
 msgid "Persona visibility"
-msgstr "Persona visibility"
+msgstr "Ορατότητα persona"
 
 #. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
-msgstr "Personas"
+msgstr "Persona"
 
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
@@ -365,39 +365,39 @@ msgstr "Καρφίτσωμα για αυτήν την περσόνα"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
-msgstr "Prefix (e.g. [)"
+msgstr "Πρόθεμα (π.χ. [)"
 
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
-msgstr "Preparing avatar batch download..."
+msgstr "Προετοιμασία μαζικής λήψης avatar..."
 
 #. Persona visibility private
 msgid "Private"
-msgstr "Private"
+msgstr "Ιδιωτικό"
 
 #. Tooltip on private persona badge
 msgid "Private persona"
-msgstr "Private persona"
+msgstr "Ιδιωτική persona"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
-msgstr "Processing: {0}"
+msgstr "Επεξεργασία: {0}"
 
 #. Helper description for unlisted persona visibility
 msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
-msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Οι κάρτες προφίλ είναι προσβάσιμες μόνο με κλικ σε μηνύματα που στάλθηκαν από αυτήν την persona. Δεν εμφανίζεται στη δημόσια λίστα persona σας."
 
 #. Helper description for public persona visibility
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
-msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Οι κάρτες προφίλ είναι προσβάσιμες με κλικ σε μηνύματα και ορατές στη δημόσια λίστα persona σας για φίλους και κοινούς διακομιστές."
 
 #. Persona visibility public
 msgid "Public"
-msgstr "Public"
+msgstr "Δημόσιο"
 
 #. Tooltip on public persona badge
 msgid "Public persona"
-msgstr "Public persona"
+msgstr "Δημόσια persona"
 
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
@@ -414,7 +414,7 @@ msgid "Reacting with a signature emoji will always react as this persona, regard
 msgstr "Η αντίδραση με ένα χαρακτηριστικό emoji θα αντιδρά πάντα ως αυτή η περσόνα, ανεξάρτητα από την ενεργή περσόνα."
 
 msgid "Recent Personas"
-msgstr "Recent Personas"
+msgstr "Πρόσφατες persona"
 
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
@@ -422,55 +422,55 @@ msgstr "Κατάργηση χαρακτηριστικού emoji"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
-msgstr "Remove tag pair"
+msgstr "Αφαίρεση ζεύγους ετικετών"
 
 msgid "Replace All"
-msgstr "Replace All"
+msgstr "Αντικατάσταση όλων"
 
 msgid "Replace All Personas"
-msgstr "Replace All Personas"
+msgstr "Αντικατάσταση όλων των persona"
 
 msgid "Replace all existing personas (Destructive)"
-msgstr "Replace all existing personas (Destructive)"
+msgstr "Αντικατάσταση όλων των υπαρχουσών persona (μη αναστρέψιμο)"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Επαναφορά σήματος για όλους"
 
 msgid "Root Account (Default)"
-msgstr "Root Account (Default)"
+msgstr "Κύριος λογαριασμός (Προεπιλογή)"
 
 #. Progress status when saving personas
 msgid "Saving personas..."
-msgstr "Saving personas..."
+msgstr "Αποθήκευση persona..."
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
-msgstr "Search Results ({0})"
+msgstr "Αποτελέσματα αναζήτησης ({0})"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
-msgstr "Search personas, tags, pronouns..."
+msgstr "Αναζήτηση persona, ετικετών, αντωνυμιών..."
 
 #. Description of personas settings section
 msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "Στείλτε μηνύματα με ξεχωριστά ονόματα και avatar. Οι persona μπορούν να αντιπροσωπεύουν μέλη ενός πληθυντικού συστήματος, χαρακτήρες παιχνιδιού ρόλων ή οποιαδήποτε άλλη ταυτότητα."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
-msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Αποστολή ως @{username} ({mode}) - Κάντε κλικ για αλλαγή persona"
 
 #. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
-msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Αποστολή ως {name} (αντιστοίχιση μέσω ετικέτας) - Κάντε κλικ για αλλαγή persona"
 
 msgid "Set Active"
-msgstr "Set Active"
+msgstr "Ορισμός ως ενεργό"
 
 #. Aria label for setting active persona
 msgid "Set as active persona"
-msgstr "Set as active persona"
+msgstr "Ορισμός ως ενεργής persona"
 
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
@@ -479,11 +479,11 @@ msgstr "Εμφάνιση κουμπιού αντιγραφής"
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
-msgstr "Show personas button"
+msgstr "Εμφάνιση κουμπιού persona"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
-msgstr "Show server list"
+msgstr "Εμφάνιση λίστας διακομιστών"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
@@ -517,50 +517,50 @@ msgstr "Το χαρακτηριστικό emoji χρησιμοποιείται �
 
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
-msgstr "Skipped member because they have no name configured."
+msgstr "Το μέλος παραλείφθηκε επειδή δεν έχει ρυθμισμένο όνομα."
 
 msgid "Start Import"
-msgstr "Start Import"
+msgstr "Έναρξη εισαγωγής"
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "Εισήχθησαν επιτυχώς {0} persona στον λογαριασμό σας. Όλες οι εικόνες avatar αποθηκεύονται με ασφάλεια στον τοπικό σας διακομιστή."
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
-msgstr "Suffix (e.g. ])"
+msgstr "Επίθημα (π.χ. ])"
 
 #. Section header for suggested time zones in the timestamp modal.
 msgid "Suggested"
 msgstr "Προτεινόμενα"
 
 msgid "Supports PluralKit system export files"
-msgstr "Supports PluralKit system export files"
+msgstr "Υποστηρίζει αρχεία εξαγωγής συστήματος PluralKit"
 
 msgid "System Tag (Applied to imported personas)"
-msgstr "System Tag (Applied to imported personas)"
+msgstr "Ετικέτα συστήματος (εφαρμόζεται στις εισαγόμενες persona)"
 
 msgid "Tag Icon"
-msgstr "Tag Icon"
+msgstr "Εικονίδιο ετικέτας"
 
 msgid "Tag Text"
-msgstr "Tag Text"
+msgstr "Κείμενο ετικέτας"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
-msgstr "Tag pair already in use by persona \"{name}\""
+msgstr "Το ζεύγος ετικετών χρησιμοποιείται ήδη από την persona «{name}»"
 
 #. Settings search synonym.
 msgid "Taskbar"
-msgstr "Taskbar"
+msgstr "Γραμμή εργασιών"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."
-msgstr "Tell us about this persona..."
+msgstr "Πείτε μας για αυτήν την persona..."
 
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
-msgstr "The chosen file is not a valid JSON object."
+msgstr "Το επιλεγμένο αρχείο δεν είναι έγκυρο αντικείμενο JSON."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Η γραμμή σημάτων είναι ανενεργή μέχρι να επιλέξεις ένα κανάλι εδώ. Η επιλογή μιας κατηγορίας ή ολόκληρης της κοινότητας καλύπτει και τα κανάλια που θα δημιουργηθούν εκεί αργότερα."
@@ -570,14 +570,14 @@ msgid "This emoji is already added as a signature emoji"
 msgstr "Αυτό το emoji έχει ήδη προστεθεί ως χαρακτηριστικό emoji"
 
 msgid "This is a preview of how your display tag will look in chat."
-msgstr "This is a preview of how your display tag will look in chat."
+msgstr "Αυτή είναι μια προεπισκόπηση του πώς θα φαίνεται η ετικέτα εμφάνισής σας στη συνομιλία."
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Εναλλαγή λίστας καναλιών"
 
 msgid "Total Members"
-msgstr "Total Members"
+msgstr "Σύνολο μελών"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -593,7 +593,7 @@ msgstr "Ενεργοποίηση γραμμής σημάτων"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
-msgstr "Unlisted"
+msgstr "Μη καταχωρισμένο"
 
 #. Emoji context menu action that unpins the emoji.
 msgid "Unpin emoji"
@@ -605,30 +605,30 @@ msgstr "Ξεκαρφίτσωμα για αυτήν την περσόνα"
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "Τα μηνύματα χωρίς ετικέτα αποστέλλονται ως η persona που μίλησε πιο πρόσφατα. Όποτε κάποιος χρησιμοποιεί μια ετικέτα persona, αυτή γίνεται αυτόματα η ενεργή persona."
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "Τα μηνύματα χωρίς ετικέτα αποστέλλονται ως η persona που επιλέξατε. Η πληκτρολόγηση των ετικετών άλλης persona θα στείλει μόνο εκείνο το μήνυμα και δεν θα αλλάξει ποια είναι ενεργή."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
-msgstr "View your personas"
+msgstr "Προβολή των persona σας"
 
 msgid "Where the signal bar appears"
 msgstr "Πού εμφανίζεται η γραμμή σημάτων"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
-msgstr "avatars downloaded"
+msgstr "avatar που λήφθηκαν"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
-msgstr "e.g. Alice"
+msgstr "π.χ. Alice"
 
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
-msgstr "e.g. she/her"
+msgstr "π.χ. αυτή"
 
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
@@ -636,22 +636,22 @@ msgstr "π.χ. αύριο στις 3 μ.μ., σε 2 ώρες, τώρα"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
-msgstr "personas prepared"
+msgstr "persona που προετοιμάστηκαν"
 
 #. Progress label when saving personas
 msgid "saving personas"
-msgstr "saving personas"
+msgstr "persona που αποθηκεύτηκαν"
 
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
-msgstr "{0} notice(s) during import"
+msgstr "{0} ειδοποίηση(-εις) κατά την εισαγωγή"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
 #. placeholder {2}: progress.label ?? 'items'
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
-msgstr "{0} of {1} {2} ({3}%)"
+msgstr "{0} από {1} {2} ({3}%)"
 
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
@@ -659,7 +659,7 @@ msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
-msgstr "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - Κάντε κλικ για αλλαγή persona"
 
 msgid "— Today at 12:00 PM"
-msgstr "— Today at 12:00 PM"
+msgstr "— Σήμερα στις 12:00"
