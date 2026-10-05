@@ -11,6 +11,10 @@ import {AllLocales, type LocaleCode} from '@fluxer/constants/src/Locales';
 import {type I18n, i18n, type Messages} from '@lingui/core';
 import {createAtom, runInAction} from 'mobx';
 
+// Fork imports.
+
+import {withForkMessages} from '@app/app/ForkI18n';
+
 const DEFAULT_LOCALE: LocaleCode = 'en-US';
 const supportedLocaleSet = new Set<LocaleCode>(AllLocales);
 const logger = new Logger('i18n');
@@ -190,7 +194,7 @@ export async function loadLocaleCatalog(localeCode: string): Promise<LocaleCode>
 	}
 	let loadPromise = inFlightLoads.get(normalized);
 	if (!loadPromise) {
-		loadPromise = loadLazyModule(loaders[normalized])
+		loadPromise = loadLazyModule(withForkMessages(normalized, loaders[normalized]))
 			.then(({messages}) => messages)
 			.finally(() => {
 				inFlightLoads.delete(normalized);
