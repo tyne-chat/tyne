@@ -1,4 +1,5 @@
-import {createTestAccount} from '@app/api/auth/tests/AuthTestUtils';
+import {createTestAccount, type TestAccount} from '@app/api/auth/tests/AuthTestUtils';
+import {setupTestGuildWithMembers} from '@app/api/channel/tests/ChannelTestUtils';
 import {ensureSessionStarted, getMessages} from '@app/api/message/tests/MessageTestUtils';
 import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHarness';
 import {HTTP_STATUS} from '@app/api/test/TestConstants';
@@ -16,6 +17,7 @@ import {afterAll, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest'
 import {createChannelID, createGuildID, createMessageID, createPersonaID, createUserID} from '../../BrandedTypes';
 import {Message} from '../../models/Message';
 import {Persona} from '../../models/Persona';
+import {personaLookupKey} from '../../persona/IPersonaRepository';
 import {PersonaRepository} from '../../persona/PersonaRepository';
 import {normalizeMessageSubprofile} from '../services/message/MessageHelpers';
 import {MessageResponseDataService} from '../services/message/MessageResponseDataService';
@@ -572,8 +574,8 @@ describe('Personal Notes Persona Integration', () => {
 				.mockImplementation(async (pairs: Array<{userId: unknown; personaId: unknown}>) => {
 					const map = new Map<string, Persona>();
 					for (const p of pairs) {
-						if (String(p.personaId) === '999') {
-							map.set('999', mockPersona);
+						if (String(p.userId) === '30' && String(p.personaId) === '999') {
+							map.set(personaLookupKey('30', '999'), mockPersona);
 						}
 					}
 					return map;
@@ -757,5 +759,192 @@ describe('Personal Notes Persona Integration', () => {
 				name: 'Deleted Persona',
 			}),
 		);
+	});
+
+	it("rejects sending a message with another member's persona", async () => {
+		const {members, systemChannel} = await setupTestGuildWithMembers(harness, 2);
+		const [owner, impostor] = members as [TestAccount, TestAccount];
+		await ensureSessionStarted(harness, owner.token);
+		await ensureSessionStarted(harness, impostor.token);
+
+		const ownerPersona = await createBuilder<{id: string; name: string}>(harness, owner.token)
+			.post('/users/@me/personas')
+			.body({name: 'Owner Persona'})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+
+		const ownerMessage = await createBuilder<MessageResponse>(harness, owner.token)
+			.post(`/channels/${systemChannel.id}/messages`)
+			.body({content: 'From the real owner', subprofile: {id: ownerPersona.id, name: ownerPersona.name}})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		expect(ownerMessage.subprofile?.name).toBe('Owner Persona');
+
+		await createBuilder(harness, impostor.token)
+			.post(`/channels/${systemChannel.id}/messages`)
+			.body({content: 'From the impostor', subprofile: {id: ownerPersona.id, name: ownerPersona.name}})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+
+		await createBuilder(harness, impostor.token)
+			.post(`/channels/${systemChannel.id}/messages`)
+			.body({content: 'Bad id', subprofile: {id: 'not-a-snowflake', name: 'Nobody'}})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+
+		const messages = await getMessages(harness, impostor.token, systemChannel.id);
+		expect(messages.some((m) => m.content === 'From the impostor' || m.content === 'Bad id')).toBe(false);
+	});
+
+	it("rejects editing a message onto another member's persona and leaves it unchanged", async () => {
+		const {members, systemChannel} = await setupTestGuildWithMembers(harness, 2);
+		const [owner, impostor] = members as [TestAccount, TestAccount];
+		await ensureSessionStarted(harness, owner.token);
+		await ensureSessionStarted(harness, impostor.token);
+
+		const ownerPersona = await createBuilder<{id: string; name: string}>(harness, owner.token)
+			.post('/users/@me/personas')
+			.body({name: 'Owner Persona'})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+
+		const impostorMessage = await createBuilder<MessageResponse>(harness, impostor.token)
+			.post(`/channels/${systemChannel.id}/messages`)
+			.body({content: 'Plain message'})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		await createBuilder(harness, impostor.token)
+			.patch(`/channels/${systemChannel.id}/messages/${impostorMessage.id}`)
+			.body({subprofile: {id: ownerPersona.id, name: ownerPersona.name}})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+
+		const messages = await getMessages(harness, owner.token, systemChannel.id);
+		const fetched = messages.find((m) => m.id === impostorMessage.id);
+		expect(fetched?.subprofile ?? null).toBeNull();
+	});
+
+	it('keeps a message editable when it re-sends its own since-deleted persona', async () => {
+		const account = await createTestAccount(harness);
+		await ensureSessionStarted(harness, account.token);
+		const personalNotesChannelId = account.userId;
+
+		const persona = await createBuilder<{id: string; name: string}>(harness, account.token)
+			.post('/users/@me/personas')
+			.body({name: 'Short Lived'})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+
+		const sent = await createBuilder<MessageResponse>(harness, account.token)
+			.post(`/channels/${personalNotesChannelId}/messages`)
+			.body({content: 'Before deletion', subprofile: {id: persona.id, name: persona.name}})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		await createBuilder(harness, account.token)
+			.delete(`/users/@me/personas/${persona.id}`)
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+
+		const edited = await createBuilder<MessageResponse>(harness, account.token)
+			.patch(`/channels/${personalNotesChannelId}/messages/${sent.id}`)
+			.body({content: 'After deletion', subprofile: {id: persona.id, name: persona.name}})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		expect(edited.content).toBe('After deletion');
+		expect(edited.subprofile?.id).toBe(persona.id);
+
+		await createBuilder(harness, account.token)
+			.post(`/channels/${personalNotesChannelId}/messages`)
+			.body({content: 'New message', subprofile: {id: persona.id, name: persona.name}})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+	});
+
+	it("does not hydrate a stored foreign persona id with the owner's persona from the same batch", async () => {
+		const fakeManager = new FakeConnectionManager();
+		const ownerPersona = new Persona({
+			user_id: createUserID(30n),
+			persona_id: createPersonaID(999n),
+			name: 'Sneaks',
+			avatar_hash: 'sneaks_hash',
+			banner_hash: null,
+			pronouns: null,
+			color: null,
+			avatar_color: null,
+			bio: null,
+			auto_tag_disabled: false,
+			persona_tags: '[]',
+			signature_emojis: '[]',
+			use_count: 0,
+			last_used_at_ms: null,
+			visibility: 'public',
+			external_uuid: null,
+			created_at: new Date(),
+			updated_at: new Date(),
+			deleted_at: null,
+			version: 1,
+		});
+		const mockRepo = {
+			findByUserAndPersonaIds: vi
+				.fn()
+				.mockImplementation(async (pairs: Array<{userId: unknown; personaId: unknown}>) => {
+					const map = new Map<string, Persona>();
+					for (const p of pairs) {
+						if (String(p.userId) === '30' && String(p.personaId) === '999') {
+							map.set(personaLookupKey('30', '999'), ownerPersona);
+						}
+					}
+					return map;
+				}),
+			findSettingsByUserIds: vi.fn().mockResolvedValue(new Map()),
+		} as unknown as PersonaRepository;
+		const service = new MessageResponseDataService(fakeManager, mockRepo);
+		const baseMessage = {
+			channel_id: '500',
+			type: MessageTypes.DEFAULT,
+			flags: 0,
+			timestamp: '2026-01-01T00:00:00.000Z',
+			edited_timestamp: null,
+			pinned: false,
+			mention_everyone: false,
+			tts: false,
+			mentions: [],
+			mention_roles: [],
+			embeds: [],
+			attachments: [],
+			stickers: [],
+			persona_id: '999',
+		};
+		fakeManager.customResponse = {
+			FoundApiMany: [
+				{
+					...baseMessage,
+					id: '3001',
+					author: {id: '30', username: 'owner', discriminator: '0001', avatar: null, flags: 0},
+					content: 'real',
+				},
+				{
+					...baseMessage,
+					id: '3002',
+					author: {id: '40', username: 'impostor', discriminator: '0001', avatar: null, flags: 0},
+					content: 'forged',
+				},
+			],
+		};
+
+		const messages = await service.listMessages({
+			userId: createUserID(40n),
+			channelId: createChannelID(500n),
+			limit: 10,
+			access: {canReadMessageHistory: true} as any,
+		});
+
+		const real = messages.find((m) => m.id === '3001');
+		const forged = messages.find((m) => m.id === '3002');
+		expect(real?.subprofile?.name).toBe('Sneaks');
+		expect(forged?.subprofile?.name).toBe('Unknown Persona');
+		expect(forged?.subprofile?.avatar).toBeNull();
 	});
 });
