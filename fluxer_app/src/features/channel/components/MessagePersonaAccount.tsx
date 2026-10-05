@@ -60,7 +60,6 @@ export const MessagePersonaAccount = observer(
 			(e.currentTarget as HTMLElement).click();
 		}, []);
 		const keyboardModeEnabled = KeyboardMode.keyboardModeEnabled;
-		if (!message.subprofile) return null;
 
 		const staticIconUrl = customIconUrl
 			? customIconUrl.startsWith('http://') || customIconUrl.startsWith('https://') || customIconUrl.startsWith('data:')
@@ -81,6 +80,8 @@ export const MessagePersonaAccount = observer(
 			isHovering: hasDistinctHover && (isTagHovering || Boolean(forceAnimate)),
 		});
 		const resolvedIconUrl = shouldAnimate ? hoverIconUrl : staticIconUrl;
+
+		if (!message.subprofile) return null;
 
 		return (
 			<PreloadableUserPopout
