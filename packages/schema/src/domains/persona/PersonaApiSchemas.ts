@@ -180,3 +180,30 @@ export const ChannelPersonaMentionsQuerySchema = z.object({
 	limit: z.coerce.number().int().min(1).max(1000).optional().default(100),
 });
 export type ChannelPersonaMentionsQuery = z.infer<typeof ChannelPersonaMentionsQuerySchema>;
+
+export const PersonaAvatarUploadRequest = z.object({
+	avatar: z.string().describe('Base64 data URI of the avatar image'),
+});
+export const PersonaAvatarUploadResponse = z.object({
+	avatar_hash: z.string().describe('Hash of the uploaded avatar'),
+	avatar_color: z.number().int().nullish().optional().describe('Dominant avatar color'),
+});
+
+export const PersonaBannerUploadRequest = z.object({
+	banner: z.string().describe('Base64 data URI of the banner image'),
+});
+export const PersonaBannerUploadResponse = z.object({
+	banner_hash: z.string().describe('Hash of the uploaded banner'),
+});
+
+export const PersonaAvatarImportRequest = z.object({
+	url: z.string().url().max(2048).describe('Remote URL of the avatar image to import'),
+});
+export const PersonaAvatarImportResponse = z.object({
+	avatar_hash: z.string().describe('Hash of the imported avatar'),
+	avatar_color: z.number().int().nullish().optional().describe('Dominant avatar color'),
+});
+
+export const PersonaBatchAvatarImportRequest = z.object({
+	urls: z.array(z.string().url().max(2048)).min(1).max(500).describe('List of remote avatar URLs to import'),
+});
