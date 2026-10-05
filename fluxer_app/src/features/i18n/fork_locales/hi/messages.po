@@ -8,7 +8,7 @@ msgstr ""
 
 #. placeholder {0}: w.prefix
 msgid "(Prefix: {0})"
-msgstr "(Prefix: {0})"
+msgstr "(उपसर्ग: {0})"
 
 #. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
 msgid "(pinned)"
@@ -16,32 +16,32 @@ msgstr "(पिन किया गया)"
 
 #. Tooltip showing root account username
 msgid "Account: @{username}"
-msgstr "Account: @{username}"
+msgstr "अकाउंट: @{username}"
 
 msgid "Active Persona Mode"
-msgstr "Active Persona Mode"
+msgstr "सक्रिय परसोना मोड"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
 msgid "Active persona mode"
-msgstr "Active persona mode"
+msgstr "सक्रिय परसोना मोड"
 
 #. placeholder {0}: formData.signatureEmojis.length
 msgid "Add Emoji ({0})"
 msgstr "इमोजी जोड़ें ({0})"
 
 msgid "Add Persona"
-msgstr "Add Persona"
+msgstr "परसोना जोड़ें"
 
 #. placeholder {0}: formData.tags.length
 msgid "Add Tag Pair ({0}/5)"
-msgstr "Add Tag Pair ({0}/5)"
+msgstr "टैग जोड़ी जोड़ें ({0}/5)"
 
 msgid "Add signal"
 msgstr "सिग्नल जोड़ें"
 
 msgid "All Personas"
-msgstr "All Personas"
+msgstr "सभी परसोना"
 
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
@@ -49,41 +49,41 @@ msgstr "सभी समय क्षेत्र"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "क्या आप वाकई <0>{0}</0> को डिलीट करना चाहते हैं? यह कार्रवाई वापस नहीं ली जा सकती।"
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "क्या आप वाकई सभी <0>{existingCount}</0> मौजूदा परसोना बदलना चाहते हैं? ये आपके अकाउंट से हमेशा के लिए डिलीट हो जाएँगे और इसे वापस नहीं लिया जा सकता।"
 
 #. Settings search synonym.
 msgid "Auto-hide"
-msgstr "Auto-hide"
+msgstr "अपने-आप छिपाएँ"
 
 #. Settings section label in Advanced Settings for edge hover peek preference.
 #. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
 msgid "Auto-peek hidden sidebars"
-msgstr "Auto-peek hidden sidebars"
+msgstr "छिपे साइडबार अपने-आप दिखाएँ"
 
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
-msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "अवतार इमेज डाउनलोड नहीं हो सकी: {error}। परसोना बिना अवतार के इंपोर्ट हुआ।"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
-msgstr "Change persona"
+msgstr "परसोना बदलें"
 
 msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Choose a PluralKit export (.json) or drag & drop"
+msgstr "PluralKit एक्सपोर्ट (.json) चुनें या खींचकर छोड़ें"
 
 msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "चुनें कि बिना टैग वाले संदेश और परसोना टैग आपके सक्रिय परसोना के साथ कैसे काम करें।"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
-msgstr "Configured Personas ({count})"
+msgstr "कॉन्फ़िगर किए गए परसोना ({count})"
 
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
-msgstr "Configuring {name}..."
+msgstr "{name} कॉन्फ़िगर हो रहा है..."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -91,27 +91,27 @@ msgstr "समय टिकट कॉपी करें\\"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
-msgstr "Deactivate persona"
+msgstr "परसोना निष्क्रिय करें"
 
 msgid "Delete Persona"
-msgstr "Delete Persona"
+msgstr "परसोना डिलीट करें"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
-msgstr "Delete persona"
+msgstr "परसोना डिलीट करें"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "समय टिकट मिटाएँ\\"
 
 msgid "Detected System Name / Tag"
-msgstr "Detected System Name / Tag"
+msgstr "पहचाना गया सिस्टम नाम / टैग"
 
 msgid "Display Tag"
-msgstr "Display Tag"
+msgstr "डिस्प्ले टैग"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
-msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "डिस्प्ले टैग मैसेज में सभी परसोना नाम के आगे दिखाई देगा। यदि कोई डिस्प्ले टैग सेट नहीं है, तो आपकी अकाउंट प्रोफ़ाइल पिक्चर दिखाई जाएगी।"
 
 #. Settings search entry label for double-clicking a message to edit it.
 #. Short label for an advanced message editing preference.
@@ -121,20 +121,20 @@ msgstr "एडिट करने के लिए डबल-क्लिक क
 
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
-msgstr "Downloading avatar {current} of {total}..."
+msgstr "अवतार डाउनलोड हो रहा है {current}/{total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
-msgstr "Duplicate tag pair on this persona"
+msgstr "इस परसोना पर टैग जोड़ी दोहराई गई है"
 
 #. Title for edit persona modal
 msgid "Edit Persona"
-msgstr "Edit Persona"
+msgstr "परसोना एडिट करें"
 
 #. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
-msgstr "Edit persona"
+msgstr "परसोना एडिट करें"
 
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
@@ -142,27 +142,27 @@ msgid "Edit timestamp"
 msgstr "समय टिकट एडिट करें\\"
 
 msgid "Export Summary"
-msgstr "Export Summary"
+msgstr "एक्सपोर्ट सारांश"
 
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
-msgstr "Failed to delete persona"
+msgstr "परसोना डिलीट नहीं हो सका"
 
 #. Toast error message on persona import failure
 msgid "Failed to import personas"
-msgstr "Failed to import personas"
+msgstr "परसोना इंपोर्ट नहीं हो सके"
 
 #. Error message when parsing PluralKit JSON fails
 msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
-msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "JSON फ़ाइल पार्स नहीं हो सकी। कृपया पक्का करें कि यह मान्य PluralKit एक्सपोर्ट है।"
 
 #. Error message when reading uploaded file fails
 msgid "Failed to read the selected file."
-msgstr "Failed to read the selected file."
+msgstr "चुनी गई फ़ाइल पढ़ी नहीं जा सकी।"
 
 #. Toast when persona save fails
 msgid "Failed to save persona"
-msgstr "Failed to save persona"
+msgstr "परसोना सेव नहीं हो सका"
 
 #. Error toast in the community Message Tools settings tab when saving the signal bar fails.
 msgid "Failed to save the signal bar. Try again."
@@ -174,7 +174,7 @@ msgstr "सिग्नल बार कहाँ दिखे, यह सहे
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
-msgstr "Failed to upload icon to server"
+msgstr "आइकन सर्वर पर अपलोड नहीं हो सका"
 
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
@@ -182,11 +182,11 @@ msgstr "प्रारूप पूर्वावलोकन"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
-msgstr "Hide channel list"
+msgstr "चैनल सूची छिपाएँ"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
-msgstr "Hide server list"
+msgstr "सर्वर सूची छिपाएँ"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -194,32 +194,32 @@ msgstr "सिग्नल बार छिपाएँ"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
-msgstr "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "सिकुड़े हुए पैनल कुछ देर के लिए दिखाने के लिए विंडो के किनारों के पास माउस ले जाएँ।"
 
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
-msgstr "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "आइकन फ़ाइल बहुत बड़ी है। 10MB से छोटी इमेज चुनें।"
 
 #. Modal title for PluralKit import step completed
 msgid "Import Complete"
-msgstr "Import Complete"
+msgstr "इंपोर्ट पूरा हुआ"
 
 msgid "Import Complete!"
-msgstr "Import Complete!"
+msgstr "इंपोर्ट पूरा हुआ!"
 
 msgid "Import Strategy"
-msgstr "Import Strategy"
+msgstr "इंपोर्ट रणनीति"
 
 #. Modal title for PluralKit import step select
 msgid "Import from PluralKit"
-msgstr "Import from PluralKit"
+msgstr "PluralKit से इंपोर्ट करें"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
-msgstr "Importing Personas..."
+msgstr "परसोना इंपोर्ट हो रहे हैं..."
 
 msgid "Importing..."
-msgstr "Importing..."
+msgstr "इंपोर्ट हो रहा है..."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -232,33 +232,33 @@ msgid "Insert timestamp"
 msgstr "समय टिकट डालें"
 
 msgid "Keep existing and add new (Recommended)"
-msgstr "Keep existing and add new (Recommended)"
+msgstr "मौजूदा रखें और नए जोड़ें (सुझाया गया)"
 
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "अपने {existingCount} मौजूदा परसोना रखें और सभी {0} इंपोर्ट किए गए परसोना उनके साथ नई एंट्री के रूप में जोड़ें।"
 
 #. Active persona mode last used
 #. Active persona mode last used
 #. Active persona mode last used
 msgid "Last Used"
-msgstr "Last Used"
+msgstr "पिछली बार इस्तेमाल किया गया"
 
 msgid "Main account"
-msgstr "Main account"
+msgstr "मेन अकाउंट"
 
 msgid "Manage Personas"
-msgstr "Manage Personas"
+msgstr "परसोना मैनेज करें"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
-msgstr "Manage and create your personas"
+msgstr "अपने परसोना मैनेज करें और बनाएँ"
 
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
 msgid "Manual"
-msgstr "Manual"
+msgstr "मैनुअल"
 
 #. Validation error when signature emoji limit is reached
 msgid "Maximum {max} signature emojis allowed per persona"
@@ -266,10 +266,10 @@ msgstr "प्रति व्यक्तित्व अधिकतम {max} 
 
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
-msgstr "Member #{index}"
+msgstr "सदस्य #{index}"
 
 msgid "Members with Avatars"
-msgstr "Members with Avatars"
+msgstr "अवतार वाले सदस्य"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -277,23 +277,23 @@ msgstr "संदेश टूल"
 
 #. Title for new persona modal
 msgid "New Persona"
-msgstr "New Persona"
+msgstr "नया परसोना"
 
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
-msgstr "No \"members\" array found in this export file."
+msgstr "इस एक्सपोर्ट फ़ाइल में कोई \"members\" ऐरे नहीं मिला।"
 
 msgid "No display tag configured. Messages will show your account profile picture."
-msgstr "No display tag configured. Messages will show your account profile picture."
+msgstr "कोई डिस्प्ले टैग कॉन्फ़िगर नहीं है। संदेशों में आपके अकाउंट की प्रोफ़ाइल तस्वीर दिखेगी।"
 
 msgid "No matching personas found."
-msgstr "No matching personas found."
+msgstr "कोई मेल खाने वाला परसोना नहीं मिला।"
 
 msgid "No personas configured yet. Create one in Settings."
-msgstr "No personas configured yet. Create one in Settings."
+msgstr "अभी तक कोई परसोना कॉन्फ़िगर नहीं है। सेटिंग्स में एक बनाएँ।"
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
-msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "अभी तक कोई परसोना नहीं बना है। अपना पहला परसोना बनाने के लिए \"परसोना जोड़ें\" पर क्लिक करें!"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "अभी कोई सिग्नल नहीं है। जब तक आप एक नहीं जोड़ते, बार छिपा रहेगा।"
@@ -304,11 +304,11 @@ msgstr "किसी ने यह सिग्नल चालू नहीं 
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
-msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "सिर्फ़ आपको दिखता है। दूसरे लोग इस परसोना का पूरा बायो या प्रोफ़ाइल विवरण नहीं देख सकते।"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "वैकल्पिक सिस्टम बैज, जैसे ⚞Seraphim⚟"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -316,21 +316,21 @@ msgstr "सादा पाठ के रूप में चिपकाएँ"
 
 #. Settings search synonym.
 msgid "Peek"
-msgstr "Peek"
+msgstr "झलक"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "सभी {existingCount} मौजूदा परसोना हमेशा के लिए डिलीट करें और उन्हें पूरी तरह इंपोर्ट किए गए परसोना से बदलें।"
 
 msgid "Persona Tags (Prefix & Suffix)"
-msgstr "Persona Tags (Prefix & Suffix)"
+msgstr "परसोना टैग (उपसर्ग और प्रत्यय)"
 
 #. Toast when persona is created
 msgid "Persona created"
-msgstr "Persona created"
+msgstr "परसोना बन गया"
 
 #. Toast when persona is deleted
 msgid "Persona deleted"
-msgstr "Persona deleted"
+msgstr "परसोना डिलीट हो गया"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -344,16 +344,16 @@ msgstr "परसोना प्रोफ़ाइल: {name}"
 
 #. Toast when persona is updated
 msgid "Persona updated"
-msgstr "Persona updated"
+msgstr "परसोना अपडेट हो गया"
 
 #. Aria label for persona visibility tabs
 msgid "Persona visibility"
-msgstr "Persona visibility"
+msgstr "परसोना की दृश्यता"
 
 #. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
-msgstr "Personas"
+msgstr "परसोना"
 
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
@@ -365,39 +365,39 @@ msgstr "इस व्यक्तित्व के लिए पिन कर�
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
-msgstr "Prefix (e.g. [)"
+msgstr "उपसर्ग (जैसे [)"
 
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
-msgstr "Preparing avatar batch download..."
+msgstr "अवतार का बैच डाउनलोड तैयार हो रहा है..."
 
 #. Persona visibility private
 msgid "Private"
-msgstr "Private"
+msgstr "प्राइवेट"
 
 #. Tooltip on private persona badge
 msgid "Private persona"
-msgstr "Private persona"
+msgstr "निजी परसोना"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
-msgstr "Processing: {0}"
+msgstr "प्रोसेस हो रहा है: {0}"
 
 #. Helper description for unlisted persona visibility
 msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
-msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "प्रोफ़ाइल कार्ड सिर्फ़ इस परसोना के भेजे संदेशों पर क्लिक करने से खुलते हैं। आपकी सार्वजनिक परसोना सूची में शामिल नहीं है।"
 
 #. Helper description for public persona visibility
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
-msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "प्रोफ़ाइल कार्ड संदेशों पर क्लिक करने से खुलते हैं और आपकी सार्वजनिक परसोना सूची में दोस्तों और साझा सर्वरों को दिखते हैं।"
 
 #. Persona visibility public
 msgid "Public"
-msgstr "Public"
+msgstr "पब्लिक"
 
 #. Tooltip on public persona badge
 msgid "Public persona"
-msgstr "Public persona"
+msgstr "सार्वजनिक परसोना"
 
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
@@ -414,7 +414,7 @@ msgid "Reacting with a signature emoji will always react as this persona, regard
 msgstr "हस्ताक्षर इमोजी के साथ प्रतिक्रिया देने पर हमेशा इस व्यक्तित्व के रूप में प्रतिक्रिया होगी, चाहे कोई भी सक्रिय व्यक्तित्व हो।"
 
 msgid "Recent Personas"
-msgstr "Recent Personas"
+msgstr "हाल के परसोना"
 
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
@@ -422,55 +422,55 @@ msgstr "हस्ताक्षर इमोजी हटाएं"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
-msgstr "Remove tag pair"
+msgstr "टैग जोड़ी हटाएँ"
 
 msgid "Replace All"
-msgstr "Replace All"
+msgstr "सभी बदलें"
 
 msgid "Replace All Personas"
-msgstr "Replace All Personas"
+msgstr "सभी परसोना बदलें"
 
 msgid "Replace all existing personas (Destructive)"
-msgstr "Replace all existing personas (Destructive)"
+msgstr "सभी मौजूदा परसोना बदलें (वापस नहीं होगा)"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "सभी के लिए सिग्नल रीसेट करें"
 
 msgid "Root Account (Default)"
-msgstr "Root Account (Default)"
+msgstr "रूट अकाउंट (डिफ़ॉल्ट)"
 
 #. Progress status when saving personas
 msgid "Saving personas..."
-msgstr "Saving personas..."
+msgstr "परसोना सेव हो रहे हैं..."
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
-msgstr "Search Results ({0})"
+msgstr "खोज परिणाम ({0})"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
-msgstr "Search personas, tags, pronouns..."
+msgstr "परसोना, टैग, प्रोनाउन खोजें..."
 
 #. Description of personas settings section
 msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "अलग-अलग नामों और अवतारों के साथ संदेश भेजें। परसोना किसी प्लूरल सिस्टम के सदस्यों, रोलप्ले किरदारों या किसी भी दूसरी पहचान को दर्शा सकते हैं।"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
-msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "@{username} के रूप में भेजा जा रहा है ({mode}) - परसोना बदलने के लिए क्लिक करें"
 
 #. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
-msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "{name} के रूप में भेजा जा रहा है (टैग से मिलान) - परसोना बदलने के लिए क्लिक करें"
 
 msgid "Set Active"
-msgstr "Set Active"
+msgstr "एक्टिव सेट करें"
 
 #. Aria label for setting active persona
 msgid "Set as active persona"
-msgstr "Set as active persona"
+msgstr "सक्रिय परसोना बनाएँ"
 
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
@@ -479,11 +479,11 @@ msgstr "कॉपी बटन दिखाएं"
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
-msgstr "Show personas button"
+msgstr "परसोना बटन दिखाएँ"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
-msgstr "Show server list"
+msgstr "सर्वर सूची दिखाएँ"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
@@ -517,50 +517,50 @@ msgstr "हस्ताक्षर इमोजी का उपयोग प�
 
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
-msgstr "Skipped member because they have no name configured."
+msgstr "सदस्य को छोड़ दिया गया क्योंकि उसका कोई नाम कॉन्फ़िगर नहीं है।"
 
 msgid "Start Import"
-msgstr "Start Import"
+msgstr "इंपोर्ट शुरू करें"
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "{0} परसोना आपके अकाउंट में सफलतापूर्वक इंपोर्ट हो गए। सभी अवतार इमेज आपके लोकल सर्वर पर सुरक्षित रखी गई हैं।"
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
-msgstr "Suffix (e.g. ])"
+msgstr "प्रत्यय (जैसे ])"
 
 #. Section header for suggested time zones in the timestamp modal.
 msgid "Suggested"
 msgstr "सुझाए गए"
 
 msgid "Supports PluralKit system export files"
-msgstr "Supports PluralKit system export files"
+msgstr "PluralKit सिस्टम एक्सपोर्ट फ़ाइलें समर्थित हैं"
 
 msgid "System Tag (Applied to imported personas)"
-msgstr "System Tag (Applied to imported personas)"
+msgstr "सिस्टम टैग (इंपोर्ट किए गए परसोना पर लागू)"
 
 msgid "Tag Icon"
-msgstr "Tag Icon"
+msgstr "टैग आइकन"
 
 msgid "Tag Text"
-msgstr "Tag Text"
+msgstr "टैग टेक्स्ट"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
-msgstr "Tag pair already in use by persona \"{name}\""
+msgstr "टैग जोड़ी पहले से परसोना \"{name}\" इस्तेमाल कर रहा है"
 
 #. Settings search synonym.
 msgid "Taskbar"
-msgstr "Taskbar"
+msgstr "टास्कबार"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."
-msgstr "Tell us about this persona..."
+msgstr "हमें इस परसोना के बारे में बताएँ..."
 
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
-msgstr "The chosen file is not a valid JSON object."
+msgstr "चुनी गई फ़ाइल मान्य JSON ऑब्जेक्ट नहीं है।"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "जब तक आप यहाँ कोई चैनल नहीं चुनते, सिग्नल बार बंद रहता है। किसी श्रेणी या पूरी कम्युनिटी को चुनने पर वहाँ बाद में बनने वाले चैनल भी शामिल होते हैं।"
@@ -570,14 +570,14 @@ msgid "This emoji is already added as a signature emoji"
 msgstr "यह इमोजी पहले से ही एक हस्ताक्षर इमोजी के रूप में जोड़ा गया है"
 
 msgid "This is a preview of how your display tag will look in chat."
-msgstr "This is a preview of how your display tag will look in chat."
+msgstr "यह इस बात का पूर्वावलोकन है कि आपका डिस्प्ले टैग चैट में कैसा दिखेगा।"
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "चैनल सूची टॉगल करें"
 
 msgid "Total Members"
-msgstr "Total Members"
+msgstr "कुल सदस्य"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -593,7 +593,7 @@ msgstr "सिग्नल बार चालू करें"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
-msgstr "Unlisted"
+msgstr "अनलिस्टेड"
 
 #. Emoji context menu action that unpins the emoji.
 msgid "Unpin emoji"
@@ -605,30 +605,30 @@ msgstr "इस व्यक्तित्व के लिए अनपिन �
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "बिना टैग वाले संदेश उस परसोना के रूप में भेजे जाते हैं जिसने सबसे हाल में बात की। जब भी कोई परसोना टैग इस्तेमाल करता है, वह परसोना अपने-आप सक्रिय हो जाता है।"
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "बिना टैग वाले संदेश आपके चुने हुए परसोना के रूप में भेजे जाते हैं। किसी दूसरे परसोना के टैग टाइप करने से सिर्फ़ वही एक संदेश भेजा जाएगा और सक्रिय परसोना नहीं बदलेगा।"
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
-msgstr "View your personas"
+msgstr "अपने परसोना देखें"
 
 msgid "Where the signal bar appears"
 msgstr "सिग्नल बार कहाँ दिखे"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
-msgstr "avatars downloaded"
+msgstr "अवतार डाउनलोड हुए"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
-msgstr "e.g. Alice"
+msgstr "जैसे Alice"
 
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
-msgstr "e.g. she/her"
+msgstr "जैसे वह"
 
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
@@ -636,22 +636,22 @@ msgstr "उदा. कल दोपहर 3 बजे, 2 घंटे में,
 
 #. Progress label for prepared personas
 msgid "personas prepared"
-msgstr "personas prepared"
+msgstr "परसोना तैयार हुए"
 
 #. Progress label when saving personas
 msgid "saving personas"
-msgstr "saving personas"
+msgstr "परसोना सेव हुए"
 
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
-msgstr "{0} notice(s) during import"
+msgstr "इंपोर्ट के दौरान {0} सूचना(एँ)"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
 #. placeholder {2}: progress.label ?? 'items'
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
-msgstr "{0} of {1} {2} ({3}%)"
+msgstr "{1} में से {0} {2} ({3}%)"
 
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
@@ -659,7 +659,7 @@ msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
-msgstr "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - परसोना बदलने के लिए क्लिक करें"
 
 msgid "— Today at 12:00 PM"
-msgstr "— Today at 12:00 PM"
+msgstr "— आज दोपहर 12:00 बजे"
