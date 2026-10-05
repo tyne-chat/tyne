@@ -50,7 +50,8 @@ describe('Idle', () => {
 		const {default: Idle} = await import('@app/features/ui/state/Idle');
 		expect(Idle.isIdle()).toBe(true);
 		expect(LocalPresence).toBeDefined();
-	});
+		// The first import of ./Idle loads its whole module graph in real time, which can exceed 5s in a full run.
+	}, 30_000);
 
 	it('moves LocalPresence to idle and back to online with the idle state', async () => {
 		const {default: LocalPresence, setLocalPresenceUserSettings} = await import(
