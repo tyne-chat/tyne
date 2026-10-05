@@ -239,7 +239,7 @@ export const InstanceCommunitySchema = z
 		signal_bar_guild_id: z
 			.string()
 			.nullable()
-			.default(null)
+			.optional()
 			.describe('The home community whose managers configure the instance-wide signal bar'),
 		direct_messages_disabled: z
 			.boolean()
@@ -253,13 +253,7 @@ export const InstanceCommunitySchema = z
 			.boolean()
 			.default(false)
 			.describe('Whether community creation is restricted to staff members'),
-		server_list_buttons: ServerListButtonsSchema.default({
-			favorites: true,
-			explore: true,
-			create_join: true,
-			download: true,
-			help: true,
-		}),
+		server_list_buttons: ServerListButtonsSchema.optional(),
 	})
 	.describe('Community topology and direct-message policy for this instance');
 export type InstanceCommunity = z.infer<typeof InstanceCommunitySchema>;
