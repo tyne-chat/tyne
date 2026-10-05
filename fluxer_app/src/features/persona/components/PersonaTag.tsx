@@ -46,6 +46,32 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 		const rawIcon = subprofile.display_tag_icon ?? (isCurrentUser && !message ? PersonaStore.displayTagIcon : null);
 		const tagIcon = rawIcon?.trim() || null;
 
+		const [tagHoverRef, isTagHovering] = useHover();
+
+		const staticIconUrl = tagIcon
+			? tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')
+				? tagIcon
+				: rootUser
+					? AvatarUtils.getUserAvatarURL({id: rootUser.id, avatar: tagIcon}, false, 32)
+					: tagIcon
+			: null;
+
+		const hoverIconUrl = tagIcon
+			? tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')
+				? tagIcon
+				: rootUser
+					? AvatarUtils.getUserAvatarURL({id: rootUser.id, avatar: tagIcon}, true, 32)
+					: tagIcon
+			: null;
+
+		const hasDistinctHover = Boolean(hoverIconUrl && hoverIconUrl !== staticIconUrl);
+		const shouldAnimate = useShouldAnimate({
+			kind: 'avatar',
+			isAnimated: hasDistinctHover,
+			isHovering: hasDistinctHover && (isTagHovering || Boolean(propIsHovering)),
+		});
+		const resolvedTagIcon = shouldAnimate ? hoverIconUrl : staticIconUrl;
+
 		// When message and rootUser are present (standard chat message rendering):
 		// Delegate to MessagePersonaAccount for unified popout, context menu, and tooltip across all variations
 		if (message && rootUser) {
@@ -110,32 +136,6 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 				UserProfileCommands.openUserProfile(rootUser.id, guild?.id);
 			}
 		};
-
-		const [tagHoverRef, isTagHovering] = useHover();
-
-		const staticIconUrl = tagIcon
-			? tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')
-				? tagIcon
-				: rootUser
-					? AvatarUtils.getUserAvatarURL({id: rootUser.id, avatar: tagIcon}, false, 32)
-					: tagIcon
-			: null;
-
-		const hoverIconUrl = tagIcon
-			? tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')
-				? tagIcon
-				: rootUser
-					? AvatarUtils.getUserAvatarURL({id: rootUser.id, avatar: tagIcon}, true, 32)
-					: tagIcon
-			: null;
-
-		const hasDistinctHover = Boolean(hoverIconUrl && hoverIconUrl !== staticIconUrl);
-		const shouldAnimate = useShouldAnimate({
-			kind: 'avatar',
-			isAnimated: hasDistinctHover,
-			isHovering: hasDistinctHover && (isTagHovering || Boolean(propIsHovering)),
-		});
-		const resolvedTagIcon = shouldAnimate ? hoverIconUrl : staticIconUrl;
 
 		if (tagText) {
 			const pill = (
