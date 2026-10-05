@@ -9,42 +9,16 @@ import {deriveDominantAvatarColor} from '@app/api/utils/AvatarColorUtils';
 import {Validator} from '@app/api/Validator';
 import {validateOutboundEndpointUrl} from '@fluxer/hono/src/security/OutboundEndpoint';
 import {SuccessResponse} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
+import {
+	PersonaAvatarImportRequest,
+	PersonaAvatarImportResponse,
+	PersonaAvatarUploadRequest,
+	PersonaAvatarUploadResponse,
+	PersonaBannerUploadRequest,
+	PersonaBannerUploadResponse,
+	PersonaBatchAvatarImportRequest,
+} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {streamText} from 'hono/streaming';
-import {z} from 'zod';
-
-const PersonaAvatarUploadRequest = z.object({
-	avatar: z.string().describe('Base64 data URI of the avatar image'),
-});
-const SubprofileAvatarUploadRequest = PersonaAvatarUploadRequest;
-const PersonaAvatarUploadResponse = z.object({
-	avatar_hash: z.string().describe('Hash of the uploaded avatar'),
-	avatar_color: z.number().int().nullish().optional().describe('Dominant avatar color'),
-});
-const SubprofileAvatarUploadResponse = PersonaAvatarUploadResponse;
-
-const PersonaBannerUploadRequest = z.object({
-	banner: z.string().describe('Base64 data URI of the banner image'),
-});
-const SubprofileBannerUploadRequest = PersonaBannerUploadRequest;
-const PersonaBannerUploadResponse = z.object({
-	banner_hash: z.string().describe('Hash of the uploaded banner'),
-});
-const SubprofileBannerUploadResponse = PersonaBannerUploadResponse;
-
-const PersonaAvatarImportRequest = z.object({
-	url: z.string().url().max(2048).describe('Remote URL of the avatar image to import'),
-});
-const SubprofileAvatarImportRequest = PersonaAvatarImportRequest;
-const PersonaAvatarImportResponse = z.object({
-	avatar_hash: z.string().describe('Hash of the imported avatar'),
-	avatar_color: z.number().int().nullish().optional().describe('Dominant avatar color'),
-});
-const SubprofileAvatarImportResponse = PersonaAvatarImportResponse;
-
-const PersonaBatchAvatarImportRequest = z.object({
-	urls: z.array(z.string().url().max(2048)).min(1).max(500).describe('List of remote avatar URLs to import'),
-});
-const SubprofileBatchAvatarImportRequest = PersonaBatchAvatarImportRequest;
 
 // Fork: the fork's account routes. UserAccountController() registers them with one call at the
 // place they had among its own, so every route keeps its order.
@@ -259,11 +233,11 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
 		LoginRequired,
 		DefaultUserOnly,
-		Validator('json', SubprofileAvatarUploadRequest),
+		Validator('json', PersonaAvatarUploadRequest),
 		OpenAPI({
 			operationId: 'upload_subprofile_avatar',
 			summary: 'Upload subprofile avatar (legacy alias)',
-			responseSchema: SubprofileAvatarUploadResponse,
+			responseSchema: PersonaAvatarUploadResponse,
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
@@ -294,11 +268,11 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
 		LoginRequired,
 		DefaultUserOnly,
-		Validator('json', SubprofileBannerUploadRequest),
+		Validator('json', PersonaBannerUploadRequest),
 		OpenAPI({
 			operationId: 'upload_subprofile_banner',
 			summary: 'Upload subprofile banner (legacy alias)',
-			responseSchema: SubprofileBannerUploadResponse,
+			responseSchema: PersonaBannerUploadResponse,
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
@@ -329,11 +303,11 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
 		LoginRequired,
 		DefaultUserOnly,
-		Validator('json', SubprofileAvatarImportRequest),
+		Validator('json', PersonaAvatarImportRequest),
 		OpenAPI({
 			operationId: 'import_subprofile_avatar',
 			summary: 'Import subprofile avatar from remote URL (legacy alias)',
-			responseSchema: SubprofileAvatarImportResponse,
+			responseSchema: PersonaAvatarImportResponse,
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
@@ -364,7 +338,7 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_BATCH_AVATAR_IMPORT),
 		LoginRequired,
 		DefaultUserOnly,
-		Validator('json', SubprofileBatchAvatarImportRequest),
+		Validator('json', PersonaBatchAvatarImportRequest),
 		OpenAPI({
 			operationId: 'import_subprofile_batch_avatars',
 			summary: 'Batch import subprofile avatars from remote URLs (legacy alias)',
