@@ -99,6 +99,16 @@ interface RuntimeConfigPublication {
 	phase: RuntimeConfigPublicationPhase;
 }
 
+// The fork's community fields are optional on the wire (an instance may not send
+// them). The snapshot readers fill them in; these cover a snapshot that has neither.
+const DEFAULT_SERVER_LIST_BUTTONS: ServerListButtons = {
+	favorites: true,
+	explore: true,
+	create_join: true,
+	download: true,
+	help: true,
+};
+
 class RuntimeActivationSupersededError extends Error {
 	constructor() {
 		super('Runtime activation was superseded by another instance transition');
@@ -848,11 +858,11 @@ class RuntimeConfig {
 	}
 
 	get signalBarGuildId(): string | null {
-		return this.community.signal_bar_guild_id;
+		return this.community.signal_bar_guild_id ?? null;
 	}
 
 	get serverListButtons(): ServerListButtons {
-		return this.community.server_list_buttons;
+		return this.community.server_list_buttons ?? DEFAULT_SERVER_LIST_BUTTONS;
 	}
 
 	get gifEnabled(): boolean {
