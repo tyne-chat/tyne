@@ -8,7 +8,7 @@ msgstr ""
 
 #. placeholder {0}: w.prefix
 msgid "(Prefix: {0})"
-msgstr "(Prefix: {0})"
+msgstr "(Előtag: {0})"
 
 #. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
 msgid "(pinned)"
@@ -16,32 +16,32 @@ msgstr "(kitűzve)"
 
 #. Tooltip showing root account username
 msgid "Account: @{username}"
-msgstr "Account: @{username}"
+msgstr "Fiók: @{username}"
 
 msgid "Active Persona Mode"
-msgstr "Active Persona Mode"
+msgstr "Aktív persona mód"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
 msgid "Active persona mode"
-msgstr "Active persona mode"
+msgstr "Aktív persona mód"
 
 #. placeholder {0}: formData.signatureEmojis.length
 msgid "Add Emoji ({0})"
 msgstr "Hangulatjel hozzáadása ({0})"
 
 msgid "Add Persona"
-msgstr "Add Persona"
+msgstr "Persona hozzáadása"
 
 #. placeholder {0}: formData.tags.length
 msgid "Add Tag Pair ({0}/5)"
-msgstr "Add Tag Pair ({0}/5)"
+msgstr "Címkepár hozzáadása ({0}/5)"
 
 msgid "Add signal"
 msgstr "Jelzés hozzáadása"
 
 msgid "All Personas"
-msgstr "All Personas"
+msgstr "Összes persona"
 
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
@@ -49,41 +49,41 @@ msgstr "Összes időzóna"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Biztosan törlöd ezt: <0>{0}</0>? Ez a művelet nem vonható vissza."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "Biztosan lecseréled mind a(z) <0>{existingCount}</0> meglévő personát? Véglegesen törlődnek a fiókodból, és ez nem vonható vissza."
 
 #. Settings search synonym.
 msgid "Auto-hide"
-msgstr "Auto-hide"
+msgstr "Automatikus elrejtés"
 
 #. Settings section label in Advanced Settings for edge hover peek preference.
 #. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
 msgid "Auto-peek hidden sidebars"
-msgstr "Auto-peek hidden sidebars"
+msgstr "Rejtett oldalsávok automatikus megjelenítése"
 
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
-msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Az avatárkép letöltése nem sikerült: {error}. A persona avatár nélkül lett importálva."
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
-msgstr "Change persona"
+msgstr "Persona váltása"
 
 msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Choose a PluralKit export (.json) or drag & drop"
+msgstr "Válassz egy PluralKit-exportot (.json), vagy húzd ide"
 
 msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "Válaszd ki, hogyan működnek együtt a címke nélküli üzenetek és a personacímkék az aktív personáddal."
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
-msgstr "Configured Personas ({count})"
+msgstr "Beállított personák ({count})"
 
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
-msgstr "Configuring {name}..."
+msgstr "{name} beállítása..."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -91,27 +91,27 @@ msgstr "Időbélyegző másolása\\"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
-msgstr "Deactivate persona"
+msgstr "Persona kikapcsolása"
 
 msgid "Delete Persona"
-msgstr "Delete Persona"
+msgstr "Persona törlése"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
-msgstr "Delete persona"
+msgstr "Persona törlése"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "Időbélyegző törlése\\"
 
 msgid "Detected System Name / Tag"
-msgstr "Detected System Name / Tag"
+msgstr "Észlelt rendszernév / címke"
 
 msgid "Display Tag"
-msgstr "Display Tag"
+msgstr "Megjelenítési címke"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
-msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "A megjelenítési címke minden persona neve mellett megjelenik az üzenetekben. Ha nincs beállítva megjelenítési címke, a fiókod profilképe fog megjelenni."
 
 #. Settings search entry label for double-clicking a message to edit it.
 #. Short label for an advanced message editing preference.
@@ -121,20 +121,20 @@ msgstr "Dupla kattintás a szerkesztéshez"
 
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
-msgstr "Downloading avatar {current} of {total}..."
+msgstr "Avatár letöltése: {current} / {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
-msgstr "Duplicate tag pair on this persona"
+msgstr "Ismétlődő címkepár ennél a personánál"
 
 #. Title for edit persona modal
 msgid "Edit Persona"
-msgstr "Edit Persona"
+msgstr "Persona szerkesztése"
 
 #. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
-msgstr "Edit persona"
+msgstr "Persona szerkesztése"
 
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
@@ -142,27 +142,27 @@ msgid "Edit timestamp"
 msgstr "Időbélyegző szerkesztése\\"
 
 msgid "Export Summary"
-msgstr "Export Summary"
+msgstr "Export összegzése"
 
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
-msgstr "Failed to delete persona"
+msgstr "A persona törlése nem sikerült"
 
 #. Toast error message on persona import failure
 msgid "Failed to import personas"
-msgstr "Failed to import personas"
+msgstr "A personák importálása nem sikerült"
 
 #. Error message when parsing PluralKit JSON fails
 msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
-msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "A JSON-fájl feldolgozása nem sikerült. Győződj meg róla, hogy érvényes PluralKit-export."
 
 #. Error message when reading uploaded file fails
 msgid "Failed to read the selected file."
-msgstr "Failed to read the selected file."
+msgstr "A kiválasztott fájl olvasása nem sikerült."
 
 #. Toast when persona save fails
 msgid "Failed to save persona"
-msgstr "Failed to save persona"
+msgstr "A persona mentése nem sikerült"
 
 #. Error toast in the community Message Tools settings tab when saving the signal bar fails.
 msgid "Failed to save the signal bar. Try again."
@@ -174,7 +174,7 @@ msgstr "Nem sikerült menteni, hol jelenik meg a jelzősáv. Próbáld újra."
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
-msgstr "Failed to upload icon to server"
+msgstr "Az ikon feltöltése a szerverre nem sikerült"
 
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
@@ -182,11 +182,11 @@ msgstr "Formátum előnézete"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
-msgstr "Hide channel list"
+msgstr "Csatornalista elrejtése"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
-msgstr "Hide server list"
+msgstr "Szerverlista elrejtése"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -194,32 +194,32 @@ msgstr "Jelzősáv elrejtése"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
-msgstr "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Vidd az egeret az ablak széléhez az összecsukott panelek ideiglenes megjelenítéséhez."
 
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
-msgstr "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Az ikonfájl túl nagy. Válassz 10 MB-nál kisebb képet."
 
 #. Modal title for PluralKit import step completed
 msgid "Import Complete"
-msgstr "Import Complete"
+msgstr "Importálás kész"
 
 msgid "Import Complete!"
-msgstr "Import Complete!"
+msgstr "Importálás kész!"
 
 msgid "Import Strategy"
-msgstr "Import Strategy"
+msgstr "Importálási stratégia"
 
 #. Modal title for PluralKit import step select
 msgid "Import from PluralKit"
-msgstr "Import from PluralKit"
+msgstr "Importálás a PluralKitből"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
-msgstr "Importing Personas..."
+msgstr "Personák importálása..."
 
 msgid "Importing..."
-msgstr "Importing..."
+msgstr "Importálás..."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -232,33 +232,33 @@ msgid "Insert timestamp"
 msgstr "Időbélyegző beszúrása"
 
 msgid "Keep existing and add new (Recommended)"
-msgstr "Keep existing and add new (Recommended)"
+msgstr "Meglévők megtartása és újak hozzáadása (ajánlott)"
 
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "Tartsd meg a(z) {existingCount} jelenlegi personádat, és add hozzá mellé mind a(z) {0} importált personát új bejegyzésként."
 
 #. Active persona mode last used
 #. Active persona mode last used
 #. Active persona mode last used
 msgid "Last Used"
-msgstr "Last Used"
+msgstr "Legutóbb használt"
 
 msgid "Main account"
-msgstr "Main account"
+msgstr "Fő fiók"
 
 msgid "Manage Personas"
-msgstr "Manage Personas"
+msgstr "Personák kezelése"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
-msgstr "Manage and create your personas"
+msgstr "Kezeld és hozd létre a personáidat"
 
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
 msgid "Manual"
-msgstr "Manual"
+msgstr "Kézi"
 
 #. Validation error when signature emoji limit is reached
 msgid "Maximum {max} signature emojis allowed per persona"
@@ -266,10 +266,10 @@ msgstr "Személyenként legfeljebb {max} aláírási hangulatjel engedélyezett"
 
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
-msgstr "Member #{index}"
+msgstr "{index}. tag"
 
 msgid "Members with Avatars"
-msgstr "Members with Avatars"
+msgstr "Avatárral rendelkező tagok"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -277,23 +277,23 @@ msgstr "Üzeneteszközök"
 
 #. Title for new persona modal
 msgid "New Persona"
-msgstr "New Persona"
+msgstr "Új persona"
 
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
-msgstr "No \"members\" array found in this export file."
+msgstr "Ebben az exportfájlban nem található „members” tömb."
 
 msgid "No display tag configured. Messages will show your account profile picture."
-msgstr "No display tag configured. Messages will show your account profile picture."
+msgstr "Nincs megjelenítési címke beállítva. Az üzenetek a fiókod profilképét mutatják."
 
 msgid "No matching personas found."
-msgstr "No matching personas found."
+msgstr "Nem található megfelelő persona."
 
 msgid "No personas configured yet. Create one in Settings."
-msgstr "No personas configured yet. Create one in Settings."
+msgstr "Még nincs persona beállítva. Hozz létre egyet a Beállításokban."
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
-msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Még nincs létrehozott persona. Kattints a „Persona hozzáadása” gombra az első personád létrehozásához!"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Még nincsenek jelzések. A sáv rejtve marad, amíg nem adsz hozzá egyet."
@@ -304,11 +304,11 @@ msgstr "Senkinél sincs bekapcsolva ez a jelzés"
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
-msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Csak te láthatod. Mások nem tekinthetik meg ennek a personának a teljes bemutatkozását és profiladatait."
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "Nem kötelező rendszerjelvény, pl. ⚞Seraphim⚟"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -316,21 +316,21 @@ msgstr "Beillesztés egyszerű szövegként"
 
 #. Settings search synonym.
 msgid "Peek"
-msgstr "Peek"
+msgstr "Bepillantás"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "Véglegesen törli mind a(z) {existingCount} meglévő personát, és teljesen lecseréli őket az importáltakra."
 
 msgid "Persona Tags (Prefix & Suffix)"
-msgstr "Persona Tags (Prefix & Suffix)"
+msgstr "Personacímkék (előtag és utótag)"
 
 #. Toast when persona is created
 msgid "Persona created"
-msgstr "Persona created"
+msgstr "Persona létrehozva"
 
 #. Toast when persona is deleted
 msgid "Persona deleted"
-msgstr "Persona deleted"
+msgstr "Persona törölve"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -344,16 +344,16 @@ msgstr "Persona-profil: {name}"
 
 #. Toast when persona is updated
 msgid "Persona updated"
-msgstr "Persona updated"
+msgstr "Persona frissítve"
 
 #. Aria label for persona visibility tabs
 msgid "Persona visibility"
-msgstr "Persona visibility"
+msgstr "Persona láthatósága"
 
 #. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
-msgstr "Personas"
+msgstr "Personák"
 
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
@@ -365,39 +365,39 @@ msgstr "Rögzítés ehhez a perszónához"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
-msgstr "Prefix (e.g. [)"
+msgstr "Előtag (pl. [)"
 
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
-msgstr "Preparing avatar batch download..."
+msgstr "Avatárok csoportos letöltésének előkészítése..."
 
 #. Persona visibility private
 msgid "Private"
-msgstr "Private"
+msgstr "Privát"
 
 #. Tooltip on private persona badge
 msgid "Private persona"
-msgstr "Private persona"
+msgstr "Privát persona"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
-msgstr "Processing: {0}"
+msgstr "Feldolgozás: {0}"
 
 #. Helper description for unlisted persona visibility
 msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
-msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "A profilkártyák csak az e persona által küldött üzenetekre kattintva érhetők el. Nem szerepel a nyilvános personalistádon."
 
 #. Helper description for public persona visibility
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
-msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "A profilkártyák az üzenetekre kattintva érhetők el, és a nyilvános personalistádon láthatók a barátok és a közös szerverek számára."
 
 #. Persona visibility public
 msgid "Public"
-msgstr "Public"
+msgstr "Nyilvános"
 
 #. Tooltip on public persona badge
 msgid "Public persona"
-msgstr "Public persona"
+msgstr "Nyilvános persona"
 
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
@@ -414,7 +414,7 @@ msgid "Reacting with a signature emoji will always react as this persona, regard
 msgstr "Az aláírási hangulatjellel való reagálás mindig ezen személyként történik, a függetlenül az aktív személytől."
 
 msgid "Recent Personas"
-msgstr "Recent Personas"
+msgstr "Legutóbbi personák"
 
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
@@ -422,55 +422,55 @@ msgstr "Aláírási hangulatjel eltávolítása"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
-msgstr "Remove tag pair"
+msgstr "Címkepár eltávolítása"
 
 msgid "Replace All"
-msgstr "Replace All"
+msgstr "Összes cseréje"
 
 msgid "Replace All Personas"
-msgstr "Replace All Personas"
+msgstr "Az összes persona cseréje"
 
 msgid "Replace all existing personas (Destructive)"
-msgstr "Replace all existing personas (Destructive)"
+msgstr "Az összes meglévő persona cseréje (visszafordíthatatlan)"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Jelzés visszaállítása mindenkinél"
 
 msgid "Root Account (Default)"
-msgstr "Root Account (Default)"
+msgstr "Fő fiók (Alapértelmezett)"
 
 #. Progress status when saving personas
 msgid "Saving personas..."
-msgstr "Saving personas..."
+msgstr "Personák mentése..."
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
-msgstr "Search Results ({0})"
+msgstr "Keresési találatok ({0})"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
-msgstr "Search personas, tags, pronouns..."
+msgstr "Personák, címkék, pronév keresése..."
 
 #. Description of personas settings section
 msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "Küldj üzeneteket különböző nevekkel és avatárokkal. A personák képviselhetik egy plurális rendszer tagjait, szerepjáték-karaktereket vagy bármilyen más identitást."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
-msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Küldés mint @{username} ({mode}) – Kattints a persona váltásához"
 
 #. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
-msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Küldés mint {name} (címke alapján) – Kattints a persona váltásához"
 
 msgid "Set Active"
-msgstr "Set Active"
+msgstr "Beállítás aktívként"
 
 #. Aria label for setting active persona
 msgid "Set as active persona"
-msgstr "Set as active persona"
+msgstr "Beállítás aktív personaként"
 
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
@@ -479,11 +479,11 @@ msgstr "Másolás gomb megjelenítése"
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
-msgstr "Show personas button"
+msgstr "Personák gomb megjelenítése"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
-msgstr "Show server list"
+msgstr "Szerverlista megjelenítése"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
@@ -517,50 +517,50 @@ msgstr "Ezt az aláírási hangulatjelet már használja a(z) \"{name}\" személ
 
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
-msgstr "Skipped member because they have no name configured."
+msgstr "A tag kihagyva, mert nincs név beállítva hozzá."
 
 msgid "Start Import"
-msgstr "Start Import"
+msgstr "Importálás indítása"
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "{0} persona sikeresen importálva a fiókodba. Minden avatárkép biztonságosan tárolódik a helyi szervereden."
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
-msgstr "Suffix (e.g. ])"
+msgstr "Utótag (pl. ])"
 
 #. Section header for suggested time zones in the timestamp modal.
 msgid "Suggested"
 msgstr "Javasolt"
 
 msgid "Supports PluralKit system export files"
-msgstr "Supports PluralKit system export files"
+msgstr "Támogatja a PluralKit rendszerexport-fájljait"
 
 msgid "System Tag (Applied to imported personas)"
-msgstr "System Tag (Applied to imported personas)"
+msgstr "Rendszercímke (az importált personákra kerül)"
 
 msgid "Tag Icon"
-msgstr "Tag Icon"
+msgstr "Címkeikon"
 
 msgid "Tag Text"
-msgstr "Tag Text"
+msgstr "Címkeszöveg"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
-msgstr "Tag pair already in use by persona \"{name}\""
+msgstr "A címkepárt már használja a(z) „{name}” persona"
 
 #. Settings search synonym.
 msgid "Taskbar"
-msgstr "Taskbar"
+msgstr "Tálca"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."
-msgstr "Tell us about this persona..."
+msgstr "Mesélj erről a personáról..."
 
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
-msgstr "The chosen file is not a valid JSON object."
+msgstr "A kiválasztott fájl nem érvényes JSON-objektum."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "A jelzősáv ki van kapcsolva, amíg itt be nem jelölsz egy csatornát. Egy kategória vagy az egész közösség bejelölése az ott később létrehozott csatornákra is érvényes."
@@ -570,14 +570,14 @@ msgid "This emoji is already added as a signature emoji"
 msgstr "Ez a hangulatjel már hozzá van adva aláírási hangulatjelként"
 
 msgid "This is a preview of how your display tag will look in chat."
-msgstr "This is a preview of how your display tag will look in chat."
+msgstr "Ez egy előnézet arról, hogyan fog kinézni a megjelenítési címkéd a csevegésben."
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Csatornalista be/ki kapcsolása"
 
 msgid "Total Members"
-msgstr "Total Members"
+msgstr "Tagok összesen"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -593,7 +593,7 @@ msgstr "Jelzősáv bekapcsolása"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
-msgstr "Unlisted"
+msgstr "Nem listázott"
 
 #. Emoji context menu action that unpins the emoji.
 msgid "Unpin emoji"
@@ -605,30 +605,30 @@ msgstr "Feloldás ennél a perszónánál"
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "A címke nélküli üzenetek a legutóbb megszólalt personaként lesznek elküldve. Amikor valaki personacímkét használ, az a persona automatikusan aktívvá válik."
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "A címke nélküli üzenetek a választott personádként lesznek elküldve. Ha egy másik persona címkéit írod be, csak az az egy üzenet megy úgy, és az aktív persona nem változik."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
-msgstr "View your personas"
+msgstr "Personáid megtekintése"
 
 msgid "Where the signal bar appears"
 msgstr "Hol jelenik meg a jelzősáv"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
-msgstr "avatars downloaded"
+msgstr "avatár letöltve"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
-msgstr "e.g. Alice"
+msgstr "pl. Alice"
 
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
-msgstr "e.g. she/her"
+msgstr "pl. ő"
 
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
@@ -636,22 +636,22 @@ msgstr "pl. holnap 15:00-kor, 2 óra múlva, most"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
-msgstr "personas prepared"
+msgstr "persona előkészítve"
 
 #. Progress label when saving personas
 msgid "saving personas"
-msgstr "saving personas"
+msgstr "persona mentve"
 
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
-msgstr "{0} notice(s) during import"
+msgstr "{0} megjegyzés az importálás során"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
 #. placeholder {2}: progress.label ?? 'items'
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
-msgstr "{0} of {1} {2} ({3}%)"
+msgstr "{0} / {1} {2} ({3}%)"
 
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
@@ -659,7 +659,7 @@ msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
-msgstr "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) – Kattints a persona váltásához"
 
 msgid "— Today at 12:00 PM"
-msgstr "— Today at 12:00 PM"
+msgstr "— Ma 12:00-kor"
