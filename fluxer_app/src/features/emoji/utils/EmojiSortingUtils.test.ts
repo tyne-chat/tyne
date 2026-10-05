@@ -30,7 +30,7 @@ describe('EmojiSortingUtils', () => {
 		expect(sorted.map((e) => e.name)).toEqual(['blob_1', 'blob_2', 'blob_10', 'blob_20']);
 	});
 
-	it('breaks ties deterministically with exact case and id', () => {
+	it('keeps newest-first order among names that differ only by case', () => {
 		const emojis = [
 			{name: 'star', id: '200'},
 			{name: 'star', id: '100'},
@@ -40,9 +40,9 @@ describe('EmojiSortingUtils', () => {
 		const sorted = [...emojis].sort(compareEmojisByName);
 
 		expect(sorted).toEqual([
-			{name: 'star', id: '100'},
 			{name: 'star', id: '200'},
 			{name: 'Star', id: '150'},
+			{name: 'star', id: '100'},
 		]);
 	});
 
