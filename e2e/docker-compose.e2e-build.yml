@@ -7,7 +7,7 @@ services:
         - type=gha,scope=api
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=api
-    image: fluxer-custom/fluxer-api:bleeding-edge
+    image: fluxer-e2e/fluxer-api:local
 
   app-proxy:
     build:
@@ -19,7 +19,7 @@ services:
         - type=gha,scope=app-proxy
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=app-proxy
-    image: fluxer-custom/fluxer-app-proxy-self-hosted:bleeding-edge
+    image: fluxer-e2e/fluxer-app-proxy-self-hosted:local
 
   messages:
     build:
@@ -29,7 +29,7 @@ services:
         - type=gha,scope=messages
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=messages
-    image: fluxer-custom/fluxer-messages:bleeding-edge
+    image: fluxer-e2e/fluxer-messages:local
 
   static-proxy:
     build:
@@ -39,7 +39,7 @@ services:
         - type=gha,scope=static-proxy
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=static-proxy
-    image: fluxer-custom/fluxer-static:bleeding-edge
+    image: fluxer-e2e/fluxer-static:local
 
   snowflakes:
     build:
@@ -49,7 +49,7 @@ services:
         - type=gha,scope=snowflakes
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=snowflakes
-    image: fluxer-custom/fluxer-snowflakes:bleeding-edge
+    image: fluxer-e2e/fluxer-snowflakes:local
 
   users:
     build:
@@ -59,7 +59,7 @@ services:
         - type=gha,scope=users
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=users
-    image: fluxer-custom/fluxer-users:bleeding-edge
+    image: fluxer-e2e/fluxer-users:local
 
   media-proxy:
     build:
@@ -69,7 +69,7 @@ services:
         - type=gha,scope=media-proxy
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=media-proxy
-    image: fluxer-custom/fluxer-media-proxy:bleeding-edge
+    image: fluxer-e2e/fluxer-media-proxy:local
 
   gateway:
     build:
@@ -79,4 +79,4 @@ services:
         - type=gha,scope=gateway
       cache_to:
         - type=gha,mode=max,ignore-error=true,scope=gateway
-    image: fluxer-custom/fluxer-gateway:bleeding-edge
+    image: fluxer-e2e/fluxer-gateway:local
