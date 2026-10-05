@@ -38,7 +38,7 @@ import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 
 import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
 import {PersonaNotFoundError} from '@app/api/persona/errors/PersonaErrors';
-import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+import {type IPersonaRepository, personaLookupKey} from '@app/api/persona/IPersonaRepository';
 import type {ReactionUserItemResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
@@ -179,7 +179,7 @@ export class MessageReactionService {
 			const base = mapUserToPartialResponse(user);
 			let subprofile: MessageSubprofileResponse | null = null;
 			if (reaction.personaId) {
-				const persona = personasByKey.get(reaction.personaId.toString());
+				const persona = personasByKey.get(personaLookupKey(reaction.userId, reaction.personaId));
 				if (persona) {
 					const settings = userSettingsByUserId.get(reaction.userId.toString());
 					subprofile = persona.toSubprofileResponse(settings);
