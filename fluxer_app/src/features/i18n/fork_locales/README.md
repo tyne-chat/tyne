@@ -9,8 +9,9 @@ After adding, changing or removing a user-facing string, from `fluxer_app`:
 
 1. `node scripts/fork-i18n.mjs sync` adds new fork-only strings with an empty `msgstr` and removes
    the ones no longer used (or since adopted by upstream).
-2. Translate every empty `msgstr` in every locale. Do not copy the English text; if a string is
-   meant to be identical in all languages, add its msgid to `reviewed-unchanged.json`.
+2. Translate every empty `msgstr` in every locale. Do not copy the English text; if a string
+   really is the same in a language, list its msgid in `reviewed-unchanged.json` (under
+   `locales.<locale>`, or `msgids` when it is the same everywhere).
 3. `node scripts/fork-i18n.mjs check` and `pnpm lingui:compile` must pass.
 
 Never run `pnpm lingui:extract` and commit the result: it rewrites the upstream catalogues.

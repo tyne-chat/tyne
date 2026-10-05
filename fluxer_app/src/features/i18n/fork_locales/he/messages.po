@@ -8,7 +8,7 @@ msgstr ""
 
 #. placeholder {0}: w.prefix
 msgid "(Prefix: {0})"
-msgstr "(Prefix: {0})"
+msgstr "(קידומת: {0})"
 
 #. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
 msgid "(pinned)"
@@ -16,32 +16,32 @@ msgstr "(מוצמד)"
 
 #. Tooltip showing root account username
 msgid "Account: @{username}"
-msgstr "Account: @{username}"
+msgstr "חשבון: @{username}"
 
 msgid "Active Persona Mode"
-msgstr "Active Persona Mode"
+msgstr "מצב פרסונה פעילה"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
 msgid "Active persona mode"
-msgstr "Active persona mode"
+msgstr "מצב פרסונה פעילה"
 
 #. placeholder {0}: formData.signatureEmojis.length
 msgid "Add Emoji ({0})"
 msgstr "הוסף אימוג'י ({0})"
 
 msgid "Add Persona"
-msgstr "Add Persona"
+msgstr "הוסף פרסונה"
 
 #. placeholder {0}: formData.tags.length
 msgid "Add Tag Pair ({0}/5)"
-msgstr "Add Tag Pair ({0}/5)"
+msgstr "הוספת זוג תגיות ({0}/5)"
 
 msgid "Add signal"
 msgstr "הוספת אות"
 
 msgid "All Personas"
-msgstr "All Personas"
+msgstr "כל הפרסונות"
 
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
@@ -49,41 +49,41 @@ msgstr "כל אזורי הזמן"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "למחוק את <0>{0}</0>? לא ניתן לבטל פעולה זו."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "להחליף את כל <0>{existingCount}</0> הפרסונות הקיימות? הן יימחקו לצמיתות מהחשבון שלך ולא ניתן לבטל זאת."
 
 #. Settings search synonym.
 msgid "Auto-hide"
-msgstr "Auto-hide"
+msgstr "הסתרה אוטומטית"
 
 #. Settings section label in Advanced Settings for edge hover peek preference.
 #. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
 msgid "Auto-peek hidden sidebars"
-msgstr "Auto-peek hidden sidebars"
+msgstr "הצגה אוטומטית של סרגלי צד מוסתרים"
 
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
-msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "הורדת תמונת האווטאר נכשלה: {error}. הפרסונה יובאה ללא אווטאר."
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
-msgstr "Change persona"
+msgstr "החלפת פרסונה"
 
 msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Choose a PluralKit export (.json) or drag & drop"
+msgstr "בחרו קובץ ייצוא של PluralKit‏ (‎.json) או גררו ושחררו"
 
 msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "בחרו כיצד הודעות ללא תגית ותגיות פרסונה פועלות יחד עם הפרסונה הפעילה שלכם."
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
-msgstr "Configured Personas ({count})"
+msgstr "פרסונות מוגדרות ({count})"
 
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
-msgstr "Configuring {name}..."
+msgstr "מגדיר את {name}..."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -91,27 +91,27 @@ msgstr "העתקת חותמת זמן\\"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
-msgstr "Deactivate persona"
+msgstr "השבתת פרסונה"
 
 msgid "Delete Persona"
-msgstr "Delete Persona"
+msgstr "מחק פרסונה"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
-msgstr "Delete persona"
+msgstr "מחיקת פרסונה"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "מחיקת חותמת זמן\\"
 
 msgid "Detected System Name / Tag"
-msgstr "Detected System Name / Tag"
+msgstr "שם / תגית מערכת שזוהו"
 
 msgid "Display Tag"
-msgstr "Display Tag"
+msgstr "תגית תצוגה"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
-msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "תגית התצוגה תופיע לצד כל שמות הפרסונות בהודעות. אם לא הוגדרה תגית תצוגה, תוצג תמונת הפרופיל של החשבון שלך."
 
 #. Settings search entry label for double-clicking a message to edit it.
 #. Short label for an advanced message editing preference.
@@ -121,20 +121,20 @@ msgstr "לחיצה כפולה לעריכה"
 
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
-msgstr "Downloading avatar {current} of {total}..."
+msgstr "מוריד אווטאר {current} מתוך {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
-msgstr "Duplicate tag pair on this persona"
+msgstr "זוג תגיות כפול בפרסונה זו"
 
 #. Title for edit persona modal
 msgid "Edit Persona"
-msgstr "Edit Persona"
+msgstr "ערוך פרסונה"
 
 #. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
-msgstr "Edit persona"
+msgstr "ערוך פרסונה"
 
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
@@ -142,27 +142,27 @@ msgid "Edit timestamp"
 msgstr "עריכת חותמת זמן\\"
 
 msgid "Export Summary"
-msgstr "Export Summary"
+msgstr "סיכום הייצוא"
 
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
-msgstr "Failed to delete persona"
+msgstr "מחיקת הפרסונה נכשלה"
 
 #. Toast error message on persona import failure
 msgid "Failed to import personas"
-msgstr "Failed to import personas"
+msgstr "ייבוא הפרסונות נכשל"
 
 #. Error message when parsing PluralKit JSON fails
 msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
-msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "ניתוח קובץ ה-JSON נכשל. ודאו שזהו ייצוא תקין של PluralKit."
 
 #. Error message when reading uploaded file fails
 msgid "Failed to read the selected file."
-msgstr "Failed to read the selected file."
+msgstr "קריאת הקובץ שנבחר נכשלה."
 
 #. Toast when persona save fails
 msgid "Failed to save persona"
-msgstr "Failed to save persona"
+msgstr "שמירת הפרסונה נכשלה"
 
 #. Error toast in the community Message Tools settings tab when saving the signal bar fails.
 msgid "Failed to save the signal bar. Try again."
@@ -174,7 +174,7 @@ msgstr "שמירת המקומות שבהם סרגל האותות מופיע נכ
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
-msgstr "Failed to upload icon to server"
+msgstr "העלאת הסמל לשרת נכשלה"
 
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
@@ -182,11 +182,11 @@ msgstr "תצוגה מקדימה של הפורמט"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
-msgstr "Hide channel list"
+msgstr "הסתרת רשימת הערוצים"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
-msgstr "Hide server list"
+msgstr "הסתרת רשימת השרתים"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -194,32 +194,32 @@ msgstr "הסתרת סרגל האותות"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
-msgstr "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "רחפו ליד קצוות החלון כדי להציג זמנית חלוניות מכווצות."
 
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
-msgstr "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "קובץ הסמל גדול מדי. בחרו תמונה קטנה מ-10MB."
 
 #. Modal title for PluralKit import step completed
 msgid "Import Complete"
-msgstr "Import Complete"
+msgstr "הייבוא הושלם"
 
 msgid "Import Complete!"
-msgstr "Import Complete!"
+msgstr "הייבוא הושלם!"
 
 msgid "Import Strategy"
-msgstr "Import Strategy"
+msgstr "אסטרטגיית ייבוא"
 
 #. Modal title for PluralKit import step select
 msgid "Import from PluralKit"
-msgstr "Import from PluralKit"
+msgstr "ייבוא מ-PluralKit"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
-msgstr "Importing Personas..."
+msgstr "מייבא פרסונות..."
 
 msgid "Importing..."
-msgstr "Importing..."
+msgstr "מייבא..."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -232,33 +232,33 @@ msgid "Insert timestamp"
 msgstr "הוספת חותמת זמן"
 
 msgid "Keep existing and add new (Recommended)"
-msgstr "Keep existing and add new (Recommended)"
+msgstr "שמירת הקיימות והוספת חדשות (מומלץ)"
 
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "שמרו את {existingCount} הפרסונות הנוכחיות שלכם והוסיפו לצידן את כל {0} הפרסונות המיובאות כרשומות חדשות."
 
 #. Active persona mode last used
 #. Active persona mode last used
 #. Active persona mode last used
 msgid "Last Used"
-msgstr "Last Used"
+msgstr "שימוש אחרון"
 
 msgid "Main account"
-msgstr "Main account"
+msgstr "חשבון ראשי"
 
 msgid "Manage Personas"
-msgstr "Manage Personas"
+msgstr "ניהול פרסונות"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
-msgstr "Manage and create your personas"
+msgstr "ניהול ויצירה של הפרסונות שלכם"
 
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
 msgid "Manual"
-msgstr "Manual"
+msgstr "ידני"
 
 #. Validation error when signature emoji limit is reached
 msgid "Maximum {max} signature emojis allowed per persona"
@@ -266,10 +266,10 @@ msgstr "מותר עד {max} אימוג'י חתימה לכל פרסונה"
 
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
-msgstr "Member #{index}"
+msgstr "חבר מס' {index}"
 
 msgid "Members with Avatars"
-msgstr "Members with Avatars"
+msgstr "חברים עם אווטארים"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -277,23 +277,23 @@ msgstr "כלי הודעות"
 
 #. Title for new persona modal
 msgid "New Persona"
-msgstr "New Persona"
+msgstr "פרסונה חדשה"
 
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
-msgstr "No \"members\" array found in this export file."
+msgstr "לא נמצא מערך \"members\" בקובץ הייצוא הזה."
 
 msgid "No display tag configured. Messages will show your account profile picture."
-msgstr "No display tag configured. Messages will show your account profile picture."
+msgstr "לא הוגדרה תגית תצוגה. ההודעות יציגו את תמונת הפרופיל של החשבון שלכם."
 
 msgid "No matching personas found."
-msgstr "No matching personas found."
+msgstr "לא נמצאו פרסונות תואמות."
 
 msgid "No personas configured yet. Create one in Settings."
-msgstr "No personas configured yet. Create one in Settings."
+msgstr "עדיין לא הוגדרו פרסונות. צרו אחת בהגדרות."
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
-msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "עדיין לא נוצרו פרסונות. לחצו על \"הוסף פרסונה\" כדי ליצור את הפרסונה הראשונה שלכם!"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "אין עדיין אותות. הסרגל נשאר מוסתר עד שתוסיפו אחד."
@@ -304,11 +304,11 @@ msgstr "אף אחד לא הפעיל את האות הזה"
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
-msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "גלוי רק לכם. אחרים אינם יכולים לראות את הביו המלא או את פרטי הפרופיל של פרסונה זו."
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "תג מערכת אופציונלי, לדוגמה ⚞Seraphim⚟"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -316,21 +316,21 @@ msgstr "הדבקה כטקסט רגיל"
 
 #. Settings search synonym.
 msgid "Peek"
-msgstr "Peek"
+msgstr "הצצה"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "מחקו לצמיתות את כל {existingCount} הפרסונות הקיימות והחליפו אותן לחלוטין בפרסונות המיובאות."
 
 msgid "Persona Tags (Prefix & Suffix)"
-msgstr "Persona Tags (Prefix & Suffix)"
+msgstr "תגיות פרסונה (קידומת וסיומת)"
 
 #. Toast when persona is created
 msgid "Persona created"
-msgstr "Persona created"
+msgstr "הפרסונה נוצרה"
 
 #. Toast when persona is deleted
 msgid "Persona deleted"
-msgstr "Persona deleted"
+msgstr "הפרסונה נמחקה"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -344,16 +344,16 @@ msgstr "פרופيل פרסונה: {name}"
 
 #. Toast when persona is updated
 msgid "Persona updated"
-msgstr "Persona updated"
+msgstr "הפרסונה עודכנה"
 
 #. Aria label for persona visibility tabs
 msgid "Persona visibility"
-msgstr "Persona visibility"
+msgstr "נראות הפרסונה"
 
 #. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
-msgstr "Personas"
+msgstr "פרסונות"
 
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
@@ -365,39 +365,39 @@ msgstr "הצמד לפרسונה זו"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
-msgstr "Prefix (e.g. [)"
+msgstr "קידומת (לדוגמה [)"
 
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
-msgstr "Preparing avatar batch download..."
+msgstr "מכין הורדה מרוכזת של אווטארים..."
 
 #. Persona visibility private
 msgid "Private"
-msgstr "Private"
+msgstr "פרטי"
 
 #. Tooltip on private persona badge
 msgid "Private persona"
-msgstr "Private persona"
+msgstr "פרסונה פרטית"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
-msgstr "Processing: {0}"
+msgstr "מעבד: {0}"
 
 #. Helper description for unlisted persona visibility
 msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
-msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "כרטיסי פרופיל נגישים רק בלחיצה על הודעות שנשלחו על ידי פרסונה זו. לא מופיעה ברשימת הפרסונות הציבורית שלכם."
 
 #. Helper description for public persona visibility
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
-msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "כרטיסי פרופיל נגישים בלחיצה על הודעות וגלויים ברשימת הפרסונות הציבורית שלכם לחברים ולשרתים משותפים."
 
 #. Persona visibility public
 msgid "Public"
-msgstr "Public"
+msgstr "ציבורי"
 
 #. Tooltip on public persona badge
 msgid "Public persona"
-msgstr "Public persona"
+msgstr "פרסונה ציבורית"
 
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
@@ -414,7 +414,7 @@ msgid "Reacting with a signature emoji will always react as this persona, regard
 msgstr "תגובה עם אימוג'י חתימה תגיב תמיד בתור פרסונה זו, ללא קשר לפרסונה הפעילה."
 
 msgid "Recent Personas"
-msgstr "Recent Personas"
+msgstr "פרסונות אחרונות"
 
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
@@ -422,55 +422,55 @@ msgstr "הסר אימוג'י חתימה"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
-msgstr "Remove tag pair"
+msgstr "הסרת זוג תגיות"
 
 msgid "Replace All"
-msgstr "Replace All"
+msgstr "החלפת הכול"
 
 msgid "Replace All Personas"
-msgstr "Replace All Personas"
+msgstr "החלפת כל הפרסונות"
 
 msgid "Replace all existing personas (Destructive)"
-msgstr "Replace all existing personas (Destructive)"
+msgstr "החלפת כל הפרסונות הקיימות (בלתי הפיך)"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "איפוס האות לכולם"
 
 msgid "Root Account (Default)"
-msgstr "Root Account (Default)"
+msgstr "חשבון ראשי (ברירת מחדל)"
 
 #. Progress status when saving personas
 msgid "Saving personas..."
-msgstr "Saving personas..."
+msgstr "שומר פרסונות..."
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
-msgstr "Search Results ({0})"
+msgstr "תוצאות חיפוש ({0})"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
-msgstr "Search personas, tags, pronouns..."
+msgstr "חפש פרסונות, תגיות, כינויי גוף..."
 
 #. Description of personas settings section
 msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "שלחו הודעות עם שמות ואווטארים נפרדים. פרסונות יכולות לייצג חברי מערכת מרובת זהויות, דמויות משחק תפקידים או כל זהות אחרת."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
-msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "שולח בתור @{username} ({mode}) - לחצו כדי להחליף פרסונה"
 
 #. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
-msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "שולח בתור {name} (זוהה לפי תגית) - לחצו כדי להחליף פרסונה"
 
 msgid "Set Active"
-msgstr "Set Active"
+msgstr "הגדר כפעיל"
 
 #. Aria label for setting active persona
 msgid "Set as active persona"
-msgstr "Set as active persona"
+msgstr "הגדרה כפרסונה פעילה"
 
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
@@ -479,11 +479,11 @@ msgstr "הצגת כפתור ההעתקה"
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
-msgstr "Show personas button"
+msgstr "הצגת כפתור הפרסונות"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
-msgstr "Show server list"
+msgstr "הצגת רשימת השרתים"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
@@ -517,50 +517,50 @@ msgstr "אימוג'י החתימה כבר נמצא בשימוש על ידי הפ
 
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
-msgstr "Skipped member because they have no name configured."
+msgstr "החבר דולג כי לא הוגדר לו שם."
 
 msgid "Start Import"
-msgstr "Start Import"
+msgstr "התחלת ייבוא"
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "{0} פרסונות יובאו בהצלחה לחשבון שלכם. כל תמונות האווטאר מאוחסנות בבטחה בשרת המקומי שלכם."
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
-msgstr "Suffix (e.g. ])"
+msgstr "סיומת (לדוגמה ])"
 
 #. Section header for suggested time zones in the timestamp modal.
 msgid "Suggested"
 msgstr "מוצעות"
 
 msgid "Supports PluralKit system export files"
-msgstr "Supports PluralKit system export files"
+msgstr "תומך בקובצי ייצוא מערכת של PluralKit"
 
 msgid "System Tag (Applied to imported personas)"
-msgstr "System Tag (Applied to imported personas)"
+msgstr "תגית מערכת (מוחלת על פרסונות מיובאות)"
 
 msgid "Tag Icon"
-msgstr "Tag Icon"
+msgstr "סמל התגית"
 
 msgid "Tag Text"
-msgstr "Tag Text"
+msgstr "טקסט התגית"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
-msgstr "Tag pair already in use by persona \"{name}\""
+msgstr "זוג התגיות כבר בשימוש על ידי הפרסונה \"{name}\""
 
 #. Settings search synonym.
 msgid "Taskbar"
-msgstr "Taskbar"
+msgstr "שורת המשימות"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."
-msgstr "Tell us about this persona..."
+msgstr "ספרו לנו על הפרסונה הזו..."
 
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
-msgstr "The chosen file is not a valid JSON object."
+msgstr "הקובץ שנבחר אינו אובייקט JSON תקין."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "סרגל האותות כבוי עד שתסמנו כאן ערוץ. סימון קטגוריה או הקהילה כולה חל גם על ערוצים שייווצרו שם בהמשך."
@@ -570,14 +570,14 @@ msgid "This emoji is already added as a signature emoji"
 msgstr "אימוג'י זה כבר נוסף כאימוג'י חתימה"
 
 msgid "This is a preview of how your display tag will look in chat."
-msgstr "This is a preview of how your display tag will look in chat."
+msgstr "זוהי תצוגה מקדימה של האופן שבו תגית התצוגה שלכם תיראה בצ'אט."
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "הצגת/הסתרת רשימת הערוצים"
 
 msgid "Total Members"
-msgstr "Total Members"
+msgstr "סך כל החברים"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -593,7 +593,7 @@ msgstr "הפעלת סרגל האותות"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
-msgstr "Unlisted"
+msgstr "לא רשום"
 
 #. Emoji context menu action that unpins the emoji.
 msgid "Unpin emoji"
@@ -605,30 +605,30 @@ msgstr "בטל הצמדה לפרسונה זו"
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "הודעות ללא תגית נשלחות בתור הפרסונה שדיברה לאחרונה. בכל פעם שמישהו משתמש בתגית פרסונה, אותה פרסונה הופכת אוטומטית לפעילה."
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "הודעות ללא תגית נשלחות בתור הפרסונה שבחרתם. הקלדת תגיות של פרסונה אחרת תשלח רק את אותה הודעה ולא תחליף את הפרסונה הפעילה."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
-msgstr "View your personas"
+msgstr "הצגת הפרסונות שלכם"
 
 msgid "Where the signal bar appears"
 msgstr "היכן סרגל האותות מופיע"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
-msgstr "avatars downloaded"
+msgstr "אווטארים הורדו"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
-msgstr "e.g. Alice"
+msgstr "לדוגמה: Alice"
 
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
-msgstr "e.g. she/her"
+msgstr "לדוגמה: היא"
 
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
@@ -636,22 +636,22 @@ msgstr "לדוגמה: מחר ב-15:00, בעוד שעתיים, עכשיו"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
-msgstr "personas prepared"
+msgstr "פרסונות הוכנו"
 
 #. Progress label when saving personas
 msgid "saving personas"
-msgstr "saving personas"
+msgstr "פרסונות נשמרו"
 
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
-msgstr "{0} notice(s) during import"
+msgstr "{0} הערות במהלך הייבוא"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
 #. placeholder {2}: progress.label ?? 'items'
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
-msgstr "{0} of {1} {2} ({3}%)"
+msgstr "{0} מתוך {1} {2} ({3}%)"
 
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
@@ -659,7 +659,7 @@ msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
-msgstr "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - לחצו כדי להחליף פרסונה"
 
 msgid "— Today at 12:00 PM"
-msgstr "— Today at 12:00 PM"
+msgstr "— היום ב-12:00"
