@@ -5,7 +5,7 @@ import {createPersonaID, createUserID, type UserID} from '../../BrandedTypes';
 import type {UserPersonaSettingsRow} from '../../database/types/PersonaTypes';
 import {Persona} from '../../models/Persona';
 import {type ApiTestHarness, createApiTestHarness} from '../../test/ApiTestHarness';
-import {IPersonaRepository} from '../IPersonaRepository';
+import {IPersonaRepository, personaLookupKey} from '../IPersonaRepository';
 import {PersonaRepository} from '../PersonaRepository';
 
 describe('PersonaRepository', () => {
@@ -77,8 +77,12 @@ describe('PersonaRepository', () => {
 			{userId: userB, personaId: createdB.id},
 		]);
 		expect(pairsMap.size).toBe(2);
-		expect(pairsMap.get(created1.id.toString())?.name).toBe('Fox Persona');
-		expect(pairsMap.get(createdB.id.toString())?.name).toBe('Bear Persona');
+		expect(pairsMap.get(personaLookupKey(userA, created1.id))?.name).toBe('Fox Persona');
+		expect(pairsMap.get(personaLookupKey(userB, createdB.id))?.name).toBe('Bear Persona');
+
+		// A persona id paired with the wrong owner resolves to nothing
+		const crossMap = await repo.findByUserAndPersonaIds([{userId: userB, personaId: created1.id}]);
+		expect(crossMap.size).toBe(0);
 	});
 
 	it('updates persona fields and increments version', async () => {
