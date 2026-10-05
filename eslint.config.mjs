@@ -12,6 +12,7 @@ export default [
 			'**/coverage/**',
 			'**/*.generated.*',
 			'fluxer_app/src/features/i18n/locales/*/messages.mjs',
+			'fluxer_app/src/features/i18n/fork_locales/*/messages.mjs',
 		],
 	},
 	{
