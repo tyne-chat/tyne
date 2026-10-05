@@ -10,6 +10,15 @@ import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
+vi.mock('@lingui/core/macro', () => {
+	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
+	return {msg: descriptor, t: descriptor, plural: () => '', select: () => '', selectOrdinal: () => ''};
+});
+vi.mock('@lingui/react/macro', () => ({
+	Trans: ({children}: {children?: unknown}) => children ?? null,
+	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
+}));
+
 installVoiceMenuTestBootstrap();
 
 let mockHasLayers = false;
