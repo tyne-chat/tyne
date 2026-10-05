@@ -12,7 +12,7 @@ E2E_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_DIR="$(cd "$E2E_DIR/.." && pwd)"
 
 SKIP_BUILD=false
-BUILD_ALL=false
+PULL_UNCHANGED=false
 CLEANUP=true
 PASSTHROUGH_ARGS=()
 
@@ -22,7 +22,10 @@ for arg in "$@"; do
       SKIP_BUILD=true
       ;;
     --build-all)
-      BUILD_ALL=true
+      # Building everything from source is the default; kept so old invocations still work.
+      ;;
+    --pull-unchanged)
+      PULL_UNCHANGED=true
       ;;
     --no-cleanup)
       CLEANUP=false
@@ -36,19 +39,28 @@ done
 
 echo "=================================================="
 echo "🚀 Fluxer E2E Automated Integration Test Pipeline"
-echo "  Repo Dir:   $REPO_DIR"
-echo "  E2E Dir:    $E2E_DIR"
-echo "  Skip Build: $SKIP_BUILD"
-echo "  Build All:  $BUILD_ALL"
+echo "  Repo Dir:       $REPO_DIR"
+echo "  E2E Dir:        $E2E_DIR"
+echo "  Skip Build:     $SKIP_BUILD"
+echo "  Pull Unchanged: $PULL_UNCHANGED"
 echo "=================================================="
 
 # ------------------------------------------------------------------------------
 # 1. Image Preparation
 # ------------------------------------------------------------------------------
+# E2E images live under their own fluxer-e2e/*:local tags. They must never share
+# the fluxer-custom/*:bleeding-edge tags that docker-compose.build.yml produces
+# and production runs, or an E2E run could change what the next deploy ships.
 BUILD_COMPOSE="$E2E_DIR/docker-compose.e2e-build.yml"
-if [ ! -f "$BUILD_COMPOSE" ] && [ -f "$REPO_DIR/docker-compose.build.yml" ]; then
-  BUILD_COMPOSE="$REPO_DIR/docker-compose.build.yml"
-fi
+RUN_COMPOSE="$E2E_DIR/docker-compose.e2e.yml"
+
+E2E_IMAGES=($(docker compose -f "$RUN_COMPOSE" config --images | grep '^fluxer-' | sort -u))
+for img in "${E2E_IMAGES[@]}"; do
+  if [[ "$img" != fluxer-e2e/* ]]; then
+    echo "❌ $RUN_COMPOSE references '$img'; E2E images must be tagged fluxer-e2e/*."
+    exit 1
+  fi
+done
 
 if [ "$SKIP_BUILD" = false ]; then
   # On hosts that also serve traffic, a throttled buildx builder named "lowprio" may
@@ -57,16 +69,15 @@ if [ "$SKIP_BUILD" = false ]; then
     export BUILDX_BUILDER=lowprio
     echo "🐢 Building at low priority through the 'lowprio' builder."
   fi
-  ALL_SERVICES=($(docker compose -f "$BUILD_COMPOSE" config --services 2>/dev/null || true))
-  if [ ${#ALL_SERVICES[@]} -eq 0 ]; then
-    # Fallback to standard services if compose query fails
-    ALL_SERVICES=(api app-proxy messages gateway static-proxy snowflakes users media-proxy)
-  fi
+  ALL_SERVICES=($(docker compose -f "$BUILD_COMPOSE" config --services))
 
-  if [ "$BUILD_ALL" = true ]; then
+  if [ "$PULL_UNCHANGED" = false ]; then
     echo "🔨 Building all ${#ALL_SERVICES[@]} custom Fluxer microservices from source (${ALL_SERVICES[*]})..."
     COMPOSE_BAKE=true docker compose -f "$BUILD_COMPOSE" build "${ALL_SERVICES[@]}"
   else
+    # Opt-in shortcut: reuse upstream's released image for services whose own
+    # directory is unchanged. The check does not see shared crates or packages,
+    # so the stack under test may not match this tree exactly.
     UPSTREAM_REF="upstream/main"
     if ! git rev-parse --verify "$UPSTREAM_REF" >/dev/null 2>&1; then
       UPSTREAM_REF="origin/main"
@@ -85,9 +96,6 @@ if [ "$SKIP_BUILD" = false ]; then
       fi
 
       src_dir="fluxer_${svc//-/_}"
-      if [ "$svc" = "static-proxy" ]; then
-        src_dir="fluxer_static"
-      fi
 
       if git rev-parse --verify "$UPSTREAM_REF" >/dev/null 2>&1 && ! git diff --quiet "$UPSTREAM_REF...HEAD" -- "$src_dir" 2>/dev/null; then
         echo "  ⚡ Service '$svc': changes detected in $src_dir vs $UPSTREAM_REF -> building from source."
@@ -101,7 +109,7 @@ if [ "$SKIP_BUILD" = false ]; then
       echo "📥 Pulling upstream base images for services without local modifications (${SERVICES_TO_PULL[*]})..."
       for svc in "${SERVICES_TO_PULL[@]}"; do
         upstream_img="ghcr.io/fluxerapp/fluxer-${svc}:v1"
-        target_img="fluxer-custom/fluxer-${svc}:bleeding-edge"
+        target_img="$(docker compose -f "$BUILD_COMPOSE" config --images "$svc")"
         echo "  Checking / pulling $upstream_img..."
         if docker pull "$upstream_img" --quiet; then
           docker tag "$upstream_img" "$target_img"
@@ -120,6 +128,12 @@ if [ "$SKIP_BUILD" = false ]; then
   echo "✅ Docker images ready."
 else
   echo "⏩ Skipping Docker image builds as requested (--skip-build)."
+  for img in "${E2E_IMAGES[@]}"; do
+    if ! docker image inspect "$img" >/dev/null 2>&1; then
+      echo "❌ $img does not exist yet; run once without --skip-build to build the E2E images."
+      exit 1
+    fi
+  done
 fi
 
 # ------------------------------------------------------------------------------
