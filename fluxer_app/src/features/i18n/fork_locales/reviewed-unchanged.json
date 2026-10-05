@@ -1,4 +1,17 @@
 {
 	"version": 1,
-	"msgids": []
+	"msgids": ["Dev (Staging)"],
+	"locales": {
+		"cs": ["(Prefix: {0})"],
+		"de": ["Account: @{username}", "Personas"],
+		"es-419": ["Manual", "Personas"],
+		"es-ES": ["Manual", "Personas"],
+		"fr": ["Personas", "Public"],
+		"id": ["Edit Persona", "Edit persona", "Manual"],
+		"it": ["Account: @{username}"],
+		"nl": ["Account: @{username}"],
+		"pt-BR": ["Manual", "Personas"],
+		"ro": ["(Prefix: {0})", "Manual", "Personas"],
+		"sv-SE": ["(Prefix: {0})", "Personas"]
+	}
 }
