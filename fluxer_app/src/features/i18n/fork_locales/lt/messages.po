@@ -8,7 +8,7 @@ msgstr ""
 
 #. placeholder {0}: w.prefix
 msgid "(Prefix: {0})"
-msgstr "(Prefix: {0})"
+msgstr "(Priešdėlis: {0})"
 
 #. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
 msgid "(pinned)"
@@ -16,32 +16,32 @@ msgstr "(prisegta)"
 
 #. Tooltip showing root account username
 msgid "Account: @{username}"
-msgstr "Account: @{username}"
+msgstr "Paskyra: @{username}"
 
 msgid "Active Persona Mode"
-msgstr "Active Persona Mode"
+msgstr "Aktyvios personos režimas"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
 msgid "Active persona mode"
-msgstr "Active persona mode"
+msgstr "Aktyvios personos režimas"
 
 #. placeholder {0}: formData.signatureEmojis.length
 msgid "Add Emoji ({0})"
 msgstr "Pridėti jaustuką ({0})"
 
 msgid "Add Persona"
-msgstr "Add Persona"
+msgstr "Pridėti personą"
 
 #. placeholder {0}: formData.tags.length
 msgid "Add Tag Pair ({0}/5)"
-msgstr "Add Tag Pair ({0}/5)"
+msgstr "Pridėti žymų porą ({0}/5)"
 
 msgid "Add signal"
 msgstr "Pridėti signalą"
 
 msgid "All Personas"
-msgstr "All Personas"
+msgstr "Visos personos"
 
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
@@ -49,41 +49,41 @@ msgstr "Visos laiko juostos"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Ar tikrai norite ištrinti <0>{0}</0>? Šio veiksmo anuliuoti negalima."
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "Ar tikrai norite pakeisti visas esamas personas (<0>{existingCount}</0>)? Jos bus visam laikui ištrintos iš jūsų paskyros ir to anuliuoti negalima."
 
 #. Settings search synonym.
 msgid "Auto-hide"
-msgstr "Auto-hide"
+msgstr "Slėpti automatiškai"
 
 #. Settings section label in Advanced Settings for edge hover peek preference.
 #. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
 msgid "Auto-peek hidden sidebars"
-msgstr "Auto-peek hidden sidebars"
+msgstr "Automatiškai rodyti paslėptas šonines juostas"
 
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
-msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Nepavyko atsisiųsti avataro paveikslėlio: {error}. Persona importuota be avataro."
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
-msgstr "Change persona"
+msgstr "Keisti personą"
 
 msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Choose a PluralKit export (.json) or drag & drop"
+msgstr "Pasirinkite „PluralKit“ eksportą (.json) arba nuvilkite jį čia"
 
 msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "Pasirinkite, kaip žinutės be žymos ir personų žymos sąveikauja su jūsų aktyvia persona."
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
-msgstr "Configured Personas ({count})"
+msgstr "Sukonfigūruotos personos ({count})"
 
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
-msgstr "Configuring {name}..."
+msgstr "Konfigūruojama {name}..."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -91,27 +91,27 @@ msgstr "Kopijuoti laiko žymą\\"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
-msgstr "Deactivate persona"
+msgstr "Išjungti personą"
 
 msgid "Delete Persona"
-msgstr "Delete Persona"
+msgstr "Ištrinti personą"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
-msgstr "Delete persona"
+msgstr "Ištrinti personą"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "Ištrinti laiko žymą\\"
 
 msgid "Detected System Name / Tag"
-msgstr "Detected System Name / Tag"
+msgstr "Aptiktas sistemos pavadinimas / žyma"
 
 msgid "Display Tag"
-msgstr "Display Tag"
+msgstr "Rodoma žyma"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
-msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "Rodoma žyma pasirodys šalia visų personų pavadinimų pranešimuose. Jei rodoma žyma nenustatyta, bus rodoma jūsų paskyros profilio nuotrauka."
 
 #. Settings search entry label for double-clicking a message to edit it.
 #. Short label for an advanced message editing preference.
@@ -121,20 +121,20 @@ msgstr "Dukart spustelėkite, norėdami redaguoti"
 
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
-msgstr "Downloading avatar {current} of {total}..."
+msgstr "Atsisiunčiamas avataras {current} iš {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
-msgstr "Duplicate tag pair on this persona"
+msgstr "Pasikartojanti žymų pora šioje personoje"
 
 #. Title for edit persona modal
 msgid "Edit Persona"
-msgstr "Edit Persona"
+msgstr "Redaguoti personą"
 
 #. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
-msgstr "Edit persona"
+msgstr "Redaguoti personą"
 
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
@@ -142,27 +142,27 @@ msgid "Edit timestamp"
 msgstr "Redaguoti laiko žymą\\"
 
 msgid "Export Summary"
-msgstr "Export Summary"
+msgstr "Eksporto santrauka"
 
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
-msgstr "Failed to delete persona"
+msgstr "Nepavyko ištrinti personos"
 
 #. Toast error message on persona import failure
 msgid "Failed to import personas"
-msgstr "Failed to import personas"
+msgstr "Nepavyko importuoti personų"
 
 #. Error message when parsing PluralKit JSON fails
 msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
-msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Nepavyko išanalizuoti JSON failo. Įsitikinkite, kad tai galiojantis „PluralKit“ eksportas."
 
 #. Error message when reading uploaded file fails
 msgid "Failed to read the selected file."
-msgstr "Failed to read the selected file."
+msgstr "Nepavyko nuskaityti pasirinkto failo."
 
 #. Toast when persona save fails
 msgid "Failed to save persona"
-msgstr "Failed to save persona"
+msgstr "Nepavyko išsaugoti personos"
 
 #. Error toast in the community Message Tools settings tab when saving the signal bar fails.
 msgid "Failed to save the signal bar. Try again."
@@ -174,7 +174,7 @@ msgstr "Nepavyko išsaugoti, kur rodoma signalų juosta. Bandyk dar kartą."
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
-msgstr "Failed to upload icon to server"
+msgstr "Nepavyko įkelti piktogramos į serverį"
 
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
@@ -182,11 +182,11 @@ msgstr "Formato peržiūra"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
-msgstr "Hide channel list"
+msgstr "Slėpti kanalų sąrašą"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
-msgstr "Hide server list"
+msgstr "Slėpti serverių sąrašą"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -194,32 +194,32 @@ msgstr "Slėpti signalų juostą"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
-msgstr "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Užveskite pelės žymeklį prie lango kraštų, kad laikinai parodytumėte suskleistus skydelius."
 
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
-msgstr "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Piktogramos failas per didelis. Pasirinkite mažesnį nei 10 MB paveikslėlį."
 
 #. Modal title for PluralKit import step completed
 msgid "Import Complete"
-msgstr "Import Complete"
+msgstr "Importavimas baigtas"
 
 msgid "Import Complete!"
-msgstr "Import Complete!"
+msgstr "Importavimas baigtas!"
 
 msgid "Import Strategy"
-msgstr "Import Strategy"
+msgstr "Importavimo strategija"
 
 #. Modal title for PluralKit import step select
 msgid "Import from PluralKit"
-msgstr "Import from PluralKit"
+msgstr "Importuoti iš „PluralKit“"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
-msgstr "Importing Personas..."
+msgstr "Importuojamos personos..."
 
 msgid "Importing..."
-msgstr "Importing..."
+msgstr "Importuojama..."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -232,33 +232,33 @@ msgid "Insert timestamp"
 msgstr "Įterpti laiko žymą"
 
 msgid "Keep existing and add new (Recommended)"
-msgstr "Keep existing and add new (Recommended)"
+msgstr "Palikti esamas ir pridėti naujas (rekomenduojama)"
 
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "Palikite dabartines personas ({existingCount}) ir šalia jų pridėkite visas importuotas personas ({0}) kaip naujus įrašus."
 
 #. Active persona mode last used
 #. Active persona mode last used
 #. Active persona mode last used
 msgid "Last Used"
-msgstr "Last Used"
+msgstr "Paskiausiai naudota"
 
 msgid "Main account"
-msgstr "Main account"
+msgstr "Pagrindinė paskyra"
 
 msgid "Manage Personas"
-msgstr "Manage Personas"
+msgstr "Tvarkyti personas"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
-msgstr "Manage and create your personas"
+msgstr "Tvarkykite ir kurkite savo personas"
 
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
 msgid "Manual"
-msgstr "Manual"
+msgstr "Rankinis"
 
 #. Validation error when signature emoji limit is reached
 msgid "Maximum {max} signature emojis allowed per persona"
@@ -266,10 +266,10 @@ msgstr "Leidžiama ne daugiau kaip {max} parašo jaustukai vienam profiliui"
 
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
-msgstr "Member #{index}"
+msgstr "Narys Nr. {index}"
 
 msgid "Members with Avatars"
-msgstr "Members with Avatars"
+msgstr "Nariai su avatarais"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -277,23 +277,23 @@ msgstr "Žinučių įrankiai"
 
 #. Title for new persona modal
 msgid "New Persona"
-msgstr "New Persona"
+msgstr "Nauja persona"
 
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
-msgstr "No \"members\" array found in this export file."
+msgstr "Šiame eksporto faile nerasta masyvo „members“."
 
 msgid "No display tag configured. Messages will show your account profile picture."
-msgstr "No display tag configured. Messages will show your account profile picture."
+msgstr "Rodoma žyma nesukonfigūruota. Žinutėse bus rodoma jūsų paskyros profilio nuotrauka."
 
 msgid "No matching personas found."
-msgstr "No matching personas found."
+msgstr "Atitinkančių personų nerasta."
 
 msgid "No personas configured yet. Create one in Settings."
-msgstr "No personas configured yet. Create one in Settings."
+msgstr "Personų dar nesukonfigūruota. Sukurkite ją nustatymuose."
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
-msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Personų dar nesukurta. Spustelėkite „Pridėti personą“, kad sukurtumėte pirmąją!"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Signalų dar nėra. Juosta lieka paslėpta, kol nepridėsi bent vieno."
@@ -304,11 +304,11 @@ msgstr "Niekas neįjungė šio signalo"
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
-msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Matoma tik jums. Kiti negali matyti šios personos viso aprašymo ir profilio informacijos."
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "Neprivalomas sistemos ženklelis, pvz., ⚞Seraphim⚟"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -316,21 +316,21 @@ msgstr "Įklijuoti kaip paprastąjį tekstą"
 
 #. Settings search synonym.
 msgid "Peek"
-msgstr "Peek"
+msgstr "Žvilgtelėti"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "Visam laikui ištrinkite visas esamas personas ({existingCount}) ir visiškai pakeiskite jas importuotomis."
 
 msgid "Persona Tags (Prefix & Suffix)"
-msgstr "Persona Tags (Prefix & Suffix)"
+msgstr "Personos žymos (priešdėlis ir priesaga)"
 
 #. Toast when persona is created
 msgid "Persona created"
-msgstr "Persona created"
+msgstr "Persona sukurta"
 
 #. Toast when persona is deleted
 msgid "Persona deleted"
-msgstr "Persona deleted"
+msgstr "Persona ištrinta"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -344,16 +344,16 @@ msgstr "Personos profilis: {name}"
 
 #. Toast when persona is updated
 msgid "Persona updated"
-msgstr "Persona updated"
+msgstr "Persona atnaujinta"
 
 #. Aria label for persona visibility tabs
 msgid "Persona visibility"
-msgstr "Persona visibility"
+msgstr "Personos matomumas"
 
 #. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
-msgstr "Personas"
+msgstr "Personos"
 
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
@@ -365,39 +365,39 @@ msgstr "Prisegti šiai personai"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
-msgstr "Prefix (e.g. [)"
+msgstr "Priešdėlis (pvz., [)"
 
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
-msgstr "Preparing avatar batch download..."
+msgstr "Ruošiamas avatarų paketinis atsisiuntimas..."
 
 #. Persona visibility private
 msgid "Private"
-msgstr "Private"
+msgstr "Privatus"
 
 #. Tooltip on private persona badge
 msgid "Private persona"
-msgstr "Private persona"
+msgstr "Privati persona"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
-msgstr "Processing: {0}"
+msgstr "Apdorojama: {0}"
 
 #. Helper description for unlisted persona visibility
 msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
-msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Profilio kortelės pasiekiamos tik spustelėjus šios personos išsiųstas žinutes. Nerodoma jūsų viešame personų sąraše."
 
 #. Helper description for public persona visibility
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
-msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Profilio kortelės pasiekiamos spustelėjus žinutes ir matomos jūsų viešame personų sąraše draugams ir bendriems serveriams."
 
 #. Persona visibility public
 msgid "Public"
-msgstr "Public"
+msgstr "Viešas"
 
 #. Tooltip on public persona badge
 msgid "Public persona"
-msgstr "Public persona"
+msgstr "Vieša persona"
 
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
@@ -414,7 +414,7 @@ msgid "Reacting with a signature emoji will always react as this persona, regard
 msgstr "Reagavimas su parašo jaustuku visada reaguos kaip šis profilis, nepriklausomai nuo aktyvaus profilio."
 
 msgid "Recent Personas"
-msgstr "Recent Personas"
+msgstr "Naujausios personos"
 
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
@@ -422,55 +422,55 @@ msgstr "Pašalinti parašo jaustuką"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
-msgstr "Remove tag pair"
+msgstr "Pašalinti žymų porą"
 
 msgid "Replace All"
-msgstr "Replace All"
+msgstr "Pakeisti visas"
 
 msgid "Replace All Personas"
-msgstr "Replace All Personas"
+msgstr "Pakeisti visas personas"
 
 msgid "Replace all existing personas (Destructive)"
-msgstr "Replace all existing personas (Destructive)"
+msgstr "Pakeisti visas esamas personas (negrįžtama)"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Atstatyti signalą visiems"
 
 msgid "Root Account (Default)"
-msgstr "Root Account (Default)"
+msgstr "Šakninė paskyra (Numatytoji)"
 
 #. Progress status when saving personas
 msgid "Saving personas..."
-msgstr "Saving personas..."
+msgstr "Išsaugomos personos..."
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
-msgstr "Search Results ({0})"
+msgstr "Paieškos rezultatai ({0})"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
-msgstr "Search personas, tags, pronouns..."
+msgstr "Ieškoti personų, žymų, įvardžių..."
 
 #. Description of personas settings section
 msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "Siųskite žinutes su skirtingais vardais ir avatarais. Personos gali atstovauti daugialypės sistemos nariams, vaidmenų žaidimų veikėjams ar bet kokiai kitai tapatybei."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
-msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Siunčiama kaip @{username} ({mode}) – spustelėkite, kad pakeistumėte personą"
 
 #. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
-msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Siunčiama kaip {name} (atpažinta pagal žymą) – spustelėkite, kad pakeistumėte personą"
 
 msgid "Set Active"
-msgstr "Set Active"
+msgstr "Nustatyti kaip aktyvią"
 
 #. Aria label for setting active persona
 msgid "Set as active persona"
-msgstr "Set as active persona"
+msgstr "Nustatyti kaip aktyvią personą"
 
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
@@ -479,11 +479,11 @@ msgstr "Rodyti kopijavimo mygtuką"
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
-msgstr "Show personas button"
+msgstr "Rodyti personų mygtuką"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
-msgstr "Show server list"
+msgstr "Rodyti serverių sąrašą"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
@@ -517,50 +517,50 @@ msgstr "Parašo jaustuką jau naudoja profilis „{name}“"
 
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
-msgstr "Skipped member because they have no name configured."
+msgstr "Narys praleistas, nes jam nenustatytas vardas."
 
 msgid "Start Import"
-msgstr "Start Import"
+msgstr "Pradėti importavimą"
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "Personos ({0}) sėkmingai importuotos į jūsų paskyrą. Visi avatarų paveikslėliai saugiai laikomi jūsų vietiniame serveryje."
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
-msgstr "Suffix (e.g. ])"
+msgstr "Priesaga (pvz., ])"
 
 #. Section header for suggested time zones in the timestamp modal.
 msgid "Suggested"
 msgstr "Siūloma"
 
 msgid "Supports PluralKit system export files"
-msgstr "Supports PluralKit system export files"
+msgstr "Palaiko „PluralKit“ sistemos eksporto failus"
 
 msgid "System Tag (Applied to imported personas)"
-msgstr "System Tag (Applied to imported personas)"
+msgstr "Sistemos žyma (taikoma importuotoms personoms)"
 
 msgid "Tag Icon"
-msgstr "Tag Icon"
+msgstr "Žymos piktograma"
 
 msgid "Tag Text"
-msgstr "Tag Text"
+msgstr "Žymos tekstas"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
-msgstr "Tag pair already in use by persona \"{name}\""
+msgstr "Žymų porą jau naudoja persona „{name}“"
 
 #. Settings search synonym.
 msgid "Taskbar"
-msgstr "Taskbar"
+msgstr "Užduočių juosta"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."
-msgstr "Tell us about this persona..."
+msgstr "Papasakokite apie šią personą..."
 
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
-msgstr "The chosen file is not a valid JSON object."
+msgstr "Pasirinktas failas nėra galiojantis JSON objektas."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Signalų juosta išjungta, kol čia nepažymėsi kanalo. Pažymėjus kategoriją ar visą bendruomenę, tai galios ir vėliau ten sukurtiems kanalams."
@@ -570,14 +570,14 @@ msgid "This emoji is already added as a signature emoji"
 msgstr "Šis jaustukas jau pridėtas kaip parašo jaustukas"
 
 msgid "This is a preview of how your display tag will look in chat."
-msgstr "This is a preview of how your display tag will look in chat."
+msgstr "Tai peržiūra, kaip jūsų rodoma žyma atrodys pokalbyje."
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Perjungti kanalų sąrašą"
 
 msgid "Total Members"
-msgstr "Total Members"
+msgstr "Iš viso narių"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -593,7 +593,7 @@ msgstr "Įjungti signalų juostą"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
-msgstr "Unlisted"
+msgstr "Neįtrauktas į sąrašą"
 
 #. Emoji context menu action that unpins the emoji.
 msgid "Unpin emoji"
@@ -605,30 +605,30 @@ msgstr "Atsegti šiai personai"
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "Žinutės be žymos siunčiamos kaip persona, kuri kalbėjo paskutinė. Kai kas nors panaudoja personos žymą, ta persona automatiškai tampa aktyvia."
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "Žinutės be žymos siunčiamos kaip jūsų pasirinkta persona. Įvedus kitos personos žymas, taip bus išsiųsta tik ta viena žinutė, o aktyvi persona nepasikeis."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
-msgstr "View your personas"
+msgstr "Peržiūrėti savo personas"
 
 msgid "Where the signal bar appears"
 msgstr "Kur rodoma signalų juosta"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
-msgstr "avatars downloaded"
+msgstr "avatarų atsisiųsta"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
-msgstr "e.g. Alice"
+msgstr "pvz., Alice"
 
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
-msgstr "e.g. she/her"
+msgstr "pvz., ji/jos"
 
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
@@ -636,22 +636,22 @@ msgstr "pvz., rytoj 15:00, po 2 valandų, dabar"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
-msgstr "personas prepared"
+msgstr "personų paruošta"
 
 #. Progress label when saving personas
 msgid "saving personas"
-msgstr "saving personas"
+msgstr "personų išsaugota"
 
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
-msgstr "{0} notice(s) during import"
+msgstr "Pastabos importuojant: {0}"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
 #. placeholder {2}: progress.label ?? 'items'
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
-msgstr "{0} of {1} {2} ({3}%)"
+msgstr "{0} iš {1} {2} ({3} %)"
 
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
@@ -659,7 +659,7 @@ msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
-msgstr "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) – spustelėkite, kad pakeistumėte personą"
 
 msgid "— Today at 12:00 PM"
-msgstr "— Today at 12:00 PM"
+msgstr "— Šiandien 12:00"

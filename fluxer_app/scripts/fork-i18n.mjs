@@ -213,8 +213,9 @@ function check(upstreamRef) {
 	const problems = [];
 	const report = (locale, entry, text) => problems.push(`[${locale}] ${JSON.stringify(entry.msgid)}: ${text}`);
 	const forkOnly = forkOnlyStrings();
-	const reviewedUnchanged = new Set(JSON.parse(fs.readFileSync(REVIEWED_UNCHANGED_PATH, 'utf8')).msgids);
+	const reviewed = JSON.parse(fs.readFileSync(REVIEWED_UNCHANGED_PATH, 'utf8'));
 	for (const locale of LOCALES) {
+		const reviewedUnchanged = new Set([...reviewed.msgids, ...(reviewed.locales[locale] ?? [])]);
 		const catalogue = readPo(forkPoPath(locale));
 		const upstream = readPo(path.join(UPSTREAM_DIR, locale, 'messages.po'));
 		for (const [key, source] of forkOnly) {
@@ -238,7 +239,7 @@ function check(upstreamRef) {
 				report(
 					locale,
 					source,
-					'translation is an English copy; translate it or list the msgid in fork_locales/reviewed-unchanged.json',
+					'translation is an English copy; translate it, or list the msgid in fork_locales/reviewed-unchanged.json if the word really is the same',
 				);
 			}
 		}
