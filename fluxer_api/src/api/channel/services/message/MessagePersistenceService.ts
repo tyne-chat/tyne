@@ -68,8 +68,7 @@ import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 
 // Fork imports.
 
-import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
-import type {MessageSubprofileRow} from '@app/api/database/types/MessageTypes';
+import type {PersonaID} from '@app/api/BrandedTypes';
 
 const FORWARD_MEDIA_EMBED_TYPES: ReadonlySet<string> = new Set([
 	MessageEmbedTypes.IMAGE,
@@ -153,7 +152,6 @@ interface CreateMessageParams {
 	processedStickerItems?: Array<MessageStickerItem>;
 	skipDeferredEmbeds?: boolean;
 	threadInsert?: boolean;
-	subprofile?: MessageSubprofileRow | null;
 	personaId?: PersonaID | null;
 }
 
@@ -440,7 +438,7 @@ export class MessagePersistenceService {
 			call: null,
 			has_reaction: false,
 			version: 1,
-			persona_id: params.personaId ?? (params.subprofile?.id ? createPersonaID(BigInt(params.subprofile.id)) : null),
+			persona_id: params.personaId ?? null,
 		};
 		const message = await this.channelRepository.messages.upsertMessage(
 			messageRowData,
@@ -589,6 +587,7 @@ export class MessagePersistenceService {
 		isBot?: boolean;
 		locale?: string | null;
 		dmNsfwContext?: DmNsfwContext;
+		personaId?: PersonaID | null;
 		hasPermission?: (permission: bigint) => Promise<boolean>;
 	}): Promise<UpdateMessageResult> {
 		const {message, messageId, data, channel, guild, member} = params;
@@ -635,9 +634,8 @@ export class MessagePersistenceService {
 			updatedRowData.flags = preservedFlags | newFlags;
 			hasChanges = true;
 		}
-		if (data.subprofile !== undefined || (data as any).persona_id !== undefined) {
-			const rawId = (data as any).persona_id ?? data.subprofile?.id;
-			updatedRowData.persona_id = rawId ? createPersonaID(BigInt(rawId)) : null;
+		if (params.personaId !== undefined) {
+			updatedRowData.persona_id = params.personaId;
 			hasChanges = true;
 		}
 		if (data.attachments !== undefined) {
