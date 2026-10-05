@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint';
 export default [
 	{
 		ignores: [
+			'fluxer_app/src/features/i18n/fork_locales/*/messages.mjs',
 			'**/node_modules/**',
 			'**/dist/**',
 			'**/build/**',
