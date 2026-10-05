@@ -8,7 +8,7 @@ msgstr ""
 
 #. placeholder {0}: w.prefix
 msgid "(Prefix: {0})"
-msgstr "(Prefix: {0})"
+msgstr "(คำนำหน้า: {0})"
 
 #. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
 msgid "(pinned)"
@@ -16,32 +16,32 @@ msgstr "(ปักหมุดแล้ว)"
 
 #. Tooltip showing root account username
 msgid "Account: @{username}"
-msgstr "Account: @{username}"
+msgstr "บัญชี: @{username}"
 
 msgid "Active Persona Mode"
-msgstr "Active Persona Mode"
+msgstr "โหมด Persona ที่ใช้งานอยู่"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
 msgid "Active persona mode"
-msgstr "Active persona mode"
+msgstr "โหมด Persona ที่ใช้งานอยู่"
 
 #. placeholder {0}: formData.signatureEmojis.length
 msgid "Add Emoji ({0})"
 msgstr "เพิ่มอีโมจิ ({0})"
 
 msgid "Add Persona"
-msgstr "Add Persona"
+msgstr "เพิ่ม Persona"
 
 #. placeholder {0}: formData.tags.length
 msgid "Add Tag Pair ({0}/5)"
-msgstr "Add Tag Pair ({0}/5)"
+msgstr "เพิ่มคู่แท็ก ({0}/5)"
 
 msgid "Add signal"
 msgstr "เพิ่มสัญญาณ"
 
 msgid "All Personas"
-msgstr "All Personas"
+msgstr "Persona ทั้งหมด"
 
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
@@ -49,41 +49,41 @@ msgstr "เขตเวลาทั้งหมด"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบ <0>{0}</0> การดำเนินการนี้ไม่สามารถย้อนกลับได้"
 
 msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
+msgstr "คุณแน่ใจหรือไม่ว่าต้องการแทนที่ Persona ที่มีอยู่ทั้ง <0>{existingCount}</0> รายการ ระบบจะลบออกจากบัญชีของคุณอย่างถาวรและไม่สามารถย้อนกลับได้"
 
 #. Settings search synonym.
 msgid "Auto-hide"
-msgstr "Auto-hide"
+msgstr "ซ่อนอัตโนมัติ"
 
 #. Settings section label in Advanced Settings for edge hover peek preference.
 #. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
 msgid "Auto-peek hidden sidebars"
-msgstr "Auto-peek hidden sidebars"
+msgstr "แสดงแถบด้านข้างที่ซ่อนอยู่โดยอัตโนมัติ"
 
 #. Import warning when avatar fails to download
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
-msgstr "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "ดาวน์โหลดรูปอวาตาร์ไม่สำเร็จ: {error} นำเข้า Persona โดยไม่มีอวาตาร์"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
-msgstr "Change persona"
+msgstr "เปลี่ยน Persona"
 
 msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Choose a PluralKit export (.json) or drag & drop"
+msgstr "เลือกไฟล์ส่งออกของ PluralKit (.json) หรือลากมาวาง"
 
 msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choose how untagged messages and persona tags interact with your active persona."
+msgstr "เลือกว่าข้อความที่ไม่มีแท็กและแท็ก Persona จะทำงานร่วมกับ Persona ที่ใช้งานอยู่ของคุณอย่างไร"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
-msgstr "Configured Personas ({count})"
+msgstr "Persona ที่ตั้งค่าแล้ว ({count})"
 
 #. Progress status for configuring persona
 msgid "Configuring {name}..."
-msgstr "Configuring {name}..."
+msgstr "กำลังตั้งค่า {name}..."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -91,27 +91,27 @@ msgstr "คัดลอกการประทับเวลา\\"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
-msgstr "Deactivate persona"
+msgstr "ปิดใช้งาน Persona"
 
 msgid "Delete Persona"
-msgstr "Delete Persona"
+msgstr "ลบ Persona"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
-msgstr "Delete persona"
+msgstr "ลบ Persona"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "ลบการประทับเวลา\\"
 
 msgid "Detected System Name / Tag"
-msgstr "Detected System Name / Tag"
+msgstr "ชื่อ / แท็กระบบที่ตรวจพบ"
 
 msgid "Display Tag"
-msgstr "Display Tag"
+msgstr "แท็กแสดงผล"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
-msgstr "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "แท็กแสดงผลจะปรากฏถัดจากชื่อ Persona ทั้งหมดในข้อความ หากไม่ได้ตั้งค่าแท็กแสดงผล จะแสดงรูปโปรไฟล์บัญชีของคุณแทน"
 
 #. Settings search entry label for double-clicking a message to edit it.
 #. Short label for an advanced message editing preference.
@@ -121,20 +121,20 @@ msgstr "ดับเบิลคลิกเพื่อแก้ไข"
 
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
-msgstr "Downloading avatar {current} of {total}..."
+msgstr "กำลังดาวน์โหลดอวาตาร์ {current} จาก {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
-msgstr "Duplicate tag pair on this persona"
+msgstr "คู่แท็กซ้ำใน Persona นี้"
 
 #. Title for edit persona modal
 msgid "Edit Persona"
-msgstr "Edit Persona"
+msgstr "แก้ไข Persona"
 
 #. Action button to edit persona
 #. Aria label for editing persona
 msgid "Edit persona"
-msgstr "Edit persona"
+msgstr "แก้ไข Persona"
 
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
@@ -142,27 +142,27 @@ msgid "Edit timestamp"
 msgstr "แก้ไขการประทับเวลา\\"
 
 msgid "Export Summary"
-msgstr "Export Summary"
+msgstr "สรุปการส่งออก"
 
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
-msgstr "Failed to delete persona"
+msgstr "ลบ Persona ไม่สำเร็จ"
 
 #. Toast error message on persona import failure
 msgid "Failed to import personas"
-msgstr "Failed to import personas"
+msgstr "นำเข้า Persona ไม่สำเร็จ"
 
 #. Error message when parsing PluralKit JSON fails
 msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
-msgstr "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "แยกวิเคราะห์ไฟล์ JSON ไม่สำเร็จ โปรดตรวจสอบว่าเป็นไฟล์ส่งออกของ PluralKit ที่ถูกต้อง"
 
 #. Error message when reading uploaded file fails
 msgid "Failed to read the selected file."
-msgstr "Failed to read the selected file."
+msgstr "อ่านไฟล์ที่เลือกไม่สำเร็จ"
 
 #. Toast when persona save fails
 msgid "Failed to save persona"
-msgstr "Failed to save persona"
+msgstr "บันทึก Persona ไม่สำเร็จ"
 
 #. Error toast in the community Message Tools settings tab when saving the signal bar fails.
 msgid "Failed to save the signal bar. Try again."
@@ -174,7 +174,7 @@ msgstr "บันทึกตำแหน่งที่แสดงแถบส
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
-msgstr "Failed to upload icon to server"
+msgstr "อัปโหลดไอคอนไปยังเซิร์ฟเวอร์ไม่สำเร็จ"
 
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
@@ -182,11 +182,11 @@ msgstr "ดูตัวอย่างรูปแบบ"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
-msgstr "Hide channel list"
+msgstr "ซ่อนรายการช่อง"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently shown.
 msgid "Hide server list"
-msgstr "Hide server list"
+msgstr "ซ่อนรายการเซิร์ฟเวอร์"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -194,32 +194,32 @@ msgstr "ซ่อนแถบสัญญาณ"
 
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
-msgstr "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "วางเมาส์ใกล้ขอบหน้าต่างเพื่อแสดงแผงที่ย่อไว้ชั่วคราว"
 
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
-msgstr "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "ไฟล์ไอคอนมีขนาดใหญ่เกินไป เลือกรูปภาพที่เล็กกว่า 10 MB"
 
 #. Modal title for PluralKit import step completed
 msgid "Import Complete"
-msgstr "Import Complete"
+msgstr "นำเข้าเสร็จสิ้น"
 
 msgid "Import Complete!"
-msgstr "Import Complete!"
+msgstr "นำเข้าเสร็จสิ้น!"
 
 msgid "Import Strategy"
-msgstr "Import Strategy"
+msgstr "กลยุทธ์การนำเข้า"
 
 #. Modal title for PluralKit import step select
 msgid "Import from PluralKit"
-msgstr "Import from PluralKit"
+msgstr "นำเข้าจาก PluralKit"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
-msgstr "Importing Personas..."
+msgstr "กำลังนำเข้า Persona..."
 
 msgid "Importing..."
-msgstr "Importing..."
+msgstr "กำลังนำเข้า..."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -232,33 +232,33 @@ msgid "Insert timestamp"
 msgstr "แทรกการประทับเวลา"
 
 msgid "Keep existing and add new (Recommended)"
-msgstr "Keep existing and add new (Recommended)"
+msgstr "เก็บรายการเดิมและเพิ่มรายการใหม่ (แนะนำ)"
 
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
+msgstr "เก็บ Persona ปัจจุบัน {existingCount} รายการของคุณไว้ และเพิ่ม Persona ที่นำเข้าทั้ง {0} รายการเป็นรายการใหม่ควบคู่กัน"
 
 #. Active persona mode last used
 #. Active persona mode last used
 #. Active persona mode last used
 msgid "Last Used"
-msgstr "Last Used"
+msgstr "ใช้งานล่าสุด"
 
 msgid "Main account"
-msgstr "Main account"
+msgstr "บัญชีหลัก"
 
 msgid "Manage Personas"
-msgstr "Manage Personas"
+msgstr "จัดการ Persona"
 
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
-msgstr "Manage and create your personas"
+msgstr "จัดการและสร้าง Persona ของคุณ"
 
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
 msgid "Manual"
-msgstr "Manual"
+msgstr "ดำเนินการเอง"
 
 #. Validation error when signature emoji limit is reached
 msgid "Maximum {max} signature emojis allowed per persona"
@@ -266,10 +266,10 @@ msgstr "อนุญาตให้อีโมจิประจำตัวไ
 
 #. Placeholder name for unnamed member in import
 msgid "Member #{index}"
-msgstr "Member #{index}"
+msgstr "สมาชิก #{index}"
 
 msgid "Members with Avatars"
-msgstr "Members with Avatars"
+msgstr "สมาชิกที่มีอวาตาร์"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -277,23 +277,23 @@ msgstr "เครื่องมือข้อความ"
 
 #. Title for new persona modal
 msgid "New Persona"
-msgstr "New Persona"
+msgstr "Persona ใหม่"
 
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
-msgstr "No \"members\" array found in this export file."
+msgstr "ไม่พบอาร์เรย์ \"members\" ในไฟล์ส่งออกนี้"
 
 msgid "No display tag configured. Messages will show your account profile picture."
-msgstr "No display tag configured. Messages will show your account profile picture."
+msgstr "ยังไม่ได้ตั้งค่าแท็กแสดงผล ข้อความจะแสดงรูปโปรไฟล์ของบัญชีคุณ"
 
 msgid "No matching personas found."
-msgstr "No matching personas found."
+msgstr "ไม่พบ Persona ที่ตรงกัน"
 
 msgid "No personas configured yet. Create one in Settings."
-msgstr "No personas configured yet. Create one in Settings."
+msgstr "ยังไม่มี Persona ที่ตั้งค่าไว้ สร้างได้ในการตั้งค่า"
 
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
-msgstr "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "ยังไม่ได้สร้าง Persona คลิก \"เพิ่ม Persona\" เพื่อสร้าง Persona แรกของคุณ!"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "ยังไม่มีสัญญาณ แถบจะถูกซ่อนไว้จนกว่าคุณจะเพิ่มสัญญาณ"
@@ -304,11 +304,11 @@ msgstr "ยังไม่มีใครเปิดสัญญาณนี้
 
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
-msgstr "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "มองเห็นได้เฉพาะคุณ ผู้อื่นไม่สามารถดูประวัติฉบับเต็มหรือรายละเอียดโปรไฟล์ของ Persona นี้ได้"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Optional system badge, e.g. ⚞Seraphim⚟"
+msgstr "ป้ายระบบ (ไม่บังคับ) เช่น ⚞Seraphim⚟"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -316,21 +316,21 @@ msgstr "วางเป็นข้อความธรรมดา"
 
 #. Settings search synonym.
 msgid "Peek"
-msgstr "Peek"
+msgstr "แอบดู"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
+msgstr "ลบ Persona ที่มีอยู่ทั้ง {existingCount} รายการอย่างถาวร และแทนที่ทั้งหมดด้วย Persona ที่นำเข้า"
 
 msgid "Persona Tags (Prefix & Suffix)"
-msgstr "Persona Tags (Prefix & Suffix)"
+msgstr "แท็ก Persona (คำนำหน้าและคำต่อท้าย)"
 
 #. Toast when persona is created
 msgid "Persona created"
-msgstr "Persona created"
+msgstr "สร้าง Persona แล้ว"
 
 #. Toast when persona is deleted
 msgid "Persona deleted"
-msgstr "Persona deleted"
+msgstr "ลบ Persona แล้ว"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -344,16 +344,16 @@ msgstr "โปรไฟล์ Persona: {name}"
 
 #. Toast when persona is updated
 msgid "Persona updated"
-msgstr "Persona updated"
+msgstr "อัปเดต Persona แล้ว"
 
 #. Aria label for persona visibility tabs
 msgid "Persona visibility"
-msgstr "Persona visibility"
+msgstr "การมองเห็น Persona"
 
 #. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
-msgstr "Personas"
+msgstr "Persona"
 
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
@@ -365,39 +365,39 @@ msgstr "ปักหมุดสำหรับเพอร์โซนานี
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
-msgstr "Prefix (e.g. [)"
+msgstr "คำนำหน้า (เช่น [)"
 
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
-msgstr "Preparing avatar batch download..."
+msgstr "กำลังเตรียมดาวน์โหลดอวาตาร์เป็นชุด..."
 
 #. Persona visibility private
 msgid "Private"
-msgstr "Private"
+msgstr "ส่วนตัว"
 
 #. Tooltip on private persona badge
 msgid "Private persona"
-msgstr "Private persona"
+msgstr "Persona ส่วนตัว"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
-msgstr "Processing: {0}"
+msgstr "กำลังประมวลผล: {0}"
 
 #. Helper description for unlisted persona visibility
 msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
-msgstr "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "การ์ดโปรไฟล์เข้าถึงได้เฉพาะเมื่อคลิกข้อความที่ส่งโดย Persona นี้ ไม่แสดงในรายการ Persona สาธารณะของคุณ"
 
 #. Helper description for public persona visibility
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
-msgstr "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "การ์ดโปรไฟล์เข้าถึงได้เมื่อคลิกข้อความ และเพื่อนกับเซิร์ฟเวอร์ที่มีร่วมกันมองเห็นได้ในรายการ Persona สาธารณะของคุณ"
 
 #. Persona visibility public
 msgid "Public"
-msgstr "Public"
+msgstr "สาธารณะ"
 
 #. Tooltip on public persona badge
 msgid "Public persona"
-msgstr "Public persona"
+msgstr "Persona สาธารณะ"
 
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
@@ -414,7 +414,7 @@ msgid "Reacting with a signature emoji will always react as this persona, regard
 msgstr "การแสดงความรู้สึกด้วยอีโมจิประจำตัวจะแสดงความรู้สึกในฐานะตัวตนนี้เสมอ ไม่ว่าจะใช้ตัวตนใดอยู่ก็ตาม"
 
 msgid "Recent Personas"
-msgstr "Recent Personas"
+msgstr "Persona ล่าสุด"
 
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
@@ -422,55 +422,55 @@ msgstr "ลบอีโมจิประจำตัว"
 
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
-msgstr "Remove tag pair"
+msgstr "ลบคู่แท็ก"
 
 msgid "Replace All"
-msgstr "Replace All"
+msgstr "แทนที่ทั้งหมด"
 
 msgid "Replace All Personas"
-msgstr "Replace All Personas"
+msgstr "แทนที่ Persona ทั้งหมด"
 
 msgid "Replace all existing personas (Destructive)"
-msgstr "Replace all existing personas (Destructive)"
+msgstr "แทนที่ Persona ที่มีอยู่ทั้งหมด (ไม่สามารถกู้คืนได้)"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "รีเซ็ตสัญญาณสำหรับทุกคน"
 
 msgid "Root Account (Default)"
-msgstr "Root Account (Default)"
+msgstr "บัญชีหลัก (ค่าเริ่มต้น)"
 
 #. Progress status when saving personas
 msgid "Saving personas..."
-msgstr "Saving personas..."
+msgstr "กำลังบันทึก Persona..."
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
-msgstr "Search Results ({0})"
+msgstr "ผลการค้นหา ({0})"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
-msgstr "Search personas, tags, pronouns..."
+msgstr "ค้นหา Persona, แท็ก, คำสรรพนาม..."
 
 #. Description of personas settings section
 msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
+msgstr "ส่งข้อความด้วยชื่อและอวาตาร์ที่แตกต่างกัน Persona สามารถเป็นตัวแทนของสมาชิกระบบพหุลักษณ์ ตัวละครสวมบทบาท หรือตัวตนอื่นใดก็ได้"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
-msgstr "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "กำลังส่งในชื่อ @{username} ({mode}) - คลิกเพื่อสลับ Persona"
 
 #. Tooltip when sending as a persona matched by persona tag
 msgid "Sending as {name} (Matched by tag) - Click to switch persona"
-msgstr "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "กำลังส่งในชื่อ {name} (ตรงตามแท็ก) - คลิกเพื่อสลับ Persona"
 
 msgid "Set Active"
-msgstr "Set Active"
+msgstr "ตั้งเป็นใช้งานอยู่"
 
 #. Aria label for setting active persona
 msgid "Set as active persona"
-msgstr "Set as active persona"
+msgstr "ตั้งเป็น Persona ที่ใช้งานอยู่"
 
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
@@ -479,11 +479,11 @@ msgstr "แสดงปุ่มคัดลอก"
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
-msgstr "Show personas button"
+msgstr "แสดงปุ่ม Persona"
 
 #. Tooltip on the channel header server list toggle when the server rail is currently hidden.
 msgid "Show server list"
-msgstr "Show server list"
+msgstr "แสดงรายการเซิร์ฟเวอร์"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
@@ -517,50 +517,50 @@ msgstr "อีโมจิประจำตัวถูกใช้งานแ
 
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
-msgstr "Skipped member because they have no name configured."
+msgstr "ข้ามสมาชิกเนื่องจากไม่ได้ตั้งชื่อไว้"
 
 msgid "Start Import"
-msgstr "Start Import"
+msgstr "เริ่มนำเข้า"
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
+msgstr "นำเข้า {0} Persona เข้าสู่บัญชีของคุณสำเร็จแล้ว รูปอวาตาร์ทั้งหมดถูกจัดเก็บอย่างปลอดภัยบนเซิร์ฟเวอร์ภายในของคุณ"
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
-msgstr "Suffix (e.g. ])"
+msgstr "คำต่อท้าย (เช่น ])"
 
 #. Section header for suggested time zones in the timestamp modal.
 msgid "Suggested"
 msgstr "แนะนำ"
 
 msgid "Supports PluralKit system export files"
-msgstr "Supports PluralKit system export files"
+msgstr "รองรับไฟล์ส่งออกระบบของ PluralKit"
 
 msgid "System Tag (Applied to imported personas)"
-msgstr "System Tag (Applied to imported personas)"
+msgstr "แท็กระบบ (ใช้กับ Persona ที่นำเข้า)"
 
 msgid "Tag Icon"
-msgstr "Tag Icon"
+msgstr "ไอคอนแท็ก"
 
 msgid "Tag Text"
-msgstr "Tag Text"
+msgstr "ข้อความแท็ก"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
-msgstr "Tag pair already in use by persona \"{name}\""
+msgstr "คู่แท็กถูกใช้โดย Persona \"{name}\" อยู่แล้ว"
 
 #. Settings search synonym.
 msgid "Taskbar"
-msgstr "Taskbar"
+msgstr "แถบงาน"
 
 #. Placeholder for persona bio
 msgid "Tell us about this persona..."
-msgstr "Tell us about this persona..."
+msgstr "เล่าเกี่ยวกับ Persona นี้ให้เราฟัง..."
 
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
-msgstr "The chosen file is not a valid JSON object."
+msgstr "ไฟล์ที่เลือกไม่ใช่ออบเจ็กต์ JSON ที่ถูกต้อง"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "แถบสัญญาณจะปิดอยู่จนกว่าคุณจะติ๊กช่องที่นี่ การติ๊กหมวดหมู่หรือทั้งคอมมูนิตี้จะรวมถึงช่องที่สร้างขึ้นที่นั่นในภายหลังด้วย"
@@ -570,14 +570,14 @@ msgid "This emoji is already added as a signature emoji"
 msgstr "อีโมจินี้ถูกเพิ่มเป็นอีโมจิประจำตัวแล้ว"
 
 msgid "This is a preview of how your display tag will look in chat."
-msgstr "This is a preview of how your display tag will look in chat."
+msgstr "นี่คือตัวอย่างลักษณะของแท็กแสดงผลของคุณในแชต"
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "สลับรายการช่อง"
 
 msgid "Total Members"
-msgstr "Total Members"
+msgstr "สมาชิกทั้งหมด"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -593,7 +593,7 @@ msgstr "เปิดแถบสัญญาณ"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
-msgstr "Unlisted"
+msgstr "ไม่แสดงในรายการ"
 
 #. Emoji context menu action that unpins the emoji.
 msgid "Unpin emoji"
@@ -605,30 +605,30 @@ msgstr "เลิกปักหมุดสำหรับเพอร์โซ
 
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
+msgstr "ข้อความที่ไม่มีแท็กจะส่งในชื่อ Persona ที่พูดล่าสุด เมื่อใดก็ตามที่มีคนใช้แท็ก Persona Persona นั้นจะกลายเป็น Persona ที่ใช้งานอยู่โดยอัตโนมัติ"
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
+msgstr "ข้อความที่ไม่มีแท็กจะส่งในชื่อ Persona ที่คุณเลือก การพิมพ์แท็กของ Persona อื่นจะส่งเฉพาะข้อความนั้นเท่านั้นและจะไม่เปลี่ยน Persona ที่ใช้งานอยู่"
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
-msgstr "View your personas"
+msgstr "ดู Persona ของคุณ"
 
 msgid "Where the signal bar appears"
 msgstr "ตำแหน่งที่แสดงแถบสัญญาณ"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
-msgstr "avatars downloaded"
+msgstr "อวาตาร์ที่ดาวน์โหลดแล้ว"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
-msgstr "e.g. Alice"
+msgstr "เช่น Alice"
 
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
-msgstr "e.g. she/her"
+msgstr "เช่น เธอ"
 
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
@@ -636,22 +636,22 @@ msgstr "เช่น พรุ่งนี้ 15:00 น., ในอีก 2 ช�
 
 #. Progress label for prepared personas
 msgid "personas prepared"
-msgstr "personas prepared"
+msgstr "Persona ที่เตรียมแล้ว"
 
 #. Progress label when saving personas
 msgid "saving personas"
-msgstr "saving personas"
+msgstr "Persona ที่บันทึกแล้ว"
 
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
-msgstr "{0} notice(s) during import"
+msgstr "มี {0} ข้อสังเกตระหว่างการนำเข้า"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
 #. placeholder {2}: progress.label ?? 'items'
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
-msgstr "{0} of {1} {2} ({3}%)"
+msgstr "{0} จาก {1} {2} ({3}%)"
 
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
@@ -659,7 +659,7 @@ msgstr "{label}: {names}"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
-msgstr "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - คลิกเพื่อสลับ Persona"
 
 msgid "— Today at 12:00 PM"
-msgstr "— Today at 12:00 PM"
+msgstr "— วันนี้ เวลา 12:00"
