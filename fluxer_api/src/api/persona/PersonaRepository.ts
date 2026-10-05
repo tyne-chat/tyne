@@ -6,7 +6,12 @@ import {deleteOneOrMany, fetchMany, fetchOne, upsertOne} from '../database/Cassa
 import type {PersonaRow, UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import {Persona} from '../models/Persona';
 import {Personas, UserPersonaSettings} from '../Tables';
-import {type CreatePersonaParams, IPersonaRepository, type UpdatePersonaParams} from './IPersonaRepository';
+import {
+	type CreatePersonaParams,
+	IPersonaRepository,
+	personaLookupKey,
+	type UpdatePersonaParams,
+} from './IPersonaRepository';
 
 const FETCH_PERSONA_CQL = Personas.selectCql({
 	where: [Personas.where.eq('user_id'), Personas.where.eq('persona_id')],
@@ -78,7 +83,7 @@ export class PersonaRepository extends IPersonaRepository {
 		if (!pairs || pairs.length === 0) return new Map();
 		const uniquePairs = new Map<string, {userId: UserID; personaId: PersonaID}>();
 		for (const pair of pairs) {
-			uniquePairs.set(`${pair.userId.toString()}:${pair.personaId.toString()}`, pair);
+			uniquePairs.set(personaLookupKey(pair.userId, pair.personaId), pair);
 		}
 		const results = new Map<string, Persona>();
 		const entries = Array.from(uniquePairs.values());
@@ -91,12 +96,12 @@ export class PersonaRepository extends IPersonaRepository {
 						user_id: userId,
 						persona_id: personaId,
 					});
-					return row ? new Persona(row) : null;
+					return row ? {key: personaLookupKey(userId, personaId), persona: new Persona(row)} : null;
 				}),
 			);
-			for (const p of fetched) {
-				if (p) {
-					results.set(p.id.toString(), p);
+			for (const entry of fetched) {
+				if (entry) {
+					results.set(entry.key, entry.persona);
 				}
 			}
 		}
