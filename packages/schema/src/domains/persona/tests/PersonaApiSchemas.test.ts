@@ -89,4 +89,33 @@ describe('PersonaApiSchemas', () => {
 		});
 		expect(validUpdate.success).toBe(true);
 	});
+
+	it('accepts only server-issued asset hashes for avatar_hash and banner_hash (audit M1-6)', () => {
+		for (const field of ['avatar_hash', 'banner_hash'] as const) {
+			for (const hash of ['0badc0de', 'a_0badc0de', null, undefined]) {
+				expect(PersonaCreateRequestSchema.safeParse({name: 'Alice', [field]: hash}).success).toBe(true);
+				expect(PersonaUpdateRequestSchema.safeParse({[field]: hash}).success).toBe(true);
+			}
+			for (const hash of [
+				'',
+				'../../x',
+				'0badc0de/../x',
+				'0badc0de?x=1',
+				'0badc0de#x',
+				'0badc0de.png',
+				'0BADC0DE',
+				'b_0badc0de',
+				'a_a_0badc0de',
+				'0badc0d',
+				'0badc0de0',
+				' 0badc0de',
+				'0badc0de\n',
+				'https://example.com/avatars/1/0badc0de',
+			]) {
+				expect(PersonaCreateRequestSchema.safeParse({name: 'Alice', [field]: hash}).success).toBe(false);
+				expect(PersonaUpdateRequestSchema.safeParse({[field]: hash}).success).toBe(false);
+				expect(PersonaBulkImportRequestSchema.safeParse([{name: 'Alice', [field]: hash}]).success).toBe(false);
+			}
+		}
+	});
 });
