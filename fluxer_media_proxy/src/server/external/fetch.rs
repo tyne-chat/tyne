@@ -40,6 +40,7 @@ pub(super) struct ExternalFetchRequest<'a> {
     pub(super) url: &'a str,
     pub(super) range: Option<ExternalRangeSelection<'a>>,
     pub(super) mode: ExternalFetchMode,
+    pub(super) max_bytes: usize,
 }
 
 pub(super) async fn fetch_external_with_range(
@@ -160,6 +161,7 @@ async fn fetch_external_inner(
         url,
         range,
         mode,
+        max_bytes,
     } = request;
     let external_metrics = app.metrics.external();
     let ExternalUpstream {
@@ -169,7 +171,7 @@ async fn fetch_external_inner(
     let content_type = external_content_type(response.headers());
     let declared_length = validated_content_length(response.headers());
     if let Some(len) = declared_length
-        && len > constants::MAX_MEDIA_PROXY_BYTES as u64
+        && len > max_bytes as u64
     {
         warn!(url = %public_net_policy::external_url_for_log(&current_url), len, "external payload too large");
         return Err(ExternalFetchError::PayloadTooLarge);
@@ -177,12 +179,9 @@ async fn fetch_external_inner(
     let status = if response.status() == StatusCode::PARTIAL_CONTENT {
         let content_range =
             bounded_single_visible_header(response.headers(), &header::CONTENT_RANGE);
-        let Some(partial) = validate_external_partial(
-            range,
-            content_range,
-            declared_length,
-            constants::MAX_MEDIA_PROXY_BYTES,
-        ) else {
+        let Some(partial) =
+            validate_external_partial(range, content_range, declared_length, max_bytes)
+        else {
             warn!(url = %public_net_policy::external_url_for_log(&current_url), "invalid upstream partial response");
             external_metrics.fetch_failures.inc();
             return Err(ExternalFetchError::FetchFailed);
@@ -218,7 +217,7 @@ async fn fetch_external_inner(
         budget: app.media.external_buffer_bytes(),
         metrics: &external_metrics,
         content_length: declared_length,
-        limit: constants::MAX_MEDIA_PROXY_BYTES,
+        limit: max_bytes,
     })
     .await?;
     if status
