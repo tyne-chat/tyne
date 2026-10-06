@@ -38,6 +38,8 @@ use bytes::Bytes;
 use serde::Deserialize;
 use std::sync::Arc;
 
+// Fork imports.
+use crate::server::media_operations::external_input_limit;
 const MEDIA_WIDTH_HEADER: &str = "x-fluxer-media-width";
 const MEDIA_HEIGHT_HEADER: &str = "x-fluxer-media-height";
 
@@ -54,6 +56,7 @@ struct MetadataRequest {
     key: Option<String>,
     url: Option<String>,
     with_base64: Option<bool>,
+    max_bytes: Option<u64>,
 }
 
 impl MetadataRequest {
@@ -77,6 +80,7 @@ impl MetadataRequest {
             "external" => Ok(MediaInput::External {
                 url: self.url.ok_or(MediaFailure::MediaInputMissingField)?,
                 filename: self.filename,
+                max_bytes: external_input_limit(self.max_bytes),
             }),
             _ => Err(MediaFailure::MediaInputUnsupportedType),
         }
@@ -109,6 +113,7 @@ impl FramesRequest {
             key: self.key,
             url: self.url,
             with_base64: None,
+            max_bytes: None,
         }
     }
 }
