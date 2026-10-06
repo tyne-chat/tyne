@@ -263,6 +263,7 @@ impl<'a> PreparedExternalRequest<'a> {
             url: &self.url,
             range,
             mode,
+            max_bytes: constants::MAX_MEDIA_PROXY_BYTES,
         })
         .await
         .map_err(|err| Box::new(external_fetch_error_response(&self.url, err)))
@@ -432,12 +433,14 @@ async fn serve_fetched_external(
 pub(in crate::server) async fn fetch_external(
     app: &AppState,
     url: &str,
+    max_bytes: usize,
 ) -> Result<(String, BudgetedBytes), ExternalFetchError> {
     let fetched = fetch_external_with_range(ExternalFetchRequest {
         app,
         url,
         range: None,
         mode: ExternalFetchMode::Buffered,
+        max_bytes,
     })
     .await?;
     let FetchedExternal { url, body, .. } = fetched;

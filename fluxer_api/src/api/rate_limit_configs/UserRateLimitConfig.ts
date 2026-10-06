@@ -22,7 +22,7 @@ export const UserRateLimitConfigs = {
 	} as RouteRateLimitConfig,
 	USER_PERSONA_BATCH_AVATAR_IMPORT: {
 		bucket: 'user:persona:batch_avatar_import',
-		config: {limit: 5, windowMs: ms('10 minutes')},
+		config: {limit: 30, windowMs: ms('10 minutes')},
 	} as RouteRateLimitConfig,
 	USER_EMAIL_CHANGE_START: {
 		bucket: 'user:email_change:start',
