@@ -20,6 +20,7 @@ type MediaProxyMetadataExternalRequest = {
 	type: 'external';
 	url: string;
 	with_base64?: boolean;
+	max_bytes?: number;
 } & MediaProxyMetadataPolicy;
 type MediaProxyMetadataUploadRequest = {
 	type: 'upload';
