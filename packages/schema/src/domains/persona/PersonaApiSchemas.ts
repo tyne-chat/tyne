@@ -29,6 +29,13 @@ export const SignatureEmojiSchema = z.object({
 });
 export type SignatureEmoji = z.infer<typeof SignatureEmojiSchema>;
 
+// Persona image hashes are issued by the upload and import routes: the first 8 hex characters of the image's MD5,
+// prefixed with "a_" when animated. They are interpolated into media URLs and storage keys, so nothing else is accepted.
+const PERSONA_ASSET_HASH_PATTERN = /^(a_)?[0-9a-f]{8}$/;
+const PersonaAssetHashType = z
+	.string()
+	.regex(PERSONA_ASSET_HASH_PATTERN, 'Must be a hash returned by the persona avatar or banner upload routes');
+
 export const PersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
@@ -72,8 +79,8 @@ export type PublicPersonaListResponse = z.infer<typeof PublicPersonaListResponse
 
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),
-	avatar_hash: z.string().max(64).nullish().optional().describe('Avatar asset hash'),
-	banner_hash: z.string().max(64).nullish().optional().describe('Banner asset hash'),
+	avatar_hash: PersonaAssetHashType.nullish().optional().describe('Avatar asset hash'),
+	banner_hash: PersonaAssetHashType.nullish().optional().describe('Banner asset hash'),
 	pronouns: z.string().max(100).nullish().optional().describe('Optional pronouns'),
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	avatar_color: z.number().int().nullish().optional().describe('Optional avatar accent color'),
@@ -92,8 +99,8 @@ export type PersonaCreateRequest = z.infer<typeof PersonaCreateRequestSchema>;
 
 export const PersonaUpdateRequestSchema = z.object({
 	name: createStringType(1, 100).optional().describe('Persona display name'),
-	avatar_hash: z.string().max(64).nullish().optional().describe('Avatar asset hash'),
-	banner_hash: z.string().max(64).nullish().optional().describe('Banner asset hash'),
+	avatar_hash: PersonaAssetHashType.nullish().optional().describe('Avatar asset hash'),
+	banner_hash: PersonaAssetHashType.nullish().optional().describe('Banner asset hash'),
 	pronouns: z.string().max(100).nullish().optional().describe('Optional pronouns'),
 	color: z.number().int().nullish().optional().describe('Optional color integer'),
 	avatar_color: z.number().int().nullish().optional().describe('Optional avatar accent color'),
