@@ -93,8 +93,8 @@ import {uint8ArrayToBase64} from 'uint8array-extras';
 
 // Fork imports.
 
+import {beginPersonaAvatarBatchImport, importPersonaAvatar} from '@app/api/persona/PersonaAvatarImporter';
 import {deriveDominantAvatarColor} from '@app/api/utils/AvatarColorUtils';
-import {validateOutboundEndpointUrl} from '@fluxer/hono/src/security/OutboundEndpoint';
 import {
 	PersonaAvatarImportRequest,
 	PersonaAvatarImportResponse,
@@ -197,80 +197,18 @@ export function UserAccountController(app: HonoApp) {
 		return ctx.json({banner_hash: prepared.newHash ?? ''});
 	};
 
-	async function processRemoteAvatar(
-		rawUrl: string,
-		userId: string,
-		entityAssetService: any,
-	): Promise<{avatar_hash?: string; avatar_color?: number | null; error?: string}> {
-		try {
-			validateOutboundEndpointUrl(rawUrl, {
-				name: 'Avatar URL',
-				allowHttp: true,
-				allowLocalhost: false,
-				allowPrivateIpLiterals: false,
-				allowQuery: true,
-				allowFragment: true,
-			});
-		} catch (err: unknown) {
-			return {error: err instanceof Error ? err.message : 'Invalid avatar URL'};
-		}
-
-		const controller = new AbortController();
-		const timeout = setTimeout(() => controller.abort(), 12000);
-		let fetchRes: Response;
-		try {
-			fetchRes = await fetch(rawUrl, {
-				signal: controller.signal,
-				headers: {
-					'User-Agent': 'Fluxer/1.0 (Persona Avatar Importer)',
-					Accept: 'image/*',
-				},
-			});
-		} catch (err: unknown) {
-			clearTimeout(timeout);
-			const errorMsg = err instanceof Error ? err.message : 'Network error';
-			return {error: `Failed to download image from host: ${errorMsg}`};
-		} finally {
-			clearTimeout(timeout);
-		}
-
-		if (!fetchRes.ok) {
-			return {error: `Image host responded with HTTP ${fetchRes.status} ${fetchRes.statusText}`};
-		}
-
-		const contentType = fetchRes.headers.get('content-type') || 'image/png';
-		const arrayBuf = await fetchRes.arrayBuffer();
-		if (arrayBuf.byteLength > 10 * 1024 * 1024) {
-			return {error: 'Image exceeds maximum 10MB limit'};
-		}
-
-		const base64Data = Buffer.from(arrayBuf).toString('base64');
-		const base64Image = `data:${contentType};base64,${base64Data}`;
-
-		try {
-			const prepared = await entityAssetService.prepareAssetUpload({
-				assetType: 'avatar',
-				entityType: 'user',
-				entityId: userId,
-				previousHash: null,
-				base64Image,
-				errorPath: 'avatar',
-			});
-			await entityAssetService.commitAssetChange({prepared});
-			const avatarColor = prepared.imageBuffer ? await deriveDominantAvatarColor(prepared.imageBuffer) : null;
-			return {avatar_hash: prepared.newHash ?? '', avatar_color: avatarColor};
-		} catch (err: unknown) {
-			const errorMsg = err instanceof Error ? err.message : 'Failed to process image';
-			return {error: errorMsg};
-		}
-	}
+	const personaAvatarImportDeps = (ctx: any) => ({
+		mediaService: ctx.get('mediaService'),
+		entityAssetService: ctx.get('entityAssetService'),
+		rateLimitService: ctx.get('rateLimitService'),
+		cacheService: ctx.get('cacheService'),
+	});
 
 	const handlePersonaAvatarImport = async (ctx: any) => {
 		const user = ctx.get('user');
 		const body = ctx.req.valid('json');
-		const entityAssetService = ctx.get('entityAssetService');
 
-		const result = await processRemoteAvatar(body.url, user.id, entityAssetService);
+		const result = await importPersonaAvatar(personaAvatarImportDeps(ctx), user.id, body.url);
 		if (result.error) {
 			return ctx.json({message: result.error}, 400 as any);
 		}
@@ -280,72 +218,41 @@ export function UserAccountController(app: HonoApp) {
 	const handlePersonaBatchAvatarImport = async (ctx: any) => {
 		const user = ctx.get('user');
 		const body = ctx.req.valid('json');
-		const entityAssetService = ctx.get('entityAssetService');
 
 		const rawUrls = body.urls as Array<string>;
 		const uniqueUrls = Array.from(new Set(rawUrls));
 		const total = uniqueUrls.length;
+		const batch = await beginPersonaAvatarBatchImport(personaAvatarImportDeps(ctx), user.id, uniqueUrls);
 
 		const res = streamText(ctx, async (stream) => {
 			let aborted = false;
 			stream.onAbort(() => {
 				aborted = true;
 			});
-
-			await stream.writeln(
-				JSON.stringify({
-					type: 'start',
-					total,
-				}),
-			);
-
-			const results: Record<string, {avatar_hash?: string; avatar_color?: number | null; error?: string}> = {};
-			let completedCount = 0;
-			let currentIndex = 0;
-			const CONCURRENCY = 4;
-
-			const worker = async () => {
-				while (currentIndex < uniqueUrls.length && !aborted) {
-					const idx = currentIndex++;
-					const url = uniqueUrls[idx];
-					const r = await processRemoteAvatar(url, user.id, entityAssetService);
-					results[url] = r;
-					completedCount++;
-
-					if (!aborted) {
-						try {
-							await stream.writeln(
-								JSON.stringify({
-									type: 'progress',
-									completed: completedCount,
-									total,
-									url,
-									avatar_hash: r.avatar_hash,
-									avatar_color: r.avatar_color,
-									error: r.error,
-								}),
-							);
-						} catch {
-							aborted = true;
-							break;
-						}
-					}
+			const write = async (event: Record<string, unknown>) => {
+				if (aborted) return;
+				try {
+					await stream.writeln(JSON.stringify(event));
+				} catch {
+					aborted = true;
 				}
 			};
 
-			const workerCount = Math.min(CONCURRENCY, total);
-			const workers = Array.from({length: workerCount}, () => worker());
-			await Promise.all(workers);
-
-			if (!aborted) {
-				await stream.writeln(
-					JSON.stringify({
-						type: 'complete',
+			await write({type: 'start', total});
+			const results = await batch.run({
+				isCancelled: () => aborted,
+				onResult: (url, r, completed) =>
+					write({
+						type: 'progress',
+						completed,
 						total,
-						results,
+						url,
+						avatar_hash: r.avatar_hash,
+						avatar_color: r.avatar_color,
+						error: r.error,
 					}),
-				);
-			}
+			});
+			await write({type: 'complete', total, results});
 		});
 
 		res.headers.set('Content-Type', 'application/x-ndjson');

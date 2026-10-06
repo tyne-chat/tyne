@@ -8,6 +8,8 @@ pub(in crate::server) use input::{
     MediaInput, MediaInputLimit, STORED_SNIFF_PREFIX_BYTES, load_media_input, read_sniff_prefix,
     spool_stored_media,
 };
+// Fork: in a `use` of its own, so upstream's list above keeps its lines.
+pub(in crate::server) use input::external_input_limit;
 
 use crate::{
     constants::{self, AssetExtension},
