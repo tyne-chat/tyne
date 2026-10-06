@@ -45,7 +45,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 			.post('/users/@me/personas')
 			.body({
 				name: 'Archived Persona',
-				avatar_hash: 'archived_hash',
+				avatar_hash: 'a4c41bed',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
@@ -94,7 +94,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 		expect(fetched?.subprofile).toBeDefined();
 		expect(fetched?.subprofile?.id).toBe(persona.id);
 		expect(fetched?.subprofile?.name).toBe('Archived Persona');
-		expect(fetched?.subprofile?.avatar).toBe('archived_hash');
+		expect(fetched?.subprofile?.avatar).toBe('a4c41bed');
 		expect(fetched?.subprofile?.display_tag_text).toBe('ArchiveTag');
 	});
 
@@ -108,7 +108,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 			.post('/users/@me/personas')
 			.body({
 				name: 'Ghost Persona',
-				avatar_hash: 'ghost_hash',
+				avatar_hash: '6405754a',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
@@ -154,7 +154,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 			.post('/users/@me/personas')
 			.body({
 				name: 'Initial Name',
-				avatar_hash: 'init_hash',
+				avatar_hash: '1217a100',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
@@ -175,7 +175,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 			.patch(`/users/@me/personas/${persona.id}`)
 			.body({
 				name: 'Evolved Name',
-				avatar_hash: 'evolved_hash',
+				avatar_hash: 'e501bed0',
 			})
 			.expect(HTTP_STATUS.OK)
 			.execute();
@@ -193,7 +193,7 @@ describe('Persona Relational Identity & Soft Deletion', () => {
 		const fetched = messages.find((m) => m.id === sentMessage.id);
 		expect(fetched).toBeDefined();
 		expect(fetched?.subprofile?.name).toBe('Evolved Name');
-		expect(fetched?.subprofile?.avatar).toBe('evolved_hash');
+		expect(fetched?.subprofile?.avatar).toBe('e501bed0');
 		expect(fetched?.subprofile?.display_tag_text).toBe('EvolvedTag');
 	});
 });

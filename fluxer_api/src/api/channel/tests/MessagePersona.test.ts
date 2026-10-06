@@ -426,7 +426,7 @@ describe('Personal Notes Persona Integration', () => {
 			.post('/users/@me/personas')
 			.body({
 				name: 'Alice in Notes',
-				avatar_hash: 'alice_hash',
+				avatar_hash: 'a11ce0a5',
 			})
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
