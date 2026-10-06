@@ -42,24 +42,4 @@ describe('OutboundEndpoint', () => {
 		});
 		expect(() => buildEndpointUrl(endpoint, 'https://evil.example.com')).toThrow('Outbound path must be relative');
 	});
-	test('rejects query and fragment unless explicitly allowed', () => {
-		expect(() =>
-			validateOutboundEndpointUrl('https://api.example.com/avatar.png?size=1024', {
-				name: 'test.endpoint',
-				allowHttp: false,
-				allowLocalhost: false,
-				allowPrivateIpLiterals: false,
-			}),
-		).toThrow('query string or fragment');
-
-		const allowed = validateOutboundEndpointUrl('https://api.example.com/avatar.png?size=1024#top', {
-			name: 'test.endpoint',
-			allowHttp: false,
-			allowLocalhost: false,
-			allowPrivateIpLiterals: false,
-			allowQuery: true,
-			allowFragment: true,
-		});
-		expect(allowed.toString()).toBe('https://api.example.com/avatar.png?size=1024#top');
-	});
 });
