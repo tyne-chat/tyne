@@ -30,7 +30,7 @@ test.describe('Persona Asset Management & Batch Avatar Import', () => {
 
 		expect(res.status).toBe(400);
 		const body = (await res.json()) as any;
-		expect(body.message).toMatch(/cannot use private|Invalid avatar URL|Blocked/i);
+		expect(body.message).toBe('Could not import an avatar from this URL');
 	});
 
 	test('batch avatar importer enforces SSRF protection and streams NDJSON progress', async () => {
