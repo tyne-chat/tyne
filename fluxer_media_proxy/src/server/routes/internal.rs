@@ -37,6 +37,9 @@ use bytes::Bytes;
 use serde::Deserialize;
 use std::sync::Arc;
 
+// Fork imports.
+use crate::server::media_operations::external_input_limit;
+
 #[derive(Debug, Deserialize)]
 struct MetadataRequest {
     version: Option<i64>,
@@ -50,6 +53,7 @@ struct MetadataRequest {
     key: Option<String>,
     url: Option<String>,
     with_base64: Option<bool>,
+    max_bytes: Option<u64>,
 }
 
 impl MetadataRequest {
@@ -73,6 +77,7 @@ impl MetadataRequest {
             "external" => Ok(MediaInput::External {
                 url: self.url.ok_or(MediaFailure::MediaInputMissingField)?,
                 filename: self.filename,
+                max_bytes: external_input_limit(self.max_bytes),
             }),
             _ => Err(MediaFailure::MediaInputUnsupportedType),
         }
@@ -105,6 +110,7 @@ impl FramesRequest {
             key: self.key,
             url: self.url,
             with_base64: None,
+            max_bytes: None,
         }
     }
 }
@@ -594,6 +600,75 @@ mod tests {
             assert_eq!(StatusCode::OK, response.status(), "{spelling}");
             assert!(response_body(response).await.contains("\"width\":4"));
         }
+    }
+
+    #[tokio::test]
+    async fn metadata_external_max_bytes_caps_the_input_the_caller_will_accept() {
+        const ENDPOINT: &str = "https://media.test";
+        let tmp = tempfile::tempdir().expect("temp storage root");
+        let storage_root = tmp.path().canonicalize().expect("canonical storage root");
+        let app = Arc::new(AppState::for_tests(
+            Config::load_from_iter([
+                (
+                    "FLUXER_MEDIA_PROXY_SECRET_KEY".to_owned(),
+                    "secret".to_owned(),
+                ),
+                (
+                    "FLUXER_MEDIA_PROXY_STORAGE_ROOT".to_owned(),
+                    storage_root.display().to_string(),
+                ),
+                (
+                    "FLUXER_MEDIA_PROXY_PUBLIC_ENDPOINT".to_owned(),
+                    ENDPOINT.to_owned(),
+                ),
+            ])
+            .expect("metadata max_bytes config"),
+        ));
+        let key = "attachments/1/2/cat.png";
+        let png = synthetic_png(4, 4);
+        app.store
+            .write_object(&app.cfg.storage.bucket_cdn, key, &png, "image/png")
+            .await
+            .expect("stored attachment");
+
+        for (max_bytes, expected) in [
+            (png.len() as u64, StatusCode::OK),
+            (png.len() as u64 - 1, StatusCode::PAYLOAD_TOO_LARGE),
+            (0, StatusCode::PAYLOAD_TOO_LARGE),
+            (u64::MAX, StatusCode::OK),
+        ] {
+            let body = serde_json::json!({
+                "version": 2,
+                "type": "external",
+                "nsfw": "allow",
+                "with_base64": true,
+                "max_bytes": max_bytes,
+                "url": format!("{ENDPOINT}/{key}"),
+            })
+            .to_string();
+            let response = metadata_handler(
+                State(Arc::clone(&app)),
+                authorized_headers(),
+                json_request(body),
+            )
+            .await;
+            assert_eq!(expected, response.status(), "max_bytes={max_bytes}");
+        }
+    }
+
+    #[test]
+    fn external_input_limit_only_ever_lowers_the_proxy_ceiling() {
+        assert_eq!(constants::MAX_MEDIA_PROXY_BYTES, external_input_limit(None));
+        assert_eq!(1024, external_input_limit(Some(1024)));
+        assert_eq!(0, external_input_limit(Some(0)));
+        assert_eq!(
+            constants::MAX_MEDIA_PROXY_BYTES,
+            external_input_limit(Some(constants::MAX_MEDIA_PROXY_BYTES as u64 + 1))
+        );
+        assert_eq!(
+            constants::MAX_MEDIA_PROXY_BYTES,
+            external_input_limit(Some(u64::MAX))
+        );
     }
 
     #[tokio::test]
