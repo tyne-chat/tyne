@@ -549,22 +549,22 @@ describe('PersonaController', () => {
 				.post('/users/@me/personas')
 				.body({
 					name: 'Banner Persona',
-					banner_hash: 'b_banner123',
+					banner_hash: 'a_0badc0de',
 				})
 				.expect(HTTP_STATUS.CREATED)
 				.execute();
 
-			expect(created.banner_hash).toBe('b_banner123');
+			expect(created.banner_hash).toBe('a_0badc0de');
 
 			const updated = await createBuilder<PersonaResponse>(harness, account.token)
 				.patch(`/users/@me/personas/${created.id}`)
 				.body({
-					banner_hash: 'b_updated123',
+					banner_hash: '1badc0de',
 				})
 				.expect(HTTP_STATUS.OK)
 				.execute();
 
-			expect(updated.banner_hash).toBe('b_updated123');
+			expect(updated.banner_hash).toBe('1badc0de');
 
 			// Also verify public endpoint returns banner_hash
 			const publicPersona = await createBuilder<PersonaResponse>(harness, account.token)
@@ -572,7 +572,7 @@ describe('PersonaController', () => {
 				.expect(HTTP_STATUS.OK)
 				.execute();
 
-			expect(publicPersona.banner_hash).toBe('b_updated123');
+			expect(publicPersona.banner_hash).toBe('1badc0de');
 		});
 	});
 });
