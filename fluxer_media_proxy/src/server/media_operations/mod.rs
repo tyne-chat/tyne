@@ -10,6 +10,8 @@ pub(in crate::server) use input::{
     spool_stored_media,
 };
 pub(in crate::server) use strip::{StrippedMedia, probe_audio_duration, strip_media};
+// Fork: in a `use` of its own, so upstream's list above keeps its lines.
+pub(in crate::server) use input::external_input_limit;
 
 use crate::{
     constants::{self, AssetExtension},
