@@ -40,7 +40,18 @@ pub(in crate::server) enum MediaInput {
     External {
         url: String,
         filename: Option<String>,
+        max_bytes: usize,
     },
+}
+
+// An internal caller may ask for less than the proxy-wide ceiling when it already knows how much
+// it is willing to keep, such as an avatar import. The ceiling itself is never raised.
+pub(in crate::server) fn external_input_limit(requested: Option<u64>) -> usize {
+    requested.map_or(constants::MAX_MEDIA_PROXY_BYTES, |bytes| {
+        usize::try_from(bytes)
+            .unwrap_or(usize::MAX)
+            .min(constants::MAX_MEDIA_PROXY_BYTES)
+    })
 }
 
 pub(in crate::server) struct LoadedMediaInput {
@@ -130,7 +141,11 @@ pub(in crate::server) async fn load_media_input(
                 filename: filename.unwrap_or(key),
             })
         }
-        MediaInput::External { url, filename } => match self_origin::resolve(app, &url) {
+        MediaInput::External {
+            url,
+            filename,
+            max_bytes,
+        } => match self_origin::resolve(app, &url) {
             Some(SelfOrigin::Stored {
                 bucket,
                 key,
@@ -143,15 +158,24 @@ pub(in crate::server) async fn load_media_input(
                         warn!(reason = failure.code(), bucket = bucket.as_str(), key = key.as_str(), %err);
                         failure
                     })?;
+                if data.len() > max_bytes {
+                    let failure = MediaFailure::ExternalSourcePayloadTooLarge;
+                    warn!(
+                        reason = failure.code(),
+                        key = key.as_str(),
+                        len = data.len()
+                    );
+                    return Err(failure);
+                }
                 Ok(LoadedMediaInput {
                     data,
                     filename: filename.unwrap_or_else(|| url_filename(&url)),
                 })
             }
             Some(SelfOrigin::External { url: target }) => {
-                load_external_url(app, &target, filename).await
+                load_external_url(app, &target, filename, max_bytes).await
             }
-            None => load_external_url(app, &url, filename).await,
+            None => load_external_url(app, &url, filename, max_bytes).await,
         },
     }
 }
@@ -160,8 +184,9 @@ async fn load_external_url(
     app: &AppState,
     url: &str,
     filename: Option<String>,
+    max_bytes: usize,
 ) -> Result<LoadedMediaInput, MediaFailure> {
-    let (fetched_url, data) = fetch_external(app, url).await.map_err(|err| {
+    let (fetched_url, data) = fetch_external(app, url, max_bytes).await.map_err(|err| {
         let failure = MediaFailure::from(err);
         warn!(reason = failure.code(), url = %external_url_for_log(url), ?err);
         failure
