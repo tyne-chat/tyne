@@ -8,8 +8,6 @@ interface ValidateOutboundEndpointOptions {
 	allowHttp: boolean;
 	allowLocalhost: boolean;
 	allowPrivateIpLiterals: boolean;
-	allowQuery?: boolean;
-	allowFragment?: boolean;
 }
 
 export function validateOutboundEndpointUrl(rawEndpoint: string, options: ValidateOutboundEndpointOptions): URL {
@@ -28,7 +26,7 @@ export function validateOutboundEndpointUrl(rawEndpoint: string, options: Valida
 	if (endpointUrl.username || endpointUrl.password) {
 		throw new Error(`${options.name} must not include URL credentials`);
 	}
-	if ((!options.allowQuery && endpointUrl.search) || (!options.allowFragment && endpointUrl.hash)) {
+	if (endpointUrl.search || endpointUrl.hash) {
 		throw new Error(`${options.name} must not include query string or fragment`);
 	}
 	const hostname = endpointUrl.hostname.toLowerCase();
