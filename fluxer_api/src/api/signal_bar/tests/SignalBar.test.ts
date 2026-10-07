@@ -397,4 +397,23 @@ describe('signal bar', () => {
 		const state = await listSignals(owner.token, systemChannel.id);
 		expect(state.entries.map((entry) => entry.user.id)).toEqual([other.userId]);
 	});
+
+	it('accepts up to 50 signals and rejects more than 50', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+
+		const fiftySignals = Array.from({length: 50}, () => ({emoji_name: '😀'}));
+		const bar = await createBuilder<SignalBarResponse>(harness, owner.token)
+			.put('/instance/signal-bar')
+			.body({signals: fiftySignals})
+			.execute();
+		expect(bar.signals).toHaveLength(50);
+
+		const fiftyOneSignals = Array.from({length: 51}, () => ({emoji_name: '😀'}));
+		await createBuilder(harness, owner.token)
+			.put('/instance/signal-bar')
+			.body({signals: fiftyOneSignals})
+			.expect(HTTP_STATUS.BAD_REQUEST)
+			.execute();
+	});
 });
