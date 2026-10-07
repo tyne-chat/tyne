@@ -6,7 +6,7 @@ import {SnowflakeStringType, SnowflakeType} from '@fluxer/schema/src/primitives/
 import {schemaMetadata} from '@fluxer/schema/src/SchemaMetadata';
 import {z} from 'zod';
 
-export const MAX_SIGNAL_BAR_SIGNALS = 12;
+export const MAX_SIGNAL_BAR_SIGNALS = 50;
 export const MAX_SIGNAL_LABEL_LENGTH = 32;
 
 const SignalIdSchema = z
