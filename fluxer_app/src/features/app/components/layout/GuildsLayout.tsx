@@ -229,7 +229,7 @@ function useGuildNavigationVisibility(): GuildNavigationVisibility {
 	const fluxerVisible = !RuntimeConfig.directMessagesDisabled;
 	const favoritesVisible = Accessibility.showFavorites && buttons.favorites;
 	const discoveryVisible = communityActionsVisible && buttons.explore;
-	const addGuildVisible = communityActionsVisible && buttons.create_join;
+	const addGuildVisible = communityActionsVisible && (buttons.create_join || (Users.currentUser?.isStaff() ?? false));
 	const downloadVisible =
 		!Platform.isElectron && !Platform.isPWA && !HiddenGuildListButtons.downloadButtonHidden && buttons.download;
 	const helpVisible = !HiddenGuildListButtons.helpButtonHidden && Routes.help() != null && buttons.help;
