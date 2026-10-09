@@ -123,6 +123,10 @@ import {
 import {app, dialog, ipcMain, netLog, session, shell} from 'electron';
 import log from 'electron-log';
 
+// Fork imports.
+
+import {recordAppWindowRoute} from '@electron/main/Window';
+
 log.transports.file.level = 'info';
 
 log.transports.file.sync = false;
@@ -349,7 +353,9 @@ if (launchConfigurationError) {
 	ipcMain.on(DESKTOP_CAPABILITY_MANIFEST_CHANNEL, (event) => {
 		event.returnValue = desktopCapabilityManifest;
 	});
-	ipcMain.on(DESKTOP_LAST_ROUTE_CHANNEL, (_event, routePath: unknown) => {
+	ipcMain.on(DESKTOP_LAST_ROUTE_CHANNEL, (event, routePath: unknown) => {
+		// Fork: an extra app window's route belongs to the saved window layout, not to the main window.
+		if (!recordAppWindowRoute(event.sender, routePath)) return;
 		recordDesktopLastRoute(app.getPath('userData'), routePath);
 	});
 	if (process.platform === 'win32') {
