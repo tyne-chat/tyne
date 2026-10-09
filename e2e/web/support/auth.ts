@@ -1,9 +1,25 @@
 import {expect, type Page} from '@playwright/test';
 
-export async function loginAs(page: Page, email: string, password = 'TestPassword123!'): Promise<void> {
-	await page.goto('/login');
+const EMAIL_INPUT_SELECTOR = 'input[type="email"], input[name="email"], input[autocomplete="email"]';
 
-	const emailInput = page.locator('input[type="email"], input[name="email"], input[autocomplete="email"]').first();
+/**
+ * Opens the login page and gets to the email and password form. The page may first ask how to
+ * sign in; if it does, choose email.
+ */
+export async function openEmailSignIn(page: Page): Promise<void> {
+	await page.goto('/login');
+	const emailInput = page.locator(EMAIL_INPUT_SELECTOR).first();
+	const signInWithEmail = page.getByRole('button', {name: /sign in with email/i}).first();
+	await expect(emailInput.or(signInWithEmail).first()).toBeVisible({timeout: 15_000});
+	if (!(await emailInput.isVisible())) {
+		await signInWithEmail.click();
+	}
+}
+
+export async function loginAs(page: Page, email: string, password = 'TestPassword123!'): Promise<void> {
+	await openEmailSignIn(page);
+
+	const emailInput = page.locator(EMAIL_INPUT_SELECTOR).first();
 	const passwordInput = page.locator('input[type="password"]').first();
 	const submitButton = page.locator('button[type="submit"]').first();
 
