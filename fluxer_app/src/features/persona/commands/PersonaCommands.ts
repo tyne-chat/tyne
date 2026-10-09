@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
-import {ResettableStates} from '@app/features/app/state/ResettableStates';
 import MessageReactions from '@app/features/messaging/state/MessageReactions';
 import Messages from '@app/features/messaging/state/MessagingMessages';
+import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Logger} from '@app/features/platform/utils/AppLogger';
 import type {
@@ -40,6 +40,8 @@ const FETCH_COOLDOWN_MS = 2000;
 export function resetFetchPersonasCooldown(): void {
 	lastFetchTimestamp = 0;
 }
+
+AccountScopedWork.registerCancellation(() => resetFetchPersonasCooldown());
 
 export async function fetchPersonas(force = false): Promise<Array<PersonaResponse>> {
 	const now = Date.now();
@@ -151,10 +153,3 @@ export async function fetchPublicPersona(userId: string, personaId: string): Pro
 		return null;
 	}
 }
-
-// Personas belong to one account: forget them, and the fetch cooldown, when the account changes
-// or the session is replaced (upstream's registry of per-account state).
-ResettableStates.register(PersonaStore, () => {
-	PersonaStore.reset();
-	resetFetchPersonasCooldown();
-});
