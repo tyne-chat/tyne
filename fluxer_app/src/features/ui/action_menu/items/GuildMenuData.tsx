@@ -83,6 +83,10 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {useMemo} from 'react';
 
+// Fork imports.
+
+import {buildOpenInNewWindowMenuItem} from '@app/features/ui/action_menu/items/ForkOpenInNewWindowMenuItem';
+
 const COMMUNITY_DEBUG_DESCRIPTOR = msg({
 	message: 'Community debug',
 	comment: 'Title of the developer-mode community debug modal.',
@@ -337,7 +341,9 @@ export function useGuildMenuData(guild: Guild, options: UseGuildMenuDataOptions)
 			];
 		}
 		const menuGroups: Array<MenuGroupType> = [];
-		const quickActions: Array<MenuItemType | MenuSubmenuItemType> = [];
+		const quickActions: Array<MenuItemType | MenuSubmenuItemType> = [
+			buildOpenInNewWindowMenuItem(i18n, Routes.guildChannel(guild.id), onClose),
+		];
 		if (hasGuildUnread) {
 			quickActions.push({
 				icon: <MarkAsReadIcon size={20} data-flx="ui.action-menu.items.guild-menu-data.groups.mark-as-read-icon" />,
