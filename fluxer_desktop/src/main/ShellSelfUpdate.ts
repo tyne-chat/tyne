@@ -31,13 +31,23 @@ const requireModule = createRequire(import.meta.url);
 const logger = createChildLogger('ShellSelfUpdate');
 
 export const SHELL_SELF_UPDATE_CHECK_TIMEOUT_MS = 30_000;
-export const SHELL_SELF_UPDATE_TOTAL_TIMEOUT_MS = 600_000;
+// Fork: upstream's ten minutes suit its small shell package. A fork build downloads the whole
+// app (about 365 MB), which on a slow connection takes far longer, so the limit there only
+// guards against a download that never ends.
+export const SHELL_SELF_UPDATE_TOTAL_TIMEOUT_MS = forkVelopackSourceUrl() == null ? 600_000 : 6 * 60 * 60_000;
 
 export function getElectronUpdateFeedUrl(): string {
 	return `${getUpdateBaseUrl()}/RELEASES.json`;
 }
 
-type ShellSelfUpdateReason = 'no-update' | 'check-failed' | 'download-failed' | 'install-failed' | 'timed-out';
+type ShellSelfUpdateReason =
+	| 'no-update'
+	| 'check-failed'
+	| 'download-failed'
+	| 'install-failed'
+	| 'timed-out'
+	// Fork: the update is downloaded and the user chose to restart later (confirmRestart).
+	| 'postponed';
 
 interface ShellSelfUpdateFailure {
 	readonly reason: ShellSelfUpdateReason;
@@ -47,6 +57,9 @@ interface ShellSelfUpdateFailure {
 interface ShellSelfUpdateHooks {
 	readonly onDownloading: (progress: number | null) => void;
 	readonly onRestarting: () => void;
+	// Fork: asked once the update is on disk and before the app closes to install it. Resolving
+	// false leaves the update staged and ends the run as 'postponed'.
+	readonly confirmRestart?: () => Promise<boolean>;
 }
 
 interface SelfUpdateControl {
@@ -172,6 +185,11 @@ async function runVelopackSelfUpdate(control: SelfUpdateControl, hooks: ShellSel
 		staged = available;
 	}
 	control.clearCheckDeadline();
+	if (hooks.confirmRestart != null && !(await hooks.confirmRestart())) {
+		control.settle({reason: 'postponed', detail: null});
+		return;
+	}
+	if (control.isSettled()) return;
 	hooks.onRestarting();
 	const stagedVersion = getStagedVelopackVersion(staged);
 	if (stagedVersion != null) {
@@ -287,6 +305,11 @@ async function runAppImageSelfUpdate(
 	if (control.isSettled()) {
 		return;
 	}
+	if (hooks.confirmRestart != null && !(await hooks.confirmRestart())) {
+		control.settle({reason: 'postponed', detail: null});
+		return;
+	}
+	if (control.isSettled()) return;
 	hooks.onRestarting();
 	appImageStaging = null;
 	try {

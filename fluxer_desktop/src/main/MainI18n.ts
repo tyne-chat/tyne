@@ -91,6 +91,8 @@ const FALLBACK_STRINGS: Readonly<Record<string, string>> = Object.freeze({
 	'desktop.update.failedMessage': "{appName} couldn't finish updating.",
 	'desktop.update.failedDetail': 'The update did not download or install. Try again or download it yourself.',
 	'desktop.update.stillDownloadingDetail': 'The update is still downloading. Try again in a few minutes.',
+	'desktop.update.readyMessage': '{appName} {version} is ready to install.',
+	'desktop.update.restartNow': 'Restart now',
 	'desktop.tray.copyBuildInfo': 'Copy build info',
 	'desktop.tray.restart': 'Restart {appName}',
 	'desktop.tray.quit': 'Quit {appName}',
