@@ -25,6 +25,9 @@ export function resolveDesktopPackageOrigin(): string {
 }
 
 export function getUpdateBaseUrl(platform: NodeJS.Platform = process.platform): string {
+	// Fork: a fork build never asks upstream's package origin for updates (see the note below).
+	const forkBaseUrl = forkLatestAssetBaseUrl();
+	if (forkBaseUrl != null) return forkBaseUrl;
 	return `${resolveDesktopPackageOrigin()}/desktop/${BUILD_CHANNEL}/${platform}/${DESKTOP_DOWNLOAD_ARCH}`;
 }
 
