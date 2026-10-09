@@ -86,7 +86,7 @@ function isEscapedAt(text: string, index: number): boolean {
 	return backslashes % 2 === 1;
 }
 
-function $convertEmojiShortcode(node: TextNode, resolve: ComposerEmojiResolver, parserFlags?: number): void {
+export function $convertEmojiShortcode(node: TextNode, resolve: ComposerEmojiResolver, parserFlags?: number): void {
 	if ($isComposerCaretAnchorNode(node)) {
 		return;
 	}
