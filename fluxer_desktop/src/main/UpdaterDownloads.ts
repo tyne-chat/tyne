@@ -9,7 +9,6 @@ import {getUpdateBaseUrl, type ManualDesktopFormat} from '@electron/main/ShellDo
 import {DESKTOP_ARTIFACT_PRODUCT_NAME} from '@electron/common/DesktopIdentity';
 import {
 	DESKTOP_DOWNLOAD_ARCH,
-	forkLatestAssetBaseUrl,
 	forkReleasesPageUrl,
 	forkVersionDownloadUrl,
 	isLinuxManualDesktopFormat,
@@ -17,7 +16,6 @@ import {
 	LINUX_MANUAL_FORMAT_EXTENSIONS,
 	type LinuxManualDesktopFormat,
 } from '@electron/main/ShellDownloadFormats';
-
 export type UpdaterDownloadOption = {
 	format: ManualDesktopFormat;
 	label: string;
@@ -26,7 +24,7 @@ export type UpdaterDownloadOption = {
 	sha256?: string | null;
 };
 
-export const UPDATE_BASE_URL = forkLatestAssetBaseUrl() ?? getUpdateBaseUrl();
+export const UPDATE_BASE_URL = getUpdateBaseUrl();
 export const DOWNLOAD_PAGE_URL = forkReleasesPageUrl() ?? DOWNLOAD_PAGE_URLS[BUILD_CHANNEL];
 
 export type ManualLatestFile = {url: string; sha256: string | null};
