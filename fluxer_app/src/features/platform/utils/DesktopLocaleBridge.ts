@@ -16,7 +16,11 @@ import {msg} from '@lingui/core/macro';
 
 // Fork imports.
 
-import {NEW_WINDOW_DESCRIPTOR} from '@app/features/platform/utils/ForkAppWindowMessageDescriptors';
+import {
+	NEW_WINDOW_DESCRIPTOR,
+	UPDATE_READY_MESSAGE_DESCRIPTOR,
+	UPDATE_RESTART_NOW_DESCRIPTOR,
+} from '@app/features/platform/utils/ForkAppWindowMessageDescriptors';
 
 const ABOUT_DESCRIPTOR = msg({
 	message: 'About {appName}',
@@ -542,6 +546,8 @@ const NATIVE_MESSAGES: Record<string, NativeMessage> = {
 	'desktop.update.failedMessage': UPDATE_FAILED_MESSAGE_DESCRIPTOR,
 	'desktop.update.failedDetail': UPDATE_FAILED_DETAIL_DESCRIPTOR,
 	'desktop.update.stillDownloadingDetail': UPDATE_STILL_DOWNLOADING_DETAIL_DESCRIPTOR,
+	'desktop.update.readyMessage': UPDATE_READY_MESSAGE_DESCRIPTOR,
+	'desktop.update.restartNow': UPDATE_RESTART_NOW_DESCRIPTOR,
 	'desktop.tray.copyBuildInfo': COPY_BUILD_INFO_DESCRIPTOR,
 	'desktop.tray.restart': RESTART_DESCRIPTOR,
 	'desktop.tray.quit': QUIT_DESCRIPTOR,
