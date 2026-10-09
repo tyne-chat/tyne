@@ -9,7 +9,25 @@ import {buildTroubleshootingMenuItems} from '@electron/main/Troubleshooting';
 import {getMainWindow, toggleWindowDevTools} from '@electron/main/Window';
 import {type BaseWindow, BrowserWindow, Menu, type MenuItem, type MenuItemConstructorOptions} from 'electron';
 
+// Fork imports.
+
+import {openAppWindowLike} from '@electron/main/Window';
+
 const MACOS_HELP_MENU_TITLE_AUTODETECT_OPT_OUT = '\u200C';
+
+// Fork: File > New window opens another app window on the route of the focused one.
+function buildNewWindowMenuItems(): Array<MenuItemConstructorOptions> {
+	return [
+		{
+			label: t('desktop.appMenu.newWindow'),
+			accelerator: 'CmdOrCtrl+N',
+			click: (_item, focusedWindow) => {
+				openAppWindowLike(focusedWindow instanceof BrowserWindow ? focusedWindow : null);
+			},
+		},
+		{type: 'separator'},
+	];
+}
 
 function checkForUpdatesItem(): MenuItemConstructorOptions {
 	return {
@@ -64,8 +82,9 @@ function buildTemplate(): Array<MenuItemConstructorOptions> {
 	template.push({
 		label: t('desktop.appMenu.file'),
 		submenu: isMac
-			? [{role: 'close'}]
+			? [...buildNewWindowMenuItems(), {role: 'close'}]
 			: [
+					...buildNewWindowMenuItems(),
 					{
 						label: t('desktop.appMenu.preferencesPlain'),
 						accelerator: 'Ctrl+,',
