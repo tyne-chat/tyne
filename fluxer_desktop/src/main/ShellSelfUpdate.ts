@@ -31,13 +31,23 @@ const requireModule = createRequire(import.meta.url);
 const logger = createChildLogger('ShellSelfUpdate');
 
 const SHELL_SELF_UPDATE_CHECK_TIMEOUT_MS = 30_000;
-const SHELL_SELF_UPDATE_TOTAL_TIMEOUT_MS = 600_000;
+// Fork: upstream's ten minutes suit its small shell package. A fork build downloads the whole
+// app (about 365 MB), which on a slow connection takes far longer, so the limit there only
+// guards against a download that never ends.
+const SHELL_SELF_UPDATE_TOTAL_TIMEOUT_MS = forkVelopackSourceUrl() == null ? 600_000 : 6 * 60 * 60_000;
 
 function getElectronUpdateFeedUrl(): string {
 	return `${getUpdateBaseUrl()}/RELEASES.json`;
 }
 
-type ShellSelfUpdateReason = 'no-update' | 'check-failed' | 'download-failed' | 'install-failed' | 'timed-out';
+type ShellSelfUpdateReason =
+	| 'no-update'
+	| 'check-failed'
+	| 'download-failed'
+	| 'install-failed'
+	| 'timed-out'
+	// Fork: the update is downloaded and the user chose to restart later (confirmRestart).
+	| 'postponed';
 
 interface ShellSelfUpdateFailure {
 	readonly reason: ShellSelfUpdateReason;
@@ -47,6 +57,9 @@ interface ShellSelfUpdateFailure {
 interface ShellSelfUpdateHooks {
 	readonly onDownloading: (progress: number | null) => void;
 	readonly onRestarting: () => void;
+	// Fork: asked once the update is on disk and before the app closes to install it. Resolving
+	// false ends the run as 'postponed': the update installs at the next yes or when the app quits.
+	readonly confirmRestart?: () => Promise<boolean>;
 }
 
 type ShellStageResult =
@@ -564,6 +577,10 @@ export async function runShellSelfUpdate(
 	const staged = await stageShellUpdate(plan, hooks.onDownloading);
 	if (staged.status === 'failed') {
 		return staged.failure;
+	}
+	// Fork: on 'Later' the update installs at the next yes or when the app quits (tyne-chat/tyne#602).
+	if (hooks.confirmRestart != null && !(await hooks.confirmRestart())) {
+		return {reason: 'postponed', detail: null};
 	}
 	hooks.onRestarting();
 	const failure = applyStagedShellUpdate();
