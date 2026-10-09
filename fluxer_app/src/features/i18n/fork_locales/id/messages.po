@@ -279,6 +279,10 @@ msgstr "Alat Pesan"
 msgid "New Persona"
 msgstr "Persona Baru"
 
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "Jendela baru"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Tidak ditemukan array \"members\" dalam file ekspor ini."
@@ -305,6 +309,10 @@ msgstr "Belum ada yang menyalakan sinyal ini"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Hanya terlihat olehmu. Orang lain tidak dapat melihat bio lengkap atau detail profil persona ini."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "Buka di jendela baru"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
