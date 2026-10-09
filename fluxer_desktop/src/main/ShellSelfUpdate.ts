@@ -196,7 +196,10 @@ async function runVelopackSelfUpdate(control: SelfUpdateControl, hooks: ShellSel
 		recordVelopackApplyAttempt(stagedVersion);
 	}
 	try {
-		manager.waitExitThenApplyUpdate(staged, true, true);
+		// Fork: not silent, so Velopack's updater shows its own progress window while it replaces
+		// the app. Installing the whole app takes a quarter of a minute or more, during which
+		// this process has already quit and can show nothing itself.
+		manager.waitExitThenApplyUpdate(staged, forkVelopackSourceUrl() == null, true);
 	} catch (error) {
 		control.settle({reason: 'install-failed', detail: errorDetail(error)});
 		return;
