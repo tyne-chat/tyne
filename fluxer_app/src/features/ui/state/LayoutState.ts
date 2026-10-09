@@ -46,6 +46,36 @@ class LayoutState {
 
 	constructor() {
 		makeAutoObservable(this, {}, {autoBind: true});
+		if (typeof AppStorage.subscribe !== 'function') {
+			return;
+		}
+		// Both values are stored per account, and the account's storage is loaded after this store
+		// is created. Storage reports that with an event that names no key. The sidebar is read
+		// again only then: each window shows or hides its own, so a change made in another window
+		// is left alone. The peek preference is a setting, so it follows other windows too.
+		AppStorage.subscribe(
+			(event) => {
+				if (event.key !== null) return;
+				this.restoreLeftSidebarVisible();
+			},
+			{source: 'external'},
+		);
+		AppStorage.subscribe(() => this.restoreEdgeHoverPeekEnabled(), {
+			key: EDGE_HOVER_PEEK_ENABLED_STORAGE_KEY,
+			source: 'external',
+		});
+	}
+
+	private restoreLeftSidebarVisible(): void {
+		this.leftSidebarVisible = getInitialLeftSidebarVisible();
+	}
+
+	private restoreEdgeHoverPeekEnabled(): void {
+		this.edgeHoverPeekEnabled = getInitialBoolean(EDGE_HOVER_PEEK_ENABLED_STORAGE_KEY, true);
+		if (!this.edgeHoverPeekEnabled) {
+			this.isLeftHoverPeeking = false;
+			this.isRightHoverPeeking = false;
+		}
 	}
 
 	toggleLeftSidebar(): void {
