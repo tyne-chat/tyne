@@ -1,11 +1,12 @@
 import {expect, test} from '@playwright/test';
 import {FluxerApiClient} from '../../api-helpers/client.js';
+import {openEmailSignIn} from '../support/auth.js';
 
 test.describe('Authentication Flows', () => {
 	const baseURL = process.env.E2E_BASE_URL || 'http://localhost:9188';
 
 	test('login page loads and displays brand elements', async ({page}) => {
-		await page.goto('/login');
+		await openEmailSignIn(page);
 		await expect(page).toHaveTitle(/Fluxer|Sign In|Log In/i);
 		// Verify email and password input fields are visible
 		const emailInput = page.locator('input[type="email"], input[name="email"], input[autocomplete="email"]');
@@ -29,7 +30,7 @@ test.describe('Authentication Flows', () => {
 			global_name: 'Login Tester',
 		});
 
-		await page.goto('/login');
+		await openEmailSignIn(page);
 
 		const emailInput = page.locator('input[type="email"], input[name="email"], input[autocomplete="email"]').first();
 		const passwordInput = page.locator('input[type="password"]').first();
