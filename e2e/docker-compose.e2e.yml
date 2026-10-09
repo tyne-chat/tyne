@@ -154,7 +154,9 @@ services:
   seaweedfs:
     <<: *e2e-service
     image: chrislusf/seaweedfs:4.47
-    command: ["server", "-s3", "-dir=/data", "-master.telemetry=false"]
+    # Each bucket is a collection that takes several volume slots when first written to, and the
+    # default of 8 slots runs out after one bucket. Volumes only use space as they fill.
+    command: ["server", "-s3", "-dir=/data", "-master.telemetry=false", "-volume.max=64"]
     tmpfs:
       - /data:rw,size=512m
     healthcheck:
@@ -177,15 +179,25 @@ services:
       - -c
       - >
         buckets="fluxer fluxer-uploads fluxer-reports fluxer-harvests";
-        for attempt in $(seq 1 30); do
-          if ! nc -z seaweedfs 9333 2>/dev/null; then sleep 1; continue; fi;
+        run() { echo "$$1" | weed shell -master=seaweedfs:9333 2>&1; };
+        for attempt in $$(seq 1 30); do
+          for b in $$buckets; do run "s3.bucket.create -name $$b" >/dev/null; done;
+          run "s3.configure -user=fluxer -access_key=$$FLUXER_S3_ACCESS_KEY -secret_key=$$FLUXER_S3_SECRET_KEY -actions=Admin,Read,Write,List,Tagging -apply" >/dev/null;
+          listed="$$(run "s3.bucket.list")";
+          configured="$$(run "s3.configure")";
+          missing="";
           for b in $$buckets; do
-            weed shell -master=seaweedfs:9333 "s3.bucket.create -name $$b" >/dev/null 2>&1 || true;
+            echo "$$listed" | grep -q "^ *$$b[[:space:]]" || missing="$$missing $$b";
           done;
-          weed shell -master=seaweedfs:9333 "s3.configure -user=fluxer -access_key=$$FLUXER_S3_ACCESS_KEY -secret_key=$$FLUXER_S3_SECRET_KEY -actions=Admin,Read,Write,List,Tagging -apply" >/dev/null 2>&1 || true;
-          echo "SeaweedFS buckets ready";
-          exit 0;
+          if [ -z "$$missing" ] && echo "$$configured" | grep -q "$$FLUXER_S3_ACCESS_KEY"; then
+            echo "SeaweedFS buckets ready";
+            exit 0;
+          fi;
+          sleep 1;
         done;
+        echo "SeaweedFS setup failed. Missing buckets:$$missing";
+        echo "$$listed";
+        echo "$$configured";
         exit 1;
 
   snowflakes:
