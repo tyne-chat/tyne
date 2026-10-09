@@ -17,6 +17,10 @@ import {
 import {app, type BrowserWindow, ipcMain, net} from 'electron';
 import log from 'electron-log';
 
+// Fork imports.
+
+import {forkLatestInfoUrl} from '@electron/main/ShellDownloadFormats';
+
 type UpdaterContext = 'user' | 'background' | 'focus';
 type UpdaterEvent =
 	| {
@@ -73,7 +77,7 @@ function parseManualLatestFiles(value: unknown): Partial<Record<ManualDesktopFor
 }
 
 async function fetchFluxerLatest(): Promise<ManualLatestInfo> {
-	const response = await net.fetch(`${UPDATE_BASE_URL}/latest`, {
+	const response = await net.fetch(forkLatestInfoUrl() ?? `${UPDATE_BASE_URL}/latest`, {
 		cache: 'no-store',
 		headers: {
 			Accept: 'application/json',
