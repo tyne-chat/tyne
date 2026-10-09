@@ -279,6 +279,10 @@ msgstr "Üzeneteszközök"
 msgid "New Persona"
 msgstr "Új persona"
 
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "Új ablak"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Ebben az exportfájlban nem található „members” tömb."
@@ -305,6 +309,10 @@ msgstr "Senkinél sincs bekapcsolva ez a jelzés"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Csak te láthatod. Mások nem tekinthetik meg ennek a personának a teljes bemutatkozását és profiladatait."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "Megnyitás új ablakban"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
