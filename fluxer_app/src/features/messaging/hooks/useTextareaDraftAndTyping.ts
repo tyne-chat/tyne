@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import * as DraftCommands from '@app/features/messaging/commands/DraftCommands';
 import {segmentsEqual} from '@app/features/messaging/state/MessagingDrafts';
 import type {MentionSegment, TextareaSegmentManager} from '@app/features/messaging/utils/TextareaSegmentManager';
@@ -137,7 +139,7 @@ export const useTextareaDraftAndTyping = ({
 		if (!value) {
 			pendingDraftRef.current = null;
 			if (currentDraftRef.current) {
-				DraftCommands.deleteDraft(channelId);
+				DraftCommands.deleteDraft(draftOwner, channelId);
 			}
 			return;
 		}
