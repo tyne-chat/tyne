@@ -324,20 +324,28 @@ function readCommunity(value: unknown): InstanceCommunity {
 			'single_community_guild_id',
 			'community.single_community_guild_id',
 		),
-		signal_bar_guild_id: Object.hasOwn(source, 'signal_bar_guild_id')
-			? readNullableNonEmptyString(source, 'signal_bar_guild_id', 'community.signal_bar_guild_id')
-			: null,
 		direct_messages_disabled: readBoolean(source, 'direct_messages_disabled', 'community.direct_messages_disabled'),
 		guild_create_access: readOptionalBoolean(source, 'guild_create_access', 'community.guild_create_access') ?? true,
 		community_creation_staff_only:
 			readOptionalBoolean(source, 'community_creation_staff_only', 'community.community_creation_staff_only') ?? false,
-		server_list_buttons: readServerListButtons(source.server_list_buttons),
+		...(Object.hasOwn(source, 'signal_bar_guild_id')
+			? {
+					signal_bar_guild_id: readNullableNonEmptyString(
+						source,
+						'signal_bar_guild_id',
+						'community.signal_bar_guild_id',
+					),
+				}
+			: {}),
+		...(Object.hasOwn(source, 'server_list_buttons')
+			? {server_list_buttons: readServerListButtons(source.server_list_buttons)}
+			: {}),
 	};
 }
 
 function readServerListButtons(value: unknown): ServerListButtons {
 	const path = 'community.server_list_buttons';
-	const source = value === undefined ? {} : readRecord(value, path);
+	const source = readRecord(value, path);
 	const visible = (key: keyof ServerListButtons): boolean => readOptionalBoolean(source, key, `${path}.${key}`) ?? true;
 	return {
 		favorites: visible('favorites'),
@@ -444,6 +452,9 @@ function readAppPublic(value: unknown): InstanceAppPublic {
 			premium_info_url: Object.hasOwn(branding, 'premium_info_url')
 				? readNullableAbsoluteHttpUrl(branding, 'premium_info_url', 'appPublic.branding.premium_info_url')
 				: null,
+			desktop_app_prompt_enabled:
+				readOptionalBoolean(branding, 'desktop_app_prompt_enabled', 'appPublic.branding.desktop_app_prompt_enabled') ??
+				true,
 		},
 		setup: {
 			configured: readBoolean(setup, 'configured', 'appPublic.setup.configured'),
