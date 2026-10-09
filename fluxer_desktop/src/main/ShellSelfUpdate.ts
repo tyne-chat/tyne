@@ -25,7 +25,7 @@ import type {UpdateInfo, VelopackAsset} from 'velopack';
 // Fork imports.
 
 import {DESKTOP_ARTIFACT_PRODUCT_NAME} from '@electron/common/DesktopIdentity';
-import {forkLatestInfoUrl, forkVersionDownloadUrl} from '@electron/main/ShellDownloadFormats';
+import {forkLatestInfoUrl, forkVelopackSourceUrl, forkVersionDownloadUrl} from '@electron/main/ShellDownloadFormats';
 
 const requireModule = createRequire(import.meta.url);
 const logger = createChildLogger('ShellSelfUpdate');
@@ -128,7 +128,7 @@ function downloadVelopackUpdateOnce(
 
 async function runVelopackSelfUpdate(control: SelfUpdateControl, hooks: ShellSelfUpdateHooks): Promise<void> {
 	const {UpdateManager} = requireModule('velopack') as typeof import('velopack');
-	const manager = new UpdateManager(getUpdateBaseUrl());
+	const manager = new UpdateManager(forkVelopackSourceUrl() ?? getUpdateBaseUrl());
 	const unlanded = classifyUnlandedVelopackApply(manager);
 	if (unlanded === 'recent') {
 		control.settle({reason: 'install-failed', detail: 'the last downloaded update was never installed'});
