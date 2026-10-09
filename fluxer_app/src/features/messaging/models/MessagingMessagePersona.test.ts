@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // @vitest-environment happy-dom
 
-import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
 import {describe, expect, it, vi} from 'vitest';
 
 vi.mock('@lingui/core/macro', () => {
@@ -18,6 +17,7 @@ vi.mock('@app/features/app/state/RuntimeConfig', () => ({
 		localInstanceDomain: 'local',
 		isSelfHosted: () => false,
 		inviteUrlBase: 'https://invite.test',
+		getSnapshotOrNull: () => null,
 	},
 }));
 vi.mock('@app/features/auth/state/Authentication', () => ({
@@ -40,8 +40,6 @@ vi.mock('@app/features/messaging/state/MessageReactions', () => ({
 		getMessageReactions: () => [],
 	},
 }));
-
-installVoiceMenuTestBootstrap();
 
 const {Message} = await import('@app/features/messaging/models/MessagingMessage');
 const {default: MessageReferences, MessageReferenceState} = await import(
