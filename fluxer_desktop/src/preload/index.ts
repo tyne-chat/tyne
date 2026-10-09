@@ -90,6 +90,10 @@ import type {
 } from '@simplewebauthn/browser';
 import {contextBridge, ipcRenderer, webFrame} from 'electron';
 
+// Fork imports.
+
+import {DEFAULT_HOMESERVER_URL} from '@electron/common/Constants';
+
 const ACCESSIBILITY_STORE_STORAGE_KEY = 'AccessibilityStore';
 const ACTIVE_ALLOW_TRANSPARENCY_RENDERER_ARG = '--fluxer-active-allow-transparency=1';
 const ACTIVE_USE_NATIVE_TITLEBAR_RENDERER_ARG = '--fluxer-active-use-native-titlebar=1';
@@ -398,7 +402,9 @@ applyStartupAccessibilitySettings();
 const api: ElectronAPI = {
 	platform: process.platform,
 	buildChannel: BUILD_CHANNEL,
-	localDevelopmentInstanceUrl: LOCAL_DEVELOPMENT_INSTANCE_URL,
+	// Fork: the instance picker pins this URL as its own row. Outside development builds, pin the
+	// default homeserver so it can always be chosen again after switching away.
+	localDevelopmentInstanceUrl: LOCAL_DEVELOPMENT_INSTANCE_URL ?? DEFAULT_HOMESERVER_URL,
 	capabilities: readDesktopCapabilityManifest(),
 	offlineBuild: IS_OFFLINE_BUILD,
 	...createDesktopStoragePreloadAPI(ipcRenderer),
