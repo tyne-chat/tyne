@@ -22,6 +22,11 @@ import {
 import {app, autoUpdater, net} from 'electron';
 import type {UpdateInfo, VelopackAsset} from 'velopack';
 
+// Fork imports.
+
+import {DESKTOP_ARTIFACT_PRODUCT_NAME} from '@electron/common/DesktopIdentity';
+import {forkLatestInfoUrl, forkVersionDownloadUrl} from '@electron/main/ShellDownloadFormats';
+
 const requireModule = createRequire(import.meta.url);
 const logger = createChildLogger('ShellSelfUpdate');
 
@@ -220,7 +225,7 @@ async function stageVelopackUpdate(
 }
 
 async function fetchPublishedAppImage(): Promise<{version: string; sha256: string | null}> {
-	const response = await net.fetch(`${getUpdateBaseUrl()}/latest`, {
+	const response = await net.fetch(forkLatestInfoUrl() ?? `${getUpdateBaseUrl()}/latest`, {
 		cache: 'no-store',
 		headers: {Accept: 'application/json', 'Cache-Control': 'no-cache'},
 	});
@@ -251,7 +256,9 @@ async function stageAppImageUpdateOnce(
 		const observers = new Set<(percent: number) => void>();
 		const staged = stageAppImageUpdate({
 			target,
-			url: `${getUpdateBaseUrl()}/${version}/appimage`,
+			url:
+				forkVersionDownloadUrl(DESKTOP_ARTIFACT_PRODUCT_NAME, version, 'appimage') ??
+				`${getUpdateBaseUrl()}/${version}/appimage`,
 			expectedSha256,
 			fetchImpl: moduleNetworkFetch,
 			onProgress: ({transferred, total}) => {
