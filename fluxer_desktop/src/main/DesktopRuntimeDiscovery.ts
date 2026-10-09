@@ -28,6 +28,10 @@ import {
 import {InstanceEndpointKind, normalizeInstanceEndpoint} from '@fluxer/instance_bootstrap/src/EndpointNormalization';
 import {officialClientApiEndpointForAlias} from '@fluxer/instance_bootstrap/src/OfficialInstance';
 
+// Fork imports.
+
+import {DEFAULT_HOMESERVER_URL} from '@electron/common/Constants';
+
 const log = createChildLogger('DesktopRuntimeDiscovery');
 
 const DISCOVERY_TIMEOUT_MS = 15_000;
@@ -174,7 +178,7 @@ export async function restoreRememberedRuntimePlan(instanceKey: string): Promise
 }
 
 export function desktopRuntimeInitialInput(): string | null {
-	return getLaunchInstanceEndpointOverride();
+	return getLaunchInstanceEndpointOverride() ?? DEFAULT_HOMESERVER_URL;
 }
 
 async function fetchRuntimePlan(
