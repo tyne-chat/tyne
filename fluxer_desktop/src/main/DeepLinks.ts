@@ -8,6 +8,10 @@ import {getMainWindow, isMainWindowTakenOver, onMainWindowTakeoverEnded, showWin
 import {app, ipcMain} from 'electron';
 import log from 'electron-log';
 
+// Fork imports.
+
+import {openAppWindowLike} from '@electron/main/Window';
+
 let initialDeepLink: string | null = null;
 let handoffReturnLinkSink: ((url: URL) => void) | null = null;
 
@@ -231,6 +235,11 @@ export function handleSecondInstance(argv: Array<string>): void {
 		return;
 	}
 	if (argv.some(isSquirrelOrSyntheticArg)) {
+		return;
+	}
+	// Fork: a second launch with --new-window opens another app window in the running app.
+	if (argv.includes('--new-window')) {
+		openAppWindowLike(null);
 		return;
 	}
 	showWindow();
