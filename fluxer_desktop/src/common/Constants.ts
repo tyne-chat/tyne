@@ -23,6 +23,8 @@ export const CHANNEL_APP_URLS: Record<BuildChannel, string> = {
 	development: DEVELOPMENT_APP_URL,
 };
 export const LOCAL_DEVELOPMENT_INSTANCE_URL = BUILD_CHANNEL === 'development' ? DEVELOPMENT_APP_URL : null;
+// Fork: the homeserver the sign-in flow starts on. Another instance can still be chosen there.
+export const DEFAULT_HOMESERVER_URL = 'https://temple.hypersystem.xyz';
 export const DOWNLOAD_PAGE_URLS: Record<BuildChannel, string> = {
 	stable: 'https://fluxer.app/download',
 	canary: 'https://canary.fluxer.app/download',
