@@ -154,6 +154,7 @@ function projectAppPublic(appPublic: InstanceDiscoveryDocument['appPublic']): In
 	const value = requireValue(appPublic, 'app_public');
 	return {
 		branding: {
+			desktop_app_prompt_enabled: value.branding.desktop_app_prompt_enabled ?? true,
 			product_name: requireDefined(value.branding.product_name, 'app_public.branding.product_name'),
 			icon_url: requireDefined(value.branding.icon_url, 'app_public.branding.icon_url'),
 			symbol_url: requireDefined(value.branding.symbol_url, 'app_public.branding.symbol_url'),
