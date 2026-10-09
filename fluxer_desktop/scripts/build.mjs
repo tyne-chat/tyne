@@ -6,6 +6,10 @@ import {createRequire} from 'node:module';
 import * as path from 'node:path';
 import * as esbuild from 'esbuild';
 
+// Fork imports.
+
+import {forkPublicBuildDefines} from './ForkBuildDefines.mjs';
+
 const ROOT_DIR = path.resolve(import.meta.dirname, '..');
 const SRC_DIR = path.join(ROOT_DIR, 'src');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
@@ -74,6 +78,7 @@ const offlineBuild = process.env.FLUXER_OFFLINE === '1' || process.env.FLUXER_OF
 const packageLaunchCommand = process.env.FLUXER_LAUNCH_COMMAND || '';
 function buildInfoDefines() {
 	return {
+		...forkPublicBuildDefines(),
 		[BUILD_CHANNEL_DEFINE]: JSON.stringify(buildChannel),
 		'process.env.BUILD_VERSION': JSON.stringify(embeddedBuildVersion),
 		'process.env.FLUXER_MODULES': JSON.stringify(modulesEnabled ? '1' : ''),
