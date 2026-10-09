@@ -81,6 +81,11 @@ export function AuthRuntimeTargetProvider({target, children}: AuthRuntimeTargetP
 	return <AuthRuntimeTargetContext.Provider value={target}>{children}</AuthRuntimeTargetContext.Provider>;
 }
 
+// Fork: for components that also render outside an auth flow (see AuthInstanceHint).
+export function useOptionalAuthRuntimeTarget(): AuthRuntimeTarget | null {
+	return useContext(AuthRuntimeTargetContext);
+}
+
 export function useAuthRuntimeTarget(): AuthRuntimeTarget {
 	const target = useContext(AuthRuntimeTargetContext);
 	if (target == null) {
