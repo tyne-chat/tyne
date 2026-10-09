@@ -142,6 +142,7 @@ function projectAppPublic(appPublic: InstanceDiscoveryDocument['appPublic']): In
 			custom_css: value.branding.custom_css ?? null,
 			upload_limit_message: value.branding.upload_limit_message ?? null,
 			trusted_domains: value.branding.trusted_domains ?? [],
+			desktop_app_prompt_enabled: value.branding.desktop_app_prompt_enabled ?? true,
 		},
 		setup: {
 			...value.setup,
