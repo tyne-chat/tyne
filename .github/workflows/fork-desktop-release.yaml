@@ -1,0 +1,341 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Fork: builds the desktop app on GitHub-hosted runners, unsigned, and publishes it as a GitHub
+# release that the in-app updater reads (fluxer_desktop/src/main/ShellDownloadFormats.ts).
+# Upstream's build-desktop.yaml needs its own runners, signing identities and package server, so
+# this is a separate file. It follows that workflow's layout and calls the same tools/ci steps
+# wherever they work without signing; compare the two when upstream changes its build.
+#
+# - Run by hand with a version and release notes to publish a release tagged desktop-v<version>.
+# - A push to a desktop-test/** branch builds every platform and keeps the files as workflow
+#   artifacts only. Nothing is published, so installed apps never see those builds.
+name: fork desktop release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to build, for example 1.4.0. Must be higher than the last release for installed apps to update.
+        required: true
+        type: string
+      notes:
+        description: Release notes (Markdown). Required when publishing.
+        required: false
+        default: ""
+        type: string
+      publish:
+        description: Publish a GitHub release. Leave off to only build artifacts.
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - "desktop-test/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fork-desktop-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_CHANNEL: stable
+  VERSION: ${{ inputs.version || format('0.0.{0}', github.run_number) }}
+  BUILD_VERSION: ${{ inputs.version || format('0.0.{0}', github.run_number) }}
+  PUBLIC_BUILD_VERSION: ${{ inputs.version || format('0.0.{0}', github.run_number) }}
+  RELEASE_CHANNEL: stable
+  PUBLIC_RELEASE_CHANNEL: stable
+  SOURCE_SHA: ${{ github.sha }}
+  NODE_ENV: production
+  FLUXER_DESKTOP_PRODUCTION: "true"
+  FLUXER_FORK_RELEASES: ${{ github.repository }}
+  CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
+
+jobs:
+  # The renderer's WebAssembly parts only compile with a clang that targets wasm32, which the
+  # Linux runner has and the Windows and macOS runners do not. As upstream does, build it once
+  # here and hand it to every platform build.
+  renderer:
+    name: Build renderer
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      ARCH: x64
+    steps:
+      - name: Checkout CI helpers
+        uses: actions/checkout@v4
+        with:
+          path: _ci
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.98.1"
+          targets: wasm32-unknown-unknown
+
+      - name: Set workdir
+        env:
+          SUBST_TARGET: ${{ github.workspace }}/source
+        run: ${{ env.CI_TOOL }} --step set_workdir_unix
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Set up pnpm
+        run: ${{ env.CI_TOOL }} --step setup_pnpm
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step install_dependencies
+
+      - name: Update version
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step update_version
+
+      - name: Set build channel
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step set_build_channel
+
+      - name: Build renderer
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step build_shared_assets
+
+      - name: Prepare renderer artifact
+        run: ${{ env.CI_TOOL }} --step prepare_shared_assets
+
+      - name: Upload renderer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fork-renderer-assets
+          path: source/desktop-shared-assets
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  build:
+    name: Build ${{ matrix.platform }} (${{ matrix.arch }})
+    needs: renderer
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {platform: windows, node_platform: win32, arch: x64, os: windows-2025}
+          - {platform: linux, node_platform: linux, arch: x64, os: ubuntu-22.04}
+          - {platform: macos, node_platform: darwin, arch: arm64, os: macos-14}
+    defaults:
+      run:
+        shell: bash
+    env:
+      ARCH: ${{ matrix.arch }}
+      ELECTRON_ARCH: ${{ matrix.arch }}
+    steps:
+      - name: Checkout CI helpers
+        uses: actions/checkout@v4
+        with:
+          path: _ci
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.98.1"
+
+      - name: Set up Python (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Ensure python3 command (Windows)
+        if: runner.os == 'Windows'
+        run: ${{ env.CI_TOOL }} --step ensure_python3_windows
+
+      - name: Shorten Windows paths and pin pnpm store
+        if: runner.os == 'Windows'
+        env:
+          SUBST_TARGET: ${{ github.workspace }}/source
+        run: ${{ env.CI_TOOL }} --step windows_paths
+
+      - name: Set workdir (Unix)
+        if: runner.os != 'Windows'
+        env:
+          SUBST_TARGET: ${{ github.workspace }}/source
+        run: ${{ env.CI_TOOL }} --step set_workdir_unix
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Set up pnpm
+        run: ${{ env.CI_TOOL }} --step setup_pnpm
+
+      - name: Install Python setuptools (macOS)
+        if: matrix.platform == 'macos'
+        run: ${{ env.CI_TOOL }} --step install_setuptools_macos
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: ${{ env.CI_TOOL }} --step install_linux_deps
+
+      - name: Set up MSVC env (Windows)
+        if: matrix.platform == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Install dependencies
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step install_dependencies
+
+      - name: Update version
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step update_version
+
+      - name: Set build channel
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step set_build_channel
+
+      - name: Download renderer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fork-renderer-assets
+          path: source/desktop-shared-assets
+
+      - name: Restore renderer
+        run: ${{ env.CI_TOOL }} --step restore_shared_assets
+
+      # Upstream's build_electron_main step sets FLUXER_MODULES=1, which strips the renderer out of
+      # the app so it can be downloaded as modules from upstream's server. This fork packs the
+      # renderer into the app, so run the same build without that flag.
+      - name: Build Electron main process
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: pnpm exec node scripts/build.mjs --use-shared-renderer
+
+      - name: Build Electron app (Windows)
+        if: matrix.platform == 'windows'
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step build_app_windows
+
+      - name: Set up .NET SDK (Windows)
+        if: matrix.platform == 'windows'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install Velopack CLI
+        if: matrix.platform == 'windows'
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step install_velopack_cli
+
+      # Upstream's package_app_windows_velopack step refuses to run without its signing service.
+      # These are the same vpk arguments (tools/ci/src/desktop.rs) without the signing one.
+      - name: Package Windows app with Velopack (unsigned)
+        if: matrix.platform == 'windows'
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: |
+          unpacked="$(find dist-electron -maxdepth 2 -type f -name 'Fluxer Temple.exe' -path '*unpacked*' -print -quit)"
+          test -n "$unpacked" || { echo "No unpacked Windows app with Fluxer Temple.exe under dist-electron"; ls -R dist-electron | head -50; exit 1; }
+          ./.velopack/vpk --yes pack \
+            --packId fluxer_desktop_temple \
+            --packVersion "$VERSION" \
+            --packDir "$(dirname "$unpacked")" \
+            --mainExe "Fluxer Temple.exe" \
+            --packTitle "Fluxer Temple" \
+            --packAuthors "Fluxer Platform AB" \
+            --shortcuts Desktop,StartMenu \
+            --runtime "win-${ARCH}" \
+            --icon build_resources/icons-stable/icon.ico \
+            --outputDir "dist-electron/velopack-windows-${ARCH}" \
+            --delta None
+          ls -la "dist-electron/velopack-windows-${ARCH}"
+
+      - name: Build Electron app (Linux)
+        if: matrix.platform == 'linux'
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        env:
+          USE_SYSTEM_FPM: "true"
+        run: ${{ env.CI_TOOL }} --step build_app_linux
+
+      # Upstream's build_app_macos step requires its signing keychain. This build is unsigned and
+      # not notarized, so macOS asks for confirmation on first launch and cannot update itself.
+      - name: Build Electron app (macOS, unsigned)
+        if: matrix.platform == 'macos'
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: pnpm exec electron-builder --config electron-builder.config.cjs --mac "--${ARCH}"
+
+      - name: Prepare release assets
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: >-
+          node scripts/fork-release-assets.mjs
+          --platform "${{ matrix.node_platform }}" --arch "$ARCH" --version "$VERSION"
+          --input dist-electron --output release_assets
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: fork-desktop-${{ matrix.platform }}-${{ matrix.arch }}
+          path: source/fluxer_desktop/release_assets
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub release
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Require release notes
+        env:
+          NOTES: ${{ inputs.notes }}
+        run: |
+          if [ -z "${NOTES//[[:space:]]/}" ]; then
+            echo "Release notes are required to publish a release."
+            exit 1
+          fi
+
+      - name: Download release assets
+        uses: actions/download-artifact@v4
+        with:
+          pattern: fork-desktop-*
+          path: release_assets
+          merge-multiple: true
+
+      - name: Write checksums
+        working-directory: release_assets
+        run: sha256sum -- * > SHA256SUMS.txt
+
+      # Not a draft or a pre-release: installed apps follow "the latest release" of this
+      # repository, and GitHub only counts a published, full release as latest.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTES: ${{ inputs.notes }}
+        run: >-
+          gh release create "desktop-v${VERSION}"
+          --repo "${{ github.repository }}"
+          --target "${{ github.sha }}"
+          --title "Fluxer Temple Desktop v${VERSION}"
+          --notes "$NOTES"
+          --latest
+          release_assets/*
