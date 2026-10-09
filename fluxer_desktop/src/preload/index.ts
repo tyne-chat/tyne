@@ -99,6 +99,7 @@ import {contextBridge, ipcRenderer, webFrame} from 'electron';
 // Fork imports.
 
 import {DEFAULT_HOMESERVER_URL} from '@electron/common/Constants';
+import {createForkAppWindowPreloadAPI} from '@electron/preload/ForkAppWindowPreload';
 
 const ACCESSIBILITY_STORE_STORAGE_KEY = 'AccessibilityStore';
 const ACTIVE_ALLOW_TRANSPARENCY_RENDERER_ARG = '--fluxer-active-allow-transparency=1';
@@ -420,6 +421,7 @@ const api: ElectronAPI = {
 	...createNativeGatewayPreloadAPI(ipcRenderer),
 	...createAccountEnginePreloadAPI(ipcRenderer),
 	...createOtherPlatformTemplatePreloadAPI(ipcRenderer),
+	...createForkAppWindowPreloadAPI(ipcRenderer),
 	reportLastRoute: (routePath: string): void => {
 		ipcRenderer.send(DESKTOP_LAST_ROUTE_CHANNEL, routePath);
 	},
