@@ -18,12 +18,9 @@ vi.mock('@app/features/app/state/RuntimeConfig', () => ({
 		localInstanceDomain: 'local',
 		isSelfHosted: () => false,
 		inviteUrlBase: 'https://invite.test',
+		getSnapshotOrNull: () => null,
 	},
 }));
-
-import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
-
-installVoiceMenuTestBootstrap();
 
 const {User} = await import('@app/features/user/models/User');
 const {createReactionUsersSnapshot, transitionReactionUsersSnapshot} = await import('./ReactionUsersStateMachine');
