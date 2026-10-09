@@ -75,11 +75,6 @@ import {DEFAULT_API_VERSION} from '@fluxer/constants/src/AppConstants';
 import {GatewayCloseCodes, GatewayIdentifyFlags} from '@fluxer/constants/src/GatewayConstants';
 import {action, actionBound, makeAutoObservable, observableRef, runInAction} from 'mobx';
 
-// Fork imports.
-
-import {resetFetchPersonasCooldown} from '@app/features/persona/commands/PersonaCommands';
-import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-
 const logger = new Logger('GatewayConnection');
 
 const FOREGROUND_SOCKET_EVENTS = [
@@ -958,8 +953,6 @@ export class PooledGatewayConnection {
 		AttachmentUrlRefresher.reset();
 		ChannelFrecency.handleLogout();
 		MemberSearch.handleLogout();
-		PersonaStore.reset();
-		resetFetchPersonasCooldown();
 		ReportFlows.reset();
 		ThreadPanel.closeCreate();
 		ThreadGuilds.reset();
