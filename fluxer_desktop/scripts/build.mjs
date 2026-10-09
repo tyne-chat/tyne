@@ -6,6 +6,10 @@ import {createRequire} from 'node:module';
 import * as path from 'node:path';
 import * as esbuild from 'esbuild';
 
+// Fork imports.
+
+import {forkPublicBuildDefines} from './ForkBuildDefines.mjs';
+
 const ROOT_DIR = path.resolve(import.meta.dirname, '..');
 const SRC_DIR = path.join(ROOT_DIR, 'src');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
@@ -64,6 +68,7 @@ function buildInfoDefines() {
 		'process.env.BUILD_CHANNEL': JSON.stringify(embeddedBuildChannel),
 		'process.env.FLUXER_MODULES': JSON.stringify(modulesEnabled ? '1' : ''),
 		'process.env.FLUXER_OFFLINE': JSON.stringify(offlineBuild ? '1' : ''),
+		...forkPublicBuildDefines(),
 	};
 }
 const electronExternals = [
