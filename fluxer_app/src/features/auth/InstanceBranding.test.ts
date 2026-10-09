@@ -26,6 +26,7 @@ function snapshot(branding: Partial<Branding>, origin = 'https://chat.example.or
 				status_page_incident_history_url: null,
 				premium_product_name: 'Premium',
 				premium_info_url: null,
+				desktop_app_prompt_enabled: true,
 				...branding,
 			},
 			setup: {configured: true, admin_url: null},
