@@ -52,7 +52,7 @@ function getKindAllowance(kind: ShouldAnimateKind): AnimationAllowanceMode {
 	}
 }
 
-interface ShouldAnimateDecisionInput {
+export interface ShouldAnimateDecisionInput {
 	isAnimated?: boolean;
 	allowance: AnimationAllowanceMode;
 	reducedMotion: boolean;
@@ -62,7 +62,7 @@ interface ShouldAnimateDecisionInput {
 	windowActive: boolean;
 }
 
-function resolveShouldAnimateDecision({
+export function resolveShouldAnimateDecision({
 	isAnimated = true,
 	allowance,
 	reducedMotion,
