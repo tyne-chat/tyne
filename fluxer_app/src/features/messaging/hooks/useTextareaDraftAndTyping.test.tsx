@@ -8,6 +8,22 @@ import {act, useImperativeHandle, useRef, useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {afterEach, beforeEach, expect, test, vi} from 'vitest';
 
+// Fork: the hook also reports which persona the composer is writing as. Those stores are not
+// what this file tests, and loading them for real needs the translation macros, which tests do
+// not compile.
+vi.mock('@app/features/persona/state/PersonaStore', () => ({
+	normalizeSubprofile: () => null,
+	PersonaStore: {
+		activePersonaId: null,
+		isPersonaLatched: false,
+		displayTagText: '',
+		displayTagIcon: '',
+		getEffectivePersonaForText: () => ({persona: null}),
+	},
+}));
+vi.mock('@app/features/signal_bar/state/SignalBarStore', () => ({
+	default: {setComposerPersona: () => undefined, clearComposerPersona: () => undefined},
+}));
 vi.mock('@app/features/typing/rolling/RollingTypingSender', () => ({
 	default: {handleComposerChange: vi.fn(), stopTyping: vi.fn(), handleOwnMessageSent: vi.fn()},
 }));

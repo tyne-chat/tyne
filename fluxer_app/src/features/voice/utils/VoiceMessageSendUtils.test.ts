@@ -92,6 +92,7 @@ vi.mock('@app/features/app/state/RuntimeConfig', () => ({
 		localInstanceDomain: 'local',
 		isSelfHosted: () => false,
 		inviteUrlBase: 'https://invite.test',
+		getSnapshotOrNull: () => null,
 	},
 }));
 
