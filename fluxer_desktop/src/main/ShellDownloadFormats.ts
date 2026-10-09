@@ -106,6 +106,17 @@ export function forkLatestAssetBaseUrl(): string | null {
 	return releases === null ? null : `${releases}/latest/download`;
 }
 
+// What the Windows updater (Velopack) is given as its update source. It has to be the bare
+// repository URL: Velopack does not treat a github.com URL as a plain file server but reads
+// the repository's releases through the GitHub API, taking the feed and the package from the
+// newest release that has them. Given forkLatestAssetBaseUrl() it takes ".../releases/latest/
+// download" for part of the repository name and every check fails with HTTP 404, which is what
+// 2.0.0 to 2.0.2 did.
+export function forkVelopackSourceUrl(): string | null {
+	const repository = forkReleaseRepository();
+	return repository === null ? null : `https://github.com/${repository}`;
+}
+
 export function forkLatestInfoUrl(
 	platform: NodeJS.Platform = process.platform,
 	arch: DesktopDownloadArch = getDesktopDownloadArch(process.arch),
