@@ -279,6 +279,10 @@ msgstr "Công cụ tin nhắn"
 msgid "New Persona"
 msgstr "Persona mới"
 
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "Cửa sổ mới"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Không tìm thấy mảng \"members\" trong tệp xuất này."
@@ -305,6 +309,10 @@ msgstr "Chưa ai bật tín hiệu này"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Chỉ bạn nhìn thấy. Người khác không thể xem tiểu sử đầy đủ hay chi tiết hồ sơ của persona này."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "Mở trong cửa sổ mới"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
