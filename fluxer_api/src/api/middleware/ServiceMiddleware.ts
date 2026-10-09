@@ -713,7 +713,7 @@ class RequestServices implements RequestScopedServices {
 			findUser: (userId) => getUserRepository().findUnique(userId),
 			findChannel: (channelId) => this.channelRepository.findUnique(channelId),
 			settingsRepository: new SignalBarSettingsRepository(),
-			listGuildChannels: (guildId) => this.channelRepository.listGuildChannels(guildId),
+			listGuildChannels: (guildId) => this.channelRepository.listGuildChannels(guildId, 'enrolled'),
 		});
 		return this.cachedSignalBarService;
 	}
