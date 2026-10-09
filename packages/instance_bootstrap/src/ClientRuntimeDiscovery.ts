@@ -131,6 +131,7 @@ function projectAppPublic(appPublic: InstanceDiscoveryDocument['appPublic']): In
 			status_page_incident_history_url: value.branding.status_page_incident_history_url ?? null,
 			premium_product_name: value.branding.premium_product_name ?? DEFAULT_PREMIUM_PRODUCT_NAME,
 			premium_info_url: value.branding.premium_info_url ?? null,
+			desktop_app_prompt_enabled: value.branding.desktop_app_prompt_enabled ?? true,
 		},
 		setup: {
 			...value.setup,
