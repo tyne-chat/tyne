@@ -22,6 +22,10 @@ import {BrowserIcon, EnvelopeSimpleIcon, KeyIcon, UserIcon, UserPlusIcon} from '
 import {clsx} from 'clsx';
 import {cloneElement, type ReactElement, type ReactNode} from 'react';
 
+// Fork imports.
+
+import {AuthInstanceHint} from '@app/features/auth/flow/AuthInstanceHint';
+
 const SIGN_IN_WITH_EMAIL_DESCRIPTOR = msg({
 	message: 'Sign in with email',
 	comment: 'Button label on the authentication method picker.',
@@ -213,6 +217,7 @@ export function AuthLoginMethodStep({
 					{title}
 				</h1>
 			) : null}
+			<AuthInstanceHint data-flx="auth.flow.auth-login-core.auth-login-method-step.auth-instance-hint" />
 			{renderSwitchError()}
 			{leadingAction}
 			<AuthLoginMethodPicker
