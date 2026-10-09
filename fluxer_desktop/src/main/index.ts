@@ -622,6 +622,9 @@ if (launchConfigurationError) {
 					const {registerUpdater} = await import('@electron/main/Updater');
 					stopStartupIfQuitting();
 					registerUpdater(getMainWindow);
+					// Fork: upstream only looks for shell updates inside its module system, which fork builds leave off.
+					const {armForkShellUpdate} = await import('@electron/main/ForkShellUpdate');
+					armForkShellUpdate();
 				}
 				app.on('activate', () => {
 					if (hasQuitStarted()) return;
