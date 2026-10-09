@@ -17,6 +17,11 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {Routes} from '@app/app/Routes';
+import {openRouteInNewWindowOnMiddleClick} from '@app/features/platform/utils/ForkAppWindows';
+
 interface GuildListItemContentProps extends GuildListItemProps {
 	readonly isDesktopLayout: boolean;
 	readonly isMobileExperience: boolean;
@@ -134,6 +139,7 @@ export const GuildListItemContent = observer((props: GuildListItemContentProps) 
 						surfaceRef={surfaceRef}
 						dragAndDrop={props.dragAndDrop}
 						onClick={interaction.handleSelect}
+						onAuxClick={(event) => openRouteInNewWindowOnMiddleClick(event, Routes.guildChannel(props.guild.id))}
 						onContextMenu={interaction.handleContextMenu}
 						onKeyDown={interaction.handleKeyDown}
 						onLongPress={interaction.handleLongPress}

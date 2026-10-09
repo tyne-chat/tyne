@@ -15,6 +15,7 @@ const FALLBACK_STRINGS: Readonly<Record<string, string>> = Object.freeze({
 	'desktop.appMenu.quit': 'Quit {appName}',
 	'desktop.appMenu.exit': 'Exit',
 	'desktop.appMenu.file': 'File',
+	'desktop.appMenu.newWindow': 'New window',
 	'desktop.appMenu.edit': 'Edit',
 	'desktop.appMenu.undo': 'Undo',
 	'desktop.appMenu.redo': 'Redo',
