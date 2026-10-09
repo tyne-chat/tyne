@@ -228,3 +228,7 @@ function $adjustEmbedCaret(
 	};
 	return {anchor: adjust(selection.anchor), focus: adjust(selection.focus)};
 }
+
+// Fork: exported for the fork's ComposerEmojiCaret.test.ts, here rather than on
+// upstream's declaration so that upstream can change its signature without a conflict.
+export {$convertEmojiShortcode};
