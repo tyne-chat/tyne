@@ -82,6 +82,11 @@ import type {ConnectableElement} from 'react-dnd';
 import {useDrag, useDrop} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 
+// Fork imports.
+
+import {Routes} from '@app/app/Routes';
+import {openRouteInNewWindowOnMiddleClick} from '@app/features/platform/utils/ForkAppWindows';
+
 const CATEGORY_DESCRIPTOR = msg({
 	message: 'category',
 	comment: 'Lowercase channel type label used inside channel-list accessible text.',
@@ -432,6 +437,14 @@ export const ChannelItem = observer(
 			if (!Permission.can(Permissions.CONNECT, channel)) return;
 			startVoiceConnection({skipConfirm: true});
 		}, [channelIsVoice, isVoiceSelected, channel, startVoiceConnection]);
+		// Fork: a middle click opens the channel in another window.
+		const handleAuxClick = useCallback(
+			(event: React.MouseEvent) => {
+				if (channelIsCategory) return;
+				openRouteInNewWindowOnMiddleClick(event, Routes.guildChannel(guild.id, channel.id));
+			},
+			[channelIsCategory, guild.id, channel.id],
+		);
 		const handleContextMenu = useCallback(
 			(event: React.MouseEvent) => {
 				event.preventDefault();
@@ -783,6 +796,7 @@ export const ChannelItem = observer(
 				aria-expanded={channelIsCategory ? !isCollapsed : undefined}
 				className={channelItemClassName}
 				onClick={handleSelect}
+				onAuxClick={handleAuxClick}
 				onDoubleClick={handleDoubleClick}
 				onContextMenu={handleContextMenu}
 				onKeyDown={handleKeyDown}
