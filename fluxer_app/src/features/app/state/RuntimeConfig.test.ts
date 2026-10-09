@@ -62,6 +62,7 @@ function discoveryDocument(host: string): InstanceDiscoveryResponse {
 			single_community_guild_id: null,
 			direct_messages_disabled: false,
 			guild_create_access: true,
+			community_creation_staff_only: false,
 		},
 		services: {gif_enabled: true, youtube_enabled: false, bluesky_enabled: false},
 		limits: EMPTY_LIMITS,
