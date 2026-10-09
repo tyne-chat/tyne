@@ -377,20 +377,28 @@ function readRegistration(value: unknown): InstanceRegistration {
 function readCommunity(value: unknown): InstanceCommunity {
 	const source = readRecord(value, 'community');
 	const community: InstanceCommunity = {
+		...(Object.hasOwn(source, 'server_list_buttons')
+			? {server_list_buttons: readServerListButtons(source.server_list_buttons)}
+			: {}),
+		...(Object.hasOwn(source, 'signal_bar_guild_id')
+			? {
+					signal_bar_guild_id: readNullableNonEmptyString(
+						source,
+						'signal_bar_guild_id',
+						'community.signal_bar_guild_id',
+					),
+				}
+			: {}),
 		single_community: readBoolean(source, 'single_community', 'community.single_community'),
 		single_community_guild_id: readNullableNonEmptyString(
 			source,
 			'single_community_guild_id',
 			'community.single_community_guild_id',
 		),
-		signal_bar_guild_id: Object.hasOwn(source, 'signal_bar_guild_id')
-			? readNullableNonEmptyString(source, 'signal_bar_guild_id', 'community.signal_bar_guild_id')
-			: null,
 		direct_messages_disabled: readBoolean(source, 'direct_messages_disabled', 'community.direct_messages_disabled'),
 		guild_create_access: readOptionalBoolean(source, 'guild_create_access', 'community.guild_create_access') ?? true,
 		personal_notes_enabled:
 			readOptionalBoolean(source, 'personal_notes_enabled', 'community.personal_notes_enabled') ?? true,
-		server_list_buttons: readServerListButtons(source.server_list_buttons),
 	};
 	const friendsDisabled = readOptionalBoolean(source, 'friends_disabled', 'community.friends_disabled');
 	if (friendsDisabled !== undefined) {
@@ -401,7 +409,7 @@ function readCommunity(value: unknown): InstanceCommunity {
 
 function readServerListButtons(value: unknown): ServerListButtons {
 	const path = 'community.server_list_buttons';
-	const source = value === undefined ? {} : readRecord(value, path);
+	const source = readRecord(value, path);
 	const visible = (key: keyof ServerListButtons): boolean => readOptionalBoolean(source, key, `${path}.${key}`) ?? true;
 	return {
 		favorites: visible('favorites'),
@@ -520,6 +528,9 @@ function readAppPublic(value: unknown): InstanceAppPublic {
 	const accountIdentityLockReason = readOptionalLockReason(setup);
 	return {
 		branding: {
+			desktop_app_prompt_enabled:
+				readOptionalBoolean(branding, 'desktop_app_prompt_enabled', 'appPublic.branding.desktop_app_prompt_enabled') ??
+				true,
 			product_name: readNonEmptyString(branding, 'product_name', 'appPublic.branding.product_name'),
 			icon_url: readNullableAbsoluteHttpUrl(branding, 'icon_url', 'appPublic.branding.icon_url'),
 			symbol_url: readNullableAbsoluteHttpUrl(branding, 'symbol_url', 'appPublic.branding.symbol_url'),
