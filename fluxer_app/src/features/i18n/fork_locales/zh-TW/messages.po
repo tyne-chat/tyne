@@ -279,6 +279,10 @@ msgstr "訊息工具"
 msgid "New Persona"
 msgstr "新增人格"
 
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "新增視窗"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "此匯出檔中找不到「members」陣列。"
@@ -305,6 +309,10 @@ msgstr "還沒有人開啟此訊號"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "僅你可見。其他人無法查看此人格的完整簡介或個人檔案詳情。"
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "在新視窗中開啟"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
