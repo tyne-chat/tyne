@@ -165,7 +165,10 @@ function launchVelopackApply(
 	if (version != null) {
 		recordVelopackApplyAttempt(version);
 	}
-	manager.waitExitThenApplyUpdate(update, true, restart);
+	// Fork: not silent, so Velopack's updater shows its own progress window while it replaces
+	// the app. Installing the whole app takes a quarter of a minute or more, during which
+	// this process has already quit and can show nothing itself.
+	manager.waitExitThenApplyUpdate(update, forkVelopackSourceUrl() == null, restart);
 }
 
 function armVelopackApplyOnQuit(): void {
