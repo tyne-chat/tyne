@@ -85,7 +85,7 @@ describe('signal bar', () => {
 			findUser: (userId) => getUserRepository().findUnique(userId),
 			findChannel: (channelId) => getChannelRepository().findUnique(channelId),
 			settingsRepository: new SignalBarSettingsRepository(),
-			listGuildChannels: (guildId) => getChannelRepository().listGuildChannels(guildId),
+			listGuildChannels: (guildId) => getChannelRepository().listGuildChannels(guildId, 'enrolled'),
 		});
 
 	it('is empty and unmanageable until a home community is set', async () => {
