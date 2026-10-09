@@ -279,6 +279,10 @@ msgstr "כלי הודעות"
 msgid "New Persona"
 msgstr "פרסונה חדשה"
 
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "חלון חדש"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "לא נמצא מערך \"members\" בקובץ הייצוא הזה."
@@ -305,6 +309,10 @@ msgstr "אף אחד לא הפעיל את האות הזה"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "גלוי רק לכם. אחרים אינם יכולים לראות את הביו המלא או את פרטי הפרופיל של פרסונה זו."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "פתח בחלון חדש"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
