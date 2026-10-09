@@ -10,6 +10,9 @@
 # - A push to a desktop-test/** branch builds every platform and keeps the files as workflow
 #   artifacts only. Nothing is published, so installed apps never see those builds.
 name: fork desktop release
+# The version in the run's name is how a release run finds older releases still being built
+# (the publish job below waits for them).
+run-name: ${{ inputs.version && format('desktop release {0}', inputs.version) || format('desktop test build ({0})', github.ref_name) }}
 
 on:
   workflow_dispatch:
@@ -35,8 +38,10 @@ on:
 permissions:
   contents: write
 
+# One run per branch and version: a push to a test branch replaces the build before it, while
+# two releases of different versions can build side by side.
 concurrency:
-  group: fork-desktop-release-${{ github.ref }}
+  group: fork-desktop-release-${{ github.ref }}-${{ inputs.version || 'test' }}
   cancel-in-progress: true
 
 env:
@@ -324,6 +329,36 @@ jobs:
       - name: Write checksums
         working-directory: release_assets
         run: sha256sum -- * > SHA256SUMS.txt
+
+      # Releases may build side by side, and the updater takes the release created last for the
+      # newest. So a release is only created once no lower version is still on its way.
+      - name: Wait for older releases still being built
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 120); do
+            pending="$(
+              for status in in_progress queued; do
+                gh run list --repo "${{ github.repository }}" --workflow fork-desktop-release.yaml \
+                  --status "$status" --limit 50 --json displayTitle \
+                  --jq '.[].displayTitle | select(startswith("desktop release ")) | sub("desktop release "; "")'
+              done | sort -u
+            )"
+            older=""
+            for other in $pending; do
+              if [ "$other" != "$VERSION" ] && [ "$(printf '%s\n%s\n' "$other" "$VERSION" | sort -V | head -1)" = "$other" ]; then
+                older="$older $other"
+              fi
+            done
+            if [ -z "$older" ]; then
+              echo "No older release is being built."
+              exit 0
+            fi
+            echo "Waiting for older release(s):$older (attempt $attempt)"
+            sleep 30
+          done
+          echo "Older releases were still being built after an hour:$older"
+          exit 1
 
       # Not a draft or a pre-release: installed apps follow "the latest release" of this
       # repository, and GitHub only counts a published, full release as latest.
