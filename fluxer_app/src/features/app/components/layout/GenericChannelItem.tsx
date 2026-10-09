@@ -22,6 +22,7 @@ interface GenericChannelItemProps {
 	isOver?: boolean;
 	dropIndicator?: {position: 'top' | 'bottom'; isValid: boolean} | null;
 	onClick?: () => void;
+	onAuxClick?: (event: React.MouseEvent) => void;
 	onDoubleClick?: (event: React.MouseEvent) => void;
 	onContextMenu?: (event: React.MouseEvent) => void;
 	onKeyDown?: (event: React.KeyboardEvent) => void;
@@ -64,6 +65,7 @@ export const GenericChannelItem = React.forwardRef<HTMLDivElement, GenericChanne
 			isOver,
 			dropIndicator,
 			onClick,
+			onAuxClick,
 			onDoubleClick,
 			onContextMenu,
 			onKeyDown,
@@ -132,6 +134,7 @@ export const GenericChannelItem = React.forwardRef<HTMLDivElement, GenericChanne
 						)}
 						pressedClassName={pressedClassName ?? channelItemStyles.channelItemPressed}
 						onClick={onClick}
+						onAuxClick={onAuxClick}
 						onDoubleClick={onDoubleClick}
 						onContextMenu={onContextMenu}
 						onKeyDown={handleKeyDown}
