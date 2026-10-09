@@ -618,11 +618,15 @@ function parseCommunity(value: unknown): InstanceCommunity | null {
 	return {
 		single_community: singleCommunity,
 		single_community_guild_id: readNonEmptyString(source, 'single_community_guild_id'),
-		signal_bar_guild_id: readNonEmptyString(source, 'signal_bar_guild_id'),
 		direct_messages_disabled: directMessagesDisabled,
 		guild_create_access: readBoolean(source, 'guild_create_access') ?? true,
 		community_creation_staff_only: readBoolean(source, 'community_creation_staff_only') ?? false,
-		server_list_buttons: parseServerListButtons(source.server_list_buttons),
+		...(Object.hasOwn(source, 'signal_bar_guild_id')
+			? {signal_bar_guild_id: readNonEmptyString(source, 'signal_bar_guild_id')}
+			: {}),
+		...(Object.hasOwn(source, 'server_list_buttons')
+			? {server_list_buttons: parseServerListButtons(source.server_list_buttons)}
+			: {}),
 	};
 }
 
@@ -799,6 +803,10 @@ function parseBranding(value: unknown): Readonly<Partial<InstanceBranding>> {
 	}
 	if (Object.hasOwn(source, 'theme_color')) {
 		branding.theme_color = readNonEmptyString(source, 'theme_color');
+	}
+	const desktopAppPromptEnabled = readBoolean(source, 'desktop_app_prompt_enabled');
+	if (desktopAppPromptEnabled != null) {
+		branding.desktop_app_prompt_enabled = desktopAppPromptEnabled;
 	}
 	return branding;
 }
