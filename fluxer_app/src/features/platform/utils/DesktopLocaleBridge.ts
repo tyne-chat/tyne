@@ -14,6 +14,10 @@ import {VOICE_DEAFEN_DESCRIPTOR, VOICE_UNDEAFEN_DESCRIPTOR} from '@app/features/
 import {i18n, type MessageDescriptor} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import {NEW_WINDOW_DESCRIPTOR} from '@app/features/platform/utils/ForkAppWindowMessageDescriptors';
+
 const ABOUT_DESCRIPTOR = msg({
 	message: 'About {appName}',
 	comment: 'Desktop app menu item. Opens the About panel. {appName} is the desktop app name (typically Fluxer).',
@@ -463,6 +467,7 @@ const NATIVE_MESSAGES: Record<string, NativeMessage> = {
 	'desktop.appMenu.quit': QUIT_DESCRIPTOR,
 	'desktop.appMenu.exit': EXIT_DESCRIPTOR,
 	'desktop.appMenu.file': FILE_DESCRIPTOR,
+	'desktop.appMenu.newWindow': NEW_WINDOW_DESCRIPTOR,
 	'desktop.appMenu.edit': EDIT_DESCRIPTOR,
 	'desktop.appMenu.undo': UNDO_DESCRIPTOR,
 	'desktop.appMenu.redo': REDO_DESCRIPTOR,
