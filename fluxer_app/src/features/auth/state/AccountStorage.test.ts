@@ -319,6 +319,7 @@ describe('stashAccountData', () => {
 				single_community_guild_id: '77',
 				direct_messages_disabled: true,
 				guild_create_access: true,
+				community_creation_staff_only: false,
 			},
 			services: {gif_enabled: false, youtube_enabled: true, bluesky_enabled: true},
 		};
