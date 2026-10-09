@@ -63,6 +63,7 @@ describe('fork release feed', () => {
 			assert.equal(formats.forkReleaseRepository(), null);
 			assert.equal(formats.forkLatestAssetBaseUrl(), null);
 			assert.equal(formats.forkLatestInfoUrl(), null);
+			assert.equal(formats.forkVelopackSourceUrl(), null);
 			assert.equal(formats.forkVersionDownloadUrl('Fluxer', '1.4.0', 'appimage'), null);
 			assert.equal(formats.getUpdateBaseUrl(), 'https://pkgs.fluxer.com/desktop/stable/linux/x64');
 			assert.equal(downloads.UPDATE_BASE_URL, 'https://pkgs.fluxer.com/desktop/stable/linux/x64');
@@ -84,6 +85,15 @@ describe('fork release feed', () => {
 		assert.equal(downloads.DOWNLOAD_PAGE_URL, `${RELEASES}/latest`);
 		assert.equal(formats.forkLatestInfoUrl(), `${RELEASES}/latest/download/latest-win32-x64.json`);
 		assert.equal(formats.forkLatestInfoUrl('linux', 'arm64'), `${RELEASES}/latest/download/latest-linux-arm64.json`);
+	});
+
+	test('the Windows updater is given the bare repository, which is what Velopack reads GitHub through', () => {
+		const {formats} = load({platform: 'win32'});
+		// Not the latest/download base: Velopack switches to the GitHub API for any github.com URL
+		// and takes extra path segments for part of the repository name (HTTP 404 on every check).
+		assert.equal(formats.forkVelopackSourceUrl(), `https://github.com/${REPOSITORY}`);
+		assert.notEqual(formats.forkVelopackSourceUrl(), formats.getUpdateBaseUrl());
+		assert.equal(new URL(formats.forkVelopackSourceUrl()).pathname.split('/').filter(Boolean).length, 2);
 	});
 
 	test('a versioned download points at the asset of that release', () => {
