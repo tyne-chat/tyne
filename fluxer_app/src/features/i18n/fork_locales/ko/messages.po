@@ -661,6 +661,10 @@ msgstr "가져오는 중 알림 {0}건"
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{1}개 중 {0}개 {2} ({3}%)"
 
+#. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
+msgid "{appName} {version} is ready to install."
+msgstr "{appName} {version}을(를) 설치할 준비가 되었습니다."
+
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
 msgstr "{label}: {names}"
