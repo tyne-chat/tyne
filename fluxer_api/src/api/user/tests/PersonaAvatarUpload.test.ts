@@ -5,11 +5,7 @@ import {afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, type M
 import {createTestAccount} from '../../auth/tests/AuthTestUtils';
 import {Config} from '../../Config';
 import {getPngDataUrl} from '../../emoji/tests/EmojiTestUtils';
-import type {
-	MediaProxyMetadataExternalRequest,
-	MediaProxyMetadataRequest,
-	MediaProxyMetadataResponse,
-} from '../../infrastructure/IMediaService';
+import type {MediaProxyMetadataRequest, MediaProxyMetadataResponse} from '../../infrastructure/IMediaService';
 import {ensureSessionStarted} from '../../message/tests/MessageTestUtils';
 import {setInjectedMediaService} from '../../middleware/ServiceRegistry';
 import {PERSONA_AVATAR_IMPORT_QUOTA} from '../../persona/PersonaAvatarImporter';
@@ -28,7 +24,7 @@ const QUOTA_KEY_FRAGMENT = 'persona:avatar_import:';
 // client answers null for every refusal or failure (blocked address, redirect to a private host,
 // oversized body, upstream error), so "unreachable" here covers all of them.
 class RemoteAvatarMediaService extends TestMediaService {
-	readonly externalRequests: Array<MediaProxyMetadataExternalRequest> = [];
+	readonly externalRequests: Array<Extract<MediaProxyMetadataRequest, {type: 'external'}>> = [];
 	gate: Promise<void> | null = null;
 
 	override async getMetadata(request: MediaProxyMetadataRequest): Promise<MediaProxyMetadataResponse | null> {
