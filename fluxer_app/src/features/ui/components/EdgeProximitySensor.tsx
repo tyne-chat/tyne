@@ -3,13 +3,18 @@
 import MemberList from '@app/features/member/state/MemberList';
 import styles from '@app/features/ui/components/EdgeProximitySensor.module.css';
 import ContextMenuState from '@app/features/ui/state/ContextMenu';
-import LayerManager from '@app/features/ui/state/LayerManager';
+import LayerManager, {LayerType} from '@app/features/ui/state/LayerManager';
 import LayoutState from '@app/features/ui/state/LayoutState';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
 import {canUseWindowFocusedHoverControls} from '@app/features/ui/utils/WindowFocusInteractionGuard';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useRef} from 'react';
+
+// A modal, popout or context menu is open on top of the app.
+function hasOpenLayer(): boolean {
+	return Object.values(LayerType).some((type) => LayerManager.hasType(type));
+}
 
 const INTENT_DELAY_MS = 60;
 const CURSOR_WIDTH_PX = 18;
@@ -102,7 +107,7 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 			lastPointerCoordsRef.current = {x: e.clientX, y: e.clientY};
 
 			// If a modal, popout, or context menu is active, don't retract the peeking drawer
-			if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) {
+			if (hasOpenLayer() || ContextMenuState.contextMenu !== null) {
 				if (leftRetractTimerRef.current !== null) {
 					window.clearTimeout(leftRetractTimerRef.current);
 					leftRetractTimerRef.current = null;
@@ -124,7 +129,7 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 					if (leftRetractTimerRef.current === null) {
 						leftRetractTimerRef.current = window.setTimeout(() => {
 							leftRetractTimerRef.current = null;
-							if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) return;
+							if (hasOpenLayer() || ContextMenuState.contextMenu !== null) return;
 							const coords = lastPointerCoordsRef.current;
 							if (coords && isPointerWithinDrawer('left', coords.x, coords.y)) {
 								return;
@@ -146,7 +151,7 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 					if (rightRetractTimerRef.current === null) {
 						rightRetractTimerRef.current = window.setTimeout(() => {
 							rightRetractTimerRef.current = null;
-							if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) return;
+							if (hasOpenLayer() || ContextMenuState.contextMenu !== null) return;
 							const coords = lastPointerCoordsRef.current;
 							if (coords && isPointerWithinDrawer('right', coords.x, coords.y)) {
 								return;
@@ -166,7 +171,7 @@ export const EdgeProximitySensor: React.FC = observer(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key !== 'Escape' || e.defaultPrevented) return;
 			// Let Escape dismiss an open modal/popout/context menu first without collapsing the drawer behind it.
-			if (LayerManager.hasLayers() || ContextMenuState.contextMenu !== null) return;
+			if (hasOpenLayer() || ContextMenuState.contextMenu !== null) return;
 			LayoutState.setLeftHoverPeeking(false);
 			LayoutState.setRightHoverPeeking(false);
 		};
