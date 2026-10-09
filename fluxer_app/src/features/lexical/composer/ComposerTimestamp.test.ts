@@ -57,6 +57,7 @@ vi.mock('@app/features/app/state/RuntimeConfig', () => ({
 		localInstanceDomain: 'local',
 		isSelfHosted: () => false,
 		inviteUrlBase: 'https://invite.test',
+		getSnapshotOrNull: () => null,
 	},
 }));
 vi.mock('@app/features/lexical/composer/nodes/ComposerTimestampPill', () => ({
