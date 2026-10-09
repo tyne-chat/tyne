@@ -279,6 +279,10 @@ msgstr "Nástroje zpráv"
 msgid "New Persona"
 msgstr "Nová persona"
 
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "Nové okno"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "V tomto exportním souboru nebylo nalezeno pole „members“."
@@ -305,6 +309,10 @@ msgstr "Tento signál nemá nikdo zapnutý"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Viditelné pouze pro vás. Ostatní nemohou zobrazit celé bio ani podrobnosti profilu této persony."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "Otevřít v novém okně"
 
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
