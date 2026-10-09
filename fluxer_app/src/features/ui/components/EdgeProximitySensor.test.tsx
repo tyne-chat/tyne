@@ -25,8 +25,9 @@ let mockHasLayers = false;
 let mockHasContextMenu = false;
 
 vi.mock('@app/features/ui/state/LayerManager', () => ({
+	LayerType: {CONTEXT_MENU: 'contextmenu', MODAL: 'modal', POPOUT: 'popout'},
 	default: {
-		hasLayers: () => mockHasLayers,
+		hasType: () => mockHasLayers,
 	},
 }));
 

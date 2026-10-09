@@ -187,7 +187,7 @@ interface QuickReactionButtonProps {
 	hidden?: boolean;
 }
 
-const QuickReactionButton = observer(
+export const QuickReactionButton = observer(
 	React.forwardRef<HTMLButtonElement, QuickReactionButtonProps>(({emoji, onReact, hidden, ...fork}, ref) => {
 		const {channelId, messageId} = fork;
 		const {i18n} = useLingui();
