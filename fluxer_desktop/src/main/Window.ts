@@ -41,6 +41,31 @@ import {NATIVE_GATEWAY_TRANSPORT_AVAILABLE_RENDERER_ARG} from '@fluxer/desktop_i
 import {app, BrowserWindow, dialog, ipcMain, screen} from 'electron';
 import log from 'electron-log';
 
+// Fork: the imports below are used only by the extra app windows block at the end of this file.
+
+import {DESKTOP_APP_LANDING_URL, DESKTOP_APP_URL} from '@electron/common/Constants';
+import {recordDesktopLastRoute} from '@electron/main/DesktopLastRoute';
+import {
+	ForkNotificationClaims,
+	ForkWindowAccountSync,
+	ForkWindowLoadQueue,
+} from '@electron/main/ForkWindowCoordination';
+import {
+	cascadeForkWindowBounds,
+	FORK_EXTRA_APP_WINDOWS_MAX,
+	FORK_WINDOW_SESSION_FILE_NAME,
+	type ForkWindowBounds,
+	type ForkWindowSessionEntry,
+	fitForkWindowBounds,
+	forkAppWindowRouteFromUrl,
+	forkAppWindowUrl,
+	isForkAppWindowRoute,
+	parseForkWindowSession,
+	planForkWindowRestore,
+	serializeForkWindowSession,
+} from '@electron/main/ForkWindowSession';
+import {FORK_APP_WINDOW_CHANNELS} from '@fluxer/desktop_ipc/src/ForkAppWindowContract';
+
 const logger = createChildLogger('Window');
 const runtimeSecurity = new DesktopRuntimeSecurity({
 	logger: createChildLogger('DesktopRuntimeSecurity'),
@@ -317,6 +342,7 @@ function saveWindowBounds(): void {
 }
 
 export function clearSavedWindowBounds(): void {
+	clearForkWindowSession();
 	try {
 		const filePath = getWindowStateFile();
 		if (fs.existsSync(filePath)) {
@@ -342,7 +368,7 @@ function shouldHideMainWindowOnMinimize(): boolean {
 }
 
 export function getMainWindow(): BrowserWindow | null {
-	return mainWindow;
+	return mainWindow ?? frontExtraAppWindow();
 }
 
 export function getActiveUseNativeTitleBar(): boolean {
@@ -373,7 +399,7 @@ function recoverMainWindowRendererBeforeShow(reason: string): void {
 }
 
 export function isAppDocumentWindowContents(contents: Electron.WebContents): boolean {
-	return [mainWindow, themeStudioPopoutWindow].some(
+	return [mainWindow, themeStudioPopoutWindow, ...forkExtraAppWindows].some(
 		(window) => isAliveWindow(window) && window.webContents === contents,
 	);
 }
@@ -1074,7 +1100,7 @@ export function createWindow(options: CreateWindowOptions = {}): BrowserWindow {
 	webContents.on('will-frame-navigate', (event) => {
 		preventUntrustedNavigation(event, event.url, event.isMainFrame);
 	});
-	webContents.on('did-create-window', (window, details) => {
+	const onDidCreateWindow = (window: BrowserWindow, details: Electron.DidCreateWindowDetails): void => {
 		if (
 			details.frameName === THEME_STUDIO_POPOUT_WINDOW_NAME &&
 			getSanitizedPath(details.url) === THEME_STUDIO_POPOUT_PATHNAME
@@ -1085,8 +1111,8 @@ export function createWindow(options: CreateWindowOptions = {}): BrowserWindow {
 			trackVoicePopoutWindow(details.frameName, window);
 		}
 		attachChildWindowGuards(window.webContents);
-	});
-	webContents.setWindowOpenHandler(({url, frameName}) => {
+	};
+	const onWindowOpen = ({url, frameName}: Electron.HandlerDetails): Electron.WindowOpenHandlerResponse => {
 		if (isVoicePopoutWindowName(frameName) && url === 'about:blank') {
 			if (!hasVoicePopoutCapacity()) {
 				logger.warn('Denied voice popout window: capacity reached', {frameName});
@@ -1122,13 +1148,20 @@ export function createWindow(options: CreateWindowOptions = {}): BrowserWindow {
 			log.warn('Failed to open external URL from window-open:', error);
 		});
 		return {action: 'deny'};
-	});
+	};
+	webContents.on('did-create-window', onDidCreateWindow);
+	webContents.setWindowOpenHandler(onWindowOpen);
+	attachForkAppWindows(mainWindow, {onDidCreateWindow, onWindowOpen});
 	return mainWindow;
 }
 
 export function showWindow(): void {
 	if (mainWindowTakeover != null) {
 		mainWindowTakeover();
+		return;
+	}
+	if (!mainWindow) {
+		showFrontExtraAppWindow();
 		return;
 	}
 	if (mainWindow && pendingMainWindowReveal?.window === mainWindow && !mainWindow.isVisible()) {
@@ -1182,6 +1215,7 @@ export function hideWindow(): void {
 }
 
 export function setQuitting(quitting: boolean): void {
+	if (quitting && !isQuitting) saveForkWindowSessionBeforeQuit();
 	isQuitting = quitting;
 }
 
@@ -1308,4 +1342,546 @@ export async function closeAppWindowsForUpdate(
 	} finally {
 		closingMainWindowForUpdate = false;
 	}
+}
+
+// ---------------------------------------------------------------------------------------------
+// Fork: more than one app window.
+//
+// Upstream has a single app window. This fork can open more of them ("Open in new window" in the
+// app, File > New window), remembers where every window was and what it showed, and brings them
+// all back at the next launch. The code for that is below, so upstream's code above stays as it
+// is apart from a few one-line calls into this block. What needs no Electron is in
+// ForkWindowSession.ts and ForkWindowCoordination.ts, which have unit tests.
+//
+// An extra window is a second copy of the app document. It loads through the same retry loop as
+// the main window, gets the same navigation guards and popout handling, and counts as an app
+// document in isAppDocumentWindowContents, which is what lets it use the instance runtime and
+// the native gateway. Each window has its own connection to the server.
+// ---------------------------------------------------------------------------------------------
+
+const FORK_WINDOW_SESSION_SAVE_DELAY_MS = 500;
+const FORK_WINDOW_LOAD_SETTLE_TIMEOUT_MS = 8000;
+const FORK_WINDOW_RESTACK_PERIOD_MS = 30000;
+
+interface ForkWindowOpenHandlers {
+	readonly onDidCreateWindow: (window: BrowserWindow, details: Electron.DidCreateWindowDetails) => void;
+	readonly onWindowOpen: (details: Electron.HandlerDetails) => Electron.WindowOpenHandlerResponse;
+}
+
+interface OpenAppWindowOptions {
+	readonly route?: string | null;
+	readonly bounds?: ForkWindowBounds;
+	readonly isMaximized?: boolean;
+	readonly focus?: boolean;
+}
+
+interface ForkRestoredWindowStack {
+	readonly order: ReadonlyArray<BrowserWindow>;
+	readonly focused: BrowserWindow | null;
+	readonly until: number;
+}
+
+const forkExtraAppWindows = new Set<BrowserWindow>();
+// App windows from the back of the stack to the front, by when each last had focus.
+const forkWindowStack: Array<BrowserWindow> = [];
+const forkWindowRoutes = new WeakMap<BrowserWindow, string>();
+const forkWindowMaximized = new WeakMap<BrowserWindow, boolean>();
+const forkWindowLoadQueue = new ForkWindowLoadQueue();
+const forkNotificationClaims = new ForkNotificationClaims();
+const forkWindowAccountSync = new ForkWindowAccountSync();
+let forkWindowOpenHandlers: ForkWindowOpenHandlers | null = null;
+let forkWindowSessionSaveTimer: NodeJS.Timeout | null = null;
+let forkWindowSessionReady = false;
+let forkWindowSessionCleared = false;
+let forkWindowSessionRestorePending = false;
+let forkMainWindowSignedIn = false;
+let forkWindowIpcRegistered = false;
+let forkRestoredWindowStack: ForkRestoredWindowStack | null = null;
+
+export function getAppWindows(): Array<BrowserWindow> {
+	return [mainWindow, ...forkExtraAppWindows].filter(isAliveWindow);
+}
+
+function frontExtraAppWindow(): BrowserWindow | null {
+	for (let index = forkWindowStack.length - 1; index >= 0; index -= 1) {
+		const window = forkWindowStack[index];
+		if (forkExtraAppWindows.has(window) && isAliveWindow(window)) return window;
+	}
+	return [...forkExtraAppWindows].find(isAliveWindow) ?? null;
+}
+
+function showFrontExtraAppWindow(): void {
+	const window = frontExtraAppWindow();
+	if (window == null) return;
+	if (window.isMinimized()) window.restore();
+	window.show();
+	window.focus();
+}
+
+function appWindowForContents(contents: Electron.WebContents): BrowserWindow | null {
+	return getAppWindows().find((window) => window.webContents === contents) ?? null;
+}
+
+// The app window an IPC message came from, or null unless it was sent by that window's own
+// top-level app document.
+function appWindowForIpcSender(event: Electron.IpcMainEvent | Electron.IpcMainInvokeEvent): BrowserWindow | null {
+	const window = appWindowForContents(event.sender);
+	if (window == null) return null;
+	try {
+		const frame = event.senderFrame;
+		if (frame == null || frame.detached || frame.parent != null || !isTrustedOrigin(frame.url)) return null;
+	} catch {
+		return null;
+	}
+	return window;
+}
+
+function forkWindowSessionFilePath(): string {
+	return path.join(app.getPath('userData'), FORK_WINDOW_SESSION_FILE_NAME);
+}
+
+function cancelForkWindowSessionSave(): void {
+	if (forkWindowSessionSaveTimer) {
+		clearTimeout(forkWindowSessionSaveTimer);
+		forkWindowSessionSaveTimer = null;
+	}
+}
+
+function scheduleForkWindowSessionSave(): void {
+	if (isQuitting || closingMainWindowForUpdate || !forkWindowSessionReady) return;
+	forkWindowSessionCleared = false;
+	cancelForkWindowSessionSave();
+	forkWindowSessionSaveTimer = setTimeout(() => {
+		forkWindowSessionSaveTimer = null;
+		// While the app quits its windows close one by one, which must not shrink the saved layout.
+		if (!isQuitting) saveForkWindowSession();
+	}, FORK_WINDOW_SESSION_SAVE_DELAY_MS);
+}
+
+function forkWindowSessionEntry(
+	window: BrowserWindow,
+	isMainEntry: boolean,
+	isFocused: boolean,
+): ForkWindowSessionEntry | null {
+	const route = forkWindowRoutes.get(window) ?? forkAppWindowRouteFromUrl(window.webContents.getURL(), DESKTOP_APP_URL);
+	if (route == null && !isMainEntry) return null;
+	const {x, y, width, height} = window.getNormalBounds();
+	const wasMaximized = window === mainWindow ? lastRestorableMainWindowMaximized : forkWindowMaximized.get(window);
+	// A window that is minimized, in the tray, or restored but not shown yet is not maximized
+	// right now, so go by what it was (or is about to be).
+	const onScreen = window.isVisible() && !window.isMinimized();
+	return {
+		route,
+		bounds: {x, y, width, height},
+		isMaximized: onScreen ? window.isMaximized() : Boolean(wasMaximized),
+		isMainWindow: isMainEntry,
+		isFocused,
+	};
+}
+
+function saveForkWindowSession(): void {
+	if (!forkWindowSessionReady || forkWindowSessionCleared) return;
+	if (!getDesktopWindowBehaviorSettings().rememberWindowState) return;
+	const windows = getAppWindows();
+	if (windows.length === 0) return;
+	if (windows.some((window) => windowsHtmlFullscreenStates.has(window))) return;
+	try {
+		const stacked = forkWindowStack.filter((window) => windows.includes(window));
+		const ordered = [...windows.filter((window) => !stacked.includes(window)), ...stacked];
+		const front = ordered[ordered.length - 1];
+		const osFocused = BrowserWindow.getFocusedWindow();
+		const focused = osFocused != null && windows.includes(osFocused) ? osFocused : front;
+		// With the main window closed, the frontmost window opens as the main window next time.
+		const mainEntryWindow = isAliveWindow(mainWindow) ? mainWindow : front;
+		const entries: Array<ForkWindowSessionEntry> = [];
+		for (const window of ordered) {
+			const entry = forkWindowSessionEntry(window, window === mainEntryWindow, window === focused);
+			if (entry == null) continue;
+			entries.push(entry);
+			if (entry.isMainWindow && window !== mainWindow) {
+				const state: WindowBounds = {...entry.bounds, isMaximized: entry.isMaximized};
+				fs.writeFileSync(getWindowStateFile(), JSON.stringify(state, null, 2), 'utf-8');
+				if (entry.route != null) recordDesktopLastRoute(app.getPath('userData'), entry.route);
+			}
+		}
+		fs.writeFileSync(forkWindowSessionFilePath(), serializeForkWindowSession(entries), 'utf8');
+	} catch (error) {
+		logger.warn('Failed to save the window layout', {error});
+	}
+}
+
+function saveForkWindowSessionBeforeQuit(): void {
+	cancelForkWindowSessionSave();
+	saveForkWindowSession();
+}
+
+// Upstream closes every window but one before it reloads or replaces the app for an update
+// (closeAppWindowsForUpdate). That is not the user closing them, so the layout is saved as it
+// stands when the first window is asked to close and then left alone. It comes back the next
+// time the main window is signed in: after the reload, or at the next launch.
+function holdForkWindowSessionForUpdate(): void {
+	if (!closingMainWindowForUpdate || !forkWindowSessionReady) return;
+	cancelForkWindowSessionSave();
+	saveForkWindowSession();
+	forkWindowSessionReady = false;
+	forkWindowSessionRestorePending = true;
+	forkMainWindowSignedIn = false;
+}
+
+function clearForkWindowSession(): void {
+	forkWindowSessionCleared = true;
+	cancelForkWindowSessionSave();
+	try {
+		fs.rmSync(forkWindowSessionFilePath(), {force: true});
+	} catch (error) {
+		logger.warn('Failed to clear the saved window layout', {error});
+	}
+}
+
+function trackForkAppWindow(window: BrowserWindow): void {
+	const contentsId = window.webContents.id;
+	if (!forkWindowStack.includes(window)) forkWindowStack.push(window);
+	window.on('focus', () => {
+		const index = forkWindowStack.indexOf(window);
+		if (index !== -1) forkWindowStack.splice(index, 1);
+		forkWindowStack.push(window);
+		scheduleForkWindowSessionSave();
+	});
+	window.on('close', holdForkWindowSessionForUpdate);
+	window.on('move', scheduleForkWindowSessionSave);
+	window.on('resize', scheduleForkWindowSessionSave);
+	window.on('maximize', () => {
+		forkWindowMaximized.set(window, true);
+		scheduleForkWindowSessionSave();
+	});
+	window.on('unmaximize', () => {
+		if (!window.isMinimized()) forkWindowMaximized.set(window, false);
+		scheduleForkWindowSessionSave();
+	});
+	window.webContents.on('did-start-navigation', (_event, _url, isSameDocument, isMainFrame) => {
+		// A fresh document has not told us which account it is on yet.
+		if (isMainFrame && !isSameDocument) forkWindowAccountSync.forget(contentsId);
+	});
+	window.once('closed', () => {
+		const index = forkWindowStack.indexOf(window);
+		if (index !== -1) forkWindowStack.splice(index, 1);
+		forkWindowLoadQueue.settle(contentsId);
+		forkNotificationClaims.releaseWindow(contentsId);
+		forkWindowAccountSync.releaseWindow(contentsId);
+		scheduleForkWindowSessionSave();
+	});
+}
+
+// Puts the windows of a restored layout back in the order they were stacked in. Each window is
+// shown when its content is ready, which is not the saved order, so this runs after every one.
+function applyForkRestoredWindowStack(): void {
+	const restored = forkRestoredWindowStack;
+	if (restored == null) return;
+	if (Date.now() > restored.until) {
+		forkRestoredWindowStack = null;
+		return;
+	}
+	for (const window of restored.order) {
+		if (isAliveWindow(window) && window.isVisible()) window.moveTop();
+	}
+	if (isAliveWindow(restored.focused) && restored.focused.isVisible()) restored.focused.focus();
+	if (restored.order.every((window) => !isAliveWindow(window) || window.isVisible())) {
+		forkRestoredWindowStack = null;
+	}
+}
+
+// The saved layout comes back once the main window is signed in and on screen. Before that the
+// other windows would only show a sign-in page each, or appear while the app is still in the tray.
+function restoreForkWindowSessionWhenReady(): void {
+	if (!forkWindowSessionRestorePending || !forkMainWindowSignedIn) return;
+	if (!isAliveWindow(mainWindow) || !mainWindow.isVisible()) return;
+	forkWindowSessionRestorePending = false;
+	restoreForkWindowSession();
+}
+
+function markAppWindowSignedIn(window: BrowserWindow): void {
+	forkWindowLoadQueue.settle(window.webContents.id);
+	if (window !== mainWindow || forkMainWindowSignedIn) return;
+	forkMainWindowSignedIn = true;
+	restoreForkWindowSessionWhenReady();
+}
+
+function restoreForkWindowSession(): void {
+	try {
+		if (shouldIgnoreWindowStateForLaunch(process.argv)) return;
+		if (!getDesktopWindowBehaviorSettings().rememberWindowState) return;
+		let raw: string;
+		try {
+			raw = fs.readFileSync(forkWindowSessionFilePath(), 'utf8');
+		} catch {
+			return;
+		}
+		const plan = planForkWindowRestore(parseForkWindowSession(raw));
+		if (plan.extraWindows.length === 0) return;
+		const workAreas = screen.getAllDisplays().map((display) => display.workArea);
+		const created = plan.extraWindows.map((entry, index) =>
+			openAppWindow({
+				route: entry.route,
+				bounds: fitForkWindowBounds(entry.bounds, workAreas),
+				isMaximized: entry.isMaximized,
+				focus: plan.focused === index,
+			}),
+		);
+		const windowAt = (position: number | 'main'): BrowserWindow | null =>
+			position === 'main' ? mainWindow : created[position];
+		const order = plan.stackingOrder.map(windowAt).filter(isAliveWindow);
+		forkWindowStack.splice(0, forkWindowStack.length, ...order);
+		forkRestoredWindowStack = {
+			order,
+			focused: windowAt(plan.focused),
+			until: Date.now() + FORK_WINDOW_RESTACK_PERIOD_MS,
+		};
+		logger.info('Restoring the saved window layout', {extraWindows: created.filter(isAliveWindow).length});
+	} catch (error) {
+		logger.warn('Failed to restore the saved window layout', {error});
+	} finally {
+		// Nothing is saved before this point, so a launch that never gets as far as restoring the
+		// layout (the user is signed out, say) leaves it on disk for the next one.
+		forkWindowSessionReady = true;
+	}
+}
+
+// Called once createWindow has set up the main window.
+function attachForkAppWindows(window: BrowserWindow, handlers: ForkWindowOpenHandlers): void {
+	const firstMainWindow = forkWindowOpenHandlers == null;
+	forkWindowOpenHandlers = handlers;
+	registerForkAppWindowIpc();
+	trackForkAppWindow(window);
+	// Several windows side by side need to be narrower than upstream's minimum allows, so app
+	// windows in this fork have none. The app switches to its narrow layout by itself.
+	window.setMinimumSize(0, 0);
+	// The main window loads outside the queue, so tell the queue it is busy until it has settled.
+	const contentsId = window.webContents.id;
+	forkWindowLoadQueue.markLoading(contentsId);
+	setTimeout(() => forkWindowLoadQueue.settle(contentsId), FORK_WINDOW_LOAD_SETTLE_TIMEOUT_MS).unref?.();
+	window.on('show', () => {
+		restoreForkWindowSessionWhenReady();
+		applyForkRestoredWindowStack();
+	});
+	if (firstMainWindow) forkWindowSessionRestorePending = true;
+}
+
+// Opens another app window. Returns null if the route is not one a window may open on, or if
+// there are already too many windows.
+export function openAppWindow(options: OpenAppWindowOptions = {}): BrowserWindow | null {
+	const handlers = forkWindowOpenHandlers;
+	if (handlers == null) {
+		logger.warn('Ignoring a request for another app window before the main window exists');
+		return null;
+	}
+	if ([...forkExtraAppWindows].filter(isAliveWindow).length >= FORK_EXTRA_APP_WINDOWS_MAX) {
+		logger.warn('Ignoring a request for another app window: the limit is reached');
+		return null;
+	}
+	const route = options.route ?? null;
+	const appUrl = route == null ? DESKTOP_APP_LANDING_URL : forkAppWindowUrl(route, DESKTOP_APP_URL);
+	if (appUrl == null || !isTrustedOrigin(appUrl)) {
+		logger.warn('Ignoring a request for an app window on a route that cannot be opened', {route});
+		return null;
+	}
+	let bounds = options.bounds;
+	if (bounds == null) {
+		const osFocused = BrowserWindow.getFocusedWindow();
+		const reference = osFocused != null && getAppWindows().includes(osFocused) ? osFocused : getMainWindow();
+		if (isAliveWindow(reference)) {
+			const referenceBounds = reference.getNormalBounds();
+			bounds = cascadeForkWindowBounds(referenceBounds, screen.getDisplayMatching(referenceBounds).workArea);
+		}
+	}
+	const isMac = process.platform === 'darwin';
+	const allowTransparency = getActiveAllowTransparency();
+	const useNativeTitleBar = getActiveUseNativeTitleBar();
+	const windowOptions: Electron.BrowserWindowConstructorOptions = {
+		width: bounds?.width ?? DEFAULT_WINDOW_WIDTH,
+		height: bounds?.height ?? DEFAULT_WINDOW_HEIGHT,
+		show: false,
+		backgroundColor: getWindowBackgroundColor(allowTransparency),
+		transparent: allowTransparency,
+		...getWindowShadowOptions(allowTransparency),
+		...getTitleBarWindowOptions(useNativeTitleBar),
+		...(isMac ? {trafficLightPosition: CUSTOM_TITLEBAR_TRAFFIC_LIGHT_POSITION} : {}),
+		acceptFirstMouse: isMac,
+		webPreferences: getSharedWebPreferences(allowTransparency, useNativeTitleBar, true),
+	};
+	if (process.platform === 'linux') {
+		const iconPath = getLinuxWindowIconPath();
+		if (iconPath) {
+			windowOptions.icon = iconPath;
+		}
+	}
+	if (bounds != null) {
+		windowOptions.x = bounds.x;
+		windowOptions.y = bounds.y;
+	} else {
+		windowOptions.center = true;
+	}
+	const window = new BrowserWindow(windowOptions);
+	const contents = window.webContents;
+	const contentsId = contents.id;
+	forkExtraAppWindows.add(window);
+	if (route != null) forkWindowRoutes.set(window, route);
+	forkWindowMaximized.set(window, options.isMaximized === true);
+	trackForkAppWindow(window);
+	installHtmlFullscreenChromeGuard(window);
+	forwardMaximizeChanges(window);
+	window.setMenuBarVisibility(false);
+
+	let pendingMaximize = options.isMaximized === true;
+	const revealGate = new MainWindowRevealGate({
+		onReveal: () => {
+			if (!isAliveWindow(window) || window.isVisible()) return;
+			if (pendingMaximize) {
+				pendingMaximize = false;
+				window.maximize();
+			}
+			if (options.focus === false) {
+				window.showInactive();
+			} else {
+				window.show();
+			}
+			applyForkRestoredWindowStack();
+		},
+	});
+	const onFirstContentPainted = (event: Electron.IpcMainEvent): void => {
+		if (window.isDestroyed() || event.sender !== contents) return;
+		if (event.senderFrame == null || event.senderFrame.parent != null) return;
+		revealGate.markContentPainted();
+	};
+	ipcMain.on(DESKTOP_FIRST_CONTENT_PAINTED_CHANNEL, onFirstContentPainted);
+	window.once('ready-to-show', () => revealGate.markReadyToShow());
+	let settleTimer: NodeJS.Timeout | null = null;
+	window.once('closed', () => {
+		ipcMain.removeListener(DESKTOP_FIRST_CONTENT_PAINTED_CHANNEL, onFirstContentPainted);
+		revealGate.dispose();
+		if (settleTimer) clearTimeout(settleTimer);
+		forkExtraAppWindows.delete(window);
+	});
+
+	contents.on('preload-error', (_event, preloadPath, error) => {
+		logger.error('Preload script failed in an extra app window:', {preloadPath, error});
+	});
+	let lastRendererGoneAt = 0;
+	contents.on('render-process-gone', (_event, details) => {
+		logger.error('Render process gone in an extra app window', {url: contents.getURL(), details});
+		if (isQuitting || details.reason === 'clean-exit' || !isAliveWindow(window)) return;
+		const now = Date.now();
+		const repeated = now - lastRendererGoneAt < RENDERER_GONE_REPEAT_WINDOW_MS;
+		lastRendererGoneAt = now;
+		if (repeated) {
+			window.destroy();
+			return;
+		}
+		contents.reloadIgnoringCache();
+	});
+	contents.on('will-navigate', (event, url) => {
+		preventUntrustedNavigation(event, url, true);
+	});
+	contents.on('will-frame-navigate', (event) => {
+		preventUntrustedNavigation(event, event.url, event.isMainFrame);
+	});
+	contents.on('did-create-window', handlers.onDidCreateWindow);
+	contents.setWindowOpenHandler(handlers.onWindowOpen);
+	registerSpellcheck(contents);
+	getDesktopLocalAppAuthorization().authorize(contents);
+
+	const appLoadRetry = createAppLoadRetry({
+		webContents: contents,
+		appUrl,
+		logger,
+		isTrustedUrl: isTrustedOrigin,
+		onCommitted: () => undefined,
+		onRepeatedFailure: (failure) => {
+			logger.warn('An extra app window keeps failing to load', {...failure});
+		},
+	});
+	forkWindowLoadQueue.enqueue(contentsId, () => {
+		if (!isAliveWindow(window)) {
+			forkWindowLoadQueue.settle(contentsId);
+			return;
+		}
+		revealGate.start();
+		appLoadRetry.start();
+		settleTimer = setTimeout(() => forkWindowLoadQueue.settle(contentsId), FORK_WINDOW_LOAD_SETTLE_TIMEOUT_MS);
+	});
+	scheduleForkWindowSessionSave();
+	return window;
+}
+
+// Opens a window next to the given one showing the same route (File > New window).
+export function openAppWindowLike(reference: BrowserWindow | null): BrowserWindow | null {
+	const source = reference != null && getAppWindows().includes(reference) ? reference : getMainWindow();
+	if (!isAliveWindow(source)) return openAppWindow();
+	const route = forkWindowRoutes.get(source) ?? forkAppWindowRouteFromUrl(source.webContents.getURL(), DESKTOP_APP_URL);
+	return openAppWindow({route});
+}
+
+// Called for every last-route report. Extra windows keep their own route for the saved layout;
+// only the main window's goes on to upstream's last-route file, which is what this returns.
+export function recordAppWindowRoute(sender: Electron.WebContents, routePath: unknown): boolean {
+	const window = appWindowForContents(sender);
+	if (window == null) return true;
+	// A window reports its route once it is signed in and showing the app, so it is done loading.
+	markAppWindowSignedIn(window);
+	if (isForkAppWindowRoute(routePath)) {
+		forkWindowRoutes.set(window, routePath);
+		scheduleForkWindowSessionSave();
+	}
+	return window === mainWindow;
+}
+
+function reloadStaleAppWindows(contentsIds: ReadonlyArray<number>): void {
+	for (const window of getAppWindows()) {
+		const contents = window.webContents;
+		const contentsId = contents.id;
+		if (!contentsIds.includes(contentsId)) continue;
+		logger.info('Reloading an app window after the signed-in account changed in another window');
+		// If it is the window loading right now, it must not wait for itself.
+		forkWindowLoadQueue.settle(contentsId);
+		forkWindowLoadQueue.enqueue(contentsId, () => {
+			if (!isAliveWindow(window)) {
+				forkWindowLoadQueue.settle(contentsId);
+				return;
+			}
+			contents.reload();
+			setTimeout(() => forkWindowLoadQueue.settle(contentsId), FORK_WINDOW_LOAD_SETTLE_TIMEOUT_MS).unref?.();
+		});
+	}
+}
+
+function registerForkAppWindowIpc(): void {
+	if (forkWindowIpcRegistered) return;
+	forkWindowIpcRegistered = true;
+	ipcMain.handle(FORK_APP_WINDOW_CHANNELS.open, (event, route: unknown): boolean => {
+		if (appWindowForIpcSender(event) == null) return false;
+		if (route != null && typeof route !== 'string') return false;
+		return openAppWindow({route: route ?? null}) != null;
+	});
+	// A window asks before it notifies or plays a sound for something every window hears about.
+	ipcMain.handle(FORK_APP_WINDOW_CHANNELS.claimNotification, (event, key: unknown, channelId: unknown): boolean => {
+		// Anything that is not one of our windows keeps upstream's behaviour and announces.
+		if (appWindowForIpcSender(event) == null || typeof key !== 'string' || key.length === 0) return true;
+		const osFocused = BrowserWindow.getFocusedWindow();
+		return forkNotificationClaims.claim({
+			windowId: event.sender.id,
+			key,
+			channelId: typeof channelId === 'string' ? channelId : null,
+			focusedWindowId: osFocused != null && getAppWindows().includes(osFocused) ? osFocused.webContents.id : null,
+		});
+	});
+	ipcMain.on(FORK_APP_WINDOW_CHANNELS.viewedChannel, (event, channelId: unknown) => {
+		if (appWindowForIpcSender(event) == null) return;
+		forkNotificationClaims.setViewedChannel(event.sender.id, typeof channelId === 'string' ? channelId : null);
+	});
+	ipcMain.on(FORK_APP_WINDOW_CHANNELS.account, (event, accountKey: unknown) => {
+		const window = appWindowForIpcSender(event);
+		if (window == null) return;
+		const settled = typeof accountKey === 'string' && accountKey.length > 0 ? accountKey : null;
+		if (settled != null) markAppWindowSignedIn(window);
+		reloadStaleAppWindows(forkWindowAccountSync.report(event.sender.id, settled));
+	});
 }
