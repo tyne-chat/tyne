@@ -60,6 +60,7 @@ import {runInAction} from 'mobx';
 
 // Fork imports.
 
+import {scheduleForkAccountReadyWork} from '@app/features/gateway/events/ForkAccountReadyWork';
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
@@ -160,12 +161,7 @@ function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext,
 	Users.handleGatewayReady(accountKey, data.user);
 	Users.cacheUsers(data.users ?? []);
 	syncAccountUserData(accountKey, data.user);
-	void PersonaCommands.fetchPersonas(true).catch((error) => {
-		logger.warn('Failed to fetch personas after READY', error);
-	});
-	void PersonaCommands.fetchPersonaSettings().catch((error) => {
-		logger.warn('Failed to fetch persona settings after READY', error);
-	});
+	scheduleForkAccountReadyWork();
 	Authentication.handleGatewayReady({user: data.user});
 	Guilds.handleGatewayReady({guilds});
 	UserSettings.handleGatewayReady(data.user_settings);
