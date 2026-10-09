@@ -54,6 +54,22 @@ const CHANNELS = {
 		provisioningProfile: null,
 	},
 };
+// Fork: package the stable channel as "Fluxer Temple" with its own IDs, matching the fork identity
+// in src/common/DesktopIdentity.ts. It is unsigned, so nothing here needs upstream's signing
+// profile or notarization. FLUXER_FORK_IDENTITY=0 packages with upstream's identity.
+if (process.env.FLUXER_FORK_IDENTITY !== '0') {
+	Object.assign(CHANNELS.stable, {
+		productName: 'Fluxer Temple',
+		linuxOptDirName: 'fluxer-temple',
+		artifactProductName: 'Fluxer-Temple',
+		appId: 'app.fluxer.temple',
+		packageName: 'fluxer_desktop_temple',
+		linuxPackageName: 'fluxer-temple',
+		linuxDesktopId: 'app.fluxer.FluxerDesktopTemple',
+		notarize: false,
+		provisioningProfile: null,
+	});
+}
 const buildChannel = process.env.BUILD_CHANNEL || 'stable';
 const channel = CHANNELS[buildChannel];
 
