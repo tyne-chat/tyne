@@ -54,6 +54,11 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {Routes} from '@app/app/Routes';
+import {openRouteInNewWindowOnMiddleClick} from '@app/features/platform/utils/ForkAppWindows';
+
 const YOU_DESCRIPTOR = msg({
 	message: 'You',
 	comment: 'First-person prefix used in DM list row preview when the current user is the message author.',
@@ -483,6 +488,7 @@ const ResolvedDMListItem = observer(function ResolvedDMListItem({
 						contextMenuOpen && styles.contextMenuActive,
 					)}
 					onClick={handleNavigate}
+					onAuxClick={(event) => openRouteInNewWindowOnMiddleClick(event, Routes.dmChannel(channel.id))}
 					onContextMenu={handleContextMenu}
 					onMouseEnter={scheduleChannelPreload}
 					onMouseLeave={cancelChannelPreload}

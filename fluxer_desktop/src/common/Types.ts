@@ -70,6 +70,10 @@ import type {
 	RegistrationResponseJSON,
 } from '@simplewebauthn/browser';
 
+// Fork imports.
+
+import type {ForkAppWindowAPI} from '@fluxer/desktop_ipc/src/ForkAppWindowContract';
+
 export interface DesktopInfo {
 	version: string;
 	channel: BuildChannel;
@@ -239,6 +243,7 @@ export type TrayActionPayload =
 export interface ElectronAPI {
 	platform: NodeJS.Platform;
 	buildChannel: BuildChannel;
+	appWindows: ForkAppWindowAPI;
 	localDevelopmentInstanceUrl: string | null;
 	offlineBuild?: boolean;
 	getDesktopInfo: () => Promise<DesktopInfo>;
