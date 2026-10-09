@@ -16,7 +16,7 @@ const sweepSignalBar: WorkerTaskHandler = async (_payload, helpers) => {
 		findUser: (userId) => deps.userRepository.findUnique(userId),
 		findChannel: (channelId) => deps.channelRepository.findUnique(channelId),
 		settingsRepository: new SignalBarSettingsRepository(),
-		listGuildChannels: (guildId) => deps.channelRepository.listGuildChannels(guildId),
+		listGuildChannels: (guildId) => deps.channelRepository.listGuildChannels(guildId, 'enrolled'),
 	});
 	const {cleared} = await service.sweep();
 	if (cleared > 0) {
