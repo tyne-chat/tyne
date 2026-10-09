@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import {Endpoints} from '@app/features/app/constants/Endpoints';
+import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import {http} from '@app/features/platform/transport/RestTransport';
 import * as Toast from '@app/features/ui/commands/ToastCommands';
 import type {
@@ -820,5 +821,9 @@ export class PersonaStoreClass {
 }
 
 export const PersonaStore = new PersonaStoreClass();
+
+// Personas belong to one account: drop them whenever the app logs out or switches account.
+AccountScopedWork.registerCancellation(() => PersonaStore.reset());
+
 export const SubprofileStore = PersonaStore;
 export default PersonaStore;
