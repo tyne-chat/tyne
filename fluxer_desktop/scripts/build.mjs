@@ -43,6 +43,9 @@ let embeddedBuildVersion = process.env.PUBLIC_BUILD_VERSION || process.env.BUILD
 const embeddedReleaseChannel = process.env.PUBLIC_RELEASE_CHANNEL || process.env.RELEASE_CHANNEL || '';
 const modulesEnabled = process.env.FLUXER_MODULES === '1' || process.env.FLUXER_MODULES === 'true';
 const offlineBuild = process.env.FLUXER_OFFLINE === '1' || process.env.FLUXER_OFFLINE === 'true';
+// Fork: the GitHub repository whose releases the in-app updater reads (src/main/ForkReleaseFeed.ts).
+// Compiled into every build so that none can fall back to upstream's package server.
+const forkReleaseRepository = process.env.FLUXER_FORK_RELEASES || 'chiaracoetzee/fluxer-subprofiles';
 function publicBuildDefines() {
 	return {
 		'process.env.PUBLIC_BUILD_VERSION': JSON.stringify(embeddedBuildVersion),
@@ -51,6 +54,9 @@ function publicBuildDefines() {
 		'process.env.RELEASE_CHANNEL': JSON.stringify(embeddedReleaseChannel),
 		'process.env.FLUXER_MODULES': JSON.stringify(modulesEnabled ? '1' : ''),
 		'process.env.FLUXER_OFFLINE': JSON.stringify(offlineBuild ? '1' : ''),
+		'process.env.FLUXER_FORK_RELEASES': JSON.stringify(forkReleaseRepository),
+		// Fork: install as "Fluxer Temple" (src/common/DesktopIdentity.ts). FLUXER_FORK_IDENTITY=0 builds with upstream's identity.
+		'process.env.FLUXER_FORK_IDENTITY': JSON.stringify(process.env.FLUXER_FORK_IDENTITY === '0' ? '' : '1'),
 	};
 }
 const electronExternals = [
