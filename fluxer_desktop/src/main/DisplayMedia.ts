@@ -12,6 +12,10 @@ import {reuseWindowsCaptureItemsForSource} from '@electron/main/WindowsWindowCap
 import {BrowserWindow, desktopCapturer, ipcMain, screen} from 'electron';
 import log from 'electron-log';
 
+// Fork imports.
+
+import {isLocalAppRendererDocumentURL} from '@electron/main/LocalAppURL';
+
 type DisplayMediaPortalSurfacePreference = 'window' | 'monitor';
 
 interface PendingDisplayMediaRequest {
@@ -177,8 +181,23 @@ export function drainPendingDisplayMediaRequests(reason: string): void {
 	pendingDisplayMediaRequests.clear();
 }
 
-export function registerDisplayMediaRequestHandler(session: Electron.Session, webContents: Electron.WebContents): void {
+// Fork: with more than one app window, the picker belongs in the window that asked to share.
+// Popouts are not app documents of their own, so their requests stay with the main window.
+function requestingAppWindowContents(
+	request: Electron.DisplayMediaRequestHandlerHandlerRequest,
+): Electron.WebContents | null {
+	const frame = request.frame;
+	if (frame == null || frame.parent != null || !isLocalAppRendererDocumentURL(frame.url)) return null;
+	const window = BrowserWindow.getAllWindows().find((candidate) => candidate.webContents.mainFrame === frame);
+	return window?.webContents ?? null;
+}
+
+export function registerDisplayMediaRequestHandler(
+	session: Electron.Session,
+	mainWebContents: Electron.WebContents,
+): void {
 	session.setDisplayMediaRequestHandler((request, callback) => {
+		const webContents = requestingAppWindowContents(request) ?? mainWebContents;
 		const requestId = `display-media-${++displayMediaRequestCounter}`;
 		let callbackInvoked = false;
 		const invokeCallback = (streams: Electron.Streams | null): void => {

@@ -50,6 +50,13 @@ import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 
+// Fork imports.
+
+import {
+	channelWindowRoute,
+	OpenInNewWindowContextMenuItem,
+} from '@app/features/ui/action_menu/items/ForkOpenInNewWindowMenuItem';
+
 const OPEN_IN_COMMUNITY_DESCRIPTOR = msg({
 	message: 'Open in community',
 	comment: 'Favorites menu action that opens the favorited channel in the community it belongs to.',
@@ -165,6 +172,11 @@ export const FavoritesChannelContextMenu: React.FC<FavoritesChannelContextMenuPr
 					>
 						{i18n._(CHANGE_NICKNAME_DESCRIPTOR)}
 					</MenuItem>
+					<OpenInNewWindowContextMenuItem
+						route={channelWindowRoute(channel)}
+						onClose={onClose}
+						data-flx="ui.action-menu.favorites-channel-context-menu.open-in-new-window-context-menu-item"
+					/>
 					{channel.guildId && (
 						<MenuItem
 							icon={
