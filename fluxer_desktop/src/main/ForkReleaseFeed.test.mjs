@@ -64,6 +64,7 @@ describe('fork release feed', () => {
 			assert.equal(formats.forkLatestAssetBaseUrl(), null);
 			assert.equal(formats.forkLatestInfoUrl(), null);
 			assert.equal(formats.forkVersionDownloadUrl('Fluxer', '1.4.0', 'appimage'), null);
+			assert.equal(formats.getUpdateBaseUrl(), 'https://pkgs.fluxer.com/desktop/stable/linux/x64');
 			assert.equal(downloads.UPDATE_BASE_URL, 'https://pkgs.fluxer.com/desktop/stable/linux/x64');
 			assert.equal(downloads.DOWNLOAD_PAGE_URL, 'https://fluxer.app/download');
 			assert.equal(
@@ -75,6 +76,10 @@ describe('fork release feed', () => {
 
 	test('the updater reads its feed from the newest release and never from the package origin', () => {
 		const {formats, downloads} = load({platform: 'win32'});
+		// Everything upstream downloads for a shell update starts from this one function, so a
+		// consumer upstream adds later is covered without a change here.
+		assert.equal(formats.getUpdateBaseUrl(), `${RELEASES}/latest/download`);
+		assert.equal(formats.getUpdateBaseUrl('linux'), `${RELEASES}/latest/download`);
 		assert.equal(downloads.UPDATE_BASE_URL, `${RELEASES}/latest/download`);
 		assert.equal(downloads.DOWNLOAD_PAGE_URL, `${RELEASES}/latest`);
 		assert.equal(formats.forkLatestInfoUrl(), `${RELEASES}/latest/download/latest-win32-x64.json`);

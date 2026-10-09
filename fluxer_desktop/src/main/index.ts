@@ -135,6 +135,7 @@ import log from 'electron-log';
 
 // Fork imports.
 
+import {armForkShellUpdate} from '@electron/main/ForkShellUpdate';
 import {recordAppWindowRoute} from '@electron/main/Window';
 
 log.transports.file.level = 'info';
@@ -820,6 +821,8 @@ export {readBootSession};
 export async function finishMainAppStartup(): Promise<void> {
 	if (process.env.FLUXER_OFFLINE !== '1' && !shouldDisableModuleUpdatesForLaunch()) {
 		runStartupPhase('updater', () => registerUpdater(getMainWindow));
+		// Fork: upstream only looks for shell updates inside its module system, which fork builds leave off.
+		armForkShellUpdate();
 	}
 	await new Promise<void>((resolve) => setImmediate(resolve));
 	await new Promise<void>((resolve) => onMainWindowReady(resolve));
