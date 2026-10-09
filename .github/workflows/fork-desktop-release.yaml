@@ -339,3 +339,27 @@ jobs:
           --notes "$NOTES"
           --latest
           release_assets/*
+
+      # The updater library decides for itself how to read the update source, so ask it. This
+      # fails the job when an installed app could not find the release that was just published.
+      - name: Checkout the update check
+        uses: actions/checkout@v4
+        with:
+          path: source
+          sparse-checkout: |
+            fluxer_desktop/scripts
+            fluxer_desktop/package.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Verify that installed apps can find the release
+        run: |
+          velopack_version="$(node -p "require('./source/fluxer_desktop/package.json').dependencies.velopack")"
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/updater" "velopack@${velopack_version}"
+          node source/fluxer_desktop/scripts/fork-verify-update-feed.cjs \
+            --repository "${{ github.repository }}" \
+            --expect "$VERSION" \
+            --velopack "$RUNNER_TEMP/updater/node_modules/velopack"
