@@ -141,6 +141,13 @@ import type {I18n, MessageDescriptor} from '@lingui/core';
 import {useLingui} from '@lingui/react/macro';
 import {useCallback, useMemo} from 'react';
 
+// Fork imports.
+
+import {
+	buildOpenInNewWindowMenuItem,
+	channelWindowRoute,
+} from '@app/features/ui/action_menu/items/ForkOpenInNewWindowMenuItem';
+
 const logger = new Logger('DMMenuData');
 
 function showDmMenuErrorModal(i18n: I18n, message: MessageDescriptor): void {
@@ -538,7 +545,9 @@ export function useDMMenuData(
 				],
 			});
 		}
-		const groupActionsItems: Array<MenuItemType> = [];
+		const groupActionsItems: Array<MenuItemType> = [
+			buildOpenInNewWindowMenuItem(i18n, channelWindowRoute(channel), onClose),
+		];
 		if (isGroupDM) {
 			groupActionsItems.push({
 				icon: <EditGroupIcon size={20} data-flx="ui.action-menu.items.dm-menu-data.groups.edit-group-icon" />,
@@ -742,6 +751,9 @@ export function useDMMenuData(
 		handleDebugChannel,
 		handleCopyUserId,
 		handleCopyChannelId,
+		channel,
+		i18n,
+		onClose,
 	]);
 	return {
 		groups,
