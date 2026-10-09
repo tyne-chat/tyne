@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {createChannelID} from '@app/api/BrandedTypes';
+import {viewerFromCtx} from '@app/api/experiment/ChannelThreadsGate';
 import {DefaultUserOnly, LoginRequired} from '@app/api/middleware/AuthMiddleware';
 import {RateLimitMiddleware} from '@app/api/middleware/RateLimitMiddleware';
 import {OpenAPI} from '@app/api/middleware/ResponseTypeMiddleware';
@@ -45,6 +46,7 @@ export function ChannelPersonaMentionController(app: HonoApp) {
 			const authChannel = await channelService.channelData.auth.getChannelAuthenticated({
 				userId: user.id,
 				channelId,
+				viewer: viewerFromCtx(ctx),
 			});
 
 			const userMap = new Map<
