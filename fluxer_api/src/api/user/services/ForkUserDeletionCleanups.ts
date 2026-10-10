@@ -2,11 +2,16 @@
 
 import type {UserID} from '@app/api/BrandedTypes';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+import {forgetThreadOwnerPersonasOfUser} from '@app/api/persona/ThreadOwnerPersonaStore';
 
 // Fork: the fork's steps in processUserDeletion's last Promise.all, which spreads them in at the end.
 export function forkUserDeletionCleanups(
 	userId: UserID,
 	personaRepository: IPersonaRepository,
 ): Array<Promise<unknown>> {
-	return [personaRepository.hardDeleteAllByUserId(userId), personaRepository.deleteSettings(userId)];
+	return [
+		personaRepository.hardDeleteAllByUserId(userId),
+		personaRepository.deleteSettings(userId),
+		forgetThreadOwnerPersonasOfUser(userId),
+	];
 }
