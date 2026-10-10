@@ -162,6 +162,7 @@ const NON_COMMAND_TRIGGERS: Array<TriggerType> = ['mention', 'channel', 'emoji',
 
 export const LexicalChannelTextareaContent = observer(
 	({
+		onWireValueChange,
 		accountKey,
 		channel,
 		draft,
@@ -181,6 +182,7 @@ export const LexicalChannelTextareaContent = observer(
 		onValueChange,
 		onFocus,
 	}: {
+		onWireValueChange?: (wireValue: string) => void;
 		accountKey: string | null;
 		channel: Channel;
 		draft: string | null;
@@ -995,6 +997,10 @@ export const LexicalChannelTextareaContent = observer(
 		useEffect(() => {
 			onValueChange?.(value);
 		}, [onValueChange, value]);
+		// Fork: a bare composer hides its persona pill, so its host shows one and needs the text as it is sent.
+		useEffect(() => {
+			onWireValueChange?.(wireValue);
+		}, [onWireValueChange, wireValue]);
 		const handleArrowUpEmpty = useCallback(() => {
 			if (KeyboardMode.keyboardModeEnabled) {
 				ComponentBus.dispatch('FOCUS_BOTTOMMOST_MESSAGE', {channelId: channel.id});
