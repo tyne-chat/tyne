@@ -46,7 +46,7 @@ export const SystemMessageUsername = observer(
 					ref={usernameRef}
 					data-flx="channel.system-message-username.system-message-link"
 				>
-					{NicknameUtils.getNickname(author, guild?.id)}
+					{message.subprofile?.name ?? NicknameUtils.getNickname(author, guild?.id)}
 				</span>
 			</PreloadableUserPopout>
 		);
