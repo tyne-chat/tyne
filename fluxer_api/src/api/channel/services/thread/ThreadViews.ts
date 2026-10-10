@@ -8,6 +8,10 @@ import {ThreadState} from '@app/api/models/ThreadState';
 import {ThreadStats} from '@app/api/models/ThreadStats';
 import {THREAD_ONLY_CHANNEL_TYPES} from '@fluxer/constants/src/ThreadConstants';
 
+// Fork: threads started as a persona.
+
+import {loadThreadOwnerPersonaId, loadThreadOwnerPersonaIds} from '@app/api/persona/ThreadOwnerPersonaStore';
+
 async function liveTagIds(
 	repository: ChannelRepository,
 	guildId: GuildID,
@@ -55,15 +59,18 @@ export async function loadThreadViews(
 		),
 	);
 	const channelById = new Map(channels.map((channel) => [channel.id, channel]));
+	const ownerPersonaIds = await loadThreadOwnerPersonaIds(threadIds);
 	return states.flatMap((state) => {
 		const channel = channelById.get(state.threadId);
 		if (!channel) return [];
+		const ownerPersonaId = ownerPersonaIds.get(state.threadId);
 		return [
 			{
 				channel,
 				state: withLiveTags(state, tagsByParent.get(state.parentId)),
 				stats: stats.get(state.threadId) ?? ThreadStats.empty(state.threadId),
 				parentType: parentTypes.get(state.parentId) ?? null,
+				...(ownerPersonaId != null ? {ownerPersonaId} : {}),
 			},
 		];
 	});
@@ -81,5 +88,12 @@ export async function loadThreadView(
 			? liveTagIds(repository, state.guildId, parent.id)
 			: Promise.resolve(undefined),
 	]);
-	return {channel, state: withLiveTags(state, tagIds), stats, parentType: parent.type};
+	const ownerPersonaId = await loadThreadOwnerPersonaId(channel.id);
+	return {
+		channel,
+		state: withLiveTags(state, tagIds),
+		stats,
+		parentType: parent.type,
+		...(ownerPersonaId != null ? {ownerPersonaId} : {}),
+	};
 }
