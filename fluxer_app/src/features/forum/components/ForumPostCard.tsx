@@ -130,7 +130,9 @@ export const ForumPostCard = observer(({forum, post, grid}: ForumPostCardProps) 
 	const media = firstMedia(firstMessage);
 	const authorId = firstMessage?.author.id ?? post.ownerId;
 	const author = authorId ? Users.getUser(authorId) : undefined;
-	const authorName = author ? NicknameUtils.getNickname(author, forum.guildId, forum.id) : null;
+	// Fork: a post made as a persona is listed under that persona's name.
+	const authorName =
+		firstMessage?.subprofile?.name ?? (author ? NicknameUtils.getNickname(author, forum.guildId, forum.id) : null);
 	const tags = getForumTags(forum, post.appliedTags);
 	const joined = ThreadMemberships.isMember(post.id);
 	const postUnreadCount = joined ? 0 : ForumReadState.getPostUnreadCount(post.id);
