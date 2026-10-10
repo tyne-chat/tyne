@@ -32,6 +32,7 @@ import {useCallback} from 'react';
 
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
 
 interface UseMessageSubmissionOptions {
 	accountKey: string | null;
@@ -122,24 +123,14 @@ export const useMessageSubmission = ({
 
 			const hasPendingAttachments = hasAttachments || CloudUpload.getTextareaAttachments(channel.id).length > 0;
 			const hasNonTextMedia = hasPendingAttachments || stickers.length > 0 || favoriteMemeId !== undefined;
-			const matchResult = PersonaStore.matchOutgoingMessage(content, hasPendingAttachments, {
+			const {content: finalContent, subprofile} = resolveOutgoingPersona(content, hasPendingAttachments, {
 				allowEmptyContent: hasNonTextMedia,
 			});
-			const finalContent = matchResult.matched || matchResult.wasEscaped ? matchResult.strippedContent : content;
 			if (finalContent.length === 0 && !hasNonTextMedia) {
 				RollingTypingSender.stopTyping(channel.id);
 				DraftCommands.deleteDraft(accountKey, channel.id);
 				return true;
 			}
-			const displayTagText = PersonaStore.displayTagText;
-			const displayTagIcon = PersonaStore.displayTagIcon;
-			const subprofile =
-				matchResult.matched && matchResult.persona
-					? normalizeSubprofile(matchResult.persona, {
-							display_tag_text: displayTagText || null,
-							display_tag_icon: displayTagIcon || null,
-						})
-					: undefined;
 
 			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
 			if (!MessageCommands.reserveSend(channel.id, nonce)) return false;
