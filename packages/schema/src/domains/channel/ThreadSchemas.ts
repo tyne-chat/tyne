@@ -76,6 +76,9 @@ export const ThreadChannelFields = {
 		.optional()
 		.describe('IDs of the most recently joined members of a forum or media post, newest first'),
 	member: ThreadMemberResponse.optional().describe('The thread member object for the current user'),
+	owner_persona_id: SnowflakeStringType.nullish().describe(
+		'The ID of the persona the owner started the thread as, absent when it was started as the account',
+	),
 };
 
 export const ThreadParentChannelFields = {
