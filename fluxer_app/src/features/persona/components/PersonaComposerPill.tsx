@@ -40,10 +40,12 @@ interface PersonaComposerPillProps {
 	className?: string;
 	text?: string;
 	hasAttachments?: boolean;
+	/** Sits in a row of icon buttons (the forum post composer) rather than beside the chat composer. */
+	inButtonRow?: boolean;
 }
 
 export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
-	({className, text = '', hasAttachments = false}) => {
+	({className, text = '', hasAttachments = false, inButtonRow = false}) => {
 		const {i18n} = useLingui();
 		const currentUser = Users.getCurrentUser();
 		const personas = PersonaStore.personas;
@@ -73,7 +75,10 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 		}
 
 		return (
-			<div className={clsx(styles.pillContainer, className)} data-flx="persona.composer-pill">
+			<div
+				className={clsx(styles.pillContainer, inButtonRow && styles.inButtonRow, className)}
+				data-flx="persona.composer-pill"
+			>
 				<Popout
 					position="top-start"
 					offsetMainAxis={8}
