@@ -41,6 +41,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo, useState} from 'react';
 
+// Fork: posts made as a persona.
+
+import {useThreadOwnerPersona} from '@app/features/persona/utils/ThreadOwnerPersona';
+
 const MAX_CARD_TAGS = 3;
 const LIST_THUMBNAIL_SIZE = 96;
 const GRID_THUMBNAIL_SIZE = 480;
@@ -130,9 +134,13 @@ export const ForumPostCard = observer(({forum, post, grid}: ForumPostCardProps) 
 	const media = firstMedia(firstMessage);
 	const authorId = firstMessage?.author.id ?? post.ownerId;
 	const author = authorId ? Users.getUser(authorId) : undefined;
-	// Fork: a post made as a persona is listed under that persona's name.
+	// Fork: a post made as a persona is listed under that persona's name. The first message says
+	// which; once it is deleted, the persona the post was started as does.
+	const ownerPersona = useThreadOwnerPersona(firstMessage ? null : post);
 	const authorName =
-		firstMessage?.subprofile?.name ?? (author ? NicknameUtils.getNickname(author, forum.guildId, forum.id) : null);
+		firstMessage?.subprofile?.name ??
+		ownerPersona?.name ??
+		(author ? NicknameUtils.getNickname(author, forum.guildId, forum.id) : null);
 	const tags = getForumTags(forum, post.appliedTags);
 	const joined = ThreadMemberships.isMember(post.id);
 	const postUnreadCount = joined ? 0 : ForumReadState.getPostUnreadCount(post.id);

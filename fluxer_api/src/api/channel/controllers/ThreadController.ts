@@ -165,6 +165,7 @@ export function ThreadController(app: HonoApp) {
 				},
 				requestCache: ctx.get('requestCache'),
 				auditLogReason: ctx.get('auditLogReason') ?? null,
+				personaId: body.persona_id,
 			});
 			return ctx.json(thread, 201);
 		},
@@ -223,6 +224,7 @@ export function ThreadController(app: HonoApp) {
 					rateLimitPerUser: body.rate_limit_per_user,
 				},
 				auditLogReason,
+				personaId: body.persona_id,
 			});
 			return ctx.json(thread, 201);
 		},
