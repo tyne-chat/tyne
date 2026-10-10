@@ -319,6 +319,8 @@ export class MessageSendService {
 		if (!user.isBot && user.id !== SYSTEM_USER_ID && !(user.flags & UserFlags.HAS_SESSION_STARTED)) {
 			throw InputValidationError.fromCode('content', ValidationErrorCodes.MUST_START_SESSION_BEFORE_SENDING);
 		}
+		// Fork: refuse a persona the user does not own before the post exists, as validateMessageCanBeSent does.
+		await this.resolveMessagePersonaId({user, data});
 		const {channel, guild, member, checkPermission, hasPermission} = parentAuth;
 		await this.checkMessageSendPermissions({guild, member, channel, data, user, checkPermission, hasPermission});
 		this.ensureMessageRequestIsValid({user, data, guildFeatures: guild?.features ?? null});
