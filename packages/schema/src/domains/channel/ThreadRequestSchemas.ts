@@ -46,6 +46,7 @@ export const StartThreadFromMessageRequest = z.object({
 	name: ThreadNameType,
 	auto_archive_duration: ThreadAutoArchiveDurationSchema.optional(),
 	rate_limit_per_user: ThreadRateLimitPerUserType.optional(),
+	persona_id: SnowflakeType.nullish().describe('ID of one of your personas to start the thread as'),
 });
 
 export type StartThreadFromMessageRequest = z.infer<typeof StartThreadFromMessageRequest>;
@@ -64,6 +65,7 @@ export const StartThreadRequest = z.object({
 	auto_archive_duration: ThreadAutoArchiveDurationSchema.optional(),
 	rate_limit_per_user: ThreadRateLimitPerUserType.optional(),
 	invitable: z.boolean().optional().describe('Whether non-moderators can add other non-moderators (private threads)'),
+	persona_id: SnowflakeType.nullish().describe('ID of one of your personas to start the thread as'),
 });
 
 export type StartThreadRequest = z.infer<typeof StartThreadRequest>;
