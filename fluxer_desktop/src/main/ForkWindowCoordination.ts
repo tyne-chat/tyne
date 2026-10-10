@@ -214,3 +214,50 @@ export class ForkWindowLoadQueue {
 		}
 	}
 }
+
+export interface ForkWindowPlacement {
+	readonly x: number;
+	readonly y: number;
+	readonly width: number;
+	readonly height: number;
+}
+
+// Where each app window was the last time it sat still outside fullscreen. A window that leaves
+// HTML fullscreen (a video, say) is put back there. Upstream keeps one such position, the main
+// window's, which is right while there is one window and sends every other window to the main
+// window's place.
+export class ForkWindowRestingBounds {
+	private readonly settled = new Map<number, ForkWindowPlacement>();
+	private readonly pending = new Map<number, ReturnType<typeof setTimeout>>();
+
+	record(windowId: number, bounds: ForkWindowPlacement): void {
+		this.settled.set(windowId, {x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height});
+	}
+
+	// The window moved or changed size. Going fullscreen is reported as a move like any other, so
+	// the new place only counts once the window has stayed put for delayMs, and read returns null
+	// if the window turns out to be fullscreen by then.
+	noteChange(windowId: number, read: () => ForkWindowPlacement | null, delayMs: number): void {
+		const waiting = this.pending.get(windowId);
+		if (waiting !== undefined) clearTimeout(waiting);
+		this.pending.set(
+			windowId,
+			setTimeout(() => {
+				this.pending.delete(windowId);
+				const bounds = read();
+				if (bounds != null) this.record(windowId, bounds);
+			}, delayMs),
+		);
+	}
+
+	get(windowId: number): ForkWindowPlacement | null {
+		return this.settled.get(windowId) ?? null;
+	}
+
+	releaseWindow(windowId: number): void {
+		const waiting = this.pending.get(windowId);
+		if (waiting !== undefined) clearTimeout(waiting);
+		this.pending.delete(windowId);
+		this.settled.delete(windowId);
+	}
+}
