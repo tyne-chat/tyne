@@ -31,6 +31,12 @@ on:
         required: false
         default: false
         type: boolean
+      platform:
+        description: Build only this platform, to try a change quickly. A release needs all of them.
+        required: false
+        default: all
+        type: choice
+        options: [all, windows, linux, macos]
   push:
     branches:
       - "desktop-test/**"
@@ -136,10 +142,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - {platform: windows, node_platform: win32, arch: x64, os: windows-2025}
-          - {platform: linux, node_platform: linux, arch: x64, os: ubuntu-22.04}
-          - {platform: macos, node_platform: darwin, arch: arm64, os: macos-14}
+        # Every platform, or the one named by the platform input.
+        include: >-
+          ${{ fromJSON(format('[{0}]',
+          inputs.platform == 'windows' && '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"}'
+          || inputs.platform == 'linux' && '{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"}'
+          || inputs.platform == 'macos' && '{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-14"}'
+          || '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"},{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"},{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-14"}')) }}
     defaults:
       run:
         shell: bash
@@ -279,14 +288,24 @@ jobs:
           USE_SYSTEM_FPM: "true"
         run: ${{ env.CI_TOOL }} --step build_app_linux
 
-      # Upstream's build_app_macos step requires its signing keychain. This build is unsigned and
-      # not notarized, so macOS asks for confirmation on first launch and cannot update itself.
-      - name: Build Electron app (macOS, unsigned)
+      # Upstream's build_app_macos step requires its signing keychain. This build is signed ad hoc
+      # (electron-builder.config.cjs) and not notarized, so macOS asks for confirmation on first
+      # launch and the app cannot update itself.
+      - name: Build Electron app (macOS, ad-hoc signed)
         if: matrix.platform == 'macos'
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: pnpm exec electron-builder --config electron-builder.config.cjs --mac "--${ARCH}"
+
+      - name: Check the macOS signature
+        if: matrix.platform == 'macos'
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: |
+          app="$(find dist-electron -maxdepth 2 -name '*.app' -type d | head -n 1)"
+          test -n "$app"
+          codesign --verify --deep --strict --verbose=2 "$app"
+          codesign --display --verbose=2 --entitlements - "$app"
 
       - name: Prepare release assets
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
@@ -305,7 +324,7 @@ jobs:
 
   publish:
     name: Publish GitHub release
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' }}
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
