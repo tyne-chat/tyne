@@ -49,6 +49,7 @@ interface ChannelRecordOptions {
 }
 
 export interface ThreadChannelFields {
+	readonly owner_persona_id?: string | null;
 	readonly flags?: number;
 	readonly thread_metadata?: ThreadMetadataResponse;
 	readonly applied_tags?: ReadonlyArray<string>;
@@ -70,6 +71,7 @@ export interface ChannelWire extends WireChannel, ThreadChannelFields {
 }
 
 const THREAD_FIELD_KEYS: ReadonlyArray<keyof ThreadChannelFields> = [
+	'owner_persona_id',
 	'flags',
 	'thread_metadata',
 	'applied_tags',
@@ -274,6 +276,11 @@ export class Channel {
 
 	get appliedTags(): ReadonlyArray<string> {
 		return this.threadFields?.applied_tags ?? [];
+	}
+
+	/** Fork: the persona the owner started this thread as, if any. */
+	get ownerPersonaId(): string | null {
+		return this.threadFields?.owner_persona_id ?? null;
 	}
 
 	get availableTags(): ReadonlyArray<ForumTagResponse> {
