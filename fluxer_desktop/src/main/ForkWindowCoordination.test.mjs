@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {describe, test} from 'node:test';
 import {installElectronStub} from './LocalAppTestSupport.test.mjs';
 
 installElectronStub();
 
-const {ForkNotificationClaims, ForkWindowAccountSync, ForkWindowLoadQueue} = await import(
+const {ForkNotificationClaims, ForkWindowAccountSync, ForkWindowLoadQueue, ForkWindowRestingBounds} = await import(
 	'./ForkWindowCoordination.ts'
 );
 
@@ -246,5 +247,79 @@ describe('app windows load one at a time', () => {
 		queue.enqueue(THIRD, () => started.push(THIRD));
 		queue.settle(MAIN);
 		assert.deepEqual(started, [THIRD]);
+	});
+});
+
+describe('each window goes back to its own place after fullscreen', () => {
+	const MAIN_PLACE = {x: 100, y: 100, width: 1200, height: 800};
+	const EXTRA_PLACE = {x: 2600, y: 150, width: 900, height: 700};
+	const SECOND_MONITOR = {x: 1920, y: 0, width: 2560, height: 1440};
+	const DELAY_MS = 500;
+
+	test('a second window on another monitor is not sent to the main window', () => {
+		const resting = new ForkWindowRestingBounds();
+		resting.record(MAIN, MAIN_PLACE);
+		resting.record(EXTRA, EXTRA_PLACE);
+		assert.deepEqual(resting.get(EXTRA), EXTRA_PLACE);
+		assert.deepEqual(resting.get(MAIN), MAIN_PLACE);
+	});
+
+	test('a window that was moved goes back to where it was moved to', (t) => {
+		t.mock.timers.enable({apis: ['setTimeout']});
+		const resting = new ForkWindowRestingBounds();
+		resting.record(EXTRA, MAIN_PLACE);
+		resting.noteChange(EXTRA, () => EXTRA_PLACE, DELAY_MS);
+		t.mock.timers.tick(DELAY_MS);
+		assert.deepEqual(resting.get(EXTRA), EXTRA_PLACE);
+	});
+
+	test('the move into fullscreen does not replace the place to go back to', (t) => {
+		t.mock.timers.enable({apis: ['setTimeout']});
+		const resting = new ForkWindowRestingBounds();
+		resting.record(EXTRA, EXTRA_PLACE);
+		let fullscreen = false;
+		const read = () => (fullscreen ? null : SECOND_MONITOR);
+		// The window reports its fullscreen size before anything says it is fullscreen.
+		resting.noteChange(EXTRA, read, DELAY_MS);
+		fullscreen = true;
+		t.mock.timers.tick(DELAY_MS);
+		assert.deepEqual(resting.get(EXTRA), EXTRA_PLACE);
+	});
+
+	test('a window still being dragged is read once, when it stops', (t) => {
+		t.mock.timers.enable({apis: ['setTimeout']});
+		const resting = new ForkWindowRestingBounds();
+		let reads = 0;
+		const read = () => {
+			reads += 1;
+			return EXTRA_PLACE;
+		};
+		resting.noteChange(EXTRA, read, DELAY_MS);
+		t.mock.timers.tick(DELAY_MS - 1);
+		resting.noteChange(EXTRA, read, DELAY_MS);
+		t.mock.timers.tick(DELAY_MS - 1);
+		assert.equal(reads, 0);
+		t.mock.timers.tick(1);
+		assert.equal(reads, 1);
+	});
+
+	test('a closed window is forgotten, along with a read that was still waiting', (t) => {
+		t.mock.timers.enable({apis: ['setTimeout']});
+		const resting = new ForkWindowRestingBounds();
+		resting.record(EXTRA, EXTRA_PLACE);
+		resting.noteChange(EXTRA, () => MAIN_PLACE, DELAY_MS);
+		resting.releaseWindow(EXTRA);
+		t.mock.timers.tick(DELAY_MS);
+		assert.equal(resting.get(EXTRA), null);
+	});
+
+	test("upstream's fullscreen guard asks for the bounds of the window it is given", () => {
+		const source = readFileSync(new URL('./Window.ts', import.meta.url), 'utf-8');
+		const guard = source.slice(
+			source.indexOf('function enterWindowsHtmlFullscreenChromeGuard('),
+			source.indexOf('function restoreWindowsHtmlFullscreenBounds('),
+		);
+		assert.match(guard, /const bounds = forkBoundsBeforeHtmlFullscreen\(window\);/);
+		assert.doesNotMatch(guard, /lastGoodWindowBounds/);
 	});
 });
