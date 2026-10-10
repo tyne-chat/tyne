@@ -81,6 +81,13 @@ import type {ThreadChannelResponse} from '@fluxer/schema/src/domains/channel/Thr
 import type {MessageResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 
+// Fork: threads started as a persona.
+
+import type {PersonaID} from '@app/api/BrandedTypes';
+import {resolveThreadOwnerPersonaId} from '@app/api/channel/services/thread/ForkThreadOwnerPersona';
+import {requestedPersonaId} from '@app/api/persona/PersonaOwnership';
+import {storeThreadOwnerPersona} from '@app/api/persona/ThreadOwnerPersonaStore';
+
 const THREAD_CREATED_MESSAGE_RECENT_WINDOW = 5;
 
 function slowmodeThreadKey(parentId: ChannelID, userId: UserID): string {
@@ -106,6 +113,7 @@ interface NewThread {
 	invitable: boolean | null;
 	hasStarter: boolean;
 	appliedTags?: Array<bigint>;
+	ownerPersonaId?: PersonaID | null;
 }
 
 export class ThreadCreationService {
@@ -119,8 +127,10 @@ export class ThreadCreationService {
 		input: CreateThreadInput;
 		requestCache: RequestCache;
 		auditLogReason: string | null;
+		personaId?: bigint | null;
 	}): Promise<ThreadChannelResponse> {
 		const parentAuth = await this.authorizeParent(params.viewer, params.user, params.channelId, 'from_message');
+		const ownerPersonaId = await resolveThreadOwnerPersonaId(params.user.id, params.personaId);
 		const source = await this.ctx.channelRepository.messages.getMessage(parentAuth.channel.id, params.messageId);
 		if (!source) {
 			throw new UnknownMessageError();
@@ -139,6 +149,7 @@ export class ThreadCreationService {
 			input: params.input,
 			invitable: null,
 			hasStarter: true,
+			ownerPersonaId,
 		});
 		await this.recordCreateAudit(view, params.user.id, params.auditLogReason);
 		const events: Array<ThreadDispatchEvent> = [threadCreateEvent(view, {members, newlyCreated: true})];
@@ -168,7 +179,7 @@ export class ThreadCreationService {
 			events.push(starter);
 		}
 		if (!(await this.isAmongRecentMessages(parentAuth.channel.id, source.id))) {
-			events.push(await this.createThreadCreatedMessage(parentAuth.channel, view, params.user.id));
+			events.push(await this.createThreadCreatedMessage(parentAuth.channel, view, params.user.id, ownerPersonaId));
 		}
 		await dispatchThreadEvents(this.ctx.gatewayService, view.state.guildId, events);
 		return mapThreadToResponse(view);
@@ -194,6 +205,7 @@ export class ThreadCreationService {
 		invitable?: boolean;
 		input: CreateThreadInput;
 		auditLogReason: string | null;
+		personaId?: bigint | null;
 	}): Promise<ThreadChannelResponse> {
 		const type = resolveTextThreadType(params.parentAuth.channel.type, params.type);
 		if (type === null) {
@@ -205,6 +217,7 @@ export class ThreadCreationService {
 			params.user,
 			isPrivate ? 'private' : 'public',
 		);
+		const ownerPersonaId = await resolveThreadOwnerPersonaId(params.user.id, params.personaId);
 		const threadId = createChannelID(await this.ctx.snowflakeService.generate());
 		const {view, members} = await this.create({
 			parent: parentAuth.channel,
@@ -214,11 +227,12 @@ export class ThreadCreationService {
 			input: params.input,
 			invitable: isPrivate ? (params.invitable ?? true) : null,
 			hasStarter: false,
+			ownerPersonaId,
 		});
 		await this.recordCreateAudit(view, params.user.id, params.auditLogReason);
 		const events: Array<ThreadDispatchEvent> = [threadCreateEvent(view, {members, newlyCreated: true})];
 		if (!isPrivate) {
-			events.push(await this.createThreadCreatedMessage(parentAuth.channel, view, params.user.id));
+			events.push(await this.createThreadCreatedMessage(parentAuth.channel, view, params.user.id, ownerPersonaId));
 		}
 		await dispatchThreadEvents(this.ctx.gatewayService, view.state.guildId, events);
 		return mapThreadToResponse(view);
@@ -253,6 +267,8 @@ export class ThreadCreationService {
 			moderator: isThreadModerator(withImplicitThreadBits(actor.permissions), actor),
 		});
 		await this.ctx.validateForumStarter({user, parentAuth, data: body.message});
+		// Fork: a post belongs to the persona its first message is sent as.
+		const ownerPersonaId = await resolveThreadOwnerPersonaId(user.id, requestedPersonaId(body.message, user.id));
 		const threadId = createChannelID(await this.ctx.snowflakeService.generate());
 		const {view, members} = await this.create({
 			parent,
@@ -267,6 +283,7 @@ export class ThreadCreationService {
 			invitable: null,
 			hasStarter: true,
 			appliedTags,
+			ownerPersonaId,
 		});
 		await dispatchThreadEvents(this.ctx.gatewayService, view.state.guildId, [
 			threadCreateEvent(view, {members, newlyCreated: true}),
@@ -440,6 +457,7 @@ export class ThreadCreationService {
 			}
 			throw error;
 		});
+		if (params.ownerPersonaId != null) await storeThreadOwnerPersona(params.threadId, ownerId, params.ownerPersonaId);
 		const channel = await this.ctx.channelRepository.channelData.findUnique(params.threadId);
 		if (!channel) {
 			throw new InvalidChannelTypeError();
@@ -578,6 +596,7 @@ export class ThreadCreationService {
 		parent: Channel,
 		view: ThreadView,
 		userId: UserID,
+		personaId: PersonaID | null = null,
 	): Promise<ThreadDispatchEvent> {
 		const messageId = createMessageID(await this.ctx.snowflakeService.generateForChannel(parent.id));
 		const row: MessageRow = {
@@ -610,6 +629,7 @@ export class ThreadCreationService {
 			call: null,
 			has_reaction: false,
 			version: 1,
+			persona_id: personaId,
 		};
 		const message: Message = await this.ctx.channelRepository.messages.upsertMessage(row, null, {
 			skipParentLastMessageId: true,
