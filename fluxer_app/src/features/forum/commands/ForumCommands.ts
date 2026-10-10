@@ -13,6 +13,10 @@ import ThreadGuilds from '@app/features/threads/state/ThreadGuilds';
 import {ChannelFlags} from '@fluxer/constants/src/ThreadConstants';
 import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork: personas.
+
+import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+
 export interface ForumTagInput {
 	id?: string;
 	name: string;
@@ -41,6 +45,7 @@ export interface ForumPostInput {
 	nonce: string;
 	hasAttachments: boolean;
 	stickerIds: ReadonlyArray<string>;
+	subprofile?: MessageSubprofileRequest;
 }
 
 function assertActive(channel: Channel): asserts channel is Channel & {guildId: string} {
@@ -67,6 +72,7 @@ export async function createForumPost(forum: Channel, input: ForumPostInput): Pr
 	if (normalized.flags !== 0) message.flags = normalized.flags;
 	if (prepared.attachments?.length) message.attachments = prepared.attachments;
 	if (input.stickerIds.length > 0) message.sticker_ids = [...input.stickerIds];
+	if (input.subprofile) message.subprofile = input.subprofile;
 	const payload = {
 		name: input.name,
 		auto_archive_duration: forum.defaultAutoArchiveDuration ?? undefined,
