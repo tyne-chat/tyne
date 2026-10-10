@@ -55,8 +55,15 @@ const CHANNELS = {
 	},
 };
 // Fork: package the stable channel as "Fluxer Temple" with its own IDs, matching the fork identity
-// in src/common/DesktopIdentity.ts. It is unsigned, so nothing here needs upstream's signing
-// profile or notarization. FLUXER_FORK_IDENTITY=0 packages with upstream's identity.
+// in src/common/DesktopIdentity.ts. It has no signing certificate, so nothing here needs upstream's
+// signing profile or notarization. FLUXER_FORK_IDENTITY=0 packages with upstream's identity.
+//
+// On macOS the app is signed ad hoc (no certificate). An app with no signature at all is reported
+// as "damaged" once downloaded; an ad-hoc one gets the ordinary "could not verify" prompt that
+// the user can allow in System Settings. An ad-hoc signature cannot carry the entitlements tied
+// to upstream's team (application-identifier, associated-domains): macOS refuses to start an app
+// that claims them without a matching profile. The development entitlements are the stable ones
+// without those two.
 if (process.env.FLUXER_FORK_IDENTITY !== '0') {
 	Object.assign(CHANNELS.stable, {
 		productName: 'Fluxer Temple',
@@ -68,6 +75,8 @@ if (process.env.FLUXER_FORK_IDENTITY !== '0') {
 		linuxDesktopId: 'app.fluxer.FluxerDesktopTemple',
 		notarize: false,
 		provisioningProfile: null,
+		macEntitlements: 'build_resources/entitlements.mac.development.plist',
+		macAdHocSign: true,
 	});
 }
 const buildChannel = process.env.BUILD_CHANNEL || 'stable';
@@ -1823,6 +1832,7 @@ module.exports = {
 		darkModeSupport: true,
 		notarize: channel.notarize,
 		sign: {
+			...(channel.macAdHocSign ? {identity: '-'} : {}),
 			hardenedRuntime: true,
 			...(channel.provisioningProfile ? {provisioningProfile: channel.provisioningProfile} : {}),
 			entitlements: channel.macEntitlements,
