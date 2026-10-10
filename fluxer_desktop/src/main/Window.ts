@@ -49,6 +49,7 @@ import {
 	ForkNotificationClaims,
 	ForkWindowAccountSync,
 	ForkWindowLoadQueue,
+	ForkWindowRestingBounds,
 } from '@electron/main/ForkWindowCoordination';
 import {
 	cascadeForkWindowBounds,
@@ -538,7 +539,7 @@ function enterWindowsHtmlFullscreenChromeGuard(window: BrowserWindow): void {
 	if (process.platform !== 'win32') return;
 	if (windowsHtmlFullscreenStates.has(window)) return;
 	const customChromeGuardActive = !getActiveUseNativeTitleBar();
-	const bounds = lastGoodWindowBounds ?? window.getNormalBounds();
+	const bounds = forkBoundsBeforeHtmlFullscreen(window);
 	const isMaximized = window.isMaximized();
 	windowsHtmlFullscreenStates.set(window, {
 		resizable: window.isResizable(),
@@ -1360,6 +1361,8 @@ export async function closeAppWindowsForUpdate(
 // ---------------------------------------------------------------------------------------------
 
 const FORK_WINDOW_SESSION_SAVE_DELAY_MS = 500;
+// As long as upstream waits before it saves the main window's bounds.
+const FORK_WINDOW_RESTING_BOUNDS_DELAY_MS = 500;
 const FORK_WINDOW_LOAD_SETTLE_TIMEOUT_MS = 8000;
 const FORK_WINDOW_RESTACK_PERIOD_MS = 30000;
 
@@ -1389,6 +1392,7 @@ const forkWindowMaximized = new WeakMap<BrowserWindow, boolean>();
 const forkWindowLoadQueue = new ForkWindowLoadQueue();
 const forkNotificationClaims = new ForkNotificationClaims();
 const forkWindowAccountSync = new ForkWindowAccountSync();
+const forkWindowRestingBounds = new ForkWindowRestingBounds();
 let forkWindowOpenHandlers: ForkWindowOpenHandlers | null = null;
 let forkWindowSessionSaveTimer: NodeJS.Timeout | null = null;
 let forkWindowSessionReady = false;
@@ -1538,9 +1542,38 @@ function clearForkWindowSession(): void {
 	}
 }
 
+// Null while the window is fullscreen: where it is then is not where it should go back to.
+function readForkWindowRestingBounds(window: BrowserWindow): Bounds | null {
+	if (!isAliveWindow(window)) return null;
+	if (windowsHtmlFullscreenStates.has(window) || window.isFullScreen()) return null;
+	return window.getNormalBounds();
+}
+
+// The bounds upstream's HTML fullscreen guard puts a window back to when the fullscreen ends.
+// Upstream reads lastGoodWindowBounds, which only ever follows the main window, so a second
+// window that played a video fullscreen came back on top of the main window. Each window is
+// followed separately here; lastGoodWindowBounds remains the fallback for the main window.
+function forkBoundsBeforeHtmlFullscreen(window: BrowserWindow): Bounds {
+	return (
+		forkWindowRestingBounds.get(window.webContents.id) ??
+		(window === mainWindow ? lastGoodWindowBounds : null) ??
+		window.getNormalBounds()
+	);
+}
+
 function trackForkAppWindow(window: BrowserWindow): void {
 	const contentsId = window.webContents.id;
 	if (!forkWindowStack.includes(window)) forkWindowStack.push(window);
+	forkWindowRestingBounds.record(contentsId, window.getNormalBounds());
+	const noteRestingBounds = () => {
+		forkWindowRestingBounds.noteChange(
+			contentsId,
+			() => readForkWindowRestingBounds(window),
+			FORK_WINDOW_RESTING_BOUNDS_DELAY_MS,
+		);
+	};
+	window.on('move', noteRestingBounds);
+	window.on('resize', noteRestingBounds);
 	window.on('focus', () => {
 		const index = forkWindowStack.indexOf(window);
 		if (index !== -1) forkWindowStack.splice(index, 1);
@@ -1568,6 +1601,7 @@ function trackForkAppWindow(window: BrowserWindow): void {
 		forkWindowLoadQueue.settle(contentsId);
 		forkNotificationClaims.releaseWindow(contentsId);
 		forkWindowAccountSync.releaseWindow(contentsId);
+		forkWindowRestingBounds.releaseWindow(contentsId);
 		scheduleForkWindowSessionSave();
 	});
 }
