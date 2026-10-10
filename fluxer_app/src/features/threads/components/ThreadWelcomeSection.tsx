@@ -10,10 +10,15 @@ import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 
+// Fork: threads started as a persona.
+
+import {useThreadOwnerPersona} from '@app/features/persona/utils/ThreadOwnerPersona';
+
 export const ThreadWelcomeSection = observer(({thread}: {thread: Channel}) => {
 	const {i18n} = useLingui();
 	const forum = getPostForum(thread);
 	const owner = !forum && thread.ownerId ? Users.getUser(thread.ownerId) : null;
+	const ownerPersona = useThreadOwnerPersona(forum ? null : thread);
 	return (
 		<div className={styles.container} data-flx="threads.thread-welcome-section.container">
 			<div className={styles.icon} data-flx="threads.thread-welcome-section.icon">
@@ -25,7 +30,7 @@ export const ThreadWelcomeSection = observer(({thread}: {thread: Channel}) => {
 			{owner && (
 				<p className={styles.description} data-flx="threads.thread-welcome-section.description">
 					{i18n._(D.THREAD_STARTED_BY_DESCRIPTOR, {
-						name: NicknameUtils.getNickname(owner, thread.guildId, thread.id),
+						name: ownerPersona?.name ?? NicknameUtils.getNickname(owner, thread.guildId, thread.id),
 					})}
 				</p>
 			)}
