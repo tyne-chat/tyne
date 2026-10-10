@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import type {PersonaID, UserID} from '../../BrandedTypes';
+import type {ChannelID, PersonaID, UserID} from '../../BrandedTypes';
 
 type Nullish<T> = T | null;
 
@@ -71,3 +71,13 @@ export const USER_PERSONA_SETTINGS_COLUMNS = [
 	'updated_at',
 	'version',
 ] as const satisfies ReadonlyArray<keyof UserPersonaSettingsRow>;
+
+export interface ThreadOwnerPersonaRow {
+	thread_id: ChannelID;
+	user_id: UserID;
+	persona_id: PersonaID;
+}
+
+export const THREAD_OWNER_PERSONA_COLUMNS = ['thread_id', 'user_id', 'persona_id'] as const satisfies ReadonlyArray<
+	keyof ThreadOwnerPersonaRow
+>;
