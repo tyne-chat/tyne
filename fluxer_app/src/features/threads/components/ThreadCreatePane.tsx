@@ -99,7 +99,7 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 				favoriteMemeIdOrStickers,
 				maybeFavoriteMemeId,
 			);
-			// Fork: the first message goes out as the persona the composer shows, as a normal send does.
+			// Fork: the thread is started, and its first message sent, as the persona the composer shows.
 			const pendingAttachments = hasAttachments || CloudUpload.getTextareaAttachments(draftKey).length > 0;
 			const {content, subprofile} = resolveOutgoingPersona(typedContent, pendingAttachments, {
 				allowEmptyContent: pendingAttachments || stickers.length > 0 || favoriteMemeId !== undefined,
@@ -110,10 +110,11 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 				{formatMultipleFileLabel: (count) => formatUploadingAttachmentSummary(i18n, count)},
 			);
 			const create = messageId
-				? ThreadCommands.createThreadFromMessage(parent, messageId, {name: threadName})
+				? ThreadCommands.createThreadFromMessage(parent, messageId, {name: threadName, persona_id: subprofile?.id})
 				: ThreadCommands.createThread(parent, {
 						name: threadName,
 						type: privateSelected ? ChannelTypes.PRIVATE_THREAD : publicThreadTypeFor(parent.type),
+						persona_id: subprofile?.id,
 					});
 			void create
 				.then((thread) => {
