@@ -1,11 +1,29 @@
 import {createTestAccount, type TestAccount} from '@app/api/auth/tests/AuthTestUtils';
-import {setupTestGuildWithMembers} from '@app/api/channel/tests/ChannelTestUtils';
+import {
+	acceptInvite,
+	createChannel,
+	createChannelInvite,
+	createGuild,
+	setupTestGuildWithMembers,
+} from '@app/api/channel/tests/ChannelTestUtils';
+import {
+	ALL_THREADS_ACTIVE,
+	resetChannelThreadsConfig,
+	setChannelThreadsConfig,
+	threadsRequest,
+} from '@app/api/channel/tests/ThreadTestUtils';
 import {ensureSessionStarted, getMessages} from '@app/api/message/tests/MessageTestUtils';
 import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHarness';
+import {NoopGatewayService} from '@app/api/test/NoopGatewayService';
 import {HTTP_STATUS} from '@app/api/test/TestConstants';
 import {createBuilder} from '@app/api/test/TestRequestBuilder';
-import {MessageTypes} from '@fluxer/constants/src/ChannelConstants';
+import {ChannelTypes, MessageTypes} from '@fluxer/constants/src/ChannelConstants';
 import {DELETED_USER_USERNAME} from '@fluxer/constants/src/UserConstants';
+import type {ChannelResponse} from '@fluxer/schema/src/domains/channel/ChannelSchemas';
+import type {
+	StartForumThreadResponse,
+	ThreadPostDataResponse,
+} from '@fluxer/schema/src/domains/channel/ForumRequestSchemas';
 import {
 	MessageRequestSchema,
 	MessageUpdateRequestSchema,
@@ -946,5 +964,99 @@ describe('Personal Notes Persona Integration', () => {
 		expect(real?.subprofile?.name).toBe('Sneaks');
 		expect(forged?.subprofile?.name).toBe('Unknown Persona');
 		expect(forged?.subprofile?.avatar).toBeNull();
+	});
+});
+
+describe('Forum post personas', () => {
+	let harness: ApiTestHarness;
+
+	beforeAll(async () => {
+		harness = await createApiTestHarness();
+	});
+
+	beforeEach(async () => {
+		await harness.reset();
+		resetChannelThreadsConfig();
+	});
+
+	afterAll(async () => {
+		resetChannelThreadsConfig();
+		await harness.shutdown();
+	});
+
+	async function setupForum(): Promise<{owner: TestAccount; member: TestAccount; forumId: string}> {
+		await setChannelThreadsConfig(ALL_THREADS_ACTIVE);
+		const owner = await createTestAccount(harness);
+		const member = await createTestAccount(harness);
+		await ensureSessionStarted(harness, owner.token);
+		await ensureSessionStarted(harness, member.token);
+		const guild = await createGuild(harness, owner.token, 'forum personas');
+		const general = await createChannel(harness, owner.token, guild.id, 'general');
+		const invite = await createChannelInvite(harness, owner.token, general.id);
+		await acceptInvite(harness, member.token, invite.code);
+		const forum = await threadsRequest<ChannelResponse>(harness, owner.token)
+			.post(`/guilds/${guild.id}/channels`)
+			.body({name: 'forum', type: ChannelTypes.GUILD_FORUM})
+			.execute();
+		return {owner, member, forumId: forum.id};
+	}
+
+	async function createPersona(token: string, name: string): Promise<{id: string; name: string}> {
+		return createBuilder<{id: string; name: string}>(harness, token)
+			.post('/users/@me/personas')
+			.body({name})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+	}
+
+	it('creates a post as a persona and serves the persona on its first message', async () => {
+		const {owner, member, forumId} = await setupForum();
+		const persona = await createPersona(member.token, 'Fox');
+
+		const created = await threadsRequest<StartForumThreadResponse>(harness, member.token)
+			.post(`/channels/${forumId}/threads`)
+			.body({name: 'post', message: {content: 'bao', subprofile: {id: persona.id, name: persona.name}}})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		expect(created.owner_id).toBe(member.userId);
+		expect(created.message?.author.id).toBe(member.userId);
+		expect(created.message?.subprofile?.id).toBe(persona.id);
+		expect(created.message?.subprofile?.name).toBe('Fox');
+
+		const messages = await threadsRequest<Array<MessageResponse>>(harness, owner.token)
+			.get(`/channels/${created.id}/messages`)
+			.execute();
+		expect(messages.map((message) => message.subprofile?.name)).toEqual(['Fox']);
+
+		const data = await threadsRequest<ThreadPostDataResponse>(harness, owner.token)
+			.post(`/channels/${forumId}/post-data`)
+			.body({thread_ids: [created.id]})
+			.execute();
+		expect(data.threads[created.id]?.first_message?.subprofile?.name).toBe('Fox');
+	});
+
+	it("refuses another member's persona before the post exists", async () => {
+		const {owner, member, forumId} = await setupForum();
+		const ownerPersona = await createPersona(owner.token, 'Owner Persona');
+		const dispatched: Array<string> = [];
+		const spy = vi.spyOn(NoopGatewayService.prototype, 'dispatchGuild').mockImplementation(async (params) => {
+			dispatched.push(params.event);
+		});
+
+		await threadsRequest(harness, member.token)
+			.post(`/channels/${forumId}/threads`)
+			.body({name: 'forged', message: {content: 'hi', subprofile: {id: ownerPersona.id, name: ownerPersona.name}}})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+		await threadsRequest(harness, member.token)
+			.post(`/channels/${forumId}/threads`)
+			.body({name: 'bad id', message: {content: 'hi', subprofile: {id: 'not-a-snowflake', name: 'Nobody'}}})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+		spy.mockRestore();
+
+		expect(dispatched).not.toContain('THREAD_CREATE');
+		const forum = await threadsRequest<ChannelResponse>(harness, owner.token).get(`/channels/${forumId}`).execute();
+		expect(forum.last_message_id ?? null).toBeNull();
 	});
 });

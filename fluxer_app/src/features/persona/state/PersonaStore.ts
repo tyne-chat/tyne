@@ -14,6 +14,7 @@ import {
 	type MatchPersonaOptions,
 	type MatchResult,
 	matchPersona,
+	type PersonaLike,
 	previewPersona,
 } from '@fluxer/schema/src/domains/persona/PersonaMatcher';
 import type {
@@ -639,8 +640,8 @@ export class PersonaStoreClass {
 		return {isCommand: false, handled: false};
 	}
 
-	matchOutgoingMessage(content: string, hasAttachments = false, options?: MatchPersonaOptions): MatchResult {
-		const personasLike = this._personas.map((p) => ({
+	private matchablePersonas(): Array<PersonaLike> {
+		return this._personas.map((p) => ({
 			id: p.id,
 			name: p.name,
 			avatar_hash: p.avatar_hash ?? p.avatarHash ?? null,
@@ -654,6 +655,10 @@ export class PersonaStoreClass {
 				suffix: t.suffix ?? null,
 			})),
 		}));
+	}
+
+	matchOutgoingMessage(content: string, hasAttachments = false, options?: MatchPersonaOptions): MatchResult {
+		const personasLike = this.matchablePersonas();
 
 		const activeLatchedId = this.activePersona?.id ?? null;
 		const result = matchPersona(content, personasLike, activeLatchedId, hasAttachments, options);
@@ -671,24 +676,23 @@ export class PersonaStoreClass {
 		return result;
 	}
 
+	/** The text matchOutgoingMessage would send, without recording a use or changing the active persona. */
+	previewOutgoingContent(content: string, hasAttachments = false, options?: MatchPersonaOptions): string {
+		const result = matchPersona(
+			content,
+			this.matchablePersonas(),
+			this.activePersona?.id ?? null,
+			hasAttachments,
+			options,
+		);
+		return result.matched || result.wasEscaped ? result.strippedContent : content;
+	}
+
 	getEffectivePersonaForText(
 		content: string,
 		hasAttachments = false,
 	): {persona: ClientPersona | null; isFromTag: boolean} {
-		const personasLike = this._personas.map((p) => ({
-			id: p.id,
-			name: p.name,
-			avatar_hash: p.avatar_hash ?? p.avatarHash ?? null,
-			banner_hash: p.banner_hash ?? p.bannerHash ?? null,
-			pronouns: p.pronouns ?? null,
-			color: p.color ?? p.accentColor ?? null,
-			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
-			bio: p.bio ?? null,
-			persona_tags: (p.persona_tags ?? p.personaTags ?? []).map((t) => ({
-				prefix: t.prefix ?? null,
-				suffix: t.suffix ?? null,
-			})),
-		}));
+		const personasLike = this.matchablePersonas();
 
 		const activeLatchedId = this.isPersonaLatched && this.activePersona ? this.activePersona.id : null;
 		const preview = previewPersona(content, personasLike, activeLatchedId, hasAttachments);
@@ -751,20 +755,7 @@ export class PersonaStoreClass {
 		finalContent: string;
 		subprofile?: MessageSubprofileRequest | null;
 	} {
-		const personasLike = this._personas.map((p) => ({
-			id: p.id,
-			name: p.name,
-			avatar_hash: p.avatar_hash ?? p.avatarHash ?? null,
-			banner_hash: p.banner_hash ?? p.bannerHash ?? null,
-			pronouns: p.pronouns ?? null,
-			color: p.color ?? p.accentColor ?? null,
-			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
-			bio: p.bio ?? null,
-			persona_tags: (p.persona_tags ?? p.personaTags ?? []).map((t) => ({
-				prefix: t.prefix ?? null,
-				suffix: t.suffix ?? null,
-			})),
-		}));
+		const personasLike = this.matchablePersonas();
 
 		// If user typed \ or \\ to explicitly clear active persona / escape
 		if (content.startsWith('\\') && currentSubprofile) {
