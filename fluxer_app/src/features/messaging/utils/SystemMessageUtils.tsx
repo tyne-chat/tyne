@@ -152,6 +152,7 @@ interface StringifyableMessage {
 	content: string;
 	author: {id: string};
 	mentions?: ReadonlyArray<{id: string}>;
+	subprofile?: {name: string} | null;
 }
 
 const getGuildJoinMessagesPlaintext = (i18n: I18n): Array<(username: string) => string> => [
@@ -194,7 +195,7 @@ export const SystemMessageUtils = {
 	stringify(message: StringifyableMessage, i18n: I18n): string | null {
 		const author = Users.getUser(message.author.id);
 		if (!author) return null;
-		const username = NicknameUtils.getDisplayName(author);
+		const username = message.subprofile?.name ?? NicknameUtils.getDisplayName(author);
 		switch (message.type) {
 			case MessageTypes.USER_JOIN: {
 				const messageList = getGuildJoinMessagesPlaintext(i18n);
