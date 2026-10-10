@@ -13,6 +13,7 @@ import {
 	threadsRequest,
 } from '@app/api/channel/tests/ThreadTestUtils';
 import {ensureSessionStarted, getMessages} from '@app/api/message/tests/MessageTestUtils';
+import {forgetThreadOwnerPersonasOfUser, loadThreadOwnerPersonaId} from '@app/api/persona/ThreadOwnerPersonaStore';
 import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHarness';
 import {NoopGatewayService} from '@app/api/test/NoopGatewayService';
 import {HTTP_STATUS} from '@app/api/test/TestConstants';
@@ -24,6 +25,7 @@ import type {
 	StartForumThreadResponse,
 	ThreadPostDataResponse,
 } from '@fluxer/schema/src/domains/channel/ForumRequestSchemas';
+import type {ThreadChannelResponse} from '@fluxer/schema/src/domains/channel/ThreadRequestSchemas';
 import {
 	MessageRequestSchema,
 	MessageUpdateRequestSchema,
@@ -1019,6 +1021,7 @@ describe('Forum post personas', () => {
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
 		expect(created.owner_id).toBe(member.userId);
+		expect(created.owner_persona_id).toBe(persona.id);
 		expect(created.message?.author.id).toBe(member.userId);
 		expect(created.message?.subprofile?.id).toBe(persona.id);
 		expect(created.message?.subprofile?.name).toBe('Fox');
@@ -1058,5 +1061,171 @@ describe('Forum post personas', () => {
 		expect(dispatched).not.toContain('THREAD_CREATE');
 		const forum = await threadsRequest<ChannelResponse>(harness, owner.token).get(`/channels/${forumId}`).execute();
 		expect(forum.last_message_id ?? null).toBeNull();
+	});
+});
+
+describe('Thread personas', () => {
+	let harness: ApiTestHarness;
+
+	beforeAll(async () => {
+		harness = await createApiTestHarness();
+	});
+
+	beforeEach(async () => {
+		await harness.reset();
+		resetChannelThreadsConfig();
+	});
+
+	afterAll(async () => {
+		resetChannelThreadsConfig();
+		await harness.shutdown();
+	});
+
+	async function setupChannel(): Promise<{owner: TestAccount; member: TestAccount; channelId: string}> {
+		await setChannelThreadsConfig(ALL_THREADS_ACTIVE);
+		const owner = await createTestAccount(harness);
+		const member = await createTestAccount(harness);
+		await ensureSessionStarted(harness, owner.token);
+		await ensureSessionStarted(harness, member.token);
+		const guild = await createGuild(harness, owner.token, 'thread personas');
+		const channel = await createChannel(harness, owner.token, guild.id, 'general');
+		const invite = await createChannelInvite(harness, owner.token, channel.id);
+		await acceptInvite(harness, member.token, invite.code);
+		return {owner, member, channelId: channel.id};
+	}
+
+	async function createPersona(token: string, name: string): Promise<{id: string; name: string}> {
+		return createBuilder<{id: string; name: string}>(harness, token)
+			.post('/users/@me/personas')
+			.body({name})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+	}
+
+	async function threadAnnouncements(token: string, channelId: string): Promise<Array<MessageResponse>> {
+		const messages = await threadsRequest<Array<MessageResponse>>(harness, token)
+			.get(`/channels/${channelId}/messages`)
+			.execute();
+		return messages.filter((message) => message.type === MessageTypes.THREAD_CREATED);
+	}
+
+	it('starts a thread as a persona and names the persona on the thread and its announcement', async () => {
+		const {owner, member, channelId} = await setupChannel();
+		const persona = await createPersona(member.token, 'Fox');
+
+		const thread = await threadsRequest<ThreadChannelResponse>(harness, member.token)
+			.post(`/channels/${channelId}/threads`)
+			.body({name: 'fox thread', type: ChannelTypes.PUBLIC_THREAD, persona_id: persona.id})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		expect(thread.owner_id).toBe(member.userId);
+		expect(thread.owner_persona_id).toBe(persona.id);
+
+		const read = await threadsRequest<ChannelResponse>(harness, owner.token).get(`/channels/${thread.id}`).execute();
+		expect(read.owner_id).toBe(member.userId);
+		expect(read.owner_persona_id).toBe(persona.id);
+
+		const renamed = await threadsRequest<ChannelResponse>(harness, owner.token)
+			.patch(`/channels/${thread.id}`)
+			.body({name: 'renamed'})
+			.execute();
+		expect(renamed.owner_persona_id).toBe(persona.id);
+
+		const [announcement] = await threadAnnouncements(owner.token, channelId);
+		expect(announcement?.author.id).toBe(member.userId);
+		expect(announcement?.subprofile?.id).toBe(persona.id);
+		expect(announcement?.subprofile?.name).toBe('Fox');
+	});
+
+	it('starts a thread from a message as a persona', async () => {
+		const {owner, member, channelId} = await setupChannel();
+		const persona = await createPersona(member.token, 'Fox');
+		const source = await createBuilder<MessageResponse>(harness, owner.token)
+			.post(`/channels/${channelId}/messages`)
+			.body({content: 'source'})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const thread = await threadsRequest<ThreadChannelResponse>(harness, member.token)
+			.post(`/channels/${channelId}/messages/${source.id}/threads`)
+			.body({name: 'from message', persona_id: persona.id})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		expect(thread.id).toBe(source.id);
+		expect(thread.owner_id).toBe(member.userId);
+		expect(thread.owner_persona_id).toBe(persona.id);
+	});
+
+	it('leaves a thread started as the account as it was', async () => {
+		const {owner, member, channelId} = await setupChannel();
+
+		const thread = await threadsRequest<ThreadChannelResponse>(harness, member.token)
+			.post(`/channels/${channelId}/threads`)
+			.body({name: 'plain', type: ChannelTypes.PUBLIC_THREAD})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		expect(thread.owner_id).toBe(member.userId);
+		expect(thread).not.toHaveProperty('owner_persona_id');
+
+		const [announcement] = await threadAnnouncements(owner.token, channelId);
+		expect(announcement?.author.id).toBe(member.userId);
+		expect(announcement?.subprofile ?? null).toBeNull();
+	});
+
+	it("refuses another member's persona before the thread exists", async () => {
+		const {owner, member, channelId} = await setupChannel();
+		const ownerPersona = await createPersona(owner.token, 'Owner Persona');
+		const source = await createBuilder<MessageResponse>(harness, owner.token)
+			.post(`/channels/${channelId}/messages`)
+			.body({content: 'source'})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		const dispatched: Array<string> = [];
+		const spy = vi.spyOn(NoopGatewayService.prototype, 'dispatchGuild').mockImplementation(async (params) => {
+			dispatched.push(params.event);
+		});
+
+		await threadsRequest(harness, member.token)
+			.post(`/channels/${channelId}/threads`)
+			.body({name: 'forged', type: ChannelTypes.PUBLIC_THREAD, persona_id: ownerPersona.id})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+		await threadsRequest(harness, member.token)
+			.post(`/channels/${channelId}/messages/${source.id}/threads`)
+			.body({name: 'forged', persona_id: ownerPersona.id})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+		spy.mockRestore();
+
+		expect(dispatched).not.toContain('THREAD_CREATE');
+		expect(await threadAnnouncements(owner.token, channelId)).toEqual([]);
+	});
+
+	it('forgets the persona when the thread is deleted and when the account is deleted', async () => {
+		const {owner, member, channelId} = await setupChannel();
+		const persona = await createPersona(member.token, 'Fox');
+		const start = (name: string) =>
+			threadsRequest<ThreadChannelResponse>(harness, member.token)
+				.post(`/channels/${channelId}/threads`)
+				.body({name, type: ChannelTypes.PUBLIC_THREAD, persona_id: persona.id})
+				.expect(HTTP_STATUS.CREATED)
+				.execute();
+
+		const deleted = await start('deleted');
+		const kept = await start('kept');
+		expect((await loadThreadOwnerPersonaId(createChannelID(BigInt(deleted.id))))?.toString()).toBe(persona.id);
+
+		await threadsRequest(harness, owner.token)
+			.delete(`/channels/${deleted.id}`)
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+		expect(await loadThreadOwnerPersonaId(createChannelID(BigInt(deleted.id)))).toBeNull();
+		expect((await loadThreadOwnerPersonaId(createChannelID(BigInt(kept.id))))?.toString()).toBe(persona.id);
+
+		await forgetThreadOwnerPersonasOfUser(createUserID(BigInt(member.userId)));
+		expect(await loadThreadOwnerPersonaId(createChannelID(BigInt(kept.id)))).toBeNull();
+		const read = await threadsRequest<ChannelResponse>(harness, owner.token).get(`/channels/${kept.id}`).execute();
+		expect(read.owner_id).toBe(member.userId);
+		expect(read).not.toHaveProperty('owner_persona_id');
 	});
 });

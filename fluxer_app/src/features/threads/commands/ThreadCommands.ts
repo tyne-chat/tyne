@@ -56,7 +56,7 @@ function ingestThread(wire: ChannelWire, guildId: string): Channel | undefined {
 export async function createThreadFromMessage(
 	parent: Channel,
 	messageId: string,
-	body: {name: string; auto_archive_duration?: number},
+	body: {name: string; auto_archive_duration?: number; persona_id?: string},
 ): Promise<Channel | undefined> {
 	assertActive(parent.guildId);
 	const response = await http.post<ChannelWire>(Endpoints.CHANNEL_MESSAGE_THREADS(parent.id, messageId), {
@@ -70,7 +70,7 @@ export async function createThreadFromMessage(
 
 export async function createThread(
 	parent: Channel,
-	body: {name: string; type: number; auto_archive_duration?: number; invitable?: boolean},
+	body: {name: string; type: number; auto_archive_duration?: number; invitable?: boolean; persona_id?: string},
 ): Promise<Channel | undefined> {
 	assertActive(parent.guildId);
 	const withDuration = {
