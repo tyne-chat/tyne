@@ -35,6 +35,10 @@ import {ChatsIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
+// Fork: personas.
+
+import {consumePersonaCommand, resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
+
 interface ThreadCreatePaneProps {
 	parent: Channel;
 	messageId: string | null;
@@ -77,7 +81,11 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 	const privateSelected = canPrivate && (isPrivate || !canPublic);
 	const disabled = cooldownSeconds > 0 || (!canPublic && !canPrivate);
 	const handleSubmit: SendMessageFunction = useCallback(
-		(content, hasAttachments, stickersOrTts, favoriteMemeIdOrStickers, maybeFavoriteMemeId) => {
+		(typedContent, hasAttachments, stickersOrTts, favoriteMemeIdOrStickers, maybeFavoriteMemeId) => {
+			if (consumePersonaCommand(typedContent)) {
+				DraftCommands.deleteDraft(accountKey, draftKey);
+				return true;
+			}
 			const threadName = (nameRef.current.trim() || sourceMessage?.content.trim() || '').slice(
 				0,
 				THREAD_NAME_MAX_LENGTH,
@@ -91,6 +99,11 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 				favoriteMemeIdOrStickers,
 				maybeFavoriteMemeId,
 			);
+			// Fork: the first message goes out as the persona the composer shows, as a normal send does.
+			const pendingAttachments = hasAttachments || CloudUpload.getTextareaAttachments(draftKey).length > 0;
+			const {content, subprofile} = resolveOutgoingPersona(typedContent, pendingAttachments, {
+				allowEmptyContent: pendingAttachments || stickers.length > 0 || favoriteMemeId !== undefined,
+			});
 			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
 			const attachments = MessageSubmitUtils.createUploadingAttachments(
 				MessageSubmitUtils.claimMessageAttachments(draftKey, nonce, content),
@@ -108,12 +121,22 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 					ThreadPanel.startCreateCooldown(parent.id, parent.rateLimitPerUser);
 					setName('');
 					if (content.trim() || attachments.length > 0 || stickers.length > 0 || favoriteMemeId) {
-						sendThreadStarter(thread, {content, nonce, attachments, hasAttachments, stickers, favoriteMemeId});
+						sendThreadStarter(thread, {
+							content,
+							nonce,
+							attachments,
+							hasAttachments,
+							stickers,
+							favoriteMemeId,
+							subprofile,
+						});
 					}
 					openThread(thread);
 				})
 				.catch((error) => {
-					if (content && !Drafts.getDraft(draftKey)) DraftCommands.createDraft(accountKey, draftKey, content);
+					if (typedContent && !Drafts.getDraft(draftKey)) {
+						DraftCommands.createDraft(accountKey, draftKey, typedContent);
+					}
 					CloudUpload.restoreAttachmentsToTextarea(nonce);
 					ToastCommands.createToast({
 						type: 'error',
@@ -122,7 +145,7 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 				});
 			return true;
 		},
-		[draftKey, i18n, messageId, parent, privateSelected, sourceMessage],
+		[accountKey, draftKey, i18n, messageId, parent, privateSelected, sourceMessage],
 	);
 	return (
 		<div className={styles.pane} data-flx="threads.thread-create-pane.pane">

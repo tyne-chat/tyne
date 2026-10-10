@@ -175,6 +175,7 @@ export const LexicalChannelTextareaContent = observer(
 		bare = false,
 		controlsRef,
 		onValueChange,
+		onWireValueChange,
 	}: {
 		accountKey: string | null;
 		channel: Channel;
@@ -192,6 +193,7 @@ export const LexicalChannelTextareaContent = observer(
 		bare?: boolean;
 		controlsRef?: React.MutableRefObject<ChannelTextareaControls | null>;
 		onValueChange?: (value: string) => void;
+		onWireValueChange?: (wireValue: string) => void;
 	}) => {
 		const {i18n} = useLingui();
 		const composerKey = draftChannelId ?? channel.id;
@@ -969,6 +971,10 @@ export const LexicalChannelTextareaContent = observer(
 		useEffect(() => {
 			onValueChange?.(value);
 		}, [onValueChange, value]);
+		// Fork: a bare composer hides its persona pill, so its host shows one and needs the text as it is sent.
+		useEffect(() => {
+			onWireValueChange?.(wireValue);
+		}, [onWireValueChange, wireValue]);
 		const handleArrowUpEmpty = useCallback(() => {
 			if (KeyboardMode.keyboardModeEnabled) {
 				ComponentBus.dispatch('FOCUS_BOTTOMMOST_MESSAGE', {channelId: channel.id});
