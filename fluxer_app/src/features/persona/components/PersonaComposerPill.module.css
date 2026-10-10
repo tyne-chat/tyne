@@ -9,6 +9,11 @@
 	align-self: center;
 }
 
+.inButtonRow {
+	width: 2rem;
+	height: 2rem;
+}
+
 .pillButton {
 	position: relative;
 	display: inline-flex;
