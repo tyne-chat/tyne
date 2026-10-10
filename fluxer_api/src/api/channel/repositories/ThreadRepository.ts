@@ -59,6 +59,10 @@ import {ThreadAlreadyCreatedForMessageError} from '@fluxer/errors/src/domains/ch
 import {ServiceUnavailableError} from '@fluxer/errors/src/domains/core/ServiceUnavailableError';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 
+// Fork: threads started as a persona.
+
+import {forgetThreadOwnerPersona} from '@app/api/persona/ThreadOwnerPersonaStore';
+
 export interface CreateThreadMember {
 	userId: UserID;
 	flags: number;
@@ -998,6 +1002,7 @@ export class ThreadRepository {
 		if (state?.isPinned) await this.releaseForumPin(state.parentId, threadId);
 		await this.channelData.delete(threadId, channel?.guild_id ?? state?.guildId, channel?.type ?? state?.type);
 		await deleteOneOrMany(ThreadStateTable.deleteByPk({thread_id: threadId}));
+		await forgetThreadOwnerPersona(threadId);
 		if (guildId !== null) {
 			await deleteOneOrMany(ActiveThreadsByGuild.deleteByPk({guild_id: guildId, thread_id: threadId}));
 		}
