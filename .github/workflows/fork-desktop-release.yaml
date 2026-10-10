@@ -60,6 +60,8 @@ env:
   SOURCE_SHA: ${{ github.sha }}
   NODE_ENV: production
   FLUXER_DESKTOP_PRODUCTION: "true"
+  # Fork: cargo gives up after three quick tries by default; ride out a longer network blip.
+  CARGO_NET_RETRY: "10"
   FLUXER_FORK_RELEASES: ${{ github.repository }}
   CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
 
@@ -92,6 +94,21 @@ jobs:
         with:
           toolchain: "1.98.1"
           targets: wasm32-unknown-unknown
+
+      # Fork: the build fetches its crates from crates.io part-way through, once for each native
+      # add-on. A runner that could not resolve the registry for a few seconds failed the Windows
+      # build of 2.0.7 that way. Keeping what cargo downloaded between runs means a build with
+      # unchanged lockfiles fetches nothing, and one with a few changes fetches only those.
+      - name: Cache Rust downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: fork-cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('source/**/Cargo.lock') }}
+          restore-keys: |
+            fork-cargo-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Set workdir
         env:
@@ -170,6 +187,38 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: "1.98.1"
+
+      # Fork: the build fetches its crates from crates.io part-way through, once for each native
+      # add-on. A runner that could not resolve the registry for a few seconds failed the Windows
+      # build of 2.0.7 that way. Keeping what cargo downloaded between runs means a build with
+      # unchanged lockfiles fetches nothing, and one with a few changes fetches only those.
+      - name: Cache Rust downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: fork-cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('source/**/Cargo.lock') }}
+          restore-keys: |
+            fork-cargo-${{ runner.os }}-${{ runner.arch }}-
+
+      # Fork: most of "Build Electron main process" is compiling the Rust native add-ons, about
+      # ten minutes of it on Windows, and nearly all of that is their third-party crates, which
+      # change only with the lockfiles. Each add-on builds into a folder of its own: under
+      # C:\fcargo on Windows (tools/ci picks that to keep paths short), beside its source
+      # elsewhere. Keeping those folders means the crates are compiled once per lockfile change.
+      # The add-ons' own code is still rebuilt every run, since a fresh checkout is newer than
+      # anything cached. The key names the compiler so a toolchain change starts clean.
+      - name: Cache compiled Rust add-ons
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\fcargo
+            source/fluxer_desktop/native/*/target
+          key: fork-addons-${{ runner.os }}-${{ runner.arch }}-rust1.98.1-${{ hashFiles('source/fluxer_desktop/native/**/Cargo.lock') }}
+          restore-keys: |
+            fork-addons-${{ runner.os }}-${{ runner.arch }}-rust1.98.1-
 
       - name: Set up Python (Windows)
         if: runner.os == 'Windows'
