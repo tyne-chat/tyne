@@ -9,11 +9,17 @@ import type {ThreadChannelResponse} from '@fluxer/schema/src/domains/channel/Thr
 import type {ThreadMemberResponse, ThreadMemberRpcResponse} from '@fluxer/schema/src/domains/channel/ThreadSchemas';
 import type {GuildMemberResponse} from '@fluxer/schema/src/domains/guild/GuildMemberSchemas';
 
+// Fork: threads started as a persona.
+
+import type {PersonaID} from '@app/api/BrandedTypes';
+
 export interface ThreadView {
 	channel: Channel;
 	state: ThreadState;
 	stats: ThreadStats;
 	parentType: number | null;
+	/** Fork: the persona the owner started the thread as (persona/ThreadOwnerPersonaStore.ts). */
+	ownerPersonaId?: PersonaID | null;
 }
 
 export function mapThreadMemberToResponse(
@@ -88,6 +94,8 @@ export function mapThreadToResponse(view: ThreadView, viewerMember?: ThreadMembe
 	if (viewerMember) {
 		response.member = mapThreadMemberToResponse(viewerMember, {self: true});
 	}
+	// Fork: only present on a thread started as a persona, so every other thread reads as upstream's.
+	if (view.ownerPersonaId != null) response.owner_persona_id = view.ownerPersonaId.toString();
 	return response;
 }
 
