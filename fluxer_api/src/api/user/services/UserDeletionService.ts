@@ -48,6 +48,10 @@ import type Stripe from 'stripe';
 import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 
+// Fork: threads started as a persona.
+
+import {forgetThreadOwnerPersonasOfUser} from '@app/api/persona/ThreadOwnerPersonaStore';
+
 const CHUNK_SIZE = 100;
 
 interface UserDeletionDependencies {
@@ -564,6 +568,7 @@ export async function processUserDeletion(
 		userRepository.deletePinnedDmsByUserId(userId),
 		personaRepository.hardDeleteAllByUserId(userId),
 		personaRepository.deleteSettings(userId),
+		forgetThreadOwnerPersonasOfUser(userId),
 	]);
 	await userRepository.deleteUserSecondaryIndices(userId);
 	const userForAnonymization = await userRepository.findUniqueAssert(userId);
