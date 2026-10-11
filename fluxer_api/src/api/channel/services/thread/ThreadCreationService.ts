@@ -82,6 +82,7 @@ import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 
 import type {PersonaID} from '@app/api/BrandedTypes';
 import {resolveThreadOwnerPersonaId} from '@app/api/channel/services/thread/ForkThreadOwnerPersona';
+import {requestedPersonaId} from '@app/api/persona/PersonaOwnership';
 import {storeThreadOwnerPersona} from '@app/api/persona/ThreadOwnerPersonaStore';
 
 const THREAD_CREATED_MESSAGE_RECENT_WINDOW = 5;
@@ -250,7 +251,7 @@ export class ThreadCreationService {
 		});
 		await this.ctx.validateForumStarter({user, parentAuth, data: body.message});
 		// Fork: a post belongs to the persona its first message is sent as.
-		const ownerPersonaId = await resolveThreadOwnerPersonaId(user.id, body.message.subprofile?.id);
+		const ownerPersonaId = await resolveThreadOwnerPersonaId(user.id, requestedPersonaId(body.message, user.id));
 		const threadId = createChannelID(await this.ctx.snowflakeService.generate());
 		const {view, members} = await this.create({
 			parent,

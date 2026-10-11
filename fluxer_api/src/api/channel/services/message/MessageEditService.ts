@@ -41,7 +41,7 @@ import type {AllowedMentionsRequest} from '@fluxer/schema/src/domains/message/Sh
 import type {PersonaID} from '@app/api/BrandedTypes';
 import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
-import {resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
+import {requestedPersonaId, resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
 
 interface EditMessageResult {
 	message: Message;
@@ -186,18 +186,19 @@ export class MessageEditService {
 		}
 		const isBugHunterBot = !!user?.isBot && (user.flags & UserFlags.BUG_HUNTER) !== 0n;
 		const dmNsfwContext = guild ? undefined : await this.deps.persistenceService.resolveDmNsfwContext(channel, userId);
+		const requestedPersona = requestedPersonaId(data, userId);
 		let personaId: PersonaID | null | undefined;
-		if (data.subprofile === null) {
+		if (requestedPersona === null) {
 			personaId = null;
-		} else if (data.subprofile !== undefined) {
+		} else if (requestedPersona !== undefined) {
 			// Re-sending the persona the message already has is not a change, so it stays editable after that persona is deleted.
 			personaId =
-				message.personaId != null && data.subprofile.id === message.personaId.toString()
+				message.personaId != null && requestedPersona === message.personaId.toString()
 					? message.personaId
 					: await resolveOwnedPersonaId(
 							this.deps.personaRepository ?? getPersonaRepository(),
 							userId,
-							data.subprofile.id,
+							requestedPersona,
 						);
 		}
 		const updateResult = await this.deps.messageWriteLock.withFreshMessage(channelId, messageId, async (fresh) => {
