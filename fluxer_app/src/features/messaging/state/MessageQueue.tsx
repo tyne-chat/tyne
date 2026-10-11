@@ -71,7 +71,7 @@ import {reaction} from 'mobx';
 
 // Fork imports.
 
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const YOUR_MESSAGE_COULD_NOT_BE_DELIVERED_THIS_IS_DESCRIPTOR = msg({
 	message:
@@ -129,7 +129,7 @@ interface SendMessagePayload extends BaseMessagePayload {
 	favoriteMemeId?: string;
 	stickers?: Array<MessageStickerItem>;
 	tts?: boolean;
-	subprofile?: MessageSubprofileRequest | null;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 type MessageQueuePayload = SendMessagePayload;
