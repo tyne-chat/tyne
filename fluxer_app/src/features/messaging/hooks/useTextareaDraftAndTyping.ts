@@ -191,7 +191,11 @@ export const useTextareaDraftAndTyping = ({
 				})
 			: null;
 		if (!isEditingMessageInComposerRef.current) {
-			SignalBarStore.setComposerPersona(channelId, subprofile);
+			SignalBarStore.setComposerPersona(channelId, subprofile, {
+				value,
+				previousValue: typingPreviousValue?.channelId === channelId ? typingPreviousValue.value : null,
+				typingEnabled: enabled && typingEnabled,
+			});
 		}
 
 		RollingTypingSender.handleComposerChange({
