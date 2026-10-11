@@ -50,7 +50,11 @@ import {flushSync} from 'react-dom';
 import Accessibility from '@app/features/accessibility/state/Accessibility';
 import {PersonaComposerPill} from '@app/features/persona/components/PersonaComposerPill';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import {consumePersonaCommand, resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
+import {
+	consumePersonaCommand,
+	resolveOutgoingPersona,
+	startChannelAsPersona,
+} from '@app/features/persona/utils/OutgoingPersona';
 
 interface ForumPostComposerProps {
 	forum: Channel;
@@ -77,13 +81,13 @@ export const ForumPostComposer = observer(({forum, onClose}: ForumPostComposerPr
 	const attachments = useTextareaAttachments(draftKey);
 	// Fork: `body` is the message without its persona tag, which is what gets posted and previewed.
 	const [wireBody, setWireBody] = useState('');
-	const body = PersonaStore.previewOutgoingContent(typedBody, attachments.length > 0, {
+	const body = PersonaStore.previewOutgoingContent(forum.id, typedBody, attachments.length > 0, {
 		allowEmptyContent: attachments.length > 0,
 	});
 	const cooldownSeconds = useThreadCreateCooldownSeconds(forum);
 	const handleSubmit: SendMessageFunction = useCallback(
 		(typedContent, _hasAttachments, stickersOrTts, favoriteMemeIdOrStickers, maybeFavoriteMemeId) => {
-			if (consumePersonaCommand(typedContent)) {
+			if (consumePersonaCommand(forum.id, typedContent)) {
 				DraftCommands.deleteDraft(accountKey, draftKey);
 				return true;
 			}
@@ -113,7 +117,7 @@ export const ForumPostComposer = observer(({forum, onClose}: ForumPostComposerPr
 			}
 			// Fork: the post goes out as the persona the pill shows, as a normal send does.
 			const hasOtherContent = hasAttachments || stickers.length > 0;
-			const {content, subprofile} = resolveOutgoingPersona(typedContent, hasAttachments, {
+			const {content, subprofile} = resolveOutgoingPersona(forum.id, typedContent, hasAttachments, {
 				allowEmptyContent: hasOtherContent,
 			});
 			if (content.length === 0 && !hasOtherContent) {
@@ -133,6 +137,7 @@ export const ForumPostComposer = observer(({forum, onClose}: ForumPostComposerPr
 			})
 				.then((post) => {
 					if (!post) return;
+					startChannelAsPersona(post.id, subprofile?.id);
 					ThreadPanel.startCreateCooldown(forum.id, forum.rateLimitPerUser);
 					onClose();
 					openThread(post);
@@ -269,6 +274,7 @@ export const ForumPostComposer = observer(({forum, onClose}: ForumPostComposerPr
 				<div className={styles.composerBarStart} data-flx="forum.forum-post-composer.composer-bar-start">
 					{Accessibility.showPersonasButton && (
 						<PersonaComposerPill
+							channelId={forum.id}
 							text={wireBody}
 							hasAttachments={attachments.length > 0}
 							inButtonRow
