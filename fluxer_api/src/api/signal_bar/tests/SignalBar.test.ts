@@ -105,6 +105,17 @@ describe('signal bar', () => {
 		expect(after).toMatchObject({guild_id: guild.id, can_manage: true, signals: []});
 	});
 
+	it('switches the bar off when the home community is cleared', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		await setHomeGuild(null);
+
+		const discovery = await createBuilder<InstanceDiscoveryResponse>(harness, '').get('/.well-known/fluxer').execute();
+		expect(discovery.community.signal_bar_guild_id).toBeNull();
+		const bar = await createBuilder<SignalBarResponse>(harness, owner.token).get('/instance/signal-bar').execute();
+		expect(bar).toMatchObject({guild_id: null, can_manage: false});
+	});
+
 	it('lets only home community managers edit the bar and keeps signal ids across reorders', async () => {
 		const {owner, members, guild} = await setupTestGuildWithMembers(harness, 1);
 		const [member] = members as [TestAccount];
