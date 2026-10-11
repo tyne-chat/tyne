@@ -3,7 +3,6 @@
 
 import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import type {Persona} from './PersonaStore';
 
 vi.mock('@lingui/core/macro', () => {
 	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
@@ -39,6 +38,7 @@ vi.mock('@app/features/platform/transport/RestTransport', () => ({
 installVoiceMenuTestBootstrap();
 
 const {PersonaStoreClass, normalizePersona, normalizeSubprofile} = await import('./PersonaStore');
+const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
 type PersonaStoreInstance = InstanceType<typeof PersonaStoreClass>;
 
 describe('PersonaStore', () => {
@@ -61,8 +61,8 @@ describe('PersonaStore', () => {
 		expect(store.rankedPersonas).toEqual([]);
 	});
 
-	it('adds a new persona', async () => {
-		const persona = await store.addPersona({
+	it('holds a persona as the server sends it', () => {
+		const persona = addTestPersona(store, {
 			name: 'Alice',
 			pronouns: 'she/her',
 			color: 0xff0000,
@@ -70,46 +70,35 @@ describe('PersonaStore', () => {
 			persona_tags: [{prefix: '[', suffix: ']'}],
 		});
 
+		expect(persona.id).toMatch(/^\d+$/);
 		expect(persona.name).toBe('Alice');
 		expect(persona.pronouns).toBe('she/her');
-		expect(persona.personaTags?.length).toBe(1);
-		expect(persona.personaTags?.[0].prefix).toBe('[');
-		expect(persona.personaTags?.[0].suffix).toBe(']');
+		expect(persona.persona_tags).toEqual([{prefix: '[', suffix: ']'}]);
 		expect(store.personas.length).toBe(1);
 	});
 
-	it('finds persona by name with case-insensitivity and prefix matching', async () => {
-		await store.addPersona({name: 'Alice'});
-		await store.addPersona({name: 'Bob'});
+	it('replaces a persona when the server sends it again', () => {
+		const persona = addTestPersona(store, {name: 'Alice'});
+		store.upsertPersona({...persona, pronouns: 'they/them'});
 
-		expect(store.findPersonaByName('alice')?.name).toBe('Alice');
-		expect(store.findPersonaByName('ALICE')?.name).toBe('Alice');
-		expect(store.findPersonaByName('Bo')?.name).toBe('Bob');
-		expect(store.findPersonaByName('Unknown')).toBeNull();
+		expect(store.personas.length).toBe(1);
+		expect(store.getPersona(persona.id)?.pronouns).toBe('they/them');
 	});
 
-	it('updates a persona', async () => {
-		const persona = await store.addPersona({name: 'Alice'});
-		await store.updatePersona(persona.id, {pronouns: 'they/them'});
-
-		const updated = store.personas.find((p: Persona) => p.id === persona.id);
-		expect(updated?.pronouns).toBe('they/them');
-	});
-
-	it('deletes a persona and unlatches if it was active', async () => {
-		const persona = await store.addPersona({name: 'Alice'});
+	it('removes a persona and unlatches if it was active', async () => {
+		const persona = addTestPersona(store, {name: 'Alice'});
 		await store.setActivePersona(persona.id, true);
 		expect(store.isPersonaLatched).toBe(true);
 		expect(store.activePersonaId).toBe(persona.id);
 
-		await store.deletePersona(persona.id);
+		store.removePersona(persona.id);
 		expect(store.personas.length).toBe(0);
 		expect(store.isPersonaLatched).toBe(false);
 		expect(store.activePersonaId).toBeNull();
 	});
 
 	it('latches and unlatches active persona', async () => {
-		const persona = await store.addPersona({name: 'Alice'});
+		const persona = addTestPersona(store, {name: 'Alice'});
 		await store.setActivePersona(persona.id, true);
 		expect(store.isPersonaLatched).toBe(true);
 		expect(store.activePersona?.name).toBe('Alice');
@@ -120,10 +109,10 @@ describe('PersonaStore', () => {
 	});
 
 	it('sorts personas by name without changing the stored order', async () => {
-		await store.addPersona({name: 'mallory'});
-		await store.addPersona({name: 'Zed'});
-		await store.addPersona({name: 'alice'});
-		await store.addPersona({name: 'Bob'});
+		addTestPersona(store, {name: 'mallory'});
+		addTestPersona(store, {name: 'Zed'});
+		addTestPersona(store, {name: 'alice'});
+		addTestPersona(store, {name: 'Bob'});
 
 		expect(store.sortedPersonas.map((p) => p.name)).toEqual(['alice', 'Bob', 'mallory', 'Zed']);
 		expect(store.personas.map((p) => p.name)).toEqual(['mallory', 'Zed', 'alice', 'Bob']);
@@ -131,7 +120,7 @@ describe('PersonaStore', () => {
 
 	it('files decorated persona names under their first letter or digit', async () => {
 		for (const name of ['Zoe', '✨Élodie', '🌙 Luna', '𝓐𝓶𝔂', '[Mika]', 'Ⓑⓔⓝ', '✨✨', 'Dana', '★ 2B']) {
-			await store.addPersona({name});
+			addTestPersona(store, {name});
 		}
 
 		expect(store.sortedPersonas.map((p) => p.name)).toEqual([
@@ -148,15 +137,15 @@ describe('PersonaStore', () => {
 	});
 
 	it('sorts numbers in persona names by value', async () => {
-		await store.addPersona({name: 'Alex 10'});
-		await store.addPersona({name: 'Alex 2'});
+		addTestPersona(store, {name: 'Alex 10'});
+		addTestPersona(store, {name: 'Alex 2'});
 
 		expect(store.sortedPersonas.map((p) => p.name)).toEqual(['Alex 2', 'Alex 10']);
 	});
 
 	it('calculates decay frecency accurately', async () => {
-		await store.addPersona({name: 'P1'});
-		await store.addPersona({name: 'P2'});
+		addTestPersona(store, {name: 'P1'});
+		addTestPersona(store, {name: 'P2'});
 
 		const p1Id = store.personas[0].id;
 		const p2Id = store.personas[1].id;
@@ -170,8 +159,8 @@ describe('PersonaStore', () => {
 	});
 
 	it('handles in-chat latch commands', async () => {
-		await store.addPersona({name: 'Alice'});
-		await store.addPersona({name: 'Bob'});
+		addTestPersona(store, {name: 'Alice'});
+		addTestPersona(store, {name: 'Bob'});
 
 		await store.setActivePersona(store.personas[0].id, true);
 		expect(store.isPersonaLatched).toBe(true);
@@ -184,7 +173,7 @@ describe('PersonaStore', () => {
 	});
 
 	it('matches outgoing messages with persona tags and updates frecency', async () => {
-		await store.addPersona({
+		addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: '[', suffix: ']'}],
 		});
@@ -196,7 +185,7 @@ describe('PersonaStore', () => {
 	});
 
 	it('preserves latch when escaping with single backslash \\ in manual mode', async () => {
-		const alice = await store.addPersona({
+		const alice = addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
@@ -216,7 +205,7 @@ describe('PersonaStore', () => {
 	});
 
 	it('unlatches when escaping with single backslash \\ in last-used mode while preserving last mode', async () => {
-		const alice = await store.addPersona({
+		const alice = addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
@@ -240,7 +229,7 @@ describe('PersonaStore', () => {
 	});
 
 	it('clears latch when escaping with double backslash \\\\ followed by message', async () => {
-		const alice = await store.addPersona({
+		const alice = addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
@@ -258,7 +247,7 @@ describe('PersonaStore', () => {
 	});
 
 	it('does not intercept commands or strip slashes when root account is already selected', async () => {
-		await store.addPersona({
+		addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: '[', suffix: ']'}],
 		});
@@ -293,14 +282,14 @@ describe('PersonaStore', () => {
 	});
 
 	it('correctly handles message editing with matchEditMessage', async () => {
-		const alice = await store.addPersona({
+		const alice = addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [
 				{prefix: '[', suffix: ']'},
 				{prefix: 'A:', suffix: ''},
 			],
 		});
-		const bob = await store.addPersona({
+		const bob = addTestPersona(store, {
 			name: 'Bob',
 			persona_tags: [{prefix: 'B:', suffix: ''}],
 		});
@@ -412,25 +401,8 @@ describe('PersonaStore', () => {
 		expect(res12.subprofile?.name).toBe('Bob');
 	});
 
-	it('replaces all personas and unlatches if previous active was removed', async () => {
-		const p1 = await store.addPersona({name: 'Alice'});
-		await store.setActivePersona(p1.id, true);
-
-		const newPersona = {
-			id: 'new_1',
-			name: 'Bob',
-			personaTags: [],
-		};
-
-		await store.replaceAllPersonas([newPersona as any]);
-		expect(store.personas.length).toBe(1);
-		expect(store.personas[0].name).toBe('Bob');
-		expect(store.isPersonaLatched).toBe(false);
-		expect(store.activePersonaId).toBeNull();
-	});
-
 	it('setPersonas unlatches if active persona is not in new persona set', async () => {
-		const persona = await store.addPersona({name: 'Alice'});
+		const persona = addTestPersona(store, {name: 'Alice'});
 		await store.setActivePersona(persona.id, true);
 		expect(store.isPersonaLatched).toBe(true);
 		expect(store.activePersonaId).toBe(persona.id);
@@ -442,26 +414,26 @@ describe('PersonaStore', () => {
 	});
 
 	it('appends personas alongside existing ones', async () => {
-		await store.addPersona({name: 'Alice'});
+		addTestPersona(store, {name: 'Alice'});
 
 		const newPersona = {
-			id: 'new_2',
+			id: '1540000000000009002',
 			name: 'Bob',
-			personaTags: [],
+			persona_tags: [],
 		};
 
-		await store.appendPersonas([newPersona as any]);
+		store.upsertPersonas([newPersona as any]);
 		expect(store.personas.length).toBe(2);
 		expect(store.personas[0].name).toBe('Alice');
 		expect(store.personas[1].name).toBe('Bob');
 	});
 
 	it('auto-activates on persona tag match when activePersonaMode is "last"', async () => {
-		const alice = await store.addPersona({
+		const alice = addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
-		const bob = await store.addPersona({
+		const bob = addTestPersona(store, {
 			name: 'Bob',
 			persona_tags: [{prefix: 'b:', suffix: ''}],
 		});
@@ -490,11 +462,11 @@ describe('PersonaStore', () => {
 	});
 
 	it('does NOT switch activePersona on persona tag match when activePersonaMode is "manual"', async () => {
-		const alice = await store.addPersona({
+		const alice = addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
-		const bob = await store.addPersona({
+		const bob = addTestPersona(store, {
 			name: 'Bob',
 			persona_tags: [{prefix: 'b:', suffix: ''}],
 		});
@@ -517,7 +489,7 @@ describe('PersonaStore', () => {
 	});
 
 	it('does NOT send as persona for untagged messages when in "manual" mode with root account selected', async () => {
-		await store.addPersona({
+		addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
@@ -533,11 +505,11 @@ describe('PersonaStore', () => {
 	});
 
 	it('switching to "last" while on root starts on root without auto-selecting first persona', async () => {
-		await store.addPersona({
+		addTestPersona(store, {
 			name: 'Alice',
 			persona_tags: [{prefix: 'a:', suffix: ''}],
 		});
-		const bob = await store.addPersona({
+		const bob = addTestPersona(store, {
 			name: 'Bob',
 			persona_tags: [{prefix: 'b:', suffix: ''}],
 		});
@@ -574,8 +546,8 @@ describe('PersonaStore', () => {
 
 	describe('getEffectivePersonaForText', () => {
 		it('says so while the text could still become another persona tag', async () => {
-			const alice = await store.addPersona({name: 'Alice', persona_tags: [{prefix: 'a:'}]});
-			await store.addPersona({name: 'Bob', persona_tags: [{prefix: 'b:'}]});
+			const alice = addTestPersona(store, {name: 'Alice', persona_tags: [{prefix: 'a:'}]});
+			addTestPersona(store, {name: 'Bob', persona_tags: [{prefix: 'b:'}]});
 			await store.setActivePersona(alice.id, true);
 
 			// One character into Bob's tag: still Alice for now, and not to be shown to anyone yet.
@@ -590,11 +562,11 @@ describe('PersonaStore', () => {
 		});
 
 		it('returns tag-matched persona and isFromTag=true on tag match', async () => {
-			const alice = await store.addPersona({
+			const alice = addTestPersona(store, {
 				name: 'Alice',
 				persona_tags: [{prefix: '[', suffix: ']'}],
 			});
-			const bob = await store.addPersona({
+			const bob = addTestPersona(store, {
 				name: 'Bob',
 				persona_tags: [{prefix: 'b:', suffix: ''}],
 			});
@@ -619,11 +591,11 @@ describe('PersonaStore', () => {
 		});
 
 		it('falls back to active latched persona with isFromTag=false when untagged', async () => {
-			const alice = await store.addPersona({
+			const alice = addTestPersona(store, {
 				name: 'Alice',
 				persona_tags: [{prefix: '[', suffix: ']'}],
 			});
-			const bob = await store.addPersona({
+			const bob = addTestPersona(store, {
 				name: 'Bob',
 				persona_tags: [{prefix: 'b:', suffix: ''}],
 			});
@@ -667,7 +639,7 @@ describe('PersonaStore', () => {
 		});
 
 		it('populates display_tag_text and display_tag_icon on matchEditMessage', async () => {
-			const alice = await store.addPersona({
+			const alice = addTestPersona(store, {
 				name: 'Alice',
 				persona_tags: [{prefix: '[', suffix: ']'}],
 			});
@@ -705,7 +677,7 @@ describe('PersonaStore', () => {
 
 		it('retrieves owned persona via getKnownPersona formatted as MessageSubprofileResponse', async () => {
 			await store.setDisplayTag('Wonderland', null);
-			const alice = await store.addPersona({
+			const alice = addTestPersona(store, {
 				name: 'Alice',
 				pronouns: 'she/her',
 			});
@@ -727,7 +699,7 @@ describe('PersonaStore', () => {
 				signature_emojis: [{name: '🦊'}, {id: '12345', name: 'custom_fox', animated: true}],
 			});
 
-			expect(normalized.signatureEmojis).toEqual([
+			expect(normalized.signature_emojis).toEqual([
 				{id: null, name: '🦊', animated: null},
 				{id: '12345', name: 'custom_fox', animated: true},
 			]);
@@ -742,7 +714,7 @@ describe('PersonaStore', () => {
 				{
 					id: 'p_fox',
 					name: 'Fox Persona',
-					signatureEmojis: [
+					signature_emojis: [
 						{id: null, name: '🦊'},
 						{id: 'custom_100', name: 'custom_fox'},
 					],
@@ -750,7 +722,7 @@ describe('PersonaStore', () => {
 				{
 					id: 'p_cat',
 					name: 'Cat Persona',
-					signatureEmojis: [{id: null, name: '🐱'}],
+					signature_emojis: [{id: null, name: '🐱'}],
 				} as any,
 			]);
 
@@ -769,8 +741,8 @@ describe('PersonaStore', () => {
 				{
 					id: 'p_fox',
 					name: 'Fox Persona',
-					personaTags: [{prefix: 'f:'}],
-					signatureEmojis: [{id: null, name: '🦊'}],
+					persona_tags: [{prefix: 'f:'}],
+					signature_emojis: [{id: null, name: '🦊'}],
 				} as any,
 				{
 					id: 'p_active',
@@ -817,32 +789,6 @@ describe('PersonaStore', () => {
 				pronouns: 'she/her',
 				color: 0x445566,
 				visibility: 'public',
-			});
-		});
-
-		it('normalizes MobX ClientPersona with camelCase aliases (avatarColor and accentColor)', () => {
-			const subprofile = normalizeSubprofile({
-				id: 'persona_client_1',
-				name: 'Bob Client',
-				avatarHash: 'client_avatar_hash_789',
-				bannerHash: 'client_banner_hash_012',
-				avatarColor: 0x112233,
-				accentColor: 0x778899,
-				bio: 'Client bio',
-				pronouns: 'he/him',
-				visibility: 'unlisted',
-			} as any);
-
-			expect(subprofile).toEqual({
-				id: 'persona_client_1',
-				name: 'Bob Client',
-				avatar: 'client_avatar_hash_789',
-				avatar_color: 0x112233,
-				display_tag_text: undefined,
-				display_tag_icon: undefined,
-				pronouns: 'he/him',
-				color: 0x778899,
-				visibility: 'unlisted',
 			});
 		});
 
