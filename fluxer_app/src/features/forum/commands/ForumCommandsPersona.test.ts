@@ -72,7 +72,7 @@ describe('createForumPost', () => {
 			subprofile: FOX,
 		});
 		expect(post?.id).toBe(POST);
-		expect(sentMessage()).toEqual({content: 'bao', subprofile: FOX});
+		expect(sentMessage()).toEqual({content: 'bao', persona_id: FOX.id});
 		expect(ForumPosts.setFirstMessage).toHaveBeenCalledWith(expect.objectContaining({subprofile: FOX}));
 	});
 
