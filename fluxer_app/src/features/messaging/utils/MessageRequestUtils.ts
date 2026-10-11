@@ -14,7 +14,7 @@ import {hasVisibleContent as hasVisibleMessageContent} from '@fluxer/schema/src/
 
 // Fork imports.
 
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const DEFAULT_ALLOWED_MENTIONS: AllowedMentions = {replied_user: true};
 
@@ -53,7 +53,7 @@ export interface MessageCreateRequest {
 	favorite_meme_id?: string;
 	sticker_ids?: Array<string>;
 	tts?: true;
-	subprofile?: MessageSubprofileRequest | null;
+	persona_id?: string | null;
 }
 
 export interface MessageEditRequest {
@@ -61,7 +61,7 @@ export interface MessageEditRequest {
 	attachments?: Array<ApiMessageEditAttachmentMetadata>;
 	allowed_mentions?: AllowedMentions;
 	flags?: number;
-	subprofile?: MessageSubprofileRequest | null;
+	persona_id?: string | null;
 }
 
 export interface MessageEditPayload {
@@ -69,7 +69,7 @@ export interface MessageEditPayload {
 	attachments?: Array<ApiMessageEditAttachmentMetadata>;
 	allowedMentions?: AllowedMentions;
 	flags?: number;
-	subprofile?: MessageSubprofileRequest | null;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 export interface MessageCreatePayload {
@@ -82,7 +82,7 @@ export interface MessageCreatePayload {
 	favoriteMemeId?: string;
 	stickers?: Array<MessageStickerItem>;
 	tts?: boolean;
-	subprofile?: MessageSubprofileRequest | null;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 export interface NormalizedMessageContent {
@@ -166,8 +166,9 @@ export function buildMessageCreateRequest(payload: MessageCreatePayload): Messag
 	if (tts) {
 		requestBody.tts = true;
 	}
+	// Fork: the request names the persona; the copy the payload carries is for drawing the pending message.
 	if (payload.subprofile != null) {
-		requestBody.subprofile = payload.subprofile;
+		requestBody.persona_id = payload.subprofile.id;
 	}
 	return requestBody;
 }
@@ -187,8 +188,9 @@ export function buildMessageEditRequest(payload: MessageEditPayload): MessageEdi
 	if (flags !== undefined) {
 		requestBody.flags = flags;
 	}
+	// Fork: absent leaves the message's persona alone, null takes it back to the account.
 	if (payload.subprofile !== undefined) {
-		requestBody.subprofile = payload.subprofile;
+		requestBody.persona_id = payload.subprofile === null ? null : payload.subprofile.id;
 	}
 	return requestBody;
 }
