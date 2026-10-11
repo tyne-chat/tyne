@@ -589,6 +589,9 @@ msgstr "אימוג'י זה כבר נוסף כאימוג'י חתימה"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "זוהי תצוגה מקדימה של האופן שבו תגית התצוגה שלכם תיראה בצ'אט."
 
+msgid "This persona’s profile is private."
+msgstr "הפרופיל של הפרסונה הזו פרטי."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "הצגת/הסתרת רשימת הערוצים"
