@@ -169,6 +169,21 @@ export function normalizePersona(
 	};
 }
 
+const personaNameCollator = new Intl.Collator(undefined, {numeric: true});
+const LEADING_DECORATION = /^[^\p{Alphabetic}\p{N}]+/u;
+
+/** The name as it is filed in sorted lists: without leading symbols or emoji, so "✨Alice" sits with the A's. */
+export function getPersonaSortName(name: string): string {
+	const trimmed = name.trim();
+	return trimmed.replace(LEADING_DECORATION, '') || trimmed;
+}
+
+export function comparePersonasByName(a: ClientPersona, b: ClientPersona): number {
+	return (
+		personaNameCollator.compare(getPersonaSortName(a.name), getPersonaSortName(b.name)) || a.id.localeCompare(b.id)
+	);
+}
+
 export class PersonaStoreClass {
 	private _personas: Array<ClientPersona> = [];
 	private _displayTagText: string = '';
@@ -414,6 +429,11 @@ export class PersonaStoreClass {
 			});
 			Toast.error('Failed to update display tag');
 		}
+	}
+
+	/** Personas by name, for the lists people browse. `personas` keeps the order they were loaded in. */
+	get sortedPersonas(): ReadonlyArray<ClientPersona> {
+		return [...this._personas].sort(comparePersonasByName);
 	}
 
 	get rankedPersonas(): ReadonlyArray<ClientPersona> {
