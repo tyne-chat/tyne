@@ -80,11 +80,12 @@ vi.mock('@app/features/channel/commands/PrivateChannelCommands', () => ({
 }));
 
 vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
-	fetchPublicPersona: vi.fn().mockResolvedValue(null),
+	fetchPersonaProfile: vi.fn().mockResolvedValue({status: 'unavailable'}),
 }));
 
 const {PersonaProfileMobileSheet} = await import('./PersonaProfileMobileSheet');
 const {default: PersonaProfileMobile} = await import('../state/PersonaProfileMobile');
+const PersonaCommands = await import('@app/features/persona/commands/PersonaCommands');
 
 describe('PersonaProfileMobileSheet', () => {
 	let container: HTMLDivElement;
@@ -120,7 +121,6 @@ describe('PersonaProfileMobileSheet', () => {
 		avatar: null,
 		display_tag_text: 'Starlight',
 		pronouns: 'they/them',
-		bio: 'Hello from Caelum!',
 	};
 
 	it('renders nothing when closed', () => {
@@ -164,10 +164,29 @@ describe('PersonaProfileMobileSheet', () => {
 		expect(rootAccountButton?.textContent).toContain('@testuser');
 	});
 
-	it('navigates to main account profile on root account click and closes sheet', async () => {
+	it('says the profile is private when the server refuses it as private', async () => {
+		vi.mocked(PersonaCommands.fetchPersonaProfile).mockResolvedValueOnce({status: 'private'});
 		act(() => {
 			root.render(
 				<PersonaProfileMobileSheet data-flx="persona.persona-profile-mobile-sheet-test.persona-profile-mobile-sheet--3" />,
+			);
+		});
+		act(() => {
+			PersonaProfileMobile.open({...mockSubprofile, id: 'sub_private'}, mockUser, 'guild_456');
+		});
+		await act(async () => {
+			await Promise.resolve();
+		});
+
+		const notice = document.querySelector('[data-flx="persona.persona-profile-mobile-sheet.private-notice"]');
+		expect(notice?.textContent).toBe('This persona’s profile is private.');
+		expect(document.querySelector('[data-flx="persona.persona-profile-mobile-sheet.bio-section"]')).toBeNull();
+	});
+
+	it('navigates to main account profile on root account click and closes sheet', async () => {
+		act(() => {
+			root.render(
+				<PersonaProfileMobileSheet data-flx="persona.persona-profile-mobile-sheet-test.persona-profile-mobile-sheet--4" />,
 			);
 		});
 
@@ -195,7 +214,7 @@ describe('PersonaProfileMobileSheet', () => {
 	it('triggers direct message action on message button click', async () => {
 		act(() => {
 			root.render(
-				<PersonaProfileMobileSheet data-flx="persona.persona-profile-mobile-sheet-test.persona-profile-mobile-sheet--4" />,
+				<PersonaProfileMobileSheet data-flx="persona.persona-profile-mobile-sheet-test.persona-profile-mobile-sheet--5" />,
 			);
 		});
 

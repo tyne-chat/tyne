@@ -589,6 +589,9 @@ msgstr "Ez a hangulatjel már hozzá van adva aláírási hangulatjelként"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Ez egy előnézet arról, hogyan fog kinézni a megjelenítési címkéd a csevegésben."
 
+msgid "This persona’s profile is private."
+msgstr "Ennek a personának a profilja privát."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Csatornalista be/ki kapcsolása"

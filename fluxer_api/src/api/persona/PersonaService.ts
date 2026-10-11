@@ -26,6 +26,7 @@ import {
 	DuplicateSignatureEmojiError,
 	PersonaLimitReachedError,
 	PersonaNotFoundError,
+	PersonaPrivateError,
 	PersonaTagLimitExceededError,
 	SignatureEmojiLimitExceededError,
 } from './errors/PersonaErrors';
@@ -495,7 +496,7 @@ export class PersonaService {
 		}
 
 		if (persona.visibility === 'private' && viewerUserId !== targetUserId) {
-			throw new PersonaNotFoundError();
+			throw new PersonaPrivateError();
 		}
 
 		return persona.toPublicResponse();
