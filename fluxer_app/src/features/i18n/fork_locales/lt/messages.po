@@ -18,11 +18,9 @@ msgstr "(prisegta)"
 msgid "Account: @{username}"
 msgstr "Paskyra: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Aktyvios personos režimas"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Aktyvios personos režimas"
 
@@ -74,9 +72,6 @@ msgstr "Keisti personą"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Pasirinkite „PluralKit“ eksportą (.json) arba nuvilkite jį čia"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Pasirinkite, kaip žinutės be žymos ir personų žymos sąveikauja su jūsų aktyvia persona."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Sukonfigūruotos personos ({count})"
@@ -107,7 +102,8 @@ msgstr "Ištrinti laiko žymą\\"
 msgid "Detected System Name / Tag"
 msgstr "Aptiktas sistemos pavadinimas / žyma"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Rodoma žyma"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Atsisiunčiamas avataras {current} iš {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Pasikartojanti žymų pora šioje personoje"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Kiekvienas kanalas išlaiko savo personą. Nauji kanalai prasideda kaip jūsų paskyra."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Redaguoti personą"
@@ -140,6 +140,10 @@ msgstr "Redaguoti personą"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Redaguoti laiko žymą\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Visur"
 
 msgid "Export Summary"
 msgstr "Eksporto santrauka"
@@ -221,6 +225,10 @@ msgstr "Importuojamos personos..."
 msgid "Importing..."
 msgstr "Importuojama..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Kiekviename kanale"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Įterpti"
@@ -237,12 +245,6 @@ msgstr "Palikti esamas ir pridėti naujas (rekomenduojama)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Palikite dabartines personas ({existingCount}) ir šalia jų pridėkite visas importuotas personas ({0}) kaip naujus įrašus."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Paskiausiai naudota"
 
 msgid "Main account"
 msgstr "Pagrindinė paskyra"
@@ -306,6 +308,14 @@ msgstr "Signalų dar nėra. Juosta lieka paslėpta, kol nepridėsi bent vieno."
 msgid "Nobody has this signal on"
 msgstr "Niekas neįjungė šio signalo"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Viena persona visiems kanalams."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Tik šiam kanalui"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Matoma tik jums. Kiti negali matyti šios personos viso aprašymo ir profilio informacijos."
@@ -331,6 +341,10 @@ msgstr "Visam laikui ištrinkite visas esamas personas ({existingCount}) ir visi
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Personos žymos (priešdėlis ir priesaga)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Persona taikoma"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persona atnaujinta"
 msgid "Persona visibility"
 msgstr "Personos matomumas"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personos"
@@ -460,10 +473,6 @@ msgstr "Paieškos rezultatai ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Ieškoti personų, žymų, įvardžių..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Siųskite žinutes su skirtingais vardais ir avatarais. Personos gali atstovauti daugialypės sistemos nariams, vaidmenų žaidimų veikėjams ar bet kokiai kitai tapatybei."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Atsegti jaustuką"
 msgid "Unpin for this persona"
 msgstr "Atsegti šiai personai"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Žinutės be žymos siunčiamos kaip persona, kuri kalbėjo paskutinė. Kai kas nors panaudoja personos žymą, ta persona automatiškai tampa aktyvia."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Žinutės be žymos siunčiamos kaip jūsų pasirinkta persona. Įvedus kitos personos žymas, taip bus išsiųsta tik ta viena žinutė, o aktyvi persona nepasikeis."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Žinutės be žymos siunčiamos kaip jūsų pasirinkta persona. Žyma galioja tik tai žinutei."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Žinutės be žymos siunčiamos kaip paskutinė kalbėjusi persona. Panaudojus žymą perjungiama į tą personą."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Peržiūrėti savo personas"
 
 msgid "Where the signal bar appears"
 msgstr "Kur rodoma signalų juosta"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Kur įsimenama jūsų persona"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"

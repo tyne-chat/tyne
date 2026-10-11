@@ -4,6 +4,9 @@ import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork'
 import {http} from '@app/features/platform/transport/RestTransport';
 import * as Toast from '@app/features/ui/commands/ToastCommands';
 import type {
+	ActivePersonaScope,
+	PersonaChannelState,
+	PersonaChannelStatesResponse,
 	PersonaResponse,
 	PersonaSettingsResponse,
 	PersonaTag,
@@ -23,7 +26,7 @@ import type {
 	MessageSubprofileResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
-import {makeAutoObservable, runInAction} from 'mobx';
+import {makeAutoObservable, observable, runInAction} from 'mobx';
 
 export type ActivePersonaMode = 'manual' | 'last';
 
@@ -192,6 +195,9 @@ export class PersonaStoreClass {
 	private _activePersonaMode: ActivePersonaMode = 'manual';
 	private _activePersonaId: string | null = null;
 	private _isPersonaLatched: boolean = false;
+	private _activePersonaScope: ActivePersonaScope = 'global';
+	/** With the per-channel scope: the persona selected in each channel. No entry means the account. */
+	private readonly _channelPersonaIds = observable.map<string, string>();
 	private _settingsLoaded: boolean = false;
 	private _knownPersonas = new Map<string, MessageSubprofileResponse>();
 
@@ -207,6 +213,8 @@ export class PersonaStoreClass {
 			this._activePersonaMode = 'manual';
 			this._activePersonaId = null;
 			this._isPersonaLatched = false;
+			this._activePersonaScope = 'global';
+			this._channelPersonaIds.clear();
 			this._settingsLoaded = false;
 			this._knownPersonas.clear();
 		});
@@ -374,6 +382,26 @@ export class PersonaStoreClass {
 		return this._personas.find((p) => p.id === id) ?? null;
 	}
 
+	/** `global`: one selected persona for every channel. `channel`: each channel remembers its own. */
+	get activePersonaScope(): ActivePersonaScope {
+		return this._activePersonaScope;
+	}
+
+	/**
+	 * The persona selected for a channel: what an untagged message there is sent as, and what its
+	 * composer shows. Everything that acts in a channel asks this, never `activePersona`, which is
+	 * only the selection for every channel and says nothing about one channel when the selection is
+	 * kept per channel. Without a channel (null) there is nothing per channel to look up, and the
+	 * answer is the selection for every channel, or nobody when selections are per channel.
+	 */
+	latchedPersonaFor(channelId: string | null): ClientPersona | null {
+		if (this._activePersonaScope === 'channel') {
+			const id = channelId ? this._channelPersonaIds.get(channelId) : undefined;
+			return id ? (this._personas.find((p) => p.id === id) ?? null) : null;
+		}
+		return this._isPersonaLatched ? this.activePersona : null;
+	}
+
 	get displayTagText(): string {
 		return this._displayTagText;
 	}
@@ -390,6 +418,9 @@ export class PersonaStoreClass {
 		runInAction(() => {
 			if (settings.active_persona_mode !== undefined) {
 				this._activePersonaMode = settings.active_persona_mode;
+			}
+			if (settings.active_persona_scope !== undefined) {
+				this._activePersonaScope = settings.active_persona_scope;
 			}
 			if (settings.active_persona_id !== undefined) {
 				this._activePersonaId = settings.active_persona_id;
@@ -574,7 +605,20 @@ export class PersonaStoreClass {
 		}
 	}
 
-	async setActivePersona(id: string | null, latch = true, mode?: ActivePersonaMode): Promise<void> {
+	/**
+	 * Selects a persona. With the per-channel scope and a channel, the selection is that channel's
+	 * alone and the selection for every channel is left as it is.
+	 */
+	async setActivePersona(
+		id: string | null,
+		latch = true,
+		mode?: ActivePersonaMode,
+		channelId: string | null = null,
+	): Promise<void> {
+		if (this._activePersonaScope === 'channel' && channelId) {
+			await this.selectInChannel(channelId, id && latch ? id : null);
+			return;
+		}
 		const prevId = this._activePersonaId;
 		const prevLatched = this._isPersonaLatched;
 		const prevMode = this._activePersonaMode;
@@ -606,7 +650,11 @@ export class PersonaStoreClass {
 		}
 	}
 
-	async unlatch(_preserveMode?: boolean): Promise<void> {
+	async unlatch(_preserveMode?: boolean, channelId: string | null = null): Promise<void> {
+		if (this._activePersonaScope === 'channel' && channelId) {
+			await this.selectInChannel(channelId, null);
+			return;
+		}
 		const prevLatched = this._isPersonaLatched;
 		const prevId = this._activePersonaId;
 		const prevMode = this._activePersonaMode;
@@ -637,6 +685,73 @@ export class PersonaStoreClass {
 		}
 	}
 
+	async setActivePersonaScope(scope: ActivePersonaScope): Promise<void> {
+		const previous = this._activePersonaScope;
+		if (previous === scope) return;
+		runInAction(() => {
+			this._activePersonaScope = scope;
+		});
+		try {
+			await http.patch(Endpoints.USER_PERSONA_SETTINGS, {body: {active_persona_scope: scope}});
+		} catch {
+			runInAction(() => {
+				this._activePersonaScope = previous;
+			});
+			Toast.error('Failed to update where your persona is remembered');
+		}
+	}
+
+	setChannelStates(states: ReadonlyArray<PersonaChannelState>): void {
+		runInAction(() => {
+			this._channelPersonaIds.clear();
+			for (const state of states) {
+				if (state.persona_id) this._channelPersonaIds.set(state.channel_id, state.persona_id);
+			}
+		});
+	}
+
+	/** Another session of this account selected a persona in a channel, or the server cleared one. */
+	handleChannelStateUpdate(state: PersonaChannelState): void {
+		runInAction(() => {
+			if (state.persona_id) {
+				this._channelPersonaIds.set(state.channel_id, state.persona_id);
+			} else {
+				this._channelPersonaIds.delete(state.channel_id);
+			}
+		});
+	}
+
+	/**
+	 * A thread or post that was just created starts as whoever opened it, when personas are kept per
+	 * channel: they have just spoken there. Opened as the account, it starts as the account like any
+	 * other channel.
+	 */
+	startChannelAs(channelId: string, personaId: string | null | undefined): void {
+		if (this._activePersonaScope === 'channel' && personaId) {
+			void this.selectInChannel(channelId, personaId);
+		}
+	}
+
+	async fetchChannelStates(): Promise<void> {
+		try {
+			const res = await http.get<PersonaChannelStatesResponse>(Endpoints.USER_PERSONA_CHANNEL_STATES);
+			if (res.ok && Array.isArray(res.body?.states)) this.setChannelStates(res.body.states);
+		} catch {
+			// The selections stay as they are; the next load or event corrects them.
+		}
+	}
+
+	private async selectInChannel(channelId: string, personaId: string | null): Promise<void> {
+		this.handleChannelStateUpdate({channel_id: channelId, persona_id: personaId});
+		try {
+			await http.put(Endpoints.USER_PERSONA_CHANNEL_STATE(channelId), {body: {persona_id: personaId}});
+		} catch {
+			// Ask the server what holds now, instead of putting back a value that may itself be stale.
+			await this.fetchChannelStates();
+			Toast.error('Failed to set the persona for this channel');
+		}
+	}
+
 	async recordPersonaUse(id: string): Promise<void> {
 		const persona = this._personas.find((p) => p.id === id);
 		if (persona) {
@@ -649,12 +764,12 @@ export class PersonaStoreClass {
 		}
 	}
 
-	handleInChatCommand(content: string): {isCommand: boolean; handled: boolean} {
+	handleInChatCommand(channelId: string | null, content: string): {isCommand: boolean; handled: boolean} {
 		if (content.trim() === '\\\\') {
-			if (!this.activePersona) {
+			if (!this.latchedPersonaFor(channelId)) {
 				return {isCommand: false, handled: false};
 			}
-			void this.unlatch();
+			void this.unlatch(false, channelId);
 			Toast.success('Active persona cleared');
 			return {isCommand: true, handled: true};
 		}
@@ -678,19 +793,24 @@ export class PersonaStoreClass {
 		}));
 	}
 
-	matchOutgoingMessage(content: string, hasAttachments = false, options?: MatchPersonaOptions): MatchResult {
+	matchOutgoingMessage(
+		channelId: string | null,
+		content: string,
+		hasAttachments = false,
+		options?: MatchPersonaOptions,
+	): MatchResult {
 		const personasLike = this.matchablePersonas();
 
-		const activeLatchedId = this.activePersona?.id ?? null;
+		const activeLatchedId = this.latchedPersonaFor(channelId)?.id ?? null;
 		const result = matchPersona(content, personasLike, activeLatchedId, hasAttachments, options);
 
 		if (result.clearedLatch || (result.wasEscaped && this.activePersonaMode === 'last')) {
-			void this.unlatch();
+			void this.unlatch(false, channelId);
 			Toast.success('Active persona cleared (sending as root account)');
 		} else if (result.matched && result.persona) {
 			void this.recordPersonaUse(result.persona.id);
-			if (this.activePersonaMode === 'last' && this.activePersonaId !== result.persona.id) {
-				void this.setActivePersona(result.persona.id, true, 'last');
+			if (this.activePersonaMode === 'last' && activeLatchedId !== result.persona.id) {
+				void this.setActivePersona(result.persona.id, true, 'last', channelId);
 			}
 		}
 
@@ -698,11 +818,16 @@ export class PersonaStoreClass {
 	}
 
 	/** The text matchOutgoingMessage would send, without recording a use or changing the active persona. */
-	previewOutgoingContent(content: string, hasAttachments = false, options?: MatchPersonaOptions): string {
+	previewOutgoingContent(
+		channelId: string | null,
+		content: string,
+		hasAttachments = false,
+		options?: MatchPersonaOptions,
+	): string {
 		const result = matchPersona(
 			content,
 			this.matchablePersonas(),
-			this.activePersona?.id ?? null,
+			this.latchedPersonaFor(channelId)?.id ?? null,
 			hasAttachments,
 			options,
 		);
@@ -715,12 +840,13 @@ export class PersonaStoreClass {
 	 * anyone else yet.
 	 */
 	getEffectivePersonaForText(
+		channelId: string | null,
 		content: string,
 		hasAttachments = false,
 	): {persona: ClientPersona | null; isFromTag: boolean; isTagUnfinished: boolean} {
 		const personasLike = this.matchablePersonas();
 
-		const activeLatchedId = this.isPersonaLatched && this.activePersona ? this.activePersona.id : null;
+		const activeLatchedId = this.latchedPersonaFor(channelId)?.id ?? null;
 		const preview = previewPersona(content, personasLike, activeLatchedId, hasAttachments);
 		const isTagUnfinished = isUnfinishedPersonaTag(content, personasLike, preview.persona?.id ?? null);
 
@@ -753,6 +879,7 @@ export class PersonaStoreClass {
 	}
 
 	getEffectiveReactionPersona(
+		channelId: string | null,
 		emoji?: {id?: string | null; name: string; animated?: boolean; surrogates?: string} | null,
 		composerText?: string | null,
 	): ClientPersona | null {
@@ -763,12 +890,12 @@ export class PersonaStoreClass {
 			}
 		}
 		if (composerText) {
-			const fromText = this.getEffectivePersonaForText(composerText);
+			const fromText = this.getEffectivePersonaForText(channelId, composerText);
 			if (fromText.isFromTag && fromText.persona) {
 				return fromText.persona;
 			}
 		}
-		return this.activePersona;
+		return this.latchedPersonaFor(channelId);
 	}
 
 	matchEditMessage(
@@ -827,9 +954,8 @@ export class PersonaStoreClass {
 		};
 	}
 
-	getActiveSubprofileRequest(): MessageSubprofileRequest | null {
-		if (!this._isPersonaLatched) return null;
-		const active = this.activePersona;
+	getActiveSubprofileRequest(channelId: string | null): MessageSubprofileRequest | null {
+		const active = this.latchedPersonaFor(channelId);
 		if (!active) return null;
 		return normalizeSubprofile(active, {
 			display_tag_text: this.displayTagText || null,

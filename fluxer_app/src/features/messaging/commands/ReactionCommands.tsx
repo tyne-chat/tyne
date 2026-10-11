@@ -354,7 +354,7 @@ export function addReaction(
 	const effectivePersonaId =
 		personaId !== undefined
 			? personaId
-			: (PersonaStore.getEffectiveReactionPersona(emoji, Drafts.getDraft(channelId))?.id ?? null);
+			: (PersonaStore.getEffectiveReactionPersona(channelId, emoji, Drafts.getDraft(channelId))?.id ?? null);
 	logger.debug(`Adding reaction ${emoji.name} to message ${messageId} as persona ${effectivePersonaId}`);
 	const apiFunc = () => addReactionRequest(channelId, messageId, emoji, effectivePersonaId);
 	performReactionAction(
@@ -380,7 +380,7 @@ export function removeReaction(
 	const effectivePersonaId =
 		personaId !== undefined
 			? personaId
-			: (PersonaStore.getEffectiveReactionPersona(emoji, Drafts.getDraft(channelId))?.id ?? null);
+			: (PersonaStore.getEffectiveReactionPersona(channelId, emoji, Drafts.getDraft(channelId))?.id ?? null);
 	logger.debug(`Removing reaction ${emoji.name} from message ${messageId} as persona ${effectivePersonaId}`);
 	const apiFunc = () => removeReactionRequest(channelId, messageId, emoji, userId, effectivePersonaId);
 	performReactionAction(
