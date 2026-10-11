@@ -8,7 +8,11 @@ import {
 } from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import MessageReactions from '@app/features/messaging/state/MessageReactions';
 import Messages from '@app/features/messaging/state/MessagingMessages';
-import type {PersonaResponse, PersonaSettingsResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {
+	PersonaChannelState,
+	PersonaResponse,
+	PersonaSettingsResponse,
+} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 
 type PersonaPayload = {persona: PersonaResponse} | PersonaResponse;
@@ -80,6 +84,16 @@ export function handleUserPersonaSettingsUpdate(
 				display_tag_icon: settings.display_tag_icon,
 			});
 		}
+	}
+}
+
+/** Another session of this account selected a persona in a channel, or the server cleared one. */
+export function handleUserPersonaChannelStateUpdate(
+	data: PersonaChannelState | undefined,
+	_context: GatewayHandlerContext,
+): void {
+	if (data?.channel_id) {
+		PersonaStore.handleChannelStateUpdate({channel_id: data.channel_id, persona_id: data.persona_id ?? null});
 	}
 }
 

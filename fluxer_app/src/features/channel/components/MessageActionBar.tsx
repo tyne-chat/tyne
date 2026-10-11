@@ -196,7 +196,7 @@ export const QuickReactionButton = observer(
 		const {url: displayUrl} = getEmojiDisplayData(emoji);
 		const reactionEmoji = useMemo(() => toReactionEmoji(emoji), [emoji]);
 		const draft = channelId ? Drafts.getDraft(channelId) : undefined;
-		const effectivePersona = PersonaStore.getEffectiveReactionPersona(reactionEmoji, draft);
+		const effectivePersona = PersonaStore.getEffectiveReactionPersona(channelId ?? null, reactionEmoji, draft);
 		const handleClick = useCallback(
 			(event: React.MouseEvent | React.KeyboardEvent) => {
 				event.preventDefault();
@@ -353,7 +353,7 @@ export const MessageActionBarCore: React.FC<MessageActionBarCoreProps> = observe
 		);
 		const channel = permissions.channel;
 		const draft = Drafts.getDraft(channel.id);
-		const effectivePersona = PersonaStore.getEffectiveReactionPersona(null, draft);
+		const effectivePersona = PersonaStore.getEffectiveReactionPersona(channel.id, null, draft);
 		const quickReactionEmojis = useQuickReactionEmojis(
 			channel,
 			3,
