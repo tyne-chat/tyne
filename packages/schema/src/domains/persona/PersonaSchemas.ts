@@ -46,17 +46,21 @@ export const LegacyMessageSubprofileRequestSchema = z.object({
 });
 export type LegacyMessageSubprofileRequest = z.infer<typeof LegacyMessageSubprofileRequestSchema>;
 
+/**
+ * Who a message, reaction, typing indicator or signal is from: what is drawn beside it, and the
+ * persona's visibility, which clients use to keep other people's private personas out of mention
+ * suggestions. The profile itself (bio, banner) is fetched when someone opens it, where that
+ * visibility decides who gets it.
+ */
 export const MessageSubprofileResponseSchema = z.object({
 	id: z.string().describe('Persona ID'),
 	name: z.string().describe('Persona display name'),
 	avatar: z.string().nullish().describe('Avatar asset URL or hash'),
 	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
-	banner: z.string().nullish().optional().describe('Banner asset URL or hash'),
 	display_tag_text: z.string().nullish().optional().describe('Display tag text'),
 	display_tag_icon: z.string().nullish().optional().describe('Display tag icon URL or hash'),
 	pronouns: z.string().nullish().describe('Pronouns'),
 	color: z.number().int().nullish().describe('Custom color integer'),
-	bio: z.string().nullish().optional().describe('Persona bio (deprecated on message)'),
 	visibility: PersonaVisibilitySchema.nullish().optional().describe('Persona visibility setting'),
 });
 export type MessageSubprofileResponse = z.infer<typeof MessageSubprofileResponseSchema>;
