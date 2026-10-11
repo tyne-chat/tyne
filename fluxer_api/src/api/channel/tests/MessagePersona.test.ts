@@ -39,7 +39,6 @@ import {Message} from '../../models/Message';
 import {Persona} from '../../models/Persona';
 import {personaLookupKey} from '../../persona/IPersonaRepository';
 import {PersonaRepository} from '../../persona/PersonaRepository';
-import {normalizeMessageSubprofile} from '../services/message/MessageHelpers';
 import {MessageResponseDataService} from '../services/message/MessageResponseDataService';
 
 const encoder = new TextEncoder();
@@ -177,7 +176,7 @@ class FakeConnectionManager implements INatsConnectionManager {
 }
 
 describe('MessagePersona Backend Pipeline', () => {
-	it('validates MessageRequest with subprofile', () => {
+	it('reads only the id from the subprofile object older clients send', () => {
 		const parsed = MessageRequestSchema.safeParse({
 			content: 'Hello from Alice',
 			subprofile: {
@@ -193,13 +192,11 @@ describe('MessagePersona Backend Pipeline', () => {
 
 		expect(parsed.success).toBe(true);
 		if (parsed.success) {
-			expect(parsed.data.subprofile?.name).toBe('Alice');
-			expect(parsed.data.subprofile?.display_tag_text).toBe('Wonderland');
-			expect(parsed.data.subprofile?.display_tag_icon).toBe('https://example.com/icon.png');
+			expect(parsed.data.subprofile).toEqual({id: 'persona-1'});
 		}
 	});
 
-	it('validates MessageUpdateRequest with subprofile', () => {
+	it('accepts the same on an edit, and null to go back to the account', () => {
 		const parsed = MessageUpdateRequestSchema.safeParse({
 			content: 'Updated content from Bob',
 			subprofile: {
@@ -213,10 +210,9 @@ describe('MessagePersona Backend Pipeline', () => {
 
 		expect(parsed.success).toBe(true);
 		if (parsed.success) {
-			expect(parsed.data.subprofile?.name).toBe('Bob');
+			expect(parsed.data.subprofile).toEqual({id: 'persona-2'});
 		}
 
-		// Also allows clearing subprofile with null
 		const cleared = MessageUpdateRequestSchema.safeParse({
 			content: 'Reverted to root',
 			subprofile: null,
@@ -369,48 +365,6 @@ describe('MessagePersona Backend Pipeline', () => {
 
 		expect(result).toHaveLength(1);
 		expect(result[0].users).toEqual(['1481621807877361924', '123456']);
-	});
-
-	describe('normalizeMessageSubprofile', () => {
-		it('returns null for nullish input', () => {
-			expect(normalizeMessageSubprofile(null)).toBeNull();
-			expect(normalizeMessageSubprofile(undefined)).toBeNull();
-		});
-
-		it('normalizes complete subprofile data', () => {
-			const input = {
-				id: 'p-1',
-				name: 'Alice',
-				avatar: 'https://example.com/avatar.png',
-				avatar_color: 0x123456,
-				display_tag_text: 'System Tag',
-				display_tag_icon: 'https://example.com/icon.png',
-				pronouns: 'she/they',
-				color: 0xff0000,
-				bio: 'Bio text',
-			};
-			expect(normalizeMessageSubprofile(input)).toEqual({
-				id: 'p-1',
-				name: 'Alice',
-				avatar: 'https://example.com/avatar.png',
-				avatar_color: 0x123456,
-				banner: null,
-				display_tag_text: 'System Tag',
-				display_tag_icon: 'https://example.com/icon.png',
-				pronouns: 'she/they',
-				color: 0xff0000,
-				bio: 'Bio text',
-			});
-		});
-
-		it('normalizes display_tag_text', () => {
-			const tagOnly = normalizeMessageSubprofile({
-				id: 'p-1',
-				name: 'Alice',
-				display_tag_text: 'OnlyTag',
-			});
-			expect(tagOnly?.display_tag_text).toBe('OnlyTag');
-		});
 	});
 });
 
@@ -1010,6 +964,30 @@ describe('Forum post personas', () => {
 			.expect(HTTP_STATUS.CREATED)
 			.execute();
 	}
+
+	it('creates a post as the persona that persona_id names', async () => {
+		const {owner, member, forumId} = await setupForum();
+		const persona = await createPersona(member.token, 'Fox');
+
+		const created = await threadsRequest<StartForumThreadResponse>(harness, member.token)
+			.post(`/channels/${forumId}/threads`)
+			.body({name: 'post', message: {content: 'bao', persona_id: persona.id}})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		expect(created.owner_persona_id).toBe(persona.id);
+		expect(created.message?.subprofile?.name).toBe('Fox');
+
+		const messages = await threadsRequest<Array<MessageResponse>>(harness, owner.token)
+			.get(`/channels/${created.id}/messages`)
+			.execute();
+		expect(messages.map((message) => message.subprofile?.name)).toEqual(['Fox']);
+
+		await threadsRequest(harness, owner.token)
+			.post(`/channels/${forumId}/threads`)
+			.body({name: 'forged', message: {content: 'hi', persona_id: persona.id}})
+			.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
+			.execute();
+	});
 
 	it('creates a post as a persona and serves the persona on its first message', async () => {
 		const {owner, member, forumId} = await setupForum();
