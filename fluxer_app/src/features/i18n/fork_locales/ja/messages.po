@@ -18,11 +18,9 @@ msgstr "(ピン留め)"
 msgid "Account: @{username}"
 msgstr "アカウント: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "アクティブペルソナモード"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "アクティブペルソナモード"
 
@@ -74,9 +72,6 @@ msgstr "ペルソナを変更"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "PluralKit のエクスポート (.json) を選択するか、ドラッグ＆ドロップ"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "タグなしメッセージとペルソナタグが、アクティブなペルソナとどう連動するかを選択します。"
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "設定済みのペルソナ ({count})"
@@ -107,7 +102,8 @@ msgstr "タイムスタンプを削除\\"
 msgid "Detected System Name / Tag"
 msgstr "検出されたシステム名 / タグ"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "表示タグ"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "アバターをダウンロード中 {current}/{total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "このペルソナでタグのペアが重複しています"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "各チャンネルがそれぞれのペルソナを保持します。新しいチャンネルはアカウントから始まります。"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "ペルソナを編集"
@@ -140,6 +140,10 @@ msgstr "ペルソナを編集"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "タイムスタンプを編集\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "すべての場所"
 
 msgid "Export Summary"
 msgstr "エクスポートの概要"
@@ -221,6 +225,10 @@ msgstr "ペルソナをインポート中..."
 msgid "Importing..."
 msgstr "インポート中..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "チャンネルごと"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "挿入"
@@ -237,12 +245,6 @@ msgstr "既存を残して新規を追加 (推奨)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "現在の {existingCount} 件のペルソナを残し、インポートした {0} 件のペルソナをすべて新しい項目として追加します。"
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "最終使用"
 
 msgid "Main account"
 msgstr "メインアカウント"
@@ -306,6 +308,14 @@ msgstr "シグナルはまだありません。追加するまでバーは表示
 msgid "Nobody has this signal on"
 msgstr "このシグナルをオンにしている人はいません"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "すべてのチャンネルで1つのペルソナ。"
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "このチャンネルのみ"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "自分にのみ表示されます。他の人はこのペルソナの自己紹介全文やプロフィールの詳細を見ることができません。"
@@ -331,6 +341,10 @@ msgstr "既存の {existingCount} 件のペルソナをすべて完全に削除�
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "ペルソナタグ (プレフィックスとサフィックス)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "ペルソナの適用範囲"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "ペルソナを更新しました"
 msgid "Persona visibility"
 msgstr "ペルソナの公開範囲"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "ペルソナ"
@@ -460,10 +473,6 @@ msgstr "検索結果 ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "ペルソナ、タグ、代名詞を検索..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "別々の名前とアバターでメッセージを送信できます。ペルソナは、複数人格システムのメンバー、ロールプレイのキャラクター、その他あらゆるアイデンティティを表せます。"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "絵文字のピン留めを解除"
 msgid "Unpin for this persona"
 msgstr "このペルソナ用のピン留めを解除"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "タグなしメッセージは、最後に発言したペルソナとして送信されます。誰かがペルソナタグを使うと、そのペルソナが自動的にアクティブになります。"
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "タグなしメッセージは、選択したペルソナとして送信されます。別のペルソナのタグを入力すると、そのメッセージだけがそのペルソナで送信され、アクティブなペルソナは切り替わりません。"
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "タグのないメッセージは選択したペルソナとして送信されます。タグはそのメッセージにのみ適用されます。"
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "タグのないメッセージは最後に発言したペルソナとして送信されます。タグを使うとそのペルソナに切り替わります。"
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "ペルソナを表示"
 
 msgid "Where the signal bar appears"
 msgstr "シグナルバーを表示する場所"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "ペルソナを記憶する範囲"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
