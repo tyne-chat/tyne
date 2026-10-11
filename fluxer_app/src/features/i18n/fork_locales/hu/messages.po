@@ -18,11 +18,9 @@ msgstr "(kitűzve)"
 msgid "Account: @{username}"
 msgstr "Fiók: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Aktív persona mód"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Aktív persona mód"
 
@@ -74,9 +72,6 @@ msgstr "Persona váltása"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Válassz egy PluralKit-exportot (.json), vagy húzd ide"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Válaszd ki, hogyan működnek együtt a címke nélküli üzenetek és a personacímkék az aktív personáddal."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Beállított personák ({count})"
@@ -107,7 +102,8 @@ msgstr "Időbélyegző törlése\\"
 msgid "Detected System Name / Tag"
 msgstr "Észlelt rendszernév / címke"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Megjelenítési címke"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Avatár letöltése: {current} / {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Ismétlődő címkepár ennél a personánál"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Minden csatorna megtartja a saját personáját. Az új csatornák a fiókoddal indulnak."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Persona szerkesztése"
@@ -140,6 +140,10 @@ msgstr "Persona szerkesztése"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Időbélyegző szerkesztése\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Mindenhol"
 
 msgid "Export Summary"
 msgstr "Export összegzése"
@@ -221,6 +225,10 @@ msgstr "Personák importálása..."
 msgid "Importing..."
 msgstr "Importálás..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Minden csatornában"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Beszúrás"
@@ -237,12 +245,6 @@ msgstr "Meglévők megtartása és újak hozzáadása (ajánlott)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Tartsd meg a(z) {existingCount} jelenlegi personádat, és add hozzá mellé mind a(z) {0} importált personát új bejegyzésként."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Legutóbb használt"
 
 msgid "Main account"
 msgstr "Fő fiók"
@@ -306,6 +308,14 @@ msgstr "Még nincsenek jelzések. A sáv rejtve marad, amíg nem adsz hozzá egy
 msgid "Nobody has this signal on"
 msgstr "Senkinél sincs bekapcsolva ez a jelzés"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Egy persona minden csatornához."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Csak ehhez a csatornához"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Csak te láthatod. Mások nem tekinthetik meg ennek a personának a teljes bemutatkozását és profiladatait."
@@ -331,6 +341,10 @@ msgstr "Véglegesen törli mind a(z) {existingCount} meglévő personát, és te
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Personacímkék (előtag és utótag)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "A persona érvényessége"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persona frissítve"
 msgid "Persona visibility"
 msgstr "Persona láthatósága"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personák"
@@ -460,10 +473,6 @@ msgstr "Keresési találatok ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Personák, címkék, pronév keresése..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Küldj üzeneteket különböző nevekkel és avatárokkal. A personák képviselhetik egy plurális rendszer tagjait, szerepjáték-karaktereket vagy bármilyen más identitást."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Hangulatjel feloldása"
 msgid "Unpin for this persona"
 msgstr "Feloldás ennél a perszónánál"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "A címke nélküli üzenetek a legutóbb megszólalt personaként lesznek elküldve. Amikor valaki personacímkét használ, az a persona automatikusan aktívvá válik."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "A címke nélküli üzenetek a választott personádként lesznek elküldve. Ha egy másik persona címkéit írod be, csak az az egy üzenet megy úgy, és az aktív persona nem változik."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "A címke nélküli üzenetek a kiválasztott personaként mennek el. A címke csak arra az egy üzenetre érvényes."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "A címke nélküli üzenetek annak a nevében mennek el, aki utoljára írt. Címke használata arra a personára vált."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Personáid megtekintése"
 
 msgid "Where the signal bar appears"
 msgstr "Hol jelenik meg a jelzősáv"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Hol van megjegyezve a personád"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
