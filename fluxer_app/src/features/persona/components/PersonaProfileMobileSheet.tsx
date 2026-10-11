@@ -8,10 +8,10 @@ import type {GuildMember} from '@app/features/member/models/GuildMember';
 import GuildMembers from '@app/features/member/state/GuildMembers';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
-import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobile';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {getUserAccentColor} from '@app/features/theme/utils/AccentColorUtils';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
@@ -30,7 +30,6 @@ import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {DEFAULT_ACCENT_COLOR} from '@fluxer/constants/src/AppConstants';
-import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
@@ -38,7 +37,7 @@ import {CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/reac
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useMemo} from 'react';
 import styles from './PersonaProfileMobileSheet.module.css';
 
 const PERSONA_PROFILE_DESCRIPTOR = msg({
@@ -92,60 +91,14 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 		const isCurrentUser = Boolean(currentUserId && user?.id && user.id === currentUserId);
 		const localPersona = isCurrentUser ? (PersonaStore.personas.find((p) => p.id === subprofile.id) ?? null) : null;
 
-		const [publicPersona, setPublicPersona] = useState<PublicPersonaResponse | null>(null);
-		const [isLoading, setIsLoading] = useState<boolean>(!localPersona);
+		const {profile, isLoading, isPrivate} = usePersonaProfile(user.id, subprofile.id, localPersona);
 
-		useEffect(() => {
-			if (localPersona) {
-				setPublicPersona({
-					id: localPersona.id,
-					name: localPersona.name,
-					avatar_hash: localPersona.avatar_hash ?? localPersona.avatarHash ?? null,
-					banner_hash: localPersona.banner_hash ?? localPersona.bannerHash ?? null,
-					pronouns: localPersona.pronouns ?? null,
-					color: localPersona.color ?? localPersona.accentColor ?? null,
-					avatar_color: localPersona.avatar_color ?? localPersona.avatarColor ?? null,
-					bio: localPersona.bio ?? null,
-					visibility: localPersona.visibility ?? 'unlisted',
-				});
-				setIsLoading(false);
-				return;
-			}
-
-			let isMounted = true;
-			setIsLoading(true);
-			void PersonaCommands.fetchPublicPersona(user.id, subprofile.id)
-				.then((res) => {
-					if (isMounted) {
-						setPublicPersona(res);
-						setIsLoading(false);
-					}
-				})
-				.catch(() => {
-					if (isMounted) {
-						setIsLoading(false);
-					}
-				});
-
-			return () => {
-				isMounted = false;
-			};
-		}, [user.id, subprofile.id, localPersona]);
-
-		const effectivePronouns =
-			publicPersona !== null && publicPersona !== undefined
-				? publicPersona.pronouns
-				: (localPersona?.pronouns ?? subprofile.pronouns);
+		const effectivePronouns = profile ? profile.pronouns : subprofile.pronouns;
 		const effectiveDisplayTagText = isCurrentUser ? PersonaStore.displayTagText : (subprofile.display_tag_text ?? null);
 		const effectiveDisplayTagIcon = isCurrentUser ? PersonaStore.displayTagIcon : (subprofile.display_tag_icon ?? null);
-		const effectiveBio =
-			publicPersona !== null && publicPersona !== undefined ? publicPersona.bio : (localPersona?.bio ?? subprofile.bio);
-		const rawBanner =
-			publicPersona !== null && publicPersona !== undefined
-				? publicPersona.banner_hash
-				: localPersona
-					? (localPersona.banner_hash ?? localPersona.bannerHash ?? null)
-					: ((subprofile as any).banner ?? null);
+		// The bio and banner are the profile's, and the profile comes from the server for this viewer.
+		const effectiveBio = profile?.bio ?? null;
+		const rawBanner = profile?.banner_hash ?? null;
 		const staticBannerUrl = useMemo(() => {
 			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner}, false);
 		}, [user.id, rawBanner]);
@@ -166,19 +119,11 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 			return null;
 		}, [guildMember, guildId, user.id]);
 
-		const effectiveColor =
-			subprofile.color ?? publicPersona?.color ?? localPersona?.color ?? localPersona?.accentColor ?? null;
+		const effectiveColor = subprofile.color ?? profile?.color ?? null;
 
-		const effectiveAvatarColor =
-			subprofile.avatar_color ??
-			publicPersona?.avatar_color ??
-			localPersona?.avatar_color ??
-			localPersona?.avatarColor ??
-			null;
+		const effectiveAvatarColor = subprofile.avatar_color ?? profile?.avatar_color ?? null;
 
-		const hasCustomPersonaAvatar = Boolean(
-			subprofile.avatar || publicPersona?.avatar_hash || localPersona?.avatar_hash || localPersona?.avatarHash,
-		);
+		const hasCustomPersonaAvatar = Boolean(subprofile.avatar || profile?.avatar_hash);
 
 		const accentColor = useMemo(() => {
 			if (effectiveColor != null && effectiveColor !== 0) {
@@ -500,6 +445,18 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 														style={{width: '50%', height: '12px', borderRadius: '4px'}}
 														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.div--5"
 													/>
+												</div>
+											</div>
+										) : isPrivate ? (
+											<div
+												className={styles.bioSection}
+												data-flx="persona.persona-profile-mobile-sheet.bio-section.private"
+											>
+												<div
+													className={styles.privateNotice}
+													data-flx="persona.persona-profile-mobile-sheet.private-notice"
+												>
+													<Trans>This persona’s profile is private.</Trans>
 												</div>
 											</div>
 										) : effectiveBio ? (

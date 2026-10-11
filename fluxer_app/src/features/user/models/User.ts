@@ -755,11 +755,9 @@ function subprofilesEqual(
 		a.name === b.name &&
 		a.avatar === b.avatar &&
 		a.avatar_color === b.avatar_color &&
-		a.banner === b.banner &&
 		a.display_tag_text === b.display_tag_text &&
 		a.display_tag_icon === b.display_tag_icon &&
 		a.pronouns === b.pronouns &&
-		a.color === b.color &&
-		a.bio === b.bio
+		a.color === b.color
 	);
 }

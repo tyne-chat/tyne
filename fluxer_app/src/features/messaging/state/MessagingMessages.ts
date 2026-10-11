@@ -731,14 +731,12 @@ class Messages {
 				name: persona.name,
 				avatar: persona.avatar !== undefined ? persona.avatar : (current.avatar ?? null),
 				avatar_color: persona.avatar_color !== undefined ? persona.avatar_color : (current.avatar_color ?? null),
-				banner: persona.banner !== undefined ? persona.banner : (current.banner ?? null),
 				display_tag_text:
 					persona.display_tag_text !== undefined ? persona.display_tag_text : (current.display_tag_text ?? null),
 				display_tag_icon:
 					persona.display_tag_icon !== undefined ? persona.display_tag_icon : (current.display_tag_icon ?? null),
 				pronouns: persona.pronouns !== undefined ? persona.pronouns : (current.pronouns ?? null),
 				color: persona.color !== undefined ? persona.color : (current.color ?? null),
-				bio: persona.bio !== undefined ? persona.bio : (current.bio ?? null),
 				visibility: persona.visibility !== undefined ? persona.visibility : current.visibility,
 			};
 			return message.withUpdates({subprofile: updatedSubprofile});
