@@ -5,12 +5,6 @@ import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
 import {resolveOwnedPersona} from '@app/api/persona/PersonaOwnership';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
-/** Who is typing, as far as an indicator shows it: no bio, banner or visibility. */
-export type TypingSubprofile = Pick<
-	MessageSubprofileResponse,
-	'id' | 'name' | 'avatar' | 'avatar_color' | 'display_tag_text' | 'display_tag_icon' | 'pronouns' | 'color'
->;
-
 /**
  * What a typing indicator shows for the persona a request names, read from the account's own
  * records: the request supplies the id and nothing else. `undefined` when it names no persona.
@@ -20,22 +14,12 @@ export type TypingSubprofile = Pick<
 export async function resolveTypingSubprofile(
 	userId: UserID,
 	personaId: string | null | undefined,
-): Promise<TypingSubprofile | undefined> {
+): Promise<MessageSubprofileResponse | undefined> {
 	if (personaId == null) return undefined;
 	const personaRepository = getPersonaRepository();
 	const [persona, settings] = await Promise.all([
 		resolveOwnedPersona(personaRepository, userId, personaId),
 		personaRepository.findSettings(userId),
 	]);
-	const subprofile = persona.toSubprofileResponse(settings);
-	return {
-		id: subprofile.id,
-		name: subprofile.name,
-		avatar: subprofile.avatar,
-		avatar_color: subprofile.avatar_color,
-		display_tag_text: subprofile.display_tag_text ?? null,
-		display_tag_icon: subprofile.display_tag_icon ?? null,
-		pronouns: subprofile.pronouns,
-		color: subprofile.color,
-	};
+	return persona.toSubprofileResponse(settings);
 }
