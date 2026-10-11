@@ -94,7 +94,7 @@ const MessageReactionItem = observer(
 		}, [reaction.count, prevCount]);
 		const isDisabled = isPreview || disableInteraction;
 		const draft = Drafts.getDraft(message.channelId);
-		const effectivePersona = PersonaStore.getEffectiveReactionPersona(reaction.emoji, draft);
+		const effectivePersona = PersonaStore.getEffectiveReactionPersona(message.channelId, reaction.emoji, draft);
 		const effectivePersonaId = effectivePersona?.id ?? null;
 		const hasEffectivePersonaReacted = hasPersonaReacted(reaction, effectivePersonaId);
 		const handleClick = () => {

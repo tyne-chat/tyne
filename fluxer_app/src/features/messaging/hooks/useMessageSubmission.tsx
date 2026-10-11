@@ -114,7 +114,7 @@ export const useMessageSubmission = ({
 			if (!canSubmitMessage(content, hasNonTextContent)) return false;
 			if (isBlockedBySlowmode(channel)) return false;
 
-			const cmdResult = PersonaStore.handleInChatCommand(content);
+			const cmdResult = PersonaStore.handleInChatCommand(channel.id, content);
 			if (cmdResult.handled) {
 				RollingTypingSender.stopTyping(channel.id);
 				DraftCommands.deleteDraft(accountKey, channel.id);
@@ -123,7 +123,7 @@ export const useMessageSubmission = ({
 
 			const hasPendingAttachments = hasAttachments || CloudUpload.getTextareaAttachments(channel.id).length > 0;
 			const hasNonTextMedia = hasPendingAttachments || stickers.length > 0 || favoriteMemeId !== undefined;
-			const {content: finalContent, subprofile} = resolveOutgoingPersona(content, hasPendingAttachments, {
+			const {content: finalContent, subprofile} = resolveOutgoingPersona(channel.id, content, hasPendingAttachments, {
 				allowEmptyContent: hasNonTextMedia,
 			});
 			if (finalContent.length === 0 && !hasNonTextMedia) {
@@ -219,14 +219,17 @@ export const useMessageSubmission = ({
 			const draft =
 				(sendOptions.draftOverride !== undefined ? sendOptions.draftOverride : Drafts.getDraft(channel.id)) || '';
 			const draftMatch = draft
-				? PersonaStore.matchOutgoingMessage(draft, sendOptions.hasAttachments, {allowEmptyContent: true})
+				? PersonaStore.matchOutgoingMessage(channel.id, draft, sendOptions.hasAttachments, {allowEmptyContent: true})
 				: null;
 			let matchedPersona = draftMatch?.matched && draftMatch.persona ? draftMatch.persona : null;
 
 			if (!matchedPersona) {
-				const fallbackMatch = PersonaStore.matchOutgoingMessage(messageData.content, sendOptions.hasAttachments, {
-					allowEmptyContent: true,
-				});
+				const fallbackMatch = PersonaStore.matchOutgoingMessage(
+					channel.id,
+					messageData.content,
+					sendOptions.hasAttachments,
+					{allowEmptyContent: true},
+				);
 				if (fallbackMatch.matched && fallbackMatch.persona) {
 					matchedPersona = fallbackMatch.persona;
 				}
