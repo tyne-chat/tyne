@@ -226,6 +226,12 @@
 	margin-bottom: 0.75rem;
 }
 
+.privateNotice {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: var(--text-tertiary);
+}
+
 .bioHeader {
 	margin-bottom: 0.5rem;
 	font-weight: 600;
