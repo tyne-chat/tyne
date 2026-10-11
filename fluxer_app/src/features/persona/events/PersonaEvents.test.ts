@@ -196,6 +196,7 @@ describe('PersonaEvents', () => {
 			{
 				user_id: '1540000000000000001',
 				active_persona_mode: 'manual',
+				active_persona_scope: 'global',
 				active_persona_id: '1540000000000000001',
 				is_latched: true,
 				display_tag_text: 'SYS',
