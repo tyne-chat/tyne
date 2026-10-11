@@ -589,6 +589,9 @@ msgstr "Toto emoji je již přidáno jako podpisové emoji"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Toto je náhled toho, jak bude vaše zobrazovaná značka vypadat v chatu."
 
+msgid "This persona’s profile is private."
+msgstr "Profil této persony je soukromý."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Přepnout seznam kanálů"

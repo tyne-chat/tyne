@@ -589,6 +589,9 @@ msgstr "この絵文字はすでにシグネチャー絵文字として追加さ
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "これは、表示タグがチャットでどう見えるかのプレビューです。"
 
+msgid "This persona’s profile is private."
+msgstr "このペルソナのプロフィールは非公開です。"
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "チャンネルリストを切り替え"

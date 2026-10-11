@@ -589,6 +589,9 @@ msgstr "Šis jaustukas jau pridėtas kaip parašo jaustukas"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Tai peržiūra, kaip jūsų rodoma žyma atrodys pokalbyje."
 
+msgid "This persona’s profile is private."
+msgstr "Šios personos profilis yra privatus."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Perjungti kanalų sąrašą"
