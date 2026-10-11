@@ -98,7 +98,9 @@ export const EmojiPickerInspector = observer(({hoveredEmoji, channelId}: EmojiPi
 	const hasPersonas = PersonaStore.personas.length > 0;
 	const draft = channelId ? Drafts.getDraft(channelId) : undefined;
 	const reactionEmoji = hoveredEmoji ? toReactionEmoji(hoveredEmoji as any) : null;
-	const effectivePersona = hasPersonas ? PersonaStore.getEffectiveReactionPersona(reactionEmoji, draft) : null;
+	const effectivePersona = hasPersonas
+		? PersonaStore.getEffectiveReactionPersona(channelId ?? null, reactionEmoji, draft)
+		: null;
 	const reactorName = hasPersonas
 		? (effectivePersona?.name ?? Users.currentUser?.displayName ?? Users.currentUser?.username)
 		: null;
