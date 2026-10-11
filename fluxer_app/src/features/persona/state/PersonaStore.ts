@@ -11,6 +11,7 @@ import type {
 	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {
+	isUnfinishedPersonaTag,
 	type MatchPersonaOptions,
 	type MatchResult,
 	matchPersona,
@@ -708,21 +709,27 @@ export class PersonaStoreClass {
 		return result.matched || result.wasEscaped ? result.strippedContent : content;
 	}
 
+	/**
+	 * Who `content` would be sent as. `isTagUnfinished` says the text may still become another
+	 * persona's tag, in which case `persona` is only who it is for now and must not be shown to
+	 * anyone else yet.
+	 */
 	getEffectivePersonaForText(
 		content: string,
 		hasAttachments = false,
-	): {persona: ClientPersona | null; isFromTag: boolean} {
+	): {persona: ClientPersona | null; isFromTag: boolean; isTagUnfinished: boolean} {
 		const personasLike = this.matchablePersonas();
 
 		const activeLatchedId = this.isPersonaLatched && this.activePersona ? this.activePersona.id : null;
 		const preview = previewPersona(content, personasLike, activeLatchedId, hasAttachments);
+		const isTagUnfinished = isUnfinishedPersonaTag(content, personasLike, preview.persona?.id ?? null);
 
 		if (preview.persona) {
 			const found = this._personas.find((p) => p.id === preview.persona!.id) ?? null;
-			return {persona: found, isFromTag: preview.isFromTag};
+			return {persona: found, isFromTag: preview.isFromTag, isTagUnfinished};
 		}
 
-		return {persona: null, isFromTag: false};
+		return {persona: null, isFromTag: false, isTagUnfinished};
 	}
 
 	getPersonaBySignatureEmoji(emoji: {
