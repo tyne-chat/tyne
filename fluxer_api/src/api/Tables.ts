@@ -342,7 +342,9 @@ import {seconds} from 'itty-time';
 // Fork: used only by the fork's tables at the end of this file.
 
 import {
+	PERSONA_CHANNEL_STATE_COLUMNS,
 	PERSONA_COLUMNS,
+	type PersonaChannelStateRow,
 	type PersonaRow,
 	THREAD_OWNER_PERSONA_COLUMNS,
 	type ThreadOwnerPersonaRow,
@@ -1483,5 +1485,11 @@ export const ThreadOwnerPersonasByUser = defineTable<ThreadOwnerPersonaRow, 'use
 	name: 'thread_owner_personas_by_user',
 	columns: THREAD_OWNER_PERSONA_COLUMNS,
 	primaryKey: ['user_id', 'thread_id'],
+	partitionKey: ['user_id'],
+});
+export const PersonaChannelStates = defineTable<PersonaChannelStateRow, 'user_id' | 'channel_id', 'user_id'>({
+	name: 'persona_channel_states',
+	columns: PERSONA_CHANNEL_STATE_COLUMNS,
+	primaryKey: ['user_id', 'channel_id'],
 	partitionKey: ['user_id'],
 });
