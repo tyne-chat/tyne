@@ -234,4 +234,33 @@ export function previewPersona(
 	return {persona: null, isFromTag: false};
 }
 
+/**
+ * Whether what has been typed so far could still become another persona's tag: it is the start
+ * of a tag that goes in front of a message, and not yet the whole of it.
+ *
+ * Until that is settled, nobody else should be told who is typing. The text resolves to
+ * `currentPersonaId` for now (the latched persona, or nobody), and naming that persona would
+ * show them for a keystroke or two in front of a message that turns out to be someone else's.
+ *
+ * Only a tag that is a prefix alone can be seen coming. A tag with a suffix is not known until
+ * its last character is typed, so those are not held back.
+ */
+export function isUnfinishedPersonaTag(
+	text: string,
+	personas: ReadonlyArray<PersonaLike>,
+	currentPersonaId?: string | null,
+): boolean {
+	const typed = text.trim();
+	if (typed === '') return false;
+	for (const persona of personas) {
+		if (persona.auto_tag_disabled || persona.id === currentPersonaId) continue;
+		for (const tag of persona.persona_tags ?? []) {
+			if (tag.suffix) continue;
+			const prefix = (tag.prefix ?? '').trim();
+			if (typed.length < prefix.length && prefix.startsWith(typed)) return true;
+		}
+	}
+	return false;
+}
+
 export const matchPersonaTags = matchPersona;
