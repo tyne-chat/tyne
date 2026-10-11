@@ -68,7 +68,6 @@ describe('MessageSubmitUtils', () => {
 						display_tag_icon: '🦊',
 						pronouns: 'she/they',
 						color: 0xffa500,
-						bio: 'Clever fox',
 						visibility: 'public',
 					},
 				},

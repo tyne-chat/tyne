@@ -15,7 +15,7 @@ import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/Me
 
 // Fork: personas.
 
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 export interface ForumTagInput {
 	id?: string;
@@ -45,7 +45,7 @@ export interface ForumPostInput {
 	nonce: string;
 	hasAttachments: boolean;
 	stickerIds: ReadonlyArray<string>;
-	subprofile?: MessageSubprofileRequest;
+	subprofile?: MessageSubprofileResponse;
 }
 
 function assertActive(channel: Channel): asserts channel is Channel & {guildId: string} {
@@ -72,7 +72,7 @@ export async function createForumPost(forum: Channel, input: ForumPostInput): Pr
 	if (normalized.flags !== 0) message.flags = normalized.flags;
 	if (prepared.attachments?.length) message.attachments = prepared.attachments;
 	if (input.stickerIds.length > 0) message.sticker_ids = [...input.stickerIds];
-	if (input.subprofile) message.subprofile = input.subprofile;
+	if (input.subprofile) message.persona_id = input.subprofile.id;
 	const payload = {
 		name: input.name,
 		auto_archive_duration: forum.defaultAutoArchiveDuration ?? undefined,

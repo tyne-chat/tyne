@@ -62,7 +62,7 @@ describe('PersonaStore with a persona remembered per channel', () => {
 		perChannel();
 		expect(store.latchedPersonaFor('one')).toBeNull();
 		expect(store.latchedPersonaFor(null)).toBeNull();
-		expect(store.getActiveSubprofileRequest('one')).toBeNull();
+		expect(store.getActiveSubprofile('one')).toBeNull();
 		expect(store.getEffectivePersonaForText('one', 'hello').persona).toBeNull();
 	});
 
@@ -79,7 +79,7 @@ describe('PersonaStore with a persona remembered per channel', () => {
 		expect(http.patch).not.toHaveBeenCalledWith(SETTINGS, expect.anything());
 		// Still there for when the scope is switched back.
 		expect(store.activePersona?.id).toBe(alice);
-		expect(store.getActiveSubprofileRequest('one')?.id).toBe(bob);
+		expect(store.getActiveSubprofile('one')?.id).toBe(bob);
 		expect(store.getEffectiveReactionPersona('one', null, null)?.id).toBe(bob);
 		expect(store.getEffectiveReactionPersona('two', null, null)).toBeNull();
 	});
