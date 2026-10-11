@@ -62,6 +62,10 @@ import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 
 const VOICE_ACTIVITY_SHARING_LOCK_TTL_SECONDS = 60;
 
+// Fork imports.
+
+import {dropRetiredSyncedPreferenceFields} from '@app/api/persona/RetiredSyncedPreferenceFields';
+
 interface UserAccountSettingsServiceDeps {
 	userAccountRepository: UserRepository;
 
@@ -300,6 +304,8 @@ export class UserAccountSettingsService {
 				throw new SyncedPreferencesConflictError();
 			}
 			updatedRowData.synced_preferences = normalizeSyncedPreferencesSnapshot(data.synced_preferences);
+			// Fork: clients send back fields the fork once defined here and no longer does.
+			updatedRowData.synced_preferences = dropRetiredSyncedPreferenceFields(updatedRowData.synced_preferences);
 		}
 		const updatedSettings = await this.deps.userAccountRepository.upsertSettings(
 			updatedRowData,
