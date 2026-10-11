@@ -20,7 +20,7 @@ test.describe('Signal Bar', () => {
 	const baseURL = process.env.E2E_BASE_URL || 'http://localhost:9188';
 	const seed = readSeed();
 
-	const api = async (token: string, method: string, path: string, body?: unknown): Promise<void> => {
+	const api = async <T = unknown>(token: string, method: string, path: string, body?: unknown): Promise<T> => {
 		const response = await fetch(`${baseURL}/api/v1${path}`, {
 			method,
 			headers: {'Content-Type': 'application/json', Authorization: token},
@@ -29,6 +29,8 @@ test.describe('Signal Bar', () => {
 		if (!response.ok) {
 			throw new Error(`API ${method} ${path} failed (${response.status}): ${await response.text()}`);
 		}
+		const text = await response.text();
+		return (text ? JSON.parse(text) : undefined) as T;
 	};
 
 	const setEverywhere = (enabled: boolean) =>
@@ -60,7 +62,7 @@ test.describe('Signal Bar', () => {
 		await api(seed.E2E_ALICE_TOKEN, 'PUT', '/instance/signal-bar', {signals: []});
 	});
 
-	test('signals toggle in real time, follow the active persona, and are managed per channel', async ({
+	test('signals toggle in real time, follow what is done in their channel, and are managed per channel', async ({
 		page,
 		browser,
 	}) => {
@@ -85,7 +87,7 @@ test.describe('Signal Bar', () => {
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-pressed', 'false');
 			await expect(signal(page, 'Done')).toHaveAttribute('aria-label', 'Done');
 
-			// The signal follows whoever Bob is right now: typing a persona tag in the
+			// The signal follows what Bob does in this channel: typing a persona tag in the
 			// composer switches it to that persona without another click.
 			const bobComposer = bobPage
 				.locator(
@@ -97,10 +99,90 @@ test.describe('Signal Bar', () => {
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Alpha');
 			await expect(signal(bobPage, 'Reading')).toHaveAttribute('aria-pressed', 'true');
 
-			// Clearing the tag switches it back to the account.
+			// Deleting the text is not typing, so the signal keeps naming that persona...
 			await bobPage.keyboard.press('Control+A');
 			await bobPage.keyboard.press('Backspace');
+			await expect(bobComposer).toHaveText('');
+			await bobPage.waitForTimeout(750);
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Alpha');
+
+			// ...until Bob types as someone else, here the account.
+			await bobPage.keyboard.type('just me');
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+			await bobPage.keyboard.press('Control+A');
+			await bobPage.keyboard.press('Backspace');
+			await expect(bobComposer).toHaveText('');
+
+			// A persona picked in another channel stays out of this one. Bob's signal here
+			// is lit as his account; he goes elsewhere and switches to Bob-Alpha there.
+			// He moves through the channel list, as people do: a page reload would start the
+			// app afresh and prove nothing about what it does while it stays open.
+			const elsewhereName = `signals-elsewhere-${Date.now().toString().slice(-6)}`;
+			const elsewhere = await api<{id: string}>(seed.E2E_ALICE_TOKEN, 'POST', `/guilds/${seed.E2E_GUILD_ID}/channels`, {
+				name: elsewhereName,
+				type: 0,
+			});
+			const here = await api<{name: string}>(seed.E2E_ALICE_TOKEN, 'GET', `/channels/${seed.E2E_CHANNEL_ID}`);
+			const openFromChannelList = async (name: string, channelId: string) => {
+				await bobPage
+					.locator('[data-flx="app.channel-item-content.channel-name"]')
+					.filter({hasText: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)})
+					.first()
+					.click();
+				await bobPage.waitForURL(`**/channels/${seed.E2E_GUILD_ID}/${channelId}`);
+			};
+			const bobPill = bobPage.locator('[data-flx="persona.composer-pill"] button').first();
+			const pickInPill = async (name: RegExp) => {
+				await bobPill.click();
+				const sheet = bobPage.locator('[data-flx="persona.picker-sheet"]');
+				await sheet.getByText(name).first().click();
+			};
+			// A second window of Bob's stays open on this channel the whole time. It learns of
+			// the switch at once, and must not pass it on to the signal either.
+			const bobSecondWindow = await bobContext.newPage();
+			try {
+				await bobSecondWindow.goto(channelPath);
+				await expect(signal(bobSecondWindow, 'Reading')).toHaveAttribute('aria-pressed', 'true', {timeout: 20_000});
+
+				await openFromChannelList(elsewhereName, elsewhere.id);
+				await expect(bobPill).toBeVisible({timeout: 20_000});
+				// Bob has a signal lit in the other channel too, so the pick has one to change there.
+				await expect(signal(bobPage, 'Done')).toHaveAttribute('aria-pressed', 'false');
+				await signal(bobPage, 'Done').click();
+				await expect(signal(bobPage, 'Done')).toHaveAttribute('aria-label', /^Done: Bob Multi/);
+				await pickInPill(/^Bob-Alpha$/);
+				await expect(bobPill).toHaveAttribute('aria-label', /Bob-Alpha/);
+				await expect(signal(bobPage, 'Done')).toHaveAttribute('aria-label', 'Done: Bob-Alpha');
+				await expect(bobSecondWindow.locator('[data-flx="persona.composer-pill"] button').first()).toHaveAttribute(
+					'aria-label',
+					/Bob-Alpha/,
+				);
+				await bobPage.waitForTimeout(750);
+				await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+				await expect(signal(bobSecondWindow, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+				await bobSecondWindow.close();
+
+				// Coming back does not change it either, although the composer now shows Bob-Alpha.
+				await openFromChannelList(here.name, seed.E2E_CHANNEL_ID);
+				await expect(signal(bobPage, 'Reading')).toHaveAttribute('aria-pressed', 'true', {timeout: 20_000});
+				await expect(bobPill).toHaveAttribute('aria-label', /Bob-Alpha/);
+				await bobPage.waitForTimeout(750);
+				await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+
+				// Typing here as Bob-Alpha is what puts Bob-Alpha on the signal.
+				await bobComposer.click();
+				await bobPage.keyboard.type('back again');
+				await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Alpha');
+				await bobPage.keyboard.press('Control+A');
+				await bobPage.keyboard.press('Backspace');
+				await expect(bobComposer).toHaveText('');
+
+				// So does a pick made in this channel: back to the account.
+				await pickInPill(/Root Account/i);
+				await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+			} finally {
+				await api(seed.E2E_ALICE_TOKEN, 'DELETE', `/channels/${elsewhere.id}`);
+			}
 
 			// Clicking again turns it off for everyone.
 			await signal(bobPage, 'Reading').click();
