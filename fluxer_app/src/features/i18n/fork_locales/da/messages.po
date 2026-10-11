@@ -589,6 +589,9 @@ msgstr "Denne emoji er allerede tilføjet som en signatur-emoji"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Dette er en forhåndsvisning af, hvordan dit visningstag ser ud i chatten."
 
+msgid "This persona’s profile is private."
+msgstr "Denne personas profil er privat."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Vis/skjul kanallisten"
