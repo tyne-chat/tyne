@@ -183,7 +183,11 @@ export const useTextareaDraftAndTyping = ({
 		if (isRestoringDraftRef.current) {
 			return;
 		}
-		const {persona: effectivePersona, isTagUnfinished} = PersonaStore.getEffectivePersonaForText(value, false);
+		const {persona: effectivePersona, isTagUnfinished} = PersonaStore.getEffectivePersonaForText(
+			channelId,
+			value,
+			false,
+		);
 		const subprofile: MessageSubprofileRequest | null = effectivePersona
 			? normalizeSubprofile(effectivePersona, {
 					display_tag_text: PersonaStore.displayTagText || null,

@@ -20,7 +20,7 @@ const MODE_MANUAL_DESCRIPTOR = msg({
 	comment: 'Active persona mode manual',
 });
 const MODE_LAST_DESCRIPTOR = msg({
-	message: 'Last Used',
+	message: 'Last used',
 	comment: 'Active persona mode last used',
 });
 const SENDING_AS_TAG_DESCRIPTOR = msg({
@@ -50,22 +50,29 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 		const {i18n} = useLingui();
 		const currentUser = Users.getCurrentUser();
 		const personas = PersonaStore.personas;
-		const activePersona = PersonaStore.activePersona;
-		const isLatched = PersonaStore.isPersonaLatched && Boolean(activePersona);
+		// The persona selected for this composer's channel: the one for every channel, or this
+		// channel's own when selections are kept per channel.
+		const activePersona = PersonaStore.latchedPersonaFor(channelId ?? null);
+		const isLatched = Boolean(activePersona);
 		const mode = PersonaStore.activePersonaMode;
+		const isPerChannel = PersonaStore.activePersonaScope === 'channel' && Boolean(channelId);
 
 		// Hide if user has no personas configured
 		if (!currentUser || personas.length === 0) {
 			return null;
 		}
 
-		const {persona: effectivePersona, isFromTag} = PersonaStore.getEffectivePersonaForText(text, hasAttachments);
+		const {persona: effectivePersona, isFromTag} = PersonaStore.getEffectivePersonaForText(
+			channelId ?? null,
+			text,
+			hasAttachments,
+		);
 
 		// A pick made here is made in this channel, so the signals lit in it follow what the pill
 		// shows next. Signals in other channels keep the persona they were lit as.
 		const affirmPick = (): void => {
 			if (!channelId) return;
-			const {persona} = PersonaStore.getEffectivePersonaForText(text, hasAttachments);
+			const {persona} = PersonaStore.getEffectivePersonaForText(channelId ?? null, text, hasAttachments);
 			SignalBarStore.affirmPersona(
 				channelId,
 				persona
@@ -105,12 +112,14 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 						<PersonaPickerSheet
 							onClose={onClose}
 							showModes={true}
+							selectedPersonaId={activePersona?.id ?? ''}
+							perChannel={isPerChannel}
 							onSelectPersona={(id) => {
-								void PersonaStore.setActivePersona(id, true);
+								void PersonaStore.setActivePersona(id, true, undefined, channelId ?? null);
 								affirmPick();
 							}}
 							onSelectAccount={() => {
-								void PersonaStore.unlatch();
+								void PersonaStore.unlatch(false, channelId ?? null);
 								affirmPick();
 							}}
 							data-flx="persona.persona-composer-pill.persona-picker-sheet"
