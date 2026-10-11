@@ -2,6 +2,8 @@
 
 import type {
 	ChannelPersonaMentionItem,
+	PersonaChannelState,
+	PersonaChannelStatesResponse,
 	PersonaCreateRequest,
 	PersonaSettingsResponse,
 	PersonaSettingsUpdateRequest,
@@ -11,7 +13,7 @@ import type {
 	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {MAX_SIGNATURE_EMOJIS_PER_PERSONA} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
+import {type ChannelID, createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
 import {SYSTEM_USER_ID} from '../constants/Core';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
@@ -28,6 +30,12 @@ import {
 	SignatureEmojiLimitExceededError,
 } from './errors/PersonaErrors';
 import type {IPersonaRepository} from './IPersonaRepository';
+import {
+	forgetPersonaChannelState,
+	forgetPersonaChannelStatesOfPersona,
+	loadPersonaChannelStates,
+	storePersonaChannelState,
+} from './PersonaChannelStateStore';
 
 export const MAX_PERSONAS_PER_USER = 250;
 
@@ -337,12 +345,22 @@ export class PersonaService {
 			const settingsResponse: PersonaSettingsResponse = {
 				user_id: userId.toString(),
 				active_persona_mode: (settings.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
+				active_persona_scope: settings.active_persona_scope === 'channel' ? 'channel' : 'global',
 				active_persona_id: null,
 				is_latched: false,
 				display_tag_text: settings.display_tag_text ?? '',
 				display_tag_icon: settings.display_tag_icon ?? null,
 			};
 			await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', settingsResponse);
+		}
+
+		// The channels that had this persona selected go back to the account.
+		const clearedChannelIds = await forgetPersonaChannelStatesOfPersona(userId, personaId);
+		for (const channelId of clearedChannelIds) {
+			await this.dispatchToUser(userId, 'USER_PERSONA_CHANNEL_STATE_UPDATE', {
+				channel_id: channelId.toString(),
+				persona_id: null,
+			} satisfies PersonaChannelState);
 		}
 
 		await this.dispatchToMutualGuilds(userId, existing, 'delete');
@@ -489,6 +507,7 @@ export class PersonaService {
 			return {
 				user_id: userId.toString(),
 				active_persona_mode: 'manual',
+				active_persona_scope: 'global',
 				active_persona_id: null,
 				is_latched: false,
 				display_tag_text: '',
@@ -516,6 +535,7 @@ export class PersonaService {
 		return {
 			user_id: row.user_id.toString(),
 			active_persona_mode: (row.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
+			active_persona_scope: row.active_persona_scope === 'channel' ? 'channel' : 'global',
 			active_persona_id: activePersonaId,
 			is_latched: isLatched,
 			display_tag_text: row.display_tag_text ?? '',
@@ -533,6 +553,12 @@ export class PersonaService {
 					: (existing?.active_persona_mode as 'manual' | 'last') === 'last'
 						? 'last'
 						: 'manual',
+			active_persona_scope:
+				data.active_persona_scope !== undefined
+					? data.active_persona_scope
+					: existing?.active_persona_scope === 'channel'
+						? 'channel'
+						: 'global',
 			active_persona_id:
 				data.active_persona_id !== undefined ? data.active_persona_id : (existing?.active_persona_id ?? null),
 			is_latched: data.is_latched !== undefined ? data.is_latched : (existing?.is_latched ?? false),
@@ -558,6 +584,7 @@ export class PersonaService {
 		const response: PersonaSettingsResponse = {
 			user_id: updatedRow.user_id.toString(),
 			active_persona_mode: (updatedRow.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
+			active_persona_scope: updatedRow.active_persona_scope === 'channel' ? 'channel' : 'global',
 			active_persona_id: updatedRow.active_persona_id ? updatedRow.active_persona_id.toString() : null,
 			is_latched: Boolean(updatedRow.is_latched),
 			display_tag_text: updatedRow.display_tag_text ?? '',
@@ -683,6 +710,42 @@ export class PersonaService {
 		});
 	}
 
+	/** Every channel the account has a persona selected in. Channels not listed are used as the account. */
+	async getChannelStates(userId: UserID): Promise<PersonaChannelStatesResponse> {
+		const rows = await loadPersonaChannelStates(userId);
+		return {
+			states: rows.map((row) => ({
+				channel_id: row.channel_id.toString(),
+				persona_id: row.persona_id.toString(),
+			})),
+		};
+	}
+
+	/**
+	 * Selects a persona in one channel, or the account itself with `null`. The caller has already
+	 * checked that the account can see the channel. Tells the account's other sessions, and nobody
+	 * else: which persona someone has selected is theirs to show by acting.
+	 */
+	async setChannelState(
+		userId: UserID,
+		channelId: ChannelID,
+		personaId: PersonaID | null,
+	): Promise<PersonaChannelState> {
+		if (personaId === null) {
+			await forgetPersonaChannelState(userId, channelId);
+		} else {
+			const persona = await this.deps.personaRepository.findById(userId, personaId);
+			if (!persona || persona.isDeleted) throw new PersonaNotFoundError();
+			await storePersonaChannelState(userId, channelId, personaId);
+		}
+		const state: PersonaChannelState = {
+			channel_id: channelId.toString(),
+			persona_id: personaId === null ? null : personaId.toString(),
+		};
+		await this.dispatchToUser(userId, 'USER_PERSONA_CHANNEL_STATE_UPDATE', state);
+		return state;
+	}
+
 	private async dispatchToUser(
 		userId: UserID,
 		event:
@@ -690,7 +753,8 @@ export class PersonaService {
 			| 'USER_PERSONA_UPDATE'
 			| 'USER_PERSONA_DELETE'
 			| 'USER_PERSONAS_UPDATE'
-			| 'USER_PERSONA_SETTINGS_UPDATE',
+			| 'USER_PERSONA_SETTINGS_UPDATE'
+			| 'USER_PERSONA_CHANNEL_STATE_UPDATE',
 		data: unknown,
 	): Promise<void> {
 		if (!this.deps.gatewayService) return;
