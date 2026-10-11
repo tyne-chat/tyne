@@ -589,6 +589,9 @@ msgstr "यह इमोजी पहले से ही एक हस्ता
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "यह इस बात का पूर्वावलोकन है कि आपका डिस्प्ले टैग चैट में कैसा दिखेगा।"
 
+msgid "This persona’s profile is private."
+msgstr "इस परसोना की प्रोफ़ाइल निजी है।"
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "चैनल सूची टॉगल करें"
