@@ -589,6 +589,9 @@ msgstr "此表情符号已添加为专属表情符号"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "这是你的显示标签在聊天中的预览效果。"
 
+msgid "This persona’s profile is private."
+msgstr "此人格的个人资料为私密。"
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "切换频道列表"
