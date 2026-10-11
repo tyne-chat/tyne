@@ -119,6 +119,41 @@ describe('PersonaStore', () => {
 		expect(store.activePersonaId).toBeNull();
 	});
 
+	it('sorts personas by name without changing the stored order', async () => {
+		await store.addPersona({name: 'mallory'});
+		await store.addPersona({name: 'Zed'});
+		await store.addPersona({name: 'alice'});
+		await store.addPersona({name: 'Bob'});
+
+		expect(store.sortedPersonas.map((p) => p.name)).toEqual(['alice', 'Bob', 'mallory', 'Zed']);
+		expect(store.personas.map((p) => p.name)).toEqual(['mallory', 'Zed', 'alice', 'Bob']);
+	});
+
+	it('files decorated persona names under their first letter or digit', async () => {
+		for (const name of ['Zoe', '✨Élodie', '🌙 Luna', '𝓐𝓶𝔂', '[Mika]', 'Ⓑⓔⓝ', '✨✨', 'Dana', '★ 2B']) {
+			await store.addPersona({name});
+		}
+
+		expect(store.sortedPersonas.map((p) => p.name)).toEqual([
+			'✨✨',
+			'★ 2B',
+			'𝓐𝓶𝔂',
+			'Ⓑⓔⓝ',
+			'Dana',
+			'✨Élodie',
+			'🌙 Luna',
+			'[Mika]',
+			'Zoe',
+		]);
+	});
+
+	it('sorts numbers in persona names by value', async () => {
+		await store.addPersona({name: 'Alex 10'});
+		await store.addPersona({name: 'Alex 2'});
+
+		expect(store.sortedPersonas.map((p) => p.name)).toEqual(['Alex 2', 'Alex 10']);
+	});
+
 	it('calculates decay frecency accurately', async () => {
 		await store.addPersona({name: 'P1'});
 		await store.addPersona({name: 'P2'});
