@@ -184,6 +184,29 @@ test.describe('Signal Bar', () => {
 				await api(seed.E2E_ALICE_TOKEN, 'DELETE', `/channels/${elsewhere.id}`);
 			}
 
+			// Part-way through typing a persona's tag, nobody is told who is typing. Bob has
+			// Bob-Beta selected and the signal names Bob-Alpha; "a" could still become
+			// Bob-Alpha's tag, so the signal must not flip to Bob-Beta for that keystroke.
+			await pickInPill(/^Bob-Beta$/);
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Beta');
+			await bobComposer.click();
+			await bobPage.keyboard.type('a: as alpha');
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Alpha');
+			await bobPage.keyboard.press('Control+A');
+			await bobPage.keyboard.press('Backspace');
+			await expect(bobComposer).toHaveText('');
+			await bobPage.keyboard.type('a');
+			await bobPage.waitForTimeout(750);
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Alpha');
+			// Text that is not the start of anyone's tag is Bob-Beta typing.
+			await bobPage.keyboard.type('h well');
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Beta');
+			await bobPage.keyboard.press('Control+A');
+			await bobPage.keyboard.press('Backspace');
+			await expect(bobComposer).toHaveText('');
+			await pickInPill(/Root Account/i);
+			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
+
 			// Clicking again turns it off for everyone.
 			await signal(bobPage, 'Reading').click();
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading');
