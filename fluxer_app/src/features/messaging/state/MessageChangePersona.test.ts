@@ -170,12 +170,10 @@ describe('MessageChangePersona', () => {
 				id: 'bob-123',
 				name: 'Bob the Fox',
 				avatar: 'bob_avatar_hash',
-				banner: 'bob_banner_hash',
 				avatar_color: 654321,
 				color: 123456,
 				display_tag_text: 'TESTING SYSTEM',
 				display_tag_icon: 'https://example.com/icon.png',
-				bio: 'Fox bio',
 				pronouns: 'he/him',
 				visibility: undefined,
 			});
