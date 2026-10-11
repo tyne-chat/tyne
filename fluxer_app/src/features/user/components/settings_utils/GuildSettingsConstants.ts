@@ -27,6 +27,7 @@ import {
 
 // Fork imports.
 
+import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import {LightbulbIcon} from '@phosphor-icons/react';
 
 const EMOJI_DESCRIPTOR = msg({
@@ -277,8 +278,13 @@ export function formatGuildSettingsPath(i18n: I18n, tabType: GuildSettingsTabTyp
 	return [i18n._(GUILD_SETTINGS_LABEL_DESCRIPTOR), getGuildSettingsTabLabel(i18n, tabType)].filter(Boolean).join(' > ');
 }
 
+// Fork: the signal bar tab is only offered while the instance has the bar switched on.
+function isGuildSettingsTabOffered(tab: GuildSettingsTabDescriptor): boolean {
+	return tab.type !== 'signal_bar' || RuntimeConfig.signalBarGuildId !== null;
+}
+
 export const getGuildSettingsTabs = (i18n: I18n, _guildId?: string): Array<GuildSettingsTab> => {
-	return GUILD_SETTINGS_TABS_DESCRIPTORS.map((tab) => ({
+	return GUILD_SETTINGS_TABS_DESCRIPTORS.filter(isGuildSettingsTabOffered).map((tab) => ({
 		...tab,
 		label: getGuildSettingsTabLabel(i18n, tab.type),
 	}));
