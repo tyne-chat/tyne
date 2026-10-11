@@ -26,6 +26,13 @@ const FETCH_PERSONAS_BY_USER_IDS_CQL = Personas.selectCql({
 	where: Personas.where.in('user_id', 'user_ids'),
 });
 
+// Settings rows written before `active_persona_scope` existed do not have it. They mean what they
+// always meant, one persona for every channel, and a row has to carry every column to be written
+// back whole.
+function withPersonaScope(row: UserPersonaSettingsRow): UserPersonaSettingsRow {
+	return row.active_persona_scope === 'channel' ? row : {...row, active_persona_scope: 'global'};
+}
+
 const FETCH_SETTINGS_CQL = UserPersonaSettings.selectCql({
 	where: [UserPersonaSettings.where.eq('user_id')],
 	limit: 1,
@@ -246,7 +253,7 @@ export class PersonaRepository extends IPersonaRepository {
 		const row = await fetchOne<UserPersonaSettingsRow>(FETCH_SETTINGS_CQL, {
 			user_id: userId,
 		});
-		return row ?? null;
+		return row ? withPersonaScope(row) : null;
 	}
 
 	async deleteSettings(userId: UserID): Promise<void> {
@@ -267,7 +274,7 @@ export class PersonaRepository extends IPersonaRepository {
 				user_ids: chunk,
 			});
 			for (const r of rows) {
-				results.set(r.user_id.toString(), r);
+				results.set(r.user_id.toString(), withPersonaScope(r));
 			}
 		}
 		return results;
