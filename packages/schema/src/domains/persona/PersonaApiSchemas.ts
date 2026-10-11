@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import {createStringType, SnowflakeStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
+import {createStringType, SnowflakeStringType, SnowflakeType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {z} from 'zod';
 
 export const PersonaTagSchema = z
@@ -138,9 +138,20 @@ export const UserIdPersonaIdParam = z.object({
 export const ActivePersonaModeSchema = z.enum(['manual', 'last']);
 export type ActivePersonaMode = z.infer<typeof ActivePersonaModeSchema>;
 
+/**
+ * Where the persona someone has selected applies. `global`: one selection for every channel, kept
+ * in `active_persona_id`. `channel`: each channel remembers its own, kept as channel states; a
+ * channel without one is used as the account itself.
+ */
+export const ActivePersonaScopeSchema = z.enum(['global', 'channel']);
+export type ActivePersonaScope = z.infer<typeof ActivePersonaScopeSchema>;
+
 export const PersonaSettingsResponseSchema = z.object({
 	user_id: SnowflakeStringType.describe('User Snowflake ID'),
 	active_persona_mode: ActivePersonaModeSchema.default('manual'),
+	active_persona_scope: ActivePersonaScopeSchema.default('global').describe(
+		'Whether the selected persona is one for every channel or remembered per channel',
+	),
 	active_persona_id: SnowflakeStringType.nullish(),
 	is_latched: z.boolean().default(false),
 	display_tag_text: z.string().max(100).nullish(),
@@ -151,12 +162,35 @@ export type PersonaSettingsResponse = z.infer<typeof PersonaSettingsResponseSche
 
 export const PersonaSettingsUpdateRequestSchema = z.object({
 	active_persona_mode: ActivePersonaModeSchema.optional(),
+	active_persona_scope: ActivePersonaScopeSchema.optional(),
 	active_persona_id: SnowflakeStringType.nullish().optional(),
 	is_latched: z.boolean().optional(),
 	display_tag_text: z.string().max(100).nullish().optional(),
 	display_tag_icon: z.string().max(256).nullish().optional(),
 });
 export type PersonaSettingsUpdateRequest = z.infer<typeof PersonaSettingsUpdateRequestSchema>;
+
+export const PersonaChannelStateSchema = z.object({
+	channel_id: SnowflakeStringType.describe('The channel this selection belongs to'),
+	persona_id: SnowflakeStringType.nullable().describe(
+		'The persona selected in the channel, or null when the channel is used as the account itself',
+	),
+});
+export type PersonaChannelState = z.infer<typeof PersonaChannelStateSchema>;
+
+export const PersonaChannelStatesResponseSchema = z.object({
+	states: z.array(PersonaChannelStateSchema).describe('Every channel that has a persona selected'),
+});
+export type PersonaChannelStatesResponse = z.infer<typeof PersonaChannelStatesResponseSchema>;
+
+export const PersonaChannelStateUpdateRequestSchema = z.object({
+	persona_id: SnowflakeStringType.nullable().describe('The persona to select in the channel, or null for the account'),
+});
+export type PersonaChannelStateUpdateRequest = z.infer<typeof PersonaChannelStateUpdateRequestSchema>;
+
+export const PersonaChannelStateParam = z.object({
+	channel_id: SnowflakeType.describe('The ID of the channel'),
+});
 
 export const ChannelPersonaMentionItemSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),

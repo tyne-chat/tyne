@@ -3,6 +3,10 @@
 import {UserIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {
 	PersonaBulkImportRequestSchema,
+	PersonaChannelStateParam,
+	PersonaChannelStateSchema,
+	PersonaChannelStatesResponseSchema,
+	PersonaChannelStateUpdateRequestSchema,
 	PersonaCreateRequestSchema,
 	PersonaIdParam,
 	PersonaListResponseSchema,
@@ -14,7 +18,8 @@ import {
 	PublicPersonaResponseSchema,
 	UserIdPersonaIdParam,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {createPersonaID, createUserID} from '../BrandedTypes';
+import {createChannelID, createPersonaID, createUserID} from '../BrandedTypes';
+import {viewerFromCtx} from '../experiment/ChannelThreadsGate';
 import {DefaultUserOnly, LoginRequired} from '../middleware/AuthMiddleware';
 import {requireOAuth2ScopeForBearer} from '../middleware/OAuth2ScopeMiddleware';
 import {RateLimitMiddleware} from '../middleware/RateLimitMiddleware';
@@ -137,6 +142,62 @@ export function PersonaController(app: HonoApp) {
 			const body = ctx.req.valid('json');
 			const settings = await ctx.get('personaService').updateSettings(user.id, body);
 			return ctx.json(settings);
+		},
+	);
+
+	// These two sit before the `:persona_id` routes so that "channel-states" is not read as an ID.
+	app.get(
+		'/users/@me/personas/channel-states',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_READ),
+		requireOAuth2ScopeForBearer('personas.read'),
+		LoginRequired,
+		DefaultUserOnly,
+		OpenAPI({
+			operationId: 'list_my_persona_channel_states',
+			summary: 'List the personas selected per channel',
+			responseSchema: PersonaChannelStatesResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Lists every channel the authenticated user has a persona selected in. Used when their persona is remembered per channel; a channel that is not listed is used as the account itself.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			return ctx.json(await ctx.get('personaService').getChannelStates(user.id));
+		},
+	);
+
+	app.put(
+		'/users/@me/personas/channel-states/:channel_id',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', PersonaChannelStateParam),
+		Validator('json', PersonaChannelStateUpdateRequestSchema),
+		OpenAPI({
+			operationId: 'set_my_persona_channel_state',
+			summary: 'Select a persona in a channel',
+			responseSchema: PersonaChannelStateSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				"Selects one of the authenticated user's personas in a channel they can see, or the account itself with a null persona. Only their own sessions are told.",
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const channelId = createChannelID(ctx.req.valid('param').channel_id);
+			const {persona_id} = ctx.req.valid('json');
+			// Refuses a channel the account cannot see, which also keeps the rows to real channels.
+			await ctx
+				.get('channelService')
+				.interactions.authService.getChannelAuthenticated({userId: user.id, channelId, viewer: viewerFromCtx(ctx)});
+			const state = await ctx
+				.get('personaService')
+				.setChannelState(user.id, channelId, persona_id === null ? null : createPersonaID(BigInt(persona_id)));
+			return ctx.json(state);
 		},
 	);
 
