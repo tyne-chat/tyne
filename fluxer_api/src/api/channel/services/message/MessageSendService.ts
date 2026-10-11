@@ -94,7 +94,7 @@ import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 import type {PersonaID} from '@app/api/BrandedTypes';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
-import {resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
+import {requestedPersonaId, resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
 
 interface MessageSendServiceDeps {
 	threadActivity: ThreadMessageActivity;
@@ -353,8 +353,9 @@ export class MessageSendService {
 	}
 
 	private async resolveMessagePersonaId({user, data}: {user: User; data: MessageRequest}): Promise<PersonaID | null> {
-		if (!data.subprofile) return null;
-		return resolveOwnedPersonaId(this.deps.personaRepository ?? getPersonaRepository(), user.id, data.subprofile.id);
+		const requested = requestedPersonaId(data, user.id);
+		if (requested == null) return null;
+		return resolveOwnedPersonaId(this.deps.personaRepository ?? getPersonaRepository(), user.id, requested);
 	}
 
 	private assertNotThreadStarterReference(

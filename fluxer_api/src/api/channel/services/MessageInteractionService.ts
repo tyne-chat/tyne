@@ -36,7 +36,6 @@ import type {ChannelPinResponse, MessageResponse} from '@fluxer/schema/src/domai
 
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import type {ReactionUserItemResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 export class MessageInteractionService {
 	readonly authService: MessageInteractionAuthService;
@@ -90,12 +89,12 @@ export class MessageInteractionService {
 		userId,
 		channelId,
 		viewer,
-		subprofile,
+		personaId,
 	}: {
 		userId: UserID;
 		viewer: ThreadViewer;
 		channelId: ChannelID;
-		subprofile?: MessageSubprofileRequest | null;
+		personaId?: string | null;
 	}): Promise<AuthenticatedChannel> {
 		const authChannel = await this.authService.getChannelAuthenticated({userId, channelId, viewer});
 		if (authChannel.channel.isThreadOnly()) throw new InvalidChannelTypeError();
@@ -105,7 +104,7 @@ export class MessageInteractionService {
 			assertThreadAllowed(threadWriteBlock('send', authChannel.thread.actor));
 		}
 		if (!authChannel.guild && (await this.startsNewConversation(authChannel.channel, userId))) return authChannel;
-		await this.readStateService.startTyping({authChannel, userId, subprofile});
+		await this.readStateService.startTyping({authChannel, userId, personaId});
 		return authChannel;
 	}
 
