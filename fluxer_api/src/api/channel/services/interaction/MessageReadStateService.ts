@@ -10,36 +10,38 @@ import {GuildOperations} from '@fluxer/constants/src/GuildConstants';
 
 // Fork imports.
 
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {resolveTypingSubprofile} from '@app/api/persona/TypingPersona';
 
 export class MessageReadStateService {
 	constructor(private gatewayService: IGatewayService) {}
 	async startTyping({
 		authChannel,
 		userId,
-		subprofile,
+		personaId,
 	}: {
 		authChannel: AuthenticatedChannel;
 		userId: UserID;
-		subprofile?: MessageSubprofileRequest | null;
+		personaId?: string | null;
 	}): Promise<void> {
 		const {channel, guild} = authChannel;
 		ensureTextChannel(channel);
 		if (isOperationDisabled(guild, GuildOperations.TYPING_EVENTS)) {
 			return;
 		}
-		await this.dispatchTypingStart({channel, userId, subprofile});
+		await this.dispatchTypingStart({channel, userId, personaId});
 	}
 
 	private async dispatchTypingStart({
 		channel,
 		userId,
-		subprofile,
+		personaId,
 	}: {
 		channel: Channel;
 		userId: UserID;
-		subprofile?: MessageSubprofileRequest | null;
+		personaId?: string | null;
 	}): Promise<void> {
+		// Fork: the indicator shows the persona as the server knows it, never what the request said about it.
+		const subprofile = await resolveTypingSubprofile(userId, personaId);
 		await dispatchChannelEvent({
 			gatewayService: this.gatewayService,
 			channel,
@@ -48,18 +50,7 @@ export class MessageReadStateService {
 				channel_id: channel.id.toString(),
 				user_id: userId.toString(),
 				timestamp: Math.floor(Date.now() / 1000),
-				subprofile: subprofile
-					? {
-							id: subprofile.id,
-							name: subprofile.name,
-							avatar: subprofile.avatar ?? null,
-							avatar_color: subprofile.avatar_color ?? null,
-							display_tag_text: subprofile.display_tag_text ?? null,
-							display_tag_icon: subprofile.display_tag_icon ?? null,
-							pronouns: subprofile.pronouns ?? null,
-							color: subprofile.color ?? null,
-						}
-					: undefined,
+				subprofile,
 			},
 		});
 	}
