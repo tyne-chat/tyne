@@ -164,3 +164,22 @@
 	background-color: var(--background-modifier-hover);
 	color: var(--text-primary);
 }
+
+/* Fork: the count used to inherit the chat font size inside a fixed-size pill, which clipped the digits at large sizes.
+   The pill now follows the chat font size at half rate and everything inside is sized in em to keep its proportions. */
+.reactionInner {
+	font-size: calc(0.5rem + 0.5em);
+	padding: 0.125em 0.375em;
+}
+
+.emoji {
+	height: 1.25em;
+	width: 1.25em;
+	margin: 0.125em 0;
+}
+
+.countWrapper {
+	height: 1em;
+	min-width: 0.75em;
+	margin-inline-start: 0.375em;
+}
