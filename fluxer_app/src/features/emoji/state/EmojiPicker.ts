@@ -510,7 +510,7 @@ class EmojiPicker {
 		if (effectivePersonaId) {
 			const persona = PersonaStore.personas.find((p) => p.id === effectivePersonaId);
 			if (persona) {
-				const sigs = persona.signature_emojis ?? persona.signatureEmojis ?? [];
+				const sigs = persona.signature_emojis ?? [];
 				for (const sig of sigs) {
 					let key: string | null = null;
 					if (sig.id) {
@@ -608,7 +608,7 @@ class EmojiPicker {
 		if (personaId) {
 			const persona = PersonaStore.personas.find((p) => p.id === personaId);
 			if (persona) {
-				const sigs = persona.signature_emojis ?? persona.signatureEmojis ?? [];
+				const sigs = persona.signature_emojis ?? [];
 				for (const sig of sigs) {
 					if (sig.id) {
 						const match = allEmojis.find((e) => e.id === sig.id);
