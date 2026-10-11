@@ -97,17 +97,16 @@ export class Persona {
 		};
 	}
 
+	/** Who this persona is beside a message, reaction, typing indicator or signal. Its profile is `toPublicResponse`. */
 	toSubprofileResponse(settings?: UserPersonaSettingsRow | null): {
 		id: string;
 		name: string;
 		avatar: string | null;
 		avatar_color: number | null;
-		banner?: string | null;
 		display_tag_text?: string | null;
 		display_tag_icon?: string | null;
 		pronouns: string | null;
 		color: number | null;
-		bio?: string | null;
 		visibility?: PersonaVisibility | null;
 	} {
 		const effectiveTagText =
@@ -124,12 +123,10 @@ export class Persona {
 			name: this.name,
 			avatar: this.avatarHash,
 			avatar_color: this.avatarColor,
-			banner: this.bannerHash,
 			display_tag_text: effectiveTagText,
 			display_tag_icon: effectiveTagIcon,
 			pronouns: this.pronouns,
 			color: this.color,
-			bio: this.bio,
 			visibility: this.visibility,
 		};
 	}
