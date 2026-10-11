@@ -54,6 +54,10 @@ import type {
 	UserSettingsUpdateRequest,
 } from '@fluxer/schema/src/domains/user/UserRequestSchemas';
 
+// Fork imports.
+
+import {dropRetiredSyncedPreferenceFields} from '@app/api/persona/RetiredSyncedPreferenceFields';
+
 interface UserAccountSettingsServiceDeps {
 	userAccountRepository: UserRepository;
 
@@ -269,6 +273,8 @@ export class UserAccountSettingsService {
 		}
 		if (data.synced_preferences !== undefined) {
 			updatedRowData.synced_preferences = normalizeSyncedPreferencesSnapshot(data.synced_preferences);
+			// Fork: clients send back fields the fork once defined here and no longer does.
+			updatedRowData.synced_preferences = dropRetiredSyncedPreferenceFields(updatedRowData.synced_preferences);
 		}
 		await this.deps.userAccountRepository.upsertSettings(updatedRowData);
 		const updatedSettings = await this.findSettings(userId);
