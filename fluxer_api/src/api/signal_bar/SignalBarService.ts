@@ -13,7 +13,7 @@ import {
 } from '@app/api/BrandedTypes';
 import type {AuthenticatedChannel} from '@app/api/channel/services/AuthenticatedChannel';
 import {dispatchChannelEvent} from '@app/api/channel/services/ChannelGatewayDispatch';
-import type {IGuildRepositoryAggregate} from '@app/api/guild/repositories/IGuildRepositoryAggregate';
+import type {GuildRepository} from '@app/api/guild/repositories/GuildRepository';
 import type {IGatewayService} from '@app/api/infrastructure/IGatewayService';
 import type {InstanceConfigRepository} from '@app/api/instance/InstanceConfigRepository';
 import {Logger} from '@app/api/Logger';
@@ -68,7 +68,7 @@ interface SignalBarServiceDeps {
 	instanceConfigRepository: InstanceConfigRepository;
 	cacheService: ICacheService;
 	gatewayService: IGatewayService;
-	guildRepository: IGuildRepositoryAggregate;
+	guildRepository: GuildRepository;
 	personaRepository: IPersonaRepository;
 	settingsRepository: SignalBarSettingsRepository;
 	findUser: (userId: UserID) => Promise<User | null>;
