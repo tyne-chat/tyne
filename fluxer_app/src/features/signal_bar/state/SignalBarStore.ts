@@ -95,7 +95,7 @@ class SignalBarStore {
 	getEffectivePersonaId(channelId: string): string | null {
 		const live = this.composerPersonas.get(channelId);
 		if (live !== undefined) return live?.id ?? null;
-		return PersonaStore.getEffectivePersonaForText(Drafts.getDraft(channelId), false).persona?.id ?? null;
+		return PersonaStore.getEffectivePersonaForText(channelId, Drafts.getDraft(channelId), false).persona?.id ?? null;
 	}
 
 	/**

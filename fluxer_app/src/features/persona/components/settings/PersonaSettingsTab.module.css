@@ -7,54 +7,6 @@
 	padding-bottom: 40px;
 }
 
-.sectionHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 12px;
-}
-
-.sectionTitle {
-	font-size: 1rem;
-	font-weight: 600;
-	color: var(--text-primary);
-}
-
-.sectionDescription {
-	font-size: 0.875rem;
-	color: var(--text-primary-muted);
-	margin-top: 4px;
-	margin-bottom: 8px;
-	line-height: 1.4;
-}
-
-.modeControlWrapper {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	margin-bottom: 24px;
-}
-
-.modeHelperText {
-	font-size: 0.8125rem;
-	color: var(--text-primary);
-	background-color: var(--bg-primary);
-	border: 1px solid var(--border-color);
-	border-radius: var(--radius-md, 6px);
-	padding: 10px 14px;
-	line-height: 1.45;
-	display: flex;
-	align-items: flex-start;
-	gap: 10px;
-	transition: all 0.2s ease;
-}
-
-.modeHelperIcon {
-	flex-shrink: 0;
-	margin-top: 2px;
-	color: var(--brand-primary);
-}
-
 .cardList {
 	display: flex;
 	flex-direction: column;
