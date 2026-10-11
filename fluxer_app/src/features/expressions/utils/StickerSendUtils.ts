@@ -14,7 +14,7 @@ export function shouldSetPendingSticker(channelId: string, currentContent?: stri
 	const hasAttachments = CloudUpload.getTextareaAttachments(channelId).length > 0;
 	if (hasAttachments) return true;
 	if (!draft || draft.trim().length === 0) return false;
-	const match = PersonaStore.matchOutgoingMessage(draft, false, {allowEmptyContent: true});
+	const match = PersonaStore.matchOutgoingMessage(channelId, draft, false, {allowEmptyContent: true});
 	const contentAfterTags = (match.matched || match.wasEscaped ? match.strippedContent : draft).trim();
 	return contentAfterTags.length > 0;
 }
