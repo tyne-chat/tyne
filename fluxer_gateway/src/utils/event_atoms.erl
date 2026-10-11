@@ -144,6 +144,7 @@ user_voice_event_map() ->
         <<"USER_PERSONA_UPDATE">> => user_persona_update,
         <<"USER_PERSONAS_UPDATE">> => user_personas_update,
         <<"USER_PERSONA_SETTINGS_UPDATE">> => user_persona_settings_update,
+        <<"USER_PERSONA_CHANNEL_STATE_UPDATE">> => user_persona_channel_state_update,
         <<"USER_PINNED_DMS_UPDATE">> => user_pinned_dms_update,
         <<"USER_SETTINGS_UPDATE">> => user_settings_update,
         <<"USER_UPDATE">> => user_update,
