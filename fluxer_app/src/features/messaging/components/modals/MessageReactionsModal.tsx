@@ -89,6 +89,8 @@ export const MessageReactionsModal = observer(
 						{emojiForMenu && (
 							<EmojiContextMenuItems
 								emoji={emojiForMenu}
+								channelId={channelId}
+								messageId={messageId}
 								onClose={onClose}
 								data-flx="messaging.message-reactions-modal.handle-reaction-context-menu.emoji-context-menu-items"
 							/>
