@@ -26,6 +26,7 @@ vi.mock('@app/features/platform/transport/RestTransport', () => ({http}));
 installVoiceMenuTestBootstrap();
 
 const {PersonaStoreClass} = await import('./PersonaStore');
+const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
 type PersonaStoreInstance = InstanceType<typeof PersonaStoreClass>;
 
 const SETTINGS = '/users/@me/personas/settings';
@@ -42,8 +43,8 @@ describe('PersonaStore with a persona remembered per channel', () => {
 			mock.mockResolvedValue({ok: true, status: 200, body: {}});
 		}
 		store = new PersonaStoreClass();
-		alice = (await store.addPersona({name: 'Alice', persona_tags: [{prefix: 'a:'}]})).id;
-		bob = (await store.addPersona({name: 'Bob', persona_tags: [{prefix: 'b:'}]})).id;
+		alice = addTestPersona(store, {name: 'Alice', persona_tags: [{prefix: 'a:'}]}).id;
+		bob = addTestPersona(store, {name: 'Bob', persona_tags: [{prefix: 'b:'}]}).id;
 	});
 
 	const perChannel = () => store.updateSettings({active_persona_scope: 'channel'});

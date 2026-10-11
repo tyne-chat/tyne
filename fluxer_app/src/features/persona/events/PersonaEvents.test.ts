@@ -88,7 +88,7 @@ const samplePersona2: PersonaResponse = {
 // PersonaStore in sync when personas are modified on other tabs, mobile clients, or via API.
 describe('PersonaEvents', () => {
 	beforeEach(() => {
-		PersonaStore.clear();
+		PersonaStore.reset();
 		vi.clearAllMocks();
 	});
 
