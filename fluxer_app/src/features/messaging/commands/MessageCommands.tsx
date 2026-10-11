@@ -87,6 +87,7 @@ import {observer} from 'mobx-react-lite';
 
 // Fork imports.
 
+import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const MessageEditFailedModal_YOUR_MESSAGE_DIDN_T_UPDATE_DESCRIPTOR = msg({
@@ -640,6 +641,8 @@ export async function send(channelId: string, params: SendMessageParams): Promis
 		}
 		return null;
 	}
+	// Fork: lit signals in this channel now name whoever this message is sent as.
+	SignalBarStore.affirmPersona(channelId, params.subprofile ?? null);
 	const payload = {
 		type: 'send' as const,
 		accountKey,
