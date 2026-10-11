@@ -6,6 +6,7 @@ import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Logger} from '@app/features/platform/utils/AppLogger';
+import {decideComposerTyping} from '@app/features/typing/rolling/RollingComposerTypingGate';
 import Users from '@app/features/user/state/Users';
 import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import type {
@@ -18,7 +19,7 @@ import type {
 	SignalBarSignal,
 	SignalBarUpdateRequest,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
-import {makeAutoObservable, observable, reaction, runInAction} from 'mobx';
+import {makeAutoObservable, observable, runInAction} from 'mobx';
 
 const logger = new Logger('SignalBar');
 const EMPTY_SIGNALS: ReadonlyArray<SignalBarSignal> = Object.freeze([]);
@@ -27,6 +28,14 @@ const COLLAPSED_STORAGE_KEY = 'signalBarCollapsed';
 
 function isSameEntry(entry: ChannelSignalEntry, signalId: string, userId: string): boolean {
 	return entry.signal_id === signalId && entry.user.id === userId;
+}
+
+/** What the person just did to the composer's text, for telling typing apart from everything else. */
+interface ComposerEdit {
+	value: string;
+	previousValue: string | null;
+	/** Whether this composer sends typing indicators at all. */
+	typingEnabled: boolean;
 }
 
 function readCollapsed(): boolean {
@@ -55,16 +64,28 @@ class SignalBarStore {
 
 	constructor() {
 		makeAutoObservable<this, 'configRequest'>(this, {configRequest: false}, {autoBind: true});
-		reaction(
-			() => JSON.stringify(this.ownPersonaByChannel),
-			(current, previous) => this.syncOwnPersona(JSON.parse(current), JSON.parse(previous)),
-		);
 	}
 
-	setComposerPersona(channelId: string, subprofile: MessageSubprofileRequest | null): void {
+	/**
+	 * Records which persona a channel's composer is writing as, which is who a signal lit there
+	 * will name. With `edit`, the person changed the text: if that counts as typing, their lit
+	 * signals in the channel follow.
+	 */
+	setComposerPersona(channelId: string, subprofile: MessageSubprofileRequest | null, edit?: ComposerEdit): void {
 		const current = this.composerPersonas.get(channelId);
-		if (current !== undefined && (current?.id ?? null) === (subprofile?.id ?? null)) return;
-		this.composerPersonas.set(channelId, subprofile);
+		if (current === undefined || (current?.id ?? null) !== (subprofile?.id ?? null)) {
+			this.composerPersonas.set(channelId, subprofile);
+		}
+		// The same test the typing indicator uses, so a signal never names a persona the indicator would not.
+		const typed =
+			edit !== undefined &&
+			decideComposerTyping({
+				previousValue: edit.previousValue,
+				value: edit.value,
+				isEditingMessageInComposer: false,
+				enabled: edit.typingEnabled,
+			}) === 'start';
+		if (typed) this.affirmPersona(channelId, subprofile);
 	}
 
 	clearComposerPersona(channelId: string): void {
@@ -77,41 +98,31 @@ class SignalBarStore {
 		return PersonaStore.getEffectivePersonaForText(Drafts.getDraft(channelId), false).persona?.id ?? null;
 	}
 
-	private get ownPersonaByChannel(): Record<string, string | null> {
+	/**
+	 * Shows the account's lit signals in one channel as `subprofile` (null for the account itself).
+	 *
+	 * Call it only for something the person did in that channel: typing there, picking a persona in
+	 * its composer, sending a message. A signal is seen by everyone in its channel, so it must not
+	 * change because the active persona changed in another channel, another window or on another
+	 * device. Opening a channel is not a reason either.
+	 */
+	affirmPersona(channelId: string, subprofile: MessageSubprofileRequest | null): void {
 		const userId = Authentication.currentUserId;
-		const result: Record<string, string | null> = {};
-		if (!userId) return result;
-		for (const [channelId, entries] of this.entriesByChannel) {
-			if (entries.some((entry) => entry.user.id === userId)) {
-				result[channelId] = this.getEffectivePersonaId(channelId);
-			}
-		}
-		return result;
-	}
-
-	private syncOwnPersona(current: Record<string, string | null>, previous: Record<string, string | null>): void {
-		const userId = Authentication.currentUserId;
-		if (!userId) return;
-		for (const [channelId, personaId] of Object.entries(current)) {
-			if (!(channelId in previous) || previous[channelId] === personaId) continue;
-			const entries = this.entriesByChannel.get(channelId) ?? EMPTY_ENTRIES;
-			const live = this.composerPersonas.get(channelId);
-			const subprofile = personaId === null ? null : live?.id === personaId ? live : undefined;
-			const stale = entries.filter((entry) => entry.user.id === userId && (entry.persona_id ?? null) !== personaId);
-			if (stale.length === 0) continue;
-			if (subprofile !== undefined) {
-				this.entriesByChannel.set(
-					channelId,
-					entries.map((entry) =>
-						stale.includes(entry)
-							? {...entry, persona_id: personaId, subprofile: subprofile as ChannelSignalEntry['subprofile']}
-							: entry,
-					),
-				);
-			}
-			for (const entry of stale) {
-				void this.activate(channelId, entry.signal_id, personaId);
-			}
+		const entries = this.entriesByChannel.get(channelId);
+		if (!userId || !entries) return;
+		const personaId = subprofile?.id ?? null;
+		const stale = entries.filter((entry) => entry.user.id === userId && (entry.persona_id ?? null) !== personaId);
+		if (stale.length === 0) return;
+		this.entriesByChannel.set(
+			channelId,
+			entries.map((entry) =>
+				stale.includes(entry)
+					? {...entry, persona_id: personaId, subprofile: subprofile as ChannelSignalEntry['subprofile']}
+					: entry,
+			),
+		);
+		for (const entry of stale) {
+			void this.activate(channelId, entry.signal_id, personaId);
 		}
 	}
 
