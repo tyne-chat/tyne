@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {describe, expect, it} from 'vitest';
-import {matchPersona, type PersonaLike, type PersonaTagLike, previewPersona} from '../PersonaMatcher';
+import {
+	isUnfinishedPersonaTag,
+	matchPersona,
+	type PersonaLike,
+	type PersonaTagLike,
+	previewPersona,
+} from '../PersonaMatcher';
 
 describe('PersonaMatcher', () => {
 	const alice: PersonaLike = {
@@ -356,5 +362,54 @@ describe('PersonaMatcher', () => {
 			expect(res.matched).toBe(false);
 			expect(res.persona).toBeUndefined();
 		});
+	});
+});
+
+// The mobile client has its own copy of this function (`persona_matcher.dart`). Its test,
+// `persona_matcher_unfinished_tag_test.dart`, runs the same table: change both together.
+describe('isUnfinishedPersonaTag', () => {
+	const personas: Array<PersonaLike> = [
+		{id: 'caly', name: 'Caly', persona_tags: [{prefix: 'c:'}]},
+		{id: 'alex', name: 'Alex', persona_tags: [{prefix: 'alex> '}]},
+		{id: 'long', name: 'Long', persona_tags: [{prefix: 'c:c:'}]},
+		{id: 'box', name: 'Box', persona_tags: [{prefix: '[', suffix: ']'}]},
+		{id: 'dash', name: 'Dash', persona_tags: [{suffix: ' -d'}]},
+		{id: 'off', name: 'Off', persona_tags: [{prefix: 'off:'}], auto_tag_disabled: true},
+	];
+	const cases: Array<[text: string, currentPersonaId: string | null, expected: boolean, why: string]> = [
+		['c', null, true, "the start of Caly's tag"],
+		['c', 'caly', true, "Caly is latched, but it could still be Long's tag"],
+		['c:', 'caly', true, "all of Caly's tag, and still the start of Long's"],
+		['c:c', 'caly', true, "one character short of Long's tag"],
+		['c:c:', 'long', false, "all of Long's tag"],
+		['c: hi', 'caly', false, 'past every tag'],
+		['ca', null, false, 'not the start of any tag'],
+		['a', null, true, "the start of Alex's tag"],
+		['alex', null, true, "most of Alex's tag"],
+		['alex>', 'alex', false, "all of Alex's tag but its trailing space"],
+		['al', 'alex', false, 'the tag of the persona it already resolves to'],
+		['alexa', null, false, "ran past Alex's tag"],
+		['[', null, false, 'a tag with a suffix is not held back'],
+		['[hello', null, false, 'a tag with a suffix is not held back'],
+		['hello -', null, false, 'a suffix cannot be seen coming'],
+		['o', null, false, "that persona's tags are switched off"],
+		['off', null, false, "that persona's tags are switched off"],
+		['', null, false, 'nothing typed'],
+		['   ', null, false, 'only spaces'],
+		[' c', null, true, 'leading space is ignored, as the matcher does'],
+		['C', null, false, 'tags are case-sensitive'],
+	];
+
+	it.each(cases)('%j resolving to %j gives %j: %s', (text, currentPersonaId, expected) => {
+		expect(isUnfinishedPersonaTag(text, personas, currentPersonaId)).toBe(expected);
+	});
+
+	it('never holds back text that the matcher already gives to that tag alone', () => {
+		const only: Array<PersonaLike> = [{id: 'caly', name: 'Caly', persona_tags: [{prefix: 'c:'}]}];
+		for (const text of ['c:', 'c: ', 'c:hello', 'c: hello']) {
+			const preview = previewPersona(text, only, null, false);
+			expect(preview.persona?.id).toBe('caly');
+			expect(isUnfinishedPersonaTag(text, only, preview.persona?.id)).toBe(false);
+		}
 	});
 });

@@ -75,9 +75,11 @@ describe('SignalBarStore', () => {
 	it('leaves lit signals alone when the active persona changes without anything done in the channel', async () => {
 		Authentication.setUserId('1');
 		const active = observable.box<string | null>(null);
-		const persona = vi
-			.spyOn(PersonaStore, 'getEffectivePersonaForText')
-			.mockImplementation(() => ({persona: active.get() ? ({id: active.get()} as never) : null, isFromTag: false}));
+		const persona = vi.spyOn(PersonaStore, 'getEffectivePersonaForText').mockImplementation(() => ({
+			persona: active.get() ? ({id: active.get()} as never) : null,
+			isFromTag: false,
+			isTagUnfinished: false,
+		}));
 		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
 		getMock.mockResolvedValue({
 			ok: true,
