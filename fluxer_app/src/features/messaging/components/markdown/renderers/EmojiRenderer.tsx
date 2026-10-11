@@ -160,6 +160,7 @@ export const EmojiRenderer = observer(function EmojiRenderer({
 							inlineStickerOrEmojiItems={
 								<EmojiInlineMenuItems
 									emoji={emojiForMenu}
+									channelId={channelId}
 									onClose={onClose}
 									data-flx="messaging.markdown.renderers.emoji-renderer.handle-context-menu.emoji-inline-menu-items"
 								/>
