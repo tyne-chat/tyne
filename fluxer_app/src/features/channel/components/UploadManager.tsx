@@ -113,24 +113,10 @@ export const UploadManager = observer(({channel, canAttachFiles, canSendMessages
 					formatMultipleFileLabel: (count) => formatUploadingAttachmentSummary(i18n, count),
 				})?.toJSON();
 				if (!uploadingAttachment) return;
-				const subprofile = PersonaStore.getActiveSubprofileRequest(channel.id);
+				const subprofile = PersonaStore.getActiveSubprofile(channel.id);
 				if (subprofile) {
 					void PersonaStore.recordPersonaUse(subprofile.id);
 				}
-				const optimisticSubprofile = subprofile
-					? {
-							id: subprofile.id,
-							name: subprofile.name,
-							avatar: subprofile.avatar ?? null,
-							avatar_color: subprofile.avatar_color ?? null,
-							display_tag_text: subprofile.display_tag_text ?? null,
-							display_tag_icon: subprofile.display_tag_icon ?? null,
-							pronouns: subprofile.pronouns ?? null,
-							color: subprofile.color ?? null,
-							bio: subprofile.bio ?? null,
-							visibility: subprofile.visibility ?? null,
-						}
-					: null;
 				const message = new Message({
 					id: nonce,
 					channel_id: channel.id,
@@ -145,7 +131,7 @@ export const UploadManager = observer(({channel, canAttachFiles, canSendMessages
 					state: MessageStates.SENDING,
 					nonce,
 					attachments: [uploadingAttachment],
-					subprofile: optimisticSubprofile,
+					subprofile,
 				});
 				MessageCommands.createOptimistic(channel.id, message.toJSON());
 				MessageCommands.send(channel.id, {

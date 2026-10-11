@@ -149,7 +149,7 @@ describe('VoiceMessageSendUtils', () => {
 	});
 
 	it('sends voice message without persona when no persona is latched', async () => {
-		vi.spyOn(PersonaStore, 'getActiveSubprofileRequest').mockReturnValue(null);
+		vi.spyOn(PersonaStore, 'getActiveSubprofile').mockReturnValue(null);
 		const recordUseSpy = vi.spyOn(PersonaStore, 'recordPersonaUse');
 
 		await sendVoiceMessage({
@@ -187,7 +187,7 @@ describe('VoiceMessageSendUtils', () => {
 			bio: 'Hello world',
 			visibility: 'unlisted' as const,
 		};
-		vi.spyOn(PersonaStore, 'getActiveSubprofileRequest').mockReturnValue(mockSubprofile);
+		vi.spyOn(PersonaStore, 'getActiveSubprofile').mockReturnValue(mockSubprofile);
 		const recordUseSpy = vi.spyOn(PersonaStore, 'recordPersonaUse').mockResolvedValue();
 
 		await sendVoiceMessage({
@@ -216,7 +216,7 @@ describe('VoiceMessageSendUtils', () => {
 	});
 
 	it('honors explicitly provided subprofile param override', async () => {
-		vi.spyOn(PersonaStore, 'getActiveSubprofileRequest').mockReturnValue(null);
+		vi.spyOn(PersonaStore, 'getActiveSubprofile').mockReturnValue(null);
 		const explicitSubprofile = {
 			id: 'persona-override',
 			name: 'Override Persona',

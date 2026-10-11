@@ -88,7 +88,7 @@ import {observer} from 'mobx-react-lite';
 // Fork imports.
 
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import MessageChangePersona from '../state/MessageChangePersona';
 
 const MessageEditFailedModal_YOUR_MESSAGE_DIDN_T_UPDATE_DESCRIPTOR = msg({
@@ -391,7 +391,7 @@ interface SendMessageParams {
 	favoriteMemeId?: string;
 	stickers?: Array<MessageStickerItem>;
 	tts?: boolean;
-	subprofile?: MessageSubprofileRequest | null;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 export function jumpToLiveEdge(channelId: string, limit = MAX_MESSAGES_PER_CHANNEL): void {
@@ -798,7 +798,7 @@ export async function edit(
 	flags?: number,
 	allowedMentions?: AllowedMentions,
 	attachments?: Array<ApiMessageEditAttachmentMetadata>,
-	subprofile?: MessageSubprofileRequest | null,
+	subprofile?: MessageSubprofileResponse | null,
 ): Promise<WireMessage | null> {
 	logger.debug(`Editing message ${messageId} in channel ${channelId}`);
 	const isPublished = Messages.getMessage(channelId, messageId)?.isCrossposted === true;

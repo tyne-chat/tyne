@@ -12,7 +12,7 @@ import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 // Fork imports.
 
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const logger = new Logger('VoiceMessageSendUtils');
 
@@ -22,7 +22,7 @@ export interface SendVoiceMessageParams {
 	waveform: string;
 	duration: number;
 	title?: string;
-	subprofile?: MessageSubprofileRequest | null;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 export async function sendVoiceMessage(params: SendVoiceMessageParams): Promise<void> {
@@ -47,28 +47,13 @@ export async function sendVoiceMessage(params: SendVoiceMessageParams): Promise<
 		contentType: file.type,
 	}).toJSON();
 
-	let subprofile: MessageSubprofileRequest | undefined | null = params.subprofile;
+	let subprofile: MessageSubprofileResponse | undefined | null = params.subprofile;
 	if (subprofile === undefined) {
-		subprofile = PersonaStore.getActiveSubprofileRequest(channelId);
+		subprofile = PersonaStore.getActiveSubprofile(channelId);
 		if (subprofile) {
 			void PersonaStore.recordPersonaUse(subprofile.id);
 		}
 	}
-
-	const optimisticSubprofile = subprofile
-		? {
-				id: subprofile.id,
-				name: subprofile.name,
-				avatar: subprofile.avatar ?? null,
-				avatar_color: subprofile.avatar_color ?? null,
-				display_tag_text: subprofile.display_tag_text ?? null,
-				display_tag_icon: subprofile.display_tag_icon ?? null,
-				pronouns: subprofile.pronouns ?? null,
-				color: subprofile.color ?? null,
-				bio: subprofile.bio ?? null,
-				visibility: subprofile.visibility ?? null,
-			}
-		: null;
 
 	const message = new Message({
 		id: nonce,
@@ -84,7 +69,7 @@ export async function sendVoiceMessage(params: SendVoiceMessageParams): Promise<
 		state: MessageStates.SENDING,
 		nonce,
 		attachments: [uploadingAttachment],
-		subprofile: optimisticSubprofile,
+		subprofile: subprofile ?? null,
 	});
 	MessageCommands.createOptimistic(channelId, {...message.toJSON(), attachments: [uploadingAttachment]});
 	try {
