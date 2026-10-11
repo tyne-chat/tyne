@@ -379,7 +379,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			expect(msg?.subprofile?.pronouns).toBe('they/them');
 		});
 
-		it('normalizes client ClientPersona (avatarHash) and updates message subprofile', async () => {
+		it('builds the copy from one of the account’s own personas and updates message subprofile', async () => {
 			const {default: Messages} = await import('@app/features/messaging/state/MessagingMessages');
 			const {normalizeSubprofile} = await import('@app/features/persona/state/PersonaStore');
 			const wire = createWireMessage({
@@ -397,7 +397,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			const subprofile = normalizeSubprofile({
 				id: personaId,
 				name: 'Client Updated',
-				avatarHash: 'new_client_avatar_hash',
+				avatar_hash: 'new_client_avatar_hash',
 			} as any);
 
 			expect(subprofile.avatar).toBe('new_client_avatar_hash');
