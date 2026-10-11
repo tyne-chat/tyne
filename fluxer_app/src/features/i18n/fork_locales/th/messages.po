@@ -18,11 +18,9 @@ msgstr "(ปักหมุดแล้ว)"
 msgid "Account: @{username}"
 msgstr "บัญชี: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "โหมด Persona ที่ใช้งานอยู่"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "โหมด Persona ที่ใช้งานอยู่"
 
@@ -74,9 +72,6 @@ msgstr "เปลี่ยน Persona"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "เลือกไฟล์ส่งออกของ PluralKit (.json) หรือลากมาวาง"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "เลือกว่าข้อความที่ไม่มีแท็กและแท็ก Persona จะทำงานร่วมกับ Persona ที่ใช้งานอยู่ของคุณอย่างไร"
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Persona ที่ตั้งค่าแล้ว ({count})"
@@ -107,7 +102,8 @@ msgstr "ลบการประทับเวลา\\"
 msgid "Detected System Name / Tag"
 msgstr "ชื่อ / แท็กระบบที่ตรวจพบ"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "แท็กแสดงผล"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "กำลังดาวน์โหลดอวาตาร์ {current
 msgid "Duplicate tag pair on this persona"
 msgstr "คู่แท็กซ้ำใน Persona นี้"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "แต่ละช่องเก็บ Persona ของตัวเอง ช่องใหม่จะเริ่มต้นเป็นบัญชีของคุณ"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "แก้ไข Persona"
@@ -140,6 +140,10 @@ msgstr "แก้ไข Persona"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "แก้ไขการประทับเวลา\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "ทุกที่"
 
 msgid "Export Summary"
 msgstr "สรุปการส่งออก"
@@ -221,6 +225,10 @@ msgstr "กำลังนำเข้า Persona..."
 msgid "Importing..."
 msgstr "กำลังนำเข้า..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "ในแต่ละช่อง"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "แทรก"
@@ -237,12 +245,6 @@ msgstr "เก็บรายการเดิมและเพิ่มรา
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "เก็บ Persona ปัจจุบัน {existingCount} รายการของคุณไว้ และเพิ่ม Persona ที่นำเข้าทั้ง {0} รายการเป็นรายการใหม่ควบคู่กัน"
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "ใช้งานล่าสุด"
 
 msgid "Main account"
 msgstr "บัญชีหลัก"
@@ -306,6 +308,14 @@ msgstr "ยังไม่มีสัญญาณ แถบจะถูกซ�
 msgid "Nobody has this signal on"
 msgstr "ยังไม่มีใครเปิดสัญญาณนี้"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Persona เดียวสำหรับทุกช่อง"
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "เฉพาะช่องนี้"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "มองเห็นได้เฉพาะคุณ ผู้อื่นไม่สามารถดูประวัติฉบับเต็มหรือรายละเอียดโปรไฟล์ของ Persona นี้ได้"
@@ -331,6 +341,10 @@ msgstr "ลบ Persona ที่มีอยู่ทั้ง {existingCount} �
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "แท็ก Persona (คำนำหน้าและคำต่อท้าย)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Persona มีผลกับ"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "อัปเดต Persona แล้ว"
 msgid "Persona visibility"
 msgstr "การมองเห็น Persona"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Persona"
@@ -460,10 +473,6 @@ msgstr "ผลการค้นหา ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "ค้นหา Persona, แท็ก, คำสรรพนาม..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "ส่งข้อความด้วยชื่อและอวาตาร์ที่แตกต่างกัน Persona สามารถเป็นตัวแทนของสมาชิกระบบพหุลักษณ์ ตัวละครสวมบทบาท หรือตัวตนอื่นใดก็ได้"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "เลิกปักหมุดอีโมจิ"
 msgid "Unpin for this persona"
 msgstr "เลิกปักหมุดสำหรับเพอร์โซนานี้"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "ข้อความที่ไม่มีแท็กจะส่งในชื่อ Persona ที่พูดล่าสุด เมื่อใดก็ตามที่มีคนใช้แท็ก Persona Persona นั้นจะกลายเป็น Persona ที่ใช้งานอยู่โดยอัตโนมัติ"
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "ข้อความที่ไม่มีแท็กจะส่งในชื่อ Persona ที่คุณเลือก การพิมพ์แท็กของ Persona อื่นจะส่งเฉพาะข้อความนั้นเท่านั้นและจะไม่เปลี่ยน Persona ที่ใช้งานอยู่"
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "ข้อความที่ไม่มีแท็กจะส่งในนาม Persona ที่คุณเลือก แท็กมีผลกับข้อความนั้นเท่านั้น"
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "ข้อความที่ไม่มีแท็กจะส่งในนามผู้ที่พูดล่าสุด การใช้แท็กจะสลับไปยัง Persona นั้น"
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "ดู Persona ของคุณ"
 
 msgid "Where the signal bar appears"
 msgstr "ตำแหน่งที่แสดงแถบสัญญาณ"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "ตำแหน่งที่จดจำ Persona ของคุณ"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"

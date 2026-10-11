@@ -188,7 +188,7 @@ export const useMessageActionMenuData = (
 	const shouldBuildQuickReactions = permissions?.canAddReactions === true && message.state === MessageStates.SENT;
 	const reactionEmojiLimit = Math.max(quickReactionCount, submenuReactionCount);
 	const draft = channel ? Drafts.getDraft(channel.id) : undefined;
-	const effectivePersona = PersonaStore.getEffectiveReactionPersona(null, draft);
+	const effectivePersona = PersonaStore.getEffectiveReactionPersona(channel?.id ?? null, null, draft);
 	const reactionEmojis = useQuickReactionEmojis(
 		channel,
 		reactionEmojiLimit,
