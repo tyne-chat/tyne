@@ -72,7 +72,7 @@ describe('SignalBarStore', () => {
 		expect(SignalBarStore.getEntries('c', 'b')).toEqual([]);
 	});
 
-	it('re-sends own signals as the new persona when the active persona changes', async () => {
+	it('leaves lit signals alone when the active persona changes without anything done in the channel', async () => {
 		Authentication.setUserId('1');
 		const active = observable.box<string | null>(null);
 		const persona = vi
@@ -83,33 +83,96 @@ describe('SignalBarStore', () => {
 			ok: true,
 			body: {enabled: true, bar_version: 3, entries: [entry('a', '1'), entry('b', '2')]},
 		} as never);
-		await SignalBarStore.fetchChannel('sync');
-		expect(putMock).not.toHaveBeenCalled();
+		await SignalBarStore.fetchChannel('quiet');
 
+		// A switch made in another channel, another window or on another device.
 		runInAction(() => active.set('9'));
-		expect(putMock).toHaveBeenCalledWith('/channels/sync/signals/a/@me', {body: {persona_id: '9'}});
-		expect(putMock).not.toHaveBeenCalledWith('/channels/sync/signals/b/@me', expect.anything());
+		// The composer of this channel then shows the new persona, with nothing typed.
+		SignalBarStore.setComposerPersona('quiet', {id: '9', name: 'Nine'});
+		SignalBarStore.setComposerPersona(
+			'quiet',
+			{id: '9', name: 'Nine'},
+			{value: '', previousValue: null, typingEnabled: true},
+		);
+		SignalBarStore.setComposerPersona(
+			'quiet',
+			{id: '9', name: 'Nine'},
+			{value: 'a draft', previousValue: 'a draft', typingEnabled: true},
+		);
+
+		expect(putMock).not.toHaveBeenCalled();
+		expect(SignalBarStore.getEntries('quiet', 'a')[0]?.persona_id).toBeNull();
+		SignalBarStore.clearComposerPersona('quiet');
 		persona.mockRestore();
 		putMock.mockRestore();
 	});
 
-	it('updates the own badge locally as soon as the composer reports a new persona', async () => {
+	it('follows the composer of a channel while the person types in it', async () => {
 		Authentication.setUserId('1');
 		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
-		getMock.mockResolvedValue({ok: true, body: {enabled: true, bar_version: 3, entries: [entry('a', '1')]}} as never);
-		SignalBarStore.setComposerPersona('live', null);
+		getMock.mockResolvedValue({
+			ok: true,
+			body: {enabled: true, bar_version: 3, entries: [entry('a', '1'), entry('a', '2')]},
+		} as never);
 		await SignalBarStore.fetchChannel('live');
 
-		SignalBarStore.setComposerPersona('live', {id: '7', name: 'Kitsune', avatar: 'hash'});
-		const [own] = SignalBarStore.getEntries('live', 'a');
+		SignalBarStore.setComposerPersona(
+			'live',
+			{id: '7', name: 'Kitsune', avatar: 'hash'},
+			{value: 'k: h', previousValue: 'k: ', typingEnabled: true},
+		);
+		const [own, other] = SignalBarStore.getEntries('live', 'a');
 		expect(own?.persona_id).toBe('7');
 		expect(own?.subprofile?.name).toBe('Kitsune');
+		expect(other?.persona_id).toBeNull();
+		expect(putMock).toHaveBeenCalledTimes(1);
 		expect(putMock).toHaveBeenCalledWith('/channels/live/signals/a/@me', {body: {persona_id: '7'}});
 
-		SignalBarStore.setComposerPersona('live', null);
+		// Typing on without a tag goes back to the account.
+		SignalBarStore.setComposerPersona('live', null, {value: 'hello', previousValue: 'hell', typingEnabled: true});
 		expect(SignalBarStore.getEntries('live', 'a')[0]?.persona_id).toBeNull();
 		expect(putMock).toHaveBeenLastCalledWith('/channels/live/signals/a/@me', {body: {}});
 		SignalBarStore.clearComposerPersona('live');
+		putMock.mockRestore();
+	});
+
+	it('does not count emptying the composer, a command, or a composer without typing indicators as typing', async () => {
+		Authentication.setUserId('1');
+		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
+		getMock.mockResolvedValue({ok: true, body: {enabled: true, bar_version: 3, entries: [entry('a', '1')]}} as never);
+		await SignalBarStore.fetchChannel('idle');
+		const seven = {id: '7', name: 'Kitsune'};
+
+		SignalBarStore.setComposerPersona('idle', seven, {value: '', previousValue: 'k: hi', typingEnabled: true});
+		SignalBarStore.setComposerPersona('idle', seven, {value: '/nick', previousValue: '/nic', typingEnabled: true});
+		SignalBarStore.setComposerPersona('idle', seven, {value: 'k: hi', previousValue: 'k: h', typingEnabled: false});
+
+		expect(putMock).not.toHaveBeenCalled();
+		expect(SignalBarStore.getEntries('idle', 'a')[0]?.persona_id).toBeNull();
+		SignalBarStore.clearComposerPersona('idle');
+		putMock.mockRestore();
+	});
+
+	it('changes the signals of the one channel it is told about', async () => {
+		Authentication.setUserId('1');
+		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
+		getMock.mockResolvedValue({
+			ok: true,
+			body: {enabled: true, bar_version: 3, entries: [entry('a', '1'), entry('b', '1', '7'), entry('a', '2')]},
+		} as never);
+		await SignalBarStore.fetchChannel('here');
+		await SignalBarStore.fetchChannel('elsewhere');
+
+		SignalBarStore.affirmPersona('here', {id: '7', name: 'Kitsune'});
+
+		// Signal b already names that persona, and the other account's signal is not ours to change.
+		expect(putMock).toHaveBeenCalledTimes(1);
+		expect(putMock).toHaveBeenCalledWith('/channels/here/signals/a/@me', {body: {persona_id: '7'}});
+		expect(SignalBarStore.getEntries('here', 'a').map((item) => item.persona_id)).toEqual(['7', null]);
+		expect(SignalBarStore.getEntries('elsewhere', 'a').map((item) => item.persona_id)).toEqual([null, null]);
+
+		SignalBarStore.affirmPersona('never-loaded', {id: '7', name: 'Kitsune'});
+		expect(putMock).toHaveBeenCalledTimes(1);
 		putMock.mockRestore();
 	});
 
