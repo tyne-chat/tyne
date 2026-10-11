@@ -16,11 +16,12 @@ export interface OutgoingPersona {
  * check that can still refuse the send.
  */
 export function resolveOutgoingPersona(
+	channelId: string | null,
 	content: string,
 	hasAttachments: boolean,
 	options?: {allowEmptyContent?: boolean},
 ): OutgoingPersona {
-	const match = PersonaStore.matchOutgoingMessage(content, hasAttachments, options);
+	const match = PersonaStore.matchOutgoingMessage(channelId, content, hasAttachments, options);
 	return {
 		content: match.matched || match.wasEscaped ? match.strippedContent : content,
 		subprofile:
@@ -33,7 +34,12 @@ export function resolveOutgoingPersona(
 	};
 }
 
+/** See `PersonaStore.startChannelAs`. For the composers that create a thread or a forum post. */
+export function startChannelAsPersona(channelId: string, personaId: string | null | undefined): void {
+	PersonaStore.startChannelAs(channelId, personaId);
+}
+
 /** A lone `\\` clears the active persona and is not a message. Returns true when it was consumed. */
-export function consumePersonaCommand(content: string): boolean {
-	return PersonaStore.handleInChatCommand(content).handled;
+export function consumePersonaCommand(channelId: string | null, content: string): boolean {
+	return PersonaStore.handleInChatCommand(channelId, content).handled;
 }
