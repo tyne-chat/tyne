@@ -21,10 +21,7 @@ import {
 	type PersonaLike,
 	previewPersona,
 } from '@fluxer/schema/src/domains/persona/PersonaMatcher';
-import type {
-	MessageSubprofileRequest,
-	MessageSubprofileResponse,
-} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {makeAutoObservable, observable, runInAction} from 'mobx';
 
@@ -894,7 +891,7 @@ export class PersonaStoreClass {
 		},
 	): {
 		finalContent: string;
-		subprofile?: MessageSubprofileRequest | null;
+		subprofile?: MessageSubprofileResponse | null;
 	} {
 		const personasLike = this.matchablePersonas();
 
@@ -917,7 +914,7 @@ export class PersonaStoreClass {
 		// In edit mode, check explicit persona tags. Pass activeLatchedPersonaId as null so it never falls back to latched persona.
 		const result = matchPersona(content, personasLike, null, true);
 
-		// If explicit persona tags matched a persona, adopt that persona (note: bio omitted to keep message payload lightweight)
+		// If explicit persona tags matched a persona, adopt that persona
 		if (result.matched && result.persona) {
 			return {
 				finalContent: result.strippedContent,
@@ -928,20 +925,14 @@ export class PersonaStoreClass {
 			};
 		}
 
-		// Preserve existing subprofile if no tags matched
-		if (currentSubprofile) {
-			return {
-				finalContent: content,
-				subprofile: normalizeSubprofile(currentSubprofile),
-			};
-		}
+		// No tag matched: the edit says nothing about the persona, and the message keeps the one it has.
 		return {
 			finalContent: content,
 			subprofile: undefined,
 		};
 	}
 
-	getActiveSubprofileRequest(channelId: string | null): MessageSubprofileRequest | null {
+	getActiveSubprofile(channelId: string | null): MessageSubprofileResponse | null {
 		const active = this.latchedPersonaFor(channelId);
 		if (!active) return null;
 		return normalizeSubprofile(active, {
