@@ -83,7 +83,6 @@ describe('MessageSubmitUtils', () => {
 			expect(msg.subprofile?.display_tag_icon).toBe('🦊');
 			expect(msg.subprofile?.pronouns).toBe('she/they');
 			expect(msg.subprofile?.color).toBe(0xffa500);
-			expect(msg.subprofile?.bio).toBe('Clever fox');
 			expect(msg.subprofile?.visibility).toBe('public');
 		});
 

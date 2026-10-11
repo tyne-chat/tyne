@@ -92,6 +92,7 @@ describe('Typing as a persona', () => {
 			display_tag_icon: null,
 			pronouns: 'they/them',
 			color: null,
+			visibility: 'unlisted',
 		});
 	});
 
