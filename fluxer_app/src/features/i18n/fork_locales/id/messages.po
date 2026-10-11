@@ -589,6 +589,9 @@ msgstr "Emoji ini sudah ditambahkan sebagai emoji tanda tangan"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Ini adalah pratinjau tampilan tag tampilanmu di obrolan."
 
+msgid "This persona’s profile is private."
+msgstr "Profil persona ini bersifat pribadi."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Alihkan daftar saluran"

@@ -110,8 +110,8 @@ test.describe('Persona Visibility & Public Directory Integration', () => {
 		expect(unlistedCard.name).toBe('Bob-Unlisted');
 		expect(unlistedCard.bio).toBe(`Unlisted bio [${timestamp}]`);
 
-		// Private: Completely hidden from other users (returns 404)
-		await expect(aliceClient.getPublicPersona(bobAuth.user!.id, bobPrivate.id)).rejects.toThrow(/404/);
+		// Private: the profile is refused to other users, as private rather than as unknown (403)
+		await expect(aliceClient.getPublicPersona(bobAuth.user!.id, bobPrivate.id)).rejects.toThrow(/403/);
 
 		// Owner (Bob) can still access their private persona via self-endpoint
 		const ownerPersonas = await bobClient.getPersonas();
@@ -138,5 +138,16 @@ test.describe('Persona Visibility & Public Directory Integration', () => {
 		await expect(profileModalOrPopout.first()).toBeVisible({timeout: 10_000});
 		await expect(page.getByText(`Public bio [${timestamp}]`)).toBeVisible({timeout: 10_000});
 		await expect(page.getByText('he/him')).toBeVisible({timeout: 10_000});
+		await page.keyboard.press('Escape');
+
+		// 7. Bob speaks as Bob-Private: Alice sees the name, and the card says the profile is private
+		const privateMessage = `From my private persona [${timestamp}]`;
+		await bobClient.sendMessage(channelId, privateMessage, bobPrivate);
+		await expect(page.getByText(privateMessage)).toBeVisible({timeout: 20_000});
+		const privateHeader = page.locator('[data-flx*="message-username"]').getByText('Bob-Private');
+		await expect(privateHeader).toBeVisible({timeout: 10_000});
+		await privateHeader.click();
+		await expect(page.locator('[data-flx*="private-notice"]').first()).toBeVisible({timeout: 10_000});
+		await expect(page.getByText(`Private bio [${timestamp}]`)).toHaveCount(0);
 	});
 });
