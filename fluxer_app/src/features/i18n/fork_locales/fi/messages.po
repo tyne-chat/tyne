@@ -18,11 +18,9 @@ msgstr "(kiinnitetty)"
 msgid "Account: @{username}"
 msgstr "Tili: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Aktiivisen persoonan tila"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Aktiivisen persoonan tila"
 
@@ -74,9 +72,6 @@ msgstr "Vaihda persoonaa"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Valitse PluralKit-vienti (.json) tai vedä ja pudota se tähän"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Valitse, miten tunnisteettomat viestit ja persoonatunnisteet toimivat aktiivisen persoonasi kanssa."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Määritetyt persoonat ({count})"
@@ -107,7 +102,8 @@ msgstr "Poista aikaleima\\"
 msgid "Detected System Name / Tag"
 msgstr "Havaittu järjestelmän nimi / tunniste"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Näyttötunniste"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Ladataan avataria {current}/{total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Tunnistepari on jo tällä persoonalla"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Jokainen kanava säilyttää oman persoonansa. Uudet kanavat alkavat tilinäsi."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Muokkaa persoonaa"
@@ -140,6 +140,10 @@ msgstr "Muokkaa persoonaa"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Muokkaa aikaleimaa\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Kaikkialla"
 
 msgid "Export Summary"
 msgstr "Viennin yhteenveto"
@@ -221,6 +225,10 @@ msgstr "Tuodaan persoonia..."
 msgid "Importing..."
 msgstr "Tuodaan..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Kullakin kanavalla"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Lisää"
@@ -237,12 +245,6 @@ msgstr "Säilytä nykyiset ja lisää uudet (suositus)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Säilytä {existingCount} nykyistä persoonaasi ja lisää kaikki {0} tuotua persoonaa niiden rinnalle uusina kohteina."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Viimeksi käytetty"
 
 msgid "Main account"
 msgstr "Päätili"
@@ -306,6 +308,14 @@ msgstr "Ei vielä signaaleja. Palkki pysyy piilossa, kunnes lisäät sellaisen."
 msgid "Nobody has this signal on"
 msgstr "Kenelläkään ei ole tätä signaalia päällä"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Yksi persoona kaikille kanaville."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Vain tälle kanavalle"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Näkyy vain sinulle. Muut eivät näe tämän persoonan koko kuvausta tai profiilitietoja."
@@ -331,6 +341,10 @@ msgstr "Poista kaikki {existingCount} nykyistä persoonaa pysyvästi ja korvaa n
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Persoonatunnisteet (etuliite ja jälkiliite)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Persoona koskee"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persoona päivitetty"
 msgid "Persona visibility"
 msgstr "Persoonan näkyvyys"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Persoonat"
@@ -460,10 +473,6 @@ msgstr "Hakutulokset ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Hae persoonia, tunnisteita, pronomineja..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Lähetä viestejä eri nimillä ja avatareilla. Persoonat voivat edustaa plural-järjestelmän jäseniä, roolipelihahmoja tai mitä tahansa muuta identiteettiä."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Irrota emoji"
 msgid "Unpin for this persona"
 msgstr "Irrota tältä persoonalta"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Tunnisteettomat viestit lähetetään viimeksi puhuneena persoonana. Aina kun joku käyttää persoonatunnistetta, siitä persoonasta tulee automaattisesti aktiivinen."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Tunnisteettomat viestit lähetetään valitsemanasi persoonana. Toisen persoonan tunnisteiden kirjoittaminen lähettää vain kyseisen viestin eikä vaihda aktiivista persoonaa."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Tunnisteettomat viestit lähetetään valitsemanasi persoonana. Tunniste koskee vain kyseistä viestiä."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Tunnisteettomat viestit lähetetään viimeksi puhuneena persoonana. Tunnisteen käyttö vaihtaa kyseiseen persoonaan."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Näytä persoonasi"
 
 msgid "Where the signal bar appears"
 msgstr "Missä signaalipalkki näkyy"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Missä persoonasi muistetaan"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"

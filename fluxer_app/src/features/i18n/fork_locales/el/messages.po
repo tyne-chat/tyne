@@ -18,11 +18,9 @@ msgstr "(καρφιτσωμένο)"
 msgid "Account: @{username}"
 msgstr "Λογαριασμός: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Λειτουργία ενεργής persona"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Λειτουργία ενεργής persona"
 
@@ -74,9 +72,6 @@ msgstr "Αλλαγή persona"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Επιλέξτε μια εξαγωγή PluralKit (.json) ή σύρετε και αποθέστε"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Επιλέξτε πώς τα μηνύματα χωρίς ετικέτα και οι ετικέτες persona αλληλεπιδρούν με την ενεργή persona σας."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Ρυθμισμένες persona ({count})"
@@ -107,7 +102,8 @@ msgstr "Διαγραφή χρονικής σήμανσης\\"
 msgid "Detected System Name / Tag"
 msgstr "Εντοπισμένο όνομα / ετικέτα συστήματος"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Ετικέτα εμφάνισης"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Λήψη avatar {current} από {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Διπλό ζεύγος ετικετών σε αυτήν την persona"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Κάθε κανάλι κρατά τη δική του persona. Τα νέα κανάλια ξεκινούν με τον λογαριασμό σας."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Επεξεργασία persona"
@@ -140,6 +140,10 @@ msgstr "Επεξεργασία persona"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Επεξεργασία χρονικής σήμανσης\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Παντού"
 
 msgid "Export Summary"
 msgstr "Σύνοψη εξαγωγής"
@@ -221,6 +225,10 @@ msgstr "Εισαγωγή persona..."
 msgid "Importing..."
 msgstr "Εισαγωγή..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Σε κάθε κανάλι"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Εισαγωγή"
@@ -237,12 +245,6 @@ msgstr "Διατήρηση των υπαρχουσών και προσθήκη �
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Διατηρήστε τις {existingCount} τρέχουσες persona σας και προσθέστε και τις {0} εισαγόμενες persona δίπλα τους ως νέες καταχωρίσεις."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Τελευταία χρήση"
 
 msgid "Main account"
 msgstr "Κύριος λογαριασμός"
@@ -306,6 +308,14 @@ msgstr "Δεν υπάρχουν σήματα ακόμα. Η γραμμή μέν�
 msgid "Nobody has this signal on"
 msgstr "Κανείς δεν έχει ενεργό αυτό το σήμα"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Μία persona για όλα τα κανάλια."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Μόνο για αυτό το κανάλι"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Ορατό μόνο σε εσάς. Οι άλλοι δεν μπορούν να δουν το πλήρες βιογραφικό ή τα στοιχεία προφίλ αυτής της persona."
@@ -331,6 +341,10 @@ msgstr "Διαγράψτε οριστικά και τις {existingCount} υπά
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Ετικέτες persona (πρόθεμα και επίθημα)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Η persona ισχύει για"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Η persona ενημερώθηκε"
 msgid "Persona visibility"
 msgstr "Ορατότητα persona"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Persona"
@@ -460,10 +473,6 @@ msgstr "Αποτελέσματα αναζήτησης ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Αναζήτηση persona, ετικετών, αντωνυμιών..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Στείλτε μηνύματα με ξεχωριστά ονόματα και avatar. Οι persona μπορούν να αντιπροσωπεύουν μέλη ενός πληθυντικού συστήματος, χαρακτήρες παιχνιδιού ρόλων ή οποιαδήποτε άλλη ταυτότητα."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Ξεκαρφίτσωμα emoji"
 msgid "Unpin for this persona"
 msgstr "Ξεκαρφίτσωμα για αυτήν την περσόνα"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Τα μηνύματα χωρίς ετικέτα αποστέλλονται ως η persona που μίλησε πιο πρόσφατα. Όποτε κάποιος χρησιμοποιεί μια ετικέτα persona, αυτή γίνεται αυτόματα η ενεργή persona."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Τα μηνύματα χωρίς ετικέτα αποστέλλονται ως η persona που επιλέξατε. Η πληκτρολόγηση των ετικετών άλλης persona θα στείλει μόνο εκείνο το μήνυμα και δεν θα αλλάξει ποια είναι ενεργή."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Τα μηνύματα χωρίς ετικέτα στέλνονται ως η persona που επιλέξατε. Μια ετικέτα ισχύει μόνο για εκείνο το μήνυμα."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Τα μηνύματα χωρίς ετικέτα στέλνονται ως όποιος μίλησε τελευταίος. Η χρήση ετικέτας αλλάζει σε εκείνη την persona."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Προβολή των persona σας"
 
 msgid "Where the signal bar appears"
 msgstr "Πού εμφανίζεται η γραμμή σημάτων"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Πού απομνημονεύεται η persona σας"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
