@@ -28,6 +28,7 @@ vi.mock('@app/features/platform/transport/RestTransport', () => ({
 installVoiceMenuTestBootstrap();
 
 const {PersonaStore} = await import('@app/features/persona/state/PersonaStore');
+const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
 const {consumePersonaCommand, resolveOutgoingPersona} = await import('@app/features/persona/utils/OutgoingPersona');
 
 describe('resolveOutgoingPersona', () => {
@@ -36,8 +37,8 @@ describe('resolveOutgoingPersona', () => {
 
 	beforeEach(async () => {
 		PersonaStore.reset();
-		foxId = (await PersonaStore.addPersona({name: 'Fox'})).id;
-		baoId = (await PersonaStore.addPersona({name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]})).id;
+		foxId = addTestPersona(PersonaStore, {name: 'Fox'}).id;
+		baoId = addTestPersona(PersonaStore, {name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]}).id;
 	});
 
 	afterEach(() => {
@@ -91,7 +92,7 @@ describe('consumePersonaCommand', () => {
 	});
 
 	it('consumes a lone double backslash and clears the active persona', async () => {
-		const fox = await PersonaStore.addPersona({name: 'Fox'});
+		const fox = addTestPersona(PersonaStore, {name: 'Fox'});
 		await PersonaStore.setActivePersona(fox.id, true);
 		expect(consumePersonaCommand(null, '\\\\')).toBe(true);
 		expect(PersonaStore.activePersona).toBeNull();
@@ -99,7 +100,7 @@ describe('consumePersonaCommand', () => {
 
 	it('leaves everything else to be sent', async () => {
 		expect(consumePersonaCommand(null, '\\\\')).toBe(false);
-		const fox = await PersonaStore.addPersona({name: 'Fox'});
+		const fox = addTestPersona(PersonaStore, {name: 'Fox'});
 		await PersonaStore.setActivePersona(fox.id, true);
 		expect(consumePersonaCommand(null, 'hello')).toBe(false);
 		expect(PersonaStore.activePersona?.id).toBe(fox.id);
@@ -117,7 +118,7 @@ describe('PersonaStore.previewOutgoingContent', () => {
 	});
 
 	it('gives the text without its tag and records nothing', async () => {
-		const bao = await PersonaStore.addPersona({name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]});
+		const bao = addTestPersona(PersonaStore, {name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]});
 		await PersonaStore.setActivePersonaMode('last');
 		const usesBefore = PersonaStore.getPersona(bao.id)?.use_count ?? 0;
 		expect(PersonaStore.previewOutgoingContent(null, 'B: bao')).toBe('bao');
