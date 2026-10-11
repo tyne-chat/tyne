@@ -48,7 +48,7 @@ export const PersonaReactAsModal: React.FC<PersonaReactAsModalProps> = observer(
 		const searchInputRef = useRef<HTMLInputElement>(null);
 		const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 		const currentUser = Users.getCurrentUser();
-		const personas = PersonaStore.personas;
+		const personas = PersonaStore.sortedPersonas;
 
 		useEffect(() => {
 			void fetchPersonas();
