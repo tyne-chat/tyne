@@ -5,7 +5,9 @@ import MessageReactions from '@app/features/messaging/state/MessageReactions';
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import {http} from '@app/features/platform/transport/RestTransport';
+import {HttpError} from '@app/features/platform/types/EndpointError';
 import {Logger} from '@app/features/platform/utils/AppLogger';
+import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import type {
 	PersonaCreateRequest,
 	PersonaResponse,
@@ -17,8 +19,21 @@ import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 
 const logger = new Logger('PersonaCommands');
 
-const publicPersonaCache = new Map<string, {data: PublicPersonaResponse; expiresAt: number}>();
-const PUBLIC_PERSONA_TTL_MS = 60 * 1000;
+/**
+ * What asking for another account's persona profile came to. `private` is the owner keeping it to
+ * themselves, which is worth telling the person who asked; `unavailable` is everything else that
+ * stops it being shown (deleted, no access to the account, the request failed).
+ */
+export type PersonaProfileResult =
+	| {status: 'ready'; profile: PublicPersonaResponse}
+	| {status: 'private'}
+	| {status: 'unavailable'};
+
+const personaProfileCache = new Map<string, {result: PersonaProfileResult; expiresAt: number}>();
+const PERSONA_PROFILE_TTL_MS = 60 * 1000;
+
+// What one account was given for a profile is not the next account's to see.
+AccountScopedWork.registerCancellation(() => personaProfileCache.clear());
 
 export async function fetchPersonaSettings(): Promise<PersonaSettingsResponse | null> {
 	try {
@@ -99,9 +114,9 @@ export async function updatePersona(id: string, data: PersonaUpdateRequest): Pro
 	Messages.handlePersonaUpdate({persona: subprofile});
 	MessageReactions.handlePersonaUpdate(subprofile);
 	// Invalidate any cached public representation of this persona
-	for (const key of publicPersonaCache.keys()) {
+	for (const key of personaProfileCache.keys()) {
 		if (key.endsWith(`:${id}`)) {
-			publicPersonaCache.delete(key);
+			personaProfileCache.delete(key);
 		}
 	}
 	return res.body;
@@ -113,9 +128,9 @@ export async function deletePersona(id: string): Promise<void> {
 		throw new Error(`Failed to delete persona: status ${res.status}`);
 	}
 	PersonaStore.removePersona(id);
-	for (const key of publicPersonaCache.keys()) {
+	for (const key of personaProfileCache.keys()) {
 		if (key.endsWith(`:${id}`)) {
-			publicPersonaCache.delete(key);
+			personaProfileCache.delete(key);
 		}
 	}
 }
@@ -131,25 +146,36 @@ export async function importPersonas(personas: Array<PersonaCreateRequest>): Pro
 	return res.body;
 }
 
-export async function fetchPublicPersona(userId: string, personaId: string): Promise<PublicPersonaResponse | null> {
+export async function fetchPersonaProfile(userId: string, personaId: string): Promise<PersonaProfileResult> {
 	const cacheKey = `${userId}:${personaId}`;
-	const cached = publicPersonaCache.get(cacheKey);
+	const cached = personaProfileCache.get(cacheKey);
 	if (cached && Date.now() < cached.expiresAt) {
-		return cached.data;
+		return cached.result;
 	}
 
+	let result: PersonaProfileResult = {status: 'unavailable'};
 	try {
 		const res = await http.get<PublicPersonaResponse>(Endpoints.USER_PUBLIC_PERSONA(userId, personaId));
 		if (res.ok && res.body) {
-			publicPersonaCache.set(cacheKey, {
-				data: res.body,
-				expiresAt: Date.now() + PUBLIC_PERSONA_TTL_MS,
-			});
-			return res.body;
+			result = {status: 'ready', profile: res.body};
+		} else if (isPrivatePersonaReply(res.status, res.body)) {
+			result = {status: 'private'};
 		}
-		return null;
 	} catch (err) {
-		logger.warn(`Failed to fetch public persona ${personaId} for user ${userId}`, err);
-		return null;
+		if (err instanceof HttpError && isPrivatePersonaReply(err.status, err.body)) {
+			result = {status: 'private'};
+		} else {
+			logger.warn(`Failed to fetch persona profile ${personaId} for user ${userId}`, err);
+		}
 	}
+	// A failed request is asked again next time; an answer, private included, is good for a minute.
+	if (result.status !== 'unavailable') {
+		personaProfileCache.set(cacheKey, {result, expiresAt: Date.now() + PERSONA_PROFILE_TTL_MS});
+	}
+	return result;
+}
+
+function isPrivatePersonaReply(status: number, body: unknown): boolean {
+	if (status !== 403) return false;
+	return typeof body === 'object' && body !== null && (body as {code?: unknown}).code === APIErrorCodes.PRIVATE_PERSONA;
 }
