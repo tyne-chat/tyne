@@ -799,6 +799,8 @@ const InstancePolicyUpdateSchema = z.object({
 	server_list_buttons: ServerListButtonsUpdateSchema.optional(),
 	signal_bar_guild_id: SnowflakeStringType.nullish(),
 });
+// Fork: a patch of only `signal_bar_guild_id: null` (switching the bar off) must reach the controller.
+InstancePolicyUpdateSchema.register(schemaMetadata, {preserveNullFields: true});
 
 export const InstanceConfigUpdateRequest = z.object({
 	gateway_rollout: GatewayRolloutConfigUpdateRequest.nullish(),
