@@ -19,7 +19,7 @@ import type {
 // Fork imports.
 
 import {normalizeSubprofile} from '@app/features/persona/state/PersonaStore';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 interface MessageSubmitData {
 	content: string;
@@ -30,7 +30,7 @@ interface MessageSubmitData {
 	replyMentioning?: boolean;
 	stickers?: Array<MessageStickerItem>;
 	favoriteMemeId?: string;
-	subprofile?: MessageSubprofileRequest | null;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 export function createUploadingAttachments(
