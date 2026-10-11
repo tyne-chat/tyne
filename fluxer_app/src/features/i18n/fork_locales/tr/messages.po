@@ -18,11 +18,9 @@ msgstr "(sabitlendi)"
 msgid "Account: @{username}"
 msgstr "Hesap: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Etkin Persona Modu"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Etkin persona modu"
 
@@ -74,9 +72,6 @@ msgstr "Persona değiştir"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Bir PluralKit dışa aktarımı (.json) seç veya sürükleyip bırak"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Etiketsiz mesajların ve persona etiketlerinin etkin personanla nasıl etkileşeceğini seç."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Yapılandırılmış Personalar ({count})"
@@ -107,7 +102,8 @@ msgstr "Zaman damgasını sil\\"
 msgid "Detected System Name / Tag"
 msgstr "Algılanan Sistem Adı / Etiketi"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Görünen Etiket"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Avatar indiriliyor: {current} / {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Bu personada yinelenen etiket çifti"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Her kanal kendi personasını korur. Yeni kanallar hesabınla başlar."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Personayı Düzenle"
@@ -140,6 +140,10 @@ msgstr "Personayı düzenle"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Zaman damgasını düzenle\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Her Yerde"
 
 msgid "Export Summary"
 msgstr "Dışa Aktarma Özeti"
@@ -221,6 +225,10 @@ msgstr "Personalar içe aktarılıyor..."
 msgid "Importing..."
 msgstr "İçe aktarılıyor..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Her kanalda"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Ekle"
@@ -237,12 +245,6 @@ msgstr "Mevcutları koru ve yenilerini ekle (Önerilen)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Mevcut {existingCount} personanı koru ve içe aktarılan {0} personanın tümünü yeni girişler olarak yanlarına ekle."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Son kullanılan"
 
 msgid "Main account"
 msgstr "Ana hesap"
@@ -306,6 +308,14 @@ msgstr "Henüz sinyal yok. Bir tane ekleyene kadar çubuk gizli kalır."
 msgid "Nobody has this signal on"
 msgstr "Bu sinyali açan kimse yok"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Tüm kanallar için tek persona."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Yalnızca bu kanal için"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Yalnızca sana görünür. Başkaları bu personanın tam biyografisini veya profil ayrıntılarını göremez."
@@ -331,6 +341,10 @@ msgstr "Mevcut {existingCount} personanın tümünü kalıcı olarak sil ve bunl
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Persona Etiketleri (Ön Ek ve Son Ek)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Personanın geçerli olduğu yer"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persona güncellendi"
 msgid "Persona visibility"
 msgstr "Persona görünürlüğü"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personalar"
@@ -460,10 +473,6 @@ msgstr "Arama Sonuçları ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Personaları, etiketleri, zamirleri ara..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Farklı adlar ve avatarlarla mesaj gönder. Personalar çoğul sistem üyelerini, rol yapma karakterlerini veya başka herhangi bir kimliği temsil edebilir."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Emoji sabitlemesini kaldır"
 msgid "Unpin for this persona"
 msgstr "Bu persona için sabitlemeyi kaldır"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Etiketsiz mesajlar en son konuşan persona olarak gönderilir. Biri bir persona etiketi kullandığında o persona otomatik olarak etkin persona olur."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Etiketsiz mesajlar seçtiğin persona olarak gönderilir. Başka bir personanın etiketlerini yazmak yalnızca o tek mesajı gönderir ve kimin etkin olduğunu değiştirmez."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Etiketsiz mesajlar seçtiğin persona olarak gönderilir. Bir etiket yalnızca o mesaj için geçerlidir."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Etiketsiz mesajlar en son konuşan olarak gönderilir. Bir etiket kullanmak o personaya geçer."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Personalarını görüntüle"
 
 msgid "Where the signal bar appears"
 msgstr "Sinyal çubuğunun göründüğü yerler"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Personanın hatırlandığı yer"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
