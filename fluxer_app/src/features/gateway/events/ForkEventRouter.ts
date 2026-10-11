@@ -3,6 +3,7 @@
 import type {GatewayHandlerRegistry} from '@app/features/gateway/events/EventRouter';
 import {
 	handleGuildPersonasDirty,
+	handleUserPersonaChannelStateUpdate,
 	handleUserPersonaCreate,
 	handleUserPersonaDelete,
 	handleUserPersonaSettingsUpdate,
@@ -25,6 +26,7 @@ export function registerForkGatewayHandlers(registry: GatewayHandlerRegistry): v
 	registry.set('USER_PERSONA_DELETE', handleUserPersonaDelete as GatewayEventHandler);
 	registry.set('USER_PERSONAS_UPDATE', handleUserPersonasUpdate as GatewayEventHandler);
 	registry.set('USER_PERSONA_SETTINGS_UPDATE', handleUserPersonaSettingsUpdate as GatewayEventHandler);
+	registry.set('USER_PERSONA_CHANNEL_STATE_UPDATE', handleUserPersonaChannelStateUpdate as GatewayEventHandler);
 	registry.set('GUILD_PERSONAS_DIRTY', handleGuildPersonasDirty as GatewayEventHandler);
 	registry.set('CHANNEL_SIGNAL_UPDATE', handleChannelSignalUpdate as GatewayEventHandler);
 	registry.set('SIGNAL_BAR_UPDATE', handleSignalBarUpdate as GatewayEventHandler);

@@ -62,11 +62,11 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 		// 4. Open User Settings -> Personas tab
 		await openPersonasSettings(page);
 
-		// 5. Select "Last Used" mode tab
-		const lastUsedTab = page.getByRole('tab', {name: /Last Used/i});
-		await expect(lastUsedTab).toBeVisible({timeout: 15_000});
-		await lastUsedTab.click();
-		await expect(lastUsedTab).toHaveAttribute('aria-selected', 'true');
+		// 5. Select the "Last used" mode. On the settings page the modes are radio options.
+		const lastUsedOption = page.getByRole('radio', {name: /Last used/i});
+		await expect(lastUsedOption).toBeVisible({timeout: 15_000});
+		await lastUsedOption.click();
+		await expect(lastUsedOption).toHaveAttribute('aria-checked', 'true');
 
 		// Verify backend settings persistence
 		await expect
