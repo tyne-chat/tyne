@@ -18,11 +18,9 @@ msgstr "(disematkan)"
 msgid "Account: @{username}"
 msgstr "Akun: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Mode Persona Aktif"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Mode persona aktif"
 
@@ -74,9 +72,6 @@ msgstr "Ganti persona"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Pilih ekspor PluralKit (.json) atau seret & lepas"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Pilih bagaimana pesan tanpa tag dan tag persona berinteraksi dengan persona aktifmu."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Persona Terkonfigurasi ({count})"
@@ -107,7 +102,8 @@ msgstr "Hapus stempel waktu\\"
 msgid "Detected System Name / Tag"
 msgstr "Nama / Tag Sistem Terdeteksi"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Tag Tampilan"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Mengunduh avatar {current} dari {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Pasangan tag duplikat pada persona ini"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Setiap saluran menyimpan personanya sendiri. Saluran baru dimulai sebagai akunmu."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Edit Persona"
@@ -140,6 +140,10 @@ msgstr "Edit persona"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Edit stempel waktu\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Di Mana Saja"
 
 msgid "Export Summary"
 msgstr "Ringkasan Ekspor"
@@ -221,6 +225,10 @@ msgstr "Mengimpor Persona..."
 msgid "Importing..."
 msgstr "Mengimpor..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Di setiap saluran"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Sisipkan"
@@ -237,12 +245,6 @@ msgstr "Pertahankan yang ada dan tambahkan yang baru (Disarankan)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Pertahankan {existingCount} persona milikmu saat ini dan tambahkan semua {0} persona yang diimpor di sampingnya sebagai entri baru."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Terakhir Digunakan"
 
 msgid "Main account"
 msgstr "Akun utama"
@@ -306,6 +308,14 @@ msgstr "Belum ada sinyal. Bilah tetap tersembunyi sampai kamu menambahkannya."
 msgid "Nobody has this signal on"
 msgstr "Belum ada yang menyalakan sinyal ini"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Satu persona untuk semua saluran."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Hanya untuk saluran ini"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Hanya terlihat olehmu. Orang lain tidak dapat melihat bio lengkap atau detail profil persona ini."
@@ -331,6 +341,10 @@ msgstr "Hapus permanen semua {existingCount} persona yang ada dan ganti sepenuhn
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Tag Persona (Awalan & Akhiran)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Persona berlaku untuk"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persona diperbarui"
 msgid "Persona visibility"
 msgstr "Visibilitas persona"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Persona"
@@ -460,10 +473,6 @@ msgstr "Hasil Pencarian ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Cari persona, tag, kata ganti..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Kirim pesan dengan nama dan avatar yang berbeda. Persona dapat mewakili anggota sistem plural, karakter roleplay, atau identitas lainnya."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Lepas sematan emoji"
 msgid "Unpin for this persona"
 msgstr "Lepas sematan untuk persona ini"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Pesan tanpa tag dikirim sebagai persona yang terakhir berbicara. Setiap kali seseorang menggunakan tag persona, persona itu otomatis menjadi persona aktif."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Pesan tanpa tag dikirim sebagai persona pilihanmu. Mengetik tag persona lain hanya akan mengirim satu pesan itu dan tidak mengubah siapa yang aktif."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Pesan tanpa tag dikirim sebagai persona yang kamu pilih. Tag hanya berlaku untuk pesan itu."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Pesan tanpa tag dikirim sebagai yang terakhir berbicara. Menggunakan tag beralih ke persona itu."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Lihat personamu"
 
 msgid "Where the signal bar appears"
 msgstr "Tempat bilah sinyal ditampilkan"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Tempat persona kamu diingat"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"

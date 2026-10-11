@@ -23,7 +23,7 @@ export function useEmojiCategories(
 	const guilds = GuildList.guilds;
 	const selectedGuildId = SelectedGuild.selectedGuildId;
 	const draft = channelId ? Drafts.getDraft(channelId) : undefined;
-	const effectivePersona = PersonaStore.getEffectiveReactionPersona(null, draft);
+	const effectivePersona = PersonaStore.getEffectiveReactionPersona(channelId ?? null, null, draft);
 	const favoriteEmojis = EmojiPicker.getFavoriteEmojis(allEmojis as ReadonlyArray<FlatEmoji>);
 	const pinnedRankingRef = useRef<UsageRanking | null>(null);
 	pinnedRankingRef.current ??= EmojiPicker.getRanking();
