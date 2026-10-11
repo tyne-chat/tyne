@@ -140,7 +140,7 @@ export interface PersonaSettingsTabProps {
 
 export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({initialSubtab}) => {
 	const {i18n} = useLingui();
-	const personas = PersonaStore.personas;
+	const personas = PersonaStore.sortedPersonas;
 	const activePersonaId = PersonaStore.activePersonaId;
 	const isLatched = PersonaStore.isPersonaLatched;
 	const activePersonaMode = PersonaStore.activePersonaMode;
