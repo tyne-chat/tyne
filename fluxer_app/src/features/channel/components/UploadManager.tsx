@@ -113,7 +113,7 @@ export const UploadManager = observer(({channel, canAttachFiles, canSendMessages
 					formatMultipleFileLabel: (count) => formatUploadingAttachmentSummary(i18n, count),
 				})?.toJSON();
 				if (!uploadingAttachment) return;
-				const subprofile = PersonaStore.getActiveSubprofileRequest();
+				const subprofile = PersonaStore.getActiveSubprofileRequest(channel.id);
 				if (subprofile) {
 					void PersonaStore.recordPersonaUse(subprofile.id);
 				}

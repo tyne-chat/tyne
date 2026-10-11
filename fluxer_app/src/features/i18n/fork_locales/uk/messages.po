@@ -18,11 +18,9 @@ msgstr "(закріплено)"
 msgid "Account: @{username}"
 msgstr "Акаунт: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Режим активної персони"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Режим активної персони"
 
@@ -74,9 +72,6 @@ msgstr "Змінити персону"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Виберіть експорт PluralKit (.json) або перетягніть його сюди"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Виберіть, як повідомлення без тегу та теги персон взаємодіють із вашою активною персоною."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Налаштовані персони ({count})"
@@ -107,7 +102,8 @@ msgstr "Видалити мітку часу\\"
 msgid "Detected System Name / Tag"
 msgstr "Виявлена назва / тег системи"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Значок відображення"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Завантаження аватара {current} з {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Така пара тегів уже є в цієї персони"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Кожен канал зберігає свою персону. Нові канали починаються з вашого облікового запису."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Редагувати персону"
@@ -140,6 +140,10 @@ msgstr "Редагувати персону"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Редагувати мітку часу\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Усюди"
 
 msgid "Export Summary"
 msgstr "Підсумок експорту"
@@ -221,6 +225,10 @@ msgstr "Імпорт персон..."
 msgid "Importing..."
 msgstr "Імпорт..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "У кожному каналі"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Вставити"
@@ -237,12 +245,6 @@ msgstr "Залишити наявні та додати нові (рекомен
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Залишити ваші поточні персони ({existingCount}) і додати до них усі імпортовані персони ({0}) як нові записи."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Останнє використання"
 
 msgid "Main account"
 msgstr "Основний обліковий запис"
@@ -306,6 +308,14 @@ msgstr "Сигналів поки немає. Панель залишаєтьс�
 msgid "Nobody has this signal on"
 msgstr "Ніхто не ввімкнув цей сигнал"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Одна персона для всіх каналів."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Лише для цього каналу"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Видно лише вам. Інші не можуть переглядати повний опис і дані профілю цієї персони."
@@ -331,6 +341,10 @@ msgstr "Остаточно видалити всі наявні персони (
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Теги персони (префікс і суфікс)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Персона діє"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Персону оновлено"
 msgid "Persona visibility"
 msgstr "Видимість персони"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Персони"
@@ -460,10 +473,6 @@ msgstr "Результати пошуку ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Пошук персон, тегів, займенників..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Надсилайте повідомлення з різними іменами й аватарами. Персони можуть представляти учасників множинної системи, персонажів рольових ігор або будь-яку іншу ідентичність."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Відкріпити емодзі"
 msgid "Unpin for this persona"
 msgstr "Відкріпити для цієї персони"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Повідомлення без тегу надсилаються від імені персони, яка говорила останньою. Щойно хтось використовує тег персони, ця персона автоматично стає активною."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Повідомлення без тегу надсилаються від імені вибраної вами персони. Якщо ввести теги іншої персони, так буде надіслано лише це одне повідомлення, а активна персона не зміниться."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Повідомлення без тегу надсилаються від вибраної вами персони. Тег діє лише для цього повідомлення."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Повідомлення без тегу надсилаються від того, хто говорив останнім. Використання тегу перемикає на цю персону."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Переглянути ваші персони"
 
 msgid "Where the signal bar appears"
 msgstr "Де показується панель сигналів"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Де запам’ятовується ваша персона"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"

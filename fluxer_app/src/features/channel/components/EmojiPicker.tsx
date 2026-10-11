@@ -244,7 +244,7 @@ const EmojiPickerBase = observer(
 				if (!roleIconGuildId) {
 					const draft = channelId ? Drafts.getDraft(channelId) : undefined;
 					const reactionEmoji = toReactionEmoji(emoji as any);
-					const effectivePersona = PersonaStore.getEffectiveReactionPersona(reactionEmoji, draft);
+					const effectivePersona = PersonaStore.getEffectiveReactionPersona(channelId ?? null, reactionEmoji, draft);
 					EmojiPickerState.trackEmoji(emoji, effectivePersona?.id);
 				}
 				handleSelect(emoji, shiftKey);
