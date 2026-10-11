@@ -183,7 +183,7 @@ export const useTextareaDraftAndTyping = ({
 		if (isRestoringDraftRef.current) {
 			return;
 		}
-		const {persona: effectivePersona} = PersonaStore.getEffectivePersonaForText(value, false);
+		const {persona: effectivePersona, isTagUnfinished} = PersonaStore.getEffectivePersonaForText(value, false);
 		const subprofile: MessageSubprofileRequest | null = effectivePersona
 			? normalizeSubprofile(effectivePersona, {
 					display_tag_text: PersonaStore.displayTagText || null,
@@ -194,9 +194,12 @@ export const useTextareaDraftAndTyping = ({
 			SignalBarStore.setComposerPersona(channelId, subprofile, {
 				value,
 				previousValue: typingPreviousValue?.channelId === channelId ? typingPreviousValue.value : null,
-				typingEnabled: enabled && typingEnabled,
+				typingEnabled: enabled && typingEnabled && !isTagUnfinished,
 			});
 		}
+		// The text may still become another persona's tag. Until it is one or stops looking like
+		// one, neither the signals nor the typing indicator say who is typing.
+		if (isTagUnfinished) return;
 
 		RollingTypingSender.handleComposerChange({
 			channelId,
