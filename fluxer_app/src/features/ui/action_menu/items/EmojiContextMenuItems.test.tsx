@@ -73,6 +73,21 @@ vi.mock('@app/features/ui/action_menu/MenuGroup', () => ({
 	),
 }));
 
+vi.mock('@app/features/app/state/GeoIP', () => ({default: {latitude: null, longitude: null}}));
+
+vi.mock('@app/features/gateway/transport/GatewayConnection', () => ({
+	default: {isReady: false, isConnected: false, connectionEpoch: 1},
+}));
+
+vi.mock('@app/features/ui/action_menu/MenuItemSubmenu', () => ({
+	MenuItemSubmenu: ({label, render}: any) => (
+		<div data-flx="ui.action-menu.items.emoji-context-menu-items-test.menu-item-submenu.div">
+			{label}
+			{render?.()}
+		</div>
+	),
+}));
+
 vi.mock('@app/features/ui/commands/ModalCommands', () => ({
 	push: vi.fn(),
 	pop: vi.fn(),
@@ -92,11 +107,13 @@ vi.mock('@app/features/ui/commands/ToastCommands', () => ({
 }));
 
 import * as EmojiPickerCommands from '@app/features/emoji/commands/EmojiPickerCommands';
+import ExpressionPicker from '@app/features/emoji/state/ExpressionPicker';
 import type {FlatEmoji} from '@app/features/emoji/types/EmojiTypes';
+import Messages from '@app/features/messaging/state/MessagingMessages';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import * as TextCopyCommands from '@app/features/ui/commands/TextCopyCommands';
-import {EmojiContextMenuItems} from './EmojiContextMenuItems';
+import {EmojiContextMenuItems, EmojiInlineMenuItems} from './EmojiContextMenuItems';
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -232,6 +249,88 @@ describe('EmojiContextMenuItems', () => {
 		expect(document.body.textContent).not.toContain('React as...');
 	});
 
+	describe('with a stale expression picker channel (EM-1)', () => {
+		beforeEach(() => {
+			runInAction(() => {
+				ExpressionPicker.open('c-picker');
+				ExpressionPicker.close();
+			});
+			Messages.handleLoadMessagesSuccess({
+				channelId: 'c-picker',
+				messages: [
+					{
+						id: '1555923739894349824',
+						channel_id: 'c-picker',
+						author: {
+							id: '100',
+							username: 'fox',
+							discriminator: '0001',
+							global_name: null,
+							avatar: null,
+							avatar_color: null,
+							flags: 0,
+						},
+						type: 0,
+						flags: 0,
+						pinned: false,
+						tts: false,
+						mention_everyone: false,
+						mentions: [],
+						mention_roles: [],
+						content: 'latest message in the picker channel',
+						timestamp: '2026-10-04T18:50:00.000Z',
+					},
+				],
+			});
+			expect(Messages.getMessages('c-picker').toArray()).toHaveLength(1);
+		});
+
+		afterEach(() => {
+			Messages.handleSessionInvalidated();
+		});
+
+		it('hides "React as..." when no message is given', async () => {
+			await act(async () => {
+				root.render(
+					<EmojiContextMenuItems
+						emoji={customEmoji}
+						onClose={mockOnClose}
+						data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--5"
+					/>,
+				);
+			});
+			expect(document.body.textContent).toContain('Copy emoji ID');
+			expect(document.body.textContent).not.toContain('React as...');
+
+			await act(async () => {
+				root.render(
+					<EmojiContextMenuItems
+						emoji={customEmoji}
+						channelId="c-picker"
+						onClose={mockOnClose}
+						data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--6"
+					/>,
+				);
+			});
+			expect(document.body.textContent).not.toContain('React as...');
+		});
+
+		it('never offers "React as..." on an emoji in message text', async () => {
+			await act(async () => {
+				root.render(
+					<EmojiInlineMenuItems
+						emoji={customEmoji}
+						channelId="c-picker"
+						onClose={mockOnClose}
+						data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-inline-menu-items"
+					/>,
+				);
+			});
+			expect(document.body.textContent).toContain('Copy image');
+			expect(document.body.textContent).not.toContain('React as...');
+		});
+	});
+
 	it('supports toggling favorite emoji', async () => {
 		await act(async () => {
 			root.render(
@@ -240,7 +339,7 @@ describe('EmojiContextMenuItems', () => {
 					channelId="c1"
 					messageId="m1"
 					onClose={mockOnClose}
-					data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--5"
+					data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--7"
 				/>,
 			);
 		});
@@ -265,7 +364,7 @@ describe('EmojiContextMenuItems', () => {
 					channelId="c1"
 					messageId="m1"
 					onClose={mockOnClose}
-					data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--6"
+					data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--8"
 				/>,
 			);
 		});
