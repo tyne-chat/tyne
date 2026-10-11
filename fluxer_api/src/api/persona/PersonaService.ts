@@ -17,7 +17,7 @@ import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
 import type {Persona} from '../models/Persona';
 import type {UserGuildRepository} from '../user/repositories/account/UserGuildRepository';
-import type {IUserChannelRepository} from '../user/repositories/IUserChannelRepository';
+import type {UserChannelRepository} from '../user/repositories/UserChannelRepository';
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
 import {
 	DuplicatePersonaTagError,
@@ -36,7 +36,7 @@ export interface PersonaServiceDeps {
 	userAccountLookupService?: UserAccountLookupService;
 	gatewayService?: IGatewayService;
 	userGuildRepository?: UserGuildRepository;
-	userChannelRepository?: IUserChannelRepository;
+	userChannelRepository?: UserChannelRepository;
 }
 
 function normalizeTag(tag: PersonaTag): {prefix: string; suffix: string} {
