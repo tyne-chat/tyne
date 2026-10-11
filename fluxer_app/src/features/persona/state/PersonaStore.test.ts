@@ -574,6 +574,22 @@ describe('PersonaStore', () => {
 	});
 
 	describe('getEffectivePersonaForText', () => {
+		it('says so while the text could still become another persona tag', async () => {
+			const alice = await store.addPersona({name: 'Alice', persona_tags: [{prefix: 'a:'}]});
+			await store.addPersona({name: 'Bob', persona_tags: [{prefix: 'b:'}]});
+			await store.setActivePersona(alice.id, true);
+
+			// One character into Bob's tag: still Alice for now, and not to be shown to anyone yet.
+			const partial = store.getEffectivePersonaForText('b');
+			expect(partial.persona?.id).toBe(alice.id);
+			expect(partial.isTagUnfinished).toBe(true);
+
+			expect(store.getEffectivePersonaForText('b:').isTagUnfinished).toBe(false);
+			expect(store.getEffectivePersonaForText('bye').isTagUnfinished).toBe(false);
+			// The start of Alice's own tag changes nothing about who is typing.
+			expect(store.getEffectivePersonaForText('a').isTagUnfinished).toBe(false);
+		});
+
 		it('returns tag-matched persona and isFromTag=true on tag match', async () => {
 			const alice = await store.addPersona({
 				name: 'Alice',

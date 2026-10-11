@@ -151,7 +151,7 @@ describe('SignalBar', () => {
 	it('gives the signal as the persona resolved from the composer', async () => {
 		const persona = vi
 			.spyOn(PersonaStore, 'getEffectivePersonaForText')
-			.mockReturnValue({persona: {id: '9'} as never, isFromTag: true});
+			.mockReturnValue({persona: {id: '9'} as never, isFromTag: true, isTagUnfinished: false});
 		setSignals([READING]);
 		await render(channel());
 		await act(async () => button('Reading')?.click());
