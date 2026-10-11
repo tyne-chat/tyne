@@ -18,11 +18,9 @@ msgstr "(prikvačeno)"
 msgid "Account: @{username}"
 msgstr "Račun: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Način aktivne persone"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Način aktivne persone"
 
@@ -74,9 +72,6 @@ msgstr "Promijeni personu"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Odaberite PluralKit izvoz (.json) ili ga povucite i ispustite"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Odaberite kako poruke bez oznake i oznake persona djeluju s vašom aktivnom personom."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Konfigurirane persone ({count})"
@@ -107,7 +102,8 @@ msgstr "Izbriši vremensku oznaku\\"
 msgid "Detected System Name / Tag"
 msgstr "Otkriveni naziv / oznaka sustava"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Oznaka prikaza"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Preuzimanje avatara {current} od {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Dvostruki par oznaka na ovoj personi"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Svaki kanal zadržava svoju personu. Novi kanali počinju kao vaš račun."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Uredi personu"
@@ -140,6 +140,10 @@ msgstr "Uredi personu"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Uredi vremensku oznaku\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Svugdje"
 
 msgid "Export Summary"
 msgstr "Sažetak izvoza"
@@ -221,6 +225,10 @@ msgstr "Uvoz persona..."
 msgid "Importing..."
 msgstr "Uvoz..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "U svakom kanalu"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Umetni"
@@ -237,12 +245,6 @@ msgstr "Zadrži postojeće i dodaj nove (preporučeno)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Zadržite svoje trenutačne persone ({existingCount}) i uz njih dodajte sve uvezene persone ({0}) kao nove unose."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Zadnje korišteno"
 
 msgid "Main account"
 msgstr "Glavni račun"
@@ -306,6 +308,14 @@ msgstr "Još nema signala. Traka ostaje skrivena dok ne dodaš jedan."
 msgid "Nobody has this signal on"
 msgstr "Nitko nema uključen ovaj signal"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Jedna persona za sve kanale."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Samo za ovaj kanal"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Vidljivo samo vama. Drugi ne mogu vidjeti puni opis ni pojedinosti profila ove persone."
@@ -331,6 +341,10 @@ msgstr "Trajno izbrišite sve postojeće persone ({existingCount}) i potpuno ih 
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Oznake persone (prefiks i sufiks)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Persona vrijedi za"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persona je ažurirana"
 msgid "Persona visibility"
 msgstr "Vidljivost persone"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Persone"
@@ -460,10 +473,6 @@ msgstr "Rezultati pretraživanja ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Pretraži persone, oznake, zamjenice..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Šaljite poruke s različitim imenima i avatarima. Persone mogu predstavljati članove pluralnog sustava, likove iz igranja uloga ili bilo koji drugi identitet."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Otkvači emotikon"
 msgid "Unpin for this persona"
 msgstr "Otkvači za ovu personu"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Poruke bez oznake šalju se kao persona koja je zadnja govorila. Kad god netko upotrijebi oznaku persone, ta persona automatski postaje aktivna."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Poruke bez oznake šalju se kao persona koju ste odabrali. Upisivanjem oznaka druge persone poslat će se samo ta jedna poruka i aktivna se persona neće promijeniti."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Poruke bez oznake šalju se kao persona koju ste odabrali. Oznaka vrijedi samo za tu poruku."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Poruke bez oznake šalju se kao onaj tko je zadnji govorio. Korištenje oznake prebacuje na tu personu."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Pogledajte svoje persone"
 
 msgid "Where the signal bar appears"
 msgstr "Gdje se prikazuje traka signala"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Gdje se pamti vaša persona"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
