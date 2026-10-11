@@ -84,9 +84,7 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 			);
 		};
 
-		const avatarHash = effectivePersona
-			? (effectivePersona.avatar_hash ?? effectivePersona.avatarHash ?? undefined)
-			: undefined;
+		const avatarHash = effectivePersona ? (effectivePersona.avatar_hash ?? undefined) : undefined;
 		const modeLabel = mode === 'last' ? i18n._(MODE_LAST_DESCRIPTOR) : i18n._(MODE_MANUAL_DESCRIPTOR);
 
 		let tooltipText: string;
