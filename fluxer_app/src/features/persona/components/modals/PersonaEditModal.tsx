@@ -294,20 +294,20 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			id: persona.id,
 			name: persona.name,
 			pronouns: persona.pronouns ?? '',
-			avatarHash: persona.avatar_hash ?? persona.avatarHash ?? '',
-			avatarColor: persona.avatar_color ?? persona.avatarColor ?? null,
-			bannerHash: persona.banner_hash ?? persona.bannerHash ?? '',
+			avatarHash: persona.avatar_hash ?? '',
+			avatarColor: persona.avatar_color ?? null,
+			bannerHash: persona.banner_hash ?? '',
 			accentColor: persona.color ?? null,
 			bio: persona.bio ?? '',
 			visibility: persona.visibility ?? 'unlisted',
 			tags:
-				(persona.persona_tags ?? persona.personaTags ?? []).length > 0
-					? (persona.persona_tags ?? persona.personaTags ?? []).map((t) => ({
+				(persona.persona_tags ?? []).length > 0
+					? (persona.persona_tags ?? []).map((t) => ({
 							prefix: t.prefix ?? '',
 							suffix: t.suffix ?? '',
 						}))
 					: [{prefix: '', suffix: ''}],
-			signatureEmojis: (persona.signature_emojis ?? persona.signatureEmojis ?? []).map((e) => ({
+			signatureEmojis: (persona.signature_emojis ?? []).map((e) => ({
 				id: e.id ?? null,
 				name: e.name,
 				animated: e.animated ?? null,
@@ -411,7 +411,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			// 2. Check collisions across other personas
 			for (const p of personas) {
 				if (formData.id && p.id === formData.id) continue;
-				const otherTags = p.persona_tags ?? p.personaTags ?? [];
+				const otherTags = p.persona_tags ?? [];
 				for (const ot of otherTags) {
 					const normOther = normalizeTag(ot);
 					if ((normOther.prefix || normOther.suffix) && getTagKey(normOther) === currentKey) {
@@ -454,7 +454,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 			for (const p of personas) {
 				if (formData.id && p.id === formData.id) continue;
-				const otherSigs = p.signature_emojis ?? p.signatureEmojis ?? [];
+				const otherSigs = p.signature_emojis ?? [];
 				const collision = otherSigs.some(
 					(s) => (s.id && s.id === newSig.id) || (!s.id && !newSig.id && s.name === newSig.name),
 				);
@@ -653,7 +653,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			const key = getTagKey(norm);
 			for (const p of personas) {
 				if (formData.id && p.id === formData.id) continue;
-				const otherTags = p.persona_tags ?? p.personaTags ?? [];
+				const otherTags = p.persona_tags ?? [];
 				for (const ot of otherTags) {
 					const otherNorm = normalizeTag(ot);
 					if ((otherNorm.prefix || otherNorm.suffix) && getTagKey(otherNorm) === key) {
