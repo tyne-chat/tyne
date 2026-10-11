@@ -36,6 +36,16 @@ export const MessageSubprofileRequestSchema = z.object({
 });
 export type MessageSubprofileRequest = z.infer<typeof MessageSubprofileRequestSchema>;
 
+/**
+ * What clients released before `persona_id` send to name the persona of a message or of typing:
+ * a copy of the whole persona. Only its id was ever used, and only its id is read; whatever else
+ * it carries is dropped.
+ */
+export const LegacyMessageSubprofileRequestSchema = z.object({
+	id: z.string().min(1).max(64),
+});
+export type LegacyMessageSubprofileRequest = z.infer<typeof LegacyMessageSubprofileRequestSchema>;
+
 export const MessageSubprofileResponseSchema = z.object({
 	id: z.string().describe('Persona ID'),
 	name: z.string().describe('Persona display name'),
