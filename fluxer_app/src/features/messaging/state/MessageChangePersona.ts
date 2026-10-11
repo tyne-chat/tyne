@@ -3,10 +3,7 @@
 import type {Channel} from '@app/features/channel/models/Channel';
 import {type ClientPersona, normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
 import type {PersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import type {
-	MessageSubprofileRequest,
-	MessageSubprofileResponse,
-} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
 import {compareStructural, makeAutoObservable, reaction} from 'mobx';
 import * as MessageCommands from '../commands/MessageCommands';
 import type {Message} from '../models/MessagingMessage';
@@ -37,7 +34,7 @@ class MessageChangePersona {
 		makeAutoObservable(this, {}, {autoBind: true});
 	}
 
-	buildSubprofilePayload(persona: PersonaPayloadSource): MessageSubprofileRequest {
+	buildSubprofilePayload(persona: PersonaPayloadSource): MessageSubprofileResponse {
 		return normalizeSubprofile(persona as any, {
 			display_tag_text: PersonaStore.displayTagText || null,
 			display_tag_icon: PersonaStore.displayTagIcon || null,
@@ -58,7 +55,7 @@ class MessageChangePersona {
 		return this.editingMessageIds[channelId] === messageId;
 	}
 
-	async changePersona(channel: Channel, message: Message, subprofile: MessageSubprofileRequest | null): Promise<void> {
+	async changePersona(channel: Channel, message: Message, subprofile: MessageSubprofileResponse | null): Promise<void> {
 		await MessageCommands.edit(
 			channel.id,
 			message.id,
