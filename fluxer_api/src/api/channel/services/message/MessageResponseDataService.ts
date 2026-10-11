@@ -175,7 +175,7 @@ export class MessageResponseDataService {
 			const anyMsg = msg as unknown as Record<string, unknown>;
 			// Case 1: Root user account deleted -> Render as Deleted Persona if persona was used, else null
 			if (isDeletedAuthor(msg.author)) {
-				const rawPersonaId = anyMsg.persona_id ?? msg.subprofile?.id;
+				const rawPersonaId = anyMsg.persona_id;
 				const personaIdStr =
 					typeof rawPersonaId === 'string' || typeof rawPersonaId === 'bigint' || typeof rawPersonaId === 'number'
 						? String(rawPersonaId)
@@ -199,7 +199,7 @@ export class MessageResponseDataService {
 			}
 
 			// Case 2: Persona ID present on message
-			const rawPersonaId = anyMsg.persona_id ?? msg.subprofile?.id;
+			const rawPersonaId = anyMsg.persona_id;
 			const personaIdStr =
 				typeof rawPersonaId === 'string' || typeof rawPersonaId === 'bigint' || typeof rawPersonaId === 'number'
 					? String(rawPersonaId)
@@ -232,7 +232,7 @@ export class MessageResponseDataService {
 		for (const msg of targetMessages) {
 			if (isDeletedAuthor(msg.author)) continue;
 			const anyMsg = msg as unknown as Record<string, unknown>;
-			const rawPersonaId = anyMsg.persona_id ?? msg.subprofile?.id;
+			const rawPersonaId = anyMsg.persona_id;
 			const personaIdStr =
 				typeof rawPersonaId === 'string' || typeof rawPersonaId === 'bigint' || typeof rawPersonaId === 'number'
 					? String(rawPersonaId)
