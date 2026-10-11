@@ -24,7 +24,7 @@ import {z} from 'zod';
 
 // Fork imports.
 
-import {MessageSubprofileRequestSchema} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {LegacyMessageSubprofileRequestSchema} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {SnowflakeStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 
 const RICH_EMBED_AUTHOR_NAME_MAX_LENGTH = 256 as const;
@@ -351,7 +351,10 @@ export const MessageRequestSchema = z
 		favorite_meme_id: SnowflakeType.nullish().describe('ID of a favorite meme to attach'),
 		sticker_ids: z.array(SnowflakeType).max(3).nullish().describe('Array of sticker IDs to include (max 3)'),
 		tts: z.boolean().optional().describe('Whether this is a text-to-speech message'),
-		subprofile: MessageSubprofileRequestSchema.nullish().describe('Optional subprofile persona information'),
+		persona_id: SnowflakeType.nullish().describe('ID of one of your personas to send the message as'),
+		subprofile: LegacyMessageSubprofileRequestSchema.nullish().describe(
+			'Deprecated, use persona_id. Only its id is read, and persona_id wins when both are sent',
+		),
 	})
 	.partial();
 
@@ -371,6 +374,7 @@ export const MessageUpdateRequestSchema = MessageRequestSchema.pick({
 	content: true,
 	embeds: true,
 	allowed_mentions: true,
+	persona_id: true,
 	subprofile: true,
 }).extend({
 	flags: createBitflagInt32Type(
@@ -464,7 +468,10 @@ export type MessageAckRequest = z.infer<typeof MessageAckRequest>;
 
 export const IndicateTypingRequestSchema = z
 	.object({
-		subprofile: MessageSubprofileRequestSchema.nullish().optional().describe('Optional subprofile persona information'),
+		persona_id: SnowflakeType.nullish().describe('ID of one of your personas to show as typing'),
+		subprofile: LegacyMessageSubprofileRequestSchema.nullish().describe(
+			'Deprecated, use persona_id. Only its id is read, and persona_id wins when both are sent',
+		),
 	})
 	.optional();
 
