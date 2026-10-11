@@ -18,11 +18,9 @@ msgstr "(épinglé)"
 msgid "Account: @{username}"
 msgstr "Compte : @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Mode de persona actif"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Mode de persona actif"
 
@@ -74,9 +72,6 @@ msgstr "Changer de persona"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Choisissez un export PluralKit (.json) ou glissez-déposez-le"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Choisissez comment les messages sans balise et les balises de persona interagissent avec votre persona active."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Personas configurées ({count})"
@@ -107,7 +102,8 @@ msgstr "Supprimer l'horodatage\\"
 msgid "Detected System Name / Tag"
 msgstr "Nom / balise de système détecté"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Badge d'affichage"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Téléchargement de l'avatar {current} sur {total}…"
 msgid "Duplicate tag pair on this persona"
 msgstr "Paire de balises déjà présente sur cette persona"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Chaque salon conserve son propre persona. Les nouveaux salons commencent avec votre compte."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Modifier la persona"
@@ -140,6 +140,10 @@ msgstr "Modifier la persona"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Modifier l'horodatage\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Partout"
 
 msgid "Export Summary"
 msgstr "Résumé de l'export"
@@ -221,6 +225,10 @@ msgstr "Importation des personas…"
 msgid "Importing..."
 msgstr "Importation…"
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Dans chaque salon"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Insérer"
@@ -237,12 +245,6 @@ msgstr "Conserver les existantes et ajouter les nouvelles (Recommandé)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Conserve vos {existingCount} persona(s) actuelle(s) et ajoute les {0} personas importées comme nouvelles entrées."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Dernière utilisée"
 
 msgid "Main account"
 msgstr "Compte principal"
@@ -306,6 +308,14 @@ msgstr "Aucun signal pour l’instant. La barre reste masquée tant que tu n’e
 msgid "Nobody has this signal on"
 msgstr "Personne n’a activé ce signal"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Un seul persona pour tous les salons."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Uniquement pour ce salon"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Visible uniquement par vous. Les autres ne peuvent pas voir la biographie complète ni les détails du profil de cette persona."
@@ -331,6 +341,10 @@ msgstr "Supprime définitivement l'ensemble des {existingCount} persona(s) exist
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Balises de persona (Préfixe et Suffixe)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Le persona s’applique à"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persona mise à jour"
 msgid "Persona visibility"
 msgstr "Visibilité de la persona"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
@@ -460,10 +473,6 @@ msgstr "Résultats de recherche ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Rechercher des personas, balises, pronoms…"
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Envoyez des messages avec des noms et avatars distincts. Les personas peuvent représenter les membres d'un système pluriel, des personnages de jeu de rôle ou toute autre identité."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Désépingler l'émoji"
 msgid "Unpin for this persona"
 msgstr "Désépingler pour cette persona"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Les messages sans balise sont envoyés sous l'identité de la persona ayant parlé le plus récemment. Dès qu'une balise de persona est utilisée, celle-ci devient automatiquement la persona active."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Les messages sans balise sont envoyés sous l'identité de la persona choisie. Taper les balises d'une autre persona enverra uniquement ce message sans changer la persona active."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Les messages sans tag sont envoyés avec le persona que vous avez choisi. Un tag ne s’applique qu’à ce message."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Les messages sans tag sont envoyés avec le dernier persona à avoir parlé. Utiliser un tag bascule vers ce persona."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Voir vos personas"
 
 msgid "Where the signal bar appears"
 msgstr "Où la barre de signaux apparaît"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Où votre persona est mémorisé"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
