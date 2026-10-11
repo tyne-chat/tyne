@@ -2,7 +2,7 @@
 
 import type {Channel} from '@app/features/channel/models/Channel';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas.js';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import * as MessageCommands from '../commands/MessageCommands';
 import type {Message} from '../models/MessagingMessage';
@@ -109,7 +109,7 @@ describe('MessageChangePersona', () => {
 				attachments: [],
 			} as unknown as Message;
 
-			const subprofilePayload: MessageSubprofileRequest = {
+			const subprofilePayload: MessageSubprofileResponse = {
 				id: 'persona-123',
 				name: 'Test Persona',
 			};
