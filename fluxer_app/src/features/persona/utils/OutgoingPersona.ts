@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 export interface OutgoingPersona {
 	content: string;
-	subprofile: MessageSubprofileRequest | undefined;
+	subprofile: MessageSubprofileResponse | undefined;
 }
 
 /**
