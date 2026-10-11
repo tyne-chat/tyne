@@ -9,6 +9,7 @@ import {
 	DuplicateSignatureEmojiError,
 	PersonaLimitReachedError,
 	PersonaNotFoundError,
+	PersonaPrivateError,
 	PersonaTagLimitExceededError,
 	SignatureEmojiLimitExceededError,
 } from '../errors/PersonaErrors';
@@ -234,16 +235,17 @@ describe('PersonaService', () => {
 			);
 		});
 
-		// Privacy enforcement: Private personas return 404 (NotFound) rather than 403 (Forbidden)
-		// to prevent unauthorized users from discovering or enumerating the existence of private personas.
-		it('throws PersonaNotFoundError when persona is private and viewer is not the owner', async () => {
+		// A private persona is refused as private, not as unknown, so a client can say so instead of
+		// showing an empty profile. Whoever asks has its id from a message it sent, so that it exists
+		// is not news to them.
+		it('throws PersonaPrivateError when persona is private and viewer is not the owner', async () => {
 			const privatePersona = makeMockPersona(userId, defaultPersonaId, 'Secret', {
 				visibility: 'private',
 			});
 			vi.mocked(mockRepo.findById).mockResolvedValueOnce(privatePersona);
 
 			await expect(service.getPublicPersonaById(otherViewerId, userId, defaultPersonaId)).rejects.toThrow(
-				PersonaNotFoundError,
+				PersonaPrivateError,
 			);
 		});
 
