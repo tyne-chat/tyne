@@ -589,6 +589,9 @@ msgstr "Tämä emoji on jo lisätty nimikkoemojiksi"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Tämä on esikatselu siitä, miltä näyttötunnisteesi näyttää keskustelussa."
 
+msgid "This persona’s profile is private."
+msgstr "Tämän persoonan profiili on yksityinen."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Näytä tai piilota kanavaluettelo"
