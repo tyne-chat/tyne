@@ -344,7 +344,7 @@ export function createMessageActionHandlers(
 		}
 		const reactionEmoji = toReactionEmoji(emoji);
 		const draft = Drafts.getDraft(message.channelId);
-		const effectivePersona = PersonaStore.getEffectiveReactionPersona(reactionEmoji, draft);
+		const effectivePersona = PersonaStore.getEffectiveReactionPersona(message.channelId, reactionEmoji, draft);
 		const effectivePersonaId = effectivePersona?.id ?? null;
 		const hasEffectivePersonaReacted = hasPersonaReacted(message.getReaction(reactionEmoji), effectivePersonaId);
 		if (hasEffectivePersonaReacted) {

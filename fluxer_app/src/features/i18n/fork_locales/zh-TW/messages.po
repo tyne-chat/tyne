@@ -18,11 +18,9 @@ msgstr "(已釘選)"
 msgid "Account: @{username}"
 msgstr "帳號：@{username}"
 
-msgid "Active Persona Mode"
-msgstr "使用中人格模式"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "使用中人格模式"
 
@@ -74,9 +72,6 @@ msgstr "變更人格"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "選擇 PluralKit 匯出檔（.json）或拖放至此"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "選擇無標籤訊息和人格標籤如何與你的使用中人格搭配。"
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "已設定的人格（{count}）"
@@ -107,7 +102,8 @@ msgstr "刪除時間戳記\\"
 msgid "Detected System Name / Tag"
 msgstr "偵測到的系統名稱 / 標籤"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "顯示標籤"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "正在下載頭像 {current} / {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "此人格上有重複的標籤組"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "每個頻道保留各自的人格。新頻道以你的帳號開始。"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "編輯人格"
@@ -140,6 +140,10 @@ msgstr "編輯人格"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "編輯時間戳記\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "所有地方"
 
 msgid "Export Summary"
 msgstr "匯出摘要"
@@ -221,6 +225,10 @@ msgstr "正在匯入人格..."
 msgid "Importing..."
 msgstr "正在匯入..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "每個頻道"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "插入"
@@ -237,12 +245,6 @@ msgstr "保留現有並新增新的（建議）"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "保留你目前的 {existingCount} 個人格，並將全部 {0} 個匯入的人格作為新項目一併加入。"
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "最後使用"
 
 msgid "Main account"
 msgstr "主帳號"
@@ -306,6 +308,14 @@ msgstr "目前還沒有訊號。新增訊號後才會顯示訊號列。"
 msgid "Nobody has this signal on"
 msgstr "還沒有人開啟此訊號"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "所有頻道使用同一個人格。"
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "僅限此頻道"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "僅你可見。其他人無法查看此人格的完整簡介或個人檔案詳情。"
@@ -331,6 +341,10 @@ msgstr "永久刪除全部 {existingCount} 個現有人格，並以匯入的人�
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "人格標籤（前綴和後綴）"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "人格適用範圍"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "人格已更新"
 msgid "Persona visibility"
 msgstr "人格可見度"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "人格"
@@ -460,10 +473,6 @@ msgstr "搜尋結果（{0}）"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "搜尋人格、標籤、代名詞..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "使用不同的名稱和頭像傳送訊息。人格可以代表多重系統成員、角色扮演角色或任何其他身分。"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "取消釘選表情符號"
 msgid "Unpin for this persona"
 msgstr "為此人設取消釘選"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "無標籤訊息會以最近發言的人格傳送。每當有人使用人格標籤時，該人格會自動成為使用中人格。"
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "無標籤訊息會以你選擇的人格傳送。輸入其他人格的標籤只會傳送那一則訊息，不會切換使用中人格。"
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "未加標籤的訊息以你選擇的人格傳送。標籤僅對該則訊息生效。"
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "未加標籤的訊息以最後發言的人格傳送。使用標籤會切換到該人格。"
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "查看你的人格"
 
 msgid "Where the signal bar appears"
 msgstr "訊號列顯示位置"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "人格的記憶範圍"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
