@@ -185,10 +185,14 @@ describe('Persona Privacy and OAuth2 Scope Enforcement', () => {
 				.execute();
 			expect(unlistedCard.bio).toBe('Unlisted Bio');
 
-			// 4. Direct Query for Private by Friend: Returns 404
+			// 4. Direct Query for Private by Friend: refused as private, which is not the same as unknown
 			await createBuilder(harness, userB.token)
 				.get(`/users/${userA.userId}/personas/${pPrivate.id}`)
-				.expect(HTTP_STATUS.NOT_FOUND)
+				.expect(HTTP_STATUS.FORBIDDEN, 'PRIVATE_PERSONA')
+				.execute();
+			await createBuilder(harness, userB.token)
+				.get(`/users/${userA.userId}/personas/1546500000000000009`)
+				.expect(HTTP_STATUS.NOT_FOUND, 'UNKNOWN_PERSONA')
 				.execute();
 
 			// 5. Direct Query for Private by Owner: Returns 200
