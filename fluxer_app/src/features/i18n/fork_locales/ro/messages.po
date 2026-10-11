@@ -589,6 +589,9 @@ msgstr "Acest emoji este deja adăugat ca emoji semnătură"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Aceasta este o previzualizare a modului în care va arăta eticheta ta de afișare în chat."
 
+msgid "This persona’s profile is private."
+msgstr "Profilul acestei persona este privat."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Comută lista de canale"
