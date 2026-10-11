@@ -46,35 +46,35 @@ describe('resolveOutgoingPersona', () => {
 	});
 
 	it('sends as the account when no tag matches and no persona is active', () => {
-		expect(resolveOutgoingPersona('hello', false)).toEqual({content: 'hello', subprofile: undefined});
+		expect(resolveOutgoingPersona(null, 'hello', false)).toEqual({content: 'hello', subprofile: undefined});
 	});
 
 	it('takes the tag out of the text and sends as the tagged persona', () => {
-		const outgoing = resolveOutgoingPersona('B: bao', false);
+		const outgoing = resolveOutgoingPersona(null, 'B: bao', false);
 		expect(outgoing.content).toBe('bao');
 		expect(outgoing.subprofile).toMatchObject({id: baoId, name: 'Bao'});
 	});
 
 	it('sends as the active persona and leaves untagged text alone', async () => {
 		await PersonaStore.setActivePersona(foxId, true);
-		const outgoing = resolveOutgoingPersona('bao', false);
+		const outgoing = resolveOutgoingPersona(null, 'bao', false);
 		expect(outgoing.content).toBe('bao');
 		expect(outgoing.subprofile).toMatchObject({id: foxId, name: 'Fox'});
 	});
 
 	it('prefers a tag over the active persona', async () => {
 		await PersonaStore.setActivePersona(foxId, true);
-		expect(resolveOutgoingPersona('B: bao', false).subprofile).toMatchObject({id: baoId});
+		expect(resolveOutgoingPersona(null, 'B: bao', false).subprofile).toMatchObject({id: baoId});
 	});
 
 	it('sends a backslash-escaped message as the account without the backslash', async () => {
 		await PersonaStore.setActivePersona(foxId, true);
-		expect(resolveOutgoingPersona('\\bao', false)).toEqual({content: 'bao', subprofile: undefined});
+		expect(resolveOutgoingPersona(null, '\\bao', false)).toEqual({content: 'bao', subprofile: undefined});
 	});
 
 	it('treats a tag on its own as a tag only when the message has other content', () => {
-		expect(resolveOutgoingPersona('B:', false)).toEqual({content: 'B:', subprofile: undefined});
-		const withMedia = resolveOutgoingPersona('B:', true, {allowEmptyContent: true});
+		expect(resolveOutgoingPersona(null, 'B:', false)).toEqual({content: 'B:', subprofile: undefined});
+		const withMedia = resolveOutgoingPersona(null, 'B:', true, {allowEmptyContent: true});
 		expect(withMedia.content).toBe('');
 		expect(withMedia.subprofile).toMatchObject({id: baoId});
 	});
@@ -93,15 +93,15 @@ describe('consumePersonaCommand', () => {
 	it('consumes a lone double backslash and clears the active persona', async () => {
 		const fox = await PersonaStore.addPersona({name: 'Fox'});
 		await PersonaStore.setActivePersona(fox.id, true);
-		expect(consumePersonaCommand('\\\\')).toBe(true);
+		expect(consumePersonaCommand(null, '\\\\')).toBe(true);
 		expect(PersonaStore.activePersona).toBeNull();
 	});
 
 	it('leaves everything else to be sent', async () => {
-		expect(consumePersonaCommand('\\\\')).toBe(false);
+		expect(consumePersonaCommand(null, '\\\\')).toBe(false);
 		const fox = await PersonaStore.addPersona({name: 'Fox'});
 		await PersonaStore.setActivePersona(fox.id, true);
-		expect(consumePersonaCommand('hello')).toBe(false);
+		expect(consumePersonaCommand(null, 'hello')).toBe(false);
 		expect(PersonaStore.activePersona?.id).toBe(fox.id);
 	});
 });
@@ -120,8 +120,8 @@ describe('PersonaStore.previewOutgoingContent', () => {
 		const bao = await PersonaStore.addPersona({name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]});
 		await PersonaStore.setActivePersonaMode('last');
 		const usesBefore = PersonaStore.getPersona(bao.id)?.use_count ?? 0;
-		expect(PersonaStore.previewOutgoingContent('B: bao')).toBe('bao');
-		expect(PersonaStore.previewOutgoingContent('plain')).toBe('plain');
+		expect(PersonaStore.previewOutgoingContent(null, 'B: bao')).toBe('bao');
+		expect(PersonaStore.previewOutgoingContent(null, 'plain')).toBe('plain');
 		expect(PersonaStore.getPersona(bao.id)?.use_count ?? 0).toBe(usesBefore);
 		expect(PersonaStore.activePersonaId).toBeNull();
 	});
