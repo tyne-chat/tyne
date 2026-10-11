@@ -589,6 +589,9 @@ msgstr "이 이모지는 이미 시그니처 이모지로 추가되었습니다"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "채팅에서 표시 태그가 어떻게 보일지 미리 보여 줘요."
 
+msgid "This persona’s profile is private."
+msgstr "이 페르소나의 프로필은 비공개입니다."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "채널 목록 전환"
