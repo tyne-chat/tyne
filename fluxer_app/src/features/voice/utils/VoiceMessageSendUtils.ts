@@ -49,7 +49,7 @@ export async function sendVoiceMessage(params: SendVoiceMessageParams): Promise<
 
 	let subprofile: MessageSubprofileRequest | undefined | null = params.subprofile;
 	if (subprofile === undefined) {
-		subprofile = PersonaStore.getActiveSubprofileRequest();
+		subprofile = PersonaStore.getActiveSubprofileRequest(channelId);
 		if (subprofile) {
 			void PersonaStore.recordPersonaUse(subprofile.id);
 		}
