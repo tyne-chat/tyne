@@ -363,20 +363,22 @@ describe('Persona Account Deletion Compliance', () => {
 			};
 
 			const mockChannelRepo = {
-				listMessagesByAuthor: vi
-					.fn()
-					.mockResolvedValueOnce([
-						{channelId: createChannelID(1n), messageId: createMessageID(101n)},
-						{channelId: createChannelID(1n), messageId: createMessageID(102n)},
-					])
-					.mockResolvedValueOnce([]),
-				anonymizeMessage: vi
-					.fn()
-					.mockImplementation(
-						async (chId: any, msgId: any, newAuthor: UserID, mapping?: ReadonlyMap<string, PersonaID>) => {
-							anonymizedMessages.push({channelId: chId, messageId: msgId, newAuthorId: newAuthor, mapping});
-						},
-					),
+				messages: {
+					listMessagesByAuthor: vi
+						.fn()
+						.mockResolvedValueOnce([
+							{channelId: createChannelID(1n), messageId: createMessageID(101n)},
+							{channelId: createChannelID(1n), messageId: createMessageID(102n)},
+						])
+						.mockResolvedValueOnce([]),
+					anonymizeMessage: vi
+						.fn()
+						.mockImplementation(
+							async (chId: any, msgId: any, newAuthor: UserID, mapping?: ReadonlyMap<string, PersonaID>) => {
+								anonymizedMessages.push({channelId: chId, messageId: msgId, newAuthorId: newAuthor, mapping});
+							},
+						),
+				},
 			};
 
 			const mockUserRepo = {
