@@ -23,7 +23,7 @@ const MODE_MANUAL_DESCRIPTOR = msg({
 	comment: 'Active persona mode manual',
 });
 const MODE_LAST_DESCRIPTOR = msg({
-	message: 'Last Used',
+	message: 'Last used',
 	comment: 'Active persona mode last used',
 });
 export const SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR = msg({
@@ -44,12 +44,14 @@ interface PersonaPickerSheetProps {
 	onClose: () => void;
 	selectedPersonaId?: string;
 	showModes?: boolean;
+	/** The pick applies to the channel the picker was opened from, not to every channel. */
+	perChannel?: boolean;
 	onSelectPersona: (id: string) => void;
 	onSelectAccount: () => void;
 }
 
 export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
-	({onClose, selectedPersonaId, showModes = false, onSelectPersona, onSelectAccount}) => {
+	({onClose, selectedPersonaId, showModes = false, perChannel = false, onSelectPersona, onSelectAccount}) => {
 		const {i18n} = useLingui();
 		const activePersonaTabs = useMemo(() => getActivePersonaTabs(i18n), [i18n]);
 
@@ -138,6 +140,14 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 							ariaLabel={i18n._(ACTIVE_PERSONA_MODE_ARIA_DESCRIPTOR)}
 							data-flx="persona.persona-picker-sheet.segmented-tabs"
 						/>
+					</div>
+				)}
+
+				{perChannel && (
+					<div className={styles.scopeNote} data-flx="persona.picker-sheet.scope-note">
+						<Trans comment="Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.">
+							Only for this channel
+						</Trans>
 					</div>
 				)}
 
