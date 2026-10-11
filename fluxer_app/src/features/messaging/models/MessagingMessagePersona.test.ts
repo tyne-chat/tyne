@@ -80,7 +80,6 @@ function createWireMessage(overrides?: Partial<WireMessage>): WireMessage {
 			display_tag_text: 'Wonderland',
 			pronouns: 'she/her',
 			color: 0xff0000,
-			bio: 'Curiouser and curiouser',
 		},
 		...overrides,
 	};
@@ -117,7 +116,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				avatar: null,
 				pronouns: 'he/him',
 				color: 0x0000ff,
-				bio: null,
 			},
 		});
 
@@ -162,7 +160,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				display_tag_text: 'Foxes',
 				pronouns: 'he/him',
 				color: 0xff8800,
-				bio: 'A cunning fox',
 			},
 		});
 
@@ -194,7 +191,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				display_tag_icon: 'https://example.com/icon.png',
 				pronouns: 'she/her',
 				color: 0xff0000,
-				bio: 'Curiouser and curiouser',
 			},
 		});
 		const msg = new Message(wire, {skipUserCache: true});
@@ -212,7 +208,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				display_tag_icon: null,
 				pronouns: null,
 				color: null,
-				bio: null,
 			},
 		});
 		const wire2 = createWireMessage({
@@ -224,7 +219,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				display_tag_icon: null,
 				pronouns: null,
 				color: null,
-				bio: null,
 			},
 		});
 
@@ -250,7 +244,6 @@ describe('MessagingMessage Persona Preservation', () => {
 					display_tag_icon: null,
 					pronouns: null,
 					color: null,
-					bio: null,
 				},
 			});
 
@@ -313,7 +306,6 @@ describe('MessagingMessage Persona Preservation', () => {
 					display_tag_icon: null,
 					pronouns: null,
 					color: null,
-					bio: null,
 				},
 			});
 			const liveMsg = new Message(liveWire, {skipUserCache: true});
@@ -364,7 +356,6 @@ describe('MessagingMessage Persona Preservation', () => {
 					display_tag_text: 'ORIG_TAG',
 					pronouns: 'they/them',
 					color: 0x112233,
-					bio: 'bio text',
 				},
 			});
 			(Messages as any).commitMessages(ChannelMessages.getOrCreate(channelId).applyIncomingMessage(wire, false));
