@@ -42,7 +42,11 @@ const THREAD_NAME_PARSER_FLAGS = getParserFlagsForContext(MarkdownContext.STANDA
 
 // Fork: personas.
 
-import {consumePersonaCommand, resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
+import {
+	consumePersonaCommand,
+	resolveOutgoingPersona,
+	startChannelAsPersona,
+} from '@app/features/persona/utils/OutgoingPersona';
 
 interface ThreadCreatePaneProps {
 	parent: Channel;
@@ -99,7 +103,7 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 	const disabled = cooldownSeconds > 0 || (!canPublic && !canPrivate);
 	const handleSubmit: SendMessageFunction = useCallback(
 		(typedContent, hasAttachments, stickersOrTts, favoriteMemeIdOrStickers, maybeFavoriteMemeId) => {
-			if (consumePersonaCommand(typedContent)) {
+			if (consumePersonaCommand(parent.id, typedContent)) {
 				DraftCommands.deleteDraft(accountKey, draftKey);
 				return true;
 			}
@@ -115,7 +119,7 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 			);
 			// Fork: the thread is started, and its first message sent, as the persona the composer shows.
 			const pendingAttachments = hasAttachments || CloudUpload.getTextareaAttachments(draftKey).length > 0;
-			const {content, subprofile} = resolveOutgoingPersona(typedContent, pendingAttachments, {
+			const {content, subprofile} = resolveOutgoingPersona(parent.id, typedContent, pendingAttachments, {
 				allowEmptyContent: pendingAttachments || stickers.length > 0 || favoriteMemeId !== undefined,
 			});
 			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
@@ -133,6 +137,7 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 			void create
 				.then((thread) => {
 					if (!thread) return;
+					startChannelAsPersona(thread.id, subprofile?.id);
 					ThreadPanel.startCreateCooldown(parent.id, parent.rateLimitPerUser);
 					setName('');
 					if (content.trim() || attachments.length > 0 || stickers.length > 0 || favoriteMemeId) {
