@@ -18,11 +18,9 @@ msgstr "(připnuto)"
 msgid "Account: @{username}"
 msgstr "Účet: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "Režim aktivní persony"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "Režim aktivní persony"
 
@@ -74,9 +72,6 @@ msgstr "Změnit personu"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "Vyberte export z PluralKit (.json) nebo jej přetáhněte sem"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "Zvolte, jak spolu fungují zprávy bez značky, značky person a vaše aktivní persona."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Nastavené persony ({count})"
@@ -107,7 +102,8 @@ msgstr "Smazat časové razítko\\"
 msgid "Detected System Name / Tag"
 msgstr "Zjištěný název / značka systému"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "Zobrazovaná značka"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "Stahování avataru {current} z {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "Duplicitní pár značek u této persony"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Každý kanál si drží vlastní personu. Nové kanály začínají jako váš účet."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Upravit personu"
@@ -140,6 +140,10 @@ msgstr "Upravit personu"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Upravit časové razítko\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Všude"
 
 msgid "Export Summary"
 msgstr "Souhrn exportu"
@@ -221,6 +225,10 @@ msgstr "Importování person..."
 msgid "Importing..."
 msgstr "Importování..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "V každém kanálu"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "Vložit"
@@ -237,12 +245,6 @@ msgstr "Ponechat stávající a přidat nové (doporučeno)"
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Ponechte si své stávající persony ({existingCount}) a přidejte k nim všechny importované persony ({0}) jako nové položky."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "Naposledy použito"
 
 msgid "Main account"
 msgstr "Hlavní účet"
@@ -306,6 +308,14 @@ msgstr "Zatím žádné signály. Lišta zůstane skrytá, dokud nějaký nepři
 msgid "Nobody has this signal on"
 msgstr "Tento signál nemá nikdo zapnutý"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Jedna persona pro všechny kanály."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Jen pro tento kanál"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Viditelné pouze pro vás. Ostatní nemohou zobrazit celé bio ani podrobnosti profilu této persony."
@@ -331,6 +341,10 @@ msgstr "Trvale smažte všechny stávající persony ({existingCount}) a zcela j
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Značky persony (prefix a sufix)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Persona platí pro"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "Persona aktualizována"
 msgid "Persona visibility"
 msgstr "Viditelnost persony"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Persony"
@@ -460,10 +473,6 @@ msgstr "Výsledky hledání ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Hledat persony, značky, zájmena..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "Posílejte zprávy s odlišnými jmény a avatary. Persony mohou představovat členy plurálního systému, postavy z her na hrdiny nebo jakoukoli jinou identitu."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "Odepnout emoji"
 msgid "Unpin for this persona"
 msgstr "Odepnout pro tuto personu"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "Zprávy bez značky se odesílají jako persona, která mluvila naposledy. Kdykoli někdo použije značku persony, stane se tato persona automaticky aktivní."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "Zprávy bez značky se odesílají jako vámi zvolená persona. Napsáním značek jiné persony odešlete pouze tu jednu zprávu a aktivní persona se nezmění."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Zprávy bez tagu se odesílají jako persona, kterou jste vybrali. Tag platí jen pro danou zprávu."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Zprávy bez tagu se odesílají jako ten, kdo psal naposledy. Použití tagu přepne na danou personu."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "Zobrazit vaše persony"
 
 msgid "Where the signal bar appears"
 msgstr "Kde se lišta signálů zobrazuje"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Kde se pamatuje vaše persona"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
