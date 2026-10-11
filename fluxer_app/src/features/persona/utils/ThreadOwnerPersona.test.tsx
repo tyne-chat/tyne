@@ -51,6 +51,7 @@ import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 
 const {PersonaStore} = await import('@app/features/persona/state/PersonaStore');
+const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
 const {useThreadOwnerPersona} = await import('@app/features/persona/utils/ThreadOwnerPersona');
 const {http} = await import('@app/features/platform/transport/RestTransport');
 
@@ -105,7 +106,7 @@ describe('useThreadOwnerPersona', () => {
 	});
 
 	it("names one of the user's own personas without a request", async () => {
-		const own = await PersonaStore.addPersona({name: 'Fox'});
+		const own = addTestPersona(PersonaStore, {name: 'Fox'});
 		expect(await render(thread(own.id))).toBe('Fox');
 		expect(http.get).not.toHaveBeenCalled();
 	});
