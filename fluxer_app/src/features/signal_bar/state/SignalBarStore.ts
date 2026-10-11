@@ -8,7 +8,7 @@ import {http} from '@app/features/platform/transport/RestTransport';
 import {Logger} from '@app/features/platform/utils/AppLogger';
 import {decideComposerTyping} from '@app/features/typing/rolling/RollingComposerTypingGate';
 import Users from '@app/features/user/state/Users';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import type {
 	ChannelSignalBarUpdateEvent,
 	ChannelSignalEntry,
@@ -57,7 +57,7 @@ class SignalBarStore {
 		deep: false,
 	});
 	private readonly enabledByChannel = observable.map<string, boolean>();
-	private readonly composerPersonas = observable.map<string, MessageSubprofileRequest | null>(undefined, {
+	private readonly composerPersonas = observable.map<string, MessageSubprofileResponse | null>(undefined, {
 		deep: false,
 	});
 	private configRequest: Promise<void> | null = null;
@@ -71,7 +71,7 @@ class SignalBarStore {
 	 * will name. With `edit`, the person changed the text: if that counts as typing, their lit
 	 * signals in the channel follow.
 	 */
-	setComposerPersona(channelId: string, subprofile: MessageSubprofileRequest | null, edit?: ComposerEdit): void {
+	setComposerPersona(channelId: string, subprofile: MessageSubprofileResponse | null, edit?: ComposerEdit): void {
 		const current = this.composerPersonas.get(channelId);
 		if (current === undefined || (current?.id ?? null) !== (subprofile?.id ?? null)) {
 			this.composerPersonas.set(channelId, subprofile);
@@ -106,7 +106,7 @@ class SignalBarStore {
 	 * change because the active persona changed in another channel, another window or on another
 	 * device. Opening a channel is not a reason either.
 	 */
-	affirmPersona(channelId: string, subprofile: MessageSubprofileRequest | null): void {
+	affirmPersona(channelId: string, subprofile: MessageSubprofileResponse | null): void {
 		const userId = Authentication.currentUserId;
 		const entries = this.entriesByChannel.get(channelId);
 		if (!userId || !entries) return;
