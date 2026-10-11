@@ -53,6 +53,8 @@ export const PERSONA_COLUMNS = [
 export interface UserPersonaSettingsRow {
 	user_id: UserID;
 	active_persona_mode: string;
+	/** `global` or `channel`. Rows written before this existed have none and read as `global`. */
+	active_persona_scope: string;
 	active_persona_id: Nullish<string>;
 	is_latched: boolean;
 	display_tag_text: Nullish<string>;
@@ -64,6 +66,7 @@ export interface UserPersonaSettingsRow {
 export const USER_PERSONA_SETTINGS_COLUMNS = [
 	'user_id',
 	'active_persona_mode',
+	'active_persona_scope',
 	'active_persona_id',
 	'is_latched',
 	'display_tag_text',
@@ -81,3 +84,18 @@ export interface ThreadOwnerPersonaRow {
 export const THREAD_OWNER_PERSONA_COLUMNS = ['thread_id', 'user_id', 'persona_id'] as const satisfies ReadonlyArray<
 	keyof ThreadOwnerPersonaRow
 >;
+
+/** The persona an account has selected in one channel. No row: the channel is used as the account. */
+export interface PersonaChannelStateRow {
+	user_id: UserID;
+	channel_id: ChannelID;
+	persona_id: PersonaID;
+	updated_at: Date;
+}
+
+export const PERSONA_CHANNEL_STATE_COLUMNS = [
+	'user_id',
+	'channel_id',
+	'persona_id',
+	'updated_at',
+] as const satisfies ReadonlyArray<keyof PersonaChannelStateRow>;
