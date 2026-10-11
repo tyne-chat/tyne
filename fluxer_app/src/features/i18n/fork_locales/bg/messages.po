@@ -589,6 +589,9 @@ msgstr "Това емоджи вече е добавено като подпис
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Това е визуализация на това как ще изглежда тагът ви за показване в чата."
 
+msgid "This persona’s profile is private."
+msgstr "Профилът на тази персона е частен."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Показване/скриване на списъка с канали"
