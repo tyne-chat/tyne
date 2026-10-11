@@ -45,6 +45,7 @@ import {
 
 // Fork imports.
 
+import {requestedPersonaId} from '@app/api/persona/PersonaOwnership';
 import {IndicateTypingRequestSchema} from '@fluxer/schema/src/domains/message/MessageRequestSchemas';
 
 export function MessageController(app: HonoApp) {
@@ -491,7 +492,7 @@ export function MessageController(app: HonoApp) {
 				viewer,
 				userId: user.id,
 				channelId,
-				subprofile: body?.subprofile,
+				personaId: requestedPersonaId(body, user.id),
 			});
 			const cooldown = await channelService.getTypingCooldown({user, viewer, auth});
 			return cooldown ? ctx.json(cooldown, 200) : ctx.body(null, 204);
