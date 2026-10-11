@@ -18,11 +18,9 @@ msgstr "(पिन किया गया)"
 msgid "Account: @{username}"
 msgstr "अकाउंट: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "सक्रिय परसोना मोड"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "सक्रिय परसोना मोड"
 
@@ -74,9 +72,6 @@ msgstr "परसोना बदलें"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "PluralKit एक्सपोर्ट (.json) चुनें या खींचकर छोड़ें"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "चुनें कि बिना टैग वाले संदेश और परसोना टैग आपके सक्रिय परसोना के साथ कैसे काम करें।"
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "कॉन्फ़िगर किए गए परसोना ({count})"
@@ -107,7 +102,8 @@ msgstr "समय टिकट मिटाएँ\\"
 msgid "Detected System Name / Tag"
 msgstr "पहचाना गया सिस्टम नाम / टैग"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "डिस्प्ले टैग"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "अवतार डाउनलोड हो रहा है {current}/
 msgid "Duplicate tag pair on this persona"
 msgstr "इस परसोना पर टैग जोड़ी दोहराई गई है"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "हर चैनल अपना परसोना रखता है। नए चैनल आपके अकाउंट से शुरू होते हैं।"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "परसोना एडिट करें"
@@ -140,6 +140,10 @@ msgstr "परसोना एडिट करें"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "समय टिकट एडिट करें\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "हर जगह"
 
 msgid "Export Summary"
 msgstr "एक्सपोर्ट सारांश"
@@ -221,6 +225,10 @@ msgstr "परसोना इंपोर्ट हो रहे हैं..."
 msgid "Importing..."
 msgstr "इंपोर्ट हो रहा है..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "हर चैनल में"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "डालें"
@@ -237,12 +245,6 @@ msgstr "मौजूदा रखें और नए जोड़ें (सु
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "अपने {existingCount} मौजूदा परसोना रखें और सभी {0} इंपोर्ट किए गए परसोना उनके साथ नई एंट्री के रूप में जोड़ें।"
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "पिछली बार इस्तेमाल किया गया"
 
 msgid "Main account"
 msgstr "मेन अकाउंट"
@@ -306,6 +308,14 @@ msgstr "अभी कोई सिग्नल नहीं है। जब त
 msgid "Nobody has this signal on"
 msgstr "किसी ने यह सिग्नल चालू नहीं किया है"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "सभी चैनलों के लिए एक परसोना।"
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "केवल इस चैनल के लिए"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "सिर्फ़ आपको दिखता है। दूसरे लोग इस परसोना का पूरा बायो या प्रोफ़ाइल विवरण नहीं देख सकते।"
@@ -331,6 +341,10 @@ msgstr "सभी {existingCount} मौजूदा परसोना हम�
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "परसोना टैग (उपसर्ग और प्रत्यय)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "परसोना यहाँ लागू होता है"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "परसोना अपडेट हो गया"
 msgid "Persona visibility"
 msgstr "परसोना की दृश्यता"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "परसोना"
@@ -460,10 +473,6 @@ msgstr "खोज परिणाम ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "परसोना, टैग, प्रोनाउन खोजें..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "अलग-अलग नामों और अवतारों के साथ संदेश भेजें। परसोना किसी प्लूरल सिस्टम के सदस्यों, रोलप्ले किरदारों या किसी भी दूसरी पहचान को दर्शा सकते हैं।"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "इमोजी अनपिन करें"
 msgid "Unpin for this persona"
 msgstr "इस व्यक्तित्व के लिए अनपिन करें"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "बिना टैग वाले संदेश उस परसोना के रूप में भेजे जाते हैं जिसने सबसे हाल में बात की। जब भी कोई परसोना टैग इस्तेमाल करता है, वह परसोना अपने-आप सक्रिय हो जाता है।"
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "बिना टैग वाले संदेश आपके चुने हुए परसोना के रूप में भेजे जाते हैं। किसी दूसरे परसोना के टैग टाइप करने से सिर्फ़ वही एक संदेश भेजा जाएगा और सक्रिय परसोना नहीं बदलेगा।"
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "बिना टैग वाले संदेश आपके चुने हुए परसोना के रूप में भेजे जाते हैं। टैग केवल उसी संदेश पर लागू होता है।"
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "बिना टैग वाले संदेश उसी के रूप में भेजे जाते हैं जिसने आख़िरी बार बात की। टैग का उपयोग करने पर वही परसोना चुन लिया जाता है।"
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "अपने परसोना देखें"
 
 msgid "Where the signal bar appears"
 msgstr "सिग्नल बार कहाँ दिखे"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "आपका परसोना कहाँ याद रखा जाता है"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
