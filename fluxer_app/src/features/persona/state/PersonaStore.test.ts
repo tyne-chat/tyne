@@ -694,7 +694,6 @@ describe('PersonaStore', () => {
 				display_tag_icon: null,
 				pronouns: 'they/them',
 				color: 0x123456,
-				bio: 'Just a fox',
 			});
 
 			const known = store.getKnownPersona('p_ext');
@@ -814,12 +813,10 @@ describe('PersonaStore', () => {
 				name: 'Alice Api',
 				avatar: 'api_avatar_hash_123',
 				avatar_color: 0x112233,
-				banner: 'api_banner_hash_456',
 				display_tag_text: undefined,
 				display_tag_icon: undefined,
 				pronouns: 'she/her',
 				color: 0x445566,
-				bio: 'Api bio',
 				visibility: 'public',
 			});
 		});
@@ -842,12 +839,10 @@ describe('PersonaStore', () => {
 				name: 'Bob Client',
 				avatar: 'client_avatar_hash_789',
 				avatar_color: 0x112233,
-				banner: 'client_banner_hash_012',
 				display_tag_text: undefined,
 				display_tag_icon: undefined,
 				pronouns: 'he/him',
 				color: 0x778899,
-				bio: 'Client bio',
 				visibility: 'unlisted',
 			});
 		});
@@ -858,13 +853,11 @@ describe('PersonaStore', () => {
 					id: 'persona_snapshot_1',
 					name: 'Charlie Snapshot',
 					avatar: 'snapshot_avatar_val',
-					banner: 'snapshot_banner_val',
 					avatar_color: 0x990011,
 					color: 0x223344,
 					display_tag_text: 'OLD_TAG',
 					display_tag_icon: 'https://cdn.example.com/old.png',
 					pronouns: 'they/them',
-					bio: 'Snapshot bio',
 					visibility: 'private',
 				},
 				{
@@ -878,12 +871,10 @@ describe('PersonaStore', () => {
 				name: 'Charlie Snapshot',
 				avatar: 'snapshot_avatar_val',
 				avatar_color: 0x990011,
-				banner: 'snapshot_banner_val',
 				display_tag_text: 'NEW_TAG',
 				display_tag_icon: null,
 				pronouns: 'they/them',
 				color: 0x223344,
-				bio: 'Snapshot bio',
 				visibility: 'private',
 			});
 		});
@@ -899,12 +890,10 @@ describe('PersonaStore', () => {
 			expect(subprofile.name).toBe('Partial Persona');
 			expect(subprofile.avatar).toBe('new_hash_only');
 			expect(subprofile.avatar_color).toBeUndefined();
-			expect(subprofile.banner).toBeUndefined();
 			expect(subprofile.display_tag_text).toBeUndefined();
 			expect(subprofile.display_tag_icon).toBeUndefined();
 			expect(subprofile.pronouns).toBeUndefined();
 			expect(subprofile.color).toBeUndefined();
-			expect(subprofile.bio).toBeUndefined();
 			expect(subprofile.visibility).toBeUndefined();
 		});
 	});
