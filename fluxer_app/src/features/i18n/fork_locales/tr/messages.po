@@ -589,6 +589,9 @@ msgstr "Bu emoji zaten imza emojisi olarak eklenmiş"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Bu, görünen etiketinin sohbette nasıl görüneceğinin bir önizlemesidir."
 
+msgid "This persona’s profile is private."
+msgstr "Bu personanın profili özel."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Kanal listesini aç/kapat"

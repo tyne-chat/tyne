@@ -292,7 +292,6 @@ function updatePersonaInUsers(context: ReactionUsersContext, persona: MessageSub
 				avatar: persona.avatar !== undefined ? persona.avatar : (currentSubprofile?.avatar ?? null),
 				avatar_color:
 					persona.avatar_color !== undefined ? persona.avatar_color : (currentSubprofile?.avatar_color ?? null),
-				banner: persona.banner !== undefined ? persona.banner : (currentSubprofile?.banner ?? null),
 				display_tag_text:
 					persona.display_tag_text !== undefined
 						? persona.display_tag_text
@@ -303,7 +302,6 @@ function updatePersonaInUsers(context: ReactionUsersContext, persona: MessageSub
 						: (currentSubprofile?.display_tag_icon ?? null),
 				pronouns: persona.pronouns !== undefined ? persona.pronouns : (currentSubprofile?.pronouns ?? null),
 				color: persona.color !== undefined ? persona.color : (currentSubprofile?.color ?? null),
-				bio: persona.bio !== undefined ? persona.bio : (currentSubprofile?.bio ?? null),
 				visibility: persona.visibility !== undefined ? persona.visibility : (currentSubprofile?.visibility ?? null),
 			};
 
