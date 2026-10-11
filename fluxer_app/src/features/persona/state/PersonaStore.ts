@@ -22,138 +22,71 @@ import {
 	previewPersona,
 } from '@fluxer/schema/src/domains/persona/PersonaMatcher';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
-import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {makeAutoObservable, observable, runInAction} from 'mobx';
 
 export type ActivePersonaMode = 'manual' | 'last';
 
-export interface ClientPersona extends PersonaResponse {
-	// CamelCase aliases for backwards compatibility with React components
-	avatarHash?: string | null;
-	avatarColor?: number | null;
-	bannerHash?: string | null;
-	personaTags?: Array<{prefix?: string; suffix?: string}>;
-	signatureEmojis?: Array<SignatureEmoji>;
-	accentColor?: number | null;
-	autoTagDisabled?: boolean;
-	useCount?: number;
-	lastUsedAtMs?: bigint | null;
-}
+/** A persona of this account, as the server sends it. */
+export type ClientPersona = PersonaResponse;
 
 export type Persona = ClientPersona;
 
 /**
- * Normalizes any persona representation (API PersonaResponse, MobX ClientPersona,
- * or existing snapshot) into a canonical MessageSubprofileResponse snapshot.
+ * The copy of a persona that is drawn beside a message, from the persona itself or from such a
+ * copy. A persona calls its avatar `avatar_hash`; the copy calls it `avatar`.
  */
 export function normalizeSubprofile(
-	input: PersonaResponse | ClientPersona | MessageSubprofileResponse,
+	input: PersonaResponse | MessageSubprofileResponse,
 	overrides?: {display_tag_text?: string | null; display_tag_icon?: string | null},
 ): MessageSubprofileResponse {
 	const source = input as any;
-	// Avatar hash:
-	// - avatar_hash: REST API PersonaResponse schema
-	// - avatarHash: MobX ClientPersona camelCase alias
-	// - avatar: MessageSubprofileResponse snapshot schema
-	const avatar =
-		source.avatar_hash !== undefined
-			? source.avatar_hash
-			: source.avatarHash !== undefined
-				? source.avatarHash
-				: source.avatar;
-
-	// Avatar dominant color:
-	// - avatar_color: REST API PersonaResponse & MessageSubprofileResponse
-	// - avatarColor: MobX ClientPersona camelCase alias
-	const avatarColor = source.avatar_color !== undefined ? source.avatar_color : source.avatarColor;
-
-	// Persona accent/profile color:
-	// - color: REST API PersonaResponse & MessageSubprofileResponse
-	// - accentColor: MobX ClientPersona camelCase alias
-	const color = source.color !== undefined ? source.color : source.accentColor;
-
 	return {
 		id: source.id,
 		name: source.name,
-		avatar,
-		avatar_color: avatarColor,
+		avatar: source.avatar_hash !== undefined ? source.avatar_hash : source.avatar,
+		avatar_color: source.avatar_color,
 		display_tag_text: overrides?.display_tag_text !== undefined ? overrides.display_tag_text : source.display_tag_text,
 		display_tag_icon: overrides?.display_tag_icon !== undefined ? overrides.display_tag_icon : source.display_tag_icon,
 		pronouns: source.pronouns,
-		color,
+		color: source.color,
 		visibility: source.visibility,
 	};
 }
 
-let personaIdCounter = 0;
-
+/** A persona as the store holds it: the server's fields, with what the server left out filled in. */
 export function normalizePersona(
-	raw: PersonaResponse | (Partial<ClientPersona> & {id: string; name: string}) | {persona: PersonaResponse},
+	raw: PersonaResponse | (Partial<PersonaResponse> & {id: string; name: string}) | {persona: PersonaResponse},
 ): ClientPersona {
 	const source: any = (raw as any)?.persona ?? raw;
-	const avatarHash =
-		source.avatar_hash !== undefined ? source.avatar_hash : source.avatarHash !== undefined ? source.avatarHash : null;
-	const bannerHash =
-		source.banner_hash !== undefined ? source.banner_hash : source.bannerHash !== undefined ? source.bannerHash : null;
-	const color =
-		source.color !== undefined
-			? source.color
-			: source.accentColor !== undefined
-				? source.accentColor
-				: (source.accent_color ?? null);
-	const avatarColor =
-		source.avatar_color !== undefined
-			? source.avatar_color
-			: source.avatarColor !== undefined
-				? source.avatarColor
-				: null;
-	const rawTags = source.persona_tags ?? source.personaTags ?? [];
-	const tags: Array<PersonaTag> = rawTags.map((t: any) => ({
+	const tags: Array<PersonaTag> = (source.persona_tags ?? []).map((t: any) => ({
 		prefix: t.prefix ?? undefined,
 		suffix: t.suffix ?? undefined,
 	}));
-	const rawSigEmojis = source.signature_emojis ?? source.signatureEmojis ?? [];
-	const signatureEmojis: Array<SignatureEmoji> = rawSigEmojis.map((e: any) => ({
+	const signatureEmojis: Array<SignatureEmoji> = (source.signature_emojis ?? []).map((e: any) => ({
 		id: e.id ?? null,
 		name: e.name ?? '',
 		animated: e.animated ?? null,
 	}));
-	const useCount = source.use_count ?? source.useCount ?? 0;
-	const lastUsedRaw = source.last_used_at_ms ?? source.lastUsedAtMs;
-	const lastUsedAtMsStr = lastUsedRaw != null ? String(lastUsedRaw) : null;
-	const lastUsedAtMsBigInt = lastUsedRaw != null ? BigInt(lastUsedRaw) : 0n;
-	const autoTag =
-		source.auto_tag_disabled !== undefined ? Boolean(source.auto_tag_disabled) : Boolean(source.autoTagDisabled);
-	const visibility: PersonaVisibility = source.visibility ?? 'unlisted';
+	const lastUsedRaw = source.last_used_at_ms;
 
 	return {
 		id: source.id ?? '',
 		name: source.name ?? '',
-		avatar_hash: avatarHash,
-		banner_hash: bannerHash,
+		avatar_hash: source.avatar_hash ?? null,
+		banner_hash: source.banner_hash ?? null,
 		pronouns: source.pronouns ?? null,
-		color,
-		avatar_color: avatarColor,
+		color: source.color ?? null,
+		avatar_color: source.avatar_color ?? null,
 		bio: source.bio ?? null,
-		auto_tag_disabled: autoTag,
+		auto_tag_disabled: Boolean(source.auto_tag_disabled),
 		persona_tags: tags,
 		signature_emojis: signatureEmojis,
-		use_count: useCount,
-		last_used_at_ms: lastUsedAtMsStr,
-		visibility,
+		use_count: source.use_count ?? 0,
+		last_used_at_ms: lastUsedRaw != null ? String(lastUsedRaw) : null,
+		visibility: (source.visibility ?? 'unlisted') as PersonaVisibility,
 		external_uuid: source.external_uuid ?? null,
 		created_at: source.created_at ?? new Date().toISOString(),
 		updated_at: source.updated_at ?? new Date().toISOString(),
-		// CamelCase aliases
-		avatarHash,
-		avatarColor,
-		bannerHash,
-		personaTags: tags,
-		signatureEmojis,
-		accentColor: color,
-		autoTagDisabled: autoTag,
-		useCount,
-		lastUsedAtMs: lastUsedAtMsBigInt,
 	};
 }
 
@@ -182,7 +115,6 @@ export class PersonaStoreClass {
 	private _activePersonaScope: ActivePersonaScope = 'global';
 	/** With the per-channel scope: the persona selected in each channel. No entry means the account. */
 	private readonly _channelPersonaIds = observable.map<string, string>();
-	private _settingsLoaded: boolean = false;
 	private _knownPersonas = new Map<string, MessageSubprofileResponse>();
 
 	constructor() {
@@ -199,7 +131,6 @@ export class PersonaStoreClass {
 			this._isPersonaLatched = false;
 			this._activePersonaScope = 'global';
 			this._channelPersonaIds.clear();
-			this._settingsLoaded = false;
 			this._knownPersonas.clear();
 		});
 	}
@@ -226,12 +157,6 @@ export class PersonaStoreClass {
 	recordKnownPersona(persona: MessageSubprofileResponse): void {
 		runInAction(() => {
 			this._knownPersonas.set(persona.id, persona);
-		});
-	}
-
-	removeKnownPersona(personaId: string): void {
-		runInAction(() => {
-			this._knownPersonas.delete(personaId);
 		});
 	}
 
@@ -332,22 +257,6 @@ export class PersonaStoreClass {
 		}
 	}
 
-	clear(): void {
-		runInAction(() => {
-			this._personas = [];
-			this._displayTagText = '';
-			this._displayTagIcon = null;
-			this._activePersonaMode = 'manual';
-			this._activePersonaId = null;
-			this._isPersonaLatched = false;
-			this._settingsLoaded = false;
-		});
-	}
-
-	handleSessionInvalidated(): void {
-		this.clear();
-	}
-
 	get activePersonaId(): string | null {
 		return this._activePersonaId && this._activePersonaId.length > 0 ? this._activePersonaId : null;
 	}
@@ -394,10 +303,6 @@ export class PersonaStoreClass {
 		return this._displayTagIcon && this._displayTagIcon.length > 0 ? this._displayTagIcon : null;
 	}
 
-	get isSettingsLoaded(): boolean {
-		return this._settingsLoaded;
-	}
-
 	updateSettings(settings: Partial<PersonaSettingsResponse>): void {
 		runInAction(() => {
 			if (settings.active_persona_mode !== undefined) {
@@ -418,7 +323,6 @@ export class PersonaStoreClass {
 			if (settings.display_tag_icon !== undefined) {
 				this._displayTagIcon = settings.display_tag_icon ?? null;
 			}
-			this._settingsLoaded = true;
 		});
 	}
 
@@ -462,85 +366,12 @@ export class PersonaStoreClass {
 	}
 
 	private calculateFrecency(persona: ClientPersona, nowMs: number): number {
-		const lastUsed = Number(persona.last_used_at_ms ?? persona.lastUsedAtMs ?? 0);
-		const count = persona.use_count ?? persona.useCount ?? 0;
+		const lastUsed = Number(persona.last_used_at_ms ?? 0);
+		const count = persona.use_count ?? 0;
 		if (lastUsed === 0) return 0;
 		const hoursAgo = Math.max(0, (nowMs - lastUsed) / (1000 * 60 * 60));
 		const recencyFactor = 0.5 ** (hoursAgo / 24);
 		return (count + 1) * recencyFactor;
-	}
-
-	findPersonaByName(query: string): ClientPersona | null {
-		const trimmed = query.trim().toLowerCase();
-		if (!trimmed) return null;
-		const exact = this._personas.find((p) => p.name.toLowerCase() === trimmed);
-		if (exact) return exact;
-		const starts = this._personas.find((p) => p.name.toLowerCase().startsWith(trimmed));
-		if (starts) return starts;
-		return this._personas.find((p) => p.name.toLowerCase().includes(trimmed)) ?? null;
-	}
-
-	async addPersona(personaData: {
-		name: string;
-		avatar_hash?: string | null;
-		banner_hash?: string | null;
-		pronouns?: string | null;
-		color?: number | null;
-		accentColor?: number | null;
-		accent_color?: number | null;
-		bio?: string | null;
-		visibility?: PersonaVisibility;
-		external_uuid?: string | null;
-		persona_tags?: Array<{prefix?: string; suffix?: string}>;
-	}): Promise<ClientPersona> {
-		const id = `${SnowflakeUtils.fromTimestamp(Date.now())}_${++personaIdCounter}`;
-		const normalized = normalizePersona({
-			id,
-			name: personaData.name,
-			avatar_hash: personaData.avatar_hash ?? null,
-			banner_hash: personaData.banner_hash ?? null,
-			pronouns: personaData.pronouns ?? null,
-			color: personaData.accentColor ?? personaData.accent_color ?? personaData.color ?? null,
-			bio: personaData.bio ?? null,
-			persona_tags: personaData.persona_tags ?? [],
-			visibility: personaData.visibility ?? 'unlisted',
-			external_uuid: personaData.external_uuid ?? null,
-		});
-		this.upsertPersona(normalized);
-		return normalized;
-	}
-
-	async updatePersona(
-		id: string,
-		updates: Partial<ClientPersona> & {accentColor?: number | null; accent_color?: number | null},
-	): Promise<void> {
-		const existing = this._personas.find((p) => p.id === id);
-		if (!existing) return;
-		const updated = normalizePersona({
-			...existing,
-			...updates,
-			id,
-			name: updates.name ?? existing.name,
-		});
-		this.upsertPersona(updated);
-	}
-
-	async deletePersona(id: string): Promise<void> {
-		this.removePersona(id);
-		if (this.activePersonaId === id) {
-			await this.unlatch();
-		}
-	}
-
-	async replaceAllPersonas(newPersonas: Array<ClientPersona | PersonaResponse>): Promise<void> {
-		this.setPersonas(newPersonas);
-		if (this.activePersonaId && !this._personas.some((p) => p.id === this.activePersonaId)) {
-			await this.unlatch();
-		}
-	}
-
-	async appendPersonas(newPersonas: Array<ClientPersona | PersonaResponse>): Promise<void> {
-		this.upsertPersonas(newPersonas);
 	}
 
 	async setActivePersonaMode(mode: ActivePersonaMode): Promise<void> {
@@ -741,9 +572,7 @@ export class PersonaStoreClass {
 		if (persona) {
 			runInAction(() => {
 				persona.use_count = (persona.use_count ?? 0) + 1;
-				persona.useCount = persona.use_count;
 				persona.last_used_at_ms = Date.now().toString();
-				persona.lastUsedAtMs = BigInt(persona.last_used_at_ms);
 			});
 		}
 	}
@@ -764,13 +593,13 @@ export class PersonaStoreClass {
 		return this._personas.map((p) => ({
 			id: p.id,
 			name: p.name,
-			avatar_hash: p.avatar_hash ?? p.avatarHash ?? null,
-			banner_hash: p.banner_hash ?? p.bannerHash ?? null,
+			avatar_hash: p.avatar_hash ?? null,
+			banner_hash: p.banner_hash ?? null,
 			pronouns: p.pronouns ?? null,
-			color: p.color ?? p.accentColor ?? null,
-			auto_tag_disabled: p.auto_tag_disabled ?? p.autoTagDisabled ?? false,
+			color: p.color ?? null,
+			auto_tag_disabled: p.auto_tag_disabled ?? false,
 			bio: p.bio ?? null,
-			persona_tags: (p.persona_tags ?? p.personaTags ?? []).map((t) => ({
+			persona_tags: (p.persona_tags ?? []).map((t) => ({
 				prefix: t.prefix ?? null,
 				suffix: t.suffix ?? null,
 			})),
@@ -849,7 +678,7 @@ export class PersonaStoreClass {
 		surrogates?: string;
 	}): ClientPersona | null {
 		for (const persona of this._personas) {
-			const sigs = persona.signature_emojis ?? persona.signatureEmojis ?? [];
+			const sigs = persona.signature_emojis ?? [];
 			for (const sig of sigs) {
 				if (emoji.id && sig.id) {
 					if (emoji.id === sig.id) return persona;
@@ -947,5 +776,4 @@ export const PersonaStore = new PersonaStoreClass();
 // Personas belong to one account: drop them whenever the app logs out or switches account.
 AccountScopedWork.registerCancellation(() => PersonaStore.reset());
 
-export const SubprofileStore = PersonaStore;
 export default PersonaStore;
