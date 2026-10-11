@@ -8,9 +8,9 @@ import type {GuildMember} from '@app/features/member/models/GuildMember';
 import GuildMembers from '@app/features/member/state/GuildMembers';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
-import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {getUserAccentColor} from '@app/features/theme/utils/AccentColorUtils';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
@@ -35,14 +35,13 @@ import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {DEFAULT_ACCENT_COLOR} from '@fluxer/constants/src/AppConstants';
-import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {Trans} from '@lingui/react/macro';
 import {CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useMemo, useRef} from 'react';
 import styles from './PersonaProfilePopout.module.css';
 
 export interface PersonaProfilePopoutProps {
@@ -61,60 +60,14 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 		const isCurrentUser = Boolean(currentUserId && user?.id && user.id === currentUserId);
 		const localPersona = isCurrentUser ? (PersonaStore.personas.find((p) => p.id === subprofile.id) ?? null) : null;
 
-		const [publicPersona, setPublicPersona] = useState<PublicPersonaResponse | null>(null);
-		const [isLoading, setIsLoading] = useState<boolean>(!localPersona);
+		const {profile, isLoading, isPrivate} = usePersonaProfile(user.id, subprofile.id, localPersona);
 
-		useEffect(() => {
-			if (localPersona) {
-				setPublicPersona({
-					id: localPersona.id,
-					name: localPersona.name,
-					avatar_hash: localPersona.avatar_hash ?? localPersona.avatarHash ?? null,
-					banner_hash: localPersona.banner_hash ?? localPersona.bannerHash ?? null,
-					pronouns: localPersona.pronouns ?? null,
-					color: localPersona.color ?? localPersona.accentColor ?? null,
-					avatar_color: localPersona.avatar_color ?? localPersona.avatarColor ?? null,
-					bio: localPersona.bio ?? null,
-					visibility: localPersona.visibility ?? 'unlisted',
-				});
-				setIsLoading(false);
-				return;
-			}
-
-			let isMounted = true;
-			setIsLoading(true);
-			void PersonaCommands.fetchPublicPersona(user.id, subprofile.id)
-				.then((res) => {
-					if (isMounted) {
-						setPublicPersona(res);
-						setIsLoading(false);
-					}
-				})
-				.catch(() => {
-					if (isMounted) {
-						setIsLoading(false);
-					}
-				});
-
-			return () => {
-				isMounted = false;
-			};
-		}, [user.id, subprofile.id, localPersona]);
-
-		const effectivePronouns =
-			publicPersona !== null && publicPersona !== undefined
-				? publicPersona.pronouns
-				: (localPersona?.pronouns ?? subprofile.pronouns);
+		const effectivePronouns = profile ? profile.pronouns : subprofile.pronouns;
 		const effectiveDisplayTagText = isCurrentUser ? PersonaStore.displayTagText : (subprofile.display_tag_text ?? null);
 		const effectiveDisplayTagIcon = isCurrentUser ? PersonaStore.displayTagIcon : (subprofile.display_tag_icon ?? null);
-		const effectiveBio =
-			publicPersona !== null && publicPersona !== undefined ? publicPersona.bio : (localPersona?.bio ?? subprofile.bio);
-		const rawBanner =
-			publicPersona !== null && publicPersona !== undefined
-				? publicPersona.banner_hash
-				: localPersona
-					? (localPersona.banner_hash ?? localPersona.bannerHash ?? null)
-					: ((subprofile as any).banner ?? null);
+		// The bio and banner are the profile's, and the profile comes from the server for this viewer.
+		const effectiveBio = profile?.bio ?? null;
+		const rawBanner = profile?.banner_hash ?? null;
 		const effectiveBannerUrl = useMemo(() => {
 			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner});
 		}, [user.id, rawBanner]);
@@ -125,19 +78,11 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			return null;
 		}, [guildMember, guildId, user.id]);
 
-		const effectiveColor =
-			subprofile.color ?? publicPersona?.color ?? localPersona?.color ?? localPersona?.accentColor ?? null;
+		const effectiveColor = subprofile.color ?? profile?.color ?? null;
 
-		const effectiveAvatarColor =
-			subprofile.avatar_color ??
-			publicPersona?.avatar_color ??
-			localPersona?.avatar_color ??
-			localPersona?.avatarColor ??
-			null;
+		const effectiveAvatarColor = subprofile.avatar_color ?? profile?.avatar_color ?? null;
 
-		const hasCustomPersonaAvatar = Boolean(
-			subprofile.avatar || publicPersona?.avatar_hash || localPersona?.avatar_hash || localPersona?.avatarHash,
-		);
+		const hasCustomPersonaAvatar = Boolean(subprofile.avatar || profile?.avatar_hash);
 
 		const accentColor = useMemo(() => {
 			if (effectiveColor != null && effectiveColor !== 0) {
@@ -208,19 +153,10 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 				: AvatarUtils.getUserAvatarURL(user, true);
 		}, [subprofile.avatar, user]);
 
-		const personaBannerUrl = useMemo(() => {
-			if (subprofile.banner) {
-				return AvatarUtils.getUserBannerURL({id: user.id, banner: subprofile.banner}, false);
-			}
-			return effectiveBannerUrl;
-		}, [subprofile.banner, user.id, effectiveBannerUrl]);
-
+		const personaBannerUrl = effectiveBannerUrl;
 		const hoverPersonaBannerUrl = useMemo(() => {
-			if (subprofile.banner) {
-				return AvatarUtils.getUserBannerURL({id: user.id, banner: subprofile.banner}, true);
-			}
-			return effectiveBannerUrl;
-		}, [subprofile.banner, user.id, effectiveBannerUrl]);
+			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner}, true);
+		}, [user.id, rawBanner]);
 
 		return (
 			<FocusRingScope containerRef={popoutContainerRef} data-flx="persona.persona-profile-popout.focus-ring-scope">
@@ -291,6 +227,15 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 											style={{width: '50%', height: '12px', borderRadius: '4px'}}
 											data-flx="persona.persona-profile-popout.div--4"
 										/>
+									</div>
+								</section>
+							) : isPrivate ? (
+								<section
+									className={sharedStyles.bioContainer}
+									data-flx="persona.persona-profile-popout.bio-container-private"
+								>
+									<div className={styles.privateNotice} data-flx="persona.persona-profile-popout.private-notice">
+										<Trans>This persona’s profile is private.</Trans>
 									</div>
 								</section>
 							) : effectiveBio ? (

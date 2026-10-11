@@ -65,17 +65,6 @@ export function normalizeSubprofile(
 				? source.avatarHash
 				: source.avatar;
 
-	// Banner hash:
-	// - banner_hash: REST API PersonaResponse schema
-	// - bannerHash: MobX ClientPersona camelCase alias
-	// - banner: MessageSubprofileResponse snapshot schema
-	const banner =
-		source.banner_hash !== undefined
-			? source.banner_hash
-			: source.bannerHash !== undefined
-				? source.bannerHash
-				: source.banner;
-
 	// Avatar dominant color:
 	// - avatar_color: REST API PersonaResponse & MessageSubprofileResponse
 	// - avatarColor: MobX ClientPersona camelCase alias
@@ -91,12 +80,10 @@ export function normalizeSubprofile(
 		name: source.name,
 		avatar,
 		avatar_color: avatarColor,
-		banner,
 		display_tag_text: overrides?.display_tag_text !== undefined ? overrides.display_tag_text : source.display_tag_text,
 		display_tag_icon: overrides?.display_tag_icon !== undefined ? overrides.display_tag_icon : source.display_tag_icon,
 		pronouns: source.pronouns,
 		color,
-		bio: source.bio,
 		visibility: source.visibility,
 	};
 }

@@ -3,6 +3,7 @@
 
 import {Endpoints} from '@app/features/app/constants/Endpoints';
 import {http} from '@app/features/platform/transport/RestTransport';
+import {HttpError} from '@app/features/platform/types/EndpointError';
 import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
 import type {
 	PersonaCreateRequest,
@@ -337,7 +338,7 @@ describe('PersonaCommands', () => {
 				visibility: 'public',
 			};
 			vi.mocked(http.get).mockResolvedValueOnce({ok: true, status: 200, body: publicData} as any);
-			await PersonaCommands.fetchPublicPersona('user_123', '1540000000000000001');
+			await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000001');
 
 			vi.mocked(http.patch).mockResolvedValueOnce({
 				ok: true,
@@ -352,7 +353,7 @@ describe('PersonaCommands', () => {
 				status: 200,
 				body: {...publicData, name: 'New Name'},
 			} as any);
-			await PersonaCommands.fetchPublicPersona('user_123', '1540000000000000001');
+			await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000001');
 			expect(http.get).toHaveBeenCalledTimes(2);
 		});
 	});
@@ -424,13 +425,13 @@ describe('PersonaCommands', () => {
 				visibility: 'public',
 			};
 			vi.mocked(http.get).mockResolvedValueOnce({ok: true, status: 200, body: publicData} as any);
-			await PersonaCommands.fetchPublicPersona('user_123', '1540000000000000001');
+			await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000001');
 
 			vi.mocked(http.delete).mockResolvedValueOnce({ok: true, status: 204, body: null} as any);
 			await PersonaCommands.deletePersona('1540000000000000001');
 
 			vi.mocked(http.get).mockResolvedValueOnce({ok: false, status: 404, body: null} as any);
-			await PersonaCommands.fetchPublicPersona('user_123', '1540000000000000001');
+			await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000001');
 			expect(http.get).toHaveBeenCalledTimes(2);
 		});
 	});
@@ -515,56 +516,72 @@ describe('PersonaCommands', () => {
 		});
 	});
 
-	describe('fetchPublicPersona', () => {
-		it('caches public persona responses to prevent redundant requests', async () => {
-			const publicData: PublicPersonaResponse = {
-				id: '1540000000000000099',
-				name: 'Public Alice',
-				avatar_hash: null,
-				banner_hash: null,
-				pronouns: 'she/her',
-				color: null,
-				bio: 'Extended biography here',
-				visibility: 'public',
-			};
+	describe('fetchPersonaProfile', () => {
+		const publicData: PublicPersonaResponse = {
+			id: '1540000000000000099',
+			name: 'Public Alice',
+			avatar_hash: null,
+			banner_hash: null,
+			pronouns: 'she/her',
+			color: null,
+			bio: 'Extended biography here',
+			visibility: 'public',
+		};
 
-			vi.mocked(http.get).mockResolvedValueOnce({
-				ok: true,
-				status: 200,
-				body: publicData,
-			} as any);
+		it('caches a profile so opening it again does not ask again', async () => {
+			vi.mocked(http.get).mockResolvedValueOnce({ok: true, status: 200, body: publicData} as any);
 
-			const res1 = await PersonaCommands.fetchPublicPersona('user_123', '1540000000000000099');
-			expect(res1).toEqual(publicData);
-			expect(http.get).toHaveBeenCalledTimes(1);
+			const first = await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000099');
+			expect(first).toEqual({status: 'ready', profile: publicData});
 
-			// Second fetch should return cached response without second HTTP call
-			const res2 = await PersonaCommands.fetchPublicPersona('user_123', '1540000000000000099');
-			expect(res2).toEqual(publicData);
+			const second = await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000099');
+			expect(second).toEqual({status: 'ready', profile: publicData});
 			expect(http.get).toHaveBeenCalledTimes(1);
 		});
 
-		// When a requested public persona does not exist or has private visibility, the API returns
-		// a non-ok status (e.g. 404). fetchPublicPersona returns null so callers can gracefully
-		// fall back to the account profile without error popups.
-		it('returns null when http request returns not ok', async () => {
-			vi.mocked(http.get).mockResolvedValueOnce({
-				ok: false,
-				status: 404,
-				body: null,
-			} as any);
+		// The server refuses a private persona with its own code, so the card can say the profile is
+		// private. The transport throws on a refusal; both shapes of that answer are recognised.
+		it('reports a private persona as private, and remembers it', async () => {
+			vi.mocked(http.get).mockRejectedValueOnce(
+				new HttpError({
+					method: 'GET',
+					path: '/users/user_123/personas/1540000000000000077',
+					status: 403,
+					body: {code: 'PRIVATE_PERSONA', message: 'This persona’s profile is private'},
+				} as any),
+			);
 
-			const res = await PersonaCommands.fetchPublicPersona('user_123', 'nonexistent');
-			expect(res).toBeNull();
+			expect(await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000077')).toEqual({
+				status: 'private',
+			});
+			expect(await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000077')).toEqual({
+				status: 'private',
+			});
+			expect(http.get).toHaveBeenCalledTimes(1);
+
+			vi.mocked(http.get).mockResolvedValueOnce({ok: false, status: 403, body: {code: 'PRIVATE_PERSONA'}} as any);
+			expect(await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000078')).toEqual({
+				status: 'private',
+			});
 		});
 
-		// Transient network exceptions or aborts should be caught and logged as warnings rather
-		// than throwing uncaught errors into the UI render tree.
-		it('returns null when http request throws an error', async () => {
+		it('does not take another refusal for a private persona', async () => {
+			vi.mocked(http.get).mockRejectedValueOnce(
+				new HttpError({method: 'GET', path: '/x', status: 403, body: {code: 'MISSING_ACCESS'}} as any),
+			);
+			expect(await PersonaCommands.fetchPersonaProfile('user_123', '1540000000000000079')).toEqual({
+				status: 'unavailable',
+			});
+		});
+
+		// A persona that is gone, or a request that failed, is asked for again next time.
+		it('reports unavailable for an unknown persona or a failed request, without remembering it', async () => {
+			vi.mocked(http.get).mockResolvedValueOnce({ok: false, status: 404, body: null} as any);
+			expect(await PersonaCommands.fetchPersonaProfile('user_123', 'nonexistent')).toEqual({status: 'unavailable'});
+
 			vi.mocked(http.get).mockRejectedValueOnce(new Error('Network error'));
-
-			const res = await PersonaCommands.fetchPublicPersona('user_123', 'err-persona');
-			expect(res).toBeNull();
+			expect(await PersonaCommands.fetchPersonaProfile('user_123', 'nonexistent')).toEqual({status: 'unavailable'});
+			expect(http.get).toHaveBeenCalledTimes(2);
 		});
 	});
 });
