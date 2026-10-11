@@ -589,6 +589,9 @@ msgstr "Biểu tượng cảm xúc này đã được thêm làm biểu tượng
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Đây là bản xem trước thẻ hiển thị của bạn trong cuộc trò chuyện."
 
+msgid "This persona’s profile is private."
+msgstr "Hồ sơ của persona này ở chế độ riêng tư."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Bật/tắt danh sách kênh"

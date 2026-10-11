@@ -28,6 +28,12 @@
 	background-color: var(--scrollbar-thumb-bg-hover);
 }
 
+.privateNotice {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: var(--text-tertiary);
+}
+
 .rootAccountButton {
 	width: 100%;
 	cursor: pointer;
