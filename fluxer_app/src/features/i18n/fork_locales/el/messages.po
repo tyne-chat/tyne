@@ -589,6 +589,9 @@ msgstr "Αυτό το emoji έχει ήδη προστεθεί ως χαρακτ
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Αυτή είναι μια προεπισκόπηση του πώς θα φαίνεται η ετικέτα εμφάνισής σας στη συνομιλία."
 
+msgid "This persona’s profile is private."
+msgstr "Το προφίλ αυτής της persona είναι ιδιωτικό."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Εναλλαγή λίστας καναλιών"

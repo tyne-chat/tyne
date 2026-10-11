@@ -1097,7 +1097,6 @@ function optionToPayload(option: AutocompleteOption, channel: Channel | null): C
 			display_tag_icon: option.persona.display_tag_icon ?? null,
 			pronouns: option.persona.pronouns,
 			color: option.persona.color,
-			bio: null,
 		});
 		return {
 			kind: 'mention',
