@@ -154,19 +154,6 @@ export interface MessageRow {
 	persona_id?: Nullish<PersonaID | string>;
 }
 
-export interface MessageSubprofileRow {
-	id: string;
-	name?: Nullish<string>;
-	avatar?: Nullish<string>;
-	avatar_color?: Nullish<number>;
-	banner?: Nullish<string>;
-	display_tag_text?: Nullish<string>;
-	display_tag_icon?: Nullish<string>;
-	pronouns?: Nullish<string>;
-	color?: Nullish<number>;
-	bio?: Nullish<string>;
-}
-
 export const MESSAGE_COLUMNS = [
 	'channel_id',
 	'bucket',
