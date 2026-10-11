@@ -52,7 +52,7 @@ vi.mock('@app/features/ui/commands/ToastCommands', () => ({
 
 describe('PersonaCommands', () => {
 	beforeEach(() => {
-		PersonaStore.clear();
+		PersonaStore.reset();
 		vi.clearAllMocks();
 	});
 
