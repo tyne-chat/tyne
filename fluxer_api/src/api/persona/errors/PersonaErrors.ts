@@ -2,11 +2,23 @@
 
 import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import {BadRequestError} from '@fluxer/errors/src/domains/core/BadRequestError';
+import {ForbiddenError} from '@fluxer/errors/src/domains/core/ForbiddenError';
 import {NotFoundError} from '@fluxer/errors/src/domains/core/NotFoundError';
 
 export class PersonaNotFoundError extends NotFoundError {
 	constructor() {
 		super({code: APIErrorCodes.UNKNOWN_PERSONA, message: 'Unknown Persona'});
+	}
+}
+
+/**
+ * The persona exists and its owner keeps its profile to themselves. Said apart from "unknown" so a
+ * client can tell someone the profile is private instead of showing nothing: whoever asks has
+ * seen a message from this persona and knows it exists.
+ */
+export class PersonaPrivateError extends ForbiddenError {
+	constructor() {
+		super({code: APIErrorCodes.PRIVATE_PERSONA, message: 'This persona’s profile is private'});
 	}
 }
 

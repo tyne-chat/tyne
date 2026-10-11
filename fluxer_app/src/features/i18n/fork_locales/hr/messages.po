@@ -589,6 +589,9 @@ msgstr "Ovaj emoji je već dodan kao prepoznatljivi emoji"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Ovo je pretpregled izgleda vaše oznake prikaza u razgovoru."
 
+msgid "This persona’s profile is private."
+msgstr "Profil ove persone je privatan."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Uključi/isključi popis kanala"
