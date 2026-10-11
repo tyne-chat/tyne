@@ -321,11 +321,10 @@ describe('PersonaStore', () => {
 		expect(res2.subprofile?.id).toBe(bob.id);
 		expect(res2.subprofile?.name).toBe('Bob');
 
-		// 3. Alice message edited without any tags -> preserves Alice
+		// 3. Alice message edited without any tags -> says nothing about the persona, so it stays Alice's
 		const res3 = store.matchEditMessage('Plain edit with no tags', currentAliceSubprofile);
 		expect(res3.finalContent).toBe('Plain edit with no tags');
-		expect(res3.subprofile?.id).toBe(alice.id);
-		expect(res3.subprofile?.name).toBe('Alice');
+		expect(res3.subprofile).toBeUndefined();
 
 		// 4. Alice message edited with leading backslash -> escapes and resets to root
 		const res4 = store.matchEditMessage('\\Plain edit meant for root', currentAliceSubprofile);
