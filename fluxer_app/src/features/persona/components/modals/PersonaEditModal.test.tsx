@@ -327,7 +327,7 @@ describe('PersonaEditModal Component', () => {
 		const existingPersona = {
 			id: '100000000000000099',
 			name: 'Fox Persona',
-			signatureEmojis: [{name: '🦊'}, {name: '⭐'}],
+			signature_emojis: [{name: '🦊'}, {name: '⭐'}],
 		} as any;
 
 		await act(async () => {
