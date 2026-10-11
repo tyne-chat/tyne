@@ -12,7 +12,7 @@ import {useEffect, useRef} from 'react';
 
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
-import type {MessageSubprofileRequest} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 interface UseTextareaDraftAndTypingOptions {
 	draftOwner: DraftCommands.DraftOwner;
@@ -188,7 +188,7 @@ export const useTextareaDraftAndTyping = ({
 			value,
 			false,
 		);
-		const subprofile: MessageSubprofileRequest | null = effectivePersona
+		const subprofile: MessageSubprofileResponse | null = effectivePersona
 			? normalizeSubprofile(effectivePersona, {
 					display_tag_text: PersonaStore.displayTagText || null,
 					display_tag_icon: PersonaStore.displayTagIcon || null,
