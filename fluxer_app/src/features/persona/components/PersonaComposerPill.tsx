@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {Popout} from '@app/features/ui/popover/PopoverPopout';
@@ -10,7 +11,7 @@ import {LockSimple} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {PersonaStore} from '../state/PersonaStore';
+import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 import styles from './PersonaComposerPill.module.css';
 import {PersonaPickerSheet} from './PersonaPickerSheet';
 
@@ -45,7 +46,7 @@ interface PersonaComposerPillProps {
 }
 
 export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
-	({className, text = '', hasAttachments = false, inButtonRow = false}) => {
+	({channelId, className, text = '', hasAttachments = false, inButtonRow = false}) => {
 		const {i18n} = useLingui();
 		const currentUser = Users.getCurrentUser();
 		const personas = PersonaStore.personas;
@@ -59,6 +60,22 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 		}
 
 		const {persona: effectivePersona, isFromTag} = PersonaStore.getEffectivePersonaForText(text, hasAttachments);
+
+		// A pick made here is made in this channel, so the signals lit in it follow what the pill
+		// shows next. Signals in other channels keep the persona they were lit as.
+		const affirmPick = (): void => {
+			if (!channelId) return;
+			const {persona} = PersonaStore.getEffectivePersonaForText(text, hasAttachments);
+			SignalBarStore.affirmPersona(
+				channelId,
+				persona
+					? normalizeSubprofile(persona, {
+							display_tag_text: PersonaStore.displayTagText || null,
+							display_tag_icon: PersonaStore.displayTagIcon || null,
+						})
+					: null,
+			);
+		};
 
 		const avatarHash = effectivePersona
 			? (effectivePersona.avatar_hash ?? effectivePersona.avatarHash ?? undefined)
@@ -90,9 +107,11 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 							showModes={true}
 							onSelectPersona={(id) => {
 								void PersonaStore.setActivePersona(id, true);
+								affirmPick();
 							}}
 							onSelectAccount={() => {
 								void PersonaStore.unlatch();
+								affirmPick();
 							}}
 							data-flx="persona.persona-composer-pill.persona-picker-sheet"
 						/>
