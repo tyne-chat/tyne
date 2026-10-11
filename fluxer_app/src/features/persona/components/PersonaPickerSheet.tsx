@@ -59,7 +59,7 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 
 		const [query, setQuery] = useState('');
 		const currentUser = Users.getCurrentUser();
-		const personas = PersonaStore.personas;
+		const personas = PersonaStore.sortedPersonas;
 		const activePersonaId = selectedPersonaId || (selectedPersonaId === '' ? null : PersonaStore.activePersonaId);
 		const isLatched = selectedPersonaId ? true : PersonaStore.isPersonaLatched;
 		const activePersonaMode = PersonaStore.activePersonaMode;
