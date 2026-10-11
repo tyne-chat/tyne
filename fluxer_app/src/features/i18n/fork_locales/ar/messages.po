@@ -18,11 +18,9 @@ msgstr "(مثبّت)"
 msgid "Account: @{username}"
 msgstr "الحساب: @{username}"
 
-msgid "Active Persona Mode"
-msgstr "وضع الشخصية النشطة"
-
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
 msgid "Active persona mode"
 msgstr "وضع الشخصية النشطة"
 
@@ -74,9 +72,6 @@ msgstr "تغيير الشخصية"
 msgid "Choose a PluralKit export (.json) or drag & drop"
 msgstr "اختر ملف تصدير PluralKit (.json) أو اسحبه وأفلته هنا"
 
-msgid "Choose how untagged messages and persona tags interact with your active persona."
-msgstr "اختر كيف تتفاعل الرسائل بدون علامة وعلامات الشخصيات مع شخصيتك النشطة."
-
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "الشخصيات المُعدّة ({count})"
@@ -107,7 +102,8 @@ msgstr "حذف الطابع الزمني\\"
 msgid "Detected System Name / Tag"
 msgstr "اسم / علامة النظام المكتشفة"
 
-msgid "Display Tag"
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
 msgstr "علامة العرض"
 
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
@@ -127,6 +123,10 @@ msgstr "جارٍ تنزيل الأفاتار {current} من {total}..."
 msgid "Duplicate tag pair on this persona"
 msgstr "زوج علامات مكرر في هذه الشخصية"
 
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "كل قناة تحتفظ بشخصيتها الخاصة. القنوات الجديدة تبدأ بحسابك."
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "تعديل الشخصية"
@@ -140,6 +140,10 @@ msgstr "تعديل الشخصية"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "تعديل الطابع الزمني\\"
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "في كل مكان"
 
 msgid "Export Summary"
 msgstr "ملخص التصدير"
@@ -221,6 +225,10 @@ msgstr "جارٍ استيراد الشخصيات..."
 msgid "Importing..."
 msgstr "جارٍ الاستيراد..."
 
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "في كل قناة"
+
 #. Button to insert timestamp into message composer.
 msgid "Insert"
 msgstr "إدراج"
@@ -237,12 +245,6 @@ msgstr "الاحتفاظ بالموجودة وإضافة الجديدة (موص�
 #. placeholder {0}: pkData.members?.length ?? 0
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "احتفظ بشخصياتك الحالية ({existingCount}) وأضف جميع الشخصيات المستوردة ({0}) بجانبها كإدخالات جديدة."
-
-#. Active persona mode last used
-#. Active persona mode last used
-#. Active persona mode last used
-msgid "Last Used"
-msgstr "آخر استخدام"
 
 msgid "Main account"
 msgstr "الحساب الرئيسي"
@@ -306,6 +308,14 @@ msgstr "لا توجد إشارات بعد. يبقى الشريط مخفيًا ح
 msgid "Nobody has this signal on"
 msgstr "لم يُفعّل أحد هذه الإشارة"
 
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "شخصية واحدة لكل القنوات."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "لهذه القناة فقط"
+
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "مرئية لك فقط. لا يستطيع الآخرون رؤية النبذة الكاملة أو تفاصيل الملف الشخصي لهذه الشخصية."
@@ -331,6 +341,10 @@ msgstr "احذف جميع الشخصيات الحالية ({existingCount}) نه
 
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "علامات الشخصية (البادئة واللاحقة)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "الشخصية تنطبق على"
 
 #. Toast when persona is created
 msgid "Persona created"
@@ -358,7 +372,6 @@ msgstr "تم تحديث الشخصية"
 msgid "Persona visibility"
 msgstr "ظهور الشخصية"
 
-#. Title of personas settings section
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "الشخصيات"
@@ -460,10 +473,6 @@ msgstr "نتائج البحث ({0})"
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "ابحث عن شخصيات، علامات، ضمائر..."
-
-#. Description of personas settings section
-msgid "Send messages with distinct names and avatars. Personas can represent plural system members, roleplay characters, or any other identity."
-msgstr "أرسل رسائل بأسماء وصور أفاتار مختلفة. يمكن أن تمثّل الشخصيات أعضاء نظام متعدد، أو شخصيات لعب أدوار، أو أي هوية أخرى."
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
@@ -611,13 +620,13 @@ msgstr "إلغاء تثبيت الرمز التعبيري"
 msgid "Unpin for this persona"
 msgstr "إلغاء التثبيت لهذه الشخصية"
 
-#. Helper description for Last Used persona mode
-msgid "Untagged messages send as the persona that spoke most recently. Whenever anyone uses a persona tag, they automatically become the active persona."
-msgstr "تُرسَل الرسائل بدون علامة باسم الشخصية التي تحدثت مؤخرًا. كلما استخدم أحد علامة شخصية، تصبح تلك الشخصية نشطة تلقائيًا."
-
 #. Helper description for Manual persona mode
-msgid "Untagged messages send as your chosen persona. Typing another persona’s tags will only send that single message and won’t switch who is active."
-msgstr "تُرسَل الرسائل بدون علامة باسم الشخصية التي اخترتها. كتابة علامات شخصية أخرى ستُرسل تلك الرسالة فقط ولن تغيّر الشخصية النشطة."
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "الرسائل غير الموسومة تُرسل بالشخصية التي اخترتها. الوسم ينطبق على تلك الرسالة فقط."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "الرسائل غير الموسومة تُرسل باسم آخر من تحدّث. استخدام وسم يبدّل إلى تلك الشخصية."
 
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
@@ -625,6 +634,10 @@ msgstr "عرض شخصياتك"
 
 msgid "Where the signal bar appears"
 msgstr "أين يظهر شريط الإشارات"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "أين تُحفظ شخصيتك"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
