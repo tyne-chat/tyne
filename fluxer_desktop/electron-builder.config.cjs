@@ -1970,7 +1970,9 @@ if (process.env.FLUXER_FORK_IDENTITY !== '0') {
 	// The company Windows shows as the publisher of the executable (firewall and UAC prompts, file
 	// properties) comes from the package's author, which is upstream's company. The fork's builds are
 	// published by the fork. The copyright line keeps naming upstream, whose code most of this is.
-	module.exports.extraMetadata.author = 'Tyne Chat';
+	// The address is the maintainer contact the deb and rpm carry; electron-builder refuses to build
+	// them without one.
+	module.exports.extraMetadata.author = {name: 'Tyne Chat', email: 'support@tyne.chat'};
 	module.exports.copyright = 'Copyright © 2026 Fluxer Platform AB and Tyne contributors';
 	const extendInfo = module.exports.mac.extendInfo;
 	for (const [key, value] of Object.entries(extendInfo)) {
