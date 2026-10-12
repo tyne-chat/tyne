@@ -367,7 +367,7 @@ function buildLinuxDesktopFileContents(): string {
 		GENERATED_MARKER,
 		'Type=Application',
 		`Name=${escapeDesktopEntry(APP_NAME)}`,
-		'Comment=Fluxer',
+		`Comment=${DESKTOP_APP_NAME}`,
 		`Exec=${escapeDesktopEntry(execLine)}`,
 		`TryExec=${escapeDesktopEntry(execPath)}`,
 		'Terminal=false',
