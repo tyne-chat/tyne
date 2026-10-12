@@ -681,6 +681,10 @@ msgstr "{0} trên {1} {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} phiên bản {version} đã sẵn sàng để cài đặt."
 
+#. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
+msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
+msgstr "{domain} chạy phiên bản {productName} mới hơn ứng dụng này. Hãy cập nhật {productName} rồi thử lại."
+
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
 msgstr "{label}: {names}"
@@ -688,6 +692,10 @@ msgstr "{label}: {names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - Nhấp để đổi persona"
+
+#. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
+msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
+msgstr "{productName} đã ngừng kiểm tra xem trình duyệt có phê duyệt đăng nhập này không. Mã của bạn vẫn còn nguyên."
 
 msgid "— Today at 12:00 PM"
 msgstr "— Hôm nay lúc 12:00"

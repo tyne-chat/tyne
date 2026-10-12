@@ -7,6 +7,9 @@ import {
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 export const CONNECTING_TO_INSTANCE_DESCRIPTOR = msg({
 	message: 'Connecting to {domain}\u2026',
 	comment:
@@ -22,9 +25,10 @@ const INSTANCE_UNREACHABLE_DESCRIPTOR = msg({
 	comment: 'Instance selector error shown when no Fluxer instance answered at the address. Domain is interpolated.',
 });
 const INSTANCE_NEEDS_NEWER_CLIENT_DESCRIPTOR = msg({
-	message: '{domain} runs a newer version of Fluxer than this app. Update Fluxer, then try again.',
+	// Fork: names the app through productName instead of spelling out upstream's name.
+	message: '{domain} runs a newer version of {productName} than this app. Update {productName}, then try again.',
 	comment:
-		'Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated.',
+		'Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.',
 });
 export const INSTANCE_CONNECT_FAILED_DESCRIPTOR = msg({
 	message: "Couldn't connect to {domain}. Try again.",
@@ -40,7 +44,7 @@ export interface InstanceDiscoveryFailureRequest {
 
 export function describeInstanceDiscoveryFailure({error, domain, i18n}: InstanceDiscoveryFailureRequest): string {
 	if (error instanceof InstanceRequiresNewerClientError) {
-		return i18n._(INSTANCE_NEEDS_NEWER_CLIENT_DESCRIPTOR, {domain});
+		return i18n._(INSTANCE_NEEDS_NEWER_CLIENT_DESCRIPTOR, {domain, productName: PRODUCT_NAME});
 	}
 	if (error instanceof InstanceDiscoveryUnreachableError) {
 		return i18n._(INSTANCE_UNREACHABLE_DESCRIPTOR, {domain});
