@@ -51,13 +51,19 @@ import {
 import {observer} from 'mobx-react-lite';
 import {type ReactElement, type ReactNode, useCallback, useEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
+
 const OPEN_BROWSER_AGAIN_DESCRIPTOR = msg({
 	message: 'Open browser again',
 	comment: 'Button in the desktop app that reopens the browser sign-in page while the app waits for the browser.',
 });
 const BROWSER_WAIT_STOPPED_DESCRIPTOR = msg({
-	message: "Fluxer stopped checking whether the browser approved this sign-in. It didn't lose your code.",
-	comment: 'Status shown when browser sign-in status polling gives up after repeated failures.',
+	// Fork: names the app through productName instead of spelling out upstream's name.
+	message: "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code.",
+	comment:
+		'Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.',
 });
 const BROWSER_WAIT_UNREACHABLE_DESCRIPTOR = msg({
 	message:
@@ -277,7 +283,7 @@ function StoppedWaitingText({
 	}
 	return (
 		<>
-			{i18n._(BROWSER_WAIT_STOPPED_DESCRIPTOR)}
+			{i18n._(BROWSER_WAIT_STOPPED_DESCRIPTOR, {productName: PRODUCT_NAME})}
 			{handoff.error ? (
 				<>
 					<br data-flx="auth.flow.auth-login-core.auth-login-browser-step.stopped-waiting-text.br" />
