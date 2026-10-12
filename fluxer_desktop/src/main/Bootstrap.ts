@@ -75,6 +75,10 @@ import {createWindow, getMainWindow} from '@electron/main/Window';
 import {repairWindowsShortcuts} from '@electron/main/WindowsShortcuts';
 import {app, clipboard, session, shell} from 'electron';
 
+// Fork imports.
+
+import {DESKTOP_APP_NAME} from '@electron/common/DesktopIdentity';
+
 declare const __FLUXER_MAIN_APP_OUTPUT_FILE__: string;
 
 const requireModule = createRequire(import.meta.url);
@@ -122,8 +126,7 @@ const MODULE_LAUNCH_PERMIT = Symbol('fluxer.desktop.moduleLaunchPermit');
 const IN_PLACE_RELOAD_CONFIRM_TIMEOUT_MS = 45_000;
 const NETWORK_SPLASH_GRACE_MS = 500;
 
-const UPDATE_SERVER_UNREACHABLE_MESSAGE =
-	"Fluxer couldn't reach its update server to download app files. Check your internet connection, proxy or firewall. Fluxer keeps retrying.";
+const UPDATE_SERVER_UNREACHABLE_MESSAGE = `${DESKTOP_APP_NAME} couldn't reach its update server to download app files. Check your internet connection, proxy or firewall. ${DESKTOP_APP_NAME} keeps retrying.`;
 
 interface ModuleLaunchPermit {
 	readonly [MODULE_LAUNCH_PERMIT]: true;
