@@ -2,6 +2,10 @@
 
 import 'fake-indexeddb/auto';
 
+// Fork imports.
+
+import './vitest.fork.setup';
+
 interface TestLockManager {
 	request<Result>(name: string, operation: () => Promise<Result>): Promise<Result>;
 }
