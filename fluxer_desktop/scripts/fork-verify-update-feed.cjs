@@ -45,9 +45,9 @@ function installedAppAt(root, version) {
 		manifest,
 		`<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"><metadata>
-<id>fluxer_desktop_temple</id><title>Fluxer Temple</title><description>Fluxer Temple</description>
-<authors>Fluxer Platform AB</authors><version>${version}</version><channel>win</channel>
-<mainExe>Fluxer Temple.exe</mainExe><os>win</os><rid>win-x64</rid>
+<id>tyne_desktop</id><title>Tyne</title><description>Tyne</description>
+<authors>Tyne Chat</authors><version>${version}</version><channel>win</channel>
+<mainExe>Tyne.exe</mainExe><os>win</os><rid>win-x64</rid>
 </metadata></package>`,
 	);
 	fs.writeFileSync(path.join(root, 'Update.exe'), '');
