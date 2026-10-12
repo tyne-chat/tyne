@@ -50,21 +50,25 @@ const DESKTOP_ARTIFACT_PRODUCT_NAMES: Record<BuildChannel, string> = {
 	development: 'Fluxer-Development',
 };
 
-// Fork: builds of this fork install as "Fluxer Temple", with their own IDs, so they can sit next
-// to an official Fluxer install. scripts/build.mjs compiles FLUXER_FORK_IDENTITY into every build;
-// electron-builder.config.cjs and the release workflow carry the matching packaging names. The
-// fluxer:// link scheme is deliberately shared with the official app.
+// Fork: builds of this fork are an app of their own, "Tyne", with its own name and IDs, as
+// upstream's name and marks policy asks of a fork with functional changes (.github/GOVERNANCE.md).
+// It can sit next to an official Fluxer install. scripts/build.mjs compiles FLUXER_FORK_IDENTITY
+// into every build; electron-builder.config.cjs, scripts/fork-release-assets.mjs and the release
+// workflow carry the matching packaging names (ForkIdentityConsistency.test.mjs holds them
+// together). The IDs are under tyne.chat and must never change once a build has shipped: the
+// system would take the app for a different one. The fluxer:// link scheme is deliberately shared
+// with the official app.
 export const IS_FORK_IDENTITY = typeof process.env === 'object' && process.env.FLUXER_FORK_IDENTITY === '1';
 if (IS_FORK_IDENTITY) {
-	DESKTOP_APP_NAMES.stable = 'Fluxer Temple';
-	DESKTOP_ARTIFACT_PRODUCT_NAMES.stable = 'Fluxer-Temple';
-	MACOS_BUNDLE_IDS.stable = 'app.fluxer.temple';
-	LINUX_DESKTOP_ENTRY_IDS.stable = 'app.fluxer.FluxerDesktopTemple';
-	LEGACY_LINUX_DESKTOP_ENTRY_IDS.stable = 'fluxer-temple';
-	LINUX_PORTAL_SESSION_TOKENS.stable = 'fluxer_temple_global_shortcuts';
-	WINDOWS_VELOPACK_IDS.stable = 'fluxer_desktop_temple';
-	WINDOWS_APP_USER_MODEL_IDS.stable = 'Fluxer.Fluxer.Temple';
-	WINDOWS_TOAST_ACTIVATOR_CLSIDS.stable = '{E95456AA-13E2-4043-8835-18EF84FB8A2C}';
+	DESKTOP_APP_NAMES.stable = 'Tyne';
+	DESKTOP_ARTIFACT_PRODUCT_NAMES.stable = 'Tyne';
+	MACOS_BUNDLE_IDS.stable = 'chat.tyne.desktop';
+	LINUX_DESKTOP_ENTRY_IDS.stable = 'chat.tyne.Tyne';
+	LEGACY_LINUX_DESKTOP_ENTRY_IDS.stable = 'tyne';
+	LINUX_PORTAL_SESSION_TOKENS.stable = 'tyne_global_shortcuts';
+	WINDOWS_VELOPACK_IDS.stable = 'tyne_desktop';
+	WINDOWS_APP_USER_MODEL_IDS.stable = 'TyneChat.Tyne';
+	WINDOWS_TOAST_ACTIVATOR_CLSIDS.stable = '{353A331D-BBF0-49D3-9144-AD28E0EE5FE9}';
 }
 
 export const DESKTOP_APP_NAME = DESKTOP_APP_NAMES[BUILD_CHANNEL];
@@ -80,7 +84,7 @@ export const OTHER_CHANNEL_LINUX_DESKTOP_FILES: ReadonlySet<string> = new Set(
 		.flatMap((channel) => [LINUX_DESKTOP_ENTRY_IDS[channel], LEGACY_LINUX_DESKTOP_ENTRY_IDS[channel]])
 		.map((id) => `${id}.desktop`),
 );
-export const WINDOWS_SHORTCUT_AUTHOR = 'Fluxer Platform AB';
+export const WINDOWS_SHORTCUT_AUTHOR = IS_FORK_IDENTITY ? 'Tyne Chat' : 'Fluxer Platform AB';
 export const WINDOWS_VELOPACK_ID = WINDOWS_VELOPACK_IDS[BUILD_CHANNEL];
 export const WINDOWS_LEGACY_SQUIRREL_ID = 'fluxer_app';
 export const WINDOWS_APP_USER_MODEL_ID = WINDOWS_APP_USER_MODEL_IDS[BUILD_CHANNEL];
