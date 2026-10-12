@@ -25,6 +25,7 @@ function capture(source, pattern, description) {
 process.env.FLUXER_FORK_IDENTITY = '1';
 const {BUILD_CHANNEL} = await import('../common/BuildChannel.ts');
 const identity = await import('../common/DesktopIdentity.ts');
+const {APP_PROTOCOL} = await import('../common/Constants.ts');
 
 const builderConfig = read('electron-builder.config.cjs');
 const builderForkBlock = capture(
@@ -56,6 +57,14 @@ describe('the fork identity', {skip: BUILD_CHANNEL !== 'stable' && 'the fork shi
 		assert.equal(builderValue('packageName'), identity.WINDOWS_VELOPACK_ID);
 		assert.equal(builderValue('linuxDesktopId'), identity.LINUX_DESKTOP_ENTRY_ID);
 		assert.equal(builderValue('linuxPackageName'), identity.LEGACY_LINUX_DESKTOP_ENTRY_ID);
+	});
+
+	test('the packages declare the link scheme the app registers when it runs', () => {
+		assert.match(builderForkBlock, /protocolScheme: process\.env\.FLUXER_FORK_LINK_SCHEME\b/u);
+		assert.equal(
+			capture(workflow, /^ {2}FLUXER_FORK_LINK_SCHEME: (\S+)$/mu, 'FLUXER_FORK_LINK_SCHEME in the workflow'),
+			APP_PROTOCOL,
+		);
 	});
 
 	test('the Windows installer is packed for the app the updater expects', () => {
@@ -115,6 +124,7 @@ describe('the fork identity', {skip: BUILD_CHANNEL !== 'stable' && 'the fork shi
 			WINDOWS_SHORTCUT_AUTHOR: identity.WINDOWS_SHORTCUT_AUTHOR,
 			linuxOptDirName: builderValue('linuxOptDirName'),
 			iconDirectory: builderValue('iconDirectory'),
+			APP_PROTOCOL,
 		};
 		for (const [name, value] of Object.entries(visible)) {
 			assert.doesNotMatch(value, /fluxer/iu, `${name} is "${value}"`);

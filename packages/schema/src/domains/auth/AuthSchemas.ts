@@ -323,7 +323,8 @@ export const UsernameAvailabilityResponse = z.object({
 
 export type UsernameAvailabilityResponse = z.infer<typeof UsernameAvailabilityResponse>;
 
-const DESKTOP_HANDOFF_RETURN_URI_PATTERN = /^fluxer(?:-canary|-development)?:\/\/handoff$/u;
+// Fork: tyne://handoff is the return link of the fork's desktop app, Tyne, which does not register fluxer://.
+const DESKTOP_HANDOFF_RETURN_URI_PATTERN = /^(?:fluxer(?:-canary|-development)?|tyne):\/\/handoff$/u;
 
 export const DesktopHandoffReturnMethod = z.enum(['deep_link', 'code']);
 
