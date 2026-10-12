@@ -20,7 +20,10 @@ vi.mock('@app/features/ui/utils/NativeUtils', () => ({
 	isDesktop: vi.fn(),
 }));
 
-vi.mock('@app/features/user/utils/AvatarUtils', () => ({
+// Only the four functions the tests steer are replaced. Everything else is the real module,
+// so a function upstream adds to it later does not break these tests.
+vi.mock('@app/features/user/utils/AvatarUtils', async (importOriginal) => ({
+	...(await importOriginal<typeof import('@app/features/user/utils/AvatarUtils')>()),
 	getGuildMemberNotificationAvatarURL: vi.fn(),
 	getGuildMemberDisplayAvatarURL: vi.fn(),
 	getUserNotificationAvatarURL: vi.fn(),
