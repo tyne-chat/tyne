@@ -70,7 +70,7 @@ interface SelfUpdateControl {
 }
 
 function feedUserAgent(): string {
-	return `Fluxer/${app.getVersion()} (${process.platform}: ${process.arch})`;
+	return `${DESKTOP_ARTIFACT_PRODUCT_NAME}/${app.getVersion()} (${process.platform}: ${process.arch})`;
 }
 
 type VelopackUpdateManager = InstanceType<typeof import('velopack').UpdateManager>;
