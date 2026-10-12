@@ -36,7 +36,7 @@ describe('LimitConfigUpdateRequest', () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			const issue = result.error.issues.find((i) => i.path.includes('max_bio_length'));
-			expect(issue?.message).toBe('Max Bio Length cannot exceed 10000');
+			expect(issue?.message).toBe('VALUE_MUST_BE_INTEGER_IN_RANGE');
 		}
 	});
 
@@ -56,7 +56,7 @@ describe('LimitConfigUpdateRequest', () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			const issue = result.error.issues.find((i) => i.path.includes('max_bio_length'));
-			expect(issue?.message).toBe('Max Bio Length must be at least 1');
+			expect(issue?.message).toBe('VALUE_MUST_BE_INTEGER_IN_RANGE');
 		}
 	});
 });
