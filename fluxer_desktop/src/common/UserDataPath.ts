@@ -22,7 +22,7 @@ const channelStorageDirectoryMap: ChannelStorageDirectoryMap = {
 
 // Fork: its own data folder, matching the fork identity in DesktopIdentity.ts.
 if (typeof process.env === 'object' && process.env.FLUXER_FORK_IDENTITY === '1') {
-	channelStorageDirectoryMap.stable = 'fluxertemple';
+	channelStorageDirectoryMap.stable = 'tyne';
 }
 
 class UserDataPathConflictError extends Error {
