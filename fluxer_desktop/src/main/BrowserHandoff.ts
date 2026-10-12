@@ -25,6 +25,10 @@ import {
 	DesktopHandoffStatus,
 } from '@fluxer/desktop_ipc/src/BrowserHandoffContract';
 
+// Fork imports.
+
+import {initiateWithReturnLink} from '@electron/main/ForkHandoffReturnLink';
+
 const RENDERER_CONTEXT = 'Browser sign-in handoff';
 const INITIATION_CONTEXT = 'Desktop handoff initiation';
 const STATUS_CONTEXT = 'Desktop handoff status';
@@ -239,14 +243,16 @@ export class DesktopBrowserHandoff {
 		const owner = this.dependencies.rendererDocumentOwners.capture(event, RENDERER_CONTEXT);
 		const instance = requireDesktopHandoffInstance(request);
 		const origin = requireDesktopHTTPOrigin(new URL(instance.apiEndpoint).origin);
-		const returnUri = this.dependencies.returnUri();
-		const response = await this.requestJSON({
-			...(returnUri == null ? {} : {body: {return_uri: returnUri}}),
-			instance,
-			origin,
-			method: 'POST',
-			path: HANDOFF_INITIATE_PATH,
-		});
+		// Fork: an instance that does not know this app's link scheme refuses its return link.
+		const {response, returnUri} = await initiateWithReturnLink(this.dependencies.returnUri(), (body) =>
+			this.requestJSON({
+				...(body == null ? {} : {body}),
+				instance,
+				origin,
+				method: 'POST',
+				path: HANDOFF_INITIATE_PATH,
+			}),
+		);
 		if (response.status !== HttpStatus.OK && response.status !== HttpStatus.CREATED) {
 			throw new DesktopHandoffHTTPStatusError(INITIATION_CONTEXT, response.status);
 		}
