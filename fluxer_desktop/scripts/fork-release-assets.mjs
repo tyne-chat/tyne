@@ -17,8 +17,8 @@ import vm from 'node:vm';
 const require = createRequire(import.meta.url);
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // The stable channel's DESKTOP_ARTIFACT_PRODUCT_NAME under the fork identity (src/common/DesktopIdentity.ts).
-const PRODUCT_NAME = 'Fluxer-Temple';
-const DEFAULT_REPOSITORY = 'chiaracoetzee/fluxer-subprofiles';
+const PRODUCT_NAME = 'Tyne';
+const DEFAULT_REPOSITORY = 'tyne-chat/tyne';
 
 const INSTALLER_EXTENSIONS = {
 	darwin: {dmg: '.dmg', zip: '.zip'},

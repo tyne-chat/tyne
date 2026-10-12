@@ -33,7 +33,7 @@ const TRAY_POSITION_GUIDS: Record<BuildChannel, string> = {
 };
 // Fork: Windows ties a tray icon GUID to one executable, so the fork identity needs its own.
 if (typeof process.env === 'object' && process.env.FLUXER_FORK_IDENTITY === '1') {
-	TRAY_POSITION_GUIDS.stable = 'b355b637-9973-448e-8e8c-a06e72b7a136';
+	TRAY_POSITION_GUIDS.stable = '26342e67-36a0-490d-9740-b711853df87c';
 }
 const APP_NAME = DESKTOP_APP_NAME;
 const ICON_DIR_NAME = ICON_DIR_NAMES[BUILD_CHANNEL];
