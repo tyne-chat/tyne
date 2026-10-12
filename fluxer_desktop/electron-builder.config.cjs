@@ -74,6 +74,9 @@ if (process.env.FLUXER_FORK_IDENTITY !== '0') {
 		packageName: 'tyne_desktop',
 		linuxPackageName: 'tyne',
 		linuxDesktopId: 'chat.tyne.Tyne',
+		// Tyne's deb and rpm do not claim to replace upstream's old fluxer-app package: installing Tyne
+		// must not remove someone's Fluxer.
+		replacesUpstreamLegacyPackage: false,
 		// The link scheme the package declares (macOS Info.plist, Linux desktop file); the app registers
 		// the same one when it runs (CHANNEL_APP_PROTOCOLS in src/common/Constants.ts). It is passed in
 		// by the release workflow rather than written here because upstream's ChannelIsolation test
@@ -138,10 +141,12 @@ const legacyLinuxStablePackageNames = {
 	'.deb': legacyLinuxStableDebPackageName,
 	'.rpm': legacyLinuxStableRpmPackageName,
 };
-const legacyLinuxStableDebFpmArgs = isStable
+// Fork: see replacesUpstreamLegacyPackage in the fork block above.
+const replacesLegacyStablePackage = isStable && channel.replacesUpstreamLegacyPackage !== false;
+const legacyLinuxStableDebFpmArgs = replacesLegacyStablePackage
 	? ['--replaces', legacyLinuxStableDebPackageName, '--conflicts', legacyLinuxStableDebPackageName]
 	: [];
-const legacyLinuxStableRpmFpmArgs = isStable
+const legacyLinuxStableRpmFpmArgs = replacesLegacyStablePackage
 	? ['--replaces', legacyLinuxStableRpmPackageName, '--conflicts', legacyLinuxStableRpmPackageName]
 	: [];
 const legacyLinuxCanaryOptDir = '/opt/Fluxer Canary';
@@ -1660,12 +1665,12 @@ async function verifyLinuxPackagesDeclareTheLegacyStableReplacement(buildResult)
 			...(replaces.includes(legacyName) ? ['replaces'] : []),
 			...(conflicts.includes(legacyName) ? ['conflicts'] : []),
 		];
-		if (!isStable && declared.length > 0) {
+		if (!replacesLegacyStablePackage && declared.length > 0) {
 			violations.push({
 				artifactPath,
 				detail: `${buildChannel} declares ${declared.join(' and ')} on ${legacyName}, which belongs to stable only`,
 			});
-		} else if (isStable && declared.length !== 2) {
+		} else if (replacesLegacyStablePackage && declared.length !== 2) {
 			violations.push({
 				artifactPath,
 				detail: `stable declares ${declared.join(' and ') || 'neither'} on ${legacyName}, expected both`,
@@ -1959,6 +1964,13 @@ module.exports = {
 // upstream's begin with "Fluxer". Only that first word is the app; "a Fluxer instance" further on
 // is the kind of server and stays.
 if (process.env.FLUXER_FORK_IDENTITY !== '0') {
+	// The company Windows shows as the publisher of the executable (firewall and UAC prompts, file
+	// properties) comes from the package's author, which is upstream's company. The fork's builds are
+	// published by the fork. The copyright line keeps naming upstream, whose code most of this is.
+	// The address is the maintainer contact the deb and rpm carry; electron-builder refuses to build
+	// them without one.
+	module.exports.extraMetadata.author = {name: 'Tyne Chat', email: 'support@tyne.chat'};
+	module.exports.copyright = 'Copyright © 2026 Fluxer Platform AB and Tyne contributors';
 	const extendInfo = module.exports.mac.extendInfo;
 	for (const [key, value] of Object.entries(extendInfo)) {
 		if (key.endsWith('UsageDescription') && typeof value === 'string') {

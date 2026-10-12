@@ -70,6 +70,10 @@ import {
 } from '@electron/main/ForkWindowSession';
 import {FORK_APP_WINDOW_CHANNELS} from '@fluxer/desktop_ipc/src/ForkAppWindowContract';
 
+// Fork imports.
+
+import {DESKTOP_APP_NAME} from '@electron/common/DesktopIdentity';
+
 const logger = createChildLogger('Window');
 const runtimeSecurity = new DesktopRuntimeSecurity({
 	logger: createChildLogger('DesktopRuntimeSecurity'),
@@ -92,7 +96,8 @@ const MEDIA_DEVICE_BLINK_FEATURES = 'EnumerateDevices,AudioOutputDevices';
 const ACTIVE_ALLOW_TRANSPARENCY_RENDERER_ARG = '--fluxer-active-allow-transparency=1';
 const ACTIVE_USE_NATIVE_TITLEBAR_RENDERER_ARG = '--fluxer-active-use-native-titlebar=1';
 export const QUICK_CSS_EDITOR_WINDOW_KEY = 'fluxer_quick_css_editor';
-const QUICK_CSS_EDITOR_WINDOW_TITLE = 'Fluxer | Quick CSS';
+// Fork: the window title names the app as the fork brands it.
+const QUICK_CSS_EDITOR_WINDOW_TITLE = `${DESKTOP_APP_NAME} | Quick CSS`;
 const QUICK_CSS_EDITOR_MIN_WIDTH = 900;
 const QUICK_CSS_EDITOR_MIN_HEIGHT = 620;
 const VOICE_POPOUT_WINDOW_NAME_PREFIX = 'fluxer-voice-popout:';
