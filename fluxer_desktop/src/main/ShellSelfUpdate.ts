@@ -89,7 +89,7 @@ let stagedShell: StagedShellUpdate | null = null;
 let applyingShell = false;
 
 function feedUserAgent(): string {
-	return `Fluxer/${app.getVersion()} (${process.platform}: ${process.arch})`;
+	return `${DESKTOP_ARTIFACT_PRODUCT_NAME}/${app.getVersion()} (${process.platform}: ${process.arch})`;
 }
 
 function readInstalledVelopackVersion(manager: VelopackUpdateManager): string {
