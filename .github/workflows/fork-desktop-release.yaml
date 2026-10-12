@@ -314,18 +314,18 @@ jobs:
         if: matrix.platform == 'windows'
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
         run: |
-          unpacked="$(find dist-electron -maxdepth 2 -type f -name 'Fluxer Temple.exe' -path '*unpacked*' -print -quit)"
-          test -n "$unpacked" || { echo "No unpacked Windows app with Fluxer Temple.exe under dist-electron"; ls -R dist-electron | head -50; exit 1; }
+          unpacked="$(find dist-electron -maxdepth 2 -type f -name 'Tyne.exe' -path '*unpacked*' -print -quit)"
+          test -n "$unpacked" || { echo "No unpacked Windows app with Tyne.exe under dist-electron"; ls -R dist-electron | head -50; exit 1; }
           ./.velopack/vpk --yes pack \
-            --packId fluxer_desktop_temple \
+            --packId tyne_desktop \
             --packVersion "$VERSION" \
             --packDir "$(dirname "$unpacked")" \
-            --mainExe "Fluxer Temple.exe" \
-            --packTitle "Fluxer Temple" \
-            --packAuthors "Fluxer Platform AB" \
+            --mainExe "Tyne.exe" \
+            --packTitle "Tyne" \
+            --packAuthors "Tyne Chat" \
             --shortcuts Desktop,StartMenu \
             --runtime "win-${ARCH}" \
-            --icon build_resources/icons-stable/icon.ico \
+            --icon build_resources/icons-tyne/icon.ico \
             --outputDir "dist-electron/velopack-windows-${ARCH}" \
             --delta None
           ls -la "dist-electron/velopack-windows-${ARCH}"
@@ -438,7 +438,7 @@ jobs:
           gh release create "desktop-v${VERSION}"
           --repo "${{ github.repository }}"
           --target "${{ github.sha }}"
-          --title "Fluxer Temple Desktop v${VERSION}"
+          --title "Tyne Desktop v${VERSION}"
           --notes "$NOTES"
           --latest
           release_assets/*
