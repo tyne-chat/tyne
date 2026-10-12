@@ -13,6 +13,12 @@ export const CHANNEL_APP_PROTOCOLS: Record<BuildChannel, string> = {
 	canary: 'fluxer',
 	development: 'fluxer-development',
 };
+// Fork: Tyne answers to its own link scheme, tyne://, and leaves fluxer:// to the official app, so
+// the two do not compete for each other's links when both are installed. Links written inside
+// messages keep the fluxer: form, which is part of the message format every client reads.
+if (typeof process.env === 'object' && process.env.FLUXER_FORK_IDENTITY === '1') {
+	CHANNEL_APP_PROTOCOLS.stable = 'tyne';
+}
 export const APP_PROTOCOL = CHANNEL_APP_PROTOCOLS[BUILD_CHANNEL];
 export const STABLE_APP_URL = 'https://web.fluxer.app';
 export const CANARY_APP_URL = 'https://web.canary.fluxer.app';
