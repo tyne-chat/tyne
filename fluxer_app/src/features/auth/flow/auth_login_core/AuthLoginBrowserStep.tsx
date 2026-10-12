@@ -50,13 +50,19 @@ import {
 import {observer} from 'mobx-react-lite';
 import {type ReactElement, type ReactNode, useCallback, useEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
+
 const OPEN_BROWSER_AGAIN_DESCRIPTOR = msg({
 	message: 'Open browser again',
 	comment: 'Button in the desktop app that reopens the browser sign-in page while the app waits for the browser.',
 });
 const BROWSER_WAIT_STOPPED_DESCRIPTOR = msg({
-	message: "Fluxer stopped checking whether the browser approved this sign-in. It didn't lose your code.",
-	comment: 'Status shown when browser sign-in status polling gives up after repeated failures.',
+	// Fork: names the app through productName instead of spelling out upstream's name.
+	message: "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code.",
+	comment:
+		'Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.',
 });
 const BROWSER_HANDOFF_UNSUPPORTED_INSTANCE_DESCRIPTOR = msg({
 	message: '{instanceName} does not publish a web address, so sign-in cannot be handed to a browser.',
@@ -191,7 +197,7 @@ function WaitingContent({handoff, instanceName, onOtherDevice}: WaitingContentPr
 				data-flx="auth.flow.auth-login-core.auth-login-browser-step.waiting-text"
 			>
 				{handoff.hasStoppedWaiting ? (
-					i18n._(BROWSER_WAIT_STOPPED_DESCRIPTOR)
+					i18n._(BROWSER_WAIT_STOPPED_DESCRIPTOR, {productName: PRODUCT_NAME})
 				) : showCode ? (
 					<Trans comment="Shown in the desktop app above the code when the browser cannot return the sign-in automatically. instanceName is the server name, such as Fluxer.">
 						Sign in to {instanceName} in your browser, and check that it shows this code:
@@ -270,7 +276,7 @@ function OtherDeviceContent({handoff, signInAddress}: {handoff: BrowserLoginHand
 					role="status"
 					data-flx="auth.flow.auth-login-core.auth-login-browser-step.other-device-stopped"
 				>
-					{i18n._(BROWSER_WAIT_STOPPED_DESCRIPTOR)}
+					{i18n._(BROWSER_WAIT_STOPPED_DESCRIPTOR, {productName: PRODUCT_NAME})}
 				</flx-auth-login-browser-step-status-text>
 			) : null}
 		</flx-auth-login-browser-step-manual-panel>
