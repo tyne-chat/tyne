@@ -56,8 +56,8 @@ const DESKTOP_ARTIFACT_PRODUCT_NAMES: Record<BuildChannel, string> = {
 // into every build; electron-builder.config.cjs, scripts/fork-release-assets.mjs and the release
 // workflow carry the matching packaging names (ForkIdentityConsistency.test.mjs holds them
 // together). The IDs are under tyne.chat and must never change once a build has shipped: the
-// system would take the app for a different one. The fluxer:// link scheme is deliberately shared
-// with the official app.
+// system would take the app for a different one. Its link scheme is tyne:// (CHANNEL_APP_PROTOCOLS
+// in Constants.ts); fluxer:// is left to the official app.
 export const IS_FORK_IDENTITY = typeof process.env === 'object' && process.env.FLUXER_FORK_IDENTITY === '1';
 if (IS_FORK_IDENTITY) {
 	DESKTOP_APP_NAMES.stable = 'Tyne';
