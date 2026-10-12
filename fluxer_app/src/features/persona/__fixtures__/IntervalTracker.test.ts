@@ -1,29 +1,32 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {trackIntervals} from '@app/features/persona/__fixtures__/IntervalTracker';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 function createHost() {
 	return {setInterval: globalThis.setInterval, clearInterval: globalThis.clearInterval};
 }
 
-async function wait(ms: number): Promise<void> {
-	await new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 describe('trackIntervals', () => {
-	it('stops a repeating timer that nobody stopped', async () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it('stops a repeating timer that nobody stopped', () => {
 		const host = createHost();
 		const tracker = trackIntervals(host);
 		const tick = vi.fn();
 		host.setInterval(tick, 5);
-		await wait(30);
-		expect(tick).toHaveBeenCalled();
+		vi.advanceTimersByTime(30);
+		expect(tick).toHaveBeenCalledTimes(6);
 
 		expect(tracker.clearLeftovers()).toBe(1);
-		const ticksWhenStopped = tick.mock.calls.length;
-		await wait(30);
-		expect(tick).toHaveBeenCalledTimes(ticksWhenStopped);
+		vi.advanceTimersByTime(30);
+		expect(tick).toHaveBeenCalledTimes(6);
 	});
 
 	it('does not count a timer its owner already stopped', () => {
