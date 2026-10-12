@@ -83,8 +83,25 @@ describe('fork release feed', () => {
 		assert.equal(formats.getUpdateBaseUrl('linux'), `${RELEASES}/latest/download`);
 		assert.equal(downloads.UPDATE_BASE_URL, `${RELEASES}/latest/download`);
 		assert.equal(downloads.DOWNLOAD_PAGE_URL, `${RELEASES}/latest`);
-		assert.equal(formats.forkLatestInfoUrl(), `${RELEASES}/latest/download/latest-win32-x64.json`);
-		assert.equal(formats.forkLatestInfoUrl('linux', 'arm64'), `${RELEASES}/latest/download/latest-linux-arm64.json`);
+		assert.equal(formats.forkLatestInfoUrl(), `${RELEASES}/latest/download/tyne-latest-win32-x64.json`);
+		assert.equal(
+			formats.forkLatestInfoUrl('linux', 'arm64'),
+			`${RELEASES}/latest/download/tyne-latest-linux-arm64.json`,
+		);
+	});
+
+	test('builds from before the rename cannot mistake a release of this app for their own update', () => {
+		// "Fluxer Temple" builds read the same releases and ask for latest-<platform>-<arch>.json.
+		for (const [platform, arch] of [
+			['win32', 'x64'],
+			['darwin', 'arm64'],
+			['linux', 'x64'],
+		]) {
+			const {formats} = load({platform, arch});
+			const name = new URL(formats.forkLatestInfoUrl()).pathname.split('/').pop();
+			assert.notEqual(name, `latest-${platform}-${arch}.json`);
+			assert.equal(name, `tyne-latest-${platform}-${arch}.json`);
+		}
 	});
 
 	test('the Windows updater is given the bare repository, which is what Velopack reads GitHub through', () => {
