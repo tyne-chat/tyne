@@ -76,12 +76,16 @@ export function buildManualLatestDownloadUrl(format: ManualDesktopFormat): strin
 //
 // A release is tagged desktop-v<version> and carries, per platform and architecture:
 //   - on Windows, the Velopack feed and package (releases.<channel>.json, *-full.nupkg),
-//   - latest-<platform>-<arch>.json, the document the package origin serves at <base>/latest,
+//   - tyne-latest-<platform>-<arch>.json, the document the package origin serves at <base>/latest,
 //   - the installers named by forkReleaseAssetName.
 // scripts/fork-release-assets.mjs produces those files under the same names.
 
 const FORK_RELEASE_REPOSITORY_PATTERN = /^[\w.-]+\/[\w.-]+$/u;
 const FORK_RELEASE_TAG_PREFIX = 'desktop-v';
+// Not plain "latest": builds from before the rename to Tyne ("Fluxer Temple") read the same
+// releases and ask for latest-<platform>-<arch>.json. They must not find it in a Tyne release, or
+// they would try to install a Tyne package over themselves. Not finding it, they stay as they are.
+const FORK_LATEST_INFO_PREFIX = 'tyne-latest';
 
 export function forkReleaseRepository(): string | null {
 	const repository = typeof process.env === 'object' ? process.env.FLUXER_FORK_RELEASES?.trim() : undefined;
@@ -122,7 +126,7 @@ export function forkLatestInfoUrl(
 	arch: DesktopDownloadArch = getDesktopDownloadArch(process.arch),
 ): string | null {
 	const base = forkLatestAssetBaseUrl();
-	return base === null ? null : `${base}/latest-${platform}-${arch}.json`;
+	return base === null ? null : `${base}/${FORK_LATEST_INFO_PREFIX}-${platform}-${arch}.json`;
 }
 
 export function forkReleaseAssetName(
