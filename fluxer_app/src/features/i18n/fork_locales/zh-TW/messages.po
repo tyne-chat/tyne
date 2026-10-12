@@ -681,6 +681,10 @@ msgstr "{0} / {1} {2}（{3}%）"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} 已可安裝。"
 
+#. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
+msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
+msgstr "{domain} 執行了比此應用程式更新版本的 {productName}。請更新 {productName}，然後再試一次。"
+
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
 msgstr "{label}：{names}"
@@ -688,6 +692,10 @@ msgstr "{label}：{names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name}（{mode}）- 點擊以切換人格"
+
+#. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
+msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
+msgstr "{productName} 已停止檢查瀏覽器是否核准此登入。您的驗證碼並未遺失。"
 
 msgid "— Today at 12:00 PM"
 msgstr "— 今天 12:00"
