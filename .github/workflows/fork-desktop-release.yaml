@@ -63,6 +63,9 @@ env:
   # Fork: cargo gives up after three quick tries by default; ride out a longer network blip.
   CARGO_NET_RETRY: "10"
   FLUXER_FORK_RELEASES: ${{ github.repository }}
+  # Fork: the link scheme the packages declare. Must be the one the app registers when it runs
+  # (CHANNEL_APP_PROTOCOLS in fluxer_desktop/src/common/Constants.ts).
+  FLUXER_FORK_LINK_SCHEME: tyne
   CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
 
 jobs:
