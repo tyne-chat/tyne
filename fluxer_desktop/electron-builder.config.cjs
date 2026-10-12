@@ -54,7 +54,7 @@ const CHANNELS = {
 		provisioningProfile: null,
 	},
 };
-// Fork: package the stable channel as "Fluxer Temple" with its own IDs, matching the fork identity
+// Fork: package the stable channel as "Tyne" with its own IDs and icons, matching the fork identity
 // in src/common/DesktopIdentity.ts. It has no signing certificate, so nothing here needs upstream's
 // signing profile or notarization. FLUXER_FORK_IDENTITY=0 packages with upstream's identity.
 //
@@ -66,13 +66,14 @@ const CHANNELS = {
 // without those two.
 if (process.env.FLUXER_FORK_IDENTITY !== '0') {
 	Object.assign(CHANNELS.stable, {
-		productName: 'Fluxer Temple',
-		linuxOptDirName: 'fluxer-temple',
-		artifactProductName: 'Fluxer-Temple',
-		appId: 'app.fluxer.temple',
-		packageName: 'fluxer_desktop_temple',
-		linuxPackageName: 'fluxer-temple',
-		linuxDesktopId: 'app.fluxer.FluxerDesktopTemple',
+		productName: 'Tyne',
+		linuxOptDirName: 'tyne',
+		artifactProductName: 'Tyne',
+		appId: 'chat.tyne.desktop',
+		iconDirectory: 'icons-tyne',
+		packageName: 'tyne_desktop',
+		linuxPackageName: 'tyne',
+		linuxDesktopId: 'chat.tyne.Tyne',
 		notarize: false,
 		provisioningProfile: null,
 		macEntitlements: 'build_resources/entitlements.mac.development.plist',
@@ -1948,3 +1949,15 @@ module.exports = {
 	},
 	publish: null,
 };
+
+// Fork: the sentence macOS shows when it asks for a permission begins with the app's name, and
+// upstream's begin with "Fluxer". Only that first word is the app; "a Fluxer instance" further on
+// is the kind of server and stays.
+if (process.env.FLUXER_FORK_IDENTITY !== '0') {
+	const extendInfo = module.exports.mac.extendInfo;
+	for (const [key, value] of Object.entries(extendInfo)) {
+		if (key.endsWith('UsageDescription') && typeof value === 'string') {
+			extendInfo[key] = value.replace(/^Fluxer\b/u, productName);
+		}
+	}
+}
