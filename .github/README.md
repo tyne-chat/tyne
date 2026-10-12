@@ -50,7 +50,7 @@ documentation for building and self-hosting. Where they say Fluxer, the same ste
 
 Desktop builds for Windows, macOS and Linux are on the
 [releases page](https://github.com/tyne-chat/tyne/releases). They are not code-signed, so your
-system will ask before running them. The icon is a placeholder for now.
+system will ask before running them.
 
 ## Licence
 
