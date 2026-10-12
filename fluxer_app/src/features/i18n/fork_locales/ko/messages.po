@@ -681,6 +681,10 @@ msgstr "{1}개 중 {0}개 {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version}을(를) 설치할 준비가 되었습니다."
 
+#. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
+msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
+msgstr "{domain}에서 더 최신 버전의 {productName}를 사용 중입니다. {productName}를 업데이트한 후 다시 시도하세요."
+
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
 msgstr "{label}: {names}"
@@ -688,6 +692,10 @@ msgstr "{label}: {names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - 클릭하여 페르소나 전환"
+
+#. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
+msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
+msgstr "{productName}가 브라우저에서 이 로그인을 승인했는지 확인을 중단했습니다. 코드는 잃지 않았습니다."
 
 msgid "— Today at 12:00 PM"
 msgstr "— 오늘 오후 12:00"
