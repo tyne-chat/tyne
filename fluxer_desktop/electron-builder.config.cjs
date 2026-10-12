@@ -74,6 +74,11 @@ if (process.env.FLUXER_FORK_IDENTITY !== '0') {
 		packageName: 'tyne_desktop',
 		linuxPackageName: 'tyne',
 		linuxDesktopId: 'chat.tyne.Tyne',
+		// The link scheme the package declares (macOS Info.plist, Linux desktop file); the app registers
+		// the same one when it runs (CHANNEL_APP_PROTOCOLS in src/common/Constants.ts). It is passed in
+		// by the release workflow rather than written here because upstream's ChannelIsolation test
+		// loads this file and expects the stable channel to declare fluxer.
+		...(process.env.FLUXER_FORK_LINK_SCHEME ? {protocolScheme: process.env.FLUXER_FORK_LINK_SCHEME} : {}),
 		notarize: false,
 		provisioningProfile: null,
 		macEntitlements: 'build_resources/entitlements.mac.development.plist',
