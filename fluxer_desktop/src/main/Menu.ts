@@ -11,6 +11,7 @@ import {type BaseWindow, BrowserWindow, Menu, type MenuItem, type MenuItemConstr
 
 // Fork imports.
 
+import {FORK_ISSUES_URL, FORK_SOURCE_URL, FORK_WEBSITE_URL} from '@electron/common/ForkLinks';
 import {openAppWindowLike} from '@electron/main/Window';
 
 const MACOS_HELP_MENU_TITLE_AUTODETECT_OPT_OUT = '\u200C';
@@ -233,20 +234,20 @@ function buildTemplate(): Array<MenuItemConstructorOptions> {
 			{
 				label: t('desktop.appMenu.website'),
 				click: async () => {
-					await openExternalDeduped('https://fluxer.app');
+					await openExternalDeduped(FORK_WEBSITE_URL);
 				},
 			},
 			{
 				label: t('desktop.appMenu.github'),
 				click: async () => {
-					await openExternalDeduped('https://github.com/fluxerapp/fluxer');
+					await openExternalDeduped(FORK_SOURCE_URL);
 				},
 			},
 			{type: 'separator'},
 			{
 				label: t('desktop.appMenu.reportIssue'),
 				click: async () => {
-					await openExternalDeduped('https://feedback.fluxer.com');
+					await openExternalDeduped(FORK_ISSUES_URL);
 				},
 			},
 			{type: 'separator'},
