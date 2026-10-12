@@ -27,6 +27,10 @@ import type {SplashState, SplashStatus} from '@electron/main/SplashWindow';
 import {repairWindowsShortcuts} from '@electron/main/WindowsShortcuts';
 import {type BrowserWindow, app as electronApp} from 'electron';
 
+// Fork imports.
+
+import {DESKTOP_APP_NAME} from '@electron/common/DesktopIdentity';
+
 declare const __FLUXER_MAIN_APP_OUTPUT_FILE__: string;
 
 const requireModule = createRequire(import.meta.url);
@@ -77,8 +81,7 @@ const IN_PLACE_RELOAD_CONFIRM_TIMEOUT_MS = 45_000;
 const UPDATE_TAKEOVER_SPLASH_WAIT_MS = 250;
 const UPDATE_SPLASH_PRELOAD_DELAY_MS = 5000;
 
-const UPDATE_SERVER_UNREACHABLE_MESSAGE =
-	"Fluxer couldn't reach its update server to download app files. Check your internet connection, proxy or firewall. Fluxer keeps retrying.";
+const UPDATE_SERVER_UNREACHABLE_MESSAGE = `${DESKTOP_APP_NAME} couldn't reach its update server to download app files. Check your internet connection, proxy or firewall. ${DESKTOP_APP_NAME} keeps retrying.`;
 
 interface ModuleLaunchPermit {
 	readonly [MODULE_LAUNCH_PERMIT]: true;

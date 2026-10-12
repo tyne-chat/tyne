@@ -681,6 +681,10 @@ msgstr "{0} z {1} {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "Wersja {version} programu {appName} jest gotowa do instalacji."
 
+#. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
+msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
+msgstr "{domain} używa nowszej wersji {productName}a niż ta aplikacja. Zaktualizuj {productName}a i spróbuj ponownie."
+
 #. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
 msgid "{label}: {names}"
 msgstr "{label}: {names}"
@@ -688,6 +692,10 @@ msgstr "{label}: {names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) – kliknij, aby zmienić personę"
+
+#. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
+msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
+msgstr "{productName} przestał sprawdzać, czy przeglądarka zatwierdziła to logowanie. Nie stracił Twojego kodu."
 
 msgid "— Today at 12:00 PM"
 msgstr "— Dzisiaj o 12:00"
