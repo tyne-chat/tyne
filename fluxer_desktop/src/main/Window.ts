@@ -67,6 +67,10 @@ import {
 } from '@electron/main/ForkWindowSession';
 import {FORK_APP_WINDOW_CHANNELS} from '@fluxer/desktop_ipc/src/ForkAppWindowContract';
 
+// Fork imports.
+
+import {DESKTOP_APP_NAME} from '@electron/common/DesktopIdentity';
+
 const logger = createChildLogger('Window');
 const runtimeSecurity = new DesktopRuntimeSecurity({
 	logger: createChildLogger('DesktopRuntimeSecurity'),
@@ -90,7 +94,7 @@ const ACTIVE_ALLOW_TRANSPARENCY_RENDERER_ARG = '--fluxer-active-allow-transparen
 const ACTIVE_USE_NATIVE_TITLEBAR_RENDERER_ARG = '--fluxer-active-use-native-titlebar=1';
 const THEME_STUDIO_POPOUT_WINDOW_NAME = 'fluxer_theme_studio';
 const THEME_STUDIO_POPOUT_PATHNAME = '/theme-studio';
-const THEME_STUDIO_POPOUT_TITLE = 'Fluxer | Theme Studio';
+const THEME_STUDIO_POPOUT_TITLE = `${DESKTOP_APP_NAME} | Theme Studio`;
 const THEME_STUDIO_POPOUT_MIN_WIDTH = 900;
 const THEME_STUDIO_POPOUT_MIN_HEIGHT = 620;
 export const THEME_STUDIO_POPOUT_KEY = THEME_STUDIO_POPOUT_WINDOW_NAME;
