@@ -42,9 +42,9 @@ vi.mock('@app/features/ui/components/Avatar', () => ({
 	Avatar: () => <span data-testid="badge-avatar" data-flx="signal-bar.signal-bar-test.avatar.badge-avatar" />,
 }));
 
-import Authentication from '@app/features/auth/state/Authentication';
 import type {Channel} from '@app/features/channel/models/Channel';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import SessionManager from '@app/features/platform/state/AuthSession';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {SignalBar} from '@app/features/signal_bar/components/SignalBar';
 import styles from '@app/features/signal_bar/components/SignalBar.module.css';
@@ -161,7 +161,7 @@ describe('SignalBar', () => {
 	});
 
 	it('turns the signal off when the account already has it on, whatever persona it shows', async () => {
-		Authentication.setUserId('100000000000000001');
+		SessionManager.setUserId('100000000000000001');
 		setSignals([READING]);
 		const own = {...entry('reading', '100000000000000001', 'me'), persona_id: '9'};
 		await render(channel(), [own]);

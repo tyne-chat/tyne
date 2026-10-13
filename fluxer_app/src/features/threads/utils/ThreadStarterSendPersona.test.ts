@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 // Fork: the first message of a new thread is sent by its own helper, not by the composer's normal
@@ -12,6 +13,10 @@ const createOptimistic = vi.fn();
 const send = vi.fn();
 const createOptimisticMessage = vi.fn();
 
+// The helper now shares its module with thread-creation UI helpers, which use the Lingui macros.
+// The macros have no runtime outside the build.
+vi.mock('@lingui/core/macro', () => ({msg: (descriptor: unknown) => descriptor}));
+vi.mock('@lingui/react/macro', () => ({Trans: () => null, useLingui: () => ({i18n: {_: () => ''}})}));
 vi.mock('@app/features/messaging/commands/MessageCommands', () => ({reserveSend, createOptimistic, send}));
 vi.mock('@app/features/messaging/utils/MessageSubmitUtils', () => ({createOptimisticMessage}));
 vi.mock('@app/features/user/state/Users', () => ({default: {getCurrentUser: () => ({id: '100'})}}));
