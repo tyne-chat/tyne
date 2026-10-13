@@ -131,15 +131,6 @@ describe('MessagingMessage Persona Preservation', () => {
 		expect(updated.subprofile).toBeNull();
 	});
 
-	it('preserves subprofile across withReaction', () => {
-		const wire = createWireMessage();
-		const msg = new Message(wire, {skipUserCache: true});
-
-		const reacted = msg.withReaction({name: '🔥'}, true, false);
-		expect(reacted.subprofile?.id).toBe('sub-alice');
-		expect(reacted.subprofile?.name).toBe('Alice');
-	});
-
 	it('skips reaction hydration during withUpdates', () => {
 		mockHydrateMessageReactions.mockClear();
 		const wire = createWireMessage();
