@@ -234,6 +234,7 @@ describe('runtimeSnapshotFromDiscovery', () => {
 				status_page_incident_history_url: 'https://status.q.test/history',
 				premium_product_name: 'Supporter',
 				premium_info_url: 'https://q.test/premium',
+				desktop_app_prompt_enabled: true,
 			},
 			setup: {
 				configured: false,

@@ -151,7 +151,7 @@ export interface MessageRow {
 	call: MessageCall | null;
 	has_reaction: boolean | null;
 	version: number;
-	persona_id?: Nullish<PersonaID | string>;
+	persona_id?: PersonaID | string | null;
 }
 
 export const MESSAGE_COLUMNS = [
@@ -197,7 +197,7 @@ export interface MessageReactionRow {
 	emoji_name: string;
 	emoji_animated: boolean;
 	created_at: Date | null;
-	persona_id?: Nullish<PersonaID | bigint | string>;
+	persona_id?: PersonaID | bigint | string | null;
 }
 
 export interface AttachmentLookupRow {
