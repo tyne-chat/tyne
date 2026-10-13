@@ -1030,7 +1030,6 @@ mod tests {
     }
 
     #[tokio::test]
-        let _tracing_lock = crate::test_fixtures::lock_test_tracing();
     async fn off_mode_never_inspects_origin() {
         let tmp = tempfile::tempdir().expect("storage root");
         let root = tmp.path().canonicalize().expect("canonical storage root");
@@ -1864,7 +1863,6 @@ mod tests {
     }
 
     #[tokio::test]
-        let _tracing_lock = crate::test_fixtures::lock_test_tracing();
     async fn off_mode_serves_a_signed_request_unchanged() {
         let tmp = tempfile::tempdir().expect("storage root");
         let root = tmp.path().canonicalize().expect("canonical storage root");
