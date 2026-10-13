@@ -5,6 +5,7 @@ export interface AuthRegisterRequest {
 	consent?: boolean;
 	date_of_birth?: string;
 	global_name?: string;
+	setup_token?: string;
 }
 
 export interface AuthLoginRequest {
