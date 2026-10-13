@@ -62,6 +62,7 @@ import {type MouseEvent, useCallback, useMemo} from 'react';
 
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {originalPosterTagAppliesToMessage} from '@app/features/persona/utils/OriginalPosterPersona';
 
 const JUMP_TO_MESSAGE_FROM_SENT_DESCRIPTOR = msg({
 	message: 'Jump to message from {displayName}, sent {formattedDate}',
@@ -547,7 +548,7 @@ export const UserMessage = observer(() => {
 							data-flx="channel.user-message.user-tag-offset--2"
 						/>
 					)}
-					{isOriginalPoster(message.channelId, author.id) && (
+					{isOriginalPoster(message.channelId, author.id) && originalPosterTagAppliesToMessage(message) && (
 						<UserTag
 							className={styles.userTagOffset}
 							variant="op"
