@@ -6,12 +6,7 @@ import {
 	createGuild,
 	setupTestGuildWithMembers,
 } from '@app/api/channel/tests/ChannelTestUtils';
-import {
-	ALL_THREADS_ACTIVE,
-	resetChannelThreadsConfig,
-	setChannelThreadsConfig,
-	threadsRequest,
-} from '@app/api/channel/tests/ThreadTestUtils';
+import {threadsRequest} from '@app/api/channel/tests/ThreadTestUtils';
 import {ensureSessionStarted, getMessages} from '@app/api/message/tests/MessageTestUtils';
 import {forgetThreadOwnerPersonasOfUser, loadThreadOwnerPersonaId} from '@app/api/persona/ThreadOwnerPersonaStore';
 import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHarness';
@@ -932,16 +927,13 @@ describe('Forum post personas', () => {
 
 	beforeEach(async () => {
 		await harness.reset();
-		resetChannelThreadsConfig();
 	});
 
 	afterAll(async () => {
-		resetChannelThreadsConfig();
 		await harness.shutdown();
 	});
 
 	async function setupForum(): Promise<{owner: TestAccount; member: TestAccount; forumId: string}> {
-		await setChannelThreadsConfig(ALL_THREADS_ACTIVE);
 		const owner = await createTestAccount(harness);
 		const member = await createTestAccount(harness);
 		await ensureSessionStarted(harness, owner.token);
@@ -1051,16 +1043,13 @@ describe('Thread personas', () => {
 
 	beforeEach(async () => {
 		await harness.reset();
-		resetChannelThreadsConfig();
 	});
 
 	afterAll(async () => {
-		resetChannelThreadsConfig();
 		await harness.shutdown();
 	});
 
 	async function setupChannel(): Promise<{owner: TestAccount; member: TestAccount; channelId: string}> {
-		await setChannelThreadsConfig(ALL_THREADS_ACTIVE);
 		const owner = await createTestAccount(harness);
 		const member = await createTestAccount(harness);
 		await ensureSessionStarted(harness, owner.token);
