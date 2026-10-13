@@ -10,7 +10,6 @@ import {GlobalLimits} from '@app/features/app/utils/GlobalLimits';
 import {AssetCropModal, AssetType} from '@app/features/expressions/components/modals/AssetCropModal';
 import {openAssetSourceModal} from '@app/features/expressions/components/modals/AssetSourceModal';
 import {isAnimatedFile} from '@app/features/expressions/utils/AnimatedImageUtils';
-import {getAcceptString} from '@app/features/expressions/utils/AssetFormatCopy';
 import {formatImageUploadRecommendedHint} from '@app/features/expressions/utils/AssetUploadHintCopy';
 import {downloadGifAsImageFile} from '@app/features/expressions/utils/GifFileDownload';
 import {isSvgFile, readImageFileAsUploadDataUrl} from '@app/features/expressions/utils/ImageUploadFileUtils';
@@ -18,6 +17,7 @@ import {CLEAR_SEARCH_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDes
 import {openFilePicker} from '@app/features/messaging/utils/FilePickerUtils';
 import {formatFileSize} from '@app/features/messaging/utils/FileUtils';
 import {http} from '@app/features/platform/transport/RestTransport';
+import {readBlobAsDataUrl} from '@app/features/platform/utils/BlobDataUrl';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
@@ -30,6 +30,7 @@ import type {SegmentedTab} from '@app/features/ui/segmented_tabs/SegmentedTabs';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
+import {getAcceptString} from '@fluxer/constants/src/AssetFormatPolicy';
 import type {ActivePersonaScope} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
@@ -346,7 +347,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 			}
 			const svg = isSvgFile(file);
 			const animated = svg ? false : await isAnimatedFile(file);
-			const base64 = svg ? await readImageFileAsUploadDataUrl(file) : await AvatarUtils.fileToBase64(file);
+			const base64 = svg ? await readImageFileAsUploadDataUrl(file) : await readBlobAsDataUrl(file);
 			if (animated || svg) {
 				await handleTagIconUpload(base64);
 				return;
