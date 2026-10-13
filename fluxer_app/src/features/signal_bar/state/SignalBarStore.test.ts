@@ -18,8 +18,8 @@ vi.mock('@lingui/react/macro', () => ({
 	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
 }));
 
-import Authentication from '@app/features/auth/state/Authentication';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import SessionManager from '@app/features/platform/state/AuthSession';
 import {http} from '@app/features/platform/transport/RestTransport';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {moveSignal} from '@app/features/signal_bar/utils/SignalUtils';
@@ -73,7 +73,7 @@ describe('SignalBarStore', () => {
 	});
 
 	it('leaves lit signals alone when the active persona changes without anything done in the channel', async () => {
-		Authentication.setUserId('1');
+		SessionManager.setUserId('1');
 		const active = observable.box<string | null>(null);
 		const persona = vi.spyOn(PersonaStore, 'getEffectivePersonaForText').mockImplementation(() => ({
 			persona: active.get() ? ({id: active.get()} as never) : null,
@@ -110,7 +110,7 @@ describe('SignalBarStore', () => {
 	});
 
 	it('follows the composer of a channel while the person types in it', async () => {
-		Authentication.setUserId('1');
+		SessionManager.setUserId('1');
 		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
 		getMock.mockResolvedValue({
 			ok: true,
@@ -139,7 +139,7 @@ describe('SignalBarStore', () => {
 	});
 
 	it('does not count emptying the composer, a command, or a composer without typing indicators as typing', async () => {
-		Authentication.setUserId('1');
+		SessionManager.setUserId('1');
 		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
 		getMock.mockResolvedValue({ok: true, body: {enabled: true, bar_version: 3, entries: [entry('a', '1')]}} as never);
 		await SignalBarStore.fetchChannel('idle');
@@ -156,7 +156,7 @@ describe('SignalBarStore', () => {
 	});
 
 	it('changes the signals of the one channel it is told about', async () => {
-		Authentication.setUserId('1');
+		SessionManager.setUserId('1');
 		const putMock = vi.spyOn(http, 'put').mockResolvedValue({ok: true} as never);
 		getMock.mockResolvedValue({
 			ok: true,
