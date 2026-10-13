@@ -49,6 +49,5 @@ pub async fn lock_test_tracing_async() -> tokio::sync::MutexGuard<'static, ()> {
     TRACING_TEST_LOCK.lock().await
 }
 
-
 mod captured_log;
 pub(crate) use captured_log::CapturedLog;
