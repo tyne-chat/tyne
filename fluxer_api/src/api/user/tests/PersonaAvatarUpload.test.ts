@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {AVATAR_MAX_SIZE} from '@fluxer/constants/src/LimitConstants';
+import {MockKVProvider} from '@pkgs/kv_client/src/testing/MockKVProvider';
 import {afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, type MockInstance, vi} from 'vitest';
 import {createTestAccount} from '../../auth/tests/AuthTestUtils';
 import {Config} from '../../Config';
@@ -10,7 +11,6 @@ import {ensureSessionStarted} from '../../message/tests/MessageTestUtils';
 import {setInjectedMediaService} from '../../middleware/ServiceRegistry';
 import {PERSONA_AVATAR_IMPORT_QUOTA} from '../../persona/PersonaAvatarImporter';
 import {type ApiTestHarness, createApiTestHarness} from '../../test/ApiTestHarness';
-import type {MockKVProvider} from '../../test/mocks/MockKVProvider';
 import {HTTP_STATUS} from '../../test/TestConstants';
 import {TestMediaService} from '../../test/TestMediaService';
 import {createBuilder} from '../../test/TestRequestBuilder';
@@ -60,6 +60,8 @@ describe('Persona Avatar Upload', () => {
 	let harness: ApiTestHarness;
 	let media: RemoteAvatarMediaService;
 	let fetchSpy: MockInstance<typeof fetch>;
+	// Every rate-limit check the request made, in order. The KV mock does not record these itself.
+	let leakyBucketChecks: Array<{key: string; cost: number}> = [];
 	beforeAll(async () => {
 		harness = await createApiTestHarness();
 	});
@@ -68,6 +70,12 @@ describe('Persona Avatar Upload', () => {
 		media = new RemoteAvatarMediaService(harness.storageService);
 		setInjectedMediaService(media);
 		fetchSpy = vi.spyOn(globalThis, 'fetch');
+		const kv = harness.kvProvider as MockKVProvider;
+		leakyBucketChecks = [];
+		kv.checkLeakyBucketLimit = async (key, limit, windowMs, cost) => {
+			leakyBucketChecks.push({key, cost});
+			return MockKVProvider.prototype.checkLeakyBucketLimit.call(kv, key, limit, windowMs, cost);
+		};
 	});
 	afterEach(() => {
 		// The API process must never fetch a user-supplied URL itself (audit M1-1). Registration's
@@ -122,9 +130,7 @@ describe('Persona Avatar Upload', () => {
 			headers: {authorization: token},
 		});
 	const quotaCharges = () =>
-		(harness.kvProvider as MockKVProvider).checkLeakyBucketLimitSpy.mock.calls.filter(
-			([key, , , cost]) => String(key).includes(QUOTA_KEY_FRAGMENT) && cost === 1,
-		).length;
+		leakyBucketChecks.filter(({key, cost}) => key.includes(QUOTA_KEY_FRAGMENT) && cost === 1).length;
 
 	it('imports a persona avatar through the media proxy with the avatar size cap', async () => {
 		const account = await createTestAccount(harness);

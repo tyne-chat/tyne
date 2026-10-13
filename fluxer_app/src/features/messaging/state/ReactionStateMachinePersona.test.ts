@@ -1,20 +1,38 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {
-	applyAdd,
-	applyRemove,
 	emptyMap,
-	getRecord,
-	hydrate,
+	getEmojiKey,
 	mapToReactions,
+	type ReactionMap,
 	transitionReactionMap,
 } from '@app/features/messaging/state/ReactionStateMachine';
 import type {ReactionEmoji} from '@app/features/messaging/utils/ReactionUtils';
+import type {MessageReaction} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {describe, expect, it} from 'vitest';
 
 const ME = 'me-user-id';
 const ALICE = 'alice-id';
 const FIRE: ReactionEmoji = {name: '🔥'};
+
+// Upstream dropped these one-line wrappers from the state machine; the tests keep their own.
+const applyAdd = (
+	map: ReactionMap,
+	emoji: ReactionEmoji,
+	userId: string,
+	isCurrentUser: boolean,
+	personaId?: string | null,
+) => transitionReactionMap(map, {type: 'reaction.add', emoji, userId, isCurrentUser, personaId});
+const applyRemove = (
+	map: ReactionMap,
+	emoji: ReactionEmoji,
+	userId: string,
+	isCurrentUser: boolean,
+	personaId?: string | null,
+) => transitionReactionMap(map, {type: 'reaction.remove', emoji, userId, isCurrentUser, personaId});
+const getRecord = (map: ReactionMap, emoji: ReactionEmoji) => map.get(getEmojiKey(emoji));
+const hydrate = (map: ReactionMap, reactions: ReadonlyArray<MessageReaction>, currentUserId?: string | null) =>
+	transitionReactionMap(map, {type: 'reaction.hydrate', reactions, currentUserId}, currentUserId);
 
 describe('ReactionStateMachine: several reactors', () => {
 	it('preserves reaction count when another user removes their reaction', () => {
