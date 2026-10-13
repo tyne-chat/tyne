@@ -21,6 +21,9 @@ export async function seedTestData(baseUrl: string = API_BASE_URL): Promise<Seed
 		email: aliceEmail,
 		password: alicePassword,
 		global_name: 'Alice Observer',
+		// Registered first with the instance's setup token, which makes Alice the instance admin.
+		// Must match FLUXER_SETUP_TOKEN in docker-compose.e2e.yml.
+		setup_token: process.env.E2E_SETUP_TOKEN ?? 'e2e-setup-token-not-a-secret-0123456789',
 	});
 	const aliceMe = await aliceClient.getMe();
 	const alice: TestAccountInfo = {
