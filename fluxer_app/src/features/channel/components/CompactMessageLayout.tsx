@@ -25,6 +25,7 @@ import {useCallback, useLayoutEffect, useRef} from 'react';
 // Fork imports.
 
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
+import {originalPosterTagAppliesToMessage} from '@app/features/persona/utils/OriginalPosterPersona';
 
 const COMPACT_TIMESTAMP_WIDTH_CSS_VARIABLE = '--message-compact-measured-timestamp-width';
 const COMPACT_MESSAGE_SELECTOR = '[data-flx-compact="true"]';
@@ -193,7 +194,7 @@ export function CompactAuthorPrefix({
 					data-flx="channel.compact-message-layout.compact-author-prefix.user-tag-compact"
 				/>
 			)}
-			{isOriginalPoster(message.channelId, author.id) && (
+			{isOriginalPoster(message.channelId, author.id) && originalPosterTagAppliesToMessage(message) && (
 				<UserTag
 					className={styles.userTagCompact}
 					variant="op"
