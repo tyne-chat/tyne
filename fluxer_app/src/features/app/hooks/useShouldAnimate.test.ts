@@ -100,7 +100,6 @@ describe('resolveShouldAnimateDecision', () => {
 		reducedMotion: false,
 		keptUnderReducedMotion: false,
 		isInteracting: false,
-		entitlementOk: true,
 		saveData: false,
 		animatedMediaPlaybackAllowed: true,
 	};
@@ -214,16 +213,6 @@ describe('resolveShouldAnimateDecision', () => {
 				resolveShouldAnimateDecision({
 					...baseInput,
 					saveData: true,
-					animatedMediaPlaybackAllowed: true,
-				}),
-			).toBe(false);
-		});
-
-		it('returns false when entitlementOk is false', () => {
-			expect(
-				resolveShouldAnimateDecision({
-					...baseInput,
-					entitlementOk: false,
 					animatedMediaPlaybackAllowed: true,
 				}),
 			).toBe(false);
