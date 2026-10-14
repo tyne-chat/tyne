@@ -344,7 +344,9 @@ import {seconds} from 'itty-time';
 import {
 	PERSONA_CHANNEL_STATE_COLUMNS,
 	PERSONA_COLUMNS,
+	PERSONA_IMAGE_SOURCE_COLUMNS,
 	type PersonaChannelStateRow,
+	type PersonaImageSourceRow,
 	type PersonaRow,
 	THREAD_OWNER_PERSONA_COLUMNS,
 	type ThreadOwnerPersonaRow,
@@ -1491,5 +1493,11 @@ export const PersonaChannelStates = defineTable<PersonaChannelStateRow, 'user_id
 	name: 'persona_channel_states',
 	columns: PERSONA_CHANNEL_STATE_COLUMNS,
 	primaryKey: ['user_id', 'channel_id'],
+	partitionKey: ['user_id'],
+});
+export const PersonaImageSources = defineTable<PersonaImageSourceRow, 'user_id' | 'persona_id', 'user_id'>({
+	name: 'persona_image_sources',
+	columns: PERSONA_IMAGE_SOURCE_COLUMNS,
+	primaryKey: ['user_id', 'persona_id'],
 	partitionKey: ['user_id'],
 });

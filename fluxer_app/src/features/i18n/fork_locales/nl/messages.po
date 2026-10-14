@@ -65,12 +65,16 @@ msgstr "Verborgen zijbalken automatisch tonen"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Avatarafbeelding kon niet worden gedownload: {error}. De persona is zonder avatar geïmporteerd."
 
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "Bannerafbeelding kon niet worden gedownload: {error}. De persona is zonder banner geïmporteerd."
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Persona wisselen"
 
-msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Kies een PluralKit-export (.json) of sleep deze hierheen"
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "Kies een PluralKit-export (.json) of een {productName}-export (.zip), of sleep deze hierheen"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -83,6 +87,10 @@ msgstr "{name} configureren..."
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "Tijdstempel kopiëren\\"
+
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "Je persona's konden niet worden geëxporteerd."
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -118,6 +126,10 @@ msgstr "Dubbelklik om te bewerken"
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "Avatar {current} van {total} downloaden..."
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "Banner {current} van {total} downloaden..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -242,7 +254,7 @@ msgstr "Tijdstempel invoegen"
 msgid "Keep existing and add new (Recommended)"
 msgstr "Bestaande behouden en nieuwe toevoegen (aanbevolen)"
 
-#. placeholder {0}: pkData.members?.length ?? 0
+#. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Behoud je {existingCount} huidige persona('s) en voeg alle {0} geïmporteerde persona's daarnaast toe als nieuwe items."
 
@@ -536,8 +548,16 @@ msgstr "Handtekening-emoji is al in gebruik door persona \"{name}\""
 msgid "Skipped member because they have no name configured."
 msgstr "Lid overgeslagen omdat er geen naam is ingesteld."
 
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "Sommige proxytags zijn weggelaten: {productName} staat maximaal 5 per persona toe, elk van maximaal 32 tekens."
+
 msgid "Start Import"
 msgstr "Importeren starten"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "Afbeelding {current} van {total} uit het bestand opslaan..."
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
@@ -581,6 +601,14 @@ msgstr "Het gekozen bestand is geen geldig JSON-object."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "De signaalbalk staat uit totdat je hier een kanaal aanvinkt. Als je een categorie of de hele community aanvinkt, geldt dat ook voor kanalen die daar later worden gemaakt."
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "Dit .zip-bestand kon niet worden gelezen."
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "Dit .zip-bestand is geen persona-export van {productName}."
 
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
@@ -646,6 +674,10 @@ msgstr "Waar je persona wordt onthouden"
 msgid "avatars downloaded"
 msgstr "avatars gedownload"
 
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "banners gedownload"
+
 #. Placeholder for persona name
 msgid "e.g. Alice"
 msgstr "bijv. Alice"
@@ -657,6 +689,10 @@ msgstr "bijv. zij/haar"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "bijv. morgen om 15:00, over 2 uur, nu"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "afbeeldingen opgeslagen"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
@@ -696,6 +732,9 @@ msgstr "{name} ({mode}) - Klik om van persona te wisselen"
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} is gestopt met controleren of de browser deze aanmelding goedkeurde. Je code is niet verloren gegaan."
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "{publicCount} openbaar, {unlistedCount} niet vermeld, {privateCount} privé"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Vandaag om 12:00"
