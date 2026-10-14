@@ -10,6 +10,7 @@ import {Logger} from '@app/features/platform/utils/AppLogger';
 import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import type {
 	PersonaCreateRequest,
+	PersonaImportItem,
 	PersonaResponse,
 	PersonaSettingsResponse,
 	PersonaUpdateRequest,
@@ -135,7 +136,7 @@ export async function deletePersona(id: string): Promise<void> {
 	}
 }
 
-export async function importPersonas(personas: Array<PersonaCreateRequest>): Promise<Array<PersonaResponse>> {
+export async function importPersonas(personas: Array<PersonaImportItem>): Promise<Array<PersonaResponse>> {
 	const res = await http.post<Array<PersonaResponse>>(Endpoints.USER_PERSONA_IMPORT, {
 		body: personas,
 	});
@@ -144,6 +145,39 @@ export async function importPersonas(personas: Array<PersonaCreateRequest>): Pro
 	}
 	PersonaStore.upsertPersonas(res.body);
 	return res.body;
+}
+
+/** Downloads the zip of all personas the server builds (`pluralkit.json`, images, `tyne.json`, README). */
+export async function exportPersonas(): Promise<{blob: Blob; fileName: string}> {
+	const res = await http.get<Blob>(Endpoints.USER_PERSONA_EXPORT, {parse: 'binary'});
+	if (!res.ok || !res.body) {
+		throw new Error(extractErrorMessage(res, 'Failed to export personas'));
+	}
+	return {blob: res.body, fileName: exportFileName(res.headers['content-disposition'])};
+}
+
+function exportFileName(disposition: string | undefined): string {
+	const encoded = disposition ? /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1] : undefined;
+	if (encoded) {
+		try {
+			return decodeURIComponent(encoded);
+		} catch {}
+	}
+	return `Tyne personas ${new Date().toISOString().slice(0, 10)}.zip`;
+}
+
+/** Stores an image read from a persona export being imported. Returns its hash. */
+export async function importPersonaImage(
+	kind: 'avatar' | 'banner',
+	image: string,
+): Promise<{hash: string; avatarColor: number | null}> {
+	const res = await http.post<{hash: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_IMPORT_IMAGE, {
+		body: {kind, image},
+	});
+	if (!res.ok || !res.body?.hash) {
+		throw new Error(extractErrorMessage(res, 'Failed to store image'));
+	}
+	return {hash: res.body.hash, avatarColor: res.body.avatar_color ?? null};
 }
 
 export async function fetchPersonaProfile(userId: string, personaId: string): Promise<PersonaProfileResult> {
