@@ -215,9 +215,8 @@ const UserAreaInner = observer(
 			isPermissionMuted,
 			muteReason,
 			isPushToTalkEffective,
-			isPushToTalkHeld: Keybind.pushToTalkHeld,
-			isPushToMuteHeld: Keybind.pushToMuteHeld,
 			isPushToMuteEffective: Keybind.isPushToMuteEffective(),
+			isPushToMuteHeld: Keybind.pushToMuteHeld,
 		});
 		const effectiveMuted = microphoneState.effectiveMuted;
 		const isMuteToggleLocked = microphoneState.muteToggleLocked;
