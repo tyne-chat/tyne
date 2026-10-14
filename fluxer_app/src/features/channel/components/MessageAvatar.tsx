@@ -10,6 +10,10 @@ import type {User} from '@app/features/user/models/User';
 import {observer} from 'mobx-react-lite';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {personaAvatarUrls} from '@app/features/persona/utils/PersonaAvatarUrls';
+
 export const MessageAvatar = observer(
 	({
 		user,
@@ -72,7 +76,7 @@ export const MessageAvatar = observer(
 				<FocusRing data-flx="channel.message-avatar.focus-ring">
 					<Avatar
 						user={user}
-						avatarUrl={ignoreSubprofile ? undefined : (message.subprofile?.avatar ?? undefined)}
+						{...personaAvatarUrls(user.id, ignoreSubprofile ? null : message.subprofile)}
 						size={size}
 						className={className}
 						forceAnimate={isHovering}
