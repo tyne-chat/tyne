@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
@@ -212,11 +213,11 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 										data-flx="persona.persona-picker-sheet.recent-chip.select-persona"
 									>
 										{currentUser && (
-											<Avatar
+											<PersonaAvatar
 												user={currentUser}
-												avatarUrl={p.avatar_hash}
+												persona={PersonaStore.getKnownPersona(p.id)}
 												size={18}
-												data-flx="persona.persona-picker-sheet.avatar--2"
+												data-flx="persona.persona-picker-sheet.persona-avatar"
 											/>
 										)}
 										<span data-flx="persona.persona-picker-sheet.span">{p.name}</span>
@@ -261,11 +262,11 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 									data-flx="persona.persona-picker-sheet.persona-item.select-persona"
 								>
 									{currentUser && (
-										<Avatar
+										<PersonaAvatar
 											user={currentUser}
-											avatarUrl={p.avatar_hash}
+											persona={PersonaStore.getKnownPersona(p.id)}
 											size={28}
-											data-flx="persona.persona-picker-sheet.avatar--3"
+											data-flx="persona.persona-picker-sheet.persona-avatar--2"
 										/>
 									)}
 									<div className={styles.personaDetails} data-flx="persona.persona-picker-sheet.persona-details--2">
