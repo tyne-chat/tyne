@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Nightly Rebase & AI Conflict Resolver
+
+# Fork: this file only keeps the workflow registered. GitHub knows a manually
+# started workflow only if a file of that name is on the default branch, and
+# the default branch is `tyne`. The workflow that does the work is the file of
+# the same name on the `automation` branch, which is what gets dispatched:
+#
+#   gh workflow run nightly-rebase.yaml --ref automation
+#
+# Started from any other branch, this run fails with the note below.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  nightly-rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wrong branch
+        run: |
+          echo "::error::Start this workflow from the automation branch: gh workflow run nightly-rebase.yaml --ref automation"
+          exit 1
