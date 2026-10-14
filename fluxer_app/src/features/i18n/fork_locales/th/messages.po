@@ -65,12 +65,16 @@ msgstr "แสดงแถบด้านข้างที่ซ่อนอย
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "ดาวน์โหลดรูปอวาตาร์ไม่สำเร็จ: {error} นำเข้า Persona โดยไม่มีอวาตาร์"
 
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "ดาวน์โหลดรูปแบนเนอร์ไม่สำเร็จ: {error} นำเข้า Persona โดยไม่มีแบนเนอร์"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "เปลี่ยน Persona"
 
-msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "เลือกไฟล์ส่งออกของ PluralKit (.json) หรือลากมาวาง"
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "เลือกไฟล์ส่งออกของ PluralKit (.json) หรือไฟล์ส่งออกของ {productName} (.zip) หรือลากมาวาง"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -83,6 +87,10 @@ msgstr "กำลังตั้งค่า {name}..."
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "คัดลอกการประทับเวลา\\"
+
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "ส่งออก Persona ของคุณไม่สำเร็จ"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -118,6 +126,10 @@ msgstr "ดับเบิลคลิกเพื่อแก้ไข"
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "กำลังดาวน์โหลดอวาตาร์ {current} จาก {total}..."
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "กำลังดาวน์โหลดแบนเนอร์ {current} จาก {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -242,7 +254,7 @@ msgstr "แทรกการประทับเวลา"
 msgid "Keep existing and add new (Recommended)"
 msgstr "เก็บรายการเดิมและเพิ่มรายการใหม่ (แนะนำ)"
 
-#. placeholder {0}: pkData.members?.length ?? 0
+#. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "เก็บ Persona ปัจจุบัน {existingCount} รายการของคุณไว้ และเพิ่ม Persona ที่นำเข้าทั้ง {0} รายการเป็นรายการใหม่ควบคู่กัน"
 
@@ -536,8 +548,16 @@ msgstr "อีโมจิประจำตัวถูกใช้งานแ
 msgid "Skipped member because they have no name configured."
 msgstr "ข้ามสมาชิกเนื่องจากไม่ได้ตั้งชื่อไว้"
 
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "แท็กพร็อกซีบางรายการถูกข้ามไป: {productName} อนุญาตสูงสุด 5 แท็กต่อ Persona แต่ละแท็กยาวไม่เกิน 32 ตัวอักษร"
+
 msgid "Start Import"
 msgstr "เริ่มนำเข้า"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "กำลังบันทึกรูปที่ {current} จาก {total} จากไฟล์..."
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
@@ -581,6 +601,14 @@ msgstr "ไฟล์ที่เลือกไม่ใช่ออบเจ็
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "แถบสัญญาณจะปิดอยู่จนกว่าคุณจะติ๊กช่องที่นี่ การติ๊กหมวดหมู่หรือทั้งคอมมูนิตี้จะรวมถึงช่องที่สร้างขึ้นที่นั่นในภายหลังด้วย"
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "ไม่สามารถอ่านไฟล์ .zip นี้ได้"
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "ไฟล์ .zip นี้ไม่ใช่ไฟล์ส่งออก Persona จาก {productName}"
 
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
@@ -646,6 +674,10 @@ msgstr "ตำแหน่งที่จดจำ Persona ของคุณ"
 msgid "avatars downloaded"
 msgstr "อวาตาร์ที่ดาวน์โหลดแล้ว"
 
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "แบนเนอร์ที่ดาวน์โหลดแล้ว"
+
 #. Placeholder for persona name
 msgid "e.g. Alice"
 msgstr "เช่น Alice"
@@ -657,6 +689,10 @@ msgstr "เช่น เธอ"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "เช่น พรุ่งนี้ 15:00 น., ในอีก 2 ชั่วโมง, ตอนนี้"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "รูปที่บันทึกแล้ว"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
@@ -696,6 +732,9 @@ msgstr "{name} ({mode}) - คลิกเพื่อสลับ Persona"
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} หยุดตรวจสอบว่าเบราว์เซอร์อนุมัติการลงชื่อเข้านี้หรือไม่ ไม่ได้ลบโค้ดของคุณไป"
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "สาธารณะ {publicCount}, ไม่แสดงในรายการ {unlistedCount}, ส่วนตัว {privateCount}"
 
 msgid "— Today at 12:00 PM"
 msgstr "— วันนี้ เวลา 12:00"

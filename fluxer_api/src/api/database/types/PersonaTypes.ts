@@ -99,3 +99,32 @@ export const PERSONA_CHANNEL_STATE_COLUMNS = [
 	'persona_id',
 	'updated_at',
 ] as const satisfies ReadonlyArray<keyof PersonaChannelStateRow>;
+
+/**
+ * Where an imported persona's avatar and banner came from, with the image each link produced. The
+ * export links to the source again only while the persona still has that same image.
+ */
+export interface PersonaImageSourceRow {
+	user_id: UserID;
+	persona_id: PersonaID;
+	/** `avatar_url` or `webhook_avatar_url`: the PluralKit field the avatar came from. */
+	avatar_field: Nullish<string>;
+	avatar_main_empty: Nullish<boolean>;
+	avatar_url: Nullish<string>;
+	avatar_hash: Nullish<string>;
+	banner_url: Nullish<string>;
+	banner_hash: Nullish<string>;
+	updated_at: Date;
+}
+
+export const PERSONA_IMAGE_SOURCE_COLUMNS = [
+	'user_id',
+	'persona_id',
+	'avatar_field',
+	'avatar_main_empty',
+	'avatar_url',
+	'avatar_hash',
+	'banner_url',
+	'banner_hash',
+	'updated_at',
+] as const satisfies ReadonlyArray<keyof PersonaImageSourceRow>;
