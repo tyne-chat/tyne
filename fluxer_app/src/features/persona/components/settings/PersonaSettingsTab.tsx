@@ -16,6 +16,7 @@ import {isSvgFile, readImageFileAsUploadDataUrl} from '@app/features/expressions
 import {CLEAR_SEARCH_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
 import {openFilePicker} from '@app/features/messaging/utils/FilePickerUtils';
 import {formatFileSize} from '@app/features/messaging/utils/FileUtils';
+import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {readBlobAsDataUrl} from '@app/features/platform/utils/BlobDataUrl';
 import {Button} from '@app/features/ui/button/Button';
@@ -722,11 +723,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 											data-flx="persona.settings.persona-settings-tab.compact-persona-card.start-edit"
 										>
 											{currentUser && (
-												<Avatar
+												<PersonaAvatar
 													user={currentUser}
-													avatarUrl={persona.avatar_hash}
+													persona={PersonaStore.getKnownPersona(persona.id)}
 													size={36}
-													data-flx="persona.settings.persona-settings-tab.avatar"
+													data-flx="persona.settings.persona-settings-tab.persona-avatar"
 												/>
 											)}
 											<div className={styles.cardDetails} data-flx="persona.settings.persona-settings-tab.card-details">
