@@ -34,6 +34,10 @@ import {SNAPSHOT_SCHEMA_EPOCH} from './src/features/gateway/snapshot/SnapshotSch
 import {APP_SHELL_BUILD_META_NAME} from './src/features/platform/service_worker/WorkerCacheCleanup.ts';
 import * as AppStorageDatabase from './src/features/platform/state/AppStorageDatabase.ts';
 
+// Fork imports.
+
+import {forkAppNamePlugin} from './scripts/build/rspack/fork-app-name.mjs';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '.');
@@ -924,6 +928,7 @@ export default () => {
 					]
 				: []),
 			nodeAssertStrictSchemePlugin(),
+			forkAppNamePlugin(),
 			inlineScriptsPlugin(buildInfo.version),
 			fontPreloadPlugin(),
 			libfluxcoreWasmUrlPlugin({publicPath: workerWasmPublicPath ?? publicPath}),
