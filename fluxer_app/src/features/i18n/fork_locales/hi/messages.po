@@ -65,12 +65,16 @@ msgstr "छिपे साइडबार अपने-आप दिखाए�
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "अवतार इमेज डाउनलोड नहीं हो सकी: {error}। परसोना बिना अवतार के इंपोर्ट हुआ।"
 
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "बैनर इमेज डाउनलोड नहीं हो सकी: {error}। परसोना बिना बैनर के इंपोर्ट हुआ।"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "परसोना बदलें"
 
-msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "PluralKit एक्सपोर्ट (.json) चुनें या खींचकर छोड़ें"
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "PluralKit एक्सपोर्ट (.json) या {productName} एक्सपोर्ट (.zip) चुनें, या खींचकर छोड़ें"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -83,6 +87,10 @@ msgstr "{name} कॉन्फ़िगर हो रहा है..."
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "समय टिकट कॉपी करें\\"
+
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "आपके परसोना एक्सपोर्ट नहीं हो सके।"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -118,6 +126,10 @@ msgstr "एडिट करने के लिए डबल-क्लिक क
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "अवतार डाउनलोड हो रहा है {current}/{total}..."
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "बैनर डाउनलोड हो रहा है {current}/{total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -242,7 +254,7 @@ msgstr "समय टिकट डालें"
 msgid "Keep existing and add new (Recommended)"
 msgstr "मौजूदा रखें और नए जोड़ें (सुझाया गया)"
 
-#. placeholder {0}: pkData.members?.length ?? 0
+#. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "अपने {existingCount} मौजूदा परसोना रखें और सभी {0} इंपोर्ट किए गए परसोना उनके साथ नई एंट्री के रूप में जोड़ें।"
 
@@ -536,8 +548,16 @@ msgstr "हस्ताक्षर इमोजी का उपयोग प�
 msgid "Skipped member because they have no name configured."
 msgstr "सदस्य को छोड़ दिया गया क्योंकि उसका कोई नाम कॉन्फ़िगर नहीं है।"
 
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "कुछ प्रॉक्सी टैग छोड़ दिए गए: {productName} हर परसोना के लिए अधिकतम 5 टैग की अनुमति देता है, हर एक अधिकतम 32 अक्षरों का।"
+
 msgid "Start Import"
 msgstr "इंपोर्ट शुरू करें"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "फ़ाइल से इमेज {current}/{total} सेव हो रही है..."
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
@@ -581,6 +601,14 @@ msgstr "चुनी गई फ़ाइल मान्य JSON ऑब्जे
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "जब तक आप यहाँ कोई चैनल नहीं चुनते, सिग्नल बार बंद रहता है। किसी श्रेणी या पूरी कम्युनिटी को चुनने पर वहाँ बाद में बनने वाले चैनल भी शामिल होते हैं।"
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "यह .zip फ़ाइल पढ़ी नहीं जा सकी।"
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "यह .zip फ़ाइल {productName} का परसोना एक्सपोर्ट नहीं है।"
 
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
@@ -646,6 +674,10 @@ msgstr "आपका परसोना कहाँ याद रखा जा�
 msgid "avatars downloaded"
 msgstr "अवतार डाउनलोड हुए"
 
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "बैनर डाउनलोड हुए"
+
 #. Placeholder for persona name
 msgid "e.g. Alice"
 msgstr "जैसे Alice"
@@ -657,6 +689,10 @@ msgstr "जैसे वह"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "उदा. कल दोपहर 3 बजे, 2 घंटे में, अभी"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "इमेज सेव हुईं"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
@@ -696,6 +732,9 @@ msgstr "{name} ({mode}) - परसोना बदलने के लिए �
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} ने यह जांचना बंद कर दिया कि ब्राउज़र ने इस साइन-इन को मंजूरी दी है या नहीं। इसने आपका कोड नहीं खोया है।"
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "{publicCount} पब्लिक, {unlistedCount} अनलिस्टेड, {privateCount} प्राइवेट"
 
 msgid "— Today at 12:00 PM"
 msgstr "— आज दोपहर 12:00 बजे"

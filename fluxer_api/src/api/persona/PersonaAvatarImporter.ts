@@ -40,11 +40,16 @@ interface PersonaAvatarImportDeps {
 export interface PersonaAvatarImportResult {
 	avatar_hash?: string;
 	avatar_color?: number | null;
+	/** Set instead of `avatar_hash` when the links are banners. */
+	banner_hash?: string;
 	error?: string;
 }
 
+/** Persona images are avatars or banners; both are stored under the owning account. */
+export type PersonaImageKind = 'avatar' | 'banner';
+
 type PersonaAvatarImportOutcome =
-	| {status: 'imported'; avatar_hash: string; avatar_color: number | null}
+	| {status: 'imported'; hash: string; avatar_color: number | null}
 	| {status: 'invalid_url'}
 	| {status: 'rate_limited'; rateLimit: RateLimitResult}
 	| {status: 'failed'};
@@ -97,6 +102,7 @@ async function importOne(
 	deps: PersonaAvatarImportDeps,
 	userId: UserID,
 	rawUrl: string,
+	kind: PersonaImageKind = 'avatar',
 ): Promise<PersonaAvatarImportOutcome> {
 	const url = normalizeAvatarImportUrl(rawUrl);
 	if (url === null) return {status: 'invalid_url'};
@@ -114,28 +120,40 @@ async function importOne(
 			nsfw: 'allow',
 		});
 		if (!metadata?.base64) return {status: 'failed'};
-		const prepared = await deps.entityAssetService.prepareAssetUpload({
-			assetType: 'avatar',
-			entityType: 'user',
-			entityId: userId,
-			previousHash: null,
-			base64Image: metadata.base64,
-			errorPath: 'avatar',
-		});
-		await deps.entityAssetService.commitAssetChange(prepared);
-		if (!prepared.newHash) return {status: 'failed'};
-		const avatarColor = prepared.imageBuffer ? await deriveDominantAvatarColor(prepared.imageBuffer) : null;
-		return {status: 'imported', avatar_hash: prepared.newHash, avatar_color: avatarColor};
+		return await storePersonaImage(deps, userId, kind, metadata.base64);
 	} catch (error) {
 		Logger.warn({error, userId: userId.toString()}, 'Persona avatar import failed');
 		return {status: 'failed'};
 	}
 }
 
-function toResult(outcome: PersonaAvatarImportOutcome): PersonaAvatarImportResult {
+async function storePersonaImage(
+	deps: PersonaAvatarImportDeps,
+	userId: UserID,
+	kind: PersonaImageKind,
+	base64Image: string,
+): Promise<PersonaAvatarImportOutcome> {
+	const prepared = await deps.entityAssetService.prepareAssetUpload({
+		assetType: kind,
+		entityType: 'user',
+		entityId: userId,
+		previousHash: null,
+		base64Image,
+		errorPath: kind,
+	});
+	await deps.entityAssetService.commitAssetChange(prepared);
+	if (!prepared.newHash) return {status: 'failed'};
+	const avatarColor =
+		kind === 'avatar' && prepared.imageBuffer ? await deriveDominantAvatarColor(prepared.imageBuffer) : null;
+	return {status: 'imported', hash: prepared.newHash, avatar_color: avatarColor};
+}
+
+function toResult(outcome: PersonaAvatarImportOutcome, kind: PersonaImageKind = 'avatar'): PersonaAvatarImportResult {
 	switch (outcome.status) {
 		case 'imported':
-			return {avatar_hash: outcome.avatar_hash, avatar_color: outcome.avatar_color};
+			return kind === 'banner'
+				? {banner_hash: outcome.hash}
+				: {avatar_hash: outcome.hash, avatar_color: outcome.avatar_color};
 		case 'invalid_url':
 			return {error: INVALID_URL_MESSAGE};
 		case 'rate_limited':
@@ -170,6 +188,7 @@ export async function beginPersonaAvatarBatchImport(
 	deps: PersonaAvatarImportDeps,
 	userId: UserID,
 	urls: ReadonlyArray<string>,
+	kind: PersonaImageKind = 'avatar',
 ): Promise<PersonaAvatarBatchImport> {
 	const quota = await deps.rateLimitService.peekLimit({
 		identifier: quotaIdentifier(userId),
@@ -200,7 +219,7 @@ export async function beginPersonaAvatarBatchImport(
 					const url = urls[nextIndex++] as string;
 					// The lock is short and renewed per fetch, so a crashed process frees the user quickly.
 					await deps.cacheService.extendLock(lockKey, lockToken, BATCH_LOCK_TTL_SECONDS).catch(() => false);
-					const result = toResult(await importOne(deps, userId, url));
+					const result = toResult(await importOne(deps, userId, url, kind), kind);
 					results[url] = result;
 					completed++;
 					await onResult(url, result, completed);
@@ -216,4 +235,26 @@ export async function beginPersonaAvatarBatchImport(
 			return results;
 		},
 	};
+}
+
+/**
+ * Stores one image from a Tyne export the user is importing (the zip carries the images, so nothing
+ * is fetched). Charged to the same quota as a fetched image, one unit each, so a whole export of
+ * avatars and banners fits while the plain upload routes keep their tighter limit.
+ */
+export async function importPersonaImageUpload(
+	deps: PersonaAvatarImportDeps,
+	userId: UserID,
+	kind: PersonaImageKind,
+	base64Image: string,
+): Promise<{hash: string; avatar_color: number | null}> {
+	const rateLimit = await deps.rateLimitService.checkLimit({
+		identifier: quotaIdentifier(userId),
+		...PERSONA_AVATAR_IMPORT_QUOTA,
+	});
+	if (!rateLimit.allowed) throw rateLimitError(rateLimit);
+	// Invalid images are refused by the asset service with an ordinary validation error.
+	const outcome = await storePersonaImage(deps, userId, kind, base64Image);
+	if (outcome.status !== 'imported') throw new Error('Persona image upload produced no image');
+	return {hash: outcome.hash, avatar_color: outcome.avatar_color};
 }

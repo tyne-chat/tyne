@@ -5,6 +5,7 @@ import type {
 	PersonaChannelState,
 	PersonaChannelStatesResponse,
 	PersonaCreateRequest,
+	PersonaImportItem,
 	PersonaSettingsResponse,
 	PersonaSettingsUpdateRequest,
 	PersonaTag,
@@ -37,6 +38,7 @@ import {
 	loadPersonaChannelStates,
 	storePersonaChannelState,
 } from './PersonaChannelStateStore';
+import {forgetPersonaImageSources, storePersonaImageSources} from './PersonaImageSourceStore';
 
 export const MAX_PERSONAS_PER_USER = 250;
 
@@ -327,6 +329,7 @@ export class PersonaService {
 		if (!deleted) {
 			throw new PersonaNotFoundError();
 		}
+		await forgetPersonaImageSources(userId, personaId);
 
 		await this.dispatchToUser(userId, 'USER_PERSONA_DELETE', {
 			persona_id: personaId.toString(),
@@ -367,19 +370,29 @@ export class PersonaService {
 		await this.dispatchToMutualGuilds(userId, existing, 'delete');
 	}
 
-	async importPersonas(userId: UserID, items: Array<PersonaCreateRequest>): Promise<Array<Persona>> {
+	async importPersonas(userId: UserID, items: Array<PersonaImportItem>): Promise<Array<Persona>> {
 		const existingPersonas = await this.deps.personaRepository.findByUserId(userId);
 		const existingByUuid = new Map<string, Persona>();
+		const existingById = new Map<string, Persona>();
 		for (const p of existingPersonas) {
 			if (p.externalUuid) {
 				existingByUuid.set(p.externalUuid, p);
 			}
+			existingById.set(p.id.toString(), p);
 		}
+		// An item's external ID is the member ID in the file. A Tyne export writes a persona made in
+		// Tyne under its own ID, so re-importing an export updates those personas instead of adding
+		// them again.
+		const findExisting = (item: PersonaImportItem): Persona | undefined =>
+			item.external_uuid ? (existingByUuid.get(item.external_uuid) ?? existingById.get(item.external_uuid)) : undefined;
+		const updatedIds = new Set(
+			items.map((item) => findExisting(item)?.id.toString()).filter((id): id is string => id !== undefined),
+		);
 
 		// Track tags across existing personas (excluding those updated in this batch) + new imported personas
 		const usedTags = new Map<string, string>(); // tagKey -> persona name
 		for (const existing of existingPersonas) {
-			if (existing.externalUuid && items.some((it) => it.external_uuid === existing.externalUuid)) {
+			if (updatedIds.has(existing.id.toString())) {
 				continue;
 			}
 			for (const tag of existing.personaTags) {
@@ -416,12 +429,33 @@ export class PersonaService {
 			}
 		}
 
+		// Signature emojis follow the same rule as on a single persona: each belongs to one persona.
+		const signatureEmojiKey = (emoji: SignatureEmoji): string =>
+			emoji.id ? `custom:${emoji.id}` : `unicode:${emoji.name}`;
+		const usedEmojis = new Map<string, string>();
+		for (const existing of existingPersonas) {
+			if (updatedIds.has(existing.id.toString())) continue;
+			for (const emoji of existing.signatureEmojis) usedEmojis.set(signatureEmojiKey(emoji), existing.name);
+		}
+		for (const item of items) {
+			for (const emoji of item.signature_emojis ?? []) {
+				const key = signatureEmojiKey(emoji);
+				const owner = usedEmojis.get(key);
+				if (owner !== undefined) {
+					throw new DuplicateSignatureEmojiError(
+						`Signature emoji '${emoji.name}' is already assigned to persona '${owner}'`,
+					);
+				}
+				usedEmojis.set(key, item.name);
+			}
+		}
+
 		const results: Array<Persona> = [];
 		let currentCount = existingPersonas.length;
 
 		for (const item of items) {
-			if (item.external_uuid && existingByUuid.has(item.external_uuid)) {
-				const existing = existingByUuid.get(item.external_uuid)!;
+			const existing = findExisting(item);
+			if (existing) {
 				const updated = await this.deps.personaRepository.update(userId, existing.id, {
 					name: item.name,
 					avatar_hash: item.avatar_hash,
@@ -432,10 +466,15 @@ export class PersonaService {
 					bio: item.bio,
 					auto_tag_disabled: item.auto_tag_disabled,
 					persona_tags: item.persona_tags,
+					signature_emojis: item.signature_emojis,
 					visibility: item.visibility ?? existing.visibility,
-					external_uuid: item.external_uuid,
+					external_uuid:
+						existing.externalUuid ?? (item.external_uuid === existing.id.toString() ? null : item.external_uuid),
 				});
 				if (updated) {
+					if (item.image_sources !== undefined) {
+						await storePersonaImageSources(userId, updated, item.image_sources);
+					}
 					results.push(updated);
 				}
 			} else {
@@ -453,9 +492,13 @@ export class PersonaService {
 					bio: item.bio,
 					auto_tag_disabled: item.auto_tag_disabled,
 					persona_tags: item.persona_tags,
+					signature_emojis: item.signature_emojis,
 					visibility: item.visibility ?? 'unlisted',
 					external_uuid: item.external_uuid,
 				});
+				if (item.image_sources !== undefined) {
+					await storePersonaImageSources(userId, created, item.image_sources);
+				}
 				results.push(created);
 				currentCount++;
 			}
