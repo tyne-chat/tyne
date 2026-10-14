@@ -31,6 +31,7 @@ import {
 	isMentionPersona,
 } from '@app/features/channel/components/AutocompleteTypes';
 import tagStyles from '@app/features/persona/components/PersonaTag.module.css';
+import {personaAvatarUrls} from '@app/features/persona/utils/PersonaAvatarUrls';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {BaseAvatar} from '@app/features/ui/components/BaseAvatar';
 import Users from '@app/features/user/state/Users';
@@ -167,7 +168,7 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 						<Avatar
 							user={user}
 							size={24}
-							avatarUrl={option.persona.avatar_hash}
+							{...personaAvatarUrls(user.id, {avatar: option.persona.avatar_hash})}
 							showOffline={false}
 							disableStatusTooltip={true}
 							data-flx="channel.autocomplete-mention.persona-avatar"

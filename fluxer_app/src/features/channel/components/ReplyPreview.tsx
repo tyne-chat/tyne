@@ -22,6 +22,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type CSSProperties, useCallback} from 'react';
 
+// Fork imports.
+
+import {personaAvatarUrls} from '@app/features/persona/utils/PersonaAvatarUrls';
+
 const ORIGINAL_MESSAGE_WAS_DELETED_DESCRIPTOR = msg({
 	message: 'Original message was deleted',
 	comment: 'Label in the channel and chat reply preview. Keep the tone plain and specific.',
@@ -185,7 +189,7 @@ export const ReplyPreview = observer(
 					>
 						<Avatar
 							user={referencedMessage.author}
-							avatarUrl={referencedMessage.subprofile?.avatar ?? undefined}
+							{...personaAvatarUrls(referencedMessage.author.id, referencedMessage.subprofile)}
 							size={16}
 							className={styles.repliedAvatar}
 							guildId={resolvedGuildId}
