@@ -31,6 +31,10 @@ import {normalizeString} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {parseCassandraConsistency, parseCassandraSerialConsistency} from '@pkgs/cassandra/src/Client';
 import {parseGeoipSourceConfig, resolveGeoipRuntimeSourceConfig} from '@pkgs/geoip/src/GeoipStartup';
 
+// Fork imports.
+
+import {withForkPasskeyOrigins} from '@app/api/auth/ForkPasskeyOrigins';
+
 function extractHostname(url: string): string {
 	try {
 		return new URL(url).hostname;
@@ -607,7 +611,7 @@ export function buildAPIConfigFromMaster(master: MasterConfig): APIConfig {
 			passkeys: {
 				rpName: master.auth.passkeys.rp_name,
 				rpId: master.auth.passkeys.rp_id,
-				allowedOrigins: master.auth.passkeys.additional_allowed_origins,
+				allowedOrigins: withForkPasskeyOrigins(master.auth.passkeys.additional_allowed_origins),
 			},
 			bluesky: master.auth.bluesky as BlueskyOAuthConfig,
 		},
