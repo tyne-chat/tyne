@@ -15,6 +15,10 @@ import {
 import {getLinguiSwcPluginConfig} from './scripts/build/rspack/lingui.mjs';
 import {staticFilesPlugin} from './scripts/build/rspack/static-files.mjs';
 
+// Fork imports.
+
+import {forkAppNamePlugin} from './scripts/build/rspack/fork-app-name.mjs';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '.');
@@ -645,6 +649,7 @@ export default () => {
 		},
 		plugins: [
 			nodeAssertStrictSchemePlugin(),
+			forkAppNamePlugin(),
 			fontPreloadPlugin(),
 			...(isProduction ? [bootPreloadPlugin()] : []),
 			...(isProduction && !isDesktopRenderer ? [authEntryDocumentPlugin()] : []),
