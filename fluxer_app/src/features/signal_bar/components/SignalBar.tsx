@@ -6,6 +6,7 @@ import {useShouldAnimate} from '@app/features/app/hooks/useShouldAnimate';
 import Authentication from '@app/features/auth/state/Authentication';
 import type {Channel} from '@app/features/channel/models/Channel';
 import Permission from '@app/features/permissions/state/Permission';
+import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import styles from '@app/features/signal_bar/components/SignalBar.module.css';
 import {SignalContextMenu} from '@app/features/signal_bar/components/SignalContextMenu';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
@@ -17,7 +18,6 @@ import {
 	moveSignal,
 } from '@app/features/signal_bar/utils/SignalUtils';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
-import {Avatar} from '@app/features/ui/components/Avatar';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import Users from '@app/features/user/state/Users';
 import {Permissions} from '@fluxer/constants/src/ChannelConstants';
@@ -195,10 +195,10 @@ const SignalButton = observer(
 										key={getSignalEntryKey(entry)}
 										data-flx="signal-bar.signal-button.badge"
 									>
-										<Avatar
+										<PersonaAvatar
 											user={user}
 											size={BADGE_SIZE}
-											avatarUrl={entry.subprofile?.avatar ?? undefined}
+											persona={entry.subprofile}
 											guildId={guildId ?? undefined}
 											disableStatusTooltip={true}
 											data-flx="signal-bar.signal-button.avatar"
