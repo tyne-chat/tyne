@@ -65,12 +65,16 @@ msgstr "Rejtett oldalsávok automatikus megjelenítése"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Az avatárkép letöltése nem sikerült: {error}. A persona avatár nélkül lett importálva."
 
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "A borítókép letöltése nem sikerült: {error}. A persona borítókép nélkül lett importálva."
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Persona váltása"
 
-msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Válassz egy PluralKit-exportot (.json), vagy húzd ide"
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "Válassz egy PluralKit-exportot (.json) vagy egy {productName}-exportot (.zip), vagy húzd ide"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -83,6 +87,10 @@ msgstr "{name} beállítása..."
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "Időbélyegző másolása\\"
+
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "Nem sikerült exportálni a personáidat."
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -118,6 +126,10 @@ msgstr "Dupla kattintás a szerkesztéshez"
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "Avatár letöltése: {current} / {total}..."
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "Borítókép letöltése: {current} / {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -242,7 +254,7 @@ msgstr "Időbélyegző beszúrása"
 msgid "Keep existing and add new (Recommended)"
 msgstr "Meglévők megtartása és újak hozzáadása (ajánlott)"
 
-#. placeholder {0}: pkData.members?.length ?? 0
+#. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Tartsd meg a(z) {existingCount} jelenlegi personádat, és add hozzá mellé mind a(z) {0} importált personát új bejegyzésként."
 
@@ -536,8 +548,16 @@ msgstr "Ezt az aláírási hangulatjelet már használja a(z) \"{name}\" személ
 msgid "Skipped member because they have no name configured."
 msgstr "A tag kihagyva, mert nincs név beállítva hozzá."
 
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "Néhány proxycímke kimaradt: a {productName} personánként legfeljebb 5 címkét enged, egyenként legfeljebb 32 karakterrel."
+
 msgid "Start Import"
 msgstr "Importálás indítása"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "Kép mentése a fájlból: {current} / {total}..."
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
@@ -581,6 +601,14 @@ msgstr "A kiválasztott fájl nem érvényes JSON-objektum."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "A jelzősáv ki van kapcsolva, amíg itt be nem jelölsz egy csatornát. Egy kategória vagy az egész közösség bejelölése az ott később létrehozott csatornákra is érvényes."
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "Ez a .zip fájl nem olvasható."
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "Ez a .zip fájl nem {productName} persona-export."
 
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
@@ -646,6 +674,10 @@ msgstr "Hol van megjegyezve a personád"
 msgid "avatars downloaded"
 msgstr "avatár letöltve"
 
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "borítókép letöltve"
+
 #. Placeholder for persona name
 msgid "e.g. Alice"
 msgstr "pl. Alice"
@@ -657,6 +689,10 @@ msgstr "pl. ő"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "pl. holnap 15:00-kor, 2 óra múlva, most"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "kép mentve"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
@@ -696,6 +732,9 @@ msgstr "{name} ({mode}) – Kattints a persona váltásához"
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "A {productName} abbahagyta annak ellenőrzését, hogy a böngésző jóváhagyta-e ezt a bejelentkezést. Nem veszítette el a kódodat."
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "{publicCount} nyilvános, {unlistedCount} nem listázott, {privateCount} privát"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Ma 12:00-kor"

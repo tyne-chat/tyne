@@ -65,12 +65,16 @@ msgstr "Автоматично показване на скритите стра
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Изображението на аватара не можа да бъде изтеглено: {error}. Персоната е импортирана без аватар."
 
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "Изображението на банера не можа да бъде изтеглено: {error}. Персоната е импортирана без банер."
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Смяна на персона"
 
-msgid "Choose a PluralKit export (.json) or drag & drop"
-msgstr "Изберете експорт от PluralKit (.json) или го плъзнете и пуснете"
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "Изберете експорт от PluralKit (.json) или експорт от {productName} (.zip), или го плъзнете и пуснете"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -83,6 +87,10 @@ msgstr "Конфигуриране на {name}..."
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "Копирай клеймото за време\\"
+
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "Персоните ви не можаха да бъдат експортирани."
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -118,6 +126,10 @@ msgstr "Двойно щракване за редактиране"
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "Изтегляне на аватар {current} от {total}..."
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "Изтегляне на банер {current} от {total}..."
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -242,7 +254,7 @@ msgstr "Вмъкване на клеймо за време"
 msgid "Keep existing and add new (Recommended)"
 msgstr "Запазване на съществуващите и добавяне на нови (препоръчително)"
 
-#. placeholder {0}: pkData.members?.length ?? 0
+#. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Запазете текущите си персони ({existingCount}) и добавете всички импортирани персони ({0}) до тях като нови записи."
 
@@ -536,8 +548,16 @@ msgstr "Подписаното емоджи вече се използва от 
 msgid "Skipped member because they have no name configured."
 msgstr "Членът е пропуснат, защото няма конфигурирано име."
 
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "Някои етикети за прокси бяха пропуснати: {productName} позволява до 5 на персона, всеки с най-много 32 знака."
+
 msgid "Start Import"
 msgstr "Начало на импортирането"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "Запазване на изображение {current} от {total} от файла..."
 
 #. placeholder {0}: importResults.successCount
 msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
@@ -581,6 +601,14 @@ msgstr "Избраният файл не е валиден JSON обект."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Лентата със сигнали е изключена, докато не отметнеш канал тук. Отмятането на категория или на цялата общност обхваща и каналите, създадени там по-късно."
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "Този .zip файл не може да бъде прочетен."
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "Този .zip файл не е експорт на персони от {productName}."
 
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
@@ -646,6 +674,10 @@ msgstr "Къде се помни персоната ви"
 msgid "avatars downloaded"
 msgstr "изтеглени аватара"
 
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "изтеглени банера"
+
 #. Placeholder for persona name
 msgid "e.g. Alice"
 msgstr "напр. Алис"
@@ -657,6 +689,10 @@ msgstr "напр. тя/нея"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "напр. утре в 15:00 ч., след 2 часа, сега"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "запазени изображения"
 
 #. Progress label for prepared personas
 msgid "personas prepared"
@@ -696,6 +732,9 @@ msgstr "{name} ({mode}) – щракнете, за да смените перс�
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} спря да проверява дали браузърът е одобрил влизането. Кодът ви не е изгубен."
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "{publicCount} публични, {unlistedCount} скрити, {privateCount} лични"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Днес в 12:00"
