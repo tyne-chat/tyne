@@ -117,12 +117,44 @@ export const PersonaUpdateRequestSchema = z.object({
 });
 export type PersonaUpdateRequest = z.infer<typeof PersonaUpdateRequestSchema>;
 
+/**
+ * Where an imported persona's images came from, so that an export can link to them there again for
+ * as long as the image is unchanged. The avatar's field is kept even without a link: PluralKit
+ * shows `webhook_avatar_url` on messages and `avatar_url` on the member card, and the export
+ * writes the avatar back to the field it came from.
+ */
+export const PersonaImportImageSourcesSchema = z.object({
+	avatar: z
+		.object({
+			url: z.string().max(2048).nullish().describe('The link the avatar was imported from'),
+			field: z.enum(['avatar_url', 'webhook_avatar_url']).describe('The PluralKit field it came from'),
+			main_avatar_empty: z
+				.boolean()
+				.optional()
+				.describe("Whether the member's avatar_url was empty, when the avatar came from webhook_avatar_url"),
+		})
+		.nullish(),
+	banner: z
+		.object({
+			url: z.string().max(2048).nullish().describe('The link the banner was imported from'),
+		})
+		.nullish(),
+});
+export type PersonaImportImageSources = z.infer<typeof PersonaImportImageSourcesSchema>;
+
+export const PersonaImportItemSchema = PersonaCreateRequestSchema.extend({
+	image_sources: PersonaImportImageSourcesSchema.nullish().describe(
+		"Where the persona's images were imported from; null when the file gave it none",
+	),
+});
+export type PersonaImportItem = z.infer<typeof PersonaImportItemSchema>;
+
 export const PersonaBulkImportRequestSchema = z.preprocess(
 	(val) =>
 		val && typeof val === 'object' && !Array.isArray(val) && Array.isArray((val as any).personas)
 			? (val as any).personas
 			: val,
-	z.array(PersonaCreateRequestSchema).max(250),
+	z.array(PersonaImportItemSchema).max(250),
 );
 export type PersonaBulkImportRequest = z.infer<typeof PersonaBulkImportRequestSchema>;
 
@@ -245,6 +277,26 @@ export const PersonaAvatarImportResponse = z.object({
 	avatar_color: z.number().int().nullish().optional().describe('Dominant avatar color'),
 });
 
+export const PersonaImportImageKindSchema = z.enum(['avatar', 'banner']);
+
 export const PersonaBatchAvatarImportRequest = z.object({
 	urls: z.array(z.string().url().max(2048)).min(1).max(500).describe('List of remote avatar URLs to import'),
+	kind: PersonaImportImageKindSchema.optional().describe(
+		'Whether the links are avatars or banners; avatars when absent',
+	),
 });
+
+export const PersonaImportImageRequest = z.object({
+	kind: PersonaImportImageKindSchema.describe('Whether the image is an avatar or a banner'),
+	image: z.string().describe('Base64 data URI of the image'),
+});
+export const PersonaImportImageResponse = z.object({
+	hash: z.string().describe('Hash of the stored image'),
+	avatar_color: z.number().int().nullish().describe('Dominant colour, for an avatar'),
+});
+
+export const PersonaExportResponse = z
+	.file()
+	.describe(
+		'A ZIP file with the personas as a PluralKit export (pluralkit.json), their images, tyne.json and a README',
+	);
