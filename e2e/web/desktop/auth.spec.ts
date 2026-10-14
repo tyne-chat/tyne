@@ -7,7 +7,7 @@ test.describe('Authentication Flows', () => {
 
 	test('login page loads and displays brand elements', async ({page}) => {
 		await openEmailSignIn(page);
-		await expect(page).toHaveTitle(/Fluxer|Sign In|Log In/i);
+		await expect(page).toHaveTitle(/Tyne|Fluxer|Sign In|Log In/i);
 		// Verify email and password input fields are visible
 		const emailInput = page.locator('input[type="email"], input[name="email"], input[autocomplete="email"]');
 		const passwordInput = page.locator('input[type="password"]');
