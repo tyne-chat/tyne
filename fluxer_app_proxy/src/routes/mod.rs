@@ -8,6 +8,10 @@ mod health;
 mod spa_index;
 mod spa_static;
 
+// Fork modules.
+
+mod fork_android_association;
+
 pub use spa_index::present_local_asset_prefixes;
 
 use crate::state::AppState;
@@ -41,7 +45,7 @@ pub fn build_router(state: AppState) -> Router {
         )
         .route(
             "/.well-known/assetlinks.json",
-            get(android_association::assetlinks),
+            get(fork_android_association::assetlinks),
         )
         .route(
             "/apple-app-site-association",
