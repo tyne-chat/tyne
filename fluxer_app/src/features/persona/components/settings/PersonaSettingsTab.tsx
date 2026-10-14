@@ -19,6 +19,7 @@ import {formatFileSize} from '@app/features/messaging/utils/FileUtils';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {readBlobAsDataUrl} from '@app/features/platform/utils/BlobDataUrl';
+import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
@@ -38,6 +39,7 @@ import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
 import {
 	CaretRight,
+	DownloadSimple,
 	GlobeSimple,
 	LockSimple,
 	LockSimpleOpen,
@@ -50,6 +52,7 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import * as PersonaCommands from '../../commands/PersonaCommands';
 import {type ActivePersonaMode, type Persona, PersonaStore} from '../../state/PersonaStore';
 import {openPersonaEditModal} from '../modals/PersonaEditModal';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
@@ -101,6 +104,10 @@ const ACTIVE_PERSONA_MODE_ARIA_DESCRIPTOR = msg({
 	comment: 'Aria label for active persona mode tabs',
 });
 
+const EXPORT_FAILED_DESCRIPTOR = msg({
+	message: 'Could not export your personas.',
+	comment: 'Toast when downloading the persona export fails',
+});
 const FAILED_TO_UPLOAD_ICON_DESCRIPTOR = msg({
 	message: 'Failed to upload icon to server',
 	comment: 'Toast when icon upload fails',
@@ -426,6 +433,19 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		}
 	};
 
+	const [isExporting, setIsExporting] = useState(false);
+	const handleExport = async () => {
+		setIsExporting(true);
+		try {
+			const {blob, fileName} = await PersonaCommands.exportPersonas();
+			downloadBlob(blob, fileName);
+		} catch {
+			ToastCommands.createToast({type: 'error', children: i18n._(EXPORT_FAILED_DESCRIPTOR)});
+		} finally {
+			setIsExporting(false);
+		}
+	};
+
 	const handleStartAdd = () => {
 		openPersonaEditModal();
 	};
@@ -651,6 +671,17 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									data-flx="persona.settings.persona-settings-tab.button.open-plural-kit-import-modal"
 								>
 									<Trans>Import from PluralKit</Trans>
+								</Button>
+								<Button
+									variant="secondary"
+									leftIcon={
+										<DownloadSimple size={16} data-flx="persona.settings.persona-settings-tab.download-simple" />
+									}
+									onClick={() => void handleExport()}
+									submitting={isExporting}
+									data-flx="persona.settings.persona-settings-tab.button"
+								>
+									<Trans>Export</Trans>
 								</Button>
 								<Button
 									variant="primary"
