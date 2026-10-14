@@ -222,7 +222,7 @@ export function UserAccountController(app: HonoApp) {
 		const rawUrls = body.urls as Array<string>;
 		const uniqueUrls = Array.from(new Set(rawUrls));
 		const total = uniqueUrls.length;
-		const batch = await beginPersonaAvatarBatchImport(personaAvatarImportDeps(ctx), user.id, uniqueUrls);
+		const batch = await beginPersonaAvatarBatchImport(personaAvatarImportDeps(ctx), user.id, uniqueUrls, body.kind);
 
 		const res = streamText(ctx, async (stream) => {
 			let aborted = false;
@@ -249,6 +249,7 @@ export function UserAccountController(app: HonoApp) {
 						url,
 						avatar_hash: r.avatar_hash,
 						avatar_color: r.avatar_color,
+						banner_hash: r.banner_hash,
 						error: r.error,
 					}),
 			});
