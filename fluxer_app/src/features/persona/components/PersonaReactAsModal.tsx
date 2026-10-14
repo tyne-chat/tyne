@@ -6,6 +6,7 @@ import * as ReactionCommands from '@app/features/messaging/commands/ReactionComm
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import {hasPersonaReacted, toReactionEmoji} from '@app/features/messaging/utils/ReactionUtils';
 import {fetchPersonas} from '@app/features/persona/commands/PersonaCommands';
+import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {type ClientPersona, PersonaStore} from '@app/features/persona/state/PersonaStore';
 import * as PopoutCommands from '@app/features/ui/commands/PopoutCommands';
@@ -297,11 +298,11 @@ export const PersonaReactAsModal: React.FC<PersonaReactAsModalProps> = observer(
 										data-flx="persona.persona-react-as-modal.persona-item"
 									>
 										{currentUser && (
-											<Avatar
+											<PersonaAvatar
 												user={currentUser}
-												avatarUrl={p.avatar_hash}
+												persona={PersonaStore.getKnownPersona(p.id)}
 												size={32}
-												data-flx="persona.persona-react-as-modal.avatar--2"
+												data-flx="persona.persona-react-as-modal.persona-avatar"
 											/>
 										)}
 										<div className={styles.personaDetails} data-flx="persona.persona-react-as-modal.persona-details--2">
