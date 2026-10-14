@@ -272,6 +272,16 @@ export const UserRateLimitConfigs = {
 		bucket: 'user:persona:mutate',
 		config: {limit: 30, windowMs: ms('1 minute')},
 	} as RouteRateLimitConfig,
+	USER_PERSONA_EXPORT: {
+		bucket: 'user:persona:export',
+		config: {limit: 5, windowMs: ms('10 minutes')},
+	} as RouteRateLimitConfig,
+	// An export holds up to 250 personas, each with an avatar and a banner. Each image is also
+	// charged to the persona image import quota (PERSONA_AVATAR_IMPORT_QUOTA).
+	USER_PERSONA_IMAGE_IMPORT: {
+		bucket: 'user:persona:image_import',
+		config: {limit: 600, windowMs: ms('10 minutes')},
+	} as RouteRateLimitConfig,
 	SIGNAL_BAR_READ: {
 		bucket: 'signal_bar:read',
 		config: {limit: 60, windowMs: ms('10 seconds')},

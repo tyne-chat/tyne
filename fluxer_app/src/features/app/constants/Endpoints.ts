@@ -189,6 +189,8 @@ export const Endpoints = {
 	USER_PERSONA_BANNER: '/users/@me/personas/banner',
 	USER_PERSONA_IMPORT_AVATAR: '/users/@me/personas/import-avatar',
 	USER_PERSONA_IMPORT_BATCH_AVATARS: '/users/@me/personas/import-batch-avatars',
+	USER_PERSONA_IMPORT_IMAGE: '/users/@me/personas/import-image',
+	USER_PERSONA_EXPORT: '/users/@me/personas/export',
 	USER_PERSONA_SETTINGS: '/users/@me/personas/settings',
 	USER_PERSONA_CHANNEL_STATES: '/users/@me/personas/channel-states',
 	USER_PERSONA_CHANNEL_STATE: (channelId: string) => `/users/@me/personas/channel-states/${channelId}`,
