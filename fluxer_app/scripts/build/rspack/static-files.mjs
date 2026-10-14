@@ -77,6 +77,8 @@ function generateManifest(staticCdnEndpoint) {
 		],
 	};
 
+	// Fork: the installed web app carries the fork's name (see FORK_MANIFEST_IDENTITY below).
+	Object.assign(manifest, FORK_MANIFEST_IDENTITY);
 	return JSON.stringify(manifest, null, 2);
 }
 
@@ -165,3 +167,14 @@ export class StaticFilesPlugin {
 export function staticFilesPlugin(options) {
 	return new StaticFilesPlugin(options);
 }
+
+// Fork: what a browser shows when the web app is installed ("Install Tyne..."). A self-hosted
+// instance with its own branding replaces these when the manifest is served (fluxer_app_proxy);
+// they are what the dev server and an unbranded instance show. Keep the name in step with
+// PRODUCT_NAME in src/features/app/config/ProductConstants.ts.
+const FORK_MANIFEST_IDENTITY = {
+	name: 'Tyne',
+	short_name: 'Tyne',
+	description:
+		'Tyne is a free and open source chat app for friends, groups and communities, with personas. A fork of Fluxer.',
+};
