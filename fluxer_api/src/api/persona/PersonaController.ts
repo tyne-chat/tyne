@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {Readable} from 'node:stream';
 import {UserIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {
 	PersonaBulkImportRequestSchema,
@@ -8,7 +9,10 @@ import {
 	PersonaChannelStatesResponseSchema,
 	PersonaChannelStateUpdateRequestSchema,
 	PersonaCreateRequestSchema,
+	PersonaExportResponse,
 	PersonaIdParam,
+	PersonaImportImageRequest,
+	PersonaImportImageResponse,
 	PersonaListResponseSchema,
 	PersonaResponseSchema,
 	PersonaSettingsResponseSchema,
@@ -27,6 +31,8 @@ import {OpenAPI} from '../middleware/ResponseTypeMiddleware';
 import {RateLimitConfigs} from '../RateLimitConfig';
 import type {HonoApp} from '../types/HonoEnv';
 import {Validator} from '../Validator';
+import {importPersonaImageUpload} from './PersonaAvatarImporter';
+import {createPersonaExportArchive} from './PersonaExportService';
 
 export function PersonaController(app: HonoApp) {
 	app.get(
@@ -142,6 +148,73 @@ export function PersonaController(app: HonoApp) {
 			const body = ctx.req.valid('json');
 			const settings = await ctx.get('personaService').updateSettings(user.id, body);
 			return ctx.json(settings);
+		},
+	);
+
+	// Before the `:persona_id` routes, so that "export" is not read as an ID.
+	app.get(
+		'/users/@me/personas/export',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_EXPORT),
+		requireOAuth2ScopeForBearer('personas.read'),
+		LoginRequired,
+		DefaultUserOnly,
+		OpenAPI({
+			operationId: 'export_my_personas',
+			summary: 'Export own personas',
+			responseSchema: PersonaExportResponse,
+			responseContentType: 'application/zip',
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				"Exports all personas of the authenticated user as a ZIP file: a PluralKit export file (pluralkit.json), each persona's avatar and banner and the tag icon, tyne.json listing which image belongs to which persona, and a README. Importing the ZIP gives the personas back.",
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {fileName, stream} = await createPersonaExportArchive(
+				{personaService: ctx.get('personaService'), storageService: ctx.get('storageService')},
+				user.id,
+			);
+			const headers = new Headers();
+			headers.set('Content-Type', 'application/zip');
+			headers.set('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`);
+			headers.set('Cache-Control', 'private, no-store');
+			return new Response(Readable.toWeb(stream) as ReadableStream, {status: 200, headers});
+		},
+	);
+
+	app.post(
+		'/users/@me/personas/import-image',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_IMAGE_IMPORT),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaImportImageRequest),
+		OpenAPI({
+			operationId: 'import_persona_image',
+			summary: 'Store an image from a persona export being imported',
+			responseSchema: PersonaImportImageResponse,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Stores one avatar or banner image read from a persona export ZIP that the user is importing, and returns its hash for use in the import. Counts against the persona image import quota.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {kind, image} = ctx.req.valid('json');
+			const result = await importPersonaImageUpload(
+				{
+					mediaService: ctx.get('mediaService'),
+					entityAssetService: ctx.get('entityAssetService'),
+					rateLimitService: ctx.get('rateLimitService'),
+					cacheService: ctx.get('cacheService'),
+				},
+				user.id,
+				kind,
+				image,
+			);
+			return ctx.json(result);
 		},
 	);
 
