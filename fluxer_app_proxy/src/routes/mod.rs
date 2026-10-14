@@ -11,6 +11,10 @@ mod spa_static;
 pub use assets_proxy::bundles_app_assets;
 pub use spa_index::present_local_asset_prefixes;
 
+// Fork modules.
+
+mod fork_android_association;
+
 use crate::state::AppState;
 use axum::{
     Router,
@@ -42,7 +46,7 @@ pub fn build_router(state: AppState) -> Router {
         )
         .route(
             "/.well-known/assetlinks.json",
-            get(android_association::assetlinks),
+            get(fork_android_association::assetlinks),
         )
         .route(
             "/apple-app-site-association",
