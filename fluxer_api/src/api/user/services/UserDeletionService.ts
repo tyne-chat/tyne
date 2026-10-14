@@ -51,6 +51,7 @@ import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 // Fork: threads started as a persona.
 
 import {forgetPersonaChannelStatesOfUser} from '@app/api/persona/PersonaChannelStateStore';
+import {forgetPersonaImageSourcesOfUser} from '@app/api/persona/PersonaImageSourceStore';
 import {forgetThreadOwnerPersonasOfUser} from '@app/api/persona/ThreadOwnerPersonaStore';
 
 const CHUNK_SIZE = 100;
@@ -571,6 +572,7 @@ export async function processUserDeletion(
 		personaRepository.deleteSettings(userId),
 		forgetThreadOwnerPersonasOfUser(userId),
 		forgetPersonaChannelStatesOfUser(userId),
+		forgetPersonaImageSourcesOfUser(userId),
 	]);
 	await userRepository.deleteUserSecondaryIndices(userId);
 	const userForAnonymization = await userRepository.findUniqueAssert(userId);

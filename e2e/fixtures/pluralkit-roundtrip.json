@@ -1,0 +1,74 @@
+{
+	"version": 2,
+	"tag": "⚞Round Trip⚟",
+	"members": [
+		{
+			"id": "rtaaa",
+			"name": "Wren",
+			"color": "4a90e2",
+			"pronouns": "they/them",
+			"avatar_url": null,
+			"webhook_avatar_url": null,
+			"banner": null,
+			"description": "Keeps the map.\nLikes **bold** text.",
+			"proxy_tags": [{"prefix": "w:", "suffix": null}, {"prefix": "[", "suffix": "]"}],
+			"privacy": {
+				"visibility": "public",
+				"name_privacy": "public",
+				"description_privacy": "public",
+				"banner_privacy": "public",
+				"birthday_privacy": "public",
+				"pronoun_privacy": "public",
+				"avatar_privacy": "public",
+				"metadata_privacy": "public",
+				"proxy_privacy": "public"
+			}
+		},
+		{
+			"id": "rtbbb",
+			"name": "Wren",
+			"color": null,
+			"pronouns": null,
+			"avatar_url": null,
+			"webhook_avatar_url": null,
+			"banner": null,
+			"description": null,
+			"proxy_tags": [{"prefix": null, "suffix": "-w2"}],
+			"privacy": {
+				"visibility": "private",
+				"name_privacy": "public",
+				"description_privacy": "public",
+				"banner_privacy": "public",
+				"birthday_privacy": "public",
+				"pronoun_privacy": "public",
+				"avatar_privacy": "public",
+				"metadata_privacy": "public",
+				"proxy_privacy": "public"
+			}
+		},
+		{
+			"id": "rtccc",
+			"name": "Moss 🌿",
+			"color": "e24a90",
+			"pronouns": "she/her",
+			"avatar_url": null,
+			"webhook_avatar_url": null,
+			"banner": null,
+			"description": "Quiet one.",
+			"proxy_tags": [],
+			"privacy": {
+				"visibility": "private",
+				"name_privacy": "private",
+				"description_privacy": "private",
+				"banner_privacy": "private",
+				"birthday_privacy": "private",
+				"pronoun_privacy": "private",
+				"avatar_privacy": "private",
+				"metadata_privacy": "private",
+				"proxy_privacy": "private"
+			}
+		}
+	],
+	"groups": [],
+	"switches": []
+}
