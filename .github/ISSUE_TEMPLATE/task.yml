@@ -1,0 +1,16 @@
+name: Task
+description: Internal work item for maintainers.
+labels: ["task"]
+assignees: ["chiaracoetzee"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: ["P0", "P1", "P2", "P3"]
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+    validations:
+      required: true
