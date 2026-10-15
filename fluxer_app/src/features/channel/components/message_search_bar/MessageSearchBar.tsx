@@ -42,6 +42,11 @@ import {HashIcon, MagnifyingGlassIcon, XIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import React, {useCallback, useEffect, useMemo} from 'react';
 
+// Fork imports.
+
+import {withoutPersonaOptions} from '@app/features/channel/components/message_search_bar/PersonaSearchSuggestions';
+import {PersonasSection} from '@app/features/channel/components/message_search_bar/PersonasSection';
+
 export type {SearchBarProps} from '@app/features/channel/components/message_search_bar/MessageSearchBarTypes';
 
 const SEARCH_SCOPE_DESCRIPTOR = msg({
@@ -275,7 +280,7 @@ export const MessageSearchBar = observer(
 				case 'users':
 					return (
 						<UsersSection
-							options={getAutocompleteOptions() as Array<User>}
+							options={withoutPersonaOptions(getAutocompleteOptions()) as Array<User>}
 							selectedIndex={keyboardFocusIndex}
 							hoverIndex={hoverIndexForRender}
 							onSelect={handleAutocompleteSelect}
@@ -520,6 +525,18 @@ export const MessageSearchBar = observer(
 										data-flx="channel.message-search-bar.message-search-bar.list"
 									>
 										{renderAutocompleteContent()}
+										{autocompleteType === 'users' && (
+											<PersonasSection
+												options={getAutocompleteOptions()}
+												selectedIndex={keyboardFocusIndex}
+												hoverIndex={hoverIndexForRender}
+												onSelect={handleAutocompleteSelect}
+												onMouseEnter={handleOptionMouseEnter}
+												onMouseLeave={handleOptionMouseLeave}
+												listboxId={listboxId}
+												data-flx="channel.message-search-bar.message-search-bar.personas-section.autocomplete-select"
+											/>
+										)}
 									</div>
 								</div>
 							</div>
