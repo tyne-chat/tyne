@@ -1,7 +1,7 @@
 # Security policy
 
-Do not report a vulnerability in a pull request, on feedback.fluxer.com, in a Fluxer community, or in a direct message to staff.
+Do not report a vulnerability in a public issue, a pull request, a Tyne community, or a direct message.
 
-Submit a report through <https://fluxer.app/security> or email <security@fluxer.com>. Include the affected component, impact, reproduction steps, and supporting evidence. Remove unrelated personal data and secrets.
+Report it privately through [GitHub](https://github.com/tyne-chat/tyne/security/advisories/new) or email <security@tyne.chat>. Include the affected component, impact, reproduction steps, and supporting evidence. Remove unrelated personal data and secrets.
 
-The programme scope, testing rules, safe harbour, disclosure process, and reward terms are published at <https://fluxer.app/security>. That page is authoritative.
+Tyne is a fork of [Fluxer](https://github.com/fluxerapp/fluxer). If the vulnerability also affects upstream Fluxer, you may report it to Fluxer through <https://fluxer.app/security> as well.
