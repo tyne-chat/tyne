@@ -1,0 +1,101 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Fork issue labels
+
+# Fork: reporters cannot label issues themselves, so this reads the Priority
+# and Platforms answers from the issue forms and applies the matching
+# priority:* and platform:* labels. It never removes a label, and it leaves
+# the priority alone once an issue has one, so a maintainer's change sticks.
+# A newly opened issue with no assignee is assigned to the maintainer; later
+# edits never reassign, so an issue can be handed to someone else.
+# Start it by hand to label every open issue:
+#
+#   gh workflow run fork-issue-labels.yaml
+
+on:
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+concurrency:
+  group: fork-issue-labels-${{ github.event.issue.number || 'all' }}
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const platformLabels = {
+              'Web': 'platform:web',
+              'Desktop': 'platform:desktop',
+              'Android': 'platform:android',
+              'iOS': 'platform:ios',
+              'Server': 'platform:server',
+            };
+
+            function sections(body) {
+              const result = {};
+              for (const part of (body || '').split(/^### /m).slice(1)) {
+                const newline = part.indexOf('\n');
+                if (newline === -1) continue;
+                result[part.slice(0, newline).trim()] = part.slice(newline + 1).trim();
+              }
+              return result;
+            }
+
+            function wantedLabels(body) {
+              const answers = sections(body);
+              const wanted = [];
+              const priority = /^P([0-3])\b/.exec(answers['Priority'] || '');
+              if (priority) wanted.push(`priority:P${priority[1]}`);
+              for (const line of (answers['Platforms'] || '').split('\n')) {
+                const ticked = /^- \[[xX]\] (\S+)/.exec(line.trim());
+                if (ticked && platformLabels[ticked[1]]) wanted.push(platformLabels[ticked[1]]);
+              }
+              return wanted;
+            }
+
+            async function labelIssue(issue) {
+              if (issue.pull_request) return;
+              const current = issue.labels.map((label) => (typeof label === 'string' ? label : label.name));
+              const hasPriority = current.some((name) => name.startsWith('priority:'));
+              const toAdd = wantedLabels(issue.body).filter(
+                (name) => !current.includes(name) && !(hasPriority && name.startsWith('priority:')),
+              );
+              if (toAdd.length === 0) return;
+              core.info(`#${issue.number}: adding ${toAdd.join(', ')}`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: toAdd,
+              });
+            }
+
+            async function assignNewIssue(issue) {
+              if (issue.assignees.length > 0) return;
+              core.info(`#${issue.number}: assigning chiaracoetzee`);
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                assignees: ['chiaracoetzee'],
+              });
+            }
+
+            if (context.eventName === 'issues') {
+              await labelIssue(context.payload.issue);
+              if (context.payload.action === 'opened') await assignNewIssue(context.payload.issue);
+            } else {
+              const issues = await github.paginate(github.rest.issues.listForRepo, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100,
+              });
+              for (const issue of issues) await labelIssue(issue);
+            }
