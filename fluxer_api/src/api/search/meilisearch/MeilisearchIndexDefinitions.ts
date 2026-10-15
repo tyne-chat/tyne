@@ -39,6 +39,9 @@ export const MEILISEARCH_INDEX_DEFINITIONS: Record<FluxerSearchIndexName, Meilis
 			'linkHostnames',
 			'attachmentFilenames',
 			'attachmentExtensions',
+			// Fork: persona filters (search/message/PersonaMessageSearch.ts).
+			'personaId',
+			'mentionedPersonaIds',
 		],
 		sortableAttributes: ['createdAt', 'id'],
 	},
