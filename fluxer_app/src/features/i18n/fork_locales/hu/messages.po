@@ -384,6 +384,7 @@ msgstr "Persona frissítve"
 msgid "Persona visibility"
 msgstr "Persona láthatósága"
 
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personák"
