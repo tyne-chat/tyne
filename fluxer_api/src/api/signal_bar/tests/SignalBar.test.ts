@@ -75,17 +75,22 @@ describe('signal bar', () => {
 	const listSignals = (token: string, channelId: string): Promise<ChannelSignalsResponse> =>
 		createBuilder<ChannelSignalsResponse>(harness, token).get(`/channels/${channelId}/signals`).execute();
 
-	const createSweepService = (): SignalBarService =>
+	const HOUR_MS = 60 * 60 * 1000;
+
+	const createSweepService = (clock: {now: number; online: boolean}): SignalBarService =>
 		new SignalBarService({
 			instanceConfigRepository: getInstanceConfigRepository(),
 			cacheService: getCacheService(),
-			gatewayService: getGatewayService(),
+			gatewayService: Object.create(getGatewayService(), {
+				hasActivePresence: {value: async () => clock.online},
+			}),
 			guildRepository: getGuildRepository(),
 			personaRepository: getPersonaRepository(),
 			findUser: (userId) => getUserRepository().findUnique(userId),
 			findChannel: (channelId) => getChannelRepository().channelData.findUnique(channelId),
 			settingsRepository: new SignalBarSettingsRepository(),
 			listGuildChannels: (guildId) => getChannelRepository().channelData.listGuildChannels(guildId, 'enrolled'),
+			now: () => clock.now,
 		});
 
 	it('is empty and unmanageable until a home community is set', async () => {
@@ -258,7 +263,7 @@ describe('signal bar', () => {
 		expect((await listSignals(other.token, groupDm.id)).entries).toEqual([]);
 	});
 
-	it('clears signals after two sweeps with no connected session and drops removed signals', async () => {
+	it('keeps signals for 12 hours after the last disconnect and drops removed signals at once', async () => {
 		const {owner, guild, systemChannel} = await setupTestGuildWithMembers(harness, 0);
 		await setHomeGuild(guild.id);
 		await enableEverywhere(owner.token, guild.id);
@@ -279,9 +284,22 @@ describe('signal bar', () => {
 			.put('/instance/signal-bar')
 			.body({signals: [{id: reading!.id, emoji_name: '📖'}]})
 			.execute();
-		const service = createSweepService();
+		const clock = {now: 0, online: false};
+		const service = createSweepService(clock);
 		expect(await service.sweep()).toEqual({cleared: 1});
 		expect((await listSignals(owner.token, systemChannel.id)).entries).toHaveLength(1);
+
+		clock.now = 11 * HOUR_MS;
+		clock.online = true;
+		expect(await service.sweep()).toEqual({cleared: 0});
+		clock.now = 12 * HOUR_MS;
+		clock.online = false;
+		expect(await service.sweep()).toEqual({cleared: 0});
+		clock.now = 24 * HOUR_MS - 1;
+		expect(await service.sweep()).toEqual({cleared: 0});
+		expect((await listSignals(owner.token, systemChannel.id)).entries).toHaveLength(1);
+
+		clock.now = 24 * HOUR_MS;
 		expect(await service.sweep()).toEqual({cleared: 1});
 		expect((await listSignals(owner.token, systemChannel.id)).entries).toEqual([]);
 	});
