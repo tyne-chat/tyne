@@ -157,6 +157,7 @@ vi.mock('@app/features/presence/state/LocalPresence', async () => {
 			{},
 			{deep: false},
 		),
+		setLocalPresenceUserSettings: () => undefined,
 	};
 });
 
