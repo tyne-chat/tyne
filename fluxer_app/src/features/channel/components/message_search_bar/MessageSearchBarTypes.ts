@@ -7,6 +7,13 @@ import type {SearchSegment} from '@app/features/search/utils/SearchSegmentManage
 import type {SearchFilterOption} from '@app/features/search/utils/SearchUtils';
 import type {User} from '@app/features/user/models/User';
 
+// Fork imports.
+
+import type {
+	PersonaSuggestionRow,
+	SearchPersonaOption,
+} from '@app/features/channel/components/message_search_bar/PersonaSearchSuggestions';
+
 export interface SearchBarProps {
 	channel?: Channel;
 	value: string;
@@ -31,6 +38,7 @@ export type HistoryFilterRow = {kind: 'filter'; option: SearchFilterOption};
 export type PlaintextAutocompleteRow =
 	| {kind: 'user-suggestion'; filterKey: string; user: User}
 	| {kind: 'channel-suggestion'; filterKey: string; channel: Channel}
+	| PersonaSuggestionRow
 	| {kind: 'filter-key'; filter: SearchFilterOption};
 
 export type AutocompleteOption =
@@ -43,5 +51,6 @@ export type AutocompleteOption =
 	  }
 	| string
 	| SearchHistoryEntry
+	| SearchPersonaOption
 	| PlaintextAutocompleteRow
 	| HistoryFilterRow;
