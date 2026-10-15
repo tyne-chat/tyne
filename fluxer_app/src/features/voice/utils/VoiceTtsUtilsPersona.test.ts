@@ -106,14 +106,15 @@ vi.mock('@app/features/navigation/state/SelectedChannel', () => ({
 
 vi.mock('@app/features/ui/state/Notification', () => ({
 	default: {
-		ttsNotificationMode: 1, // ALL_CHANNELS
-		getTTSNotificationMode: () => 1,
+		ttsNotificationMode: 0, // FOR_ALL_CHANNELS
+		getTTSNotificationMode: () => 0,
 		setTTSNotificationMode: vi.fn(),
+		isViewingChannel: () => true,
 	},
 	TTSNotificationMode: {
-		NEVER: 0,
-		ALL_CHANNELS: 1,
-		FOR_CURRENT_CHANNEL: 2,
+		FOR_ALL_CHANNELS: 0,
+		FOR_CURRENT_CHANNEL: 1,
+		NEVER: 2,
 	},
 }));
 
