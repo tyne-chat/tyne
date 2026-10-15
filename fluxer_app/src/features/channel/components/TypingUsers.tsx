@@ -20,8 +20,8 @@ import {type ReactNode, type RefObject, useLayoutEffect, useRef, useState} from 
 
 // Fork imports.
 
+import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import type {TypistEntry} from '@app/features/typing/rolling/RollingTypingText';
-import {Avatar} from '@app/features/ui/components/Avatar';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 
 const AVATAR_THRESHOLD = 5;
@@ -137,12 +137,11 @@ export const TypingUsers = observer(
 									channelId={channel.id}
 									renderAvatar={(user, size, index) => {
 										const typist = typists[index];
-										const avatarUrl = typist?.subprofile?.avatar ?? undefined;
 										return (
-											<Avatar
+											<PersonaAvatar
 												user={user}
+												persona={typist?.subprofile}
 												size={size}
-												avatarUrl={avatarUrl}
 												guildId={channel.guildId ?? undefined}
 												data-flx="channel.typing-users.avatar"
 											/>

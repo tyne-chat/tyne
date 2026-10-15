@@ -41,25 +41,7 @@ describe('NotificationIconURL', () => {
 		vi.mocked(isDesktop).mockReturnValue(false);
 	});
 
-	describe('when customAvatarUrl is provided (persona subprofile)', () => {
-		it('returns trimmed absolute URL directly', () => {
-			const url = '  https://cdn.example.com/persona.png  ';
-			expect(getNotificationIconURL(mockUser, 'guild_1', url)).toBe('https://cdn.example.com/persona.png');
-		});
-
-		it('resolves relative URLs against window.location.origin', () => {
-			const relativeUrl = '/assets/personas/avatar123.webp';
-			const result = getNotificationIconURL(mockUser, 'guild_1', relativeUrl);
-			expect(result).toBe(`${window.location.origin}/assets/personas/avatar123.webp`);
-		});
-
-		it('falls back to customAvatarUrl.trim() if URL parsing throws', () => {
-			const weirdUrl = 'invalid://[invalid-url';
-			expect(getNotificationIconURL(mockUser, null, weirdUrl)).toBe(weirdUrl);
-		});
-	});
-
-	describe('when no customAvatarUrl is provided', () => {
+	describe('upstream behaviour', () => {
 		const mockMember = {
 			avatar: 'member_avatar_hash',
 			isAvatarUnset: () => false,
@@ -70,7 +52,7 @@ describe('NotificationIconURL', () => {
 			vi.mocked(GuildMembers.getMember).mockReturnValue(mockMember);
 			vi.mocked(AvatarUtils.getGuildMemberNotificationAvatarURL).mockReturnValue('https://cdn/member_desktop.png');
 
-			const result = getNotificationIconURL(mockUser, 'guild_1', null);
+			const result = getNotificationIconURL(mockUser, 'guild_1');
 
 			expect(result).toBe('https://cdn/member_desktop.png');
 			expect(AvatarUtils.getGuildMemberNotificationAvatarURL).toHaveBeenCalledWith({
@@ -88,7 +70,7 @@ describe('NotificationIconURL', () => {
 			vi.mocked(GuildMembers.getMember).mockReturnValue(mockMember);
 			vi.mocked(AvatarUtils.getGuildMemberDisplayAvatarURL).mockReturnValue('https://cdn/member_web.png');
 
-			const result = getNotificationIconURL(mockUser, 'guild_1', undefined);
+			const result = getNotificationIconURL(mockUser, 'guild_1');
 
 			expect(result).toBe('https://cdn/member_web.png');
 			expect(AvatarUtils.getGuildMemberDisplayAvatarURL).toHaveBeenCalledWith({
@@ -105,7 +87,7 @@ describe('NotificationIconURL', () => {
 			vi.mocked(GuildMembers.getMember).mockReturnValue(null);
 			vi.mocked(AvatarUtils.getUserNotificationAvatarURL).mockReturnValue('https://cdn/user_desktop.png');
 
-			const result = getNotificationIconURL(mockUser, null, null);
+			const result = getNotificationIconURL(mockUser, null);
 
 			expect(result).toBe('https://cdn/user_desktop.png');
 			expect(AvatarUtils.getUserNotificationAvatarURL).toHaveBeenCalledWith(
@@ -119,7 +101,7 @@ describe('NotificationIconURL', () => {
 			vi.mocked(GuildMembers.getMember).mockReturnValue(null);
 			vi.mocked(AvatarUtils.getUserAvatarURL).mockReturnValue('https://cdn/user_web.png');
 
-			const result = getNotificationIconURL(mockUser, 'guild_1', null);
+			const result = getNotificationIconURL(mockUser, 'guild_1');
 
 			expect(result).toBe('https://cdn/user_web.png');
 			expect(AvatarUtils.getUserAvatarURL).toHaveBeenCalledWith(mockUser, false);
