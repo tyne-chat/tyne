@@ -33,6 +33,10 @@ import type {
 } from '@fluxer/schema/src/contracts/search/SearchDocumentTypes';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 
+// Fork imports.
+
+import {buildPersonaMessageFilters} from '@app/api/search/message/PersonaMessageSearch';
+
 const HAS_FIELD_MAP: Record<string, string> = {
 	image: 'hasImage',
 	sound: 'hasSound',
@@ -129,6 +133,7 @@ function buildMessageFilters(filters: MessageSearchFilters): Array<MeilisearchFi
 	}
 	if (filters.maxId != null) clauses.push(meiliRangeFilter('createdAt', {lt: snowflakeSeconds(filters.maxId)}));
 	if (filters.minId != null) clauses.push(meiliRangeFilter('createdAt', {gt: snowflakeSeconds(filters.minId)}));
+	clauses.push(...buildPersonaMessageFilters(filters));
 	return compactMeiliFilters(clauses);
 }
 
