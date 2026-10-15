@@ -31,8 +31,10 @@
 	}
 }
 
+/* Fork: with "stay fully interactive when unfocused" the bar is already showing, so hiding it during the
+   window-activation click swallowed the click (tyne-chat/tyne#94). */
 :global(html:not(.window-focused):not(.unfocused-fully-interactive)) .actionBarContainer,
-:global(.window-focus-activation-guard) .actionBarContainer {
+:global(html.window-focus-activation-guard:not(.unfocused-fully-interactive)) .actionBarContainer {
 	opacity: 0 !important;
 	visibility: hidden !important;
 	pointer-events: none !important;
