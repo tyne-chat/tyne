@@ -54,6 +54,7 @@ import {makeAutoObservable, reaction, runInAction} from 'mobx';
 
 // Fork imports.
 
+import {getPersonaNotificationIconURL} from '@app/features/persona/utils/PersonaNotificationIconURL';
 import {startForkAppWindowBridge} from '@app/features/platform/utils/ForkAppWindowBridge';
 import {claimNotificationAcrossWindows} from '@app/features/platform/utils/ForkAppWindows';
 
@@ -367,7 +368,7 @@ class NotificationState {
 				title,
 				subtitle,
 				body,
-				icon: getNotificationIconURL(user, channel.guildId, persona?.avatar),
+				icon: getPersonaNotificationIconURL(user, channel.guildId, persona),
 				url: notificationUrl,
 				playSound: false,
 				accountKey,
