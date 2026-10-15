@@ -3,6 +3,10 @@
 import type {MessageSearchFilters} from '@fluxer/schema/src/contracts/search/SearchDocumentTypes';
 import type {MessageSearchRequest} from '@fluxer/schema/src/domains/message/MessageRequestSchemas';
 
+// Fork imports.
+
+import {applyPersonaSearchFilters} from '@app/api/search/message/PersonaMessageSearch';
+
 export function buildMessageSearchFilters(
 	searchParams: MessageSearchRequest,
 	channelIds: Array<string>,
@@ -97,5 +101,6 @@ export function buildMessageSearchFilters(
 	if (searchParams.include_nsfw !== undefined) {
 		filters.includeNsfw = searchParams.include_nsfw;
 	}
+	applyPersonaSearchFilters(filters, searchParams);
 	return filters;
 }
