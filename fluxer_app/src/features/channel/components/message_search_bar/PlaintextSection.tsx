@@ -15,6 +15,10 @@ import {FunnelIcon, MagnifyingGlassIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 
+// Fork imports.
+
+import {PlaintextPersonaRow} from '@app/features/channel/components/message_search_bar/PersonasSection';
+
 const SEARCH_FILTERS_DESCRIPTOR = msg({
 	message: 'Search filters',
 	comment: 'Section header in the message search popout listing available filter operators.',
@@ -110,6 +114,22 @@ export const PlaintextSection: React.FC<PlaintextSectionProps> = observer(
 										onMouseLeave={onMouseLeave}
 										listboxId={listboxId}
 										data-flx="channel.message-search-bar.plaintext-section.filter-option.select"
+									/>
+								);
+							}
+							if (row.kind === 'persona-suggestion') {
+								return (
+									<PlaintextPersonaRow
+										key={`${row.filterKey}-persona-${row.persona.id}`}
+										row={row}
+										index={index}
+										selectedIndex={selectedIndex}
+										hoverIndex={hoverIndex}
+										onSelect={onSelect}
+										onMouseEnter={onMouseEnter}
+										onMouseLeave={onMouseLeave}
+										listboxId={listboxId}
+										data-flx="channel.message-search-bar.plaintext-section.plaintext-persona-row.select"
 									/>
 								);
 							}

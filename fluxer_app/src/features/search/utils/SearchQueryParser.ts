@@ -9,6 +9,10 @@ import {MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND} from '@fluxer/dat
 import {fromTimestamp, isProbablyAValidSnowflake} from '@fluxer/snowflake/src/SnowflakeUtils';
 import {DateTime} from 'luxon';
 
+// Fork imports.
+
+import {applyPersonaSearchValue, isPickedPersona} from '@app/features/search/utils/PersonaSearchFilters';
+
 export interface SearchHints {
 	usersByTag?: Record<string, string>;
 	channelsByName?: Record<string, string>;
@@ -642,7 +646,7 @@ export function parseQuery(query: string, hints?: SearchHints, ctx?: ParseContex
 			case 'from': {
 				const values = splitCSV(tok.value);
 				for (const tag of values) {
-					const id = tryResolveUser(tag, hints);
+					const id = isPickedPersona(tag, hints) ? null : tryResolveUser(tag, hints);
 					if (id) {
 						if (isExcludeKey) {
 							params.excludeAuthorId = add(params.excludeAuthorId, id);
@@ -650,6 +654,7 @@ export function parseQuery(query: string, hints?: SearchHints, ctx?: ParseContex
 							params.authorId = add(params.authorId, id);
 						}
 					}
+					if (!id) applyPersonaSearchValue(params, 'from', tag, isExcludeKey, hints);
 				}
 				break;
 			}
@@ -660,7 +665,7 @@ export function parseQuery(query: string, hints?: SearchHints, ctx?: ParseContex
 					if (lower === 'everyone' || lower === 'here') {
 						params.mentionEveryone = true;
 					} else {
-						const id = tryResolveUser(v, hints);
+						const id = isPickedPersona(v, hints) ? null : tryResolveUser(v, hints);
 						if (id) {
 							if (isExcludeKey) {
 								params.excludeMentions = add(params.excludeMentions, id);
@@ -668,6 +673,7 @@ export function parseQuery(query: string, hints?: SearchHints, ctx?: ParseContex
 								params.mentions = add(params.mentions, id);
 							}
 						}
+						if (!id) applyPersonaSearchValue(params, 'mentions', v, isExcludeKey, hints);
 					}
 				}
 				break;

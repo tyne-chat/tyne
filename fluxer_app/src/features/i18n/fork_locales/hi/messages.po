@@ -384,6 +384,7 @@ msgstr "परसोना अपडेट हो गया"
 msgid "Persona visibility"
 msgstr "परसोना की दृश्यता"
 
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "परसोना"
