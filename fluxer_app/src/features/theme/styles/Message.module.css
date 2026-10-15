@@ -716,14 +716,15 @@
 	}
 }
 
+/* Fork: the activation guard only applies when hover controls are hidden while unfocused (tyne-chat/tyne#94). */
 :global(html:not(.window-focused):not(.unfocused-fully-interactive)) .message .hoverAction,
 :global(html:not(.window-focused):not(.unfocused-fully-interactive)) .messageCompact .hoverAction,
-:global(.window-focus-activation-guard) .message .hoverAction,
-:global(.window-focus-activation-guard) .messageCompact .hoverAction,
+:global(html.window-focus-activation-guard:not(.unfocused-fully-interactive)) .message .hoverAction,
+:global(html.window-focus-activation-guard:not(.unfocused-fully-interactive)) .messageCompact .hoverAction,
 :global(html:not(.window-focused):not(.unfocused-fully-interactive)) .messageTimestampHover,
 :global(html:not(.window-focused):not(.unfocused-fully-interactive)) .messageTimestampCompactHover,
-:global(.window-focus-activation-guard) .messageTimestampHover,
-:global(.window-focus-activation-guard) .messageTimestampCompactHover {
+:global(html.window-focus-activation-guard:not(.unfocused-fully-interactive)) .messageTimestampHover,
+:global(html.window-focus-activation-guard:not(.unfocused-fully-interactive)) .messageTimestampCompactHover {
 	opacity: 0 !important;
 	pointer-events: none !important;
 }
