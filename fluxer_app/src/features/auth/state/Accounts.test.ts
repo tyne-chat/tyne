@@ -139,6 +139,7 @@ vi.mock('@app/features/voice/VoiceAccountLifecycle', () => ({
 
 vi.mock('@app/features/presence/state/LocalPresence', () => ({
 	default: {captureIntent: () => null, restoreIntent: () => undefined},
+	setLocalPresenceUserSettings: () => undefined,
 }));
 
 vi.mock('@app/features/ui/state/LayerManager', () => ({default: {closeAll: () => undefined}}));
