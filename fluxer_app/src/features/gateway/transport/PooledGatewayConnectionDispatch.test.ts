@@ -120,6 +120,7 @@ vi.mock('@app/features/presence/state/LocalPresence', () => ({
 		getGatewayPresence: () => null,
 		handleSessionChanging: vi.fn(),
 	},
+	setLocalPresenceUserSettings: () => undefined,
 }));
 
 vi.mock('@app/features/presence/state/Presence', () => ({default: {handleSessionInvalidated: vi.fn()}}));
