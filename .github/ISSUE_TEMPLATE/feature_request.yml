@@ -1,0 +1,63 @@
+name: Feature or change request
+description: Suggest something new or a change to how Tyne works.
+labels: ["enhancement"]
+assignees: ["chiaracoetzee"]
+body:
+  - type: input
+    id: reported_by
+    attributes:
+      label: Requested by
+      description: Tyne handle of the user who asked for this, if it came from Tyne. Leave blank if it's your own idea.
+      placeholder: "@handle"
+
+  - type: input
+    id: original_report
+    attributes:
+      label: Original request
+      description: Link to the message or channel on Tyne where it was requested, if any.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How much does this matter to you? It may be adjusted during triage.
+      options:
+        - "P1 – Blocks me or my community from using Tyne"
+        - "P2 – Would make a real difference"
+        - "P3 – Nice to have"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms
+      options:
+        - label: Web
+        - label: Desktop
+        - label: Android
+        - label: iOS
+        - label: All / not platform-specific
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Replace the prompts below with your own words. Mockups or screenshots welcome; drag them into this box.
+      value: |
+        **What problem would this solve?**
+
+
+        **What would you like to happen?**
+
+
+        **Alternatives or workarounds**
+
+
+        **Mock-ups or screenshots**
+
+
+        **Other notes**
+
+    validations:
+      required: true
