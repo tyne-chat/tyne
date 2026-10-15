@@ -16,6 +16,9 @@ export const MEILISEARCH_INDEX_DEFINITIONS: Record<FluxerSearchIndexName, Meilis
 		primaryKey: 'id',
 		searchableAttributes: ['content', 'embedContent'],
 		filterableAttributes: [
+			// Fork: persona filters (search/message/PersonaMessageSearch.ts).
+			'personaId',
+			'mentionedPersonaIds',
 			'id',
 			'createdAt',
 			'channelId',
