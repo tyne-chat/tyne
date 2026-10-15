@@ -1,0 +1,119 @@
+name: Bug report
+description: Something in Tyne is broken or behaves wrongly.
+labels: ["bug"]
+assignees: ["chiaracoetzee"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! One issue per bug, please. **Screenshots or screen recordings make bugs much faster to fix**: paste or drag them into the Description box. Issues are public, so remove other people's messages, names and private details from screenshots and logs.
+
+  - type: input
+    id: reported_by
+    attributes:
+      label: Reported by
+      description: Tyne handle of the user who reported this, if it came from a report on Tyne. Leave blank if you found it yourself.
+      placeholder: "@handle"
+
+  - type: input
+    id: original_report
+    attributes:
+      label: Original report
+      description: Link to the message or channel on Tyne where it was reported, if any.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Your best guess. It may be adjusted during triage.
+      options:
+        - "P0 – Outage, data loss or security problem"
+        - "P1 – Major feature broken, no workaround"
+        - "P2 – Broken, but there is a workaround"
+        - "P3 – Minor or cosmetic"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms
+      description: Where does it happen? Tick all that apply.
+      options:
+        - label: Web
+        - label: Desktop (Windows / macOS / Linux)
+        - label: Android
+        - label: iOS
+        - label: Server / backend
+        - label: Not sure
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Messaging
+        - Personas
+        - Voice / video
+        - Notifications / push
+        - Login / passkeys / account
+        - Media / uploads
+        - Servers, channels and roles
+        - Settings
+        - Other / not sure
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Replace the prompts below with your own words. Drag screenshots or screen recordings into this box.
+      value: |
+        **What happened?**
+
+
+        **Steps to reproduce**
+        1.
+        2.
+        3.
+
+        **Expected result:**
+
+
+        **Actual result:**
+
+
+        **Screenshots or recordings**
+
+
+        **Other notes**
+
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often does it happen?
+      options:
+        - Every time
+        - Sometimes
+        - Only once so far
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown in Settings. For example 2026.10.100 (101).
+
+  - type: input
+    id: device
+    attributes:
+      label: Device, OS and browser
+      placeholder: "Pixel 8, GrapheneOS 15 / Firefox 140 on Windows 11"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Console output, adb logcat or server logs, if you have them.
+      render: text
