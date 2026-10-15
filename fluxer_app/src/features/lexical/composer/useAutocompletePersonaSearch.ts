@@ -25,6 +25,17 @@ export function clearPersonaMentionCache(channelId?: string): void {
 	}
 }
 
+/** Every persona fetched for any channel so far, once each; message search resolves typed persona names against these. */
+export function getCachedPersonaMentionItems(): Array<ChannelPersonaMentionItem> {
+	const byId = new Map<string, ChannelPersonaMentionItem>();
+	for (const entry of channelPersonaCache.values()) {
+		for (const item of entry.items) {
+			byId.set(item.id, item);
+		}
+	}
+	return Array.from(byId.values());
+}
+
 export function invalidatePersonaMentionCache(guildId?: string): void {
 	if (!guildId) {
 		channelPersonaCache.clear();

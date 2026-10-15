@@ -12,6 +12,10 @@ import type {SearchSegment} from '@app/features/search/utils/SearchSegmentManage
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {isProbablyAValidSnowflake} from '@fluxer/snowflake/src/SnowflakeUtils';
 
+// Fork imports.
+
+import {personaSegmentFromHints} from '@app/features/search/utils/PersonaSearchFilters';
+
 const USER_FILTER_KEYS = new Set(['from', 'mentions']);
 
 function unquoteTokenValue(value: string): string {
@@ -93,6 +97,8 @@ export function buildSearchSegmentsFromHints(query: string, hints?: SearchHints)
 					end: token.end,
 				});
 			}
+			const personaSegment = personaSegmentFromHints(hints, token, filterKey, value);
+			if (personaSegment) segments.push(personaSegment);
 			continue;
 		}
 		if (normalizedFilterKey === 'in') {
