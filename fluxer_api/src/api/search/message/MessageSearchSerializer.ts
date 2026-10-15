@@ -8,6 +8,10 @@ import type {MessageSnapshot} from '@app/api/models/MessageSnapshot';
 import type {SearchableMessage} from '@fluxer/schema/src/contracts/search/SearchDocumentTypes';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 
+// Fork imports.
+
+import {personaSearchFields} from '@app/api/search/message/PersonaMessageSearch';
+
 const LINK_URL_MATCHER = /https?:\/\/[^\s<>"']+/gi;
 const HAS_LINK_REGEX = /https?:\/\/[^\s/]+/i;
 const TRAILING_URL_PUNCTUATION = /[.,;:!?)\]}\x22'\u00bb\u201c\u201d]+$/;
@@ -232,6 +236,7 @@ export function convertToSearchableMessage(message: Message, authorIsBot?: boole
 		linkHostnames: acc.linkHostnames,
 		attachmentFilenames: acc.attachmentFilenames,
 		attachmentExtensions: acc.attachmentExtensions,
+		...personaSearchFields(message),
 	};
 }
 
