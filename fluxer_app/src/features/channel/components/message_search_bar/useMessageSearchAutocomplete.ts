@@ -62,6 +62,16 @@ import {DateTime} from 'luxon';
 import {matchSorter} from 'match-sorter';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {
+	isSearchPersonaOption,
+	personaSearchOptions,
+	pushPersonaSuggestionRows,
+	replaceTokenWithPersona,
+	useSearchPersonaSuggestions,
+} from '@app/features/channel/components/message_search_bar/PersonaSearchSuggestions';
+
 const MAX_FILTER_VALUE_SUGGESTIONS = 12;
 const MAX_MEMBER_SEARCH_RESULTS = 25;
 const MAX_DATE_WORD_SUGGESTIONS = 10;
@@ -160,6 +170,7 @@ export function useMessageSearchAutocomplete({
 	const [memberSearchResults, setMemberSearchResults] = useState<Array<User>>([]);
 	const memberFetchDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const memberFetchQueryRef = useRef<string>('');
+	const personaSuggestions = useSearchPersonaSuggestions({autocompleteType, currentFilter, value, inputRef, channel});
 	const filterOptions = useMemo(() => [...getSearchFilterOptions(i18n)], [i18n.locale]);
 	const hidePersonalInformation = StreamerMode.shouldHidePersonalInformation;
 	const filterEligibility = useMemo(
@@ -528,6 +539,12 @@ export function useMessageSearchAutocomplete({
 				rows.push({kind: 'user-suggestion', filterKey, user: suggestion});
 				suggestionCount += 1;
 			}
+			suggestionCount += pushPersonaSuggestionRows(
+				rows,
+				filterKey,
+				personaSuggestions,
+				PLAINTEXT_SUGGESTIONS_PER_FILTER,
+			);
 		}
 		if (suggestionCount === 0) {
 			for (const filter of orderInlineFilterOptions(filterOptions, filterEligibility)) {
@@ -535,7 +552,7 @@ export function useMessageSearchAutocomplete({
 			}
 		}
 		return rows;
-	}, [value, filterOptions, filterEligibility, resolveChannelSuggestions, resolveUserSuggestions]);
+	}, [value, filterOptions, filterEligibility, resolveChannelSuggestions, resolveUserSuggestions, personaSuggestions]);
 	const resolveAutocompleteOptions = useCallback((): Array<AutocompleteOption> => {
 		const cursorPos = resolveInputCursorPosition(inputRef, value);
 		const currentWord = resolveMessageSearchCurrentWord({value, cursorPosition: cursorPos});
@@ -567,7 +584,10 @@ export function useMessageSearchAutocomplete({
 			case 'users': {
 				if (!currentFilter) return [];
 				const searchTerm = currentWord.slice(currentFilter.syntax.length);
-				return resolveUserSuggestions(searchTerm, MAX_FILTER_VALUE_SUGGESTIONS);
+				return [
+					...resolveUserSuggestions(searchTerm, MAX_FILTER_VALUE_SUGGESTIONS),
+					...personaSearchOptions(personaSuggestions),
+				];
 			}
 			case 'channels': {
 				if (!currentFilter) return [];
@@ -617,6 +637,7 @@ export function useMessageSearchAutocomplete({
 		getPlaintextRows,
 		resolveChannelSuggestions,
 		resolveUserSuggestions,
+		personaSuggestions,
 	]);
 	const historyFilterRows = useMemo(
 		() => buildHistoryFilterRows(filterOptions, filterEligibility),
@@ -785,6 +806,14 @@ export function useMessageSearchAutocomplete({
 				break;
 			}
 			case 'users': {
+				if (isSearchPersonaOption(option)) {
+					const persona = option.persona;
+					const filter = requireCurrentFilter();
+					const hints = hintsRef.current;
+					replacement = replaceTokenWithPersona({value, cursorPosition, currentSegments, filter, persona, hints});
+					shouldSubmit = true;
+					break;
+				}
 				const user = option as User;
 				const filter = requireCurrentFilter();
 				const tag = NicknameUtils.formatUserTagForStreamerMode(user);
@@ -887,6 +916,13 @@ export function useMessageSearchAutocomplete({
 						replacementSegment: {type: 'user', filterKey: filter.key, id: row.user.id},
 					});
 					hintsRef.current.usersByTag[tag] = row.user.id;
+					shouldSubmit = true;
+					break;
+				}
+				if (row.kind === 'persona-suggestion') {
+					const persona = row.persona;
+					const hints = hintsRef.current;
+					replacement = replaceTokenWithPersona({value, cursorPosition, currentSegments, filter, persona, hints});
 					shouldSubmit = true;
 					break;
 				}
