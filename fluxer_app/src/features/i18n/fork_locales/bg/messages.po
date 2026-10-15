@@ -384,6 +384,7 @@ msgstr "Персоната е обновена"
 msgid "Persona visibility"
 msgstr "Видимост на персоната"
 
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Персони"
