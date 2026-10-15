@@ -47,8 +47,8 @@ const SIGNAL_BAR_CONFIG_KEY = 'signal_bar';
 const EMPTY_CONFIG: SignalBarConfig = {version: 0, signals: []};
 const ENTRY_TTL_SECONDS = 600;
 const INDEX_TTL_SECONDS = 7 * 24 * 60 * 60;
-const OFFLINE_MISS_TTL_SECONDS = 300;
-const OFFLINE_MISSES_BEFORE_CLEAR = 2;
+const OFFLINE_GRACE_MS = 12 * 60 * 60 * 1000;
+const OFFLINE_SINCE_TTL_SECONDS = 24 * 60 * 60;
 const NO_PERSONA = '0';
 const ACTIVE_USERS_KEY = 'signalbar:users';
 const UNICODE_EMOJI_REGEX = /\p{Extended_Pictographic}|\p{Regional_Indicator}|[#*0-9]️?⃣/u;
@@ -58,7 +58,7 @@ const entryKey = (channelId: string, signalId: string, userId: string) =>
 	`signalbar:entry:${channelId}:${signalId}:${userId}`;
 const channelIndexKey = (channelId: string) => `signalbar:channel:${channelId}`;
 const userIndexKey = (userId: string) => `signalbar:user:${userId}`;
-const offlineMissKey = (userId: string) => `signalbar:offline:${userId}`;
+const offlineSinceKey = (userId: string) => `signalbar:offline_since:${userId}`;
 
 interface StoredEntry extends ChannelSignalEntry {
 	channel_id: string;
@@ -74,6 +74,7 @@ interface SignalBarServiceDeps {
 	findUser: (userId: UserID) => Promise<User | null>;
 	findChannel: (channelId: ChannelID) => Promise<Channel | null>;
 	listGuildChannels: (guildId: GuildID) => Promise<Array<Channel>>;
+	now?: () => number;
 }
 
 function parseStoredConfig(raw: string | null): SignalBarConfig {
@@ -488,8 +489,9 @@ export class SignalBarService {
 				return {channelId, signalId, userId};
 			});
 			let stale = targets.filter((target) => !signalIds.has(target.signalId));
-			if (await this.isOnline(userId)) {
-				await this.deps.cacheService.delete(offlineMissKey(userId));
+			if (await this.offlineTooLong(userId)) {
+				stale = targets;
+			} else {
 				await Promise.all(
 					targets
 						.filter((target) => signalIds.has(target.signalId))
@@ -502,14 +504,6 @@ export class SignalBarService {
 							}
 						}),
 				);
-			} else {
-				const misses = ((await this.deps.cacheService.get<number>(offlineMissKey(userId))) ?? 0) + 1;
-				if (misses >= OFFLINE_MISSES_BEFORE_CLEAR) {
-					stale = targets;
-					await this.deps.cacheService.delete(offlineMissKey(userId));
-				} else {
-					await this.deps.cacheService.set(offlineMissKey(userId), misses, OFFLINE_MISS_TTL_SECONDS);
-				}
 			}
 			for (const target of stale) {
 				const removed = await this.removeEntries([target]);
@@ -526,6 +520,23 @@ export class SignalBarService {
 			if (channel) await this.dispatchChannelUpdate(channel, config.version, [], removed);
 		}
 		return {cleared};
+	}
+
+	private async offlineTooLong(userId: string): Promise<boolean> {
+		const key = offlineSinceKey(userId);
+		if (await this.isOnline(userId)) {
+			await this.deps.cacheService.delete(key);
+			return false;
+		}
+		const now = this.deps.now?.() ?? Date.now();
+		const since = await this.deps.cacheService.get<number>(key);
+		if (since === null) {
+			await this.deps.cacheService.set(key, now, OFFLINE_SINCE_TTL_SECONDS);
+			return false;
+		}
+		if (now - since < OFFLINE_GRACE_MS) return false;
+		await this.deps.cacheService.delete(key);
+		return true;
 	}
 
 	private async isOnline(userId: string): Promise<boolean> {
