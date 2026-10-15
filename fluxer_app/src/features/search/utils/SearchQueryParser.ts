@@ -9,6 +9,10 @@ import {MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND} from '@fluxer/dat
 import {fromTimestamp, isProbablyAValidSnowflake} from '@fluxer/snowflake/src/SnowflakeUtils';
 import {DateTime} from 'luxon';
 
+// Fork imports.
+
+import {applyPersonaSearchValue, isPickedPersona} from '@app/features/search/utils/PersonaSearchFilters';
+
 export interface SearchHints {
 	usersByTag?: Record<string, string>;
 	channelsByName?: Record<string, string>;
@@ -642,8 +646,9 @@ export function parseQuery(query: string, hints?: SearchHints, ctx?: ParseContex
 			case 'from': {
 				const values = splitCSV(tok.value);
 				for (const tag of values) {
-					const id = tryResolveUser(tag, hints);
+					const id = isPickedPersona(tag, hints) ? null : tryResolveUser(tag, hints);
 					if (!id) {
+						applyPersonaSearchValue(params, 'from', tag, isExcludeKey, hints);
 						continue;
 					}
 					const destination = isExcludeKey ? 'excludeAuthorId' : 'authorId';
@@ -659,8 +664,9 @@ export function parseQuery(query: string, hints?: SearchHints, ctx?: ParseContex
 						params.mentionEveryone = true;
 						continue;
 					}
-					const id = tryResolveUser(v, hints);
+					const id = isPickedPersona(v, hints) ? null : tryResolveUser(v, hints);
 					if (!id) {
+						applyPersonaSearchValue(params, 'mentions', v, isExcludeKey, hints);
 						continue;
 					}
 					const destination = isExcludeKey ? 'excludeMentions' : 'mentions';
