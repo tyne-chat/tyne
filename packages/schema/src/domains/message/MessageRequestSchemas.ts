@@ -25,6 +25,7 @@ import {z} from 'zod';
 // Fork imports.
 
 import {LegacyMessageSubprofileRequestSchema} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {PersonaMessageSearchRequestFields} from '@fluxer/schema/src/domains/persona/PersonaSearchSchemas';
 import {SnowflakeStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 
 const RICH_EMBED_AUTHOR_NAME_MAX_LENGTH = 256 as const;
@@ -246,6 +247,7 @@ export const MessageSearchRequest = z.object({
 	exclude_author_id: z.array(SnowflakeType).max(100).optional().describe('Author user IDs to exclude'),
 	mentions: z.array(SnowflakeType).max(100).optional().describe('User IDs that must be mentioned'),
 	exclude_mentions: z.array(SnowflakeType).max(100).optional().describe('User IDs that must not be mentioned'),
+	...PersonaMessageSearchRequestFields,
 	mention_everyone: z.boolean().optional().describe('Filter by whether message mentions everyone'),
 	pinned: z.boolean().optional().describe('Filter by pinned status'),
 	has: z
