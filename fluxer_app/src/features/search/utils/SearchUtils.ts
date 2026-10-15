@@ -14,6 +14,14 @@ import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/Me
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import {
+	applyPersonaSegment,
+	personaHintsForQuery,
+	personaSearchApiParams,
+} from '@app/features/search/utils/PersonaSearchFilters';
+
 const NO_RESPONSE_BODY_RECEIVED_DESCRIPTOR = msg({
 	message: 'No response body received',
 	comment:
@@ -490,6 +498,7 @@ function toApiParams(params: MessageSearchParams, extraParams?: MessageSearchApi
 		exclude_author_id: params.excludeAuthorId,
 		mentions: params.mentions,
 		exclude_mentions: params.excludeMentions,
+		...personaSearchApiParams(params),
 		mention_everyone: params.mentionEveryone,
 		pinned: params.pinned,
 		has: params.has,
@@ -567,6 +576,7 @@ function applySegmentsToParams(
 		if (!segmentMatchesQuery(query, segment)) {
 			continue;
 		}
+		if (applyPersonaSegment(params, segment)) continue;
 		const isExclude = segment.filterKey.startsWith('-');
 		const filterKey = isExclude ? segment.filterKey.slice(1) : segment.filterKey;
 		if (segment.type === 'user') {
@@ -641,6 +651,7 @@ export function parseSearchQueryWithSegments(
 		{
 			usersByTag: Object.keys(usersByTag).length > 0 ? usersByTag : undefined,
 			channelsByName: Object.keys(channelsByName).length > 0 ? channelsByName : undefined,
+			...personaHintsForQuery(entry, segments),
 		},
 		{guildId: ctx?.guildId ?? null},
 	);

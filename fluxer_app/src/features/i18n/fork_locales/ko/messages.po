@@ -384,6 +384,7 @@ msgstr "페르소나 업데이트됨"
 msgid "Persona visibility"
 msgstr "페르소나 공개 범위"
 
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "페르소나"
