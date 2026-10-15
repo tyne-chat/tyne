@@ -384,6 +384,7 @@ msgstr "人格已更新"
 msgid "Persona visibility"
 msgstr "人格可見度"
 
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "人格"
