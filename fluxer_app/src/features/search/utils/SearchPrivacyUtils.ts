@@ -5,6 +5,10 @@ import {type SearchHints, tokenize} from '@app/features/search/utils/SearchQuery
 import type {SearchSegment} from '@app/features/search/utils/SearchSegmentManager';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 
+// Fork imports.
+
+import {personaSegmentFromHints} from '@app/features/search/utils/PersonaSearchFilters';
+
 const USER_FILTER_KEYS = new Set(['from', 'mentions']);
 
 function unquoteTokenValue(value: string): string {
@@ -70,6 +74,8 @@ export function buildSearchSegmentsFromHints(query: string, hints?: SearchHints)
 					end: token.end,
 				});
 			}
+			const personaSegment = personaSegmentFromHints(hints, token, filterKey, value);
+			if (personaSegment) segments.push(personaSegment);
 			continue;
 		}
 		if (normalizedFilterKey === 'in') {
