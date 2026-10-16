@@ -280,6 +280,12 @@ export const PersonaBatchAvatarImportRequest = z.object({
 	),
 });
 
+export const PersonaBatchAvatarImportStream = z
+	.string()
+	.describe(
+		'Newline-delimited JSON: a start line with the total, a progress line as each URL finishes, and a complete line with every result',
+	);
+
 export const PersonaImportImageRequest = z.object({
 	kind: PersonaImportImageKindSchema.describe('Whether the image is an avatar or a banner'),
 	image: z.string().describe('Base64 data URI of the image'),
