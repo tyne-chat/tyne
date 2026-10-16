@@ -313,7 +313,6 @@ export const ErrorCodeToI18nKey = {
 	[APIErrorCodes.UNKNOWN_USER_FLAG]: 'unknown_entities.unknown_user_flag',
 	[APIErrorCodes.UNKNOWN_USER]: 'unknown_entities.unknown_user',
 	[APIErrorCodes.UNKNOWN_PERSONA]: 'unknown_entities.unknown_user',
-	[APIErrorCodes.PERSONA_NOT_FOUND]: 'unknown_entities.unknown_user',
 	[APIErrorCodes.PRIVATE_PERSONA]: 'permissions.missing_access',
 	[APIErrorCodes.PERSONA_LIMIT_REACHED]: 'connections.limit_reached',
 	[APIErrorCodes.DUPLICATE_PERSONA_TAG]: 'usernames_and_tags.tag_already_taken',
