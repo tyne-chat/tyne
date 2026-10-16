@@ -9,7 +9,8 @@
 		"fluxer_app_proxy/src/routes/instance_brand_preboot.js",
 		"fluxer_app_proxy/src/routes/saturation_preboot.js",
 		"fluxer_app/src/features/voice/utils/camera-effects/models/selfie_segmentation_256x256.d.onnx.ts",
-		"fluxer_app/src/media/images/i-like-food.d.svg.ts"
+		"fluxer_app/src/media/images/i-like-food.d.svg.ts",
+		"e2e/**"
 	],
 	"ignoreIssues": {
 		"fluxer_api/src/api/infrastructure/activity/Contract.generated.ts": ["exports", "types"],
@@ -19,7 +20,8 @@
 	},
 	"workspaces": {
 		".": {
-			"ignoreDependencies": ["vite"]
+			"ignoreDependencies": ["vite"],
+			"ignoreBinaries": ["electron-builder"]
 		},
 		"fluxer_api": {
 			"ignoreDependencies": [
@@ -36,7 +38,8 @@
 				"undici",
 				"validator"
 			],
-			"ignoreExportsUsedInFile": false
+			"ignoreExportsUsedInFile": false,
+			"entry": ["scripts/migrate_*.ts", "scripts/seed_*.ts"]
 		},
 		"fluxer_app": {
 			"entry": [
@@ -44,7 +47,9 @@
 				"scripts/build-sw.mjs",
 				"scripts/Generate*.ts",
 				"src/features/account_engine/core/index.ts",
-				"src/features/platform/utils/BrowserAssertStrict.ts"
+				"src/features/platform/utils/BrowserAssertStrict.ts",
+				"lingui.fork.config.js",
+				"scripts/fork-i18n.mjs"
 			]
 		},
 		"fluxer_desktop": {
@@ -57,7 +62,8 @@
 				"src/engine/AccountEngineMain.ts",
 				"native/*/index.{js,d.ts}",
 				"native/*/loader-diagnostics.cjs",
-				"scripts/generate-windows-badges.mjs"
+				"scripts/generate-windows-badges.mjs",
+				"scripts/fork-release-assets.mjs"
 			],
 			"project": ["src/**/*.{ts,tsx,mjs,js}", "scripts/**/*.mjs", "native/**/*.{js,mjs,cjs,d.ts}"],
 			"ignoreBinaries": ["reg.exe", "update-desktop-database", "xdg-mime"],
