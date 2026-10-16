@@ -223,5 +223,3 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 		);
 	},
 );
-
-export const SubprofileTag = PersonaTag;
