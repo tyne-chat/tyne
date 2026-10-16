@@ -722,7 +722,7 @@ class RuntimeConfig {
 	applyAdminInstanceConfig(config: InstanceConfigResponse): void {
 		const current = this.requireActiveSnapshot();
 		const appPublic: InstanceAppPublic = {
-			branding: config.app_public.branding,
+			branding: forkAdminBranding(config.app_public.branding, current.appPublic.branding),
 			setup: {
 				configured: config.app_public.setup.configured,
 				admin_url: current.appPublic.setup.admin_url,
@@ -969,3 +969,15 @@ class RuntimeConfig {
 }
 
 export default new RuntimeConfig();
+
+// Fork: the admin config response may leave out the fork's fields (a server from before them);
+// keep the value the client already has.
+function forkAdminBranding(
+	branding: InstanceConfigResponse['app_public']['branding'],
+	current: InstanceAppPublic['branding'],
+): InstanceAppPublic['branding'] {
+	return {
+		...branding,
+		desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? current.desktop_app_prompt_enabled,
+	};
+}
