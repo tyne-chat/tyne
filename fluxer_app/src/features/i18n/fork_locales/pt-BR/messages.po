@@ -10,10 +10,6 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Prefixo: {0})"
 
-#. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
-msgid "(pinned)"
-msgstr "(fixado)"
-
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "Conta: @{username}"
@@ -199,10 +195,6 @@ msgstr "Prévia do formato"
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Ocultar lista de canais"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently shown.
-msgid "Hide server list"
-msgstr "Ocultar lista de servidores"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -510,10 +502,6 @@ msgstr "Mostrar botão de copiar"
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
 msgstr "Mostrar botão de personas"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently hidden.
-msgid "Show server list"
-msgstr "Mostrar lista de servidores"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
