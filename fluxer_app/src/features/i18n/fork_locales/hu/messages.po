@@ -10,10 +10,6 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Előtag: {0})"
 
-#. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
-msgid "(pinned)"
-msgstr "(kitűzve)"
-
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "Fiók: @{username}"
@@ -199,10 +195,6 @@ msgstr "Formátum előnézete"
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Csatornalista elrejtése"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently shown.
-msgid "Hide server list"
-msgstr "Szerverlista elrejtése"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -510,10 +502,6 @@ msgstr "Másolás gomb megjelenítése"
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
 msgstr "Personák gomb megjelenítése"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently hidden.
-msgid "Show server list"
-msgstr "Szerverlista megjelenítése"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"

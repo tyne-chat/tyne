@@ -10,10 +10,6 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Tiền tố: {0})"
 
-#. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
-msgid "(pinned)"
-msgstr "(đã ghim)"
-
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "Tài khoản: @{username}"
@@ -199,10 +195,6 @@ msgstr "Xem trước định dạng"
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Ẩn danh sách kênh"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently shown.
-msgid "Hide server list"
-msgstr "Ẩn danh sách máy chủ"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -510,10 +502,6 @@ msgstr "Hiện nút sao chép"
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
 msgstr "Hiện nút persona"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently hidden.
-msgid "Show server list"
-msgstr "Hiện danh sách máy chủ"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
