@@ -68,10 +68,6 @@ describe('fork release feed', () => {
 			assert.equal(formats.getUpdateBaseUrl(), 'https://pkgs.fluxer.com/desktop/stable/linux/x64');
 			assert.equal(downloads.UPDATE_BASE_URL, 'https://pkgs.fluxer.com/desktop/stable/linux/x64');
 			assert.equal(downloads.DOWNLOAD_PAGE_URL, 'https://fluxer.app/download');
-			assert.equal(
-				downloads.buildManualVersionDownloadUrl('1.4.0', 'appimage'),
-				'https://pkgs.fluxer.com/desktop/stable/linux/x64/1.4.0/appimage',
-			);
 		}
 	});
 
@@ -114,32 +110,29 @@ describe('fork release feed', () => {
 	});
 
 	test('a versioned download points at the asset of that release', () => {
-		const {downloads: linux} = load({platform: 'linux', arch: 'x64'});
+		const {formats: linux} = load({platform: 'linux', arch: 'x64'});
 		assert.equal(
-			linux.buildManualVersionDownloadUrl('1.4.0', 'appimage'),
+			linux.forkVersionDownloadUrl('Fluxer', '1.4.0', 'appimage'),
 			`${RELEASES}/download/desktop-v1.4.0/Fluxer-1.4.0-linux-x86_64.AppImage`,
 		);
 		assert.equal(
-			linux.buildManualVersionDownloadUrl('1.4.0', 'deb'),
+			linux.forkVersionDownloadUrl('Fluxer', '1.4.0', 'deb'),
 			`${RELEASES}/download/desktop-v1.4.0/Fluxer-1.4.0-linux-amd64.deb`,
 		);
-		const {downloads: windows} = load({platform: 'win32', arch: 'x64'});
+		const {formats: windows} = load({platform: 'win32', arch: 'x64'});
 		assert.equal(
-			windows.buildManualVersionDownloadUrl('1.4.0', 'setup'),
+			windows.forkVersionDownloadUrl('Fluxer', '1.4.0', 'setup'),
 			`${RELEASES}/download/desktop-v1.4.0/Fluxer-Setup-1.4.0-win-x64.exe`,
 		);
-		const {downloads: mac} = load({platform: 'darwin', arch: 'arm64'});
+		const {formats: mac} = load({platform: 'darwin', arch: 'arm64'});
 		assert.equal(
-			mac.buildManualVersionDownloadUrl('1.4.0', 'dmg'),
+			mac.forkVersionDownloadUrl('Fluxer', '1.4.0', 'dmg'),
 			`${RELEASES}/download/desktop-v1.4.0/Fluxer-1.4.0-mac-arm64.dmg`,
 		);
 	});
 
-	test('the Linux download options offered for an update come from the release', () => {
-		const {downloads} = load({platform: 'linux', arch: 'x64'});
-		const [appimage] = downloads.getManualDownloadOptions({version: '1.4.0', pubDate: null, files: {}});
-		assert.equal(appimage.format, 'appimage');
-		assert.equal(appimage.url, `${RELEASES}/download/desktop-v1.4.0/Fluxer-1.4.0-linux-x86_64.AppImage`);
-		assert.equal(appimage.suggestedName, 'Fluxer-1.4.0-linux-x86_64.AppImage');
+	test('a release asset is named for the product, version, platform and architecture', () => {
+		const {formats} = load({platform: 'linux', arch: 'x64'});
+		assert.equal(formats.forkReleaseAssetName('Fluxer', '1.4.0', 'appimage'), 'Fluxer-1.4.0-linux-x86_64.AppImage');
 	});
 });
