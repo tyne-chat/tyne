@@ -4,6 +4,7 @@
 	"ignoreExportsUsedInFile": true,
 	"ignoreDependencies": ["@bufbuild/protoc-gen-es", "@tailwindcss/cli", "@types/events", "events", "tailwindcss"],
 	"ignoreFiles": [
+		"e2e/**",
 		"fluxer_admin/src/styles/app.css",
 		"fluxer_admin/static/htmx.min.js",
 		"fluxer_app/inline_scripts/*.js",
@@ -20,6 +21,7 @@
 	},
 	"workspaces": {
 		".": {
+			"ignoreBinaries": ["electron-builder"],
 			"ignoreDependencies": ["vite"]
 		},
 		"fluxer_api": {
@@ -37,10 +39,13 @@
 				"undici",
 				"validator"
 			],
-			"ignoreExportsUsedInFile": false
+			"ignoreExportsUsedInFile": false,
+			"entry": ["scripts/migrate_*.ts", "scripts/seed_*.ts"]
 		},
 		"fluxer_app": {
 			"entry": [
+				"lingui.fork.config.js",
+				"scripts/fork-i18n.mjs",
 				"lingui.config.js",
 				"scripts/build-sw.mjs",
 				"scripts/Generate*.ts",
@@ -53,6 +58,7 @@
 		"fluxer_desktop": {
 			"ignoreExportsUsedInFile": false,
 			"entry": [
+				"scripts/fork-release-assets.mjs",
 				"src/main/Bootstrap.ts",
 				"src/main/DesktopTrustedCertificatesWorker.ts",
 				"src/main/index.ts",
