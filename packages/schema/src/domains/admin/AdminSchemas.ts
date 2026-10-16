@@ -615,6 +615,8 @@ const InstanceRegistrationResponse = InstanceRegistrationConfigResponse.extend({
 
 const AppPublicConfigResponse = z.object({
 	branding: z.object({
+		// Fork: optional, so a response without it (an older server, upstream's fixtures) still parses.
+		desktop_app_prompt_enabled: z.boolean().optional(),
 		product_name: z.string(),
 		icon_url: z.string().nullable(),
 		symbol_url: z.string().nullable(),
@@ -636,7 +638,6 @@ const AppPublicConfigResponse = z.object({
 		custom_css: z.string().nullable(),
 		upload_limit_message: z.string().nullable(),
 		trusted_domains: z.array(z.string()),
-		desktop_app_prompt_enabled: z.boolean(),
 	}),
 	setup: z.object({
 		configured: z.boolean(),
@@ -714,9 +715,11 @@ const AppPublicConfigUpdateRequest = z.object({
 });
 
 const InstancePolicyResponse = z.object({
+	server_list_buttons: ServerListButtonsSchema.optional(),
 	single_community_enabled: z.boolean(),
 	single_community_guild_id: z.string().nullable(),
-	signal_bar_guild_id: z.string().nullable().default(null),
+	// Fork: optional, so a response without them (an older server, upstream's fixtures) still parses.
+	signal_bar_guild_id: z.string().nullish(),
 	direct_messages_disabled: z.boolean(),
 	direct_messages_locked: z.boolean(),
 	friends_disabled: z.boolean().describe('Whether friend requests are disabled instance-wide'),
@@ -737,13 +740,6 @@ const InstancePolicyResponse = z.object({
 		gif: z.boolean(),
 		youtube: z.boolean(),
 		bluesky: z.boolean(),
-	}),
-	server_list_buttons: ServerListButtonsSchema.default({
-		favorites: true,
-		explore: true,
-		create_join: true,
-		download: true,
-		help: true,
 	}),
 });
 
