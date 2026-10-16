@@ -330,6 +330,14 @@ Channels with threads can't be converted to announcement channels
 
 Only text and announcement channels can be converted into each other
 
+### `DUPLICATE_PERSONA_TAG`
+
+This tag is already taken
+
+### `DUPLICATE_SIGNATURE_EMOJI`
+
+This tag is already taken
+
 ### `ENFORCEMENT_ACCOUNT_CLOSED`
 
 This account is closed, so it can't be suspended
@@ -902,6 +910,14 @@ NSFW content is age restricted
 
 Passkey authentication failed
 
+### `PERSONA_LIMIT_REACHED`
+
+Maximum number of personas reached (250)
+
+### `PERSONA_TAG_LIMIT_REACHED`
+
+A persona can have at most 5 tags
+
 ### `PREMIUM_PURCHASE_BLOCKED`
 
 No active subscription
@@ -909,6 +925,10 @@ No active subscription
 ### `PREVIEW_MUST_BE_JPEG`
 
 Preview must be JPEG
+
+### `PRIVATE_PERSONA`
+
+You don't have access to this resource or feature
 
 ### `PROCESSING_FAILED`
 
@@ -993,6 +1013,10 @@ Service unavailable
 ### `SESSION_TOKEN_MISMATCH`
 
 Session token mismatch
+
+### `SIGNATURE_EMOJI_LIMIT_REACHED`
+
+A persona can have at most 10000 signature emojis
 
 ### `SINGLE_COMMUNITY_CANNOT_CREATE_GUILDS`
 
@@ -1253,6 +1277,10 @@ This passkey request has expired
 ### `UNKNOWN_PASSKEY_MIGRATION`
 
 There is no passkey to update right now
+
+### `UNKNOWN_PERSONA`
+
+User wasn't found
 
 ### `UNKNOWN_REPORT`
 

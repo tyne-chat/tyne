@@ -18,7 +18,7 @@ Hello advertises a heartbeat interval of 41,250 ms. The Gateway checks the heart
 
 There is no separate authentication deadline. The heartbeat rule alone closes a socket that never authenticates.
 
-A disconnected session remains resumable for 60,000 ms. Its presence is published as `offline` 5,000 ms after the socket drops, well before the retention window ends. A successful Resume inside the window restores the status the session last selected.
+A disconnected session remains resumable for 300,000 ms. Its presence is published as `offline` 5,000 ms after the socket drops, well before the retention window ends. A successful Resume inside the window restores the status the session last selected.
 
 One user credential holds at most 100 live sessions. A further Identify closes with `4008` and reason `Too many sessions`. A bot credential is bounded by the guild ceiling below.
 

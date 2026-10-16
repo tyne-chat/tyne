@@ -26,6 +26,7 @@ A channel object always has its identity and type. Every other field is present 
 | url? | ?string | The destination URL, present only for a guild link channel |
 | icon? | ?string | The icon hash, present only for a group direct message |
 | owner_id? | ?snowflake | The ID of the owner, or null when the channel stores none, present only for a group direct message and a thread |
+| owner_persona_id? | ?snowflake | The [persona](/http-api/users/personas/) a thread's owner started it as, absent when it was started as the account |
 | position?<sup>2</sup> | integer | The sort position, present only for a guild channel other than a thread |
 | parent_id?<sup>13</sup> | ?snowflake | The ID of the parent category, null when the channel sits at the top level |
 | bitrate?<sup>3</sup> | ?integer | The voice bitrate in bits per second, present only for a guild voice channel |
