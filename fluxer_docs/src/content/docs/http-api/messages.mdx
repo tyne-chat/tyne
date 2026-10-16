@@ -54,6 +54,7 @@ A message object is the full stored form of one post in a channel.
 | call? | [message call](#message-call-object) object | Call state attached to a call message |
 | referenced_message?<sup>7</sup> | ?[message](#message-object) object | Resolved referenced message without a nested `referenced_message` field |
 | thread?<sup>8</sup> | [thread](/http-api/threads/#thread-object) object | The thread started from this message |
+| subprofile? | ?[message persona](#message-persona-object) object | The [persona](/http-api/users/personas/) the message was sent as, or null when it was sent as the account |
 
 <sup>1</sup> Built for a webhook-authored message and for a stored author ID that no longer resolves
 
@@ -271,6 +272,24 @@ An emoji is either a custom guild emoji identified by ID or a standard Unicode e
 
 <sup>1</sup> Holds the guild emoji name for a custom emoji and the literal Unicode sequence for a standard emoji
 
+## Message persona object
+
+A snapshot of the [persona](/http-api/users/personas/) a message, reaction, typing indicator or signal is from, holding what a client draws beside it. The full profile is fetched with [Get persona profile card by ID](/http-api/users/personas/#get-persona-profile-card-by-id).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | string | The ID of the persona |
+| name | string | The persona's display name |
+| avatar? | ?string | The persona's avatar hash |
+| avatar_color? | ?integer | The avatar's dominant colour |
+| display_tag_text? | ?string | The owner's display tag text |
+| display_tag_icon? | ?string | The owner's display tag icon |
+| pronouns? | ?string | The persona's pronouns |
+| color? | ?integer | The persona's accent colour |
+| visibility? | ?string | The persona's [visibility](/http-api/users/personas/#visibility) |
+
 ## Reaction object
 
 A reaction object summarises one emoji group on a message. Fluxer has ordinary reactions only.
@@ -282,10 +301,14 @@ A reaction object summarises one emoji group on a message. Fluxer has ordinary r
 | emoji | [emoji](#emoji-object) object | The emoji this group counts |
 | count<sup>1</sup> | integer | The number of users who added this emoji |
 | me?<sup>2</sup> | boolean | Whether the authenticated user has this reaction |
+| me_root?<sup>2</sup> | ?boolean | Whether the authenticated user has this reaction as the account itself, rather than as a persona |
+| persona_reactions?<sup>3</sup> | ?array[[reaction persona entry](#reaction-persona-entry-object) object] | The reactions in this group made as [personas](/http-api/users/personas/) |
 
 <sup>1</sup> Capped by the resolved `max_users_per_message_reaction` limit, which defaults to 1,000,000 users for each group
 
 <sup>2</sup> Present and `true` only when the authenticated user has this reaction, and omitted entirely otherwise, so an absent key must be read as false
+
+<sup>3</sup> Present only when someone reacted as a persona. An account can react with one emoji once as itself and once as each of its personas, and `count` counts every one of those reactions
 
 Each message has at most the resolved `max_reactions_per_message` distinct groups, which defaults to 30. Groups are ordered by the time each group's earliest reaction was added, then by emoji name, then by emoji ID.
 
@@ -302,6 +325,16 @@ Each message has at most the resolved `max_reactions_per_message` distinct group
   "me": true
 }
 ```
+
+## Reaction persona entry object
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | snowflake | The persona that reacted |
+| count | integer | The number of reactions made as this persona |
+| me? | ?boolean | Present and `true` when the authenticated user reacted as this persona |
 
 ## Message reference object
 
@@ -844,7 +877,7 @@ The page has no cursor field. The next request repeats the operation with `befor
 
 | Field | Type | Description |
 | --- | --- | --- |
-| items | array[[partial user](/http-api/users/#partial-user-object) object] | Users in ascending user ID order |
+| items | array[[reactor](#reactor-object) object] | Users in ascending user ID order |
 | has_more | boolean | Whether another page exists |
 | next_after<sup>1</sup> | ?snowflake | User ID cursor for the next page |
 
@@ -1191,6 +1224,7 @@ The request body is read as a multipart form when `Content-Type` contains `multi
 | favorite_meme_id?<sup>4</sup> | ?snowflake | Favourite meme to attach |
 | sticker_ids? | ?array[snowflake] | At most 3 sticker IDs |
 | tts?<sup>5</sup> | boolean | Whether to request text-to-speech |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to send the message as, or null for the account |
 
 <sup>1</sup> Echoed back on the created message and on its [Message Create](/gateway/events/#message-create) Dispatch so a client can match the result to its optimistic entry. An integer is converted to its decimal string form
 
@@ -1361,6 +1395,7 @@ The body is read exactly as it is for [Create message](#create-message), so a `m
 | flags?<sup>3</sup> | integer | Replacement [message flags](#message-flags) |
 | attachments?<sup>1</sup> | array[[pre-uploaded attachment](#pre-uploaded-attachment-object) object \| [existing attachment reference](#existing-attachment-reference-object) object] | Complete retained and added attachment collection |
 | message_snapshots?<sup>4</sup> | array | Declared by the body schema and never accepted |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to show the message as from, or null for the account. Absent leaves it unchanged |
 
 <sup>1</sup> Replaces the stored collection outright, so an existing embed or attachment that the array omits is removed. Both collections are bounded by the same resolved limits as message creation
 
@@ -2003,11 +2038,22 @@ Fluxer validates the emoji in full only when a request would create a new reacti
 
 Every reaction operation is idempotent and writes no audit log entry. Every removal route emits its Dispatch whether or not the message held the reaction, group, or reactions the request names. [Add own reaction](#add-own-reaction), [Remove own reaction](#remove-own-reaction), and [Remove another user's reaction](#remove-another-users-reaction) each accept a `session_id` query parameter, which is echoed in that route's Dispatch so the originating session can match its own optimistic update, and it never affects authorisation or the stored reaction.
 
+## Reactor object
+
+A reactor object extends the [partial user](/http-api/users/#partial-user-object) object with the persona the user reacted as. A user who reacted as the account itself and as personas appears once for each.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| subprofile? | ?[message persona](#message-persona-object) object | The persona the user reacted as, or null |
+| persona_id? | ?snowflake | The ID of that persona, or null when the user reacted as the account |
+
 ## List reaction users unpaged
 
 <RouteHeader method="GET" path="/v1/channels/{channel_id}/messages/{message_id}/reactions/{emoji}" bot />
 
-Returns a bare array of [partial user](/http-api/users/#partial-user-object) objects for one reaction.
+Returns a bare array of [reactor](#reactor-object) objects for one reaction.
 
 ### Limitations
 
@@ -2034,7 +2080,7 @@ The pagination signal is in the response headers. `X-Has-More` is `true` or `fal
 
 | Status | Body | Condition |
 | --- | --- | --- |
-| 200 | array[[partial user](/http-api/users/#partial-user-object) object] | Reaction users were returned |
+| 200 | array[[reactor](#reactor-object) object] | Reaction users were returned |
 | 400 | [error response](/http-api/#error-response) | Path, emoji, or pagination input is invalid, or the channel has no messages and the request returns `CANNOT_SEND_MESSAGES_IN_NON_TEXT_CHANNEL` |
 | 403 | [error response](/http-api/#error-response) | Caller lacks `VIEW_CHANNEL` and the request returns `MISSING_PERMISSIONS` |
 | 404 | [error response](/http-api/#error-response) | Channel or message does not exist, or the message is outside the caller's message history cutoff |
@@ -2111,6 +2157,14 @@ Adds the authenticated identity's reaction. Returns 204 with an empty body. Emit
 | message_id | snowflake | The ID of the message |
 | emoji | string | URI-encoded [reaction emoji path value](#reaction-emoji-path-value) |
 
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to react as, or null for the account |
+
+The body is optional. A persona the caller does not own returns 404 `UNKNOWN_PERSONA`.
+
 ### Query parameters
 
 | Field | Type | Description |
@@ -2179,8 +2233,11 @@ Removes the authenticated identity's own reaction. Returns 204 with an empty bod
 | Field | Type | Description |
 | --- | --- | --- |
 | session_id?<sup>1</sup> | string | Originating Gateway session ID (1-64 characters) |
+| persona_id? | string | The persona whose reaction to remove, or `0` for the one made as the account |
 
 <sup>1</sup> See [reaction session correlation](#reaction-emoji-path-value)
+
+Without `persona_id`, the caller's reactions with this emoji are removed whether they were made as the account or as any persona.
 
 ### Response
 
@@ -2231,8 +2288,11 @@ Removes one named user's reaction. Returns 204 with an empty body. Emits a [Mess
 | Field | Type | Description |
 | --- | --- | --- |
 | session_id?<sup>1</sup> | string | Originating Gateway session ID (1-64 characters) |
+| persona_id? | string | The persona whose reaction to remove, or `0` for the one made as the account |
 
 <sup>1</sup> See [reaction session correlation](#reaction-emoji-path-value)
+
+Without `persona_id`, the user's reactions with this emoji are removed whether they were made as the account or as any persona.
 
 ### Response
 
@@ -2349,6 +2409,14 @@ Publishes typing activity in a text-bearing channel. Returns 204 with an empty b
 | Field | Type | Description |
 | --- | --- | --- |
 | channel_id | snowflake | The ID of the channel where typing is shown |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to show as typing, or null for the account |
+
+The body is optional. A persona the caller does not own, or has deleted, returns 404 `UNKNOWN_PERSONA`.
 
 ### Response body
 

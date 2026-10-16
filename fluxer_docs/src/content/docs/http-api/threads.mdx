@@ -29,6 +29,7 @@ A thread is a [channel object](/http-api/channels/#channel-object) with the thre
 | guild_id | snowflake | The ID of the guild |
 | parent_id | snowflake | The ID of the text, announcement, forum, or media channel the thread belongs to |
 | owner_id | snowflake | The ID of the user or webhook that created the thread |
+| owner_persona_id? | ?snowflake | The [persona](/http-api/users/personas/) the owner started the thread as, absent when it was started as the account |
 | name | string | The name of the thread (1-100 characters) |
 | last_message_id | ?snowflake | The ID of the most recent message, or null when the thread has none |
 | last_pin_timestamp | ?ISO8601 timestamp | The time a message was most recently pinned, or null when nothing has ever been pinned |
@@ -184,6 +185,7 @@ Starts a public thread from a message in a guild text channel, or an announcemen
 | name | string | The name of the thread (1-100 characters) |
 | auto_archive_duration? | integer | The [auto archive duration](#auto-archive-durations) in minutes (default 4320) |
 | rate_limit_per_user? | integer | The slowmode interval in seconds (0-21,600) |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to start the thread as, or null for the account |
 
 `rate_limit_per_user` defaults to the `default_thread_rate_limit_per_user` of the parent, or `0` when the parent has none.
 
@@ -251,6 +253,7 @@ The parent type selects the body. Either body can be sent as multipart form data
 | auto_archive_duration? | integer | The [auto archive duration](#auto-archive-durations) in minutes (default 4320) |
 | rate_limit_per_user? | integer | The slowmode interval in seconds (0-21,600) |
 | invitable?<sup>1</sup> | boolean | Whether a member who is not a thread moderator can add members who are not thread moderators (default true) |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to start the thread as, or null for the account |
 
 <sup>1</sup> Applies only to a private thread
 
