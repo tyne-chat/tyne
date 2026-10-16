@@ -915,4 +915,3 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 });
 
 export default PersonaSettingsTab;
-export const SubprofileSettingsTab = PersonaSettingsTab;

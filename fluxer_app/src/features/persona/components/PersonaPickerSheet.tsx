@@ -334,5 +334,3 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 		);
 	},
 );
-
-export const SubprofilePickerSheet = PersonaPickerSheet;
