@@ -262,5 +262,3 @@ export function isUnfinishedPersonaTag(
 	}
 	return false;
 }
-
-export const matchPersonaTags = matchPersona;
