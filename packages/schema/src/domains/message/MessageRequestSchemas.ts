@@ -477,8 +477,6 @@ export const IndicateTypingRequestSchema = z
 	})
 	.optional();
 
-export type IndicateTypingRequest = z.infer<typeof IndicateTypingRequestSchema>;
-
 export const ChannelPinsQuerySchema = z.object({
 	limit: z.coerce
 		.number()
