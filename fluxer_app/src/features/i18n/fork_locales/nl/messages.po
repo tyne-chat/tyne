@@ -10,10 +10,6 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Voorvoegsel: {0})"
 
-#. Short indicator shown next to pinned emoji text, for example: :heart: (pinned).
-msgid "(pinned)"
-msgstr "(vastgezet)"
-
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "Account: @{username}"
@@ -199,10 +195,6 @@ msgstr "Formaatvoorbeeld"
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Kanaallijst verbergen"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently shown.
-msgid "Hide server list"
-msgstr "Serverlijst verbergen"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -510,10 +502,6 @@ msgstr "Kopieerknop tonen"
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
 msgstr "Personaknop tonen"
-
-#. Tooltip on the channel header server list toggle when the server rail is currently hidden.
-msgid "Show server list"
-msgstr "Serverlijst tonen"
 
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
