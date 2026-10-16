@@ -1,0 +1,340 @@
+---
+# SPDX-License-Identifier: AGPL-3.0-or-later
+title: Signal bar
+description: The signal bar above the message box, where members switch shared signals on and off in a channel.
+---
+
+import RouteHeader from '@/components/RouteHeader.astro';
+
+The signal bar is a row of signals above the message box. A member switches a signal on to show it to everyone in the channel, as themselves or as one of their [personas](/http-api/users/personas/), and switches it off again when it no longer applies.
+
+The instance has one bar. It belongs to the home community named by `signal_bar_guild_id` in the [community policy](/http-api/instance/#community-policy-object), and members holding `MANAGE_GUILD` there edit its signals. Without a home community the bar has no signals.
+
+## Where the bar shows
+
+The bar is off in a channel until someone switches it on. In a community, members holding `MANAGE_GUILD` choose a default, per-category settings and per-channel settings with [Choose where the signal bar is switched on in a community](#choose-where-the-signal-bar-is-switched-on-in-a-community). A channel's own setting wins over its category's, and its category's over the default. In a direct message either participant switches the bar with [Switch the signal bar on or off in a DM](#switch-the-signal-bar-on-or-off-in-a-dm), and in a group direct message the owner does.
+
+Switching the bar off in a channel switches off every signal given there.
+
+## Signal lifetime
+
+A signal given with [Give a signal](#give-a-signal) stays on while its giver is online. Fluxer removes the signals of an account that has been offline for 12 hours. It also removes every entry for a signal that is taken off the bar, or whose custom emoji is deleted.
+
+Every change to the signals given in a channel is sent to that channel as [Channel Signal Update](/gateway/events/#channel-signal-update), and switching the bar on or off as [Channel Signal Bar Update](/gateway/events/#channel-signal-bar-update). An edit to the bar itself is announced as [Signal Bar Update](/gateway/events/#signal-bar-update).
+
+## Signal bar object
+
+The instance's signal bar.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| version | integer | Incremented on every change to the bar |
+| signals | array[[signal bar signal](#signal-bar-signal-object) object] | The signals in display order, at most 50 |
+| guild_id | ?snowflake | The home community that owns the bar |
+| can_manage | boolean | Whether the requesting user may edit the bar |
+
+## Signal bar signal object
+
+One signal on the bar.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | string | The unique identifier of the signal within the bar |
+| emoji_id | ?snowflake | Custom emoji ID (null for Unicode) |
+| emoji_name | string | Emoji name or Unicode character |
+| animated | boolean | Whether the emoji is animated |
+| label | ?string | Optional label shown instead of the emoji name |
+
+## Signal update object
+
+One signal in the list sent to [Update signal bar](#update-signal-bar).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id? | ?string | The ID of an existing signal to keep, or absent for a new signal |
+| emoji_id? | ?snowflake | Custom emoji ID, or null for a Unicode emoji |
+| emoji_name | string | The Unicode emoji, or the custom emoji's name (1-64 characters) |
+| label? | ?string | Label shown instead of the emoji name, at most 32 characters |
+
+## Channel signals object
+
+The signals given in one channel.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| enabled | boolean | Whether the signal bar is switched on in this channel |
+| bar_version | integer | The [signal bar](#signal-bar-object) `version` the entries were read against |
+| entries | array[[channel signal entry](#channel-signal-entry-object) object] | Every signal given in the channel, oldest first, or none when the bar is off |
+
+## Channel signal entry object
+
+One account giving one signal in a channel.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| signal_id | string | The unique identifier of the signal within the bar |
+| user | [partial user](/http-api/users/#partial-user-object) object | The account giving the signal |
+| persona_id | ?snowflake | The persona the account is currently signalling as, if any |
+| subprofile | ?[message persona](/http-api/messages/#message-persona-object) object | The persona the account is signalling as, or null |
+| activated_at | integer | Unix timestamp in milliseconds |
+
+## Guild signal bar settings object
+
+Where the signal bar shows in a community.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| default | boolean | Whether channels without a category or channel setting show the signal bar |
+| categories | map[string, boolean] | Settings keyed by category ID |
+| channels | map[string, boolean] | Settings keyed by text or announcement channel ID |
+
+## Switch the signal bar on or off in a DM
+
+<RouteHeader method="PUT" path="/v1/channels/{channel_id}/signal-bar" />
+
+Switches the signal bar on or off in a direct message. Either participant of a one-on-one direct message may do this, and the owner of a group direct message. A community channel is refused with 403, and its bar is set with [Choose where the signal bar is switched on in a community](#choose-where-the-signal-bar-is-switched-on-in-a-community). Switching off clears every signal in the channel.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| enabled | boolean | Whether the signal bar shows in this direct message |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The setting was saved, or was already set |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `signal_bar:mutate` bucket.
+
+## List active channel signals
+
+<RouteHeader method="GET" path="/v1/channels/{channel_id}/signals" bot />
+
+Returns the signals given in a text channel the caller can see. When the bar is off in the channel, `enabled` is false and `entries` is empty.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [channel signals](#channel-signals-object) object | The channel's signals |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `signal_bar:read` bucket.
+
+## Reset a signal
+
+<RouteHeader method="DELETE" path="/v1/channels/{channel_id}/signals/{signal_id}" bot />
+
+Switches one signal off for everyone in the channel. Requires `MANAGE_GUILD` in a community channel, or ownership of a group direct message. Either participant of a one-on-one direct message may do it.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+| signal_id | string | The unique identifier of the signal within the bar |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The signal is off for everyone |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `signal_bar:mutate` bucket.
+
+## Give a signal
+
+<RouteHeader method="PUT" path="/v1/channels/{channel_id}/signals/{signal_id}/@me" bot />
+
+Switches a signal on in the channel for the caller, or changes the persona the caller gives it as. An account has at most one entry per signal in a channel. Requires `SEND_MESSAGES` in a community channel, and a member in timeout is refused. A signal that is not on the bar is refused with 404 `UNKNOWN_EMOJI`, and a channel where the bar is off with 403.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+| signal_id | string | The unique identifier of the signal within the bar |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id? | ?snowflake | Persona the account is currently signalling as |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The signal is on for the caller |
+
+### Rate limit
+
+30 requests per 10 seconds for each authenticated user, on the `signal_bar:toggle` bucket.
+
+## Withdraw a signal
+
+<RouteHeader method="DELETE" path="/v1/channels/{channel_id}/signals/{signal_id}/@me" bot />
+
+Switches a signal off in the channel for the caller. Withdrawing a signal that is not on succeeds and changes nothing.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+| signal_id | string | The unique identifier of the signal within the bar |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The signal is off for the caller |
+
+### Rate limit
+
+30 requests per 10 seconds for each authenticated user, on the `signal_bar:toggle` bucket.
+
+## Turn off someone's signal
+
+<RouteHeader method="DELETE" path="/v1/channels/{channel_id}/signals/{signal_id}/users/{user_id}" bot />
+
+Switches one account's signal off. Requires the same rights as [Reset a signal](#reset-a-signal).
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+| signal_id | string | The unique identifier of the signal within the bar |
+| user_id | snowflake | The ID of the user whose signal is turned off |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The signal is off for that account |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `signal_bar:mutate` bucket.
+
+## Get where the signal bar is switched on in a community
+
+<RouteHeader method="GET" path="/v1/guilds/{guild_id}/signal-bar/channels" />
+
+Returns where the signal bar shows in a community. Requires `MANAGE_GUILD`.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The ID of the guild |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [guild signal bar settings](#guild-signal-bar-settings-object) object | The settings |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `signal_bar:read` bucket.
+
+## Choose where the signal bar is switched on in a community
+
+<RouteHeader method="PUT" path="/v1/guilds/{guild_id}/signal-bar/channels" />
+
+Replaces where the signal bar shows in a community. Requires `MANAGE_GUILD`. A setting for an ID that is not a category, or a text or announcement channel, of the community is dropped. Every channel whose result changes is sent [Channel Signal Bar Update](/gateway/events/#channel-signal-bar-update), and a channel switched off loses its signals.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The ID of the guild |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| default | boolean | Whether channels without a category or channel setting show the signal bar |
+| categories | map[string, boolean] | Settings keyed by category ID |
+| channels | map[string, boolean] | Settings keyed by text or announcement channel ID |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [guild signal bar settings](#guild-signal-bar-settings-object) object | The settings as saved |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `signal_bar:mutate` bucket.
+
+## Get signal bar
+
+<RouteHeader method="GET" path="/v1/instance/signal-bar" bot />
+
+Returns the instance's signal bar and whether the caller may edit it.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [signal bar](#signal-bar-object) object | The signal bar |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `signal_bar:read` bucket.
+
+## Update signal bar
+
+<RouteHeader method="PUT" path="/v1/instance/signal-bar" />
+
+Replaces the signals on the bar. Requires `MANAGE_GUILD` in the home community. A signal whose `id` names an existing signal keeps that ID, and the entries given for it survive, while every other signal gets a new ID. A custom emoji that does not exist, or an `emoji_name` that is not a Unicode emoji, is refused with 404 `UNKNOWN_EMOJI`. Increments `version` and sends [Signal Bar Update](/gateway/events/#signal-bar-update).
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| signals | array[[signal update](#signal-update-object) object] | The complete new list in display order, at most 50 |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [signal bar](#signal-bar-object) object | The new signal bar |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `signal_bar:mutate` bucket.
