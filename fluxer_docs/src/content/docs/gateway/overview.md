@@ -179,7 +179,7 @@ A connection moves through these states: Opening, Unauthenticated, Starting, Rep
 | Heartbeat. No session is attached, or the payload is `null`, or the attached session accepts the sequence | Send Heartbeat ACK | Same state |
 | Heartbeat deadline. The connection is awaiting an acknowledgement and more than 45,000 ms have passed since the last one | Close with `4009` and reason `Heartbeat timeout` | Closed |
 | Invalid frame or payload. Size, decompression, or decoding validation fails | Close with `4002` and the matching reason from [Gateway payload](#gateway-payload) or [Framing](#framing) | Closed |
-| Transport ends. A session exists | Retain the session for 60,000 ms | Closed |
+| Transport ends. A session exists | Retain the session for 300,000 ms | Closed |
 
 An opcode outside the registry, and a server opcode sent by a client, close with `4001` once a session is attached and with `4003` while the connection is unauthenticated.
 
@@ -246,7 +246,7 @@ A successful Resume replays every retained Dispatch above `seq` in order and end
 
 All fields are required. A missing field, a `token` or `session_id` that is not a string, or a `seq` that is not an integer closes with `4002` and reason `Invalid resume payload`.
 
-The Gateway retains a disconnected session for 60,000 ms. An accepted `seq` is no greater than the session's current sequence and no less than the sequence the session has already acknowledged. A `seq` outside either bound closes with `4007` and reason `Invalid sequence`.
+The Gateway retains a disconnected session for 300,000 ms. An accepted `seq` is no greater than the session's current sequence and no less than the sequence the session has already acknowledged. A `seq` outside either bound closes with `4007` and reason `Invalid sequence`.
 
 An unknown or expired session sends Opcode 9 with `d: false` and leaves the socket unauthenticated. A `seq` inside both bounds but below the replay floor sends the same Opcode 9. The replay floor is the highest sequence the replay buffer has evicted. A token that does not own the named session closes with `4004` and reason `Invalid token`. A session that cannot be reached closes with `4000` and reason `Session unavailable`. None of those failures destroys a separately retained session.
 
@@ -270,7 +270,7 @@ Opcode 7 Reconnect asks the client to open a new WebSocket. The Gateway sends it
 }
 ```
 
-The current socket then closes with `4000` and reason `Session drain requested; reconnect to continue`. A Resume sent within 60,000 ms of the close can recover the session, subject to the sequence bounds in [Resuming a session](#resuming-a-session).
+The current socket then closes with `4000` and reason `Session drain requested; reconnect to continue`. A Resume sent within 300,000 ms of the close can recover the session, subject to the sequence bounds in [Resuming a session](#resuming-a-session).
 
 ## Invalid session
 
