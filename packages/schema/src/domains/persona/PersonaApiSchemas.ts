@@ -59,7 +59,6 @@ export const PersonaResponseSchema = z.object({
 export type PersonaResponse = z.infer<typeof PersonaResponseSchema>;
 
 export const PersonaListResponseSchema = z.array(PersonaResponseSchema);
-export type PersonaListResponse = z.infer<typeof PersonaListResponseSchema>;
 
 export const PublicPersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
@@ -75,7 +74,6 @@ export const PublicPersonaResponseSchema = z.object({
 export type PublicPersonaResponse = z.infer<typeof PublicPersonaResponseSchema>;
 
 export const PublicPersonaListResponseSchema = z.array(PublicPersonaResponseSchema);
-export type PublicPersonaListResponse = z.infer<typeof PublicPersonaListResponseSchema>;
 
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),
@@ -156,7 +154,6 @@ export const PersonaBulkImportRequestSchema = z.preprocess(
 			: val,
 	z.array(PersonaImportItemSchema).max(250),
 );
-export type PersonaBulkImportRequest = z.infer<typeof PersonaBulkImportRequestSchema>;
 
 export const PersonaIdParam = z.object({
 	persona_id: SnowflakeStringType.describe('Persona Snowflake ID'),
@@ -168,7 +165,6 @@ export const UserIdPersonaIdParam = z.object({
 });
 
 export const ActivePersonaModeSchema = z.enum(['manual', 'last']);
-export type ActivePersonaMode = z.infer<typeof ActivePersonaModeSchema>;
 
 /**
  * Where the persona someone has selected applies. `global`: one selection for every channel, kept
@@ -218,7 +214,6 @@ export type PersonaChannelStatesResponse = z.infer<typeof PersonaChannelStatesRe
 export const PersonaChannelStateUpdateRequestSchema = z.object({
 	persona_id: SnowflakeStringType.nullable().describe('The persona to select in the channel, or null for the account'),
 });
-export type PersonaChannelStateUpdateRequest = z.infer<typeof PersonaChannelStateUpdateRequestSchema>;
 
 export const PersonaChannelStateParam = z.object({
 	channel_id: SnowflakeType.describe('The ID of the channel'),
@@ -252,7 +247,6 @@ export const ChannelPersonaMentionsQuerySchema = z.object({
 	q: z.string().max(100).optional().default(''),
 	limit: z.coerce.number().int().min(1).max(1000).optional().default(100),
 });
-export type ChannelPersonaMentionsQuery = z.infer<typeof ChannelPersonaMentionsQuerySchema>;
 
 export const PersonaAvatarUploadRequest = z.object({
 	avatar: z.string().describe('Base64 data URI of the avatar image'),
