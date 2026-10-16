@@ -85,8 +85,6 @@ export function getTimestampDisplay(epoch: number, format: ComposerTimestampForm
 
 export const TIMESTAMP_COMBO_REGEX = /^<t:(-?\d+):f>\s*\((<t:\1:R>)\)/;
 export const TIMESTAMP_SINGLE_REGEX = /^<t:(-?\d+)(?::([tTdDfFsSR]))?>/;
-export const GLOBAL_TIMESTAMP_COMBO_REGEX = /<t:(-?\d+):f>\s*\((<t:\1:R>)\)/g;
-export const GLOBAL_TIMESTAMP_SINGLE_REGEX = /<t:(-?\d+)(?::([tTdDfFsSR]))?>/g;
 
 export function parseTimestampWire(wire: string): {epoch: number; format: ComposerTimestampFormat} | null {
 	const comboMatch = TIMESTAMP_COMBO_REGEX.exec(wire.trim());
