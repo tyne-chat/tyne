@@ -149,11 +149,11 @@ Code 4006 is unassigned, and no code above 4012 is defined. [Event filtering](/g
 | 4011 | No | Closed. No session was created |
 | 4012 | No | Closed before Hello. No session exists |
 
-<sup>1</sup> A close that leaves a session without a socket begins a fresh 60,000 ms retention window, measured from the moment the socket ends. A session displaced by a Resume from a new socket is already attached to that socket and enters no window
+<sup>1</sup> A close that leaves a session without a socket begins a fresh 300,000 ms retention window, measured from the moment the socket ends. A session displaced by a Resume from a new socket is already attached to that socket and enters no window
 
 <sup>2</sup> A Resume that fails token verification leaves the named session in place for the rest of its retention window, so a later Resume with the owning token still recovers it. An Identify that fails token verification leaves nothing to recover
 
-`Resumable` describes only whether an already established session can still be recovered with [Resume](/gateway/commands/#resume). The 60,000 ms retention window and the bounded replay buffer described in [Limits and rate limits](/gateway/limits-and-rate-limits/#replay-and-backpressure) still limit whether a Resume succeeds and what it replays.
+`Resumable` describes only whether an already established session can still be recovered with [Resume](/gateway/commands/#resume). The 300,000 ms retention window and the bounded replay buffer described in [Limits and rate limits](/gateway/limits-and-rate-limits/#replay-and-backpressure) still limit whether a Resume succeeds and what it replays.
 
 :::caution[Reconnecting unchanged reproduces `4004`, `4010`, and `4012`]
 A client changes the token, the shard pair, or the version before it reconnects.
@@ -219,4 +219,4 @@ A held or discarded Identify, an over-budget Presence Update, an over-budget [Re
 
 ## Ordinary WebSocket closes
 
-A transport can end with no Fluxer application close code, as happens on a network failure, an intermediary reset, and an ordinary `1000` or `1001` close. An established session remains available for 60,000 ms after the transport ends, and a later transport end starts a new 60,000 ms window. Neither the window length nor the bounded replay history grows.
+A transport can end with no Fluxer application close code, as happens on a network failure, an intermediary reset, and an ordinary `1000` or `1001` close. An established session remains available for 300,000 ms after the transport ends, and a later transport end starts a new 300,000 ms window. Neither the window length nor the bounded replay history grows.

@@ -228,8 +228,27 @@ Whether this deployment runs as one community, and whether direct messages exist
 | single_community_guild_id<sup>1</sup> | ?snowflake | The ID of the guild every account joins in single-community mode, or null |
 | direct_messages_disabled | boolean | Whether direct messages and friend requests are disabled for the whole deployment |
 | guild_create_access | boolean | Whether every account can create communities, or only admins and holders of the `feature_guild_create` limit |
+| community_creation_staff_only<sup>2</sup> | boolean | Whether clients offer community creation only to staff |
+| signal_bar_guild_id? | ?string | The home community that owns the [signal bar](/http-api/signal-bar/), or null when the bar is off |
+| server_list_buttons? | [server list buttons](#server-list-buttons-object) object | Which buttons clients show in the server list |
 
 <sup>1</sup> The identifier is published only while `single_community` is true and the deployment has designated a community guild
+
+<sup>2</sup> A client setting. The API does not refuse a community created by someone else
+
+## Server list buttons object
+
+Which buttons clients show in the server list column. Each defaults to true.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| favorites | boolean | Whether the Favorites button is shown |
+| explore | boolean | Whether the Explore communities button is shown |
+| create_join | boolean | Whether the Create or join a community button is shown |
+| download | boolean | Whether the Download desktop app button is shown |
+| help | boolean | Whether the Help center button is shown |
 
 ## Service availability object
 
@@ -432,6 +451,7 @@ The instance identity a client renders: its name, its images, its theme colour, 
 | status_page_incident_history_url | ?string | Status page incident history URL, or null |
 | premium_product_name | string | Name of the premium tier a client displays. A self-hosted deployment reports `Premium` until the operator sets a name |
 | premium_info_url | ?string | Absolute URL of a page describing the premium tier, or null |
+| desktop_app_prompt_enabled | boolean | Whether the web app offers to open links in the desktop app and to download it, default true |
 
 ## Public setup state object
 
