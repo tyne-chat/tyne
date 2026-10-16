@@ -199,10 +199,14 @@ Every field is optional, though the default `current` scope requires `context_gu
 | exclude_channel_id? | array[snowflake] | The channel IDs, any of which excludes a message (at most 500) |
 | author_id?<sup>11</sup> | array[snowflake] | The author user IDs, any of which can match (at most 100) |
 | exclude_author_id? | array[snowflake] | The author user IDs, any of which excludes a message (at most 100) |
+| persona_id? | array[snowflake] | The [persona](/http-api/users/personas/) IDs, any of which can match. A message matches when it is from any `author_id` or any `persona_id` (at most 100) |
+| exclude_persona_id? | array[snowflake] | The persona IDs, any of which excludes a message (at most 100) |
 | author_type?<sup>11</sup> | array[string] | [Author types](#search-author-types), any of which can match (at most 20) |
 | exclude_author_type? | array[string] | [Author types](#search-author-types), any of which excludes a message (at most 20) |
 | mentions?<sup>12</sup> | array[snowflake] | The user IDs, all of which must be mentioned (at most 100) |
 | exclude_mentions? | array[snowflake] | The user IDs, any of which excludes a message (at most 100) |
+| persona_mentions? | array[snowflake] | The persona IDs, all of which must be mentioned (at most 100) |
+| exclude_persona_mentions? | array[snowflake] | The persona IDs, any of which excludes a message (at most 100) |
 | mention_everyone? | boolean | Whether a matching message has an everyone mention |
 | pinned? | boolean | Whether a matching message is pinned |
 | has?<sup>12</sup> | array[string] | [Content types](#search-content-types), all of which must be present (at most 20) |

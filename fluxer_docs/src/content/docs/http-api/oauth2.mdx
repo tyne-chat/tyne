@@ -41,6 +41,8 @@ A scope names one thing the application may read or do on the user's behalf.
 | guilds<sup>3</sup> | Read the guilds the authorised user is a member of |
 | connections<sup>4</sup> | Read the authorised user's [connections](/http-api/connections/) |
 | bot<sup>5</sup> | Install the application's bot account into a selected guild or group direct message |
+| personas.read<sup>6</sup> | Read the authorised user's [personas](/http-api/users/personas/) and persona settings |
+| personas.write<sup>7</sup> | Create, change, delete, import and select the authorised user's personas |
 
 <sup>1</sup> Grants [Get OAuth2 user information](#get-oauth2-user-information) and the reduced bearer representation from [Get current user](/http-api/users/current-user/#get-current-user), and is also required before [Get current OAuth2 authorisation](#get-current-oauth2-authorisation) includes a user object
 
@@ -51,6 +53,10 @@ A scope names one thing the application may read or do on the user's behalf.
 <sup>4</sup> Grants [List connections](/http-api/connections/#list-connections)
 
 <sup>5</sup> Installs a bot account and grants no bearer access of its own, so an application whose grants are bot alone is never presented as an authorisation by [List OAuth2 authorisations](#list-oauth2-authorisations)
+
+<sup>6</sup> Grants [List own personas](/http-api/users/personas/#list-own-personas), [Get own persona by ID](/http-api/users/personas/#get-own-persona-by-id), [Get own persona settings](/http-api/users/personas/#get-own-persona-settings), [List the personas selected per channel](/http-api/users/personas/#list-the-personas-selected-per-channel), and [Export own personas](/http-api/users/personas/#export-own-personas)
+
+<sup>7</sup> Grants [Create persona](/http-api/users/personas/#create-persona), [Update persona](/http-api/users/personas/#update-persona), [Delete persona](/http-api/users/personas/#delete-persona), [Update own persona settings](/http-api/users/personas/#update-own-persona-settings), [Select a persona in a channel](/http-api/users/personas/#select-a-persona-in-a-channel), [Bulk import personas](/http-api/users/personas/#bulk-import-personas), and [Store an image from a persona export being imported](/http-api/users/personas/#store-an-image-from-a-persona-export-being-imported)
 
 An unrecognised scope value is rejected when the authorisation request is completed. Fluxer splits a scope string on runs of whitespace and `+` characters, and discards empty segments. A repeated scope value is granted once.
 
