@@ -11,7 +11,8 @@
 		"fluxer_app/src/media/images/badges/partner.d.svg.ts",
 		"fluxer_app/src/media/images/badges/plutonium.d.svg.ts",
 		"fluxer_app/src/media/images/badges/staff.d.svg.ts",
-		"fluxer_app/src/media/images/i-like-food.d.svg.ts"
+		"fluxer_app/src/media/images/i-like-food.d.svg.ts",
+		"e2e/**"
 	],
 	"ignoreIssues": {
 		"fluxer_api/src/api/infrastructure/activity/Contract.generated.ts": ["exports", "types"],
@@ -21,7 +22,8 @@
 	},
 	"workspaces": {
 		".": {
-			"ignoreDependencies": ["vite"]
+			"ignoreDependencies": ["vite"],
+			"ignoreBinaries": ["electron-builder"]
 		},
 		"fluxer_api": {
 			"ignoreDependencies": [
@@ -37,14 +39,17 @@
 				"undici",
 				"validator"
 			],
-			"ignoreBinaries": ["ffmpeg", "ffprobe"]
+			"ignoreBinaries": ["ffmpeg", "ffprobe"],
+			"entry": ["scripts/migrate_*.ts", "scripts/seed_*.ts"]
 		},
 		"fluxer_app": {
 			"entry": [
 				"lingui.config.js",
 				"scripts/build-sw.mjs",
 				"scripts/Generate*.ts",
-				"src/features/platform/utils/BrowserAssertStrict.ts"
+				"src/features/platform/utils/BrowserAssertStrict.ts",
+				"lingui.fork.config.js",
+				"scripts/fork-i18n.mjs"
 			]
 		},
 		"fluxer_desktop": {
@@ -56,7 +61,8 @@
 				"src/main/**/*.test.{ts,mjs}",
 				"native/*/index.{js,d.ts}",
 				"native/*/loader-diagnostics.cjs",
-				"scripts/generate-windows-badges.mjs"
+				"scripts/generate-windows-badges.mjs",
+				"scripts/fork-release-assets.mjs"
 			],
 			"project": ["src/**/*.{ts,tsx,mjs,js}", "scripts/**/*.mjs", "native/**/*.{js,mjs,cjs,d.ts}"],
 			"ignoreBinaries": ["reg.exe", "update-desktop-database", "xdg-mime"],

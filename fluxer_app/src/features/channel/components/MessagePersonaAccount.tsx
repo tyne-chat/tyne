@@ -163,5 +163,3 @@ export const MessagePersonaAccount = observer(
 		);
 	},
 );
-
-export const MessageSubprofileAccount = MessagePersonaAccount;
