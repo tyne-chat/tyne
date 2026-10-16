@@ -153,5 +153,3 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 		);
 	},
 );
-
-export const SubprofileComposerPill = PersonaComposerPill;
