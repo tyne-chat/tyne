@@ -23,24 +23,12 @@ export function toggleLeftSidebar(): void {
 	LayoutState.toggleLeftSidebar();
 }
 
-export function setLeftSidebarVisible(visible: boolean): void {
-	LayoutState.setLeftSidebarVisible(visible);
-}
-
 export function toggleServerList(): void {
 	LayoutState.toggleServerList();
 }
 
-export function setServerListVisible(visible: boolean): void {
-	LayoutState.setServerListVisible(visible);
-}
-
 export function toggleChannelList(): void {
 	LayoutState.toggleChannelList();
-}
-
-export function setChannelListVisible(visible: boolean): void {
-	LayoutState.setChannelListVisible(visible);
 }
 
 export function setEdgeHoverPeekEnabled(enabled: boolean): void {

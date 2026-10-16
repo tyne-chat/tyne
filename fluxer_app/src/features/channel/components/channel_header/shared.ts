@@ -24,6 +24,7 @@ export const OPEN_DIRECT_MESSAGE_PROFILE_DESCRIPTOR = msg({
 	comment:
 		'Fallback accessible label for the avatar button in the channel header of a DM when the recipient name is not available.',
 });
+/** @public Fork: upstream's header uses this; the fork's sidebar toggle replaced it. */
 export const SHOW_CHANNEL_LIST_DESCRIPTOR = msg({
 	message: 'Show channel list',
 	comment: 'Accessible label on the mobile channel header button that opens the channel list drawer.',
@@ -65,14 +66,6 @@ export const HIDE_MEMBERS_DESCRIPTOR = msg({
 export const SHOW_MEMBERS_DESCRIPTOR = msg({
 	message: 'Show members',
 	comment: 'Tooltip on the channel header members toggle when the members panel is currently hidden.',
-});
-export const HIDE_SERVER_LIST_DESCRIPTOR = msg({
-	message: 'Hide server list',
-	comment: 'Tooltip on the channel header server list toggle when the server rail is currently shown.',
-});
-export const SHOW_SERVER_LIST_DESCRIPTOR = msg({
-	message: 'Show server list',
-	comment: 'Tooltip on the channel header server list toggle when the server rail is currently hidden.',
 });
 export const HIDE_CHANNELS_DESCRIPTOR = msg({
 	message: 'Hide channel list',
