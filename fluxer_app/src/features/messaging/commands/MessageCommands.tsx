@@ -89,7 +89,6 @@ import {observer} from 'mobx-react-lite';
 
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
-import MessageChangePersona from '../state/MessageChangePersona';
 
 const MessageEditFailedModal_YOUR_MESSAGE_DIDN_T_UPDATE_DESCRIPTOR = msg({
 	message: "Your message didn't update",
@@ -1044,10 +1043,6 @@ export function startEdit(channelId: string, messageId: string, initialContent: 
 	const draftContent = Accessibility.preserveEditDraft ? MessageEdit.getDraftContent(messageId) : null;
 	const contentToUse = draftContent ?? initialContent;
 	MessageEdit.startEditing(channelId, messageId, contentToUse);
-}
-
-export function changePersona(channelId: string, messageId: string): void {
-	MessageChangePersona.startChangePersona(channelId, messageId);
 }
 
 export function stopEdit(channelId: string): void {

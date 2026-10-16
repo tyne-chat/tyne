@@ -772,5 +772,3 @@ export const PersonaStore = new PersonaStoreClass();
 
 // Personas belong to one account: drop them whenever the app logs out or switches account.
 AccountScopedWork.registerCancellation(() => PersonaStore.reset());
-
-export default PersonaStore;
