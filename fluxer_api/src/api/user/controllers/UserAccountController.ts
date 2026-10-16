@@ -114,6 +114,7 @@ import {
 	PersonaBannerUploadRequest,
 	PersonaBannerUploadResponse,
 	PersonaBatchAvatarImportRequest,
+	PersonaBatchAvatarImportStream,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {streamText} from 'hono/streaming';
 
@@ -387,7 +388,8 @@ export function UserAccountController(app: HonoApp) {
 		OpenAPI({
 			operationId: 'import_persona_batch_avatars',
 			summary: 'Batch import persona avatars from remote URLs with streaming progress',
-			responseSchema: SuccessResponse,
+			responseSchema: PersonaBatchAvatarImportStream,
+			responseContentType: 'application/x-ndjson',
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
@@ -405,7 +407,8 @@ export function UserAccountController(app: HonoApp) {
 		OpenAPI({
 			operationId: 'import_subprofile_batch_avatars',
 			summary: 'Batch import subprofile avatars from remote URLs (legacy alias)',
-			responseSchema: SuccessResponse,
+			responseSchema: PersonaBatchAvatarImportStream,
+			responseContentType: 'application/x-ndjson',
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
