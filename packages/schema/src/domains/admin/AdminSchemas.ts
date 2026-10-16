@@ -779,7 +779,6 @@ export const ServerListButtonsUpdateSchema = z.object({
 	download: z.boolean().optional(),
 	help: z.boolean().optional(),
 });
-export type ServerListButtonsUpdate = z.infer<typeof ServerListButtonsUpdateSchema>;
 
 const InstancePolicyUpdateSchema = z.object({
 	single_community_enabled: z.boolean().optional(),
