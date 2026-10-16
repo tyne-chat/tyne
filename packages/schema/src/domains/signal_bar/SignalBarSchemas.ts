@@ -70,7 +70,6 @@ export const ChannelSignalToggleRequestSchema = z
 		persona_id: SnowflakeStringType.nullish().describe('Persona the account is currently signalling as'),
 	})
 	.optional();
-export type ChannelSignalToggleRequest = z.infer<typeof ChannelSignalToggleRequestSchema>;
 
 export const ChannelSignalParam = z.object({
 	channel_id: SnowflakeType.describe('The ID of the channel'),
@@ -123,7 +122,6 @@ export function resolveSignalBarEnabled(
 export const ChannelSignalBarEnabledRequestSchema = z.object({
 	enabled: z.boolean(),
 });
-export type ChannelSignalBarEnabledRequest = z.infer<typeof ChannelSignalBarEnabledRequestSchema>;
 
 export const ChannelSignalUserParam = z.object({
 	channel_id: SnowflakeType.describe('The ID of the channel'),
