@@ -357,8 +357,8 @@ Community, direct message, premium and gating policy.
 | direct_messages_locked | boolean | Whether the direct message setting is locked |
 | friends_disabled<sup>1</sup> | boolean | Whether friend requests are off |
 | guild_create_access | boolean | Whether every account can create communities. If not, only admins and accounts with the `feature_guild_create` limit can |
-| signal_bar_guild_id | ?string | The home community that owns the [signal bar](/http-api/signal-bar/), or null when the bar is off |
-| server_list_buttons | [server list buttons](/http-api/instance/#server-list-buttons-object) object | Which buttons clients show in the server list |
+| signal_bar_guild_id? | ?string | The home community that owns the [signal bar](/http-api/signal-bar/), or null when the bar is off |
+| server_list_buttons? | [server list buttons](/http-api/instance/#server-list-buttons-object) object | Which buttons clients show in the server list |
 | premium_mode | string | [Premium mode](#premium-modes) |
 | services | object | Nullable `gif_enabled`, `youtube_enabled` and `bluesky_enabled` overrides |
 | services_resolved | object | The same keys as booleans, using the override when set and `services_available` otherwise |
