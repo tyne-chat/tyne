@@ -51,21 +51,8 @@ export const LINUX_MANUAL_ARCH_TOKENS: Record<LinuxManualDesktopFormat, Record<D
 	tar_gz: {x64: 'x64', arm64: 'arm64'},
 };
 
-export const SPLASH_LINUX_FORMAT_ORDER: ReadonlyArray<LinuxManualDesktopFormat> = ['deb', 'rpm', 'appimage', 'tar_gz'];
-
-export const SPLASH_LINUX_FORMAT_LABELS: Record<LinuxManualDesktopFormat, string> = {
-	deb: 'Debian (deb)',
-	rpm: 'Fedora (rpm)',
-	appimage: 'Linux (AppImage)',
-	tar_gz: 'Linux (tar.gz)',
-};
-
 export function isLinuxManualDesktopFormat(format: ManualDesktopFormat): format is LinuxManualDesktopFormat {
 	return format === 'appimage' || format === 'deb' || format === 'rpm' || format === 'tar_gz';
-}
-
-export function buildManualLatestDownloadUrl(format: ManualDesktopFormat): string {
-	return `${getUpdateBaseUrl()}/latest/${format}`;
 }
 
 // Fork: desktop builds of this fork are published as GitHub releases, not on the package origin
