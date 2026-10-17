@@ -35,6 +35,7 @@ const FETCH_FAVORITE_MEME_CQL = FavoriteMemes.selectCql({
 });
 const FETCH_FAVORITE_MEMES_BY_USER_CQL = FavoriteMemes.selectCql({
 	where: FavoriteMemes.where.eq('user_id'),
+	orderBy: {col: 'meme_id', direction: 'DESC'},
 });
 const COUNT_FAVORITE_MEMES_CQL = FavoriteMemes.selectCountCql({
 	where: FavoriteMemes.where.eq('user_id'),
