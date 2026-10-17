@@ -40,6 +40,7 @@ export class Message {
 	readonly hasReaction: boolean | null;
 	readonly version: number;
 	readonly personaId: PersonaID | null;
+	readonly mentionedPersonaIds: Set<PersonaID>;
 
 	constructor(row: MessageRow) {
 		this.channelId = row.channel_id;
@@ -73,6 +74,7 @@ export class Message {
 		this.hasReaction = row.has_reaction ?? null;
 		this.version = row.version;
 		this.personaId = row.persona_id ? createPersonaID(BigInt(row.persona_id)) : null;
+		this.mentionedPersonaIds = row.mention_personas ?? new Set();
 	}
 
 	toRow(): MessageRow {
@@ -103,6 +105,7 @@ export class Message {
 			has_reaction: this.hasReaction ?? null,
 			version: this.version,
 			persona_id: this.personaId,
+			mention_personas: this.mentionedPersonaIds.size > 0 ? this.mentionedPersonaIds : null,
 		};
 	}
 }
