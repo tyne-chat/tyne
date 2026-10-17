@@ -282,6 +282,34 @@ export class FluxerApiClient {
 		});
 	}
 
+	/** Sends a message body as given, for fields `sendMessage` does not take (allowed_mentions, forwards). */
+	public async sendMessageBody(channelId: string, body: Record<string, unknown>): Promise<any> {
+		await this.ensureGatewaySession();
+		return this.request(`/api/v1/channels/${channelId}/messages`, {
+			method: 'POST',
+			body: JSON.stringify(body),
+		});
+	}
+
+	/**
+	 * Indexes a guild's channels for search through the API's test endpoint, as the API's own tests
+	 * do. The E2E stack runs the API in test mode, where jobs it queues (channel indexing among
+	 * them) are dropped, so search would otherwise answer `{indexing: true}` for ever.
+	 */
+	public async markGuildChannelsIndexed(guildId: string): Promise<void> {
+		for (const channel of await this.getGuildChannels(guildId)) {
+			await this.request(`/api/v1/test/channels/${channel.id}/mark-indexed`, {method: 'POST', body: '{}'});
+		}
+	}
+
+	/** Message search; answers `{indexing: true}` while the channels are still being indexed. */
+	public async searchMessages(body: Record<string, unknown>): Promise<{messages?: Array<any>; indexing?: true}> {
+		return this.request(`/api/v1/search/messages`, {
+			method: 'POST',
+			body: JSON.stringify(body),
+		});
+	}
+
 	public async getMessages(channelId: string, limit = 50): Promise<Array<any>> {
 		return this.request<Array<any>>(`/api/v1/channels/${channelId}/messages?limit=${limit}`);
 	}
