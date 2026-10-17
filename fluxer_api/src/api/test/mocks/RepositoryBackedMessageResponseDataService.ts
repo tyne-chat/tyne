@@ -47,6 +47,10 @@ import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 import type {NatsConnection} from '@nats-io/transport-node';
 import type {INatsConnectionManager} from '@pkgs/nats/src/INatsConnectionManager';
 
+// Fork imports.
+
+import {extractedPersonaPairs, personaMentionsOf} from '@app/api/test/mocks/ForkMessagePersonaMentions';
+
 class NoopNatsConnectionManager implements INatsConnectionManager {
 	async connect(): Promise<void> {}
 
@@ -98,11 +102,12 @@ export class RepositoryBackedMessageResponseDataService extends MessageResponseD
 
 	override async extractMentions(contents: Array<string>) {
 		return contents.map((content) => ({
-			users: [...content.matchAll(/<@!?(\d+)>/g)].map((match) => match[1]!),
+			users: [...content.matchAll(/<@!?(\d+)(?::\d+)?>/g)].map((match) => match[1]!),
 			roles: [...content.matchAll(/<@&(\d+)>/g)].map((match) => match[1]!),
 			channels: [...content.matchAll(/<#(\d+)>/g)].map((match) => match[1]!),
 			everyone: /(^|\s)@everyone(\s|$)/.test(content),
 			here: /(^|\s)@here(\s|$)/.test(content),
+			personas: extractedPersonaPairs(content),
 		}));
 	}
 
@@ -266,7 +271,7 @@ export class RepositoryBackedMessageResponseDataService extends MessageResponseD
 			nonce: options.nonce ?? null,
 			call: this.mapCall(message.call),
 			referenced_message: referencedMessage,
-			...({persona_id: message.personaId?.toString() ?? null} as any),
+			...({persona_id: message.personaId?.toString() ?? null, persona_mentions: personaMentionsOf(message)} as any),
 			subprofile: null,
 		};
 	}
