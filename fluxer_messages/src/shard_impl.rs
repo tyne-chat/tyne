@@ -38,6 +38,7 @@ use std::sync::Arc;
 use url::Url;
 
 // Fork imports.
+use crate::types::ApiPersonaMention;
 use crate::types::ApiPersonaReactionEntry;
 
 const BUCKET_DURATION_MS: i64 = 864_000_000;
@@ -443,6 +444,8 @@ struct MessageMentionContext {
     content: MessageMentions,
     snapshots: Vec<MessageMentions>,
     embed_users: HashSet<i64>,
+    // Fork: the personas the embeds mention, as `embed_users` holds their accounts.
+    embed_personas: HashSet<(i64, i64)>,
 }
 
 impl<T: Transport> MessagesShard<T> {
@@ -1552,6 +1555,7 @@ impl<T: Transport> MessagesShard<T> {
             call: message.call.as_ref().map(map_call),
             referenced_message,
             persona_id: message.persona_id.map(|id| id.to_string()),
+            persona_mentions: persona_mentions(message_mentions),
         }
     }
 
@@ -2982,18 +2986,20 @@ fn build_mention_context_entry(message: &Message) -> MessageMentionContext {
         .map(|snapshot| extract_mentions_from_markdown(snapshot.content.as_deref()))
         .collect();
     let mut embed_users = HashSet::new();
+    let mut embed_personas = HashSet::new();
     for embed in message.embeds.as_deref().unwrap_or_default() {
-        collect_user_ids_from_embed(embed, &mut embed_users);
+        collect_user_ids_from_embed(embed, &mut embed_users, &mut embed_personas);
     }
     for snapshot in message_snapshots {
         for embed in snapshot.embeds.as_deref().unwrap_or_default() {
-            collect_user_ids_from_embed(embed, &mut embed_users);
+            collect_user_ids_from_embed(embed, &mut embed_users, &mut embed_personas);
         }
     }
     MessageMentionContext {
         content: extract_mentions_from_markdown(message.content.as_deref()),
         snapshots,
         embed_users,
+        embed_personas,
     }
 }
 
@@ -3092,7 +3098,11 @@ fn collect_user_ids(
     ids
 }
 
-fn collect_user_ids_from_embed(embed: &MessageEmbed, target: &mut HashSet<i64>) {
+fn collect_user_ids_from_embed(
+    embed: &MessageEmbed,
+    target: &mut HashSet<i64>,
+    personas: &mut HashSet<(i64, i64)>,
+) {
     let mut mentions = MessageMentions::default();
     extend_mentions_from_markdown(embed.title.as_deref(), &mut mentions);
     extend_mentions_from_markdown(embed.description.as_deref(), &mut mentions);
@@ -3115,14 +3125,19 @@ fn collect_user_ids_from_embed(embed: &MessageEmbed, target: &mut HashSet<i64>) 
         }
     }
     target.extend(mentions.users);
+    personas.extend(mentions.personas);
     if let Some(children) = &embed.children {
         for child in children {
-            collect_user_ids_from_embed_child(child, target);
+            collect_user_ids_from_embed_child(child, target, personas);
         }
     }
 }
 
-fn collect_user_ids_from_embed_child(embed: &MessageEmbedChild, target: &mut HashSet<i64>) {
+fn collect_user_ids_from_embed_child(
+    embed: &MessageEmbedChild,
+    target: &mut HashSet<i64>,
+    personas: &mut HashSet<(i64, i64)>,
+) {
     let mut mentions = MessageMentions::default();
     extend_mentions_from_markdown(embed.title.as_deref(), &mut mentions);
     extend_mentions_from_markdown(embed.description.as_deref(), &mut mentions);
@@ -3145,6 +3160,7 @@ fn collect_user_ids_from_embed_child(embed: &MessageEmbedChild, target: &mut Has
         }
     }
     target.extend(mentions.users);
+    personas.extend(mentions.personas);
 }
 
 fn map_user_partial(partial: UserPartialServiceResponse) -> ApiUserPartial {
@@ -6111,3 +6127,29 @@ mod tests {
         users.abort();
     }
 }
+
+// Fork: the personas a message mentions in its content, its embeds and what it
+// forwards, read by the same parse as the accounts in `mentions` and `users`.
+// The API turns them into `mention_personas`.
+fn persona_mentions(mentions: &MessageMentionContext) -> Option<Vec<ApiPersonaMention>> {
+    let pairs = crate::types::sorted_persona_mentions(
+        mentions
+            .content
+            .personas
+            .iter()
+            .chain(&mentions.embed_personas)
+            .chain(
+                mentions
+                    .snapshots
+                    .iter()
+                    .flat_map(|snapshot| &snapshot.personas),
+            )
+            .copied(),
+    );
+    (!pairs.is_empty()).then_some(pairs)
+}
+
+// Fork: tests of the fork's additions, in a file of their own.
+#[cfg(test)]
+#[path = "fork_shard_tests.rs"]
+mod fork_tests;

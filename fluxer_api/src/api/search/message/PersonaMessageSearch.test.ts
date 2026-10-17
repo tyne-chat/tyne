@@ -8,7 +8,6 @@ import type {MeilisearchClient, MeilisearchTask} from '@app/api/search/meilisear
 import {MeilisearchMessageAdapter} from '@app/api/search/meilisearch/MeilisearchDomainAdapters';
 import {MEILISEARCH_INDEX_DEFINITIONS} from '@app/api/search/meilisearch/MeilisearchIndexDefinitions';
 import {convertToSearchableMessage} from '@app/api/search/message/MessageSearchSerializer';
-import {extractMentionedPersonaIds} from '@app/api/search/message/PersonaMessageSearch';
 import {MessageTypes} from '@fluxer/constants/src/ChannelConstants';
 import type {MessageSearchFilters} from '@fluxer/schema/src/contracts/search/SearchDocumentTypes';
 import {MessageSearchRequest} from '@fluxer/schema/src/domains/message/MessageRequestSchemas';
@@ -88,59 +87,17 @@ describe('persona fields on message search documents', () => {
 		expect(asAccount.mentionedPersonaIds).toEqual([]);
 	});
 
-	it('records the personas a message mentions', () => {
-		const doc = convertToSearchableMessage(
-			new Message(messageRow({content: 'hi <@30:111> and <@!31:222>, also <@32> and <@30:111> again'})),
-		);
-
-		expect(doc.mentionedPersonaIds).toEqual(['111', '222']);
-	});
-
-	it('counts the mentions in what a forward carries, as upstream does for users', () => {
+	it('records the personas stored as mentioned, and not ones only in the text', () => {
 		const doc = convertToSearchableMessage(
 			new Message(
 				messageRow({
-					content: 'look <@30:111>',
-					message_reference: {
-						channel_id: createChannelID(11n),
-						message_id: createMessageID(19n),
-						guild_id: null,
-						type: 1,
-					},
-					message_snapshots: [
-						{
-							content: 'forwarded <@31:222>',
-							timestamp: new Date('2026-10-01T00:00:00.000Z'),
-							edited_timestamp: null,
-							mention_users: null,
-							mention_roles: null,
-							mention_channels: null,
-							attachments: null,
-							embeds: null,
-							sticker_items: null,
-							type: MessageTypes.DEFAULT,
-							flags: 0,
-						},
-					],
+					content: 'hi <@30:111> and <@!31:222>, also <@32:333>',
+					mention_personas: new Set([createPersonaID(111n), createPersonaID(222n)]),
 				}),
 			),
 		);
 
 		expect(doc.mentionedPersonaIds).toEqual(['111', '222']);
-	});
-});
-
-describe('extractMentionedPersonaIds', () => {
-	it('leaves out mentions inside code, escaped mentions and non-numeric persona parts', () => {
-		const ids = extractMentionedPersonaIds([
-			'`<@1:100>` ``<@1:101>`` <@1:102>',
-			'```\n<@1:103>\n```\n<@1:104>',
-			'\\<@1:105> <@1:bob_the_fox> <@1:0>',
-			null,
-			undefined,
-		]);
-
-		expect(ids).toEqual(['102', '104']);
 	});
 });
 

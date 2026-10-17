@@ -490,6 +490,15 @@ pub struct ApiMessageResponse {
     pub referenced_message: Option<Option<Box<ApiMessageResponse>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub persona_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub persona_mentions: Option<Vec<ApiPersonaMention>>,
+}
+
+// Fork: a `<@user:persona>` mention, for the API to name the persona.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ApiPersonaMention {
+    pub user_id: String,
+    pub persona_id: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -499,6 +508,9 @@ pub struct ExtractedMentionsResponse {
     pub channels: Vec<String>,
     pub everyone: bool,
     pub here: bool,
+    // Fork: the `<@user:persona>` mentions, for the API to store beside the users.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub personas: Vec<ApiPersonaMention>,
 }
 
 impl From<crate::mention_extractor::MessageMentions> for ExtractedMentionsResponse {
@@ -521,8 +533,24 @@ impl From<crate::mention_extractor::MessageMentions> for ExtractedMentionsRespon
                 .collect(),
             everyone: mentions.everyone,
             here: mentions.here,
+            personas: sorted_persona_mentions(mentions.personas),
         }
     }
+}
+
+// Fork: in (account, persona) order, so a response does not change from run to run.
+pub fn sorted_persona_mentions(
+    pairs: impl IntoIterator<Item = (i64, i64)>,
+) -> Vec<ApiPersonaMention> {
+    pairs
+        .into_iter()
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .map(|(user_id, persona_id)| ApiPersonaMention {
+            user_id: user_id.to_string(),
+            persona_id: persona_id.to_string(),
+        })
+        .collect()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -808,6 +836,7 @@ mod tests {
             call: None,
             referenced_message: referenced,
             persona_id: None,
+            persona_mentions: None,
         }
     }
 

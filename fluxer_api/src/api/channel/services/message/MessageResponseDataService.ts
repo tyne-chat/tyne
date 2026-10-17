@@ -22,7 +22,6 @@ import type {UserPersonaSettingsRow} from '@app/api/database/types/PersonaTypes'
 import {getPersonaRepository, getUserRepository} from '@app/api/middleware/ServiceSingletons';
 import type {Persona} from '@app/api/models/Persona';
 import {type IPersonaRepository, personaLookupKey} from '@app/api/persona/IPersonaRepository';
-import {extractPersonaMentions, type PersonaMention} from '@app/api/persona/PersonaMentions';
 import {DELETED_USER_USERNAME, UserFlags} from '@fluxer/constants/src/UserConstants';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
@@ -45,6 +44,8 @@ interface ExtractedMentions {
 	channels: Array<string>;
 	everyone: boolean;
 	here: boolean;
+	// Fork: the `<@user:persona>` mentions, each account also in `users`.
+	personas?: Array<{user_id: string; persona_id: string}>;
 }
 
 type MessageServiceResponse =
@@ -128,6 +129,33 @@ function collectMessagesAndReferences(messages: Array<MessageResponse>): Array<M
 	return result;
 }
 
+/**
+ * The personas the messages service found mentioned in a message's content, embeds and what it
+ * forwards (`persona_mentions`), read by the same parse as the accounts in `mentions` and `users`.
+ * The field is the API's to read and is taken off the message, as `persona_id` is.
+ */
+interface PersonaMention {
+	readonly userId: string;
+	readonly personaId: string;
+}
+
+function takePersonaMentions(msg: MessageResponse): Array<PersonaMention> {
+	const anyMsg = msg as unknown as Record<string, unknown>;
+	const raw = anyMsg.persona_mentions;
+	delete anyMsg.persona_mentions;
+	if (!Array.isArray(raw)) return [];
+	return raw.flatMap((entry: unknown) => {
+		if (!isJsonRecord(entry)) return [];
+		const {user_id: userId, persona_id: personaId} = entry;
+		return typeof userId === 'string' &&
+			/^\d+$/.test(userId) &&
+			typeof personaId === 'string' &&
+			/^\d+$/.test(personaId)
+			? [{userId, personaId}]
+			: [];
+	});
+}
+
 function deletedPersonaSubprofile(personaId: string): MessageSubprofileResponse {
 	return {
 		id: personaId,
@@ -187,7 +215,7 @@ export class MessageResponseDataService {
 		// accounts it mentions, so a renamed persona shows its new name in old messages too.
 		const mentionsByMessage = new Map<MessageResponse, Array<PersonaMention>>();
 		for (const msg of targetMessages) {
-			const mentions = extractPersonaMentions([msg.content]);
+			const mentions = takePersonaMentions(msg);
 			if (mentions.length === 0) continue;
 			mentionsByMessage.set(msg, mentions);
 			for (const mention of mentions) {
