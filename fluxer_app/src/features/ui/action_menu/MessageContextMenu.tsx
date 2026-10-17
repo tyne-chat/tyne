@@ -123,6 +123,8 @@ interface MessageContextMenuProps {
 	attachmentExtraContent?: React.ReactNode;
 	inlineMediaItems?: React.ReactNode;
 	inlineStickerOrEmojiItems?: React.ReactNode;
+	// Fork: the reaction right-clicked to open the menu; "View reactions" opens on it.
+	openReactionsTo?: MessageReaction;
 }
 
 interface RemoveReactionsSubmenuProps {
@@ -335,6 +337,7 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = observer(
 		attachmentExtraContent,
 		inlineMediaItems,
 		inlineStickerOrEmojiItems,
+		openReactionsTo,
 	}) => {
 		const {i18n} = useLingui();
 		const closeMenu = useContextMenuClose();
@@ -443,12 +446,12 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = observer(
 						channelId={message.channelId}
 						messageId={message.id}
 						message={message}
-						openToReaction={reactions[0]}
+						openToReaction={openReactionsTo ?? reactions[0]}
 						data-flx="ui.action-menu.message-context-menu.handle-open-reactions-modal.message-reactions-modal"
 					/>
 				)),
 			);
-		}, [message.channelId, message.id, reactions]);
+		}, [message.channelId, message.id, reactions, openReactionsTo]);
 		const handleOpenEmojiPickerAction = useCallback(() => {
 			onOpenReactionPicker?.();
 			triggerAddReaction(message);
