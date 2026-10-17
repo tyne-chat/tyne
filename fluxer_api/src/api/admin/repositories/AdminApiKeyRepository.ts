@@ -115,6 +115,7 @@ export class AdminApiKeyRepository {
 	async listByCreator(createdBy: UserID): Promise<Array<AdminApiKey>> {
 		const query = AdminApiKeysByCreator.select({
 			where: AdminApiKeysByCreator.where.eq('created_by_user_id'),
+			orderBy: {col: 'key_id', direction: 'DESC'},
 		});
 		const indexRows = await fetchMany<{
 			created_by_user_id: UserID;
