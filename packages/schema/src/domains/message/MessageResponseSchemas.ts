@@ -184,7 +184,7 @@ const MessageBaseResponseSchema = z.object({
 		.array(MessageSubprofileResponseSchema)
 		.nullish()
 		.describe(
-			'The personas mentioned in the message, as they are now. Private and deleted personas are left out; absent when there are none',
+			'The personas the message mentions, shown as a message sent as them would show them; absent when there are none',
 		),
 });
 
