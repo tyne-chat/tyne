@@ -11,6 +11,7 @@
  */
 
 import type {Message} from '@app/api/models/Message';
+import {extractPersonaMentions} from '@app/api/persona/PersonaMentions';
 import {
 	type MeilisearchFilter,
 	meiliAndTerms,
@@ -41,10 +42,6 @@ export interface PersonaSearchFields {
 	mentionedPersonaIds: Array<string>;
 }
 
-const FENCED_CODE = /```[\s\S]*?```/g;
-const INLINE_CODE = /(`+)[\s\S]*?\1/g;
-const PERSONA_MENTION = /(?<!\\)<@!?\d+:(\d+)>/g;
-
 /**
  * The personas mentioned in message texts, in the `<@user:persona>` form both clients write.
  * Mentions inside code are left out, as the mention parser does.
@@ -55,15 +52,8 @@ const PERSONA_MENTION = /(?<!\\)<@!?\d+:(\d+)>/g;
  */
 export function extractMentionedPersonaIds(contents: Iterable<string | null | undefined>): Array<string> {
 	const ids: Array<string> = [];
-	for (const content of contents) {
-		if (!content?.includes('<@')) continue;
-		const outsideCode = content.replace(FENCED_CODE, ' ').replace(INLINE_CODE, ' ');
-		for (const match of outsideCode.matchAll(PERSONA_MENTION)) {
-			const personaId = match[1]!;
-			if (personaId !== '0' && !ids.includes(personaId)) {
-				ids.push(personaId);
-			}
-		}
+	for (const {personaId} of extractPersonaMentions(contents)) {
+		if (!ids.includes(personaId)) ids.push(personaId);
 	}
 	return ids;
 }
