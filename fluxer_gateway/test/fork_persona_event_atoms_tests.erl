@@ -15,3 +15,18 @@ persona_events_for_the_account_have_atoms_test() ->
         user_persona_settings_update, event_atoms:normalize(<<"USER_PERSONA_SETTINGS_UPDATE">>)
     ),
     ok.
+
+%% The rest of the fork's persona events: the account's own persona list, and the community-wide
+%% notice that a member's personas changed.
+persona_list_and_community_events_have_atoms_test() ->
+    lists:foreach(
+        fun({Name, Atom}) -> ?assertEqual(Atom, event_atoms:normalize(Name)) end,
+        [
+            {<<"USER_PERSONA_CREATE">>, user_persona_create},
+            {<<"USER_PERSONA_UPDATE">>, user_persona_update},
+            {<<"USER_PERSONA_DELETE">>, user_persona_delete},
+            {<<"USER_PERSONAS_UPDATE">>, user_personas_update},
+            {<<"GUILD_PERSONAS_DIRTY">>, guild_personas_dirty}
+        ]
+    ),
+    ok.
