@@ -13,6 +13,7 @@ const FETCH_DISCOVERY_BY_GUILD_ID = GuildDiscovery.selectCql({
 });
 const FETCH_DISCOVERY_BY_STATUS = GuildDiscoveryByStatus.selectCql({
 	where: GuildDiscoveryByStatus.where.eq('status'),
+	orderBy: {col: 'applied_at', direction: 'DESC'},
 });
 const SCAN_DISCOVERY = GuildDiscovery.selectCql({
 	columns: ['guild_id', 'status', 'applied_at'],
