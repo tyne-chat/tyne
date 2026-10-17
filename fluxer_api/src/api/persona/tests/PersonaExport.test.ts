@@ -9,7 +9,7 @@ import {
 	readTyneBundleManifest,
 } from '@fluxer/schema/src/domains/persona/PluralKitFormat';
 import sharp from 'sharp';
-import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
+import {afterAll, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
 import {createTestAccount, type TestAccount} from '../../auth/tests/AuthTestUtils';
 import {createUserID} from '../../BrandedTypes';
 import {Config} from '../../Config';
@@ -18,6 +18,12 @@ import {HTTP_STATUS} from '../../test/TestConstants';
 import {createBuilder} from '../../test/TestRequestBuilder';
 import {forgetPersonaImageSourcesOfUser, loadPersonaImageSources} from '../PersonaImageSourceStore';
 import {readZipForTests} from './ReadZipForTests';
+
+// Fork imports.
+
+import {VALID_PNG_BASE64} from '../../emoji/tests/EmojiTestUtils';
+import {getStorageService} from '../../middleware/ServiceSingletons';
+import {createPersonaExportArchive} from '../PersonaExportService';
 
 const PUBLIC = Object.fromEntries(PLURALKIT_MEMBER_PRIVACY_KEYS.map((k) => [k, 'public']));
 const PRIVATE = Object.fromEntries(PLURALKIT_MEMBER_PRIVACY_KEYS.map((k) => [k, 'private']));
@@ -369,5 +375,65 @@ describe('Persona export', () => {
 	it('exports an account without personas', async () => {
 		const {files} = await exportZip(account.token);
 		expect(pluralKitJsonOf(files)).toEqual({version: 2, tag: null, members: [], groups: [], switches: []});
+	});
+
+	const setTagIcon = (token: string, icon: string) =>
+		createBuilder(harness, token)
+			.patch('/users/@me/personas/settings')
+			.body({display_tag_text: 'Example', display_tag_icon: icon})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+	const manifestOf = (files: Map<string, Buffer>) => JSON.parse(files.get('tyne.json')!.toString('utf8'));
+
+	it('puts a tag icon stored as a data URI in the zip', async () => {
+		await setTagIcon(account.token, `data:image/png;base64,${VALID_PNG_BASE64}`);
+		const {files} = await exportZip(account.token);
+
+		expect(files.get('Tag icon.png')).toEqual(Buffer.from(VALID_PNG_BASE64, 'base64'));
+		expect(manifestOf(files).tag_icon).toBe('Tag icon.png');
+	});
+
+	it('links a tag icon that is a web address instead of copying it', async () => {
+		await setTagIcon(account.token, 'https://images.example.test/tag.png');
+		const {files} = await exportZip(account.token);
+
+		expect([...files.keys()].some((name) => name.startsWith('Tag icon'))).toBe(false);
+		expect(manifestOf(files).tag_icon_url).toBe('https://images.example.test/tag.png');
+	});
+
+	it('still exports a persona whose stored image cannot be read', async () => {
+		await createBuilder(harness, account.token)
+			.post('/users/@me/personas')
+			.body({name: 'Alvis', avatar_hash: (await storeImage(account.token, 'avatar', await distinctPng())).hash})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		const readObject = vi.spyOn(getStorageService(), 'readObject').mockRejectedValue(new Error('storage offline'));
+		try {
+			const {files} = await exportZip(account.token);
+			expect(readObject).toHaveBeenCalled();
+			expect([...files.keys()].some((name) => name.startsWith('avatars/'))).toBe(false);
+			expect(pluralKitJsonOf(files).members.map((member: {name: string}) => member.name)).toEqual(['Alvis']);
+		} finally {
+			readObject.mockRestore();
+		}
+	});
+
+	it('ends the download with an error rather than a cut-short zip when writing fails', async () => {
+		const {stream} = await createPersonaExportArchive(
+			{
+				personaService: {getPersonas: async () => [], getSettings: async () => ({})} as never,
+				storageService: getStorageService(),
+			},
+			createUserID(BigInt(account.userId)),
+		);
+		stream.emit('warning', new Error('disk full'));
+
+		await expect(
+			(async () => {
+				for await (const _chunk of stream) {
+					// Drain until the stream ends or fails.
+				}
+			})(),
+		).rejects.toThrow('disk full');
 	});
 });
