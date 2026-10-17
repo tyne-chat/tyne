@@ -19,11 +19,12 @@ import {NatsConnectionManager} from '@pkgs/nats/src/NatsConnectionManager';
 
 import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
 import type {UserPersonaSettingsRow} from '@app/api/database/types/PersonaTypes';
-import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
+import {getPersonaRepository, getUserRepository} from '@app/api/middleware/ServiceSingletons';
 import type {Persona} from '@app/api/models/Persona';
 import {type IPersonaRepository, personaLookupKey} from '@app/api/persona/IPersonaRepository';
 import {extractPersonaMentions, type PersonaMention} from '@app/api/persona/PersonaMentions';
 import {DELETED_USER_USERNAME, UserFlags} from '@fluxer/constants/src/UserConstants';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const MESSAGE_RESPONSE_SERVICE_SUBJECT = 'svc.messages';
 const MESSAGE_RESPONSE_SERVICE_TIMEOUT_MS = 6000;
@@ -127,6 +128,19 @@ function collectMessagesAndReferences(messages: Array<MessageResponse>): Array<M
 	return result;
 }
 
+function deletedPersonaSubprofile(personaId: string): MessageSubprofileResponse {
+	return {
+		id: personaId,
+		name: 'Deleted Persona',
+		avatar: null,
+		avatar_color: null,
+		pronouns: null,
+		color: null,
+		display_tag_text: null,
+		display_tag_icon: null,
+	};
+}
+
 function isDeletedAuthor(author: unknown): boolean {
 	if (!author || typeof author !== 'object') return false;
 	const record = author as Record<string, unknown>;
@@ -195,16 +209,7 @@ export class MessageResponseDataService {
 							? String(rawPersonaId)
 							: null;
 				if (personaIdStr && /^\d+$/.test(personaIdStr)) {
-					msg.subprofile = {
-						id: personaIdStr,
-						name: 'Deleted Persona',
-						avatar: null,
-						avatar_color: null,
-						pronouns: null,
-						color: null,
-						display_tag_text: null,
-						display_tag_icon: null,
-					};
+					msg.subprofile = deletedPersonaSubprofile(personaIdStr);
 				} else {
 					msg.subprofile = null;
 				}
@@ -244,6 +249,9 @@ export class MessageResponseDataService {
 		const [personasByKey, settingsByUserId] = repo
 			? await Promise.all([repo.findByUserAndPersonaIds(lookupPairs), repo.findSettingsByUserIds(authorUserIds)])
 			: [new Map<string, Persona>(), new Map<string, UserPersonaSettingsRow>()];
+		const deletedMentionedUserIds = await this.findDeletedUserIds(
+			Array.from(mentionsByMessage.values()).flatMap((mentions) => mentions.map((mention) => mention.userId)),
+		);
 
 		for (const msg of targetMessages) {
 			if (isDeletedAuthor(msg.author)) continue;
@@ -285,16 +293,35 @@ export class MessageResponseDataService {
 			delete anyMsg.persona_id;
 		}
 
+		// A mentioned persona shows as its author's persona does above: as it is, deleted (kept as it
+		// was) and private ones included, and as "Deleted Persona" once its account is gone. A persona
+		// the mentioned account does not have is left out, and clients show the account instead.
 		for (const [msg, mentions] of mentionsByMessage) {
 			const mentioned = [];
 			for (const mention of mentions) {
+				if (deletedMentionedUserIds.has(mention.userId)) {
+					mentioned.push(deletedPersonaSubprofile(mention.personaId));
+					continue;
+				}
 				const persona = personasByKey.get(personaLookupKey(mention.userId, mention.personaId));
-				// One payload goes to everyone in the channel, so personas only their owner may see stay out.
-				if (!persona || persona.isDeleted || persona.visibility === 'private') continue;
+				if (!persona) continue;
 				mentioned.push(persona.toSubprofileResponse(settingsByUserId.get(mention.userId)));
 			}
 			if (mentioned.length > 0) msg.mention_personas = mentioned;
 		}
+	}
+
+	// Mentioned accounts are looked up on their own: older messages stored no mentioned users for a
+	// persona mention, so the message's `mentions` cannot say whether the account was deleted.
+	private async findDeletedUserIds(userIds: Array<string>): Promise<Set<string>> {
+		const unique = Array.from(new Set(userIds));
+		if (unique.length === 0) return new Set();
+		const users = await getUserRepository().listUsers(unique.map((id) => createUserID(BigInt(id))));
+		return new Set(
+			users
+				.filter((user) => isDeletedAuthor({username: user.username, flags: user.flags}))
+				.map((user) => user.id.toString()),
+		);
 	}
 
 	async listMessages(params: {
