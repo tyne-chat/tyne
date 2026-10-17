@@ -43,3 +43,43 @@ pub(super) fn build_signal_bar_update(form: &MultiValueForm) -> InstanceConfigUp
         ..Default::default()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn signal_bar_guild_id(form: &[u8]) -> Option<Option<String>> {
+        build_signal_bar_update(&MultiValueForm::parse(form))
+            .policy
+            .expect("policy")
+            .signal_bar_guild_id
+    }
+
+    #[test]
+    fn a_blank_signal_bar_community_clears_it_and_a_padded_one_is_trimmed() {
+        assert_eq!(signal_bar_guild_id(b"signal_bar_guild_id="), Some(None));
+        assert_eq!(signal_bar_guild_id(b"signal_bar_guild_id=+++"), Some(None));
+        assert_eq!(signal_bar_guild_id(b""), Some(None));
+        assert_eq!(
+            signal_bar_guild_id(b"signal_bar_guild_id=+123456789012345678+"),
+            Some(Some("123456789012345678".to_owned()))
+        );
+    }
+
+    #[test]
+    fn server_list_buttons_left_unchecked_are_switched_off() {
+        let buttons = build_server_list_buttons_update(&MultiValueForm::parse(
+            b"server_list_button_favorites=true&server_list_button_help=true",
+        ))
+        .policy
+        .expect("policy")
+        .server_list_buttons
+        .expect("server list buttons");
+
+        assert_eq!(buttons.favorites, Some(true));
+        assert_eq!(buttons.explore, Some(false));
+        assert_eq!(buttons.create_join, Some(false));
+        assert_eq!(buttons.download, Some(false));
+        assert_eq!(buttons.help, Some(true));
+    }
+}
