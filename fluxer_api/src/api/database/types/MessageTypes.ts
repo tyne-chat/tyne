@@ -152,6 +152,9 @@ export interface MessageRow {
 	has_reaction: boolean | null;
 	version: number;
 	persona_id?: PersonaID | string | null;
+	// Fork: the personas the message mentions whose accounts are in `mention_users`, or in a
+	// forwarded snapshot's `mention_users` (MessagePersonaMentions.ts).
+	mention_personas?: Set<PersonaID> | null;
 }
 
 export const MESSAGE_COLUMNS = [
@@ -180,6 +183,7 @@ export const MESSAGE_COLUMNS = [
 	'has_reaction',
 	'version',
 	'persona_id',
+	'mention_personas',
 ] as const satisfies ReadonlyArray<keyof MessageRow>;
 
 export interface ChannelPinRow {
