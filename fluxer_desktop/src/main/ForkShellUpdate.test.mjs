@@ -4,9 +4,12 @@ import assert from 'node:assert/strict';
 import {describe, test} from 'node:test';
 import {installElectronStub} from './LocalAppTestSupport.test.mjs';
 
+const NO_NETWORK = () => Promise.reject(new Error('outbound network is not available in tests'));
+const net = {fetch: NO_NETWORK};
+
 installElectronStub({
 	app: {isPackaged: false, getVersion: () => '1.4.0', getPath: () => '/tmp/fluxer-desktop-test'},
-	net: {fetch: () => Promise.reject(new Error('outbound network is not available in tests'))},
+	net,
 	shell: {openExternal: () => Promise.resolve()},
 });
 
@@ -14,8 +17,10 @@ const {
 	createForkShellUpdateController,
 	createForkUpdateProgress,
 	createRestartConfirmation,
+	fetchLatestReleaseVersion,
 	ForkUpdateAnnouncements,
 	isNewerShellVersion,
+	progressDocument,
 } = await import('./ForkShellUpdate.ts');
 
 const VELOPACK = {capability: 'self-update', updater: 'velopack'};
@@ -232,5 +237,48 @@ describe('asking before the app closes to install a downloaded update', () => {
 		});
 		await update.start();
 		assert.deepEqual(calls, []);
+	});
+});
+
+describe('the update progress window', () => {
+	test('shows a version from the release feed as text, never as markup', () => {
+		const page = progressDocument('Updating to <img src=x onerror=alert(1)>', 'Fish & "chips" \'n\' <b>');
+
+		assert.ok(!page.includes('<img'));
+		assert.ok(!page.includes('<b>'));
+		assert.ok(page.includes('&#60;img src=x onerror=alert(1)&#62;'));
+		assert.ok(page.includes('Fish &#38; &#34;chips&#34; &#39;n&#39; &#60;b&#62;'));
+	});
+});
+
+describe('reading the latest fork release', () => {
+	const respond = (status, body) => {
+		net.fetch = async () => new Response(JSON.stringify(body), {status});
+	};
+
+	test('returns the version the release document names', async (t) => {
+		t.after(() => {
+			net.fetch = NO_NETWORK;
+		});
+		respond(200, {version: '1.5.0'});
+		assert.equal(await fetchLatestReleaseVersion('https://releases.example.test/latest.json'), '1.5.0');
+	});
+
+	test('fails on an error response instead of reading it', async (t) => {
+		t.after(() => {
+			net.fetch = NO_NETWORK;
+		});
+		respond(503, {version: '9.9.9'});
+		await assert.rejects(fetchLatestReleaseVersion('https://releases.example.test/latest.json'), /503/);
+	});
+
+	test('fails on a release document without a version', async (t) => {
+		t.after(() => {
+			net.fetch = NO_NETWORK;
+		});
+		for (const body of [{}, {version: ''}, {version: 15}]) {
+			respond(200, body);
+			await assert.rejects(fetchLatestReleaseVersion('https://releases.example.test/latest.json'), /no version/);
+		}
 	});
 });
