@@ -16,6 +16,10 @@ pub struct MessageMentions {
     pub everyone: bool,
     #[serde(default)]
     pub here: bool,
+    // Fork: the (account, persona) pairs of `<@user:persona>` mentions. Each one's
+    // account is in `users` too.
+    #[serde(default)]
+    pub personas: HashSet<(i64, i64)>,
 }
 
 impl MessageMentions {
@@ -68,6 +72,7 @@ pub fn extend_mentions_from_markdown(input: Option<&str>, mentions: &mut Message
     mentions.channels.extend(extracted.channels);
     mentions.everyone = mentions.everyone || extracted.everyone;
     mentions.here = mentions.here || extracted.here;
+    mentions.personas.extend(extracted.personas);
 }
 
 fn collect_mentions_from_nodes(nodes: &[Node], mentions: &mut MessageMentions) {
@@ -117,7 +122,10 @@ fn collect_mentions_from_node(node: &Node, mentions: &mut MessageMentions) {
 
 fn collect_mention_kind(kind: &MentionKind, mentions: &mut MessageMentions) {
     match kind {
-        MentionKind::User { id, .. } => insert_id(id, &mut mentions.users),
+        MentionKind::User { id, persona_id } => {
+            insert_id(id, &mut mentions.users);
+            insert_persona(id, persona_id.as_deref(), &mut mentions.personas);
+        }
         MentionKind::Role { id } => insert_id(id, &mut mentions.roles),
         MentionKind::Channel { id } => insert_id(id, &mut mentions.channels),
         MentionKind::Everyone => mentions.everyone = true,
@@ -131,6 +139,17 @@ fn insert_id(id: &str, target: &mut HashSet<i64>) {
         && id != 0
     {
         target.insert(id);
+    }
+}
+
+// Fork: a persona mention whose IDs are not both numbers and not zero names no
+// persona, as `insert_id` drops such an account.
+fn insert_persona(id: &str, persona_id: Option<&str>, target: &mut HashSet<(i64, i64)>) {
+    if let (Ok(id), Some(Ok(persona_id))) = (id.parse::<i64>(), persona_id.map(str::parse::<i64>))
+        && id != 0
+        && persona_id != 0
+    {
+        target.insert((id, persona_id));
     }
 }
 
