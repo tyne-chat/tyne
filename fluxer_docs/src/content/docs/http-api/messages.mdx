@@ -49,7 +49,7 @@ Routes that need `MANAGE_MESSAGES` also follow the guild's [MFA level](/http-api
 | referenced_message?<sup>4</sup> | ?[message](#message-object) object | The message a reply points to |
 | thread? | [thread](/http-api/threads/#thread-object) object | The thread started from this message |
 | subprofile? | ?[message persona](#message-persona-object) object | The [persona](/http-api/users/personas/) the message was sent as, or null when it was sent as the account |
-| mention_personas? | array[[message persona](#message-persona-object) object] | Personas the content mentions as `<@user_id:persona_id>`, shown as the `subprofile` of their own messages |
+| mention_personas? | array[[message persona](#message-persona-object) object] | Personas mentioned as `<@user_id:persona_id>`, also in embeds and forwards, shown as their own messages show them |
 
 <sup>1</sup> For a webhook message, Fluxer builds the author from the webhook, with `bot` set to true
 
