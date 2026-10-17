@@ -33,6 +33,7 @@ import type {
 
 // Fork imports.
 
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 type MessageInput = Omit<WireMessage, 'mentions' | 'mention_roles' | 'tts'> &
@@ -244,6 +245,10 @@ export class Message {
 		this._favoriteMemeId = message._favoriteMemeId;
 		this.stickers = message.stickers ? Object.freeze(message.stickers) : undefined;
 		this.subprofile = message.subprofile;
+		// Fork: the personas the message mentions, kept as upstream keeps the users it mentions above.
+		if (!options?.skipUserCache) {
+			for (const persona of message.mention_personas ?? []) PersonaStore.recordKnownPersona(persona);
+		}
 	}
 
 	hasFlag(flag: number): boolean {
