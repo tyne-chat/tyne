@@ -18,6 +18,7 @@ import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
 const createFetchChannelPinsQuery = (limit: number) =>
 	ChannelPins.select({
 		where: [ChannelPins.where.eq('channel_id'), ChannelPins.where.lt('pinned_timestamp', 'before_pinned_timestamp')],
+		orderBy: {col: 'pinned_timestamp', direction: 'DESC'},
 		limit,
 	});
 const FETCH_MESSAGE_REACTIONS_BY_CHANNEL_AND_MESSAGE_QUERY = MessageReactions.selectCql({
