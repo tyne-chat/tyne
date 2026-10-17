@@ -65,7 +65,7 @@ message_fields(MessageData, MarkdownContext, GuildId, GuildName, ChannelName) ->
         <<"body">> => push_notification_format:build_content_preview(
             MessageData, MarkdownContext
         ),
-        <<"icon">> => push_notification_format:resolve_author_avatar_url(AuthorData),
+        <<"icon">> => fork_push_personas:author_icon(MessageData, AuthorData),
         <<"image_url">> => nullable(push_image_url:extract(MessageData))
     },
     maps:merge(
