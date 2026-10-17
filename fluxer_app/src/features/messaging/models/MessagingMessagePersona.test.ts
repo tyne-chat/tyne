@@ -434,3 +434,23 @@ describe('MessagingMessage Persona Preservation', () => {
 		});
 	});
 });
+
+describe('personas a message mentions', () => {
+	it('are kept as known personas, as the users it mentions are cached', async () => {
+		const {PersonaStore} = await import('@app/features/persona/state/PersonaStore');
+		PersonaStore.reset();
+
+		new Message(createWireMessage({mention_personas: [{id: '777', name: 'Bob the Fox'}]}));
+
+		expect(PersonaStore.getKnownPersona('777')?.name).toBe('Bob the Fox');
+	});
+
+	it('are not recorded for a copy made without the user cache', async () => {
+		const {PersonaStore} = await import('@app/features/persona/state/PersonaStore');
+		PersonaStore.reset();
+
+		new Message(createWireMessage({mention_personas: [{id: '778', name: 'Ada'}]}), {skipUserCache: true});
+
+		expect(PersonaStore.getKnownPersona('778')).toBeNull();
+	});
+});
