@@ -21,6 +21,7 @@ const FETCH_BY_ID = BillingInvoices.selectCql({
 });
 const FETCH_BY_CUSTOMER_PARTITION = BillingInvoicesByCustomer.selectCql({
 	where: BillingInvoicesByCustomer.where.eq('customer_id'),
+	orderBy: {col: 'stripe_created_at', direction: 'DESC'},
 });
 const FETCH_BY_PROVIDER_IDS = BillingInvoices.selectCql({
 	where: BillingInvoices.where.in('provider_id', 'provider_ids'),
