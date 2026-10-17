@@ -13,6 +13,7 @@ import {AttachmentLookup} from '@app/api/Tables';
 // Fork imports.
 
 import type {PersonaID} from '@app/api/BrandedTypes';
+import {withMentionedPersonas} from '@app/api/persona/MessagePersonaMentions';
 
 export interface UpsertMessageOptions {
 	isInsert?: boolean;
@@ -55,6 +56,7 @@ export class MessageRepository {
 	}
 
 	async upsertMessage(data: MessageRow, oldData?: MessageRow | null, opts?: UpsertMessageOptions): Promise<Message> {
+		data = await withMentionedPersonas(data, oldData);
 		const message = await this.dataRepo.upsertMessage(data, oldData);
 		if (!oldData && !opts?.skipParentLastMessageId) {
 			await this.channelDataRepo.updateLastMessageId(
