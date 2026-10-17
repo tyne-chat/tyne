@@ -14,6 +14,13 @@ import type {BucketConfig, RateLimitResult, RateLimitScope} from '@pkgs/rate_lim
 import type {Context, MiddlewareHandler} from 'hono';
 import {createMiddleware} from 'hono/factory';
 
+// Fork imports.
+
+import {
+	forkLogGlobalRateLimitRevocation,
+	forkRecordRateLimitedRequest,
+} from '@app/api/middleware/ForkRateLimitDiagnostics';
+
 type AccountType = 'user' | 'bot' | 'webhook';
 
 export interface RouteRateLimitConfig {
@@ -185,10 +192,12 @@ export function RateLimitMiddleware(routeConfig: RouteRateLimitConfig): Middlewa
 		const accountType = getAccountType(ctx);
 		const showHeaders = shouldShowHeadersOnSuccess(accountType);
 		const clientId = getClientIdentifier(ctx, routeConfig);
+		forkRecordRateLimitedRequest(ctx, {exemptFromGlobal: routeConfig.config.exemptFromGlobal === true});
 		if (!routeConfig.config.exemptFromGlobal) {
 			const globalLimit = getGlobalRateLimit(ctx);
 			const globalResult = await rateLimitService.checkGlobalLimit(clientId, globalLimit);
 			if (!globalResult.allowed) {
+				forkLogGlobalRateLimitRevocation(ctx, globalResult);
 				await revokeAuthenticatedSessionOnGlobalRateLimit(ctx);
 				throw new RateLimitError({
 					global: true,
