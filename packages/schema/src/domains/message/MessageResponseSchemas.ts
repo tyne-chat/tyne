@@ -180,6 +180,12 @@ const MessageBaseResponseSchema = z.object({
 		.optional()
 		.describe('The thread started from this message, when the viewer can see threads'),
 	subprofile: MessageSubprofileResponseSchema.nullish().describe('Optional subprofile persona information'),
+	mention_personas: z
+		.array(MessageSubprofileResponseSchema)
+		.nullish()
+		.describe(
+			'The personas the message mentions, shown as a message sent as them would show them; absent when there are none',
+		),
 });
 
 type MessageBaseResponse = z.infer<typeof MessageBaseResponseSchema>;
@@ -403,6 +409,7 @@ export interface Message {
 	readonly _allowedMentions?: AllowedMentions;
 	readonly _favoriteMemeId?: string;
 	readonly subprofile?: MessageSubprofileResponse | null;
+	readonly mention_personas?: ReadonlyArray<MessageSubprofileResponse> | null;
 }
 
 export const MessagePurgeResponse = z.object({deleted_count: z.number().int().nonnegative()});
