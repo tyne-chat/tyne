@@ -35,9 +35,16 @@ vi.mock('@app/features/platform/transport/RestTransport', () => ({
 	},
 }));
 
+vi.mock('@app/features/ui/commands/ToastCommands', async (importOriginal) => ({
+	...(await importOriginal<typeof import('@app/features/ui/commands/ToastCommands')>()),
+	error: vi.fn(() => 'toast'),
+}));
+
 installVoiceMenuTestBootstrap();
 
 const {PersonaStoreClass, normalizePersona, normalizeSubprofile} = await import('./PersonaStore');
+const {http} = await import('@app/features/platform/transport/RestTransport');
+const Toast = await import('@app/features/ui/commands/ToastCommands');
 const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
 type PersonaStoreInstance = InstanceType<typeof PersonaStoreClass>;
 
@@ -840,6 +847,59 @@ describe('PersonaStore', () => {
 			expect(subprofile.pronouns).toBeUndefined();
 			expect(subprofile.color).toBeUndefined();
 			expect(subprofile.visibility).toBeUndefined();
+		});
+	});
+
+	describe('when the server refuses a change', () => {
+		beforeEach(() => {
+			vi.mocked(http.patch).mockRejectedValueOnce(new Error('offline'));
+			vi.mocked(Toast.error).mockClear();
+		});
+
+		it('puts the display tag back', async () => {
+			store.updateSettings({display_tag_text: 'old', display_tag_icon: 'https://example.test/old.png'});
+
+			await store.setDisplayTag('  new  ', 'https://example.test/new.png');
+
+			expect(store.displayTagText).toBe('old');
+			expect(store.displayTagIcon).toBe('https://example.test/old.png');
+			expect(Toast.error).toHaveBeenCalledTimes(1);
+		});
+
+		it('puts the persona mode, persona and latch back', async () => {
+			const persona = addTestPersona(store, {name: 'Alice'});
+			store.updateSettings({active_persona_mode: 'last', active_persona_id: persona.id, is_latched: true});
+
+			await store.setActivePersonaMode('manual');
+
+			expect(store.activePersonaMode).toBe('last');
+			expect(store.activePersonaId).toBe(persona.id);
+			expect(store.isPersonaLatched).toBe(true);
+			expect(Toast.error).toHaveBeenCalledTimes(1);
+		});
+
+		it('puts the previous persona back when selecting another fails', async () => {
+			const alice = addTestPersona(store, {name: 'Alice'});
+			const bob = addTestPersona(store, {name: 'Bob'});
+			store.updateSettings({active_persona_mode: 'manual', active_persona_id: alice.id, is_latched: true});
+
+			await store.setActivePersona(bob.id, false, 'last');
+
+			expect(store.activePersonaId).toBe(alice.id);
+			expect(store.isPersonaLatched).toBe(true);
+			expect(store.activePersonaMode).toBe('manual');
+			expect(Toast.error).toHaveBeenCalledTimes(1);
+		});
+
+		it('keeps the persona latched when clearing it fails', async () => {
+			const persona = addTestPersona(store, {name: 'Alice'});
+			store.updateSettings({active_persona_id: persona.id, is_latched: true});
+
+			await store.unlatch();
+
+			expect(store.activePersonaId).toBe(persona.id);
+			expect(store.isPersonaLatched).toBe(true);
+			expect(Toast.error).toHaveBeenCalledTimes(1);
 		});
 	});
 });
