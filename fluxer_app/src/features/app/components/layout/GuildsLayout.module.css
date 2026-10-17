@@ -193,6 +193,12 @@
 	pointer-events: auto;
 }
 
+/* The container's titlebar padding does not apply to absolutely positioned children. */
+:global(html.platform-native) .guildListOverlay {
+	top: var(--native-titlebar-height);
+	height: auto;
+}
+
 .guildListItem {
 	position: relative;
 	display: flex;
