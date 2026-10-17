@@ -55,7 +55,7 @@ A message object is the full stored form of one post in a channel.
 | referenced_message?<sup>7</sup> | ?[message](#message-object) object | Resolved referenced message without a nested `referenced_message` field |
 | thread?<sup>8</sup> | [thread](/http-api/threads/#thread-object) object | The thread started from this message |
 | subprofile? | ?[message persona](#message-persona-object) object | The [persona](/http-api/users/personas/) the message was sent as, or null when it was sent as the account |
-| mention_personas? | array[[message persona](#message-persona-object) object] | Personas the content mentions as `<@user_id:persona_id>`, shown as the `subprofile` of their own messages |
+| mention_personas? | array[[message persona](#message-persona-object) object] | Personas mentioned as `<@user_id:persona_id>`, also in embeds and forwards, shown as their own messages show them |
 
 <sup>1</sup> Built for a webhook-authored message and for a stored author ID that no longer resolves
 
