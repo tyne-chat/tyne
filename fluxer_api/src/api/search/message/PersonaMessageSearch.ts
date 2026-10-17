@@ -11,7 +11,6 @@
  */
 
 import type {Message} from '@app/api/models/Message';
-import {extractPersonaMentions} from '@app/api/persona/PersonaMentions';
 import {
 	type MeilisearchFilter,
 	meiliAndTerms,
@@ -43,34 +42,15 @@ export interface PersonaSearchFields {
 }
 
 /**
- * The personas mentioned in message texts, in the `<@user:persona>` form both clients write.
- * Mentions inside code are left out, as the mention parser does.
- *
- * The persona is read from the text rather than checked against the message's mentioned users:
- * messages sent before the server parsed this form store no mentioned users for it, and the
- * mention is shown in them all the same.
+ * Spread into each message's search document. The mentioned personas are the ones stored on the
+ * message when it was written (`mention_personas`, MessagePersonaMentions.ts), which include those
+ * in what a forward carries, as upstream indexes the stored `mention_users` of a message and its
+ * snapshots rather than reading the text again.
  */
-export function extractMentionedPersonaIds(contents: Iterable<string | null | undefined>): Array<string> {
-	const ids: Array<string> = [];
-	for (const {personaId} of extractPersonaMentions(contents)) {
-		if (!ids.includes(personaId)) ids.push(personaId);
-	}
-	return ids;
-}
-
-/** Spread into each message's search document. Forwarded messages also count the mentions in what they forward, as upstream does for users. */
-export function personaSearchFields(
-	message: Pick<Message, 'personaId' | 'content' | 'reference' | 'messageSnapshots'>,
-): PersonaSearchFields {
-	const contents = [message.content];
-	if (message.reference?.type === 1) {
-		for (const snapshot of message.messageSnapshots) {
-			contents.push(snapshot.content);
-		}
-	}
+export function personaSearchFields(message: Pick<Message, 'personaId' | 'mentionedPersonaIds'>): PersonaSearchFields {
 	return {
 		personaId: message.personaId != null ? message.personaId.toString() : null,
-		mentionedPersonaIds: extractMentionedPersonaIds(contents),
+		mentionedPersonaIds: [...message.mentionedPersonaIds].map(String),
 	};
 }
 
