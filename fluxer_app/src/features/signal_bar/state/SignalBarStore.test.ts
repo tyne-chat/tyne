@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {beforeEach, describe, expect, it, type MockInstance, vi} from 'vitest';
 
 await vi.hoisted(async () => {
 	const {installVoiceMenuTestBootstrap} = await import(
@@ -18,12 +18,13 @@ vi.mock('@lingui/react/macro', () => ({
 	useLingui: () => ({i18n: {_: (descriptor: {message?: string}) => descriptor.message ?? '', locale: 'en'}}),
 }));
 
+import {Endpoints} from '@app/features/app/constants/Endpoints';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import SessionManager from '@app/features/platform/state/AuthSession';
 import {http} from '@app/features/platform/transport/RestTransport';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {moveSignal} from '@app/features/signal_bar/utils/SignalUtils';
-import type {ChannelSignalEntry} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
+import type {ChannelSignalEntry, SignalBarSignal} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
 import {observable, runInAction} from 'mobx';
 
 function entry(signalId: string, userId: string, personaId: string | null = null): ChannelSignalEntry {
@@ -184,6 +185,95 @@ describe('SignalBarStore', () => {
 		expect(getMock).not.toHaveBeenCalled();
 		SignalBarStore.handleBarUpdate(4);
 		expect(getMock).toHaveBeenCalledTimes(1);
+	});
+});
+
+function signal(id: string): SignalBarSignal {
+	return {id, emoji_id: null, emoji_name: '👍', animated: false, label: null};
+}
+
+describe('SignalBarStore when the server refuses a change', () => {
+	let getMock: MockInstance<typeof http.get>;
+	let putMock: MockInstance<typeof http.put>;
+	let deleteMock: MockInstance<typeof http.delete>;
+
+	async function loadChannel(channelId: string, entries: Array<ChannelSignalEntry>): Promise<void> {
+		getMock.mockResolvedValueOnce({ok: true, body: {enabled: true, bar_version: 3, entries}} as never);
+		await SignalBarStore.fetchChannel(channelId);
+	}
+
+	beforeEach(() => {
+		getMock = vi.spyOn(http, 'get').mockResolvedValue({ok: false} as never);
+		putMock = vi.spyOn(http, 'put');
+		deleteMock = vi.spyOn(http, 'delete');
+		putMock.mockResolvedValue({ok: true, status: 204} as never);
+		deleteMock.mockResolvedValue({ok: true, status: 204} as never);
+		runInAction(() => {
+			SignalBarStore.version = 3;
+		});
+	});
+
+	function failSaving(failure: () => Promise<never>): void {
+		putMock.mockImplementation(((path: string) =>
+			path === Endpoints.INSTANCE_SIGNAL_BAR ? failure() : Promise.resolve({ok: true, status: 204})) as never);
+	}
+
+	it("drops someone's signal at once and reloads the channel when removing it fails", async () => {
+		await loadChannel('remove', [entry('a', '1'), entry('a', '2')]);
+		deleteMock.mockRejectedValue(new Error('offline'));
+
+		const removing = SignalBarStore.removeUser('remove', 'a', '2');
+		expect(SignalBarStore.getEntries('remove', 'a').map((item) => item.user.id)).toEqual(['1']);
+
+		getMock.mockResolvedValueOnce({
+			ok: true,
+			body: {enabled: true, bar_version: 3, entries: [entry('a', '1'), entry('a', '2')]},
+		} as never);
+		await removing;
+		await vi.waitFor(() => expect(SignalBarStore.getEntries('remove', 'a')).toHaveLength(2));
+	});
+
+	it('puts the previous signals back and reloads the bar when saving fails', async () => {
+		runInAction(() => {
+			SignalBarStore.signals = [signal('kept')];
+		});
+		failSaving(() => Promise.reject(new Error('offline')));
+
+		const saved = await SignalBarStore.saveSignals([signal('new')]);
+
+		expect(saved).toBe(false);
+		expect(putMock).toHaveBeenCalledWith(Endpoints.INSTANCE_SIGNAL_BAR, expect.anything());
+		expect(SignalBarStore.signals.map((item) => item.id)).toEqual(['kept']);
+		await vi.waitFor(() => expect(getMock).toHaveBeenCalledTimes(1));
+	});
+
+	it('puts the previous signals back when the server answers with an error', async () => {
+		runInAction(() => {
+			SignalBarStore.signals = [signal('kept')];
+		});
+		failSaving(() => Promise.resolve({ok: false, status: 400}) as never);
+
+		expect(await SignalBarStore.saveSignals([signal('new')])).toBe(false);
+		expect(putMock).toHaveBeenCalledWith(Endpoints.INSTANCE_SIGNAL_BAR, expect.anything());
+		expect(SignalBarStore.signals.map((item) => item.id)).toEqual(['kept']);
+	});
+
+	it('clears the signals of a channel where the bar is turned off', async () => {
+		await loadChannel('switched-off', [entry('a', '1')]);
+
+		SignalBarStore.handleEnabledUpdate({channel_id: 'switched-off', enabled: false});
+
+		expect(SignalBarStore.isEnabled('switched-off')).toBe(false);
+		expect(SignalBarStore.getEntries('switched-off', 'a')).toEqual([]);
+	});
+
+	it('keeps the signals of a loaded channel when the bar is turned on again', async () => {
+		await loadChannel('switched-on', [entry('a', '1')]);
+
+		SignalBarStore.handleEnabledUpdate({channel_id: 'switched-on', enabled: true});
+
+		expect(SignalBarStore.isEnabled('switched-on')).toBe(true);
+		expect(SignalBarStore.getEntries('switched-on', 'a')).toHaveLength(1);
 	});
 });
 
