@@ -225,6 +225,7 @@ export class AdminArchiveRepository {
 	): Promise<Array<AdminArchive>> {
 		const query = AdminArchivesBySubject.select({
 			where: [AdminArchivesBySubject.where.eq('subject_type'), AdminArchivesBySubject.where.eq('subject_id')],
+			orderBy: {col: 'archive_id', direction: 'DESC'},
 			limit,
 		});
 		const rows = await fetchMany<AdminArchiveRow>(
@@ -240,6 +241,7 @@ export class AdminArchiveRepository {
 		const query = AdminArchivesByType.select({
 			columns: ADMIN_ARCHIVE_INDEX_COLUMNS,
 			where: AdminArchivesByType.where.eq('subject_type'),
+			orderBy: {col: 'archive_id', direction: 'DESC'},
 			limit,
 		});
 		const rows = await fetchMany<AdminArchiveIndexRow>(
@@ -254,6 +256,7 @@ export class AdminArchiveRepository {
 		const query = AdminArchivesByRequester.select({
 			columns: ADMIN_ARCHIVE_INDEX_COLUMNS,
 			where: AdminArchivesByRequester.where.eq('requested_by'),
+			orderBy: {col: 'archive_id', direction: 'DESC'},
 			limit,
 		});
 		const rows = await fetchMany<AdminArchiveIndexRow>(
