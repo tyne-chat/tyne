@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {createTestAccount, type TestAccount} from '@app/api/auth/tests/AuthTestUtils';
+import {createUserID} from '@app/api/BrandedTypes';
+import {setupTestGuildWithMembers} from '@app/api/channel/tests/ChannelTestUtils';
 import {ensureSessionStarted, getMessages} from '@app/api/message/tests/MessageTestUtils';
+import {getUserRepository} from '@app/api/middleware/ServiceSingletons';
 import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHarness';
 import {HTTP_STATUS} from '@app/api/test/TestConstants';
 import {createBuilder} from '@app/api/test/TestRequestBuilder';
+import {DELETED_USER_USERNAME, UserFlags} from '@fluxer/constants/src/UserConstants';
 import type {MessageResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
 
@@ -70,14 +74,52 @@ describe('personas mentioned in a message', () => {
 		expect((await fetchAgain(sent)).mention_personas?.map((persona) => persona.name)).toEqual(['Robert']);
 	});
 
-	it('leaves out private personas, mentions in code and personas of another account', async () => {
+	it('names private personas, and deleted ones as they were', async () => {
 		const hidden = await createPersona('Hidden', 'private');
+		const gone = await createPersona('Gone', 'unlisted');
+		const sent = await send(`<@${account.userId}:${hidden.id}> <@${account.userId}:${gone.id}>`);
+
+		await createBuilder(harness, account.token)
+			.delete(`/users/@me/personas/${gone.id}`)
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+
+		expect((await fetchAgain(sent)).mention_personas?.map((persona) => persona.name)).toEqual(['Hidden', 'Gone']);
+	});
+
+	it('names a persona "Deleted Persona" once its account is deleted', async () => {
+		const {owner, members, systemChannel} = await setupTestGuildWithMembers(harness, 1);
+		const member = members[0]!;
+		await ensureSessionStarted(harness, owner.token);
+		const bob = await createBuilder<{id: string}>(harness, member.token)
+			.post('/users/@me/personas')
+			.body({name: 'Bob the Fox', visibility: 'unlisted'})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		const sent = await createBuilder<MessageResponse>(harness, owner.token)
+			.post(`/channels/${systemChannel.id}/messages`)
+			.body({content: `hi <@${member.userId}:${bob.id}>`})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		expect(sent.mention_personas?.map((persona) => persona.name)).toEqual(['Bob the Fox']);
+
+		await getUserRepository().patchUpsert(createUserID(BigInt(member.userId)), {
+			username: DELETED_USER_USERNAME,
+			flags: BigInt(UserFlags.DELETED),
+		});
+
+		const again = (await getMessages(harness, owner.token, systemChannel.id)).find((m) => m.id === sent.id)!;
+		expect(again.mention_personas).toEqual([
+			expect.objectContaining({id: bob.id, name: 'Deleted Persona', avatar: null}),
+		]);
+	});
+
+	it('leaves out mentions in code and personas the mentioned account does not have', async () => {
 		const shown = await createPersona('Shown', 'unlisted');
 		const other = await createTestAccount(harness);
 
 		const sent = await send(
 			[
-				`<@${account.userId}:${hidden.id}>`,
 				`\`<@${account.userId}:${shown.id}>\``,
 				'```',
 				`<@${account.userId}:${shown.id}>`,
