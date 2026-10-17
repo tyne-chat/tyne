@@ -112,6 +112,8 @@ const getSelectionSnapshot = (normalizeText?: (range: Range, fallbackText: strin
 };
 
 interface MessageContextMenuProps {
+	// Fork: the reaction right-clicked to open the menu; "View reactions" opens on it.
+	openReactionsTo?: MessageReaction;
 	message: Message;
 	sourceChannel?: Channel | null;
 	onClose: () => void;
@@ -328,6 +330,7 @@ QuickReactionContextMenuItem.displayName = 'QuickReactionContextMenuItem';
 
 export const MessageContextMenu: React.FC<MessageContextMenuProps> = observer(
 	({
+		openReactionsTo,
 		message,
 		sourceChannel,
 		onClose,
@@ -450,12 +453,12 @@ export const MessageContextMenu: React.FC<MessageContextMenuProps> = observer(
 						channelId={message.channelId}
 						messageId={message.id}
 						message={message}
-						openToReaction={reactions[0]}
+						openToReaction={openReactionsTo ?? reactions[0]}
 						data-flx="ui.action-menu.message-context-menu.handle-open-reactions-modal.message-reactions-modal"
 					/>
 				)),
 			);
-		}, [message.channelId, message.id, reactions]);
+		}, [openReactionsTo, message.channelId, message.id, reactions]);
 		const handleOpenEmojiPickerAction = useCallback(() => {
 			onOpenReactionPicker?.();
 			triggerAddReaction(message);
