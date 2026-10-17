@@ -8,6 +8,7 @@ import {UserEntranceSoundSelections, UserEntranceSounds} from '@app/api/Tables';
 
 const LIST_SOUNDS_CQL = UserEntranceSounds.select({
 	where: UserEntranceSounds.where.eq('user_id'),
+	orderBy: {col: 'sound_id', direction: 'DESC'},
 });
 const FETCH_SOUND_CQL = UserEntranceSounds.select({
 	where: [UserEntranceSounds.where.eq('user_id'), UserEntranceSounds.where.eq('sound_id')],
