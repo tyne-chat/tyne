@@ -54,7 +54,7 @@ notification(
         <<"body">> => push_notification_format:build_content_preview(
             MessageData, MarkdownContext
         ),
-        <<"icon">> => push_notification_format:resolve_author_avatar_url(AuthorData),
+        <<"icon">> => fork_push_personas:author_icon(MessageData, AuthorData),
         <<"tag">> => <<"channel:", ChannelIdBin/binary, ":", MessageIdBin/binary>>,
         <<"notification_tag">> => <<"channel:", ChannelIdBin/binary>>,
         <<"url">> => push_notification_format:build_url(GuildId, ChannelId, MessageId),
