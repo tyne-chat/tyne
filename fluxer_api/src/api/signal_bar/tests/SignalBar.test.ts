@@ -31,7 +31,19 @@ import type {
 	GuildSignalBarSettings,
 	SignalBarResponse,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
-import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
+import {afterAll, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
+
+// Fork imports.
+
+import {createGuildID, createUserID, type GuildID} from '@app/api/BrandedTypes';
+import {createEmoji, getPngDataUrl} from '@app/api/emoji/tests/EmojiTestUtils';
+import type {GuildRepository} from '@app/api/guild/repositories/GuildRepository';
+import type {IGatewayService} from '@app/api/infrastructure/IGatewayService';
+import {getSnowflakeService} from '@app/api/middleware/ServiceRegistry';
+import {createTestWorkerHelpers} from '@app/api/test/SyncTaskWorkerService';
+import sweepSignalBar from '@app/api/worker/tasks/SweepSignalBar';
+import {clearWorkerDependencies, setWorkerDependencies} from '@app/api/worker/WorkerContext';
+import {initializeWorkerDependencies} from '@app/api/worker/WorkerDependencies';
 
 describe('signal bar', () => {
 	let harness: ApiTestHarness;
@@ -77,14 +89,24 @@ describe('signal bar', () => {
 
 	const HOUR_MS = 60 * 60 * 1000;
 
-	const createSweepService = (clock: {now: number; online: boolean}): SignalBarService =>
+	const createSweepService = (
+		clock: {now: number; online: boolean | 'unreachable'},
+		overrides: {guildRepository?: GuildRepository; gatewayService?: IGatewayService} = {},
+	): SignalBarService =>
 		new SignalBarService({
 			instanceConfigRepository: getInstanceConfigRepository(),
 			cacheService: getCacheService(),
-			gatewayService: Object.create(getGatewayService(), {
-				hasActivePresence: {value: async () => clock.online},
-			}),
-			guildRepository: getGuildRepository(),
+			gatewayService:
+				overrides.gatewayService ??
+				Object.create(getGatewayService(), {
+					hasActivePresence: {
+						value: async () => {
+							if (clock.online === 'unreachable') throw new Error('gateway unreachable');
+							return clock.online;
+						},
+					},
+				}),
+			guildRepository: overrides.guildRepository ?? getGuildRepository(),
 			personaRepository: getPersonaRepository(),
 			findUser: (userId) => getUserRepository().findUnique(userId),
 			findChannel: (channelId) => getChannelRepository().channelData.findUnique(channelId),
@@ -444,5 +466,152 @@ describe('signal bar', () => {
 			.body({signals: fiftyOneSignals})
 			.expect(HTTP_STATUS.BAD_REQUEST)
 			.execute();
+	});
+
+	const lightSignal = async (token: string, channelId: string, signalId: string): Promise<void> => {
+		await createBuilder(harness, token)
+			.put(`/channels/${channelId}/signals/${signalId}/@me`)
+			.body({})
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+	};
+
+	it('refuses a custom emoji that does not exist and text that is not an emoji', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+
+		await createBuilder(harness, owner.token)
+			.put('/instance/signal-bar')
+			.body({signals: [{emoji_id: '123456789012345678', emoji_name: 'missing'}]})
+			.expect(HTTP_STATUS.NOT_FOUND)
+			.execute();
+		await createBuilder(harness, owner.token)
+			.put('/instance/signal-bar')
+			.body({signals: [{emoji_name: 'reading'}]})
+			.expect(HTTP_STATUS.NOT_FOUND)
+			.execute();
+	});
+
+	it('drops a signal from the bar once its custom emoji is deleted', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		const emoji = await createEmoji(harness, owner.token, guild.id, {name: 'bar_emoji', image: getPngDataUrl()});
+		const before = await createBuilder<SignalBarResponse>(harness, owner.token)
+			.put('/instance/signal-bar')
+			.body({signals: [{emoji_id: emoji.id, emoji_name: emoji.name}, {emoji_name: '📖'}]})
+			.execute();
+		expect(before.signals.map((signal) => signal.emoji_id)).toEqual([emoji.id, null]);
+
+		await createBuilder(harness, owner.token)
+			.delete(`/guilds/${guild.id}/emojis/${emoji.id}`)
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+		await createSweepService({now: 0, online: true}).sweep();
+
+		const after = await createBuilder<SignalBarResponse>(harness, owner.token).get('/instance/signal-bar').execute();
+		expect(after.signals.map((signal) => signal.emoji_name)).toEqual(['📖']);
+		expect(after.version).toBe(before.version + 1);
+	});
+
+	it('keeps signals while it cannot tell whether someone is online', async () => {
+		const {owner, guild, systemChannel} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		await enableEverywhere(owner.token, guild.id);
+		const [reading] = (await setBar(owner.token, ['📖'])).signals;
+		await lightSignal(owner.token, systemChannel.id, reading!.id);
+
+		const clock: {now: number; online: boolean | 'unreachable'} = {now: 0, online: 'unreachable'};
+		const service = createSweepService(clock);
+		expect(await service.sweep()).toEqual({cleared: 0});
+		clock.now = 48 * HOUR_MS;
+		expect(await service.sweep()).toEqual({cleared: 0});
+
+		expect((await listSignals(owner.token, systemChannel.id)).entries).toHaveLength(1);
+	});
+
+	it('forgets an account once none of its signals are left', async () => {
+		const {owner, guild, systemChannel} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		await enableEverywhere(owner.token, guild.id);
+		const [reading] = (await setBar(owner.token, ['📖'])).signals;
+		await lightSignal(owner.token, systemChannel.id, reading!.id);
+		await createBuilder(harness, owner.token)
+			.delete(`/channels/${systemChannel.id}/signals/${reading!.id}/@me`)
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+		expect(await getCacheService().smembers('signalbar:users')).toContain(owner.userId);
+
+		expect(await createSweepService({now: 0, online: true}).sweep()).toEqual({cleared: 0});
+
+		expect(await getCacheService().smembers('signalbar:users')).not.toContain(owner.userId);
+	});
+
+	it('leaves out and forgets a stored signal it cannot read', async () => {
+		const {owner, guild, systemChannel} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		await enableEverywhere(owner.token, guild.id);
+		const [reading] = (await setBar(owner.token, ['📖'])).signals;
+		await lightSignal(owner.token, systemChannel.id, reading!.id);
+		const member = `${reading!.id}:${owner.userId}`;
+		await getCacheService().set(`signalbar:entry:${systemChannel.id}:${member}`, {not: 'an entry'}, 600);
+
+		expect((await listSignals(owner.token, systemChannel.id)).entries).toEqual([]);
+		expect(await getCacheService().smembers(`signalbar:channel:${systemChannel.id}`)).not.toContain(member);
+	});
+
+	it('tells every community about a bar change, page by page, even when one dispatch fails', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		const communities = Array.from({length: 101}, (_, index) => ({id: createGuildID(BigInt(9_000_000 + index))}));
+		const pagesAfter: Array<GuildID | undefined> = [];
+		const dispatched: Array<GuildID> = [];
+		const guildRepository = Object.create(getGuildRepository(), {
+			listAllGuildsPaginated: {
+				value: async (limit: number, lastGuildId?: GuildID) => {
+					pagesAfter.push(lastGuildId);
+					const start = lastGuildId === undefined ? 0 : communities.findIndex((c) => c.id === lastGuildId) + 1;
+					return communities.slice(start, start + limit);
+				},
+			},
+		});
+		const gatewayService = Object.create(getGatewayService(), {
+			dispatchGuild: {
+				value: async ({guildId}: {guildId: GuildID}) => {
+					dispatched.push(guildId);
+					if (guildId === communities[0]!.id) throw new Error('community unreachable');
+				},
+			},
+		});
+
+		await createSweepService({now: 0, online: true}, {guildRepository, gatewayService}).updateBar(
+			createUserID(BigInt(owner.userId)),
+			{signals: [{emoji_name: '📖'}]},
+		);
+
+		expect(pagesAfter).toEqual([undefined, communities[99]!.id]);
+		expect(dispatched).toHaveLength(101);
+	});
+
+	it('runs the sweep as a worker task and logs what it cleared', async () => {
+		const {owner, guild, systemChannel} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		await enableEverywhere(owner.token, guild.id);
+		const [reading, done] = (await setBar(owner.token, ['📖', '✅'])).signals;
+		await lightSignal(owner.token, systemChannel.id, done!.id);
+		await createBuilder(harness, owner.token)
+			.put('/instance/signal-bar')
+			.body({signals: [{id: reading!.id, emoji_name: '📖'}]})
+			.execute();
+
+		setWorkerDependencies(await initializeWorkerDependencies(getSnowflakeService()));
+		try {
+			const helpers = createTestWorkerHelpers();
+			const debug = vi.spyOn(helpers.logger, 'debug');
+			await sweepSignalBar({}, helpers);
+			expect(debug).toHaveBeenCalledWith({cleared: 1}, expect.any(String));
+		} finally {
+			clearWorkerDependencies();
+		}
+		expect((await listSignals(owner.token, systemChannel.id)).entries).toEqual([]);
 	});
 });
