@@ -48,6 +48,7 @@ build_markdown_context(MessageData, GuildId, RoleNames, GuildData) ->
         <<"users">> => mention_user_names(
             maps:get(<<"mentions">>, MessageData, []), UserNicknames
         ),
+        <<"personas">> => fork_push_personas:mention_names(MessageData),
         <<"user_nicknames">> => UserNicknames,
         <<"roles">> => role_names_for_context(GuildId, RoleNames),
         <<"channels">> => channel_names_for_context(MessageData, GuildData)
@@ -95,6 +96,7 @@ resolve_author_name(MessageData, MarkdownContext, FallbackName) ->
     UserNicknames = user_nicknames_from_context_or_message(MessageData, MarkdownContext),
     case
         first_nonempty_binary([
+            fork_push_personas:author_name(MessageData),
             user_nickname(maps:get(<<"id">>, AuthorData, undefined), UserNicknames),
             maps:get(<<"global_name">>, AuthorData, undefined),
             maps:get(<<"username">>, AuthorData, undefined),

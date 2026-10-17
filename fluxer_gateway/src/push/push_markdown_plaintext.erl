@@ -75,6 +75,7 @@ default_context(Context) ->
         <<"include_emoji_names">> => maps:get(<<"include_emoji_names">>, Context, true),
         <<"include_link_urls">> => maps:get(<<"include_link_urls">>, Context, false),
         <<"users">> => bounded_name_map(maps:get(<<"users">>, Context, #{})),
+        <<"personas">> => bounded_name_map(maps:get(<<"personas">>, Context, #{})),
         <<"roles">> => bounded_name_map(maps:get(<<"roles">>, Context, #{})),
         <<"channels">> => bounded_name_map(maps:get(<<"channels">>, Context, #{}))
     }.
