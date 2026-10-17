@@ -22,6 +22,7 @@ import type {UserPersonaSettingsRow} from '@app/api/database/types/PersonaTypes'
 import {getPersonaRepository} from '@app/api/middleware/ServiceSingletons';
 import type {Persona} from '@app/api/models/Persona';
 import {type IPersonaRepository, personaLookupKey} from '@app/api/persona/IPersonaRepository';
+import {extractPersonaMentions, type PersonaMention} from '@app/api/persona/PersonaMentions';
 import {DELETED_USER_USERNAME, UserFlags} from '@fluxer/constants/src/UserConstants';
 
 const MESSAGE_RESPONSE_SERVICE_SUBJECT = 'svc.messages';
@@ -168,6 +169,20 @@ export class MessageResponseDataService {
 		const lookupPairs: Array<{userId: UserID; personaId: PersonaID}> = [];
 		const authorUserIds: Array<UserID> = [];
 
+		// The personas a message mentions are looked up as it is sent, as upstream does with the
+		// accounts it mentions, so a renamed persona shows its new name in old messages too.
+		const mentionsByMessage = new Map<MessageResponse, Array<PersonaMention>>();
+		for (const msg of targetMessages) {
+			const mentions = extractPersonaMentions([msg.content]);
+			if (mentions.length === 0) continue;
+			mentionsByMessage.set(msg, mentions);
+			for (const mention of mentions) {
+				const userId = createUserID(BigInt(mention.userId));
+				lookupPairs.push({userId, personaId: createPersonaID(BigInt(mention.personaId))});
+				authorUserIds.push(userId);
+			}
+		}
+
 		for (const msg of targetMessages) {
 			const anyMsg = msg as unknown as Record<string, unknown>;
 			// Case 1: Root user account deleted -> Render as Deleted Persona if persona was used, else null
@@ -268,6 +283,17 @@ export class MessageResponseDataService {
 				};
 			}
 			delete anyMsg.persona_id;
+		}
+
+		for (const [msg, mentions] of mentionsByMessage) {
+			const mentioned = [];
+			for (const mention of mentions) {
+				const persona = personasByKey.get(personaLookupKey(mention.userId, mention.personaId));
+				// One payload goes to everyone in the channel, so personas only their owner may see stay out.
+				if (!persona || persona.isDeleted || persona.visibility === 'private') continue;
+				mentioned.push(persona.toSubprofileResponse(settingsByUserId.get(mention.userId)));
+			}
+			if (mentioned.length > 0) msg.mention_personas = mentioned;
 		}
 	}
 
