@@ -1747,3 +1747,65 @@ mod tests {
         );
     }
 }
+
+// Fork: tests for the fork's form handlers above, in a module of their own so upstream's `tests`
+// module stays as upstream writes it.
+#[cfg(test)]
+mod fork_tests {
+    use super::*;
+
+    fn signal_bar_guild_id(form: &[u8]) -> Option<Option<String>> {
+        build_signal_bar_update(&MultiValueForm::parse(form))
+            .policy
+            .expect("policy")
+            .signal_bar_guild_id
+    }
+
+    #[test]
+    fn a_blank_signal_bar_community_clears_it_and_a_padded_one_is_trimmed() {
+        assert_eq!(signal_bar_guild_id(b"signal_bar_guild_id="), Some(None));
+        assert_eq!(signal_bar_guild_id(b"signal_bar_guild_id=+++"), Some(None));
+        assert_eq!(signal_bar_guild_id(b""), Some(None));
+        assert_eq!(
+            signal_bar_guild_id(b"signal_bar_guild_id=+123456789012345678+"),
+            Some(Some("123456789012345678".to_owned()))
+        );
+    }
+
+    #[test]
+    fn server_list_buttons_left_unchecked_are_switched_off() {
+        let buttons = build_server_list_buttons_update(&MultiValueForm::parse(
+            b"server_list_button_favorites=true&server_list_button_help=true",
+        ))
+        .policy
+        .expect("policy")
+        .server_list_buttons
+        .expect("server list buttons");
+
+        assert_eq!(buttons.favorites, Some(true));
+        assert_eq!(buttons.explore, Some(false));
+        assert_eq!(buttons.create_join, Some(false));
+        assert_eq!(buttons.download, Some(false));
+        assert_eq!(buttons.help, Some(true));
+    }
+
+    #[test]
+    fn the_policy_form_leaves_community_creation_alone_unless_it_names_it() {
+        let staff_only = |form: &[u8]| {
+            build_policy_update(&MultiValueForm::parse(form))
+                .policy
+                .expect("policy")
+                .community_creation_staff_only
+        };
+
+        assert_eq!(staff_only(b""), None);
+        assert_eq!(
+            staff_only(b"policy_community_creation_staff_only=true"),
+            Some(true)
+        );
+        assert_eq!(
+            staff_only(b"policy_community_creation_staff_only=false"),
+            Some(false)
+        );
+    }
+}

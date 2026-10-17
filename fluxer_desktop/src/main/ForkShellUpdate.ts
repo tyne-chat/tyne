@@ -177,7 +177,7 @@ function escapeHtml(text: string): string {
 
 // The whole progress window: a sentence, a bar and a percentage. It runs no code but the two
 // functions below, loads nothing, and uses a session of its own.
-function progressDocument(heading: string, detail: string): string {
+export function progressDocument(heading: string, detail: string): string {
 	return `<!doctype html><html><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <style>
@@ -318,7 +318,7 @@ async function askToRestartForUpdate(version: string | null): Promise<boolean> {
 	return response === 0;
 }
 
-async function fetchLatestReleaseVersion(url: string): Promise<string> {
+export async function fetchLatestReleaseVersion(url: string): Promise<string> {
 	const response = await net.fetch(url, {
 		cache: 'no-store',
 		headers: {Accept: 'application/json', 'Cache-Control': 'no-cache'},
