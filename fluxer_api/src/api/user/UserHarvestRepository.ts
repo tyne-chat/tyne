@@ -17,6 +17,7 @@ const FIND_HARVEST_CQL = UserHarvests.selectCql({
 
 const FIND_LATEST_HARVEST_CQL = UserHarvests.selectCql({
 	where: UserHarvests.where.eq('user_id'),
+	orderBy: {col: 'harvest_id', direction: 'DESC'},
 	limit: 1,
 });
 
