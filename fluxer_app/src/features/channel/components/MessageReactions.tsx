@@ -23,7 +23,6 @@ import {useMessageReactions as useMessageReactionsSnapshot} from '@app/features/
 import type {Message} from '@app/features/messaging/models/MessagingMessage';
 import {getEmojiName, getReactionKey, useEmojiURL} from '@app/features/messaging/utils/ReactionUtils';
 import {remFromPx} from '@app/features/theme/layout/RemFromPx';
-import {EmojiContextMenuItems} from '@app/features/ui/action_menu/items/EmojiContextMenuItems';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {Popout} from '@app/features/ui/popover/PopoverPopout';
@@ -40,9 +39,12 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {requestDeleteMessage} from '@app/features/channel/components/MessageActionUtils';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {hasPersonaReacted} from '@app/features/messaging/utils/ReactionUtils';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {EmojiInlineMenuItems} from '@app/features/ui/action_menu/items/EmojiContextMenuItems';
+import {MessageContextMenu} from '@app/features/ui/action_menu/MessageContextMenu';
 
 const PRESS_TO_REMOVE_REACTION_DESCRIPTOR = msg({
 	message: 'press to remove reaction',
@@ -131,25 +133,38 @@ const MessageReactionItem = observer(
 			setSelectedEmoji(null);
 		}, []);
 		const emojiRecord = reaction.emoji.id ? Emoji.getEmojiById(reaction.emoji.id) : null;
+		// Fork: the full message menu, as for emoji in message text, with "View reactions" opening on this reaction.
 		const handleContextMenu = (e: React.MouseEvent) => {
-			if (isDisabled) return;
-			if (!reaction.emoji.id) return;
+			if (isDisabled || isMobile) return;
 			e.preventDefault();
 			e.stopPropagation();
-			const emojiForMenu: FlatEmoji = emojiRecord ?? {
-				id: reaction.emoji.id,
-				name: reaction.emoji.name,
-				uniqueName: reaction.emoji.name,
-				allNamesString: `:${reaction.emoji.name}:`,
-				animated: Boolean(reaction.emoji.animated),
-			};
+			const emojiForMenu: FlatEmoji | null = reaction.emoji.id
+				? (emojiRecord ?? {
+						id: reaction.emoji.id,
+						name: reaction.emoji.name,
+						uniqueName: reaction.emoji.name,
+						allNamesString: `:${reaction.emoji.name}:`,
+						animated: Boolean(reaction.emoji.animated),
+					})
+				: null;
 			ContextMenuCommands.openFromEvent(e, ({onClose}) => (
-				<EmojiContextMenuItems
-					emoji={emojiForMenu}
+				<MessageContextMenu
+					message={message}
 					onClose={onClose}
-					channelId={message.channelId}
-					messageId={message.id}
-					data-flx="channel.message-reactions.handle-context-menu.emoji-context-menu-items"
+					onDelete={(bypassConfirm) => requestDeleteMessage(message, i18n, bypassConfirm)}
+					openReactionsTo={reaction}
+					inlineStickerOrEmojiItems={
+						emojiForMenu && (
+							<EmojiInlineMenuItems
+								emoji={emojiForMenu}
+								onClose={onClose}
+								channelId={message.channelId}
+								messageId={message.id}
+								data-flx="channel.message-reactions.handle-context-menu.emoji-inline-menu-items"
+							/>
+						)
+					}
+					data-flx="channel.message-reactions.handle-context-menu.message-context-menu"
 				/>
 			));
 		};

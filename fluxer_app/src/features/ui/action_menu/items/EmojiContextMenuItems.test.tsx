@@ -330,6 +330,51 @@ describe('EmojiContextMenuItems', () => {
 		});
 	});
 
+	it('keeps download, pin and favorite in view and the rest under "More emoji actions"', async () => {
+		await act(async () => {
+			root.render(
+				<EmojiContextMenuItems
+					emoji={customEmoji}
+					channelId="c1"
+					messageId="m1"
+					onClose={mockOnClose}
+					data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--9"
+				/>,
+			);
+		});
+
+		const submenu = document.querySelector(
+			'[data-flx="ui.action-menu.items.emoji-context-menu-items-test.sub-menu.div"]',
+		) as HTMLElement;
+		expect(submenu.textContent).toContain('More emoji actions');
+		const submenuItems = Array.from(submenu.querySelectorAll('[role="menuitem"]')).map((el) => el.textContent);
+		expect(submenuItems).toEqual(expect.arrayContaining(['Copy image', 'Copy image link', 'Copy emoji ID']));
+
+		const topLevelItems = Array.from(document.querySelectorAll('[role="menuitem"]'))
+			.filter((el) => !submenu.contains(el))
+			.map((el) => el.textContent);
+		// No persona is selected here, and the emoji's server is not loaded, so it cannot be favourited.
+		expect(topLevelItems).toEqual(['React as...', 'Download image', 'Pin emoji']);
+		expect(document.body.textContent).not.toContain('Open image link');
+	});
+
+	it('shows only pin and favorite for a standard emoji without an image', async () => {
+		await act(async () => {
+			root.render(
+				<EmojiInlineMenuItems
+					emoji={unicodeEmoji}
+					channelId="c1"
+					onClose={mockOnClose}
+					data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-inline-menu-items--2"
+				/>,
+			);
+		});
+
+		expect(document.body.textContent).not.toContain('More emoji actions');
+		const items = Array.from(document.querySelectorAll('[role="menuitem"]')).map((el) => el.textContent);
+		expect(items).toEqual(['Pin emoji', 'Favorite emoji']);
+	});
+
 	it('supports toggling favorite emoji', async () => {
 		await act(async () => {
 			root.render(
