@@ -17,7 +17,7 @@ export interface GifProviderInfoInput {
 type KnownGifProvider = 'klipy' | 'tenor';
 
 const GIF_PROVIDER_DISPLAY_NAMES: Record<KnownGifProvider, string> = {
-	klipy: 'Klipy',
+	klipy: 'KLIPY',
 	tenor: 'Tenor',
 };
 
