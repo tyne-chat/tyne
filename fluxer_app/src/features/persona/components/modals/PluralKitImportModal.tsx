@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import i18n from '@app/app/I18n';
 import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
@@ -32,6 +33,22 @@ import {PersonaStore} from '../../state/PersonaStore';
 import {type PersonaImportSource, readPersonaImportFile} from '../../utils/PersonaImportFile';
 import styles from './PluralKitImportModal.module.css';
 
+const IMPORT_NETWORK_ERROR_DESCRIPTOR = msg({
+	message: 'Network error',
+	comment: 'Why an image could not be imported when the request to the server failed',
+});
+const IMPORT_HTTP_ERROR_DESCRIPTOR = msg({
+	message: 'Request failed (HTTP {status})',
+	comment: 'Why an image could not be imported when the server answered with HTTP status {status}',
+});
+const IMPORT_UNKNOWN_ERROR_DESCRIPTOR = msg({
+	message: 'Unknown error',
+	comment: 'Why an image could not be imported when no reason is known',
+});
+const PROGRESS_ITEMS_DESCRIPTOR = msg({
+	message: 'items',
+	comment: 'What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"',
+});
 const FILE_INVALID_JSON_DESCRIPTOR = msg({
 	message: 'The chosen file is not a valid JSON object.',
 	comment: 'Error message when uploaded file is not valid JSON',
@@ -173,7 +190,7 @@ async function fetchRemoteImages(
 				body: JSON.stringify({urls: batch, kind}),
 			});
 			if (!res.ok) {
-				let errorMessage = `HTTP ${res.status}`;
+				let errorMessage = i18n._(IMPORT_HTTP_ERROR_DESCRIPTOR, {status: res.status});
 				try {
 					const errorJson = await res.json();
 					if (errorJson.message) errorMessage = errorJson.message;
@@ -196,7 +213,7 @@ async function fetchRemoteImages(
 			buffer += decoder.decode();
 			for (const line of buffer.split('\n')) handleLine(line);
 		} catch (err: unknown) {
-			const errorMsg = err instanceof Error ? err.message : 'Network error';
+			const errorMsg = err instanceof Error ? err.message : i18n._(IMPORT_NETWORK_ERROR_DESCRIPTOR);
 			for (const url of batch) errors.set(url, errorMsg);
 		}
 	}
@@ -358,7 +375,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				try {
 					stored.set(upload.key, await PersonaCommands.importPersonaImage(upload.kind, imageDataUri(upload.bytes)));
 				} catch (err: unknown) {
-					imageFailures.set(upload.key, err instanceof Error ? err.message : 'Error');
+					imageFailures.set(upload.key, err instanceof Error ? err.message : i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR));
 				}
 				done++;
 				showUploadProgress();
@@ -409,7 +426,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				const image = fetched.stored.get(url);
 				for (const key of keys) {
 					if (image) stored.set(key, image);
-					else imageFailures.set(key, fetched.errors.get(url) ?? 'Error');
+					else imageFailures.set(key, fetched.errors.get(url) ?? i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR));
 				}
 			}
 		}
@@ -855,7 +872,8 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 							</div>
 							<div className={styles.progressDetail} data-flx="persona.plural-kit-import-modal.progress-detail">
 								<Trans>
-									{progress.current} of {progress.total} {progress.label ?? 'items'} ({progress.percent}%)
+									{progress.current} of {progress.total} {progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)} (
+									{progress.percent}%)
 								</Trans>
 							</div>
 						</div>
