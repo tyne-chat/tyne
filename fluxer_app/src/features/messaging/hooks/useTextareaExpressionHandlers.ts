@@ -15,6 +15,13 @@ import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import type {MessageAttachment, MessageStickerItem} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {useCallback, useEffect} from 'react';
 
+// Fork imports.
+
+import {
+	clearComposerAfterExpression,
+	isDraftUsedUpByExpression,
+} from '@app/features/messaging/utils/ExpressionDraftPersona';
+
 interface UseTextareaExpressionHandlersOptions {
 	setValue: React.Dispatch<React.SetStateAction<string>>;
 	previousValueRef: React.RefObject<string>;
@@ -72,12 +79,9 @@ export const useTextareaExpressionHandlers = ({
 			if (channelId != null && !ActiveComposer.accepts(channelId)) return;
 			if (autoSend) {
 				const currentDraft = previousValueRef.current || '';
+				const draftUsedUp = isDraftUsedUpByExpression(channelId ?? null, currentDraft);
 				sendOptimisticMessage({content: gifUrl}, {hasAttachments: false, draftOverride: currentDraft});
-				if (clearComposer) {
-					clearComposer();
-				} else {
-					setValue('');
-				}
+				clearComposerAfterExpression(draftUsedUp, clearComposer, setValue);
 			} else {
 				appendText(gifUrl);
 			}
@@ -94,15 +98,12 @@ export const useTextareaExpressionHandlers = ({
 			};
 			if (!sticker) return;
 			const currentDraft = previousValueRef.current || '';
+			const draftUsedUp = isDraftUsedUpByExpression(channelId ?? null, currentDraft);
 			sendOptimisticMessage(
 				{content: '', stickers: [sticker.toJSON()]},
 				{hasAttachments: false, draftOverride: currentDraft},
 			);
-			if (clearComposer) {
-				clearComposer();
-			} else {
-				setValue('');
-			}
+			clearComposerAfterExpression(draftUsedUp, clearComposer, setValue);
 		};
 		return ComponentBus.subscribe('STICKER_SELECT', handleStickerSelect);
 	}, [sendOptimisticMessage, setValue, clearComposer, enabled, previousValueRef, channelId]);
@@ -121,13 +122,10 @@ export const useTextareaExpressionHandlers = ({
 				meme.gifProvider && meme.gifSlug ? GifSlugUtils.buildShareUrl(meme.gifProvider, meme.gifSlug) : null;
 			if (autoSend) {
 				const currentDraft = previousValueRef.current || '';
+				const draftUsedUp = isDraftUsedUpByExpression(channelId ?? null, currentDraft);
 				if (providerShareUrl) {
 					sendOptimisticMessage({content: providerShareUrl}, {hasAttachments: false, draftOverride: currentDraft});
-					if (clearComposer) {
-						clearComposer();
-					} else {
-						setValue('');
-					}
+					clearComposerAfterExpression(draftUsedUp, clearComposer, setValue);
 				} else {
 					const uploadingAttachment = UploadingAttachment.fromDescriptor({
 						filename: meme.filename,
@@ -139,11 +137,7 @@ export const useTextareaExpressionHandlers = ({
 						{content: '', attachments: [uploadingAttachment]},
 						{hasAttachments: false, favoriteMemeId: meme.id, draftOverride: currentDraft},
 					);
-					if (clearComposer) {
-						clearComposer();
-					} else {
-						setValue('');
-					}
+					clearComposerAfterExpression(draftUsedUp, clearComposer, setValue);
 				}
 			} else {
 				if (providerShareUrl) {
