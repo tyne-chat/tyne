@@ -24,7 +24,7 @@ const DEFAULT_GIF_SERVICE_REGISTER_SHARE_TIMEOUT_MS = 3_000;
 const MAX_REQUEST_TIMEOUT_MS = 2_147_483_647;
 const GIF_PROVIDER_META: GifProviderMeta = {
 	name: 'klipy',
-	displayName: 'Klipy',
+	displayName: 'KLIPY',
 	attributionRequired: false,
 };
 const KLIPY_SHARE_ORIGIN = 'https://klipy.com';
