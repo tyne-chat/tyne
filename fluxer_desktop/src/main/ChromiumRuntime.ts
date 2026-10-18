@@ -301,6 +301,10 @@ export function appendLinuxChromiumFlagsConfig(channel: BuildChannel): void {
 
 export function addLinuxHardwareVideoDecodeFeatures(features: Set<string>): void {
 	if (process.platform !== 'linux') return;
+	// Fork: NVIDIA decoding stays off unless the build sets FLUXER_FORK_NVIDIA_VAAPI_DECODE=1. On X11 it
+	// shows black video (Chromium's dma-buf import, tyne-chat/tyne#187); stock Electron lacks the VA-API patch.
+	if (process.env.FLUXER_FORK_NVIDIA_VAAPI_DECODE !== '1') return;
+	if (process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON === '1') return;
 	features.add('VaapiOnNvidiaGPUs');
 }
 
