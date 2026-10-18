@@ -4477,7 +4477,11 @@
 						"schema": {"description": "The session ID for synchronization", "type": "string"},
 						"description": "The session ID for synchronization"
 					}
-				]
+				],
+				"requestBody": {
+					"required": false,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/AddReactionBodySchema"}}}
+				}
 			},
 			"delete": {
 				"operationId": "remove_own_reaction",
@@ -4552,8 +4556,18 @@
 						"name": "session_id",
 						"in": "query",
 						"required": false,
-						"schema": {"description": "The session ID for synchronization", "type": "string"},
-						"description": "The session ID for synchronization"
+						"schema": {"description": "Session ID to avoid echo", "type": "string"},
+						"description": "Session ID to avoid echo"
+					},
+					{
+						"name": "persona_id",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"description": "Persona ID whose reaction should be removed",
+							"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+						},
+						"description": "Persona ID whose reaction should be removed"
 					}
 				]
 			}
@@ -4734,8 +4748,18 @@
 						"name": "session_id",
 						"in": "query",
 						"required": false,
-						"schema": {"description": "The session ID for synchronization", "type": "string"},
-						"description": "The session ID for synchronization"
+						"schema": {"description": "Session ID to avoid echo", "type": "string"},
+						"description": "Session ID to avoid echo"
+					},
+					{
+						"name": "persona_id",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"description": "Persona ID whose reaction should be removed",
+							"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+						},
+						"description": "Persona ID whose reaction should be removed"
 					}
 				]
 			}
@@ -4950,6 +4974,82 @@
 							"$ref": "#/components/schemas/SnowflakeType"
 						},
 						"description": "The ID of the permission overwrite"
+					}
+				]
+			}
+		},
+		"/channels/{channel_id}/persona-mentions": {
+			"get": {
+				"operationId": "get_channel_persona_mentions",
+				"summary": "Get persona mention candidates for a channel",
+				"tags": ["Channels", "Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/ChannelPersonaMentionsResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves mentionable personas belonging to members of the specified channel. Only public personas of other members are returned, along with own personas.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					},
+					{
+						"name": "q",
+						"in": "query",
+						"required": false,
+						"schema": {"default": "", "type": "string", "maxLength": 100}
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {"default": 100, "type": "integer", "minimum": 1, "maximum": 1000}
 					}
 				]
 			}
@@ -5424,6 +5524,425 @@
 						"required": true,
 						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
 						"description": "The ID of the channel"
+					}
+				]
+			}
+		},
+		"/channels/{channel_id}/signal-bar": {
+			"put": {
+				"operationId": "set_dm_signal_bar_enabled",
+				"summary": "Switch the signal bar on or off in a DM",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Switches the signal bar on or off in a direct message. Either participant of a one-on-one DM or the owner of a group DM may do this. Community channels are configured through the community endpoint.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {"schema": {"$ref": "#/components/schemas/ChannelSignalBarEnabledRequestSchema"}}
+					}
+				}
+			}
+		},
+		"/channels/{channel_id}/signals": {
+			"get": {
+				"operationId": "list_channel_signals",
+				"summary": "List active channel signals",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ChannelSignalsResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves everyone currently giving a signal in the channel.",
+				"security": [{"botToken": []}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					}
+				]
+			}
+		},
+		"/channels/{channel_id}/signals/{signal_id}": {
+			"delete": {
+				"operationId": "reset_channel_signal",
+				"summary": "Reset a signal",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Turns a signal off for everyone in the channel. Requires Manage Community in a community channel, or ownership of a group DM.",
+				"security": [{"botToken": []}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					},
+					{
+						"name": "signal_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"pattern": "^[a-z0-9]{1,32}$",
+							"description": "The unique identifier of the signal within the bar"
+						},
+						"description": "The unique identifier of the signal within the bar"
+					}
+				]
+			}
+		},
+		"/channels/{channel_id}/signals/{signal_id}/@me": {
+			"put": {
+				"operationId": "activate_channel_signal",
+				"summary": "Give a signal",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Turns a signal on in the channel for the authenticated user, or updates the persona they are signalling as. An account holds at most one entry per signal.",
+				"security": [{"botToken": []}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					},
+					{
+						"name": "signal_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"pattern": "^[a-z0-9]{1,32}$",
+							"description": "The unique identifier of the signal within the bar"
+						},
+						"description": "The unique identifier of the signal within the bar"
+					}
+				],
+				"requestBody": {
+					"required": false,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ChannelSignalToggleRequestSchema"}}}
+				}
+			},
+			"delete": {
+				"operationId": "deactivate_channel_signal",
+				"summary": "Withdraw a signal",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Turns a signal off in the channel for the authenticated user.",
+				"security": [{"botToken": []}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					},
+					{
+						"name": "signal_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"pattern": "^[a-z0-9]{1,32}$",
+							"description": "The unique identifier of the signal within the bar"
+						},
+						"description": "The unique identifier of the signal within the bar"
+					}
+				]
+			}
+		},
+		"/channels/{channel_id}/signals/{signal_id}/users/{user_id}": {
+			"delete": {
+				"operationId": "remove_channel_signal_user",
+				"summary": "Turn off someone's signal",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Turns one account's signal off. Requires Manage Community in a community channel, or ownership of a group DM.",
+				"security": [{"botToken": []}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					},
+					{
+						"name": "signal_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"pattern": "^[a-z0-9]{1,32}$",
+							"description": "The unique identifier of the signal within the bar"
+						},
+						"description": "The unique identifier of the signal within the bar"
+					},
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"description": "The ID of the user whose signal is turned off",
+							"$ref": "#/components/schemas/SnowflakeType"
+						},
+						"description": "The ID of the user whose signal is turned off"
 					}
 				]
 			}
@@ -6659,7 +7178,11 @@
 						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
 						"description": "The ID of the channel"
 					}
-				]
+				],
+				"requestBody": {
+					"required": false,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/IndicateTypingRequestSchema"}}}
+				}
 			}
 		},
 		"/channels/{channel_id}/users/@me/threads/archived/private": {
@@ -10554,6 +11077,134 @@
 				]
 			}
 		},
+		"/guilds/{guild_id}/signal-bar/channels": {
+			"get": {
+				"operationId": "get_guild_signal_bar_channels",
+				"summary": "Get where the signal bar is switched on in a community",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildSignalBarSettingsSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves the community default, per-category defaults and per-channel exceptions. Requires Manage Community.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					}
+				]
+			},
+			"put": {
+				"operationId": "update_guild_signal_bar_channels",
+				"summary": "Choose where the signal bar is switched on in a community",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildSignalBarSettingsSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Replaces the community default, per-category defaults and per-channel exceptions. Channels without their own setting inherit from their category, then from the community. Requires Manage Community.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {"schema": {"$ref": "#/components/schemas/GuildSignalBarSettingsSchemaInput"}}
+					}
+				}
+			}
+		},
 		"/guilds/{guild_id}/stickers": {
 			"post": {
 				"operationId": "create_guild_sticker",
@@ -11396,6 +12047,114 @@
 					"content": {
 						"application/json": {"schema": {"$ref": "#/components/schemas/InstanceAccountIdentityUpdateRequest"}}
 					}
+				}
+			}
+		},
+		"/instance/signal-bar": {
+			"get": {
+				"operationId": "get_signal_bar",
+				"summary": "Get signal bar",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/SignalBarResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves the instance-wide signal bar and whether the authenticated user may edit it.",
+				"security": [{"botToken": []}, {"sessionToken": []}]
+			},
+			"put": {
+				"operationId": "update_signal_bar",
+				"summary": "Update signal bar",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/SignalBarResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Replaces the ordered list of signals. Requires Manage Community in the home community that owns the bar.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/SignalBarUpdateRequestSchema"}}}
 				}
 			}
 		},
@@ -20501,6 +21260,927 @@
 				}
 			}
 		},
+		"/users/@me/personas": {
+			"get": {
+				"operationId": "list_my_personas",
+				"summary": "List own personas",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves all personas created and owned by the authenticated user.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
+			},
+			"post": {
+				"operationId": "create_persona",
+				"summary": "Create persona",
+				"tags": ["Personas"],
+				"responses": {
+					"201": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Creates a new persona for the authenticated user.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaCreateRequestSchema"}}}
+				}
+			}
+		},
+		"/users/@me/personas/avatar": {
+			"post": {
+				"operationId": "upload_persona_avatar",
+				"summary": "Upload persona avatar",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarUploadResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Uploads and processes an avatar image for a persona, hosting it on the instance CDN/storage.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarUploadRequest"}}}
+				}
+			}
+		},
+		"/users/@me/personas/banner": {
+			"post": {
+				"operationId": "upload_persona_banner",
+				"summary": "Upload persona banner",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBannerUploadResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Uploads and processes a banner image for a persona, hosting it on the instance CDN/storage.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBannerUploadRequest"}}}
+				}
+			}
+		},
+		"/users/@me/personas/channel-states": {
+			"get": {
+				"operationId": "list_my_persona_channel_states",
+				"summary": "List the personas selected per channel",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/PersonaChannelStatesResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Lists every channel the authenticated user has a persona selected in. Used when their persona is remembered per channel; a channel that is not listed is used as the account itself.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
+			}
+		},
+		"/users/@me/personas/channel-states/{channel_id}": {
+			"put": {
+				"operationId": "set_my_persona_channel_state",
+				"summary": "Select a persona in a channel",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaChannelStateSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Selects one of the authenticated user's personas in a channel they can see, or the account itself with a null persona. Only their own sessions are told.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {"schema": {"$ref": "#/components/schemas/PersonaChannelStateUpdateRequestSchema"}}
+					}
+				}
+			}
+		},
+		"/users/@me/personas/export": {
+			"get": {
+				"operationId": "export_my_personas",
+				"summary": "Export own personas",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/zip": {"schema": {"$ref": "#/components/schemas/PersonaExportResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Exports all personas of the authenticated user as a ZIP file: a PluralKit export file (pluralkit.json), each persona's avatar and banner and the tag icon, tyne.json listing which image belongs to which persona, and a README. Importing the ZIP gives the personas back.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
+			}
+		},
+		"/users/@me/personas/import": {
+			"post": {
+				"operationId": "import_personas",
+				"summary": "Bulk import personas",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Imports or synchronizes personas in bulk (e.g. from PluralKit or Tupperbox).",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBulkImportRequestSchema"}}}
+				}
+			}
+		},
+		"/users/@me/personas/import-avatar": {
+			"post": {
+				"operationId": "import_persona_avatar",
+				"summary": "Import persona avatar from remote URL",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarImportResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Downloads an avatar image from an external URL and stores it on the instance CDN/storage.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarImportRequest"}}}
+				}
+			}
+		},
+		"/users/@me/personas/import-batch-avatars": {
+			"post": {
+				"operationId": "import_persona_batch_avatars",
+				"summary": "Batch import persona avatars from remote URLs with streaming progress",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/x-ndjson": {"schema": {"$ref": "#/components/schemas/PersonaBatchAvatarImportStream"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Downloads up to 500 avatar images from external URLs and stores them on the instance CDN/storage, streaming NDJSON progress events.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBatchAvatarImportRequest"}}}
+				}
+			}
+		},
+		"/users/@me/personas/import-image": {
+			"post": {
+				"operationId": "import_persona_image",
+				"summary": "Store an image from a persona export being imported",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaImportImageResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Stores one avatar or banner image read from a persona export ZIP that the user is importing, and returns its hash for use in the import. Counts against the persona image import quota.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaImportImageRequest"}}}
+				}
+			}
+		},
+		"/users/@me/personas/settings": {
+			"get": {
+				"operationId": "get_my_persona_settings",
+				"summary": "Get own persona settings",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaSettingsResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves persona settings (active mode, display tag, latch state) for the authenticated user.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
+			},
+			"patch": {
+				"operationId": "update_my_persona_settings",
+				"summary": "Update own persona settings",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaSettingsResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Updates persona settings (active mode, display tag, latch state) for the authenticated user.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {"schema": {"$ref": "#/components/schemas/PersonaSettingsUpdateRequestSchema"}}
+					}
+				}
+			}
+		},
+		"/users/@me/personas/{persona_id}": {
+			"get": {
+				"operationId": "get_my_persona",
+				"summary": "Get own persona by ID",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves a single persona owned by the authenticated user.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "persona_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "Persona Snowflake ID", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "Persona Snowflake ID"
+					}
+				]
+			},
+			"patch": {
+				"operationId": "update_persona",
+				"summary": "Update persona",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Updates properties of an existing persona owned by the authenticated user.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "persona_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "Persona Snowflake ID", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "Persona Snowflake ID"
+					}
+				],
+				"requestBody": {
+					"required": false,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaUpdateRequestSchema"}}}
+				}
+			},
+			"delete": {
+				"operationId": "delete_persona",
+				"summary": "Delete persona",
+				"tags": ["Personas"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Deletes an existing persona owned by the authenticated user.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "persona_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "Persona Snowflake ID", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "Persona Snowflake ID"
+					}
+				]
+			}
+		},
 		"/users/@me/preload-messages": {
 			"post": {
 				"operationId": "preload_messages_for_channels",
@@ -21719,6 +23399,236 @@
 				}
 			}
 		},
+		"/users/@me/subprofiles/avatar": {
+			"post": {
+				"operationId": "upload_subprofile_avatar",
+				"summary": "Upload subprofile avatar (legacy alias)",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarUploadResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Uploads and processes an avatar image for a subprofile/persona, hosting it on the instance CDN/storage.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarUploadRequest"}}}
+				}
+			}
+		},
+		"/users/@me/subprofiles/banner": {
+			"post": {
+				"operationId": "upload_subprofile_banner",
+				"summary": "Upload subprofile banner (legacy alias)",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBannerUploadResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Uploads and processes a banner image for a subprofile/persona, hosting it on the instance CDN/storage.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBannerUploadRequest"}}}
+				}
+			}
+		},
+		"/users/@me/subprofiles/import-avatar": {
+			"post": {
+				"operationId": "import_subprofile_avatar",
+				"summary": "Import subprofile avatar from remote URL (legacy alias)",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarImportResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Downloads an avatar image from an external URL and stores it on the instance CDN/storage.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarImportRequest"}}}
+				}
+			}
+		},
+		"/users/@me/subprofiles/import-batch-avatars": {
+			"post": {
+				"operationId": "import_subprofile_batch_avatars",
+				"summary": "Batch import subprofile avatars from remote URLs (legacy alias)",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/x-ndjson": {"schema": {"$ref": "#/components/schemas/PersonaBatchAvatarImportStream"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Downloads up to 500 avatar images from external URLs and stores them on the instance CDN/storage, streaming NDJSON progress events.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBatchAvatarImportRequest"}}}
+				}
+			}
+		},
 		"/users/@me/sudo/mfa-methods": {
 			"get": {
 				"operationId": "list_sudo_mfa_methods",
@@ -22152,6 +24062,139 @@
 						"required": true,
 						"schema": {"description": "The ID of the user", "$ref": "#/components/schemas/SnowflakeType"},
 						"description": "The ID of the user"
+					}
+				]
+			}
+		},
+		"/users/{user_id}/personas": {
+			"get": {
+				"operationId": "list_user_public_personas",
+				"summary": "List user public personas",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/PublicPersonaListResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves public personas for a target user if mutual context permits.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the user", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the user"
+					}
+				]
+			}
+		},
+		"/users/{user_id}/personas/{persona_id}": {
+			"get": {
+				"operationId": "get_user_persona_by_id",
+				"summary": "Get persona profile card by ID",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PublicPersonaResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves public or unlisted profile details for a persona if mutual context permits.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "User Snowflake ID", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "User Snowflake ID"
+					},
+					{
+						"name": "persona_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "Persona Snowflake ID", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "Persona Snowflake ID"
 					}
 				]
 			}
@@ -23544,6 +25587,17 @@
 						"description": "The thread started from this message, when the viewer can see threads",
 						"$ref": "#/components/schemas/ThreadChannelResponse"
 					},
+					"subprofile": {
+						"description": "Optional subprofile persona information",
+						"anyOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}, {"type": "null"}]
+					},
+					"mention_personas": {
+						"description": "The personas mentioned in the message, its embeds or what it forwards, shown as a message sent as them would show them; absent when there are none",
+						"anyOf": [
+							{"type": "array", "items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}},
+							{"type": "null"}
+						]
+					},
 					"referenced_message": {
 						"description": "The reply target. Present and populated when the target resolved, present and null when the target is gone, absent when this message has no default reference. Clients must tell null apart from absent by key presence.",
 						"anyOf": [
@@ -23713,6 +25767,17 @@
 									"thread": {
 										"description": "The thread started from this message, when the viewer can see threads",
 										"$ref": "#/components/schemas/ThreadChannelResponse"
+									},
+									"subprofile": {
+										"description": "Optional subprofile persona information",
+										"anyOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}, {"type": "null"}]
+									},
+									"mention_personas": {
+										"description": "The personas mentioned in the message, its embeds or what it forwards, shown as a message sent as them would show them; absent when there are none",
+										"anyOf": [
+											{"type": "array", "items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}},
+											{"type": "null"}
+										]
 									}
 								},
 								"required": [
@@ -24753,6 +26818,36 @@
 				"properties": {"sound_id": {"$ref": "#/components/schemas/SnowflakeType"}},
 				"required": ["sound_id"]
 			},
+			"SnowflakeStringType": {"type": "string", "pattern": "^(0|[1-9][0-9]*)$", "format": "snowflake"},
+			"PublicPersonaResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The unique Snowflake identifier for this persona",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"name": {"type": "string", "description": "The persona display name"},
+					"avatar_hash": {"description": "Avatar asset hash", "type": ["string", "null"]},
+					"banner_hash": {"description": "Banner asset hash", "type": ["string", "null"]},
+					"pronouns": {"description": "Optional pronouns", "type": ["string", "null"]},
+					"color": {
+						"description": "Optional accent color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"avatar_color": {
+						"description": "Avatar accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"bio": {"description": "Optional persona bio", "type": ["string", "null"]},
+					"visibility": {"description": "Visibility setting", "$ref": "#/components/schemas/PersonaVisibilitySchema"}
+				},
+				"required": ["id", "name", "visibility"],
+				"additionalProperties": false
+			},
+			"PublicPersonaListResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/PublicPersonaResponseSchema"}
+			},
 			"UserPartialResponse": {
 				"type": "object",
 				"properties": {
@@ -25154,6 +27249,79 @@
 					"has_mfa": {"type": "boolean", "description": "Whether the account can satisfy a sudo mode challenge"}
 				},
 				"required": ["totp", "webauthn", "backup_codes", "has_mfa"],
+				"additionalProperties": false
+			},
+			"PersonaBatchAvatarImportRequest": {
+				"type": "object",
+				"properties": {
+					"urls": {
+						"minItems": 1,
+						"maxItems": 500,
+						"type": "array",
+						"items": {"type": "string", "maxLength": 2048, "format": "uri"},
+						"description": "List of remote avatar URLs to import"
+					},
+					"kind": {
+						"description": "Whether the links are avatars or banners; avatars when absent",
+						"$ref": "#/components/schemas/PersonaImportImageKindSchema"
+					}
+				},
+				"required": ["urls"]
+			},
+			"PersonaBatchAvatarImportStream": {
+				"type": "string",
+				"description": "Newline-delimited JSON: a start line with the total, a progress line as each URL finishes, and a complete line with every result"
+			},
+			"PersonaAvatarImportRequest": {
+				"type": "object",
+				"properties": {
+					"url": {
+						"type": "string",
+						"maxLength": 2048,
+						"format": "uri",
+						"description": "Remote URL of the avatar image to import"
+					}
+				},
+				"required": ["url"]
+			},
+			"PersonaAvatarImportResponse": {
+				"type": "object",
+				"properties": {
+					"avatar_hash": {"type": "string", "description": "Hash of the imported avatar"},
+					"avatar_color": {
+						"description": "Dominant avatar color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					}
+				},
+				"required": ["avatar_hash"],
+				"additionalProperties": false
+			},
+			"PersonaBannerUploadRequest": {
+				"type": "object",
+				"properties": {"banner": {"type": "string", "description": "Base64 data URI of the banner image"}},
+				"required": ["banner"]
+			},
+			"PersonaBannerUploadResponse": {
+				"type": "object",
+				"properties": {"banner_hash": {"type": "string", "description": "Hash of the uploaded banner"}},
+				"required": ["banner_hash"],
+				"additionalProperties": false
+			},
+			"PersonaAvatarUploadRequest": {
+				"type": "object",
+				"properties": {"avatar": {"type": "string", "description": "Base64 data URI of the avatar image"}},
+				"required": ["avatar"]
+			},
+			"PersonaAvatarUploadResponse": {
+				"type": "object",
+				"properties": {
+					"avatar_hash": {"type": "string", "description": "Hash of the uploaded avatar"},
+					"avatar_color": {
+						"description": "Dominant avatar color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					}
+				},
+				"required": ["avatar_hash"],
 				"additionalProperties": false
 			},
 			"VoiceActivitySharingUpdateRequest": {
@@ -25797,6 +27965,295 @@
 				"propertyNames": {"$ref": "#/components/schemas/SnowflakeStringType"},
 				"additionalProperties": {"anyOf": [{"$ref": "#/components/schemas/MessageResponseSchema"}, {"type": "null"}]},
 				"description": "A map of channel IDs to the latest message in each channel"
+			},
+			"PersonaUpdateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"name": {"description": "Persona display name", "type": "string"},
+					"avatar_hash": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+					},
+					"banner_hash": {
+						"description": "Banner asset hash",
+						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+					},
+					"pronouns": {
+						"description": "Optional pronouns",
+						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
+					},
+					"color": {
+						"description": "Optional color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"avatar_color": {
+						"description": "Optional avatar accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"bio": {
+						"description": "Optional persona bio",
+						"anyOf": [{"type": "string", "maxLength": 4096}, {"type": "null"}]
+					},
+					"auto_tag_disabled": {"description": "Whether auto-tagging is disabled", "type": "boolean"},
+					"persona_tags": {
+						"description": "Persona prefix/suffix tags",
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaTagSchemaInput"}
+					},
+					"signature_emojis": {
+						"description": "Signature emojis for this persona",
+						"maxItems": 10000,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SignatureEmojiSchemaInput"}
+					},
+					"visibility": {
+						"description": "Visibility setting",
+						"type": "string",
+						"enum": ["unlisted", "public", "private"]
+					},
+					"external_uuid": {
+						"description": "Optional external UUID",
+						"anyOf": [{"type": "string", "maxLength": 64}, {"type": "null"}]
+					}
+				}
+			},
+			"PersonaResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The unique Snowflake identifier for this persona",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"name": {"type": "string", "description": "The persona display name"},
+					"avatar_hash": {"description": "Avatar asset hash", "type": ["string", "null"]},
+					"banner_hash": {"description": "Banner asset hash", "type": ["string", "null"]},
+					"pronouns": {"description": "Optional pronouns", "type": ["string", "null"]},
+					"color": {
+						"description": "Optional accent color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"avatar_color": {
+						"description": "Avatar accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"bio": {"description": "Optional persona bio", "type": ["string", "null"]},
+					"auto_tag_disabled": {
+						"default": false,
+						"description": "Whether persona tag matching is disabled",
+						"type": "boolean"
+					},
+					"persona_tags": {
+						"default": [],
+						"description": "Persona prefix and suffix tags",
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaTagSchema"}
+					},
+					"signature_emojis": {
+						"default": [],
+						"description": "Signature emojis for this persona",
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SignatureEmojiSchema"}
+					},
+					"use_count": {
+						"default": 0,
+						"description": "Usage counter for frecency ranking",
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					},
+					"last_used_at_ms": {
+						"description": "Timestamp in ms when the persona was last used",
+						"type": ["string", "null"]
+					},
+					"visibility": {
+						"description": "Visibility setting: unlisted (default), public, or private",
+						"$ref": "#/components/schemas/PersonaVisibilitySchema"
+					},
+					"external_uuid": {
+						"description": "External UUID for idempotent PluralKit imports",
+						"type": ["string", "null"]
+					},
+					"created_at": {"type": "string", "description": "ISO timestamp of persona creation"},
+					"updated_at": {"type": "string", "description": "ISO timestamp of last update"},
+					"deleted_at": {
+						"description": "ISO timestamp if the persona has been soft-deleted",
+						"anyOf": [
+							{
+								"type": "string",
+								"format": "date-time",
+								"pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+							},
+							{"type": "null"}
+						]
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"auto_tag_disabled",
+					"persona_tags",
+					"signature_emojis",
+					"use_count",
+					"visibility",
+					"created_at",
+					"updated_at"
+				],
+				"additionalProperties": false
+			},
+			"PersonaSettingsUpdateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"active_persona_mode": {"$ref": "#/components/schemas/ActivePersonaModeSchema"},
+					"active_persona_scope": {"$ref": "#/components/schemas/ActivePersonaScopeSchema"},
+					"active_persona_id": {"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]},
+					"is_latched": {"type": "boolean"},
+					"display_tag_text": {"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]},
+					"display_tag_icon": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]}
+				}
+			},
+			"PersonaSettingsResponseSchema": {
+				"type": "object",
+				"properties": {
+					"user_id": {"description": "User Snowflake ID", "$ref": "#/components/schemas/SnowflakeStringType"},
+					"active_persona_mode": {"default": "manual", "$ref": "#/components/schemas/ActivePersonaModeSchema"},
+					"active_persona_scope": {
+						"default": "global",
+						"description": "Whether the selected persona is one for every channel or remembered per channel",
+						"$ref": "#/components/schemas/ActivePersonaScopeSchema"
+					},
+					"active_persona_id": {"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]},
+					"is_latched": {"default": false, "type": "boolean"},
+					"display_tag_text": {"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]},
+					"display_tag_icon": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
+					"updated_at": {"type": "string"}
+				},
+				"required": ["user_id", "active_persona_mode", "active_persona_scope", "is_latched"],
+				"additionalProperties": false
+			},
+			"PersonaImportImageRequest": {
+				"type": "object",
+				"properties": {
+					"kind": {
+						"description": "Whether the image is an avatar or a banner",
+						"$ref": "#/components/schemas/PersonaImportImageKindSchema"
+					},
+					"image": {"type": "string", "description": "Base64 data URI of the image"}
+				},
+				"required": ["kind", "image"]
+			},
+			"PersonaImportImageResponse": {
+				"type": "object",
+				"properties": {
+					"hash": {"type": "string", "description": "Hash of the stored image"},
+					"avatar_color": {
+						"description": "Dominant colour, for an avatar",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					}
+				},
+				"required": ["hash"],
+				"additionalProperties": false
+			},
+			"PersonaBulkImportRequestSchema": {
+				"maxItems": 250,
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/PersonaImportItemSchema"}
+			},
+			"PersonaListResponseSchema": {"type": "array", "items": {"$ref": "#/components/schemas/PersonaResponseSchema"}},
+			"PersonaExportResponse": {
+				"type": "string",
+				"format": "binary",
+				"contentEncoding": "binary",
+				"description": "A ZIP file with the personas as a PluralKit export (pluralkit.json), their images, tyne.json and a README"
+			},
+			"PersonaChannelStateUpdateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"persona_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "The persona to select in the channel, or null for the account"
+					}
+				},
+				"required": ["persona_id"]
+			},
+			"PersonaChannelStateSchema": {
+				"type": "object",
+				"properties": {
+					"channel_id": {
+						"description": "The channel this selection belongs to",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"persona_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "The persona selected in the channel, or null when the channel is used as the account itself"
+					}
+				},
+				"required": ["channel_id", "persona_id"],
+				"additionalProperties": false
+			},
+			"PersonaChannelStatesResponseSchema": {
+				"type": "object",
+				"properties": {
+					"states": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaChannelStateSchema"},
+						"description": "Every channel that has a persona selected"
+					}
+				},
+				"required": ["states"],
+				"additionalProperties": false
+			},
+			"PersonaCreateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"name": {"description": "Persona display name", "type": "string"},
+					"avatar_hash": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+					},
+					"banner_hash": {
+						"description": "Banner asset hash",
+						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+					},
+					"pronouns": {
+						"description": "Optional pronouns",
+						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
+					},
+					"color": {
+						"description": "Optional color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"avatar_color": {
+						"description": "Optional avatar accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"bio": {
+						"description": "Optional persona bio",
+						"anyOf": [{"type": "string", "maxLength": 4096}, {"type": "null"}]
+					},
+					"auto_tag_disabled": {"description": "Whether auto-tagging is disabled", "type": "boolean"},
+					"persona_tags": {
+						"description": "Persona prefix/suffix tags",
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaTagSchemaInput"}
+					},
+					"signature_emojis": {
+						"description": "Signature emojis for this persona",
+						"maxItems": 10000,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SignatureEmojiSchemaInput"}
+					},
+					"visibility": {
+						"description": "Visibility: unlisted (default), public, or private",
+						"$ref": "#/components/schemas/PersonaVisibilitySchema"
+					},
+					"external_uuid": {
+						"description": "Optional external UUID (e.g. PluralKit)",
+						"anyOf": [{"type": "string", "maxLength": 64}, {"type": "null"}]
+					}
+				},
+				"required": ["name"]
 			},
 			"PasswordChangeVerifyRequest": {
 				"type": "object",
@@ -27594,6 +30051,10 @@
 						"description": "The thread member object for the current user",
 						"$ref": "#/components/schemas/ThreadMemberResponse"
 					},
+					"owner_persona_id": {
+						"description": "The ID of the persona the owner started the thread as, absent when it was started as the account",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
 					"default_auto_archive_duration": {
 						"description": "Default auto archive duration for new threads",
 						"anyOf": [{"$ref": "#/components/schemas/Int32Type"}, {"type": "null"}]
@@ -27663,7 +30124,7 @@
 						"description": "Base64-encoded profile banner image",
 						"anyOf": [{"$ref": "#/components/schemas/Base64ImageType"}, {"type": "null"}]
 					},
-					"bio": {"description": "User biography text (max 320 characters)", "type": ["string", "null"]},
+					"bio": {"description": "User biography text (max 10000 characters)", "type": ["string", "null"]},
 					"pronouns": {"description": "User pronouns (max 40 characters)", "type": ["string", "null"]},
 					"accent_color": {
 						"description": "Profile accent color as integer",
@@ -28330,6 +30791,30 @@
 					},
 					"exclude_mentions": {
 						"description": "User IDs that must not be mentioned",
+						"maxItems": 100,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeType"}
+					},
+					"persona_id": {
+						"description": "Persona IDs to filter by; a message matches if it is from any author_id or any persona_id given",
+						"maxItems": 100,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeType"}
+					},
+					"exclude_persona_id": {
+						"description": "Persona IDs whose messages to exclude",
+						"maxItems": 100,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeType"}
+					},
+					"persona_mentions": {
+						"description": "Persona IDs that must be mentioned",
+						"maxItems": 100,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeType"}
+					},
+					"exclude_persona_mentions": {
+						"description": "Persona IDs that must not be mentioned",
 						"maxItems": 100,
 						"type": "array",
 						"items": {"$ref": "#/components/schemas/SnowflakeType"}
@@ -29625,6 +32110,63 @@
 					{"$ref": "#/components/schemas/GroupDmInviteResponse"}
 				]
 			},
+			"SignalBarUpdateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"signals": {
+						"maxItems": 50,
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"description": "Existing signal ID; omit to add a new signal",
+									"anyOf": [
+										{
+											"type": "string",
+											"pattern": "^[a-z0-9]{1,32}$",
+											"description": "The unique identifier of the signal within the bar"
+										},
+										{"type": "null"}
+									]
+								},
+								"emoji_id": {
+									"description": "Custom emoji ID (null for Unicode)",
+									"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+								},
+								"emoji_name": {
+									"type": "string",
+									"minLength": 1,
+									"maxLength": 64,
+									"description": "Emoji name or Unicode character"
+								},
+								"label": {"anyOf": [{"type": "string", "maxLength": 32}, {"type": "null"}]}
+							},
+							"required": ["emoji_name"]
+						}
+					}
+				},
+				"required": ["signals"]
+			},
+			"SignalBarResponseSchema": {
+				"type": "object",
+				"properties": {
+					"version": {
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 9007199254740991,
+						"description": "Incremented on every change to the bar"
+					},
+					"signals": {"maxItems": 50, "type": "array", "items": {"$ref": "#/components/schemas/SignalBarSignalSchema"}},
+					"guild_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "The home community that owns the bar"
+					},
+					"can_manage": {"type": "boolean", "description": "Whether the requesting user may edit the bar"}
+				},
+				"required": ["version", "signals", "guild_id", "can_manage"],
+				"additionalProperties": false
+			},
 			"InstanceAccountIdentityUpdateRequest": {
 				"type": "object",
 				"properties": {
@@ -30025,6 +32567,47 @@
 				},
 				"required": ["name", "image"]
 			},
+			"GuildSignalBarSettingsSchemaInput": {
+				"type": "object",
+				"properties": {
+					"default": {
+						"type": "boolean",
+						"description": "Whether channels without a category or channel setting show the signal bar"
+					},
+					"categories": {
+						"type": "object",
+						"propertyNames": {"type": "string", "maxLength": 20},
+						"additionalProperties": {"type": "boolean"}
+					},
+					"channels": {
+						"type": "object",
+						"propertyNames": {"type": "string", "maxLength": 20},
+						"additionalProperties": {"type": "boolean"}
+					}
+				},
+				"required": ["default", "categories", "channels"]
+			},
+			"GuildSignalBarSettingsSchema": {
+				"type": "object",
+				"properties": {
+					"default": {
+						"type": "boolean",
+						"description": "Whether channels without a category or channel setting show the signal bar"
+					},
+					"categories": {
+						"type": "object",
+						"propertyNames": {"type": "string", "maxLength": 20},
+						"additionalProperties": {"type": "boolean"}
+					},
+					"channels": {
+						"type": "object",
+						"propertyNames": {"type": "string", "maxLength": 20},
+						"additionalProperties": {"type": "boolean"}
+					}
+				},
+				"required": ["default", "categories", "channels"],
+				"additionalProperties": false
+			},
 			"GuildRoleUpdateRequest": {
 				"type": "object",
 				"properties": {
@@ -30140,7 +32723,7 @@
 						"description": "Base64-encoded image data for the member guild banner",
 						"anyOf": [{"$ref": "#/components/schemas/Base64ImageType"}, {"type": "null"}]
 					},
-					"bio": {"description": "The member guild profile bio (1-320 characters)", "type": ["string", "null"]},
+					"bio": {"description": "The member guild profile bio (1-10000 characters)", "type": ["string", "null"]},
 					"pronouns": {
 						"description": "The member guild profile pronouns (1-40 characters)",
 						"type": ["string", "null"]
@@ -30256,7 +32839,7 @@
 						"description": "Base64-encoded image data for the member guild banner",
 						"anyOf": [{"$ref": "#/components/schemas/Base64ImageType"}, {"type": "null"}]
 					},
-					"bio": {"description": "The member guild profile bio (1-320 characters)", "type": ["string", "null"]},
+					"bio": {"description": "The member guild profile bio (1-10000 characters)", "type": ["string", "null"]},
 					"pronouns": {
 						"description": "The member guild profile pronouns (1-40 characters)",
 						"type": ["string", "null"]
@@ -31218,6 +33801,19 @@
 				"required": ["threads", "members", "has_more"],
 				"additionalProperties": false
 			},
+			"IndicateTypingRequestSchema": {
+				"type": "object",
+				"properties": {
+					"persona_id": {
+						"description": "ID of one of your personas to show as typing",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
+					},
+					"subprofile": {
+						"description": "Deprecated, use persona_id. Only its id is read, and persona_id wins when both are sent",
+						"anyOf": [{"$ref": "#/components/schemas/LegacyMessageSubprofileRequestSchema"}, {"type": "null"}]
+					}
+				}
+			},
 			"ThreadSearchSortOrderSchema": {
 				"type": "string",
 				"enum": ["asc", "desc"],
@@ -31409,6 +34005,10 @@
 						"description": "The thread member object for the current user",
 						"$ref": "#/components/schemas/ThreadMemberResponse"
 					},
+					"owner_persona_id": {
+						"description": "The ID of the persona the owner started the thread as, absent when it was started as the account",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
 					"default_auto_archive_duration": {
 						"description": "Default auto archive duration for new threads",
 						"anyOf": [{"$ref": "#/components/schemas/Int32Type"}, {"type": "null"}]
@@ -31573,6 +34173,30 @@
 				"required": ["rate_limit_per_user", "retry_after_ms", "next_send_allowed_at", "can_bypass"],
 				"additionalProperties": false
 			},
+			"ChannelSignalToggleRequestSchema": {
+				"type": "object",
+				"properties": {
+					"persona_id": {
+						"description": "Persona the account is currently signalling as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					}
+				}
+			},
+			"ChannelSignalsResponseSchema": {
+				"type": "object",
+				"properties": {
+					"enabled": {"type": "boolean", "description": "Whether the signal bar is switched on in this channel"},
+					"bar_version": {"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991},
+					"entries": {"type": "array", "items": {"$ref": "#/components/schemas/ChannelSignalEntrySchema"}}
+				},
+				"required": ["enabled", "bar_version", "entries"],
+				"additionalProperties": false
+			},
+			"ChannelSignalBarEnabledRequestSchema": {
+				"type": "object",
+				"properties": {"enabled": {"type": "boolean"}},
+				"required": ["enabled"]
+			},
 			"RtcRegionListResponse": {"type": "array", "items": {"$ref": "#/components/schemas/RtcRegionResponse"}},
 			"ThreadPostDataRequest": {
 				"type": "object",
@@ -31602,6 +34226,10 @@
 				"additionalProperties": false,
 				"x-fluxer-experiment": "channel_threads"
 			},
+			"ChannelPersonaMentionsResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/ChannelPersonaMentionItemSchema"}
+			},
 			"PermissionOverwriteCreateRequest": {
 				"type": "object",
 				"properties": {
@@ -31629,6 +34257,10 @@
 						"maximum": 21600,
 						"description": "Seconds a user has to wait before sending another message (0-21600)",
 						"$ref": "#/components/schemas/Int32Type"
+					},
+					"persona_id": {
+						"description": "ID of one of your personas to start the thread as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
 					}
 				},
 				"required": ["name"]
@@ -31763,6 +34395,10 @@
 						"description": "The thread member object for the current user",
 						"$ref": "#/components/schemas/ThreadMemberResponse"
 					},
+					"owner_persona_id": {
+						"description": "The ID of the persona the owner started the thread as, absent when it was started as the account",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
 					"default_auto_archive_duration": {
 						"description": "Default auto archive duration for new threads",
 						"anyOf": [{"$ref": "#/components/schemas/Int32Type"}, {"type": "null"}]
@@ -31803,7 +34439,7 @@
 				"properties": {
 					"items": {
 						"type": "array",
-						"items": {"$ref": "#/components/schemas/UserPartialResponse"},
+						"items": {"$ref": "#/components/schemas/ReactionUserItemResponse"},
 						"description": "Users who reacted with the requested emoji"
 					},
 					"has_more": {"type": "boolean", "description": "Whether more reaction users can be fetched"},
@@ -31815,7 +34451,24 @@
 				"required": ["items", "has_more", "next_after"],
 				"additionalProperties": false
 			},
-			"ReactionUsersListResponse": {"type": "array", "items": {"$ref": "#/components/schemas/UserPartialResponse"}},
+			"AddReactionBodySchema": {
+				"anyOf": [
+					{
+						"type": "object",
+						"properties": {
+							"persona_id": {
+								"description": "Persona ID to attribute the reaction to",
+								"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+							}
+						}
+					},
+					{"type": "null"}
+				]
+			},
+			"ReactionUsersListResponse": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/ReactionUserItemResponse"}
+			},
 			"CreateFavoriteMemeBodySchema": {
 				"type": "object",
 				"properties": {
@@ -31900,6 +34553,14 @@
 					"allowed_mentions": {
 						"description": "Controls which mentions trigger notifications",
 						"anyOf": [{"$ref": "#/components/schemas/AllowedMentionsRequest"}, {"type": "null"}]
+					},
+					"persona_id": {
+						"description": "ID of one of your personas to send the message as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
+					},
+					"subprofile": {
+						"description": "Deprecated, use persona_id. Only its id is read, and persona_id wins when both are sent",
+						"anyOf": [{"$ref": "#/components/schemas/LegacyMessageSubprofileRequestSchema"}, {"type": "null"}]
 					},
 					"flags": {"$ref": "#/components/schemas/MessageFlags", "description": "Message flags bitfield"},
 					"attachments": {
@@ -32025,7 +34686,15 @@
 							{"type": "null"}
 						]
 					},
-					"tts": {"description": "Whether this is a text-to-speech message", "type": "boolean"}
+					"tts": {"description": "Whether this is a text-to-speech message", "type": "boolean"},
+					"persona_id": {
+						"description": "ID of one of your personas to send the message as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
+					},
+					"subprofile": {
+						"description": "Deprecated, use persona_id. Only its id is read, and persona_id wins when both are sent",
+						"anyOf": [{"$ref": "#/components/schemas/LegacyMessageSubprofileRequestSchema"}, {"type": "null"}]
+					}
 				}
 			},
 			"ChannelInviteCreateRequest": {
@@ -33778,6 +36447,11 @@
 					"premium_info_url": {
 						"description": "Optional absolute URL of a page describing the premium tier",
 						"type": ["string", "null"]
+					},
+					"desktop_app_prompt_enabled": {
+						"default": true,
+						"description": "Whether the web app shows prompts to open deep links or download the desktop app",
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -33791,7 +36465,8 @@
 					"status_page_url",
 					"status_page_incident_history_url",
 					"premium_product_name",
-					"premium_info_url"
+					"premium_info_url",
+					"desktop_app_prompt_enabled"
 				],
 				"additionalProperties": false,
 				"description": "Branding values safe to expose to clients"
@@ -33849,6 +36524,10 @@
 						"description": "The stock community guild ID when single-community mode is enabled",
 						"type": ["string", "null"]
 					},
+					"signal_bar_guild_id": {
+						"description": "The home community whose managers configure the instance-wide signal bar",
+						"type": ["string", "null"]
+					},
 					"direct_messages_disabled": {
 						"type": "boolean",
 						"description": "Whether direct messages and friend requests are disabled instance-wide"
@@ -33856,13 +36535,20 @@
 					"guild_create_access": {
 						"type": "boolean",
 						"description": "Whether every account can create communities. When false, only admins and accounts granted the feature_guild_create limit can"
-					}
+					},
+					"community_creation_staff_only": {
+						"default": false,
+						"description": "Whether community creation is restricted to staff members",
+						"type": "boolean"
+					},
+					"server_list_buttons": {"$ref": "#/components/schemas/ServerListButtonsSchema"}
 				},
 				"required": [
 					"single_community",
 					"single_community_guild_id",
 					"direct_messages_disabled",
-					"guild_create_access"
+					"guild_create_access",
+					"community_creation_staff_only"
 				],
 				"additionalProperties": false,
 				"description": "Community topology and direct-message policy for this instance"
@@ -34048,6 +36734,39 @@
 				"enum": ["open", "approval", "closed"],
 				"type": "string"
 			},
+			"ServerListButtonsSchema": {
+				"type": "object",
+				"properties": {
+					"favorites": {
+						"default": true,
+						"description": "Whether the Favorites button is visible in the server list",
+						"type": "boolean"
+					},
+					"explore": {
+						"default": true,
+						"description": "Whether the Explore communities button is visible in the server list",
+						"type": "boolean"
+					},
+					"create_join": {
+						"default": true,
+						"description": "Whether the Create or join a community button is visible in the server list",
+						"type": "boolean"
+					},
+					"download": {
+						"default": true,
+						"description": "Whether the Download desktop app button is visible in the server list",
+						"type": "boolean"
+					},
+					"help": {
+						"default": true,
+						"description": "Whether the Help center button is visible in the server list",
+						"type": "boolean"
+					}
+				},
+				"required": ["favorites", "explore", "create_join", "download", "help"],
+				"additionalProperties": false,
+				"description": "Visibility configuration for special buttons in the server list column"
+			},
 			"InstancePushDeliveryModeSchema": {"type": "string", "enum": ["direct", "external_relay", "hybrid"]},
 			"InstanceAgePolicyGeoSchema": {
 				"type": "object",
@@ -34094,7 +36813,6 @@
 				"x-enumNames": ["TOTP", "WEBAUTHN"],
 				"x-enumDescriptions": ["Time-based one-time password authenticator", "WebAuthn authenticator"]
 			},
-			"SnowflakeStringType": {"type": "string", "pattern": "^(0|[1-9][0-9]*)$", "format": "snowflake"},
 			"MentionReplyPreferences": {
 				"description": "Reply mention preference",
 				"type": "integer",
@@ -35159,6 +37877,11 @@
 					"Personal notes DM channel"
 				]
 			},
+			"LegacyMessageSubprofileRequestSchema": {
+				"type": "object",
+				"properties": {"id": {"type": "string", "minLength": 1, "maxLength": 64}},
+				"required": ["id"]
+			},
 			"MessageNonceRequest": {
 				"description": "Client-generated identifier for the message",
 				"anyOf": [{"type": "string"}, {"type": "integer", "minimum": 0, "maximum": 9007199254740991}]
@@ -35625,6 +38348,17 @@
 							"thread": {
 								"description": "The thread started from this message, when the viewer can see threads",
 								"$ref": "#/components/schemas/ThreadChannelResponse"
+							},
+							"subprofile": {
+								"description": "Optional subprofile persona information",
+								"anyOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}, {"type": "null"}]
+							},
+							"mention_personas": {
+								"description": "The personas mentioned in the message, its embeds or what it forwards, shown as a message sent as them would show them; absent when there are none",
+								"anyOf": [
+									{"type": "array", "items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}},
+									{"type": "null"}
+								]
 							}
 						},
 						"required": [
@@ -35652,6 +38386,31 @@
 					}
 				},
 				"required": ["message", "pinned_at"],
+				"additionalProperties": false
+			},
+			"MessageSubprofileResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {"type": "string", "description": "Persona ID"},
+					"name": {"type": "string", "description": "Persona display name"},
+					"avatar": {"description": "Avatar asset URL or hash", "type": ["string", "null"]},
+					"avatar_color": {
+						"description": "Avatar accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"display_tag_text": {"description": "Display tag text", "type": ["string", "null"]},
+					"display_tag_icon": {"description": "Display tag icon URL or hash", "type": ["string", "null"]},
+					"pronouns": {"description": "Pronouns", "type": ["string", "null"]},
+					"color": {
+						"description": "Custom color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"visibility": {
+						"description": "Persona visibility setting",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaVisibilitySchema"}, {"type": "null"}]
+					}
+				},
+				"required": ["id", "name"],
 				"additionalProperties": false
 			},
 			"MessageSnapshotResponse": {
@@ -36090,6 +38849,7 @@
 					{"name": "IS_ANIMATED", "value": "32", "description": "Embed media is animated"}
 				]
 			},
+			"PersonaVisibilitySchema": {"default": "unlisted", "type": "string", "enum": ["unlisted", "public", "private"]},
 			"ClientAttachmentReferenceRequest": {
 				"type": "object",
 				"properties": {
@@ -36154,6 +38914,40 @@
 					"approximate_presence_count",
 					"discoverable"
 				],
+				"additionalProperties": false
+			},
+			"ReactionUserItemResponse": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The unique identifier (snowflake) for this user",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"username": {"type": "string", "description": "The username of the user, not unique across the platform"},
+					"discriminator": {"type": "string", "description": "The four-digit discriminator tag of the user"},
+					"global_name": {"description": "The display name of the user, if set", "type": ["string", "null"]},
+					"avatar": {"description": "The hash of the user avatar image", "type": ["string", "null"]},
+					"avatar_color": {
+						"anyOf": [{"$ref": "#/components/schemas/Int32Type"}, {"type": "null"}],
+						"description": "The dominant avatar color of the user as an integer"
+					},
+					"bot": {"description": "Whether the user is a bot account", "type": "boolean"},
+					"system": {"description": "Whether the user is an official system user", "type": "boolean"},
+					"flags": {"$ref": "#/components/schemas/PublicUserFlags"},
+					"mention_flags": {
+						"description": "The user's account-wide reply mention preference. Omitted when the user has no preference set (treated as NO_PREFERENCE).",
+						"$ref": "#/components/schemas/MentionReplyPreferences"
+					},
+					"subprofile": {
+						"description": "Persona subprofile who reacted, if any",
+						"anyOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}, {"type": "null"}]
+					},
+					"persona_id": {
+						"description": "Persona ID who reacted, if any",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					}
+				},
+				"required": ["id", "username", "discriminator", "global_name", "avatar", "avatar_color", "flags"],
 				"additionalProperties": false
 			},
 			"DefaultReactionEmojiResponse": {
@@ -36316,6 +39110,48 @@
 				"enum": [0, 1],
 				"type": "integer"
 			},
+			"ChannelPersonaMentionItemSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The unique Snowflake identifier for this persona",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"name": {"type": "string", "description": "The persona display name"},
+					"avatar_hash": {"description": "Avatar asset hash", "type": ["string", "null"]},
+					"banner_hash": {"description": "Banner asset hash", "type": ["string", "null"]},
+					"display_tag_text": {"description": "Optional display tag text", "type": ["string", "null"]},
+					"display_tag_icon": {"description": "Optional display tag icon", "type": ["string", "null"]},
+					"pronouns": {"description": "Optional pronouns", "type": ["string", "null"]},
+					"color": {
+						"description": "Optional accent color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"bio": {"description": "Optional persona bio", "type": ["string", "null"]},
+					"visibility": {"description": "Visibility setting", "$ref": "#/components/schemas/PersonaVisibilitySchema"},
+					"use_count": {
+						"default": 0,
+						"description": "Usage counter for frecency ranking",
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					},
+					"last_used_at_ms": {
+						"description": "Timestamp in ms when the persona was last used",
+						"type": ["string", "null"]
+					},
+					"owner_user_id": {
+						"description": "User ID of the persona owner",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"owner_username": {"type": "string", "description": "Username of the persona owner"},
+					"owner_discriminator": {"description": "Discriminator of the persona owner", "type": ["string", "null"]},
+					"owner_global_name": {"description": "Global display name of the persona owner", "type": ["string", "null"]},
+					"owner_nickname": {"description": "Guild nickname if applicable", "type": ["string", "null"]}
+				},
+				"required": ["id", "name", "visibility", "use_count", "owner_user_id", "owner_username"],
+				"additionalProperties": false
+			},
 			"ThreadPostDataEntryResponse": {
 				"type": "object",
 				"properties": {
@@ -36339,6 +39175,30 @@
 					"emoji": {"type": "string", "description": "The emoji associated with this RTC region"}
 				},
 				"required": ["id", "name", "emoji"],
+				"additionalProperties": false
+			},
+			"ChannelSignalEntrySchema": {
+				"type": "object",
+				"properties": {
+					"signal_id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]{1,32}$",
+						"description": "The unique identifier of the signal within the bar"
+					},
+					"user": {"$ref": "#/components/schemas/UserPartialResponse"},
+					"persona_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "The persona the account is currently signalling as, if any"
+					},
+					"subprofile": {"anyOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}, {"type": "null"}]},
+					"activated_at": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991,
+						"description": "Unix timestamp in milliseconds"
+					}
+				},
+				"required": ["signal_id", "user", "persona_id", "subprofile", "activated_at"],
 				"additionalProperties": false
 			},
 			"StartForumThreadRequest": {
@@ -36394,6 +39254,14 @@
 									{"maxItems": 3, "type": "array", "items": {"$ref": "#/components/schemas/SnowflakeType"}},
 									{"type": "null"}
 								]
+							},
+							"persona_id": {
+								"description": "ID of one of your personas to send the message as",
+								"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
+							},
+							"subprofile": {
+								"description": "Deprecated, use persona_id. Only its id is read, and persona_id wins when both are sent",
+								"anyOf": [{"$ref": "#/components/schemas/LegacyMessageSubprofileRequestSchema"}, {"type": "null"}]
 							}
 						},
 						"description": "The first message of the post",
@@ -36417,6 +39285,10 @@
 					"invitable": {
 						"description": "Whether non-moderators can add other non-moderators (private threads)",
 						"type": "boolean"
+					},
+					"persona_id": {
+						"description": "ID of one of your personas to start the thread as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
 					}
 				},
 				"required": ["name", "type"]
@@ -36461,6 +39333,14 @@
 							{"maxItems": 3, "type": "array", "items": {"$ref": "#/components/schemas/SnowflakeType"}},
 							{"type": "null"}
 						]
+					},
+					"persona_id": {
+						"description": "ID of one of your personas to send the message as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
+					},
+					"subprofile": {
+						"description": "Deprecated, use persona_id. Only its id is read, and persona_id wins when both are sent",
+						"anyOf": [{"$ref": "#/components/schemas/LegacyMessageSubprofileRequestSchema"}, {"type": "null"}]
 					}
 				},
 				"x-fluxer-experiment": "channel_threads"
@@ -37908,6 +40788,33 @@
 					"Member of the server for more than 10 minutes"
 				]
 			},
+			"SignalBarSignalSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]{1,32}$",
+						"description": "The unique identifier of the signal within the bar"
+					},
+					"emoji_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "Custom emoji ID (null for Unicode)"
+					},
+					"emoji_name": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 64,
+						"description": "Emoji name or Unicode character"
+					},
+					"animated": {"type": "boolean", "description": "Whether the emoji is animated"},
+					"label": {
+						"anyOf": [{"type": "string", "maxLength": 32}, {"type": "null"}],
+						"description": "Optional label shown instead of the emoji name"
+					}
+				},
+				"required": ["id", "emoji_id", "emoji_name", "animated", "label"],
+				"additionalProperties": false
+			},
 			"GroupDmInviteResponse": {
 				"type": "object",
 				"properties": {
@@ -39157,6 +42064,17 @@
 								"thread": {
 									"description": "The thread started from this message, when the viewer can see threads",
 									"$ref": "#/components/schemas/ThreadChannelResponse"
+								},
+								"subprofile": {
+									"description": "Optional subprofile persona information",
+									"anyOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}, {"type": "null"}]
+								},
+								"mention_personas": {
+									"description": "The personas mentioned in the message, its embeds or what it forwards, shown as a message sent as them would show them; absent when there are none",
+									"anyOf": [
+										{"type": "array", "items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}},
+										{"type": "null"}
+									]
 								}
 							},
 							"required": [
@@ -39234,9 +42152,30 @@
 						"description": "The total number of times this reaction has been used",
 						"$ref": "#/components/schemas/Int32Type"
 					},
-					"me": {"description": "Whether the current user has reacted with this emoji", "type": ["boolean", "null"]}
+					"me": {"description": "Whether the current user has reacted with this emoji", "type": ["boolean", "null"]},
+					"me_root": {"description": "Whether the current user reacted as root account", "type": ["boolean", "null"]},
+					"persona_reactions": {
+						"description": "Breakdown of persona reactions",
+						"anyOf": [
+							{"type": "array", "items": {"$ref": "#/components/schemas/MessageReactionPersonaEntry"}},
+							{"type": "null"}
+						]
+					}
 				},
 				"required": ["emoji", "count"],
+				"additionalProperties": false
+			},
+			"MessageReactionPersonaEntry": {
+				"type": "object",
+				"properties": {
+					"persona_id": {
+						"description": "The persona ID that reacted",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"count": {"description": "Count of reactions by this persona", "$ref": "#/components/schemas/Int32Type"},
+					"me": {"description": "Whether the current user reacted as this persona", "type": ["boolean", "null"]}
+				},
+				"required": ["persona_id", "count"],
 				"additionalProperties": false
 			},
 			"MessageSearchScope": {
@@ -39643,6 +42582,148 @@
 				"type": "object",
 				"properties": {"status": {"type": "string", "const": "cancelled", "description": "The ceremony was cancelled"}},
 				"required": ["status"],
+				"additionalProperties": false
+			},
+			"SignatureEmojiSchemaInput": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "Custom emoji ID (null for Unicode)",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"name": {"type": "string", "minLength": 1, "maxLength": 64, "description": "Emoji name or Unicode character"},
+					"animated": {"description": "Whether the emoji is animated", "type": ["boolean", "null"]}
+				},
+				"required": ["name"]
+			},
+			"PersonaTagSchemaInput": {
+				"type": "object",
+				"properties": {
+					"prefix": {"type": "string", "minLength": 1, "maxLength": 32},
+					"suffix": {"type": "string", "minLength": 1, "maxLength": 32}
+				}
+			},
+			"PersonaImportItemSchema": {
+				"type": "object",
+				"properties": {
+					"name": {"description": "Persona display name", "type": "string"},
+					"avatar_hash": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+					},
+					"banner_hash": {
+						"description": "Banner asset hash",
+						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+					},
+					"pronouns": {
+						"description": "Optional pronouns",
+						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
+					},
+					"color": {
+						"description": "Optional color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"avatar_color": {
+						"description": "Optional avatar accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"bio": {
+						"description": "Optional persona bio",
+						"anyOf": [{"type": "string", "maxLength": 4096}, {"type": "null"}]
+					},
+					"auto_tag_disabled": {"description": "Whether auto-tagging is disabled", "type": "boolean"},
+					"persona_tags": {
+						"description": "Persona prefix/suffix tags",
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaTagSchemaInput"}
+					},
+					"signature_emojis": {
+						"description": "Signature emojis for this persona",
+						"maxItems": 10000,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SignatureEmojiSchemaInput"}
+					},
+					"visibility": {
+						"description": "Visibility: unlisted (default), public, or private",
+						"$ref": "#/components/schemas/PersonaVisibilitySchema"
+					},
+					"external_uuid": {
+						"description": "Optional external UUID (e.g. PluralKit)",
+						"anyOf": [{"type": "string", "maxLength": 64}, {"type": "null"}]
+					},
+					"image_sources": {
+						"description": "Where the persona's images were imported from; null when the file gave it none",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaImportImageSourcesSchema"}, {"type": "null"}]
+					}
+				},
+				"required": ["name"]
+			},
+			"PersonaImportImageSourcesSchema": {
+				"type": "object",
+				"properties": {
+					"avatar": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"url": {
+										"description": "The link the avatar was imported from",
+										"anyOf": [{"type": "string", "maxLength": 2048}, {"type": "null"}]
+									},
+									"field": {
+										"type": "string",
+										"enum": ["avatar_url", "webhook_avatar_url"],
+										"description": "The PluralKit field it came from"
+									},
+									"main_avatar_empty": {
+										"description": "Whether the member's avatar_url was empty, when the avatar came from webhook_avatar_url",
+										"type": "boolean"
+									}
+								},
+								"required": ["field"]
+							},
+							{"type": "null"}
+						]
+					},
+					"banner": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"url": {
+										"description": "The link the banner was imported from",
+										"anyOf": [{"type": "string", "maxLength": 2048}, {"type": "null"}]
+									}
+								}
+							},
+							{"type": "null"}
+						]
+					}
+				}
+			},
+			"PersonaImportImageKindSchema": {"type": "string", "enum": ["avatar", "banner"]},
+			"ActivePersonaScopeSchema": {"type": "string", "enum": ["global", "channel"]},
+			"ActivePersonaModeSchema": {"type": "string", "enum": ["manual", "last"]},
+			"SignatureEmojiSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "Custom emoji ID (null for Unicode)",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"name": {"type": "string", "minLength": 1, "maxLength": 64, "description": "Emoji name or Unicode character"},
+					"animated": {"description": "Whether the emoji is animated", "type": ["boolean", "null"]}
+				},
+				"required": ["name"],
+				"additionalProperties": false
+			},
+			"PersonaTagSchema": {
+				"type": "object",
+				"properties": {
+					"prefix": {"type": "string", "minLength": 1, "maxLength": 32},
+					"suffix": {"type": "string", "minLength": 1, "maxLength": 32}
+				},
 				"additionalProperties": false
 			},
 			"RelationshipTypesInput": {
@@ -40308,6 +43389,13 @@
 					"UNKNOWN_ORIGIN_HANDOFF",
 					"UNKNOWN_PASSKEY_BRIDGE",
 					"UNKNOWN_PASSKEY_MIGRATION",
+					"UNKNOWN_PERSONA",
+					"PRIVATE_PERSONA",
+					"PERSONA_LIMIT_REACHED",
+					"DUPLICATE_PERSONA_TAG",
+					"PERSONA_TAG_LIMIT_REACHED",
+					"DUPLICATE_SIGNATURE_EMOJI",
+					"SIGNATURE_EMOJI_LIMIT_REACHED",
 					"UNKNOWN_REPORT",
 					"UNKNOWN_ROLE",
 					"UNKNOWN_STICKER",
@@ -40611,6 +43699,13 @@
 					"This sign-in transfer has expired or was already used.",
 					"This passkey request has expired. Try again.",
 					"There is no passkey to update right now.",
+					"User wasn't found.",
+					"You don't have access to this resource or feature.",
+					"You've reached the maximum number of connections ({limit}).",
+					"This tag is already taken.",
+					"You've reached the maximum number of connections ({limit}).",
+					"This tag is already taken.",
+					"You've reached the maximum number of connections ({limit}).",
 					"Unknown report.",
 					"Role wasn't found.",
 					"Unknown sticker.",
@@ -40660,6 +43755,8 @@
 							"email": "Read the user email address.",
 							"guilds": "Read guild membership information for the current user.",
 							"connections": "Read linked third-party account connections for the current user.",
+							"personas.read": "Read the personas on the user account.",
+							"personas.write": "Create, edit and delete personas on the user account.",
 							"bot": "Add a bot user to a guild."
 						}
 					}
@@ -40704,6 +43801,7 @@
 		{"name": "Gifts", "description": "Gift codes and redemption"},
 		{"name": "Messages"},
 		{"name": "Connections"},
+		{"name": "Personas"},
 		{"name": "Donations"},
 		{"name": "Experiments"},
 		{"name": "Geolocation"},
@@ -40712,6 +43810,7 @@
 		{"name": "Discovery"},
 		{"name": "Emojis"},
 		{"name": "Stickers"},
+		{"name": "Signal Bar"},
 		{"name": "Debug"},
 		{"name": "Voice"}
 	]
