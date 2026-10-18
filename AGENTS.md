@@ -78,7 +78,8 @@ Rules with a mechanical answer; follow them every time:
   `tests/fork_binary_envelope.rs`). Never add a test or an assertion to an upstream test file. The
   exception is what upstream's own tests need to run against the fork's code: a fixture line for a
   fork type, or a `vi.mock` of a fork module that upstream's code now imports (a mock applies only
-  to its own file), under a `// Fork:` comment saying why.
+  to its own file, and in the API's test project not reliably even there: `fluxer_api/AGENTS.md`),
+  under a `// Fork:` comment saying why.
 - **Upstream test expectations** that hard-code upstream's hosts, or upstream's behaviour where the
   fork deliberately differs, may be changed in place with a `// Fork:` comment saying why, after
   asking a maintainer. Everything else in the test stays as upstream has it.
