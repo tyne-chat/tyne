@@ -182,6 +182,9 @@ Every new user-facing string is translated into every supported language, and up
 are never edited: fork strings live in fork catalogues, so upstream's files stay byte-identical and
 cannot conflict.
 
+- Never write user-facing text as a plain string, not even a toast, an error fallback, a tooltip or
+  a placeholder "for now": wrap it in `msg`, `<Trans>` or `i18n._` and translate it in the same
+  change. Untranslated strings that slipped in are the reason for `fork-string-lint.mjs` (below).
 - Do not touch `fluxer_app/src/features/i18n/locales/*/messages.po`, and never commit the result of
   `pnpm --filter fluxer_app lingui:extract`.
 - After adding or editing strings (`msg()` or `<Trans>`), run `node scripts/fork-i18n.mjs sync` in
@@ -191,7 +194,13 @@ cannot conflict.
   `fork_locales/README.md`.
 - `node scripts/fork-i18n.mjs check --upstream upstream/main` (in `fluxer_app`; with `--upstream` it
   also fails if upstream's catalogues were edited) and `pnpm --filter fluxer_app lingui:compile` must
-  pass. The dev server recompiles only when upstream's catalogues change: after editing the fork's,
+  pass.
+- `node scripts/fork-string-lint.mjs --upstream upstream/main` (in `fluxer_app`) must pass too. It
+  reports string literals on the fork's lines in places people read them (JSX text, props such as
+  `title` or `placeholder`, toasts, system messages), which `fork-i18n.mjs` cannot see because they
+  never reach a catalogue. A literal that really is not translated (a brand name, a debug page) gets
+  `// i18n-ignore: <reason>` on its line or the line above. It follows no variables: text built in
+  one place and shown in another still needs your eye. The dev server recompiles only when upstream's catalogues change: after editing the fork's,
   run `lingui:compile` yourself.
 - Never run `i18n:auto` or `i18n:refresh` in `fluxer_app`: they rewrite upstream's catalogues and can
   send the strings to an outside translation service.
