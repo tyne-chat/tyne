@@ -738,6 +738,8 @@ A user reacted to a message.
 | emoji | [reaction emoji object](#reaction-emoji-object) | The emoji |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The reacting user's member object, in a guild channel |
+| persona_id? | snowflake | The [persona](/http-api/users/personas/) the user reacted as, absent for the account |
+| subprofile? | [message persona](/http-api/messages/#message-persona-object) object | That persona as shown on the reaction, absent for the account |
 | session_id? | string | The session that made the request, in a private channel |
 
 #### Reaction emoji object
@@ -781,6 +783,7 @@ A user's reaction was removed.
 | emoji | [reaction emoji object](#reaction-emoji-object) | The emoji |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The user's member object, in a guild channel |
+| persona_id? | snowflake | The [persona](/http-api/users/personas/) whose reaction was removed, absent for the account's or for a removal that named no persona |
 | session_id? | string | The session that made the request, in a private channel |
 
 ### <span id="message-reaction-remove-all"></span>MESSAGE_REACTION_REMOVE_ALL
@@ -815,6 +818,7 @@ A user started typing. [Typing is decided separately](/gateway/event-filtering/#
 | timestamp | integer | Unix seconds when typing started |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The typing user's member object, in a guild channel |
+| subprofile? | [message persona](/http-api/messages/#message-persona-object) object | The [persona](/http-api/users/personas/) the user is typing as, absent for the account |
 
 ### <span id="channel-pins-update"></span>CHANNEL_PINS_UPDATE
 
