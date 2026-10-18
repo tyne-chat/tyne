@@ -10,5 +10,9 @@ export function forkPublicBuildDefines() {
 		'process.env.FLUXER_FORK_RELEASES': JSON.stringify(forkReleaseRepository),
 		// Fork: install as "Tyne" (src/common/DesktopIdentity.ts). FLUXER_FORK_IDENTITY=0 builds with upstream's identity.
 		'process.env.FLUXER_FORK_IDENTITY': JSON.stringify(process.env.FLUXER_FORK_IDENTITY === '0' ? '' : '1'),
+		// Fork: a Linux build packaged with stock Electron (electron-builder.config.cjs).
+		'process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON': JSON.stringify(
+			process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON === '1' ? '1' : '',
+		),
 	};
 }
