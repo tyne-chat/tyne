@@ -296,6 +296,8 @@ export function appendLinuxChromiumFlagsConfig(channel: BuildChannel): void {
 
 export function addLinuxHardwareVideoDecodeFeatures(features: Set<string>): void {
 	if (process.platform !== 'linux') return;
+	// Fork: stock Electron lacks upstream's VA-API surface patch, so leave NVIDIA decoding off.
+	if (process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON === '1') return;
 	features.add('VaapiOnNvidiaGPUs');
 }
 
