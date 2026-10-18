@@ -8,6 +8,10 @@ import {useMemo} from 'react';
 
 // Fork imports.
 
+import {
+	PERSONA_COMMAND_DESCRIPTOR,
+	PERSONA_COMMAND_OPTION_DESCRIPTOR,
+} from '@app/features/persona/commands/PersonaSlashCommandMessages';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const APPENDS_TO_YOUR_MESSAGE_DESCRIPTOR = msg({
@@ -329,12 +333,12 @@ export function useCommands(): Array<Command> {
 			{
 				type: 'action',
 				name: '/persona',
-				description: 'Switch the active persona',
+				description: i18n._(PERSONA_COMMAND_DESCRIPTOR),
 				requiresGuild: false,
 				options: [
 					{
 						name: 'persona',
-						description: 'The persona to select.',
+						description: i18n._(PERSONA_COMMAND_OPTION_DESCRIPTOR),
 						type: 'choice',
 						required: false,
 						allowEmpty: true,
