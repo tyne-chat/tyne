@@ -252,6 +252,8 @@ member.)
 
 - One board: every issue lives on `tyne-chat/tyne`, whichever repository the work is in. Issues are
   switched off on the other repositories.
+- Except security vulnerabilities: never put one in an issue, a comment or anything else public
+  here. Report it as `.github/SECURITY.md` says.
 - Find or open the issue before starting. Search open and closed issues first
   (`gh issue list --repo tyne-chat/tyne --state all --search "<words>"`). Otherwise open one: `bug`,
   `enhancement`, or `task` (the Task form, with a priority) for tooling, docs, refactors and audit
