@@ -17,9 +17,11 @@ fn user_mention_golden_bytes() {
 
 #[test]
 fn user_persona_mention_golden_bytes() {
-    // Tag 7 for persona user mention: [FORMAT_VERSION, count=1, tag=14 (Mention), kind=7, user_len=3, '1', '2', '3', persona_len=3, '4', '5', '6']
+    // Kind 255 for a persona user mention, the first of the fork's kinds, which count down from 255 so
+    // they never meet upstream's (0 to 6): [FORMAT_VERSION, count=1, tag=14 (Mention), kind=255,
+    // user_len=3, '1', '2', '3', persona_len=3, '4', '5', '6']
     assert_eq!(
         encode("<@123:456>"),
-        [1, 1, 14, 7, 3, b'1', b'2', b'3', 3, b'4', b'5', b'6']
+        [1, 1, 14, 255, 3, b'1', b'2', b'3', 3, b'4', b'5', b'6']
     );
 }
