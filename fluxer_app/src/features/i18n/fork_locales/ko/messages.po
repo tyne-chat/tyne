@@ -10,9 +10,20 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(접두사: {0})"
 
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "페르소나에는 태그를 최대 5개까지 설정할 수 있어요"
+
+#. Tooltip showing root account username
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "계정: @{username}"
+
+msgid "Active persona cleared"
+msgstr "활성 페르소나가 해제됐어요"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "활성 페르소나가 해제됐어요 (기본 계정으로 보내요)"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
@@ -33,6 +44,10 @@ msgstr "태그 쌍 추가 ({0}/5)"
 
 msgid "Add signal"
 msgstr "시그널 추가"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "앨리스"
 
 msgid "All Personas"
 msgstr "모든 페르소나"
@@ -113,8 +128,6 @@ msgstr "표시 태그"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "메시지의 모든 페르소나 이름 옆에 표시 태그가 나타납니다. 표시 태그를 설정하지 않으면 계정 프로필 사진이 표시됩니다."
 
-#. Settings search entry label for double-clicking a message to edit it.
-#. Short label for an advanced message editing preference.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "더블 클릭하여 수정"
@@ -126,6 +139,10 @@ msgstr "아바타 다운로드 중 {current}/{total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "배너 다운로드 중 {current}/{total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "태그 쌍 \"{tag}\"은(는) 같은 페르소나에 두 번 이상 넣을 수 없어요"
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -156,6 +173,9 @@ msgstr "모든 곳"
 msgid "Export Summary"
 msgstr "내보내기 요약"
 
+msgid "Failed to clear active persona"
+msgstr "활성 페르소나를 해제하지 못했어요"
+
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
 msgstr "페르소나를 삭제하지 못했어요"
@@ -183,6 +203,37 @@ msgstr "시그널 바를 저장하지 못했어요. 다시 시도해 주세요."
 #. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
 msgid "Failed to save where the signal bar appears. Try again."
 msgstr "시그널 바 표시 위치를 저장하지 못했어요. 다시 시도해 주세요."
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "GIF 아이콘을 선택하지 못했어요"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "아이콘 이미지를 선택하지 못했어요"
+
+msgid "Failed to set active persona"
+msgstr "활성 페르소나를 설정하지 못했어요"
+
+msgid "Failed to set the persona for this channel"
+msgstr "이 채널의 페르소나를 설정하지 못했어요"
+
+msgid "Failed to update display tag"
+msgstr "표시 태그를 업데이트하지 못했어요"
+
+msgid "Failed to update persona mode"
+msgstr "페르소나 모드를 업데이트하지 못했어요"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "페르소나를 기억하는 범위를 변경하지 못했어요"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "아바타 이미지를 서버에 업로드하지 못했어요"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "배너 이미지를 서버에 업로드하지 못했어요"
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
@@ -343,6 +394,14 @@ msgstr "미리 보기"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "기존 페르소나 {existingCount}개를 모두 영구 삭제하고 가져온 페르소나로 완전히 교체해요."
 
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "페르소나"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "페르소나 \"{name}\"을(를) 선택했어요."
+
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "페르소나 태그 (접두사 및 접미사)"
 
@@ -357,6 +416,14 @@ msgstr "페르소나 생성됨"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "페르소나 삭제됨"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "페르소나 선택을 해제했어요."
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "페르소나 이름은 비워 둘 수 없어요"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -388,6 +455,18 @@ msgstr "이모지 고정"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "이 페르소나에 고정"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "저장하기 전에 태그 오류를 수정해 주세요"
+
+#. Toast when saving a persona while its avatar or banner is still uploading
+msgid "Please wait for images to finish uploading"
+msgstr "이미지 업로드가 끝날 때까지 기다려 주세요"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "KLIPY 제공"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
@@ -458,6 +537,10 @@ msgstr "모든 페르소나 교체"
 
 msgid "Replace all existing personas (Destructive)"
 msgstr "기존 페르소나 모두 교체 (되돌릴 수 없음)"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "요청에 실패했어요 (HTTP {status})"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
@@ -563,14 +646,23 @@ msgstr "추천"
 msgid "Supports PluralKit system export files"
 msgstr "PluralKit 시스템 내보내기 파일을 지원해요"
 
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "활성 페르소나 전환"
+
 msgid "System Tag (Applied to imported personas)"
 msgstr "시스템 태그 (가져온 페르소나에 적용)"
 
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "태그 아이콘"
 
 msgid "Tag Text"
 msgstr "태그 텍스트"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "태그 쌍 \"{tag}\"을(를) 이미 페르소나 \"{name}\"이(가) 사용 중이에요"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
@@ -587,6 +679,10 @@ msgstr "이 페르소나에 대해 알려 주세요..."
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "선택한 파일은 올바른 JSON 객체가 아니에요."
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "선택할 페르소나예요."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "여기에서 채널을 선택하기 전까지 시그널 바는 꺼져 있어요. 카테고리나 커뮤니티 전체를 선택하면 나중에 그곳에 만들어지는 채널에도 적용돼요."
@@ -671,6 +767,10 @@ msgstr "배너 다운로드됨"
 msgid "e.g. Alice"
 msgstr "예: Alice"
 
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "예: 이상한 나라"
+
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "예: 그녀"
@@ -683,6 +783,10 @@ msgstr "예: 내일 오후 3시, 2시간 후, 지금"
 msgid "images stored"
 msgstr "이미지 저장됨"
 
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "개 항목"
+
 #. Progress label for prepared personas
 msgid "personas prepared"
 msgstr "페르소나 준비됨"
@@ -691,13 +795,19 @@ msgstr "페르소나 준비됨"
 msgid "saving personas"
 msgstr "페르소나 저장됨"
 
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "텍스트"
+
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
 msgstr "가져오는 중 알림 {0}건"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
-#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{1}개 중 {0}개 {2} ({3}%)"
