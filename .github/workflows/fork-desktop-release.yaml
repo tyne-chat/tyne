@@ -66,6 +66,10 @@ env:
   # Fork: the link scheme the packages declare. Must be the one the app registers when it runs
   # (CHANNEL_APP_PROTOCOLS in fluxer_desktop/src/common/Constants.ts).
   FLUXER_FORK_LINK_SCHEME: tyne
+  # Fork: package Linux with stock Electron (fluxer_desktop/electron-builder.config.cjs). Upstream's
+  # patched Electron is compiled from Chromium source, which these runners cannot do; drop this
+  # once the workflow supplies a patched build through FLUXER_ELECTRON_DIST.
+  FLUXER_FORK_STOCK_LINUX_ELECTRON: "1"
   CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
 
 jobs:
