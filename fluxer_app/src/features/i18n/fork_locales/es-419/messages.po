@@ -10,9 +10,20 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Prefijo: {0})"
 
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "Una persona puede tener como máximo 5 etiquetas"
+
+#. Tooltip showing root account username
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "Cuenta: @{username}"
+
+msgid "Active persona cleared"
+msgstr "Persona activa quitada"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "Persona activa quitada (enviando como cuenta principal)"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
@@ -33,6 +44,10 @@ msgstr "Agregar par de etiquetas ({0}/5)"
 
 msgid "Add signal"
 msgstr "Agregar señal"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "Alicia"
 
 msgid "All Personas"
 msgstr "Todas las personas"
@@ -113,8 +128,6 @@ msgstr "Etiqueta de visualización"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "La etiqueta de visualización aparecerá junto al nombre de todas las personas en los mensajes. Si no configuras ninguna, se mostrará la foto de perfil de tu cuenta."
 
-#. Settings search entry label for double-clicking a message to edit it.
-#. Short label for an advanced message editing preference.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Doble clic para editar"
@@ -126,6 +139,10 @@ msgstr "Descargando avatar {current} de {total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "Descargando banner {current} de {total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "El par de etiquetas «{tag}» no puede aparecer más de una vez en la misma persona"
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -156,6 +173,9 @@ msgstr "En todas partes"
 msgid "Export Summary"
 msgstr "Resumen de la exportación"
 
+msgid "Failed to clear active persona"
+msgstr "No se pudo quitar la persona activa"
+
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
 msgstr "No se pudo eliminar la persona"
@@ -183,6 +203,37 @@ msgstr "No se pudo guardar la barra de señales. Inténtalo de nuevo."
 #. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
 msgid "Failed to save where the signal bar appears. Try again."
 msgstr "No se pudo guardar dónde aparece la barra de señales. Inténtalo de nuevo."
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "No se pudo seleccionar el ícono GIF"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "No se pudo seleccionar la imagen del ícono"
+
+msgid "Failed to set active persona"
+msgstr "No se pudo establecer la persona activa"
+
+msgid "Failed to set the persona for this channel"
+msgstr "No se pudo establecer la persona para este canal"
+
+msgid "Failed to update display tag"
+msgstr "No se pudo actualizar la etiqueta de visualización"
+
+msgid "Failed to update persona mode"
+msgstr "No se pudo actualizar el modo de persona"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "No se pudo cambiar dónde se recuerda tu persona"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "No se pudo subir la imagen del avatar al servidor"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "No se pudo subir la imagen del banner al servidor"
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
@@ -343,6 +394,14 @@ msgstr "Vista rápida"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Elimina permanentemente las {existingCount} persona(s) existentes y reemplázalas por completo con las personas importadas."
 
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "Persona"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "Persona «{name}» seleccionada."
+
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Etiquetas de persona (prefijo y sufijo)"
 
@@ -357,6 +416,14 @@ msgstr "Persona creada"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Persona eliminada"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "Persona deseleccionada."
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "El nombre de la persona no puede estar vacío"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -388,6 +455,18 @@ msgstr "Fijar emoji"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "Fijar para esta persona"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "Corrige los errores de las etiquetas antes de guardar"
+
+#. Toast when saving a persona while its avatar or banner is still uploading
+msgid "Please wait for images to finish uploading"
+msgstr "Espera a que terminen de subirse las imágenes"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "Con la tecnología de KLIPY"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
@@ -458,6 +537,10 @@ msgstr "Reemplazar todas las personas"
 
 msgid "Replace all existing personas (Destructive)"
 msgstr "Reemplazar todas las personas existentes (destructivo)"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "La solicitud falló (HTTP {status})"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
@@ -563,14 +646,23 @@ msgstr "Sugeridas"
 msgid "Supports PluralKit system export files"
 msgstr "Admite archivos de exportación de sistema de PluralKit"
 
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "Cambiar la persona activa"
+
 msgid "System Tag (Applied to imported personas)"
 msgstr "Etiqueta de sistema (se aplica a las personas importadas)"
 
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "Ícono de la etiqueta"
 
 msgid "Tag Text"
 msgstr "Texto de la etiqueta"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "El par de etiquetas «{tag}» ya lo usa la persona «{name}»"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
@@ -587,6 +679,10 @@ msgstr "Cuéntanos algo sobre esta persona..."
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "El archivo elegido no es un objeto JSON válido."
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "La persona que se seleccionará."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "La barra de señales está desactivada hasta que marques un canal aquí. Marcar una categoría o toda la comunidad también incluye los canales que se creen allí más adelante."
@@ -671,6 +767,10 @@ msgstr "banners descargados"
 msgid "e.g. Alice"
 msgstr "p. ej., Alice"
 
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "p. ej., País de las Maravillas"
+
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "p. ej., ella"
@@ -683,6 +783,10 @@ msgstr "p. ej. mañana a las 3pm, en 2 horas, ahora"
 msgid "images stored"
 msgstr "imágenes guardadas"
 
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "elementos"
+
 #. Progress label for prepared personas
 msgid "personas prepared"
 msgstr "personas preparadas"
@@ -691,13 +795,19 @@ msgstr "personas preparadas"
 msgid "saving personas"
 msgstr "personas guardadas"
 
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "texto"
+
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
 msgstr "{0} aviso(s) durante la importación"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
-#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} de {1} {2} ({3} %)"
