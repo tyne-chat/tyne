@@ -40,8 +40,9 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 ## Tags and escapes: matching
 
 - `matchPersona` picks the persona whose prefix and suffix are the longest match. A persona with
-  `auto_tag_disabled` is one whose tags are ignored (typing its tag sends the text as written); in
-  every other way, latched or picked, it acts like any other persona.
+  `auto_tag_disabled` is one whose tags are ignored (typing its tag sends the text as written).
+  `matchPersona` also ignores it when it is the selected (latched) persona, so its text goes out as
+  the account: a known gap (tyne-chat/tyne#130).
 - Escapes, only while a persona is selected: `\\` alone clears the selection; `\\ text` sends as the
   account and clears it; `\ text` sends as the account and keeps it.
 - **`matchOutgoingMessage` is the send, not a question.** It records a use, may clear the
@@ -75,11 +76,13 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 - **Profiles:** `fetchPersonaProfile` caches for 60 seconds; a 403 `PRIVATE_PERSONA` means the
   profile is private. Bio and banner never come from a message.
 - **Other people's personas** are cached in `_knownPersonas`, filled from messages'
-  `mention_personas`, reaction events, `GUILD_PERSONAS_DIRTY` and `fetchPersona`. A mention's wire
-  form is `<@userId:personaId>`; `MentionRenderer`, `Plaintext` and `ComposerMentionPill` resolve its
-  name from that cache, then from cached messages, then with `fetchPersona`.
-  `fetchPersona` shares no in-flight request and remembers no failure, and is called while rendering
-  (tyne-chat/tyne#121): do not add callers that run on render until that is fixed.
+  `mention_personas`, reaction events, `GUILD_PERSONAS_DIRTY`, `fetchPersona`, a pick in the mention
+  autocomplete and the composer pill's scan of cached messages. A mention's wire form is
+  `<@userId:personaId>`; `MentionRenderer`, `Plaintext` and `ComposerMentionPill` resolve its name
+  from that cache, then from cached messages. `MentionRenderer` and `ComposerMentionPill` then call
+  `fetchPersona`; `Plaintext` falls back to the user. `fetchPersona` shares no in-flight request and
+  remembers no failure, and is called while rendering (tyne-chat/tyne#121): do not add callers that
+  run on render until that is fixed.
 
 ## Reactions
 
@@ -121,11 +124,14 @@ composer, popouts) and `messaging` (submission, retry, reactions, message state)
 conflict most often in the nightly rebase: `MessageUsername.tsx`, `UserMessage.tsx`,
 `CompactMessageLayout.tsx`, `useMessageSubmission.tsx`, `useTextareaSubmit.ts`,
 `useTextareaDraftAndTyping.ts`, `ReactionCommands.tsx`, `MessageReactions.ts`, `MentionRenderer.tsx`,
-`useLexicalAutocomplete.ts`, `StickerSendUtils.ts` and the emoji picker. When you touch one, move
-fork lines out of upstream's where you can.
+`useLexicalAutocomplete.ts`, `StickerSendUtils.ts`, the emoji picker, `ChannelMessage.tsx`,
+`PreloadableUserPopout.tsx`, `MessageReactions.tsx`, `MessageActionBar.tsx`,
+`AutocompleteMention.tsx`, `ReplyPreview.tsx` and `TypingUsers.tsx`. When you touch one, move fork
+lines out of upstream's where you can. The folder guides of `channel` and `messaging` list them by
+file.
 
 The signal bar follows the composer's persona through `SignalBarStore.affirmPersona`; read
-`features/signal_bar` before changing when the composer's persona changes.
+`features/signal_bar/AGENTS.md` before changing when the composer's persona changes.
 
 ## Tests
 
@@ -138,4 +144,4 @@ The signal bar follows the composer's persona through `SignalBarStore.affirmPers
 - End to end: `e2e/web/*/persona-*.spec.ts` (26 specs).
 - Not covered: `ForkAccountReadyWork`, and request counts for `fetchPersona` and the mention fetch
   (root `AGENTS.md`, "Network calls").
-- Before committing, run the full list in the root `AGENTS.md`: a persona change needs all of it.
+- Before committing, run the full list in `CHECKS.md`: a persona change needs all of it.
