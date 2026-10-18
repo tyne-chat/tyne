@@ -10,9 +10,20 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(คำนำหน้า: {0})"
 
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "Persona หนึ่งมีแท็กได้สูงสุด 5 แท็ก"
+
+#. Tooltip showing root account username
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "บัญชี: @{username}"
+
+msgid "Active persona cleared"
+msgstr "ล้าง Persona ที่ใช้งานอยู่แล้ว"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "ล้าง Persona ที่ใช้งานอยู่แล้ว (ส่งในนามบัญชีหลัก)"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
@@ -33,6 +44,10 @@ msgstr "เพิ่มคู่แท็ก ({0}/5)"
 
 msgid "Add signal"
 msgstr "เพิ่มสัญญาณ"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "อลิซ"
 
 msgid "All Personas"
 msgstr "Persona ทั้งหมด"
@@ -113,8 +128,6 @@ msgstr "แท็กแสดงผล"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "แท็กแสดงผลจะปรากฏถัดจากชื่อ Persona ทั้งหมดในข้อความ หากไม่ได้ตั้งค่าแท็กแสดงผล จะแสดงรูปโปรไฟล์บัญชีของคุณแทน"
 
-#. Settings search entry label for double-clicking a message to edit it.
-#. Short label for an advanced message editing preference.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "ดับเบิลคลิกเพื่อแก้ไข"
@@ -126,6 +139,10 @@ msgstr "กำลังดาวน์โหลดอวาตาร์ {current
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "กำลังดาวน์โหลดแบนเนอร์ {current} จาก {total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "คู่แท็ก \"{tag}\" ใส่ซ้ำใน Persona เดียวกันไม่ได้"
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -156,6 +173,9 @@ msgstr "ทุกที่"
 msgid "Export Summary"
 msgstr "สรุปการส่งออก"
 
+msgid "Failed to clear active persona"
+msgstr "ล้าง Persona ที่ใช้งานอยู่ไม่สำเร็จ"
+
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
 msgstr "ลบ Persona ไม่สำเร็จ"
@@ -183,6 +203,37 @@ msgstr "บันทึกแถบสัญญาณไม่สำเร็จ
 #. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
 msgid "Failed to save where the signal bar appears. Try again."
 msgstr "บันทึกตำแหน่งที่แสดงแถบสัญญาณไม่สำเร็จ ลองอีกครั้ง"
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "เลือกไอคอน GIF ไม่สำเร็จ"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "เลือกรูปไอคอนไม่สำเร็จ"
+
+msgid "Failed to set active persona"
+msgstr "ตั้ง Persona ที่ใช้งานอยู่ไม่สำเร็จ"
+
+msgid "Failed to set the persona for this channel"
+msgstr "ตั้ง Persona สำหรับช่องนี้ไม่สำเร็จ"
+
+msgid "Failed to update display tag"
+msgstr "อัปเดตแท็กแสดงผลไม่สำเร็จ"
+
+msgid "Failed to update persona mode"
+msgstr "อัปเดตโหมด Persona ไม่สำเร็จ"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "เปลี่ยนตำแหน่งที่จดจำ Persona ของคุณไม่สำเร็จ"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "อัปโหลดรูปอวตารไปยังเซิร์ฟเวอร์ไม่สำเร็จ"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "อัปโหลดรูปแบนเนอร์ไปยังเซิร์ฟเวอร์ไม่สำเร็จ"
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
@@ -343,6 +394,14 @@ msgstr "แอบดู"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "ลบ Persona ที่มีอยู่ทั้ง {existingCount} รายการอย่างถาวร และแทนที่ทั้งหมดด้วย Persona ที่นำเข้า"
 
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "Persona"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "เลือก Persona \"{name}\" แล้ว"
+
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "แท็ก Persona (คำนำหน้าและคำต่อท้าย)"
 
@@ -357,6 +416,14 @@ msgstr "สร้าง Persona แล้ว"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "ลบ Persona แล้ว"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "ยกเลิกการเลือก Persona แล้ว"
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "ชื่อ Persona ต้องไม่ว่าง"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -388,6 +455,18 @@ msgstr "ปักหมุดอีโมจิ"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "ปักหมุดสำหรับเพอร์โซนานี้"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "โปรดแก้ไขข้อผิดพลาดของแท็กก่อนบันทึก"
+
+#. Toast when saving a persona while its avatar or banner is still uploading
+msgid "Please wait for images to finish uploading"
+msgstr "โปรดรอให้อัปโหลดรูปภาพเสร็จ"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "ขับเคลื่อนโดย KLIPY"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
@@ -458,6 +537,10 @@ msgstr "แทนที่ Persona ทั้งหมด"
 
 msgid "Replace all existing personas (Destructive)"
 msgstr "แทนที่ Persona ที่มีอยู่ทั้งหมด (ไม่สามารถกู้คืนได้)"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "คำขอล้มเหลว (HTTP {status})"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
@@ -563,14 +646,23 @@ msgstr "แนะนำ"
 msgid "Supports PluralKit system export files"
 msgstr "รองรับไฟล์ส่งออกระบบของ PluralKit"
 
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "สลับ Persona ที่ใช้งานอยู่"
+
 msgid "System Tag (Applied to imported personas)"
 msgstr "แท็กระบบ (ใช้กับ Persona ที่นำเข้า)"
 
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "ไอคอนแท็ก"
 
 msgid "Tag Text"
 msgstr "ข้อความแท็ก"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "คู่แท็ก \"{tag}\" ถูกใช้โดย Persona \"{name}\" อยู่แล้ว"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
@@ -587,6 +679,10 @@ msgstr "เล่าเกี่ยวกับ Persona นี้ให้เร
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "ไฟล์ที่เลือกไม่ใช่ออบเจ็กต์ JSON ที่ถูกต้อง"
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "Persona ที่จะเลือก"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "แถบสัญญาณจะปิดอยู่จนกว่าคุณจะติ๊กช่องที่นี่ การติ๊กหมวดหมู่หรือทั้งคอมมูนิตี้จะรวมถึงช่องที่สร้างขึ้นที่นั่นในภายหลังด้วย"
@@ -671,6 +767,10 @@ msgstr "แบนเนอร์ที่ดาวน์โหลดแล้ว
 msgid "e.g. Alice"
 msgstr "เช่น Alice"
 
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "เช่น แดนมหัศจรรย์"
+
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "เช่น เธอ"
@@ -683,6 +783,10 @@ msgstr "เช่น พรุ่งนี้ 15:00 น., ในอีก 2 ช�
 msgid "images stored"
 msgstr "รูปที่บันทึกแล้ว"
 
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "รายการ"
+
 #. Progress label for prepared personas
 msgid "personas prepared"
 msgstr "Persona ที่เตรียมแล้ว"
@@ -691,13 +795,19 @@ msgstr "Persona ที่เตรียมแล้ว"
 msgid "saving personas"
 msgstr "Persona ที่บันทึกแล้ว"
 
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "ข้อความ"
+
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
 msgstr "มี {0} ข้อสังเกตระหว่างการนำเข้า"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
-#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} จาก {1} {2} ({3}%)"
