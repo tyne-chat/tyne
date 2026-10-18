@@ -36,27 +36,26 @@ or `GEMINI.md` to the repository: both tools read this file.
 - `e2e/`: Playwright end-to-end suite that runs against a stack of its own.
 - `.github/README.md`: what Tyne adds to Fluxer, for users.
 
+## Architecture and folder guides
+
+`ARCHITECTURE.md` describes how the components fit together, the main flows and where the fork's
+features sit, and lists the folders that have an `AGENTS.md` of their own. Read it before a change
+that crosses folders, and read a folder's `AGENTS.md` before changing code under it: some tools load
+it only when they open a file there, others never do. Keep both up to date as you would this file.
+
 ## Personas
 
 The fork's largest feature: several identities under one account, for plural systems and anyone who
 writes as more than one person. The code calls them personas; the object embedded in a message is
-called `subprofile`.
+called `subprofile`. A message or reaction stores only the persona's id, and the API builds
+`subprofile` from the current persona whenever it returns or dispatches the message. The server side
+is `fluxer_api/src/api/persona/`, the web side `fluxer_app/src/features/persona/`; each has an
+`AGENTS.md` with its design and traps.
 
-- API: CRUD under `/api/v1/users/@me/personas`. `POST /api/v1/users/@me/personas/import-batch-avatars`
-  imports avatars and streams its progress as NDJSON (rate-limited, one batch at a time per account;
-  the fetches go through the media proxy, which enforces the network policy). A message sent
-  with `persona_id` is checked against the sender's own personas and stored with only that id (and
-  the personas it mentions); the API adds a `subprofile` object (`id`, `name`, `avatar`,
-  `avatar_color`, `display_tag_text`, `pronouns`, …) whenever it builds the message for a response
-  or an event.
-- Web app: persona settings (create, edit, delete; lists sort by name), the PluralKit import with
-  live progress and the PluralKit-compatible export, the composer's persona picker with proxy tags
-  and a remembered (global or per-channel) selection, "React as…", and messages rendered with the
-  persona's name, avatar and `[TAG]` badge.
-- Data: fork-only data lives in fork-owned tables next to `Personas`, never in new columns on
-  upstream's tables. The one deliberate exception is the persona of a message or reaction:
-  `persona_id` and `mention_personas` on `messages`, and `persona_id` in `message_reactions`' key. A
-  message or reaction comes from a persona, so the row is not a full description without it.
+Data: fork-only data lives in fork-owned tables next to `Personas`, never in new columns on
+upstream's tables. The one deliberate exception is the persona of a message or reaction:
+`persona_id` and `mention_personas` on `messages`, and `persona_id` in `message_reactions`' key. A
+message or reaction comes from a persona, so the row is not a full description without it.
 
 ## Keep fork changes out of upstream's way
 
