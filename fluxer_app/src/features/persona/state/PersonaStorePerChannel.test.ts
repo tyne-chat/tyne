@@ -4,6 +4,7 @@
 import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+vi.mock('@app/app/I18n', () => ({default: {_: (descriptor: {message?: string}) => descriptor.message ?? ''}}));
 vi.mock('@lingui/core/macro', () => {
 	const descriptor = (value: unknown): unknown => (typeof value === 'string' ? {message: value} : value);
 	return {msg: descriptor, t: descriptor, plural: () => '', select: () => '', selectOrdinal: () => ''};
