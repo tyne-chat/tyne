@@ -246,6 +246,8 @@ is in the server folder's `AGENTS.md`.
 These folders have an `AGENTS.md` with their design and traps; read it before changing code under
 the folder. A new folder guide is added to this list in the same commit.
 
+- `fluxer_api/AGENTS.md`: the API and worker: how a route is put together, where fork code hooks in,
+  and how to test in its shared test runtime.
 - `fluxer_api/src/api/channel/AGENTS.md`: channels and messages on the server, and where personas
   enter them.
 - `fluxer_api/src/api/persona/AGENTS.md`: personas on the server.
