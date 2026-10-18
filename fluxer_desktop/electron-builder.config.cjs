@@ -116,6 +116,11 @@ const customLinuxElectron =
 	isLinuxBuild && process.env.FLUXER_ELECTRON_DIST?.trim() ? require('./scripts/custom-electron.cjs') : null;
 const linuxElectronDist = customLinuxElectron?.resolveLinuxElectronDist() ?? null;
 const verifiedLinuxElectronArtifacts = new Map();
+// Fork: FLUXER_FORK_STOCK_LINUX_ELECTRON=1 packages Linux with stock Electron, as before upstream's
+// VA-API patch: Tyne's release workflow runs on GitHub's runners, which cannot compile the patched
+// Electron, and upstream's prebuilt one sits in a draft release other repositories cannot read. It
+// skips the patched-Electron checks below and is off whenever FLUXER_ELECTRON_DIST is given.
+const forkStockLinuxElectron = process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON === '1' && !linuxElectronDist;
 const productName = channel.productName;
 const linuxOptDirName = channel.linuxOptDirName;
 const installedProductName = isLinuxBuild ? linuxOptDirName : productName;
@@ -857,7 +862,7 @@ async function beforePack(context) {
 			'The patched Linux Electron distribution cannot package other platforms. Use separate electron-builder invocations for Linux and macOS or Windows.',
 		);
 	}
-	if (context.electronPlatformName === 'linux') {
+	if (context.electronPlatformName === 'linux' && !forkStockLinuxElectron) {
 		if (!linuxElectronDist) {
 			throw new Error(
 				'Linux packaging requires patched Electron. Set FLUXER_ELECTRON_DIST to the directory containing its ZIP and build manifest.',
@@ -1229,7 +1234,7 @@ async function readAsarEntry(asarPath, entryPath) {
 }
 
 async function afterPack(context) {
-	if (context.electronPlatformName === 'linux') {
+	if (context.electronPlatformName === 'linux' && !forkStockLinuxElectron) {
 		if (!customLinuxElectron) {
 			throw new Error('Custom Electron was not configured before Linux packaging.');
 		}
