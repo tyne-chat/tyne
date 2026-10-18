@@ -13,6 +13,9 @@ After adding, changing or removing a user-facing string, from `fluxer_app`:
    really is the same in a language, list its msgid in `reviewed-unchanged.json` (under
    `locales.<locale>`, or `msgids` when it is the same everywhere).
 3. `node scripts/fork-i18n.mjs check` and `pnpm lingui:compile` must pass.
+4. `node scripts/fork-string-lint.mjs` must pass: it reports hard-coded user-facing strings on the
+   fork's lines, which never reach a catalogue and so are invisible to step 3. Mark a literal that
+   is deliberately not translated with `// i18n-ignore: <reason>`.
 
 Never run `pnpm lingui:extract` and commit the result: it rewrites the upstream catalogues.
 After a rebase, `node scripts/fork-i18n.mjs check --upstream <upstream ref>` also verifies that

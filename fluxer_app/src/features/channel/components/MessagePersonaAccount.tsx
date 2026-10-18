@@ -17,10 +17,17 @@ import KeyboardMode from '@app/features/ui/state/KeyboardMode';
 import type {User} from '@app/features/user/models/User';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
+import {msg} from '@lingui/core/macro';
+import {useLingui} from '@lingui/react/macro';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useRef} from 'react';
+
+const ACCOUNT_TOOLTIP_DESCRIPTOR = msg({
+	message: 'Account: @{username}',
+	comment: 'Tooltip showing root account username',
+});
 
 export const MessagePersonaAccount = observer(
 	({
@@ -45,11 +52,12 @@ export const MessagePersonaAccount = observer(
 		tagText?: string | null;
 		isHovering?: boolean;
 	}) => {
+		const {i18n} = useLingui();
 		const usernameRef = useRef<HTMLSpanElement | null>(null);
 		const [tagHoverRef, isTagHovering] = useHover();
 		const mergedRef = useMergeRefs([usernameRef, tagHoverRef]);
 		const displayName = NicknameUtils.getNickname(user, guild?.id, message.channelId);
-		const tooltipText = user.username ? `Account: @${user.username}` : undefined;
+		const tooltipText = user.username ? i18n._(ACCOUNT_TOOLTIP_DESCRIPTOR, {username: user.username}) : undefined;
 		const onPopoutToggle = useMaybeMessageViewContext()?.onPopoutToggle;
 		const handlePopoutOpen = useCallback(() => onPopoutToggle?.(true), [onPopoutToggle]);
 		const handlePopoutClose = useCallback(() => onPopoutToggle?.(false), [onPopoutToggle]);

@@ -26,8 +26,8 @@ pnpm --filter fluxer_api test
 pnpm --filter fluxer_api typecheck
 pnpm --filter fluxer_desktop typecheck && pnpm --filter fluxer_desktop test
 pnpm --filter fluxer_app test
-# Fork catalogues.
-(cd fluxer_app && node scripts/fork-i18n.mjs check --upstream upstream/main) && pnpm --filter fluxer_app lingui:compile
+# Fork catalogues, and no hard-coded user-facing strings in the fork's code (fork-string-lint.mjs).
+(cd fluxer_app && node scripts/fork-i18n.mjs check --upstream upstream/main && node scripts/fork-string-lint.mjs --upstream upstream/main) && pnpm --filter fluxer_app lingui:compile
 # Upstream's lint job (Biome, ESLint with no warnings, data-flx attributes), plus Biome warnings on
 # files the fork added, committed or not.
 pnpm exec biome ci . && pnpm exec eslint . --max-warnings 0 && pnpm --filter fluxer_app theming:data-flx:check && pnpm exec biome ci --error-on-warnings --files-ignore-unknown=true --no-errors-on-unmatched $(git diff --name-only --no-renames --diff-filter=A $(git merge-base upstream/main HEAD)) $(git ls-files --others --exclude-standard)
