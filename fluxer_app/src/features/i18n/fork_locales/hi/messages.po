@@ -10,9 +10,20 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(उपसर्ग: {0})"
 
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "एक परसोना में अधिकतम 5 टैग हो सकते हैं"
+
+#. Tooltip showing root account username
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "अकाउंट: @{username}"
+
+msgid "Active persona cleared"
+msgstr "सक्रिय परसोना हटा दिया गया"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "सक्रिय परसोना हटा दिया गया (रूट अकाउंट के रूप में भेजा जा रहा है)"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
@@ -33,6 +44,10 @@ msgstr "टैग जोड़ी जोड़ें ({0}/5)"
 
 msgid "Add signal"
 msgstr "सिग्नल जोड़ें"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "ऐलिस"
 
 msgid "All Personas"
 msgstr "सभी परसोना"
@@ -113,8 +128,6 @@ msgstr "डिस्प्ले टैग"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "डिस्प्ले टैग मैसेज में सभी परसोना नाम के आगे दिखाई देगा। यदि कोई डिस्प्ले टैग सेट नहीं है, तो आपकी अकाउंट प्रोफ़ाइल पिक्चर दिखाई जाएगी।"
 
-#. Settings search entry label for double-clicking a message to edit it.
-#. Short label for an advanced message editing preference.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "एडिट करने के लिए डबल-क्लिक करें"
@@ -126,6 +139,10 @@ msgstr "अवतार डाउनलोड हो रहा है {current}/
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "बैनर डाउनलोड हो रहा है {current}/{total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "टैग जोड़ी \"{tag}\" एक ही परसोना पर एक से ज़्यादा बार नहीं हो सकती"
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -156,6 +173,9 @@ msgstr "हर जगह"
 msgid "Export Summary"
 msgstr "एक्सपोर्ट सारांश"
 
+msgid "Failed to clear active persona"
+msgstr "सक्रिय परसोना हटाया नहीं जा सका"
+
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
 msgstr "परसोना डिलीट नहीं हो सका"
@@ -183,6 +203,37 @@ msgstr "सिग्नल बार सहेजा नहीं जा सक�
 #. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
 msgid "Failed to save where the signal bar appears. Try again."
 msgstr "सिग्नल बार कहाँ दिखे, यह सहेजा नहीं जा सका। फिर से कोशिश करें।"
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "GIF आइकन चुना नहीं जा सका"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "आइकन इमेज चुनी नहीं जा सकी"
+
+msgid "Failed to set active persona"
+msgstr "सक्रिय परसोना सेट नहीं हो सका"
+
+msgid "Failed to set the persona for this channel"
+msgstr "इस चैनल के लिए परसोना सेट नहीं हो सका"
+
+msgid "Failed to update display tag"
+msgstr "डिस्प्ले टैग अपडेट नहीं हो सका"
+
+msgid "Failed to update persona mode"
+msgstr "परसोना मोड अपडेट नहीं हो सका"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "आपका परसोना कहाँ याद रखा जाता है, यह बदला नहीं जा सका"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "अवतार इमेज सर्वर पर अपलोड नहीं हो सकी"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "बैनर इमेज सर्वर पर अपलोड नहीं हो सकी"
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
@@ -343,6 +394,14 @@ msgstr "झलक"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "सभी {existingCount} मौजूदा परसोना हमेशा के लिए डिलीट करें और उन्हें पूरी तरह इंपोर्ट किए गए परसोना से बदलें।"
 
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "परसोना"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "परसोना \"{name}\" चुना गया।"
+
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "परसोना टैग (उपसर्ग और प्रत्यय)"
 
@@ -357,6 +416,14 @@ msgstr "परसोना बन गया"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "परसोना डिलीट हो गया"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "परसोना का चयन हटाया गया।"
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "परसोना का नाम खाली नहीं हो सकता"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -388,6 +455,18 @@ msgstr "इमोजी पिन करें"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "इस व्यक्तित्व के लिए पिन करें"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "सेव करने से पहले टैग की गलतियाँ ठीक करें"
+
+#. Toast when saving a persona while its avatar or banner is still uploading
+msgid "Please wait for images to finish uploading"
+msgstr "इमेज अपलोड पूरा होने तक रुकें"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "KLIPY द्वारा संचालित"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
@@ -458,6 +537,10 @@ msgstr "सभी परसोना बदलें"
 
 msgid "Replace all existing personas (Destructive)"
 msgstr "सभी मौजूदा परसोना बदलें (वापस नहीं होगा)"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "अनुरोध विफल रहा (HTTP {status})"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
@@ -563,14 +646,23 @@ msgstr "सुझाए गए"
 msgid "Supports PluralKit system export files"
 msgstr "PluralKit सिस्टम एक्सपोर्ट फ़ाइलें समर्थित हैं"
 
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "सक्रिय परसोना बदलें"
+
 msgid "System Tag (Applied to imported personas)"
 msgstr "सिस्टम टैग (इंपोर्ट किए गए परसोना पर लागू)"
 
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "टैग आइकन"
 
 msgid "Tag Text"
 msgstr "टैग टेक्स्ट"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "टैग जोड़ी \"{tag}\" पहले से परसोना \"{name}\" इस्तेमाल कर रहा है"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
@@ -587,6 +679,10 @@ msgstr "हमें इस परसोना के बारे में ब
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "चुनी गई फ़ाइल मान्य JSON ऑब्जेक्ट नहीं है।"
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "चुनने के लिए परसोना।"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "जब तक आप यहाँ कोई चैनल नहीं चुनते, सिग्नल बार बंद रहता है। किसी श्रेणी या पूरी कम्युनिटी को चुनने पर वहाँ बाद में बनने वाले चैनल भी शामिल होते हैं।"
@@ -671,6 +767,10 @@ msgstr "बैनर डाउनलोड हुए"
 msgid "e.g. Alice"
 msgstr "जैसे Alice"
 
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "जैसे वंडरलैंड"
+
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "जैसे वह"
@@ -683,6 +783,10 @@ msgstr "उदा. कल दोपहर 3 बजे, 2 घंटे में,
 msgid "images stored"
 msgstr "इमेज सेव हुईं"
 
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "आइटम"
+
 #. Progress label for prepared personas
 msgid "personas prepared"
 msgstr "परसोना तैयार हुए"
@@ -691,13 +795,19 @@ msgstr "परसोना तैयार हुए"
 msgid "saving personas"
 msgstr "परसोना सेव हुए"
 
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "टेक्स्ट"
+
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
 msgstr "इंपोर्ट के दौरान {0} सूचना(एँ)"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
-#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{1} में से {0} {2} ({3}%)"

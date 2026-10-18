@@ -60,6 +60,31 @@ import {SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR} from '../PersonaPickerSheet';
 import {PersonaTag} from '../PersonaTag';
 import styles from './PersonaSettingsTab.module.css';
 
+const TAG_ICON_DESCRIPTOR = msg({
+	message: 'Tag Icon',
+	comment: "Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text",
+});
+const TAG_ICON_SELECT_FAILED_DESCRIPTOR = msg({
+	message: 'Failed to select icon image',
+	comment: 'Toast when the chosen display tag icon image cannot be used',
+});
+const TAG_GIF_ICON_SELECT_FAILED_DESCRIPTOR = msg({
+	message: 'Failed to select GIF icon',
+	comment: 'Toast when the chosen animated display tag icon cannot be used',
+});
+const TAG_TEXT_PLACEHOLDER_DESCRIPTOR = msg({
+	message: 'e.g. Wonderland',
+	comment: 'Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland',
+});
+const PREVIEW_PERSONA_NAME_DESCRIPTOR = msg({
+	message: 'Alice',
+	comment:
+		'Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language',
+});
+const TAG_EXAMPLE_TEXT_DESCRIPTOR = msg({
+	message: 'text',
+	comment: 'Stands for the message text between a tag pair\'s prefix and suffix, as in "a:text"',
+});
 const MODE_MANUAL_DESCRIPTOR = msg({
 	message: 'Manual',
 	comment: 'Active persona mode manual',
@@ -386,7 +411,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 
 	const handleOpenTagIconUpload = useCallback(() => {
 		openAssetSourceModal({
-			title: 'Tag Icon',
+			title: i18n._(TAG_ICON_DESCRIPTOR),
 			uploadHint: formatImageUploadRecommendedHint(i18n, {
 				formats: STATIC_IMAGE_FORMATS,
 				maxSize: formatFileSize(i18n.locale, GlobalLimits.getAvatarMaxSize()),
@@ -400,7 +425,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 				} catch {
 					ToastCommands.createToast({
 						type: 'error',
-						children: 'Failed to select icon image',
+						children: i18n._(TAG_ICON_SELECT_FAILED_DESCRIPTOR),
 					});
 				}
 			},
@@ -412,7 +437,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 					} catch {
 						ToastCommands.createToast({
 							type: 'error',
-							children: 'Failed to select GIF icon',
+							children: i18n._(TAG_GIF_ICON_SELECT_FAILED_DESCRIPTOR),
 						});
 					}
 				})();
@@ -529,7 +554,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									<input
 										type="text"
 										className={styles.textInput}
-										placeholder="e.g. Wonderland"
+										placeholder={i18n._(TAG_TEXT_PLACEHOLDER_DESCRIPTOR)}
 										maxLength={32}
 										value={tagText}
 										onChange={(e) => handleTagTextChange(e.target.value)}
@@ -549,7 +574,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 												<img
 													ref={tagIconHoverRef}
 													src={resolvedTagIconUrl ?? tagIcon}
-													alt="Tag Icon"
+													alt={i18n._(TAG_ICON_DESCRIPTOR)}
 													className={styles.tagIconImage}
 													data-flx="persona.settings.persona-settings-tab.tag-icon-image"
 												/>
@@ -620,13 +645,13 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 												className={styles.previewName}
 												data-flx="persona.settings.persona-settings-tab.preview-name"
 											>
-												Alice
+												{i18n._(PREVIEW_PERSONA_NAME_DESCRIPTOR)}
 											</span>
 											{currentUser && (
 												<PersonaTag
 													subprofile={{
 														id: 'preview',
-														name: 'Alice',
+														name: i18n._(PREVIEW_PERSONA_NAME_DESCRIPTOR),
 														display_tag_text: tagText.trim(),
 														display_tag_icon: tagIcon,
 													}}
@@ -733,11 +758,13 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state">
 								<Trans>No personas created yet. Click "Add Persona" to create your first persona!</Trans>
 							</div>
-						) : filteredPersonaIds.length === 0 ? (
+						) : null}
+						{personas.length > 0 && filteredPersonaIds.length === 0 ? (
 							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state--2">
 								<Trans>No matching personas found.</Trans>
 							</div>
-						) : (
+						) : null}
+						{personas.length > 0 && filteredPersonaIds.length > 0 ? (
 							<div className={styles.cardList} data-flx="persona.settings.persona-settings-tab.card-list">
 								{filteredPersonaIds.map((personaId) => {
 									const persona = PersonaStore.getPersona(personaId);
@@ -842,7 +869,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 															className={styles.tagPill}
 															data-flx="persona.settings.persona-settings-tab.tag-pill"
 														>
-															{`${t.prefix ?? ''}text${t.suffix ?? ''}`}
+															{`${t.prefix ?? ''}${i18n._(TAG_EXAMPLE_TEXT_DESCRIPTOR)}${t.suffix ?? ''}`}
 														</span>
 													))}
 													{persona.bio && (
@@ -906,7 +933,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									);
 								})}
 							</div>
-						)}
+						) : null}
 					</SettingsSection>
 				</div>
 			</SettingsTabContent>
