@@ -86,7 +86,7 @@ function buildDiscoveryStaticInput(
 		gifProvider = gifService;
 	}
 	let gifProviderName = 'klipy';
-	let gifDisplayName = 'Klipy';
+	let gifDisplayName = 'KLIPY';
 	let gifAttributionRequired = false;
 	if (gifProvider !== undefined) {
 		gifProviderName = gifProvider.meta.name;
