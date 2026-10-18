@@ -127,6 +127,12 @@ A handler that touches accounts, storage or windows checks its sender with
 - **Breaks without a rebase conflict**: the workflow calls 15 `build-desktop --step` names from
   upstream's `tools/ci/src/desktop.rs` and copies its `vpk` arguments. Check both when upstream
   changes its desktop build.
+- **Linux Electron**: upstream packages Linux only with its patched Electron (a VA-API fix compiled
+  from Chromium source, given through `FLUXER_ELECTRON_DIST`; `electron/build-linux.sh`). The
+  release workflow sets `FLUXER_FORK_STOCK_LINUX_ELECTRON=1` instead, which packages stock Electron,
+  skips the patched-Electron checks in `electron-builder.config.cjs` and leaves `VaapiOnNvidiaGPUs`
+  off (`ChromiumRuntime.ts`). A new upstream requirement of this kind fails only at release time:
+  the nightly rebase does not build the desktop app.
 
 ## Native add-ons
 
