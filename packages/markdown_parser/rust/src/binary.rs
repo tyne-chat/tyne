@@ -156,7 +156,7 @@ fn write_mention(out: &mut Vec<u8>, kind: &MentionKind) {
     match kind {
         MentionKind::User { id, persona_id } => {
             if let Some(persona_id) = persona_id {
-                out.push(7);
+                out.push(FORK_USER_PERSONA_MENTION_KIND);
                 write_str(out, id);
                 write_str(out, persona_id);
             } else {
@@ -292,3 +292,9 @@ fn write_optional_str(out: &mut Vec<u8>, value: Option<&str>) {
         }
     }
 }
+
+// Fork: mention kinds the fork adds to this format. Upstream numbers its kinds in sequence (0 to 6
+// today), so a fork kind next to upstream's would turn into upstream's next kind the day it adds one,
+// and the app would read that mention as a persona. Fork kinds count down from 255. The app's reader
+// is tyne-mobile `packages/fluxer_markdown_native/lib/src/decode_binary.dart`; change both together.
+const FORK_USER_PERSONA_MENTION_KIND: u8 = 255;
