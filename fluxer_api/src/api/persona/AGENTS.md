@@ -39,7 +39,9 @@ and follow the placement rules in the root `AGENTS.md`.
   `resolveOwnedPersona` then accepts only a numeric id of the caller's own, live persona, and answers
   `UNKNOWN_PERSONA` otherwise. Send, edit, threads, forum posts and typing use these two. Reactions
   (`MessageReactionService.addReaction`), the signal bar (`SignalBarService`) and the channel
-  selection (`PersonaService`) repeat the check inline: change all of them together.
+  selection (`PersonaService`) repeat the check inline: change all of them together. The reaction
+  check runs only when `MessageReactionService` was given a persona repository; unlike send and edit
+  it has no fallback to `getPersonaRepository()`.
 - **The server stores the selection but never applies it.** Which persona a user has selected,
   globally or per channel, is kept for their clients. The server never picks a persona for a
   message: a request without `persona_id` is sent as the account.
@@ -106,8 +108,11 @@ personas), 10,000 signature emojis per persona (unique across personas).
 - `GUILD_PERSONAS_DIRTY` costs one gateway RPC per guild and per DM partner for every persona edit.
   Keep it off paths that run often.
 - **Adding an event:** add the name to `constants/Gateway.ts` and to
-  `fluxer_gateway/src/utils/event_atoms.erl`, and rebuild the gateway. The gateway raises on an
-  event name it has no atom for.
+  `fluxer_gateway/src/utils/event_atoms.erl`, document it in `fluxer_docs` (`gateway/events.md`;
+  `fluxer_docs verify` checks it), and restart the gateway. Without the atom, a DM dispatch
+  (`rpc.gateway.presence.dispatch`) fails with `presence_dispatch_error`, and a guild dispatch is
+  logged and dropped: nobody receives the event. A community event also needs a decision on channel
+  scope and passive sessions: `fluxer_gateway/AGENTS.md`, "Event names".
 
 ## Import, export and images
 
@@ -127,8 +132,10 @@ personas), 10,000 signature emojis per persona (unique across personas).
 ## Mentions for search
 
 `withMentionedPersonas` runs on every write of a message row (called from
-`MessageRepository.upsertMessage`). It asks the messages service's parser for `<@user:persona>`
-pairs and keeps a pair only when its account is in `mention_users`, so `allowed_mentions` applies.
+`MessageRepository.upsertMessage`). When the content and `mention_users` are unchanged it keeps the
+stored value, and it calls the messages service's parser only for a text that has `mention_users`
+and looks like `<@id:id>`. It keeps a `<@user:persona>` pair only when its account is in
+`mention_users`, so `allowed_mentions` applies.
 If the parser fails the message is still written, without its persona mentions. Search indexes
 `personaId` and `mentionedPersonaIds` (`search/message/PersonaMessageSearch.ts`).
 
@@ -168,5 +175,5 @@ images, then hard-deletes every persona row, setting and fork-table row.
   `search/message/PersonaMessageSearch.test.ts`, the schema package's tests, and the end-to-end specs
   `e2e/web/*/persona-*.spec.ts`.
 - Not covered: that a private persona stays out of the payloads it should not be in.
-- Before committing, run the full list in the root `AGENTS.md` ("Before committing"): a persona
+- Before committing, run the full list in `CHECKS.md`: a persona
   change counts as one that touches personas.
