@@ -19,6 +19,10 @@ import {fetchPersonas} from '../commands/PersonaCommands';
 import {type ActivePersonaMode, PersonaStore} from '../state/PersonaStore';
 import styles from './PersonaPickerSheet.module.css';
 
+const TAG_EXAMPLE_TEXT_DESCRIPTOR = msg({
+	message: 'text',
+	comment: 'Stands for the message text between a tag pair\'s prefix and suffix, as in "a:text"',
+});
 const MODE_MANUAL_DESCRIPTOR = msg({
 	message: 'Manual',
 	comment: 'Active persona mode manual',
@@ -244,7 +248,9 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 						filteredPersonas.map((p) => {
 							const isThisActive = isLatched && activePersonaId === p.id;
 							const primaryTag = p.persona_tags?.[0];
-							const tagString = primaryTag ? `${primaryTag.prefix ?? ''}text${primaryTag.suffix ?? ''}` : undefined;
+							const tagString = primaryTag
+								? `${primaryTag.prefix ?? ''}${i18n._(TAG_EXAMPLE_TEXT_DESCRIPTOR)}${primaryTag.suffix ?? ''}`
+								: undefined;
 
 							return (
 								<div

@@ -10,9 +10,20 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "（前綴：{0}）"
 
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "一個人格最多可以有 5 個標籤"
+
+#. Tooltip showing root account username
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "帳號：@{username}"
+
+msgid "Active persona cleared"
+msgstr "已清除使用中人格"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "已清除使用中人格（以根帳號傳送）"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
@@ -33,6 +44,10 @@ msgstr "新增標籤組（{0}/5）"
 
 msgid "Add signal"
 msgstr "新增訊號"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "愛麗絲"
 
 msgid "All Personas"
 msgstr "所有人格"
@@ -113,8 +128,6 @@ msgstr "顯示標籤"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "顯示標籤會出現在訊息中所有人格名稱的旁邊。如果未設定顯示標籤，則會顯示您的帳號大頭貼。"
 
-#. Settings search entry label for double-clicking a message to edit it.
-#. Short label for an advanced message editing preference.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "按兩下以編輯"
@@ -126,6 +139,10 @@ msgstr "正在下載頭像 {current} / {total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "正在下載橫幅 {current} / {total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "標籤組「{tag}」不能在同一個人格上重複新增"
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -156,6 +173,9 @@ msgstr "所有地方"
 msgid "Export Summary"
 msgstr "匯出摘要"
 
+msgid "Failed to clear active persona"
+msgstr "清除使用中人格失敗"
+
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
 msgstr "刪除人格失敗"
@@ -183,6 +203,37 @@ msgstr "訊號列儲存失敗，請再試一次。"
 #. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
 msgid "Failed to save where the signal bar appears. Try again."
 msgstr "訊號列顯示位置儲存失敗，請再試一次。"
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "選擇 GIF 圖示失敗"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "選擇圖示圖片失敗"
+
+msgid "Failed to set active persona"
+msgstr "設定使用中人格失敗"
+
+msgid "Failed to set the persona for this channel"
+msgstr "為此頻道設定人格失敗"
+
+msgid "Failed to update display tag"
+msgstr "更新顯示標籤失敗"
+
+msgid "Failed to update persona mode"
+msgstr "更新人格模式失敗"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "變更人格的記憶範圍失敗"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "上傳頭像圖片到伺服器失敗"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "上傳橫幅圖片到伺服器失敗"
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
@@ -343,6 +394,14 @@ msgstr "預覽"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "永久刪除全部 {existingCount} 個現有人格，並以匯入的人格完全取代。"
 
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "人格"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "已選擇人格「{name}」。"
+
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "人格標籤（前綴和後綴）"
 
@@ -357,6 +416,14 @@ msgstr "人格已建立"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "人格已刪除"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "已取消選擇人格。"
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "人格名稱不能為空白"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -388,6 +455,18 @@ msgstr "釘選表情符號"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "為此人設釘選"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "請在儲存前修正標籤錯誤"
+
+#. Toast when saving a persona while its avatar or banner is still uploading
+msgid "Please wait for images to finish uploading"
+msgstr "請等待圖片上傳完成"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "由 KLIPY 提供技術支援"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
@@ -458,6 +537,10 @@ msgstr "取代所有人格"
 
 msgid "Replace all existing personas (Destructive)"
 msgstr "取代所有現有人格（無法復原）"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "請求失敗（HTTP {status}）"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
@@ -563,14 +646,23 @@ msgstr "推薦"
 msgid "Supports PluralKit system export files"
 msgstr "支援 PluralKit 系統匯出檔"
 
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "切換使用中人格"
+
 msgid "System Tag (Applied to imported personas)"
 msgstr "系統標籤（套用於匯入的人格）"
 
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "標籤圖示"
 
 msgid "Tag Text"
 msgstr "標籤文字"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "標籤組「{tag}」已被人格「{name}」使用"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
@@ -587,6 +679,10 @@ msgstr "介紹一下這個人格..."
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "所選檔案不是有效的 JSON 物件。"
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "要選擇的人格。"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "在此勾選頻道之前，訊號列為關閉狀態。勾選分類或整個社群後，之後在其中建立的頻道也會套用。"
@@ -671,6 +767,10 @@ msgstr "個橫幅已下載"
 msgid "e.g. Alice"
 msgstr "例如：Alice"
 
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "例如：仙境"
+
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "例如：她"
@@ -683,6 +783,10 @@ msgstr "例如：明天下午3點、2小時後、現在"
 msgid "images stored"
 msgstr "張圖片已儲存"
 
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "個項目"
+
 #. Progress label for prepared personas
 msgid "personas prepared"
 msgstr "個人格已準備"
@@ -691,13 +795,19 @@ msgstr "個人格已準備"
 msgid "saving personas"
 msgstr "個人格已儲存"
 
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "文字"
+
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
 msgstr "匯入期間有 {0} 則提示"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
-#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} / {1} {2}（{3}%）"

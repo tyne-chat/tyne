@@ -10,9 +10,20 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(プレフィックス: {0})"
 
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "ペルソナに設定できるタグは5個までです"
+
+#. Tooltip showing root account username
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "アカウント: @{username}"
+
+msgid "Active persona cleared"
+msgstr "アクティブなペルソナを解除しました"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "アクティブなペルソナを解除しました (ルートアカウントとして送信します)"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
@@ -33,6 +44,10 @@ msgstr "タグのペアを追加 ({0}/5)"
 
 msgid "Add signal"
 msgstr "シグナルを追加"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "アリス"
 
 msgid "All Personas"
 msgstr "すべてのペルソナ"
@@ -113,8 +128,6 @@ msgstr "表示タグ"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "表示タグはメッセージ内のすべてのペルソナ名の横に表示されます。表示タグが設定されていない場合は、アカウントのプロフィール画像が表示されます。"
 
-#. Settings search entry label for double-clicking a message to edit it.
-#. Short label for an advanced message editing preference.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "ダブルクリックで編集"
@@ -126,6 +139,10 @@ msgstr "アバターをダウンロード中 {current}/{total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "バナーをダウンロード中 {current}/{total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "タグのペア「{tag}」は同じペルソナに複数回登録できません"
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -156,6 +173,9 @@ msgstr "すべての場所"
 msgid "Export Summary"
 msgstr "エクスポートの概要"
 
+msgid "Failed to clear active persona"
+msgstr "アクティブなペルソナを解除できませんでした"
+
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
 msgstr "ペルソナを削除できませんでした"
@@ -183,6 +203,37 @@ msgstr "シグナルバーを保存できませんでした。もう一度お試
 #. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
 msgid "Failed to save where the signal bar appears. Try again."
 msgstr "シグナルバーの表示場所を保存できませんでした。もう一度お試しください。"
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "GIFアイコンを選択できませんでした"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "アイコン画像を選択できませんでした"
+
+msgid "Failed to set active persona"
+msgstr "アクティブなペルソナを設定できませんでした"
+
+msgid "Failed to set the persona for this channel"
+msgstr "このチャンネルのペルソナを設定できませんでした"
+
+msgid "Failed to update display tag"
+msgstr "表示タグを更新できませんでした"
+
+msgid "Failed to update persona mode"
+msgstr "ペルソナモードを更新できませんでした"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "ペルソナを記憶する範囲を変更できませんでした"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "アバター画像をサーバーにアップロードできませんでした"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "バナー画像をサーバーにアップロードできませんでした"
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
@@ -343,6 +394,14 @@ msgstr "のぞき見"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "既存の {existingCount} 件のペルソナをすべて完全に削除し、インポートしたペルソナに置き換えます。"
 
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "ペルソナ"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "ペルソナ「{name}」を選択しました。"
+
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "ペルソナタグ (プレフィックスとサフィックス)"
 
@@ -357,6 +416,14 @@ msgstr "ペルソナを作成しました"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "ペルソナを削除しました"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "ペルソナの選択を解除しました。"
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "ペルソナ名を入力してください"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -388,6 +455,18 @@ msgstr "絵文字をピン留め"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "このペルソナ用にピン留め"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "保存する前にタグのエラーを修正してください"
+
+#. Toast when saving a persona while its avatar or banner is still uploading
+msgid "Please wait for images to finish uploading"
+msgstr "画像のアップロードが完了するまでお待ちください"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "KLIPY 提供"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
@@ -458,6 +537,10 @@ msgstr "すべてのペルソナを置き換え"
 
 msgid "Replace all existing personas (Destructive)"
 msgstr "既存のペルソナをすべて置き換え (元に戻せません)"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "リクエストに失敗しました (HTTP {status})"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
@@ -563,14 +646,23 @@ msgstr "おすすめ"
 msgid "Supports PluralKit system export files"
 msgstr "PluralKit のシステムエクスポートファイルに対応"
 
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "アクティブなペルソナを切り替える"
+
 msgid "System Tag (Applied to imported personas)"
 msgstr "システムタグ (インポートしたペルソナに適用)"
 
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "タグアイコン"
 
 msgid "Tag Text"
 msgstr "タグテキスト"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "タグのペア「{tag}」はペルソナ「{name}」ですでに使用されています"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
@@ -587,6 +679,10 @@ msgstr "このペルソナについて教えてください..."
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "選択したファイルは有効な JSON オブジェクトではありません。"
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "選択するペルソナ。"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "ここでチャンネルにチェックを入れるまで、シグナルバーはオフです。カテゴリーやコミュニティ全体にチェックを入れると、後からそこに作成されるチャンネルにも適用されます。"
@@ -671,6 +767,10 @@ msgstr "バナーをダウンロード済み"
 msgid "e.g. Alice"
 msgstr "例: アリス"
 
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "例: ふしぎの国"
+
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "例: 彼女"
@@ -683,6 +783,10 @@ msgstr "例: 明日の15時、2時間後、今"
 msgid "images stored"
 msgstr "画像を保存済み"
 
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "件"
+
 #. Progress label for prepared personas
 msgid "personas prepared"
 msgstr "ペルソナを準備済み"
@@ -691,13 +795,19 @@ msgstr "ペルソナを準備済み"
 msgid "saving personas"
 msgstr "ペルソナを保存済み"
 
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "テキスト"
+
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
 msgstr "インポート中に {0} 件の通知"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
-#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{1} 件中 {0} 件 {2} ({3}%)"
