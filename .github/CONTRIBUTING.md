@@ -80,7 +80,7 @@ Complete every section of the pull request template. Clearly describe:
 
 Report bugs and request features at [feedback.fluxer.com](https://feedback.fluxer.com).
 
-Report security vulnerabilities privately through [fluxer.app/security](https://fluxer.app/security). Never post them publicly.
+Report security vulnerabilities privately by email to <security@tyne.chat>, as [SECURITY.md](SECURITY.md) explains. Never post them publicly.
 
 Read the [operator documentation](https://fluxer.dev) for self-hosting questions.
 
