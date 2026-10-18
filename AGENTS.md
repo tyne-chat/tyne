@@ -27,7 +27,9 @@ or `GEMINI.md` to the repository: both tools read this file.
   of it.
 - `fluxer_desktop/`: desktop app, with native Rust workspaces under `native/`.
 - `fluxer_gateway/`: Erlang/OTP gateway that holds the clients' WebSocket connections.
-- `fluxer_messages/`: Rust service that persists and broadcasts message events (NATS, PostgreSQL).
+- `fluxer_messages/`: Rust service, reached over NATS, that builds message objects for responses and
+  events from the stored rows and extracts mentions. The API writes messages and dispatches the
+  events.
 - `fluxer_admin/`, `fluxer_app_proxy/`, `fluxer_media_proxy/` and the other `fluxer_*` folders:
   further services, mostly Rust.
 - `packages/schema/`: Zod schemas (the source of the OpenAPI spec) and protobuf definitions.
@@ -41,14 +43,20 @@ writes as more than one person. The code calls them personas; the object embedde
 called `subprofile`.
 
 - API: CRUD under `/api/v1/users/@me/personas`. `POST /api/v1/users/@me/personas/import-batch-avatars`
-  imports avatars as an NDJSON stream (rate-limited, a worker pool, SSRF protection). When a message
-  is created with `persona_id`, the API resolves the persona and embeds a `subprofile` object (`id`,
-  `name`, `avatar`, `avatar_color`, `display_tag_text`, `pronouns`, …) in the message.
-- Web app: persona settings (create, edit, delete, reorder), the PluralKit import with live
-  progress, the composer's persona picker and quick switcher, and messages rendered with the
+  imports avatars and streams its progress as NDJSON (rate-limited, one batch at a time per account;
+  the fetches go through the media proxy, which enforces the network policy). A message sent
+  with `persona_id` is checked against the sender's own personas and stored with only that id (and
+  the personas it mentions); the API adds a `subprofile` object (`id`, `name`, `avatar`,
+  `avatar_color`, `display_tag_text`, `pronouns`, …) whenever it builds the message for a response
+  or an event.
+- Web app: persona settings (create, edit, delete; lists sort by name), the PluralKit import with
+  live progress and the PluralKit-compatible export, the composer's persona picker with proxy tags
+  and a remembered (global or per-channel) selection, "React as…", and messages rendered with the
   persona's name, avatar and `[TAG]` badge.
 - Data: fork-only data lives in fork-owned tables next to `Personas`, never in new columns on
-  upstream's tables.
+  upstream's tables. The one deliberate exception is the persona of a message or reaction:
+  `persona_id` and `mention_personas` on `messages`, and `persona_id` in `message_reactions`' key. A
+  message or reaction comes from a persona, so the row is not a full description without it.
 
 ## Keep fork changes out of upstream's way
 
@@ -67,8 +75,10 @@ Rules with a mechanical answer; follow them every time:
 
 - **Tests** go in a fork-owned file next to upstream's (`ReactionStateMachinePersona.test.ts`,
   `ForkEnvironmentOverrides.test.ts`, `fork_session_passive_tests.erl`,
-  `tests/fork_binary_envelope.rs`). Never add a test or an assertion to an upstream test file; the
-  one exception is a fixture line upstream's own test needs to compile against a fork type.
+  `tests/fork_binary_envelope.rs`). Never add a test or an assertion to an upstream test file. The
+  exception is what upstream's own tests need to run against the fork's code: a fixture line for a
+  fork type, or a `vi.mock` of a fork module that upstream's code now imports (a mock applies only
+  to its own file), under a `// Fork:` comment saying why.
 - **Upstream test expectations** that hard-code upstream's hosts, or upstream's behaviour where the
   fork deliberately differs, may be changed in place with a `// Fork:` comment saying why, after
   asking a maintainer. Everything else in the test stays as upstream has it.
@@ -97,7 +107,8 @@ Rules with a mechanical answer; follow them every time:
   reuse one without a plan for the stored values.
 - **Strings:** fork catalogues only (see "Translations").
 - **Generated files:** never edited by hand (see "Generated code").
-- **Data:** fork-owned tables next to `Personas`.
+- **Data:** fork-owned tables next to `Personas` (the one exception, a message's or reaction's
+  persona, is under "Personas").
 
 When upstream ships its own version of something the fork did, the behaviour decides which to keep:
 
