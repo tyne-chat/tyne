@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {Logger} from '@app/api/Logger';
 import {
 	FORK_CALL_SITE_HEADER,
 	forkBuildGlobalRateLimitReport,
@@ -8,6 +9,7 @@ import {
 } from '@app/api/middleware/ForkRateLimitDiagnostics';
 import {RateLimitMiddleware} from '@app/api/middleware/RateLimitMiddleware';
 import type {HonoEnv} from '@app/api/types/HonoEnv';
+import type {LoggerInterface} from '@fluxer/logger/src/LoggerInterface';
 import type {
 	BucketConfig,
 	IRateLimitService,
@@ -15,13 +17,7 @@ import type {
 	RateLimitResult,
 } from '@pkgs/rate_limit/src/IRateLimitService';
 import {type Context, Hono} from 'hono';
-import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
-
-const loggerWarn = vi.hoisted(() => vi.fn());
-
-vi.mock('@app/api/Logger', () => ({
-	Logger: {warn: loggerWarn, info: vi.fn(), error: vi.fn(), debug: vi.fn(), trace: vi.fn(), fatal: vi.fn()},
-}));
+import {afterEach, beforeEach, describe, expect, type MockInstance, test, vi} from 'vitest';
 
 const USER_ID = 1557292976315564032n;
 const SESSION_HASH = Buffer.from('phone-session-hash-0123456789abcdef');
@@ -192,12 +188,18 @@ class RefusingGlobalLimit implements IRateLimitService {
 }
 
 describe('RateLimitMiddleware with the fork diagnostics', () => {
+	// A spy on the logger the test setup installed, as MessageCrosspost.test.ts does, not a vi.mock of
+	// the module: the `api` project does not isolate files, so a module another file has loaded
+	// already keeps the real logger and the mock never sees the report (tyne-chat/tyne#126).
+	let loggerWarn: MockInstance<LoggerInterface['warn']>;
+
 	beforeEach(() => {
 		forkResetRateLimitDiagnostics();
+		loggerWarn = vi.spyOn(Logger.child({}), 'warn').mockImplementation(() => {});
 	});
 
 	afterEach(() => {
-		loggerWarn.mockClear();
+		loggerWarn.mockRestore();
 	});
 
 	test('logs what the user requested when the global limit refuses a session request', async () => {
