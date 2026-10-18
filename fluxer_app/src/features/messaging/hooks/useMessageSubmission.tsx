@@ -31,6 +31,7 @@ import {useCallback} from 'react';
 // Fork imports.
 
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
+import {isDraftUsedUpByExpression} from '@app/features/messaging/utils/ExpressionDraftPersona';
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
 
@@ -218,6 +219,7 @@ export const useMessageSubmission = ({
 
 			const draft =
 				(sendOptions.draftOverride !== undefined ? sendOptions.draftOverride : Drafts.getDraft(channel.id)) || '';
+			const draftUsedUp = isDraftUsedUpByExpression(channel.id, draft);
 			const draftMatch = draft
 				? PersonaStore.matchOutgoingMessage(channel.id, draft, sendOptions.hasAttachments, {allowEmptyContent: true})
 				: null;
@@ -235,7 +237,9 @@ export const useMessageSubmission = ({
 				}
 			}
 
-			DraftCommands.deleteDraft(accountKey, channel.id);
+			if (draftUsedUp) {
+				DraftCommands.deleteDraft(accountKey, channel.id);
+			}
 
 			const displayTagText = PersonaStore.displayTagText;
 			const displayTagIcon = PersonaStore.displayTagIcon;
