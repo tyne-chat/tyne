@@ -10,9 +10,20 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Πρόθεμα: {0})"
 
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "Μια persona μπορεί να έχει έως 5 ετικέτες"
+
+#. Tooltip showing root account username
 #. Tooltip showing root account username
 msgid "Account: @{username}"
 msgstr "Λογαριασμός: @{username}"
+
+msgid "Active persona cleared"
+msgstr "Η ενεργή persona καταργήθηκε"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "Η ενεργή persona καταργήθηκε (αποστολή ως κύριος λογαριασμός)"
 
 #. Aria label for active persona mode tabs
 #. Aria label for active persona mode tabs
@@ -33,6 +44,10 @@ msgstr "Προσθήκη ζεύγους ετικετών ({0}/5)"
 
 msgid "Add signal"
 msgstr "Προσθήκη σήματος"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "Αλίκη"
 
 msgid "All Personas"
 msgstr "Όλες οι persona"
@@ -113,8 +128,6 @@ msgstr "Ετικέτα εμφάνισης"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Η ετικέτα εμφάνισης θα εμφανίζεται δίπλα σε όλα τα ονόματα persona στα μηνύματα. Αν δεν οριστεί ετικέτα εμφάνισης, θα εμφανίζεται η εικόνα προφίλ του λογαριασμού σας."
 
-#. Settings search entry label for double-clicking a message to edit it.
-#. Short label for an advanced message editing preference.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Διπλό κλικ για επεξεργασία"
@@ -126,6 +139,10 @@ msgstr "Λήψη avatar {current} από {total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "Λήψη πανό {current} από {total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "Το ζεύγος ετικετών «{tag}» δεν μπορεί να εμφανίζεται περισσότερες από μία φορές στην ίδια persona"
 
 #. Validation error when tag pair is duplicated within the same persona
 msgid "Duplicate tag pair on this persona"
@@ -156,6 +173,9 @@ msgstr "Παντού"
 msgid "Export Summary"
 msgstr "Σύνοψη εξαγωγής"
 
+msgid "Failed to clear active persona"
+msgstr "Η κατάργηση της ενεργής persona απέτυχε"
+
 #. Toast when persona deletion fails
 msgid "Failed to delete persona"
 msgstr "Η διαγραφή της persona απέτυχε"
@@ -183,6 +203,37 @@ msgstr "Η αποθήκευση της γραμμής σημάτων απέτυ�
 #. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
 msgid "Failed to save where the signal bar appears. Try again."
 msgstr "Δεν ήταν δυνατή η αποθήκευση του πού εμφανίζεται η γραμμή σημάτων. Δοκίμασε ξανά."
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "Η επιλογή του εικονιδίου GIF απέτυχε"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "Η επιλογή της εικόνας εικονιδίου απέτυχε"
+
+msgid "Failed to set active persona"
+msgstr "Ο ορισμός της ενεργής persona απέτυχε"
+
+msgid "Failed to set the persona for this channel"
+msgstr "Ο ορισμός της persona για αυτό το κανάλι απέτυχε"
+
+msgid "Failed to update display tag"
+msgstr "Η ενημέρωση της ετικέτας εμφάνισης απέτυχε"
+
+msgid "Failed to update persona mode"
+msgstr "Η ενημέρωση της λειτουργίας persona απέτυχε"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "Η αλλαγή του πού απομνημονεύεται η persona σας απέτυχε"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "Η μεταφόρτωση της εικόνας avatar στον διακομιστή απέτυχε"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "Η μεταφόρτωση της εικόνας banner στον διακομιστή απέτυχε"
 
 #. Toast when icon upload fails
 msgid "Failed to upload icon to server"
@@ -343,6 +394,14 @@ msgstr "Γρήγορη ματιά"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Διαγράψτε οριστικά και τις {existingCount} υπάρχουσες persona και αντικαταστήστε τις πλήρως με τις εισαγόμενες."
 
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "Persona"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "Επιλέχθηκε η persona «{name}»."
+
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Ετικέτες persona (πρόθεμα και επίθημα)"
 
@@ -357,6 +416,14 @@ msgstr "Η persona δημιουργήθηκε"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Η persona διαγράφηκε"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "Η επιλογή persona καταργήθηκε."
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "Το όνομα της persona δεν μπορεί να είναι κενό"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
@@ -388,6 +455,18 @@ msgstr "Καρφίτσωμα emoji"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "Καρφίτσωμα για αυτήν την περσόνα"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "Διορθώστε τα σφάλματα των ετικετών πριν από την αποθήκευση"
+
+#. Toast when saving a persona while its avatar or banner is still uploading
+msgid "Please wait for images to finish uploading"
+msgstr "Περιμένετε να ολοκληρωθεί η μεταφόρτωση των εικόνων"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "Με την υποστήριξη του KLIPY"
 
 #. Placeholder for persona tag prefix
 msgid "Prefix (e.g. [)"
@@ -458,6 +537,10 @@ msgstr "Αντικατάσταση όλων των persona"
 
 msgid "Replace all existing personas (Destructive)"
 msgstr "Αντικατάσταση όλων των υπαρχουσών persona (μη αναστρέψιμο)"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "Το αίτημα απέτυχε (HTTP {status})"
 
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
@@ -563,14 +646,23 @@ msgstr "Προτεινόμενα"
 msgid "Supports PluralKit system export files"
 msgstr "Υποστηρίζει αρχεία εξαγωγής συστήματος PluralKit"
 
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "Αλλαγή ενεργής persona"
+
 msgid "System Tag (Applied to imported personas)"
 msgstr "Ετικέτα συστήματος (εφαρμόζεται στις εισαγόμενες persona)"
 
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "Εικονίδιο ετικέτας"
 
 msgid "Tag Text"
 msgstr "Κείμενο ετικέτας"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "Το ζεύγος ετικετών «{tag}» χρησιμοποιείται ήδη από την persona «{name}»"
 
 #. Validation error when tag pair is already used by another persona
 msgid "Tag pair already in use by persona \"{name}\""
@@ -587,6 +679,10 @@ msgstr "Πείτε μας για αυτήν την persona..."
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "Το επιλεγμένο αρχείο δεν είναι έγκυρο αντικείμενο JSON."
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "Η persona που θα επιλεγεί."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Η γραμμή σημάτων είναι ανενεργή μέχρι να επιλέξεις ένα κανάλι εδώ. Η επιλογή μιας κατηγορίας ή ολόκληρης της κοινότητας καλύπτει και τα κανάλια που θα δημιουργηθούν εκεί αργότερα."
@@ -671,6 +767,10 @@ msgstr "πανό που λήφθηκαν"
 msgid "e.g. Alice"
 msgstr "π.χ. Alice"
 
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "π.χ. Χώρα των Θαυμάτων"
+
 #. Placeholder for persona pronouns
 msgid "e.g. she/her"
 msgstr "π.χ. αυτή"
@@ -683,6 +783,10 @@ msgstr "π.χ. αύριο στις 3 μ.μ., σε 2 ώρες, τώρα"
 msgid "images stored"
 msgstr "εικόνες που αποθηκεύτηκαν"
 
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "στοιχεία"
+
 #. Progress label for prepared personas
 msgid "personas prepared"
 msgstr "persona που προετοιμάστηκαν"
@@ -691,13 +795,19 @@ msgstr "persona που προετοιμάστηκαν"
 msgid "saving personas"
 msgstr "persona που αποθηκεύτηκαν"
 
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "κείμενο"
+
 #. placeholder {0}: importResults.warnings.length
 msgid "{0} notice(s) during import"
 msgstr "{0} ειδοποίηση(-εις) κατά την εισαγωγή"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
-#. placeholder {2}: progress.label ?? 'items'
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} από {1} {2} ({3}%)"
