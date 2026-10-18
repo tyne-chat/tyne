@@ -855,6 +855,8 @@ A user added a reaction to a message.
 | emoji | [reaction emoji object](#reaction-emoji-object) | The emoji |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The reacting user's guild member object, present in a guild channel |
+| persona_id? | snowflake | The [persona](/http-api/users/personas/) the user reacted as, absent for the account |
+| subprofile? | [message persona](/http-api/messages/#message-persona-object) object | That persona as shown on the reaction, absent for the account |
 
 In a guild channel the session named by the request's `session_id` is excluded and that field is removed from the payload. In a private channel the field is delivered as `session_id` and excludes nobody, so a client MUST tolerate receiving its own reaction back.
 
@@ -905,6 +907,7 @@ One user's reaction was removed from a message.
 | emoji | [reaction emoji object](#reaction-emoji-object) | The emoji |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The user's guild member object, present in a guild channel |
+| persona_id? | snowflake | The [persona](/http-api/users/personas/) whose reaction was removed, absent for the account's or for a removal that named no persona |
 
 Exclusion works exactly as it does for [Message Reaction Add](#message-reaction-add), so the acting session is dropped in a guild channel and kept in a private one.
 
@@ -942,6 +945,7 @@ A visible user began typing in a channel.
 | timestamp | integer | Unix seconds when typing started |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The typing user's guild member object, present in a guild channel |
+| subprofile? | [message persona](/http-api/messages/#message-persona-object) object | The [persona](/http-api/users/personas/) the user is typing as, absent for the account |
 
 The `typing` override set through [Lazy Request](/gateway/commands/#lazy-request) decides delivery in a guild. With no override, a session receives the event when it is [active](/gateway/event-filtering/#active-and-passive-guilds) in the guild or when the guild has 250 members or fewer, so a passive session in a small guild still receives it. A guild that sets the `TYPING_EVENTS` bit in its [disabled operations](/http-api/guilds/#disabled-guild-operations) produces the event for nobody. Typing in a thread also needs one of the conditions in [Dispatch events](/gateway/threads/#dispatch-events).
 
