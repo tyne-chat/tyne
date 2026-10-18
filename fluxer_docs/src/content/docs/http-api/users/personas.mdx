@@ -24,7 +24,7 @@ A persona has at most 10,000 signature emojis, and a longer list is refused with
 | --- | --- |
 | unlisted | The default. Fetched by ID and offered as a mention candidate, but not listed on the owner's profile |
 | public | Listed by [List user public personas](#list-user-public-personas) and offered as a mention candidate |
-| private | Shown only to its owner |
+| private | Not listed. Its profile and fetch by ID are refused to others; its messages and reactions still show its name and avatar |
 
 [Get persona profile card by ID](#get-persona-profile-card-by-id) refuses a `private` persona to anyone but its owner with 403 `PRIVATE_PERSONA`. A persona ID that does not belong to the account a route acts on returns 404 `UNKNOWN_PERSONA`.
 
