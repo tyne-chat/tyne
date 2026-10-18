@@ -6,7 +6,6 @@ import styles from '@app/features/channel/components/GifPicker.module.css';
 import {useGifVideoPool} from '@app/features/channel/components/GifVideoPool';
 import type {GifPickerProps} from '@app/features/channel/components/pickers/gif/GifPicker';
 import {GifPickerGrid} from '@app/features/channel/components/pickers/gif/GifPickerGrid';
-import {GifPickerHeader} from '@app/features/channel/components/pickers/gif/GifPickerHeader';
 import {GifPickerLoadingSkeletonGrid} from '@app/features/channel/components/pickers/gif/GifPickerLoadingSkeletonGrid';
 import {GifPickerState} from '@app/features/channel/components/pickers/gif/GifPickerState';
 import {ImportFavoriteGifsModal} from '@app/features/channel/components/pickers/gif/ImportFavoriteGifsModal';
@@ -28,6 +27,10 @@ import {useLingui} from '@lingui/react/macro';
 import {SmileySadIcon, StarIcon, WarningCircleIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useRef, useState} from 'react';
+
+// Fork imports.
+
+import {ForkKlipyGifPickerHeader} from '@app/features/channel/components/pickers/gif/ForkKlipyGifPickerHeader';
 
 const NO_SEARCH_RESULTS_DESCRIPTOR = msg({
 	message: 'No search results',
@@ -101,7 +104,7 @@ export const GifPickerView = observer(({onClose, selectGif}: GifPickerProps = {}
 	}, []);
 	const isSelectionMode = selectGif != null;
 	const header = (
-		<GifPickerHeader
+		<ForkKlipyGifPickerHeader
 			store={store}
 			inputRef={searchInputRef}
 			onOpenImport={isSelectionMode ? undefined : handleOpenImport}
