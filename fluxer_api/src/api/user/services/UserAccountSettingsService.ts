@@ -280,9 +280,10 @@ export class UserAccountSettingsService {
 			) {
 				throw new SyncedPreferencesConflictError();
 			}
-			updatedRowData.synced_preferences = normalizeSyncedPreferencesSnapshot(data.synced_preferences);
-			// Fork: clients send back fields the fork once defined here and no longer does.
-			updatedRowData.synced_preferences = dropRetiredSyncedPreferenceFields(updatedRowData.synced_preferences);
+			// Fork: clients send back fields the fork once defined here and no longer does. They go before the
+			// blob is read, as some of them would make it unreadable (tyne-chat/tyne#125).
+			const syncedPreferences = dropRetiredSyncedPreferenceFields(data.synced_preferences);
+			updatedRowData.synced_preferences = normalizeSyncedPreferencesSnapshot(syncedPreferences);
 		}
 		const updatedSettings = await this.deps.userAccountRepository.upsertSettings(
 			updatedRowData,
