@@ -39,6 +39,10 @@ import type {
 	UserSettingsResponse,
 } from '@fluxer/schema/src/domains/user/UserResponseSchemas';
 
+// Fork imports.
+
+import {dropRetiredSyncedPreferenceFields} from '@app/api/persona/RetiredSyncedPreferenceFields';
+
 const PUBLIC_USER_FLAGS_WITHOUT_STAFF = PUBLIC_USER_FLAGS & ~UserFlags.STAFF;
 
 function getVisiblePublicUserFlags(userFlags: bigint): bigint {
@@ -351,7 +355,7 @@ export function mapUserSettingsToResponse(params: {settings: UserSettings}): Use
 			settings.suppressUnprivilegedSelfMentionBypassUserIds,
 		),
 		staff_dm_access_user_ids: sortUserIds(settings.staffDmAccessUserIds),
-		synced_preferences: settings.syncedPreferences,
+		synced_preferences: dropRetiredSyncedPreferenceFields(settings.syncedPreferences) ?? '',
 		profile_privacy: settings.profilePrivacy,
 		default_share_voice_activity: settings.defaultShareVoiceActivity,
 		privacy_setup_version: settings.privacySetupVersion,
