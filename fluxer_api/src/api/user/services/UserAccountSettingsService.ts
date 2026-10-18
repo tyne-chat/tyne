@@ -272,9 +272,10 @@ export class UserAccountSettingsService {
 			updatedRowData.staff_dm_access_user_ids = null;
 		}
 		if (data.synced_preferences !== undefined) {
-			updatedRowData.synced_preferences = normalizeSyncedPreferencesSnapshot(data.synced_preferences);
-			// Fork: clients send back fields the fork once defined here and no longer does.
-			updatedRowData.synced_preferences = dropRetiredSyncedPreferenceFields(updatedRowData.synced_preferences);
+			// Fork: clients send back fields the fork once defined here and no longer does. They go before the
+			// blob is read, as some of them would make it unreadable (tyne-chat/tyne#125).
+			const syncedPreferences = dropRetiredSyncedPreferenceFields(data.synced_preferences);
+			updatedRowData.synced_preferences = normalizeSyncedPreferencesSnapshot(syncedPreferences);
 		}
 		await this.deps.userAccountRepository.upsertSettings(updatedRowData);
 		const updatedSettings = await this.findSettings(userId);
