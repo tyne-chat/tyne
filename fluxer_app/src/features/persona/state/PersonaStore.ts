@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+import i18n from '@app/app/I18n';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import {http} from '@app/features/platform/transport/RestTransport';
@@ -22,7 +23,17 @@ import {
 	previewPersona,
 } from '@fluxer/schema/src/domains/persona/PersonaMatcher';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {msg} from '@lingui/core/macro';
 import {makeAutoObservable, observable, runInAction} from 'mobx';
+
+const DISPLAY_TAG_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update display tag`;
+const PERSONA_MODE_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update persona mode`;
+const SET_ACTIVE_PERSONA_FAILED_DESCRIPTOR = msg`Failed to set active persona`;
+const CLEAR_ACTIVE_PERSONA_FAILED_DESCRIPTOR = msg`Failed to clear active persona`;
+const PERSONA_SCOPE_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update where your persona is remembered`;
+const CHANNEL_PERSONA_UPDATE_FAILED_DESCRIPTOR = msg`Failed to set the persona for this channel`;
+const ACTIVE_PERSONA_CLEARED_DESCRIPTOR = msg`Active persona cleared`;
+const ACTIVE_PERSONA_CLEARED_ROOT_DESCRIPTOR = msg`Active persona cleared (sending as root account)`;
 
 export type ActivePersonaMode = 'manual' | 'last';
 
@@ -344,7 +355,7 @@ export class PersonaStoreClass {
 				this._displayTagText = prevText;
 				this._displayTagIcon = prevIcon;
 			});
-			Toast.error('Failed to update display tag');
+			Toast.error(i18n._(DISPLAY_TAG_UPDATE_FAILED_DESCRIPTOR));
 		}
 	}
 
@@ -413,7 +424,7 @@ export class PersonaStoreClass {
 				this._activePersonaId = prevId;
 				this._isPersonaLatched = prevLatched;
 			});
-			Toast.error('Failed to update persona mode');
+			Toast.error(i18n._(PERSONA_MODE_UPDATE_FAILED_DESCRIPTOR));
 		}
 	}
 
@@ -458,7 +469,7 @@ export class PersonaStoreClass {
 				this._isPersonaLatched = prevLatched;
 				this._activePersonaMode = prevMode;
 			});
-			Toast.error('Failed to set active persona');
+			Toast.error(i18n._(SET_ACTIVE_PERSONA_FAILED_DESCRIPTOR));
 		}
 	}
 
@@ -493,7 +504,7 @@ export class PersonaStoreClass {
 				this._activePersonaId = prevId;
 				this._activePersonaMode = prevMode;
 			});
-			Toast.error('Failed to clear active persona');
+			Toast.error(i18n._(CLEAR_ACTIVE_PERSONA_FAILED_DESCRIPTOR));
 		}
 	}
 
@@ -509,7 +520,7 @@ export class PersonaStoreClass {
 			runInAction(() => {
 				this._activePersonaScope = previous;
 			});
-			Toast.error('Failed to update where your persona is remembered');
+			Toast.error(i18n._(PERSONA_SCOPE_UPDATE_FAILED_DESCRIPTOR));
 		}
 	}
 
@@ -560,7 +571,7 @@ export class PersonaStoreClass {
 		} catch {
 			// Ask the server what holds now, instead of putting back a value that may itself be stale.
 			await this.fetchChannelStates();
-			Toast.error('Failed to set the persona for this channel');
+			Toast.error(i18n._(CHANNEL_PERSONA_UPDATE_FAILED_DESCRIPTOR));
 		}
 	}
 
@@ -580,7 +591,7 @@ export class PersonaStoreClass {
 				return {isCommand: false, handled: false};
 			}
 			void this.unlatch(false, channelId);
-			Toast.success('Active persona cleared');
+			Toast.success(i18n._(ACTIVE_PERSONA_CLEARED_DESCRIPTOR));
 			return {isCommand: true, handled: true};
 		}
 		return {isCommand: false, handled: false};
@@ -616,7 +627,7 @@ export class PersonaStoreClass {
 
 		if (result.clearedLatch || (result.wasEscaped && this.activePersonaMode === 'last')) {
 			void this.unlatch(false, channelId);
-			Toast.success('Active persona cleared (sending as root account)');
+			Toast.success(i18n._(ACTIVE_PERSONA_CLEARED_ROOT_DESCRIPTOR));
 		} else if (result.matched && result.persona) {
 			void this.recordPersonaUse(result.persona.id);
 			if (this.activePersonaMode === 'last' && activeLatchedId !== result.persona.id) {
