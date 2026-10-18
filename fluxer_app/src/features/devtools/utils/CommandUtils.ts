@@ -23,6 +23,10 @@ import {msg} from '@lingui/core/macro';
 
 // Fork imports.
 
+import {
+	PERSONA_DESELECTED_DESCRIPTOR,
+	PERSONA_SELECTED_DESCRIPTOR,
+} from '@app/features/persona/commands/PersonaSlashCommandMessages';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const USER_MENTION_REGEX = /<@!?(\d+)>/;
@@ -382,13 +386,16 @@ export async function executeCommand(
 		}
 		case 'persona': {
 			if (!command.persona) {
-				const systemMessage = createSystemMessage(channelId, 'Persona deselected.');
+				const systemMessage = createSystemMessage(channelId, i18n._(PERSONA_DESELECTED_DESCRIPTOR));
 				PersonaStore.setActivePersona(null);
 				MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
 			} else {
 				const persona = PersonaStore.personas.find((v) => v.id === command.persona);
 				if (persona) {
-					const systemMessage = createSystemMessage(channelId, `Persona "${persona.name}" selected.`);
+					const systemMessage = createSystemMessage(
+						channelId,
+						i18n._(PERSONA_SELECTED_DESCRIPTOR, {name: persona.name}),
+					);
 					PersonaStore.setActivePersona(command.persona);
 					MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
 				}
