@@ -237,7 +237,7 @@ Whether this deployment runs as one community, and whether direct messages exist
 
 <sup>1</sup> The identifier is published only while `single_community` is true and the deployment has designated a community guild
 
-<sup>2</sup> A client setting. The API does not refuse a community created by someone else
+<sup>2</sup> The API also enforces it: [Create Guild](/http-api/guilds/) answers 403 `MISSING_PERMISSIONS` to an account without the staff flag
 
 ## Server list buttons object
 
@@ -454,7 +454,7 @@ The instance identity a client renders: its name, its images, its theme colour, 
 | status_page_incident_history_url | ?string | Status page incident history URL, or null |
 | premium_product_name | string | Name of the premium tier a client displays. A self-hosted deployment reports `Premium` until the operator sets a name |
 | premium_info_url | ?string | Absolute URL of a page describing the premium tier, or null |
-| desktop_app_prompt_enabled | boolean | Whether the web app offers to open links in the desktop app and to download it, default true |
+| desktop_app_prompt_enabled | boolean | Whether the web app offers to open links in the desktop app and to download it; default true, false when self-hosted |
 
 ## Public setup state object
 
