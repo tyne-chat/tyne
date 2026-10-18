@@ -147,6 +147,46 @@ const TAG_PAIR_IN_USE_DESCRIPTOR = msg({
 	message: 'Tag pair already in use by persona "{name}"',
 	comment: 'Validation error when tag pair is already used by another persona',
 });
+const DUPLICATE_TAG_PAIR_TOAST_DESCRIPTOR = msg({
+	message: 'Duplicate tag pair "{tag}" cannot be listed more than once on the same persona',
+	comment: 'Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice',
+});
+const TAG_PAIR_IN_USE_TOAST_DESCRIPTOR = msg({
+	message: 'Tag pair "{tag}" is already in use by persona "{name}"',
+	comment: 'Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses',
+});
+const AVATAR_UPLOAD_FAILED_DESCRIPTOR = msg({
+	message: 'Failed to upload avatar image to server',
+	comment: 'Toast when uploading a persona avatar fails',
+});
+const BANNER_UPLOAD_FAILED_DESCRIPTOR = msg({
+	message: 'Failed to upload banner image to server',
+	comment: 'Toast when uploading a persona banner fails',
+});
+const WAIT_FOR_IMAGE_UPLOADS_DESCRIPTOR = msg({
+	message: 'Please wait for images to finish uploading',
+	comment: 'Toast when saving a persona while its avatar or banner is still uploading',
+});
+const PERSONA_NAME_EMPTY_DESCRIPTOR = msg({
+	message: 'Persona name cannot be empty',
+	comment: 'Toast when saving a persona without a name',
+});
+const FIX_TAG_ERRORS_DESCRIPTOR = msg({
+	message: 'Please fix tag errors before saving',
+	comment: 'Toast when saving a persona whose tag pairs have errors',
+});
+const TOO_MANY_TAGS_DESCRIPTOR = msg({
+	message: 'A persona can have at most 5 tags',
+	comment: 'Toast when saving a persona with more than five tag pairs',
+});
+const TAG_EXAMPLE_TEXT_DESCRIPTOR = msg({
+	message: 'text',
+	comment: 'Stands for the message text between a tag pair\'s prefix and suffix inputs, as in "a:text"',
+});
+const PERSONA_NAME_FALLBACK_DESCRIPTOR = msg({
+	message: 'Persona',
+	comment: 'Name shown in the persona preview card before a name is entered',
+});
 const SIGNATURE_EMOJI_IN_USE_DESCRIPTOR = msg({
 	message: 'Signature emoji already in use by persona "{name}"',
 	comment: 'Validation error when signature emoji is already used by another persona',
@@ -267,10 +307,10 @@ function getTagKey(tag: {prefix: string; suffix: string}) {
 	return `${tag.prefix}:::${tag.suffix}`;
 }
 
-function formatTagDisplay(tag: {prefix: string; suffix: string}): string {
-	if (tag.prefix && tag.suffix) return `${tag.prefix}text${tag.suffix}`;
-	if (tag.prefix) return `${tag.prefix}text`;
-	if (tag.suffix) return `text${tag.suffix}`;
+function formatTagDisplay(tag: {prefix: string; suffix: string}, text: string): string {
+	if (tag.prefix && tag.suffix) return `${tag.prefix}${text}${tag.suffix}`;
+	if (tag.prefix) return `${tag.prefix}${text}`;
+	if (tag.suffix) return `${text}${tag.suffix}`;
 	return '';
 }
 
@@ -527,13 +567,13 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			} else {
 				ToastCommands.createToast({
 					type: 'error',
-					children: 'Failed to upload avatar image to server',
+					children: i18n._(AVATAR_UPLOAD_FAILED_DESCRIPTOR),
 				});
 			}
 		} catch {
 			ToastCommands.createToast({
 				type: 'error',
-				children: 'Failed to upload avatar image to server',
+				children: i18n._(AVATAR_UPLOAD_FAILED_DESCRIPTOR),
 			});
 		} finally {
 			setIsUploadingAvatar(false);
@@ -557,13 +597,13 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			} else {
 				ToastCommands.createToast({
 					type: 'error',
-					children: 'Failed to upload banner image to server',
+					children: i18n._(BANNER_UPLOAD_FAILED_DESCRIPTOR),
 				});
 			}
 		} catch {
 			ToastCommands.createToast({
 				type: 'error',
-				children: 'Failed to upload banner image to server',
+				children: i18n._(BANNER_UPLOAD_FAILED_DESCRIPTOR),
 			});
 		} finally {
 			setIsUploadingBanner(false);
@@ -601,7 +641,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		if (isUploadingAvatar || isUploadingBanner) {
 			ToastCommands.createToast({
 				type: 'info',
-				children: 'Please wait for images to finish uploading',
+				children: i18n._(WAIT_FOR_IMAGE_UPLOADS_DESCRIPTOR),
 			});
 			return;
 		}
@@ -610,7 +650,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		if (!trimmedName) {
 			ToastCommands.createToast({
 				type: 'error',
-				children: 'Persona name cannot be empty',
+				children: i18n._(PERSONA_NAME_EMPTY_DESCRIPTOR),
 			});
 			return;
 		}
@@ -618,7 +658,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		if (hasTagErrors) {
 			ToastCommands.createToast({
 				type: 'error',
-				children: 'Please fix tag errors before saving',
+				children: i18n._(FIX_TAG_ERRORS_DESCRIPTOR),
 			});
 			return;
 		}
@@ -632,7 +672,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		if (validTags.length > 5) {
 			ToastCommands.createToast({
 				type: 'error',
-				children: 'A persona can have at most 5 tags',
+				children: i18n._(TOO_MANY_TAGS_DESCRIPTOR),
 			});
 			return;
 		}
@@ -645,7 +685,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			if (seenTags.has(key)) {
 				ToastCommands.createToast({
 					type: 'error',
-					children: `Duplicate tag pair '${formatTagDisplay(norm)}' cannot be listed multiple times on the same persona`,
+					children: i18n._(DUPLICATE_TAG_PAIR_TOAST_DESCRIPTOR, {
+						tag: formatTagDisplay(norm, i18n._(TAG_EXAMPLE_TEXT_DESCRIPTOR)),
+					}),
 				});
 				return;
 			}
@@ -664,7 +706,10 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					if ((otherNorm.prefix || otherNorm.suffix) && getTagKey(otherNorm) === key) {
 						ToastCommands.createToast({
 							type: 'error',
-							children: `Tag pair '${formatTagDisplay(otherNorm)}' is already in use by persona '${p.name}'`,
+							children: i18n._(TAG_PAIR_IN_USE_TOAST_DESCRIPTOR, {
+								tag: formatTagDisplay(otherNorm, i18n._(TAG_EXAMPLE_TEXT_DESCRIPTOR)),
+								name: p.name,
+							}),
 						});
 						return;
 					}
@@ -962,7 +1007,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 													data-flx="persona.persona-edit-modal.tag-input.tag-change.text"
 												/>
 												<span style={{color: 'var(--text-primary-muted)'}} data-flx="persona.persona-edit-modal.span">
-													text
+													{i18n._(TAG_EXAMPLE_TEXT_DESCRIPTOR)}
 												</span>
 												<input
 													type="text"
@@ -1149,7 +1194,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 										/>
 										<ProfileCardContent data-flx="persona.persona-edit-modal.profile-card-content">
 											<ProfileCardUserInfo
-												displayName={formData.name.trim() || 'Persona'}
+												displayName={formData.name.trim() || i18n._(PERSONA_NAME_FALLBACK_DESCRIPTOR)}
 												displayNameClassName={popoutStyles.profileDisplayName}
 												user={currentUser}
 												pronouns={formData.pronouns.trim() || null}
