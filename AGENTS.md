@@ -96,14 +96,21 @@ Rules with a mechanical answer; follow them every time:
   rest parameter); no comments inside upstream's expressions; add fork behaviour as a separate
   statement. To format an upstream file, run
   `pnpm exec biome check --write --linter-enabled=false <file>` and check that only fork lines moved.
-- **Protobuf fields** (synced preferences and every other `.proto`): a fork field gets a number from
-  2200 up, in the `// Fork fields.` block at the top of its message (`accessibility.proto` has
-  one), never the next number after upstream's last field. Upstream numbers in sequence and users'
-  settings are stored by number, so a fork field there becomes upstream's next field the day
-  upstream adds one. On 2026-10-16 upstream's `double_click_message_actions = 65` collided with the
-  fork's `show_alt_text_on_images = 65`, and the fork's fields had to move to 2223–2226 with 8
-  production users already holding values. Numbers are permanent once released: never renumber or
-  reuse one without a plan for the stored values.
+- **Numbers upstream hands out:** where upstream numbers things in sequence or by position (protobuf
+  fields, schema and migration versions, enum values and binary tags, bit flags, opcodes, numeric
+  error codes, the column order of a table's key), the fork never takes the next free value and
+  never inserts into the middle: the day upstream takes that number, the two collide, often
+  silently. Use a name where the format allows one. Otherwise take the value from a fork range,
+  declared in a `// Fork:` block that says so: protobuf fields from 2200 up, in the `// Fork fields.`
+  block at the top of the message (`accessibility.proto` has one); one-byte tags counting down from
+  255 (the persona mention in `packages/markdown_parser/rust/src/binary.rs`); flag bits from the
+  top; schema versions not at all. Fork values in an upstream enum go last, after a blank line and
+  `// Fork values.`, and an enum is never stored or sent by its position. A fork column never joins
+  an upstream table's key; the one exception, `persona_id` in `message_reactions`' key, stays the 7th
+  column for good (`MessageReactionsPersonaKey.test.ts`). A shipped number is permanent: moving it
+  needs a migration and a window in which old and new builds both work, and a number given up stays
+  reserved. (On 2026-10-16 upstream's protobuf field 65 collided with the fork's, and the fork's
+  fields had to move to 2223–2226 with 8 production users already holding values.)
 - **Strings:** fork catalogues only (see "Translations").
 - **Generated files:** never edited by hand (see "Generated code").
 - **Data:** fork-owned tables next to `Personas` (the one exception, a message's or reaction's
