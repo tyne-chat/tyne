@@ -247,6 +247,12 @@ member.)
   commit; extra fallbacks need evidence that their cause happens (a log line, a query, a repro).
 - When a theory of a bug is not verified, say so when handing it on, so it is not implemented as
   fact.
+- When a bug hits some users and not others, compare what is stored for them (account and
+  per-server settings, roles, who owns the server, app version) with an unaffected user's, and look
+  for anything unusual before reading more code. Test and maintainer accounts rarely have unusual
+  settings, and a server's owner skips permission checks. (In tyne-chat/tyne#193 the affected users
+  were the only accounts with a reply mention preference set, which made the app drop their own
+  guild member in READY; reading the code had missed it for two days.)
 
 ## Issues
 
