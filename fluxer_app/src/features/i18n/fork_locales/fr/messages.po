@@ -653,6 +653,7 @@ msgstr "Changer de persona active"
 msgid "System Tag (Applied to imported personas)"
 msgstr "Balise de système (Appliquée aux personas importées)"
 
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "Icône de badge"
@@ -686,6 +687,10 @@ msgstr "La persona à sélectionner."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "La barre de signaux est désactivée tant que tu ne coches pas un salon ici. Cocher une catégorie ou toute la communauté s’applique aussi aux salons créés plus tard à cet endroit."
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "L'icône de badge n'a pas pu être enregistrée : {error}. Vous pouvez la définir à nouveau dans les paramètres des personas."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
