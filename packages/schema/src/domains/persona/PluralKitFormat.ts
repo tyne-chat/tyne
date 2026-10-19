@@ -485,7 +485,11 @@ export interface TyneBundleManifest {
 	tag_text?: string;
 	/** Path of the tag icon inside the zip. */
 	tag_icon?: string;
-	/** The tag icon's link, when it is a link rather than an image stored on Tyne. */
+	/**
+	 * A link to the tag icon instead of the file. Exports no longer write it: the icon is always an
+	 * image stored on Tyne, so it is in the zip. Older exports, and files made elsewhere, can still
+	 * carry one. The import has the server fetch it into storage and never stores the link itself.
+	 */
 	tag_icon_url?: string;
 	members: Record<string, TyneBundleMemberEntry>;
 }
@@ -631,7 +635,8 @@ export interface PersonaBundleInput {
 	/** Host name of this instance's media server, named in the README. */
 	mediaHost: string;
 	tagText: string | null;
-	tagIcon: {path: string} | {url: string} | null;
+	/** The tag icon's path inside the zip. */
+	tagIcon: {path: string} | null;
 	personas: ReadonlyArray<PersonaBundlePersona>;
 }
 
@@ -659,8 +664,7 @@ export function buildPersonaBundleText(input: PersonaBundleInput): PersonaBundle
 		members: {},
 	};
 	if (shortened.some((entry) => entry.field === 'tag') && input.tagText) manifest.tag_text = input.tagText;
-	if (input.tagIcon && 'path' in input.tagIcon) manifest.tag_icon = input.tagIcon.path;
-	if (input.tagIcon && 'url' in input.tagIcon) manifest.tag_icon_url = input.tagIcon.url;
+	if (input.tagIcon) manifest.tag_icon = input.tagIcon.path;
 	const shortenedBios = new Map(
 		shortened.filter((entry) => entry.field === 'description').map((entry) => [entry.exportId, entry.fullText]),
 	);
@@ -695,7 +699,7 @@ function buildPersonaBundleReadme(input: PersonaBundleInput, shortened: Readonly
 	const lines: Array<string> = [];
 	const hasAvatars = input.personas.some((persona) => persona.avatar?.path);
 	const hasBanners = input.personas.some((persona) => persona.banner?.path);
-	const tagIconPath = input.tagIcon && 'path' in input.tagIcon ? input.tagIcon.path : null;
+	const tagIconPath = input.tagIcon?.path ?? null;
 
 	lines.push(`Personas exported from Tyne on ${date}`, '');
 	lines.push('What is in here', '');
