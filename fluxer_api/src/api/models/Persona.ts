@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import type {
-	PersonaResponse,
-	PersonaVisibility,
-	PublicPersonaResponse,
-	SignatureEmoji,
+import {
+	type PersonaResponse,
+	type PersonaVisibility,
+	type PublicPersonaResponse,
+	personaAssetHashOrNull,
+	type SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
@@ -41,8 +42,10 @@ export class Persona {
 		this.id = row.persona_id;
 		this.userId = row.user_id;
 		this.name = row.name;
-		this.avatarHash = row.avatar_hash ?? null;
-		this.bannerHash = row.banner_hash ?? null;
+		// Image fields are hashes of images stored under the account (the routes accept nothing else);
+		// anything else read from storage, a link above all, is dropped rather than handed on.
+		this.avatarHash = personaAssetHashOrNull(row.avatar_hash);
+		this.bannerHash = personaAssetHashOrNull(row.banner_hash);
 		this.pronouns = row.pronouns ?? null;
 		this.color = row.color ?? null;
 		this.avatarColor = row.avatar_color ?? null;

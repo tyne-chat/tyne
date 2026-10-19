@@ -158,7 +158,7 @@ describe('PersonaCommands', () => {
 				active_persona_id: '1540000000000000001',
 				is_latched: true,
 				display_tag_text: 'SYS',
-				display_tag_icon: 'https://example.com/icon.png',
+				display_tag_icon: '19191919',
 			};
 
 			vi.mocked(http.get).mockResolvedValueOnce({
@@ -174,7 +174,7 @@ describe('PersonaCommands', () => {
 			expect(PersonaStore.activePersonaId).toBe('1540000000000000001');
 			expect(PersonaStore.isPersonaLatched).toBe(true);
 			expect(PersonaStore.displayTagText).toBe('SYS');
-			expect(PersonaStore.displayTagIcon).toBe('https://example.com/icon.png');
+			expect(PersonaStore.displayTagIcon).toBe('19191919');
 		});
 
 		it('returns null on failure without crashing', async () => {

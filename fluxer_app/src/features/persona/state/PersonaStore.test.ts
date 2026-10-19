@@ -637,9 +637,9 @@ describe('PersonaStore', () => {
 			expect(store.displayTagText).toBe('');
 			expect(store.displayTagIcon).toBeNull();
 
-			await store.setDisplayTag('Wonderland', 'https://example.com/icon.png');
+			await store.setDisplayTag('Wonderland', '1a2b3c4d');
 			expect(store.displayTagText).toBe('Wonderland');
-			expect(store.displayTagIcon).toBe('https://example.com/icon.png');
+			expect(store.displayTagIcon).toBe('1a2b3c4d');
 
 			await store.setDisplayTag('', null);
 			expect(store.displayTagText).toBe('');
@@ -651,12 +651,12 @@ describe('PersonaStore', () => {
 				name: 'Alice',
 				persona_tags: [{prefix: '[', suffix: ']'}],
 			});
-			await store.setDisplayTag('Wonderland', 'https://example.com/icon.png');
+			await store.setDisplayTag('Wonderland', '1a2b3c4d');
 
 			const res = store.matchEditMessage('[Hello]');
 			expect(res.subprofile?.id).toBe(alice.id);
 			expect(res.subprofile?.display_tag_text).toBe('Wonderland');
-			expect(res.subprofile?.display_tag_icon).toBe('https://example.com/icon.png');
+			expect(res.subprofile?.display_tag_icon).toBe('1a2b3c4d');
 		});
 	});
 
@@ -667,7 +667,7 @@ describe('PersonaStore', () => {
 			store.recordKnownPersona({
 				id: 'p_ext',
 				name: 'Fox Persona',
-				avatar: 'https://example.com/fox.png',
+				avatar: 'd4d4d4d4',
 				avatar_color: 0x123456,
 				display_tag_text: 'Fox System',
 				display_tag_icon: null,
@@ -778,8 +778,8 @@ describe('PersonaStore', () => {
 			const subprofile = normalizeSubprofile({
 				id: 'persona_api_1',
 				name: 'Alice Api',
-				avatar_hash: 'api_avatar_hash_123',
-				banner_hash: 'api_banner_hash_456',
+				avatar_hash: 'e6e6e6e6',
+				banner_hash: '4c4c4c4c',
 				avatar_color: 0x112233,
 				color: 0x445566,
 				bio: 'Api bio',
@@ -790,7 +790,7 @@ describe('PersonaStore', () => {
 			expect(subprofile).toEqual({
 				id: 'persona_api_1',
 				name: 'Alice Api',
-				avatar: 'api_avatar_hash_123',
+				avatar: 'e6e6e6e6',
 				avatar_color: 0x112233,
 				display_tag_text: undefined,
 				display_tag_icon: undefined,
@@ -805,11 +805,11 @@ describe('PersonaStore', () => {
 				{
 					id: 'persona_snapshot_1',
 					name: 'Charlie Snapshot',
-					avatar: 'snapshot_avatar_val',
+					avatar: 'c3c3c3c3',
 					avatar_color: 0x990011,
 					color: 0x223344,
 					display_tag_text: 'OLD_TAG',
-					display_tag_icon: 'https://cdn.example.com/old.png',
+					display_tag_icon: '2a2a2a2a',
 					pronouns: 'they/them',
 					visibility: 'private',
 				},
@@ -822,7 +822,7 @@ describe('PersonaStore', () => {
 			expect(subprofile).toEqual({
 				id: 'persona_snapshot_1',
 				name: 'Charlie Snapshot',
-				avatar: 'snapshot_avatar_val',
+				avatar: 'c3c3c3c3',
 				avatar_color: 0x990011,
 				display_tag_text: 'NEW_TAG',
 				display_tag_icon: null,
@@ -836,12 +836,12 @@ describe('PersonaStore', () => {
 			const subprofile = normalizeSubprofile({
 				id: 'partial_1',
 				name: 'Partial Persona',
-				avatar_hash: 'new_hash_only',
+				avatar_hash: '80808080',
 			} as any);
 
 			expect(subprofile.id).toBe('partial_1');
 			expect(subprofile.name).toBe('Partial Persona');
-			expect(subprofile.avatar).toBe('new_hash_only');
+			expect(subprofile.avatar).toBe('80808080');
 			expect(subprofile.avatar_color).toBeUndefined();
 			expect(subprofile.display_tag_text).toBeUndefined();
 			expect(subprofile.display_tag_icon).toBeUndefined();
@@ -858,12 +858,12 @@ describe('PersonaStore', () => {
 		});
 
 		it('puts the display tag back', async () => {
-			store.updateSettings({display_tag_text: 'old', display_tag_icon: 'https://example.test/old.png'});
+			store.updateSettings({display_tag_text: 'old', display_tag_icon: '08080808'});
 
 			await store.setDisplayTag('  new  ', 'https://example.test/new.png');
 
 			expect(store.displayTagText).toBe('old');
-			expect(store.displayTagIcon).toBe('https://example.test/old.png');
+			expect(store.displayTagIcon).toBe('08080808');
 			expect(Toast.error).toHaveBeenCalledTimes(1);
 		});
 

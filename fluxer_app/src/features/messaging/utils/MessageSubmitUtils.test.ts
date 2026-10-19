@@ -62,10 +62,10 @@ describe('MessageSubmitUtils', () => {
 					subprofile: {
 						id: 'persona_1',
 						name: 'Fox Persona',
-						avatar: 'https://example.com/fox.png',
+						avatar: 'd4d4d4d4',
 						avatar_color: 0xff0000,
 						display_tag_text: 'VIXEN',
-						display_tag_icon: '🦊',
+						display_tag_icon: '1a2b3c4d',
 						pronouns: 'she/they',
 						color: 0xffa500,
 						visibility: 'public',
@@ -77,9 +77,9 @@ describe('MessageSubmitUtils', () => {
 			expect(msg.subprofile).toBeDefined();
 			expect(msg.subprofile?.id).toBe('persona_1');
 			expect(msg.subprofile?.name).toBe('Fox Persona');
-			expect(msg.subprofile?.avatar).toBe('https://example.com/fox.png');
+			expect(msg.subprofile?.avatar).toBe('d4d4d4d4');
 			expect(msg.subprofile?.display_tag_text).toBe('VIXEN');
-			expect(msg.subprofile?.display_tag_icon).toBe('🦊');
+			expect(msg.subprofile?.display_tag_icon).toBe('1a2b3c4d');
 			expect(msg.subprofile?.pronouns).toBe('she/they');
 			expect(msg.subprofile?.color).toBe(0xffa500);
 			expect(msg.subprofile?.visibility).toBe('public');

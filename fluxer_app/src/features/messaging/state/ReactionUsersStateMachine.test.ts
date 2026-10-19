@@ -153,7 +153,7 @@ describe('ReactionUsersStateMachine: persona support', () => {
 			persona: {
 				id: PERSONA_1_ID,
 				name: 'Kenoma',
-				avatar: 'new_avatar_hash',
+				avatar: '6e6e6e6e',
 				color: 0x990000,
 			},
 		});
@@ -161,7 +161,7 @@ describe('ReactionUsersStateMachine: persona support', () => {
 		expect(snapshot.context.version).toBeGreaterThan(initialVersion);
 		expect(snapshot.context.userSnapshot.length).toBe(3);
 		expect(snapshot.context.userSnapshot[1].subprofile?.name).toBe('Kenoma');
-		expect(snapshot.context.userSnapshot[1].subprofile?.avatar).toBe('new_avatar_hash');
+		expect(snapshot.context.userSnapshot[1].subprofile?.avatar).toBe('6e6e6e6e');
 		expect(snapshot.context.userSnapshot[1].subprofile?.color).toBe(0x990000);
 		expect(snapshot.context.userSnapshot[1].subprofile?.display_tag_text).toBe('SYS');
 		expect(snapshot.context.userSnapshot[1].subprofile?.pronouns).toBe('she/her');
@@ -198,10 +198,10 @@ describe('ReactionUsersStateMachine: persona support', () => {
 			type: 'displayTag.update',
 			userId: ROOT_USER_ID,
 			display_tag_text: 'SERAPHIM HYPERSYSTEM',
-			display_tag_icon: 'https://cdn.example.com/icon.png',
+			display_tag_icon: '2b3c4d5e',
 		});
 
 		expect(snapshot.context.userSnapshot[0].subprofile?.display_tag_text).toBe('SERAPHIM HYPERSYSTEM');
-		expect(snapshot.context.userSnapshot[0].subprofile?.display_tag_icon).toBe('https://cdn.example.com/icon.png');
+		expect(snapshot.context.userSnapshot[0].subprofile?.display_tag_icon).toBe('2b3c4d5e');
 	});
 });

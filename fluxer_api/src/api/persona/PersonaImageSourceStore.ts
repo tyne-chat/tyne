@@ -9,6 +9,12 @@
 // The avatar's PluralKit field is kept even without a link, so the export can write the avatar
 // back to the field it came from.
 //
+// These links record where an image came from; they are not images to show. The import fetches
+// every image into this instance's storage, and personas show only those copies. A link stored
+// here is never sent to a client, in a response or an event, and never used as an image address:
+// the one place it leaves the server is the account's own export zip (`pluralkit.json`), for
+// PluralKit to read. Keep `loadPersonaImageSources` out of any other path.
+//
 // One partition per account: the export reads them in one go and deleting an account removes them
 // in one write.
 
