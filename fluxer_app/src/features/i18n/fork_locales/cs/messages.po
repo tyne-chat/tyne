@@ -653,6 +653,7 @@ msgstr "Přepnout aktivní personu"
 msgid "System Tag (Applied to imported personas)"
 msgstr "Značka systému (použije se na importované persony)"
 
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "Ikona značky"
@@ -686,6 +687,10 @@ msgstr "Persona, která se má vybrat."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Lišta signálů je vypnutá, dokud tady nezaškrtneš kanál. Zaškrtnutí kategorie nebo celé komunity platí i pro kanály, které tam vzniknou později."
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "Ikonu značky se nepodařilo uložit: {error}. Můžete ji znovu nastavit v nastavení person."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
