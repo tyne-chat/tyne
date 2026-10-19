@@ -653,6 +653,7 @@ msgstr "Змінити активну персону"
 msgid "System Tag (Applied to imported personas)"
 msgstr "Тег системи (застосовується до імпортованих персон)"
 
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "Значок тегу"
@@ -686,6 +687,10 @@ msgstr "Персона, яку потрібно вибрати."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Панель сигналів вимкнена, доки ти не позначиш тут канал. Якщо позначити категорію або всю спільноту, це пошириться й на канали, створені там пізніше."
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "Не вдалося зберегти значок тегу: {error}. Його можна знову встановити в налаштуваннях персон."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
