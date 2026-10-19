@@ -10,12 +10,12 @@ import {isKeyboardActivationKey} from '@app/features/input/utils/KeyboardUtils';
 import type {GuildMember} from '@app/features/member/models/GuildMember';
 import type {Message} from '@app/features/messaging/models/MessagingMessage';
 import tagStyles from '@app/features/persona/components/PersonaTag.module.css';
+import {personaTagIconUrls} from '@app/features/persona/utils/PersonaTagIconUrls';
 import styles from '@app/features/theme/styles/Message.module.css';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import KeyboardMode from '@app/features/ui/state/KeyboardMode';
 import type {User} from '@app/features/user/models/User';
-import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
@@ -36,7 +36,7 @@ export const MessagePersonaAccount = observer(
 		guild,
 		member,
 		className,
-		customIconUrl,
+		tagIcon,
 		tagText,
 		isHovering: forceAnimate,
 	}: {
@@ -48,7 +48,8 @@ export const MessagePersonaAccount = observer(
 		isPreview?: boolean;
 		previewColor?: string;
 		previewName?: string;
-		customIconUrl?: string | null;
+		/** The account's display tag icon: an image hash, see `personaTagIconUrls`. */
+		tagIcon?: string | null;
 		tagText?: string | null;
 		isHovering?: boolean;
 	}) => {
@@ -69,17 +70,9 @@ export const MessagePersonaAccount = observer(
 		}, []);
 		const keyboardModeEnabled = KeyboardMode.keyboardModeEnabled;
 
-		const staticIconUrl = customIconUrl
-			? customIconUrl.startsWith('http://') || customIconUrl.startsWith('https://') || customIconUrl.startsWith('data:')
-				? customIconUrl
-				: AvatarUtils.getUserAvatarURL({id: user.id, avatar: customIconUrl}, false, 32)
-			: null;
-
-		const hoverIconUrl = customIconUrl
-			? customIconUrl.startsWith('http://') || customIconUrl.startsWith('https://') || customIconUrl.startsWith('data:')
-				? customIconUrl
-				: AvatarUtils.getUserAvatarURL({id: user.id, avatar: customIconUrl}, true, 32)
-			: null;
+		const iconUrls = personaTagIconUrls(user.id, tagIcon);
+		const staticIconUrl = iconUrls?.staticUrl ?? null;
+		const hoverIconUrl = iconUrls?.hoverUrl ?? null;
 
 		const hasDistinctHover = Boolean(hoverIconUrl && hoverIconUrl !== staticIconUrl);
 		const shouldAnimate = useShouldAnimate({

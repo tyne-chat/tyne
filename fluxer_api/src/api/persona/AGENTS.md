@@ -18,6 +18,7 @@ and follow the placement rules in the root `AGENTS.md`.
 | Which persona a request names, and whether the caller owns it | `PersonaOwnership.ts` |
 | Who is typing as whom | `TypingPersona.ts` |
 | Image import from links | `PersonaAvatarImporter.ts`; the upload and link routes are in `user/controllers/UserAccountController.ts` |
+| Deleting the images with the account | `PersonaImageDeletion.ts`, called from `UserDeletionService` |
 | Export zip | `PersonaExportService.ts`, with the PluralKit mapping in `packages/schema/src/domains/persona/PluralKitFormat.ts` |
 | Persona mentions on message rows | `MessagePersonaMentions.ts` |
 | Old settings bytes | `RetiredSyncedPreferenceFields.ts` (a workaround; removal is tyne-chat/tyne#127) |
@@ -55,6 +56,17 @@ and follow the placement rules in the root `AGENTS.md`.
   banner, profile card) is withheld: `GET /users/:id/personas/:pid` answers 403 `PRIVATE_PERSONA`,
   not 404, because the asker has already seen the persona on a message. Other people's lookups also
   pass upstream's `validateProfileAccess` first.
+- **Every image is stored here, never linked.** A persona's avatar and banner and the account's
+  display tag icon are hashes of images this instance stores under the account (`avatars/<user
+  id>/`, `banners/<user id>/`); clients build the address from the media endpoint, the owner's id
+  and the hash. The schemas accept only `PERSONA_ASSET_HASH_PATTERN`, and images given as links are
+  fetched into storage first (below). The tag icon links stored before the route checked were
+  migrated to hashes once. As a backstop, values read from storage pass through
+  `personaAssetHashOrNull` (in the `Persona` constructor for avatars and banners, in
+  `PersonaRepository` for the tag icon), which drops anything that is not a hash, and the response
+  schemas declare the pattern, so dev and tests fail on a response that breaks it. The clients
+  turn a hash into an address only through helpers that refuse anything else. A link stored and
+  shown would tell its server who reads the account's messages.
 - **Counters and other concurrent fields need partial writes.** `update` and `recordUsage` write
   every other column from a read made earlier, so two concurrent edits can revert each other. An
   `upsertAll` row with columns missing becomes a partial update; use that for new counters.
@@ -71,7 +83,7 @@ single Postgres key/value table.
 | `user_persona_settings` | user_id | mode (`manual` or `last`), scope (`global` or `channel`), the selected persona and whether it is latched, the account-wide display tag |
 | `persona_channel_states` | (user_id, channel_id) | the per-channel selection; no row means the account |
 | `thread_owner_personas`, `thread_owner_personas_by_user` | thread_id; (user_id, thread_id) | which persona started a thread; the by-user row is written first, so account deletion finds it |
-| `persona_image_sources` | (user_id, persona_id) | the PluralKit link an image came from, and the hash it produced |
+| `persona_image_sources` | (user_id, persona_id) | the PluralKit link an image came from, and the hash it produced; only the export reads it |
 
 The persona columns on upstream's tables (`persona_id` and `mention_personas` on `messages`,
 `persona_id` in the key of `message_reactions`) are the one exception to "fork data in fork tables";
@@ -119,15 +131,23 @@ personas), 10,000 signature emojis per persona (unique across personas).
 - **Import:** the client reads a PluralKit export or a Tyne zip, sends the images first, then
   `POST /import` in chunks (the server takes at most 250 personas per request). `importPersonas`
   matches an existing persona by `external_uuid` or by its own id, so re-importing an export updates
-  it. It is not atomic: a failure leaves the personas already written.
+  it. It is not atomic: a failure leaves the personas already written. The zip's tag icon is stored
+  the same way, through `/import-image` or, for an older export's `tag_icon_url`, the batch link
+  import; the settings then get its hash.
+- **Image sources are a record, not images.** `persona_image_sources` keeps the PluralKit link each
+  imported image came from. A link there is never sent to a client, in a response or an event, and
+  never used as an image address; the one place it leaves the server is the account's own export,
+  in `pluralkit.json`, so PluralKit keeps its links. Keep `loadPersonaImageSources` out of every
+  other path.
 - **Images from links** (`PersonaAvatarImporter`): the fetch goes through the media proxy, which
   enforces the network policy (public addresses only, redirects checked hop by hop, a size cap).
   This code refuses only non-http(s) links, links with credentials and links on the media
   endpoint's own host. All three image routes share one quota (2,500 per 10 minutes); a batch runs
   one at a time per account, under a Valkey lock.
-- **Export:** `GET /export` streams a zip: the images, a README, `pluralkit.json` (PluralKit v2) and
-  `tyne.json`. An image that has not changed since it was imported links back to its PluralKit
-  source.
+- **Export:** `GET /export` streams a zip: the images and the tag icon as files, a README,
+  `pluralkit.json` (PluralKit v2) and `tyne.json`. An image that has not changed since it was
+  imported links back to its PluralKit source in `pluralkit.json`. Exports no longer write
+  `tag_icon_url`; the import still reads it from older files.
 
 ## Mentions for search
 
@@ -143,7 +163,8 @@ If the parser fails the message is still written, without its persona mentions. 
 
 `UserDeletionService` gives each persona, deleted ones included, a new id with a "Deleted Persona"
 row under the deleted user's id, rewrites the messages to that mapping, deletes and purges the
-images, then hard-deletes every persona row, setting and fork-table row.
+images (persona avatars and banners and the tag icon, `PersonaImageDeletion.ts`), then hard-deletes
+every persona row, setting and fork-table row.
 
 ## Known gaps
 
@@ -151,7 +172,7 @@ images, then hard-deletes every persona row, setting and fork-table row.
   (tyne-chat/tyne#123).
 - Persona edits and deletions reach every mutual guild whatever the persona's visibility.
 - Persona images share the account's `avatars/<user id>/` prefix, and deletion purges only the
-  current hashes.
+  current hashes: an image a persona or the tag icon used before is left in storage.
 
 ## Where this code hooks into upstream files
 
@@ -163,13 +184,16 @@ images, then hard-deletes every persona row, setting and fork-table row.
   `ApiErrorCodes.ts` and `ErrorCodeMappings.ts`, one entry in `UserRateLimitConfig.ts`, the scopes in
   `OAuth2Constants.ts`.
 - The largest blocks: about 240 lines of image routes inside `UserAccountController`, and the
-  persona part of `UserDeletionService`. Move code out of these when you touch it, not into them.
+  persona part of `UserDeletionService` (its image deletion has moved to `PersonaImageDeletion.ts`).
+  Move code out of these when you touch it, not into them.
 
 ## Tests
 
 - `persona/tests/` uses `createApiTestHarness` (in-memory database, a gateway with spies, in-memory
   search): no network needed. `PersonaService.test.ts`, `PersonaErrors.test.ts` and
   `MessagePersonaMentions.test.ts` are unit tests with mocks.
+- `PersonaTagIcon.test.ts` covers the tag icon rule (route, rows holding a link, messages) and
+  `PersonaImageDeletion.test.ts` the image deletion.
 - Elsewhere: `user/tests/PersonaAvatarUpload.test.ts` and `PersonaAccountDeletionCompliance.test.ts`,
   `channel/tests/` (`MessagePersona*`, `ChannelPersonaMentions`, `MessageReactionPersona`),
   `search/message/PersonaMessageSearch.test.ts`, the schema package's tests, and the end-to-end specs
