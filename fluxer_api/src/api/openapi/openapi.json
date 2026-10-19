@@ -26827,8 +26827,14 @@
 						"$ref": "#/components/schemas/SnowflakeStringType"
 					},
 					"name": {"type": "string", "description": "The persona display name"},
-					"avatar_hash": {"description": "Avatar asset hash", "type": ["string", "null"]},
-					"banner_hash": {"description": "Banner asset hash", "type": ["string", "null"]},
+					"avatar_hash": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"banner_hash": {
+						"description": "Banner asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
 					"pronouns": {"description": "Optional pronouns", "type": ["string", "null"]},
 					"color": {
 						"description": "Optional accent color integer",
@@ -27287,7 +27293,10 @@
 			"PersonaAvatarImportResponse": {
 				"type": "object",
 				"properties": {
-					"avatar_hash": {"type": "string", "description": "Hash of the imported avatar"},
+					"avatar_hash": {
+						"description": "Hash of the imported avatar",
+						"$ref": "#/components/schemas/PersonaAssetHashType"
+					},
 					"avatar_color": {
 						"description": "Dominant avatar color",
 						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
@@ -27303,7 +27312,12 @@
 			},
 			"PersonaBannerUploadResponse": {
 				"type": "object",
-				"properties": {"banner_hash": {"type": "string", "description": "Hash of the uploaded banner"}},
+				"properties": {
+					"banner_hash": {
+						"description": "Hash of the uploaded banner",
+						"$ref": "#/components/schemas/PersonaAssetHashType"
+					}
+				},
 				"required": ["banner_hash"],
 				"additionalProperties": false
 			},
@@ -27315,7 +27329,10 @@
 			"PersonaAvatarUploadResponse": {
 				"type": "object",
 				"properties": {
-					"avatar_hash": {"type": "string", "description": "Hash of the uploaded avatar"},
+					"avatar_hash": {
+						"description": "Hash of the uploaded avatar",
+						"$ref": "#/components/schemas/PersonaAssetHashType"
+					},
 					"avatar_color": {
 						"description": "Dominant avatar color",
 						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
@@ -27972,11 +27989,11 @@
 					"name": {"description": "Persona display name", "type": "string"},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
-						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
 					"banner_hash": {
 						"description": "Banner asset hash",
-						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
 					"pronouns": {
 						"description": "Optional pronouns",
@@ -28026,8 +28043,14 @@
 						"$ref": "#/components/schemas/SnowflakeStringType"
 					},
 					"name": {"type": "string", "description": "The persona display name"},
-					"avatar_hash": {"description": "Avatar asset hash", "type": ["string", "null"]},
-					"banner_hash": {"description": "Banner asset hash", "type": ["string", "null"]},
+					"avatar_hash": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"banner_hash": {
+						"description": "Banner asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
 					"pronouns": {"description": "Optional pronouns", "type": ["string", "null"]},
 					"color": {
 						"description": "Optional accent color integer",
@@ -28109,7 +28132,10 @@
 					"active_persona_id": {"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]},
 					"is_latched": {"type": "boolean"},
 					"display_tag_text": {"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]},
-					"display_tag_icon": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]}
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, from the persona avatar upload or import routes",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					}
 				}
 			},
 			"PersonaSettingsResponseSchema": {
@@ -28125,7 +28151,10 @@
 					"active_persona_id": {"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]},
 					"is_latched": {"default": false, "type": "boolean"},
 					"display_tag_text": {"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]},
-					"display_tag_icon": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, an image stored under the account",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
 					"updated_at": {"type": "string"}
 				},
 				"required": ["user_id", "active_persona_mode", "active_persona_scope", "is_latched"],
@@ -28145,7 +28174,7 @@
 			"PersonaImportImageResponse": {
 				"type": "object",
 				"properties": {
-					"hash": {"type": "string", "description": "Hash of the stored image"},
+					"hash": {"description": "Hash of the stored image", "$ref": "#/components/schemas/PersonaAssetHashType"},
 					"avatar_color": {
 						"description": "Dominant colour, for an avatar",
 						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
@@ -28209,11 +28238,11 @@
 					"name": {"description": "Persona display name", "type": "string"},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
-						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
 					"banner_hash": {
 						"description": "Banner asset hash",
-						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
 					"pronouns": {
 						"description": "Optional pronouns",
@@ -38393,13 +38422,19 @@
 				"properties": {
 					"id": {"type": "string", "description": "Persona ID"},
 					"name": {"type": "string", "description": "Persona display name"},
-					"avatar": {"description": "Avatar asset URL or hash", "type": ["string", "null"]},
+					"avatar": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
 					"avatar_color": {
 						"description": "Avatar accent color",
 						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
 					},
 					"display_tag_text": {"description": "Display tag text", "type": ["string", "null"]},
-					"display_tag_icon": {"description": "Display tag icon URL or hash", "type": ["string", "null"]},
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, an image stored under the account",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
 					"pronouns": {"description": "Pronouns", "type": ["string", "null"]},
 					"color": {
 						"description": "Custom color integer",
@@ -38850,6 +38885,7 @@
 				]
 			},
 			"PersonaVisibilitySchema": {"default": "unlisted", "type": "string", "enum": ["unlisted", "public", "private"]},
+			"PersonaAssetHashType": {"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"},
 			"ClientAttachmentReferenceRequest": {
 				"type": "object",
 				"properties": {
@@ -39118,10 +39154,19 @@
 						"$ref": "#/components/schemas/SnowflakeStringType"
 					},
 					"name": {"type": "string", "description": "The persona display name"},
-					"avatar_hash": {"description": "Avatar asset hash", "type": ["string", "null"]},
-					"banner_hash": {"description": "Banner asset hash", "type": ["string", "null"]},
+					"avatar_hash": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"banner_hash": {
+						"description": "Banner asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
 					"display_tag_text": {"description": "Optional display tag text", "type": ["string", "null"]},
-					"display_tag_icon": {"description": "Optional display tag icon", "type": ["string", "null"]},
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, an image stored under the account",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
 					"pronouns": {"description": "Optional pronouns", "type": ["string", "null"]},
 					"color": {
 						"description": "Optional accent color integer",
@@ -42609,11 +42654,11 @@
 					"name": {"description": "Persona display name", "type": "string"},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
-						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
 					"banner_hash": {
 						"description": "Banner asset hash",
-						"anyOf": [{"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"}, {"type": "null"}]
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
 					"pronouns": {
 						"description": "Optional pronouns",

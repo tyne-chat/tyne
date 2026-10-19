@@ -22,6 +22,7 @@ vi.mock('@lingui/react/macro', () => ({
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
 import {User} from '@app/features/user/models/User';
+import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 
@@ -64,23 +65,55 @@ describe('PersonaTag Component', () => {
 		expect(tagEl?.textContent).toBe('TEST_TAG');
 	});
 
-	it('renders standalone icon when only tagIcon is provided without rootUser', async () => {
-		await act(async () => {
-			root.render(
-				<PersonaTag
-					subprofile={{
-						id: 'p2',
-						name: 'IconPersona',
-						display_tag_icon: 'https://example.com/icon.png',
-					}}
-					data-flx="persona.persona-tag-test.persona-tag--2"
-				/>,
-			);
-		});
+	it.each(['1a2b3c4d', 'https://example.com/icon.png'])(
+		'shows no icon without a rootUser, who the icon is stored under (%s)',
+		async (icon) => {
+			await act(async () => {
+				root.render(
+					<PersonaTag
+						subprofile={{
+							id: 'p2',
+							name: 'IconPersona',
+							display_tag_text: 'TAG',
+							display_tag_icon: icon,
+						}}
+						data-flx="persona.persona-tag-test.persona-tag--2"
+					/>,
+				);
+			});
 
-		const imgEl = container.querySelector('img[data-flx="persona.standalone-icon"]');
-		expect(imgEl).not.toBeNull();
-		expect(imgEl?.getAttribute('src')).toBe('https://example.com/icon.png');
+			expect(container.querySelector('[data-flx="persona.tag"]')?.textContent).toBe('TAG');
+			expect(container.querySelector('img')).toBeNull();
+		},
+	);
+
+	it('shows the icon stored under the rootUser, and never a link', async () => {
+		const mockUser = new User({
+			id: '100000000000000001',
+			username: 'alice',
+			discriminator: '0001',
+			avatar: null,
+			flags: 0,
+		} as any);
+		const render = (icon: string) =>
+			act(async () => {
+				root.render(
+					<PersonaTag
+						rootUser={mockUser}
+						subprofile={{id: 'p5', name: 'AlicePersona', display_tag_text: 'ALICE', display_tag_icon: icon}}
+						data-flx="persona.persona-tag-test.persona-tag--5"
+					/>,
+				);
+			});
+
+		await render('1a2b3c4d');
+		expect(container.querySelector('[data-flx="persona.tag"] img')?.getAttribute('src')).toBe(
+			AvatarUtils.getUserAvatarURL({id: mockUser.id, avatar: '1a2b3c4d'}, false, 32),
+		);
+
+		await render('https://tracker.example/pixel.png');
+		expect(container.querySelector('[data-flx="persona.tag"]')?.textContent).toBe('ALICE');
+		expect(container.querySelector('img')).toBeNull();
 	});
 
 	it('returns null when subprofile has neither tag text nor icon and no rootUser', async () => {

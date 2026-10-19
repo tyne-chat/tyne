@@ -9,12 +9,12 @@ import {isKeyboardActivationKey} from '@app/features/input/utils/KeyboardUtils';
 import type {GuildMember} from '@app/features/member/models/GuildMember';
 import type {Message} from '@app/features/messaging/models/MessagingMessage';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {personaTagIconUrls} from '@app/features/persona/utils/PersonaTagIconUrls';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
 import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
-import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
@@ -48,21 +48,9 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 
 		const [tagHoverRef, isTagHovering] = useHover();
 
-		const staticIconUrl = tagIcon
-			? tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')
-				? tagIcon
-				: rootUser
-					? AvatarUtils.getUserAvatarURL({id: rootUser.id, avatar: tagIcon}, false, 32)
-					: tagIcon
-			: null;
-
-		const hoverIconUrl = tagIcon
-			? tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')
-				? tagIcon
-				: rootUser
-					? AvatarUtils.getUserAvatarURL({id: rootUser.id, avatar: tagIcon}, true, 32)
-					: tagIcon
-			: null;
+		const iconUrls = personaTagIconUrls(rootUser?.id, tagIcon);
+		const staticIconUrl = iconUrls?.staticUrl ?? null;
+		const hoverIconUrl = iconUrls?.hoverUrl ?? null;
 
 		const hasDistinctHover = Boolean(hoverIconUrl && hoverIconUrl !== staticIconUrl);
 		const shouldAnimate = useShouldAnimate({
@@ -81,7 +69,7 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 					message={message}
 					guild={guild}
 					member={member}
-					customIconUrl={tagIcon}
+					tagIcon={tagIcon}
 					tagText={tagText || null}
 					className={className}
 					isHovering={propIsHovering}
@@ -90,29 +78,16 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 			);
 		}
 
-		// When no rootUser is available, render static markup if tagText or tagIcon exists
+		// Without a root user there is no account to serve the icon from, so only the text shows.
 		if (!rootUser) {
-			if (tagText) {
-				return (
-					<span className={clsx(styles.tag, className)} data-flx="persona.tag">
-						{tagIcon && <img src={tagIcon} alt="" className={styles.icon} data-flx="persona.persona-tag.icon" />}
-						<span className={styles.text} data-flx="persona.persona-tag.text">
-							{tagText}
-						</span>
+			if (!tagText) return null;
+			return (
+				<span className={clsx(styles.tag, className)} data-flx="persona.tag">
+					<span className={styles.text} data-flx="persona.persona-tag.text">
+						{tagText}
 					</span>
-				);
-			}
-			if (tagIcon) {
-				return (
-					<img
-						src={tagIcon}
-						alt=""
-						className={clsx(styles.standaloneIcon, className)}
-						data-flx="persona.standalone-icon"
-					/>
-				);
-			}
-			return null;
+				</span>
+			);
 		}
 
 		// Fallback for previews or contexts without a full message object (e.g., inside PersonaProfilePopout)

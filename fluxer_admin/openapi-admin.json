@@ -15854,7 +15854,11 @@
 				"properties": {
 					"id": {"type": "string", "description": "Persona ID"},
 					"name": {"type": "string", "description": "Persona display name"},
-					"avatar": {"description": "Avatar asset URL or hash", "nullable": true, "type": "string"},
+					"avatar": {
+						"description": "Avatar asset hash",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}]
+					},
 					"avatar_color": {
 						"description": "Avatar accent color",
 						"nullable": true,
@@ -15863,7 +15867,11 @@
 						"maximum": 9007199254740991
 					},
 					"display_tag_text": {"description": "Display tag text", "nullable": true, "type": "string"},
-					"display_tag_icon": {"description": "Display tag icon URL or hash", "nullable": true, "type": "string"},
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, an image stored under the account",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}]
+					},
 					"pronouns": {"description": "Pronouns", "nullable": true, "type": "string"},
 					"color": {
 						"description": "Custom color integer",
@@ -16992,6 +17000,7 @@
 				]
 			},
 			"PersonaVisibilitySchema": {"default": "unlisted", "type": "string", "enum": ["unlisted", "public", "private"]},
+			"PersonaAssetHashType": {"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"},
 			"MessageDeletionBasis": {
 				"oneOf": [
 					{
