@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {z} from 'zod';
-import {PersonaVisibilitySchema} from './PersonaApiSchemas';
+import {PersonaAssetHashType, PersonaVisibilitySchema} from './PersonaApiSchemas';
 
 /**
  * What clients released before `persona_id` send to name the persona of a message or of typing:
@@ -22,10 +22,12 @@ export type LegacyMessageSubprofileRequest = z.infer<typeof LegacyMessageSubprof
 export const MessageSubprofileResponseSchema = z.object({
 	id: z.string().describe('Persona ID'),
 	name: z.string().describe('Persona display name'),
-	avatar: z.string().nullish().describe('Avatar asset URL or hash'),
+	avatar: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
 	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
 	display_tag_text: z.string().nullish().optional().describe('Display tag text'),
-	display_tag_icon: z.string().nullish().optional().describe('Display tag icon URL or hash'),
+	display_tag_icon: PersonaAssetHashType.nullish()
+		.optional()
+		.describe('Hash of the display tag icon, an image stored under the account'),
 	pronouns: z.string().nullish().describe('Pronouns'),
 	color: z.number().int().nullish().describe('Custom color integer'),
 	visibility: PersonaVisibilitySchema.nullish().optional().describe('Persona visibility setting'),

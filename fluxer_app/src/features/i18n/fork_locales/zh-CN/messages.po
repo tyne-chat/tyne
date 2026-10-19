@@ -653,6 +653,7 @@ msgstr "切换活跃人格"
 msgid "System Tag (Applied to imported personas)"
 msgstr "系统标签（应用于导入的人格）"
 
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "标签图标"
@@ -686,6 +687,10 @@ msgstr "要选择的人格。"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "在此勾选频道之前，信号栏处于关闭状态。勾选分类或整个社区后，之后在其中创建的频道也会生效。"
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "无法保存标签图标：{error}。可在人格设置中重新设置。"
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
