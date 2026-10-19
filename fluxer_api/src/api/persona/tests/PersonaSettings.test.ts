@@ -43,13 +43,13 @@ describe('PersonaSettingsController', () => {
 				.patch('/users/@me/personas/settings')
 				.body({
 					display_tag_text: 'SYS',
-					display_tag_icon: 'system_badge.png',
+					display_tag_icon: '1a2b3c4d',
 				})
 				.expect(HTTP_STATUS.OK)
 				.execute();
 
 			expect(res.display_tag_text).toBe('SYS');
-			expect(res.display_tag_icon).toBe('system_badge.png');
+			expect(res.display_tag_icon).toBe('1a2b3c4d');
 			expect(res.active_persona_mode).toBe('manual');
 
 			// Check persistence via subsequent GET
@@ -59,7 +59,7 @@ describe('PersonaSettingsController', () => {
 				.execute();
 
 			expect(getRes.display_tag_text).toBe('SYS');
-			expect(getRes.display_tag_icon).toBe('system_badge.png');
+			expect(getRes.display_tag_icon).toBe('1a2b3c4d');
 		});
 
 		test('updates active persona mode and latching', async () => {
@@ -93,7 +93,7 @@ describe('PersonaSettingsController', () => {
 			await createBuilder<PersonaSettingsResponse>(harness, account.token)
 				.patch('/users/@me/personas/settings')
 				.body({
-					display_tag_icon: 'icon.png',
+					display_tag_icon: 'a_1a2b3c4d',
 				})
 				.expect(HTTP_STATUS.OK)
 				.execute();

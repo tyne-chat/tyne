@@ -24,6 +24,7 @@ import {readZipForTests} from './ReadZipForTests';
 import {VALID_PNG_BASE64} from '../../emoji/tests/EmojiTestUtils';
 import {getStorageService} from '../../middleware/ServiceSingletons';
 import {createPersonaExportArchive} from '../PersonaExportService';
+import {PersonaRepository} from '../PersonaRepository';
 
 const PUBLIC = Object.fromEntries(PLURALKIT_MEMBER_PRIVACY_KEYS.map((k) => [k, 'public']));
 const PRIVATE = Object.fromEntries(PLURALKIT_MEMBER_PRIVACY_KEYS.map((k) => [k, 'private']));
@@ -395,20 +396,49 @@ describe('Persona export', () => {
 			.execute();
 	const manifestOf = (files: Map<string, Buffer>) => JSON.parse(files.get('tyne.json')!.toString('utf8'));
 
-	it('puts a tag icon stored as a data URI in the zip', async () => {
-		await setTagIcon(account.token, `data:image/png;base64,${VALID_PNG_BASE64}`);
+	it('puts the tag icon in the zip', async () => {
+		const icon = await storeImage(account.token, 'avatar', `data:image/png;base64,${VALID_PNG_BASE64}`);
+		await setTagIcon(account.token, icon.hash);
 		const {files} = await exportZip(account.token);
 
-		expect(files.get('Tag icon.png')).toEqual(Buffer.from(VALID_PNG_BASE64, 'base64'));
+		expect(files.get('Tag icon.png')!.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
 		expect(manifestOf(files).tag_icon).toBe('Tag icon.png');
+		expect(manifestOf(files).tag_icon_url).toBeUndefined();
 	});
 
-	it('links a tag icon that is a web address instead of copying it', async () => {
-		await setTagIcon(account.token, 'https://images.example.test/tag.png');
+	// Rows written before the settings route checked the icon.
+	const storeRawTagIcon = (icon: string) =>
+		new PersonaRepository().upsertSettings({
+			user_id: createUserID(BigInt(account.userId)),
+			active_persona_id: null,
+			active_persona_mode: 'manual',
+			active_persona_scope: 'global',
+			is_latched: false,
+			display_tag_text: 'Example',
+			display_tag_icon: icon,
+			updated_at: new Date(),
+			version: 1,
+		});
+
+	it.each(['https://images.example.test/tag.png', `data:image/png;base64,${VALID_PNG_BASE64}`])(
+		'writes neither a file nor a link for a tag icon stored as %s',
+		async (icon) => {
+			await storeRawTagIcon(icon);
+			const {files} = await exportZip(account.token);
+
+			expect([...files.keys()].some((name) => name.startsWith('Tag icon'))).toBe(false);
+			expect(manifestOf(files).tag_icon).toBeUndefined();
+			expect(manifestOf(files).tag_icon_url).toBeUndefined();
+		},
+	);
+
+	it("writes neither a file nor a link for a tag icon stored as a link to the account's own image", async () => {
+		const icon = await storeImage(account.token, 'avatar', `data:image/png;base64,${VALID_PNG_BASE64}`);
+		await storeRawTagIcon(`https://media.tyne.test/media/avatars/${account.userId}/${icon.hash}.png`);
 		const {files} = await exportZip(account.token);
 
 		expect([...files.keys()].some((name) => name.startsWith('Tag icon'))).toBe(false);
-		expect(manifestOf(files).tag_icon_url).toBe('https://images.example.test/tag.png');
+		expect(manifestOf(files).tag_icon_url).toBeUndefined();
 	});
 
 	it('still exports a persona whose stored image cannot be read', async () => {

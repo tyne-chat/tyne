@@ -30,6 +30,10 @@ import {
 } from '@fluxer/constants/src/MediaProxyAssetSizes';
 import type {MediaProxyImageSize} from '@fluxer/constants/src/MediaProxyImageSizes';
 
+// Fork imports.
+
+import {isPersonaAssetHash} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+
 const DEFAULT_AVATAR_PRIMARY_COLORS = [0x4641d9, 0xf0b100, 0x00bba7, 0x2b7fff, 0xad46ff, 0x6a7282];
 const DEFAULT_AVATAR_COUNT = BigInt(DEFAULT_AVATAR_PRIMARY_COLORS.length);
 const normalizeEndpoint = (endpoint: string): string => endpoint.replace(/\/$/, '');
@@ -312,16 +316,16 @@ export function getUserBannerURL({id, banner}: BannerOptions, animated = false, 
 	});
 }
 
+// Fork: a persona's avatar and banner are hashes of images stored under the owning account. Any
+// other value gives no address ('', as for no image): a link would make the app load a picture from
+// wherever it points, and tell that server who is reading.
 export function getPersonaAvatarURL(
 	{userId, avatar}: {userId: string; avatar: string | null | undefined},
 	animated = false,
 	size: MediaProxyImageSize = MEDIA_PROXY_AVATAR_SIZE_DEFAULT,
 ): string {
-	if (!avatar) {
+	if (!isPersonaAssetHash(avatar)) {
 		return '';
-	}
-	if (avatar.startsWith('http://') || avatar.startsWith('https://') || avatar.startsWith('data:')) {
-		return avatar;
 	}
 	return getUserAvatarURL({id: userId, avatar}, animated, size);
 }
@@ -331,11 +335,8 @@ export function getPersonaBannerURL(
 	animated = false,
 	size: MediaProxyImageSize = 1024,
 ): string {
-	if (!banner) {
+	if (!isPersonaAssetHash(banner)) {
 		return '';
-	}
-	if (banner.startsWith('http://') || banner.startsWith('https://') || banner.startsWith('data:')) {
-		return banner;
 	}
 	return getUserBannerURL({id: userId, banner}, animated, size);
 }
