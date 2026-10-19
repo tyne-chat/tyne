@@ -29,21 +29,20 @@ describe('AvatarUtils - Persona & Asset URLs', () => {
 			expect(getPersonaAvatarURL({userId: '123', avatar: ''})).toBe('');
 		});
 
-		it('preserves direct HTTP, HTTPS, and data URIs without modification', () => {
-			const httpUrl = 'http://example.com/avatar.png';
-			const httpsUrl = 'https://cdn.example.com/avatar.webp';
-			const dataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA';
-
-			expect(getPersonaAvatarURL({userId: '123', avatar: httpUrl})).toBe(httpUrl);
-			expect(getPersonaAvatarURL({userId: '123', avatar: httpsUrl})).toBe(httpsUrl);
-			expect(getPersonaAvatarURL({userId: '123', avatar: dataUri})).toBe(dataUri);
+		it.each([
+			'http://example.com/avatar.png',
+			'https://cdn.example.com/avatar.webp',
+			'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA',
+			'avatar.png',
+			'abcdef0123456789abcdef0123456789',
+		])('gives no address for a value that is not a hash, never the value itself: %s', (avatar) => {
+			expect(getPersonaAvatarURL({userId: '123', avatar})).toBe('');
 		});
 
 		it('formats uploaded hash into media URL using user ID', () => {
-			const hash = 'a_abcdef0123456789abcdef0123456789';
-			const result = getPersonaAvatarURL({userId: '987654321', avatar: hash});
+			const result = getPersonaAvatarURL({userId: '987654321', avatar: 'a_abcdef01'});
 			expect(result).toContain('987654321');
-			expect(result).toContain('abcdef0123456789abcdef0123456789');
+			expect(result).toContain('abcdef01');
 		});
 	});
 
@@ -54,16 +53,18 @@ describe('AvatarUtils - Persona & Asset URLs', () => {
 			expect(getPersonaBannerURL({userId: '123', banner: ''})).toBe('');
 		});
 
-		it('preserves direct HTTP, HTTPS, and data URIs', () => {
-			const httpsUrl = 'https://cdn.example.com/banner.png';
-			expect(getPersonaBannerURL({userId: '123', banner: httpsUrl})).toBe(httpsUrl);
+		it.each([
+			'https://cdn.example.com/banner.png',
+			'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA',
+			'banner_hash_123',
+		])('gives no address for a value that is not a hash, never the value itself: %s', (banner) => {
+			expect(getPersonaBannerURL({userId: '123', banner})).toBe('');
 		});
 
 		it('formats uploaded banner hash into media URL', () => {
-			const hash = 'banner_hash_123';
-			const result = getPersonaBannerURL({userId: '987654321', banner: hash});
+			const result = getPersonaBannerURL({userId: '987654321', banner: '0a1b2c3d'});
 			expect(result).toContain('987654321');
-			expect(result).toContain(hash);
+			expect(result).toContain('0a1b2c3d');
 		});
 	});
 
