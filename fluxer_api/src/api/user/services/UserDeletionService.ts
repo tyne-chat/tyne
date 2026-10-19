@@ -58,6 +58,7 @@ import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 // Fork: threads started as a persona.
 
 import {forgetPersonaChannelStatesOfUser} from '@app/api/persona/PersonaChannelStateStore';
+import {deletePersonaImagesOfUser} from '@app/api/persona/PersonaImageDeletion';
 import {forgetPersonaImageSourcesOfUser} from '@app/api/persona/PersonaImageSourceStore';
 import {forgetThreadOwnerPersonasOfUser} from '@app/api/persona/ThreadOwnerPersonaStore';
 
@@ -508,46 +509,7 @@ export async function processUserDeletion(
 			Logger.error({error, userId}, 'Failed to delete banner');
 		}
 	}
-	for (const persona of personas) {
-		if (persona.avatarHash) {
-			const rawHash = persona.avatarHash.replace(/^a_/, '');
-			try {
-				await storageService.deleteAvatar({prefix: 'avatars', key: `${userId}/${persona.avatarHash}`});
-				if (rawHash !== persona.avatarHash) {
-					await storageService.deleteAvatar({prefix: 'avatars', key: `${userId}/${rawHash}`});
-				}
-				await purgeQueue.addUrls([
-					`${Config.endpoints.media}/avatars/${userId}/${persona.avatarHash}`,
-					`${Config.endpoints.media}/avatars/${userId}/${rawHash}`,
-				]);
-				Logger.debug(
-					{userId, personaId: persona.id, avatarHash: persona.avatarHash, rawHash},
-					'Deleted persona avatar',
-				);
-			} catch (error) {
-				Logger.error({error, userId, personaId: persona.id}, 'Failed to delete persona avatar');
-			}
-		}
-		if (persona.bannerHash) {
-			const rawHash = persona.bannerHash.replace(/^a_/, '');
-			try {
-				await storageService.deleteAvatar({prefix: 'banners', key: `${userId}/${persona.bannerHash}`});
-				if (rawHash !== persona.bannerHash) {
-					await storageService.deleteAvatar({prefix: 'banners', key: `${userId}/${rawHash}`});
-				}
-				await purgeQueue.addUrls([
-					`${Config.endpoints.media}/banners/${userId}/${persona.bannerHash}`,
-					`${Config.endpoints.media}/banners/${userId}/${rawHash}`,
-				]);
-				Logger.debug(
-					{userId, personaId: persona.id, bannerHash: persona.bannerHash, rawHash},
-					'Deleted persona banner',
-				);
-			} catch (error) {
-				Logger.error({error, userId, personaId: persona.id}, 'Failed to delete persona banner');
-			}
-		}
-	}
+	await deletePersonaImagesOfUser({storageService, purgeQueue, personaRepository}, userId, personas);
 
 	const favoriteMemes = await favoriteMemeRepository.findByUserId(userId);
 	for (const meme of favoriteMemes) {
