@@ -20,6 +20,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | Composer pill and picker | `components/PersonaComposerPill.tsx`, `components/PersonaPickerSheet.tsx` |
 | Badge on messages | `components/PersonaTag.tsx`, handing off to `channel/components/MessagePersonaAccount.tsx` |
 | Avatars | `utils/PersonaAvatarUrls.ts`, `components/PersonaAvatar.tsx` |
+| Display tag icon | `utils/PersonaTagIconUrls.ts` |
 | Profile popout and sheet | `components/PersonaProfilePopout.tsx`, `PersonaProfileMobileSheet.tsx`, `utils/usePersonaProfile.ts` |
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
 | Tag matching | `packages/schema/src/domains/persona/PersonaMatcher.ts` (`matchPersona`) |
@@ -73,6 +74,13 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   `personaAvatarUrls` or `<PersonaAvatar>`; never pass it to upstream's `<Avatar>`.
   `utils/PersonaAvatarUsage.test.ts` scans the sources and fails if a hash reaches `<Avatar>`.
   Without a hash, the account's avatar shows.
+- **The display tag icon** is also a media hash, of an image stored under the account. Turn it into
+  an address only with `personaTagIconUrls(ownerUserId, icon)`, which gives nothing for any other
+  value: never use the value as an image source, even when it looks like a link. A link would make
+  the app fetch a picture from wherever it points and tell that server who is reading. Without the
+  owner's id (no root user) the tag shows its text only.
+- **The editor's upload preview** is a separate state: the picked file shows while it uploads, and
+  the form itself only ever holds the hash the upload returns.
 - **Profiles:** `fetchPersonaProfile` caches for 60 seconds; a 403 `PRIVATE_PERSONA` means the
   profile is private. Bio and banner never come from a message.
 - **Other people's personas** are cached in `_knownPersonas`, filled from messages'
@@ -112,7 +120,9 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 - `PluralKitImportModal` reads PluralKit JSON or a Tyne zip (`PersonaImportFile`), reuses images
   already on the instance by hash, uploads the zip's images, has the server fetch remote ones (a
   streamed NDJSON response), then imports in chunks of 50. "Replace all" first deletes every
-  existing persona, one request each, in sequence.
+  existing persona, one request each, in sequence. A link in the file is never stored: every image,
+  the tag icon included (the zip's file, or an older export's `tag_icon_url`), is stored on the
+  instance first, and only its hash is saved; an image that cannot be stored becomes a warning.
 - `exportPersonas` downloads the server's zip, which this import reads back.
 
 ## Where persona code hooks into upstream
