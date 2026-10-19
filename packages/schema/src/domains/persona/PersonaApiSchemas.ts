@@ -31,16 +31,34 @@ export type SignatureEmoji = z.infer<typeof SignatureEmojiSchema>;
 
 // Persona image hashes are issued by the upload and import routes: the first 8 hex characters of the image's MD5,
 // prefixed with "a_" when animated. They are interpolated into media URLs and storage keys, so nothing else is accepted.
-const PERSONA_ASSET_HASH_PATTERN = /^(a_)?[0-9a-f]{8}$/;
-const PersonaAssetHashType = z
+// The display tag icon is stored the same way: every image a persona or the tag shows is one this instance stores, never
+// a link to somewhere else.
+export const PERSONA_ASSET_HASH_PATTERN = /^(a_)?[0-9a-f]{8}$/;
+export const PersonaAssetHashType = z
 	.string()
 	.regex(PERSONA_ASSET_HASH_PATTERN, 'Must be a hash returned by the persona avatar or banner upload routes');
+
+/** Whether `value` is a persona image hash (see `PERSONA_ASSET_HASH_PATTERN`). */
+export function isPersonaAssetHash(value: string | null | undefined): value is string {
+	return typeof value === 'string' && PERSONA_ASSET_HASH_PATTERN.test(value);
+}
+
+/**
+ * A persona image value as received, cleaned: the hash, trimmed, when it is one, and null for
+ * anything else. The server applies it to what it reads from storage and the clients to what they
+ * receive, so a link never travels on from wherever it got in.
+ */
+export function personaAssetHashOrNull(value: unknown): string | null {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim();
+	return isPersonaAssetHash(trimmed) ? trimmed : null;
+}
 
 export const PersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
-	avatar_hash: z.string().nullish().describe('Avatar asset hash'),
-	banner_hash: z.string().nullish().describe('Banner asset hash'),
+	avatar_hash: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
+	banner_hash: PersonaAssetHashType.nullish().describe('Banner asset hash'),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional accent color integer'),
 	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
@@ -63,8 +81,8 @@ export const PersonaListResponseSchema = z.array(PersonaResponseSchema);
 export const PublicPersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
-	avatar_hash: z.string().nullish().describe('Avatar asset hash'),
-	banner_hash: z.string().nullish().describe('Banner asset hash'),
+	avatar_hash: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
+	banner_hash: PersonaAssetHashType.nullish().describe('Banner asset hash'),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional accent color integer'),
 	avatar_color: z.number().int().nullish().describe('Avatar accent color'),
@@ -120,6 +138,11 @@ export type PersonaUpdateRequest = z.infer<typeof PersonaUpdateRequestSchema>;
  * as long as the image is unchanged. The avatar's field is kept even without a link: PluralKit
  * shows `webhook_avatar_url` on messages and `avatar_url` on the member card, and the export
  * writes the avatar back to the field it came from.
+ *
+ * These links are a record of origin, not images to show. The images themselves are fetched into
+ * this instance's storage at import, and the persona shows only those. A link is never sent to a
+ * client or shown as an image; the one place it goes out is the account's own export zip
+ * (`pluralkit.json`), for PluralKit to read.
  */
 export const PersonaImportImageSourcesSchema = z.object({
 	avatar: z
@@ -183,7 +206,9 @@ export const PersonaSettingsResponseSchema = z.object({
 	active_persona_id: SnowflakeStringType.nullish(),
 	is_latched: z.boolean().default(false),
 	display_tag_text: z.string().max(100).nullish(),
-	display_tag_icon: z.string().max(256).nullish(),
+	display_tag_icon: PersonaAssetHashType.nullish().describe(
+		'Hash of the display tag icon, an image stored under the account',
+	),
 	updated_at: z.string().optional(),
 });
 export type PersonaSettingsResponse = z.infer<typeof PersonaSettingsResponseSchema>;
@@ -194,7 +219,9 @@ export const PersonaSettingsUpdateRequestSchema = z.object({
 	active_persona_id: SnowflakeStringType.nullish().optional(),
 	is_latched: z.boolean().optional(),
 	display_tag_text: z.string().max(100).nullish().optional(),
-	display_tag_icon: z.string().max(256).nullish().optional(),
+	display_tag_icon: PersonaAssetHashType.nullish()
+		.optional()
+		.describe('Hash of the display tag icon, from the persona avatar upload or import routes'),
 });
 export type PersonaSettingsUpdateRequest = z.infer<typeof PersonaSettingsUpdateRequestSchema>;
 
@@ -222,10 +249,12 @@ export const PersonaChannelStateParam = z.object({
 export const ChannelPersonaMentionItemSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
-	avatar_hash: z.string().nullish().describe('Avatar asset hash'),
-	banner_hash: z.string().nullish().describe('Banner asset hash'),
+	avatar_hash: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
+	banner_hash: PersonaAssetHashType.nullish().describe('Banner asset hash'),
 	display_tag_text: z.string().nullish().describe('Optional display tag text'),
-	display_tag_icon: z.string().nullish().describe('Optional display tag icon'),
+	display_tag_icon: PersonaAssetHashType.nullish().describe(
+		'Hash of the display tag icon, an image stored under the account',
+	),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional accent color integer'),
 	bio: z.string().nullish().describe('Optional persona bio'),
@@ -252,7 +281,7 @@ export const PersonaAvatarUploadRequest = z.object({
 	avatar: z.string().describe('Base64 data URI of the avatar image'),
 });
 export const PersonaAvatarUploadResponse = z.object({
-	avatar_hash: z.string().describe('Hash of the uploaded avatar'),
+	avatar_hash: PersonaAssetHashType.describe('Hash of the uploaded avatar'),
 	avatar_color: z.number().int().nullish().optional().describe('Dominant avatar color'),
 });
 
@@ -260,14 +289,14 @@ export const PersonaBannerUploadRequest = z.object({
 	banner: z.string().describe('Base64 data URI of the banner image'),
 });
 export const PersonaBannerUploadResponse = z.object({
-	banner_hash: z.string().describe('Hash of the uploaded banner'),
+	banner_hash: PersonaAssetHashType.describe('Hash of the uploaded banner'),
 });
 
 export const PersonaAvatarImportRequest = z.object({
 	url: z.string().url().max(2048).describe('Remote URL of the avatar image to import'),
 });
 export const PersonaAvatarImportResponse = z.object({
-	avatar_hash: z.string().describe('Hash of the imported avatar'),
+	avatar_hash: PersonaAssetHashType.describe('Hash of the imported avatar'),
 	avatar_color: z.number().int().nullish().optional().describe('Dominant avatar color'),
 });
 
@@ -291,7 +320,7 @@ export const PersonaImportImageRequest = z.object({
 	image: z.string().describe('Base64 data URI of the image'),
 });
 export const PersonaImportImageResponse = z.object({
-	hash: z.string().describe('Hash of the stored image'),
+	hash: PersonaAssetHashType.describe('Hash of the stored image'),
 	avatar_color: z.number().int().nullish().describe('Dominant colour, for an avatar'),
 });
 
