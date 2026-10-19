@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {personaAssetHashOrNull} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {generateSnowflake} from '@fluxer/snowflake/src/Snowflake';
 import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
 import {deleteOneOrMany, fetchMany, fetchOne, upsertOne} from '../database/CassandraQueryExecution';
@@ -28,9 +29,15 @@ const FETCH_PERSONAS_BY_USER_IDS_CQL = Personas.selectCql({
 
 // Settings rows written before `active_persona_scope` existed do not have it. They mean what they
 // always meant, one persona for every channel, and a row has to carry every column to be written
-// back whole.
-function withPersonaScope(row: UserPersonaSettingsRow): UserPersonaSettingsRow {
-	return row.active_persona_scope === 'channel' ? row : {...row, active_persona_scope: 'global'};
+// back whole. The tag icon is the hash of an image stored under the account; the route accepts
+// nothing else, the rows written before it checked were migrated once, and anything else read
+// here (a restored backup, say) is dropped rather than handed to apps that would load it.
+function normalizeSettingsRow(row: UserPersonaSettingsRow): UserPersonaSettingsRow {
+	return {
+		...row,
+		active_persona_scope: row.active_persona_scope === 'channel' ? 'channel' : 'global',
+		display_tag_icon: personaAssetHashOrNull(row.display_tag_icon),
+	};
 }
 
 const FETCH_SETTINGS_CQL = UserPersonaSettings.selectCql({
@@ -253,7 +260,7 @@ export class PersonaRepository extends IPersonaRepository {
 		const row = await fetchOne<UserPersonaSettingsRow>(FETCH_SETTINGS_CQL, {
 			user_id: userId,
 		});
-		return row ? withPersonaScope(row) : null;
+		return row ? normalizeSettingsRow(row) : null;
 	}
 
 	async deleteSettings(userId: UserID): Promise<void> {
@@ -274,7 +281,7 @@ export class PersonaRepository extends IPersonaRepository {
 				user_ids: chunk,
 			});
 			for (const r of rows) {
-				results.set(r.user_id.toString(), withPersonaScope(r));
+				results.set(r.user_id.toString(), normalizeSettingsRow(r));
 			}
 		}
 		return results;
