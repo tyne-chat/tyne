@@ -214,8 +214,8 @@ describe('Persona Account Deletion Compliance', () => {
 				user_id: userId,
 				persona_id: originalPersonaId1,
 				name: 'Alice',
-				avatar_hash: 'a_avatar1',
-				banner_hash: 'a_banner1',
+				avatar_hash: 'a_a1a1a1a1',
+				banner_hash: 'a_b1b1b1b1',
 				pronouns: 'she/her',
 				color: 0xff0000,
 				avatar_color: null,
@@ -257,8 +257,8 @@ describe('Persona Account Deletion Compliance', () => {
 				user_id: userId,
 				persona_id: createPersonaID(3333333333333333333n),
 				name: 'Error Persona',
-				avatar_hash: 'error_avatar',
-				banner_hash: 'error_banner',
+				avatar_hash: 'e0e0e0e0',
+				banner_hash: 'e1e1e1e1',
 				pronouns: null,
 				color: null,
 				avatar_color: null,
@@ -278,8 +278,8 @@ describe('Persona Account Deletion Compliance', () => {
 				user_id: userId,
 				persona_id: createPersonaID(4444444444444444444n),
 				name: 'Static Persona',
-				avatar_hash: 'static_avatar4',
-				banner_hash: 'static_banner4',
+				avatar_hash: 'c4c4c4c4',
+				banner_hash: 'd4d4d4d4',
 				pronouns: 'they/them',
 				color: null,
 				avatar_color: null,
@@ -335,7 +335,7 @@ describe('Persona Account Deletion Compliance', () => {
 
 			const mockStorageService = {
 				deleteAvatar: vi.fn().mockImplementation(async (params: {prefix: string; key: string}) => {
-					if (params.key.includes('error')) {
+					if (params.key.includes('e0e0e0e0') || params.key.includes('e1e1e1e1')) {
 						throw new Error('Simulated S3 deletion error');
 					}
 					deletedAvatars.push(params);
@@ -491,19 +491,19 @@ describe('Persona Account Deletion Compliance', () => {
 			// 4. Surgical S3 media cleanup was performed for persona1 (hash-based) including rawHash
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'avatars',
-				key: `${userId}/a_avatar1`,
+				key: `${userId}/a_a1a1a1a1`,
 			});
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'avatars',
-				key: `${userId}/avatar1`,
+				key: `${userId}/a1a1a1a1`,
 			});
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'banners',
-				key: `${userId}/a_banner1`,
+				key: `${userId}/a_b1b1b1b1`,
 			});
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'banners',
-				key: `${userId}/banner1`,
+				key: `${userId}/b1b1b1b1`,
 			});
 			// User animated avatar and banner cleanup
 			expect(deletedAvatars).toContainEqual({
@@ -528,31 +528,31 @@ describe('Persona Account Deletion Compliance', () => {
 			// persona4 (static hash-based without a_ prefix): single deletion each
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'avatars',
-				key: `${userId}/static_avatar4`,
+				key: `${userId}/c4c4c4c4`,
 			});
 			expect(deletedAvatars).toContainEqual({
 				prefix: 'banners',
-				key: `${userId}/static_banner4`,
+				key: `${userId}/d4d4d4d4`,
 			});
 
 			// persona3 avatar/banner threw S3 deletion errors, yet deletion completed without aborting
 			expect(mockStorageService.deleteAvatar).toHaveBeenCalledWith({
 				prefix: 'avatars',
-				key: `${userId}/error_avatar`,
+				key: `${userId}/e0e0e0e0`,
 			});
 			expect(mockStorageService.deleteAvatar).toHaveBeenCalledWith({
 				prefix: 'banners',
-				key: `${userId}/error_banner`,
+				key: `${userId}/e1e1e1e1`,
 			});
-			expect(deletedAvatars.some((a) => a.key.includes('error'))).toBe(false);
+			expect(deletedAvatars.some((a) => a.key.includes('e0e0e0e0') || a.key.includes('e1e1e1e1'))).toBe(false);
 
 			// Purge queue received CDN URLs
-			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/a_avatar1`);
-			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/avatar1`);
-			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/a_banner1`);
-			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/banner1`);
-			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/static_avatar4`);
-			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/static_banner4`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/a_a1a1a1a1`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/a1a1a1a1`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/a_b1b1b1b1`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/b1b1b1b1`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/avatars/${userId}/c4c4c4c4`);
+			expect(purgedUrls).toContain(`${Config.endpoints.media}/banners/${userId}/d4d4d4d4`);
 
 			// 5. Hard delete of original persona rows and settings was executed
 			expect(hardDeletedUserId).toBe(userId);
