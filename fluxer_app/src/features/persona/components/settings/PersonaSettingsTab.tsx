@@ -17,6 +17,7 @@ import {CLEAR_SEARCH_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDes
 import {openFilePicker} from '@app/features/messaging/utils/FilePickerUtils';
 import {formatFileSize} from '@app/features/messaging/utils/FileUtils';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
+import {personaTagIconUrls} from '@app/features/persona/utils/PersonaTagIconUrls';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {readBlobAsDataUrl} from '@app/features/platform/utils/BlobDataUrl';
 import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
@@ -31,7 +32,6 @@ import {RadioGroup, type RadioOption} from '@app/features/ui/radio_group/RadioGr
 import type {SegmentedTab} from '@app/features/ui/segmented_tabs/SegmentedTabs';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import Users from '@app/features/user/state/Users';
-import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import {getAcceptString} from '@fluxer/constants/src/AssetFormatPolicy';
 import type {ActivePersonaScope} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {I18n} from '@lingui/core';
@@ -197,23 +197,10 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const [isUploadingTagIcon, setIsUploadingTagIcon] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const staticTagIconUrl = useMemo(() => {
-		if (!tagIcon) return null;
-		if (tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')) {
-			return tagIcon;
-		}
-		const currentUserId = Users.currentUser?.id;
-		return currentUserId ? AvatarUtils.getUserAvatarURL({id: currentUserId, avatar: tagIcon}, false, 32) : tagIcon;
-	}, [tagIcon]);
-
-	const hoverTagIconUrl = useMemo(() => {
-		if (!tagIcon) return null;
-		if (tagIcon.startsWith('http://') || tagIcon.startsWith('https://') || tagIcon.startsWith('data:')) {
-			return tagIcon;
-		}
-		const currentUserId = Users.currentUser?.id;
-		return currentUserId ? AvatarUtils.getUserAvatarURL({id: currentUserId, avatar: tagIcon}, true, 32) : tagIcon;
-	}, [tagIcon]);
+	// The icon is uploaded first and shown by the hash the upload returns, as everywhere else.
+	const tagIconUrls = personaTagIconUrls(currentUser?.id, tagIcon);
+	const staticTagIconUrl = tagIconUrls?.staticUrl ?? null;
+	const hoverTagIconUrl = tagIconUrls?.hoverUrl ?? null;
 
 	const [tagIconHoverRef, isTagIconHovering] = useHover();
 	const hasDistinctTagIconHover = Boolean(hoverTagIconUrl && hoverTagIconUrl !== staticTagIconUrl);
@@ -571,13 +558,15 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									<div className={styles.tagIconRow} data-flx="persona.settings.persona-settings-tab.tag-icon-row">
 										{tagIcon ? (
 											<>
-												<img
-													ref={tagIconHoverRef}
-													src={resolvedTagIconUrl ?? tagIcon}
-													alt={i18n._(TAG_ICON_DESCRIPTOR)}
-													className={styles.tagIconImage}
-													data-flx="persona.settings.persona-settings-tab.tag-icon-image"
-												/>
+												{resolvedTagIconUrl && (
+													<img
+														ref={tagIconHoverRef}
+														src={resolvedTagIconUrl}
+														alt={i18n._(TAG_ICON_DESCRIPTOR)}
+														className={styles.tagIconImage}
+														data-flx="persona.settings.persona-settings-tab.tag-icon-image"
+													/>
+												)}
 												<Button
 													variant="secondary"
 													small={true}

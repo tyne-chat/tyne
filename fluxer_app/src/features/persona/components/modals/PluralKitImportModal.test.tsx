@@ -522,6 +522,130 @@ describe('PluralKitImportModal Component', () => {
 		}
 	});
 
+	describe("a Tyne export's tag icon", () => {
+		// A one-persona Tyne export whose tyne.json carries `tagIcon`.
+		function tyneZipWithTagIcon(tagIcon: Record<string, string>, files: Record<string, Uint8Array> = {}): File {
+			const encoder = new TextEncoder();
+			const pluralKit = {
+				version: 2,
+				tag: 'SYS',
+				members: [{id: 'aaaaa', name: 'Alvis', proxy_tags: [], privacy: PUBLIC}],
+				groups: [],
+				switches: [],
+			};
+			const manifest = {
+				format: 'tyne-personas',
+				version: 1,
+				pluralkit_file: 'pluralkit.json',
+				members: {},
+				...tagIcon,
+			};
+			const zip = zipSync({
+				'pluralkit.json': encoder.encode(JSON.stringify(pluralKit)),
+				'tyne.json': encoder.encode(JSON.stringify(manifest)),
+				...files,
+			});
+			return new File([zip as BlobPart], 'Tyne personas.zip', {type: 'application/zip'});
+		}
+
+		async function importZip(file: File): Promise<void> {
+			await act(async () => {
+				root.render(
+					<PluralKitImportModal
+						onClose={vi.fn()}
+						data-flx="persona.plural-kit-import-modal-test.plural-kit-import-modal--8"
+					/>,
+				);
+			});
+			await chooseFile(file, 'Total Members1');
+			await startImport();
+		}
+
+		it('stores the icon file from the zip and sets its hash', async () => {
+			const fetchSpy = vi.spyOn(globalThis, 'fetch');
+			try {
+				await importZip(tyneZipWithTagIcon({tag_icon: 'Tag icon.png'}, {'Tag icon.png': PNG}));
+
+				expect(fetchSpy).not.toHaveBeenCalled();
+				expect(PersonaCommands.importPersonaImage).toHaveBeenCalledWith(
+					'avatar',
+					expect.stringMatching(/^data:image\/png;base64,/),
+				);
+				expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('SYS', 'aaaaaaaa');
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
+		it('has the server download a linked icon, once, and sets the stored copy, never the link', async () => {
+			const url = 'https://images.example/tag.png';
+			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+				const results = {[url]: {avatar_hash: 'dddddddd'}};
+				return new Response(`${JSON.stringify({type: 'complete', total: 1, results})}\n`, {status: 200});
+			});
+			try {
+				await importZip(tyneZipWithTagIcon({tag_icon_url: url}));
+
+				expect(fetchSpy).toHaveBeenCalledTimes(1);
+				expect(JSON.parse(String(fetchSpy.mock.calls[0]?.[1]?.body))).toEqual({urls: [url], kind: 'avatar'});
+				expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('SYS', 'dddddddd');
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
+		it('keeps the current icon and warns when the download fails', async () => {
+			const url = 'https://images.example/tag.png';
+			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+				const results = {[url]: {error: 'Could not import an avatar from this URL'}};
+				return new Response(`${JSON.stringify({type: 'complete', total: 1, results})}\n`, {status: 200});
+			});
+			try {
+				await importZip(tyneZipWithTagIcon({tag_icon_url: url}));
+
+				expect(fetchSpy).toHaveBeenCalledTimes(1);
+				expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('SYS', undefined);
+				expect(document.body.textContent).toContain('Tag Icon');
+				expect(document.body.textContent).not.toContain('Prefix:');
+				expect(document.body.textContent).toContain(
+					'The tag icon could not be stored: Could not import an avatar from this URL.',
+				);
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
+		it('keeps the current icon and warns when the server refuses the batch', async () => {
+			const fetchSpy = vi
+				.spyOn(globalThis, 'fetch')
+				.mockImplementation(async () => new Response('{"message":"Too many"}', {status: 429}));
+			try {
+				await importZip(tyneZipWithTagIcon({tag_icon_url: 'https://images.example/tag.png'}));
+
+				expect(fetchSpy).toHaveBeenCalledTimes(1);
+				expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('SYS', undefined);
+				// The reason for a refused batch is formatted with the app's own i18n, which this test does not
+				// set up, so only the warning itself is checked.
+				expect(document.body.textContent).toContain('The tag icon could not be stored: ');
+				expect(document.body.textContent).toContain('It can be set again in the persona settings.');
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
+		it('ignores a link that is not a web address', async () => {
+			const fetchSpy = vi.spyOn(globalThis, 'fetch');
+			try {
+				await importZip(tyneZipWithTagIcon({tag_icon_url: 'data:image/png;base64,iVBORw0KGgo='}));
+
+				expect(fetchSpy).not.toHaveBeenCalled();
+				expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('SYS', undefined);
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+	});
+
 	it('refuses a zip that is not a Tyne export', async () => {
 		await act(async () => {
 			root.render(

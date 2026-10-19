@@ -200,7 +200,7 @@ describe('PersonaEvents', () => {
 				active_persona_id: '1540000000000000001',
 				is_latched: true,
 				display_tag_text: 'SYS',
-				display_tag_icon: 'https://cdn.example.com/badge.png',
+				display_tag_icon: '3c4d5e6f',
 			},
 			mockContext,
 		);
@@ -209,7 +209,7 @@ describe('PersonaEvents', () => {
 		expect(PersonaStore.activePersonaId).toBe('1540000000000000001');
 		expect(PersonaStore.isPersonaLatched).toBe(true);
 		expect(PersonaStore.displayTagText).toBe('SYS');
-		expect(PersonaStore.displayTagIcon).toBe('https://cdn.example.com/badge.png');
+		expect(PersonaStore.displayTagIcon).toBe('3c4d5e6f');
 	});
 
 	it('notifies MessageReactions and Messages on USER_PERSONA_UPDATE', () => {
@@ -251,7 +251,7 @@ describe('PersonaEvents', () => {
 				guild_id: 'guild-1',
 				user_id: 'user-123',
 				display_tag_text: 'SYS',
-				display_tag_icon: 'https://cdn.example.com/icon.png',
+				display_tag_icon: '2b3c4d5e',
 			},
 			mockContext,
 		);
@@ -259,12 +259,12 @@ describe('PersonaEvents', () => {
 		expect(reactionsSpy).toHaveBeenCalledWith({
 			userId: 'user-123',
 			display_tag_text: 'SYS',
-			display_tag_icon: 'https://cdn.example.com/icon.png',
+			display_tag_icon: '2b3c4d5e',
 		});
 		expect(messagesSpy).toHaveBeenCalledWith({
 			userId: 'user-123',
 			display_tag_text: 'SYS',
-			display_tag_icon: 'https://cdn.example.com/icon.png',
+			display_tag_icon: '2b3c4d5e',
 		});
 	});
 });
