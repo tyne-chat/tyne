@@ -6,6 +6,11 @@
 // README on bringing them back into Tyne or into PluralKit. The mapping itself is in
 // `@fluxer/schema/src/domains/persona/PluralKitFormat`, shared with the web app's import.
 //
+// This export is the one place the links in `persona_image_sources` leave the server
+// (`PersonaImageSourceStore.ts`): `pluralkit.json` links an unchanged imported image to where it
+// came from, for PluralKit. Everything else in the zip, the tag icon included, is a file read
+// from this instance's storage.
+//
 // The zip is streamed. Images are read from storage one at a time and the archive waits for each
 // to be written before reading the next, so a large export does not sit in memory. The text files
 // go last, because they name the images, whose extensions are only known once they are read.
@@ -35,7 +40,6 @@ import {ZipArchive, type ZipEntryData} from 'archiver';
 
 // Stored images can be a little larger than the upload limit: JPEGs are re-encoded when stored.
 const MAX_STORED_IMAGE_BYTES = 64 * 1024 * 1024;
-const MEDIA_HASH = /^(a_)?[0-9a-f]{8,32}$/;
 
 export interface PersonaExportDeps {
 	personaService: PersonaService;
@@ -57,11 +61,6 @@ function mediaHost(): string {
 	} catch {
 		return Config.endpoints.media;
 	}
-}
-
-function decodeDataUri(uri: string): Uint8Array | null {
-	const match = /^data:[^;,]*;base64,(.*)$/s.exec(uri);
-	return match ? Uint8Array.from(Buffer.from(match[1] ?? '', 'base64')) : null;
 }
 
 /** Oldest persona first, which is the order they were created in, and the order an import makes them. */
@@ -188,18 +187,15 @@ export async function createPersonaExportArchive(
 			});
 		}
 
-		let tagIcon: {path: string} | {url: string} | null = null;
-		const icon = settings.display_tag_icon?.trim();
-		if (icon) {
-			let bytes: Uint8Array | null = null;
-			if (MEDIA_HASH.test(icon)) bytes = await readImage('avatar', icon);
-			else if (icon.startsWith('data:')) bytes = decodeDataUri(icon);
-			else if (icon.startsWith('https://') || icon.startsWith('http://')) tagIcon = {url: icon};
-			if (bytes) {
-				const path = `${PERSONA_BUNDLE_FILES.tagIconBaseName}.${imageFileExtension(bytes)}`;
-				await append(Buffer.from(bytes), {name: path, date: now, store: true});
-				tagIcon = {path};
-			}
+		// The settings carry the icon only as the hash of an image stored under the account
+		// (`PersonaRepository`), so the zip holds the file and never a link.
+		let tagIcon: {path: string} | null = null;
+		const icon = settings.display_tag_icon;
+		const iconBytes = icon ? await readImage('avatar', icon) : null;
+		if (iconBytes) {
+			const path = `${PERSONA_BUNDLE_FILES.tagIconBaseName}.${imageFileExtension(iconBytes)}`;
+			await append(Buffer.from(iconBytes), {name: path, date: now, store: true});
+			tagIcon = {path};
 		}
 
 		const text = buildPersonaBundleText({
