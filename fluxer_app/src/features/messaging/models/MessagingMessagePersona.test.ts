@@ -76,7 +76,7 @@ function createWireMessage(overrides?: Partial<WireMessage>): WireMessage {
 		subprofile: {
 			id: 'sub-alice',
 			name: 'Alice',
-			avatar: 'https://example.com/alice.png',
+			avatar: 'a1a1a1a1',
 			display_tag_text: 'Wonderland',
 			pronouns: 'she/her',
 			color: 0xff0000,
@@ -91,7 +91,7 @@ describe('MessagingMessage Persona Preservation', () => {
 		const msg = new Message(wire, {skipUserCache: true});
 		expect(msg.subprofile?.id).toBe('sub-alice');
 		expect(msg.subprofile?.name).toBe('Alice');
-		expect(msg.subprofile?.avatar).toBe('https://example.com/alice.png');
+		expect(msg.subprofile?.avatar).toBe('a1a1a1a1');
 	});
 
 	it('preserves subprofile across empty withUpdates ({}) such as reactions', () => {
@@ -147,7 +147,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			subprofile: {
 				id: 'sub-bob',
 				name: 'Bob the Fox',
-				avatar: 'https://example.com/bob.png',
+				avatar: 'e5e5e5e5',
 				display_tag_text: 'Foxes',
 				pronouns: 'he/him',
 				color: 0xff8800,
@@ -168,7 +168,7 @@ describe('MessagingMessage Persona Preservation', () => {
 		const replyMsg = new Message(replyWire, {skipUserCache: true});
 		expect(replyMsg.referencedMessage).toBeDefined();
 		expect(replyMsg.referencedMessage?.subprofile?.name).toBe('Bob the Fox');
-		expect(replyMsg.referencedMessage?.subprofile?.avatar).toBe('https://example.com/bob.png');
+		expect(replyMsg.referencedMessage?.subprofile?.avatar).toBe('e5e5e5e5');
 		expect(replyMsg.referencedMessage?.subprofile?.color).toBe(0xff8800);
 	});
 
@@ -177,16 +177,16 @@ describe('MessagingMessage Persona Preservation', () => {
 			subprofile: {
 				id: 'sub-alice',
 				name: 'Alice',
-				avatar: 'https://example.com/alice.png',
+				avatar: 'a1a1a1a1',
 				display_tag_text: 'TEST SYSTEM',
-				display_tag_icon: 'https://example.com/icon.png',
+				display_tag_icon: '1a2b3c4d',
 				pronouns: 'she/her',
 				color: 0xff0000,
 			},
 		});
 		const msg = new Message(wire, {skipUserCache: true});
 		expect(msg.subprofile?.display_tag_text).toBe('TEST SYSTEM');
-		expect(msg.subprofile?.display_tag_icon).toBe('https://example.com/icon.png');
+		expect(msg.subprofile?.display_tag_icon).toBe('1a2b3c4d');
 	});
 
 	it('distinguishes messages with different display tags in equals()', () => {
@@ -194,7 +194,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			subprofile: {
 				id: 'sub-alice',
 				name: 'Alice',
-				avatar: 'https://example.com/alice.png',
+				avatar: 'a1a1a1a1',
 				display_tag_text: 'TAG ONE',
 				display_tag_icon: null,
 				pronouns: null,
@@ -205,7 +205,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			subprofile: {
 				id: 'sub-alice',
 				name: 'Alice',
-				avatar: 'https://example.com/alice.png',
+				avatar: 'a1a1a1a1',
 				display_tag_text: 'TAG TWO',
 				display_tag_icon: null,
 				pronouns: null,
@@ -230,7 +230,7 @@ describe('MessagingMessage Persona Preservation', () => {
 				subprofile: {
 					id: 'sub-sneaks',
 					name: 'Sneaks',
-					avatar: 'https://example.com/sneaks.png',
+					avatar: '7f7f7f7f',
 					display_tag_text: 'SERAPHIM',
 					display_tag_icon: null,
 					pronouns: null,
@@ -292,7 +292,7 @@ describe('MessagingMessage Persona Preservation', () => {
 				subprofile: {
 					id: 'sub-bob',
 					name: 'Bob the Fox',
-					avatar: 'https://example.com/bob.png',
+					avatar: 'e5e5e5e5',
 					display_tag_text: null,
 					display_tag_icon: null,
 					pronouns: null,
@@ -343,7 +343,7 @@ describe('MessagingMessage Persona Preservation', () => {
 				subprofile: {
 					id: personaId,
 					name: 'Original Name',
-					avatar: 'orig_hash',
+					avatar: 'b2b2b2b2',
 					display_tag_text: 'ORIG_TAG',
 					pronouns: 'they/them',
 					color: 0x112233,
@@ -354,10 +354,10 @@ describe('MessagingMessage Persona Preservation', () => {
 			const subprofile = normalizeSubprofile({
 				id: personaId,
 				name: 'Updated Name',
-				avatar_hash: 'new_api_avatar_hash',
+				avatar_hash: 'a2a2a2a2',
 			} as any);
 
-			expect(subprofile.avatar).toBe('new_api_avatar_hash');
+			expect(subprofile.avatar).toBe('a2a2a2a2');
 
 			const updated = Messages.handlePersonaUpdate({persona: subprofile});
 
@@ -365,7 +365,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			const channelMessages = ChannelMessages.get(channelId);
 			const msg = channelMessages?.get(messageId);
 			expect(msg?.subprofile?.name).toBe('Updated Name');
-			expect(msg?.subprofile?.avatar).toBe('new_api_avatar_hash');
+			expect(msg?.subprofile?.avatar).toBe('a2a2a2a2');
 			expect(msg?.subprofile?.display_tag_text).toBe('ORIG_TAG');
 			expect(msg?.subprofile?.pronouns).toBe('they/them');
 		});
@@ -379,7 +379,7 @@ describe('MessagingMessage Persona Preservation', () => {
 				subprofile: {
 					id: personaId,
 					name: 'Original Name',
-					avatar: 'orig_hash',
+					avatar: 'b2b2b2b2',
 					display_tag_text: 'ORIG_TAG',
 				},
 			});
@@ -388,10 +388,10 @@ describe('MessagingMessage Persona Preservation', () => {
 			const subprofile = normalizeSubprofile({
 				id: personaId,
 				name: 'Client Updated',
-				avatar_hash: 'new_client_avatar_hash',
+				avatar_hash: '91919191',
 			} as any);
 
-			expect(subprofile.avatar).toBe('new_client_avatar_hash');
+			expect(subprofile.avatar).toBe('91919191');
 
 			const updated = Messages.handlePersonaUpdate({persona: subprofile});
 
@@ -399,7 +399,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			const channelMessages = ChannelMessages.get(channelId);
 			const msg = channelMessages?.get(messageId);
 			expect(msg?.subprofile?.name).toBe('Client Updated');
-			expect(msg?.subprofile?.avatar).toBe('new_client_avatar_hash');
+			expect(msg?.subprofile?.avatar).toBe('91919191');
 		});
 
 		it('updates message subprofile from snapshot MessageSubprofileResponse directly', async () => {
@@ -410,7 +410,7 @@ describe('MessagingMessage Persona Preservation', () => {
 				subprofile: {
 					id: personaId,
 					name: 'Original Name',
-					avatar: 'orig_hash',
+					avatar: 'b2b2b2b2',
 				},
 			});
 			(Messages as any).commitMessages(ChannelMessages.getOrCreate(channelId).applyIncomingMessage(wire, false));
@@ -419,7 +419,7 @@ describe('MessagingMessage Persona Preservation', () => {
 				persona: {
 					id: personaId,
 					name: 'Snapshot Updated',
-					avatar: 'new_snapshot_avatar',
+					avatar: '5d5d5d5d',
 					avatar_color: null,
 					pronouns: null,
 					color: null,
@@ -430,7 +430,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			const channelMessages = ChannelMessages.get(channelId);
 			const msg = channelMessages?.get(messageId);
 			expect(msg?.subprofile?.name).toBe('Snapshot Updated');
-			expect(msg?.subprofile?.avatar).toBe('new_snapshot_avatar');
+			expect(msg?.subprofile?.avatar).toBe('5d5d5d5d');
 		});
 	});
 });

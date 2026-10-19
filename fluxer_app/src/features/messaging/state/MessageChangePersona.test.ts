@@ -153,13 +153,13 @@ describe('MessageChangePersona', () => {
 	describe('buildSubprofilePayload regression tests', () => {
 		it('includes active displayTagText and displayTagIcon in subprofile payload', () => {
 			(PersonaStore as any)._displayTagText = 'TESTING SYSTEM';
-			(PersonaStore as any)._displayTagIcon = 'https://example.com/icon.png';
+			(PersonaStore as any)._displayTagIcon = '1a2b3c4d';
 
 			const payload = MessageChangePersona.buildSubprofilePayload({
 				id: 'bob-123',
 				name: 'Bob the Fox',
-				avatar_hash: 'bob_avatar_hash',
-				banner_hash: 'bob_banner_hash',
+				avatar_hash: 'c4c4c4c4',
+				banner_hash: '3b3b3b3b',
 				avatar_color: 654321,
 				color: 123456,
 				bio: 'Fox bio',
@@ -169,11 +169,11 @@ describe('MessageChangePersona', () => {
 			expect(payload).toEqual({
 				id: 'bob-123',
 				name: 'Bob the Fox',
-				avatar: 'bob_avatar_hash',
+				avatar: 'c4c4c4c4',
 				avatar_color: 654321,
 				color: 123456,
 				display_tag_text: 'TESTING SYSTEM',
-				display_tag_icon: 'https://example.com/icon.png',
+				display_tag_icon: '1a2b3c4d',
 				pronouns: 'he/him',
 				visibility: undefined,
 			});

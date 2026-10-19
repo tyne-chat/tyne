@@ -7,7 +7,6 @@ import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import SessionManager from '@app/features/platform/state/AuthSession';
-import {http} from '@app/features/platform/transport/RestTransport';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
@@ -113,6 +112,15 @@ const BANNERS_DOWNLOADED_LABEL = msg({
 const IMAGES_STORED_LABEL = msg({
 	message: 'images stored',
 	comment: 'Progress label while the images inside an imported persona export are stored',
+});
+const TAG_ICON_LABEL_DESCRIPTOR = msg({
+	message: 'Tag Icon',
+	comment: 'Names the display tag icon in the list of import warnings, where personas are named otherwise',
+});
+const TAG_ICON_FAILED_DESCRIPTOR = msg({
+	message: 'The tag icon could not be stored: {error}. It can be set again in the persona settings.',
+	comment:
+		'Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.',
 });
 const DROPPED_TAGS_DESCRIPTOR = msg({
 	message: 'Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters.',
@@ -549,22 +557,35 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				await PersonaCommands.importPersonas(chunk);
 			}
 
-			// A Tyne export also brings back the tag icon.
+			// A Tyne export also brings back the tag icon. Like a persona image, it is stored on this
+			// instance before it is used: the file from the zip, this account's own copy here, or a
+			// copy the server downloads. The settings take only the stored image's hash, never a link.
 			let tagIcon: string | undefined;
-			if (bundle?.manifest.tag_icon) {
-				const bytes = bundle.images.get(bundle.manifest.tag_icon);
-				if (bytes) {
-					try {
-						const res = await http.post<{avatar_hash?: string}>(ForkEndpoints.USER_PERSONA_AVATAR, {
-							body: {avatar: imageDataUri(bytes)},
-						});
-						if (res.ok && res.body?.avatar_hash) tagIcon = res.body.avatar_hash;
-					} catch {
-						// Non-fatal: the personas are in; the icon can be set again in settings.
-					}
+			let tagIconError: string | null = null;
+			const tagIconBytes = bundle?.manifest.tag_icon ? bundle.images.get(bundle.manifest.tag_icon) : undefined;
+			const tagIconUrl = bundle?.manifest.tag_icon_url;
+			if (tagIconBytes) {
+				try {
+					tagIcon = (await PersonaCommands.importPersonaImage('avatar', imageDataUri(tagIconBytes))).hash;
+				} catch (err: unknown) {
+					tagIconError = err instanceof Error ? err.message : i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
 				}
-			} else if (bundle?.manifest.tag_icon_url) {
-				tagIcon = bundle.manifest.tag_icon_url;
+			} else if (tagIconUrl) {
+				const ownHash =
+					ownUserId && mediaEndpoint ? ownTyneMediaImageHash(tagIconUrl, mediaEndpoint, 'avatar', ownUserId) : null;
+				if (ownHash) {
+					tagIcon = ownHash;
+				} else if (tagIconUrl.startsWith('http://') || tagIconUrl.startsWith('https://')) {
+					const fetched = await fetchRemoteImages([tagIconUrl], 'avatar', () => {});
+					tagIcon = fetched.stored.get(tagIconUrl)?.hash;
+					if (!tagIcon) tagIconError = fetched.errors.get(tagIconUrl) ?? i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
+				}
+			}
+			if (tagIconError) {
+				warnings.push({
+					displayName: i18n._(TAG_ICON_LABEL_DESCRIPTOR),
+					reason: i18n._(TAG_ICON_FAILED_DESCRIPTOR, {error: tagIconError}),
+				});
 			}
 			const tagText = systemTagOverride.trim();
 			if (tagText || tagIcon !== undefined) {
@@ -918,13 +939,18 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 													className={styles.warningItemName}
 													data-flx="persona.plural-kit-import-modal.warning-item-name"
 												>
-													{w.displayName}{' '}
-													<span
-														style={{fontWeight: 400, color: 'var(--text-primary-muted)'}}
-														data-flx="persona.plural-kit-import-modal.span--3"
-													>
-														<Trans>(Prefix: {w.prefix})</Trans>
-													</span>
+													{w.displayName}
+													{w.prefix && (
+														<>
+															{' '}
+															<span
+																style={{fontWeight: 400, color: 'var(--text-primary-muted)'}}
+																data-flx="persona.plural-kit-import-modal.span--3"
+															>
+																<Trans>(Prefix: {w.prefix})</Trans>
+															</span>
+														</>
+													)}
 												</div>
 												<div
 													className={styles.warningItemDetail}
