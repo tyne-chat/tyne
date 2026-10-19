@@ -30,7 +30,7 @@ describe('RollingTypingStore', () => {
 	const samplePersona: MessageSubprofileResponse = {
 		id: 'persona_1',
 		name: 'Persona One',
-		avatar: 'avatar_hash_1',
+		avatar: '1a1a1a1a',
 		color: 0xff0000,
 		pronouns: 'she/her',
 		display_tag_text: 'P1',

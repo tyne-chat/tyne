@@ -38,6 +38,7 @@ vi.mock('@app/features/user/utils/NicknameUtils', async (importOriginal) => {
 
 import {MessagePersonaAccount} from '@app/features/channel/components/MessagePersonaAccount';
 import {User} from '@app/features/user/models/User';
+import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 
@@ -90,7 +91,7 @@ describe('MessagePersonaAccount Component', () => {
 		expect(container.innerHTML).toBe('');
 	});
 
-	it('renders tag text and icon when tagText and customIconUrl are provided', async () => {
+	it('renders tag text and icon when tagText and a tag icon hash are provided', async () => {
 		const message = {
 			id: '100000000000000099',
 			channelId: '100000000000000020',
@@ -107,7 +108,7 @@ describe('MessagePersonaAccount Component', () => {
 					user={mockUser}
 					message={message}
 					tagText="SYS"
-					customIconUrl="https://example.com/icon.png"
+					tagIcon="1a2b3c4d"
 					data-flx="channel.message-persona-account-test.message-persona-account--2"
 				/>,
 			);
@@ -119,10 +120,12 @@ describe('MessagePersonaAccount Component', () => {
 
 		const imgEl = tagEl?.querySelector('img');
 		expect(imgEl).not.toBeNull();
-		expect(imgEl?.getAttribute('src')).toBe('https://example.com/icon.png');
+		expect(imgEl?.getAttribute('src')).toBe(
+			AvatarUtils.getUserAvatarURL({id: mockUser.id, avatar: '1a2b3c4d'}, false, 32),
+		);
 	});
 
-	it('renders standalone custom icon when customIconUrl is provided without tagText', async () => {
+	it('renders the standalone tag icon when a hash is provided without tagText', async () => {
 		const message = {
 			id: '100000000000000099',
 			channelId: '100000000000000020',
@@ -138,7 +141,7 @@ describe('MessagePersonaAccount Component', () => {
 				<MessagePersonaAccount
 					user={mockUser}
 					message={message}
-					customIconUrl="https://example.com/icon.png"
+					tagIcon="1a2b3c4d"
 					data-flx="channel.message-persona-account-test.message-persona-account--3"
 				/>,
 			);
@@ -148,10 +151,40 @@ describe('MessagePersonaAccount Component', () => {
 			'[data-flx="channel.user-message.message-avatar-subprofile-custom-icon"]',
 		) as HTMLImageElement;
 		expect(iconEl).not.toBeNull();
-		expect(iconEl.src).toBe('https://example.com/icon.png');
+		expect(iconEl.getAttribute('src')).toBe(
+			AvatarUtils.getUserAvatarURL({id: mockUser.id, avatar: '1a2b3c4d'}, false, 32),
+		);
 	});
 
-	it('renders root user avatar when neither tagText nor customIconUrl is provided', async () => {
+	it.each(['https://tracker.example/pixel.png', 'data:image/png;base64,iVBORw0KGgo='])(
+		'loads no image from a tag icon that is not a hash (%s)',
+		async (tagIcon) => {
+			const message = {
+				id: '100000000000000099',
+				channelId: '100000000000000020',
+				authorId: mockUser.id,
+				subprofile: {id: 'p1', name: 'Persona One'},
+			} as any;
+
+			await act(async () => {
+				root.render(
+					<MessagePersonaAccount
+						user={mockUser}
+						message={message}
+						tagText="SYS"
+						tagIcon={tagIcon}
+						data-flx="channel.message-persona-account-test.message-persona-account--5"
+					/>,
+				);
+			});
+
+			expect(container.querySelector('[data-flx="persona.tag"]')?.textContent).toContain('SYS');
+			expect([...container.querySelectorAll('img')].map((img) => img.getAttribute('src'))).not.toContain(tagIcon);
+			expect(container.innerHTML).not.toContain('tracker.example');
+		},
+	);
+
+	it('renders root user avatar when neither tagText nor a tag icon is provided', async () => {
 		const message = {
 			id: '100000000000000099',
 			channelId: '100000000000000020',
