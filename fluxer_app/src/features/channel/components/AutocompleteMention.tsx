@@ -32,6 +32,7 @@ import {
 } from '@app/features/channel/components/AutocompleteTypes';
 import tagStyles from '@app/features/persona/components/PersonaTag.module.css';
 import {personaAvatarUrls} from '@app/features/persona/utils/PersonaAvatarUrls';
+import {personaTagIconUrls} from '@app/features/persona/utils/PersonaTagIconUrls';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {BaseAvatar} from '@app/features/ui/components/BaseAvatar';
 import Users from '@app/features/user/state/Users';
@@ -153,12 +154,8 @@ export const AutocompleteMention = observer(function AutocompleteMention({
 							: option.persona.owner_username,
 					);
 		const systemTag = option.persona.display_tag_text?.trim();
-		const rawTagIcon = option.persona.display_tag_icon?.trim();
-		const tagIcon = rawTagIcon
-			? rawTagIcon.startsWith('http://') || rawTagIcon.startsWith('https://') || rawTagIcon.startsWith('data:')
-				? rawTagIcon
-				: AvatarUtils.getUserAvatarURL({id: option.persona.owner_user_id, avatar: rawTagIcon}, false, 32)
-			: null;
+		const tagIcon =
+			personaTagIconUrls(option.persona.owner_user_id, option.persona.display_tag_icon)?.staticUrl ?? null;
 		const hasTag = Boolean(systemTag || tagIcon);
 		return (
 			<AutocompleteItem
