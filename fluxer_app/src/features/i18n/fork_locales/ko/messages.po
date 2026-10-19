@@ -653,6 +653,7 @@ msgstr "활성 페르소나 전환"
 msgid "System Tag (Applied to imported personas)"
 msgstr "시스템 태그 (가져온 페르소나에 적용)"
 
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
 msgstr "태그 아이콘"
@@ -686,6 +687,10 @@ msgstr "선택할 페르소나예요."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "여기에서 채널을 선택하기 전까지 시그널 바는 꺼져 있어요. 카테고리나 커뮤니티 전체를 선택하면 나중에 그곳에 만들어지는 채널에도 적용돼요."
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "태그 아이콘을 저장하지 못했어요: {error}. 페르소나 설정에서 다시 설정할 수 있어요."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
