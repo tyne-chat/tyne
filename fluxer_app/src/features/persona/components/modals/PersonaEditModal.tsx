@@ -359,6 +359,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	const initialFormStateRef = useRef<PersonaFormState>(initialFormState);
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 	const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+	// The picked file, shown only while it uploads. The form keeps only the hash the upload returns.
+	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+	const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [flashBanner, setFlashBanner] = useState(false);
 
@@ -548,7 +551,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	}, []);
 
 	const handleAvatarUpload = async (base64: string) => {
-		setFormData((prev) => ({...prev, avatarHash: base64}));
+		setAvatarPreview(base64);
 		setIsUploadingAvatar(true);
 		try {
 			const res = await http.post<{avatar_hash?: string; avatar_color?: number | null}>(
@@ -576,6 +579,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				children: i18n._(AVATAR_UPLOAD_FAILED_DESCRIPTOR),
 			});
 		} finally {
+			setAvatarPreview(null);
 			setIsUploadingAvatar(false);
 		}
 	};
@@ -585,7 +589,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	};
 
 	const handleBannerUpload = async (base64: string) => {
-		setFormData((prev) => ({...prev, bannerHash: base64}));
+		setBannerPreview(base64);
 		setIsUploadingBanner(true);
 		try {
 			const res = await http.post<{banner_hash?: string}>(ForkEndpoints.USER_PERSONA_BANNER, {
@@ -606,6 +610,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				children: i18n._(BANNER_UPLOAD_FAILED_DESCRIPTOR),
 			});
 		} finally {
+			setBannerPreview(null);
 			setIsUploadingBanner(false);
 		}
 	};
@@ -1169,23 +1174,25 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 									>
 										<ProfileCardBanner
 											bannerUrl={
-												formData.bannerHash
+												bannerPreview ??
+												(formData.bannerHash
 													? AvatarUtils.getPersonaBannerURL({
 															userId: currentUser?.id ?? '',
 															banner: formData.bannerHash,
 														})
-													: null
+													: null)
 											}
 											hoverBannerUrl={null}
 											bannerColor={previewColor != null ? ColorUtils.int2hex(previewColor) : 'var(--bg-secondary)'}
 											user={currentUser}
 											avatarUrl={
-												formData.avatarHash.trim()
+												avatarPreview ??
+												(formData.avatarHash.trim()
 													? AvatarUtils.getPersonaAvatarURL({
 															userId: currentUser?.id ?? '',
 															avatar: formData.avatarHash.trim(),
 														})
-													: AvatarUtils.getUserAvatarURL(currentUser, false)
+													: AvatarUtils.getUserAvatarURL(currentUser, false))
 											}
 											hoverAvatarUrl={null}
 											disablePresence={true}
