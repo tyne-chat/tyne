@@ -247,6 +247,12 @@ member.)
   commit; extra fallbacks need evidence that their cause happens (a log line, a query, a repro).
 - When a theory of a bug is not verified, say so when handing it on, so it is not implemented as
   fact.
+- Do not blame the environment (CI, a phone, production) until a theory explains every symptom.
+  Look past the last normal log line for evidence that contradicts the obvious reading (what was
+  still running at the end, timestamps, a later step's output): a contradiction moves the question.
+  When a command passes on its own but fails under the tool that runs it (an orchestrator, a test
+  runner, a wrapper script), suspect how that tool starts it or reads its output, and reproduce
+  through the tool, not around it (tyne-chat/tyne#194).
 - When a bug hits some users and not others, compare what is stored for them (account and
   per-server settings, roles, who owns the server, app version) with an unaffected user's, and look
   for anything unusual before reading more code. Test and maintainer accounts rarely have unusual
