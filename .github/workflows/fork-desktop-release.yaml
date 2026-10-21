@@ -66,10 +66,11 @@ env:
   # Fork: the link scheme the packages declare. Must be the one the app registers when it runs
   # (CHANNEL_APP_PROTOCOLS in fluxer_desktop/src/common/Constants.ts).
   FLUXER_FORK_LINK_SCHEME: tyne
-  # Fork: package Linux with stock Electron (fluxer_desktop/electron-builder.config.cjs). Upstream's
-  # patched Electron is compiled from Chromium source, which these runners cannot do; drop this
-  # once the workflow supplies a patched build through FLUXER_ELECTRON_DIST.
-  FLUXER_FORK_STOCK_LINUX_ELECTRON: "1"
+  # Fork: Linux is packaged with upstream's patched Electron (fluxer_desktop/electron/build-linux.sh),
+  # which these runners cannot compile. It is built on the maintainers' host and kept as the assets of
+  # this draft release; the Linux job downloads them into FLUXER_ELECTRON_DIST. Rebuild and upload a
+  # new draft when upstream moves Electron or the patch (tyne-chat/tyne#187).
+  FLUXER_FORK_ELECTRON_RELEASE: electron-v44.4.1-tyne1
   CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
 
 jobs:
@@ -337,11 +338,23 @@ jobs:
             --delta None
           ls -la "dist-electron/velopack-windows-${ARCH}"
 
+      - name: Download patched Electron distribution (Linux)
+        if: matrix.platform == 'linux'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$FLUXER_FORK_ELECTRON_RELEASE" --repo "$GITHUB_REPOSITORY" \
+            --dir "$RUNNER_TEMP/fluxer-electron-dist" \
+            --pattern "electron-v*-linux-${{ matrix.arch }}.zip" \
+            --pattern "electron-v*-linux-${{ matrix.arch }}.fluxer.json"
+          ls -la "$RUNNER_TEMP/fluxer-electron-dist"
+
       - name: Build Electron app (Linux)
         if: matrix.platform == 'linux'
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
         env:
           USE_SYSTEM_FPM: "true"
+          FLUXER_ELECTRON_DIST: ${{ runner.temp }}/fluxer-electron-dist
         run: ${{ env.CI_TOOL }} --step build_app_linux
 
       # Upstream's build_app_macos step requires its signing keychain. This build is signed ad hoc
