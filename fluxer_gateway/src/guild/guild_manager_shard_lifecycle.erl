@@ -69,7 +69,10 @@ start_new_guild(GuildId, Data, GuildKey, State) ->
     {ok, pid(), state()} | {error, term()}.
 start_transferred_guild(GuildId, TransferState, State) ->
     GuildKey = process_registry:build_process_key(guild, GuildId),
-    GuildState = normalize_transferred_guild_state(GuildId, TransferState),
+    %% Fork (tyne-chat/tyne#196): the sessions that came with the guild reconnect without a gap.
+    GuildState = fork_guild_handoff:mark_carried_over(
+        normalize_transferred_guild_state(GuildId, TransferState)
+    ),
     case process_registry:registry_whereis(GuildKey) of
         undefined -> start_new_guild_from_state(GuildId, GuildState, GuildKey, State);
         _ExistingPid -> lookup_existing_guild(GuildId, GuildKey, State)
