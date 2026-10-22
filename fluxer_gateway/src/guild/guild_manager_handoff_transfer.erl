@@ -19,7 +19,9 @@ handoff_guild_to_owner(GuildId, TargetNode, State) ->
     #{pid := Shard} = maps:get(Index, maps:get(shards, State1)),
     case local_guild_pid(Shard, GuildId) of
         {ok, GuildPid} ->
-            Result = guild_handoff_freeze:transfer(GuildId, GuildPid, Shard, TargetNode, #{}),
+            %% Fork (tyne-chat/tyne#196): repoint every node's guild pid cache on the move.
+            Opts = fork_guild_handoff:transfer_opts(GuildId, GuildPid),
+            Result = guild_handoff_freeze:transfer(GuildId, GuildPid, Shard, TargetNode, Opts),
             {handed_off(GuildId, TargetNode, Result), State1};
         {error, _Reason} ->
             {false, State1}
