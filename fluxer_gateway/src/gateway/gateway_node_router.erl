@@ -69,7 +69,8 @@ select_owner_node(_Key, [Only]) ->
     Only;
 select_owner_node(Key, Nodes) when is_list(Nodes) ->
     Hashable = hashable_key(Key),
-    Sorted = lists:usort(Nodes),
+    %% Fork (tyne-chat/tyne#196): a draining node owns nothing while another node remains.
+    Sorted = lists:usort(fork_gateway_drain:owners(Nodes)),
     case rendezvous_router:select_node(Hashable, Sorted) of
         undefined -> node();
         Owner -> Owner
