@@ -402,7 +402,7 @@ upsert_pending_session(S, U, P, Request, State) ->
                 sessions => Sessions0#{S => Entry}
             });
         {ok, Existing} ->
-            State#{sessions => Sessions0#{S => mark_pending(Existing)}}
+            fork_upsert_existing(S, P, Existing, Sessions0, State)
     end.
 
 -spec mark_pending(map()) -> map().
@@ -911,3 +911,24 @@ unavailable_test_messages() ->
     end.
 
 -endif.
+
+%% Fork (tyne-chat/tyne#196): a session that connects again because of a handoff keeps receiving
+%% the guild's events meanwhile. Upstream marks an existing entry pending_connect until the connect
+%% worker is done, and the dispatch filters skip pending sessions
+%% (guild_sessions:is_pending_or_excluded/3), so events in that window were lost, and a resuming
+%% client never learns it. Two cases are a handoff: the session id connects from a different
+%% process (the session moved to another node; the entry is taken over for the new process,
+%% fork_guild_session_rebind), or the entry came with the guild's own transfer
+%% (fork_guild_handoff:mark_carried_over/1) and this is its first connect. The worker still runs
+%% and finalises the entry (upsert_session/6 handles an entry that is not pending). Every other
+%% reconnect is upstream's.
+
+-spec fork_upsert_existing(binary(), pid(), map(), map(), map()) -> map().
+fork_upsert_existing(S, _P, #{pending_connect := true} = Existing, Sessions0, State) ->
+    State#{sessions => Sessions0#{S => mark_pending(Existing)}};
+fork_upsert_existing(S, P, #{pid := OldPid}, _Sessions0, State) when OldPid =/= P ->
+    fork_guild_session_rebind:rebind(S, P, State);
+fork_upsert_existing(S, _P, #{fork_carried_over := true} = Existing, Sessions0, State) ->
+    State#{sessions => Sessions0#{S => maps:remove(fork_carried_over, Existing)}};
+fork_upsert_existing(S, _P, Existing, Sessions0, State) ->
+    State#{sessions => Sessions0#{S => mark_pending(Existing)}}.
