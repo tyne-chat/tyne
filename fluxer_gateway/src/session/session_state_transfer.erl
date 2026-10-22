@@ -74,6 +74,8 @@ handle_call({receive_state, SessionId, SessionState}, _From, Store) when
         state => SessionState,
         received_at => erlang:monotonic_time(millisecond)
     },
+    %% Fork (tyne-chat/tyne#196): start the session now, not at its client's RESUME.
+    ok = fork_session_transfer_start:start_received(SessionId),
     {reply, ok, Store#{SessionId => Entry}};
 handle_call({pop_state, SessionId}, _From, Store) when is_binary(SessionId) ->
     case maps:take(SessionId, Store) of
