@@ -16,6 +16,8 @@ start(_StartType, _StartArgs) ->
 -spec init_subsystems() -> ok.
 init_subsystems() ->
     _ = fluxer_gateway_env:load(),
+    %% Fork (tyne-chat/tyne#196): beside other gateway nodes, take API requests once joined.
+    ok = fork_cluster_join:defer_rpc_until_joined(),
     ok = gateway_guild_pin_keeper:apply_boot_pins(),
     gateway_compress:init(),
     gateway_cluster_metrics:init(),
