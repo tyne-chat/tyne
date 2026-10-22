@@ -60,6 +60,15 @@ How names come out:
   off for a schema and `preserveNullFields` keeps its all-`null` objects. A patch that clears a
   setting with only `null`s needs the latter: the fork registers it on upstream's
   `InstancePolicyUpdateSchema` so that `signal_bar_guild_id: null` alone gets through.
+- **Empty query values are a 400** unless the field accepts `null`: `?q=` reaches the schema as
+  `null`, which `.optional()` and `.optional().default(…)` both refuse (`INVALID_FORMAT`). Clients
+  send empty values more often than it looks: the web client sends `''` as `key=`, and a
+  hand-written Dio call sends `null` as a bare `?key` (the generated SDK drops nulls). A fork query
+  field a client may send empty is either `.nullish()`, with the handler treating `null` like a
+  missing value, or registers `preserveEmptyValues` on the field after any `.default()` (the
+  validator unwraps only `Optional` and `Nullable` to find it) and receives `''`
+  (`ChannelPersonaMentionsQuerySchema`'s `q`, tyne-chat/tyne#200). Beware `z.coerce.number()`: it
+  turns `null` into `0`, so an empty value can silently become a real filter.
 - **Errors:** a Zod message that is a `ValidationErrorCodes` value reaches the client as that code;
   other text becomes `INVALID_FORMAT` (`PersonaTagSchema`'s refine message does).
 - **Responses differ by environment.** Outside production (`dev.validate_responses`, on unless `env`
