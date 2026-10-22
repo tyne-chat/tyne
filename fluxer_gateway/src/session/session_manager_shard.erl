@@ -139,6 +139,10 @@ handle_call(reconnect_drain, _From, State) ->
     {reply, {ok, DrainCount}, State};
 handle_call({handoff_to_topology, TargetNodes}, _From, State) ->
     handle_handoff_topology(TargetNodes, State);
+%% Fork (tyne-chat/tyne#196): a session handed over from another node starts when it arrives.
+handle_call({fork_start_transferred, SessionId}, _From, State) when is_binary(SessionId) ->
+    {Reply, NewState} = fork_session_transfer_start:handle_shard_start(SessionId, State),
+    {reply, Reply, NewState};
 handle_call(_, _From, State) ->
     {reply, ok, State}.
 
