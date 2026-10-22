@@ -111,8 +111,9 @@ handle_call({resume, Seq, SocketPid}, _From, State) when
     session_lifecycle:handle_resume(Seq, SocketPid, State);
 handle_call({get_state}, _From, State) ->
     {reply, session_lifecycle:serialize_state(State), State};
-handle_call(export_state, _From, State) ->
-    {reply, {ok, session_lifecycle:serialize_transfer_state(State)}, State};
+handle_call(export_state, From, State) ->
+    %% Fork (tyne-chat/tyne#196): after the export, forward to the new process (no lost events).
+    fork_session_handoff:export_and_forward(From, State);
 handle_call({terminate, SessionIdHashes}, _From, State) ->
     case binary_list(SessionIdHashes) of
         {ok, Hashes} -> session_lifecycle:handle_terminate_call(Hashes, State);

@@ -192,7 +192,9 @@ poll(
     case Resolver(DnsName) of
         {ok, Addrs} ->
             NewPeers = ip_addrs_to_peers(Addrs, Base),
-            apply_resolved_peers(NewPeers, OldPeers, State);
+            %% Fork (tyne-chat/tyne#196): an answer naming only this node is not a DNS blip.
+            Previous = fork_cluster_discovery:previous_peers(Addrs, NewPeers, OldPeers),
+            apply_resolved_peers(NewPeers, Previous, State);
         {error, Reason} ->
             gateway_cluster_metrics:record_discovery_resolve_failure(),
             logger:warning(

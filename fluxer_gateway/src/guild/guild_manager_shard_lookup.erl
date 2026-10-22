@@ -92,7 +92,7 @@ lookup_from_registry(GuildId, Guilds, State) ->
     GuildKey = process_registry:build_process_key(guild, GuildId),
     case process_registry:lookup_or_monitor(GuildKey, GuildId, Guilds) of
         {ok, Pid, _Ref, NewGuilds} -> {reply, {ok, Pid}, State#{guilds => NewGuilds}};
-        {error, not_found} -> {reply, {error, not_found}, State}
+        {error, not_found} -> fork_lookup_not_found(GuildKey, State)
     end.
 
 -spec monitor_existing(process_registry:process_key(), guild_id(), map(), state()) ->
@@ -109,7 +109,7 @@ lookup_or_fetch(GuildId, From, State) ->
     GuildKey = process_registry:build_process_key(guild, GuildId),
     case process_registry:registry_whereis(GuildKey) of
         undefined ->
-            lookup_or_fetch_new(GuildId, GuildKey, From, State);
+            fork_lookup_or_fetch_new(GuildId, GuildKey, From, State);
         _ExistingPid ->
             Guilds = maps:get(guilds, State),
             monitor_existing(GuildKey, GuildId, Guilds, State)
@@ -469,3 +469,26 @@ legacy_fetch_result_completes_when_no_fetch_worker_is_tracked_test() ->
     end.
 
 -endif.
+
+%% Fork (tyne-chat/tyne#196): a guild this node owns but does not have yet may still run on another
+%% node: one that is draining (fork_gateway_drain), or the one it ran on before this node joined.
+%% It is used there, not loaded afresh: a fresh copy would have no sessions, and the handoff would
+%% adopt it in place of the real one (guild_manager_shard_lifecycle:start_transferred_guild/3).
+
+-spec fork_lookup_not_found(process_registry:process_key(), state()) ->
+    {reply, {ok, pid()} | {error, not_found}, state()}.
+fork_lookup_not_found(GuildKey, State) ->
+    case fork_gateway_drain:live_elsewhere(GuildKey) of
+        {ok, Pid} -> {reply, {ok, Pid}, State};
+        none -> {reply, {error, not_found}, State}
+    end.
+
+-spec fork_lookup_or_fetch_new(
+    guild_id(), process_registry:process_key(), gen_server:from(), state()
+) ->
+    {reply, {ok, pid()} | {error, term()}, state()} | {noreply, state()}.
+fork_lookup_or_fetch_new(GuildId, GuildKey, From, State) ->
+    case fork_gateway_drain:live_elsewhere(GuildKey) of
+        {ok, Pid} -> {reply, {ok, Pid}, State};
+        none -> lookup_or_fetch_new(GuildId, GuildKey, From, State)
+    end.
