@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {createStringType, SnowflakeStringType, SnowflakeType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
+import {schemaMetadata} from '@fluxer/schema/src/SchemaMetadata';
 import {z} from 'zod';
 
 export const PersonaTagSchema = z
@@ -273,7 +274,9 @@ export const ChannelPersonaMentionsResponseSchema = z.array(ChannelPersonaMentio
 export type ChannelPersonaMentionsResponse = z.infer<typeof ChannelPersonaMentionsResponseSchema>;
 
 export const ChannelPersonaMentionsQuerySchema = z.object({
-	q: z.string().max(100).optional().default(''),
+	// The clients preload a channel's candidates with `q=`. The API's validator turns an empty string
+	// into null unless the field keeps empty values, and null fails z.string() (tyne-chat/tyne#200).
+	q: z.string().max(100).optional().default('').register(schemaMetadata, {preserveEmptyValues: true}),
 	limit: z.coerce.number().int().min(1).max(1000).optional().default(100),
 });
 
