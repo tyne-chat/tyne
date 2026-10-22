@@ -115,7 +115,7 @@ The outline is in `ARCHITECTURE.md` ("Connecting to the gateway"). The details t
 - **RESUME** works only on a socket without a session (else 4005). A seq beyond the current one or
   below `ack_seq` closes with 4007; an unknown session or a seq below `replay_floor` gets
   INVALID_SESSION. Sessions live only in memory: after a gateway restart every client identifies
-  again.
+  again; a deploy hands them to a new node instead ("Handing the gateway over").
 - A new session-state field must also go into `session_lifecycle:serialize_transfer_state/1` and
   `session_init:extract_fields/1`, or moving a session between nodes drops it.
 
@@ -173,13 +173,54 @@ The gateway's requests go to the API's `/internal/rpc`:
 | `utils/constants.erl` | `resume_timeout() -> 300000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`); the docs say 300,000 ms | one value |
 | `guild/guild_dispatch_filter.erl` | `channel_signal_update`, `channel_signal_bar_update` are channel-scoped | two clauses |
 | `session/session_passive.erl` | `signal_bar_update` bypasses the passive filter | one clause |
+| `gateway/fork_gateway_drain.erl`, `fork_cluster_join.erl`, `fork_cluster_discovery.erl`; `guild/fork_guild_handoff.erl`, `fork_guild_session_rebind.erl`; `session/fork_session_handoff.erl`, `fork_session_transfer_start.erl` | the handoff fixes ("Handing the gateway over", below) | fork-owned |
+| `gateway/gateway_node_router.erl` | `select_owner_node/2` hashes over `fork_gateway_drain:owners/1` | one line replaced |
+| `gateway/gateway_cluster_handoff.erl` | `drain_async/0` announces the drain, `clear_draining/0` withdraws it; the role `all` drain calls `fork_gateway_drain:reconnect_drain/0`; `maybe_start_handoff/1` also sees a handoff in flight stored as a map | two lines added, one replaced, one clause |
+| `gateway/fluxer_gateway_app.erl` | `fork_cluster_join:defer_rpc_until_joined/0` after the config loads | one line |
+| `gateway/gateway_cluster_discovery.erl` | `poll/1` compares with `fork_cluster_discovery:previous_peers/3` | one line added, one replaced |
+| `guild/guild_manager_handoff_transfer.erl` | the transfer's options from `fork_guild_handoff:transfer_opts/2` | one line added, one replaced |
+| `guild/guild_manager_shard_lookup.erl` | two calls to the appended fork block (`fork_lookup_not_found/2`, `fork_lookup_or_fetch_new/4`) | two lines replaced, block appended |
+| `guild/guild_connect_async.erl` | `upsert_pending_session/5` hands an existing entry to the appended fork block (`fork_upsert_existing/5`) | one line replaced, block appended |
+| `guild/guild_manager_shard_lifecycle.erl` | `start_transferred_guild/3` marks the carried-over sessions (`fork_guild_handoff:mark_carried_over/1`) | one call wrapped |
+| `session/session.erl` | `export_state` answers through `fork_session_handoff:export_and_forward/2` | one clause body |
+| `session/session_state_transfer.erl`, `session/session_manager_shard.erl` | a received state starts its session (`fork_session_transfer_start`) | one line; one clause |
 
-None of the lines in upstream's files has a `%% Fork:` marker. Keep the hand-overs when upstream
+The persona and signal lines in upstream's files have no `%% Fork:` marker; the handoff's do. Keep the hand-overs when upstream
 changes these files: the `icon` line is the easiest to lose (no test checks a persona's icon through
 `push_job_publisher`). Going back to 60 s changes behaviour: ask a maintainer. The NIF crates are
 outside the root Cargo workspace, so the root `cargo fmt` and Clippy do not reach `lib.rs`. How the
 API sends the fork's events: `fluxer_api/src/api/persona/AGENTS.md` and
 `fluxer_api/src/api/signal_bar/AGENTS.md`.
+
+## Handing the gateway over (deploys)
+
+Production runs the gateway with clustering on, one node between deploys. A deploy starts a second
+node, which joins the first; the edge sends new connections to it; the old node is drained and
+removed (`scripts/gateway_handoff.sh` in the maintainers' tooling). Sessions, guilds and calls move
+with upstream's handoff (`gateway_cluster_handoff`), and clients resume instead of identifying
+again. Upstream's handoff loses events and routes to the wrong node in several places, measured in a
+rehearsal (tyne-chat/tyne#196); the fork's modules close them:
+
+- `fork_session_transfer_start`: a session's state starts its process on arrival, not at RESUME.
+- `fork_session_handoff`: after `export_state` the old session process forwards every cast and call
+  to the new one until it has passed nothing on for 2 s, so nothing sent to it after the export is
+  lost.
+- `fork_guild_session_rebind` and the block in `guild_connect_async`: a session that reconnects
+  because of a handoff (its id from a new process, or an entry that came with the guild's
+  transfer) is not marked `pending_connect`, which upstream's dispatch filters skip; a known
+  session id from a new process takes the entry over.
+- `fork_guild_handoff`: a moved guild's new process replaces the cached pid on every node, and its
+  carried-over sessions are marked.
+- `fork_gateway_drain`: a draining node, or one still starting, owns nothing (owner selection);
+  with another node to hand over to, a draining node also leaves the API's NATS queue group; a
+  guild its owner does not have yet is used where it still runs, never loaded afresh.
+- `fork_cluster_join`: a node starting beside others subscribes to the API's NATS requests only
+  once it has started and joined.
+- `fork_cluster_discovery`: a DNS answer naming only this node is not a DNS failure.
+
+A RESUME is lossless only if all of these hold; a change to upstream's handoff, session export,
+ownership or startup order can reopen a gap that no unit test sees. Rehearse it (the maintainers'
+`rehearse_gateway_handoff.sh`) before deploying such a change.
 
 ## Known gaps
 
@@ -193,7 +234,8 @@ API sends the fork's events: `fluxer_api/src/api/persona/AGENTS.md` and
   with `meck`.
 - Fork tests: `test/fork_persona_event_atoms_tests.erl` (persona names),
   `test/fork_session_passive_tests.erl` (signal-bar names, scoping, the passive rule at 300
-  members), `test/fork_push_personas_tests.erl` (preview, title, icon). New ones go in
+  members), `test/fork_push_personas_tests.erl` (preview, title, icon), and one per handoff module
+  (`test/fork_gateway_drain_tests.erl` and the others named after their module). New ones go in
   `test/fork_<subject>_tests.erl`, never in an upstream test module or inline block.
 - Not covered: the resume timeout's value, routing of the persona events, the `icon` line.
 - Checks: the four `gateway_*` steps in `CHECKS.md`, as upstream's CI
