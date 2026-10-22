@@ -111,6 +111,31 @@ describe('Channel Persona Mentions and Privacy Filtering', () => {
 		expect(unlistedResults.map((r) => r.name).sort()).toEqual(['Alice Unlisted', 'Bob Unlisted'].sort());
 	});
 
+	test('treats an empty search query like no query', async () => {
+		await createPersona(harness, userB.token, {name: 'Bob Public', visibility: 'public'});
+		await createPersona(harness, userA.token, {name: 'Alice Public', visibility: 'public'});
+
+		// The clients preload a channel's candidates this way (tyne-chat/tyne#200).
+		const emptyQueryResults = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userA.token)
+			.get(`/channels/${channelId}/persona-mentions?q=&limit=500`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		const noQueryResults = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userA.token)
+			.get(`/channels/${channelId}/persona-mentions?limit=500`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		expect(emptyQueryResults.map((r) => r.name).sort()).toEqual(['Alice Public', 'Bob Public']);
+		expect(emptyQueryResults.map((r) => r.name).sort()).toEqual(noQueryResults.map((r) => r.name).sort());
+	});
+
+	test('still rejects a search query over 100 characters', async () => {
+		await createBuilder(harness, userA.token)
+			.get(`/channels/${channelId}/persona-mentions?q=${'x'.repeat(101)}`)
+			.expect(HTTP_STATUS.BAD_REQUEST)
+			.execute();
+	});
+
 	test('rejects queries from users without channel view permission', async () => {
 		// User C is not in the guild and cannot view the channel
 		await createBuilder(harness, userC.token)
