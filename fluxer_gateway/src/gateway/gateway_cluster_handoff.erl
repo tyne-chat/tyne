@@ -48,6 +48,8 @@ start_link() ->
 -spec drain_async() -> ok.
 drain_async() ->
     persistent_term:put({fluxer_gateway, draining}, true),
+    %% Fork (tyne-chat/tyne#196): peers stop counting this node as an owner.
+    ok = fork_gateway_drain:announce(),
     ok = drain_notify_role(),
     drain_dispatch().
 
@@ -65,6 +67,8 @@ undrain() ->
 -spec clear_draining() -> ok.
 clear_draining() ->
     persistent_term:erase({fluxer_gateway, draining}),
+    %% Fork (tyne-chat/tyne#196): this node owns again on its peers too.
+    ok = fork_gateway_drain:withdraw(),
     logger:info("Gateway un-cordoned: draining flag cleared"),
     ok.
 
@@ -202,7 +206,8 @@ drain_notify_role() ->
             );
         all ->
             _ = shard_utils:safe_apply(
-                fun session_manager:reconnect_drain/0,
+                %% Fork (tyne-chat/tyne#196): not while sessions move to another node.
+                fun fork_gateway_drain:reconnect_drain/0,
                 {error, unavailable}
             ),
             ok;
@@ -296,6 +301,10 @@ normalize_role_members(RoleMembers) when is_map(RoleMembers) ->
     ).
 
 -spec maybe_start_handoff(state()) -> state().
+%% Fork (tyne-chat/tyne#196): a handoff in flight is stored as a map (below), which upstream's guard
+%% does not match, so a drain during a rebalance started a second handoff beside the first.
+maybe_start_handoff(#{handoff := #{pid := _}} = State) ->
+    State;
 maybe_start_handoff(#{handoff := {_Pid, _Ref, _Members, _HandoffRoleMembers}} = State) ->
     State;
 maybe_start_handoff(#{pending_members := undefined} = State) ->
