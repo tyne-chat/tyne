@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// Fork: tests of the stock-Electron switch in addLinuxHardwareVideoDecodeFeatures, kept out of
-// upstream's tests.
+// Fork: tests of the fork's switches in addLinuxHardwareVideoDecodeFeatures, kept out of upstream's tests.
 import assert from 'node:assert/strict';
 import {afterEach, describe, test} from 'node:test';
 import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
@@ -12,21 +11,30 @@ installElectronStub({
 
 const {addLinuxHardwareVideoDecodeFeatures} = await import('./ChromiumRuntime.ts');
 
+function decodeFeatures() {
+	const features = new Set();
+	addLinuxHardwareVideoDecodeFeatures(features);
+	return features;
+}
+
 describe('addLinuxHardwareVideoDecodeFeatures', {skip: process.platform !== 'linux'}, () => {
 	afterEach(() => {
 		delete process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON;
+		delete process.env.FLUXER_FORK_NVIDIA_VAAPI_DECODE;
 	});
 
-	test('turns on NVIDIA decoding with upstream patched Electron', () => {
-		const features = new Set();
-		addLinuxHardwareVideoDecodeFeatures(features);
-		assert.ok(features.has('VaapiOnNvidiaGPUs'));
+	test('leaves NVIDIA decoding off by default (black video on X11, tyne-chat/tyne#187)', () => {
+		assert.equal(decodeFeatures().has('VaapiOnNvidiaGPUs'), false);
 	});
 
-	test('leaves NVIDIA decoding off in a stock-Electron build', () => {
+	test('turns on NVIDIA decoding when the build asks for it', () => {
+		process.env.FLUXER_FORK_NVIDIA_VAAPI_DECODE = '1';
+		assert.ok(decodeFeatures().has('VaapiOnNvidiaGPUs'));
+	});
+
+	test('leaves NVIDIA decoding off in a stock-Electron build even when asked for', () => {
+		process.env.FLUXER_FORK_NVIDIA_VAAPI_DECODE = '1';
 		process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON = '1';
-		const features = new Set();
-		addLinuxHardwareVideoDecodeFeatures(features);
-		assert.equal(features.has('VaapiOnNvidiaGPUs'), false);
+		assert.equal(decodeFeatures().has('VaapiOnNvidiaGPUs'), false);
 	});
 });
