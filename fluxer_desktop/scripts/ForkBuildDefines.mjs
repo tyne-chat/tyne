@@ -14,5 +14,9 @@ export function forkPublicBuildDefines() {
 		'process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON': JSON.stringify(
 			process.env.FLUXER_FORK_STOCK_LINUX_ELECTRON === '1' ? '1' : '',
 		),
+		// Fork: NVIDIA hardware video decoding on Linux, off unless set to 1 (src/main/ChromiumRuntime.ts).
+		'process.env.FLUXER_FORK_NVIDIA_VAAPI_DECODE': JSON.stringify(
+			process.env.FLUXER_FORK_NVIDIA_VAAPI_DECODE === '1' ? '1' : '',
+		),
 	};
 }
