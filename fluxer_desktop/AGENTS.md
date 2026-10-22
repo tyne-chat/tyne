@@ -136,6 +136,11 @@ A handler that touches accounts, storage or windows checks its sender with
   still packages stock Electron for a local build (it skips those checks and leaves
   `VaapiOnNvidiaGPUs` off, `ChromiumRuntime.ts`). A new upstream requirement of this kind fails
   only at release time: the nightly rebase does not build the desktop app.
+- **NVIDIA hardware video decoding** (`VaapiOnNvidiaGPUs`) is off unless the build sets
+  `FLUXER_FORK_NVIDIA_VAAPI_DECODE=1`, although upstream turns it on. With nvidia-vaapi-driver, X11
+  sessions show black video: three bugs in Chromium's X11 dma-buf import (ANGLE's GLX pixmap
+  binding, DRI3 1.0 without modifiers, cached pixmaps). Wayland worked in a nested test.
+  Details, test harness and reproducers in tyne-chat/tyne#187.
 
 ## Native add-ons
 
