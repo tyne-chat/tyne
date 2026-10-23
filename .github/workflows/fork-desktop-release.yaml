@@ -416,7 +416,8 @@ jobs:
     if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') }}
     needs: build
     runs-on: macos-14
-    timeout-minutes: 120
+    # Two notarizations of up to two hours each (scripts/fork-sign-macos.sh).
+    timeout-minutes: 300
     environment: desktop-release
     steps:
       - name: Checkout the signing script and entitlements
