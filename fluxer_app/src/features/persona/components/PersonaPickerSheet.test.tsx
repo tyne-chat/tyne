@@ -214,6 +214,32 @@ describe('PersonaPickerSheet Component', () => {
 		expect(container.textContent).not.toContain('Persona Alpha');
 	});
 
+	// The display tag is the account's, shared by every persona listed here, so it must not make every
+	// persona match (tyne#160, M4-13).
+	it('does not match every persona when the query is part of the display tag', async () => {
+		runInAction(() => PersonaStore.updateSettings({display_tag_text: 'Betamax System'}));
+		await act(async () => {
+			root.render(
+				<PersonaPickerSheet
+					onClose={vi.fn()}
+					onSelectPersona={vi.fn()}
+					onSelectAccount={vi.fn()}
+					data-flx="persona.persona-picker-sheet-test.persona-picker-sheet--display-tag"
+				/>,
+			);
+		});
+
+		const searchInput = container.querySelector('input[type="text"]') as HTMLInputElement;
+		await act(async () => {
+			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+			nativeInputValueSetter?.call(searchInput, 'Beta');
+			searchInput.dispatchEvent(new Event('input', {bubbles: true}));
+		});
+
+		expect(container.textContent).toContain('Persona Beta');
+		expect(container.textContent).not.toContain('Persona Alpha');
+	});
+
 	it('opens settings when manage personas button is clicked', async () => {
 		const onClose = vi.fn();
 		const onSelectPersona = vi.fn();
