@@ -584,4 +584,64 @@ describe('PersonaCommands', () => {
 			expect(http.get).toHaveBeenCalledTimes(2);
 		});
 	});
+
+	// The HTTP client throws HttpError for a refused request (its default `strict` mode), with only the
+	// method and path as its message; the server's explanation is in the body.
+	describe('when the server refuses a request', () => {
+		const refused = (method: 'POST' | 'PATCH' | 'DELETE', status: number, body: unknown) =>
+			new HttpError({method, path: '/users/@me/personas', status, body});
+
+		it("shows the server's message for a refused save", async () => {
+			const message = "Tag pair '[text]' is already in use by persona 'Alice'";
+			vi.mocked(http.post).mockRejectedValueOnce(refused('POST', 400, {code: 'DUPLICATE_PERSONA_TAG', message}));
+
+			const err = await PersonaCommands.createPersona({name: 'Bob'}).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(PersonaCommands.PersonaRequestError);
+			expect(PersonaCommands.personaErrorMessage(err, 'Failed to save persona')).toBe(message);
+		});
+
+		it('falls back to the given text when the server sent no message', async () => {
+			vi.mocked(http.patch).mockRejectedValueOnce(refused('PATCH', 502, null));
+
+			const err = await PersonaCommands.updatePersona('p1', {name: 'Bob'}).catch((e: unknown) => e);
+
+			expect(PersonaCommands.personaErrorMessage(err, 'Failed to save persona')).toBe('Failed to save persona');
+		});
+
+		it('shows nothing more for blocked text, which already has its dialog', async () => {
+			vi.mocked(http.post).mockRejectedValueOnce(
+				refused('POST', 403, {code: 'CONTENT_BLOCKED', message: 'This content was blocked by safety systems.'}),
+			);
+
+			const err = await PersonaCommands.importPersonas([{name: 'Bob'}]).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(PersonaCommands.PersonaRequestError);
+			expect(PersonaCommands.personaErrorMessage(err, 'Failed to import personas')).toBeNull();
+		});
+
+		it('passes on errors that are not refusals, and uses the fallback for them', async () => {
+			const offline = new TypeError('Failed to fetch');
+			vi.mocked(http.post).mockRejectedValueOnce(offline);
+
+			await expect(PersonaCommands.createPersona({name: 'Bob'})).rejects.toBe(offline);
+			expect(PersonaCommands.personaErrorMessage(offline, 'Failed to save persona')).toBe('Failed to save persona');
+		});
+
+		it('treats deleting a persona that is already gone as deleted', async () => {
+			PersonaStore.setPersonas([{id: 'p1', name: 'Gone'} as unknown as PersonaResponse]);
+			vi.mocked(http.delete).mockRejectedValueOnce(refused('DELETE', 404, {code: 'UNKNOWN_PERSONA'}));
+
+			await expect(PersonaCommands.deletePersona('p1')).resolves.toBeUndefined();
+			expect(PersonaStore.personas.map((p) => p.id)).not.toContain('p1');
+		});
+
+		it('keeps the persona when deleting it fails for another reason', async () => {
+			PersonaStore.setPersonas([{id: 'p1', name: 'Kept'} as unknown as PersonaResponse]);
+			vi.mocked(http.delete).mockRejectedValueOnce(refused('DELETE', 500, {message: 'Internal error'}));
+
+			await expect(PersonaCommands.deletePersona('p1')).rejects.toBeInstanceOf(PersonaCommands.PersonaRequestError);
+			expect(PersonaStore.personas.map((p) => p.id)).toContain('p1');
+		});
+	});
 });
