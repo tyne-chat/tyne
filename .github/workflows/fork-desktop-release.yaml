@@ -474,10 +474,11 @@ jobs:
 
   # A test run from tyne without publishing signs the checksums of its files the way publish does,
   # with no write token, and keeps them with the run, so release signing is exercised before a
-  # release depends on it. It runs once the other jobs are done, whichever platforms were built.
+  # release depends on it. It runs once the other jobs are done, whichever platforms were built, and
+  # whatever became of the macOS signing: a slow notarization must not keep this from being tested.
   check-release-signing:
     name: Sign checksums (test run, nothing published)
-    if: ${{ !cancelled() && !failure() && github.event_name == 'workflow_dispatch' && !inputs.publish && github.ref == 'refs/heads/tyne' }}
+    if: ${{ !cancelled() && needs.build.result == 'success' && github.event_name == 'workflow_dispatch' && !inputs.publish && github.ref == 'refs/heads/tyne' }}
     needs: [build, sign-macos, test-macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
