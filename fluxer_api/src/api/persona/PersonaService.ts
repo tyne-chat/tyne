@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {ContentBlockedError} from '@fluxer/errors/src/domains/content/ContentBlockedError';
 import type {
 	ChannelPersonaMentionItem,
 	PersonaChannelState,
@@ -18,10 +19,12 @@ import {type ChannelID, createPersonaID, type PersonaID, type UserID} from '../B
 import {SYSTEM_USER_ID} from '../constants/Core';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
+import {profileSubstringBlocklistCache} from '../middleware/ProfileSubstringBlocklistCache';
 import type {Persona} from '../models/Persona';
 import type {UserGuildRepository} from '../user/repositories/account/UserGuildRepository';
 import type {UserChannelRepository} from '../user/repositories/UserChannelRepository';
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
+import {isProfileSubstringExempt} from '../user/UserHelpers';
 import {
 	DuplicatePersonaTagError,
 	DuplicateSignatureEmojiError,
@@ -131,6 +134,24 @@ export function calculatePersonaMatchScore(
 	return -1;
 }
 
+/** A persona field checked against the admin profile blocklist, with the blocklist scope it falls under. */
+type PersonaProfileText = ['global_name' | 'bio' | 'pronouns', string | null | undefined];
+
+/**
+ * The persona fields a request changes. A value that is already stored stays allowed, so a word banned
+ * later does not stop the persona's other fields from being edited.
+ */
+function changedProfileText(
+	existing: Persona,
+	data: {name?: string | null; bio?: string | null; pronouns?: string | null},
+): Array<PersonaProfileText> {
+	const fields: Array<PersonaProfileText> = [];
+	if (data.name != null && data.name !== existing.name) fields.push(['global_name', data.name]);
+	if (data.bio != null && data.bio !== existing.bio) fields.push(['bio', data.bio]);
+	if (data.pronouns != null && data.pronouns !== existing.pronouns) fields.push(['pronouns', data.pronouns]);
+	return fields;
+}
+
 function getTagKey(tag: {prefix: string; suffix: string}): string {
 	return `${tag.prefix}:::${tag.suffix}`;
 }
@@ -184,6 +205,21 @@ export class PersonaService {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Rejects persona text containing a substring an admin banned from profiles, as upstream does for an
+	 * account's names, bio and pronouns. Accounts exempt there are exempt here; the account is only looked
+	 * up when something matches.
+	 */
+	private async assertProfileTextAllowed(userId: UserID, fields: Array<PersonaProfileText>): Promise<void> {
+		const blocked = fields.some(
+			([scope, text]) => !!text && profileSubstringBlocklistCache.containsBannedSubstring(scope, text),
+		);
+		if (!blocked) return;
+		const user = await this.deps.userAccountLookupService?.findUnique(userId);
+		if (user && isProfileSubstringExempt(user)) return;
+		throw new ContentBlockedError();
 	}
 
 	private async validateSignatureEmojis(
@@ -254,6 +290,11 @@ export class PersonaService {
 		if (data.signature_emojis) {
 			await this.validateSignatureEmojis(userId, data.signature_emojis);
 		}
+		await this.assertProfileTextAllowed(userId, [
+			['global_name', data.name],
+			['bio', data.bio],
+			['pronouns', data.pronouns],
+		]);
 
 		const persona = await this.deps.personaRepository.create({
 			user_id: userId,
@@ -292,6 +333,7 @@ export class PersonaService {
 		if (!existing) {
 			throw new PersonaNotFoundError();
 		}
+		await this.assertProfileTextAllowed(userId, changedProfileText(existing, data));
 
 		const updated = await this.deps.personaRepository.update(userId, personaId, {
 			name: data.name,
@@ -450,6 +492,20 @@ export class PersonaService {
 			}
 		}
 
+		await this.assertProfileTextAllowed(
+			userId,
+			items.flatMap((item) => {
+				const existing = findExisting(item);
+				return existing
+					? changedProfileText(existing, item)
+					: ([
+							['global_name', item.name],
+							['bio', item.bio],
+							['pronouns', item.pronouns],
+						] satisfies Array<PersonaProfileText>);
+			}),
+		);
+
 		const results: Array<Persona> = [];
 		let currentCount = existingPersonas.length;
 
@@ -589,6 +645,9 @@ export class PersonaService {
 
 	async updateSettings(userId: UserID, data: PersonaSettingsUpdateRequest): Promise<PersonaSettingsResponse> {
 		const existing = await this.deps.personaRepository.findSettings(userId);
+		if (data.display_tag_text && data.display_tag_text !== (existing?.display_tag_text ?? '')) {
+			await this.assertProfileTextAllowed(userId, [['global_name', data.display_tag_text]]);
+		}
 		const updatedRow: UserPersonaSettingsRow = {
 			user_id: userId,
 			active_persona_mode:
