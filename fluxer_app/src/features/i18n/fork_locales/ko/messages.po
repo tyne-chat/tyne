@@ -460,10 +460,6 @@ msgstr "이 페르소나에 고정"
 msgid "Please fix tag errors before saving"
 msgstr "저장하기 전에 태그 오류를 수정해 주세요"
 
-#. Toast when saving a persona while its avatar or banner is still uploading
-msgid "Please wait for images to finish uploading"
-msgstr "이미지 업로드가 끝날 때까지 기다려 주세요"
-
 #. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
 msgid "Powered by KLIPY"
 msgstr "KLIPY 제공"
