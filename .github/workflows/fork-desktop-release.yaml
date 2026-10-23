@@ -373,8 +373,8 @@ jobs:
         run: ${{ env.CI_TOOL }} --step build_app_linux
 
       # Upstream's build_app_macos step requires its signing keychain. This build is signed ad hoc
-      # (electron-builder.config.cjs) and not notarized, so macOS asks for confirmation on first
-      # launch and the app cannot update itself.
+      # (electron-builder.config.cjs); for runs from tyne the sign-macos job below signs it again
+      # with the Developer ID and notarizes it, apart from the dependencies installed here.
       - name: Build Electron app (macOS, ad-hoc signed)
         if: matrix.platform == 'macos'
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
@@ -406,10 +406,65 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  # Signs the macOS build with the Tyne team's Developer ID, notarizes it, and replaces the build's
+  # files with the signed ones (tyne-chat/tyne#202). The signing identity is only in the
+  # desktop-release environment, which runs from tyne only, and this job runs only Apple's tools
+  # (scripts/fork-sign-macos.sh) and GitHub's own actions: no dependency installs. Test builds from
+  # desktop-test/** branches keep the ad-hoc signed files; a release needs this job.
+  sign-macos:
+    name: Sign and notarize macOS
+    if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') }}
+    needs: build
+    runs-on: macos-14
+    timeout-minutes: 120
+    environment: desktop-release
+    steps:
+      - name: Checkout the signing script and entitlements
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          path: source
+          sparse-checkout: |
+            fluxer_desktop/scripts/fork-sign-macos.sh
+            fluxer_desktop/build_resources/entitlements.mac.development.plist
+            fluxer_desktop/build_resources/entitlements.mac.inherit.plist
+          sparse-checkout-cone-mode: false
+
+      - name: Download macOS build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: fork-desktop-macos-arm64
+          path: release_assets
+
+      # The entitlements are the ones electron-builder.config.cjs gives the fork's stable channel.
+      - name: Sign, notarize and staple
+        env:
+          ARCH: arm64
+          TEAM_ID: 2VU375L9T2
+          DEVELOPER_ID_P12: ${{ secrets.TYNE_MACOS_DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.TYNE_MACOS_DEVELOPER_ID_P12_PASSWORD }}
+          NOTARY_KEY_P8: ${{ secrets.TYNE_NOTARY_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.TYNE_NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.TYNE_NOTARY_ISSUER_ID }}
+        run: >-
+          source/fluxer_desktop/scripts/fork-sign-macos.sh release_assets
+          source/fluxer_desktop/build_resources/entitlements.mac.development.plist
+          source/fluxer_desktop/build_resources/entitlements.mac.inherit.plist
+
+      - name: Replace the macOS build with the signed files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fork-desktop-macos-arm64
+          path: release_assets
+          if-no-files-found: error
+          retention-days: 14
+          overwrite: true
+
   publish:
     name: Publish GitHub release
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' }}
-    needs: build
+    # Needs sign-macos, so a release can only be published from tyne, with the signed macOS build.
+    needs: [build, sign-macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
