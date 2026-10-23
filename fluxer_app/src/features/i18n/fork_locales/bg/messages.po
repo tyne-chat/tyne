@@ -460,10 +460,6 @@ msgstr "Закачане за тази персона"
 msgid "Please fix tag errors before saving"
 msgstr "Поправете грешките в таговете, преди да запазите"
 
-#. Toast when saving a persona while its avatar or banner is still uploading
-msgid "Please wait for images to finish uploading"
-msgstr "Изчакайте качването на изображенията да приключи"
-
 #. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
 msgid "Powered by KLIPY"
 msgstr "С технологията на KLIPY"
