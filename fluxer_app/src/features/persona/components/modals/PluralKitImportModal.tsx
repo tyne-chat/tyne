@@ -383,7 +383,8 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				try {
 					stored.set(upload.key, await PersonaCommands.importPersonaImage(upload.kind, imageDataUri(upload.bytes)));
 				} catch (err: unknown) {
-					imageFailures.set(upload.key, err instanceof Error ? err.message : i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR));
+					const unknownError = i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
+					imageFailures.set(upload.key, PersonaCommands.personaErrorMessage(err, unknownError) ?? unknownError);
 				}
 				done++;
 				showUploadProgress();
@@ -568,7 +569,8 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				try {
 					tagIcon = (await PersonaCommands.importPersonaImage('avatar', imageDataUri(tagIconBytes))).hash;
 				} catch (err: unknown) {
-					tagIconError = err instanceof Error ? err.message : i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
+					const unknownError = i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
+					tagIconError = PersonaCommands.personaErrorMessage(err, unknownError) ?? unknownError;
 				}
 			} else if (tagIconUrl) {
 				const ownHash =
@@ -602,8 +604,8 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			});
 			setStep('completed');
 		} catch (err: unknown) {
-			const message = err instanceof Error ? err.message : i18n._(FAILED_TO_IMPORT_DESCRIPTOR);
-			ToastCommands.error(message);
+			const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
+			if (message) ToastCommands.error(message);
 			setStep('select');
 		}
 	};
