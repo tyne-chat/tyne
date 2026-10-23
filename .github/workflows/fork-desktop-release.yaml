@@ -76,9 +76,9 @@ env:
   # commit. Rebuild, publish under a new tag and update all four values when upstream moves
   # Electron or the patch (tyne-chat/tyne#187).
   FLUXER_FORK_ELECTRON_REPOSITORY: tyne-chat/tyne-electron
-  FLUXER_FORK_ELECTRON_RELEASE: electron-v44.4.1-tyne1
-  FLUXER_FORK_ELECTRON_ZIP_SHA256: c5037e65504cbbe273c3ba960ad39cad964a90127d007f6cf6667d6b06a864ad
-  FLUXER_FORK_ELECTRON_MANIFEST_SHA256: b0b530845b3ecad90f43bc10513086db89800ea33d155288be456a80dde6dad1
+  FLUXER_FORK_ELECTRON_RELEASE: electron-v44.9.1-tyne1
+  FLUXER_FORK_ELECTRON_ZIP_SHA256: 3cf286baf06f74583f4e6a4c6d13cb376864bcf3944dba9f36c9a48270ae5380
+  FLUXER_FORK_ELECTRON_MANIFEST_SHA256: c6d652e45cb156bf125cb8524209ef8fda1e94301346c94ce3915dad13c9c9bf
   CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
 
 jobs:
