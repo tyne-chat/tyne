@@ -25,6 +25,7 @@ import type {UpdateInfo, VelopackAsset} from 'velopack';
 // Fork imports.
 
 import {DESKTOP_ARTIFACT_PRODUCT_NAME} from '@electron/common/DesktopIdentity';
+import {forkAppImageUpdateRefusal, forkVelopackUpdateRefusal} from '@electron/main/ForkReleaseSignature';
 import {forkLatestInfoUrl, forkVelopackSourceUrl, forkVersionDownloadUrl} from '@electron/main/ShellDownloadFormats';
 
 const requireModule = createRequire(import.meta.url);
@@ -185,6 +186,13 @@ async function runVelopackSelfUpdate(control: SelfUpdateControl, hooks: ShellSel
 		staged = available;
 	}
 	control.clearCheckDeadline();
+	// Fork: install only a package the release's signed checksums list (ForkReleaseSignature.ts).
+	const forkRefusal = await forkVelopackUpdateRefusal(staged);
+	if (forkRefusal != null) {
+		control.settle({reason: 'check-failed', detail: forkRefusal});
+		return;
+	}
+	if (control.isSettled()) return;
 	if (hooks.confirmRestart != null && !(await hooks.confirmRestart())) {
 		control.settle({reason: 'postponed', detail: null});
 		return;
@@ -293,6 +301,13 @@ async function runAppImageSelfUpdate(
 		control.settle({reason: 'check-failed', detail: 'the published AppImage has no checksum'});
 		return;
 	}
+	// Fork: install only an AppImage the release's signed checksums list (ForkReleaseSignature.ts).
+	const forkRefusal = await forkAppImageUpdateRefusal(published.version, published.sha256);
+	if (forkRefusal != null) {
+		control.settle({reason: 'check-failed', detail: forkRefusal});
+		return;
+	}
+	if (control.isSettled()) return;
 	control.clearCheckDeadline();
 	hooks.onDownloading(0);
 	let staged: StagedAppImageUpdate;
