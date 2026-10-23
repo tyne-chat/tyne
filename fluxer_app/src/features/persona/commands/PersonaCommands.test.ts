@@ -628,6 +628,36 @@ describe('PersonaCommands', () => {
 			expect(PersonaCommands.personaErrorMessage(offline, 'Failed to save persona')).toBe('Failed to save persona');
 		});
 
+		it("passes on the server's message when storing a picked image fails", async () => {
+			vi.mocked(http.post).mockRejectedValueOnce(refused('POST', 400, {message: 'Image is too large'}));
+
+			const err = await PersonaCommands.uploadPersonaImage('banner', 'data:image/png;base64,AA').catch(
+				(e: unknown) => e,
+			);
+
+			expect(http.post).toHaveBeenCalledWith(Endpoints.USER_PERSONA_BANNER, {
+				body: {banner: 'data:image/png;base64,AA'},
+			});
+			expect(PersonaCommands.personaErrorMessage(err, 'Failed to upload banner')).toBe('Image is too large');
+		});
+
+		it('returns the hash and colour of a stored avatar', async () => {
+			vi.mocked(http.post).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				headers: {},
+				body: {avatar_hash: 'abc', avatar_color: 7},
+			});
+
+			await expect(PersonaCommands.uploadPersonaImage('avatar', 'data:image/png;base64,AA')).resolves.toEqual({
+				hash: 'abc',
+				avatarColor: 7,
+			});
+			expect(http.post).toHaveBeenCalledWith(Endpoints.USER_PERSONA_AVATAR, {
+				body: {avatar: 'data:image/png;base64,AA'},
+			});
+		});
+
 		it('treats deleting a persona that is already gone as deleted', async () => {
 			PersonaStore.setPersonas([{id: 'p1', name: 'Gone'} as unknown as PersonaResponse]);
 			vi.mocked(http.delete).mockRejectedValueOnce(refused('DELETE', 404, {code: 'UNKNOWN_PERSONA'}));
