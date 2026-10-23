@@ -124,7 +124,8 @@ A handler that touches accounts, storage or windows checks its sender with
   and macOS arm64 (ad hoc in the build, then signed with the Developer ID and notarized by the
   `sign-macos` job, `scripts/fork-sign-macos.sh`, which runs only Apple's tools; `test-macos` then
   checks that the signed DMG passes Gatekeeper and the app starts,
-  `scripts/fork-test-macos-launch.sh`), publishes the release as latest, and
+  `scripts/fork-test-macos-launch.sh`; `macos_signing=ad-hoc` skips both and publishes the ad-hoc
+  build when notarization is too slow), publishes the release as latest, and
   `fork-verify-update-feed.cjs` asks Velopack (the version in `package.json`) whether an installed
   Tyne is offered it. Versions are semver, higher than the last. Its token is read-only except in
   the publish job, which runs only `gh` and GitHub's own actions; keep builds, installs and anything
