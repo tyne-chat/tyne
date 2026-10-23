@@ -460,10 +460,6 @@ msgstr "Ghim cho nhân vật này"
 msgid "Please fix tag errors before saving"
 msgstr "Hãy sửa lỗi thẻ trước khi lưu"
 
-#. Toast when saving a persona while its avatar or banner is still uploading
-msgid "Please wait for images to finish uploading"
-msgstr "Hãy đợi ảnh tải lên xong"
-
 #. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
 msgid "Powered by KLIPY"
 msgstr "Được cung cấp bởi KLIPY"
