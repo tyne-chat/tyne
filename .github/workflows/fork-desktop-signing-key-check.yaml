@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Fork: checks that the release signing key in the desktop-release environment pairs with the public
+# keys built into the app (fluxer_desktop/scripts/fork-release-signing-keys.pem, the same as in
+# src/main/ForkReleaseSignature.ts). It signs a throwaway text with the key and verifies it the way
+# the release workflow does before publishing. Nothing is built or published. Run it after setting
+# or rotating the key:
+#
+#   gh workflow run fork-desktop-signing-key-check.yaml --repo tyne-chat/tyne --ref tyne
+name: fork desktop signing key check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check the release signing key
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: desktop-release
+    steps:
+      - name: Checkout the public keys and the check
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          path: source
+          sparse-checkout: |
+            fluxer_desktop/scripts/fork-release-signing-keys.pem
+            fluxer_desktop/scripts/fork-verify-release-signature.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Sign a test text and verify it
+        env:
+          SIGNING_KEY: ${{ secrets.TYNE_RELEASE_SIGNING_KEY }}
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "TYNE_RELEASE_SIGNING_KEY is not set in the desktop-release environment."
+            exit 1
+          fi
+          check="$RUNNER_TEMP/signing-key-check.txt"
+          printf 'Tyne release signing key check, run %s\n' "$GITHUB_RUN_ID" > "$check"
+          openssl pkeyutl -sign -rawin -inkey <(printf '%s\n' "$SIGNING_KEY") -in "$check" -out "$check.sig"
+          source/fluxer_desktop/scripts/fork-verify-release-signature.sh \
+            source/fluxer_desktop/scripts/fork-release-signing-keys.pem "$check" "$check.sig"
