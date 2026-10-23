@@ -68,7 +68,6 @@ export const PersonaReactAsModal: React.FC<PersonaReactAsModalProps> = observer(
 			if (!trimmed) return personas;
 			return personas.filter((p) => {
 				if (p.name.toLowerCase().includes(trimmed)) return true;
-				if (PersonaStore.displayTagText?.toLowerCase().includes(trimmed)) return true;
 				if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
 				return (p.persona_tags ?? []).some(
 					(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
