@@ -22,6 +22,9 @@
 
 set -euo pipefail
 
+# A team's first notarizations can take hours at Apple; later ones usually take minutes.
+NOTARY_TIMEOUT=2h
+
 if [ "$#" -ne 3 ]; then
 	echo "usage: $0 <assets dir> <entitlements.plist> <inherited entitlements.plist>" >&2
 	exit 2
@@ -83,22 +86,56 @@ sign() {
 	codesign --force --timestamp --options runtime --keychain "$keychain" --sign "$identity" "$@"
 }
 
+# notarytool prints its result as one JSON line: on standard output when Apple has answered, on
+# standard error when it stopped waiting. Prints "<id> <status>", "-" for either one missing.
+read_submission() {
+	python3 - "$work/notary.out" "$work/notary.err" <<'PYTHON'
+import json, re, sys
+
+found = {}
+for path in sys.argv[1:]:
+    try:
+        lines = open(path).read().splitlines()
+    except OSError:
+        continue
+    for line in lines:
+        try:
+            document = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(document, dict):
+            for key in ("id", "status"):
+                if isinstance(document.get(key), str):
+                    found.setdefault(key, document[key])
+submission = found.get("id", "")
+if not re.fullmatch(r"[0-9a-fA-F-]{36}", submission):
+    submission = ""
+print(submission or "-", found.get("status", "").replace(" ", "_") or "-")
+PYTHON
+}
+
 notarize() {
-	local file="$1"
+	local file="$1" id status
 	echo "Notarizing $(basename "$file")"
 	xcrun notarytool submit "$file" --key "$work/notary.p8" --key-id "$NOTARY_KEY_ID" \
-		--issuer "$NOTARY_ISSUER_ID" --wait --timeout 1h --output-format json > "$work/notary.json" || true
-	local id status
-	id="$(plutil -extract id raw -o - "$work/notary.json" 2>/dev/null || true)"
-	status="$(plutil -extract status raw -o - "$work/notary.json" 2>/dev/null || true)"
+		--issuer "$NOTARY_ISSUER_ID" --wait --timeout "$NOTARY_TIMEOUT" --output-format json \
+		> "$work/notary.out" 2> "$work/notary.err" || true
+	read -r id status < <(read_submission)
+	[ "$id" != "-" ] || id=""
+	[ "$status" != "-" ] || status=""
 	echo "Notarization ${id:-(no id)}: ${status:-(no status)}"
-	if [ "$status" != "Accepted" ]; then
-		cat "$work/notary.json" >&2 || true
-		if [ -n "$id" ]; then
-			xcrun notarytool log "$id" --key "$work/notary.p8" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" >&2 || true
-		fi
-		exit 1
+	if [ "$status" = "Accepted" ]; then
+		return
 	fi
+	cat "$work/notary.out" "$work/notary.err" >&2 || true
+	if [ -z "$id" ]; then
+		echo "Apple did not take the submission." >&2
+	elif [ -z "$status" ] || [ "$status" = "In_Progress" ]; then
+		echo "Apple is still processing submission $id after $NOTARY_TIMEOUT; it goes on after this job." >&2
+	else
+		xcrun notarytool log "$id" --key "$work/notary.p8" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" >&2 || true
+	fi
+	exit 1
 }
 
 echo "::group::Sign the app"
