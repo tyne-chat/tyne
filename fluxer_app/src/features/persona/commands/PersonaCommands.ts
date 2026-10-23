@@ -219,6 +219,33 @@ function exportFileName(disposition: string | undefined): string {
 	return `Tyne personas ${new Date().toISOString().slice(0, 10)}.zip`;
 }
 
+/**
+ * Stores an image picked in the persona editor and returns its hash (and, for an avatar, its colour).
+ * The editor calls this on Save, as upstream's profile editor sends a picked image with the profile.
+ */
+export async function uploadPersonaImage(
+	kind: 'avatar' | 'banner',
+	image: string,
+): Promise<{hash: string; avatarColor: number | null}> {
+	if (kind === 'avatar') {
+		const res = await sendPersonaRequest(
+			() =>
+				http.post<{avatar_hash?: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_AVATAR, {
+					body: {avatar: image},
+				}),
+			'Failed to upload avatar',
+		);
+		if (!res.body.avatar_hash) throw new PersonaRequestError(res, 'Failed to upload avatar');
+		return {hash: res.body.avatar_hash, avatarColor: res.body.avatar_color ?? null};
+	}
+	const res = await sendPersonaRequest(
+		() => http.post<{banner_hash?: string}>(Endpoints.USER_PERSONA_BANNER, {body: {banner: image}}),
+		'Failed to upload banner',
+	);
+	if (!res.body.banner_hash) throw new PersonaRequestError(res, 'Failed to upload banner');
+	return {hash: res.body.banner_hash, avatarColor: null};
+}
+
 /** Stores an image read from a persona export being imported. Returns its hash. */
 export async function importPersonaImage(
 	kind: 'avatar' | 'banner',
