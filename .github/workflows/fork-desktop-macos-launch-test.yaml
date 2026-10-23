@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Fork: opens the signed macOS build as someone who downloaded it, on one of GitHub's Apple silicon
+# runners (scripts/fork-test-macos-launch.sh, tyne-chat/tyne#202). The desktop release workflow
+# calls it after signing, and a release is published only if it passes. To test the signed files
+# of an earlier release run again without rebuilding them (for example after changing the test):
+#
+#   gh workflow run fork-desktop-macos-launch-test.yaml --repo tyne-chat/tyne --ref tyne -f run_id=<run id>
+#
+# It needs no secrets: it only reads the signed build.
+name: fork desktop macOS launch test
+run-name: ${{ inputs.run_id && format('macOS launch test of run {0}', inputs.run_id) || 'macOS launch test' }}
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Id of a fork desktop release run whose signed macOS build to open.
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  open:
+    name: Open the signed macOS app
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the launch test
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          path: source
+          sparse-checkout: fluxer_desktop/scripts/fork-test-macos-launch.sh
+          sparse-checkout-cone-mode: false
+
+      # Called from the release workflow, github.run_id is that run's.
+      - name: Download the signed macOS build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: fork-desktop-macos-arm64
+          path: release_assets
+          run-id: ${{ inputs.run_id || github.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Open the app as someone who downloaded it
+        run: |
+          shopt -s nullglob
+          dmgs=(release_assets/Tyne-*-mac-arm64.dmg)
+          if [ "${#dmgs[@]}" -ne 1 ]; then
+            echo "Expected one macOS disk image, found ${#dmgs[@]}:"
+            ls -la release_assets
+            exit 1
+          fi
+          source/fluxer_desktop/scripts/fork-test-macos-launch.sh "${dmgs[0]}"
