@@ -69,7 +69,7 @@ export function createForkShellUpdateController(dependencies: ForkShellUpdateDep
 			modulesReady: false,
 		}),
 		start: async () => {
-			// The macOS builds are unsigned, and macOS only lets a signed app replace itself.
+			// The macOS builds have no update feed yet (tyne-chat/tyne#202): the user installs by hand.
 			if (dependencies.plan.updater === 'electron') {
 				await dependencies.openReleasesPage();
 				return;
