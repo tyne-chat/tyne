@@ -63,7 +63,8 @@ const CHANNELS = {
 // the user can allow in System Settings. An ad-hoc signature cannot carry the entitlements tied
 // to upstream's team (application-identifier, associated-domains): macOS refuses to start an app
 // that claims them without a matching profile. The development entitlements are the stable ones
-// without those two.
+// without those two. A release is signed again with the Tyne team's Developer ID and notarized by
+// the release workflow (scripts/fork-sign-macos.sh), with these same entitlements.
 if (process.env.FLUXER_FORK_IDENTITY !== '0') {
 	Object.assign(CHANNELS.stable, {
 		productName: 'Tyne',
