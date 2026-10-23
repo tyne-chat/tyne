@@ -472,6 +472,51 @@ jobs:
       contents: read
     uses: ./.github/workflows/fork-desktop-macos-launch-test.yaml
 
+  # A test run from tyne without publishing signs the checksums of its files the way publish does,
+  # with no write token, and keeps them with the run, so release signing is exercised before a
+  # release depends on it. It runs once the other jobs are done, whichever platforms were built.
+  check-release-signing:
+    name: Sign checksums (test run, nothing published)
+    if: ${{ !cancelled() && !failure() && github.event_name == 'workflow_dispatch' && !inputs.publish && github.ref == 'refs/heads/tyne' }}
+    needs: [build, sign-macos, test-macos]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: desktop-release
+    steps:
+      - name: Download release assets
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: fork-desktop-*
+          path: release_assets
+          merge-multiple: true
+
+      # Installed apps install only what this signed list gives (src/main/ForkReleaseSignature.ts).
+      - name: Checkout the release signing script and keys
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          path: source
+          sparse-checkout: |
+            fluxer_desktop/scripts/fork-sign-release-checksums.sh
+            fluxer_desktop/scripts/fork-release-signing-keys.pem
+            fluxer_desktop/scripts/fork-verify-release-signature.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Write and sign checksums
+        env:
+          SIGNING_KEY: ${{ secrets.TYNE_RELEASE_SIGNING_KEY }}
+        run: source/fluxer_desktop/scripts/fork-sign-release-checksums.sh release_assets
+
+      - name: Keep the signed checksums with the run
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signed-checksums
+          path: |
+            release_assets/SHA256SUMS.txt
+            release_assets/SHA256SUMS.txt.sig
+          if-no-files-found: error
+          retention-days: 14
+
   publish:
     name: Publish GitHub release
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' }}
@@ -501,37 +546,22 @@ jobs:
           path: release_assets
           merge-multiple: true
 
-      - name: Write checksums
-        working-directory: release_assets
-        run: sha256sum -- * > SHA256SUMS.txt
-
       # Installed apps install only what this signed list gives (src/main/ForkReleaseSignature.ts).
-      # The key is never written to disk, and the signature is checked against the public keys in
-      # the repository before anything is published.
-      - name: Checkout the release signing keys
+      - name: Checkout the release signing script and keys
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
           path: source
           sparse-checkout: |
+            fluxer_desktop/scripts/fork-sign-release-checksums.sh
             fluxer_desktop/scripts/fork-release-signing-keys.pem
             fluxer_desktop/scripts/fork-verify-release-signature.sh
           sparse-checkout-cone-mode: false
 
-      - name: Sign checksums
-        working-directory: release_assets
+      - name: Write and sign checksums
         env:
           SIGNING_KEY: ${{ secrets.TYNE_RELEASE_SIGNING_KEY }}
-        run: |
-          if [ -z "$SIGNING_KEY" ]; then
-            echo "TYNE_RELEASE_SIGNING_KEY is not set in the desktop-release environment."
-            exit 1
-          fi
-          openssl pkeyutl -sign -rawin -inkey <(printf '%s\n' "$SIGNING_KEY") \
-            -in SHA256SUMS.txt -out SHA256SUMS.txt.sig
-          "$GITHUB_WORKSPACE/source/fluxer_desktop/scripts/fork-verify-release-signature.sh" \
-            "$GITHUB_WORKSPACE/source/fluxer_desktop/scripts/fork-release-signing-keys.pem" \
-            SHA256SUMS.txt SHA256SUMS.txt.sig
+        run: source/fluxer_desktop/scripts/fork-sign-release-checksums.sh release_assets
 
       # Releases may build side by side, and the updater takes the release created last for the
       # newest. So a release is only created once no lower version is still on its way.
