@@ -460,11 +460,23 @@ jobs:
           retention-days: 14
           overwrite: true
 
+  # Downloads the signed DMG as a user would, has Gatekeeper judge it, installs the app and checks
+  # that it starts and keeps running. Its own workflow, so it can also be run by hand on the signed
+  # files of an earlier run.
+  test-macos:
+    name: Open the signed macOS app
+    needs: sign-macos
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/fork-desktop-macos-launch-test.yaml
+
   publish:
     name: Publish GitHub release
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' }}
-    # Needs sign-macos, so a release can only be published from tyne, with the signed macOS build.
-    needs: [build, sign-macos]
+    # Needs sign-macos and its test, so a release can only be published from tyne, with a signed
+    # macOS build that opens.
+    needs: [build, sign-macos, test-macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
