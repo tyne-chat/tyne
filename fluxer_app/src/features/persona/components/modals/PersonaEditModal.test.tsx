@@ -76,6 +76,28 @@ vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
 	createPersona: vi.fn().mockResolvedValue({id: '100000000000000099', name: 'New Persona'}),
 	updatePersona: vi.fn().mockResolvedValue(undefined),
 	deletePersona: vi.fn().mockResolvedValue(undefined),
+	uploadPersonaImage: vi.fn(),
+	personaErrorMessage: vi.fn((_err: unknown, fallback: string) => fallback),
+}));
+
+// Upstream's uploaders open a file picker and a cropper; these hand the editor a picked image directly.
+vi.mock('@app/features/user/components/modals/tabs/my_profile_tab/AvatarUploader', () => ({
+	AvatarUploader: ({onAvatarChange}: {onAvatarChange: (base64: string) => void}) => (
+		<button
+			type="button"
+			onClick={() => onAvatarChange('data:image/png;base64,AVATAR')}
+			data-flx="persona.persona-edit-modal-test.pick-avatar"
+		/>
+	),
+}));
+vi.mock('@app/features/user/components/modals/tabs/my_profile_tab/BannerUploader', () => ({
+	BannerUploader: ({onBannerChange}: {onBannerChange: (base64: string) => void}) => (
+		<button
+			type="button"
+			onClick={() => onBannerChange('data:image/png;base64,BANNER')}
+			data-flx="persona.persona-edit-modal-test.pick-banner"
+		/>
+	),
 }));
 
 vi.mock('@app/features/ui/commands/ToastCommands', () => ({
@@ -355,5 +377,90 @@ describe('PersonaEditModal Component', () => {
 		// Only ⭐ should remain
 		const remainingRemoveBtns = document.body.querySelectorAll('[aria-label="Remove signature emoji"]');
 		expect(remainingRemoveBtns.length).toBe(1);
+	});
+
+	// Like upstream's profile editor, a picked image is only uploaded on Save (tyne#160, M4-6).
+	describe('picked images', () => {
+		const existingPersona = {id: '100000000000000088', name: 'Existing Persona', pronouns: 'they/them'} as any;
+		const click = async (flx: string) => {
+			const el = document.body.querySelector(`[data-flx="${flx}"]`) as HTMLButtonElement | null;
+			expect(el).not.toBeNull();
+			await act(async () => {
+				el?.click();
+			});
+		};
+		const render = async (onClose = vi.fn()) => {
+			await act(async () => {
+				root.render(
+					<PersonaEditModal
+						persona={existingPersona}
+						onClose={onClose}
+						data-flx="persona.persona-edit-modal-test.persona-edit-modal--images"
+					/>,
+				);
+			});
+			return onClose;
+		};
+
+		it('uploads a picked avatar only on Save, then saves its hash', async () => {
+			vi.mocked(PersonaCommands.uploadPersonaImage).mockResolvedValue({hash: 'avatarhash', avatarColor: 0x123456});
+			const onClose = await render();
+
+			await click('persona.persona-edit-modal-test.pick-avatar');
+			expect(PersonaCommands.uploadPersonaImage).not.toHaveBeenCalled();
+
+			await click('persona.persona-edit-modal.button.save');
+
+			expect(PersonaCommands.uploadPersonaImage).toHaveBeenCalledTimes(1);
+			expect(PersonaCommands.uploadPersonaImage).toHaveBeenCalledWith('avatar', 'data:image/png;base64,AVATAR');
+			expect(PersonaCommands.updatePersona).toHaveBeenCalledWith(
+				existingPersona.id,
+				expect.objectContaining({avatar_hash: 'avatarhash', avatar_color: 0x123456}),
+			);
+			expect(onClose).toHaveBeenCalledTimes(1);
+		});
+
+		it('drops a picked image on Reset without uploading it', async () => {
+			await render();
+
+			await click('persona.persona-edit-modal-test.pick-banner');
+			await click('persona.persona-edit-modal.button.reset');
+
+			expect(document.body.querySelector('[data-flx="persona.persona-edit-modal.button.reset"]')).toBeNull();
+			expect(PersonaCommands.uploadPersonaImage).not.toHaveBeenCalled();
+		});
+
+		it('saves nothing when an upload fails, and does not upload a stored image again', async () => {
+			let bannerAttempts = 0;
+			vi.mocked(PersonaCommands.uploadPersonaImage).mockImplementation(async (kind) => {
+				if (kind === 'avatar') return {hash: 'avatarhash', avatarColor: null};
+				bannerAttempts++;
+				if (bannerAttempts === 1) throw new Error('offline');
+				return {hash: 'bannerhash', avatarColor: null};
+			});
+			const onClose = await render();
+			await click('persona.persona-edit-modal-test.pick-avatar');
+			await click('persona.persona-edit-modal-test.pick-banner');
+
+			await click('persona.persona-edit-modal.button.save');
+
+			expect(PersonaCommands.updatePersona).not.toHaveBeenCalled();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(ToastCommands.createToast).toHaveBeenCalledWith(expect.objectContaining({type: 'error'}));
+
+			await click('persona.persona-edit-modal.button.save');
+
+			expect(vi.mocked(PersonaCommands.uploadPersonaImage).mock.calls.map(([kind]) => kind)).toEqual([
+				'avatar',
+				'banner',
+				'banner',
+			]);
+			expect(PersonaCommands.updatePersona).toHaveBeenCalledTimes(1);
+			expect(PersonaCommands.updatePersona).toHaveBeenCalledWith(
+				existingPersona.id,
+				expect.objectContaining({avatar_hash: 'avatarhash', banner_hash: 'bannerhash'}),
+			);
+			expect(onClose).toHaveBeenCalledTimes(1);
+		});
 	});
 });
