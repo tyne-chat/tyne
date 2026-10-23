@@ -3,14 +3,12 @@
 import Accessibility from '@app/features/accessibility/state/Accessibility';
 import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
-import {Endpoints} from '@app/features/app/constants/Endpoints';
 import {EmojiPickerPopout} from '@app/features/emoji/components/popouts/EmojiPickerPopout';
 import type {FlatEmoji} from '@app/features/emoji/types/EmojiTypes';
 import {CLOSE_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
 import {toReactionEmoji, useEmojiURL} from '@app/features/messaging/utils/ReactionUtils';
-import {http} from '@app/features/platform/transport/RestTransport';
 import {ComponentBus} from '@app/features/platform/utils/ComponentBus';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
@@ -163,10 +161,6 @@ const BANNER_UPLOAD_FAILED_DESCRIPTOR = msg({
 	message: 'Failed to upload banner image to server',
 	comment: 'Toast when uploading a persona banner fails',
 });
-const WAIT_FOR_IMAGE_UPLOADS_DESCRIPTOR = msg({
-	message: 'Please wait for images to finish uploading',
-	comment: 'Toast when saving a persona while its avatar or banner is still uploading',
-});
 const PERSONA_NAME_EMPTY_DESCRIPTOR = msg({
 	message: 'Persona name cannot be empty',
 	comment: 'Toast when saving a persona without a name',
@@ -281,6 +275,9 @@ interface PersonaFormState {
 	visibility: PersonaVisibility;
 	tags: Array<{prefix: string; suffix: string}>;
 	signatureEmojis: Array<SignatureEmoji>;
+	/** A picked image, as a data URL, not stored yet: Save uploads it first, Reset drops it. */
+	pendingAvatar: string | null;
+	pendingBanner: string | null;
 }
 
 const emptyFormState = (): PersonaFormState => ({
@@ -294,6 +291,8 @@ const emptyFormState = (): PersonaFormState => ({
 	visibility: 'unlisted',
 	tags: [{prefix: '', suffix: ''}],
 	signatureEmojis: [],
+	pendingAvatar: null,
+	pendingBanner: null,
 });
 
 function normalizeTag(tag: {prefix?: string | null; suffix?: string | null}) {
@@ -352,16 +351,13 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				name: e.name,
 				animated: e.animated ?? null,
 			})),
+			pendingAvatar: null,
+			pendingBanner: null,
 		};
 	}, [persona]);
 
 	const [formData, setFormData] = useState<PersonaFormState>(initialFormState);
 	const initialFormStateRef = useRef<PersonaFormState>(initialFormState);
-	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-	const [isUploadingBanner, setIsUploadingBanner] = useState(false);
-	// The picked file, shown only while it uploads. The form keeps only the hash the upload returns.
-	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-	const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [flashBanner, setFlashBanner] = useState(false);
 
@@ -397,6 +393,8 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				formData.pronouns.trim() !== '' ||
 				formData.avatarHash !== '' ||
 				formData.bannerHash !== '' ||
+				formData.pendingAvatar !== null ||
+				formData.pendingBanner !== null ||
 				formData.accentColor !== null ||
 				formData.bio.trim() !== '' ||
 				formData.visibility !== 'unlisted' ||
@@ -408,6 +406,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		if (formData.pronouns.trim() !== initial.pronouns.trim()) return true;
 		if (formData.avatarHash !== initial.avatarHash) return true;
 		if (formData.bannerHash !== initial.bannerHash) return true;
+		if (formData.pendingAvatar !== null || formData.pendingBanner !== null) return true;
 		if (formData.accentColor !== initial.accentColor) return true;
 		if (formData.bio.trim() !== initial.bio.trim()) return true;
 		if (formData.visibility !== initial.visibility) return true;
@@ -550,70 +549,53 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
 	}, []);
 
-	const handleAvatarUpload = async (base64: string) => {
-		setAvatarPreview(base64);
-		setIsUploadingAvatar(true);
-		try {
-			const res = await http.post<{avatar_hash?: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_AVATAR, {
-				body: {avatar: base64},
-			});
-			const newHash = res.body?.avatar_hash;
-			if (res.ok && newHash) {
-				setFormData((prev) => ({
-					...prev,
-					avatarHash: newHash,
-					...(res.body?.avatar_color !== undefined ? {avatarColor: res.body.avatar_color} : {}),
-				}));
-			} else {
-				ToastCommands.createToast({
-					type: 'error',
-					children: i18n._(AVATAR_UPLOAD_FAILED_DESCRIPTOR),
-				});
-			}
-		} catch {
-			ToastCommands.createToast({
-				type: 'error',
-				children: i18n._(AVATAR_UPLOAD_FAILED_DESCRIPTOR),
-			});
-		} finally {
-			setAvatarPreview(null);
-			setIsUploadingAvatar(false);
-		}
+	// Like upstream's profile editor, a picked image stays in the form until Save.
+	const handleAvatarChange = (base64: string) => {
+		setFormData((prev) => ({...prev, pendingAvatar: base64}));
 	};
 
 	const handleAvatarClear = () => {
-		setFormData((prev) => ({...prev, avatarHash: '', avatarColor: null}));
+		setFormData((prev) => ({...prev, avatarHash: '', avatarColor: null, pendingAvatar: null}));
 	};
 
-	const handleBannerUpload = async (base64: string) => {
-		setBannerPreview(base64);
-		setIsUploadingBanner(true);
-		try {
-			const res = await http.post<{banner_hash?: string}>(Endpoints.USER_PERSONA_BANNER, {
-				body: {banner: base64},
-			});
-			const newHash = res.body?.banner_hash;
-			if (res.ok && newHash) {
-				setFormData((prev) => ({...prev, bannerHash: newHash}));
-			} else {
-				ToastCommands.createToast({
-					type: 'error',
-					children: i18n._(BANNER_UPLOAD_FAILED_DESCRIPTOR),
-				});
-			}
-		} catch {
-			ToastCommands.createToast({
-				type: 'error',
-				children: i18n._(BANNER_UPLOAD_FAILED_DESCRIPTOR),
-			});
-		} finally {
-			setBannerPreview(null);
-			setIsUploadingBanner(false);
-		}
+	const handleBannerChange = (base64: string) => {
+		setFormData((prev) => ({...prev, pendingBanner: base64}));
 	};
 
 	const handleBannerClear = () => {
-		setFormData((prev) => ({...prev, bannerHash: ''}));
+		setFormData((prev) => ({...prev, bannerHash: '', pendingBanner: null}));
+	};
+
+	/**
+	 * Stores the pending images and returns the form with their hashes. Each stored image is kept in
+	 * the form at once, so a later failure does not upload it again on the next Save. Returns null,
+	 * after telling the user, when an upload fails; nothing is saved then.
+	 */
+	const storePendingImages = async (form: PersonaFormState): Promise<PersonaFormState | null> => {
+		let next = form;
+		if (next.pendingAvatar) {
+			try {
+				const {hash, avatarColor} = await PersonaCommands.uploadPersonaImage('avatar', next.pendingAvatar);
+				next = {...next, avatarHash: hash, avatarColor, pendingAvatar: null};
+				setFormData((prev) => ({...prev, avatarHash: hash, avatarColor, pendingAvatar: null}));
+			} catch (err: unknown) {
+				const message = PersonaCommands.personaErrorMessage(err, i18n._(AVATAR_UPLOAD_FAILED_DESCRIPTOR));
+				if (message) ToastCommands.createToast({type: 'error', children: message});
+				return null;
+			}
+		}
+		if (next.pendingBanner) {
+			try {
+				const {hash} = await PersonaCommands.uploadPersonaImage('banner', next.pendingBanner);
+				next = {...next, bannerHash: hash, pendingBanner: null};
+				setFormData((prev) => ({...prev, bannerHash: hash, pendingBanner: null}));
+			} catch (err: unknown) {
+				const message = PersonaCommands.personaErrorMessage(err, i18n._(BANNER_UPLOAD_FAILED_DESCRIPTOR));
+				if (message) ToastCommands.createToast({type: 'error', children: message});
+				return null;
+			}
+		}
+		return next;
 	};
 
 	const handleAddTagRow = () => {
@@ -640,14 +622,6 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	};
 
 	const handleSaveForm = async () => {
-		if (isUploadingAvatar || isUploadingBanner) {
-			ToastCommands.createToast({
-				type: 'info',
-				children: i18n._(WAIT_FOR_IMAGE_UPLOADS_DESCRIPTOR),
-			});
-			return;
-		}
-
 		const trimmedName = formData.name.trim();
 		if (!trimmedName) {
 			ToastCommands.createToast({
@@ -721,13 +695,15 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 		setIsSubmitting(true);
 		try {
+			const stored = await storePendingImages(formData);
+			if (!stored) return;
 			if (formData.id) {
 				await PersonaCommands.updatePersona(formData.id, {
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
-					avatar_hash: formData.avatarHash.trim() || null,
-					avatar_color: formData.avatarColor ?? null,
-					banner_hash: formData.bannerHash.trim() || null,
+					avatar_hash: stored.avatarHash.trim() || null,
+					avatar_color: stored.avatarColor ?? null,
+					banner_hash: stored.bannerHash.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
@@ -742,9 +718,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				await PersonaCommands.createPersona({
 					name: trimmedName,
 					pronouns: formData.pronouns.trim() || null,
-					avatar_hash: formData.avatarHash.trim() || null,
-					avatar_color: formData.avatarColor ?? null,
-					banner_hash: formData.bannerHash.trim() || null,
+					avatar_hash: stored.avatarHash.trim() || null,
+					avatar_color: stored.avatarColor ?? null,
+					banner_hash: stored.bannerHash.trim() || null,
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
@@ -867,7 +843,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 									variant="primary"
 									small
 									onClick={handleSaveForm}
-									submitting={isSubmitting || isUploadingAvatar || isUploadingBanner}
+									submitting={isSubmitting}
 									data-flx="persona.persona-edit-modal.button.save"
 								>
 									<Trans>Save changes</Trans>
@@ -931,20 +907,20 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 							{/* 3. Avatar */}
 							<AvatarUploader
-								hasAvatar={Boolean(formData.avatarHash)}
-								onAvatarChange={handleAvatarUpload}
+								hasAvatar={Boolean(formData.avatarHash || formData.pendingAvatar)}
+								onAvatarChange={handleAvatarChange}
 								onAvatarClear={handleAvatarClear}
 								isPerGuildProfile={false}
-								disabled={isUploadingAvatar}
+								disabled={isSubmitting}
 								data-flx="persona.persona-edit-modal.avatar-uploader"
 							/>
 
 							{/* 4. Banner */}
 							<BannerUploader
-								hasBanner={Boolean(formData.bannerHash)}
-								onBannerChange={handleBannerUpload}
+								hasBanner={Boolean(formData.bannerHash || formData.pendingBanner)}
+								onBannerChange={handleBannerChange}
 								onBannerClear={handleBannerClear}
-								disabled={isUploadingBanner}
+								disabled={isSubmitting}
 								disableModeSelection={true}
 								requireBannerEntitlement={false}
 								isPerGuildProfile={false}
@@ -1175,7 +1151,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 									>
 										<ProfileCardBanner
 											bannerUrl={
-												bannerPreview ??
+												formData.pendingBanner ??
 												(formData.bannerHash
 													? AvatarUtils.getPersonaBannerURL({
 															userId: currentUser?.id ?? '',
@@ -1187,7 +1163,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 											bannerColor={previewColor != null ? ColorUtils.int2hex(previewColor) : 'var(--bg-secondary)'}
 											user={currentUser}
 											avatarUrl={
-												avatarPreview ??
+												formData.pendingAvatar ??
 												(formData.avatarHash.trim()
 													? AvatarUtils.getPersonaAvatarURL({
 															userId: currentUser?.id ?? '',
