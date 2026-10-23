@@ -414,6 +414,8 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: write
+    # Holds the release signing key; only runs from the tyne branch can use it.
+    environment: desktop-release
     steps:
       - name: Require release notes
         env:
@@ -434,6 +436,34 @@ jobs:
       - name: Write checksums
         working-directory: release_assets
         run: sha256sum -- * > SHA256SUMS.txt
+
+      # Installed apps install only what this signed list gives (src/main/ForkReleaseSignature.ts).
+      # The key is never written to disk, and the signature is checked against the public keys in
+      # the repository before anything is published.
+      - name: Checkout the release signing keys
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          path: source
+          sparse-checkout: |
+            fluxer_desktop/scripts/fork-release-signing-keys.pem
+            fluxer_desktop/scripts/fork-verify-release-signature.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Sign checksums
+        working-directory: release_assets
+        env:
+          SIGNING_KEY: ${{ secrets.TYNE_RELEASE_SIGNING_KEY }}
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "TYNE_RELEASE_SIGNING_KEY is not set in the desktop-release environment."
+            exit 1
+          fi
+          openssl pkeyutl -sign -rawin -inkey <(printf '%s\n' "$SIGNING_KEY") \
+            -in SHA256SUMS.txt -out SHA256SUMS.txt.sig
+          "$GITHUB_WORKSPACE/source/fluxer_desktop/scripts/fork-verify-release-signature.sh" \
+            "$GITHUB_WORKSPACE/source/fluxer_desktop/scripts/fork-release-signing-keys.pem" \
+            SHA256SUMS.txt SHA256SUMS.txt.sig
 
       # Releases may build side by side, and the updater takes the release created last for the
       # newest. So a release is only created once no lower version is still on its way.
@@ -511,3 +541,12 @@ jobs:
             --repository "${{ github.repository }}" \
             --expect "$VERSION" \
             --velopack "$RUNNER_TEMP/updater/node_modules/velopack"
+
+      - name: Verify the published signature
+        run: |
+          base="https://github.com/${{ github.repository }}/releases/download/desktop-v${VERSION}"
+          curl -fsSL --retry 5 -o "$RUNNER_TEMP/SHA256SUMS.txt" "$base/SHA256SUMS.txt"
+          curl -fsSL --retry 5 -o "$RUNNER_TEMP/SHA256SUMS.txt.sig" "$base/SHA256SUMS.txt.sig"
+          source/fluxer_desktop/scripts/fork-verify-release-signature.sh \
+            source/fluxer_desktop/scripts/fork-release-signing-keys.pem \
+            "$RUNNER_TEMP/SHA256SUMS.txt" "$RUNNER_TEMP/SHA256SUMS.txt.sig"
