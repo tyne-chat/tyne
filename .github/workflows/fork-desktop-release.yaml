@@ -621,6 +621,9 @@ jobs:
   # that library from npm, so it runs apart from the publish job and its token.
   verify:
     name: Check that installed apps see the release
+    # Without a condition a job runs only if every job before it succeeded, and with
+    # macos_signing=ad-hoc the macOS signing is skipped; so this asks only for the publish job.
+    if: ${{ !cancelled() && needs.publish.result == 'success' }}
     needs: publish
     runs-on: ubuntu-24.04
     timeout-minutes: 15
