@@ -41,8 +41,11 @@ on:
     branches:
       - "desktop-test/**"
 
+# Read-only by default. Only the publish job can write, and it runs nothing but gh and GitHub's own
+# actions. Every action is pinned to a commit, with its version in a comment; move a pin by looking
+# up the new version's commit.
 permissions:
-  contents: write
+  contents: read
 
 # One run per branch and version: a push to a test branch replaces the build before it, while
 # two releases of different versions can build side by side.
@@ -67,10 +70,15 @@ env:
   # (CHANNEL_APP_PROTOCOLS in fluxer_desktop/src/common/Constants.ts).
   FLUXER_FORK_LINK_SCHEME: tyne
   # Fork: Linux is packaged with upstream's patched Electron (fluxer_desktop/electron/build-linux.sh),
-  # which these runners cannot compile. It is built on the maintainers' host and kept as the assets of
-  # this draft release; the Linux job downloads them into FLUXER_ELECTRON_DIST. Rebuild and upload a
-  # new draft when upstream moves Electron or the patch (tyne-chat/tyne#187).
+  # which these runners cannot compile. It is built on the maintainers' host and published as this
+  # release of FLUXER_FORK_ELECTRON_REPOSITORY; the Linux job downloads it into FLUXER_ELECTRON_DIST
+  # and stops unless both files match the hashes here, so a new build only reaches the app through a
+  # commit. Rebuild, publish under a new tag and update all four values when upstream moves
+  # Electron or the patch (tyne-chat/tyne#187).
+  FLUXER_FORK_ELECTRON_REPOSITORY: tyne-chat/tyne-electron
   FLUXER_FORK_ELECTRON_RELEASE: electron-v44.4.1-tyne1
+  FLUXER_FORK_ELECTRON_ZIP_SHA256: c5037e65504cbbe273c3ba960ad39cad964a90127d007f6cf6667d6b06a864ad
+  FLUXER_FORK_ELECTRON_MANIFEST_SHA256: b0b530845b3ecad90f43bc10513086db89800ea33d155288be456a80dde6dad1
   CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
 
 jobs:
@@ -88,17 +96,19 @@ jobs:
       ARCH: x64
     steps:
       - name: Checkout CI helpers
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           path: _ci
 
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           path: source
 
       - name: Set up Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master on 2026-10-22
         with:
           toolchain: "1.98.1"
           targets: wasm32-unknown-unknown
@@ -108,7 +118,7 @@ jobs:
       # build of 2.0.7 that way. Keeping what cargo downloaded between runs means a build with
       # unchanged lockfiles fetches nothing, and one with a few changes fetches only those.
       - name: Cache Rust downloads
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ~/.cargo/registry/index
@@ -124,7 +134,7 @@ jobs:
         run: ${{ env.CI_TOOL }} --step set_workdir_unix
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 26
 
@@ -151,7 +161,7 @@ jobs:
         run: ${{ env.CI_TOOL }} --step prepare_shared_assets
 
       - name: Upload renderer artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: fork-renderer-assets
           path: source/desktop-shared-assets
@@ -182,17 +192,19 @@ jobs:
       ELECTRON_ARCH: ${{ matrix.arch }}
     steps:
       - name: Checkout CI helpers
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           path: _ci
 
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           path: source
 
       - name: Set up Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master on 2026-10-22
         with:
           toolchain: "1.98.1"
 
@@ -201,7 +213,7 @@ jobs:
       # build of 2.0.7 that way. Keeping what cargo downloaded between runs means a build with
       # unchanged lockfiles fetches nothing, and one with a few changes fetches only those.
       - name: Cache Rust downloads
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ~/.cargo/registry/index
@@ -219,7 +231,7 @@ jobs:
       # The add-ons' own code is still rebuilt every run, since a fresh checkout is newer than
       # anything cached. The key names the compiler so a toolchain change starts clean.
       - name: Cache compiled Rust add-ons
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             C:\fcargo
@@ -230,7 +242,7 @@ jobs:
 
       - name: Set up Python (Windows)
         if: runner.os == 'Windows'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.14"
 
@@ -251,7 +263,7 @@ jobs:
         run: ${{ env.CI_TOOL }} --step set_workdir_unix
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 26
 
@@ -268,7 +280,7 @@ jobs:
 
       - name: Set up MSVC env (Windows)
         if: matrix.platform == 'windows'
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: amd64
 
@@ -285,7 +297,7 @@ jobs:
         run: ${{ env.CI_TOOL }} --step set_build_channel
 
       - name: Download renderer artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: fork-renderer-assets
           path: source/desktop-shared-assets
@@ -307,7 +319,7 @@ jobs:
 
       - name: Set up .NET SDK (Windows)
         if: matrix.platform == 'windows'
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
         with:
           dotnet-version: "10.0.x"
 
@@ -340,14 +352,17 @@ jobs:
 
       - name: Download patched Electron distribution (Linux)
         if: matrix.platform == 'linux'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download "$FLUXER_FORK_ELECTRON_RELEASE" --repo "$GITHUB_REPOSITORY" \
-            --dir "$RUNNER_TEMP/fluxer-electron-dist" \
-            --pattern "electron-v*-linux-${{ matrix.arch }}.zip" \
-            --pattern "electron-v*-linux-${{ matrix.arch }}.fluxer.json"
-          ls -la "$RUNNER_TEMP/fluxer-electron-dist"
+          dist="$RUNNER_TEMP/fluxer-electron-dist"
+          base="https://github.com/$FLUXER_FORK_ELECTRON_REPOSITORY/releases/download/$FLUXER_FORK_ELECTRON_RELEASE"
+          version="${FLUXER_FORK_ELECTRON_RELEASE#electron-v}"
+          name="electron-v${version%%-*}-linux-${ARCH}"
+          mkdir -p "$dist"
+          curl -fsSL --retry 5 -o "$dist/$name.zip" "$base/$name.zip"
+          curl -fsSL --retry 5 -o "$dist/$name.fluxer.json" "$base/$name.fluxer.json"
+          printf '%s  %s\n' \
+            "$FLUXER_FORK_ELECTRON_ZIP_SHA256" "$dist/$name.zip" \
+            "$FLUXER_FORK_ELECTRON_MANIFEST_SHA256" "$dist/$name.fluxer.json" | sha256sum -c -
 
       - name: Build Electron app (Linux)
         if: matrix.platform == 'linux'
@@ -384,7 +399,7 @@ jobs:
           --input dist-electron --output release_assets
 
       - name: Upload release assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: fork-desktop-${{ matrix.platform }}-${{ matrix.arch }}
           path: source/fluxer_desktop/release_assets
@@ -397,6 +412,8 @@ jobs:
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - name: Require release notes
         env:
@@ -408,7 +425,7 @@ jobs:
           fi
 
       - name: Download release assets
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: fork-desktop-*
           path: release_assets
@@ -463,18 +480,26 @@ jobs:
           --latest
           release_assets/*
 
-      # The updater library decides for itself how to read the update source, so ask it. This
-      # fails the job when an installed app could not find the release that was just published.
+  # The updater library decides for itself how to read the update source, so ask it. This fails
+  # the run when an installed app could not find the release that was just published. It installs
+  # that library from npm, so it runs apart from the publish job and its token.
+  verify:
+    name: Check that installed apps see the release
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
       - name: Checkout the update check
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           path: source
           sparse-checkout: |
             fluxer_desktop/scripts
             fluxer_desktop/package.json
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 26
 
