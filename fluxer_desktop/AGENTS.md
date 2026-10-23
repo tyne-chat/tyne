@@ -122,12 +122,13 @@ A handler that touches accounts, storage or windows checks its sender with
 - **The workflow** (`.github/workflows/fork-desktop-release.yaml`) runs by hand; a push to
   `desktop-test/<name>` builds artifacts only. It builds Windows x64 (unsigned Velopack), Linux x64
   and macOS arm64 (ad hoc in the build, then signed with the Developer ID and notarized by the
-  `sign-macos` job, `scripts/fork-sign-macos.sh`, which runs only Apple's tools), publishes the
-  release as latest, and `fork-verify-update-feed.cjs` asks Velopack (the version in
-  `package.json`) whether an installed Tyne is offered it. Versions are semver, higher than the
-  last. Its token is read-only except in the publish job, which runs only
-  `gh` and GitHub's own actions; keep builds, installs and anything from npm out of it. Every
-  action is pinned to a commit.
+  `sign-macos` job, `scripts/fork-sign-macos.sh`, which runs only Apple's tools; `test-macos` then
+  checks that the signed DMG passes Gatekeeper and the app starts,
+  `scripts/fork-test-macos-launch.sh`), publishes the release as latest, and
+  `fork-verify-update-feed.cjs` asks Velopack (the version in `package.json`) whether an installed
+  Tyne is offered it. Versions are semver, higher than the last. Its token is read-only except in
+  the publish job, which runs only `gh` and GitHub's own actions; keep builds, installs and anything
+  from npm out of it. Every action is pinned to a commit.
 - **Signed releases**: the publish job signs the release's `SHA256SUMS.txt` with an Ed25519 key
   (secret of the `desktop-release` environment, usable from `tyne` only), and installed apps
   install a Windows package or AppImage only if that signed list gives its name and SHA-256
