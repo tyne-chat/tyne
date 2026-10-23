@@ -123,18 +123,22 @@ A handler that touches accounts, storage or windows checks its sender with
   `desktop-test/<name>` builds artifacts only. It builds Windows x64 (unsigned Velopack), Linux x64
   and macOS arm64 (ad hoc), publishes the release as latest, and `fork-verify-update-feed.cjs` asks
   Velopack (the version in `package.json`) whether an installed Tyne is offered it. Versions are
-  semver, higher than the last.
+  semver, higher than the last. Its token is read-only except in the publish job, which runs only
+  `gh` and GitHub's own actions; keep builds, installs and anything from npm out of it. Every
+  action is pinned to a commit.
 - **Breaks without a rebase conflict**: the workflow calls 15 `build-desktop --step` names from
   upstream's `tools/ci/src/desktop.rs` and copies its `vpk` arguments. Check both when upstream
   changes its desktop build.
 - **Linux Electron**: upstream packages Linux only with its patched Electron (a VA-API fix compiled
   from Chromium source, given through `FLUXER_ELECTRON_DIST`; `electron/build-linux.sh`). GitHub's
-  runners cannot compile it, so the maintainers build it with `build-linux.sh` and keep the ZIP and
-  its `.fluxer.json` as the assets of a draft release; the release workflow downloads them
-  (`FLUXER_FORK_ELECTRON_RELEASE`). When upstream moves Electron or the patch, the packaging checks
-  fail until a new build is uploaded under a new draft tag. `FLUXER_FORK_STOCK_LINUX_ELECTRON=1`
-  still packages stock Electron for a local build (it skips those checks and leaves
-  `VaapiOnNvidiaGPUs` off, `ChromiumRuntime.ts`). A new upstream requirement of this kind fails
+  runners cannot compile it, so the maintainers build it with `build-linux.sh` and publish the ZIP
+  and its `.fluxer.json` as a release of
+  [tyne-chat/tyne-electron](https://github.com/tyne-chat/tyne-electron). The release workflow
+  downloads them without a token and stops unless both match the SHA-256 pinned next to
+  `FLUXER_FORK_ELECTRON_RELEASE`. When upstream moves Electron or the patch, the packaging checks
+  fail until a new build is published there under a new tag and the workflow points at it.
+  `FLUXER_FORK_STOCK_LINUX_ELECTRON=1` still packages stock Electron for a local build (it skips
+  those checks and leaves `VaapiOnNvidiaGPUs` off, `ChromiumRuntime.ts`). A new upstream requirement of this kind fails
   only at release time: the nightly rebase does not build the desktop app.
 - **NVIDIA hardware video decoding** (`VaapiOnNvidiaGPUs`) is off unless the build sets
   `FLUXER_FORK_NVIDIA_VAAPI_DECODE=1`, although upstream turns it on. With nvidia-vaapi-driver, X11
