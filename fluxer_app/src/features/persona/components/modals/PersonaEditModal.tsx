@@ -759,11 +759,13 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 			onClose();
 		} catch (err: unknown) {
-			const message = err instanceof Error ? err.message : i18n._(FAILED_TO_SAVE_PERSONA_DESCRIPTOR);
-			ToastCommands.createToast({
-				type: 'error',
-				children: message,
-			});
+			const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_SAVE_PERSONA_DESCRIPTOR));
+			if (message) {
+				ToastCommands.createToast({
+					type: 'error',
+					children: message,
+				});
+			}
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -794,10 +796,12 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								children: i18n._(PERSONA_DELETED_DESCRIPTOR),
 							});
 							ModalCommands.popWithKey(PERSONA_EDIT_MODAL_KEY);
-						} catch {
+						} catch (err: unknown) {
 							ToastCommands.createToast({
 								type: 'error',
-								children: i18n._(FAILED_TO_DELETE_PERSONA_DESCRIPTOR),
+								children:
+									PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_DELETE_PERSONA_DESCRIPTOR)) ??
+									i18n._(FAILED_TO_DELETE_PERSONA_DESCRIPTOR),
 							});
 						}
 					}}

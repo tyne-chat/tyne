@@ -6,6 +6,7 @@ import Messages from '@app/features/messaging/state/MessagingMessages';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {HttpError} from '@app/features/platform/types/EndpointError';
+import type {RestResponse} from '@app/features/platform/types/TransportTypes';
 import {Logger} from '@app/features/platform/utils/AppLogger';
 import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import type {
@@ -80,36 +81,82 @@ export async function fetchPersonas(force = false): Promise<Array<PersonaRespons
 	}
 }
 
-function extractErrorMessage(res: {status: number; body: unknown}, fallback: string): string {
-	if (
-		res.body &&
-		typeof res.body === 'object' &&
-		'message' in res.body &&
-		typeof (res.body as {message: unknown}).message === 'string'
-	) {
-		return (res.body as {message: string}).message;
+function bodyString(body: unknown, key: 'message' | 'code'): string | null {
+	if (body && typeof body === 'object' && key in body) {
+		const value = (body as Record<string, unknown>)[key];
+		if (typeof value === 'string' && value) return value;
 	}
-	return `${fallback}: status ${res.status}`;
+	return null;
+}
+
+/**
+ * A persona request the server refused. `serverMessage` is the server's explanation, when it gave
+ * one, for showing to the user; `message` adds the status for logs.
+ */
+export class PersonaRequestError extends Error {
+	readonly status: number;
+	readonly code: string | null;
+	readonly serverMessage: string | null;
+
+	constructor(reply: {status: number; body: unknown}, fallback: string) {
+		const serverMessage = bodyString(reply.body, 'message');
+		super(serverMessage ?? `${fallback}: status ${reply.status}`);
+		this.name = 'PersonaRequestError';
+		this.status = reply.status;
+		this.code = bodyString(reply.body, 'code');
+		this.serverMessage = serverMessage;
+	}
+
+	/** The server blocked the text; the app has already shown upstream's content-blocked dialog. */
+	get isContentBlocked(): boolean {
+		return this.status === 403 && this.code === APIErrorCodes.CONTENT_BLOCKED;
+	}
+}
+
+/**
+ * What to tell the user about a failed persona request: the server's message, otherwise `fallback`.
+ * Null when the app has already shown a dialog for it (content blocked).
+ */
+export function personaErrorMessage(err: unknown, fallback: string): string | null {
+	if (err instanceof PersonaRequestError) {
+		return err.isContentBlocked ? null : (err.serverMessage ?? fallback);
+	}
+	return fallback;
+}
+
+/**
+ * Sends a persona request and returns a reply with a body. The HTTP client throws `HttpError` for a
+ * refused request, whose message is only the method and path; the server's message is in its body.
+ */
+async function sendPersonaRequest<T>(
+	send: () => Promise<RestResponse<T>>,
+	fallback: string,
+): Promise<RestResponse<NonNullable<T>>> {
+	let res: RestResponse<T>;
+	try {
+		res = await send();
+	} catch (err) {
+		if (err instanceof HttpError) throw new PersonaRequestError(err, fallback);
+		throw err;
+	}
+	if (!res.ok || !res.body) throw new PersonaRequestError(res, fallback);
+	return res as RestResponse<NonNullable<T>>;
 }
 
 export async function createPersona(data: PersonaCreateRequest): Promise<PersonaResponse> {
-	const res = await http.post<PersonaResponse>(Endpoints.USER_PERSONAS, {
-		body: data,
-	});
-	if (!res.ok || !res.body) {
-		throw new Error(extractErrorMessage(res, 'Failed to create persona'));
-	}
+	const res = await sendPersonaRequest(
+		() => http.post<PersonaResponse>(Endpoints.USER_PERSONAS, {body: data}),
+		'Failed to create persona',
+	);
 	PersonaStore.upsertPersona(res.body);
 	return res.body;
 }
 
 export async function updatePersona(id: string, data: PersonaUpdateRequest): Promise<PersonaResponse> {
-	const res = await http.patch<PersonaResponse>(Endpoints.USER_PERSONA(id), {
-		body: data,
-	});
-	if (!res.ok || !res.body) {
-		throw new Error(extractErrorMessage(res, 'Failed to update persona'));
-	}
+	const res = await sendPersonaRequest(
+		() => http.patch<PersonaResponse>(Endpoints.USER_PERSONA(id), {body: data}),
+		'Failed to update persona',
+	);
 	PersonaStore.upsertPersona(res.body);
 	const subprofile = normalizeSubprofile(res.body);
 	Messages.handlePersonaUpdate({persona: subprofile});
@@ -124,9 +171,17 @@ export async function updatePersona(id: string, data: PersonaUpdateRequest): Pro
 }
 
 export async function deletePersona(id: string): Promise<void> {
-	const res = await http.delete(Endpoints.USER_PERSONA(id));
+	// A persona that is already gone counts as deleted.
+	let res: RestResponse;
+	try {
+		res = await http.delete(Endpoints.USER_PERSONA(id));
+	} catch (err) {
+		if (!(err instanceof HttpError)) throw err;
+		if (err.status !== 404) throw new PersonaRequestError(err, 'Failed to delete persona');
+		res = {ok: false, status: 404, headers: {}, body: null};
+	}
 	if (!res.ok && res.status !== 404) {
-		throw new Error(`Failed to delete persona: status ${res.status}`);
+		throw new PersonaRequestError(res, 'Failed to delete persona');
 	}
 	PersonaStore.removePersona(id);
 	for (const key of personaProfileCache.keys()) {
@@ -137,22 +192,20 @@ export async function deletePersona(id: string): Promise<void> {
 }
 
 export async function importPersonas(personas: Array<PersonaImportItem>): Promise<Array<PersonaResponse>> {
-	const res = await http.post<Array<PersonaResponse>>(Endpoints.USER_PERSONA_IMPORT, {
-		body: personas,
-	});
-	if (!res.ok || !res.body) {
-		throw new Error(extractErrorMessage(res, 'Failed to import personas'));
-	}
+	const res = await sendPersonaRequest(
+		() => http.post<Array<PersonaResponse>>(Endpoints.USER_PERSONA_IMPORT, {body: personas}),
+		'Failed to import personas',
+	);
 	PersonaStore.upsertPersonas(res.body);
 	return res.body;
 }
 
 /** Downloads the zip of all personas the server builds (`pluralkit.json`, images, `tyne.json`, README). */
 export async function exportPersonas(): Promise<{blob: Blob; fileName: string}> {
-	const res = await http.get<Blob>(Endpoints.USER_PERSONA_EXPORT, {parse: 'binary'});
-	if (!res.ok || !res.body) {
-		throw new Error(extractErrorMessage(res, 'Failed to export personas'));
-	}
+	const res = await sendPersonaRequest(
+		() => http.get<Blob>(Endpoints.USER_PERSONA_EXPORT, {parse: 'binary'}),
+		'Failed to export personas',
+	);
 	return {blob: res.body, fileName: exportFileName(res.headers['content-disposition'])};
 }
 
@@ -171,11 +224,15 @@ export async function importPersonaImage(
 	kind: 'avatar' | 'banner',
 	image: string,
 ): Promise<{hash: string; avatarColor: number | null}> {
-	const res = await http.post<{hash: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_IMPORT_IMAGE, {
-		body: {kind, image},
-	});
-	if (!res.ok || !res.body?.hash) {
-		throw new Error(extractErrorMessage(res, 'Failed to store image'));
+	const res = await sendPersonaRequest(
+		() =>
+			http.post<{hash: string; avatar_color?: number | null}>(Endpoints.USER_PERSONA_IMPORT_IMAGE, {
+				body: {kind, image},
+			}),
+		'Failed to store image',
+	);
+	if (!res.body.hash) {
+		throw new PersonaRequestError(res, 'Failed to store image');
 	}
 	return {hash: res.body.hash, avatarColor: res.body.avatar_color ?? null};
 }
