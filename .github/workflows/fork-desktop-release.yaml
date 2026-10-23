@@ -37,6 +37,12 @@ on:
         default: all
         type: choice
         options: [all, windows, linux, macos]
+      macos_signing:
+        description: "developer-id: sign with the Developer ID and notarize (the default). ad-hoc: publish the build's ad-hoc signed macOS files, as releases before 2026-10-23 did, when Apple's notarization is too slow to wait for."
+        required: false
+        default: developer-id
+        type: choice
+        options: [developer-id, ad-hoc]
   push:
     branches:
       - "desktop-test/**"
@@ -413,7 +419,7 @@ jobs:
   # desktop-test/** branches keep the ad-hoc signed files; a release needs this job.
   sign-macos:
     name: Sign and notarize macOS
-    if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') }}
+    if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') && inputs.macos_signing != 'ad-hoc' }}
     needs: build
     runs-on: macos-14
     # Two notarizations of up to two hours each (scripts/fork-sign-macos.sh).
@@ -520,9 +526,10 @@ jobs:
 
   publish:
     name: Publish GitHub release
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' }}
-    # Needs sign-macos and its test, so a release can only be published from tyne, with a signed
-    # macOS build that opens.
+    # Only from tyne. With Developer ID signing (the default) it needs sign-macos and its test, so
+    # the macOS build is signed and opens; with macos_signing=ad-hoc those two are skipped and the
+    # build's own macOS files are published.
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' && github.ref == 'refs/heads/tyne' && needs.build.result == 'success' && (inputs.macos_signing == 'ad-hoc' || (needs.sign-macos.result == 'success' && needs.test-macos.result == 'success')) }}
     needs: [build, sign-macos, test-macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
