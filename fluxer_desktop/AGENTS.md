@@ -113,7 +113,7 @@ A handler that touches accounts, storage or windows checks its sender with
 - **Controller**: `armForkShellUpdate` (`ForkShellUpdate.ts`, called in `index.ts` after
   `registerUpdater`) arms upstream's `DesktopUpdateGate` for self-updating installs (Windows,
   AppImage, macOS). An update runs `runShellSelfUpdate` with a progress window and a "Restart now"
-  question (`confirmRestart`); on macOS, where ad hoc signed builds cannot replace themselves, it
+  question (`confirmRestart`); on macOS, which has no update feed yet (tyne-chat/tyne#202), it
   opens the releases page. Other Linux installs use upstream's manual check in `Updater.ts`, which
   reads the same JSON.
 - **`ShellDownloadFormats.ts` may import only `@electron/common/BuildChannel`**:
@@ -121,9 +121,11 @@ A handler that touches accounts, storage or windows checks its sender with
   (`ForkReleaseFeed.test.mjs` stubs two more, so it does not catch those).
 - **The workflow** (`.github/workflows/fork-desktop-release.yaml`) runs by hand; a push to
   `desktop-test/<name>` builds artifacts only. It builds Windows x64 (unsigned Velopack), Linux x64
-  and macOS arm64 (ad hoc), publishes the release as latest, and `fork-verify-update-feed.cjs` asks
-  Velopack (the version in `package.json`) whether an installed Tyne is offered it. Versions are
-  semver, higher than the last. Its token is read-only except in the publish job, which runs only
+  and macOS arm64 (ad hoc in the build, then signed with the Developer ID and notarized by the
+  `sign-macos` job, `scripts/fork-sign-macos.sh`, which runs only Apple's tools), publishes the
+  release as latest, and `fork-verify-update-feed.cjs` asks Velopack (the version in
+  `package.json`) whether an installed Tyne is offered it. Versions are semver, higher than the
+  last. Its token is read-only except in the publish job, which runs only
   `gh` and GitHub's own actions; keep builds, installs and anything from npm out of it. Every
   action is pinned to a commit.
 - **Signed releases**: the publish job signs the release's `SHA256SUMS.txt` with an Ed25519 key
@@ -145,8 +147,9 @@ A handler that touches accounts, storage or windows checks its sender with
   `FLUXER_FORK_ELECTRON_RELEASE`. When upstream moves Electron or the patch, the packaging checks
   fail until a new build is published there under a new tag and the workflow points at it.
   `FLUXER_FORK_STOCK_LINUX_ELECTRON=1` still packages stock Electron for a local build (it skips
-  those checks and leaves `VaapiOnNvidiaGPUs` off, `ChromiumRuntime.ts`). A new upstream requirement of this kind fails
-  only at release time: the nightly rebase does not build the desktop app.
+  those checks and leaves `VaapiOnNvidiaGPUs` off, `ChromiumRuntime.ts`). A new upstream
+  requirement of this kind fails only at release time: the nightly rebase does not build the
+  desktop app.
 - **NVIDIA hardware video decoding** (`VaapiOnNvidiaGPUs`) is off unless the build sets
   `FLUXER_FORK_NVIDIA_VAAPI_DECODE=1`, although upstream turns it on. With nvidia-vaapi-driver, X11
   sessions show black video: three bugs in Chromium's X11 dma-buf import (ANGLE's GLX pixmap
