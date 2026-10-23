@@ -2,7 +2,7 @@
 // @vitest-environment happy-dom
 
 import React from 'react';
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, onTestFinished, vi} from 'vitest';
 
 await vi.hoisted(async () => {
 	const {installVoiceMenuTestBootstrap} = await import(
@@ -179,6 +179,34 @@ describe('PersonaReactAsModal', () => {
 		expect(document.body.textContent).toContain('Alice');
 		expect(document.body.textContent).not.toContain('Bob');
 		expect(document.body.textContent).not.toContain('Root Account (Default)');
+	});
+
+	// The display tag is the account's, shared by every persona listed here, so it must not make every
+	// persona match (tyne#160, M4-13).
+	it('does not match every persona when the query is part of the display tag', async () => {
+		runInAction(() => PersonaStore.updateSettings({display_tag_text: "Alice's System"}));
+		onTestFinished(() => runInAction(() => PersonaStore.updateSettings({display_tag_text: ''})));
+		await act(async () => {
+			root.render(
+				<PersonaReactAsModal
+					emoji={mockEmoji}
+					channelId="c1"
+					messageId="m1"
+					onClose={mockOnClose}
+					data-flx="persona.persona-react-as-modal-test.persona-react-as-modal--display-tag"
+				/>,
+			);
+		});
+
+		const input = document.querySelector('input')!;
+		await act(async () => {
+			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+			nativeInputValueSetter?.call(input, 'Alice');
+			input.dispatchEvent(new Event('input', {bubbles: true}));
+		});
+
+		expect(document.body.textContent).toContain('Alice');
+		expect(document.body.textContent).not.toContain('Bob');
 	});
 
 	it('reacts as persona when a persona is clicked', async () => {
