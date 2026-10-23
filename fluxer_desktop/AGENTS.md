@@ -126,6 +126,13 @@ A handler that touches accounts, storage or windows checks its sender with
   semver, higher than the last. Its token is read-only except in the publish job, which runs only
   `gh` and GitHub's own actions; keep builds, installs and anything from npm out of it. Every
   action is pinned to a commit.
+- **Signed releases**: the publish job signs the release's `SHA256SUMS.txt` with an Ed25519 key
+  (secret of the `desktop-release` environment, usable from `tyne` only), and installed apps
+  install a Windows package or AppImage only if that signed list gives its name and SHA-256
+  (`ForkReleaseSignature.ts`, called from `ShellSelfUpdate.ts`). Any new way of installing an update
+  goes through the same check. The public keys are in `ForkReleaseSignature.ts` and
+  `scripts/fork-release-signing-keys.pem`, kept equal by its test; rotating the key is described
+  there.
 - **Breaks without a rebase conflict**: the workflow calls 15 `build-desktop --step` names from
   upstream's `tools/ci/src/desktop.rs` and copies its `vpk` arguments. Check both when upstream
   changes its desktop build.
