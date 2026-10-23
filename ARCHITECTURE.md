@@ -209,7 +209,8 @@ is in the server folder's `AGENTS.md`.
 
 - Desktop (`fluxer_desktop/AGENTS.md`): built as Tyne with its own IDs and `tyne://`; extra app
   windows (end of `src/main/Window.ts`); updates from this repository's GitHub releases
-  (`ShellDownloadFormats.ts`, `ForkShellUpdate.ts`), built by `fork-desktop-release.yaml`. Each
+  (`ShellDownloadFormats.ts`, `ForkShellUpdate.ts`), built by `fork-desktop-release.yaml`, and
+  installed only if the release's signed checksums list them (`ForkReleaseSignature.ts`). Each
   release carries the web app of its commit.
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
