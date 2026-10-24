@@ -3,7 +3,7 @@
 // Fork: tests of the fork's switches in addLinuxHardwareVideoDecodeFeatures, kept out of upstream's tests.
 import assert from 'node:assert/strict';
 import {afterEach, describe, test} from 'node:test';
-import {installElectronStub} from './LocalAppTestSupport.test.mjs';
+import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
 
 installElectronStub({
 	app: {isPackaged: false, getVersion: () => '1.0.0', getPath: () => '/tmp/fluxer-desktop-test'},
