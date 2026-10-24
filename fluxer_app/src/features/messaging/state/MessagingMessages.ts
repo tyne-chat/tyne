@@ -718,6 +718,19 @@ class Messages {
 		return hasChanges;
 	}
 
+	/** Fork: the personas an author wrote loaded messages as, by ID. */
+	getPersonaIdsByAuthor(authorId: string): Array<string> {
+		const ids = new Set<string>();
+		for (const [channelId, personaByMessage] of this.indexedPersonasByChannel) {
+			const authorByMessage = this.indexedAuthorsByChannel.get(channelId);
+			if (!authorByMessage) continue;
+			for (const [messageId, personaId] of personaByMessage) {
+				if (authorByMessage.get(messageId) === authorId) ids.add(personaId);
+			}
+		}
+		return Array.from(ids);
+	}
+
 	handlePersonaUpdate(action: {persona: MessageSubprofileResponse}): boolean {
 		const persona = action.persona;
 		if (!persona?.id) return false;
@@ -736,7 +749,6 @@ class Messages {
 					persona.display_tag_text !== undefined ? persona.display_tag_text : (current.display_tag_text ?? null),
 				display_tag_icon:
 					persona.display_tag_icon !== undefined ? persona.display_tag_icon : (current.display_tag_icon ?? null),
-				pronouns: persona.pronouns !== undefined ? persona.pronouns : (current.pronouns ?? null),
 				color: persona.color !== undefined ? persona.color : (current.color ?? null),
 				visibility: persona.visibility !== undefined ? persona.visibility : current.visibility,
 			};

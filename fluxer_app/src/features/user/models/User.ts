@@ -888,7 +888,6 @@ function subprofilesEqual(
 		a.avatar_color === b.avatar_color &&
 		a.display_tag_text === b.display_tag_text &&
 		a.display_tag_icon === b.display_tag_icon &&
-		a.pronouns === b.pronouns &&
 		a.color === b.color
 	);
 }
