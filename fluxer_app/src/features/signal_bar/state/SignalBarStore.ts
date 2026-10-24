@@ -198,7 +198,7 @@ class SignalBarStore {
 		if (entries.length === 0) return;
 		Users.cacheUsers(entries.map((entry) => entry.user));
 		for (const entry of entries) {
-			if (entry.subprofile) PersonaStore.recordKnownPersona(entry.subprofile);
+			if (entry.subprofile) PersonaStore.recordKnownPersona(entry.subprofile, entry.user.id);
 		}
 	}
 

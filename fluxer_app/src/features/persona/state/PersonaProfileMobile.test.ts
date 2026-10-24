@@ -17,7 +17,6 @@ describe('PersonaProfileMobile', () => {
 		name: 'Caelum',
 		avatar: null,
 		display_tag_text: 'Starlight',
-		pronouns: 'they/them',
 	};
 
 	it('manages open and closed state cleanly', () => {
