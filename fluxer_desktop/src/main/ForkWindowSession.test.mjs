@@ -12,11 +12,13 @@ const {
 	fitForkWindowBounds,
 	forkAppWindowRouteFromUrl,
 	forkAppWindowUrl,
+	forkExtraAppWindowRendererArguments,
 	isForkAppWindowRoute,
 	parseForkWindowSession,
 	planForkWindowRestore,
 	serializeForkWindowSession,
 } = await import('./ForkWindowSession.ts');
+const {ACCOUNT_ENGINE_AVAILABLE_RENDERER_ARG} = await import('@fluxer/desktop_ipc/src/AccountEngineContract');
 
 const APP_URL = 'fluxer-app://app/';
 const BOUNDS = {x: 100, y: 80, width: 1200, height: 800};
@@ -202,5 +204,19 @@ describe('placing windows', () => {
 		const next = cascadeForkWindowBounds(nearEdge, display);
 		assert.ok(next.x + next.width <= display.x + display.width);
 		assert.ok(next.y + next.height <= display.y + display.height);
+	});
+});
+
+describe('renderer arguments of an extra window', () => {
+	test('leave out the account engine, which serves only the main window', () => {
+		assert.deepEqual(
+			forkExtraAppWindowRendererArguments(['--first', ACCOUNT_ENGINE_AVAILABLE_RENDERER_ARG, '--last']),
+			['--first', '--last'],
+		);
+	});
+
+	test('keep the others, and need none', () => {
+		assert.deepEqual(forkExtraAppWindowRendererArguments(['--only']), ['--only']);
+		assert.deepEqual(forkExtraAppWindowRendererArguments(undefined), []);
 	});
 });
