@@ -27,6 +27,7 @@ vi.mock('@app/features/messaging/state/MessagingMessages', () => ({
 	default: {
 		handlePersonaUpdate: vi.fn(),
 		handleAuthorDisplayTagUpdate: vi.fn(),
+		getPersonaIdsByAuthor: vi.fn(() => []),
 	},
 }));
 
@@ -223,7 +224,7 @@ describe('PersonaEvents', () => {
 		expect(messagesSpy).toHaveBeenCalledWith({persona: expectedSubprofile});
 	});
 
-	it('handles GUILD_PERSONAS_DIRTY action update by recording known persona and notifying Messages and MessageReactions', () => {
+	it('handles GUILD_PERSONAS_DIRTY action update carrying the persona by notifying Messages and MessageReactions', () => {
 		const reactionsSpy = vi.spyOn(MessageReactions, 'handlePersonaUpdate');
 		const messagesSpy = vi.spyOn(Messages, 'handlePersonaUpdate');
 
@@ -237,7 +238,8 @@ describe('PersonaEvents', () => {
 		);
 
 		const expectedSubprofile = normalizeSubprofile(samplePersona);
-		expect(PersonaStore.getKnownPersona(samplePersona.id)).toEqual(expectedSubprofile);
+		// Not shown here before, so the event alone does not make it remembered.
+		expect(PersonaStore.getKnownPersona(samplePersona.id)).toBeNull();
 		expect(reactionsSpy).toHaveBeenCalledWith(expectedSubprofile);
 		expect(messagesSpy).toHaveBeenCalledWith({persona: expectedSubprofile});
 	});
