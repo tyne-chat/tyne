@@ -64,6 +64,7 @@ import {
 	fitForkWindowBounds,
 	forkAppWindowRouteFromUrl,
 	forkAppWindowUrl,
+	forkExtraAppWindowRendererArguments,
 	isForkAppWindowRoute,
 	parseForkWindowSession,
 	planForkWindowRestore,
@@ -1729,17 +1730,22 @@ export function openAppWindow(options: OpenAppWindowOptions = {}): BrowserWindow
 	const isMac = process.platform === 'darwin';
 	const allowTransparency = getActiveAllowTransparency();
 	const useNativeTitleBar = getActiveUseNativeTitleBar();
+	const webPreferences = getSharedWebPreferences(allowTransparency, useNativeTitleBar, true);
 	const windowOptions: Electron.BrowserWindowConstructorOptions = {
 		width: bounds?.width ?? DEFAULT_WINDOW_WIDTH,
 		height: bounds?.height ?? DEFAULT_WINDOW_HEIGHT,
 		show: false,
+		...getLaunchTitleWindowOptions(),
 		backgroundColor: getWindowBackgroundColor(allowTransparency),
 		transparent: allowTransparency,
 		...getWindowShadowOptions(allowTransparency),
 		...getTitleBarWindowOptions(useNativeTitleBar),
 		...(isMac ? {trafficLightPosition: CUSTOM_TITLEBAR_TRAFFIC_LIGHT_POSITION} : {}),
 		acceptFirstMouse: isMac,
-		webPreferences: getSharedWebPreferences(allowTransparency, useNativeTitleBar, true),
+		webPreferences: {
+			...webPreferences,
+			additionalArguments: forkExtraAppWindowRendererArguments(webPreferences.additionalArguments),
+		},
 	};
 	if (process.platform === 'linux') {
 		const iconPath = getLinuxWindowIconPath();
