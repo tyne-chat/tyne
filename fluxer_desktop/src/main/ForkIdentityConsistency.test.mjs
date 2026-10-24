@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import {existsSync, readFileSync} from 'node:fs';
 import {describe, test} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {installElectronStub} from './LocalAppTestSupport.test.mjs';
+import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
 
 installElectronStub();
 
