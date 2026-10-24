@@ -18,6 +18,15 @@ function runForkAccountReadyWork(): void {
 	void PersonaStore.fetchChannelStates();
 }
 
+// Upstream's promoted resume (completePromotedResume in PooledGatewayConnection.ts): on the desktop,
+// the account engine kept the account's session warm, so switching to it (or starting the app on it)
+// resumes that session and no READY arrives. Do here what the READY handler does for the fork. The
+// switch has already dropped the previous account's personas (PersonaStore's cancellation).
+export function handleForkPromotedResume(): void {
+	SignalBarStore.invalidate();
+	scheduleForkAccountReadyWork();
+}
+
 export function scheduleForkAccountReadyWork(): void {
 	if (AccountScopedWork.isSuspended) {
 		pending = true;
