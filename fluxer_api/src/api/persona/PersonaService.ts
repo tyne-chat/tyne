@@ -152,8 +152,9 @@ function changedProfileText(
 	return fields;
 }
 
+// A JSON pair, so no prefix or suffix can be read as part of the other.
 function getTagKey(tag: {prefix: string; suffix: string}): string {
-	return `${tag.prefix}:::${tag.suffix}`;
+	return JSON.stringify([tag.prefix, tag.suffix]);
 }
 
 function formatTagDisplay(tag: {prefix: string; suffix: string}): string {
