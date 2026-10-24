@@ -852,3 +852,8 @@ const BRANDING_ASSET_SCRIPT: &str = r#"
 	});
 })();
 "#;
+
+// Fork: tests of the fork's additions, in a file of their own.
+#[cfg(test)]
+#[path = "fork_instance_branding_tests.rs"]
+mod fork_tests;
