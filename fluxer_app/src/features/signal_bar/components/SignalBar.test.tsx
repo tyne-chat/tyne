@@ -193,11 +193,27 @@ describe('SignalBar', () => {
 		expect(container.innerHTML).toBe('');
 	});
 
-	it('hides the signals when collapsed and keeps the caret', async () => {
+	it('collapses to the caret when no signal is on', async () => {
 		setSignals([READING]);
 		await render(channel());
 		await act(async () => button('Hide signal bar')?.click());
 		expect(button('Reading')).toBeUndefined();
 		expect(button('Show signal bar')).toBeDefined();
+		expect(container.querySelector(`.${styles.barCollapsed}`)).not.toBeNull();
+	});
+
+	// tyne-chat/tyne#208, as on mobile (#198).
+	it('keeps the signals someone has on when collapsed, and drops the rest', async () => {
+		setSignals([READING, DONE]);
+		await render(channel(), [entry('done', '1', 'alice')]);
+		await act(async () => button('Hide signal bar')?.click());
+
+		expect(button('Reading')).toBeUndefined();
+		expect(button('✅')?.getAttribute('aria-label')).toBe('✅: alice');
+		expect(button('Show signal bar')).toBeDefined();
+		expect(container.querySelector(`.${styles.barCollapsed}`)).toBeNull();
+
+		await act(async () => button('Show signal bar')?.click());
+		expect(button('Reading')).toBeDefined();
 	});
 });
