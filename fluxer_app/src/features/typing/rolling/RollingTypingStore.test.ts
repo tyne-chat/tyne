@@ -32,7 +32,6 @@ describe('RollingTypingStore', () => {
 		name: 'Persona One',
 		avatar: '1a1a1a1a',
 		color: 0xff0000,
-		pronouns: 'she/her',
 		display_tag_text: 'P1',
 		display_tag_icon: null,
 	};
