@@ -37,6 +37,7 @@
 		"i18n:refresh": "pnpm i18n:extract && pnpm i18n:compile",
 		"lingui:compile": "lingui compile --strict && lingui compile --strict --config lingui.fork.config.js",
 		"lingui:extract": "lingui extract --clean",
+		"test": "vitest run --config vitest.fork.config.ts",
 		"wasm:codegen": "../tools/ci/run.sh build-app-wasm"
 	},
 	"browserslist": [
@@ -260,6 +261,8 @@
 		"@webgpu/types": "catalog:",
 		"autoprefixer": "catalog:",
 		"esbuild": "catalog:",
+		"fake-indexeddb": "6.2.5",
+		"happy-dom": "20.14.5",
 		"postcss": "catalog:",
 		"postcss-discard-comments": "catalog:",
 		"postcss-loader": "catalog:",
@@ -267,7 +270,8 @@
 		"sharp": "catalog:",
 		"tsx": "catalog:",
 		"typed-css-modules": "catalog:",
-		"typescript": "catalog:ts7"
+		"typescript": "catalog:ts7",
+		"vitest": "catalog:"
 	},
 	"packageManager": "pnpm@11.27.0"
 }

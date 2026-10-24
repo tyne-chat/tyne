@@ -38,8 +38,8 @@ cargo fmt --all -- --check && cargo fmt --manifest-path fluxer_app/rust/libfluxw
 # Needs `cargo install cargo-deny --version 0.20.2 --locked` once.
 cargo deny --locked check -D warnings licenses bans sources && cargo deny --manifest-path fluxer_app/rust/libfluxwebp/Cargo.toml --config deny.toml --locked check licenses bans sources && (for m in fluxer_desktop/native/*/Cargo.toml; do cargo deny --manifest-path "$m" --all-features --locked check -D warnings -A unmatched-skip -A unnecessary-skip -D duplicate licenses bans sources || exit 1; done)
 # Gateway, Knip, synced catalogues, API docs, and a check of the admin, messages and media-proxy
-# crates.
-(for s in gateway_fmt gateway_compile gateway_dialyzer gateway_eunit knip; do tools/ci/run.sh ci --step $s || exit 1; done)
+# crates. The gateway's eunit run covers the fork's own tests; upstream dropped its own and the CI step.
+(for s in gateway_fmt gateway_compile gateway_dialyzer knip; do tools/ci/run.sh ci --step $s || exit 1; done) && (cd fluxer_gateway && rebar3 as test eunit)
 pnpm i18n:compile && git diff --exit-code -- packages/errors/src/i18n/weblate fluxer_api/pkgs/email/src/email_i18n fluxer_api/src/api/content_i18n/weblate
 pnpm --filter fluxer_docs verify && pnpm --filter fluxer_docs build
 cargo check -p fluxer_admin -p fluxer-messages -p fluxer-media-proxy
