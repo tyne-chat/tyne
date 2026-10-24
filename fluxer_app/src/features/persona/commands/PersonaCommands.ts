@@ -264,6 +264,13 @@ export async function importPersonaImage(
 	return {hash: res.body.hash, avatarColor: res.body.avatar_color ?? null};
 }
 
+/** Forgets the cached profile cards of an account's personas, after it changed its personas. */
+export function forgetPersonaProfilesOf(userId: string): void {
+	for (const key of personaProfileCache.keys()) {
+		if (key.startsWith(`${userId}:`)) personaProfileCache.delete(key);
+	}
+}
+
 export async function fetchPersonaProfile(userId: string, personaId: string): Promise<PersonaProfileResult> {
 	const cacheKey = `${userId}:${personaId}`;
 	const cached = personaProfileCache.get(cacheKey);

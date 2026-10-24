@@ -13,7 +13,9 @@ import type {
 	PersonaResponse,
 	PersonaSettingsResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {forgetPersonaProfilesOf} from '../commands/PersonaCommands';
 import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
+import {applyPersonaUpdate, requestPersonaRefresh} from './PersonaRefresh';
 
 type PersonaPayload = {persona: PersonaResponse} | PersonaResponse;
 type PersonaDeletePayload = {persona_id: string} | {id: string};
@@ -94,6 +96,12 @@ export function handleUserPersonaChannelStateUpdate(
 	}
 }
 
+/**
+ * Another account changed its personas. For public and unlisted personas the event carries the persona,
+ * as older servers did for all; otherwise it carries only the account, and the personas of it this
+ * client shows are fetched again (`requestPersonaRefresh`). A deleted persona keeps showing as it was
+ * on old messages, so a delete fetches nothing.
+ */
 export function handleGuildPersonasDirty(
 	data:
 		| {
@@ -111,11 +119,16 @@ export function handleGuildPersonasDirty(
 		return;
 	}
 	invalidatePersonaMentionCache(data?.guild_id);
-	if (data?.persona && data?.action === 'update') {
-		const subprofile = normalizeSubprofile(data.persona);
-		PersonaStore.recordKnownPersona(subprofile);
-		Messages.handlePersonaUpdate({persona: subprofile});
-		MessageReactions.handlePersonaUpdate(subprofile);
+	if (data?.user_id) forgetPersonaProfilesOf(data.user_id);
+	if (data?.action === 'update' || data?.action === 'sync') {
+		if (data.persona) {
+			const subprofile = normalizeSubprofile(data.persona);
+			// Only a persona already shown here is remembered; the event alone is no reason to keep one.
+			if (PersonaStore.getKnownPersona(subprofile.id)) PersonaStore.recordKnownPersona(subprofile, data.user_id);
+			applyPersonaUpdate(subprofile);
+		} else if (data.user_id) {
+			requestPersonaRefresh(data.user_id);
+		}
 	}
 	if (data?.user_id && (data?.display_tag_text !== undefined || data?.display_tag_icon !== undefined)) {
 		Messages.handleAuthorDisplayTagUpdate({
