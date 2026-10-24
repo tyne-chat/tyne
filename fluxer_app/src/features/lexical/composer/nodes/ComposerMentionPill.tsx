@@ -108,7 +108,7 @@ export const ComposerMentionPill = observer(({mentionType, mentionId, display, .
 							const sub = msg.subprofile;
 							if (sub != null && sub.id === resolvedPersonaId) {
 								persona = sub;
-								PersonaStore.recordKnownPersona(sub);
+								PersonaStore.recordKnownPersona(sub, mentionId);
 								return false;
 							}
 							return true;

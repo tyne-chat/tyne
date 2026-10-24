@@ -22,9 +22,14 @@ import {
 	type PersonaLike,
 	previewPersona,
 } from '@fluxer/schema/src/domains/persona/PersonaMatcher';
-import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import type {
+	MessageSubprofileResponse,
+	PersonaLookupItem,
+	PersonaLookupResponse,
+} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {msg} from '@lingui/core/macro';
 import {makeAutoObservable, observable, runInAction} from 'mobx';
+import {PersonaLookupBatcher, type PersonaLookupPair} from './PersonaLookupBatcher';
 
 const DISPLAY_TAG_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update display tag`;
 const PERSONA_MODE_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update persona mode`;
@@ -58,7 +63,6 @@ export function normalizeSubprofile(
 		avatar_color: source.avatar_color,
 		display_tag_text: overrides?.display_tag_text !== undefined ? overrides.display_tag_text : source.display_tag_text,
 		display_tag_icon: overrides?.display_tag_icon !== undefined ? overrides.display_tag_icon : source.display_tag_icon,
-		pronouns: source.pronouns,
 		color: source.color,
 		visibility: source.visibility,
 	};
@@ -116,6 +120,20 @@ export function comparePersonasByName(a: ClientPersona, b: ClientPersona): numbe
 	);
 }
 
+/** What a message shows of a looked-up persona, without the owner the lookup adds. */
+function lookupItemToSubprofile(item: PersonaLookupItem): MessageSubprofileResponse {
+	const {user_id: _ownerId, ...subprofile} = item;
+	return subprofile;
+}
+
+// Fork: every persona lookup goes through one batcher, so lookups made close together share a request.
+const personaLookups = new PersonaLookupBatcher(async (pairs: Array<PersonaLookupPair>) => {
+	const res = await http.post<PersonaLookupResponse>(ForkEndpoints.PERSONA_LOOKUP, {
+		body: {personas: pairs.map(({userId, personaId}) => ({user_id: userId, persona_id: personaId}))},
+	});
+	return res.body ?? [];
+});
+
 export class PersonaStoreClass {
 	private _personas: Array<ClientPersona> = [];
 	private _displayTagText: string = '';
@@ -127,6 +145,8 @@ export class PersonaStoreClass {
 	/** With the per-channel scope: the persona selected in each channel. No entry means the account. */
 	private readonly _channelPersonaIds = observable.map<string, string>();
 	private _knownPersonas = new Map<string, MessageSubprofileResponse>();
+	/** The account each known persona belongs to, where it is known, so an account's edits can be fetched. */
+	private _knownPersonaOwners = new Map<string, string>();
 
 	constructor() {
 		makeAutoObservable(this);
@@ -143,7 +163,9 @@ export class PersonaStoreClass {
 			this._activePersonaScope = 'global';
 			this._channelPersonaIds.clear();
 			this._knownPersonas.clear();
+			this._knownPersonaOwners.clear();
 		});
+		personaLookups.reset();
 	}
 
 	get personas(): ReadonlyArray<ClientPersona> {
@@ -165,26 +187,51 @@ export class PersonaStoreClass {
 		return this._knownPersonas.get(personaId) ?? null;
 	}
 
-	recordKnownPersona(persona: MessageSubprofileResponse): void {
+	/** Remembers a persona seen beside a message, reaction, signal or mention, with its owner when known. */
+	recordKnownPersona(persona: MessageSubprofileResponse, ownerId?: string | null): void {
 		runInAction(() => {
 			this._knownPersonas.set(persona.id, persona);
+			if (ownerId) this._knownPersonaOwners.set(persona.id, ownerId);
 		});
 	}
 
+	/** The known personas of another account, by ID. */
+	getKnownPersonaIdsOf(userId: string): Array<string> {
+		const ids: Array<string> = [];
+		for (const [personaId, ownerId] of this._knownPersonaOwners) {
+			if (ownerId === userId && this._knownPersonas.has(personaId)) ids.push(personaId);
+		}
+		return ids;
+	}
+
+	/**
+	 * What a message from a persona shows, from memory or looked up by ID (lookups made close together
+	 * share one request). Null when it cannot be found or the lookup failed recently.
+	 */
 	async fetchPersona(userId: string, personaId: string): Promise<MessageSubprofileResponse | null> {
 		const existing = this.getKnownPersona(personaId);
 		if (existing) return existing;
-		try {
-			const res = await http.get<any>(ForkEndpoints.USER_PUBLIC_PERSONA(userId, personaId));
-			if (res.ok && res.body) {
-				const subprofile = normalizeSubprofile(res.body);
-				this.recordKnownPersona(subprofile);
-				return subprofile;
-			}
-		} catch {
-			// ignore
+		const item = await personaLookups.lookup({userId, personaId});
+		if (!item) return null;
+		const subprofile = lookupItemToSubprofile(item);
+		this.recordKnownPersona(subprofile, item.user_id);
+		return subprofile;
+	}
+
+	/**
+	 * Fetches the given personas again, known or not (after their owner edited one), and remembers what
+	 * comes back. Returns the personas found; one request for all of them.
+	 */
+	async refreshPersonas(pairs: ReadonlyArray<PersonaLookupPair>): Promise<Array<MessageSubprofileResponse>> {
+		const items = await Promise.all(pairs.map((pair) => personaLookups.lookup(pair, {force: true})));
+		const found: Array<MessageSubprofileResponse> = [];
+		for (const item of items) {
+			if (!item) continue;
+			const subprofile = lookupItemToSubprofile(item);
+			this.recordKnownPersona(subprofile, item.user_id);
+			found.push(subprofile);
 		}
-		return null;
+		return found;
 	}
 
 	setPersonas(
