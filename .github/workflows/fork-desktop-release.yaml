@@ -76,15 +76,12 @@ env:
   # (CHANNEL_APP_PROTOCOLS in fluxer_desktop/src/common/Constants.ts).
   FLUXER_FORK_LINK_SCHEME: tyne
   # Fork: Linux is packaged with upstream's patched Electron (fluxer_desktop/electron/build-linux.sh),
-  # which these runners cannot compile. It is built on the maintainers' host and published as this
-  # release of FLUXER_FORK_ELECTRON_REPOSITORY; the Linux job downloads it into FLUXER_ELECTRON_DIST
-  # and stops unless both files match the hashes here, so a new build only reaches the app through a
-  # commit. Rebuild, publish under a new tag and update all four values when upstream moves
-  # Electron or the patch (tyne-chat/tyne#187).
-  FLUXER_FORK_ELECTRON_REPOSITORY: tyne-chat/tyne-electron
-  FLUXER_FORK_ELECTRON_RELEASE: electron-v44.9.1-tyne1
-  FLUXER_FORK_ELECTRON_ZIP_SHA256: 3cf286baf06f74583f4e6a4c6d13cb376864bcf3944dba9f36c9a48270ae5380
-  FLUXER_FORK_ELECTRON_MANIFEST_SHA256: c6d652e45cb156bf125cb8524209ef8fda1e94301346c94ce3915dad13c9c9bf
+  # which these runners cannot compile. Upstream publishes its build as the release named in
+  # fluxer_desktop/electron/runtime.json and pins the archive's SHA-256 there, and
+  # scripts/custom-electron.cjs refuses any other archive. The Linux job downloads it from upstream's
+  # public repository, without a token, and checks it against that pin. (Until upstream published
+  # it, the maintainers built their own: tyne-chat/tyne#187.)
+  FLUXER_FORK_ELECTRON_REPOSITORY: fluxerapp/fluxer
   CI_TOOL: cargo run --locked --quiet --manifest-path "$GITHUB_WORKSPACE/_ci/tools/ci/Cargo.toml" -- build-desktop
 
 jobs:
@@ -360,15 +357,16 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           dist="$RUNNER_TEMP/fluxer-electron-dist"
-          base="https://github.com/$FLUXER_FORK_ELECTRON_REPOSITORY/releases/download/$FLUXER_FORK_ELECTRON_RELEASE"
-          version="${FLUXER_FORK_ELECTRON_RELEASE#electron-v}"
-          name="electron-v${version%%-*}-linux-${ARCH}"
+          runtime="$WORKDIR/fluxer_desktop/electron/runtime.json"
+          release_tag=$(jq -er .releaseTag "$runtime")
+          version=$(jq -er .electronVersion "$runtime")
+          archive_sha256=$(jq -er --arg arch "$ARCH" '.linux[$arch].archiveSha256' "$runtime")
+          base="https://github.com/$FLUXER_FORK_ELECTRON_REPOSITORY/releases/download/$release_tag"
+          name="electron-v${version}-linux-${ARCH}"
           mkdir -p "$dist"
           curl -fsSL --retry 5 -o "$dist/$name.zip" "$base/$name.zip"
           curl -fsSL --retry 5 -o "$dist/$name.fluxer.json" "$base/$name.fluxer.json"
-          printf '%s  %s\n' \
-            "$FLUXER_FORK_ELECTRON_ZIP_SHA256" "$dist/$name.zip" \
-            "$FLUXER_FORK_ELECTRON_MANIFEST_SHA256" "$dist/$name.fluxer.json" | sha256sum -c -
+          printf '%s  %s\n' "$archive_sha256" "$dist/$name.zip" | sha256sum -c -
 
       - name: Build Electron app (Linux)
         if: matrix.platform == 'linux'
