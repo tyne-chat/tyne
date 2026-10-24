@@ -90,7 +90,6 @@ describe('Typing as a persona', () => {
 			avatar_color: null,
 			display_tag_text: 'The Den',
 			display_tag_icon: null,
-			pronouns: 'they/them',
 			color: null,
 			visibility: 'unlisted',
 		});

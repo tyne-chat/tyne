@@ -78,7 +78,6 @@ function createWireMessage(overrides?: Partial<WireMessage>): WireMessage {
 			name: 'Alice',
 			avatar: 'a1a1a1a1',
 			display_tag_text: 'Wonderland',
-			pronouns: 'she/her',
 			color: 0xff0000,
 		},
 		...overrides,
@@ -114,7 +113,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				id: 'sub-bob',
 				name: 'Bob',
 				avatar: null,
-				pronouns: 'he/him',
 				color: 0x0000ff,
 			},
 		});
@@ -149,7 +147,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				name: 'Bob the Fox',
 				avatar: 'e5e5e5e5',
 				display_tag_text: 'Foxes',
-				pronouns: 'he/him',
 				color: 0xff8800,
 			},
 		});
@@ -180,7 +177,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				avatar: 'a1a1a1a1',
 				display_tag_text: 'TEST SYSTEM',
 				display_tag_icon: '1a2b3c4d',
-				pronouns: 'she/her',
 				color: 0xff0000,
 			},
 		});
@@ -197,7 +193,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				avatar: 'a1a1a1a1',
 				display_tag_text: 'TAG ONE',
 				display_tag_icon: null,
-				pronouns: null,
 				color: null,
 			},
 		});
@@ -208,7 +203,6 @@ describe('MessagingMessage Persona Preservation', () => {
 				avatar: 'a1a1a1a1',
 				display_tag_text: 'TAG TWO',
 				display_tag_icon: null,
-				pronouns: null,
 				color: null,
 			},
 		});
@@ -233,7 +227,6 @@ describe('MessagingMessage Persona Preservation', () => {
 					avatar: '7f7f7f7f',
 					display_tag_text: 'SERAPHIM',
 					display_tag_icon: null,
-					pronouns: null,
 					color: null,
 				},
 			});
@@ -295,7 +288,6 @@ describe('MessagingMessage Persona Preservation', () => {
 					avatar: 'e5e5e5e5',
 					display_tag_text: null,
 					display_tag_icon: null,
-					pronouns: null,
 					color: null,
 				},
 			});
@@ -345,7 +337,6 @@ describe('MessagingMessage Persona Preservation', () => {
 					name: 'Original Name',
 					avatar: 'b2b2b2b2',
 					display_tag_text: 'ORIG_TAG',
-					pronouns: 'they/them',
 					color: 0x112233,
 				},
 			});
@@ -367,7 +358,7 @@ describe('MessagingMessage Persona Preservation', () => {
 			expect(msg?.subprofile?.name).toBe('Updated Name');
 			expect(msg?.subprofile?.avatar).toBe('a2a2a2a2');
 			expect(msg?.subprofile?.display_tag_text).toBe('ORIG_TAG');
-			expect(msg?.subprofile?.pronouns).toBe('they/them');
+			expect(msg?.subprofile).not.toHaveProperty('pronouns');
 		});
 
 		it('builds the copy from one of the account’s own personas and updates message subprofile', async () => {
@@ -421,7 +412,6 @@ describe('MessagingMessage Persona Preservation', () => {
 					name: 'Snapshot Updated',
 					avatar: '5d5d5d5d',
 					avatar_color: null,
-					pronouns: null,
 					color: null,
 				},
 			});
