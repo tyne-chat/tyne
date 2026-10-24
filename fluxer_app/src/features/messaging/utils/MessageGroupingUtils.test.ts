@@ -65,6 +65,7 @@ function buildStream(messages: Array<Message>, oldestUnreadMessageId: string | n
 		messages: channelMessages(messages),
 		oldestUnreadMessageId,
 		treatSpam: false,
+		hideBlocked: false,
 	});
 }
 

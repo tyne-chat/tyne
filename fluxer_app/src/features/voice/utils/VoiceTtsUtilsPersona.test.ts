@@ -119,6 +119,8 @@ vi.mock('@app/features/ui/state/Notification', () => ({
 }));
 
 vi.mock('@app/features/accessibility/state/Accessibility', () => ({
+	ACCESSIBILITY_CUSTOM_THEME_STORAGE_KEY: 'Accessibility:customThemeCss',
+	ACCESSIBILITY_CUSTOM_THEME_SYNC_STORAGE_KEY: 'Accessibility:customThemeCssSyncAcrossDevices',
 	default: {
 		enableTTSCommand: true,
 		setEnableTTSCommand: vi.fn(),

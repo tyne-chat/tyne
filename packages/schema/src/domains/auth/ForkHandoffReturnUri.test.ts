@@ -4,7 +4,7 @@
 // returns a browser sign-in to it is tyne://handoff. The instance has to accept it next to
 // upstream's.
 
-import {DESKTOP_HANDOFF_RETURN_URI_PATTERN, HandoffInitiateRequest} from '@fluxer/schema/src/domains/auth/AuthSchemas';
+import {HandoffInitiateRequest} from '@fluxer/schema/src/domains/auth/AuthSchemas';
 import {describe, expect, it} from 'vitest';
 
 describe('the return link of a browser sign-in', () => {
@@ -15,7 +15,6 @@ describe('the return link of a browser sign-in', () => {
 			'fluxer-canary://handoff',
 			'fluxer-development://handoff',
 		]) {
-			expect(DESKTOP_HANDOFF_RETURN_URI_PATTERN.test(link), link).toBe(true);
 			expect(HandoffInitiateRequest.safeParse({return_uri: link}).success, link).toBe(true);
 		}
 	});
@@ -31,7 +30,6 @@ describe('the return link of a browser sign-in', () => {
 			'https://tyne.chat/handoff',
 			'fluxer://handoff\ntyne://handoff',
 		]) {
-			expect(DESKTOP_HANDOFF_RETURN_URI_PATTERN.test(link), link).toBe(false);
 			expect(HandoffInitiateRequest.safeParse({return_uri: link}).success, link).toBe(false);
 		}
 	});

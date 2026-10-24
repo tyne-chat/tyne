@@ -15,9 +15,12 @@ import type {SearchHints as SearchBarHints} from '@app/features/channel/componen
 import {getCachedPersonaMentionItems} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import type {SearchHistoryEntry} from '@app/features/search/state/SearchHistory';
-import type {ParsedToken, SearchHints} from '@app/features/search/utils/SearchQueryParser';
+import type {SearchHints, tokenize} from '@app/features/search/utils/SearchQueryParser';
 import type {SearchSegment} from '@app/features/search/utils/SearchSegmentManager';
 import type {MessageSearchParams} from '@app/features/search/utils/SearchUtils';
+
+// Upstream keeps its token type private; this is the type tokenize() returns.
+type ParsedToken = ReturnType<typeof tokenize>['tokens'][number];
 
 declare module '@app/features/search/utils/SearchUtils' {
 	interface MessageSearchParams {

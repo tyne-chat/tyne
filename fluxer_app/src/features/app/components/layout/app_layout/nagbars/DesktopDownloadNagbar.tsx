@@ -16,6 +16,7 @@ import {observer} from 'mobx-react-lite';
 
 // Fork imports.
 
+import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import NagbarState from '@app/features/ui/state/Nagbar';
 
 const DESKTOP_APP_DOWNLOAD_MESSAGE_DESCRIPTOR = msg({

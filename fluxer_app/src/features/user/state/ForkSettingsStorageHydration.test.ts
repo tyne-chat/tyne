@@ -28,7 +28,7 @@ beforeAll(async () => {
 	await saved.set(ACCOUNT_WITH_SETTINGS, LEFT_SIDEBAR_VISIBLE_KEY, 'false');
 	await saved.set(ACCOUNT_WITH_SETTINGS, EDGE_HOVER_PEEK_ENABLED_KEY, 'false');
 	// The app starts its storage signed out, and only then loads the stores.
-	await storage.initializeAppStorage({scoped: true});
+	await storage.initializeAppStorage();
 	await storage.activateAppStorageScope(null);
 	LayoutState = (await import('@app/features/ui/state/LayoutState')).default;
 });
