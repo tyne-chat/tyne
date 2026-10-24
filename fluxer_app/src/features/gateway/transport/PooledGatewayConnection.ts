@@ -68,6 +68,10 @@ import {DEFAULT_API_VERSION} from '@fluxer/constants/src/AppConstants';
 import {GatewayCloseCodes, GatewayIdentifyFlags} from '@fluxer/constants/src/GatewayConstants';
 import {action, actionBound, makeAutoObservable, observableRef, runInAction} from 'mobx';
 
+// Fork imports.
+
+import {handleForkPromotedResume} from '@app/features/gateway/events/ForkAccountReadyWork';
+
 const logger = new Logger('GatewayConnection');
 
 function gatewayLogName(accountKey: string | null): string {
@@ -448,6 +452,7 @@ export class PooledGatewayConnection {
 		ForumPosts.handleGatewayReady();
 		ForumReadState.handleGatewayReady();
 		NavigationSideEffects.handleGatewayReady();
+		handleForkPromotedResume();
 		const userId = SessionManager.userId;
 		if (userId !== null) {
 			scheduleAccountReadyWork(userId);
