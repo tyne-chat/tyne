@@ -26,10 +26,11 @@ SDK generated from this repository's OpenAPI spec, and the same gateway.
 
 ## Components
 
-An edge Caddy server routes by path (`deploy/self-hosting/Caddyfile`): `/api/*` to the API,
-`/gateway` to the gateway, `/media/*` to the media proxy, `/livekit/*`, `/admin`, static paths, and
-everything else to the app proxy, which serves the web app. The self-hosting compose file is
-`deploy/self-hosting/docker-compose.yml`.
+An edge Caddy server routes by path (`fluxer_rexctl/internal/stack/files/Caddyfile`): `/api/*` to
+the API, `/gateway` to the gateway, `/media/*` to the media proxy, `/livekit/*`, `/admin`, static
+paths, `/.well-known/fluxer` to the API, and everything else to the app proxy, which serves the web
+app. Upstream's self-hosting stack, compose file included, is embedded in `rexctl`
+(`fluxer_rexctl/internal/stack/files/`); it replaced `deploy/self-hosting/` in 2026-10.
 
 | Component | Folder | Role | Talks to |
 |---|---|---|---|
