@@ -382,14 +382,15 @@ export const GuildChannelView = observer(({channelId, guildId}: GuildChannelView
 			/>
 		);
 	};
-	const withSignalBar = (chatArea: React.ReactElement) => (
-		<>
-			{chatArea.type !== ChannelTextarea && (
-				<SignalBar channel={channel} data-flx="channel.channel-view.guild-channel-view.signal-bar" />
-			)}
-			{chatArea}
-		</>
-	);
+	const withSignalBar = (chatArea: React.ReactElement | null) =>
+		chatArea === null ? null : (
+			<>
+				{chatArea.type !== ChannelTextarea && (
+					<SignalBar channel={channel} data-flx="channel.channel-view.guild-channel-view.signal-bar" />
+				)}
+				{chatArea}
+			</>
+		);
 	const renderChatArea = (inputSuppressed = false) => {
 		if (guild?.visiting) return null;
 		if (DeveloperOptions.mockVerificationBarrier !== 'none' && !channel.isPrivate()) {
