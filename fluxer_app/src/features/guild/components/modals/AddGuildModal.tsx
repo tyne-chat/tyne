@@ -24,6 +24,11 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {canCreateCommunities} from '@app/features/guild/utils/ForkCommunityCreation';
+import {useEffect} from 'react';
+
 export type {AddGuildModalView} from '@app/features/guild/components/modals/add_guild_modal/shared';
 
 const footerRevealTransition: Transition = {
@@ -39,7 +44,9 @@ const instantTransition: Transition = {
 export const AddGuildModal = observer(({initialView = 'landing'}: {initialView?: AddGuildModalView} = {}) => {
 	const {i18n} = useLingui();
 	const shouldReduceMotion = useReducedMotion();
-	const [view, setView] = useState<AddGuildModalView>(initialView);
+	// Fork: an account that may not create a community gets only the join form, with no way back to the others.
+	const canCreate = canCreateCommunities();
+	const [view, setView] = useState<AddGuildModalView>(canCreate ? initialView : 'join_guild');
 	const [footerContent, setFooterContent] = useState<React.ReactNode>(null);
 	const getTitle = (): string => {
 		switch (view) {
@@ -56,7 +63,14 @@ export const AddGuildModal = observer(({initialView = 'landing'}: {initialView?:
 		}
 	};
 	const handleBack = useCallback(() => setView('landing'), []);
-	const contextValue = useMemo(() => ({setFooterContent, onBack: handleBack}), [handleBack]);
+	const onBack = canCreate ? handleBack : undefined;
+	const contextValue = useMemo(() => ({setFooterContent, onBack}), [onBack]);
+	// Fork: an account that loses the right while the modal is open is moved to the join form.
+	useEffect(() => {
+		if (!canCreate) {
+			setView('join_guild');
+		}
+	}, [canCreate]);
 	if (RuntimeConfig.singleCommunityEnabled) {
 		return null;
 	}
