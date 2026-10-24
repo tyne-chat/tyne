@@ -22,6 +22,10 @@ import {
 	PublicPersonaResponseSchema,
 	UserIdPersonaIdParam,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {
+	PersonaLookupRequestSchema,
+	PersonaLookupResponseSchema,
+} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {createChannelID, createPersonaID, createUserID} from '../BrandedTypes';
 import {viewerFromCtx} from '../experiment/ChannelThreadsGate';
 import {DefaultUserOnly, LoginRequired} from '../middleware/AuthMiddleware';
@@ -368,6 +372,34 @@ export function PersonaController(app: HonoApp) {
 			const {user_id} = ctx.req.valid('param');
 			const publicPersonas = await ctx.get('personaService').getPublicPersonas(user.id, createUserID(BigInt(user_id)));
 			return ctx.json(publicPersonas);
+		},
+	);
+
+	app.post(
+		'/personas/lookup',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_READ),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaLookupRequestSchema),
+		OpenAPI({
+			operationId: 'lookup_personas',
+			summary: 'Look up personas by ID',
+			responseSchema: PersonaLookupResponseSchema,
+			statusCode: 200,
+			security: ['sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Returns what messages from the given personas show (name, avatar, colours, display tag), whatever their visibility, including deleted ones, each with its owner. Nothing of their profiles. Pairs that name no persona of that user are left out.',
+		}),
+		async (ctx) => {
+			const {personas} = ctx.req.valid('json');
+			const found = await ctx.get('personaService').lookupPersonas(
+				personas.map(({user_id, persona_id}) => ({
+					userId: createUserID(BigInt(user_id)),
+					personaId: createPersonaID(BigInt(persona_id)),
+				})),
+			);
+			return ctx.json(found);
 		},
 	);
 

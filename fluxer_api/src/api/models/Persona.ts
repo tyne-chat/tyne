@@ -100,7 +100,10 @@ export class Persona {
 		};
 	}
 
-	/** Who this persona is beside a message, reaction, typing indicator or signal. Its profile is `toPublicResponse`. */
+	/**
+	 * Who this persona is beside a message, reaction, typing indicator or signal: what is needed to show
+	 * it there, and nothing of its profile (bio, banner, pronouns), which is `toPublicResponse`.
+	 */
 	toSubprofileResponse(settings?: UserPersonaSettingsRow | null): {
 		id: string;
 		name: string;
@@ -108,7 +111,6 @@ export class Persona {
 		avatar_color: number | null;
 		display_tag_text?: string | null;
 		display_tag_icon?: string | null;
-		pronouns: string | null;
 		color: number | null;
 		visibility?: PersonaVisibility | null;
 	} {
@@ -128,7 +130,6 @@ export class Persona {
 			avatar_color: this.avatarColor,
 			display_tag_text: effectiveTagText,
 			display_tag_icon: effectiveTagIcon,
-			pronouns: this.pronouns,
 			color: this.color,
 			visibility: this.visibility,
 		};

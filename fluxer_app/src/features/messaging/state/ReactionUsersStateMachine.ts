@@ -300,7 +300,6 @@ function updatePersonaInUsers(context: ReactionUsersContext, persona: MessageSub
 					persona.display_tag_icon !== undefined
 						? persona.display_tag_icon
 						: (currentSubprofile?.display_tag_icon ?? null),
-				pronouns: persona.pronouns !== undefined ? persona.pronouns : (currentSubprofile?.pronouns ?? null),
 				color: persona.color !== undefined ? persona.color : (currentSubprofile?.color ?? null),
 				visibility: persona.visibility !== undefined ? persona.visibility : (currentSubprofile?.visibility ?? null),
 			};

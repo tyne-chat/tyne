@@ -164,7 +164,7 @@ describe('ReactionUsersStateMachine: persona support', () => {
 		expect(snapshot.context.userSnapshot[1].subprofile?.avatar).toBe('6e6e6e6e');
 		expect(snapshot.context.userSnapshot[1].subprofile?.color).toBe(0x990000);
 		expect(snapshot.context.userSnapshot[1].subprofile?.display_tag_text).toBe('SYS');
-		expect(snapshot.context.userSnapshot[1].subprofile?.pronouns).toBe('she/her');
+		expect(snapshot.context.userSnapshot[1].subprofile).not.toHaveProperty('pronouns');
 
 		// Order is strictly preserved
 		const names = snapshot.context.userSnapshot.map((u) => u.subprofile?.name ?? u.globalName);

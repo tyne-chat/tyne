@@ -174,7 +174,6 @@ describe('MessageChangePersona', () => {
 				color: 123456,
 				display_tag_text: 'TESTING SYSTEM',
 				display_tag_icon: '1a2b3c4d',
-				pronouns: 'he/him',
 				visibility: undefined,
 			});
 		});

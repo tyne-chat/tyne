@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {SnowflakeStringType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {z} from 'zod';
 import {PersonaAssetHashType, PersonaVisibilitySchema} from './PersonaApiSchemas';
 
@@ -28,10 +29,40 @@ export const MessageSubprofileResponseSchema = z.object({
 	display_tag_icon: PersonaAssetHashType.nullish()
 		.optional()
 		.describe('Hash of the display tag icon, an image stored under the account'),
-	pronouns: z.string().nullish().describe('Pronouns'),
 	color: z.number().int().nullish().describe('Custom color integer'),
 	visibility: PersonaVisibilitySchema.nullish().optional().describe('Persona visibility setting'),
 });
 export type MessageSubprofileResponse = z.infer<typeof MessageSubprofileResponseSchema>;
+
+/** The most personas one lookup takes. */
+export const MAX_PERSONA_LOOKUP_IDS = 100;
+
+/**
+ * Personas to look up, each named by its owner and its ID. Knowing a persona's ID entitles anyone signed
+ * in to what a message from it shows, whatever its visibility: an ID is only learned from something
+ * already seen.
+ */
+export const PersonaLookupRequestSchema = z.object({
+	personas: z
+		.array(
+			z.object({
+				user_id: SnowflakeStringType.describe('The persona owner’s user ID'),
+				persona_id: SnowflakeStringType.describe('The persona’s ID'),
+			}),
+		)
+		.min(1)
+		.max(MAX_PERSONA_LOOKUP_IDS)
+		.describe('Personas to look up'),
+});
+
+/** A persona found, as a message shows it, with its owner. */
+export const PersonaLookupItemSchema = MessageSubprofileResponseSchema.extend({
+	user_id: z.string().describe('The persona owner’s user ID'),
+});
+export type PersonaLookupItem = z.infer<typeof PersonaLookupItemSchema>;
+
+/** The personas found; pairs that name no persona of that user are left out. */
+export const PersonaLookupResponseSchema = z.array(PersonaLookupItemSchema);
+export type PersonaLookupResponse = z.infer<typeof PersonaLookupResponseSchema>;
 
 export * from './PersonaApiSchemas';

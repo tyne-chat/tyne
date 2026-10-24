@@ -4,6 +4,7 @@
 // Fork: a thread carries only the ID of the persona it was started as. "Started by" has to turn
 // that into a name from what the client knows, and fall back to the account when it cannot.
 
+import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import {installVoiceMenuTestBootstrap} from '@app/features/ui/action_menu/items/__fixtures__/VoiceMenuTestBootstrap';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
@@ -87,12 +88,14 @@ describe('useThreadOwnerPersona', () => {
 		loaded.clear();
 		vi.mocked(http.get).mockReset();
 		vi.mocked(http.get).mockResolvedValue({ok: false, status: 404, body: null} as never);
+		vi.mocked(http.post).mockReset();
 		container = document.createElement('div');
 		document.body.appendChild(container);
 		root = createRoot(container);
 	});
 
 	afterEach(async () => {
+		vi.useRealTimers();
 		await act(async () => {
 			root.unmount();
 		});
@@ -112,7 +115,7 @@ describe('useThreadOwnerPersona', () => {
 	});
 
 	it('names a persona seen before', async () => {
-		PersonaStore.recordKnownPersona({id: FOX, name: 'Fox', pronouns: null, color: null});
+		PersonaStore.recordKnownPersona({id: FOX, name: 'Fox', color: null});
 		expect(await render(thread(FOX))).toBe('Fox');
 		expect(http.get).not.toHaveBeenCalled();
 	});
@@ -128,15 +131,39 @@ describe('useThreadOwnerPersona', () => {
 		expect(PersonaStore.getKnownPersona(FOX)?.name).toBe('Fox');
 	});
 
+	// Looked up by ID, which also names a private persona (tyne-tools#7); lookups made close together
+	// wait 50 ms to share one request.
+	async function afterLookupDelay(): Promise<void> {
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(60);
+		});
+	}
+
 	it('looks the persona up once when nothing loaded names it', async () => {
-		vi.mocked(http.get).mockResolvedValue({ok: true, status: 200, body: {id: FOX, name: 'Fox'}} as never);
+		vi.useFakeTimers();
+		vi.mocked(http.post).mockResolvedValue({
+			ok: true,
+			status: 200,
+			headers: {},
+			body: [{id: FOX, user_id: OWNER, name: 'Fox'}],
+		});
 		await render(thread(FOX));
+		await afterLookupDelay();
 		expect(await render(thread(FOX))).toBe('Fox');
-		expect(http.get).toHaveBeenCalledTimes(1);
+		expect(http.post).toHaveBeenCalledTimes(1);
+		expect(http.post).toHaveBeenCalledWith(ForkEndpoints.PERSONA_LOOKUP, {
+			body: {personas: [{user_id: OWNER, persona_id: FOX}]},
+		});
+		expect(http.get).not.toHaveBeenCalled();
 	});
 
-	it('falls back to the account when the persona cannot be looked up', async () => {
+	it('falls back to the account when the persona cannot be looked up, and does not ask again', async () => {
+		vi.useFakeTimers();
+		vi.mocked(http.post).mockResolvedValue({ok: true, status: 200, headers: {}, body: []});
+		await render(thread(FOX));
+		await afterLookupDelay();
 		expect(await render(thread(FOX))).toBe('account');
-		expect(http.get).toHaveBeenCalledTimes(1);
+		await afterLookupDelay();
+		expect(http.post).toHaveBeenCalledTimes(1);
 	});
 });

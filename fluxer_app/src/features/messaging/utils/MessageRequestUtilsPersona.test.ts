@@ -26,7 +26,6 @@ const FOX: MessageSubprofileResponse = {
 	name: 'Fox',
 	avatar: 'fox_avatar_hash',
 	display_tag_text: 'The Den',
-	pronouns: 'they/them',
 };
 
 describe('how a message request names its persona', () => {
