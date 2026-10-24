@@ -107,7 +107,8 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 ## Loading, resets and events
 
 - After READY, `ForkAccountReadyWork` fetches the personas, the settings and the channel
-  selections (3 GETs). While `AccountScopedWork` is suspended (signing in, switching accounts) it
+  selections (3 GETs). A desktop account switch that resumes a session the account engine kept warm
+  gets no READY: upstream's `completePromotedResume` calls `handleForkPromotedResume` instead. While `AccountScopedWork` is suspended (signing in, switching accounts) it
   waits, because upstream aborts requests made then.
 - The store is emptied on the `AccountScopedWork` cancellation, on logout, and on a READY with a new
   session id. A send in the moment before the refetch goes out as the account.
@@ -162,6 +163,8 @@ The signal bar follows the composer's persona through `SignalBarStore.affirmPers
   elsewhere.
 - End to end: `e2e/web/*/persona-*.spec.ts` (26 specs).
 - Request counts: `state/PersonaLookupBatcher.test.ts`, `events/PersonaRefresh.test.ts`.
-- Not covered: `ForkAccountReadyWork`, and request counts for the mention fetch (root `AGENTS.md`,
-  "Network calls").
+- `gateway/events/ForkAccountReadyWork.test.ts`: the work after a promoted resume, its 3 requests and
+  its wait for a switch.
+- Not covered: the call from `completePromotedResume`, and request counts for the mention fetch
+  (root `AGENTS.md`, "Network calls").
 - Before committing, run the full list in `CHECKS.md`: a persona change needs all of it.
