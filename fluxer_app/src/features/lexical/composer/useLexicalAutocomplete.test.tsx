@@ -265,6 +265,7 @@ describe('useLexicalAutocomplete - Persona Mentions', () => {
 				id: 'persona_selected',
 				name: 'Selectable',
 			}),
+			'user_owner_99',
 		);
 		expect(insertPayloadMock).toHaveBeenCalledWith(
 			0,

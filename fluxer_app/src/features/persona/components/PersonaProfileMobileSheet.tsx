@@ -93,7 +93,8 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 
 		const {profile, isLoading, isPrivate} = usePersonaProfile(user.id, subprofile.id, localPersona);
 
-		const effectivePronouns = profile ? profile.pronouns : subprofile.pronouns;
+		// Pronouns are part of the profile, not of the persona beside a message.
+		const effectivePronouns = profile?.pronouns ?? null;
 		const effectiveDisplayTagText = isCurrentUser ? PersonaStore.displayTagText : (subprofile.display_tag_text ?? null);
 		const effectiveDisplayTagIcon = isCurrentUser ? PersonaStore.displayTagIcon : (subprofile.display_tag_icon ?? null);
 		// The bio and banner are the profile's, and the profile comes from the server for this viewer.
