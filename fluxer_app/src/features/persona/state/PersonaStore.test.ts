@@ -671,7 +671,6 @@ describe('PersonaStore', () => {
 				avatar_color: 0x123456,
 				display_tag_text: 'Fox System',
 				display_tag_icon: null,
-				pronouns: 'they/them',
 				color: 0x123456,
 			});
 
@@ -680,7 +679,7 @@ describe('PersonaStore', () => {
 			expect(known?.id).toBe('p_ext');
 			expect(known?.name).toBe('Fox Persona');
 			expect(known?.display_tag_text).toBe('Fox System');
-			expect(known?.pronouns).toBe('they/them');
+			expect(known).not.toHaveProperty('pronouns');
 		});
 
 		it('retrieves owned persona via getKnownPersona formatted as MessageSubprofileResponse', async () => {
@@ -695,7 +694,7 @@ describe('PersonaStore', () => {
 			expect(known?.id).toBe(alice.id);
 			expect(known?.name).toBe('Alice');
 			expect(known?.display_tag_text).toBe('Wonderland');
-			expect(known?.pronouns).toBe('she/her');
+			expect(known).not.toHaveProperty('pronouns');
 		});
 	});
 
@@ -794,7 +793,6 @@ describe('PersonaStore', () => {
 				avatar_color: 0x112233,
 				display_tag_text: undefined,
 				display_tag_icon: undefined,
-				pronouns: 'she/her',
 				color: 0x445566,
 				visibility: 'public',
 			});
@@ -826,7 +824,6 @@ describe('PersonaStore', () => {
 				avatar_color: 0x990011,
 				display_tag_text: 'NEW_TAG',
 				display_tag_icon: null,
-				pronouns: 'they/them',
 				color: 0x223344,
 				visibility: 'private',
 			});
@@ -845,7 +842,7 @@ describe('PersonaStore', () => {
 			expect(subprofile.avatar_color).toBeUndefined();
 			expect(subprofile.display_tag_text).toBeUndefined();
 			expect(subprofile.display_tag_icon).toBeUndefined();
-			expect(subprofile.pronouns).toBeUndefined();
+			expect(subprofile).not.toHaveProperty('pronouns');
 			expect(subprofile.color).toBeUndefined();
 			expect(subprofile.visibility).toBeUndefined();
 		});

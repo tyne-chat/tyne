@@ -39,7 +39,7 @@ export function handleMessageReactionAdd(data: MessageReactionAddPayload, _conte
 		GuildMembers.hydrateIfMissing(data.guild_id, data.member);
 	}
 	if (data.subprofile) {
-		PersonaStore.recordKnownPersona(data.subprofile);
+		PersonaStore.recordKnownPersona(data.subprofile, data.user_id);
 	}
 	SavedMessages.handleMessageReactionChange(data.message_id);
 	MessageReactions.handleReactionAdd(data.message_id, data.user_id, emoji, undefined, data.persona_id, data.subprofile);
