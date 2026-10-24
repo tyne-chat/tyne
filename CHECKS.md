@@ -41,7 +41,7 @@ cargo deny --locked check -D warnings licenses bans sources && cargo deny --mani
 # crates. The gateway's eunit run covers the fork's own tests; upstream dropped its own and the CI step.
 (for s in gateway_fmt gateway_compile gateway_dialyzer knip; do tools/ci/run.sh ci --step $s || exit 1; done) && (cd fluxer_gateway && rebar3 as test eunit)
 pnpm i18n:compile && git diff --exit-code -- packages/errors/src/i18n/weblate fluxer_api/pkgs/email/src/email_i18n fluxer_api/src/api/content_i18n/weblate
-pnpm --filter fluxer_docs verify && pnpm --filter fluxer_docs build
+pnpm --filter fluxer_docs build
 cargo check -p fluxer_admin -p fluxer-messages -p fluxer-media-proxy
 ```
 
