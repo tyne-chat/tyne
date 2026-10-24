@@ -193,6 +193,8 @@ export class User {
 	private readonly _termsAgreedAt: Date | null | undefined;
 	private readonly _privacyAgreedAt: Date | null | undefined;
 	private readonly _traits: ReadonlyArray<string>;
+	// Fork: the account's admin ACLs from its private user object (ForkCommunityCreation.ts reads them).
+	private readonly _acls: ReadonlyArray<string>;
 	private readonly _claimed: boolean | undefined;
 	private readonly _accountTier: AccountTier | undefined;
 	private readonly _verificationNeed: AccountVerificationNeed | null | undefined;
@@ -290,6 +292,14 @@ export class User {
 		this._termsAgreedAt = hasKey(user, 'terms_agreed_at') ? parseDateOrNull(user.terms_agreed_at) : undefined;
 		this._privacyAgreedAt = hasKey(user, 'privacy_agreed_at') ? parseDateOrNull(user.privacy_agreed_at) : undefined;
 		this._traits = mergeTraitsArray(EMPTY_STRING_ARRAY, user, {clearMissing: true});
+		this._acls = mergeAuthoritativeArray(
+			EMPTY_STRING_ARRAY,
+			user,
+			'acls',
+			parseStringItem,
+			{clearMissing: true},
+			EMPTY_STRING_ARRAY,
+		);
 		this._claimed = hasKey(user, 'claimed') ? user.claimed : undefined;
 		this._accountTier = hasKey(user, 'account_tier') ? user.account_tier : undefined;
 		this._verificationNeed = hasKey(user, 'verification_need') ? user.verification_need : undefined;
@@ -399,6 +409,10 @@ export class User {
 
 	get traits(): ReadonlyArray<string> {
 		return this._traits;
+	}
+
+	get acls(): ReadonlyArray<string> {
+		return this._acls;
 	}
 
 	get displayName(): string {
@@ -554,6 +568,7 @@ export class User {
 		const subprofile = pickField(this.subprofile, u as any, 'subprofile' as any, opts);
 		if (subprofile !== undefined) (result as any).subprofile = subprofile;
 		result.traits = mergeTraitsArray(this._traits, u, opts);
+		result.acls = mergeAuthoritativeArray(this._acls, u, 'acls', parseStringItem, opts, EMPTY_STRING_ARRAY);
 		const claimed = pickField(this._claimed, u, 'claimed', opts);
 		if (claimed !== undefined) result.claimed = claimed;
 		const accountTier = pickField(this._accountTier, u, 'account_tier', opts);
@@ -760,6 +775,7 @@ export class User {
 			this.personaId === other.personaId &&
 			subprofilesEqual(this.subprofile, other.subprofile) &&
 			arraysShallowEqual(this._traits, other._traits) &&
+			arraysShallowEqual(this._acls, other._acls) &&
 			this._claimed === other._claimed &&
 			this._accountTier === other._accountTier &&
 			this._verificationNeed === other._verificationNeed &&
@@ -846,6 +862,7 @@ export class User {
 			this._privacyAgreedAt === undefined ? undefined : dateToIsoOrNull(this._privacyAgreedAt),
 		);
 		privateFields.traits = [...this._traits];
+		privateFields.acls = [...this._acls];
 		setOptional('claimed', this._claimed);
 		setOptional('account_tier', this._accountTier);
 		setOptional('verification_need', this._verificationNeed);
