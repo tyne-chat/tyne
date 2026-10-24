@@ -148,12 +148,13 @@ A handler that touches accounts, storage or windows checks its sender with
   changes its desktop build.
 - **Linux Electron**: upstream packages Linux only with its patched Electron (a VA-API fix compiled
   from Chromium source, given through `FLUXER_ELECTRON_DIST`; `electron/build-linux.sh`). GitHub's
-  runners cannot compile it, so the maintainers build it with `build-linux.sh` and publish the ZIP
-  and its `.fluxer.json` as a release of
-  [tyne-chat/tyne-electron](https://github.com/tyne-chat/tyne-electron). The release workflow
-  downloads them without a token and stops unless both match the SHA-256 pinned next to
-  `FLUXER_FORK_ELECTRON_RELEASE`. When upstream moves Electron or the patch, the packaging checks
-  fail until a new build is published there under a new tag and the workflow points at it.
+  runners cannot compile it. Upstream publishes its build as the release named in
+  `electron/runtime.json`, which pins the archive's SHA-256, and `scripts/custom-electron.cjs`
+  accepts no other archive. The fork's release workflow downloads that release from upstream's
+  public repository and checks it against the pin, so it follows upstream's Electron and patch with
+  no work of ours. (Until upstream published it on 2026-10-21, the maintainers built their own in
+  [tyne-chat/tyne-electron](https://github.com/tyne-chat/tyne-electron), tyne-chat/tyne#187; upstream's
+  pin now refuses those builds.)
   `FLUXER_FORK_STOCK_LINUX_ELECTRON=1` still packages stock Electron for a local build (it skips
   those checks and leaves `VaapiOnNvidiaGPUs` off, `ChromiumRuntime.ts`). A new upstream
   requirement of this kind fails only at release time: the nightly rebase does not build the
