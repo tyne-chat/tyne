@@ -35,23 +35,23 @@ export const MANUAL_DESKTOP_FORMATS = ['setup', 'dmg', 'zip', 'appimage', 'deb',
 
 export type ManualDesktopFormat = (typeof MANUAL_DESKTOP_FORMATS)[number];
 
-export type LinuxManualDesktopFormat = Extract<ManualDesktopFormat, 'appimage' | 'deb' | 'rpm' | 'tar_gz'>;
+type LinuxManualDesktopFormat = Extract<ManualDesktopFormat, 'appimage' | 'deb' | 'rpm' | 'tar_gz'>;
 
-export const LINUX_MANUAL_FORMAT_EXTENSIONS: Record<LinuxManualDesktopFormat, string> = {
+const LINUX_MANUAL_FORMAT_EXTENSIONS: Record<LinuxManualDesktopFormat, string> = {
 	appimage: '.AppImage',
 	deb: '.deb',
 	rpm: '.rpm',
 	tar_gz: '.tar.gz',
 };
 
-export const LINUX_MANUAL_ARCH_TOKENS: Record<LinuxManualDesktopFormat, Record<DesktopDownloadArch, string>> = {
+const LINUX_MANUAL_ARCH_TOKENS: Record<LinuxManualDesktopFormat, Record<DesktopDownloadArch, string>> = {
 	appimage: {x64: 'x86_64', arm64: 'arm64'},
 	deb: {x64: 'amd64', arm64: 'arm64'},
 	rpm: {x64: 'x86_64', arm64: 'aarch64'},
 	tar_gz: {x64: 'x64', arm64: 'arm64'},
 };
 
-export function isLinuxManualDesktopFormat(format: ManualDesktopFormat): format is LinuxManualDesktopFormat {
+function isLinuxManualDesktopFormat(format: ManualDesktopFormat): format is LinuxManualDesktopFormat {
 	return format === 'appimage' || format === 'deb' || format === 'rpm' || format === 'tar_gz';
 }
 
@@ -92,7 +92,7 @@ export function forkReleasesPageUrl(): string | null {
 	return releases === null ? null : `${releases}/latest`;
 }
 
-export function forkLatestAssetBaseUrl(): string | null {
+function forkLatestAssetBaseUrl(): string | null {
 	const releases = forkReleasesUrl();
 	return releases === null ? null : `${releases}/latest/download`;
 }
