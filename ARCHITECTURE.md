@@ -125,8 +125,9 @@ and the mobile app builds it from its `fluxer` submodule.
 4. READY goes out with the guilds inline once presence and every guild have answered, or after 5 s
    at most with the slow guilds marked unavailable (they follow as GUILD_CREATE). On the web,
    `gateway/events/GatewayReady.ts` handles it, and the fork's `ForkAccountReadyWork.ts` then fetches
-   the personas over REST (after READY only, not after a RESUME or a desktop account switch:
-   tyne-chat/tyne#141).
+   the personas over REST. A desktop account switch that resumes the session upstream's account
+   engine kept warm gets no READY; `completePromotedResume` (`PooledGatewayConnection.ts`) runs the
+   same work (tyne-chat/tyne#141).
 5. Heartbeat acks trim the replay buffer. RESUME (`gateway_handler_resume.erl`), accepted only on a
    socket without a session (4005 otherwise), finds or rebuilds the session and replays what the
    client missed. A session is kept for 300 s after its socket drops (the fork's value; upstream's
