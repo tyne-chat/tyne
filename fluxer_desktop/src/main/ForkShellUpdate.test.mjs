@@ -2,7 +2,7 @@
 
 import assert from 'node:assert/strict';
 import {describe, test} from 'node:test';
-import {installElectronStub} from './LocalAppTestSupport.test.mjs';
+import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
 
 const NO_NETWORK = () => Promise.reject(new Error('outbound network is not available in tests'));
 const net = {fetch: NO_NETWORK};
