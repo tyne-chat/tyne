@@ -152,9 +152,8 @@ A handler that touches accounts, storage or windows checks its sender with
   `electron/runtime.json`, which pins the archive's SHA-256, and `scripts/custom-electron.cjs`
   accepts no other archive. The fork's release workflow downloads that release from upstream's
   public repository and checks it against the pin, so it follows upstream's Electron and patch with
-  no work of ours. (Until upstream published it on 2026-10-21, the maintainers built their own in
-  [tyne-chat/tyne-electron](https://github.com/tyne-chat/tyne-electron), tyne-chat/tyne#187; upstream's
-  pin now refuses those builds.)
+  no work of ours. (Until upstream published it on 2026-10-21, the maintainers built their own,
+  tyne-chat/tyne#187; upstream's pin refuses such builds.)
   `FLUXER_FORK_STOCK_LINUX_ELECTRON=1` still packages stock Electron for a local build (it skips
   those checks and leaves `VaapiOnNvidiaGPUs` off, `ChromiumRuntime.ts`). A new upstream
   requirement of this kind fails only at release time: the nightly rebase does not build the
