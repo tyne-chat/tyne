@@ -4,11 +4,15 @@
 //! `instance_config_post` in `system_actions.rs`.
 
 use crate::{
-    api::types::{InstanceConfigUpdateRequest, InstancePolicyUpdateRequest, ServerListButtonsUpdateRequest},
+    api::types::{
+        InstanceConfigUpdateRequest, InstancePolicyUpdateRequest, ServerListButtonsUpdateRequest,
+    },
     utils::forms::MultiValueForm,
 };
 
-pub(super) fn build_server_list_buttons_update(form: &MultiValueForm) -> InstanceConfigUpdateRequest {
+pub(super) fn build_server_list_buttons_update(
+    form: &MultiValueForm,
+) -> InstanceConfigUpdateRequest {
     let flag = |key: &str| form.bool_value(key);
     InstanceConfigUpdateRequest {
         policy: Some(InstancePolicyUpdateRequest {
