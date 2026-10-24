@@ -17,7 +17,14 @@ pub(super) fn server_list_buttons_form(
 ) -> Markup {
     let buttons = &policy.server_list_buttons;
     let button = |name: &'static str, label: &'static str, checked: bool| {
-        Checkbox { name, value: "true", label, checked, enabled: true }.render()
+        Checkbox {
+            name,
+            value: "true",
+            label,
+            checked,
+            enabled: true,
+        }
+        .render()
     };
     html! {
         div class="space-y-4 border-t border-neutral-200 pt-6" {
