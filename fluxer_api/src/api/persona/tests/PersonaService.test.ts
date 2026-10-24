@@ -500,7 +500,7 @@ describe('PersonaService', () => {
 			});
 		});
 
-		it('does NOT dispatch GUILD_PERSONAS_DIRTY for private persona mutations', async () => {
+		it('does NOT dispatch GUILD_PERSONAS_DIRTY when a private persona is created', async () => {
 			const mockGateway = {
 				dispatchPresence: vi.fn().mockResolvedValue(undefined),
 				dispatchGuild: vi.fn().mockResolvedValue(undefined),
@@ -521,6 +521,78 @@ describe('PersonaService', () => {
 			await serviceWithGuilds.createPersona(userId, {name: 'Alice Private', visibility: 'private'});
 
 			expect(mockGateway.dispatchGuild).not.toHaveBeenCalled();
+		});
+
+		// An edit or delete of a private persona tells communities and DM partners only that the account
+		// changed its personas: no ID, no details (tyne-tools#7).
+		describe('when a private persona is edited or deleted', () => {
+			function serviceWithRecipients() {
+				const gateway = {
+					dispatchPresence: vi.fn().mockResolvedValue(undefined),
+					dispatchGuild: vi.fn().mockResolvedValue(undefined),
+				};
+				const service = new PersonaService({
+					personaRepository: mockRepo,
+					gatewayService: gateway as any,
+					userGuildRepository: {getUserGuildIds: vi.fn().mockResolvedValue([123n])} as any,
+					userChannelRepository: {
+						listPrivateChannels: vi.fn().mockResolvedValue([{recipientIds: [userId, 4000000000000000001n]}]),
+					} as any,
+				});
+				return {gateway, service};
+			}
+			const dirtyEvents = (gateway: {dispatchPresence: any; dispatchGuild: any}) =>
+				[...gateway.dispatchGuild.mock.calls, ...gateway.dispatchPresence.mock.calls]
+					.map(([call]) => call)
+					.filter((call) => call.event === 'GUILD_PERSONAS_DIRTY');
+
+			it('sends the edit without the persona to communities and DM partners', async () => {
+				const {gateway, service} = serviceWithRecipients();
+				const persona = makeMockPersona(userId, defaultPersonaId, 'Hidden', {visibility: 'private'});
+				vi.mocked(mockRepo.findById).mockResolvedValueOnce(persona);
+				vi.mocked(mockRepo.update).mockResolvedValueOnce(
+					makeMockPersona(userId, defaultPersonaId, 'Hidden renamed', {visibility: 'private'}),
+				);
+
+				await service.updatePersona(userId, defaultPersonaId, {name: 'Hidden renamed'});
+
+				const events = dirtyEvents(gateway);
+				expect(events).toHaveLength(2);
+				for (const event of events) {
+					expect(event.data).not.toHaveProperty('persona');
+					expect(event.data).toMatchObject({user_id: userId.toString(), action: 'update'});
+				}
+			});
+
+			it('sends a delete without the persona', async () => {
+				const {gateway, service} = serviceWithRecipients();
+				vi.mocked(mockRepo.findById).mockResolvedValueOnce(
+					makeMockPersona(userId, defaultPersonaId, 'Hidden', {visibility: 'private'}),
+				);
+				vi.mocked(mockRepo.delete).mockResolvedValueOnce(true);
+
+				await service.deletePersona(userId, defaultPersonaId);
+
+				const events = dirtyEvents(gateway);
+				expect(events.length).toBeGreaterThan(0);
+				for (const event of events) expect(event.data).not.toHaveProperty('persona');
+			});
+
+			it('still sends a public persona’s edit with the persona', async () => {
+				const {gateway, service} = serviceWithRecipients();
+				vi.mocked(mockRepo.findById).mockResolvedValueOnce(
+					makeMockPersona(userId, defaultPersonaId, 'Open', {visibility: 'public'}),
+				);
+				vi.mocked(mockRepo.update).mockResolvedValueOnce(
+					makeMockPersona(userId, defaultPersonaId, 'Open renamed', {visibility: 'public'}),
+				);
+
+				await service.updatePersona(userId, defaultPersonaId, {name: 'Open renamed'});
+
+				for (const event of dirtyEvents(gateway)) {
+					expect(event.data.persona).toMatchObject({id: defaultPersonaId.toString(), name: 'Open renamed'});
+				}
+			});
 		});
 
 		it('does NOT dispatch GUILD_PERSONAS_DIRTY when active persona or latch settings change', async () => {
