@@ -257,7 +257,8 @@ describe('PersonaProfilePopout Component', () => {
 		expect(container.textContent).not.toContain('Bio left on an old message');
 		expect(container.innerHTML).not.toContain('old_banner_hash');
 		expect(container.textContent).toContain('Bobs Persona');
-		expect(container.textContent).toContain('he/him');
+		// Pronouns are part of the profile, which is private.
+		expect(container.textContent).not.toContain('he/him');
 	});
 
 	it('shows neither a bio nor the private notice when the profile could not be fetched', async () => {
