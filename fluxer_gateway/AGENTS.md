@@ -85,7 +85,8 @@ binary. Atoms are never freed, so nothing here may call `binary_to_atom` on outs
 - The existing-atom fallback can make a missing entry work by accident. The map is the contract.
 
 **Adding an event:** the name in `fluxer_api/src/api/constants/Gateway.ts` and a section in
-`fluxer_docs/src/content/docs/gateway/events.md` (`pnpm --filter fluxer_docs verify` checks it); the
+`fluxer_docs/src/content/docs/gateway/events.md` (nothing checks it since upstream dropped the docs
+verifier); the
 entry in `event_atoms.erl`, the atom being the name in lower case; for a community event, whether it
 is channel-scoped (then it needs `channel_id`) and whether passive sessions get it
 (`bypasses_passive_filter/3` or `should_passive_receive/3`); a fork test; a gateway restart.
