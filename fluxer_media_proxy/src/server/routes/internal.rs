@@ -40,6 +40,7 @@ use std::sync::Arc;
 
 // Fork imports.
 use crate::server::media_operations::external_input_limit;
+
 const MEDIA_WIDTH_HEADER: &str = "x-fluxer-media-width";
 const MEDIA_HEIGHT_HEADER: &str = "x-fluxer-media-height";
 
@@ -143,6 +144,7 @@ impl MediaSourceRequest {
             key: self.key,
             url: None,
             with_base64: None,
+            max_bytes: None,
         };
         (request, self.content_type)
     }
