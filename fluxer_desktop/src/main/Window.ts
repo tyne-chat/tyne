@@ -1815,6 +1815,7 @@ export function openAppWindow(options: OpenAppWindowOptions = {}): BrowserWindow
 		width: bounds?.width ?? DEFAULT_WINDOW_WIDTH,
 		height: bounds?.height ?? DEFAULT_WINDOW_HEIGHT,
 		show: false,
+		...getLaunchTitleWindowOptions(),
 		backgroundColor: getWindowBackgroundColor(allowTransparency),
 		transparent: allowTransparency,
 		...getWindowShadowOptions(allowTransparency),
@@ -1933,6 +1934,15 @@ export function openAppWindowLike(reference: BrowserWindow | null): BrowserWindo
 	if (!isAliveWindow(source)) return openAppWindow();
 	const route = forkWindowRoutes.get(source) ?? forkAppWindowRouteFromUrl(source.webContents.getURL(), DESKTOP_APP_URL);
 	return openAppWindow({route});
+}
+
+// Upstream's account engine serves one renderer, the main window's (AccountEngineIpc.ts connects only
+// getMainWindow(), which falls back to the front extra window once the main one is closed), so index.ts
+// tells an extra window the engine is not there: it keeps a gateway session of its own, as it did
+// before the engine.
+export function isForkExtraAppWindowContents(contents: Electron.WebContents): boolean {
+	const window = appWindowForContents(contents);
+	return window != null && forkExtraAppWindows.has(window);
 }
 
 // Called for every last-route report. Extra windows keep their own route for the saved layout;
