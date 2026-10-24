@@ -12,7 +12,8 @@ import {afterAll, beforeAll, beforeEach, describe, expect, it} from 'vitest';
 
 const EMOJI = encodeURIComponent('👍');
 
-// What is drawn beside a message, and its visibility. Nothing of the profile behind it.
+// What is drawn beside a message, and its visibility. Nothing of the profile behind it (bio, banner,
+// pronouns).
 const COPY_KEYS = [
 	'avatar',
 	'avatar_color',
@@ -21,7 +22,6 @@ const COPY_KEYS = [
 	'display_tag_text',
 	'id',
 	'name',
-	'pronouns',
 	'visibility',
 ];
 
@@ -60,7 +60,7 @@ describe('The copy of a persona that travels with what it does', () => {
 			.expect(HTTP_STATUS.OK)
 			.execute();
 		expect(Object.keys(sent.subprofile ?? {}).sort()).toEqual(COPY_KEYS);
-		expect(sent.subprofile).toMatchObject({id: personaId, name: 'Fox', pronouns: 'they/them'});
+		expect(sent.subprofile).toMatchObject({id: personaId, name: 'Fox'});
 
 		const read = (await getMessages(harness, reader.token, channelId)).find((m) => m.id === sent.id);
 		expect(Object.keys(read?.subprofile ?? {}).sort()).toEqual(COPY_KEYS);

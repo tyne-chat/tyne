@@ -1081,10 +1081,12 @@ Another account changed its personas or its display tag. A client that caches th
 | --- | --- | --- |
 | guild_id? | snowflake | The guild the Dispatch was sent through, absent when it was sent to a direct message recipient |
 | user_id | snowflake | The account that changed |
-| persona? | [message persona](/http-api/messages/#message-persona-object) object | The persona that changed, absent after a bulk import or a settings change |
+| persona? | [message persona](/http-api/messages/#message-persona-object) object | The persona that changed, when it is `public` or `unlisted` |
 | display_tag_text | ?string | The account's display tag text |
 | display_tag_icon | ?string | The account's display tag icon |
 | action | string | `update`, `delete` or `sync` |
+
+A `private` persona is never named: its Dispatch, like the one after a bulk import or a settings change, carries no `persona`. A client that shows that account's personas then looks them up again with [Look up personas by ID](/http-api/users/personas/#look-up-personas-by-id). A `delete` needs no lookup, as old messages keep showing the persona.
 
 The Dispatch goes to every guild the account is a member of, and directly to each recipient of its direct messages. Creating a `public` or `unlisted` persona sends it with `update`, updating or deleting any persona sends it with `update` or `delete`, and a bulk import that touched a `public` or `unlisted` persona, or a change to the display tag, sends it with `sync`.
 

@@ -92,7 +92,6 @@ describe('PersonaProfileModal', () => {
 		name: 'Caelum',
 		avatar: null,
 		display_tag_text: 'Starlight',
-		pronouns: 'they/them',
 	};
 
 	it('renders with accessible Modal.ScreenReaderLabel and does not throw', async () => {
