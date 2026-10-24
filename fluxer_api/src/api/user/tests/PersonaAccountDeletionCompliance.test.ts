@@ -74,7 +74,6 @@ describe('Persona Account Deletion Compliance', () => {
 				name: 'Deleted Persona',
 				avatar: null,
 				avatar_color: null,
-				pronouns: null,
 				color: null,
 				display_tag_text: null,
 				display_tag_icon: null,

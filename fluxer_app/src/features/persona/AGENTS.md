@@ -79,18 +79,21 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   value: never use the value as an image source, even when it looks like a link. A link would make
   the app fetch a picture from wherever it points and tell that server who is reading. Without the
   owner's id (no root user) the tag shows its text only.
-- **The editor's upload preview** is a separate state: the picked file shows while it uploads, and
-  the form itself only ever holds the hash the upload returns.
+- **Picked images wait for Save**, as in upstream's profile editor: the form keeps them as
+  `pendingAvatar`/`pendingBanner` (previewed from there), Save uploads them
+  (`PersonaCommands.uploadPersonaImage`) before saving the persona, and Reset drops them.
 - **Profiles:** `fetchPersonaProfile` caches for 60 seconds; a 403 `PRIVATE_PERSONA` means the
-  profile is private. Bio and banner never come from a message.
-- **Other people's personas** are cached in `_knownPersonas`, filled from messages'
-  `mention_personas`, reaction events, `GUILD_PERSONAS_DIRTY`, `fetchPersona`, a pick in the mention
-  autocomplete and the composer pill's scan of cached messages. A mention's wire form is
-  `<@userId:personaId>`; `MentionRenderer`, `Plaintext` and `ComposerMentionPill` resolve its name
-  from that cache, then from cached messages. `MentionRenderer` and `ComposerMentionPill` then call
-  `fetchPersona`; `Plaintext` falls back to the user. `fetchPersona` shares no in-flight request and
-  remembers no failure, and is called while rendering (tyne-chat/tyne#121): do not add callers that
-  run on render until that is fixed.
+  profile is private. Bio, banner and pronouns never come from a message.
+- **Other people's personas** are cached in `_knownPersonas`, with their owner where it is known
+  (`_knownPersonaOwners`), filled from messages' `mention_personas` (owners read from the
+  `<@userId:personaId>` text, `utils/MentionedPersonas.ts`), reaction events, signals, lookups, a pick
+  in the mention autocomplete and the composer pill's scan of cached messages. `MentionRenderer`,
+  `Plaintext` and `ComposerMentionPill` resolve a mention's name from that cache, then from cached
+  messages; `MentionRenderer`, `ComposerMentionPill` and thread owners then call `fetchPersona`.
+- **`fetchPersona` looks personas up by ID** (`POST /personas/lookup`, which also names private
+  personas) through `PersonaLookupBatcher`: lookups within 50 ms share one request, a lookup in
+  flight is shared, and a failed or empty answer is not asked again for a while. It may be called
+  while rendering for that reason.
 
 ## Reactions
 
@@ -109,8 +112,14 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 - The store is emptied on the `AccountScopedWork` cancellation, on logout, and on a READY with a new
   session id. A send in the moment before the refetch goes out as the account.
 - `PersonaEvents` patch the store and push updates into cached messages and reactions
-  (`Messages.handlePersonaUpdate`, `MessageReactions.handlePersonaUpdate`). They send no requests.
-  Payloads are accepted wrapped or bare. `GUILD_PERSONAS_DIRTY` for one's own account is skipped.
+  (`Messages.handlePersonaUpdate`, `MessageReactions.handlePersonaUpdate`). Payloads are accepted
+  wrapped or bare. `GUILD_PERSONAS_DIRTY` for one's own account is skipped.
+- `GUILD_PERSONAS_DIRTY` carries the persona only when it is public or unlisted; that one is applied
+  as it comes and remembered only if already known. Otherwise (`update`, `sync`) `PersonaRefresh`
+  waits a second, to collect the copy sent per shared community, then fetches again in one request
+  the personas of that account this client holds (`Messages.getPersonaIdsByAuthor`,
+  `PersonaStore.getKnownPersonaIdsOf`), and nothing if it holds none. A `delete` fetches nothing.
+  Every such event clears that account's cached profile cards.
 
 ## Settings, import and export
 
@@ -152,6 +161,7 @@ The signal bar follows the composer's persona through `SignalBarStore.affirmPers
 - Beside upstream files: the `*Persona*.test.ts(x)` files in `messaging`, `channel`, `lexical` and
   elsewhere.
 - End to end: `e2e/web/*/persona-*.spec.ts` (26 specs).
-- Not covered: `ForkAccountReadyWork`, and request counts for `fetchPersona` and the mention fetch
-  (root `AGENTS.md`, "Network calls").
+- Request counts: `state/PersonaLookupBatcher.test.ts`, `events/PersonaRefresh.test.ts`.
+- Not covered: `ForkAccountReadyWork`, and request counts for the mention fetch (root `AGENTS.md`,
+  "Network calls").
 - Before committing, run the full list in `CHECKS.md`: a persona change needs all of it.
