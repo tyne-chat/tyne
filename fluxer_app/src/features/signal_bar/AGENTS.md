@@ -50,8 +50,9 @@ rules every client follows and where the web and mobile clients differ are in th
 - **Events.** `handleChannelUpdate` applies `added`/`removed` to loaded channels and ignores others.
   `handleEnabledUpdate` sets the flag; off empties the channel. A newer `version` or `bar_version`
   starts `fetchConfig`.
-- **Resets.** `GatewayReady` calls `invalidate()` on every READY, and `ForkAccountReadyWork` again
-  when a sign-in or account switch is released. Nothing else resets the store: it has no
+- **Resets.** `GatewayReady` calls `invalidate()` on every READY, `ForkAccountReadyWork` on a
+  promoted resume (a desktop switch with no READY), and again when a sign-in or account switch is
+  released. Nothing else resets the store: it has no
   `AccountScopedWork` cancellation and no logout hook.
 - **Writes.** `activate` is not optimistic: the signal shows lit when the event arrives.
   `deactivate` and `removeUser` remove the entry first; `reset` and `setDmEnabled` wait for the event.
