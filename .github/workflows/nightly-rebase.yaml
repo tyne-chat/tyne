@@ -45,31 +45,37 @@ on:
         default: false
         type: boolean
 
+# Read-only by default. The rebase job runs code nobody here controls (upstream's new commits,
+# installs and build scripts, the test suites, the agent), so it holds no token that can write:
+# its GITHUB_TOKEN reads, and the private tools come in with a read-only deploy key. The publish
+# job is the only one with WORKFLOW_TOKEN, and it runs nothing but GitHub's own actions and
+# publish_result.py from a fresh checkout of the tools, which checks what the rebase job left
+# before pushing it. Every action is pinned to a commit, with its version in a comment.
 permissions:
-  contents: write
-  issues: write
-  actions: write
+  contents: read
 
 jobs:
   nightly-rebase:
     runs-on: ubuntu-24.04
-    # Chain worst case from the 01:00 Pacific dispatch: monorepo 210 + SDK 30 + Flutter 150 min ends 07:30, before the 07:40 mobile sync.
-    timeout-minutes: 210
+    # Chain worst case from the 01:00 Pacific dispatch: monorepo 195 + SDK 30 + Flutter 135 min, plus 10 for
+    # each publish job, ends 07:30, before the 07:40 mobile sync.
+    timeout-minutes: 195
 
     steps:
       - name: Checkout tyne
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: tyne
           fetch-depth: 0
-          token: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Checkout shared rebase tools
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: tyne-chat/tyne-tools
           ref: main
-          token: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          ssh-key: ${{ secrets.TOOLS_DEPLOY_KEY }}
+          persist-credentials: false
           path: .shared_tools
 
       - name: Stage shared rebase tools to /tmp
@@ -79,7 +85,7 @@ jobs:
           rm -rf .shared_tools
 
       - name: Set up Python for AI Resolver
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.12'
 
@@ -98,14 +104,14 @@ jobs:
       # The toolchain, components and targets of upstream's rust job (tests.yaml): the gate runs
       # its rustfmt and Clippy checks, desktop-native workspaces included, with the same versions.
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master on 2026-09-12, as in upstream's tests.yaml
         with:
           toolchain: "1.98.1"
           components: clippy, rustfmt
           targets: wasm32-unknown-unknown, x86_64-pc-windows-msvc
 
       - name: Cache cargo
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             . -> target
@@ -116,7 +122,7 @@ jobs:
       # The native libraries upstream's rust job installs (media proxy, desktop native), copied
       # from its tests.yaml: Clippy and the Rust tests in the gate build and run against them.
       - name: Cache native media dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /opt/fluxer-native
           key: media-native-${{ runner.os }}-${{ hashFiles('fluxer_media_proxy/tools/install-native-deps.sh') }}
@@ -166,13 +172,13 @@ jobs:
       # Erlang/OTP and rebar3 as upstream's gateway job pins them, for the gateway's erlfmt,
       # compile, Dialyzer and eunit steps in the gate.
       - name: Set up Erlang
-        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28'
           rebar3-version: '3.27.0'
 
       - name: Cache rebar3 dependencies and the Dialyzer PLT
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cache/rebar3
@@ -186,10 +192,10 @@ jobs:
             rebar3-${{ runner.os }}-otp28-rebar3.27.0-
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           # Upstream's CI (tests.yaml) runs on Node 26.
           node-version: 26
@@ -208,10 +214,10 @@ jobs:
           df -h /
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Expose GitHub Runtime Token for Docker BuildKit
-        uses: crazy-max/ghaction-github-runtime@v3
+        uses: crazy-max/ghaction-github-runtime@3cb05d89e1f492524af3d41a1c98c83bc3025124 # v3.1.0
 
       # The pipeline runs as one step per phase, so this page shows which phase is
       # running, how long each took, and whether the repair agent was needed (its
@@ -235,13 +241,13 @@ jobs:
           if [ "${{ inputs.smoke }}" = "true" ]; then
             FLAGS="$FLAGS --skip-baseline --stop-after-codegen"
           fi
-          echo "REBASE_ARGS=--profile subprofiles --time-budget-minutes 200 $FLAGS" >> "$GITHUB_ENV"
+          echo "REBASE_ARGS=--profile subprofiles --time-budget-minutes 185 --result-dir /tmp/rebase_result $FLAGS" >> "$GITHUB_ENV"
 
       - name: "1. Check upstream and tag a backup"
         id: prepare
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase prepare
 
       - name: "2. Baseline tests (before the rebase)"
@@ -249,7 +255,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase baseline
 
       - name: "3. Rebase onto upstream"
@@ -257,7 +263,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase rebase
 
       - name: "3a. Agent: resolve conflicts"
@@ -265,7 +271,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.rebase.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase resolve-conflicts
 
       - name: "4. Dependencies and code generation"
@@ -273,7 +279,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase codegen
 
       - name: "4a. Agent: repair code generation"
@@ -281,7 +287,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.codegen.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase repair-codegen
 
       - name: "5. Tests and analysis"
@@ -289,7 +295,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase unit
 
       - name: "5a. Agent: repair tests"
@@ -297,7 +303,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.unit.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase repair-unit
 
       - name: "6. End-to-end tests"
@@ -305,7 +311,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase e2e
 
       - name: "6a. Agent: repair end-to-end tests"
@@ -313,20 +319,29 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.e2e.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase repair-e2e
 
-      - name: "7. Push and start the next repository"
+      - name: "7. Hand the rebased branch to the publish job"
         id: push
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase push
+
+      - name: Upload the result for the publish job
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rebase-result
+          if-no-files-found: ignore
+          path: /tmp/rebase_result
+          retention-days: 14
 
       - name: Upload E2E Test Report & Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: playwright-e2e-report
           if-no-files-found: ignore
@@ -337,7 +352,7 @@ jobs:
 
       - name: Upload AI Agent Logs & Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: rebase-agent-logs
           if-no-files-found: ignore
@@ -347,3 +362,53 @@ jobs:
             /tmp/test_failures.log
             /tmp/e2e_failures.log
             /tmp/antigravity_data
+
+  # Pushes the rebased branch and the backup tag, opens the escalation and absorbed-commit issues
+  # and starts the next repository's rebase: everything that needs WORKFLOW_TOKEN. It runs no code
+  # from the rebase job or the rebased branch; publish_result.py says what it checks.
+  publish:
+    needs: nightly-rebase
+    # Also after a failed, crashed or timed-out rebase job: the escalation and the next link's
+    # start happen here.
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout shared rebase tools
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: tyne-chat/tyne-tools
+          ref: main
+          ssh-key: ${{ secrets.TOOLS_DEPLOY_KEY }}
+          persist-credentials: false
+          path: tools
+
+      - name: Checkout tyne
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: tyne
+          fetch-depth: 0
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          path: repo
+
+      # Missing when the rebase job stopped before it wrote anything; the next step escalates then.
+      - name: Download the rebase job's result
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: rebase-result
+          path: result
+
+      - name: Check, push, report and start the next repository
+        working-directory: repo
+        env:
+          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          REBASE_JOB: ${{ needs.nightly-rebase.result }}
+          DRY_RUN: ${{ inputs.dry_run || inputs.smoke }}
+        run: |
+          FLAGS=""
+          if [ "$DRY_RUN" = "true" ]; then
+            FLAGS="--dry-run"
+          fi
+          python3 ../tools/rebase/publish_result.py --profile subprofiles --result-dir ../result --rebase-job "$REBASE_JOB" $FLAGS
