@@ -52,10 +52,17 @@ and follow the placement rules in the root `AGENTS.md`.
   the persona. Rows are removed only when the account is deleted.
 - **Private hides the profile, not the identity.** Visibility is `public`, `unlisted` (the default)
   or `private`. A private persona still speaks: its name and avatar appear on its messages,
-  reactions and typing, in `mention_personas`, and in `GUILD_PERSONAS_DIRTY`. Only its profile (bio,
-  banner, profile card) is withheld: `GET /users/:id/personas/:pid` answers 403 `PRIVATE_PERSONA`,
-  not 404, because the asker has already seen the persona on a message. Other people's lookups also
-  pass upstream's `validateProfileAccess` first.
+  reactions, typing and signals, and in `mention_personas`. Only its profile (bio, banner, pronouns,
+  profile card) is withheld: `GET /users/:id/personas/:pid` answers 403 `PRIVATE_PERSONA`, not 404,
+  because the asker has already seen the persona on a message. Other people's lookups also pass
+  upstream's `validateProfileAccess` first.
+- **Knowing a persona's ID entitles anyone signed in to what a message from it shows**, whatever
+  its visibility: `POST /personas/lookup` takes up to 100 `{user_id, persona_id}` pairs and returns
+  `toSubprofileResponse` with the owner (`lookupPersonas`), deleted personas included. That shape
+  carries nothing of the profile, pronouns included. An ID is only learned from something already
+  seen, so no event names a private persona: `GUILD_PERSONAS_DIRTY` carries only the account for it,
+  and clients that show its personas fetch them again by ID (tyne-tools#7). Public and unlisted
+  personas still travel with the event for clients released before the lookup (tyne-chat/tyne#206).
 - **Every image is stored here, never linked.** A persona's avatar and banner and the account's
   display tag icon are hashes of images this instance stores under the account (`avatars/<user
   id>/`, `banners/<user id>/`); clients build the address from the media endpoint, the owner's id
@@ -115,7 +122,7 @@ personas), 10,000 signature emojis per persona (unique across personas).
 | `USER_PERSONAS_UPDATE` | own sessions | after a bulk import (the whole list) |
 | `USER_PERSONA_SETTINGS_UPDATE` | own sessions | a settings save |
 | `USER_PERSONA_CHANNEL_STATE_UPDATE` | own sessions only, on purpose | a per-channel selection |
-| `GUILD_PERSONAS_DIRTY` | every guild the account is in, plus each DM and group-DM recipient | create (public and unlisted only), every update and delete, a bulk import, a display-tag change |
+| `GUILD_PERSONAS_DIRTY` | every guild the account is in, plus each DM and group-DM recipient | create (public and unlisted only), every update and delete, a bulk import, a display-tag change; carries the persona only when it is public or unlisted |
 
 - `GUILD_PERSONAS_DIRTY` costs one gateway RPC per guild and per DM partner for every persona edit.
   Keep it off paths that run often.
