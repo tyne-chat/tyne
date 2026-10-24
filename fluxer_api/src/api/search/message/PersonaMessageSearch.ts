@@ -33,8 +33,8 @@ declare module '@fluxer/schema/src/contracts/search/SearchDocumentTypes' {
 	}
 }
 
-export const PERSONA_ID_FIELD = 'personaId';
-export const MENTIONED_PERSONA_IDS_FIELD = 'mentionedPersonaIds';
+const PERSONA_ID_FIELD = 'personaId';
+const MENTIONED_PERSONA_IDS_FIELD = 'mentionedPersonaIds';
 
 export interface PersonaSearchFields {
 	personaId: string | null;
