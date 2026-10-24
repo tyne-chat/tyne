@@ -252,20 +252,25 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 		? Permission.can(Permissions.MANAGE_GUILD, channel)
 		: !channel.isGroupDM() || channel.ownerId === Authentication.currentUserId;
 	const toggleLabel = i18n._(collapsed ? SHOW_SIGNAL_BAR_DESCRIPTOR : HIDE_SIGNAL_BAR_DESCRIPTOR);
+	// Collapsed, the bar keeps the signals someone has on and drops the rest; with none on, only the
+	// caret is left. Each signal keeps its place in the whole list, which reordering by drag uses.
+	const shown = (draft ?? signals)
+		.map((signal, index) => ({signal, index}))
+		.filter(({signal}) => !collapsed || SignalBarStore.getEntries(channel.id, signal.id).length > 0);
 	return (
 		<div
 			className={clsx(
 				styles.bar,
 				attached ? styles.barAttached : styles.barStandalone,
-				collapsed && styles.barCollapsed,
+				shown.length === 0 && styles.barCollapsed,
 			)}
 			role="toolbar"
 			aria-label={i18n._(SIGNAL_BAR_DESCRIPTOR)}
 			data-flx="signal-bar.signal-bar.bar"
 		>
-			{!collapsed && (
+			{shown.length > 0 && (
 				<div className={styles.signals} data-flx="signal-bar.signal-bar.signals">
-					{(draft ?? signals).map((signal, index) => (
+					{shown.map(({signal, index}) => (
 						<SignalButton
 							key={signal.id}
 							channel={channel}
