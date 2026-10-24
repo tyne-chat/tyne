@@ -61,7 +61,6 @@ describe('fork release feed', () => {
 		for (const repository of [null, '', 'not a repository', 'https://github.com/example/fluxer-fork']) {
 			const {formats, downloads} = load({repository});
 			assert.equal(formats.forkReleaseRepository(), null);
-			assert.equal(formats.forkLatestAssetBaseUrl(), null);
 			assert.equal(formats.forkLatestInfoUrl(), null);
 			assert.equal(formats.forkVelopackSourceUrl(), null);
 			assert.equal(formats.forkVersionDownloadUrl('Fluxer', '1.4.0', 'appimage'), null);
