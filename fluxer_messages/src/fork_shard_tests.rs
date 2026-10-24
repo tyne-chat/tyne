@@ -29,6 +29,7 @@ fn options() -> ResponseBuildOptions {
         threads_mask: false,
         excluded_types: Vec::new(),
         attachment_decay: true,
+        instance_name: "test".to_owned(),
     }
 }
 
