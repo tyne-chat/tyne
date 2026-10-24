@@ -14,6 +14,11 @@ name: Nightly Rebase & AI Conflict Resolver
 on:
   workflow_dispatch:
     inputs:
+      test_issue:
+        description: 'Only test the issue account: skip the rebase, open a test escalation as tyne-rebase[bot] and close it. Starts no other repository.'
+        required: false
+        default: false
+        type: boolean
       dry_run:
         description: 'Dry run (rebase and run tests, but do NOT push to remote)'
         required: true
@@ -56,6 +61,7 @@ permissions:
 
 jobs:
   nightly-rebase:
+    if: ${{ !inputs.test_issue }}
     runs-on: ubuntu-24.04
     # Chain worst case from the 01:00 Pacific dispatch: monorepo 195 + SDK 30 + Flutter 135 min, plus 10 for
     # each publish job, ends 07:30, before the 07:40 mobile sync.
@@ -400,15 +406,35 @@ jobs:
           name: rebase-result
           path: result
 
+      # Escalations and the absorbed-commits issue are opened as tyne-rebase[bot] (the Tyne Rebase
+      # App: Issues only, installed on tyne-chat/tyne), not as WORKFLOW_TOKEN's account. If this
+      # step fails, they fall back to WORKFLOW_TOKEN (tyne-tools rebase/pipeline_issues.py).
+      - name: Token for the pipeline's issues
+        id: issues-token
+        continue-on-error: true
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: Iv23lislBoXAblKx3tR3
+          private-key: ${{ secrets.REBASE_APP_KEY }}
+          owner: tyne-chat
+          repositories: tyne
+          permission-issues: write
+
       - name: Check, push, report and start the next repository
         working-directory: repo
         env:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          ISSUES_GH_TOKEN: ${{ steps.issues-token.outputs.token }}
           REBASE_JOB: ${{ needs.nightly-rebase.result }}
+          TEST_ISSUE: ${{ inputs.test_issue }}
           DRY_RUN: ${{ inputs.dry_run || inputs.smoke }}
         run: |
           FLAGS=""
           if [ "$DRY_RUN" = "true" ]; then
             FLAGS="--dry-run"
+          fi
+          # Last: a test-issue run does nothing else, whatever dry_run says.
+          if [ "$TEST_ISSUE" = "true" ]; then
+            FLAGS="--test-issue"
           fi
           python3 ../tools/rebase/publish_result.py --profile subprofiles --result-dir ../result --rebase-job "$REBASE_JOB" $FLAGS
