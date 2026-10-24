@@ -25,6 +25,10 @@ import {
 import {MissingAccessError} from '@fluxer/errors/src/domains/core/MissingAccessError';
 import type {GuildMemberResponse} from '@fluxer/schema/src/domains/guild/GuildMemberSchemas';
 
+// Fork imports.
+
+import {UnknownUserError} from '@fluxer/errors/src/domains/user/UnknownUserError';
+
 interface ProfileFieldPrivacyContext {
 	isOwner: boolean;
 	isFriend: boolean;
