@@ -610,6 +610,8 @@ export interface UserPrivate extends UserPartial, UserProfile {
 	readonly date_of_birth_required?: boolean;
 	readonly has_age_range?: boolean;
 	readonly profile_restricted?: boolean;
+	// Fork: UserPrivateResponse sends it; the web app reads it to hide community creation from accounts that may not.
+	readonly acls?: ReadonlyArray<string>;
 }
 
 export type User = UserPartial & Partial<UserPrivate>;
