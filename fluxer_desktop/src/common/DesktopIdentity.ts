@@ -58,7 +58,7 @@ const DESKTOP_ARTIFACT_PRODUCT_NAMES: Record<BuildChannel, string> = {
 // together). The IDs are under tyne.chat and must never change once a build has shipped: the
 // system would take the app for a different one. Its link scheme is tyne:// (CHANNEL_APP_PROTOCOLS
 // in Constants.ts); fluxer:// is left to the official app.
-export const IS_FORK_IDENTITY = typeof process.env === 'object' && process.env.FLUXER_FORK_IDENTITY === '1';
+const IS_FORK_IDENTITY = typeof process.env === 'object' && process.env.FLUXER_FORK_IDENTITY === '1';
 if (IS_FORK_IDENTITY) {
 	DESKTOP_APP_NAMES.stable = 'Tyne';
 	DESKTOP_ARTIFACT_PRODUCT_NAMES.stable = 'Tyne';
