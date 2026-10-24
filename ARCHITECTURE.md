@@ -213,6 +213,9 @@ is in the server folder's `AGENTS.md`.
   (`ShellDownloadFormats.ts`, `ForkShellUpdate.ts`), built by `fork-desktop-release.yaml`, and
   installed only if the release's signed checksums list them (`ForkReleaseSignature.ts`). Each
   release carries the web app of its commit.
+- Community creation: the web app hides it from accounts the API would refuse, by evaluating
+  upstream's rule itself (`packages/limits/src/ForkCommunityCreation.ts`); the API test
+  `ForkCommunityCreationClientRule.test.ts` checks that the two agree.
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
