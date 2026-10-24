@@ -70,7 +70,7 @@ describe('Message persona reactions', () => {
 		expect(page.items[0].subprofile).toBeDefined();
 		expect(page.items[0].subprofile?.id).toBe(persona.id);
 		expect(page.items[0].subprofile?.name).toBe('Kitsune');
-		expect(page.items[0].subprofile?.pronouns).toBe('kitsune/they');
+		expect(page.items[0].subprofile).not.toHaveProperty('pronouns');
 
 		// 5. Reactor also reacts as root account with the same emoji
 		await createBuilder(harness, reactor.token)
