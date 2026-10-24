@@ -5,8 +5,10 @@
 // that feature that does not need Electron, so it can be unit tested: which routes may open in a
 // window, how the layout is written to and read from disk, and where a window may be placed.
 
-import {isReservedLocalAppProxyPath} from '@electron/main/LocalAppURL';
+import {DESKTOP_APP_HOST} from '@electron/common/Constants';
+import {isLocalAppRendererDocumentURL} from '@electron/main/LocalAppURL';
 import {isRestorableDesktopRoutePath} from '@fluxer/desktop_ipc/src/LastRouteContract';
+import {DESKTOP_LOCAL_APP_PROTOCOL} from '@fluxer/desktop_ipc/src/LocalAppRouteContract';
 
 export const FORK_WINDOW_SESSION_FILE_NAME = 'window-session.json';
 export const FORK_EXTRA_APP_WINDOWS_MAX = 12;
@@ -44,9 +46,13 @@ export interface ForkWindowRestorePlan {
 }
 
 // A route a window may open on: an in-app path, as upstream accepts for the main window's last
-// route, that is not one of the local app's reserved proxy paths.
+// route, that is not one of the local app's reserved proxy paths. Upstream keeps that path check
+// private; a local app URL outside those paths is what it calls a renderer document URL.
 export function isForkAppWindowRoute(value: unknown): value is string {
-	return isRestorableDesktopRoutePath(value) && !isReservedLocalAppProxyPath(value.split(/[?#]/u)[0]);
+	return (
+		isRestorableDesktopRoutePath(value) &&
+		isLocalAppRendererDocumentURL(`${DESKTOP_LOCAL_APP_PROTOCOL}//${DESKTOP_APP_HOST}${value.split(/[?#]/u)[0]}`)
+	);
 }
 
 export function forkAppWindowUrl(route: string, appUrl: string): string | null {

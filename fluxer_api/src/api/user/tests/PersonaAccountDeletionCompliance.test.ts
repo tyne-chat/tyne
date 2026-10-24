@@ -393,6 +393,7 @@ describe('Persona Account Deletion Compliance', () => {
 					id: userId,
 					avatarHash: 'a_user-avatar-hash',
 					bannerHash: 'a_user-banner-hash',
+					traits: new Set<string>(),
 				}),
 				create: vi.fn().mockResolvedValue(undefined),
 				deleteUserSecondaryIndices: vi.fn().mockResolvedValue(undefined),
@@ -466,6 +467,16 @@ describe('Persona Account Deletion Compliance', () => {
 				workerService: mockWorkerService,
 				connectionRepository: mockConnectionRepo,
 				storeEntitlementService: {stopBillingForDeletedUser: vi.fn()},
+				operatorPassServices: {
+					repository: {
+						listOffersByUser: vi.fn().mockResolvedValue([]),
+						listUnitsByHolder: vi.fn().mockResolvedValue([]),
+						deleteOperatorPass: vi.fn().mockResolvedValue(undefined),
+					},
+					wallService: {forgetForDeletion: vi.fn().mockResolvedValue(undefined)},
+				},
+				adminRepository: {removeDecisionIpBans: vi.fn().mockResolvedValue([])},
+				cacheService: {publish: vi.fn().mockResolvedValue(undefined)},
 			};
 
 			await processUserDeletion(userId, scheduledAt, 1, deps);

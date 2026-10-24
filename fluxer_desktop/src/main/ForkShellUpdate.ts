@@ -15,7 +15,7 @@
 // (SplashBundleOwnership.test.mjs), so the progress here has a small window of its own.
 
 import {createChildLogger} from '@electron/common/Logger';
-import {MODULE_SYSTEM_BUILD_ENABLED} from '@electron/common/ModuleSystem';
+import {ModuleSystemLaunchDecision, resolveModuleSystemLaunch} from '@electron/common/ModuleSystem';
 import {armDesktopUpdate, checkDesktopUpdateNow, type DesktopUpdateCheck} from '@electron/main/DesktopUpdateGate';
 import {t} from '@electron/main/MainI18n';
 import {compareModuleVersions, parseModuleVersion} from '@electron/main/ModuleVersion';
@@ -333,12 +333,19 @@ export async function fetchLatestReleaseVersion(url: string): Promise<string> {
 	return payload.version;
 }
 
+// Whether this build ships upstream's module system, which updates the shell itself. Upstream keeps
+// that switch private; resolveModuleSystemLaunch reports a build without it as DISABLED_BY_BUILD.
+function moduleSystemBuild(): boolean {
+	const launch = resolveModuleSystemLaunch({argv: [], env: {}, hasOfflineRenderer: false});
+	return launch.kind !== ModuleSystemLaunchDecision.DISABLED_BY_BUILD;
+}
+
 // Called once at startup. Does nothing unless this is a packaged fork build that can update itself;
 // builds that cannot (portable, deb, rpm) already go through upstream's manual download check.
 export function armForkShellUpdate(): void {
 	const latestInfoUrl = forkLatestInfoUrl();
 	const releasesPageUrl = forkReleasesPageUrl();
-	if (latestInfoUrl == null || releasesPageUrl == null || MODULE_SYSTEM_BUILD_ENABLED) return;
+	if (latestInfoUrl == null || releasesPageUrl == null || moduleSystemBuild()) return;
 	const plan = resolveShellUpdatePlan();
 	if (plan.capability !== ShellUpdateCapability.SELF_UPDATE) return;
 	let latestVersion: string | null = null;
