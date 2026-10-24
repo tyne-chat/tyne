@@ -128,7 +128,7 @@ personas), 10,000 signature emojis per persona (unique across personas).
   Keep it off paths that run often.
 - **Adding an event:** add the name to `constants/Gateway.ts` and to
   `fluxer_gateway/src/utils/event_atoms.erl`, document it in `fluxer_docs` (`gateway/events.md`;
-  `fluxer_docs verify` checks it), and restart the gateway. Without the atom, a DM dispatch
+  nothing checks that since upstream dropped the docs verifier), and restart the gateway. Without the atom, a DM dispatch
   (`rpc.gateway.presence.dispatch`) fails with `presence_dispatch_error`, and a guild dispatch is
   logged and dropped: nobody receives the event. A community event also needs a decision on channel
   scope and passive sessions: `fluxer_gateway/AGENTS.md`, "Event names".
