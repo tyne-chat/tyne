@@ -74,7 +74,7 @@ function mediaEndpointHostname(): string | null {
 // proxy owns the network policy (public addresses only, per-hop redirect checks, pinned DNS); the
 // one thing it does not refuse is its own public host, which it reads straight from storage
 // without a signature check. It recognises that host by exact name, and so does this.
-export function normalizeAvatarImportUrl(rawUrl: string): string | null {
+function normalizeAvatarImportUrl(rawUrl: string): string | null {
 	let url: URL;
 	try {
 		url = new URL(rawUrl);

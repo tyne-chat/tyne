@@ -71,7 +71,7 @@ function byCreation(a: Persona, b: Persona): number {
 	return left < right ? -1 : 1;
 }
 
-export function personaExportFileName(now: Date): string {
+function personaExportFileName(now: Date): string {
 	return `Tyne personas ${now.toISOString().slice(0, 10)}.zip`;
 }
 
