@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {describe, test} from 'node:test';
-import {installElectronStub} from './LocalAppTestSupport.test.mjs';
+import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
 
 installElectronStub();
 

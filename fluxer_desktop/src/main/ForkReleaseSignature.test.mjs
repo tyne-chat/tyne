@@ -7,7 +7,7 @@ import {createRequire} from 'node:module';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {beforeEach, describe, test} from 'node:test';
-import {installElectronStub} from './LocalAppTestSupport.test.mjs';
+import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
 
 process.env.FLUXER_FORK_RELEASES = 'tyne-chat/tyne';
 
