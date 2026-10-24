@@ -158,7 +158,7 @@ export const MentionRenderer = observer(function MentionRenderer({
 								const sub = msg.subprofile;
 								if (sub != null && sub.id === kind.personaId) {
 									persona = sub;
-									PersonaStore.recordKnownPersona(sub);
+									PersonaStore.recordKnownPersona(sub, kind.id);
 									return false;
 								}
 								return true;

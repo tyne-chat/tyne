@@ -120,7 +120,6 @@ describe('PersonaProfileMobileSheet', () => {
 		name: 'Caelum',
 		avatar: null,
 		display_tag_text: 'Starlight',
-		pronouns: 'they/them',
 	};
 
 	it('renders nothing when closed', () => {
@@ -134,6 +133,21 @@ describe('PersonaProfileMobileSheet', () => {
 	});
 
 	it('renders bottom sheet when opened with persona info', async () => {
+		// Pronouns come from the profile, not from the persona beside a message.
+		vi.mocked(PersonaCommands.fetchPersonaProfile).mockResolvedValueOnce({
+			status: 'ready',
+			profile: {
+				id: mockSubprofile.id,
+				name: mockSubprofile.name,
+				avatar_hash: null,
+				banner_hash: null,
+				pronouns: 'they/them',
+				color: null,
+				avatar_color: null,
+				bio: null,
+				visibility: 'public',
+			},
+		});
 		act(() => {
 			root.render(
 				<PersonaProfileMobileSheet data-flx="persona.persona-profile-mobile-sheet-test.persona-profile-mobile-sheet--2" />,
