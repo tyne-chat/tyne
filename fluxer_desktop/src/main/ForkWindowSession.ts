@@ -7,6 +7,7 @@
 
 import {DESKTOP_APP_HOST} from '@electron/common/Constants';
 import {isLocalAppRendererDocumentURL} from '@electron/main/LocalAppURL';
+import {ACCOUNT_ENGINE_AVAILABLE_RENDERER_ARG} from '@fluxer/desktop_ipc/src/AccountEngineContract';
 import {isRestorableDesktopRoutePath} from '@fluxer/desktop_ipc/src/LastRouteContract';
 import {DESKTOP_LOCAL_APP_PROTOCOL} from '@fluxer/desktop_ipc/src/LocalAppRouteContract';
 
@@ -229,4 +230,12 @@ export function cascadeForkWindowBounds(reference: ForkWindowBounds, workArea: F
 		y = workArea.y;
 	}
 	return {x: Math.max(workArea.x, x), y: Math.max(workArea.y, y), width, height};
+}
+
+// The renderer arguments of an extra window. Upstream's account engine serves one renderer, the main
+// window's (AccountEngineIpc.ts connects only getMainWindow(), which falls back to the front extra
+// window once the main one is closed), so an extra window is not told the engine is there: it keeps a
+// gateway session of its own, as it did before the engine.
+export function forkExtraAppWindowRendererArguments(args: ReadonlyArray<string> | undefined): Array<string> {
+	return (args ?? []).filter((arg) => arg !== ACCOUNT_ENGINE_AVAILABLE_RENDERER_ARG);
 }
