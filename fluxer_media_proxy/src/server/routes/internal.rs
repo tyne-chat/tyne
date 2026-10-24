@@ -693,3 +693,8 @@ mod tests {
         assert_eq!(StatusCode::UNAUTHORIZED, response.status());
     }
 }
+
+// Fork: tests of the fork's additions, in a file of their own.
+#[cfg(test)]
+#[path = "fork_internal_tests.rs"]
+mod fork_tests;
