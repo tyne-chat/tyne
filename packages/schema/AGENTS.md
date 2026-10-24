@@ -36,8 +36,8 @@ settings, and a block of accessibility protobuf fields.
    `/admin` routes go to `openapi-admin.json` (OpenAPI 3.0.3, read by `fluxer_admin`'s `build.rs`),
    the rest to `openapi.json` (3.1, the SDK's source). Neither is written unless both validate.
 4. **Regenerate the SDK and adapt the app** in the root `AGENTS.md`'s order ("Generated code").
-   Document the field on the route's page under `fluxer_docs/src/content/docs/http-api/`:
-   `pnpm --filter fluxer_docs verify` reports a spec field missing from a page's field table.
+   Document the field on the route's page under `fluxer_docs/src/content/docs/http-api/`. Nothing
+   reports a missing one since upstream dropped the docs verifier.
 
 How names come out:
 
