@@ -96,6 +96,11 @@ A handler that touches accounts, storage or windows checks its sender with
   Windows badge overlay, and the screen-share clean-up on navigation or crash
   (`drainPendingDisplayMediaRequests`; tyne-chat/tyne#153). After a rebase that changes `createWindow`, compare the
   two, and keep its window-open handlers as the named functions both share.
+- **Extra windows do not use upstream's account engine.** It serves one renderer, the one
+  `getMainWindow()` returns, so `openAppWindow` drops the flag that announces it
+  (`forkExtraAppWindowRendererArguments`) and each extra window keeps its own gateway session.
+  Otherwise extra windows are refused, or take the engine's one connection from each other once the
+  main window is closed.
 - **`tyne://`**: `DeepLinks.ts` registers it at run time in packaged Windows and macOS builds,
   turns `tyne://<path>` into an in-app route, and refuses a link that names an instance. Links
   inside messages keep the `fluxer:` form. `tyne://handoff` ends a browser sign-in; an instance
