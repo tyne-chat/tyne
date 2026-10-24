@@ -42,7 +42,7 @@ rules every client follows and where the web and mobile clients differ are in th
 | `enabledByChannel` | whether the bar is on; an unknown channel counts as off |
 | `composerPersonas` | per channel, whom the mounted composer writes as (`null`: the account) |
 | `epoch` | bumped by `invalidate()`, so mounted bars refetch |
-| `collapsed` | the caret: one value for every account and channel |
+| `collapsed` | the caret: one value for every account and channel. Collapsed, the bar keeps the lit signals and drops the rest; with none lit only the caret is left (as on mobile) |
 
 - **Loading.** `fetchConfig` shares the request in flight. `fetchChannel` is neither shared nor
   cached: it replaces the channel's entries and flag, and `rememberEntries` writes each entry's `user`
@@ -80,6 +80,8 @@ barrier), the persona resolved from the draft. Badges draw `entry.subprofile` wi
 - `canToggle`: always in a DM; Send Messages in a community. `canReset`: Manage Community; anyone in a
   one-to-one DM; a group DM's owner. A right-click opens `SignalContextMenu` only with `canReset`.
 - At most three badges, then `+N`; the tooltip lists the names one per line.
+- Collapsed, each lit signal keeps its index in the whole list, so dragging still reorders the bar
+  correctly.
 - `canManage` (the home community's managers) lets a manager drag the instance-wide bar inside any
   channel's bar; the drop is one `PUT /instance/signal-bar`.
 - The settings tab (`signal_bar`, in the `message_tools` category) needs Manage Community and is
