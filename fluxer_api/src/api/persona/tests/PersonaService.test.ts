@@ -128,6 +128,20 @@ describe('PersonaService', () => {
 			);
 		});
 
+		// Prefix 'a:::' with suffix 'b' and prefix 'a' with suffix ':::b' are different tags; the check once
+		// joined them with ':::' and saw the same key.
+		it('does not take tags containing the old separator for duplicates', async () => {
+			vi.mocked(mockRepo.count).mockResolvedValueOnce(0);
+			vi.mocked(mockRepo.create).mockResolvedValueOnce(makeMockPersona(userId, defaultPersonaId, 'Colons'));
+
+			const tags = [
+				{prefix: 'a:::', suffix: 'b'},
+				{prefix: 'a', suffix: ':::b'},
+			];
+
+			await expect(service.createPersona(userId, {name: 'Colons', persona_tags: tags})).resolves.toBeDefined();
+		});
+
 		// Inter-persona collision check: prevents two different personas of the same user from sharing
 		// identical prefix/suffix tags, ensuring unambiguous in-chat persona matching.
 		it('throws DuplicatePersonaTagError when tag is already in use by another persona of the user', async () => {
