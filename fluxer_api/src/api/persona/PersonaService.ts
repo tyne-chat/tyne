@@ -15,6 +15,7 @@ import type {
 	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {MAX_SIGNATURE_EMOJIS_PER_PERSONA} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {PersonaLookupItem} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {type ChannelID, createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
 import {SYSTEM_USER_ID} from '../constants/Core';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
@@ -602,6 +603,23 @@ export class PersonaService {
 		return persona.toPublicResponse();
 	}
 
+	/**
+	 * What messages from the given personas show, each named by owner and ID, whatever their visibility.
+	 * Knowing the ID entitles the caller to this and to nothing of the profile. Deleted personas are
+	 * included, as their old messages still show them.
+	 */
+	async lookupPersonas(pairs: Array<{userId: UserID; personaId: PersonaID}>): Promise<Array<PersonaLookupItem>> {
+		if (pairs.length === 0) return [];
+		const found = await this.deps.personaRepository.findByUserAndPersonaIds(pairs);
+		if (found.size === 0) return [];
+		const owners = Array.from(new Set(Array.from(found.values(), (persona) => persona.userId)));
+		const settings = await this.deps.personaRepository.findSettingsByUserIds(owners);
+		return Array.from(found.values(), (persona) => ({
+			...persona.toSubprofileResponse(settings.get(persona.userId.toString())),
+			user_id: persona.userId.toString(),
+		}));
+	}
+
 	async getSettings(userId: UserID): Promise<PersonaSettingsResponse> {
 		const row = await this.deps.personaRepository.findSettings(userId);
 		if (!row) {
@@ -882,7 +900,11 @@ export class PersonaService {
 		if (!this.deps.gatewayService) return;
 		try {
 			const effectiveSettings = settings ?? (await this.deps.personaRepository.findSettings(userId));
-			const personaData = persona ? persona.toSubprofileResponse(effectiveSettings) : undefined;
+			// A private persona is never named in an event: its ID is only for those who have seen it, and
+			// clients that show it fetch it again by ID. Public and unlisted personas still travel with the
+			// event, for clients released before the lookup (tyne#206 drops them too).
+			const personaData =
+				persona && persona.visibility !== 'private' ? persona.toSubprofileResponse(effectiveSettings) : undefined;
 			const dispatches: Array<Promise<void>> = [];
 
 			if (this.deps.userGuildRepository) {

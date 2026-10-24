@@ -15936,7 +15936,6 @@
 						"nullable": true,
 						"allOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}]
 					},
-					"pronouns": {"description": "Pronouns", "nullable": true, "type": "string"},
 					"color": {
 						"description": "Custom color integer",
 						"nullable": true,

@@ -13710,6 +13710,63 @@
 				"security": [{"oauth2Token": ["identify"]}]
 			}
 		},
+		"/personas/lookup": {
+			"post": {
+				"operationId": "lookup_personas",
+				"summary": "Look up personas by ID",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaLookupResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Returns what messages from the given personas show (name, avatar, colours, display tag), whatever their visibility, including deleted ones, each with its owner. Nothing of their profiles. Pairs that name no persona of that user are left out.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaLookupRequestSchema"}}}
+				}
+			}
+		},
 		"/premium/cancel-pending-subscription-change": {
 			"post": {
 				"operationId": "cancel_pending_subscription_change",
@@ -31705,6 +31762,33 @@
 				},
 				"required": ["billing_cycle"]
 			},
+			"PersonaLookupRequestSchema": {
+				"type": "object",
+				"properties": {
+					"personas": {
+						"minItems": 1,
+						"maxItems": 100,
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"user_id": {
+									"description": "The persona owner’s user ID",
+									"$ref": "#/components/schemas/SnowflakeStringType"
+								},
+								"persona_id": {"description": "The persona’s ID", "$ref": "#/components/schemas/SnowflakeStringType"}
+							},
+							"required": ["user_id", "persona_id"]
+						},
+						"description": "Personas to look up"
+					}
+				},
+				"required": ["personas"]
+			},
+			"PersonaLookupResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/PersonaLookupItemSchema"}
+			},
 			"OAuth2UserInfoResponse": {
 				"type": "object",
 				"properties": {
@@ -38436,7 +38520,6 @@
 						"description": "Hash of the display tag icon, an image stored under the account",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
-					"pronouns": {"description": "Pronouns", "type": ["string", "null"]},
 					"color": {
 						"description": "Custom color integer",
 						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
@@ -41019,6 +41102,37 @@
 				"x-enumDescriptions": ["An OAuth2 access token", "An OAuth2 refresh token"],
 				"enum": ["access_token", "refresh_token"],
 				"type": "string"
+			},
+			"PersonaLookupItemSchema": {
+				"type": "object",
+				"properties": {
+					"id": {"type": "string", "description": "Persona ID"},
+					"name": {"type": "string", "description": "Persona display name"},
+					"avatar": {
+						"description": "Avatar asset hash",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"avatar_color": {
+						"description": "Avatar accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"display_tag_text": {"description": "Display tag text", "type": ["string", "null"]},
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, an image stored under the account",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"color": {
+						"description": "Custom color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"visibility": {
+						"description": "Persona visibility setting",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaVisibilitySchema"}, {"type": "null"}]
+					},
+					"user_id": {"type": "string", "description": "The persona owner’s user ID"}
+				},
+				"required": ["id", "name", "user_id"],
+				"additionalProperties": false
 			},
 			"PremiumCurrency": {"type": "string", "pattern": "^[A-Z]{3}$"},
 			"SelfServeRefundIneligibilityReason": {
