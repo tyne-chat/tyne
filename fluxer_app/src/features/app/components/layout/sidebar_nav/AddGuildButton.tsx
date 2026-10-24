@@ -20,13 +20,20 @@ import {HouseIcon, LinkIcon, PlusIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 
+// Fork imports.
+
+import {JOIN_A_COMMUNITY_DESCRIPTOR} from '@app/features/guild/components/modals/add_guild_modal/shared';
+import {canCreateCommunities} from '@app/features/guild/utils/ForkCommunityCreation';
+
 const CREATE_OR_JOIN_A_COMMUNITY_DESCRIPTOR = msg({
 	message: 'Create or join a community',
 	comment: 'Short label in the sidebar navigation add guild button.',
 });
 export const AddGuildButton = observer(() => {
 	const {i18n} = useLingui();
-	const buttonLabel = i18n._(CREATE_OR_JOIN_A_COMMUNITY_DESCRIPTOR);
+	const buttonLabel = canCreateCommunities()
+		? i18n._(CREATE_OR_JOIN_A_COMMUNITY_DESCRIPTOR)
+		: i18n._(JOIN_A_COMMUNITY_DESCRIPTOR);
 	const handleAddGuild = (view?: AddGuildModalView) => {
 		ModalCommands.push(
 			modal(() => (
@@ -42,21 +49,23 @@ export const AddGuildButton = observer(() => {
 		e.stopPropagation();
 		ContextMenuCommands.openFromEvent(e, ({onClose}) => (
 			<MenuGroup data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-group">
-				<MenuItem
-					icon={
-						<HouseIcon
-							className={styles.menuIcon}
-							data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-icon"
-						/>
-					}
-					onClick={() => {
-						handleAddGuild('create_guild');
-						onClose();
-					}}
-					data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-item.add-guild"
-				>
-					{i18n._(CREATE_COMMUNITY_DESCRIPTOR)}
-				</MenuItem>
+				{canCreateCommunities() && (
+					<MenuItem
+						icon={
+							<HouseIcon
+								className={styles.menuIcon}
+								data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-icon"
+							/>
+						}
+						onClick={() => {
+							handleAddGuild('create_guild');
+							onClose();
+						}}
+						data-flx="app.sidebar-nav.add-guild-button.handle-context-menu.menu-item.add-guild"
+					>
+						{i18n._(CREATE_COMMUNITY_DESCRIPTOR)}
+					</MenuItem>
+				)}
 				<MenuItem
 					icon={
 						<LinkIcon

@@ -20,7 +20,8 @@ export const ADD_GUILD_VIEW_ORDER: ReadonlyArray<AddGuildModalView> = [
 
 export interface ModalFooterContextValue {
 	setFooterContent: (content: React.ReactNode) => void;
-	onBack: () => void;
+	// Fork: optional; AddGuildModal leaves it out for an account that may not create a community.
+	onBack?: () => void;
 }
 
 export const ModalFooterContext = React.createContext<ModalFooterContextValue | null>(null);
