@@ -379,6 +379,73 @@ describe('PersonaEditModal Component', () => {
 		expect(remainingRemoveBtns.length).toBe(1);
 	});
 
+	// Prefix 'a:::' with suffix 'b' and prefix 'a' with suffix ':::b' are different tags; the check once
+	// joined them with ':::' and saw the same key.
+	it('does not take tags containing the old separator for duplicates', async () => {
+		await act(async () => {
+			root.render(
+				<PersonaEditModal onClose={vi.fn()} data-flx="persona.persona-edit-modal-test.persona-edit-modal--colons" />,
+			);
+		});
+		const type = async (input: HTMLInputElement, value: string) => {
+			await act(async () => {
+				Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(input, value);
+				input.dispatchEvent(new Event('input', {bubbles: true}));
+			});
+		};
+		const click = async (flx: string) => {
+			await act(async () => {
+				(document.body.querySelector(`[data-flx="${flx}"]`) as HTMLButtonElement).click();
+			});
+		};
+		const prefixes = () =>
+			document.body.querySelectorAll<HTMLInputElement>(
+				'[data-flx="persona.persona-edit-modal.tag-input.tag-change.text"]',
+			);
+		const suffixes = () =>
+			document.body.querySelectorAll<HTMLInputElement>(
+				'[data-flx="persona.persona-edit-modal.tag-input.tag-change.text--2"]',
+			);
+
+		await type(document.body.querySelector('[data-flx="persona.persona-edit-modal.input.name"]')!, 'Colons');
+		await type(prefixes()[0], 'a:::');
+		await type(suffixes()[0], 'b');
+		await click('persona.persona-edit-modal.button.add-tag-row');
+		await type(prefixes()[1], 'a');
+		await type(suffixes()[1], ':::b');
+		await click('persona.persona-edit-modal.button.save');
+
+		expect(PersonaCommands.createPersona).toHaveBeenCalledWith(
+			expect.objectContaining({
+				persona_tags: [
+					{prefix: 'a:::', suffix: 'b'},
+					{prefix: 'a', suffix: ':::b'},
+				],
+			}),
+		);
+	});
+
+	// Like upstream's profile fields, each input stops at the server's limit (tyne#160, M4-12).
+	it('limits proxy tag prefixes and suffixes to 32 characters', async () => {
+		await act(async () => {
+			root.render(
+				<PersonaEditModal
+					onClose={vi.fn()}
+					data-flx="persona.persona-edit-modal-test.persona-edit-modal--tag-limits"
+				/>,
+			);
+		});
+
+		for (const flx of [
+			'persona.persona-edit-modal.tag-input.tag-change.text',
+			'persona.persona-edit-modal.tag-input.tag-change.text--2',
+		]) {
+			const input = document.body.querySelector(`[data-flx="${flx}"]`) as HTMLInputElement | null;
+			expect(input).not.toBeNull();
+			expect(input?.maxLength).toBe(32);
+		}
+	});
+
 	// Like upstream's profile editor, a picked image is only uploaded on Save (tyne#160, M4-6).
 	describe('picked images', () => {
 		const existingPersona = {id: '100000000000000088', name: 'Existing Persona', pronouns: 'they/them'} as any;
