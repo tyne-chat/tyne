@@ -337,7 +337,6 @@ describe('MessagePersona Backend Pipeline', () => {
 			avatar_color: null,
 			display_tag_text: null,
 			display_tag_icon: null,
-			pronouns: null,
 			color: null,
 		});
 
@@ -611,7 +610,6 @@ describe('Personal Notes Persona Integration', () => {
 			expect.objectContaining({
 				id: '999',
 				name: 'Sneaks',
-				pronouns: 'they/them',
 				color: 0x123456,
 			}),
 		);
