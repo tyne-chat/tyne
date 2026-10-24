@@ -138,3 +138,49 @@ fn a_reply_names_the_personas_of_the_message_it_answers_on_that_message() {
         json!([pair("40", "41")])
     );
 }
+
+fn reaction(
+    user_id: i64,
+    emoji_id: i64,
+    emoji_name: &str,
+    created_at_ms: i64,
+    persona_id: Option<i64>,
+) -> MessageReactionDbRow {
+    MessageReactionDbRow {
+        user_id,
+        emoji_id,
+        emoji_name: emoji_name.to_owned(),
+        emoji_animated: Some(false),
+        created_at: DateTime::<Utc>::from_timestamp_millis(created_at_ms),
+        persona_id,
+    }
+}
+
+#[test]
+fn reactions_include_persona_breakdowns() {
+    let r1 = reaction(10, 0, "heart", 100, Some(101));
+    let r2 = reaction(11, 0, "heart", 200, Some(102));
+    let r3 = reaction(10, 0, "heart", 300, Some(103));
+    let r4 = reaction(12, 0, "heart", 400, None);
+
+    let mapped = map_reactions(vec![r1.clone(), r2.clone(), r3.clone(), r4.clone()], 10);
+    assert_eq!(mapped.len(), 1);
+    assert_eq!(mapped[0].count, 4);
+    assert_eq!(mapped[0].me, Some(true));
+    assert_eq!(mapped[0].me_root, None);
+    let personas = mapped[0].persona_reactions.as_ref().unwrap();
+    assert_eq!(personas.len(), 3);
+    let p101 = personas.iter().find(|p| p.persona_id == "101").unwrap();
+    assert_eq!(p101.count, 1);
+    assert_eq!(p101.me, Some(true));
+    let p102 = personas.iter().find(|p| p.persona_id == "102").unwrap();
+    assert_eq!(p102.count, 1);
+    assert_eq!(p102.me, None);
+    let p103 = personas.iter().find(|p| p.persona_id == "103").unwrap();
+    assert_eq!(p103.count, 1);
+    assert_eq!(p103.me, Some(true));
+
+    let r5 = reaction(10, 0, "heart", 500, None);
+    let mapped = map_reactions(vec![r1, r2, r3, r4, r5], 10);
+    assert_eq!(mapped[0].me_root, Some(true));
+}
