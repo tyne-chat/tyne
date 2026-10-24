@@ -44,7 +44,7 @@ export function useThreadOwnerPersona(thread: Channel | null | undefined): Messa
 	useEffect(() => {
 		if (!unresolved) return;
 		if (onMessages) {
-			PersonaStore.recordKnownPersona(onMessages);
+			PersonaStore.recordKnownPersona(onMessages, ownerId);
 			return;
 		}
 		void PersonaStore.fetchPersona(ownerId, personaId);

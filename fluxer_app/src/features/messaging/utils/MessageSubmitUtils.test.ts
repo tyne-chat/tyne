@@ -66,7 +66,6 @@ describe('MessageSubmitUtils', () => {
 						avatar_color: 0xff0000,
 						display_tag_text: 'VIXEN',
 						display_tag_icon: '1a2b3c4d',
-						pronouns: 'she/they',
 						color: 0xffa500,
 						visibility: 'public',
 					},
@@ -80,7 +79,6 @@ describe('MessageSubmitUtils', () => {
 			expect(msg.subprofile?.avatar).toBe('d4d4d4d4');
 			expect(msg.subprofile?.display_tag_text).toBe('VIXEN');
 			expect(msg.subprofile?.display_tag_icon).toBe('1a2b3c4d');
-			expect(msg.subprofile?.pronouns).toBe('she/they');
 			expect(msg.subprofile?.color).toBe(0xffa500);
 			expect(msg.subprofile?.visibility).toBe('public');
 		});
