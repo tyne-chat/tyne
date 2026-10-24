@@ -133,6 +133,7 @@ import {useDrop} from 'react-dnd';
 
 // Fork imports.
 
+import {hasCommunityCreationGrant} from '@app/features/guild/utils/ForkCommunityCreation';
 import {EdgeProximitySensor} from '@app/features/ui/components/EdgeProximitySensor';
 import LayoutState from '@app/features/ui/state/LayoutState';
 
@@ -245,7 +246,7 @@ function useGuildNavigationVisibility(): GuildNavigationVisibility {
 	const communityActionsVisible = !RuntimeConfig.singleCommunityEnabled;
 	const discoveryVisible = RuntimeConfig.discoveryAvailable && buttons.explore;
 	const favoritesVisible = Accessibility.showFavorites && buttons.favorites;
-	const addGuildVisible = communityActionsVisible && (buttons.create_join || (Users.currentUser?.isStaff() ?? false));
+	const addGuildVisible = communityActionsVisible && (buttons.create_join || hasCommunityCreationGrant());
 	const downloadVisible =
 		!Platform.isElectron && !Platform.isPWA && !HiddenGuildListButtons.downloadButtonHidden && buttons.download;
 	const helpVisible = !HiddenGuildListButtons.helpButtonHidden && Routes.help() != null && buttons.help;
