@@ -212,7 +212,6 @@ function buildRecentPersonaOptions(
 				name: sub.name,
 				avatar_hash: sub.avatar ?? null,
 				color: sub.color ?? sub.avatar_color ?? null,
-				pronouns: sub.pronouns ?? null,
 				display_tag_text: sub.display_tag_text ?? null,
 				display_tag_icon: sub.display_tag_icon ?? null,
 				visibility: sub.visibility ?? 'public',
@@ -1085,16 +1084,18 @@ function optionToPayload(option: AutocompleteOption, channel: Channel | null): C
 	}
 	if (isMentionPersona(option)) {
 		MentionFrecency.recordMention(channelGuildId, option.persona.owner_user_id);
-		PersonaStore.recordKnownPersona({
-			id: option.persona.id,
-			name: option.persona.name,
-			avatar: option.persona.avatar_hash,
-			avatar_color: option.persona.color,
-			display_tag_text: option.persona.display_tag_text ?? null,
-			display_tag_icon: option.persona.display_tag_icon ?? null,
-			pronouns: option.persona.pronouns,
-			color: option.persona.color,
-		});
+		PersonaStore.recordKnownPersona(
+			{
+				id: option.persona.id,
+				name: option.persona.name,
+				avatar: option.persona.avatar_hash,
+				avatar_color: option.persona.color,
+				display_tag_text: option.persona.display_tag_text ?? null,
+				display_tag_icon: option.persona.display_tag_icon ?? null,
+				color: option.persona.color,
+			},
+			option.persona.owner_user_id,
+		);
 		return {
 			kind: 'mention',
 			mentionType: 'user',
