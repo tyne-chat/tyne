@@ -2,7 +2,7 @@
 
 import assert from 'node:assert/strict';
 import {describe, test} from 'node:test';
-import {installElectronStub} from './LocalAppTestSupport.test.mjs';
+import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
 
 installElectronStub();
 const {desktopRuntimeInitialInput} = await import('@electron/main/DesktopRuntimeDiscovery');
