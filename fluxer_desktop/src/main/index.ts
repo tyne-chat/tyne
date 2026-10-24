@@ -136,7 +136,7 @@ import log from 'electron-log';
 // Fork imports.
 
 import {armForkShellUpdate} from '@electron/main/ForkShellUpdate';
-import {recordAppWindowRoute} from '@electron/main/Window';
+import {isForkExtraAppWindowContents, recordAppWindowRoute} from '@electron/main/Window';
 
 log.transports.file.level = 'info';
 
@@ -451,6 +451,11 @@ export function initializeMainWindowStartup(): void {
 			});
 	});
 	ipcMain.on(ACCOUNT_ENGINE_CHANNELS.isAvailable, (event) => {
+		// Fork: an extra app window keeps its own gateway session (Window.ts).
+		if (isForkExtraAppWindowContents(event.sender)) {
+			event.returnValue = false;
+			return;
+		}
 		void syncAnswersReady.then(() => {
 			if (event.sender.isDestroyed()) return;
 			event.returnValue = !hasQuitStarted() && isAccountEngineAvailable();
