@@ -302,8 +302,9 @@ function normalizeTag(tag: {prefix?: string | null; suffix?: string | null}) {
 	};
 }
 
+// A JSON pair, so no prefix or suffix can be read as part of the other.
 function getTagKey(tag: {prefix: string; suffix: string}) {
-	return `${tag.prefix}:::${tag.suffix}`;
+	return JSON.stringify([tag.prefix, tag.suffix]);
 }
 
 function formatTagDisplay(tag: {prefix: string; suffix: string}, text: string): string {
@@ -986,6 +987,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 													type="text"
 													className={`${styles.tagInput} ${tagError ? styles.tagInputError : ''}`}
 													placeholder={i18n._(PREFIX_PLACEHOLDER_DESCRIPTOR)}
+													maxLength={32}
 													value={tag.prefix}
 													onChange={(e) => handleTagChange(idx, 'prefix', e.target.value)}
 													data-flx="persona.persona-edit-modal.tag-input.tag-change.text"
@@ -997,6 +999,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 													type="text"
 													className={`${styles.tagInput} ${tagError ? styles.tagInputError : ''}`}
 													placeholder={i18n._(SUFFIX_PLACEHOLDER_DESCRIPTOR)}
+													maxLength={32}
 													value={tag.suffix}
 													onChange={(e) => handleTagChange(idx, 'suffix', e.target.value)}
 													data-flx="persona.persona-edit-modal.tag-input.tag-change.text--2"
