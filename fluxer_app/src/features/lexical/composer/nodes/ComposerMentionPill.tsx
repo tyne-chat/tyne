@@ -21,6 +21,7 @@ import {useContext} from 'react';
 
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {personaMentionStyle} from '@app/features/persona/utils/PersonaMentionStyle';
 
 const PERSONA_WIRE_RE = /^<@!?(\d+):([a-zA-Z0-9_-]+)>$/;
 
@@ -126,6 +127,7 @@ export const ComposerMentionPill = observer(({mentionType, mentionId, display, .
 			const pill = (
 				<span
 					className={markupStyles.mention}
+					style={personaMentionStyle(persona?.color)}
 					contentEditable={false}
 					data-lexical-mention-type="user"
 					data-lexical-persona-id={resolvedPersonaId}
