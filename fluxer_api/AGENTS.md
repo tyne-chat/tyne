@@ -133,8 +133,6 @@ spies returned by MSW handler factories (outbound HTTP).
 ### Running
 
 - One file, in the dev container: `pnpm --filter fluxer_api test src/api/<path>.test.ts`.
-- Tests that start their own Postgres (`test/DockerTestContainer.ts`) need the host's network, and a
-  few files are known to fail; `CHECKS.md` has the host command, and the maintainers keep both lists
-  outside the repository.
+- A few files are known to fail on the fork; the maintainers keep that list outside the repository.
 - A fork test goes in a fork-owned file (`<Upstream>Persona.test.ts`, `tests/Fork*.test.ts`), never in
   upstream's (root `AGENTS.md`). Before committing: `CHECKS.md`.
