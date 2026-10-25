@@ -48,6 +48,8 @@ Routes that need `MANAGE_MESSAGES` also follow the guild's [MFA level](/http-api
 | call? | [message call](#message-call-object) object | The call a `CALL` message records |
 | referenced_message?<sup>4</sup> | ?[message](#message-object) object | The message a reply points to |
 | thread? | [thread](/http-api/threads/#thread-object) object | The thread started from this message |
+| subprofile? | ?[message persona](#message-persona-object) object | The [persona](/http-api/users/personas/) the message was sent as, or null when it was sent as the account |
+| mention_personas? | array[[message persona](#message-persona-object) object] | Personas mentioned as `<@user_id:persona_id>`, also in embeds and forwards, shown as their own messages show them |
 
 <sup>1</sup> For a webhook message, Fluxer builds the author from the webhook, with `bot` set to true
 
@@ -199,6 +201,23 @@ A [data harvest](/http-api/users/data-harvest/) archive links each attachment wi
 | name | string | The custom emoji name, or the Unicode emoji itself |
 | animated? | boolean | Whether the custom emoji is animated |
 
+## Message persona object
+
+A snapshot of the [persona](/http-api/users/personas/) a message, reaction, typing indicator or signal is from, holding what a client draws beside it. The full profile is fetched with [Get persona profile card by ID](/http-api/users/personas/#get-persona-profile-card-by-id).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | string | The ID of the persona |
+| name | string | The persona's display name |
+| avatar? | ?string | The persona's avatar hash |
+| avatar_color? | ?integer | The avatar's dominant colour |
+| display_tag_text? | ?string | The owner's display tag text |
+| display_tag_icon? | ?string | The owner's display tag icon |
+| color? | ?integer | The persona's accent colour |
+| visibility? | ?string | The persona's [visibility](/http-api/users/personas/#visibility) |
+
 ## Reaction object
 
 ### Structure
@@ -208,8 +227,22 @@ A [data harvest](/http-api/users/data-harvest/) archive links each attachment wi
 | emoji | [emoji](#emoji-object) object | The emoji |
 | count | integer | How many users reacted with it |
 | me? | boolean | Present and true when you reacted with it |
+| me_root? | ?boolean | Whether you reacted with it as the account itself, rather than as a persona |
+| persona_reactions?<sup>1</sup> | ?array[[reaction persona entry](#reaction-persona-entry-object) object] | The reactions in this group made as [personas](/http-api/users/personas/) |
+
+<sup>1</sup> Present only when someone reacted as a persona. An account can react with one emoji once as itself and once as each of its personas, and `count` counts every one of those reactions
 
 A message can have up to `max_reactions_per_message` different emoji (default 30), and each up to `max_users_per_message_reaction` users (default 1,000,000).
+
+## Reaction persona entry object
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | snowflake | The persona that reacted |
+| count | integer | The number of reactions made as this persona |
+| me? | ?boolean | Present and `true` when the authenticated user reacted as this persona |
 
 ## Message reference object
 
@@ -664,7 +697,7 @@ To get the next page, set `before` to the `pinned_at` of the last item. Skip mes
 
 | Field | Type | Description |
 | --- | --- | --- |
-| items | array[[partial user](/http-api/users/#partial-user-object) object] | The users, by ascending ID |
+| items | array[[reactor](#reactor-object) object] | The users, by ascending ID |
 | has_more | boolean | Whether there's another page |
 | next_after | ?snowflake | The `after` value for the next page |
 
@@ -886,6 +919,7 @@ A message needs text, an embed, an attachment, a meme or a sticker. Text can be 
 | favorite_meme_id? | ?snowflake | A saved meme to attach |
 | sticker_ids? | ?array[snowflake] | The stickers (at most 3) |
 | tts? | boolean | Whether to use text-to-speech, which needs `SEND_TTS_MESSAGES` |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to send the message as, or null for the account |
 
 <sup>1</sup> Fluxer remembers a nonce for 5 minutes, and sending it again in the same channel returns the first message. Reuse the nonce when you retry a send. Reusing it in a different channel within that time returns 404 `UNKNOWN_MESSAGE`
 
@@ -961,6 +995,7 @@ The body works like [Create message](#create-message), including multipart. Fiel
 | flags? | integer | [Message flags](#message-flags) |
 | attachments?<sup>1</sup> | array[[pre-uploaded attachment](#pre-uploaded-attachment-object) object \| [existing attachment reference](#existing-attachment-reference-object) object] | The attachments to keep and add |
 | message_snapshots? | array | Not accepted, and returns 403 `MISSING_PERMISSIONS` |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to show the message as from, or null for the account. Absent leaves it unchanged |
 
 <sup>1</sup> Replaces the whole list, so include every existing item you want to keep
 
@@ -1201,6 +1236,17 @@ The rate limit is 20 requests per 10 seconds, on the `channel:pins::channel_id` 
 
 The `{emoji}` path value is URL-encoded and 1-64 characters long. Use `name:id` for a custom emoji and the emoji itself for a Unicode emoji.
 
+## Reactor object
+
+A reactor object extends the [partial user](/http-api/users/#partial-user-object) object with the persona the user reacted as. A user who reacted as the account itself and as personas appears once for each.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| subprofile? | ?[message persona](#message-persona-object) object | The persona the user reacted as, or null |
+| persona_id? | ?snowflake | The ID of that persona, or null when the user reacted as the account |
+
 ## List reaction users unpaged
 
 <RouteHeader method="GET" path="/v1/channels/{channel_id}/messages/{message_id}/reactions/{emoji}" bot />
@@ -1218,7 +1264,7 @@ Returns the users who reacted with an emoji, as a plain array. The `X-Has-More` 
 
 | Status | Body | Condition |
 | --- | --- | --- |
-| 200 | array[[partial user](/http-api/users/#partial-user-object) object] | The users were returned |
+| 200 | array[[reactor](#reactor-object) object] | The users were returned |
 
 The rate limit is 30 requests per 10 seconds, on the `channel:reactions::channel_id` bucket.
 
@@ -1248,6 +1294,14 @@ The rate limit is 30 requests per 10 seconds, on the `channel:reactions::channel
 <RouteHeader method="PUT" path="/v1/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me" bot />
 
 Adds your reaction, and Fluxer sends [Message Reaction Add](/gateway/events/#message-reaction-add). In a guild, adding a new emoji needs `ADD_REACTIONS`, and a custom emoji also needs `USE_EXTERNAL_EMOJIS`. Using another guild's emoji needs the `feature_global_expressions` limit. Your account needs a verified email.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to react as, or null for the account |
+
+The body is optional. A persona the caller does not own returns 404 `UNKNOWN_PERSONA`.
 
 ### Query parameters
 
@@ -1280,6 +1334,9 @@ Removes your reaction, and Fluxer sends [Message Reaction Remove](/gateway/event
 | Field | Type | Description |
 | --- | --- | --- |
 | session_id? | string | Your Gateway session ID (1-64 characters) |
+| persona_id? | string | The persona whose reaction to remove, or `0` for the one made as the account |
+
+Without `persona_id`, the caller's reactions with this emoji are removed whether they were made as the account or as any persona.
 
 ### Response
 
@@ -1300,6 +1357,9 @@ Removes the reaction of the user `target_id`, and Fluxer sends [Message Reaction
 | Field | Type | Description |
 | --- | --- | --- |
 | session_id? | string | Your Gateway session ID (1-64 characters) |
+| persona_id? | string | The persona whose reaction to remove, or `0` for the one made as the account |
+
+Without `persona_id`, the user's reactions with this emoji are removed whether they were made as the account or as any persona.
 
 ### Response
 
@@ -1342,6 +1402,14 @@ The rate limit is 30 requests per 10 seconds, on the `channel:reactions::channel
 <RouteHeader method="POST" path="/v1/channels/{channel_id}/typing" bot />
 
 Shows that you're typing, and Fluxer sends [Typing Start](/gateway/events/#typing-start). In a guild channel you need `SEND_MESSAGES`, or `SEND_MESSAGES_IN_THREADS` in a thread.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id? | ?snowflake | One of the caller's [personas](/http-api/users/personas/) to show as typing, or null for the account |
+
+The body is optional. A persona the caller does not own, or has deleted, returns 404 `UNKNOWN_PERSONA`.
 
 ### Response body
 
