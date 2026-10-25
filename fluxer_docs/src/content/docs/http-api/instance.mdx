@@ -209,6 +209,22 @@ Check `services.gif_enabled` before you show a GIF picker.
 | friends_disabled? | boolean | Whether friend requests are off for the whole instance |
 | personal_notes_enabled? | boolean | Whether people can use personal notes. Missing means they can |
 | guild_create_access | boolean | Whether every account can create communities. When false, only admins and accounts with `feature_guild_create` can |
+| signal_bar_guild_id? | ?string | The home community that owns the [signal bar](/http-api/signal-bar/), or null when the bar is off |
+| server_list_buttons? | [server list buttons](#server-list-buttons-object) object | Which buttons clients show in the server list |
+
+## Server list buttons object
+
+Which buttons clients show in the server list column. Each defaults to true.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| favorites | boolean | Whether the Favorites button is shown |
+| explore | boolean | Whether the Explore communities button is shown |
+| create_join | boolean | Whether the Create or join a community button is shown |
+| download | boolean | Whether the Download desktop app button is shown |
+| help | boolean | Whether the Help center button is shown |
 
 ## Service availability object
 
@@ -388,6 +404,7 @@ What a client needs before anyone signs in.
 | custom_css | ?string | CSS the web and desktop app apply before the person's own theme, or null |
 | upload_limit_message | ?string | Markdown shown when a file is over the upload limit, or null for the default text |
 | trusted_domains | string[] | Extra domains whose links open without a warning. Entries are hostnames, and a `*.` prefix also covers subdomains |
+| desktop_app_prompt_enabled | boolean | Whether the web app offers to open links in the desktop app and to download it; default true, false when self-hosted |
 
 ## Public setup state object
 
