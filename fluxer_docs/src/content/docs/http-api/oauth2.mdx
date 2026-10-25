@@ -37,10 +37,16 @@ String fields such as `state`, `redirect_uri` and `code` can be at most 256 char
 | guilds | Use [List current user guilds](/http-api/guilds/#list-current-user-guilds), [Get guild](/http-api/guilds/#get-guild) and [List guild roles](/http-api/permissions/#list-guild-roles) |
 | connections | Use [List connections](/http-api/connections/#list-connections) |
 | bot<sup>2</sup> | Install the application's bot into a guild or group DM |
+| personas.read<sup>3</sup> | Read the authorised user's [personas](/http-api/users/personas/) and persona settings |
+| personas.write<sup>4</sup> | Create, change, delete, import and select the authorised user's personas |
 
 <sup>1</sup> Only works together with `identify`
 
 <sup>2</sup> The access token gets no access from this scope
+
+<sup>3</sup> Grants [List own personas](/http-api/users/personas/#list-own-personas), [Get own persona by ID](/http-api/users/personas/#get-own-persona-by-id), [Get own persona settings](/http-api/users/personas/#get-own-persona-settings), [List the personas selected per channel](/http-api/users/personas/#list-the-personas-selected-per-channel), and [Export own personas](/http-api/users/personas/#export-own-personas)
+
+<sup>4</sup> Grants [Create persona](/http-api/users/personas/#create-persona), [Update persona](/http-api/users/personas/#update-persona), [Delete persona](/http-api/users/personas/#delete-persona), [Update own persona settings](/http-api/users/personas/#update-own-persona-settings), [Select a persona in a channel](/http-api/users/personas/#select-a-persona-in-a-channel), [Bulk import personas](/http-api/users/personas/#bulk-import-personas), and [Store an image from a persona export being imported](/http-api/users/personas/#store-an-image-from-a-persona-export-being-imported)
 
 Separate scopes with spaces. Fluxer rejects an unknown scope with `invalid_scope`, and the order of scopes in a response isn't fixed.
 
