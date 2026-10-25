@@ -1,0 +1,1073 @@
+---
+# SPDX-License-Identifier: AGPL-3.0-or-later
+title: Personas
+description: Personas let one account post, react and appear under several names, each with its own avatar, tags and profile.
+---
+
+import RouteHeader from '@/components/RouteHeader.astro';
+
+A persona is a name an account can post, react, type and signal as. Each persona has its own avatar, banner, colour, pronouns, bio, tags and signature emojis. A message sent as a persona carries its `persona_id` and a snapshot of the persona in `subprofile`, described by the [message persona](/http-api/messages/#message-persona-object) object.
+
+The routes under `/users/@me/personas` act on the caller's own personas. [List user public personas](#list-user-public-personas) and [Get persona profile card by ID](#get-persona-profile-card-by-id) read another account's personas, [Look up personas by ID](#look-up-personas-by-id) reads what messages from given personas show, and [Get persona mention candidates for a channel](#get-persona-mention-candidates-for-a-channel) reads the personas of the people in a channel.
+
+## Limits
+
+An account holds at most 250 personas. Creating one more is refused with 400 `PERSONA_LIMIT_REACHED`, and so is a [bulk import](#bulk-import-personas) that would create one more.
+
+A persona has at most five tags. A longer list is refused with 400 `PERSONA_TAG_LIMIT_REACHED`. A tag listed twice on one persona, or a tag another of the account's personas already uses, is refused with 400 `DUPLICATE_PERSONA_TAG`.
+
+A persona has at most 10 aliases of up to 100 characters each: other names it is found by when searching or mentioning, never shown. A longer list is refused with 400, and a blank alias or a repeat (compared without case) is dropped. Each alias is checked against the profile blocklist as a name, and one it refuses is answered with 403 `CONTENT_BLOCKED`.
+
+A persona has at most 10,000 signature emojis, and a longer list is refused with 400 `SIGNATURE_EMOJI_LIMIT_REACHED`. A custom emoji is identified by its ID and a Unicode emoji by its name. An emoji listed twice, or one another of the account's personas already lists, is refused with 400 `DUPLICATE_SIGNATURE_EMOJI`.
+
+An account holds at most 250 [persona groups](#persona-groups). Making one more is refused with 400 `PERSONA_GROUP_LIMIT_REACHED`.
+
+## Visibility
+
+| Value | Description |
+| --- | --- |
+| unlisted | The default. Fetched by ID, but not listed on the owner's profile |
+| public | Listed by [List user public personas](#list-user-public-personas) |
+| private | Not listed. Its profile is refused to others; its messages, reactions and [lookup by ID](#look-up-personas-by-id) still show its name and avatar |
+
+[Get persona profile card by ID](#get-persona-profile-card-by-id) refuses a `private` persona to anyone but its owner with 403 `PRIVATE_PERSONA`. A persona ID that does not belong to the account a route acts on returns 404 `UNKNOWN_PERSONA`.
+
+## Mention setting
+
+`mentionable_by` decides who is offered a persona as a [mention candidate](#get-persona-mention-candidates-for-a-channel), which clients also use for search suggestions. It is a convenience for copies of other people's personas and changes nothing else: messages, profiles, listing and mentions typed by hand are unaffected.
+
+| Value | Description |
+| --- | --- |
+| everyone | Offered to everyone in the channel |
+| self | Offered only to the persona's owner |
+| nobody | Offered to nobody, its owner included |
+| null | The default: follows [visibility](#visibility), `self` for a `private` persona and `everyone` otherwise |
+
+A `private` persona offered to others is sent to them without its bio, banner and pronouns.
+
+## Selecting a persona
+
+[Persona settings](#persona-settings-object) hold which persona the account is using. With an `active_persona_scope` of `global`, `active_persona_id` applies in every channel. With `channel`, each channel remembers its own [selection](#persona-channel-state-object), and a channel without one is used as the account itself.
+
+Clients send a message as the selected persona by naming it in `persona_id`. A message wrapped in one of a persona's tags is sent as that persona instead, unless the persona has `auto_tag_disabled`. With an `active_persona_mode` of `last`, such a message also makes that persona the selected one.
+
+Every change to a persona, to the settings or to a channel selection is sent to the owner's sessions as the matching [Gateway Dispatch](/gateway/events/#personas-and-signals). Most changes are also announced to every community the owner is in, and to everyone the owner shares a direct message with, as [Guild Personas Dirty](/gateway/events/#guild-personas-dirty), which lists the changes it covers.
+
+## Persona groups
+
+An account can sort its personas into groups, as PluralKit sorts members, and a persona can be in any number of groups. Groups are private: only the owner can list them, and changes to them are sent only to the owner's sessions, as [User Persona Groups Update](/gateway/events/#user-persona-groups-update). A group ID that is not the caller's returns 404 `UNKNOWN_PERSONA_GROUP`.
+
+## Persona object
+
+One of the caller's own personas, with every setting the owner can change.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | snowflake | The unique Snowflake identifier for this persona |
+| name | string | The persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each) |
+| avatar_hash? | ?string | Avatar asset hash |
+| banner_hash? | ?string | Banner asset hash |
+| pronouns? | ?string | Optional pronouns |
+| color? | ?integer | Optional accent color integer |
+| avatar_color? | ?integer | Avatar accent color |
+| bio? | ?string | Optional persona bio |
+| auto_tag_disabled | boolean | Whether persona tag matching is disabled |
+| persona_tags | array[[persona tag](#persona-tag-object) object] | Persona prefix and suffix tags |
+| signature_emojis | array[[signature emoji](#signature-emoji-object) object] | Signature emojis for this persona |
+| use_count | integer | Usage counter for frecency ranking |
+| last_used_at_ms? | ?string | Timestamp in ms when the persona was last used |
+| visibility | string | Visibility setting: unlisted (default), public, or private |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, only you (self) or nobody. Null until chosen: it then follows visibility (private: self, otherwise everyone) |
+| external_uuid? | ?string | External UUID for idempotent PluralKit imports |
+| created_at | string | ISO timestamp of persona creation |
+| updated_at | string | ISO timestamp of last update |
+| deleted_at? | ?string | ISO timestamp if the persona has been soft-deleted |
+
+## Persona tag object
+
+A prefix and suffix pair. A message that starts with the prefix and ends with the suffix is sent as the persona, with both removed. At least one of the two is present.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| prefix? | string | Text a message starts with, 1-32 characters |
+| suffix? | string | Text a message ends with, 1-32 characters |
+
+## Signature emoji object
+
+An emoji the persona uses as its signature.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id? | ?snowflake | Custom emoji ID (null for Unicode) |
+| name | string | Emoji name or Unicode character |
+| animated? | ?boolean | Whether the emoji is animated |
+
+## Public persona object
+
+Another account's persona as others see it, without the settings only its owner reads.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | snowflake | The unique Snowflake identifier for this persona |
+| name | string | The persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each) |
+| avatar_hash? | ?string | Avatar asset hash |
+| banner_hash? | ?string | Banner asset hash |
+| pronouns? | ?string | Optional pronouns |
+| color? | ?integer | Optional accent color integer |
+| avatar_color? | ?integer | Avatar accent color |
+| bio? | ?string | Optional persona bio |
+| visibility | string | Visibility setting |
+
+## Persona settings object
+
+How the account chooses the persona its messages are sent as.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| user_id | snowflake | User Snowflake ID |
+| active_persona_mode | string | `manual`, or `last` to also select the persona whose tags a sent message used |
+| active_persona_scope | string | Whether the selected persona is one for every channel or remembered per channel |
+| active_persona_id? | ?snowflake | The persona selected in every channel, or null for the account itself |
+| is_latched | boolean | Whether `active_persona_id` is in use |
+| display_tag_text? | ?string | Text shown after the persona's name on its messages, empty when none is set |
+| display_tag_icon? | ?string | Icon shown with the display tag, or null |
+| updated_at? | string | ISO 8601 timestamp of the last change |
+
+## Persona channel states object
+
+Every channel in which the caller has selected a persona.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| states | array[[persona channel state](#persona-channel-state-object) object] | Every channel that has a persona selected |
+
+## Persona group object
+
+A group of the caller's personas.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | snowflake | The ID of the group |
+| name | string | The name of the group, 1 to 100 characters |
+| persona_ids | array[snowflake] | The personas in the group, in the order they were added. A deleted persona stays listed, so that [restoring](#restore-a-deleted-persona) it puts it back |
+
+## Persona channel state object
+
+The persona the caller has selected in one channel, used when the settings' `active_persona_scope` is `channel`.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The channel this selection belongs to |
+| persona_id | ?snowflake | The persona selected in the channel, or null when the channel is used as the account itself |
+
+## Channel persona mention item object
+
+A persona that can be mentioned in a channel, with its owner.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | snowflake | The unique Snowflake identifier for this persona |
+| name | string | The persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each) |
+| avatar_hash? | ?string | Avatar asset hash |
+| banner_hash? | ?string | Banner asset hash |
+| display_tag_text? | ?string | Optional display tag text |
+| display_tag_icon? | ?string | Optional display tag icon |
+| pronouns? | ?string | Optional pronouns |
+| color? | ?integer | Optional accent color integer |
+| bio? | ?string | Optional persona bio |
+| visibility | string | Visibility setting |
+| use_count | integer | Usage counter for frecency ranking |
+| last_used_at_ms? | ?string | Timestamp in ms when the persona was last used |
+| owner_user_id | snowflake | User ID of the persona owner |
+| owner_username | string | Username of the persona owner |
+| owner_discriminator? | ?string | Discriminator of the persona owner |
+| owner_global_name? | ?string | Global display name of the persona owner |
+| owner_nickname? | ?string | Guild nickname if applicable |
+
+## Persona import item object
+
+One persona in a [bulk import](#bulk-import-personas), with the fields of the [Create persona](#create-persona) JSON body and `image_sources`.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name | string | Persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each). Each is trimmed, and blank ones and repeats are dropped. Leave it out to keep the stored ones; an empty list clears them |
+| avatar_hash? | ?string | Avatar asset hash |
+| banner_hash? | ?string | Banner asset hash |
+| pronouns? | ?string | Optional pronouns |
+| color? | ?integer | Optional color integer |
+| avatar_color? | ?integer | Optional avatar accent color |
+| bio? | ?string | Optional persona bio |
+| auto_tag_disabled? | boolean | Whether auto-tagging is disabled |
+| persona_tags? | array[[persona tag](#persona-tag-object) object] | Persona prefix/suffix tags |
+| signature_emojis? | array[[signature emoji](#signature-emoji-object) object] | Signature emojis for this persona |
+| visibility? | string | Visibility: unlisted (default), public, or private |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, self or nobody. Leave it out or null to follow its visibility |
+| external_uuid? | ?string | Optional external UUID (e.g. PluralKit) |
+| image_sources? | ?[persona import image sources](#persona-import-image-sources-object) object | Where the persona's images were imported from; null when the file gave it none |
+
+## Persona import image sources object
+
+Where an imported persona's images came from, so that an [export](#export-own-personas) can link to them there again while the image is unchanged.
+
+Each `url` is the link the image was imported from, or null. The avatar's `field` is the PluralKit field it came from, `avatar_url` or `webhook_avatar_url`, and the export writes it back there. `main_avatar_empty` says whether the member's `avatar_url` was empty when the avatar came from `webhook_avatar_url`.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| avatar? | ?object | Where the avatar came from, with `url`, `field` and `main_avatar_empty` |
+| banner? | ?object | Where the banner came from, with `url` |
+
+## Persona avatar upload object
+
+The stored avatar. Pass `avatar_hash` and `avatar_color` to [Create persona](#create-persona) or [Update persona](#update-persona).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| avatar_hash | string | Hash of the uploaded avatar |
+| avatar_color? | ?integer | Dominant avatar color |
+
+## Persona banner upload object
+
+The stored banner. Pass `banner_hash` to [Create persona](#create-persona) or [Update persona](#update-persona).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| banner_hash | string | Hash of the uploaded banner |
+
+## Persona avatar import object
+
+The stored avatar fetched from the remote URL.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| avatar_hash | string | Hash of the imported avatar |
+| avatar_color? | ?integer | Dominant avatar color |
+
+## Persona import image object
+
+The stored image. Pass `hash` as the `avatar_hash` or `banner_hash` of a [persona import item](#persona-import-item-object).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| hash | string | Hash of the stored image |
+| avatar_color? | ?integer | Dominant colour, for an avatar |
+
+## Get persona mention candidates for a channel
+
+<RouteHeader method="GET" path="/v1/channels/{channel_id}/persona-mentions" />
+
+Returns the personas that can be mentioned in a channel the caller can see, by their [mention setting](#mention-setting): the caller's own personas unless set to `nobody`, and those of the community's other members or the direct message's other recipients set to `everyone`. The best matches for `q` come first, then the most used.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+
+### Query parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| q? | string | Text the persona's name or one of its aliases, its display tag, or the owner's username or nickname must contain |
+| limit? | integer | The most candidates to return, 1-1000, default 100 |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[channel persona mention item](#channel-persona-mention-item-object) object] | The candidates, possibly none |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `channel:read::channel_id` bucket.
+
+## List own personas
+
+<RouteHeader method="GET" path="/v1/users/@me/personas" oauth2="personas.read" />
+
+Returns every persona the caller owns.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | Every persona the caller owns |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `user:persona:list` bucket.
+
+## Create persona
+
+<RouteHeader method="POST" path="/v1/users/@me/personas" oauth2="personas.write" />
+
+Creates a persona for the caller and sends [User Persona Create](/gateway/events/#user-persona-create) to the caller's sessions. A new persona is `unlisted` unless the body says otherwise, and the [limits](#limits) apply.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name | string | Persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each). Each is trimmed, and blank ones and repeats are dropped. Leave it out to keep the stored ones; an empty list clears them |
+| avatar_hash? | ?string | Avatar asset hash |
+| banner_hash? | ?string | Banner asset hash |
+| pronouns? | ?string | Optional pronouns |
+| color? | ?integer | Optional color integer |
+| avatar_color? | ?integer | Optional avatar accent color |
+| bio? | ?string | Optional persona bio |
+| auto_tag_disabled? | boolean | Whether auto-tagging is disabled |
+| persona_tags? | array[[persona tag](#persona-tag-object) object] | Persona prefix/suffix tags |
+| signature_emojis? | array[[signature emoji](#signature-emoji-object) object] | Signature emojis for this persona |
+| visibility? | string | Visibility: unlisted (default), public, or private |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, self or nobody. Leave it out or null to follow its visibility |
+| external_uuid? | ?string | Optional external UUID (e.g. PluralKit) |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 201 | [persona](#persona-object) object | The persona was created |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Upload persona avatar
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/avatar" />
+
+Stores an avatar image for a persona and returns its hash. No persona changes until the hash is passed to [Create persona](#create-persona) or [Update persona](#update-persona).
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| avatar | string | Base64 data URI of the avatar image |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona avatar upload](#persona-avatar-upload-object) object | The avatar was stored |
+
+### Rate limit
+
+20 requests per minute for each authenticated user, on the `user:update` bucket.
+
+## Upload persona banner
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/banner" />
+
+Stores a banner image for a persona and returns its hash. No persona changes until the hash is passed to [Create persona](#create-persona) or [Update persona](#update-persona).
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| banner | string | Base64 data URI of the banner image |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona banner upload](#persona-banner-upload-object) object | The banner was stored |
+
+### Rate limit
+
+20 requests per minute for each authenticated user, on the `user:update` bucket.
+
+## List the personas selected per channel
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/channel-states" oauth2="personas.read" />
+
+Returns every channel in which the caller has selected a persona. A channel that is not listed is used as the account itself.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona channel states](#persona-channel-states-object) object | The selections |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Select a persona in a channel
+
+<RouteHeader method="PUT" path="/v1/users/@me/personas/channel-states/{channel_id}" oauth2="personas.write" />
+
+Selects one of the caller's personas in a channel the caller can see, or the account itself with a null `persona_id`. Sends [User Persona Channel State Update](/gateway/events/#user-persona-channel-state-update) to the caller's sessions and to nobody else.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | ?snowflake | The persona to select in the channel, or null for the account |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona channel state](#persona-channel-state-object) object | The selection was saved |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Export own personas
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/export" oauth2="personas.read" />
+
+Returns the caller's personas as a ZIP file. It holds a PluralKit export file (`pluralkit.json`), each persona's avatar and banner and the display tag icon, `tyne.json` listing which image belongs to which persona and what PluralKit has no place for (such as aliases), and a README. Importing the ZIP gives the personas back.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | ZIP file | The export |
+
+### Rate limit
+
+5 requests per 10 minutes for each authenticated user, on the `user:persona:export` bucket.
+
+## Bulk import personas
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import" oauth2="personas.write" />
+
+The older import, kept for apps that have not updated: Tyne's apps now [preview](#preview-a-persona-import) the file and [apply](#apply-a-reviewed-persona-import) one action per member. Creates or updates up to 250 personas in one request, for example from a PluralKit export. An item whose `external_uuid` matches an existing persona's `external_uuid` or ID updates that persona, and every other item creates one. The whole request is checked before anything is written and then written at once, so a refused or failed import changes nothing. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, in place of an event per persona.
+
+With `replace`, every live persona of the account is deleted in the same write, as [Delete persona](#delete-persona) deletes one, and every item creates a new persona. The tags, signature emojis and places under the limit of the deleted personas are free for the imported ones. A selection that named a deleted persona goes back to the account, with a [User Persona Settings Update](/gateway/events/#user-persona-settings-update) or a [User Persona Channel State Update](/gateway/events/#user-persona-channel-state-update). If the import is refused, the personas and selections stay as they were.
+
+### Query parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| replace? | boolean | Whether to delete every live persona of the account and keep only the imported ones (default false) |
+
+### JSON body
+
+An array of up to 250 [persona import item](#persona-import-item-object) objects, or an object whose `personas` member is that array.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | Every persona the import created or updated |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Preview a persona import
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import/preview" oauth2="personas.write" />
+
+Classifies each member of an import file against the caller's personas, deleted ones included, and changes nothing. Identity is the member's `external_uuid` (the PluralKit member ID, or a Tyne export's persona ID), never the name. The rules, each over every member still open before the next:
+
+1. **The ID.** A live persona linked to the member is `up_to_date` when its details match and `differs` otherwise; failing that, a deleted one is `deleted` (the most used, if several are). Two live personas with the member's ID make it `cant_tell`.
+2. **Name and tag, one to one.** The only live persona that no member of the file is linked to, with the same name and a shared tag, is `probably_same`, when no other member matches it that way and it is linked to no other member.
+3. **Name or tag.** Such personas with the same name, or a tag in common (also one differing only in case), make the member `cant_tell`, with them as `candidates`.
+4. **Tags.** A tag (or, from a Tyne export, a signature emoji) another live persona holds, or that another member still open has too, makes the member `tag_in_use`; both members sharing one are. Every other member is `new`.
+
+Names compare after trimming and Unicode normalisation; tags compare as Tyne enforces them, trimmed and case-sensitive. Pictures are compared only where their origin is known (a link to the caller's own media, or one an earlier import recorded); otherwise the difference is `not_compared` and does not make a persona `differs`. A visibility difference is `info` only: applying never changes visibility. Links in the request are never fetched.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| source | string | `pluralkit` for a PluralKit export; `tyne` for a Tyne export, which also carries signature emojis and tag matching |
+| members | array[object] | Up to 250 members in file order, each with the [create persona](#create-persona) fields `name`, `pronouns`, `color`, `bio`, `persona_tags`, `visibility`, `external_uuid`, `signature_emojis` and `auto_tag_disabled`, and `avatar` and `banner` objects with the file's `url` and a `hash` the client already knows is stored under the account |
+| display_tag? | ?object | The file's system tag: `text` and `has_icon` |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object | `entries` (one per member: `index`, `kind`, `persona_id`, `candidates`, `differences`, `clashes`, and the stored `avatar_hash` and `banner_hash` that are safe to show), `personas` (every persona the entries name, deleted ones included), `display_tag` (`decision`: `none`, `auto_apply` for an account with no personas and no display tag, or `ask`), `untouched` (live personas no member matched) and `needs_review` |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Apply a reviewed persona import
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import/apply" oauth2="personas.write" />
+
+Applies one action per member, checked against the account as it is now and written at once: if it is refused, nothing changes. Nothing is deleted.
+
+- `add` creates a persona from `item`, leaving out `drop_tags` and `drop_signature_emojis`.
+- `link` records `external_uuid` on `persona_id` and changes nothing else. It is refused with 400 `PERSONA_IMPORT_CONFLICT` when another live persona is linked to that member already.
+- `restore` brings back the deleted `persona_id` as it was, the same persona, so its old messages and usage are its own again. Tags and signature emojis another persona holds by then are left off and listed in `dropped`.
+- `use_file` replaces the details of `persona_id`, which must be linked to the item's member: name, pronouns, bio, colour and tags (an empty one clears Tyne's), the avatar and banner unless `keep_avatar` or `keep_banner` (sent when the file's picture is the same, or could not be stored), and from a Tyne export signature emojis and tag matching. Visibility is never changed.
+
+A persona named by two actions is refused with 400 `PERSONA_IMPORT_CONFLICT`. If the result would put a tag or signature emoji on two personas, or go over the limit, it is refused with 400 `DUPLICATE_PERSONA_TAG`, `DUPLICATE_SIGNATURE_EMOJI` or `PERSONA_LIMIT_REACHED`, naming them in the message. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| source | string | `pluralkit` or `tyne`, as for the preview |
+| actions | array[object] | Up to 250 actions; skipped members are left out. Each has `action` and, by action, `persona_id`, `external_uuid`, `item` (a [persona import item](#persona-import-item-object) with its pictures stored), `drop_tags`, `drop_signature_emojis`, `keep_avatar` and `keep_banner` |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object | `personas` (the personas written, in action order) and `dropped` (for restored personas, the tags and signature emojis left off) |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## List own deleted personas
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/deleted" oauth2="personas.read" />
+
+Returns the caller's deleted personas, the most recently deleted first. They still show on their old messages and can be [restored](#restore-a-deleted-persona). [List own personas](#list-own-personas) never includes them.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | The deleted personas, each with `deleted_at` |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Restore a deleted persona
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/deleted/{persona_id}/restore" oauth2="personas.write" />
+
+Brings back one of the caller's deleted personas as it was, so its old messages and usage are its own again. Tags and signature emojis another persona holds by then are left off and listed in the response. Refused with 404 `UNKNOWN_PERSONA` when the persona is not a deleted persona of the caller, and with 400 `PERSONA_LIMIT_REACHED` when the account is at the limit. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object | `persona` (the [persona](#persona-object)), `dropped_tags` and `dropped_signature_emojis` |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Change the visibility of several personas
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/visibility" oauth2="personas.write" />
+
+Gives up to 250 of the caller's personas a new [visibility](#visibility) in one write. Each entry names its own visibility, so putting several personas back as they were is one request too. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing changes. A persona that already has the visibility asked for is left as it is. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, and one [Guild Personas Dirty](/gateway/events/#guild-personas-dirty) per community, in place of events per persona.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| personas | array[object] | Between 1 and 250 objects, each with `id` (snowflake, one of your personas) and `visibility` (`public`, `unlisted` or `private`) |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | The personas whose visibility changed |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Change who gets several personas in mention suggestions
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/mentions" oauth2="personas.write" />
+
+Gives up to 250 of the caller's personas a new [mention setting](#mention-setting) in one write. Each entry names its own value, null included, so putting several personas back as they were is one request too. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing changes. A persona that already has the value asked for is left as it is. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, and one [Guild Personas Dirty](/gateway/events/#guild-personas-dirty) per community.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| personas | array[object] | Between 1 and 250 objects, each with `id` (snowflake, one of your personas) and `mentionable_by` (`everyone`, `self`, `nobody`, or null to follow its visibility) |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | The personas whose setting changed |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Delete several personas
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/bulk-delete" oauth2="personas.write" />
+
+Deletes up to 250 of the caller's personas in one write, as [Delete persona](#delete-persona) deletes one: messages already sent as them keep showing them, and their tags, signature emojis and places under the limit become free. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing is deleted. A selection that named a deleted persona goes back to the account, with a [User Persona Settings Update](/gateway/events/#user-persona-settings-update) or a [User Persona Channel State Update](/gateway/events/#user-persona-channel-state-update). Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, in place of an event per persona.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_ids | array[snowflake] | The IDs of between 1 and 250 of your personas |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The personas were deleted |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## List own persona groups
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/groups" oauth2="personas.read" />
+
+Lists the caller's [persona groups](#persona-groups), in the order they were made.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona group](#persona-group-object) object] | The groups |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Create a persona group
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/groups" oauth2="personas.write" />
+
+Makes a [persona group](#persona-groups), optionally with some of the caller's personas in it. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing is made.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name | string | The name of the group, 1 to 100 characters |
+| persona_ids? | array[snowflake] | Up to 250 of your personas to put in the group |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 201 | [persona group](#persona-group-object) object | The new group |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Put personas in groups or take them out
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/groups/members" oauth2="personas.write" />
+
+Changes the personas in several of the caller's groups in one write. If a group is not the caller's (404 `UNKNOWN_PERSONA_GROUP`), or a persona to add is not a live persona of the caller (404 `UNKNOWN_PERSONA`), nothing changes. Any persona ID can be taken out, a deleted one too. A persona already in a group keeps its place; one both added and taken out of a group ends up in it.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| changes | array[object] | Between 1 and 250 objects, each with `group_id` (snowflake, one of your groups) and optional `add` and `remove` (each up to 250 persona IDs) |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona group](#persona-group-object) object] | Every group of the caller |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Rename a persona group
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/groups/{group_id}" oauth2="personas.write" />
+
+Gives one of the caller's groups a new name.
+
+### Path parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| group_id | snowflake | The ID of the group |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name | string | The new name, 1 to 100 characters |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona group](#persona-group-object) object | The renamed group |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Delete a persona group
+
+<RouteHeader method="DELETE" path="/v1/users/@me/personas/groups/{group_id}" oauth2="personas.write" />
+
+Deletes one of the caller's groups. The personas in it are not changed.
+
+### Path parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| group_id | snowflake | The ID of the group |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The group was deleted |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Import persona avatar from remote URL
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import-avatar" />
+
+Fetches an avatar from a remote URL and stores it. Each fetch draws on a quota of 2500 per 10 minutes for each account, shared with the batch and export image routes, and an exhausted quota is refused with 429. A URL that cannot be fetched returns 400 with a fixed `message` that does not say why.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| url | string | Remote URL of the avatar image to import |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona avatar import](#persona-avatar-import-object) object | The avatar was fetched and stored |
+
+### Rate limit
+
+20 requests per minute for each authenticated user, on the `user:update` bucket.
+
+## Batch import persona avatars from remote URLs with streaming progress
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import-batch-avatars" />
+
+Fetches up to 500 avatars or banners from remote URLs and stores them, streaming progress as newline-delimited JSON (`application/x-ndjson`). Duplicate URLs are fetched once. Before streaming starts, the batch is refused with 429 when the [import quota](#import-persona-avatar-from-remote-url) cannot cover every URL, or when the caller already has a batch running. Closing the connection stops the batch, and only the URLs fetched so far count against the quota.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| urls | array[string] | List of remote avatar URLs to import |
+| kind? | string | Whether the links are avatars or banners; avatars when absent |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | NDJSON stream | The [progress stream](#progress-stream) |
+
+### Progress stream
+
+Each line of the body is one JSON object. The first has `type` `start`, a `progress` line follows each URL as it finishes, and the last has `type` `complete`. URLs are fetched four at a time, so `progress` lines do not follow the order of `urls`.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| type | string | `start`, `progress` or `complete` |
+| total | integer | The number of distinct URLs in the batch |
+| completed? | integer | URLs finished so far, on `progress` |
+| url? | string | The URL that finished, on `progress` |
+| avatar_hash? | string | The stored avatar, on a successful `progress` for avatars |
+| avatar_color? | ?integer | The avatar's dominant colour, on a successful `progress` for avatars |
+| banner_hash? | string | The stored banner, on a successful `progress` for banners |
+| error? | string | Why the URL was not imported, on a failed `progress` |
+| results? | map[string, object] | On `complete`, the outcome for each URL, with the `progress` fields from `avatar_hash` to `error` |
+
+### Rate limit
+
+30 requests per 10 minutes for each authenticated user, on the `user:persona:batch_avatar_import` bucket.
+
+## Store an image from a persona export being imported
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import-image" oauth2="personas.write" />
+
+Stores one avatar or banner read from a persona export ZIP that the caller is importing, and returns its hash for the import. Counts against the [import quota](#import-persona-avatar-from-remote-url).
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| kind | string | Whether the image is an avatar or a banner |
+| image | string | Base64 data URI of the image |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona import image](#persona-import-image-object) object | The image was stored |
+
+### Rate limit
+
+600 requests per 10 minutes for each authenticated user, on the `user:persona:image_import` bucket.
+
+## Get own persona settings
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/settings" oauth2="personas.read" />
+
+Returns the caller's persona settings, or the defaults for an account that never saved any. An `active_persona_id` naming a deleted persona is returned as null.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona settings](#persona-settings-object) object | The settings |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Update own persona settings
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/settings" oauth2="personas.write" />
+
+Changes the caller's persona settings. Only the fields present in the body change. Sends [User Persona Settings Update](/gateway/events/#user-persona-settings-update) to the caller's sessions, and [Guild Personas Dirty](/gateway/events/#guild-personas-dirty) when the display tag changed.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| active_persona_mode? | string | `manual` or `last` |
+| active_persona_scope? | string | `global` or `channel` |
+| active_persona_id? | ?snowflake | The persona to select in every channel, or null for the account itself |
+| is_latched? | boolean | Whether `active_persona_id` is in use |
+| display_tag_text? | ?string | Text shown after the persona's name on its messages, at most 100 characters |
+| display_tag_icon? | ?string | Icon shown with the display tag, at most 256 characters |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona settings](#persona-settings-object) object | The settings were saved |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Get own persona by ID
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/{persona_id}" oauth2="personas.read" />
+
+Returns one of the caller's personas.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | snowflake | Persona Snowflake ID |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona](#persona-object) object | The persona |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Update persona
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/{persona_id}" oauth2="personas.write" />
+
+Changes one of the caller's personas. Only the fields present in the body change, and the [limits](#limits) apply to the new tags and signature emojis. Sends [User Persona Update](/gateway/events/#user-persona-update) to the caller's sessions.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | snowflake | Persona Snowflake ID |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name? | string | Persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each). Each is trimmed, and blank ones and repeats are dropped. Leave it out to keep the stored ones; an empty list clears them |
+| avatar_hash? | ?string | Avatar asset hash |
+| banner_hash? | ?string | Banner asset hash |
+| pronouns? | ?string | Optional pronouns |
+| color? | ?integer | Optional color integer |
+| avatar_color? | ?integer | Optional avatar accent color |
+| bio? | ?string | Optional persona bio |
+| auto_tag_disabled? | boolean | Whether auto-tagging is disabled |
+| persona_tags? | array[[persona tag](#persona-tag-object) object] | Persona prefix/suffix tags |
+| signature_emojis? | array[[signature emoji](#signature-emoji-object) object] | Signature emojis for this persona |
+| visibility? | string | Visibility setting |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, self or nobody; null to follow its visibility again. Leave it out to keep the stored one |
+| external_uuid? | ?string | Optional external UUID |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona](#persona-object) object | The persona was updated |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Delete persona
+
+<RouteHeader method="DELETE" path="/v1/users/@me/personas/{persona_id}" oauth2="personas.write" />
+
+Deletes one of the caller's personas. Messages already sent as it keep their snapshot, and it can be [restored](#restore-a-deleted-persona). Sends [User Persona Delete](/gateway/events/#user-persona-delete) to the caller's sessions. Where the persona was selected, in the settings or in a channel, the account itself is selected again and the matching settings or channel state event is sent.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | snowflake | Persona Snowflake ID |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The persona was deleted |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## List user public personas
+
+<RouteHeader method="GET" path="/v1/users/{user_id}/personas" />
+
+Returns another account's `public` personas, the most used first, with the account's display tag. The caller must be allowed to see that account's profile. The order is all the response tells of how much each persona is used: it carries no counts or times.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| user_id | snowflake | The ID of the user |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [public persona list](#public-persona-list-object) object | The account's display tag and public personas, possibly none |
+
+### Public persona list object
+
+| Field | Type | Description |
+| --- | --- | --- |
+| display_tag_text | ?string | The account's display tag text, or null when it has none |
+| display_tag_icon | ?string | Hash of the account's display tag icon, or null when it has none |
+| personas | array[[public persona](#public-persona-object) object] | The account's `public` personas, the most used first; `unlisted` and `private` ones are left out |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `user:persona:list` bucket.
+
+## Get persona profile card by ID
+
+<RouteHeader method="GET" path="/v1/users/{user_id}/personas/{persona_id}" />
+
+Returns the profile card of another account's persona. The caller must be allowed to see that account's profile, and a `private` persona is refused with 403 `PRIVATE_PERSONA` to anyone but its owner.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| user_id | snowflake | User Snowflake ID |
+| persona_id | snowflake | Persona Snowflake ID |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [public persona](#public-persona-object) object | The profile card |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Look up personas by ID
+
+<RouteHeader method="POST" path="/v1/personas/lookup" />
+
+Returns what messages from the given personas show, whatever their [visibility](#visibility): the same fields as a message's [message persona](/http-api/messages/#message-persona-object) object, with the owner. Nothing of a persona's profile (bio, banner, pronouns) is returned. Knowing a persona's ID is enough, because an ID is only learned from something that already shows the persona, and [Guild Personas Dirty](/gateway/events/#guild-personas-dirty) never names a `private` persona. Deleted personas are returned as their old messages show them. Clients use it to refresh the personas of an account that changed them, and to name a persona a thread was started as.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| personas | array[object] | 1 to 100 personas, each as `user_id` (the owner's ID) and `persona_id` |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona lookup item](#persona-lookup-item-object) object] | The personas found; a pair that names no persona of that user is left out |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Persona lookup item object
+
+A persona as a message shows it, with its owner. Returned by [Look up personas by ID](#look-up-personas-by-id).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | string | The ID of the persona |
+| user_id | string | The ID of the persona's owner |
+| name | string | The persona's display name |
+| avatar? | ?string | The persona's avatar hash |
+| avatar_color? | ?integer | The avatar's dominant colour |
+| display_tag_text? | ?string | The owner's display tag text |
+| display_tag_icon? | ?string | The owner's display tag icon |
+| color? | ?integer | The persona's accent colour |
+| visibility? | ?string | The persona's [visibility](#visibility) |
