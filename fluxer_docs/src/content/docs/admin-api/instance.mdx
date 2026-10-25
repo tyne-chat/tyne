@@ -358,6 +358,8 @@ Community, direct message, premium and gating policy.
 | friends_disabled<sup>1</sup> | boolean | Whether friend requests are off |
 | personal_notes_enabled<sup>2</sup> | boolean | Whether people can use personal notes. Off by default on self-hosted instances |
 | guild_create_access | boolean | Whether every account can create communities. If not, only admins and accounts with the `feature_guild_create` limit can |
+| signal_bar_guild_id? | ?string | The home community that owns the [signal bar](/http-api/signal-bar/), or null when the bar is off |
+| server_list_buttons? | [server list buttons](/http-api/instance/#server-list-buttons-object) object | Which buttons clients show in the server list |
 | premium_mode | string | [Premium mode](#premium-modes) |
 | services | object | Nullable `gif_enabled`, `youtube_enabled` and `bluesky_enabled` overrides |
 | services_resolved | object | The same keys as booleans, using the override when set and `services_available` otherwise |
@@ -670,6 +672,8 @@ Fluxer checks the merged settings before it writes anything, and refuses these c
 | friends_disabled?<sup>4</sup> | boolean | Whether friend requests are off |
 | personal_notes_enabled? | boolean | Whether people can use personal notes |
 | guild_create_access? | boolean | Whether every account can create communities |
+| signal_bar_guild_id? | ?snowflake | The home community that owns the [signal bar](/http-api/signal-bar/), or null to switch the bar off |
+| server_list_buttons? | object | Any of the [server list buttons](/http-api/instance/#server-list-buttons-object) keys, each merged into the stored setting |
 | premium_mode? | string | [Premium mode](#premium-modes) |
 | services? | object | Nullable `gif_enabled`, `youtube_enabled` and `bluesky_enabled` overrides |
 
