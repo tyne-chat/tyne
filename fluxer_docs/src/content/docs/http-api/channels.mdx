@@ -24,6 +24,7 @@ Every channel has `id` and `type`, and the other fields are present only on the 
 | url? | ?string | The destination URL (link channels) |
 | icon? | ?string | The icon hash (group direct messages) |
 | owner_id? | ?snowflake | The ID of the owner (group direct messages and threads) |
+| owner_persona_id? | ?snowflake | The [persona](/http-api/users/personas/) a thread's owner started it as, absent when it was started as the account |
 | position? | integer | The sort position (guild channels other than threads) |
 | parent_id? | ?snowflake | The ID of the parent category, or of the parent channel for a thread |
 | bitrate? | ?integer | The bitrate in bits per second (voice channels) |
