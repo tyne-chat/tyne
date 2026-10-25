@@ -14,6 +14,7 @@ and follow the placement rules in the root `AGENTS.md`.
 | Routes, OAuth scopes | `PersonaController.ts` (registered in the fork block of `app/ControllerRegistry.ts`) |
 | Rules, settings, events | `PersonaService.ts` |
 | Rows | `PersonaRepository.ts` (behind `IPersonaRepository.ts`), plus `PersonaChannelStateStore.ts`, `ThreadOwnerPersonaStore.ts`, `PersonaImageSourceStore.ts` |
+| New persona IDs | `PersonaIdGenerator.ts` |
 | The three response shapes | `models/Persona.ts` (outside this folder) |
 | Which persona a request names, and whether the caller owns it | `PersonaOwnership.ts` |
 | Who is typing as whom | `TypingPersona.ts` |
@@ -35,6 +36,9 @@ and follow the placement rules in the root `AGENTS.md`.
   them to the persona and to `toSubprofileResponse` in `models/Persona.ts`.
 - **A persona id is unique only within its account.** Look personas up by (user, persona): batch
   results are keyed by `personaLookupKey(userId, personaId)`, never by the persona id alone.
+  New ids come from `PersonaIdGenerator.ts`: the 22 low bits are random, and each id has a
+  millisecond of its own, so ids sort in the order personas were made (the export relies on it).
+  Keep both; never make persona ids with `generateSnowflake`.
 - **Ownership is checked in one place, with three exceptions.** A request names its persona through
   `requestedPersonaId` (`undefined`: the request says nothing; `null`: the account itself; an id).
   `resolveOwnedPersona` then accepts only a numeric id of the caller's own, live persona, and answers
