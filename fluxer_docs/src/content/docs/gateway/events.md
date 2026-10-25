@@ -129,6 +129,16 @@ The session that made a change receives the Dispatch like any other session. The
 | [Call Delete](#call-delete) | A call ends or becomes unavailable |
 | [Guild Counts Update](#guild-counts-update) | Member and online counts are returned for connected guilds |
 | [Channel Member Counts Update](#channel-member-counts-update) | Per-channel member and online counts are returned for one guild |
+| [User Persona Create](#user-persona-create) | The current user creates a persona |
+| [User Persona Update](#user-persona-update) | One of the current user's personas changes |
+| [User Persona Delete](#user-persona-delete) | The current user deletes a persona |
+| [User Personas Update](#user-personas-update) | A bulk import changes the current user's personas |
+| [User Persona Settings Update](#user-persona-settings-update) | The current user's persona settings change |
+| [User Persona Channel State Update](#user-persona-channel-state-update) | The persona the current user selected in a channel changes |
+| [Guild Personas Dirty](#guild-personas-dirty) | A member or direct message recipient changes their personas |
+| [Signal Bar Update](#signal-bar-update) | The instance's signal bar is edited |
+| [Channel Signal Update](#channel-signal-update) | Signals are given or switched off in a channel |
+| [Channel Signal Bar Update](#channel-signal-bar-update) | The signal bar is switched on or off in a channel |
 
 ## Session and current user
 
@@ -728,6 +738,8 @@ A user reacted to a message.
 | emoji | [reaction emoji object](#reaction-emoji-object) | The emoji |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The reacting user's member object, in a guild channel |
+| persona_id? | snowflake | The [persona](/http-api/users/personas/) the user reacted as, absent for the account |
+| subprofile? | [message persona](/http-api/messages/#message-persona-object) object | That persona as shown on the reaction, absent for the account |
 | session_id? | string | The session that made the request, in a private channel |
 
 #### Reaction emoji object
@@ -771,6 +783,7 @@ A user's reaction was removed.
 | emoji | [reaction emoji object](#reaction-emoji-object) | The emoji |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The user's member object, in a guild channel |
+| persona_id? | snowflake | The [persona](/http-api/users/personas/) whose reaction was removed, absent for the account's or for a removal that named no persona |
 | session_id? | string | The session that made the request, in a private channel |
 
 ### <span id="message-reaction-remove-all"></span>MESSAGE_REACTION_REMOVE_ALL
@@ -805,6 +818,7 @@ A user started typing. [Typing is decided separately](/gateway/event-filtering/#
 | timestamp | integer | Unix seconds when typing started |
 | guild_id? | snowflake | Guild the channel belongs to |
 | member? | [guild member](/http-api/guild-members/#guild-member-object) object | The typing user's member object, in a guild channel |
+| subprofile? | [message persona](/http-api/messages/#message-persona-object) object | The [persona](/http-api/users/personas/) the user is typing as, absent for the account |
 
 ### <span id="channel-pins-update"></span>CHANNEL_PINS_UPDATE
 
@@ -1011,3 +1025,104 @@ The answer to [Request Channel Member Counts](/gateway/commands/#request-channel
 | channel_id | snowflake | Channel the counts are for |
 | member_count | integer | Members who can view the channel |
 | online_count | integer | Online members who can view the channel |
+
+## Personas and signals
+
+These Dispatches carry the [personas](/http-api/users/personas/) and the [signal bar](/http-api/signal-bar/) of this instance.
+
+### <span id="user-persona-create"></span>USER_PERSONA_CREATE
+
+The current user created a persona.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona | [persona](/http-api/users/personas/#persona-object) object | The new persona, with an added `user_id` |
+
+### <span id="user-persona-update"></span>USER_PERSONA_UPDATE
+
+One of the current user's personas changed.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona | [persona](/http-api/users/personas/#persona-object) object | The persona after the change, with an added `user_id` |
+
+### <span id="user-persona-delete"></span>USER_PERSONA_DELETE
+
+The current user deleted a persona.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | snowflake | The deleted persona |
+| user_id | snowflake | The current user |
+
+### <span id="user-personas-update"></span>USER_PERSONAS_UPDATE
+
+A [bulk import](/http-api/users/personas/#bulk-import-personas) changed the current user's personas.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| personas | array[[persona](/http-api/users/personas/#persona-object) object] | Every persona the account owns |
+
+`personas` is always the complete set. A client that stores the personas replaces them with this array.
+
+### <span id="user-persona-settings-update"></span>USER_PERSONA_SETTINGS_UPDATE
+
+The current user's persona settings changed, or the persona they had selected was deleted. The payload is the complete [persona settings object](/http-api/users/personas/#persona-settings-object) without `updated_at`.
+
+### <span id="user-persona-channel-state-update"></span>USER_PERSONA_CHANNEL_STATE_UPDATE
+
+The persona the current user selected in one channel changed. The payload is a [persona channel state object](/http-api/users/personas/#persona-channel-state-object), and a null `persona_id` means the channel is used as the account itself again. Only the current user's sessions receive it.
+
+### <span id="guild-personas-dirty"></span>GUILD_PERSONAS_DIRTY
+
+Another account changed its personas or its display tag. A client that caches that account's personas refreshes them.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id? | snowflake | The guild the Dispatch was sent through, absent when it was sent to a direct message recipient |
+| user_id | snowflake | The account that changed |
+| persona? | [message persona](/http-api/messages/#message-persona-object) object | The persona that changed, when it is `public` or `unlisted` |
+| display_tag_text | ?string | The account's display tag text |
+| display_tag_icon | ?string | The account's display tag icon |
+| action | string | `update`, `delete` or `sync` |
+
+A `private` persona is never named: its Dispatch, like the one after a bulk import or a settings change, carries no `persona`. A client that shows that account's personas then looks them up again with [Look up personas by ID](/http-api/users/personas/#look-up-personas-by-id). A `delete` needs no lookup, as old messages keep showing the persona.
+
+The Dispatch goes to every guild the account is a member of, and directly to each recipient of its direct messages. Creating a `public` or `unlisted` persona sends it with `update`, updating or deleting any persona sends it with `update` or `delete`, and a bulk import that touched a `public` or `unlisted` persona, or a change to the display tag, sends it with `sync`.
+
+### <span id="signal-bar-update"></span>SIGNAL_BAR_UPDATE
+
+The instance's signal bar was edited. Clients fetch it again with [Get signal bar](/http-api/signal-bar/#get-signal-bar).
+
+| Field | Type | Description |
+| --- | --- | --- |
+| version | integer | The bar's new `version` |
+
+The Dispatch is sent through every guild of the instance, so a session connected to several guilds receives it once for each, and passive sessions receive it too.
+
+### <span id="channel-signal-update"></span>CHANNEL_SIGNAL_UPDATE
+
+Signals were given, changed or switched off in a channel.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The channel |
+| bar_version | integer | The signal bar `version` the change was made against |
+| added | array[[channel signal entry](/http-api/signal-bar/#channel-signal-entry-object) object] | Entries given or changed |
+| removed | array[[removed signal](#removed-signal-object) object] | Entries switched off |
+
+#### Removed signal object
+
+| Field | Type | Description |
+| --- | --- | --- |
+| signal_id | string | The signal |
+| user_id | snowflake | The account whose entry was switched off |
+
+### <span id="channel-signal-bar-update"></span>CHANNEL_SIGNAL_BAR_UPDATE
+
+The signal bar was switched on or off in a channel. Switching it off also clears the channel's signals, and no [Channel Signal Update](#channel-signal-update) is sent for them.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The channel |
+| enabled | boolean | Whether the signal bar now shows in the channel |
