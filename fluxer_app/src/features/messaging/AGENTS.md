@@ -135,7 +135,7 @@ Fork-owned: `state/MessageChangePersona.ts`, `utils/ExpressionDraftPersona.ts`,
 | `MessagingMessage.ts`, `ChannelMessages.ts` | `subprofile` in constructor, `withUpdates`, `equals`, `toJSON`; `mention_personas` → `PersonaStore.recordKnownPersona`; `skipReactionHydration` |
 | `MessagingMessages.ts` | persona index inside upstream's index methods; `patchPersonaMessages` (a copy of `patchAuthorMessages`); `handlePersonaUpdate`, `handleAuthorDisplayTagUpdate` (from `persona/events/PersonaEvents.ts`) |
 | `ReactionStateMachine.ts`, `ReactionUsersStateMachine.ts`, `MessageReactions.ts`, `ReactionCommands.tsx`, reaction events, `ReactionUtils.ts` | upstream's functions rewritten for persona reactors; widened signatures; `MessageReactionsModal.tsx`, `EmojiRenderer.tsx` pass ids to "React as…" |
-| `Nodes.ts`, `MarkdownParserWasm.ts`, `MentionRenderer.tsx`, `Plaintext.ts` | `personaId` on user mentions; a persona branch at the top of the `User` case |
+| `Nodes.ts`, `MarkdownParserWasm.ts`, `MentionRenderer.tsx`, `Plaintext.ts` | `personaId` on user mentions; a persona branch at the top of the `User` case, in the persona's colour |
 | `MessageGroupingUtils.ts`, `MessageReferences.ts`, `SystemMessageUtils.tsx` | a persona change starts a group; reply previews keep a known persona; persona names |
 | `TypingStart.ts`, `useTextareaDraftAndTyping.ts` | the typist's persona; the composer's persona to typing and the signal bar, silent while a tag is half typed |
 
