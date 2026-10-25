@@ -217,6 +217,9 @@ is in the server folder's `AGENTS.md`.
 - Community creation: the web app hides it from accounts the API would refuse, by evaluating
   upstream's rule itself (`packages/limits/src/ForkCommunityCreation.ts`); the API test
   `ForkCommunityCreationClientRule.test.ts` checks that the two agree.
+- Link colours: on the web and desktop, links and mentions keep upstream's link colours, not the
+  instance's brand colour that upstream gives them (`features/theme/styles/ForkLinkColors.css`,
+  imported in `fluxer_app/src/index.tsx` after the generated colour system; tyne-chat/tyne#230).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
