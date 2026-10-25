@@ -185,3 +185,17 @@ Removes a direct message or group DM from your pinned list and sends you a [User
 | 400 | [error response](/http-api/#error-response) | `CHANNEL_MUST_BE_DM_OR_GROUP_DM` when the channel is another type |
 
 The rate limit is 40 requests per 10 seconds, on the `user:channels` bucket.
+
+## Get imported conversation
+
+<RouteHeader method="GET" path="/v1/users/@me/imported-conversations/{user_id}" />
+
+Your direct message with an account a Discord import made for someone who is not on Tyne, when it holds imported messages. Nobody uses such an account, so its profile offers to open this conversation instead of starting a new one: once you close it, [Create private channel](#create-private-channel) with its `recipient_id` opens it again, and refuses any other direct message with that account. Session tokens only.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object with `channel_id` (snowflake, or null) | The conversation's ID; null for any other account, or when you have no such conversation or it holds no messages |
+
+The rate limit is 100 requests per 10 seconds, on the `user:imported_conversation` bucket, one per account asked about.
