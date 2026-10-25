@@ -148,6 +148,8 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `DISCOVERY_INSUFFICIENT_MEMBERS` | This community doesn't have enough members to be listed in Explore |
 | `DISCOVERY_NOT_DISCOVERABLE` | This community isn't listed in Explore |
 | `DISCRIMINATOR_REQUIRED` | Discriminator is required |
+| `DUPLICATE_PERSONA_TAG` | This tag is already taken |
+| `DUPLICATE_SIGNATURE_EMOJI` | This tag is already taken |
 | `EMAIL_CODES_UNAVAILABLE` | This instance can't send email codes |
 | `EMAIL_CODE_RESEND_COOLDOWN` | Wait a moment before asking for another code |
 | `EMAIL_DELIVERY_OFF` | This instance doesn't send email |
@@ -179,6 +181,10 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `GONE` | Gone |
 | `GROUP_DM_MATURE_CONTENT_INELIGIBLE` | Not everyone in this group is eligible for mature content |
 | `GROUP_DM_RECIPIENTS_NOT_ADDABLE` | One or more selected users can't be added to this group DM |
+| `GUILD_COMMAND_INPUT_INVALID` | Invalid form body |
+| `GUILD_COMMAND_LIMIT_REACHED` | A community can have at most 500 commands |
+| `GUILD_COMMAND_NAME_TAKEN` | This tag is already taken |
+| `GUILD_COMMAND_TEMPLATE_INVALID` | Invalid form body |
 | `GUILD_CREATION_EMAIL_VERIFICATION_REQUIRED` | Email verification is required for this action |
 | `GUILD_CREATION_PERMISSION_REQUIRED` | You don't have permission to create communities on this instance |
 | `GUILD_EMAIL_VERIFICATION_REQUIRED` | Email verification is required for this action |
@@ -283,8 +289,11 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `PASSWORD_REQUIRED_TO_CLAIM` | Set a password to keep this account |
 | `PASSWORD_SIGN_IN_REQUIRED` | Sign in to this account with its password |
 | `PERSONAL_NOTES_DISABLED` | Personal notes are turned off on this instance |
+| `PERSONA_LIMIT_REACHED` | Maximum number of personas reached (250) |
+| `PERSONA_TAG_LIMIT_REACHED` | A persona can have at most 5 tags |
 | `PREMIUM_PURCHASE_BLOCKED` | No active subscription |
 | `PREVIEW_MUST_BE_JPEG` | Preview must be JPEG |
+| `PRIVATE_PERSONA` | You don't have access to this resource or feature |
 | `PROCESSING_FAILED` | We couldn't process the request |
 | `PROFILE_EMAIL_VERIFICATION_REQUIRED` | Email verification is required for this action |
 | `PUBLISHED_MESSAGE_EDIT_RATE_LIMITED` | This published message is at its editing limit |
@@ -307,6 +316,7 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `SEARCH_INDEX_NOT_READY` | The search index isn't ready yet |
 | `SERVICE_UNAVAILABLE` | Service unavailable |
 | `SESSION_TOKEN_MISMATCH` | Session token mismatch |
+| `SIGNATURE_EMOJI_LIMIT_REACHED` | A persona can have at most 10000 signature emojis |
 | `SIGN_IN_CODE_EXPIRED` | This code has expired |
 | `SINGLE_COMMUNITY_CANNOT_CREATE_GUILDS` | This instance is a single community, so additional communities cannot be created |
 | `SINGLE_COMMUNITY_CANNOT_DELETE` | The community for this instance cannot be deleted |
@@ -367,11 +377,13 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `UNKNOWN_FORUM_TAG` | Tag wasn't found |
 | `UNKNOWN_GIFT_CODE` | Unknown gift code |
 | `UNKNOWN_GUILD` | Community wasn't found |
+| `UNKNOWN_GUILD_COMMAND` | Not found |
 | `UNKNOWN_HARVEST` | Unknown data export |
 | `UNKNOWN_INVITE` | Invite wasn't found or is no longer valid |
 | `UNKNOWN_MEMBER` | Member wasn't found in this community |
 | `UNKNOWN_MESSAGE` | Message wasn't found |
 | `UNKNOWN_ORIGIN_HANDOFF` | This sign-in transfer has expired or was already used |
+| `UNKNOWN_PERSONA` | User wasn't found |
 | `UNKNOWN_REPORT` | Unknown report |
 | `UNKNOWN_ROLE` | Role wasn't found |
 | `UNKNOWN_SIGN_IN_TICKET` | This sign-in attempt has expired |
