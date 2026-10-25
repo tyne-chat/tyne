@@ -10,7 +10,7 @@ Every Gateway connection (not the voice connection) has limits on what it sends,
 
 Hello sends a heartbeat interval of 41,250 ms, and the Gateway checks the heartbeat every 13,750 ms. When 37,125 ms have elapsed since the last acknowledgement, the Gateway sends opcode `1` and you send a heartbeat right away. If no acknowledgement arrives within 45,000 ms, the connection closes with `4009`, and a socket that never sends Identify closes the same way.
 
-A disconnected session stays resumable for 60,000 ms, and its presence shows as `offline` after 5,000 ms. A Resume inside that window restores the status the session had.
+A disconnected session stays resumable for 300,000 ms, and its presence shows as `offline` after 5,000 ms. A Resume inside that window restores the status the session had.
 
 One user has at most 100 live sessions, and a further Identify closes with `4008`.
 
