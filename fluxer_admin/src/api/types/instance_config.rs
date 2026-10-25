@@ -542,6 +542,7 @@ pub struct AppBrandingConfigResponse {
     pub premium_showcase_upload_url: Option<String>,
     pub custom_css: Option<String>,
     #[serde(default)]
+    pub upload_limit_message: Option<String>,
     #[serde(default)]
     pub trusted_domains: Vec<String>,
 }
