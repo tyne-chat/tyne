@@ -282,6 +282,8 @@ member.)
   `enhancement`, or `task` (the Task form, with a priority) for tooling, docs, refactors and audit
   follow-ups; add the `priority:*` and `platform:*` labels that apply. Skip this only for a change
   too small to be worth a line in the history.
+- Start a bug's title with `[Upstream]` when upstream has it too (its code, changed by the fork or
+  not, or a dependency at its version); not for fork-only or setup bugs. Look for its fix first.
 - Write the investigation on the issue as you go, not only in chat: the cause with file and line,
   how you know (what you ran, what you only read), whether it is upstream's behaviour or the fork's,
   the options and the choice. A theory is labelled as one.
