@@ -20,8 +20,8 @@ In the dev container, from the repository root:
 pnpm --filter fluxer_app typecheck:only
 # Typecheck and tests of every other workspace package the fork changed.
 (B=$(git merge-base upstream/main HEAD); for c in typecheck test; do pnpm -r --filter "[$B]" --filter "!fluxer" --filter "!fluxer_app" --filter "!fluxer_api" --filter "!fluxer_desktop" --if-present $c || exit 1; done)
-# API, desktop and web tests and typechecks. A few API test files are known to fail or need the
-# host's network (below); the maintainers keep those lists outside this repository.
+# API, desktop and web tests and typechecks. A few API test files are known to fail on the fork;
+# the maintainers keep that list outside this repository.
 pnpm --filter fluxer_api test
 pnpm --filter fluxer_api typecheck
 pnpm --filter fluxer_desktop typecheck && pnpm --filter fluxer_desktop test
@@ -43,19 +43,13 @@ cargo deny --locked check -D warnings licenses bans sources && cargo deny --mani
 pnpm i18n:compile && git diff --exit-code -- packages/errors/src/i18n/weblate fluxer_api/pkgs/email/src/email_i18n fluxer_api/src/api/content_i18n/weblate
 pnpm --filter fluxer_docs build
 cargo check -p fluxer_admin -p fluxer-messages -p fluxer-media-proxy
+# Rust tests.
+cargo test --workspace --all-features --locked
 ```
 
-On the host, from the repository root (these start containers of their own or need the host's
-network; `<workspace>` is the dev container and `<workspace image>` its image):
+On the host, from the repository root (these start containers of their own):
 
 ```bash
-# Rust tests: fluxer-svc's Postgres tests reach a container on the host's 127.0.0.1, and two app-proxy
-# tests read FLUXER_* settings from the environment, which the dev container sets for the dev stack.
-docker run --rm --network host --volumes-from <workspace> -u vscode -w /workspaces/fluxer <workspace image> cargo test --workspace --all-features --locked
-# API tests that start their own Postgres on the host's 127.0.0.1 (only when a change touches the API's
-# database code: src/api/database, a repository, the job ledger, instance config). Call vitest
-# itself, never pnpm, in that container: pnpm there takes the shared node_modules for stale.
-docker run --rm --network host --volumes-from <workspace> -u vscode -w /workspaces/fluxer/fluxer_api <workspace image> node_modules/.bin/vitest run <test files>
 # Production build of the web app, in a container of its own.
 docker compose -f e2e/docker-compose.e2e-build.yml build app-proxy
 # Full E2E suite on an ephemeral stack (builds its own images; --skip-build reuses the last ones).
