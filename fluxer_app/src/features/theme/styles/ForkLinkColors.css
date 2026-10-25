@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/*
+ * Fork: links and mentions keep upstream's link colours (the `link` and `legacyLink` tones in
+ * scripts/GenerateColorSystem.ts) instead of the instance's brand colour, which upstream gave them
+ * in a133255444 (tyne-chat/tyne#230). Same selectors as the generated color-system.css, imported
+ * after it in index.tsx, so a user theme or the instance's custom CSS, added later, still wins.
+ */
+:root {
+	--text-link: hsl(198, calc(92% * var(--saturation-factor)), 70%);
+}
+
+.theme-light {
+	--text-link: hsl(198, calc(92% * var(--saturation-factor)), 45%);
+}
+
+.theme-dark_legacy {
+	--text-link: hsl(210, calc(100% * var(--saturation-factor)), 70%);
+}

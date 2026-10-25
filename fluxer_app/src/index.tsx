@@ -12,4 +12,9 @@ import '@app/features/theme/styles/generated/color-system.css';
 import '@app/features/theme/styles/generated/message-layout.css';
 import '@app/features/theme/styles/preflight.css';
 
+// Fork imports.
+
+// After color-system.css: links keep their colour (tyne-chat/tyne#230).
+import '@app/features/theme/styles/ForkLinkColors.css';
+
 void import(/* webpackMode: "eager" */ '@app/indexMain');
