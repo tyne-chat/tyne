@@ -485,6 +485,7 @@ pub struct AppBrandingConfigResponse {
     pub sign_in_backdrop_url: Option<String>,
     pub custom_css: Option<String>,
     #[serde(default)]
+    pub upload_limit_message: Option<String>,
     #[serde(default)]
     pub trusted_domains: Vec<String>,
     #[serde(default = "default_desktop_app_prompt_enabled")]
