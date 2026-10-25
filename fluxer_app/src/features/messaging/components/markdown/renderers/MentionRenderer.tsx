@@ -36,6 +36,7 @@ import type React from 'react';
 
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {personaMentionStyle} from '@app/features/persona/utils/PersonaMentionStyle';
 
 const UNKNOWN_ROLE_DESCRIPTOR = msg({
 	message: 'Unknown role',
@@ -172,12 +173,14 @@ export const MentionRenderer = observer(function MentionRenderer({
 				}
 				const personaName = persona?.name || kind.personaId;
 				const personaMentionLabel = `@${personaName}`;
+				const personaStyle = personaMentionStyle(persona?.color);
 
 				if (shouldDisableInteractions || !user) {
 					return (
 						<span
 							key={id}
 							className={markupStyles.mention}
+							style={personaStyle}
 							data-flx="messaging.markdown.renderers.mention-renderer.span-persona"
 						>
 							<MentionLabel data-flx="messaging.markdown.renderers.mention-renderer.mention-label-persona">
@@ -203,6 +206,7 @@ export const MentionRenderer = observer(function MentionRenderer({
 								role="button"
 								tabIndex={0}
 								className={clsx(markupStyles.mention, markupStyles.interactive)}
+								style={personaStyle}
 								onClick={(e) => e.stopPropagation()}
 								onKeyDown={(e) => {
 									if (!isKeyboardActivationKey(e.key)) return;
