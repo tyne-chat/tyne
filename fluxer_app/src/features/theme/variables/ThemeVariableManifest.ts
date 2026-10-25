@@ -900,7 +900,7 @@ export const THEME_VARIABLES: ReadonlyArray<ThemeVariableDefinition> = [
 	{name: "--text-chat", kind: "color", groupId: "text", groupLabel: "Text", source: "color-system"},
 	{name: "--text-chat-muted", kind: "color", groupId: "text", groupLabel: "Text", source: "color-system"},
 	{name: "--text-code", kind: "color", groupId: "code", groupLabel: "Code & terminal", source: "color-system"},
-	{name: "--text-link", kind: "color", groupId: "text", groupLabel: "Text", source: "color-system"},
+	{name: "--text-link", kind: "color", groupId: "text", groupLabel: "Text", source: "features/theme/styles/ForkLinkColors.css"},
 	{name: "--text-on-brand-primary", kind: "color", groupId: "text", groupLabel: "Text", source: "color-system"},
 	{name: "--text-on-brand-primary-light", kind: "color", groupId: "text", groupLabel: "Text", source: "color-system"},
 	{name: "--text-on-brand-tint", kind: "color", groupId: "text", groupLabel: "Text", source: "color-system"},
