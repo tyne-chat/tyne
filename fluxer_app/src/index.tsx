@@ -27,6 +27,11 @@ import {captureCustomCssOffFromLocation} from '@app/features/theme_settings/stat
 import {PASSKEY_BRIDGE_PATH} from '@fluxer/constants/src/PasskeyConstants';
 import {configure} from 'mobx';
 
+// Fork imports.
+
+// After color-system.css: links keep their colour (tyne-chat/tyne#230).
+import '@app/features/theme/styles/ForkLinkColors.css';
+
 const logger = new Logger('index');
 
 captureAccountHandoffFromLocation();

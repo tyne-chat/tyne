@@ -82,6 +82,9 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 - **Picked images wait for Save**, as in upstream's profile editor: the form keeps them as
   `pendingAvatar`/`pendingBanner` (previewed from there), Save uploads them
   (`PersonaCommands.uploadPersonaImage`) before saving the persona, and Reset drops them.
+- **Mentions** of a persona take its colour, as in the mobile app: the text, and a fill a tenth as
+  strong (`utils/PersonaMentionStyle.ts`, used by `MentionRenderer` and the composer's
+  `ComposerMentionPill`). A persona without a colour gets the usual mention colours.
 - **Profiles:** `fetchPersonaProfile` caches for 60 seconds; a 403 `PRIVATE_PERSONA` means the
   profile is private. Bio, banner and pronouns never come from a message.
 - **Other people's personas** are cached in `_knownPersonas`, with their owner where it is known
