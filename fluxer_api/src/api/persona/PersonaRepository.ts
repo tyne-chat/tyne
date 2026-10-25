@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {personaAssetHashOrNull} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {generateSnowflake} from '@fluxer/snowflake/src/Snowflake';
-import {createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
+import type {PersonaID, UserID} from '../BrandedTypes';
 import {deleteOneOrMany, fetchMany, fetchOne, upsertOne} from '../database/CassandraQueryExecution';
 import type {PersonaRow, UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import {Persona} from '../models/Persona';
@@ -13,6 +12,7 @@ import {
 	personaLookupKey,
 	type UpdatePersonaParams,
 } from './IPersonaRepository';
+import {generatePersonaId} from './PersonaIdGenerator';
 
 const FETCH_PERSONA_CQL = Personas.selectCql({
 	where: [Personas.where.eq('user_id'), Personas.where.eq('persona_id')],
@@ -129,7 +129,7 @@ export class PersonaRepository extends IPersonaRepository {
 
 	async create(params: CreatePersonaParams): Promise<Persona> {
 		const now = new Date();
-		const personaId = params.persona_id ?? createPersonaID(generateSnowflake());
+		const personaId = params.persona_id ?? (await generatePersonaId());
 		const row: PersonaRow = {
 			user_id: params.user_id,
 			persona_id: personaId,
