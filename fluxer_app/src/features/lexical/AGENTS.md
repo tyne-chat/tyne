@@ -127,7 +127,7 @@ upstream's files, each under `// Fork imports.`:
 |---|---|
 | `LexicalComposerInput.tsx` (upstream's most changed) | theme key, two nodes, two `register*` calls, `insertTimestamp`, timestamp branches in the pointer handlers |
 | `useLexicalAutocomplete.ts` | `buildRecentPersonaOptions`, persona merge in the `mention` case, `optionToSlotPayload`, `optionToPayload` |
-| `nodes/ComposerMentionPill.tsx`, `nodes/ComposerMentionNode.tsx` | persona branch, plain-mode name; `getPersonaId`, two props |
+| `nodes/ComposerMentionPill.tsx`, `nodes/ComposerMentionNode.tsx` | persona branch (in the persona's colour), plain-mode name; `getPersonaId`, two props |
 | `ComposerSerialization.ts`, `composerOffsets.ts`, `ComposerInsertion.ts`, `ComposerHandle.ts` | persona form; timestamp and anchor cases; `timestamp` payload (built only by a test) |
 | `ComposerMarkdownHighlight.ts`, `ComposerBlockquote.ts`, `ComposerEmojiShortcode.ts`, `ComposerPlainText.ts` | anchor checks inside upstream's conditions |
 | `ComposerMarkdownShortcuts.ts`, `LexicalMessageCommand.ts` | empty-selection shortcuts; `/persona` |
