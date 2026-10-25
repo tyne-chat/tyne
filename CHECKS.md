@@ -34,9 +34,14 @@ pnpm exec biome ci . && pnpm exec eslint . --max-warnings 0 && pnpm --filter flu
 # Rust formatting and Clippy. The native script also checks the Windows add-ons for
 # x86_64-pc-windows-msvc, as upstream's CI does: needs `rustup target add x86_64-pc-windows-msvc` once.
 cargo fmt --all -- --check && cargo fmt --manifest-path fluxer_app/rust/libfluxwebp/Cargo.toml -- --check && tools/ci/check-desktop-native-workspaces.sh fmt && cargo clippy --workspace --all-targets --all-features --locked -- -D warnings && tools/ci/check-desktop-native-workspaces.sh clippy
-# cargo deny: licenses, bans and sources must pass; advisories are reported only.
+# cargo deny: licenses, bans and sources must pass.
 # Needs `cargo install cargo-deny --version 0.20.2 --locked` once.
 cargo deny --locked check -D warnings licenses bans sources && cargo deny --manifest-path fluxer_app/rust/libfluxwebp/Cargo.toml --config deny.toml --locked check licenses bans sources && (for m in fluxer_desktop/native/*/Cargo.toml; do cargo deny --manifest-path "$m" --all-features --locked check -D warnings -A unmatched-skip -A unnecessary-skip -D duplicate licenses bans sources || exit 1; done)
+# Dependency advisories, report only: npm, and every Cargo.lock as upstream's daily job checks them.
+# They fail while any published advisory is open, which never holds a commit; read what they list,
+# and report one that affects the fork as `.github/SECURITY.md` says.
+pnpm audit --prod
+tools/ci/check-cargo-lockfiles.sh
 # Gateway, Knip, synced catalogues, API docs, and a check of the admin, messages and media-proxy
 # crates. The gateway's eunit run covers the fork's own tests; upstream dropped its own and the CI step.
 (for s in gateway_fmt gateway_compile gateway_dialyzer knip; do tools/ci/run.sh ci --step $s || exit 1; done) && (cd fluxer_gateway && rebar3 as test eunit)
