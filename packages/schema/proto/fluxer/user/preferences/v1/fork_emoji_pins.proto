@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+// Fork: Tyne's pinned emojis, the fork's `emoji_pins` field of `SyncedPreferences`
+// (tyne-chat/tyne#140). The whole file is the fork's. tyne-mobile keeps a copy in
+// `lib/core/synced_preferences/proto/`; change both together.
+
+syntax = "proto3";
+
+package fluxer.user.preferences.v1;
+
+// Emojis pinned to the front of the picker's frequently used section and the quick reactions.
+// Every list holds emoji keys as the pickers write them (`unicode:<unique name>`,
+// `custom:<guild id>:<emoji id>`), in the order they were pinned.
+message EmojiPinsState {
+  // Pinned whoever the account writes as.
+  repeated string pinned_emoji_ids = 1;
+  // Pinned for one persona only, by persona id; shown after the account's pins.
+  map<string, PersonaEmojiPins> persona_pins = 2;
+}
+
+message PersonaEmojiPins {
+  repeated string emoji_ids = 1;
+}
