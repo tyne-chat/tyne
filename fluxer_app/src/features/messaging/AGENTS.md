@@ -125,7 +125,7 @@ small enough, they go in a multipart POST with the message.
 ## Where the fork's code sits
 
 Fork-owned: `state/MessageChangePersona.ts`, `utils/ExpressionDraftPersona.ts`,
-`utils/PlainPasteUtils.ts` and the fork tests. Inside upstream's files, under `// Fork imports.`:
+`utils/PlainPasteUtils.ts`, `utils/MarkdownPersonaMentionSegments.ts` and the fork tests. Inside upstream's files, under `// Fork imports.`:
 
 | File | Fork change |
 |---|---|
@@ -138,6 +138,7 @@ Fork-owned: `state/MessageChangePersona.ts`, `utils/ExpressionDraftPersona.ts`,
 | `Nodes.ts`, `MarkdownParserWasm.ts`, `MentionRenderer.tsx`, `Plaintext.ts` | `personaId` on user mentions; a persona branch at the top of the `User` case, in the persona's colour |
 | `MessageGroupingUtils.ts`, `MessageReferences.ts`, `SystemMessageUtils.tsx` | a persona change starts a group; reply previews keep a known persona; persona names |
 | `TypingStart.ts`, `useTextareaDraftAndTyping.ts` | the typist's persona; the composer's persona to typing and the signal bar, silent while a tag is half typed |
+| `MarkdownToSegmentUtils.ts` | `convertMarkdownToSegments` returns through `withPersonaMentionSegments`, so an edited message's persona mentions become pills |
 
 Smaller fork changes: emoji autocomplete limit, typed shortcode case, `<t:>` in the profile's
 time zone, plain paste, an emptied composer deleting its draft. The mention parser is in
