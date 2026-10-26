@@ -47,6 +47,18 @@ relative to this folder; other features are named from `fluxer_app/src/features/
   reloads it at most every 10 s. A replacing load keeps the sending and failed messages it lacks
   (`collectUnsentMessages`). On READY, `handleGatewayReady` reloads the selected channel and marks
   the others not ready, and `MessageReactions` is emptied.
+- **Fork: a page that no longer fits is dropped.** `ScrollManager` asks for the page `before` the
+  window's first message or `after` its last. Upstream joins the page on whatever the window has
+  become meanwhile and clears that side's buffer: a live message that trims the window from the top
+  (`applyIncomingMessage` with `truncateFromTop`), or a reload that replaced it, left a gap in the
+  history until the channel was reloaded, and a page landing during a reload became the whole window
+  (tyne-chat/tyne#212). `commands/ForkMessagePageFit.ts`, called in `fetchMessages` before the page
+  is applied, applies a cursor page only if the window is ready and still starts (or ends) at its
+  cursor. When a live message trimmed the window, the trimmed messages are in `beforeBuffer`: it
+  first serves a page of them, as the next scroll would, and applies the page if that reaches the
+  cursor (one trimmed message, the usual case). Otherwise it drops the page, and the load ends
+  `loadingMore` only if it still owns the window (same `loadGeneration`, still loading); a newer load
+  or the reload keeps it. The Android app drops such pages too (`applyOlderPage`, `applyNewerPage`).
 
 ## Sending: composer to echo
 
@@ -125,12 +137,13 @@ small enough, they go in a multipart POST with the message.
 ## Where the fork's code sits
 
 Fork-owned: `state/MessageChangePersona.ts`, `utils/ExpressionDraftPersona.ts`,
-`utils/PlainPasteUtils.ts`, `utils/MarkdownPersonaMentionSegments.ts` and the fork tests. Inside upstream's files, under `// Fork imports.`:
+`utils/PlainPasteUtils.ts`, `utils/MarkdownPersonaMentionSegments.ts`, `commands/ForkMessagePageFit.ts`
+and the fork tests. Inside upstream's files, under `// Fork imports.`:
 
 | File | Fork change |
 |---|---|
 | `useMessageSubmission.tsx`, `useTextareaSubmit.ts`, `useTextareaExpressionHandlers.ts` | persona blocks in both send callbacks; `matchEditMessage` around the edit calls; the draft kept on expression sends |
-| `MessageCommands.tsx` | `subprofile` on `SendMessageParams`; `SignalBarStore.affirmPersona` in `send`; `edit`'s last parameter and response block |
+| `MessageCommands.tsx` | `subprofile` on `SendMessageParams`; `SignalBarStore.affirmPersona` in `send`; `edit`'s last parameter and response block; the page-fit check in `fetchMessages` |
 | `MessageRequestUtils.ts`, `MessageSubmitUtils.ts`, `MessageRetryUtils.ts`, `MessageQueue.tsx` | `persona_id` in requests; `subprofile` carried through |
 | `MessagingMessage.ts`, `ChannelMessages.ts` | `subprofile` in constructor, `withUpdates`, `equals`, `toJSON`; `mention_personas` → `PersonaStore.recordKnownPersona`; `skipReactionHydration` |
 | `MessagingMessages.ts` | persona index inside upstream's index methods; `patchPersonaMessages` (a copy of `patchAuthorMessages`); `handlePersonaUpdate`, `handleAuthorDisplayTagUpdate` (from `persona/events/PersonaEvents.ts`) |
@@ -164,6 +177,9 @@ or rewrite upstream's code: an upstream fix there has to be carried over by hand
 - **Opening a channel:** none if the window is loaded and fresh or loading, else one page GET
   (retried twice on network and gateway errors). A failure shows the list's retry bar; nothing
   retries by itself.
+- **Scrolling:** one page GET per load, none when the buffers hold the page. A dropped page is asked
+  for again by a later scroll, once the buffer no longer holds what lies before it: one more GET
+  for the same messages. Nothing re-asks by itself.
 - **Send:** one POST; with files, first a plan request and one PUT per file or part. A 429 costs at
   most two more. Sending as another persona re-points one's lit signals in the channel, one request
   each (`SignalBarStore.affirmPersona`).
@@ -176,14 +192,14 @@ or rewrite upstream's code: an upstream fix there has to be carried over by hand
 
 - Vitest next to the code; one file: `pnpm --filter fluxer_app test src/features/messaging/<path>`.
   Before committing, the full list in `CHECKS.md`.
-- Upstream's: `ReactionStateMachine`, the two `MessagingMessages*` tests,
-  `MessageQueueAccountTransition`, `MessagePaginationUtils`, `useImageRecovery`,
-  `useTextareaDraftAndTyping` (with two fork `vi.mock` blocks).
-- The fork's: the `*Persona.test.ts(x)` files, `ReactionUsersStateMachine`, `MessageSubmitUtils`,
-  `MessageRetryUtils`, `MessageGroupingUtils`, and the emoji, autocomplete, paste and parser tests.
-  Several carry names upstream could take; name a new one `<File>Persona.test.ts`.
-- Tests mock stores with `vi.mock`, and `@lingui/core/macro` where a module uses `msg`. To count
-  requests, mock `http` as `MessagingMessagesAccountTransition.test.ts` does.
+- Upstream removed its messaging tests on 2026-10-21; every test here is the fork's: the
+  `*Persona.test.ts(x)` files, `ForkMessagePageFit`, `ReactionUsersStateMachine`,
+  `MessageSubmitUtils`, `MessageRetryUtils`, `MessageGroupingUtils`, and the emoji, autocomplete,
+  paste and parser tests. Several carry names upstream could take; name a new one
+  `<File>Persona.test.ts`, or `Fork<Name>.test.ts` when it is not about personas.
+- Tests mock stores with `vi.mock`, and `@lingui/core/macro` where a module uses `msg`. To drive
+  loads through `fetchMessages` and count requests, mock `http` as `ForkMessagePageFit.test.ts`
+  does; it holds each request until the test answers it, so the test sets the order things land in.
 - No unit test covers `useMessageSubmission`, `send`, the queue's failure and 429 paths, presigned
   uploads, or `ReactionCommands`' retry and revert. End to end: `e2e/web/desktop/persona-*.spec.ts`.
 
