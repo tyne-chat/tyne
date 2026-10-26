@@ -42,7 +42,7 @@ rules every client follows and where the web and mobile clients differ are in th
 | `enabledByChannel` | whether the bar is on; an unknown channel counts as off |
 | `composerPersonas` | per channel, whom the mounted composer writes as (`null`: the account) |
 | `epoch` | bumped by `invalidate()`, so mounted bars refetch |
-| `collapsed` | the caret: one value for every account and channel. Collapsed, the bar keeps the lit signals and drops the rest; with none lit only the caret is left (as on mobile) |
+| `collapsed` | the caret: one value per account on this device, for every channel, kept in app storage (`makePersistent`, key `SignalBar`), not synced. Collapsed, the bar keeps the lit signals and drops the rest; with none lit only the caret is left (as on mobile) |
 
 - **Loading.** `fetchConfig` shares the request in flight. `fetchChannel` is neither shared nor
   cached: it replaces the channel's entries and flag, and `rememberEntries` writes each entry's `user`
@@ -134,8 +134,7 @@ Tracked in tyne-chat/tyne#148 unless another issue is named.
 - Lit signals carry copies made when they were lit, and `rememberEntries` writes them over newer data
   in `Users` and `PersonaStore`: opening a channel can bring back an old name or avatar there.
 - Every READY empties all channels, so the bar disappears until the channel GET returns.
-- The caret uses raw `localStorage`, which production builds remove, so it is not saved there
-  (tyne-chat/tyne#140). Keyboard use of the bar is tyne-chat/tyne#112.
+- Keyboard use of the bar is tyne-chat/tyne#112.
 - The bar shows above a blocked recipient's barrier, and the server does not check blocks.
 
 ## Where this code hooks into upstream files
@@ -161,7 +160,8 @@ Tracked in tyne-chat/tyne#148 unless another issue is named.
 ## Tests
 
 - `state/SignalBarStore.test.ts`: entries, the persona rules (typing, other channels), version
-  refetch, rollbacks, the enabled flag. `components/SignalBar.test.tsx`: rendering, badges, toggling,
+  refetch, rollbacks, the enabled flag. `state/SignalBarCollapsedStorage.test.ts`: the caret is kept
+  per account in app storage. `components/SignalBar.test.tsx`: rendering, badges, toggling,
   rights, off, collapsed. `components/SignalBarMenus.test.tsx`: the managers' menu, reset, editor
   removal. `utils/SignalBarTree.test.ts`: order, mixed states, folding.
   `user/components/settings_utils/GuildSettingsTabsSignalBar.test.ts`: no tab without a home community.
