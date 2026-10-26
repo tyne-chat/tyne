@@ -7,6 +7,7 @@ import {EMOJI_MENU_CONFIG} from '@app/features/ui/action_menu/items/ExpressionMe
 
 import {EmojiPickerReactionContext} from '@app/features/channel/components/EmojiPicker';
 import EmojiPicker, {getEmojiUsageKey} from '@app/features/emoji/state/EmojiPicker';
+import EmojiPins from '@app/features/emoji/state/EmojiPins';
 import ExpressionPicker from '@app/features/emoji/state/ExpressionPicker';
 import Guilds from '@app/features/guild/state/Guilds';
 import {LINK_COPIED_TO_CLIPBOARD_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
@@ -101,8 +102,8 @@ const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void, activePersona?:
 	const {i18n} = useLingui();
 	const canFavorite = !emoji.id || Boolean(emoji.guildId && Guilds.getGuild(emoji.guildId));
 	const isFavorite = canFavorite ? EmojiPicker.isFavorite(emoji) : false;
-	const isGloballyPinned = EmojiPicker.isGloballyPinned(emoji);
-	const isPersonaPinned = activePersona ? EmojiPicker.isPersonaPinned(emoji, activePersona.id) : false;
+	const isGloballyPinned = EmojiPins.isGloballyPinned(getEmojiUsageKey(emoji));
+	const isPersonaPinned = activePersona ? EmojiPins.isPersonaPinned(getEmojiUsageKey(emoji), activePersona.id) : false;
 	const originalUrl = emoji.id
 		? AvatarUtils.getEmojiOriginalURL({id: emoji.id, animated: emoji.animated})
 		: (emoji.url ?? null);
@@ -116,12 +117,12 @@ const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void, activePersona?:
 	}, [emoji]);
 
 	const handleToggleGlobalPin = useCallback(() => {
-		EmojiPicker.togglePin(emoji);
+		EmojiPins.togglePin(getEmojiUsageKey(emoji));
 	}, [emoji]);
 
 	const handleTogglePersonaPin = useCallback(() => {
 		if (!activePersona) return;
-		EmojiPicker.togglePin(emoji, activePersona.id);
+		EmojiPins.togglePin(getEmojiUsageKey(emoji), activePersona.id);
 	}, [emoji, activePersona]);
 
 	const handleCopyId = useCallback(() => {
