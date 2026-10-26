@@ -68,6 +68,7 @@ vi.mock('@app/features/ui/tooltip/Tooltip', () => ({
 }));
 
 import EmojiPicker from '@app/features/emoji/state/EmojiPicker';
+import EmojiPins from '@app/features/emoji/state/EmojiPins';
 import type {FlatEmoji} from '@app/features/emoji/types/EmojiTypes';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
@@ -180,8 +181,8 @@ describe('QuickReactionButton', () => {
 	});
 
 	it('displays tiny pin badge in tooltip when emoji is pinned', async () => {
-		EmojiPicker.resetPinnedEmojis();
-		EmojiPicker.pinEmoji('unicode:heart');
+		EmojiPins.reset();
+		EmojiPins.pinEmoji('unicode:heart');
 
 		await act(async () => {
 			root.render(
@@ -206,7 +207,7 @@ describe('QuickReactionButton', () => {
 		expect(container.querySelector('[data-flx="channel.message-action-bar.pinned-badge"]')).toBeNull();
 
 		// Unpin and verify pinned badge disappears
-		EmojiPicker.unpinEmoji('unicode:heart');
+		EmojiPins.unpinEmoji('unicode:heart');
 		await act(async () => {
 			root.render(
 				<QuickReactionButton
@@ -250,8 +251,8 @@ describe('EmojiRenderer Pinning', () => {
 	});
 
 	it('renders pinned badge inside emoji picker tile when emoji is pinned', async () => {
-		EmojiPicker.resetPinnedEmojis();
-		EmojiPicker.pinEmoji('unicode:heart');
+		EmojiPins.reset();
+		EmojiPins.pinEmoji('unicode:heart');
 
 		await act(async () => {
 			root.render(
@@ -273,7 +274,7 @@ describe('EmojiRenderer Pinning', () => {
 		expect(pinnedBadge).toBeTruthy();
 
 		// Unpin and verify pinned badge disappears
-		EmojiPicker.unpinEmoji('unicode:heart');
+		EmojiPins.unpinEmoji('unicode:heart');
 		await act(async () => {
 			root.render(
 				<DndProvider backend={HTML5Backend} data-flx="channel.message-action-bar-quick-reaction-test.dnd-provider--2">
