@@ -350,12 +350,12 @@ export class MessageReactionService {
 			await this.assertCanModerateMessageReactions({channel, hasPermission});
 		}
 		const emojiId = parsedEmoji.id ? createEmojiID(BigInt(parsedEmoji.id)) : undefined;
-		let normalizedPersonaId: PersonaID | undefined;
-		if (personaId === null) {
-			normalizedPersonaId = createPersonaID(0n);
-		} else if (personaId !== undefined && personaId !== '') {
-			normalizedPersonaId = createPersonaID(BigInt(personaId));
-		}
+		// No persona means the account's own reaction, as upstream does (tyne-chat/tyne#123): never
+		// every reaction of the user's personas.
+		const normalizedPersonaId =
+			personaId === undefined || personaId === null || personaId === ''
+				? createPersonaID(0n)
+				: createPersonaID(BigInt(personaId));
 
 		await this.channelRepository.messageInteractions.removeReaction(
 			channel.id,
