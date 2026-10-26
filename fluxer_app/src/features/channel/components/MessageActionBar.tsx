@@ -74,6 +74,8 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 // Fork imports.
 
 import {getEffectiveContent} from '@app/features/channel/components/MessageActionUtils';
+import {getEmojiUsageKey} from '@app/features/emoji/state/EmojiPicker';
+import EmojiPins from '@app/features/emoji/state/EmojiPins';
 import {COPY_TEXT_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
@@ -234,7 +236,7 @@ export const QuickReactionButton = observer(
 		const reactorName = hasPersonas
 			? (effectivePersona?.name ?? Users.currentUser?.displayName ?? Users.currentUser?.username)
 			: null;
-		const isPinned = EmojiPicker.isPinned(emoji, effectivePersona?.id);
+		const isPinned = EmojiPins.isPinned(getEmojiUsageKey(emoji), effectivePersona?.id);
 		const tooltipContent = useCallback(
 			() => (
 				<div className={styles.tooltipContent} data-flx="channel.message-action-bar.tooltip-content.tooltip-content">
