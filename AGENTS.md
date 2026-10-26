@@ -201,8 +201,8 @@ cannot conflict.
 - After adding or editing strings (`msg()` or `<Trans>`), run `node scripts/fork-i18n.mjs sync` in
   `fluxer_app`, then translate every empty `msgstr` in
   `src/features/i18n/fork_locales/*/messages.po`. No empty or raw English values in other locales;
-  words that really are identical go in `fork_locales/reviewed-unchanged.json`. Details in
-  `fork_locales/README.md`.
+  words that really are identical go in `fork_locales/reviewed-unchanged.json`. Tyne's own terms:
+  `fork_locales/GLOSSARY.md`, for both apps. Details in `fork_locales/README.md`.
 - `node scripts/fork-i18n.mjs check --upstream upstream/main` (in `fluxer_app`; with `--upstream` it
   also fails if upstream's catalogues were edited) and `pnpm --filter fluxer_app lingui:compile` must
   pass.
