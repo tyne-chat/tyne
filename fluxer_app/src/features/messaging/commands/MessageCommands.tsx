@@ -87,6 +87,10 @@ import {observer} from 'mobx-react-lite';
 
 // Fork imports.
 
+import {
+	dropMessagePageThatNoLongerFits,
+	messageLoadGeneration,
+} from '@app/features/messaging/commands/ForkMessagePageFit';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
@@ -515,6 +519,8 @@ export async function fetchMessages(
 			return handleForcedMessageLoadFailure(channelId, jump);
 		}
 		Messages.handleLoadMessages({channelId, jump});
+		// Fork: the load this request belongs to, for the page-fit check below (tyne-chat/tyne#212).
+		const forkLoadGeneration = messageLoadGeneration(channelId);
 		const connectedAtRequest = GatewaySessions.foregroundConnection.isConnected;
 		const epochAtRequest = GatewaySessions.foregroundConnection.connectionEpoch;
 		try {
@@ -529,6 +535,8 @@ export async function fetchMessages(
 			});
 			const pageState = calculateMessagePageState(channelId, before, after, limit, messages, jump);
 			logger.info(`Fetched ${messages.length} messages for channel ${channelId}, took ${Date.now() - timeStart}ms`);
+			// Fork: a `before`/`after` page whose window changed meanwhile is dropped (tyne-chat/tyne#212).
+			if (dropMessagePageThatNoLongerFits(channelId, before, after, jump != null, forkLoadGeneration)) return [];
 			handleMessageFetchSuccess(channelId, messages, pageState, cached, jump);
 			return messages;
 		} catch (error) {
