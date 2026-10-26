@@ -38,9 +38,9 @@ on:
         type: choice
         options: [all, windows, linux, macos]
       macos_signing:
-        description: "developer-id: sign with the Developer ID and notarize (the default). ad-hoc: publish the build's ad-hoc signed macOS files, as releases before 2026-10-23 did, when Apple's notarization is too slow to wait for."
+        description: "ad-hoc (the default since 2026-10-25, while Apple's notary service holds the team's submissions): publish the build's ad-hoc signed macOS files. developer-id: sign with the Developer ID and notarize."
         required: false
-        default: developer-id
+        default: ad-hoc
         type: choice
         options: [developer-id, ad-hoc]
   push:
