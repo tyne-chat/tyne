@@ -5,7 +5,7 @@ preferences, and a few pure helpers. The API validates with them, the web app ta
 from them, and the OpenAPI specs, and from those the mobile app's Dart SDK, are generated from them.
 Consumers import files by path; nothing here runs on its own. The package is upstream's; the fork
 adds the persona and signal-bar domains, persona fields in upstream's schemas, some instance
-settings, and a block of accessibility protobuf fields.
+settings, a block of accessibility protobuf fields, and the pinned emojis' synced-preferences field.
 
 ## Where things are
 
@@ -82,8 +82,9 @@ How names come out:
 
 ## Synced preferences
 
-- One `SyncedPreferences` message (`preferences.proto`, importing `accessibility.proto` and
-  `pickers.proto`), stored by the API as a base64 blob; clients send the whole blob on each save.
+- One `SyncedPreferences` message (`preferences.proto`, importing `accessibility.proto`,
+  `pickers.proto` and the fork's `fork_emoji_pins.proto`), stored by the API as a base64 blob;
+  clients send the whole blob on each save.
   The API decodes it strictly on a save and refuses one it cannot read (`INVALID_FORMAT`).
 - `pnpm --filter @fluxer/schema generate` runs `buf generate` into `src/gen/` and strips everything
   above the first `import`, so the generated files carry no header: the folder is the marker.
@@ -117,7 +118,8 @@ tyne-chat/tyne#127).
 ## The fork's changes and where they hook in
 
 Fork-owned: `src/domains/persona/`, `src/domains/signal_bar/`, their `tests/`,
-`src/domains/auth/ForkHandoffReturnUri.test.ts`, `src/domains/tests/AdminResponseSchemas.test.ts`.
+`src/domains/auth/ForkHandoffReturnUri.test.ts`, `src/domains/tests/AdminResponseSchemas.test.ts`,
+`proto/fluxer/user/preferences/v1/fork_emoji_pins.proto` (and its generated `fork_emoji_pins_pb.ts`).
 In upstream's files, with fork imports in a `// Fork imports.` group:
 
 - `message/MessageRequestSchemas.ts`: `persona_id` and the deprecated `subprofile` (only its id is
@@ -133,6 +135,8 @@ In upstream's files, with fork imports in a `// Fork imports.` group:
   admin client and upstream's fixtures parse a response without them.
 - `user/UserRequestSchemas.ts`, `guild/GuildRequestSchemas.ts`: `bio` up to `MAX_BIO_LENGTH`.
   `auth/AuthSchemas.ts`: `tyne://handoff`. `accessibility.proto`: the fork block.
+  `preferences.proto`: a fork import and the fork block, `emoji_pins` (2200), whose message is in
+  the fork-owned `fork_emoji_pins.proto` (the web's `emoji/state/EmojiPins.ts`, tyne-chat/tyne#140).
   `packages/openapi/.../OpenAPIGeneratorCatalog.ts`: the `personas.*` scopes.
 
 For new work: a field must sit in upstream's object, so add it last, or spread a fork-owned group
