@@ -7,6 +7,10 @@ import type {MentionSegment, TextareaSegmentManager} from '@app/features/messagi
 import Users from '@app/features/user/state/Users';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 
+// Fork imports.
+
+import {withPersonaMentionSegments} from '@app/features/messaging/utils/MarkdownPersonaMentionSegments';
+
 const MARKDOWN_SEGMENT_PATTERN = /<(@|#|@&)([a-zA-Z0-9]+)>|<(a)?:([^:]+):([a-zA-Z0-9]+)>/g;
 
 interface SegmentConversionResult {
@@ -79,7 +83,7 @@ export function convertMarkdownToSegments(markdown: string, guildId?: string | n
 			offset += segmentDisplayText.length - fullMatch.length;
 		}
 	}
-	return {displayText, segments};
+	return withPersonaMentionSegments({displayText, segments});
 }
 
 export function applyMarkdownSegments(
