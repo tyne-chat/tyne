@@ -133,38 +133,60 @@ jobs:
           path: /opt/fluxer-native
           key: media-native-${{ runner.os }}-${{ hashFiles('fluxer_media_proxy/tools/install-native-deps.sh') }}
 
+      # A slow mirror can stall apt for over an hour (2026-10-26: 146 MB at 35 kB/s, 69 minutes),
+      # which the job timeout pays for. Only the download is bounded, so a timeout never stops dpkg
+      # halfway; after a try that fails or runs out of time, Azure's mirror is dropped from the
+      # runner's mirror list so apt uses the next one. Packages already downloaded stay in apt's
+      # cache for the retry. If every try fails, the step fails and the publish job escalates.
       - name: Install native dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential \
-            binutils \
-            clang \
-            cmake \
-            curl \
-            libaom-dev \
-            libavfilter-dev \
-            libclang-dev \
-            libcurl4-openssl-dev \
-            libdav1d-dev \
-            libde265-dev \
-            libfido2-dev \
-            libheif-dev \
-            liblcms2-dev \
-            libpipewire-0.3-dev \
-            libspa-0.2-dev \
-            libssl-dev \
-            libudev-dev \
-            libvips-dev \
-            libwebp-dev \
-            libyuv-dev \
-            meson \
-            nasm \
-            ninja-build \
-            pkg-config \
-            xz-utils \
-            yasm \
+          packages=(
+            build-essential
+            binutils
+            clang
+            cmake
+            curl
+            libaom-dev
+            libavfilter-dev
+            libclang-dev
+            libcurl4-openssl-dev
+            libdav1d-dev
+            libde265-dev
+            libfido2-dev
+            libheif-dev
+            liblcms2-dev
+            libpipewire-0.3-dev
+            libspa-0.2-dev
+            libssl-dev
+            libudev-dev
+            libvips-dev
+            libwebp-dev
+            libyuv-dev
+            meson
+            nasm
+            ninja-build
+            pkg-config
+            xz-utils
+            yasm
             zlib1g-dev
+          )
+          apt_opts=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
+          for attempt in 1 2 3; do
+            if sudo timeout 3m apt-get "${apt_opts[@]}" update \
+              && sudo timeout 10m apt-get "${apt_opts[@]}" install -y --no-install-recommends --download-only "${packages[@]}"; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::apt-get failed or timed out three times."
+              exit 1
+            fi
+            echo "::warning::apt-get failed or timed out (try $attempt of 3); retrying without Azure's mirror."
+            if [ -f /etc/apt/apt-mirrors.txt ] && grep -qv 'azure\.archive\.ubuntu\.com' /etc/apt/apt-mirrors.txt; then
+              sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+              cat /etc/apt/apt-mirrors.txt
+            fi
+          done
+          sudo apt-get "${apt_opts[@]}" install -y --no-install-recommends "${packages[@]}"
           sudo fluxer_media_proxy/tools/install-native-deps.sh /opt/fluxer-native
           echo "PKG_CONFIG_PATH=/opt/fluxer-native/lib/pkgconfig:/opt/fluxer-native/lib64/pkgconfig" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=/opt/fluxer-native/lib:/opt/fluxer-native/lib64" >> "$GITHUB_ENV"
