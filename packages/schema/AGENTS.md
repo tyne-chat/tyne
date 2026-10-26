@@ -93,6 +93,11 @@ How names come out:
   preferences. Each settings store builds its message afresh (`toMessage`, `SyncedField.ts`), so a
   web save drops any field the store does not carry. That is why the accessibility fields only the
   phone uses are carried, without UI, in the web's `accessibility/state/Accessibility.ts`.
+  For a minute after a save, upstream's `UserSettings.ts` keeps the window's own value of the saved
+  fields against an incoming one; for blobs from the server, the fork keeps it only against a stale
+  echo of the window's own saves, and forgets a save once its echo arrives, so a change made in
+  another window or device that minute applies, a change back to an earlier state included
+  (`ForkSyncedPreferenceEchoes.ts`, as upstream's mobile app does; tyne-chat/tyne#236).
 - **The mobile app** has its own copy in tyne-mobile's `lib/core/synced_preferences/proto/`. It
   follows upstream's mobile app, whose files already differ from upstream's server files
   (accessibility 42 and 43 are reserved here, declared there). Only the fork block is kept in step,
@@ -138,6 +143,11 @@ In upstream's files, with fork imports in a `// Fork imports.` group:
   `preferences.proto`: a fork import and the fork block, `emoji_pins` (2200), whose message is in
   the fork-owned `fork_emoji_pins.proto` (the web's `emoji/state/EmojiPins.ts`, tyne-chat/tyne#140).
   `packages/openapi/.../OpenAPIGeneratorCatalog.ts`: the `personas.*` scopes.
+- Outside this package, the web's merge of synced preferences: `fluxer_app/src/features/user/state/UserSettings.ts`
+  has five one-line hooks into `ForkSyncedPreferenceEchoes.ts` (a save recorded, a blob from the
+  server noted in `updateUserSettings` and after a conflict, the merge's acknowledged fields, an
+  account switch); tests in `ForkSyncedPreferenceEchoes.test.ts` and
+  `ForkSyncedPreferencesOtherWindow.test.ts` there.
 
 For new work: a field must sit in upstream's object, so add it last, or spread a fork-owned group
 as `PersonaMessageSearchRequestFields` does. A new standalone schema goes in a fork-owned file, even
