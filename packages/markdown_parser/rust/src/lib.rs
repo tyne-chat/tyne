@@ -28,5 +28,9 @@ pub fn parse_markdown_json(
     let context = EmojiContext::parse(emoji_context);
     let mut parser = MarkdownParser::new(flags, context);
     let nodes = parser.parse(input)?;
+    let nodes = fork_issue_links::link_issue_shorthands(nodes, &parser);
     Ok(json::write_ast_json(&nodes, input.len() * 8 + 64))
 }
+
+// Fork: issue shorthands (`tyne/101`) in the trees the apps display.
+pub mod fork_issue_links;
