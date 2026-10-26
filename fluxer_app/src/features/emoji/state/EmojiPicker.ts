@@ -274,10 +274,15 @@ class EmojiPicker {
 		}
 		const result: Array<string> = [];
 		const seen = new Set<string>();
+		const add = (key: string): void => {
+			const identity = getEmojiIdentityKey(key);
+			if (seen.has(identity)) return;
+			seen.add(identity);
+			result.push(key);
+		};
 
 		for (const key of EmojiPins.getAllEffectivePinnedEmojiKeys(effectivePersonaId)) {
-			seen.add(key);
-			result.push(key);
+			add(key);
 		}
 
 		if (effectivePersonaId) {
@@ -293,10 +298,7 @@ class EmojiPicker {
 						const uniqueName = UnicodeEmojis.getSurrogateName(surrogate) || sig.name;
 						key = `${UNICODE_EMOJI_USAGE_KEY_PREFIX}${uniqueName}`;
 					}
-					if (key && !seen.has(key)) {
-						seen.add(key);
-						result.push(key);
-					}
+					if (key) add(key);
 				}
 			}
 
@@ -304,19 +306,13 @@ class EmojiPicker {
 			if (personaUsage) {
 				const rankedPersonaKeys = rankUsageMap(personaUsage, Date.now(), 0).rankedKeys;
 				for (const key of rankedPersonaKeys) {
-					if (!seen.has(key)) {
-						seen.add(key);
-						result.push(key);
-					}
+					add(key);
 				}
 			}
 		}
 
 		for (const key of ranking.rankedKeys) {
-			if (!seen.has(key)) {
-				seen.add(key);
-				result.push(key);
-			}
+			add(key);
 		}
 
 		if (limit > 0 && result.length > limit) {
@@ -448,3 +444,11 @@ class EmojiPicker {
 }
 
 export default new EmojiPicker();
+
+// Fork: one key per emoji when de-duplicating. A custom signature emoji is keyed by its id alone
+// (`custom::<id>`, the persona does not record the emoji's guild), while usage and pins key it as
+// `custom:<guildId>:<id>`; both name the same emoji (tyne-chat/tyne#84).
+function getEmojiIdentityKey(key: string): string {
+	if (!key.startsWith(CUSTOM_EMOJI_USAGE_KEY_PREFIX)) return key;
+	return `${CUSTOM_EMOJI_USAGE_KEY_PREFIX}${key.slice(key.lastIndexOf(':') + 1)}`;
+}
