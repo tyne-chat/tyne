@@ -6,6 +6,8 @@ import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Logger} from '@app/features/platform/utils/AppLogger';
+import {makePersistent} from '@app/features/platform/utils/MobXPersistence';
+import {initializeStore} from '@app/features/platform/utils/StoreInitialization';
 import {decideComposerTyping} from '@app/features/typing/rolling/RollingComposerTypingGate';
 import Users from '@app/features/user/state/Users';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -24,7 +26,6 @@ import {makeAutoObservable, observable, runInAction} from 'mobx';
 const logger = new Logger('SignalBar');
 const EMPTY_SIGNALS: ReadonlyArray<SignalBarSignal> = Object.freeze([]);
 const EMPTY_ENTRIES: ReadonlyArray<ChannelSignalEntry> = Object.freeze([]);
-const COLLAPSED_STORAGE_KEY = 'signalBarCollapsed';
 
 function isSameEntry(entry: ChannelSignalEntry, signalId: string, userId: string): boolean {
 	return entry.signal_id === signalId && entry.user.id === userId;
@@ -38,20 +39,13 @@ interface ComposerEdit {
 	typingEnabled: boolean;
 }
 
-function readCollapsed(): boolean {
-	try {
-		return localStorage.getItem(COLLAPSED_STORAGE_KEY) === '1';
-	} catch {
-		return false;
-	}
-}
-
 class SignalBarStore {
 	signals: ReadonlyArray<SignalBarSignal> = EMPTY_SIGNALS;
 	version = -1;
 	guildId: string | null = null;
 	canManage = false;
-	collapsed = readCollapsed();
+	/** Kept in this device's storage, per account (`makePersistent`); not synced. */
+	collapsed = false;
 	epoch = 0;
 	private readonly entriesByChannel = observable.map<string, ReadonlyArray<ChannelSignalEntry>>(undefined, {
 		deep: false,
@@ -64,6 +58,7 @@ class SignalBarStore {
 
 	constructor() {
 		makeAutoObservable<this, 'configRequest'>(this, {configRequest: false}, {autoBind: true});
+		initializeStore(this, () => makePersistent(this, 'SignalBar', ['collapsed']));
 	}
 
 	/**
@@ -139,9 +134,6 @@ class SignalBarStore {
 
 	setCollapsed(collapsed: boolean): void {
 		this.collapsed = collapsed;
-		try {
-			localStorage.setItem(COLLAPSED_STORAGE_KEY, collapsed ? '1' : '0');
-		} catch {}
 	}
 
 	invalidate(): void {
