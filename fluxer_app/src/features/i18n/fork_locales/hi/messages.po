@@ -454,7 +454,7 @@ msgstr "इमोजी पिन करें"
 
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
-msgstr "इस व्यक्तित्व के लिए पिन करें"
+msgstr "इस परसोना के लिए पिन करें"
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
@@ -735,7 +735,7 @@ msgstr "इमोजी अनपिन करें"
 
 #. Emoji context menu action that unpins the emoji for the active persona.
 msgid "Unpin for this persona"
-msgstr "इस व्यक्तित्व के लिए अनपिन करें"
+msgstr "इस परसोना के लिए अनपिन करें"
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as the persona you picked. A tag applies to that message only."

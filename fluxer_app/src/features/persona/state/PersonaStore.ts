@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import i18n from '@app/app/I18n';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
+import EmojiPins from '@app/features/emoji/state/EmojiPins';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import {http} from '@app/features/platform/transport/RestTransport';
 import * as Toast from '@app/features/ui/commands/ToastCommands';
@@ -304,6 +305,7 @@ export class PersonaStoreClass {
 			this._personas = this._personas.filter((p) => p.id !== id);
 			this._knownPersonas.delete(id);
 		});
+		EmojiPins.forgetPersona(id);
 		if (this.activePersonaId === id) {
 			void this.unlatch();
 		}
