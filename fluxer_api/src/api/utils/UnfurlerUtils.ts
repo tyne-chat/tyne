@@ -7,6 +7,10 @@ import {Logger} from '@app/api/Logger';
 import * as InviteUtils from '@app/api/utils/InviteUtils';
 import {URL_REGEX} from '@fluxer/constants/src/Core';
 
+// Fork imports.
+
+import {expandForkIssueShorthands} from '@app/api/utils/ForkIssueShorthands';
+
 const CLIENT_ROUTE_PATH_PREFIXES = ['/channels/', '/theme/', '/invite/', '/gift/', '/oauth2/', '/users/'];
 
 interface ExcludedLinkBase {
@@ -97,6 +101,7 @@ export function extractURLs(inputText: string) {
 	text = text.replace(/\|\|/g, ' ');
 	text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$2');
 	text = text.replace(/<https?:\/\/[^\s]+>/g, '');
+	text = expandForkIssueShorthands(text);
 	const urls = text.match(URL_REGEX) || [];
 	const seen = new Set<string>();
 	const result: Array<string> = [];
