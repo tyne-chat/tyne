@@ -70,8 +70,9 @@ under `composer/` unless stated.
 - **The pill** takes `wire` and `personaId` in `...fork`. A branch atop the `user` case shows the
   current name: `PersonaStore.getKnownPersona`, else the persona on a cached message (recorded as
   known), else the stored `@Name` while it calls `fetchPersona` from render ("Network calls").
-- **Raw text, not pills,** when editing a message or pasting from outside: `applyMarkdownSegments`
-  and `detectPastedSegments` match `<@id>` only. The text is sent unchanged (tyne-chat/tyne#99).
+- **Editing a message** gives persona pills: messaging's `withPersonaMentionSegments` adds them to
+  upstream's `convertMarkdownToSegments` (tyne-chat/tyne#99). **Pasting from outside** still gives
+  raw text, because `detectPastedSegments` matches `<@id>` only; the text is sent unchanged.
 - **Persona tags** are plain text here: no node, no highlight. The host passes `wireValue` to
   `PersonaComposerPill` and the send strips the tag (`persona/AGENTS.md`). Match tags against the
   wire, never the display, which shows emoji as `:name:` and mentions as `@Name`.
