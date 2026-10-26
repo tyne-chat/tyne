@@ -25,6 +25,7 @@ import React, {useEffect, useImperativeHandle, useMemo, useRef} from 'react';
 
 import {useMergeRefs} from '@app/features/app/hooks/useMergeRefs';
 import {EmojiPickerReactionContext} from '@app/features/channel/components/EmojiPicker';
+import EmojiPins from '@app/features/emoji/state/EmojiPins';
 import ExpressionPicker from '@app/features/emoji/state/ExpressionPicker';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
@@ -131,7 +132,7 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 		const resolvedChannelId = reactionContext?.channelId ?? channel?.id ?? ExpressionPicker.channelId ?? undefined;
 		const draft = resolvedChannelId ? Drafts.getDraft(resolvedChannelId) : undefined;
 		const effectivePersona = PersonaStore.getEffectiveReactionPersona(resolvedChannelId ?? null, null, draft);
-		const isPinned = EmojiPicker.isPinned(emoji, effectivePersona?.id);
+		const isPinned = EmojiPins.isPinned(getEmojiUsageKey(emoji), effectivePersona?.id);
 		useImperativeHandle(forwardedRef, () => emojiRef.current!);
 		useEffect(() => {
 			if (shouldScrollIntoView && emojiRef.current) {

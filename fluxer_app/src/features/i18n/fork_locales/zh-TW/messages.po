@@ -454,7 +454,7 @@ msgstr "釘選表情符號"
 
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
-msgstr "為此人設釘選"
+msgstr "為此人格釘選"
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
@@ -735,7 +735,7 @@ msgstr "取消釘選表情符號"
 
 #. Emoji context menu action that unpins the emoji for the active persona.
 msgid "Unpin for this persona"
-msgstr "為此人設取消釘選"
+msgstr "取消此人格的釘選"
 
 #. Helper description for Manual persona mode
 msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
