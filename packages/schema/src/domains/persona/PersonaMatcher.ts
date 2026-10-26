@@ -38,9 +38,7 @@ export function matchPersona(
 	hasAttachments?: boolean,
 	options?: MatchPersonaOptions,
 ): MatchResult {
-	const latchedPersona = activeLatchedPersonaId
-		? personas.find((p) => p.id === activeLatchedPersonaId && !p.auto_tag_disabled)
-		: undefined;
+	const latchedPersona = activeLatchedPersonaId ? personas.find((p) => p.id === activeLatchedPersonaId) : undefined;
 
 	// Only process escape slashes and unlatch commands if a persona is currently latched
 	if (latchedPersona) {
