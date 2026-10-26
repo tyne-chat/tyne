@@ -106,6 +106,12 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   `'0'` means the account. Several personas of one account may each react to the same message.
 - Open: tyne-chat/tyne#120 (`MESSAGE_REACTION_ADD_MANY` drops the persona), #123 (removing a
   reaction without `persona_id` on the server).
+- **Pinned emojis** (`emoji/state/EmojiPins.ts`): the account's pins come first, then the active
+  persona's, in the picker's frequently used row and the quick reactions. Both live in the account's
+  synced preferences (the fork's `emoji_pins` field, read and written by the mobile app too), the
+  persona's by persona id; `removePersona` drops a deleted persona's. The per-persona emoji ranking
+  (`EmojiPicker.getPersonaUsage`) is still raw `localStorage`, so production builds never keep it
+  (tyne-chat/tyne#140).
 
 ## Loading, resets and events
 
