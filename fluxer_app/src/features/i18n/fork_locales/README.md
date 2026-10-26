@@ -9,9 +9,10 @@ After adding, changing or removing a user-facing string, from `fluxer_app`:
 
 1. `node scripts/fork-i18n.mjs sync` adds new fork-only strings with an empty `msgstr` and removes
    the ones no longer used (or since adopted by upstream).
-2. Translate every empty `msgstr` in every locale. Do not copy the English text; if a string
-   really is the same in a language, list its msgid in `reviewed-unchanged.json` (under
-   `locales.<locale>`, or `msgids` when it is the same everywhere).
+2. Translate every empty `msgstr` in every locale, with the words in `GLOSSARY.md` for Tyne's own
+   terms (persona, display tag, signal bar…), which the phone's catalogues use too. Do not copy the
+   English text; if a string really is the same in a language, list its msgid in
+   `reviewed-unchanged.json` (under `locales.<locale>`, or `msgids` when it is the same everywhere).
 3. `node scripts/fork-i18n.mjs check` and `pnpm lingui:compile` must pass.
 4. `node scripts/fork-string-lint.mjs` must pass: it reports hard-coded user-facing strings on the
    fork's lines, which never reach a catalogue and so are invisible to step 3. Mark a literal that
