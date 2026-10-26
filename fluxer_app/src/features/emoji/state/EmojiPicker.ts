@@ -24,6 +24,7 @@ import {makeAutoObservable, untracked} from 'mobx';
 
 // Fork imports.
 
+import EmojiPins from '@app/features/emoji/state/EmojiPins';
 import UnicodeEmojis from '@app/features/expressions/utils/UnicodeEmojis';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
@@ -75,46 +76,35 @@ function getEmojiKeyIndex(allEmojis: ReadonlyArray<FlatEmoji>): ReadonlyMap<stri
 class EmojiPicker {
 	emojiUsage: Record<string, UsageEntry> = {};
 	favoriteEmojis: Array<string> = [];
-	pinnedEmojis: Array<string> = [];
-	personaPinnedEmojis: Record<string, Array<string>> = {};
 	collapsedCategories: Array<string> = [];
 	private _favoriteSet: Set<string> = new Set();
-	private _pinnedSet: Set<string> = new Set();
-	private _personaPinnedSets: Record<string, Set<string>> = {};
 	private _collapsedSet: Set<string> = new Set();
 	private ranking: UsageRanking = EMPTY_USAGE_RANKING;
 	private rankingDirty = true;
 	private rankingVersion = 0;
 	private personaUsageMap: Record<string, Record<string, UsageEntry>> = {};
 	private personaUsageLoaded = false;
-	private pinnedLoaded = false;
 
 	constructor() {
 		makeAutoObservable<
 			EmojiPicker,
 			| '_favoriteSet'
-			| '_pinnedSet'
-			| '_personaPinnedSets'
 			| '_collapsedSet'
 			| 'ranking'
 			| 'rankingDirty'
 			| 'rankingVersion'
 			| 'personaUsageMap'
 			| 'personaUsageLoaded'
-			| 'pinnedLoaded'
 		>(
 			this,
 			{
 				_favoriteSet: false,
-				_pinnedSet: false,
-				_personaPinnedSets: false,
 				_collapsedSet: false,
 				ranking: false,
 				rankingDirty: false,
 				rankingVersion: false,
 				personaUsageMap: false,
 				personaUsageLoaded: false,
-				pinnedLoaded: false,
 			},
 			{autoBind: true},
 		);
@@ -183,208 +173,6 @@ class EmojiPicker {
 		try {
 			window.localStorage.setItem('fluxer_persona_emoji_usage', JSON.stringify(this.personaUsageMap));
 		} catch {}
-	}
-
-	/** @internal */
-	resetPinnedEmojis(): void {
-		this.pinnedEmojis = [];
-		this._pinnedSet = new Set();
-		this.personaPinnedEmojis = {};
-		this._personaPinnedSets = {};
-		this.pinnedLoaded = false;
-	}
-
-	private loadPinnedEmojis(): void {
-		if (this.pinnedLoaded || typeof window === 'undefined') return;
-		this.pinnedLoaded = true;
-		this.pinnedEmojis = [];
-		this._pinnedSet = new Set();
-		this.personaPinnedEmojis = {};
-		this._personaPinnedSets = {};
-		try {
-			const globalRaw = window.localStorage.getItem('fluxer_pinned_emojis');
-			if (globalRaw) {
-				const parsed = JSON.parse(globalRaw);
-				if (Array.isArray(parsed)) {
-					this.pinnedEmojis = parsed.filter(isEmojiUsageKey);
-					this._pinnedSet = new Set(this.pinnedEmojis);
-				}
-			}
-		} catch {}
-		try {
-			const personaRaw = window.localStorage.getItem('fluxer_persona_pinned_emojis');
-			if (personaRaw) {
-				const parsed = JSON.parse(personaRaw);
-				if (parsed && typeof parsed === 'object') {
-					for (const [pId, keys] of Object.entries(parsed)) {
-						if (Array.isArray(keys)) {
-							const validKeys = keys.filter(isEmojiUsageKey);
-							this.personaPinnedEmojis[pId] = validKeys;
-							this._personaPinnedSets[pId] = new Set(validKeys);
-						}
-					}
-				}
-			}
-		} catch {}
-	}
-
-	private savePinnedEmojis(): void {
-		if (typeof window === 'undefined') return;
-		try {
-			window.localStorage.setItem('fluxer_pinned_emojis', JSON.stringify(this.pinnedEmojis));
-		} catch {}
-		try {
-			window.localStorage.setItem('fluxer_persona_pinned_emojis', JSON.stringify(this.personaPinnedEmojis));
-		} catch {}
-	}
-
-	getGloballyPinnedEmojiKeys(): ReadonlyArray<string> {
-		this.loadPinnedEmojis();
-		return this.pinnedEmojis;
-	}
-
-	getPersonaPinnedEmojiKeys(personaId: string): ReadonlyArray<string> {
-		this.loadPinnedEmojis();
-		return this.personaPinnedEmojis[personaId] ?? [];
-	}
-
-	getAllEffectivePinnedEmojiKeys(personaId?: string | null): ReadonlyArray<string> {
-		this.loadPinnedEmojis();
-		const result: Array<string> = [];
-		const seen = new Set<string>();
-		for (const key of this.pinnedEmojis) {
-			if (!seen.has(key)) {
-				seen.add(key);
-				result.push(key);
-			}
-		}
-		if (personaId) {
-			const personaPins = this.personaPinnedEmojis[personaId];
-			if (personaPins) {
-				for (const key of personaPins) {
-					if (!seen.has(key)) {
-						seen.add(key);
-						result.push(key);
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	isGloballyPinned(emoji: FlatEmoji | string): boolean {
-		this.loadPinnedEmojis();
-		void this.pinnedEmojis.length;
-		const key = typeof emoji === 'string' ? emoji : getEmojiUsageKey(emoji);
-		return this._pinnedSet.has(key);
-	}
-
-	isPersonaPinned(emoji: FlatEmoji | string, personaId: string): boolean {
-		this.loadPinnedEmojis();
-		void this.personaPinnedEmojis[personaId]?.length;
-		const key = typeof emoji === 'string' ? emoji : getEmojiUsageKey(emoji);
-		return this._personaPinnedSets[personaId]?.has(key) ?? false;
-	}
-
-	isPinned(emoji: FlatEmoji | string, personaId?: string | null): boolean {
-		if (personaId && this.isPersonaPinned(emoji, personaId)) {
-			return true;
-		}
-		return this.isGloballyPinned(emoji);
-	}
-
-	togglePin(emoji: FlatEmoji | string, personaId?: string | null): void {
-		const key = typeof emoji === 'string' ? emoji : getEmojiUsageKey(emoji);
-		if (!isEmojiUsageKey(key)) {
-			logger.warn(`Ignored pin toggle for invalid emoji key: ${key}`);
-			return;
-		}
-		this.loadPinnedEmojis();
-		if (personaId) {
-			if (!this.personaPinnedEmojis[personaId]) {
-				this.personaPinnedEmojis[personaId] = [];
-			}
-			const personaList = this.personaPinnedEmojis[personaId];
-			let personaSet = this._personaPinnedSets[personaId];
-			if (!personaSet) {
-				personaSet = new Set();
-				this._personaPinnedSets[personaId] = personaSet;
-			}
-			if (personaSet.has(key)) {
-				personaSet.delete(key);
-				const index = personaList.indexOf(key);
-				if (index > -1) personaList.splice(index, 1);
-			} else {
-				personaSet.add(key);
-				personaList.push(key);
-			}
-		} else {
-			if (this._pinnedSet.has(key)) {
-				this._pinnedSet.delete(key);
-				const index = this.pinnedEmojis.indexOf(key);
-				if (index > -1) this.pinnedEmojis.splice(index, 1);
-			} else {
-				this._pinnedSet.add(key);
-				this.pinnedEmojis.push(key);
-			}
-		}
-		this.savePinnedEmojis();
-		ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
-	}
-
-	pinEmoji(emoji: FlatEmoji | string, personaId?: string | null): void {
-		const key = typeof emoji === 'string' ? emoji : getEmojiUsageKey(emoji);
-		if (!isEmojiUsageKey(key)) return;
-		this.loadPinnedEmojis();
-		if (personaId) {
-			if (!this.personaPinnedEmojis[personaId]) {
-				this.personaPinnedEmojis[personaId] = [];
-			}
-			const personaList = this.personaPinnedEmojis[personaId];
-			let personaSet = this._personaPinnedSets[personaId];
-			if (!personaSet) {
-				personaSet = new Set();
-				this._personaPinnedSets[personaId] = personaSet;
-			}
-			if (!personaSet.has(key)) {
-				personaSet.add(key);
-				personaList.push(key);
-				this.savePinnedEmojis();
-				ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
-			}
-		} else {
-			if (!this._pinnedSet.has(key)) {
-				this._pinnedSet.add(key);
-				this.pinnedEmojis.push(key);
-				this.savePinnedEmojis();
-				ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
-			}
-		}
-	}
-
-	unpinEmoji(emoji: FlatEmoji | string, personaId?: string | null): void {
-		const key = typeof emoji === 'string' ? emoji : getEmojiUsageKey(emoji);
-		if (!isEmojiUsageKey(key)) return;
-		this.loadPinnedEmojis();
-		if (personaId) {
-			const personaList = this.personaPinnedEmojis[personaId];
-			const personaSet = this._personaPinnedSets[personaId];
-			if (personaSet?.has(key)) {
-				personaSet.delete(key);
-				const index = personaList ? personaList.indexOf(key) : -1;
-				if (index > -1 && personaList) personaList.splice(index, 1);
-				this.savePinnedEmojis();
-				ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
-			}
-		} else {
-			if (this._pinnedSet.has(key)) {
-				this._pinnedSet.delete(key);
-				const index = this.pinnedEmojis.indexOf(key);
-				if (index > -1) this.pinnedEmojis.splice(index, 1);
-				this.savePinnedEmojis();
-				ComponentBus.dispatch('EMOJI_PICKER_RERENDER');
-			}
-		}
 	}
 
 	getPersonaUsage(personaId: string): Record<string, UsageEntry> | undefined {
@@ -477,7 +265,6 @@ class EmojiPicker {
 		ranking: UsageRanking = this.getRanking(),
 		personaId?: string | null,
 	): ReadonlyArray<string> {
-		this.loadPinnedEmojis();
 		let limit = MAX_FRECENT_EMOJIS;
 		let effectivePersonaId = personaId;
 		if (typeof limitOrPersonaId === 'string') {
@@ -488,23 +275,9 @@ class EmojiPicker {
 		const result: Array<string> = [];
 		const seen = new Set<string>();
 
-		for (const key of this.pinnedEmojis) {
-			if (!seen.has(key)) {
-				seen.add(key);
-				result.push(key);
-			}
-		}
-
-		if (effectivePersonaId) {
-			const personaPins = this.personaPinnedEmojis[effectivePersonaId];
-			if (personaPins) {
-				for (const key of personaPins) {
-					if (!seen.has(key)) {
-						seen.add(key);
-						result.push(key);
-					}
-				}
-			}
+		for (const key of EmojiPins.getAllEffectivePinnedEmojiKeys(effectivePersonaId)) {
+			seen.add(key);
+			result.push(key);
 		}
 
 		if (effectivePersonaId) {
@@ -558,7 +331,6 @@ class EmojiPicker {
 		ranking: UsageRanking = this.getRanking(),
 		personaId?: string | null,
 	): Array<FlatEmoji> {
-		this.loadPinnedEmojis();
 		const index = getEmojiKeyIndex(allEmojis);
 		const result: Array<FlatEmoji> = [];
 		const seenKeys = new Set<string>();
@@ -588,19 +360,16 @@ class EmojiPicker {
 		};
 
 		// 1. Globally pinned emojis
-		for (const key of this.pinnedEmojis) {
+		for (const key of EmojiPins.getGloballyPinnedEmojiKeys()) {
 			addEmojiByKey(key);
 			if (limit > 0 && result.length >= limit) return result;
 		}
 
 		// 2. Active persona pinned emojis
 		if (personaId) {
-			const personaPins = this.personaPinnedEmojis[personaId];
-			if (personaPins) {
-				for (const key of personaPins) {
-					addEmojiByKey(key);
-					if (limit > 0 && result.length >= limit) return result;
-				}
+			for (const key of EmojiPins.getPersonaPinnedEmojiKeys(personaId)) {
+				addEmojiByKey(key);
+				if (limit > 0 && result.length >= limit) return result;
 			}
 		}
 
