@@ -4,8 +4,8 @@ One Rust crate, `fluxer_markdown_parser` in `rust/`, that parses Fluxer's Discor
 (mentions, timestamps, custom emoji, spoilers, alerts, tables) into a node tree. It is upstream's,
 and pure: text, flags and an emoji context go in, nodes come out. The web app, the messages service,
 the gateway's push previews and the mobile app all run it, so a change to its output reaches four
-places in two repositories. The fork adds one thing: a user mention may name a persona,
-`<@user:persona>`.
+places in two repositories. The fork adds two things: a user mention may name a persona,
+`<@user:persona>`, and issue shorthands (`tyne/101`) become links in the trees the apps display.
 
 ## Who runs it
 
@@ -78,6 +78,26 @@ In `rust/src/`:
   `lib/shared/markdown/fluxer_markdown_adapter.dart` splits at the first colon; that holds while the
   account id is digits only.
 
+## Issue shorthands (the fork)
+
+- **What:** `tyne/N` and `tyne-tools/N` become a `Link` to
+  `https://github.com/tyne-chat/<repository>/issues/N`, with the shorthand as its text and `source`,
+  so the apps show it as typed (tyne-chat/tyne#235). `src/fork_issue_links.rs` (`shorthand_at`) has
+  the rule: a word of its own, ASCII letters and digits only (so `tyne/101を見て` links), a number
+  from 1 with at most seven digits, not inside code, links, mentions or emoji, under
+  `ALLOW_AUTOLINKS`, within `MAX_AST_NODES`.
+- **Where:** a pass over the finished tree, called from `parse_markdown_json` (the web's WASM and
+  `fluxer_md_parse`) and `fluxer_md_parse_binary`, never from `MarkdownParser::parse`. Push previews
+  (`plaintext.rs`, `preserve_markdown`) would otherwise show `[tyne/101](https://...)`, and
+  `fluxer_messages` has no use for links, so both still see plain text. The web's `Plaintext.ts`
+  renders the link as typed for the same reason (`fluxer_app/.../markdown/ForkIssueShorthandLinks.ts`).
+- **Formats:** an ordinary `Link`, so no new tag, kind or field; mobile's reader and
+  `markdown_bridge.dart` need no change, only the submodule pointer.
+- **Unfurls** come from the API, which does not run this crate: `extractURLs` expands `tyne/N`
+  (never `tyne-tools/N`, whose issues are private) with `fluxer_api/src/api/utils/ForkIssueShorthands.ts`.
+  Both matchers are tested against `tests/fork_issue_shorthand_cases.json`: change the rule in both
+  and add the case there.
+
 ## Changing the output
 
 What changes together:
@@ -110,7 +130,11 @@ upstream changes `MentionKind::User`, keep the writer's and the reader's 255 arm
 
 ## Where the fork's code sits
 
-Fork-owned: `tests/fork_binary_envelope.rs`. Inside upstream's files:
+Fork-owned: `src/fork_issue_links.rs`, `tests/fork_binary_envelope.rs`, `tests/fork_issue_links.rs`
+and `tests/fork_issue_shorthand_cases.json`. Inside upstream's files:
+
+- `lib.rs` and `native.rs`: one line each handing the tree to `fork_issue_links`, and the module
+  declared in a `// Fork:` block at the end of `lib.rs`.
 
 - `links.rs`: `parse_mention`'s three-line user branch rewritten as about thirty, the largest edit,
   in a file upstream changes often. An id with a colon never passes `is_digit_only`, so the fork's
@@ -129,7 +153,8 @@ Fork-owned: `tests/fork_binary_envelope.rs`. Inside upstream's files:
 ## Tests
 
 - **Crate:** `tests/binary_envelope.rs` (upstream's golden bytes), `tests/fork_binary_envelope.rs`
-  (golden bytes for kinds 0 and 255: it pins the fork's kind), `tests/fixtures.rs`,
+  (golden bytes for kinds 0 and 255: it pins the fork's kind), `tests/fork_issue_links.rs` (issue
+  shorthands, against the shared cases and through both entry points), `tests/fixtures.rs`,
   `tests/code_blocks.rs`, `tests/native_abi.rs` (the C ABI), and unit tests in `links.rs` and
   `plaintext.rs`. Also a criterion bench (`benches/parser.rs`) and a fuzz target in `fuzz/`, which
   is outside the workspace with its own lockfile. New fork tests go in `tests/fork_*.rs`.
@@ -137,7 +162,10 @@ Fork-owned: `tests/fork_binary_envelope.rs`. Inside upstream's files:
   member of the root Cargo workspace, so the checks in `CHECKS.md` (`cargo fmt`, Clippy,
   `cargo test --workspace`) cover it, and the gateway steps build the NIF.
 - **Web:** `pnpm --filter fluxer_app wasm:codegen`, then `pnpm --filter fluxer_app test
-  src/features/messaging/utils/markdown/parser/MarkdownParserWasm.test.ts` (persona cases).
+  src/features/messaging/utils/markdown/parser/MarkdownParserWasm.test.ts` (persona cases) and
+  `src/features/messaging/utils/markdown/PlaintextIssueShorthands.test.ts`.
+- **API:** `pnpm --filter fluxer_api test src/api/utils/ForkIssueShorthands.test.ts` (the shared
+  cases and `extractURLs`).
 - **Gateway:** `fluxer_gateway/test/fork_push_personas_tests.erl` renders persona names through the
   NIF (`gateway_eunit`).
 - **Mobile,** after moving the pointer: `(cd packages/fluxer_markdown_native && dart test)` in
