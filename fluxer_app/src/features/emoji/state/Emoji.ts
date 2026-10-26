@@ -222,6 +222,14 @@ class EmojiGuildRegistry {
 			if (exactMatch) return exactMatch;
 		}
 
+		// The picker numbers `~N` among the emojis of exactly this name, after the Unicode emojis of that
+		// name (`buildAllEmojis`), so count in that list (tyne-chat/tyne#170, audit EM-4). A name no
+		// emoji has exactly (`:LAMB~1:`) still falls back to every case.
+		const exactMatches = orderedMatches.filter((emoji) => emoji.name === baseName);
+		if (exactMatches.length > 0) {
+			const targetIndex = (disambiguationIndex ?? 0) - (getBaseUnicodeEmojiIndex().nameCounts.get(baseName) ?? 0);
+			return targetIndex >= 0 ? exactMatches[targetIndex] : undefined;
+		}
 		const hasUnicodeCollision =
 			baseName === lowerBaseName && (getBaseUnicodeEmojiIndex().nameCounts.get(lowerBaseName) ?? 0) > 0;
 		const unicodeOffset = hasUnicodeCollision ? 1 : 0;
