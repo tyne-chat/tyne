@@ -223,6 +223,30 @@ describe('PersonaMatcher', () => {
 		expect(result.strippedContent).toBe('Plain message with no tags');
 	});
 
+	it('sends under a latched persona whose tags are disabled', () => {
+		const result = matchPersona('Plain message with no tags', personas, 'disabled-id');
+		expect(result.matched).toBe(true);
+		expect(result.persona?.id).toBe('disabled-id');
+		expect(result.strippedContent).toBe('Plain message with no tags');
+	});
+
+	it('keeps the escape commands for a latched persona whose tags are disabled', () => {
+		const escaped = matchPersona('\\ meant for the account', personas, 'disabled-id');
+		expect(escaped.matched).toBe(false);
+		expect(escaped.wasEscaped).toBe(true);
+		expect(escaped.strippedContent).toBe('meant for the account');
+
+		const cleared = matchPersona('\\\\', personas, 'disabled-id');
+		expect(cleared.clearedLatch).toBe(true);
+	});
+
+	it('sends the disabled tag as text under the latched persona whose tags are disabled', () => {
+		const result = matchPersona('{not a tag}', personas, 'disabled-id');
+		expect(result.matched).toBe(true);
+		expect(result.persona?.id).toBe('disabled-id');
+		expect(result.strippedContent).toBe('{not a tag}');
+	});
+
 	it('allows explicit tags to override active latched persona', () => {
 		const result = matchPersona('B: Speaking as Bob', personas, 'alice-id');
 		expect(result.matched).toBe(true);
