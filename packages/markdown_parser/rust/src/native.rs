@@ -57,6 +57,7 @@ pub unsafe extern "C" fn fluxer_md_parse_binary(
         let mut parser = crate::MarkdownParser::new(flags, context);
         parser
             .parse(input)
+            .map(|nodes| crate::fork_issue_links::link_issue_shorthands(nodes, &parser))
             .map(|nodes| crate::binary::write_ast_binary(&nodes))
     }));
     match parsed {
