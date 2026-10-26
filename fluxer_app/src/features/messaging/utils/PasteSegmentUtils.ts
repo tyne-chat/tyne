@@ -3,6 +3,10 @@
 import type {MentionSegment} from '@app/features/messaging/utils/TextareaSegmentManager';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 
+// Fork imports.
+
+import {pastedPersonaMentionSegments} from '@app/features/messaging/utils/MarkdownPersonaMentionSegments';
+
 const MARKDOWN_MENTION_PATTERN = /<(@|#|@&)([a-zA-Z0-9]+)>/g;
 const EMOJI_MARKDOWN_PATTERN = /<(a)?:([^:]+):([a-zA-Z0-9]+)>/g;
 
@@ -101,5 +105,7 @@ export function detectPastedSegments(
 			}
 		}
 	}
+	// Fork: persona mentions, `<@userId:personaId>`.
+	segments.push(...pastedPersonaMentionSegments(pastedText, pastePosition, segments));
 	return segments.sort((a, b) => a.start - b.start);
 }
