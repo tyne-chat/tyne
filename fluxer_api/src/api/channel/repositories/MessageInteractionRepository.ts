@@ -217,39 +217,17 @@ export class MessageInteractionRepository {
 	): Promise<void> {
 		const bucket = BucketUtils.makeBucket(messageId);
 		const normalizedEmojiId = emojiId ?? createEmojiID(0n);
-		if (personaId !== undefined) {
-			const normalizedPersonaId = personaId ? personaId : createPersonaID(0n);
-			await deleteOneOrMany(
-				MessageReactions.deleteByPk({
-					channel_id: channelId,
-					bucket,
-					message_id: messageId,
-					user_id: userId,
-					emoji_id: normalizedEmojiId,
-					emoji_name: emojiName,
-					persona_id: normalizedPersonaId,
-				}),
-			);
-		} else {
-			const deleteQuery = MessageReactions.deleteCql({
-				where: [
-					MessageReactions.where.eq('channel_id'),
-					MessageReactions.where.eq('bucket'),
-					MessageReactions.where.eq('message_id'),
-					MessageReactions.where.eq('emoji_id'),
-					MessageReactions.where.eq('emoji_name'),
-					MessageReactions.where.eq('user_id'),
-				],
-			});
-			await deleteOneOrMany(deleteQuery, {
+		await deleteOneOrMany(
+			MessageReactions.deleteByPk({
 				channel_id: channelId,
 				bucket,
 				message_id: messageId,
+				user_id: userId,
 				emoji_id: normalizedEmojiId,
 				emoji_name: emojiName,
-				user_id: userId,
-			});
-		}
+				persona_id: personaId ?? createPersonaID(0n),
+			}),
+		);
 		const hasReactions = await this.messageHasAnyReactions(channelId, messageId);
 		await this.setHasReaction(channelId, messageId, hasReactions);
 	}
