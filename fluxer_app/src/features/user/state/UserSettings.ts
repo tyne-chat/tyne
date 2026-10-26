@@ -70,6 +70,10 @@ import isPlainObject from 'lodash/isPlainObject';
 import snakeCase from 'lodash/snakeCase';
 import {makeAutoObservable, reaction, runInAction} from 'mobx';
 
+// Fork imports.
+
+import {forkSyncedPreferenceEchoes} from '@app/features/user/state/ForkSyncedPreferenceEchoes';
+
 export interface UserSettingsAccountTransitionCheckpoint {
 	readonly accountEpoch: number;
 	readonly hydrated: boolean;
@@ -589,6 +593,7 @@ class UserSettingsState {
 		this.inFlightSyncedPreferences = null;
 		this.recentlyAckedSyncedPreferenceFields.clear();
 		writePersistedRecentAck(this.recentlyAckedSyncedPreferenceFields);
+		forkSyncedPreferenceEchoes.clear();
 		AppStorage.removeItem(SYNCED_PREFERENCES_LOCAL_KEY);
 		AppStorage.removeItem(SYNCED_PREFERENCES_WIRE_KEY);
 		if (this.syncFlushTimer != null && this.syncFlushTimer !== 'microtask') {
@@ -721,6 +726,7 @@ class UserSettingsState {
 			(typeof incomingSyncedPreferences === 'string' || incomingSyncedPreferences === null)
 		) {
 			this.wireSyncedPreferencesBase = incomingSyncedPreferences ?? '';
+			if (hydrate) forkSyncedPreferenceEchoes.noteFromServer(incomingSyncedPreferences);
 			this.mergeIncomingSyncedPreferences(decodeSyncedPreferencesLenient(incomingSyncedPreferences));
 		}
 		if (
@@ -895,7 +901,7 @@ class UserSettingsState {
 			wire: this.wireSyncedPreferences,
 			incoming: normalizedIncoming,
 			protectedFields,
-			recentlyAckedFields,
+			recentlyAckedFields: forkSyncedPreferenceEchoes.ackedFieldsToKeep(recentlyAckedFields),
 			inFlight: this.inFlightSyncedPreferences,
 			syncInFlight: this.syncFlushInFlight,
 		});
@@ -1025,6 +1031,7 @@ class UserSettingsState {
 				this.inFlightSyncedPreferences = null;
 				const confirmedRaw = readSyncedPreferencesFromBody((response as {body?: unknown} | undefined)?.body);
 				this.wireSyncedPreferencesBase = confirmedRaw === undefined ? encoded : (confirmedRaw ?? '');
+				forkSyncedPreferenceEchoes.recordSave(baseAtFlush, this.wireSyncedPreferencesBase);
 				this.mergeIncomingSyncedPreferences(
 					confirmedRaw === undefined
 						? cloneSyncedPreferences(snapshotAtFlush)
@@ -1078,6 +1085,7 @@ class UserSettingsState {
 					const raw = readSyncedPreferencesFromBody(refetched);
 					if (raw !== undefined) {
 						this.wireSyncedPreferencesBase = raw ?? '';
+						forkSyncedPreferenceEchoes.noteFromServer(raw);
 						this.mergeIncomingSyncedPreferences(decodeSyncedPreferencesLenient(raw));
 					}
 				});
