@@ -7,7 +7,15 @@ package fluxer.user.preferences.v1;
 import "fluxer/user/preferences/v1/accessibility.proto";
 import "fluxer/user/preferences/v1/pickers.proto";
 
+// Fork imports.
+import "fluxer/user/preferences/v1/fork_emoji_pins.proto";
+
 message SyncedPreferences {
+  // Fork fields. The fork numbers its own fields from 2200 up, in this block; never give a
+  // fork field the next number after upstream's last one (`accessibility.proto` says why), and
+  // never one of 120 to 125, which the fork once used (`RetiredSyncedPreferenceFields.ts`).
+  EmojiPinsState emoji_pins = 2200;
+
   AccessibilitySettings accessibility = 1;
   AccessibilityOverrides accessibility_overrides = 2;
   TextualPreviewSettings textual_preview = 3;
