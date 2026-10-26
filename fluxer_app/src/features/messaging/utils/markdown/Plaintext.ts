@@ -45,6 +45,7 @@ import {msg} from '@lingui/core/macro';
 // Fork imports.
 
 import Messages from '@app/features/messaging/state/MessagingMessages';
+import {forkIssueShorthandText} from '@app/features/messaging/utils/markdown/ForkIssueShorthandLinks';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const logger = new Logger('MarkdownPlaintext');
@@ -202,6 +203,9 @@ function renderNodeToPlaintext(node: Node, options: PlaintextRenderOptions): str
 		}
 		case NodeType.Link: {
 			const linkNode = node as LinkNode;
+			// Fork: an issue shorthand (`tyne/101`) reads as typed.
+			const forkShorthand = forkIssueShorthandText(linkNode);
+			if (forkShorthand != null) return forkShorthand;
 			if (linkNode.text) {
 				const linkText = renderNodeToPlaintext(linkNode.text, options);
 				if (options.preserveMarkdown) {
