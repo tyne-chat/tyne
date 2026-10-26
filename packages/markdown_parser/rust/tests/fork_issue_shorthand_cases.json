@@ -1,0 +1,33 @@
+{
+	"about": "Fork: issue shorthands. Each input, and the shorthands in it that become links, in order. Read by tests/fork_issue_links.rs (the parser) and by fluxer_api/src/api/utils/ForkIssueShorthands.test.ts (unfurls, which skip tyne-tools: its issues are private).",
+	"cases": [
+		{"input": "see tyne/101", "links": ["tyne/101"]},
+		{"input": "tyne-tools/14", "links": ["tyne-tools/14"]},
+		{"input": "tyne/101 and tyne-tools/14, also tyne/7.", "links": ["tyne/101", "tyne-tools/14", "tyne/7"]},
+		{"input": "(tyne/101)", "links": ["tyne/101"]},
+		{"input": "\"tyne/101\"", "links": ["tyne/101"]},
+		{"input": "fixed in tyne/101.", "links": ["tyne/101"]},
+		{"input": "tyne/101: crash on start", "links": ["tyne/101"]},
+		{"input": "tyne/1,tyne/2", "links": ["tyne/1", "tyne/2"]},
+		{"input": "tyne/101\ntyne/102", "links": ["tyne/101", "tyne/102"]},
+		{"input": "**tyne/101** and _tyne/102_", "links": ["tyne/101", "tyne/102"]},
+		{"input": "tyne/101を見て", "links": ["tyne/101"]},
+		{"input": "見てtyne/101", "links": ["tyne/101"]},
+		{"input": "tyne/1234567", "links": ["tyne/1234567"]},
+		{"input": "/opt/tyne/123", "links": []},
+		{"input": "mytyne/1", "links": []},
+		{"input": "fork-tyne/1", "links": []},
+		{"input": "example.tyne/1", "links": []},
+		{"input": "@tyne/1", "links": []},
+		{"input": "tyne/101abc", "links": []},
+		{"input": "tyne/101/files", "links": []},
+		{"input": "tyne/101-fix", "links": []},
+		{"input": "tyne/101#issuecomment-1", "links": []},
+		{"input": "tyne/1.5", "links": []},
+		{"input": "tyne/0 and tyne/012", "links": []},
+		{"input": "tyne/12345678", "links": []},
+		{"input": "tyne/ and tyne/abc", "links": []},
+		{"input": "Tyne/101", "links": []},
+		{"input": "tyne-tool/1 and tyne-tools/", "links": []}
+	]
+}
