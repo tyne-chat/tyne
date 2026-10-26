@@ -29,6 +29,7 @@ import {makeAutoObservable} from 'mobx';
 
 // Fork imports.
 
+import EmojiPins from '@app/features/emoji/state/EmojiPins';
 import {compareEmojisByName} from '@app/features/emoji/utils/EmojiSortingUtils';
 
 type GuildEmojiContext = Readonly<{
@@ -445,7 +446,7 @@ class Emoji {
 		};
 
 		// 1. Globally pinned emojis (highest priority)
-		for (const emojiKey of EmojiPicker.getGloballyPinnedEmojiKeys()) {
+		for (const emojiKey of EmojiPins.getGloballyPinnedEmojiKeys()) {
 			addEmoji(emojiKey, this.getEmojiByUsageKey(emojiKey));
 			if (result.length >= count) {
 				return result;
@@ -454,7 +455,7 @@ class Emoji {
 
 		// 2. Active persona pinned emojis
 		if (personaId) {
-			for (const emojiKey of EmojiPicker.getPersonaPinnedEmojiKeys(personaId)) {
+			for (const emojiKey of EmojiPins.getPersonaPinnedEmojiKeys(personaId)) {
 				addEmoji(emojiKey, this.getEmojiByUsageKey(emojiKey));
 				if (result.length >= count) {
 					return result;
