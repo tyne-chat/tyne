@@ -16310,7 +16310,8 @@
 									"sign_in_backdrop_url": {"nullable": true, "type": "string"},
 									"custom_css": {"nullable": true, "type": "string"},
 									"upload_limit_message": {"nullable": true, "type": "string"},
-									"trusted_domains": {"type": "array", "items": {"type": "string"}}
+									"trusted_domains": {"type": "array", "items": {"type": "string"}},
+									"desktop_app_prompt_enabled": {"type": "boolean"}
 								},
 								"required": [
 									"product_name",
@@ -16368,6 +16369,7 @@
 						"properties": {
 							"single_community_enabled": {"type": "boolean"},
 							"single_community_guild_id": {"nullable": true, "type": "string"},
+							"signal_bar_guild_id": {"nullable": true, "type": "string"},
 							"direct_messages_disabled": {"type": "boolean"},
 							"direct_messages_locked": {"type": "boolean"},
 							"friends_disabled": {
@@ -16406,7 +16408,8 @@
 								},
 								"required": ["gif", "youtube", "bluesky"],
 								"additionalProperties": false
-							}
+							},
+							"server_list_buttons": {"allOf": [{"$ref": "#/components/schemas/ServerListButtonsSchema"}]}
 						},
 						"required": [
 							"single_community_enabled",
@@ -16979,7 +16982,8 @@
 										"maxItems": 50,
 										"type": "array",
 										"items": {"type": "string", "maxLength": 255}
-									}
+									},
+									"desktop_app_prompt_enabled": {"type": "boolean"}
 								}
 							},
 							"setup": {"nullable": true, "type": "object", "properties": {"configured": {"type": "boolean"}}},
@@ -17168,7 +17172,9 @@
 									"youtube_enabled": {"nullable": true, "type": "boolean"},
 									"bluesky_enabled": {"nullable": true, "type": "boolean"}
 								}
-							}
+							},
+							"server_list_buttons": {"allOf": [{"$ref": "#/components/schemas/ServerListButtonsUpdateSchema"}]},
+							"signal_bar_guild_id": {"nullable": true, "allOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}]}
 						}
 					},
 					"billing": {"nullable": true, "allOf": [{"$ref": "#/components/schemas/InstanceBillingUpdateRequest"}]},
@@ -19984,6 +19990,17 @@
 						"description": "The thread started from this message, when the viewer can see threads",
 						"allOf": [{"$ref": "#/components/schemas/ThreadChannelResponse"}]
 					},
+					"subprofile": {
+						"description": "Optional subprofile persona information",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}]
+					},
+					"mention_personas": {
+						"description": "The personas mentioned in the message, its embeds or what it forwards, shown as a message sent as them would show them; absent when there are none",
+						"nullable": true,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}
+					},
 					"referenced_message": {
 						"description": "The reply target. Present and populated when the target resolved, present and null when the target is gone, absent when this message has no default reference. Clients must tell null apart from absent by key presence.",
 						"nullable": true,
@@ -20133,6 +20150,17 @@
 							"thread": {
 								"description": "The thread started from this message, when the viewer can see threads",
 								"allOf": [{"$ref": "#/components/schemas/ThreadChannelResponse"}]
+							},
+							"subprofile": {
+								"description": "Optional subprofile persona information",
+								"nullable": true,
+								"allOf": [{"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}]
+							},
+							"mention_personas": {
+								"description": "The personas mentioned in the message, its embeds or what it forwards, shown as a message sent as them would show them; absent when there are none",
+								"nullable": true,
+								"type": "array",
+								"items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}
 							}
 						},
 						"required": [
@@ -20254,6 +20282,45 @@
 				"format": "int32",
 				"x-enumNames": ["SAFE", "AGE_RESTRICTED"],
 				"x-enumDescriptions": ["Guild is safe for all ages", "Guild is age-restricted"]
+			},
+			"MessageSubprofileResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {"type": "string", "description": "Persona ID"},
+					"name": {"type": "string", "description": "Persona display name"},
+					"avatar": {
+						"description": "Avatar asset hash",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}]
+					},
+					"avatar_color": {
+						"description": "Avatar accent color",
+						"nullable": true,
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					},
+					"display_tag_text": {"description": "Display tag text", "nullable": true, "type": "string"},
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, an image stored under the account",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}]
+					},
+					"color": {
+						"description": "Custom color integer",
+						"nullable": true,
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					},
+					"visibility": {
+						"description": "Persona visibility setting",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/PersonaVisibilitySchema"}]
+					}
+				},
+				"required": ["id", "name"],
+				"additionalProperties": false
 			},
 			"ThreadChannelResponse": {
 				"type": "object",
@@ -20433,6 +20500,11 @@
 						"description": "The thread member object for the current user",
 						"allOf": [{"$ref": "#/components/schemas/ThreadMemberResponse"}]
 					},
+					"owner_persona_id": {
+						"description": "The ID of the persona the owner started the thread as, absent when it was started as the account",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}]
+					},
 					"default_auto_archive_duration": {
 						"description": "Default auto archive duration for new threads",
 						"nullable": true,
@@ -20567,6 +20639,17 @@
 						"description": "Whether the current user has reacted with this emoji",
 						"nullable": true,
 						"type": "boolean"
+					},
+					"me_root": {
+						"description": "Whether the current user reacted as root account",
+						"nullable": true,
+						"type": "boolean"
+					},
+					"persona_reactions": {
+						"description": "Breakdown of persona reactions",
+						"nullable": true,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/MessageReactionPersonaEntry"}
 					}
 				},
 				"required": ["emoji", "count"],
@@ -21077,6 +21160,22 @@
 					{"name": "IS_ANIMATED", "value": "32", "description": "Attachment is animated"}
 				]
 			},
+			"MessageReactionPersonaEntry": {
+				"type": "object",
+				"properties": {
+					"persona_id": {
+						"description": "The persona ID that reacted",
+						"allOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}]
+					},
+					"count": {
+						"description": "Count of reactions by this persona",
+						"allOf": [{"$ref": "#/components/schemas/Int32Type"}]
+					},
+					"me": {"description": "Whether the current user reacted as this persona", "nullable": true, "type": "boolean"}
+				},
+				"required": ["persona_id", "count"],
+				"additionalProperties": false
+			},
 			"DefaultReactionEmojiResponse": {
 				"type": "object",
 				"properties": {
@@ -21333,6 +21432,8 @@
 					{"name": "BANNER_UNSET", "value": "2", "description": "Guild member banner is unset"}
 				]
 			},
+			"PersonaVisibilitySchema": {"default": "unlisted", "type": "string", "enum": ["unlisted", "public", "private"]},
+			"PersonaAssetHashType": {"type": "string", "pattern": "^(a_)?[0-9a-f]{8}$"},
 			"MessageDeletionBasis": {
 				"oneOf": [
 					{
@@ -22159,6 +22260,16 @@
 					"legacy_prices": {"nullable": true, "allOf": [{"$ref": "#/components/schemas/BillingLegacyPricesSchema"}]}
 				}
 			},
+			"ServerListButtonsUpdateSchema": {
+				"type": "object",
+				"properties": {
+					"favorites": {"type": "boolean"},
+					"explore": {"type": "boolean"},
+					"create_join": {"type": "boolean"},
+					"download": {"type": "boolean"},
+					"help": {"type": "boolean"}
+				}
+			},
 			"EmailDeliveryModeSchema": {
 				"description": "How the instance sends email",
 				"x-enumNames": ["OFF", "SMTP"],
@@ -22627,6 +22738,39 @@
 				],
 				"enum": ["on", "off_username_mode", "off_disabled", "off_incomplete"],
 				"type": "string"
+			},
+			"ServerListButtonsSchema": {
+				"type": "object",
+				"properties": {
+					"favorites": {
+						"default": true,
+						"description": "Whether the Favorites button is visible in the server list",
+						"type": "boolean"
+					},
+					"explore": {
+						"default": true,
+						"description": "Whether the Explore communities button is visible in the server list",
+						"type": "boolean"
+					},
+					"create_join": {
+						"default": true,
+						"description": "Whether the Create or join a community button is visible in the server list",
+						"type": "boolean"
+					},
+					"download": {
+						"default": true,
+						"description": "Whether the Download desktop app button is visible in the server list",
+						"type": "boolean"
+					},
+					"help": {
+						"default": true,
+						"description": "Whether the Help center button is visible in the server list",
+						"type": "boolean"
+					}
+				},
+				"required": ["favorites", "explore", "create_join", "download", "help"],
+				"additionalProperties": false,
+				"description": "Visibility configuration for special buttons in the server list column"
 			},
 			"AccountIdentityLockReasonSchema": {
 				"description": "Why the sign-in method can no longer change",
@@ -25122,6 +25266,13 @@
 					"UNKNOWN_ORIGIN_HANDOFF",
 					"UNKNOWN_PASSKEY_BRIDGE",
 					"UNKNOWN_PASSKEY_MIGRATION",
+					"UNKNOWN_PERSONA",
+					"PRIVATE_PERSONA",
+					"PERSONA_LIMIT_REACHED",
+					"DUPLICATE_PERSONA_TAG",
+					"PERSONA_TAG_LIMIT_REACHED",
+					"DUPLICATE_SIGNATURE_EMOJI",
+					"SIGNATURE_EMOJI_LIMIT_REACHED",
 					"UNKNOWN_REPORT",
 					"UNKNOWN_ROLE",
 					"UNKNOWN_STICKER",
@@ -25486,6 +25637,13 @@
 					"This sign-in transfer has expired or was already used.",
 					"This passkey request has expired. Try again.",
 					"There is no passkey to update right now.",
+					"User wasn't found.",
+					"You don't have access to this resource or feature.",
+					"You've reached the maximum number of connections ({limit}).",
+					"This tag is already taken.",
+					"You've reached the maximum number of connections ({limit}).",
+					"This tag is already taken.",
+					"You've reached the maximum number of connections ({limit}).",
 					"Unknown report.",
 					"Role wasn't found.",
 					"Unknown sticker.",
@@ -25554,6 +25712,8 @@
 							"email": "Read the user email address.",
 							"guilds": "Read guild membership information for the current user.",
 							"connections": "Read linked third-party account connections for the current user.",
+							"personas.read": "Read the personas on the user account.",
+							"personas.write": "Create, edit and delete personas on the user account.",
 							"bot": "Add a bot user to a guild."
 						}
 					}
