@@ -25600,236 +25600,6 @@
 				}
 			}
 		},
-		"/users/@me/subprofiles/avatar": {
-			"post": {
-				"operationId": "upload_subprofile_avatar",
-				"summary": "Upload subprofile avatar (legacy alias)",
-				"tags": ["Users"],
-				"responses": {
-					"200": {
-						"description": "Success",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarUploadResponse"}}}
-					},
-					"400": {
-						"description": "Bad Request - The request was malformed or contained invalid data",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"401": {
-						"description": "Unauthorized - Authentication is required or the token is invalid",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"403": {
-						"description": "Forbidden - You do not have permission to perform this action",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"429": {
-						"description": "Too Many Requests - You are being rate limited",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
-						"headers": {
-							"Retry-After": {
-								"description": "Number of seconds to wait before retrying (only on 429)",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Limit": {
-								"description": "The number of requests that can be made in the current window",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Remaining": {
-								"description": "The number of remaining requests that can be made",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Reset": {
-								"description": "Unix timestamp when the rate limit resets",
-								"schema": {"type": "integer"}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error - An unexpected error occurred",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					}
-				},
-				"description": "Uploads and processes an avatar image for a subprofile/persona, hosting it on the instance CDN/storage.",
-				"security": [{"sessionToken": []}],
-				"requestBody": {
-					"required": true,
-					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarUploadRequest"}}}
-				}
-			}
-		},
-		"/users/@me/subprofiles/banner": {
-			"post": {
-				"operationId": "upload_subprofile_banner",
-				"summary": "Upload subprofile banner (legacy alias)",
-				"tags": ["Users"],
-				"responses": {
-					"200": {
-						"description": "Success",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBannerUploadResponse"}}}
-					},
-					"400": {
-						"description": "Bad Request - The request was malformed or contained invalid data",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"401": {
-						"description": "Unauthorized - Authentication is required or the token is invalid",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"403": {
-						"description": "Forbidden - You do not have permission to perform this action",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"429": {
-						"description": "Too Many Requests - You are being rate limited",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
-						"headers": {
-							"Retry-After": {
-								"description": "Number of seconds to wait before retrying (only on 429)",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Limit": {
-								"description": "The number of requests that can be made in the current window",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Remaining": {
-								"description": "The number of remaining requests that can be made",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Reset": {
-								"description": "Unix timestamp when the rate limit resets",
-								"schema": {"type": "integer"}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error - An unexpected error occurred",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					}
-				},
-				"description": "Uploads and processes a banner image for a subprofile/persona, hosting it on the instance CDN/storage.",
-				"security": [{"sessionToken": []}],
-				"requestBody": {
-					"required": true,
-					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBannerUploadRequest"}}}
-				}
-			}
-		},
-		"/users/@me/subprofiles/import-avatar": {
-			"post": {
-				"operationId": "import_subprofile_avatar",
-				"summary": "Import subprofile avatar from remote URL (legacy alias)",
-				"tags": ["Users"],
-				"responses": {
-					"200": {
-						"description": "Success",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarImportResponse"}}}
-					},
-					"400": {
-						"description": "Bad Request - The request was malformed or contained invalid data",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"401": {
-						"description": "Unauthorized - Authentication is required or the token is invalid",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"403": {
-						"description": "Forbidden - You do not have permission to perform this action",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"429": {
-						"description": "Too Many Requests - You are being rate limited",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
-						"headers": {
-							"Retry-After": {
-								"description": "Number of seconds to wait before retrying (only on 429)",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Limit": {
-								"description": "The number of requests that can be made in the current window",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Remaining": {
-								"description": "The number of remaining requests that can be made",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Reset": {
-								"description": "Unix timestamp when the rate limit resets",
-								"schema": {"type": "integer"}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error - An unexpected error occurred",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					}
-				},
-				"description": "Downloads an avatar image from an external URL and stores it on the instance CDN/storage.",
-				"security": [{"sessionToken": []}],
-				"requestBody": {
-					"required": true,
-					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaAvatarImportRequest"}}}
-				}
-			}
-		},
-		"/users/@me/subprofiles/import-batch-avatars": {
-			"post": {
-				"operationId": "import_subprofile_batch_avatars",
-				"summary": "Batch import subprofile avatars from remote URLs (legacy alias)",
-				"tags": ["Users"],
-				"responses": {
-					"200": {
-						"description": "Success",
-						"content": {
-							"application/x-ndjson": {"schema": {"$ref": "#/components/schemas/PersonaBatchAvatarImportStream"}}
-						}
-					},
-					"400": {
-						"description": "Bad Request - The request was malformed or contained invalid data",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"401": {
-						"description": "Unauthorized - Authentication is required or the token is invalid",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"403": {
-						"description": "Forbidden - You do not have permission to perform this action",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					},
-					"429": {
-						"description": "Too Many Requests - You are being rate limited",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
-						"headers": {
-							"Retry-After": {
-								"description": "Number of seconds to wait before retrying (only on 429)",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Limit": {
-								"description": "The number of requests that can be made in the current window",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Remaining": {
-								"description": "The number of remaining requests that can be made",
-								"schema": {"type": "integer"}
-							},
-							"X-RateLimit-Reset": {
-								"description": "Unix timestamp when the rate limit resets",
-								"schema": {"type": "integer"}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error - An unexpected error occurred",
-						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
-					}
-				},
-				"description": "Downloads up to 500 avatar images from external URLs and stores them on the instance CDN/storage, streaming NDJSON progress events.",
-				"security": [{"sessionToken": []}],
-				"requestBody": {
-					"required": true,
-					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBatchAvatarImportRequest"}}}
-				}
-			}
-		},
 		"/users/@me/sudo/email-code": {
 			"post": {
 				"operationId": "send_sudo_email_code",
@@ -29607,90 +29377,6 @@
 				"required": ["ticket", "code_expires_at", "resend_available_at"],
 				"additionalProperties": false
 			},
-			"PersonaBatchAvatarImportRequest": {
-				"type": "object",
-				"properties": {
-					"urls": {
-						"minItems": 1,
-						"maxItems": 500,
-						"type": "array",
-						"items": {"type": "string", "maxLength": 2048, "format": "uri"},
-						"description": "List of remote avatar URLs to import"
-					},
-					"kind": {
-						"description": "Whether the links are avatars or banners; avatars when absent",
-						"$ref": "#/components/schemas/PersonaImportImageKindSchema"
-					}
-				},
-				"required": ["urls"]
-			},
-			"PersonaBatchAvatarImportStream": {
-				"type": "string",
-				"description": "Newline-delimited JSON: a start line with the total, a progress line as each URL finishes, and a complete line with every result"
-			},
-			"PersonaAvatarImportRequest": {
-				"type": "object",
-				"properties": {
-					"url": {
-						"type": "string",
-						"maxLength": 2048,
-						"format": "uri",
-						"description": "Remote URL of the avatar image to import"
-					}
-				},
-				"required": ["url"]
-			},
-			"PersonaAvatarImportResponse": {
-				"type": "object",
-				"properties": {
-					"avatar_hash": {
-						"description": "Hash of the imported avatar",
-						"$ref": "#/components/schemas/PersonaAssetHashType"
-					},
-					"avatar_color": {
-						"description": "Dominant avatar color",
-						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
-					}
-				},
-				"required": ["avatar_hash"],
-				"additionalProperties": false
-			},
-			"PersonaBannerUploadRequest": {
-				"type": "object",
-				"properties": {"banner": {"type": "string", "description": "Base64 data URI of the banner image"}},
-				"required": ["banner"]
-			},
-			"PersonaBannerUploadResponse": {
-				"type": "object",
-				"properties": {
-					"banner_hash": {
-						"description": "Hash of the uploaded banner",
-						"$ref": "#/components/schemas/PersonaAssetHashType"
-					}
-				},
-				"required": ["banner_hash"],
-				"additionalProperties": false
-			},
-			"PersonaAvatarUploadRequest": {
-				"type": "object",
-				"properties": {"avatar": {"type": "string", "description": "Base64 data URI of the avatar image"}},
-				"required": ["avatar"]
-			},
-			"PersonaAvatarUploadResponse": {
-				"type": "object",
-				"properties": {
-					"avatar_hash": {
-						"description": "Hash of the uploaded avatar",
-						"$ref": "#/components/schemas/PersonaAssetHashType"
-					},
-					"avatar_color": {
-						"description": "Dominant avatar color",
-						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
-					}
-				},
-				"required": ["avatar_hash"],
-				"additionalProperties": false
-			},
 			"VoiceActivitySharingUpdateRequest": {
 				"type": "object",
 				"properties": {
@@ -30587,6 +30273,54 @@
 				"required": ["hash"],
 				"additionalProperties": false
 			},
+			"PersonaBatchAvatarImportRequest": {
+				"type": "object",
+				"properties": {
+					"urls": {
+						"minItems": 1,
+						"maxItems": 500,
+						"type": "array",
+						"items": {"type": "string", "maxLength": 2048, "format": "uri"},
+						"description": "List of remote avatar URLs to import"
+					},
+					"kind": {
+						"description": "Whether the links are avatars or banners; avatars when absent",
+						"$ref": "#/components/schemas/PersonaImportImageKindSchema"
+					}
+				},
+				"required": ["urls"]
+			},
+			"PersonaBatchAvatarImportStream": {
+				"type": "string",
+				"description": "Newline-delimited JSON: a start line with the total, a progress line as each URL finishes, and a complete line with every result"
+			},
+			"PersonaAvatarImportRequest": {
+				"type": "object",
+				"properties": {
+					"url": {
+						"type": "string",
+						"maxLength": 2048,
+						"format": "uri",
+						"description": "Remote URL of the avatar image to import"
+					}
+				},
+				"required": ["url"]
+			},
+			"PersonaAvatarImportResponse": {
+				"type": "object",
+				"properties": {
+					"avatar_hash": {
+						"description": "Hash of the imported avatar",
+						"$ref": "#/components/schemas/PersonaAssetHashType"
+					},
+					"avatar_color": {
+						"description": "Dominant avatar color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					}
+				},
+				"required": ["avatar_hash"],
+				"additionalProperties": false
+			},
 			"PersonaBulkImportRequestSchema": {
 				"maxItems": 250,
 				"type": "array",
@@ -30634,6 +30368,42 @@
 					}
 				},
 				"required": ["states"],
+				"additionalProperties": false
+			},
+			"PersonaBannerUploadRequest": {
+				"type": "object",
+				"properties": {"banner": {"type": "string", "description": "Base64 data URI of the banner image"}},
+				"required": ["banner"]
+			},
+			"PersonaBannerUploadResponse": {
+				"type": "object",
+				"properties": {
+					"banner_hash": {
+						"description": "Hash of the uploaded banner",
+						"$ref": "#/components/schemas/PersonaAssetHashType"
+					}
+				},
+				"required": ["banner_hash"],
+				"additionalProperties": false
+			},
+			"PersonaAvatarUploadRequest": {
+				"type": "object",
+				"properties": {"avatar": {"type": "string", "description": "Base64 data URI of the avatar image"}},
+				"required": ["avatar"]
+			},
+			"PersonaAvatarUploadResponse": {
+				"type": "object",
+				"properties": {
+					"avatar_hash": {
+						"description": "Hash of the uploaded avatar",
+						"$ref": "#/components/schemas/PersonaAssetHashType"
+					},
+					"avatar_color": {
+						"description": "Dominant avatar color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					}
+				},
+				"required": ["avatar_hash"],
 				"additionalProperties": false
 			},
 			"PersonaCreateRequestSchema": {
