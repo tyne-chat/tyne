@@ -138,6 +138,8 @@ async fn strip_av(
             move || Ok(cost),
             move || {
                 media_process::strip_av_metadata(&data, container, &path, Some(deadline_ms))?;
+                // Fork: repair MP3 frames Chromium cannot decode (tyne-chat/tyne#245).
+                media_process::fork_repair_stripped_mp3(container, &path);
                 Ok(())
             },
         )
