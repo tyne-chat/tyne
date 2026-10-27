@@ -63,6 +63,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   persona. Threads and forum posts resolve against the parent channel.
 - Editing (`matchEditMessage`): a leading `\` on a persona's message removes the persona, a tag
   switches to that persona, and anything else leaves the persona as it is (the request omits it).
+  When the message's text already started with `\`, the backslash is text and removes nothing.
   "Change persona" on one's own message edits only the persona.
 
 ## Showing personas
