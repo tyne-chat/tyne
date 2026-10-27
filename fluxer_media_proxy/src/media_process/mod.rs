@@ -199,3 +199,8 @@ fn native_buffer_to_media_bytes(buffer: NativeBuffer) -> Result<MediaBytes, Medi
     }
     Ok(MediaBytes::from_native(buffer))
 }
+
+// Fork: repairs MP3 frames Chromium cannot decode, on upload and for the backfill
+// (tyne-chat/tyne#245).
+mod fork_mp3_repair;
+pub use fork_mp3_repair::{Mp3RepairReport, fork_repair_stripped_mp3, repair_mp3, repair_mp3_file};

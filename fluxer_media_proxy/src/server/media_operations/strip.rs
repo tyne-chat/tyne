@@ -137,6 +137,8 @@ async fn strip_av(
                     &media_limits,
                     Some(deadline_ms),
                 )?;
+                // Fork: repair MP3 frames Chromium cannot decode (tyne-chat/tyne#245).
+                media_process::fork_repair_stripped_mp3(container, output.path());
                 Ok(Ok((reservation, output)))
             },
         )

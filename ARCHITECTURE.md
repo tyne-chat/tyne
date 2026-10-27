@@ -224,6 +224,11 @@ is in the server folder's `AGENTS.md`.
   shared parser makes the link in the trees the apps display (`fork_issue_links.rs`), the API
   unfurls `tyne/` ones (`fluxer_api/src/api/utils/ForkIssueShorthands.ts`), and the web's plaintext
   keeps them as typed; `packages/markdown_parser/AGENTS.md` has the rule (tyne-chat/tyne#235).
+- MP3 repair: after the media proxy strips an MP3 upload's metadata, the fork clears the scale
+  factors that granules without data claim, which make Chromium's MP3 decoder (Symphonia) drop the
+  frame; FFmpeg decodes the result unchanged (`fluxer_media_proxy/src/media_process/fork_mp3_repair.rs`,
+  called from `server/media_operations/strip.rs`; `examples/fork_mp3_repair.rs` repairs stored
+  files; `fluxer_media_proxy/AGENTS.md`; tyne-chat/tyne#245).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
@@ -278,6 +283,8 @@ the folder. A new folder guide is added to this list in the same commit.
   windows, updates and releases, native add-ons.
 - `fluxer_gateway/AGENTS.md`: the Erlang gateway: its processes, how events reach sessions, resume,
   passive sessions, and the fork's hooks.
+- `fluxer_media_proxy/AGENTS.md`: the media proxy: its routes, how uploads are stripped, the MP3
+  repair, and where fork code goes in its crate.
 - `fluxer_messages/AGENTS.md`: the service that builds message objects and extracts mentions, and
   the persona fields it passes on.
 - `packages/markdown_parser/AGENTS.md`: the markdown parser shared by the web app, the server and the
