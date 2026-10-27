@@ -771,7 +771,7 @@ export class PersonaStoreClass {
 	matchEditMessage(
 		content: string,
 		currentSubprofile?: MessageSubprofileResponse | null,
-		_options?: {
+		options?: {
 			hasAttachments?: boolean;
 			originalContent?: string;
 		},
@@ -780,9 +780,12 @@ export class PersonaStoreClass {
 		subprofile?: MessageSubprofileResponse | null;
 	} {
 		const personasLike = this.matchablePersonas();
+		// A message whose text already starts with a backslash (sent as `a: \o/`) keeps it through every
+		// edit: only a backslash the edit adds removes the persona (tyne-chat/tyne#158, audit M3-1).
+		const originalStartsWithBackslash = options?.originalContent?.startsWith('\\') ?? false;
 
 		// If user typed \ or \\ to explicitly clear active persona / escape
-		if (content.startsWith('\\') && currentSubprofile) {
+		if (content.startsWith('\\') && currentSubprofile && !originalStartsWithBackslash) {
 			let strippedContent = '';
 			if (content.startsWith('\\\\')) {
 				const rawRest = content.slice(2);
