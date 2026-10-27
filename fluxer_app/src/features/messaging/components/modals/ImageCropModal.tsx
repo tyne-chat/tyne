@@ -22,6 +22,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {forkMaxCropZoom} from '@app/features/messaging/components/modals/ForkImageCropZoom';
+
 const CROP_PREVIEW_DESCRIPTOR = msg({
 	message: 'Crop preview',
 	comment: 'Short label in the image crop modal. Keep it concise.',
@@ -540,7 +544,14 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = observer(
 		const [isSkipAllowed, setIsSkipAllowed] = useState(false);
 		const isRound = cropShape === 'round';
 		const MIN_ZOOM = 1;
-		const MAX_ZOOM = 3;
+		// Fork: the limit follows the image's resolution (tyne-chat/tyne#229).
+		const MAX_ZOOM = forkMaxCropZoom(
+			imageRef.current?.naturalWidth,
+			displayDimensions,
+			cropDimensions,
+			maxWidth,
+			maxHeight,
+		);
 		const effectiveMinHeightRatio = !isRound ? (minHeightRatio ?? 1) : 1;
 		const effectiveMaxHeightRatio = !isRound ? (maxHeightRatio ?? 1) : 1;
 		const heightSliderEnabled = !isRound && effectiveMinHeightRatio < effectiveMaxHeightRatio;
