@@ -742,14 +742,3 @@ A persona as a message shows it, with its owner. Returned by [Look up personas b
 | display_tag_icon? | ?string | The owner's display tag icon |
 | color? | ?integer | The persona's accent colour |
 | visibility? | ?string | The persona's [visibility](#visibility) |
-
-## Deprecated aliases
-
-The routes below were named for subprofiles before personas had their current name. Each still answers exactly as its successor does.
-
-| Method | Deprecated path | Successor |
-| --- | --- | --- |
-| POST | `/v1/users/@me/subprofiles/avatar` | [Upload persona avatar](#upload-persona-avatar) |
-| POST | `/v1/users/@me/subprofiles/banner` | [Upload persona banner](#upload-persona-banner) |
-| POST | `/v1/users/@me/subprofiles/import-avatar` | [Import persona avatar from remote URL](#import-persona-avatar-from-remote-url) |
-| POST | `/v1/users/@me/subprofiles/import-batch-avatars` | [Batch import persona avatars from remote URLs with streaming progress](#batch-import-persona-avatars-from-remote-urls-with-streaming-progress) |
