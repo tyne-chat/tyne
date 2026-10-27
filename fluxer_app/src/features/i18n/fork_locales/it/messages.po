@@ -426,11 +426,9 @@ msgid "Persona name cannot be empty"
 msgstr "Il nome della persona non può essere vuoto"
 
 #. Fallback screen reader label for the persona profile modal. Keep it concise.
-#. Fallback screen reader label for the persona profile modal. Keep it concise.
 msgid "Persona profile"
 msgstr "Profilo persona"
 
-#. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
 #. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
 msgid "Persona profile: {name}"
 msgstr "Profilo persona: {name}"

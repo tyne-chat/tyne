@@ -137,24 +137,6 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		handlePersonaAvatarUpload,
 	);
 	app.post(
-		'/users/@me/subprofiles/avatar',
-		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
-		LoginRequired,
-		DefaultUserOnly,
-		Validator('json', PersonaAvatarUploadRequest),
-		OpenAPI({
-			operationId: 'upload_subprofile_avatar',
-			summary: 'Upload subprofile avatar (legacy alias)',
-			responseSchema: PersonaAvatarUploadResponse,
-			statusCode: 200,
-			security: ['bearerToken', 'sessionToken'],
-			tags: ['Users'],
-			description:
-				'Uploads and processes an avatar image for a subprofile/persona, hosting it on the instance CDN/storage.',
-		}),
-		handlePersonaAvatarUpload,
-	);
-	app.post(
 		'/users/@me/personas/banner',
 		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
 		LoginRequired,
@@ -168,24 +150,6 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Users'],
 			description: 'Uploads and processes a banner image for a persona, hosting it on the instance CDN/storage.',
-		}),
-		handlePersonaBannerUpload,
-	);
-	app.post(
-		'/users/@me/subprofiles/banner',
-		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
-		LoginRequired,
-		DefaultUserOnly,
-		Validator('json', PersonaBannerUploadRequest),
-		OpenAPI({
-			operationId: 'upload_subprofile_banner',
-			summary: 'Upload subprofile banner (legacy alias)',
-			responseSchema: PersonaBannerUploadResponse,
-			statusCode: 200,
-			security: ['bearerToken', 'sessionToken'],
-			tags: ['Users'],
-			description:
-				'Uploads and processes a banner image for a subprofile/persona, hosting it on the instance CDN/storage.',
 		}),
 		handlePersonaBannerUpload,
 	);
@@ -207,23 +171,6 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		handlePersonaAvatarImport,
 	);
 	app.post(
-		'/users/@me/subprofiles/import-avatar',
-		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
-		LoginRequired,
-		DefaultUserOnly,
-		Validator('json', PersonaAvatarImportRequest),
-		OpenAPI({
-			operationId: 'import_subprofile_avatar',
-			summary: 'Import subprofile avatar from remote URL (legacy alias)',
-			responseSchema: PersonaAvatarImportResponse,
-			statusCode: 200,
-			security: ['bearerToken', 'sessionToken'],
-			tags: ['Users'],
-			description: 'Downloads an avatar image from an external URL and stores it on the instance CDN/storage.',
-		}),
-		handlePersonaAvatarImport,
-	);
-	app.post(
 		'/users/@me/personas/import-batch-avatars',
 		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_BATCH_AVATAR_IMPORT),
 		LoginRequired,
@@ -232,25 +179,6 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		OpenAPI({
 			operationId: 'import_persona_batch_avatars',
 			summary: 'Batch import persona avatars from remote URLs with streaming progress',
-			responseSchema: PersonaBatchAvatarImportStream,
-			responseContentType: 'application/x-ndjson',
-			statusCode: 200,
-			security: ['bearerToken', 'sessionToken'],
-			tags: ['Users'],
-			description:
-				'Downloads up to 500 avatar images from external URLs and stores them on the instance CDN/storage, streaming NDJSON progress events.',
-		}),
-		handlePersonaBatchAvatarImport,
-	);
-	app.post(
-		'/users/@me/subprofiles/import-batch-avatars',
-		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_BATCH_AVATAR_IMPORT),
-		LoginRequired,
-		DefaultUserOnly,
-		Validator('json', PersonaBatchAvatarImportRequest),
-		OpenAPI({
-			operationId: 'import_subprofile_batch_avatars',
-			summary: 'Batch import subprofile avatars from remote URLs (legacy alias)',
 			responseSchema: PersonaBatchAvatarImportStream,
 			responseContentType: 'application/x-ndjson',
 			statusCode: 200,
