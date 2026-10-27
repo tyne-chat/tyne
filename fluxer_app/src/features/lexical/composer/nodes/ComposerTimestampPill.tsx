@@ -105,9 +105,11 @@ export const ComposerTimestampPill = observer(function ComposerTimestampPill({
 
 	if (!isValid || fullDateTime === null) {
 		return (
+			// biome-ignore lint/a11y/noStaticElementInteractions: as below; a timestamp that cannot be shown still offers Edit and Delete.
 			<span
 				className={styles.timestamp}
 				contentEditable={false}
+				onContextMenu={handleContextMenu}
 				data-lexical-composer-timestamp-pill="true"
 				data-flx={dataFlx}
 			>
