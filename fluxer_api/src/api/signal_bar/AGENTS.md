@@ -30,7 +30,7 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
 | The sweep | `worker/tasks/SweepSignalBar.ts`, scheduled in `worker/WorkerMain.ts` |
 | Home community | `signal_bar_guild_id` in the instance policy (`instance/InstanceConfigRepository.ts`); the admin panel's `signal_bar_form` in `fluxer_admin` |
 | Delivery | `fluxer_gateway`: `event_atoms.erl`, `guild_dispatch_filter.erl`, `session_passive.erl` |
-| Public docs; dev seed | `fluxer_docs` (`http-api/signal-bar.mdx`, `gateway/events.md`); `fluxer_api/scripts/seed_signal_bar.ts` |
+| Public docs | `fluxer_docs` (`http-api/signal-bar.mdx`, `gateway/events.md`) |
 
 ## What is stored where
 
