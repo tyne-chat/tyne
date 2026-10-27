@@ -28,8 +28,4 @@ export const ForkEndpoints = {
 	USER_PERSONA_SETTINGS: '/users/@me/personas/settings',
 	USER_PERSONA_CHANNEL_STATES: '/users/@me/personas/channel-states',
 	USER_PERSONA_CHANNEL_STATE: (channelId: string) => `/users/@me/personas/channel-states/${channelId}`,
-	USER_SUBPROFILE_AVATAR: '/users/@me/subprofiles/avatar',
-	USER_SUBPROFILE_BANNER: '/users/@me/subprofiles/banner',
-	USER_SUBPROFILE_IMPORT_AVATAR: '/users/@me/subprofiles/import-avatar',
-	USER_SUBPROFILE_IMPORT_BATCH_AVATARS: '/users/@me/subprofiles/import-batch-avatars',
 } as const;
