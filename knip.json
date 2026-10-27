@@ -38,8 +38,7 @@
 				"undici",
 				"validator"
 			],
-			"ignoreExportsUsedInFile": false,
-			"entry": ["scripts/migrate_*.ts", "scripts/seed_*.ts"]
+			"ignoreExportsUsedInFile": false
 		},
 		"fluxer_app": {
 			"entry": [
