@@ -107,19 +107,14 @@ import {useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, u
 
 // Fork imports.
 
-import {openTimestampModal} from '@app/features/channel/components/modals/TimestampModal';
 import {registerComposerTimestampTransform} from '@app/features/lexical/composer/ComposerTimestampTransform';
 import {ComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/ComposerCaretAnchorNode';
-import {ComposerTimestampContextMenu} from '@app/features/lexical/composer/nodes/ComposerTimestampContextMenu';
 import {
 	$createComposerTimestampNode,
-	$isComposerTimestampNode,
 	ComposerTimestampNode,
 } from '@app/features/lexical/composer/nodes/ComposerTimestampNode';
-import {normalizeTimestampFormat} from '@app/features/lexical/composer/nodes/ComposerTimestampUtils';
 import {registerComposerCaretAnchors} from '@app/features/lexical/composer/registerComposerCaretAnchors';
-import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
-import {$createTextNode, $getNodeByKey} from 'lexical';
+import {$createTextNode} from 'lexical';
 
 const THEME: InitialConfigType['theme'] = {
 	paragraph: styles.paragraph,
@@ -732,33 +727,6 @@ const ComposerInner = ({
 			if (host == null || root == null || !root.contains(host)) {
 				return;
 			}
-			if (host.matches('[data-lexical-composer-timestamp]') && event.detail === 2) {
-				event.preventDefault();
-				editor.getEditorState().read(() => {
-					const node = $getNearestNodeFromDOMNode(host);
-					if ($isComposerTimestampNode(node)) {
-						const epoch = node.getEpoch();
-						const format = node.getFormat();
-						const nodeKey = node.getKey();
-						openTimestampModal({
-							initialEpoch: epoch,
-							initialFormat: format,
-							onInsert: (_markdown, meta) => {
-								if (meta) {
-									editor.update(() => {
-										const targetNode = $getNodeByKey(nodeKey);
-										if ($isComposerTimestampNode(targetNode)) {
-											targetNode.setEpoch(meta.epoch);
-											targetNode.setFormat(normalizeTimestampFormat(meta.format));
-										}
-									});
-								}
-							},
-						});
-					}
-				});
-				return;
-			}
 			event.preventDefault();
 			const rect = host.getBoundingClientRect();
 			const clickedVisualStart = event.clientX < rect.left + rect.width / 2;
@@ -781,54 +749,6 @@ const ComposerInner = ({
 	const handleEditableContextMenu = useCallback(
 		(event: React.MouseEvent<HTMLElement>) => {
 			const target = event.target instanceof Element ? event.target : null;
-			const root = editor.getRootElement();
-			const timestampHost = target?.closest<HTMLElement>('[data-lexical-composer-timestamp]');
-			if (timestampHost && root?.contains(timestampHost)) {
-				event.preventDefault();
-				event.stopPropagation();
-				editor.getEditorState().read(() => {
-					const node = $getNearestNodeFromDOMNode(timestampHost);
-					if ($isComposerTimestampNode(node)) {
-						const epoch = node.getEpoch();
-						const format = node.getFormat();
-						const wire = node.getWireText();
-						const nodeKey = node.getKey();
-						ContextMenuCommands.openFromEvent(event, ({onClose}) => (
-							<ComposerTimestampContextMenu
-								onClose={onClose}
-								wire={wire}
-								onEdit={() => {
-									openTimestampModal({
-										initialEpoch: epoch,
-										initialFormat: format,
-										onInsert: (_markdown, meta) => {
-											if (meta) {
-												editor.update(() => {
-													const targetNode = $getNodeByKey(nodeKey);
-													if ($isComposerTimestampNode(targetNode)) {
-														targetNode.setEpoch(meta.epoch);
-														targetNode.setFormat(normalizeTimestampFormat(meta.format));
-													}
-												});
-											}
-										},
-									});
-								}}
-								onDelete={() => {
-									editor.update(() => {
-										const targetNode = $getNodeByKey(nodeKey);
-										if (targetNode != null) {
-											targetNode.remove();
-										}
-									});
-								}}
-								data-flx="lexical.composer.lexical-composer-input.handle-editable-context-menu.composer-timestamp-context-menu"
-							/>
-						));
-					}
-				});
-				return;
-			}
 			if (
 				target != null &&
 				target.closest(
