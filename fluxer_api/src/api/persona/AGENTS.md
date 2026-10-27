@@ -113,8 +113,6 @@ personas), 10,000 signature emojis per persona (unique across personas).
 - **OAuth:** the `@me` routes check `personas.read` or `personas.write` with
   `requireOAuth2ScopeForBearer`. A route without that call refuses bearer tokens, whatever its
   OpenAPI block says.
-- The image routes in `UserAccountController` are also registered under `/users/@me/subprofiles/*`.
-  No client calls those aliases and they are being removed (tyne-chat/tyne#124); do not add callers.
 - **Schemas:** a change to `PersonaApiSchemas.ts` needs `pnpm openapi:generate`, then a regeneration
   of the Dart SDK for the mobile app (root `AGENTS.md`, "Generated code").
 
