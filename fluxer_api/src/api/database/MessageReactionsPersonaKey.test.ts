@@ -10,9 +10,8 @@ import {describe, expect, it} from 'vitest';
 // part of every stored reaction: if a rebase puts an upstream key column before persona_id, or
 // drops it, the code still compiles while reads, upserts and deletes miss the stored rows (reactions
 // duplicate and cannot be removed). Keep persona_id 7th; upstream's new key columns go after it,
-// with a migration that appends their value to the stored keys
-// (scripts/migrate_message_reactions_persona_id.sql and its .ts twin in fluxer_api/scripts/ have
-// the shape).
+// with a migration that appends their value to the stored keys (the one that appended persona_id
+// is in git history: "feat(reactions): add migration scripts for message_reactions persona_id").
 const STORED_KEY = ['channel_id', 'bucket', 'message_id', 'emoji_id', 'emoji_name', 'user_id', 'persona_id'];
 
 describe('message_reactions key layout', () => {
