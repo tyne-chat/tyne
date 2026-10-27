@@ -289,6 +289,21 @@ describe('PersonaStore', () => {
 		expect(standaloneRes.strippedContent).toBe('\\\\');
 	});
 
+	it('keeps the persona when editing a message whose text starts with a backslash (tyne-chat/tyne#158)', () => {
+		const alice = addTestPersona(store, {name: 'Alice', persona_tags: [{prefix: 'A:', suffix: ''}]});
+		const currentAliceSubprofile = {id: alice.id, name: 'Alice'};
+
+		// Sent as `A: \o/`: stored as `\o/` with Alice. A typo fix keeps both the backslash and Alice.
+		const typoFix = store.matchEditMessage('\\o/ hi', currentAliceSubprofile, {originalContent: '\\o/ hii'});
+		expect(typoFix.finalContent).toBe('\\o/ hi');
+		expect(typoFix.subprofile).toBeUndefined();
+
+		// A backslash the edit adds still removes the persona.
+		const added = store.matchEditMessage('\\hello', currentAliceSubprofile, {originalContent: 'hello'});
+		expect(added.finalContent).toBe('hello');
+		expect(added.subprofile).toBeNull();
+	});
+
 	it('correctly handles message editing with matchEditMessage', async () => {
 		const alice = addTestPersona(store, {
 			name: 'Alice',
