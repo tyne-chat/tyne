@@ -127,7 +127,7 @@ export const ComposerMentionPill = observer(({mentionType, mentionId, display, .
 			const pill = (
 				<span
 					className={markupStyles.mention}
-					style={personaMentionStyle(persona?.color)}
+					style={personaMentionStyle(persona)}
 					contentEditable={false}
 					data-lexical-mention-type="user"
 					data-lexical-persona-id={resolvedPersonaId}
