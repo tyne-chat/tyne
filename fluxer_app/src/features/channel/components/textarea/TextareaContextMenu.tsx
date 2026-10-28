@@ -28,7 +28,7 @@ import {observer} from 'mobx-react-lite';
 
 // Fork imports.
 
-import {markShiftPasteActive} from '@app/features/messaging/utils/PlainPasteUtils';
+import {markNextPasteAsPlain, pasteTextIntoContentEditable} from '@app/features/messaging/utils/PlainPasteUtils';
 
 const REMOVE_FROM_DICTIONARY_DESCRIPTOR = msg({
 	message: 'Remove from dictionary',
@@ -186,7 +186,7 @@ export const TextareaContextMenu = observer(
 				return replaceSelectedText(active, text);
 			}
 			if (active instanceof HTMLElement && active.isContentEditable) {
-				return document.execCommand('insertText', false, text);
+				return pasteTextIntoContentEditable(active, text, false);
 			}
 			return false;
 		};
@@ -213,25 +213,33 @@ export const TextareaContextMenu = observer(
 				}
 			});
 		};
+		const pastePlainTextInActiveEditable = (text: string) => {
+			const active = document.activeElement;
+			if (text && active instanceof HTMLElement && active.isContentEditable) {
+				pasteTextIntoContentEditable(active, text, true);
+				return;
+			}
+			insertTextInActiveEditable(text);
+		};
 		const handlePastePlainText = () => {
 			runAfterClose(() => {
-				markShiftPasteActive();
 				const readClipboard = electronAPI?.clipboardReadText;
 				if (readClipboard) {
 					void readClipboard()
 						.then((text: string) => {
-							insertTextInActiveEditable(text);
+							pastePlainTextInActiveEditable(text);
 						})
 						.catch(() => {});
 					return;
 				}
 				if (navigator.clipboard?.readText) {
 					void navigator.clipboard.readText().then((text) => {
-						insertTextInActiveEditable(text);
+						pastePlainTextInActiveEditable(text);
 					});
 					return;
 				}
 				if (electronAPI?.pasteFromClipboard) {
+					markNextPasteAsPlain();
 					void electronAPI.pasteFromClipboard();
 				}
 			});

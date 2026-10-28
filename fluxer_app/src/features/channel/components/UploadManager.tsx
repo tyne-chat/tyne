@@ -27,7 +27,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 
 // Fork imports.
 
-import {clearShiftPaste, isShiftPasteActive} from '@app/features/messaging/utils/PlainPasteUtils';
+import {isPlainPasteEvent} from '@app/features/messaging/utils/PlainPasteUtils';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const UPLOAD_DROP_MODAL_KEY = 'upload-drop-modal';
@@ -181,8 +181,7 @@ export const UploadManager = observer(({channel, canAttachFiles, canSendMessages
 			if (event.defaultPrevented || Modal.hasModalOpen() || isDialogPasteTarget(event.target)) {
 				return;
 			}
-			if (isShiftPasteActive()) {
-				clearShiftPaste();
+			if (isPlainPasteEvent(event)) {
 				return;
 			}
 			const items = event.clipboardData?.items;
