@@ -83,6 +83,11 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 - **Picked images wait for Save**, as in upstream's profile editor: the form keeps them as
   `pendingAvatar`/`pendingBanner` (previewed from there), Save uploads them
   (`PersonaCommands.uploadPersonaImage`) before saving the persona, and Reset drops them.
+- **A persona's colour** has one rule, `personaColor` in `utils/PersonaColor.ts` (the mobile app's
+  `persona_color.dart` repeats it): the accent colour, else the colour of the persona's own avatar,
+  else none. Mentions, typing names and the profile card all use it; only the settings list shows
+  the accent setting itself. Don't compare `color` or `avatar_color` anywhere else
+  (tyne-chat/tyne#254).
 - **Mentions** of a persona take its colour, as in the mobile app: the text, and a fill a tenth as
   strong (`utils/PersonaMentionStyle.ts`, used by `MentionRenderer` and the composer's
   `ComposerMentionPill`). A persona without a colour gets the usual mention colours.
