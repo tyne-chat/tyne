@@ -42960,6 +42960,10 @@
 						"description": "Optional accent color integer",
 						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
 					},
+					"avatar_color": {
+						"description": "Color taken from the avatar, shown for the persona when it has no accent color",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
 					"bio": {"description": "Optional persona bio", "type": ["string", "null"]},
 					"visibility": {"description": "Visibility setting", "$ref": "#/components/schemas/PersonaVisibilitySchema"},
 					"use_count": {

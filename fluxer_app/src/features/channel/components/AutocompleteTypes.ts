@@ -37,6 +37,7 @@ export interface AutocompleteMentionPersonaOption {
 		name: string;
 		avatar_hash?: string | null;
 		color?: number | null;
+		avatar_color?: number | null;
 		pronouns?: string | null;
 		display_tag_text?: string | null;
 		display_tag_icon?: string | null;

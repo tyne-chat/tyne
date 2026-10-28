@@ -258,6 +258,11 @@ export const ChannelPersonaMentionItemSchema = z.object({
 	),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
 	color: z.number().int().nullish().describe('Optional accent color integer'),
+	avatar_color: z
+		.number()
+		.int()
+		.nullish()
+		.describe('Color taken from the avatar, shown for the persona when it has no accent color'),
 	bio: z.string().nullish().describe('Optional persona bio'),
 	visibility: PersonaVisibilitySchema.describe('Visibility setting'),
 	use_count: z.number().int().optional().default(0).describe('Usage counter for frecency ranking'),

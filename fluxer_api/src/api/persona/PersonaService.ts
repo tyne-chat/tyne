@@ -811,6 +811,7 @@ export class PersonaService {
 				display_tag_icon: userSettings?.display_tag_icon ?? null,
 				pronouns: persona.pronouns,
 				color: persona.color,
+				avatar_color: persona.avatarColor,
 				bio: persona.bio,
 				visibility: persona.visibility,
 				use_count: persona.useCount,
