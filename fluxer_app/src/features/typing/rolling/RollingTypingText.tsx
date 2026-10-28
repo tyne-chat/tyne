@@ -14,6 +14,8 @@ import type {ReactNode} from 'react';
 
 // Fork imports.
 
+import {personaColor} from '@app/features/persona/utils/PersonaColor';
+import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const ONE_TYPIST_DESCRIPTOR = msg({
@@ -58,8 +60,9 @@ export function getTypistName(item: Typist, channel: Channel): string {
 
 function getTypistColor(item: Typist, channel: Channel): string | undefined {
 	if (isTypistEntry(item)) {
-		if (item.subprofile?.color != null) {
-			return `#${item.subprofile.color.toString(16).padStart(6, '0')}`;
+		const color = personaColor(item.subprofile);
+		if (color != null) {
+			return ColorUtils.int2hex(color);
 		}
 		return GuildMembers.getMember(channel.guildId ?? '', item.user.id)?.getColorString();
 	}
