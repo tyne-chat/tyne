@@ -35,9 +35,13 @@ export function withPersonaMentionSegments(converted: ConvertedMarkdown): Conver
 		) {
 			continue;
 		}
-		const personaId = match[2]!;
-		const name = PersonaStore.getKnownPersona(personaId)?.name || personaId;
-		mentions.push({start, displayText: `@${name}`, actualText: match[0], type: 'user', id: match[1]!});
+		mentions.push({
+			start,
+			displayText: personaMentionDisplayText(match[2]!),
+			actualText: match[0],
+			type: 'user',
+			id: match[1]!,
+		});
 	}
 	if (mentions.length === 0) return converted;
 
@@ -56,4 +60,46 @@ export function withPersonaMentionSegments(converted: ConvertedMarkdown): Conver
 	}
 	displayText += source.slice(copiedUpTo);
 	return {displayText, segments};
+}
+
+interface PastedSegment {
+	displayText: string;
+	actualText: string;
+	type: MentionSegment['type'];
+	id: string;
+	start: number;
+	end: number;
+}
+
+/**
+ * Fork: upstream's `detectPastedSegments` matches `<@userId>` only, so a pasted persona mention stayed
+ * raw text (tyne-chat/tyne#257). Returns a user segment for each persona mention that overlaps none of
+ * `segments`, shown as in a message opened for editing (above).
+ */
+export function pastedPersonaMentionSegments(
+	pastedText: string,
+	pastePosition: number,
+	segments: ReadonlyArray<PastedSegment>,
+): Array<PastedSegment> {
+	const mentions: Array<PastedSegment> = [];
+	for (const match of pastedText.matchAll(PERSONA_MENTION_PATTERN)) {
+		const start = pastePosition + match.index;
+		const end = start + match[0].length;
+		if (segments.some((segment) => start < segment.end && segment.start < end)) {
+			continue;
+		}
+		mentions.push({
+			displayText: personaMentionDisplayText(match[2]!),
+			actualText: match[0],
+			type: 'user',
+			id: match[1]!,
+			start,
+			end,
+		});
+	}
+	return mentions;
+}
+
+function personaMentionDisplayText(personaId: string): string {
+	return `@${PersonaStore.getKnownPersona(personaId)?.name || personaId}`;
 }
