@@ -1,0 +1,126 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Fork: retries the macOS build of a desktop release when GitHub had no macOS runner for it
+# (tyne-chat/tyne#259). GitHub drops a job it cannot place on a runner ("The job was not acquired
+# by Runner of type hosted even after multiple attempts") and the release run fails, although the
+# other platforms built. This waits, reruns only the failed jobs (the jobs that succeeded and
+# their artifacts are kept, and the publish job runs again after the new macOS build), and
+# repeats up to MAX_ATTEMPTS attempts of the release run in all.
+#
+# It retries only when every failed job is the macOS build and that job was never given a
+# runner. Any other failure is left for a person.
+#
+# - Starts by itself when a run of fork-desktop-release.yaml on tyne fails.
+# - Run by hand with a run id to retry a run that failed earlier:
+#   gh workflow run fork-desktop-release-retry.yaml --repo tyne-chat/tyne --ref tyne -f run_id=<id>
+name: fork desktop release retry
+
+on:
+  workflow_run:
+    workflows: [fork desktop release]
+    types: [completed]
+    branches: [tyne]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Id of the fork desktop release run to retry
+        required: true
+        type: string
+
+permissions:
+  actions: write
+  checks: read
+  contents: read
+
+# One retry loop per release run. A second start for the same run (the rerun's own completion)
+# waits for the first and then finds nothing left to do.
+concurrency:
+  group: fork-desktop-release-retry-${{ inputs.run_id || github.event.workflow_run.id }}
+
+jobs:
+  retry:
+    name: Retry the macOS build
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event == 'workflow_dispatch') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RUN_ID: ${{ inputs.run_id || github.event.workflow_run.id }}
+      # Attempts of the release run in all, the first one included.
+      MAX_ATTEMPTS: '6'
+      WAIT_MINUTES: '20'
+    steps:
+      - name: Wait and rerun while only the macOS runner is missing
+        run: |
+          set -euo pipefail
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::Not a run id: $RUN_ID"; exit 1; }
+
+          workflow=$(gh run view "$RUN_ID" --json workflowName --jq .workflowName)
+          if [ "$workflow" != "fork desktop release" ]; then
+            echo "::error::Run $RUN_ID is a run of '$workflow', not of fork desktop release."
+            exit 1
+          fi
+
+          wait_for_run() {
+            while [ "$(gh run view "$RUN_ID" --json status --jq .status)" != completed ]; do
+              sleep 60
+            done
+          }
+
+          # Prints why the latest attempt cannot be retried, or nothing if it can.
+          not_retryable() {
+            local attempt=$1 failed job_id name dropped
+            failed=$(gh api --paginate "repos/$GH_REPO/actions/runs/$RUN_ID/attempts/$attempt/jobs" \
+              --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled" or .conclusion == "timed_out") | "\(.id)\t\(.name)"') \
+              || { echo "the jobs of attempt $attempt could not be read"; return; }
+            if [ -z "$failed" ]; then
+              echo "no job failed"
+              return
+            fi
+            while IFS=$'\t' read -r job_id name; do
+              case "$name" in
+                "Build macos ("*) ;;
+                *) echo "'$name' failed"; return ;;
+              esac
+              dropped=$(gh api "repos/$GH_REPO/check-runs/$job_id/annotations" \
+                --jq '[.[] | select(.message | contains("was not acquired by Runner"))] | length') \
+                || { echo "the annotations of '$name' could not be read"; return; }
+              if [ "$dropped" = 0 ]; then
+                echo "'$name' failed after it got a runner"
+                return
+              fi
+            done <<< "$failed"
+          }
+
+          while :; do
+            wait_for_run
+            read -r attempt conclusion < <(gh run view "$RUN_ID" --json attempt,conclusion --jq '"\(.attempt) \(.conclusion)"')
+            echo "Run $RUN_ID, attempt $attempt: $conclusion."
+            if [ "$conclusion" != failure ]; then
+              echo "Nothing to retry."
+              exit 0
+            fi
+            reason=$(not_retryable "$attempt")
+            if [ -n "$reason" ]; then
+              echo "Not retrying: $reason. That needs a person."
+              exit 0
+            fi
+            if [ "$attempt" -ge "$MAX_ATTEMPTS" ]; then
+              echo "::error::No macOS runner in $attempt attempts of run $RUN_ID. Rerun its failed jobs later: gh run rerun $RUN_ID --failed"
+              exit 1
+            fi
+            echo "Only the macOS build failed, for want of a runner. Retrying in $WAIT_MINUTES minutes."
+            sleep $((WAIT_MINUTES * 60))
+            # Someone may have rerun it meanwhile: then start over with that attempt.
+            now=$(gh run view "$RUN_ID" --json attempt,status --jq '"\(.attempt) \(.status)"')
+            if [ "$now" != "$attempt completed" ]; then
+              echo "The run changed while waiting ($now)."
+              continue
+            fi
+            gh run rerun "$RUN_ID" --failed
+            # Let the new attempt show up before waiting for it.
+            until [ "$(gh run view "$RUN_ID" --json attempt --jq .attempt)" -gt "$attempt" ]; do
+              sleep 10
+            done
+          done
