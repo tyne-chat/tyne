@@ -93,9 +93,11 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   `hasAttachments`; hidden by `showPersonasButton` and in a `bare` composer, whose host draws its
   own from `onWireValueChange`. `<SignalBar attached>` above the box (`signal_bar/AGENTS.md`).
   `handleInsertTimestamp` opens `TimestampModal` from both plus menus.
-- **Plain paste** is a module flag (`messaging/utils/PlainPasteUtils.ts`) read by
-  `useChannelComposerPaste`, `UploadManager` and `TextareaContextMenu`. A new paste path must call
-  `clearShiftPaste()` on every return.
+- **Plain paste** (`messaging/utils/PlainPasteUtils.ts`) is decided per paste event: ask
+  `isPlainPasteEvent(event)`, never keep state of your own. It skips files and the composer's
+  clipboard format; mentions and emoji still become pills, as in Discord. `TextareaContextMenu`'s
+  Paste items hand a contenteditable the text as a synthetic paste
+  (`pasteTextIntoContentEditable`), so the composer's paste checks run for them too.
 - `ActiveComposer` (`threads`) picks the composer for a `ComponentBus` event that names no channel.
 
 ## Search, header and panels (fork)
