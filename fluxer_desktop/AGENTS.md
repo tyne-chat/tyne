@@ -135,6 +135,11 @@ A handler that touches accounts, storage or windows checks its sender with
   Tyne is offered it. Versions are semver, higher than the last. Its token is read-only except in
   the publish job, which runs only `gh` and GitHub's own actions; keep builds, installs and anything
   from npm out of it. Every action is pinned to a commit.
+- **When GitHub has no macOS runner**, the macOS build is dropped unbuilt and the release run
+  fails. `fork-desktop-release-retry.yaml` then waits 20 minutes and reruns only the failed jobs
+  (the other platforms' builds are kept), up to six attempts of the run in all; it leaves any
+  other failure alone (tyne-chat/tyne#259). Its token can rerun runs (`actions: write`) and does
+  nothing else; it runs only `gh`.
 - **Signed releases**: the publish job signs the release's `SHA256SUMS.txt` with an Ed25519 key
   (secret of the `desktop-release` environment, usable from `tyne` only), and installed apps install
   a Windows package or AppImage only if that signed list gives its name and SHA-256
