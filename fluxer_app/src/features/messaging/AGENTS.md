@@ -152,6 +152,7 @@ and the fork tests. Inside upstream's files, under `// Fork imports.`:
 | `MessageGroupingUtils.ts`, `MessageReferences.ts`, `SystemMessageUtils.tsx` | a persona change starts a group; reply previews keep a known persona; persona names |
 | `TypingStart.ts`, `useTextareaDraftAndTyping.ts` | the typist's persona; the composer's persona to typing and the signal bar, silent while a tag is half typed |
 | `MarkdownToSegmentUtils.ts` | `convertMarkdownToSegments` returns through `withPersonaMentionSegments`, so an edited message's persona mentions become pills |
+| `PasteSegmentUtils.ts` | `detectPastedSegments` adds `pastedPersonaMentionSegments`, so pasted persona mentions become pills |
 
 Smaller fork changes: emoji autocomplete limit, typed shortcode case, `<t:>` in the profile's
 time zone, plain paste, an emptied composer deleting its draft. The mention parser is in
