@@ -10,6 +10,7 @@ import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {personaColor} from '@app/features/persona/utils/PersonaColor';
 import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {getUserAccentColor} from '@app/features/theme/utils/AccentColorUtils';
@@ -79,20 +80,19 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			return null;
 		}, [guildMember, guildId, user.id]);
 
-		const effectiveColor = subprofile.color ?? profile?.color ?? null;
-
-		const effectiveAvatarColor = subprofile.avatar_color ?? profile?.avatar_color ?? null;
-
 		const hasCustomPersonaAvatar = Boolean(subprofile.avatar || profile?.avatar_hash);
 
+		const ownColor = personaColor({
+			color: subprofile.color ?? profile?.color,
+			avatar_color: subprofile.avatar_color ?? profile?.avatar_color,
+			avatar: subprofile.avatar || profile?.avatar_hash,
+		});
+
 		const accentColor = useMemo(() => {
-			if (effectiveColor != null && effectiveColor !== 0) {
-				return ColorUtils.int2hex(effectiveColor);
+			if (ownColor != null) {
+				return ColorUtils.int2hex(ownColor);
 			}
 			if (hasCustomPersonaAvatar) {
-				if (effectiveAvatarColor != null && effectiveAvatarColor !== 0) {
-					return ColorUtils.int2hex(effectiveAvatarColor);
-				}
 				if (subprofile.id && /^\d+$/.test(subprofile.id)) {
 					try {
 						return ColorUtils.int2hex(AvatarUtils.getDefaultAvatarPrimaryColor(subprofile.id));
@@ -104,7 +104,7 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			}
 			// Persona has no avatar of its own; inherits root account's avatar and color
 			return getUserAccentColor(user);
-		}, [effectiveColor, hasCustomPersonaAvatar, effectiveAvatarColor, subprofile.id, user]);
+		}, [ownColor, hasCustomPersonaAvatar, subprofile.id, user]);
 
 		const rootDisplayName = useMemo(() => {
 			if (resolvedGuildMember?.nick) {
