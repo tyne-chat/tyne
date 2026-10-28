@@ -12,7 +12,12 @@ import {createBuilder} from '../../test/TestRequestBuilder';
 async function createPersona(
 	harness: ApiTestHarness,
 	token: string,
-	data: {name: string; visibility: 'public' | 'unlisted' | 'private'},
+	data: {
+		name: string;
+		visibility: 'public' | 'unlisted' | 'private';
+		color?: number | null;
+		avatar_color?: number | null;
+	},
 ): Promise<PersonaResponse> {
 	return createBuilder<PersonaResponse>(harness, token)
 		.post('/users/@me/personas')
@@ -191,5 +196,24 @@ describe('Channel Persona Mentions and Privacy Filtering', () => {
 
 		const names = results.map((r) => r.name);
 		expect(names).toContain('Charlie Lurker');
+	});
+
+	// Clients colour a persona without an accent colour by its avatar (tyne-chat/tyne#254), so a persona
+	// picked from the autocomplete needs both.
+	test('returns both the accent colour and the avatar colour', async () => {
+		await createPersona(harness, userB.token, {name: 'Bob Accent', visibility: 'public', color: 0x55ff55});
+		await createPersona(harness, userB.token, {name: 'Bob Avatar', visibility: 'public', avatar_color: 0x8f1e1e});
+
+		const results = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userA.token)
+			.get(`/channels/${channelId}/persona-mentions`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const accent = results.find((r) => r.name === 'Bob Accent');
+		const avatar = results.find((r) => r.name === 'Bob Avatar');
+		expect(accent?.color).toBe(0x55ff55);
+		expect(accent?.avatar_color ?? null).toBeNull();
+		expect(avatar?.color ?? null).toBeNull();
+		expect(avatar?.avatar_color).toBe(0x8f1e1e);
 	});
 });
