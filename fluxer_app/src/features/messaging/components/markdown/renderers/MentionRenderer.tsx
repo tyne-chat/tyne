@@ -173,7 +173,7 @@ export const MentionRenderer = observer(function MentionRenderer({
 				}
 				const personaName = persona?.name || kind.personaId;
 				const personaMentionLabel = `@${personaName}`;
-				const personaStyle = personaMentionStyle(persona?.color);
+				const personaStyle = personaMentionStyle(persona);
 
 				if (shouldDisableInteractions || !user) {
 					return (
