@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import Authentication from '@app/features/auth/state/Authentication';
 import type {Channel} from '@app/features/channel/models/Channel';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {MenuItem} from '@app/features/ui/action_menu/MenuItem';
@@ -23,7 +22,7 @@ interface SignalBarDMMenuItemProps {
 	onClose: () => void;
 }
 
-/** Shown to either person in a one-on-one DM and to the owner of a group DM. */
+/** Shown to everyone in a one-on-one or group DM. */
 export const SignalBarDMMenuItem = observer(({channel, onClose}: SignalBarDMMenuItemProps) => {
 	const {i18n} = useLingui();
 	const hasSignals = SignalBarStore.signals.length > 0;
@@ -31,7 +30,6 @@ export const SignalBarDMMenuItem = observer(({channel, onClose}: SignalBarDMMenu
 		if (hasSignals) void SignalBarStore.fetchChannel(channel.id);
 	}, [channel.id, hasSignals]);
 	if (!hasSignals) return null;
-	if (channel.isGroupDM() && channel.ownerId !== Authentication.currentUserId) return null;
 	const enabled = SignalBarStore.isEnabled(channel.id);
 	return (
 		<MenuItem
