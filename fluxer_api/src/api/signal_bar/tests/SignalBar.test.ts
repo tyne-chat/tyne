@@ -259,11 +259,6 @@ describe('signal bar', () => {
 		await createFriendship(harness, member, other);
 		await createFriendship(harness, member, owner);
 		const groupDm = await createGroupDmChannel(harness, member.token, [other.userId, owner.userId]);
-		await createBuilder(harness, other.token)
-			.put(`/channels/${groupDm.id}/signal-bar`)
-			.body({enabled: true})
-			.expect(HTTP_STATUS.FORBIDDEN)
-			.execute();
 		await createBuilder(harness, member.token)
 			.put(`/channels/${groupDm.id}/signal-bar`)
 			.body({enabled: true})
@@ -283,6 +278,42 @@ describe('signal bar', () => {
 			.expect(HTTP_STATUS.NO_CONTENT)
 			.execute();
 		expect((await listSignals(other.token, groupDm.id)).entries).toEqual([]);
+	});
+
+	it('lets anyone in a group DM switch its bar on and off, and nobody outside it', async () => {
+		const {owner, members, guild} = await setupTestGuildWithMembers(harness, 3);
+		const [member, other, third] = members as [TestAccount, TestAccount, TestAccount];
+		await setHomeGuild(guild.id);
+		const signalId = (await setBar(owner.token, ['📖'])).signals[0]!.id;
+		await createFriendship(harness, member, other);
+		await createFriendship(harness, member, third);
+		const groupDm = await createGroupDmChannel(harness, member.token, [other.userId, third.userId]);
+
+		await createBuilder(harness, other.token)
+			.put(`/channels/${groupDm.id}/signal-bar`)
+			.body({enabled: true})
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+		expect((await listSignals(member.token, groupDm.id)).enabled).toBe(true);
+		await createBuilder(harness, member.token)
+			.put(`/channels/${groupDm.id}/signals/${signalId}/@me`)
+			.body({})
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+
+		await createBuilder(harness, owner.token)
+			.put(`/channels/${groupDm.id}/signal-bar`)
+			.body({enabled: false})
+			.expect(HTTP_STATUS.NOT_FOUND)
+			.execute();
+		expect((await listSignals(other.token, groupDm.id)).entries).toHaveLength(1);
+
+		await createBuilder(harness, other.token)
+			.put(`/channels/${groupDm.id}/signal-bar`)
+			.body({enabled: false})
+			.expect(HTTP_STATUS.NO_CONTENT)
+			.execute();
+		expect(await listSignals(member.token, groupDm.id)).toMatchObject({enabled: false, entries: []});
 	});
 
 	it('keeps signals for 12 hours after the last disconnect and drops removed signals at once', async () => {
