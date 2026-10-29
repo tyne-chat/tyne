@@ -71,9 +71,29 @@ if [ "$SKIP_BUILD" = false ]; then
   fi
   ALL_SERVICES=($(docker compose -f "$BUILD_COMPOSE" config --services))
 
+  # A build downloads from many hosts (Docker Hub, npm, crates.io, ffmpeg.org),
+  # all of them at once when a base image has moved and the layer cache no
+  # longer matches. One dropped connection fails the whole build, so try again
+  # after a pause. Layers that finished stay in BuildKit's cache, so a retry
+  # redoes only what failed; a real build error fails every attempt.
+  BUILD_ATTEMPTS="${E2E_BUILD_ATTEMPTS:-3}"
+  BUILD_RETRY_DELAY="${E2E_BUILD_RETRY_DELAY:-60}"
+  build_images() {
+    local attempt=1
+    until COMPOSE_BAKE=true docker compose -f "$BUILD_COMPOSE" build "$@"; do
+      if [ "$attempt" -ge "$BUILD_ATTEMPTS" ]; then
+        echo "❌ Docker image build failed on all $BUILD_ATTEMPTS attempts."
+        return 1
+      fi
+      echo "⚠️ Docker image build failed (attempt $attempt of $BUILD_ATTEMPTS); retrying in ${BUILD_RETRY_DELAY}s..."
+      sleep "$BUILD_RETRY_DELAY"
+      attempt=$((attempt + 1))
+    done
+  }
+
   if [ "$PULL_UNCHANGED" = false ]; then
     echo "🔨 Building all ${#ALL_SERVICES[@]} custom Fluxer microservices from source (${ALL_SERVICES[*]})..."
-    COMPOSE_BAKE=true docker compose -f "$BUILD_COMPOSE" build "${ALL_SERVICES[@]}"
+    build_images "${ALL_SERVICES[@]}"
   else
     # Opt-in shortcut: reuse upstream's released image for services whose own
     # directory is unchanged. The check does not see shared crates or packages,
@@ -122,7 +142,7 @@ if [ "$SKIP_BUILD" = false ]; then
 
     if [ ${#SERVICES_TO_BUILD[@]} -gt 0 ]; then
       echo "🔨 Building custom Fluxer microservices from source (${SERVICES_TO_BUILD[*]})..."
-      COMPOSE_BAKE=true docker compose -f "$BUILD_COMPOSE" build "${SERVICES_TO_BUILD[@]}"
+      build_images "${SERVICES_TO_BUILD[@]}"
     fi
   fi
   echo "✅ Docker images ready."
