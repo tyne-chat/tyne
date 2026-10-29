@@ -13,7 +13,7 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
   label (32 characters). An instance admin picks a home community in the admin panel; its managers
   (Manage Community) edit the bar on the web. No home community, no bar.
 - The bar is off in every channel until switched on: in a community by its managers (a default, per
-  category, per channel); in a DM by either person of a one-to-one DM or a group DM's owner. Web only.
+  category, per channel); in a DM or group DM by anyone in it. Web only.
 - Managers turn one person's signal off or reset a signal for everyone.
 - A signal stays lit while its owner is online and for 12 hours after they go offline
   (tyne-chat/tyne#89).
@@ -68,11 +68,12 @@ toward the global limit.
 | `PUT /channels/:id/signals/:sid/@me` | can see; Send Messages in a community; not timed out; bar on; signal on the bar; owns `persona_id` | lights, or re-points the caller's entry |
 | `DELETE …/:sid/@me` | can see | the caller's entry off |
 | `DELETE /channels/:id/signals/:sid`, `…/:sid/users/:uid` | a manager | everyone off; one account off |
-| `PUT /channels/:id/signal-bar` | a DM's manager; no bots | the DM switch; off clears the DM's signals |
+| `PUT /channels/:id/signal-bar` | anyone in the DM or group DM; no bots | the DM switch; off clears the DM's signals |
 | `GET`, `PUT /guilds/:id/signal-bar/channels` | Manage Community; no bots | the community switches |
 
 - **Manager** (`assertCanManageChannel`): Manage Community in a community channel; either person in
-  a one-to-one DM; the owner of a group DM.
+  a one-to-one DM; the owner of a group DM. The DM switch is not theirs alone: anyone in a group DM
+  may flip it (tyne-chat/tyne#265).
 - Listing, lighting and the DM switch call `ensureTextChannel`: threads and forums get 400.
 - `updateBar` keeps an item's `id` only if it is on the current bar and not repeated, so a reorder
   keeps ids and the signals lit under them. A custom emoji must exist (in any community); Unicode
