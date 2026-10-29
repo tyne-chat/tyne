@@ -12,7 +12,7 @@ The instance has one bar. It belongs to the home community named by `signal_bar_
 
 ## Where the bar shows
 
-The bar is off in a channel until someone switches it on. In a community, members holding `MANAGE_GUILD` choose a default, per-category settings and per-channel settings with [Choose where the signal bar is switched on in a community](#choose-where-the-signal-bar-is-switched-on-in-a-community). A channel's own setting wins over its category's, and its category's over the default. In a direct message either participant switches the bar with [Switch the signal bar on or off in a DM](#switch-the-signal-bar-on-or-off-in-a-dm), and in a group direct message the owner does.
+The bar is off in a channel until someone switches it on. In a community, members holding `MANAGE_GUILD` choose a default, per-category settings and per-channel settings with [Choose where the signal bar is switched on in a community](#choose-where-the-signal-bar-is-switched-on-in-a-community). A channel's own setting wins over its category's, and its category's over the default. In a direct message or group direct message anyone in it switches the bar with [Switch the signal bar on or off in a DM](#switch-the-signal-bar-on-or-off-in-a-dm).
 
 Switching the bar off in a channel switches off every signal given there.
 
@@ -104,7 +104,7 @@ Where the signal bar shows in a community.
 
 <RouteHeader method="PUT" path="/v1/channels/{channel_id}/signal-bar" />
 
-Switches the signal bar on or off in a direct message. Either participant of a one-on-one direct message may do this, and the owner of a group direct message. A community channel is refused with 403, and its bar is set with [Choose where the signal bar is switched on in a community](#choose-where-the-signal-bar-is-switched-on-in-a-community). Switching off clears every signal in the channel.
+Switches the signal bar on or off in a direct message. Anyone in a one-on-one or group direct message may do this. A community channel is refused with 403, and its bar is set with [Choose where the signal bar is switched on in a community](#choose-where-the-signal-bar-is-switched-on-in-a-community). Switching off clears every signal in the channel.
 
 ### Path parameters
 
