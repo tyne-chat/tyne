@@ -282,11 +282,11 @@ export class SignalBarService {
 		return next;
 	}
 
-	async setDmEnabled(authChannel: AuthenticatedChannel, userId: UserID, enabled: boolean): Promise<void> {
+	/** Anyone in a DM or group DM may switch its bar; `getChannelAuthenticated` has checked they are in it. */
+	async setDmEnabled(authChannel: AuthenticatedChannel, enabled: boolean): Promise<void> {
 		const {channel} = authChannel;
 		this.ensureTextChannel(channel);
 		if (channel.guildId) throw new MissingPermissionsError();
-		await this.assertCanManageChannel(authChannel, userId);
 		if ((await this.deps.settingsRepository.isDmEnabled(channel.id)) === enabled) return;
 		await this.deps.settingsRepository.setDmEnabled(channel.id, enabled);
 		await this.announceEnabled(channel, enabled);
