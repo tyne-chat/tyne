@@ -222,7 +222,7 @@ export function SignalBarController(app: HonoApp) {
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Signal Bar'],
 			description:
-				'Switches the signal bar on or off in a direct message. Either participant of a one-on-one DM or the owner of a group DM may do this. Community channels are configured through the community endpoint.',
+				'Switches the signal bar on or off in a direct message. Anyone in a one-on-one or group DM may do this. Community channels are configured through the community endpoint.',
 		}),
 		async (ctx) => {
 			const userId = ctx.get('user').id;
@@ -230,7 +230,7 @@ export function SignalBarController(app: HonoApp) {
 			const authChannel = await ctx
 				.get('channelService')
 				.interactions.authService.getChannelAuthenticated({userId, channelId, viewer: viewerFromCtx(ctx)});
-			await ctx.get('signalBarService').setDmEnabled(authChannel, userId, ctx.req.valid('json').enabled);
+			await ctx.get('signalBarService').setDmEnabled(authChannel, ctx.req.valid('json').enabled);
 			return ctx.body(null, 204);
 		},
 	);
