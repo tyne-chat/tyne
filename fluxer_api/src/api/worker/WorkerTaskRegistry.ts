@@ -96,6 +96,7 @@ import type {WorkerTaskHandler} from '@pkgs/worker/src/contracts/WorkerTask';
 
 // Fork imports.
 
+import backfillUseExternalCommands from '@app/api/worker/tasks/BackfillUseExternalCommands';
 import sweepSignalBar from '@app/api/worker/tasks/SweepSignalBar';
 
 export const workerTasks: Record<WorkerTaskName, WorkerTaskHandler> = {
@@ -186,6 +187,7 @@ export const workerTasks: Record<WorkerTaskName, WorkerTaskHandler> = {
 	syncCrosspostedMessage,
 	flushUserActivityBuffer,
 	sweepSignalBar,
+	backfillUseExternalCommands,
 	userProcessPendingDeletion,
 	userProcessPendingDeletions,
 };
