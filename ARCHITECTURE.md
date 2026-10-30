@@ -215,8 +215,9 @@ Liquid template and posts an ordinary message through upstream's send path, whic
 command so messages carry a `command` field; fork tables, three fork permission bits, event
 `GUILD_COMMANDS_UPDATE`. Web `features/guild_commands/`: the commands join the composer's `/` menu,
 Enter runs `/name input` (`runForkGuildCommand` in `useTextareaSubmit.ts`), a chip after the
-timestamp, and a Commands tab under Message Tools. The design, including the mobile part still to
-come, is `docs/design/server-commands.md` (tyne-chat/tyne#246).
+timestamp, and a Commands tab under Message Tools with a basic editor and a script editor. The
+design, including the mobile part still to come, is `docs/design/server-commands.md`
+(tyne-chat/tyne#246).
 
 ### Other
 
