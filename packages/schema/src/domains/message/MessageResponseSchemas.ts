@@ -23,6 +23,10 @@ import {z} from 'zod';
 // Fork imports.
 
 import {
+	type MessageGuildCommandResponse,
+	MessageGuildCommandResponseSchema,
+} from '@fluxer/schema/src/domains/guild_command/MessageGuildCommandSchemas';
+import {
 	type MessageSubprofileResponse,
 	MessageSubprofileResponseSchema,
 } from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -186,6 +190,9 @@ const MessageBaseResponseSchema = z.object({
 		.describe(
 			'The personas mentioned in the message, its embeds or what it forwards, shown as a message sent as them would show them; absent when there are none',
 		),
+	command: MessageGuildCommandResponseSchema.nullish().describe(
+		'The server command that made this message; absent for other messages and after an edit',
+	),
 });
 
 type MessageBaseResponse = z.infer<typeof MessageBaseResponseSchema>;
@@ -410,6 +417,7 @@ export interface Message {
 	readonly _favoriteMemeId?: string;
 	readonly subprofile?: MessageSubprofileResponse | null;
 	readonly mention_personas?: ReadonlyArray<MessageSubprofileResponse> | null;
+	readonly command?: MessageGuildCommandResponse | null;
 }
 
 export const MessagePurgeResponse = z.object({deleted_count: z.number().int().nonnegative()});

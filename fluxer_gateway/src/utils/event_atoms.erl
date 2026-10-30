@@ -66,6 +66,7 @@ core_event_map() ->
         <<"SIGNAL_BAR_UPDATE">> => signal_bar_update,
         <<"CHANNEL_SIGNAL_UPDATE">> => channel_signal_update,
         <<"CHANNEL_SIGNAL_BAR_UPDATE">> => channel_signal_bar_update,
+        <<"GUILD_COMMANDS_UPDATE">> => guild_commands_update,
         <<"TYPING_START">> => typing_start
     }.
 

@@ -13,6 +13,19 @@ signal_bar_update_bypasses_passive_test() ->
     ),
     ok.
 
+guild_commands_update_reaches_passive_sessions_test() ->
+    SessionData = #{user_id => 1, active_guilds => sets:new(), bot => false},
+    State = #{member_count => 300},
+    ?assertEqual(guild_commands_update, event_atoms:normalize(<<"GUILD_COMMANDS_UPDATE">>)),
+    ?assertEqual(false, guild_dispatch_filter:is_channel_scoped_event(guild_commands_update)),
+    ?assertEqual(
+        true,
+        session_passive:should_receive_event(
+            guild_commands_update, #{}, 123, SessionData, State
+        )
+    ),
+    ok.
+
 channel_signal_update_is_channel_scoped_and_passive_filtered_test() ->
     SessionData = #{user_id => 1, active_guilds => sets:new(), bot => false},
     State = #{member_count => 300},

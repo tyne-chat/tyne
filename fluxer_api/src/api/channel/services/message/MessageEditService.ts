@@ -39,6 +39,7 @@ import type {AllowedMentionsRequest} from '@fluxer/schema/src/domains/message/Sh
 // Fork imports.
 
 import type {PersonaID} from '@app/api/BrandedTypes';
+import {forgetForkGuildCommandUseOnEdit} from '@app/api/guild_command/GuildCommandUses';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import {requestedPersonaId, resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
@@ -237,6 +238,7 @@ export class MessageEditService {
 				requestCache.messageMentionChannels.set(updatedMessage.id.toString(), mentionResult.mentionChannels);
 			}
 		}
+		await forgetForkGuildCommandUseOnEdit(message, updatedMessage);
 		await dispatchMessageUpdateBroadcast({gatewayService: this.deps.gatewayService, channel, message: updatedMessage});
 		await this.deps.crosspostPropagation.propagateEdit(updatedMessage);
 		if (user && ((data.content !== undefined && data.content !== message.content) || hasNewAttachments)) {

@@ -140,6 +140,7 @@ function registerCronJobs(cron: CronScheduler, jobsStreamMaxAgeMs: number, kvCli
 		{ledger: false},
 	);
 	cron.upsert('sweepSignalBar', 'sweepSignalBar', {}, '30 * * * * *', {ledger: false});
+	cron.upsert('backfillUseExternalCommands', 'backfillUseExternalCommands', {}, '15 */10 * * * *', {ledger: false});
 	cron.upsert('drainActivitySpool', 'drainActivitySpool', {}, '*/5 * * * * *', {
 		ledger: false,
 		enabled: activityEventsPublishing,
