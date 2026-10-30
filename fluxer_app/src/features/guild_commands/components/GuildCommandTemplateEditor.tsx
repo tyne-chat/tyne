@@ -59,6 +59,7 @@ const editorTheme = EditorView.theme({
 		borderRadius: '6px',
 		color: 'var(--text-primary)',
 	},
+	'.cm-tooltip-autocomplete > ul': {maxWidth: 'min(22rem, 78vw)'},
 	'.cm-tooltip-autocomplete > ul > li': {fontFamily: 'var(--font-mono, ui-monospace, monospace)'},
 	'.cm-tooltip-autocomplete > ul > li[aria-selected]': {
 		backgroundColor: 'var(--brand-primary)',
