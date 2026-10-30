@@ -164,7 +164,7 @@ export type GuildCommandTemplateIssue = z.infer<typeof GuildCommandTemplateIssue
 
 export const GuildCommandCreateRequestSchema = z.object({
 	name: GuildCommandNameSchema,
-	description: z.string().max(MAX_GUILD_COMMAND_DESCRIPTION_LENGTH).default('').describe('Shown in autocomplete'),
+	description: z.string().max(MAX_GUILD_COMMAND_DESCRIPTION_LENGTH).nullish().describe('Shown in autocomplete'),
 	template: GuildCommandTemplateSchema,
 	input_mode: GuildCommandInputMode,
 	input_type: GuildCommandInputType.default('text'),
@@ -178,7 +178,7 @@ export type GuildCommandCreateRequest = z.infer<typeof GuildCommandCreateRequest
 
 export const GuildCommandUpdateRequestSchema = z.object({
 	name: GuildCommandNameSchema.optional(),
-	description: z.string().max(MAX_GUILD_COMMAND_DESCRIPTION_LENGTH).optional(),
+	description: z.string().max(MAX_GUILD_COMMAND_DESCRIPTION_LENGTH).nullish(),
 	template: GuildCommandTemplateSchema.optional(),
 	input_mode: GuildCommandInputMode.optional(),
 	input_type: GuildCommandInputType.optional(),

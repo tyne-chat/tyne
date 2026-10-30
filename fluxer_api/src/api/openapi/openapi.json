@@ -36989,7 +36989,7 @@
 						"pattern": "^[a-z0-9_-]{1,32}$",
 						"description": "The name typed after the slash: lowercase letters, digits, - and _, at most 32 characters"
 					},
-					"description": {"type": "string", "maxLength": 100},
+					"description": {"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]},
 					"template": {
 						"type": "string",
 						"minLength": 1,
@@ -37084,7 +37084,10 @@
 						"pattern": "^[a-z0-9_-]{1,32}$",
 						"description": "The name typed after the slash: lowercase letters, digits, - and _, at most 32 characters"
 					},
-					"description": {"default": "", "description": "Shown in autocomplete", "type": "string", "maxLength": 100},
+					"description": {
+						"description": "Shown in autocomplete",
+						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
+					},
 					"template": {
 						"type": "string",
 						"minLength": 1,
