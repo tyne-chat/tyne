@@ -25,6 +25,8 @@ class GuildCommandsStore {
 	private readonly byGuild = observable.map<string, ReadonlyArray<GuildCommandResponse>>(undefined, {deep: false});
 	private readonly staleGuilds = observable.set<string>();
 	loaded = false;
+	/** A command to open in the settings tab, until the tab takes it. */
+	editingRequest: {guildId: string; commandId: string} | null = null;
 	private listRequest: Promise<void> | null = null;
 	private readonly guildRequests = new Map<string, Promise<void>>();
 	private failedAt = 0;
@@ -54,6 +56,15 @@ class GuildCommandsStore {
 		this.listRequest = null;
 		this.guildRequests.clear();
 		this.failedAt = 0;
+		this.editingRequest = null;
+	}
+
+	requestEditing(guildId: string, commandId: string): void {
+		this.editingRequest = {guildId, commandId};
+	}
+
+	clearEditingRequest(): void {
+		this.editingRequest = null;
 	}
 
 	markStale(guildId: string): void {
