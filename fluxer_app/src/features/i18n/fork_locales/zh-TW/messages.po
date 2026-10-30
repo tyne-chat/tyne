@@ -92,6 +92,10 @@ msgstr "橫幅圖片下載失敗：{error}。已匯入不含橫幅的人格。"
 msgid "Change persona"
 msgstr "變更人格"
 
+#. Help for an example in a command script.
+msgid "Change the message depending on what they typed"
+msgstr "根據輸入的內容變更訊息"
+
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "選擇 PluralKit 匯出檔（.json）或 {productName} 匯出檔（.zip），或拖放至此"
 
@@ -371,12 +375,20 @@ msgstr "插入時間戳記"
 msgid "Insert:"
 msgstr "插入："
 
+#. Why a community command could not run, shown after "Couldn't run /name:".
+msgid "Its script has a problem."
+msgstr "它的腳本有問題。"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "保留現有並新增新的（建議）"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "保留你目前的 {existingCount} 個人格，並將全部 {0} 個匯入的人格作為新項目一併加入。"
+
+#. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
+msgid "Line {line}, column {column}: {problem}"
+msgstr "第 {line} 行，第 {column} 欄：{problem}"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -551,6 +563,18 @@ msgstr "人格可見度"
 msgid "Personas"
 msgstr "人格"
 
+#. Help for an example in a command script.
+msgid "Pick one option at random"
+msgstr "隨機選擇一個選項"
+
+#. Help for an example in a command script.
+msgid "Pick one word at random"
+msgstr "隨機選擇一個字詞"
+
+#. Help for an example in a command script.
+msgid "Pick the word for a number"
+msgstr "根據數字選擇對應的字詞"
+
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
 msgstr "釘選表情符號"
@@ -648,6 +672,10 @@ msgstr "為所有人重設訊號"
 msgid "Root Account (Default)"
 msgstr "根帳號 (預設)"
 
+#. Button under the preview of a command script that picks at random: fills the preview in again.
+msgid "Run again"
+msgstr "再次執行"
+
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
 msgstr "範例輸入"
@@ -655,6 +683,14 @@ msgstr "範例輸入"
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "正在儲存人格..."
+
+#. Label of the code editor for a community command.
+msgid "Script"
+msgstr "腳本"
+
+#. Title of the expandable help under the command script editor.
+msgid "Script reference"
+msgstr "腳本參考資料"
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
@@ -784,13 +820,45 @@ msgstr "工作列"
 msgid "Tell us about this persona..."
 msgstr "介紹一下這個人格..."
 
+#. Help for a command script variable.
+msgid "That person’s name"
+msgstr "此人的名稱"
+
+#. Help for a command script variable.
+msgid "The channel, as a mention"
+msgstr "頻道（提及形式）"
+
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "所選檔案不是有效的 JSON 物件。"
 
+#. Help for a command script variable.
+msgid "The first person they mention, if any"
+msgstr "第一個被提及的人（如有）"
+
+#. Help for a command script variable.
+msgid "The name of this community"
+msgstr "此社群的名稱"
+
+#. Help for a command script variable.
+msgid "The person running it, as a mention"
+msgstr "使用者（提及形式）"
+
 #. Description of the persona option of the /persona slash command
 msgid "The persona to select."
 msgstr "要選擇的人格。"
+
+#. Problem in a community command script: it produces more text than is allowed.
+msgid "The script builds too much text."
+msgstr "腳本產生的文字過多。"
+
+#. Problem in a community command script.
+msgid "The script is too long."
+msgstr "腳本過長。"
+
+#. Problem in a community command script.
+msgid "The script took too long to run."
+msgstr "腳本執行時間過長。"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "在此勾選頻道之前，訊號列為關閉狀態。勾選分類或整個社群後，之後在其中建立的頻道也會套用。"
@@ -798,6 +866,18 @@ msgstr "在此勾選頻道之前，訊號列為關閉狀態。勾選分類或整
 #. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "無法儲存標籤圖示：{error}。可在人格設定中重新設定。"
+
+#. Help for a command script variable.
+msgid "Their name"
+msgstr "使用者的名稱"
+
+#. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
+msgid "There's no filter called {name}."
+msgstr "沒有名為 {name} 的篩選器。"
+
+#. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
+msgid "There's no tag called {name}."
+msgstr "沒有名為 {name} 的標籤。"
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -822,8 +902,20 @@ msgstr "此表情符號已新增為專屬表情符號"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "這是你的顯示標籤在聊天中的預覽效果。"
 
+#. Problem in a community command script: a syntax error at the position given before this text.
+msgid "This part can't be read."
+msgstr "無法讀取這部分內容。"
+
+#. Problem in a community command script: it failed while running, at the position given before this text.
+msgid "This part stopped with an error."
+msgstr "這部分因錯誤而停止。"
+
 msgid "This persona’s profile is private."
 msgstr "此人格的個人檔案為私人。"
+
+#. Shown instead of the preview when a command script produces no text.
+msgid "This would post nothing, so the command would fail."
+msgstr "這不會發佈任何內容，因此指令會失敗。"
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
@@ -843,6 +935,10 @@ msgstr "關閉 {name}"
 #. Direct message right-click menu action that shows the signal bar above the message box in this DM.
 msgid "Turn on signal bar"
 msgstr "開啟訊號列"
+
+#. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
+msgid "Type {output} or {tag} for suggestions."
+msgstr "輸入 {output} 或 {tag} 以查看建議。"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
@@ -888,11 +984,20 @@ msgstr "使用外部指令"
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
 msgstr "請使用小寫字母、數字、- 和 _，最多 32 個字元。"
 
+#. Button in the command editor that switches back from the code editor to the plain message field.
+msgid "Use the basic editor"
+msgstr "使用基本編輯器"
+
+#. Button in the command editor that switches the message field to the code editor for scripts.
+msgid "Use the script editor"
+msgstr "使用腳本編輯器"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "查看你的人格"
 
 #. Button inserting the placeholder for what the member types after the command.
+#. Help for a command script variable.
 msgid "What they type"
 msgstr "輸入的內容"
 
@@ -906,6 +1011,10 @@ msgstr "訊號列顯示位置"
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "人格的記憶範圍"
+
+#. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
+msgid "Write a number as 1st, 2nd, 3rd"
+msgstr "將數字寫成 1st, 2nd, 3rd"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
@@ -979,6 +1088,10 @@ msgstr "{label}：{names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name}（{mode}）- 點擊以切換人格"
+
+#. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
+msgid "{name} is never closed."
+msgstr "{name} 始終未閉合。"
 
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
