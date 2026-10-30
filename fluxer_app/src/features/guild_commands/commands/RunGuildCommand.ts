@@ -12,6 +12,7 @@ import {http} from '@app/features/platform/transport/RestTransport';
 import {Logger} from '@app/features/platform/utils/AppLogger';
 import RollingTypingSender from '@app/features/typing/rolling/RollingTypingSender';
 import * as FormUtils from '@app/lib/forms';
+import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
@@ -26,6 +27,10 @@ const COMMAND_FAILED_DESCRIPTOR = msg({
 	message: "Couldn't run /{name}: {detail}",
 	comment:
 		'Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.',
+});
+const COMMAND_BROKEN_DESCRIPTOR = msg({
+	message: 'Its script has a problem.',
+	comment: 'Why a community command could not run, shown after "Couldn\'t run /name:".',
 });
 const COMMAND_ONE_LINE_DESCRIPTOR = msg({
 	message: 'What you type after /{name} has to fit on one line.',
@@ -107,7 +112,12 @@ export async function runForkGuildCommand(params: {
 		logger.warn('Failed to run command', error);
 		// The command is gone, or the user left its community: the next use reloads that community.
 		if ((error as {status?: number} | null)?.status === 404) GuildCommandsStore.markStale(command.guild_id);
-		report(channelId, i18n._(COMMAND_FAILED_DESCRIPTOR, {name, detail: FormUtils.extractErrorMessage(i18n, error)}));
+		const code = (error as {body?: {code?: string}} | null)?.body?.code;
+		const detail =
+			code === APIErrorCodes.GUILD_COMMAND_TEMPLATE_INVALID
+				? i18n._(COMMAND_BROKEN_DESCRIPTOR)
+				: FormUtils.extractErrorMessage(i18n, error);
+		report(channelId, i18n._(COMMAND_FAILED_DESCRIPTOR, {name, detail}));
 	} finally {
 		inFlight.delete(channelId);
 	}
