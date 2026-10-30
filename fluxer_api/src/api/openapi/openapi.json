@@ -3186,6 +3186,79 @@
 				}
 			}
 		},
+		"/channels/{channel_id}/commands/{command_id}": {
+			"post": {
+				"operationId": "run_guild_command",
+				"summary": "Run guild command",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/MessageResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Fills in a command's template and posts the result as an ordinary message from the caller. The caller must be a member of the command's community, and needs Use External Commands in another community's channel.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "channel_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the channel", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the channel"
+					},
+					{
+						"name": "command_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the command"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandRunRequestSchema"}}}
+				}
+			}
+		},
 		"/channels/{channel_id}/follower-stats": {
 			"get": {
 				"operationId": "get_channel_follower_stats",
@@ -9622,6 +9695,269 @@
 					"required": true,
 					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ChannelPositionUpdateRequest"}}}
 				}
+			}
+		},
+		"/guilds/{guild_id}/commands": {
+			"get": {
+				"operationId": "list_guild_commands",
+				"summary": "List guild commands",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves a community's commands. Templates are included only for members who may create or manage commands.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					}
+				]
+			},
+			"post": {
+				"operationId": "create_guild_command",
+				"summary": "Create guild command",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Creates a command. Requires Create Commands.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandCreateRequestSchema"}}}
+				}
+			}
+		},
+		"/guilds/{guild_id}/commands/{command_id}": {
+			"patch": {
+				"operationId": "update_guild_command",
+				"summary": "Update guild command",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Updates a command. Its creator needs Create Commands; anyone else needs Manage Commands.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					},
+					{
+						"name": "command_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the command"
+					}
+				],
+				"requestBody": {
+					"required": false,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandUpdateRequestSchema"}}}
+				}
+			},
+			"delete": {
+				"operationId": "delete_guild_command",
+				"summary": "Delete guild command",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Deletes a command. Its creator needs Create Commands; anyone else needs Manage Commands.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					},
+					{
+						"name": "command_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the command"
+					}
+				]
 			}
 		},
 		"/guilds/{guild_id}/delete": {
@@ -20208,6 +20544,59 @@
 				"security": [{"sessionToken": []}]
 			}
 		},
+		"/users/@me/guild-commands": {
+			"get": {
+				"operationId": "list_my_guild_commands",
+				"summary": "List the commands of all my communities",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves the commands of every community the user is a member of, without their templates, for the message composer.",
+				"security": [{"sessionToken": []}]
+			}
+		},
 		"/users/@me/guild-visits": {
 			"get": {
 				"operationId": "list_my_guild_visits",
@@ -27625,6 +28014,10 @@
 							{"type": "null"}
 						]
 					},
+					"command": {
+						"description": "The server command that made this message; absent for other messages and after an edit",
+						"anyOf": [{"$ref": "#/components/schemas/MessageGuildCommandResponseSchema"}, {"type": "null"}]
+					},
 					"referenced_message": {
 						"description": "The reply target. Present and populated when the target resolved, present and null when the target is gone, absent when this message has no default reference. Clients must tell null apart from absent by key presence.",
 						"anyOf": [
@@ -27805,6 +28198,10 @@
 											{"type": "array", "items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}},
 											{"type": "null"}
 										]
+									},
+									"command": {
+										"description": "The server command that made this message; absent for other messages and after an edit",
+										"anyOf": [{"$ref": "#/components/schemas/MessageGuildCommandResponseSchema"}, {"type": "null"}]
 									}
 								},
 								"required": [
@@ -32026,6 +32423,10 @@
 				"type": "array",
 				"items": {"$ref": "#/components/schemas/GuildVisitResponse"},
 				"description": "Guilds the current user is visiting"
+			},
+			"GuildCommandListResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/GuildCommandResponseSchema"}
 			},
 			"GiftCodeMetadataListResponse": {
 				"type": "array",
@@ -36417,6 +36818,90 @@
 					"webauthn_challenge": {"description": "WebAuthn challenge string", "type": "string"}
 				}
 			},
+			"GuildCommandUpdateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"pattern": "^[a-z0-9_-]{1,32}$",
+						"description": "The name typed after the slash: lowercase letters, digits, - and _, at most 32 characters"
+					},
+					"description": {"type": "string", "maxLength": 100},
+					"template": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 4000,
+						"description": "The Liquid template the server fills in when the command runs"
+					},
+					"input_mode": {"$ref": "#/components/schemas/GuildCommandInputMode"},
+					"input_type": {"$ref": "#/components/schemas/GuildCommandInputType"},
+					"input_hint": {"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]}
+				}
+			},
+			"GuildCommandResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeStringType"},
+					"guild_id": {
+						"description": "The community the command belongs to",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"name": {"type": "string"},
+					"description": {"type": "string"},
+					"kind": {"$ref": "#/components/schemas/GuildCommandKind"},
+					"input_mode": {"$ref": "#/components/schemas/GuildCommandInputMode"},
+					"input_type": {"$ref": "#/components/schemas/GuildCommandInputType"},
+					"input_hint": {"type": ["string", "null"]},
+					"creator_id": {
+						"description": "The member who created the command",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"created_at": {"type": "string", "description": "ISO 8601 timestamp"},
+					"updated_at": {"type": "string", "description": "ISO 8601 timestamp"},
+					"template": {
+						"description": "The template; only returned to those who may edit the community's commands",
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"guild_id",
+					"name",
+					"description",
+					"kind",
+					"input_mode",
+					"input_type",
+					"input_hint",
+					"creator_id",
+					"created_at",
+					"updated_at"
+				],
+				"additionalProperties": false
+			},
+			"GuildCommandCreateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"pattern": "^[a-z0-9_-]{1,32}$",
+						"description": "The name typed after the slash: lowercase letters, digits, - and _, at most 32 characters"
+					},
+					"description": {"default": "", "description": "Shown in autocomplete", "type": "string", "maxLength": 100},
+					"template": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 4000,
+						"description": "The Liquid template the server fills in when the command runs"
+					},
+					"input_mode": {"$ref": "#/components/schemas/GuildCommandInputMode"},
+					"input_type": {"default": "text", "$ref": "#/components/schemas/GuildCommandInputType"},
+					"input_hint": {
+						"description": "Placeholder shown in the input while the command is filled in",
+						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
+					}
+				},
+				"required": ["name", "template", "input_mode"]
+			},
 			"ChannelPositionUpdateRequest": {
 				"maxItems": 10000,
 				"type": "array",
@@ -38013,6 +38498,21 @@
 				},
 				"required": ["channel_count", "guild_count"],
 				"additionalProperties": false
+			},
+			"GuildCommandRunRequestSchema": {
+				"type": "object",
+				"properties": {
+					"input": {
+						"description": "What the member typed, as wire text (mentions as <@...>); one line",
+						"anyOf": [{"type": "string", "maxLength": 10000, "pattern": "^[^\\r\\n]*$"}, {"type": "null"}]
+					},
+					"persona_id": {
+						"description": "One of the caller's personas to post as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"nonce": {"$ref": "#/components/schemas/MessageNonceRequest"}
+				},
+				"required": ["nonce"]
 			},
 			"CallRingBodySchema": {
 				"type": "object",
@@ -41315,6 +41815,10 @@
 				},
 				"required": ["upload_filename", "upload_id"]
 			},
+			"MessageNonceRequest": {
+				"description": "Client-generated identifier for the message",
+				"anyOf": [{"type": "string"}, {"type": "integer", "minimum": 0, "maximum": 9007199254740991}]
+			},
 			"GroupDmInviteMetadataResponse": {
 				"type": "object",
 				"properties": {
@@ -41706,10 +42210,6 @@
 				"type": "object",
 				"properties": {"id": {"type": "string", "minLength": 1, "maxLength": 64}},
 				"required": ["id"]
-			},
-			"MessageNonceRequest": {
-				"description": "Client-generated identifier for the message",
-				"anyOf": [{"type": "string"}, {"type": "integer", "minimum": 0, "maximum": 9007199254740991}]
 			},
 			"MessageFlags": {
 				"type": "integer",
@@ -42185,6 +42685,10 @@
 									{"type": "array", "items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}},
 									{"type": "null"}
 								]
+							},
+							"command": {
+								"description": "The server command that made this message; absent for other messages and after an edit",
+								"anyOf": [{"$ref": "#/components/schemas/MessageGuildCommandResponseSchema"}, {"type": "null"}]
 							}
 						},
 						"required": [
@@ -42212,6 +42716,19 @@
 					}
 				},
 				"required": ["message", "pinned_at"],
+				"additionalProperties": false
+			},
+			"MessageGuildCommandResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeStringType"},
+					"guild_id": {
+						"description": "The community the command belongs to",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"name": {"type": "string", "description": "The command's name when the message was posted"}
+				},
+				"required": ["id", "guild_id", "name"],
 				"additionalProperties": false
 			},
 			"MessageSubprofileResponseSchema": {
@@ -42932,6 +43449,21 @@
 						"name": "VIEW_CHANNEL_MEMBERS",
 						"value": "18014398509481984",
 						"description": "Allows viewing the member list in a channel"
+					},
+					{
+						"name": "CREATE_COMMANDS",
+						"value": "4611686018427387904",
+						"description": "Allows creating the guild's commands, and editing and deleting one's own"
+					},
+					{
+						"name": "MANAGE_COMMANDS",
+						"value": "2305843009213693952",
+						"description": "Allows editing and deleting anyone's guild commands"
+					},
+					{
+						"name": "USE_EXTERNAL_COMMANDS",
+						"value": "576460752303423488",
+						"description": "Allows using commands from other guilds"
 					}
 				]
 			},
@@ -44442,6 +44974,21 @@
 					}
 				},
 				"required": ["type", "name"]
+			},
+			"GuildCommandInputType": {
+				"type": "string",
+				"enum": ["text"],
+				"description": "What the input is: free text (with mentions)"
+			},
+			"GuildCommandInputMode": {
+				"type": "string",
+				"enum": ["none", "optional", "required"],
+				"description": "Whether the command takes input: none, optional or required"
+			},
+			"GuildCommandKind": {
+				"type": "string",
+				"enum": ["basic", "script"],
+				"description": "basic: only text and the person and input variables; script: anything else"
 			},
 			"NSFWLevel": {
 				"description": "The NSFW level of the guild",
@@ -46371,6 +46918,10 @@
 										{"type": "array", "items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}},
 										{"type": "null"}
 									]
+								},
+								"command": {
+									"description": "The server command that made this message; absent for other messages and after an edit",
+									"anyOf": [{"$ref": "#/components/schemas/MessageGuildCommandResponseSchema"}, {"type": "null"}]
 								}
 							},
 							"required": [
@@ -48010,6 +48561,11 @@
 					"PERSONA_TAG_LIMIT_REACHED",
 					"DUPLICATE_SIGNATURE_EMOJI",
 					"SIGNATURE_EMOJI_LIMIT_REACHED",
+					"UNKNOWN_GUILD_COMMAND",
+					"GUILD_COMMAND_NAME_TAKEN",
+					"GUILD_COMMAND_LIMIT_REACHED",
+					"GUILD_COMMAND_TEMPLATE_INVALID",
+					"GUILD_COMMAND_INPUT_INVALID",
 					"UNKNOWN_REPORT",
 					"UNKNOWN_ROLE",
 					"UNKNOWN_STICKER",
@@ -48381,6 +48937,11 @@
 					"You've reached the maximum number of connections ({limit}).",
 					"This tag is already taken.",
 					"You've reached the maximum number of connections ({limit}).",
+					"Not found.",
+					"This tag is already taken.",
+					"You've reached the maximum number of connections ({limit}).",
+					"Invalid form body.",
+					"Invalid form body.",
 					"Unknown report.",
 					"Role wasn't found.",
 					"Unknown sticker.",
@@ -48505,6 +49066,7 @@
 		{"name": "Discovery"},
 		{"name": "Emojis"},
 		{"name": "Stickers"},
+		{"name": "Guild Commands"},
 		{"name": "Operator Pass"},
 		{"name": "Signal Bar"},
 		{"name": "Debug"},

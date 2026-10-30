@@ -20010,6 +20010,11 @@
 						"type": "array",
 						"items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}
 					},
+					"command": {
+						"description": "The server command that made this message; absent for other messages and after an edit",
+						"nullable": true,
+						"allOf": [{"$ref": "#/components/schemas/MessageGuildCommandResponseSchema"}]
+					},
 					"referenced_message": {
 						"description": "The reply target. Present and populated when the target resolved, present and null when the target is gone, absent when this message has no default reference. Clients must tell null apart from absent by key presence.",
 						"nullable": true,
@@ -20170,6 +20175,11 @@
 								"nullable": true,
 								"type": "array",
 								"items": {"$ref": "#/components/schemas/MessageSubprofileResponseSchema"}
+							},
+							"command": {
+								"description": "The server command that made this message; absent for other messages and after an edit",
+								"nullable": true,
+								"allOf": [{"$ref": "#/components/schemas/MessageGuildCommandResponseSchema"}]
 							}
 						},
 						"required": [
@@ -20291,6 +20301,22 @@
 				"format": "int32",
 				"x-enumNames": ["SAFE", "AGE_RESTRICTED"],
 				"x-enumDescriptions": ["Guild is safe for all ages", "Guild is age-restricted"]
+			},
+			"MessageGuildCommandResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "The ID of the command",
+						"allOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}]
+					},
+					"guild_id": {
+						"description": "The community the command belongs to",
+						"allOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}]
+					},
+					"name": {"type": "string", "description": "The command's name when the message was posted"}
+				},
+				"required": ["id", "guild_id", "name"],
+				"additionalProperties": false
 			},
 			"MessageSubprofileResponseSchema": {
 				"type": "object",
@@ -21374,6 +21400,21 @@
 						"name": "VIEW_CHANNEL_MEMBERS",
 						"value": "18014398509481984",
 						"description": "Allows viewing the member list in a channel"
+					},
+					{
+						"name": "CREATE_COMMANDS",
+						"value": "4611686018427387904",
+						"description": "Allows creating the guild's commands, and editing and deleting one's own"
+					},
+					{
+						"name": "MANAGE_COMMANDS",
+						"value": "2305843009213693952",
+						"description": "Allows editing and deleting anyone's guild commands"
+					},
+					{
+						"name": "USE_EXTERNAL_COMMANDS",
+						"value": "576460752303423488",
+						"description": "Allows using commands from other guilds"
 					}
 				]
 			},
@@ -25287,6 +25328,11 @@
 					"PERSONA_TAG_LIMIT_REACHED",
 					"DUPLICATE_SIGNATURE_EMOJI",
 					"SIGNATURE_EMOJI_LIMIT_REACHED",
+					"UNKNOWN_GUILD_COMMAND",
+					"GUILD_COMMAND_NAME_TAKEN",
+					"GUILD_COMMAND_LIMIT_REACHED",
+					"GUILD_COMMAND_TEMPLATE_INVALID",
+					"GUILD_COMMAND_INPUT_INVALID",
 					"UNKNOWN_REPORT",
 					"UNKNOWN_ROLE",
 					"UNKNOWN_STICKER",
@@ -25658,6 +25704,11 @@
 					"You've reached the maximum number of connections ({limit}).",
 					"This tag is already taken.",
 					"You've reached the maximum number of connections ({limit}).",
+					"Not found.",
+					"This tag is already taken.",
+					"You've reached the maximum number of connections ({limit}).",
+					"Invalid form body.",
+					"Invalid form body.",
 					"Unknown report.",
 					"Role wasn't found.",
 					"Unknown sticker.",

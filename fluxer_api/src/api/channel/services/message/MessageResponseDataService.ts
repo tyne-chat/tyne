@@ -21,6 +21,7 @@ import {NatsConnectionManager} from '@pkgs/nats/src/NatsConnectionManager';
 
 import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
 import type {UserPersonaSettingsRow} from '@app/api/database/types/PersonaTypes';
+import {hydrateForkGuildCommandUses} from '@app/api/guild_command/GuildCommandUses';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import {getUserRepository} from '@app/api/middleware/ServiceSingletons';
 import type {Persona} from '@app/api/models/Persona';
@@ -209,6 +210,7 @@ export class MessageResponseDataService {
 
 	protected async hydratePersonas(messages: Array<MessageResponse>): Promise<void> {
 		if (!messages || messages.length === 0) return;
+		await hydrateForkGuildCommandUses(messages);
 
 		const targetMessages = collectMessagesAndReferences(messages);
 		const lookupPairs: Array<{userId: UserID; personaId: PersonaID}> = [];

@@ -24,6 +24,10 @@ import type {
 	MessageResponse,
 } from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork imports.
+
+import type {ForkSendMessageOptions} from '@app/api/guild_command/GuildCommandUses';
+
 function mentionsThreadChannel(mentions: ReadonlyArray<MessageChannelMentionResponse> | null | undefined): boolean {
 	return mentions?.some((mention) => THREAD_FEATURE_CHANNEL_TYPES.has(mention.type)) ?? false;
 }
@@ -191,6 +195,7 @@ export class MessageRequestService {
 		channelId: ChannelID;
 		data: MessageRequest;
 		requestCache: RequestCache;
+		fork?: ForkSendMessageOptions;
 	}): Promise<MessageResponse> {
 		if (!isPersonalNotesChannelId({userId: params.user.id, channelId: params.channelId})) {
 			assertTierAllows(params.user, TierGatedActions.MESSAGE, NO_TIER_CONTEXT);
@@ -201,6 +206,7 @@ export class MessageRequestService {
 			channelId: params.channelId,
 			data: params.data,
 			requestCache: params.requestCache,
+			fork: params.fork,
 		});
 		const access = await this.channelService.messages.retrieval.getResponseAccessContext({
 			viewer: params.viewer,
