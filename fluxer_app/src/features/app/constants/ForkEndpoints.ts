@@ -28,4 +28,8 @@ export const ForkEndpoints = {
 	USER_PERSONA_SETTINGS: '/users/@me/personas/settings',
 	USER_PERSONA_CHANNEL_STATES: '/users/@me/personas/channel-states',
 	USER_PERSONA_CHANNEL_STATE: (channelId: string) => `/users/@me/personas/channel-states/${channelId}`,
+	USER_GUILD_COMMANDS: '/users/@me/guild-commands',
+	GUILD_COMMANDS: (guildId: string) => `/guilds/${guildId}/commands`,
+	GUILD_COMMAND: (guildId: string, commandId: string) => `/guilds/${guildId}/commands/${commandId}`,
+	CHANNEL_GUILD_COMMAND: (channelId: string, commandId: string) => `/channels/${channelId}/commands/${commandId}`,
 } as const;
