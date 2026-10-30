@@ -3,6 +3,7 @@
 import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import {BadRequestError} from '@fluxer/errors/src/domains/core/BadRequestError';
 import {NotFoundError} from '@fluxer/errors/src/domains/core/NotFoundError';
+import type {GuildCommandTemplateIssue} from '@fluxer/schema/src/domains/guild_command/GuildCommandSchemas';
 
 export class UnknownGuildCommandError extends NotFoundError {
 	constructor() {
@@ -25,10 +26,24 @@ export class GuildCommandLimitReachedError extends BadRequestError {
 	}
 }
 
-/** A template that does not parse, does not render, or is not allowed yet (scripts, before phase 2). */
+/** A template that does not parse or does not render; `issue` says where and why, for its editors. */
 export class GuildCommandTemplateError extends BadRequestError {
-	constructor(message: string) {
-		super({code: APIErrorCodes.GUILD_COMMAND_TEMPLATE_INVALID, message});
+	readonly issue: GuildCommandTemplateIssue;
+
+	constructor(issue: GuildCommandTemplateIssue) {
+		super({
+			code: APIErrorCodes.GUILD_COMMAND_TEMPLATE_INVALID,
+			message: 'The template has a problem',
+			data: {template_issue: issue},
+		});
+		this.issue = issue;
+	}
+}
+
+/** What a member running a broken command gets: the details are for those who can edit it. */
+export class GuildCommandBrokenError extends BadRequestError {
+	constructor() {
+		super({code: APIErrorCodes.GUILD_COMMAND_TEMPLATE_INVALID, message: 'This command has a problem'});
 	}
 }
 
