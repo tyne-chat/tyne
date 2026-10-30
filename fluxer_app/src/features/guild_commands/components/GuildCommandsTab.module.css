@@ -158,6 +158,71 @@
 	font-weight: 600;
 }
 
+.sectionRow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.switchEditor {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--text-link);
+	font-size: 0.8125rem;
+	cursor: pointer;
+}
+
+.switchEditor:hover {
+	text-decoration: underline;
+}
+
+.scriptField {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.scriptHeader {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.scriptCount {
+	color: var(--text-tertiary);
+	font-family: var(--font-mono, ui-monospace, monospace);
+	font-size: 0.75rem;
+}
+
+/* The padding the channel topic field gives the same rich input. */
+.sampleInput {
+	--composer-placeholder-top: 0.625rem;
+	--composer-placeholder-right: 0px;
+	--composer-placeholder-left: 1rem;
+	display: flex;
+	min-width: 0;
+	flex: 1 1 0%;
+	align-self: stretch;
+	overflow: hidden;
+	padding-inline-start: 1rem;
+}
+
+.sampleInput :global([data-channel-textarea]) {
+	box-sizing: border-box;
+	flex: 1 1 0%;
+	min-width: 0;
+	padding-block: 0.625rem;
+}
+
+.problem {
+	margin: 0;
+	color: var(--status-danger);
+	font-size: 0.875rem;
+}
+
 .insertRow {
 	display: flex;
 	flex-wrap: wrap;
