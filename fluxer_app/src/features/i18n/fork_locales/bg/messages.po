@@ -92,6 +92,10 @@ msgstr "Изображението на банера не можа да бъде
 msgid "Change persona"
 msgstr "Смяна на персона"
 
+#. Help for an example in a command script.
+msgid "Change the message depending on what they typed"
+msgstr "Промяна на съобщението според въведеното"
+
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Изберете експорт от PluralKit (.json) или експорт от {productName} (.zip), или го плъзнете и пуснете"
 
@@ -371,12 +375,20 @@ msgstr "Вмъкване на клеймо за време"
 msgid "Insert:"
 msgstr "Вмъкване:"
 
+#. Why a community command could not run, shown after "Couldn't run /name:".
+msgid "Its script has a problem."
+msgstr "Скриптът ѝ има проблем."
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "Запазване на съществуващите и добавяне на нови (препоръчително)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Запазете текущите си персони ({existingCount}) и добавете всички импортирани персони ({0}) до тях като нови записи."
+
+#. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
+msgid "Line {line}, column {column}: {problem}"
+msgstr "Ред {line}, колона {column}: {problem}"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -551,6 +563,18 @@ msgstr "Видимост на персоната"
 msgid "Personas"
 msgstr "Персони"
 
+#. Help for an example in a command script.
+msgid "Pick one option at random"
+msgstr "Случаен избор на една опция"
+
+#. Help for an example in a command script.
+msgid "Pick one word at random"
+msgstr "Случаен избор на една дума"
+
+#. Help for an example in a command script.
+msgid "Pick the word for a number"
+msgstr "Избор на думата според числото"
+
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
 msgstr "Закачане на емоджи"
@@ -648,6 +672,10 @@ msgstr "Нулиране на сигнала за всички"
 msgid "Root Account (Default)"
 msgstr "Основен акаунт (По подразбиране)"
 
+#. Button under the preview of a command script that picks at random: fills the preview in again.
+msgid "Run again"
+msgstr "Изпълни отново"
+
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
 msgstr "Примерен текст"
@@ -655,6 +683,14 @@ msgstr "Примерен текст"
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Запазване на персоните..."
+
+#. Label of the code editor for a community command.
+msgid "Script"
+msgstr "Скрипт"
+
+#. Title of the expandable help under the command script editor.
+msgid "Script reference"
+msgstr "Справка за скриптове"
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
@@ -784,13 +820,45 @@ msgstr "Лента на задачите"
 msgid "Tell us about this persona..."
 msgstr "Разкажете ни за тази персона..."
 
+#. Help for a command script variable.
+msgid "That person’s name"
+msgstr "Името на този човек"
+
+#. Help for a command script variable.
+msgid "The channel, as a mention"
+msgstr "Каналът като споменаване"
+
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "Избраният файл не е валиден JSON обект."
 
+#. Help for a command script variable.
+msgid "The first person they mention, if any"
+msgstr "Първият споменат човек, ако има такъв"
+
+#. Help for a command script variable.
+msgid "The name of this community"
+msgstr "Името на тази общност"
+
+#. Help for a command script variable.
+msgid "The person running it, as a mention"
+msgstr "Човекът, който я използва, като споменаване"
+
 #. Description of the persona option of the /persona slash command
 msgid "The persona to select."
 msgstr "Персоната, която да бъде избрана."
+
+#. Problem in a community command script: it produces more text than is allowed.
+msgid "The script builds too much text."
+msgstr "Скриптът създава твърде много текст."
+
+#. Problem in a community command script.
+msgid "The script is too long."
+msgstr "Скриптът е твърде дълъг."
+
+#. Problem in a community command script.
+msgid "The script took too long to run."
+msgstr "Изпълнението на скрипта отне твърде много време."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Лентата със сигнали е изключена, докато не отметнеш канал тук. Отмятането на категория или на цялата общност обхваща и каналите, създадени там по-късно."
@@ -798,6 +866,18 @@ msgstr "Лентата със сигнали е изключена, докато
 #. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "Иконата на тага не можа да бъде запазена: {error}. Можете да я зададете отново в настройките на персоните."
+
+#. Help for a command script variable.
+msgid "Their name"
+msgstr "Името на човека, който я използва"
+
+#. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
+msgid "There's no filter called {name}."
+msgstr "Няма филтър с име {name}."
+
+#. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
+msgid "There's no tag called {name}."
+msgstr "Няма таг с име {name}."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -822,8 +902,20 @@ msgstr "Това емоджи вече е добавено като подпис
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Това е визуализация на това как ще изглежда тагът ви за показване в чата."
 
+#. Problem in a community command script: a syntax error at the position given before this text.
+msgid "This part can't be read."
+msgstr "Тази част не може да се прочете."
+
+#. Problem in a community command script: it failed while running, at the position given before this text.
+msgid "This part stopped with an error."
+msgstr "Тази част спря с грешка."
+
 msgid "This persona’s profile is private."
 msgstr "Профилът на тази персона е частен."
+
+#. Shown instead of the preview when a command script produces no text.
+msgid "This would post nothing, so the command would fail."
+msgstr "Това няма да публикува нищо, така че командата ще се провали."
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
@@ -843,6 +935,10 @@ msgstr "Изключване на {name}"
 #. Direct message right-click menu action that shows the signal bar above the message box in this DM.
 msgid "Turn on signal bar"
 msgstr "Включване на лентата със сигнали"
+
+#. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
+msgid "Type {output} or {tag} for suggestions."
+msgstr "Напишете {output} или {tag} за предложения."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
@@ -888,11 +984,20 @@ msgstr "Използване на външни команди"
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
 msgstr "Използвайте малки букви, цифри, - и _, до 32 знака."
 
+#. Button in the command editor that switches back from the code editor to the plain message field.
+msgid "Use the basic editor"
+msgstr "Използване на основния редактор"
+
+#. Button in the command editor that switches the message field to the code editor for scripts.
+msgid "Use the script editor"
+msgstr "Използване на редактора за скриптове"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Преглед на вашите персони"
 
 #. Button inserting the placeholder for what the member types after the command.
+#. Help for a command script variable.
 msgid "What they type"
 msgstr "Какво въвеждат"
 
@@ -906,6 +1011,10 @@ msgstr "Къде се показва лентата със сигнали"
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "Къде се помни персоната ви"
+
+#. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
+msgid "Write a number as 1st, 2nd, 3rd"
+msgstr "Изписване на число като 1st, 2nd, 3rd"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
@@ -979,6 +1088,10 @@ msgstr "{label}: {names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) – щракнете, за да смените персоната"
+
+#. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
+msgid "{name} is never closed."
+msgstr "{name} никога не се затваря."
 
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
