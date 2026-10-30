@@ -1,11 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import {type ChannelID, createPersonaID, createUserID, type GuildID, type UserID} from '@app/api/BrandedTypes';
+import {
+	type ChannelID,
+	createChannelID,
+	createPersonaID,
+	createUserID,
+	type GuildID,
+	type UserID,
+} from '@app/api/BrandedTypes';
 import type {MessageRequestService} from '@app/api/channel/services/message/MessageRequestService';
 import type {GuildCommandRow} from '@app/api/database/types/GuildCommandTypes';
 import type {ThreadViewer} from '@app/api/experiment/ChannelThreadsGate';
 import type {GuildRepository} from '@app/api/guild/repositories/GuildRepository';
 import {
+	GuildCommandBrokenError,
 	GuildCommandInputError,
 	GuildCommandLimitReachedError,
 	GuildCommandNameTakenError,
@@ -14,7 +22,6 @@ import {
 } from '@app/api/guild_command/GuildCommandErrors';
 import type {GuildCommandRepository} from '@app/api/guild_command/GuildCommandRepository';
 import {
-	classifyGuildCommandTemplate,
 	escapeGuildCommandName,
 	GuildCommandChannelDrop,
 	GuildCommandMentionDrop,
@@ -29,7 +36,11 @@ import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import {Permissions} from '@fluxer/constants/src/ChannelConstants';
 import {MissingPermissionsError} from '@fluxer/errors/src/domains/core/MissingPermissionsError';
 import {
+	classifyGuildCommandTemplate,
 	type GuildCommandCreateRequest,
+	type GuildCommandKind,
+	type GuildCommandPreviewRequest,
+	type GuildCommandPreviewResponse,
 	type GuildCommandResponse,
 	type GuildCommandRunRequest,
 	type GuildCommandUpdateRequest,
@@ -114,14 +125,9 @@ export class GuildCommandService {
 		if (rows.some((row) => row.name === name && row.command_id !== ownId)) throw new GuildCommandNameTakenError();
 	}
 
-	/** Phase 1 accepts basic templates only (text, `{{ person }}` and `{{ input }}`). */
-	private checkTemplate(template: string): 'basic' {
+	private checkTemplate(template: string): GuildCommandKind {
 		this.deps.engine.validate(template);
-		const kind = classifyGuildCommandTemplate(template);
-		if (kind !== 'basic') {
-			throw new GuildCommandTemplateError('Only text with {{ person }} and {{ input }} is supported for now');
-		}
-		return kind;
+		return classifyGuildCommandTemplate(template);
 	}
 
 	private async announce(guildId: GuildID): Promise<void> {
@@ -249,8 +255,13 @@ export class GuildCommandService {
 		}
 
 		const scope = await this.buildScope({user, guildId, channel, input, personaId: request.persona_id ?? null});
-		const content = this.deps.engine.render(command.template, scope);
-		if (content.trim() === '') throw new GuildCommandTemplateError('The command produced an empty message');
+		let content: string;
+		try {
+			content = this.deps.engine.render(command.template, scope);
+		} catch (error) {
+			throw error instanceof GuildCommandTemplateError ? new GuildCommandBrokenError() : error;
+		}
+		if (content === '') throw new GuildCommandBrokenError();
 
 		return this.deps.messageRequestService().sendMessage({
 			user,
@@ -260,6 +271,39 @@ export class GuildCommandService {
 			requestCache: params.requestCache,
 			fork: {guildCommandUse: {guildId, commandId, commandName: command.name}},
 		});
+	}
+
+	/**
+	 * Fills in a template without posting anything, for the script editor. A template with a problem is
+	 * an answer here, not a failed request: the editor shows it where the message would be.
+	 */
+	async preview(params: {
+		user: User;
+		guildId: GuildID;
+		request: GuildCommandPreviewRequest;
+	}): Promise<GuildCommandPreviewResponse> {
+		const {user, guildId, request} = params;
+		if (!(await this.canEdit(guildId, user.id))) throw new MissingPermissionsError();
+		const channel = await this.previewChannel(guildId, user.id, request.channel_id ?? null);
+		const scope = await this.buildScope({user, guildId, channel, input: request.input ?? '', personaId: null});
+		try {
+			return {content: this.deps.engine.render(request.template, scope), issue: null};
+		} catch (error) {
+			if (error instanceof GuildCommandTemplateError) return {content: null, issue: error.issue};
+			throw error;
+		}
+	}
+
+	/** The channel to preview in, when it is in this community and the member can see it. */
+	private async previewChannel(guildId: GuildID, userId: UserID, channelId: bigint | null): Promise<Channel | null> {
+		if (channelId === null) return null;
+		const id = createChannelID(channelId);
+		const channel = await this.deps.findChannel(id);
+		if (channel?.guildId !== guildId) return null;
+		const visible = await this.deps.gatewayService
+			.checkPermission({guildId, userId, permission: Permissions.VIEW_CHANNEL, channelId: id})
+			.catch(() => false);
+		return visible ? channel : null;
 	}
 
 	private async displayName(userId: UserID, guildId: GuildID | null): Promise<string> {

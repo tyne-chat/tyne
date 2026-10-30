@@ -40,6 +40,78 @@ export const RESERVED_GUILD_COMMAND_NAMES: ReadonlySet<string> = new Set([
 	'pagebreak',
 ]);
 
+/**
+ * The tags a template may use: the server's engine allows only these, and the editors suggest them.
+ * `#` is an inline comment; `random` is the fork's.
+ */
+export const GUILD_COMMAND_TEMPLATE_TAGS: ReadonlyArray<string> = [
+	'#',
+	'assign',
+	'capture',
+	'case',
+	'comment',
+	'echo',
+	'if',
+	'liquid',
+	'random',
+	'raw',
+	'unless',
+];
+
+/**
+ * The filters a template may use: text, numbers and short lists, plus the fork's `one_of`, `plural`
+ * and `ordinal`. Left out of Liquid's: what needs a loop or objects to be of use (`map`, `where`,
+ * `group_by` and the `_exp` family, which also run an expression per item), hashes, JSON dumps, and
+ * HTML filters, as a message is not HTML.
+ */
+export const GUILD_COMMAND_TEMPLATE_FILTERS: ReadonlyArray<string> = [
+	'abs',
+	'append',
+	'at_least',
+	'at_most',
+	'capitalize',
+	'ceil',
+	'compact',
+	'concat',
+	'date',
+	'default',
+	'divided_by',
+	'downcase',
+	'first',
+	'floor',
+	'join',
+	'last',
+	'lstrip',
+	'minus',
+	'modulo',
+	'one_of',
+	'ordinal',
+	'plural',
+	'plus',
+	'prepend',
+	'remove',
+	'remove_first',
+	'remove_last',
+	'replace',
+	'replace_first',
+	'replace_last',
+	'reverse',
+	'round',
+	'rstrip',
+	'size',
+	'slice',
+	'sort',
+	'split',
+	'strip',
+	'strip_newlines',
+	'times',
+	'truncate',
+	'truncatewords',
+	'uniq',
+	'upcase',
+	'url_encode',
+];
+
 export const GuildCommandInputMode = z
 	.enum(['none', 'optional', 'required'])
 	.describe('Whether the command takes input: none, optional or required');
@@ -63,6 +135,32 @@ const GuildCommandTemplateSchema = z
 	.min(1)
 	.max(MAX_GUILD_COMMAND_TEMPLATE_LENGTH)
 	.describe('The Liquid template the server fills in when the command runs');
+
+const BASIC_TEMPLATE_OUTPUT = /\{\{\s*(?:person|input)\s*\}\}/g;
+
+/**
+ * A template is basic when it is only text and the outputs `{{ person }}` and `{{ input }}`; anything
+ * else is a script. The server stores this and the settings editors pick their form from it.
+ */
+export function classifyGuildCommandTemplate(template: string): GuildCommandKind {
+	const rest = template.replace(BASIC_TEMPLATE_OUTPUT, '');
+	return rest.includes('{{') || rest.includes('{%') ? 'script' : 'basic';
+}
+
+export const GuildCommandTemplateIssueCode = z
+	.enum(['unknown_tag', 'unknown_filter', 'not_closed', 'too_long', 'too_large', 'too_slow', 'invalid', 'failed'])
+	.describe(
+		'unknown_tag, unknown_filter: not one of the template language; not_closed: a tag or output with no end; too_long: the template; too_large: the text it builds; too_slow: it ran out of time; invalid: it cannot be read; failed: it stopped while running',
+	);
+export type GuildCommandTemplateIssueCode = z.infer<typeof GuildCommandTemplateIssueCode>;
+
+export const GuildCommandTemplateIssueSchema = z.object({
+	code: GuildCommandTemplateIssueCode,
+	line: z.number().int().nullable().describe('The line of the problem, counted from 1, when it has one'),
+	column: z.number().int().nullable().describe('The column of the problem, counted from 1, when it has one'),
+	name: z.string().nullable().describe('The tag or filter concerned, when there is one'),
+});
+export type GuildCommandTemplateIssue = z.infer<typeof GuildCommandTemplateIssueSchema>;
 
 export const GuildCommandCreateRequestSchema = z.object({
 	name: GuildCommandNameSchema,
@@ -88,17 +186,32 @@ export const GuildCommandUpdateRequestSchema = z.object({
 });
 export type GuildCommandUpdateRequest = z.infer<typeof GuildCommandUpdateRequestSchema>;
 
+const GuildCommandInputSchema = z
+	.string()
+	.max(MAX_GUILD_COMMAND_INPUT_LENGTH)
+	.regex(/^[^\r\n]*$/)
+	.nullish()
+	.describe('What the member typed, as wire text (mentions as <@...>); one line');
+
 export const GuildCommandRunRequestSchema = z.object({
-	input: z
-		.string()
-		.max(MAX_GUILD_COMMAND_INPUT_LENGTH)
-		.regex(/^[^\r\n]*$/)
-		.nullish()
-		.describe('What the member typed, as wire text (mentions as <@...>); one line'),
+	input: GuildCommandInputSchema,
 	persona_id: SnowflakeStringType.nullish().describe("One of the caller's personas to post as"),
 	nonce: MessageNonceRequest,
 });
 export type GuildCommandRunRequest = z.infer<typeof GuildCommandRunRequestSchema>;
+
+export const GuildCommandPreviewRequestSchema = z.object({
+	template: GuildCommandTemplateSchema,
+	input: GuildCommandInputSchema,
+	channel_id: SnowflakeType.nullish().describe('A channel of this community to fill in as the channel'),
+});
+export type GuildCommandPreviewRequest = z.infer<typeof GuildCommandPreviewRequestSchema>;
+
+export const GuildCommandPreviewResponseSchema = z.object({
+	content: z.string().nullable().describe('The filled-in message; null when the template has a problem'),
+	issue: GuildCommandTemplateIssueSchema.nullable().describe('What stopped the template; null when it worked'),
+});
+export type GuildCommandPreviewResponse = z.infer<typeof GuildCommandPreviewResponseSchema>;
 
 export const GuildCommandResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The ID of the command'),
