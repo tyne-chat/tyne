@@ -56,6 +56,10 @@ msgstr "Alla personas"
 msgid "All time zones"
 msgstr "Alla tidszoner"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Ett annat kommando eller ett inbyggt kommando har redan det här namnet."
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Är du säker på att du vill ta bort <0>{0}</0>? Åtgärden kan inte ångras."
@@ -76,6 +80,10 @@ msgstr "Visa dolda sidofält automatiskt"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Det gick inte att ladda ner avatarbilden: {error}. Personan importerades utan avatar."
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Tillbaka till kommandon"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Det gick inte att ladda ner bannerbilden: {error}. Personan importerades utan banner."
@@ -86,6 +94,27 @@ msgstr "Byt persona"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Välj en PluralKit-export (.json) eller en {productName}-export (.zip), eller dra och släpp"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "Töm meddelanderutan för att använda /{name}"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Kommando"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Kommandoplatser"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Kommandon"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Kommandon sparade"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "Kopiera tidsstämpel\\"
 msgid "Could not export your personas."
 msgstr "Det gick inte att exportera dina personas."
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "Kunde inte läsa in kommandona."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "Kunde inte köra /{name}: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "Kunde inte spara /{name}: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Skapa kommandon"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Skapa kommandon för den här communityn och redigera eller ta bort dina egna."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Skapat av {name}"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "Inaktivera persona"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "Ta bort /{name}?"
+
 msgid "Delete Persona"
 msgstr "Ta bort persona"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Ta bort kommando"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "Dubblett av taggpar på denna persona"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Varje kanal behåller sin egen persona. Nya kanaler börjar som ditt konto."
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "Redigera /{name}"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Redigera persona"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Redigera eller ta bort vems kommandon som helst i den här communityn."
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "Dölj kanallistan"
 msgid "Hide signal bar"
 msgstr "Dölj signalfältet"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "Tips"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "Håll muspekaren nära fönstrets kanter för att tillfälligt visa hopfällda paneler."
@@ -294,12 +367,20 @@ msgstr "Infoga"
 msgid "Insert timestamp"
 msgstr "Infoga tidsstämpel"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Infoga:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "Behåll befintliga och lägg till nya (rekommenderas)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Behåll dina {existingCount} nuvarande persona(s) och lägg till alla {0} importerade personas bredvid dem som nya poster."
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "Gjort med /{name}"
 
 msgid "Main account"
 msgstr "Huvudkonto"
@@ -310,6 +391,10 @@ msgstr "Hantera personas"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "Hantera och skapa dina personas"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Hantera kommandon"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "Medlemmar med avatarer"
 msgid "Message Tools"
 msgstr "Meddelandeverktyg"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Meddelanden som medlemmar kan skicka genom att skriva /name."
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Ny persona"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Nytt kommando"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "Nytt fönster"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Ingen \"members\"-array hittades i exportfilen."
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "Inga kommandon"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Ingen visningstagg har konfigurerats. Meddelanden visar ditt kontos profilbild."
@@ -379,6 +476,10 @@ msgstr "Endast synlig för dig. Andra kan inte se den här personans fullständi
 msgid "Open in new window"
 msgstr "Öppna i nytt fönster"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "Valfri"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Valfritt systemmärke, t.ex. ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "Tjuvkika"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Ta bort alla {existingCount} befintliga persona(s) permanent och ersätt dem helt med de importerade."
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Den som använder det"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "Återställ signalen för alla"
 msgid "Root Account (Default)"
 msgstr "Huvudkonto (standard)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Exempeltext"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Sparar personas..."
@@ -550,6 +659,10 @@ msgstr "Sparar personas..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "Sökresultat ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Sök bland kommandon"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "Den här .zip-filen kunde inte läsas."
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "Den här .zip-filen är ingen personaexport från {productName}."
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "Det här kan inte ångras. Meddelanden som gjorts med det visar fortfarande vilket kommando som gjorde dem."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "Den här communityn har inga kommandon än."
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "Den här emojin har redan lagts till som en signaturemoji"
@@ -743,9 +864,41 @@ msgstr "Meddelanden utan tagg skickas som den persona du har valt. En tagg gäll
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "Meddelanden utan tagg skickas som den som talade senast. Att använda en tagg byter till den personan."
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "Använd /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "Använd /{name} från {community}"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Använd kommandon från andra communities i den här kanalen."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Använd kommandon från andra communities."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Använd externa kommandon"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Använd gemener, siffror, - och _, högst 32 tecken."
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Visa dina personas"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "Det de skriver"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "Det du skriver efter /{name} måste få plats på en rad."
 
 msgid "Where the signal bar appears"
 msgstr "Var signalfältet visas"
