@@ -217,6 +217,7 @@ msgstr "このペルソナでタグのペアが重複しています"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "各チャンネルがそれぞれのペルソナを保持します。新しいチャンネルはアカウントから始まります。"
 
+#. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
 msgid "Edit /{name}"
 msgstr "/{name} を編集"
@@ -315,6 +316,10 @@ msgstr "アイコンをサーバーにアップロードできませんでした
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "形式のプレビュー"
+
+#. Link at the end of the command script help to the complete guide on GitHub.
+msgid "Full script guide"
+msgstr "スクリプトの完全ガイド"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"

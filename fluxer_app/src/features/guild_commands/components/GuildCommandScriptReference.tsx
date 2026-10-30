@@ -5,11 +5,19 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 
 // Fork: a short reference beside the script editor, in the app because the fork's documentation site
-// is not public. The code stays in English: it is the script language itself.
+// is not public. The code stays in English: it is the script language itself. The whole language is
+// in `docs/server-command-scripts.md`, which it links to.
+
+const GUIDE_URL = 'https://github.com/tyne-chat/tyne/blob/tyne/docs/server-command-scripts.md';
 
 const TITLE = msg({
 	message: 'Script reference',
 	comment: 'Title of the expandable help under the command script editor.',
+});
+
+const GUIDE = msg({
+	message: 'Full script guide',
+	comment: 'Link at the end of the command script help to the complete guide on GitHub.',
 });
 
 const VARIABLES = [
@@ -100,6 +108,15 @@ export function GuildCommandScriptReference() {
 					</pre>
 				</div>
 			))}
+			<a
+				className={styles.guide}
+				href={GUIDE_URL}
+				target="_blank"
+				rel="noreferrer"
+				data-flx="guild-commands.guild-command-script-reference.guide"
+			>
+				{i18n._(GUIDE)}
+			</a>
 		</details>
 	);
 }
