@@ -19,7 +19,7 @@ and 2, tyne-chat/tyne#269 and #270: basic templates and scripts; counters are ph
 | Shapes and limits | `packages/schema/src/domains/guild_command/` |
 | Error codes | `packages/constants/src/ForkApiErrorCodes.ts`, `packages/errors/src/i18n/ForkErrorCodeMappings.ts` |
 | Public docs | `fluxer_docs` `http-api/guild-commands.mdx`, `gateway/events.md`, `http-api/permissions.mdx` |
-| Script reference for LLMs and people | `docs/server-command-scripts.md`; keep it true when a tag, filter, variable or limit changes |
+| Script reference for LLMs and people | `docs/server-command-scripts.md`, kept short enough for a small local model (about 14,000 characters); `tests/GuildCommandScriptGuide.test.ts` checks it against the engine |
 
 ## Rules
 
@@ -38,8 +38,8 @@ and 2, tyne-chat/tyne#269 and #270: basic templates and scripts; counters are ph
   thread, so the engine is locked down: tags and filters are allowlists in the schema package (the
   editors suggest from the same lists), there are no loops, `templates: {}` so nothing reads files,
   `strictFilters`, and liquidjs's `parseLimit`, `renderLimit` (checked between nodes) and `memoryLimit`.
-  A new tag or filter must count what it allocates, as `CountedCaptureTag` and `random` do. Variables are `Drop`s: they print as mentions, compare by mention, and
-  give escaped `.name`s. `classifyGuildCommandTemplate` (schema package) says `basic` or `script`.
+  A new tag or filter must count what it allocates, as `CountedCaptureTag` and `random` do. Variables are `Drop`s: they print as mentions, compare by mention,
+  give escaped `.name`s, and stay `Drop`s through `default`, which liquidjs would turn into text. `classifyGuildCommandTemplate` (schema package) says `basic` or `script`.
 - **Problems:** `describeTemplateProblem` turns liquidjs's English errors into an issue (code, name,
   line, column) by their wording, which the engine's tests pin. A failed save sends it as
   `template_issue`; the preview route returns it with a 200; someone running a broken command gets
@@ -65,6 +65,7 @@ cron, and in the gateway `event_atoms.erl` and `session_passive.erl`. The shared
 
 `tests/GuildCommands.test.ts` (routes, permissions, running in another community and a DM,
 personas, input, the backfill), `tests/GuildCommandUses.test.ts` (query counts, edits),
-`tests/GuildCommandTemplateEngine.test.ts` (the engine's limits and semantics), and
+`tests/GuildCommandTemplateEngine.test.ts` (the engine's limits and semantics),
+`tests/GuildCommandScriptGuide.test.ts` (every example and claim in `docs/server-command-scripts.md`), and
 `fluxer_gateway/test/fork_session_passive_tests.erl`. After a change:
 `pnpm --filter fluxer_api test src/api/guild_command`, then `CHECKS.md`.
