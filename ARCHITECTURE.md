@@ -291,3 +291,10 @@ the folder. A new folder guide is added to this list in the same commit.
   mobile app, its two output formats, the persona mention and the issue shorthands.
 - `packages/schema/AGENTS.md`: the shared Zod schemas behind the OpenAPI spec and the Dart SDK, and
   the synced-preferences protobuf.
+
+## Design documents
+
+`docs/design/` holds designs for fork features before they are built: what people will see, the
+decisions taken and where the code will go. Its `README.md` lists them with their issues and
+status. A design is a plan; once a feature is built, what stays true moves into the folder guides
+and this file.
