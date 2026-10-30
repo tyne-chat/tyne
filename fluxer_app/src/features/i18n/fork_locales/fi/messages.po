@@ -217,6 +217,7 @@ msgstr "Tunnistepari on jo tällä persoonalla"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Jokainen kanava säilyttää oman persoonansa. Uudet kanavat alkavat tilinäsi."
 
+#. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
 msgid "Edit /{name}"
 msgstr "Muokkaa komentoa /{name}"
@@ -315,6 +316,10 @@ msgstr "Kuvakkeen lähettäminen palvelimelle epäonnistui"
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "Muotoilun esikatselu"
+
+#. Link at the end of the command script help to the complete guide on GitHub.
+msgid "Full script guide"
+msgstr "Täydellinen skriptiopas"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
