@@ -104,7 +104,7 @@ Not now:
 | 2026-10-29 | Clicking the chip when the message box is not empty is refused, with a tooltip. |
 | 2026-10-29 | No conversion of Arcane syntax on paste: commands come from many bots, and none is favoured. |
 | 2026-10-29 | Phase 1 includes using commands in other communities and DMs. One issue per phase. Order of work: server, Dart SDK, web, phone. |
-| 2026-10-29 | `GUILD_COMMANDS_UPDATE` reaches passive sessions too. |
+| 2026-10-29 | `GUILD_COMMANDS_UPDATE` reaches passive sessions too, and clients do not refetch on it: it marks the community stale, and the next use fetches that community's list ([Events](#events)). |
 
 Proposals in this document that are not in this table are not decided.
 
@@ -569,7 +569,7 @@ message flag could remove it later (see [Alternatives considered](#alternatives-
 6. Documented in `fluxer_docs` `gateway/events.md`; tested in
    `fluxer_gateway/test/fork_session_passive_tests.erl`.
 
-**Clients do not refetch when the event arrives** (proposal). The costly part is not the event
+**Clients do not refetch when the event arrives** (decided 2026-10-29). The costly part is not the event
 but what follows it: in a community of 5,000 members, refetching at once would send up to 5,000
 requests within a second of one edit. Instead:
 
@@ -1133,7 +1133,6 @@ deploys, the APK and the one-off production task each need Chiara's approval.
 ## Open questions
 
 - **Remaining limits:** 4,000-character templates and 5 counters per command?
-- **Event handling:** the lazy refetch in [Events](#events) is Claude's proposal, not yet agreed.
 - **Replies, later:** a command could be sent as a reply to the message in the reply bar (the send
   path takes `message_reference`). Phase 1 leaves the bar alone.
 - **The phone's mask:** confirm that no code sends `allPermissions` to the server before widening
