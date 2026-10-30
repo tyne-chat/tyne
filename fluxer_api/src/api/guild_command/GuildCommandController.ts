@@ -14,6 +14,8 @@ import {
 	GuildCommandCreateRequestSchema,
 	GuildCommandListResponseSchema,
 	GuildCommandParam,
+	GuildCommandPreviewRequestSchema,
+	GuildCommandPreviewResponseSchema,
 	GuildCommandResponseSchema,
 	GuildCommandRunRequestSchema,
 	GuildCommandUpdateRequestSchema,
@@ -85,6 +87,30 @@ export function GuildCommandController(app: HonoApp) {
 			const guildId = createGuildID(ctx.req.valid('param').guild_id);
 			const body = ctx.req.valid('json');
 			return ctx.json(await ctx.get('guildCommandService').create(ctx.get('user').id, guildId, body));
+		},
+	);
+
+	app.post(
+		'/guilds/:guild_id/commands/preview',
+		RateLimitMiddleware(RateLimitConfigs.GUILD_COMMANDS_PREVIEW),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', GuildIdParam),
+		Validator('json', GuildCommandPreviewRequestSchema),
+		OpenAPI({
+			operationId: 'preview_guild_command',
+			summary: 'Preview guild command',
+			responseSchema: GuildCommandPreviewResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Guild Commands'],
+			description:
+				'Fills in a template without posting anything. A template with a problem is reported in `issue`, with a 200. Requires Create Commands or Manage Commands.',
+		}),
+		async (ctx) => {
+			const guildId = createGuildID(ctx.req.valid('param').guild_id);
+			const request = ctx.req.valid('json');
+			return ctx.json(await ctx.get('guildCommandService').preview({user: ctx.get('user'), guildId, request}));
 		},
 	);
 

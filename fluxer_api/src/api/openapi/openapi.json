@@ -9823,6 +9823,74 @@
 				}
 			}
 		},
+		"/guilds/{guild_id}/commands/preview": {
+			"post": {
+				"operationId": "preview_guild_command",
+				"summary": "Preview guild command",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandPreviewResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Fills in a template without posting anything. A template with a problem is reported in `issue`, with a 200. Requires Create Commands or Manage Commands.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandPreviewRequestSchema"}}}
+				}
+			}
+		},
 		"/guilds/{guild_id}/commands/{command_id}": {
 			"patch": {
 				"operationId": "update_guild_command",
@@ -36973,6 +37041,41 @@
 				],
 				"additionalProperties": false
 			},
+			"GuildCommandPreviewRequestSchema": {
+				"type": "object",
+				"properties": {
+					"template": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 4000,
+						"description": "The Liquid template the server fills in when the command runs"
+					},
+					"input": {
+						"description": "What the member typed, as wire text (mentions as <@...>); one line",
+						"anyOf": [{"type": "string", "maxLength": 10000, "pattern": "^[^\\r\\n]*$"}, {"type": "null"}]
+					},
+					"channel_id": {
+						"description": "A channel of this community to fill in as the channel",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
+					}
+				},
+				"required": ["template"]
+			},
+			"GuildCommandPreviewResponseSchema": {
+				"type": "object",
+				"properties": {
+					"content": {
+						"description": "The filled-in message; null when the template has a problem",
+						"type": ["string", "null"]
+					},
+					"issue": {
+						"anyOf": [{"$ref": "#/components/schemas/GuildCommandTemplateIssueSchema"}, {"type": "null"}],
+						"description": "What stopped the template; null when it worked"
+					}
+				},
+				"required": ["content", "issue"],
+				"additionalProperties": false
+			},
 			"GuildCommandCreateRequestSchema": {
 				"type": "object",
 				"properties": {
@@ -45086,6 +45189,37 @@
 				"type": "string",
 				"enum": ["none", "optional", "required"],
 				"description": "Whether the command takes input: none, optional or required"
+			},
+			"GuildCommandTemplateIssueSchema": {
+				"type": "object",
+				"properties": {
+					"code": {"$ref": "#/components/schemas/GuildCommandTemplateIssueCode"},
+					"line": {
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}],
+						"description": "The line of the problem, counted from 1, when it has one"
+					},
+					"column": {
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}],
+						"description": "The column of the problem, counted from 1, when it has one"
+					},
+					"name": {"description": "The tag or filter concerned, when there is one", "type": ["string", "null"]}
+				},
+				"required": ["code", "line", "column", "name"],
+				"additionalProperties": false
+			},
+			"GuildCommandTemplateIssueCode": {
+				"type": "string",
+				"enum": [
+					"unknown_tag",
+					"unknown_filter",
+					"not_closed",
+					"too_long",
+					"too_large",
+					"too_slow",
+					"invalid",
+					"failed"
+				],
+				"description": "unknown_tag, unknown_filter: not one of the template language; not_closed: a tag or output with no end; too_long: the template; too_large: the text it builds; too_slow: it ran out of time; invalid: it cannot be read; failed: it stopped while running"
 			},
 			"GuildCommandKind": {
 				"type": "string",
