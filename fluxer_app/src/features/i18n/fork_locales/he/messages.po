@@ -56,6 +56,10 @@ msgstr "כל הפרסונות"
 msgid "All time zones"
 msgstr "כל אזורי הזמן"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "לפקודה אחרת או לפקודה מובנית כבר יש את השם הזה."
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "למחוק את <0>{0}</0>? לא ניתן לבטל פעולה זו."
@@ -76,6 +80,10 @@ msgstr "הצגה אוטומטית של סרגלי צד מוסתרים"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "הורדת תמונת האווטאר נכשלה: {error}. הפרסונה יובאה ללא אווטאר."
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "חזרה לפקודות"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "הורדת תמונת הבאנר נכשלה: {error}. הפרסונה יובאה ללא באנר."
@@ -86,6 +94,27 @@ msgstr "החלפת פרסונה"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "בחרו קובץ ייצוא של PluralKit‏ (‎.json) או קובץ ייצוא של {productName}‏ (‎.zip), או גררו ושחררו"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "רוקנו את תיבת ההודעה כדי להשתמש ב-/{name}"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "פקודה"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "מקומות לפקודות"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "פקודות"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "הפקודות נשמרו"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "העתקת חותמת זמן\\"
 msgid "Could not export your personas."
 msgstr "לא ניתן היה לייצא את הפרסונות שלך."
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "לא ניתן היה לטעון את הפקודות."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "לא ניתן היה להריץ את /{name}: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "לא ניתן היה לשמור את /{name}: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "יצירת פקודות"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "יצירת פקודות לקהילה הזו, ועריכה או מחיקה של הפקודות שלך."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "נוצרה על ידי {name}"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "השבתת פרסונה"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "למחוק את /{name}?"
+
 msgid "Delete Persona"
 msgstr "מחק פרסונה"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "מחיקת הפקודה"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "זוג תגיות כפול בפרסונה זו"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "כל ערוץ שומר על הפרסונה שלו. ערוצים חדשים מתחילים כחשבון שלכם."
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "עריכת /{name}"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "ערוך פרסונה"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "עריכה או מחיקה של הפקודות של כל אחד בקהילה הזו."
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "הסתרת רשימת הערוצים"
 msgid "Hide signal bar"
 msgstr "הסתרת סרגל האותות"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "רמז"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "רחפו ליד קצוות החלון כדי להציג זמנית חלוניות מכווצות."
@@ -294,12 +367,20 @@ msgstr "הוספה"
 msgid "Insert timestamp"
 msgstr "הוספת חותמת זמן"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "הוספה:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "שמירת הקיימות והוספת חדשות (מומלץ)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "שמרו את {existingCount} הפרסונות הנוכחיות שלכם והוסיפו לצידן את כל {0} הפרסונות המיובאות כרשומות חדשות."
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "נוצרה עם /{name}"
 
 msgid "Main account"
 msgstr "חשבון ראשי"
@@ -310,6 +391,10 @@ msgstr "ניהול פרסונות"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "ניהול ויצירה של הפרסונות שלכם"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "ניהול פקודות"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "חברים עם אווטארים"
 msgid "Message Tools"
 msgstr "כלי הודעות"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "הודעות שחברים יכולים לפרסם על ידי הקלדת /name."
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "פרסונה חדשה"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "פקודה חדשה"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "חלון חדש"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "לא נמצא מערך \"members\" בקובץ הייצוא הזה."
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "אין פקודות"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "לא הוגדרה תגית תצוגה. ההודעות יציגו את תמונת הפרופיל של החשבון שלכם."
@@ -379,6 +476,10 @@ msgstr "גלוי רק לכם. אחרים אינם יכולים לראות את �
 msgid "Open in new window"
 msgstr "פתח בחלון חדש"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "אופציונלי"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "תג מערכת אופציונלי, לדוגמה ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "הצצה"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "מחקו לצמיתות את כל {existingCount} הפרסונות הקיימות והחליפו אותן לחלוטין בפרסונות המיובאות."
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "מי שמשתמש בה"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "איפוס האות לכולם"
 msgid "Root Account (Default)"
 msgstr "חשבון ראשי (ברירת מחדל)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "קלט לדוגמה"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "שומר פרסונות..."
@@ -550,6 +659,10 @@ msgstr "שומר פרסונות..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "תוצאות חיפוש ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "חיפוש פקודות"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "לא ניתן לקרוא את קובץ ה-‎.zip הזה."
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "קובץ ה-‎.zip הזה אינו ייצוא פרסונות מ-{productName}."
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "אי אפשר לבטל את הפעולה. הודעות שנוצרו איתה עדיין מראות איזו פקודה יצרה אותן."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "לקהילה הזו אין עדיין פקודות."
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "אימוג'י זה כבר נוסף כאימוג'י חתימה"
@@ -743,9 +864,41 @@ msgstr "הודעות ללא תג נשלחות בתור הפרסונה שבחרת
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "הודעות ללא תג נשלחות בתור מי שדיבר אחרון. שימוש בתג מחליף לאותה פרסונה."
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "שימוש ב-/{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "שימוש ב-/{name} מהקהילה {community}"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "שימוש בפקודות מקהילות אחרות בערוץ הזה."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "שימוש בפקודות מקהילות אחרות."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "שימוש בפקודות חיצוניות"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "השתמשו באותיות קטנות, ספרות, - ו-_, עד 32 תווים."
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "הצגת הפרסונות שלכם"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "מה שהם מקלידים"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "מה שמקלידים אחרי /{name} חייב להיכנס בשורה אחת."
 
 msgid "Where the signal bar appears"
 msgstr "היכן סרגל האותות מופיע"
