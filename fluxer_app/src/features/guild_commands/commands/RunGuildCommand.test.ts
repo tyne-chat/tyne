@@ -35,7 +35,10 @@ vi.mock('@app/lib/forms', () => ({extractErrorMessage: () => 'slowmode'}));
 import {resetForkGuildCommandRuns, runForkGuildCommand} from '@app/features/guild_commands/commands/RunGuildCommand';
 import type {I18n} from '@lingui/core';
 
-const i18n = {_: (descriptor: {message?: string}) => descriptor.message ?? ''} as unknown as I18n;
+const i18n = {
+	_: (descriptor: {message?: string}, values?: Record<string, string>) =>
+		(descriptor.message ?? '').replace(/\{(\w+)\}/g, (_match, key: string) => values?.[key] ?? ''),
+} as unknown as I18n;
 const TUCK = {id: '77', guild_id: 'g', name: 'tuck'};
 
 function run(content: string, overrides: Partial<Parameters<typeof runForkGuildCommand>[0]> = {}) {
@@ -106,6 +109,12 @@ describe('runForkGuildCommand', () => {
 		mocks.post.mockResolvedValueOnce({ok: false, status: 404, body: null});
 		await run('/tuck x');
 		expect(mocks.markStale).toHaveBeenCalledWith('g');
+	});
+
+	it("says a broken script is broken, in the app's words", async () => {
+		mocks.post.mockRejectedValueOnce({status: 400, body: {code: 'GUILD_COMMAND_TEMPLATE_INVALID'}});
+		await run('/tuck x');
+		expect(JSON.stringify(mocks.createOptimistic.mock.calls[0])).toContain('Its script has a problem.');
 	});
 
 	it('leaves slowmode to the normal send path, and refuses input on two lines', async () => {
