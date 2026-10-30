@@ -19,6 +19,7 @@ const calls = vi.hoisted(() => ({
 	fetchPersonaSettings: 0,
 	fetchChannelStates: 0,
 	invalidateSignalBar: 0,
+	invalidateGuildCommands: 0,
 }));
 
 vi.mock('@app/features/platform/state/AccountScopedWork', () => ({
@@ -55,6 +56,13 @@ vi.mock('@app/features/signal_bar/state/SignalBarStore', () => ({
 		},
 	},
 }));
+vi.mock('@app/features/guild_commands/state/GuildCommandsStore', () => ({
+	default: {
+		invalidate: () => {
+			calls.invalidateGuildCommands += 1;
+		},
+	},
+}));
 
 const {handleForkPromotedResume} = await import('@app/features/gateway/events/ForkAccountReadyWork');
 
@@ -67,6 +75,7 @@ describe("the fork's READY work after upstream's promoted resume", () => {
 		calls.fetchPersonaSettings = 0;
 		calls.fetchChannelStates = 0;
 		calls.invalidateSignalBar = 0;
+		calls.invalidateGuildCommands = 0;
 	});
 
 	it('loads the personas, their settings and the channel states once, as after READY', () => {
@@ -76,6 +85,7 @@ describe("the fork's READY work after upstream's promoted resume", () => {
 		expect(calls.fetchChannelStates).toBe(1);
 		expect(requests()).toBe(3);
 		expect(calls.invalidateSignalBar).toBe(1);
+		expect(calls.invalidateGuildCommands).toBe(1);
 	});
 
 	it('waits for an account switch to finish, then loads them once', () => {
