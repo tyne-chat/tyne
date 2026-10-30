@@ -167,6 +167,9 @@ Like custom emoji: a member of a community can use its commands everywhere they 
   `/tuck ` as text). When the box is not
   empty, the tooltip says so and nothing changes. For anyone who may not use the command, the chip
   is not clickable.
+- Right-clicking the chip offers **Edit /tuck** to those who may edit that command (Manage commands,
+  or Create commands for one's own), and opens it in community settings. For anyone else, and for a
+  deleted command, a right click stays the message's own menu.
 - Editing the message removes the chip: the text no longer matches the command.
 - A deleted command's messages keep the chip with the name as it was, not clickable.
 
@@ -259,13 +262,18 @@ custom tags and filters. Other options are under [Alternatives considered](#alte
 
 ### Tags and filters
 
-Kept from Liquid: `if`/`elsif`/`else`/`unless`/`case`, `assign`, `capture`, `echo`, `liquid`,
-`raw`, comments, and the standard filters (with `strictFilters`, so a misspelt filter is an error
-in the editor, not empty output).
+Tags and filters are allowlists, `GUILD_COMMAND_TEMPLATE_TAGS` and `GUILD_COMMAND_TEMPLATE_FILTERS`
+in `packages/schema/src/domains/guild_command/GuildCommandSchemas.ts`: the engine deletes everything
+else, so a liquidjs upgrade adds nothing by itself, and the editors suggest from the same lists.
 
-Removed: `for`, `tablerow`, `break`, `continue`, `cycle` (loops); `include`, `render`, `layout`,
+Kept from Liquid: `if`/`elsif`/`else`/`unless`/`case`, `assign`, `capture`, `echo`, `liquid`,
+`raw`, comments, and the filters for text, numbers and short lists (with `strictFilters`, so a
+misspelt filter is an error in the editor, not empty output).
+
+Left out: `for`, `tablerow`, `break`, `continue`, `cycle` (loops); `include`, `render`, `layout`,
 `block` (other templates and files); `increment`, `decrement` (per-render counters, confusing next
-to ours).
+to ours). Filters that need a loop or objects to be of use (`map`, `where`, `group_by`, and the
+`_exp` family, which also run an expression per item), hashes, JSON dumps and HTML filters.
 
 Ours:
 
@@ -281,9 +289,13 @@ Ours:
 {{ hugs | ordinal }}                             → "12th"
 ```
 
-- `plural` and `ordinal` use `Intl.PluralRules` with the community's preferred locale.
-- `random` uses `crypto.randomInt`, so results cannot be steered.
-- Names are provisional (Liquid already uses `or` as an operator, so a filter is not called `or`).
+- Communities have no stored language, and the language of a template is the author's, not the
+  runner's. So `plural` takes the first word for 1 and the second otherwise, and `ordinal` writes
+  English ordinals; a script in another language writes its own suffix.
+- `random` and `one_of` use `crypto.randomInt`, so results cannot be steered.
+- `one_of` also takes a list: `{{ "a,b" | split: "," | one_of }}`.
+- `{% random %}` drops the spacing around the branch it picks, and the finished message is trimmed,
+  so tags on lines of their own leave no blank lines at its ends.
 
 ### Basic or script
 
@@ -303,12 +315,6 @@ The API renders on its main thread, so the engine is locked down rather than tru
 // fluxer_api/src/api/guild_command/GuildCommandTemplateEngine.ts (sketch)
 import {Liquid} from 'liquidjs';
 
-const REMOVED_TAGS = [
-	'for', 'tablerow', 'break', 'continue', 'cycle',
-	'include', 'render', 'layout', 'block',
-	'increment', 'decrement',
-] as const;
-
 export function createGuildCommandTemplateEngine(): Liquid {
 	const engine = new Liquid({
 		templates: {}, // no file system: lookups use this empty map
@@ -317,9 +323,11 @@ export function createGuildCommandTemplateEngine(): Liquid {
 		strictVariables: false,
 		parseLimit: MAX_GUILD_COMMAND_TEMPLATE_LENGTH,
 		renderLimit: 50, // milliseconds per render
-		memoryLimit: 1_000_000, // characters allocated by filters such as append and join
+		memoryLimit: 100_000, // characters allocated by filters such as append and join
 	});
-	for (const name of REMOVED_TAGS) delete engine.tags[name];
+	for (const name of Object.keys(engine.tags)) if (!ALLOWED_TAGS.includes(name)) delete engine.tags[name];
+	for (const name of Object.keys(engine.filters)) if (!ALLOWED_FILTERS.includes(name)) delete engine.filters[name];
+	engine.registerTag('capture', CountedCaptureTag);
 	engine.registerTag('random', RandomTag);
 	engine.registerFilter('one_of', oneOf);
 	engine.registerFilter('plural', plural);
@@ -335,10 +343,19 @@ export function createGuildCommandTemplateEngine(): Liquid {
 - **No loops is not enough on its own:** `{% assign x = x | append: x %}` repeated doubles the
   output each line. `memoryLimit` stops that (`append`, `prepend`, `join` and others count against
   it).
+- **Everything stored counts:** liquidjs's `capture` does not charge `memoryLimit` for what it keeps,
+  so the fork's `CountedCaptureTag` does, as `random` does for its branch.
+- **The memory limit is 100,000 characters,** not liquidjs's unlimited default: a message holds at
+  most 4,000.
 - **Files:** by default `include`, `render` and `layout` read template files from disk. The tags are
   removed and `templates: {}` makes any lookup use an empty map.
-- **Output size:** the send path rejects content over the member's limit (2,000 or 4,000
-  characters) with `CONTENT_EXCEEDS_MAX_LENGTH`; nothing extra is needed.
+- **Output size:** plain outputs are not counted as they are written, so `render` refuses a result
+  over the memory limit before copying it (Node builds long strings lazily, so this costs nothing).
+  Below that, the send path rejects content over the member's limit (2,000 or 4,000 characters) with
+  `CONTENT_EXCEEDS_MAX_LENGTH`.
+- **Property walks:** liquidjs applies `ownPropertyOnly` to plain objects but not to `Drop`s, so
+  `{{ person.__proto__ }}` is readable. It stops at `Drop.prototype`, the constructors there throw
+  when called, and a template cannot pass arguments, so nothing else is reachable. Tests pin this.
 - **Sizes on save:** the template at most 4,000 characters; the parse must succeed.
 - **Synchronous:** parse on save and cache the parsed template per command and `updated_at`; render
   with `renderSync`. No filter of ours is asynchronous.
@@ -347,10 +364,12 @@ export function createGuildCommandTemplateEngine(): Liquid {
 
 ### Errors
 
-Liquid's errors are English. Parse and render errors are mapped to a few fork messages (unknown
-tag, unknown filter, unclosed block, too long, took too long) with the line and column, translated
-like any other string. Members running a broken command see one generic message; the details show
-in the editor and the preview.
+Liquid's errors are English, so the engine turns them into an `issue`: a code (`unknown_tag`,
+`unknown_filter`, `not_closed`, `too_long`, `too_large`, `too_slow`, `invalid`, `failed`), the name
+concerned and the line and column. The clients translate the code. A failed save carries it as
+`template_issue` in the 400; the preview route returns it with a 200, because a template with a
+problem is an answer there, not a failed request. Members running a broken command get
+`GUILD_COMMAND_TEMPLATE_INVALID` with no details; those show in the editor.
 
 ## Counters
 
@@ -465,7 +484,7 @@ Wiring (the signal bar's pattern, `fluxer_api/AGENTS.md`):
 | `POST /guilds/:guild_id/commands` | Create commands | Creates; `GUILD_COMMANDS_UPDATE` |
 | `PATCH /guilds/:guild_id/commands/:command_id` | creator with Create commands, or Manage commands | Updates; event |
 | `DELETE /guilds/:guild_id/commands/:command_id` | creator with Create commands, or Manage commands | Deletes, with its counts; event |
-| `POST /guilds/:guild_id/commands/preview` | Create commands | Renders a template without posting or counting (phase 2) |
+| `POST /guilds/:guild_id/commands/preview` | Create or Manage commands | Fills in `{template, input, channel_id}` without posting or counting; `{content, issue}`. The channel counts only if it is in this community and the member can see it |
 | `POST /channels/:channel_id/commands/:command_id` | see step 1 below | Runs it: `{input, persona_id, nonce}` → the message |
 
 Phase 3 adds a route to set or reset a count. Counter definitions travel inside the command.
@@ -862,8 +881,22 @@ A fork feature folder, `fluxer_app/src/features/guild_commands/`, with an `AGENT
   `skipReactionHydration`, and `<Message … previewContext={MessagePreviewContext.SETTINGS}>`.
   - Basic templates are substituted in the client: no request.
   - Scripts go to the preview route, debounced by 500 ms.
-- **Script editor** (phase 2): CodeMirror 6, as `theme_settings/components/QuickCssEditor.tsx`
-  sets it up, with `@codemirror/lang-liquid`.
+- **Script editor** (phase 2, `components/GuildCommandScriptEditor.tsx`): CodeMirror 6, set up like
+  `theme_settings/components/QuickCssEditor.tsx`, with `liquidLanguage` from
+  `@codemirror/lang-liquid` and loaded on demand, as its grammars weigh more than the rest of the tab.
+  - **Suggestions** are the fork's (`utils/GuildCommandLiquidCompletions.ts`), from the server's
+    allowlists: `liquid()`'s own source always offers Liquid's full list, `for` included.
+  - **Which editor:** a command opens by the server's `kind`, and the choice then stays until
+    changed, so a template does not change editor while it is typed. **Use the script editor** is
+    always offered from the basic one; the way back only when the template is basic again.
+  - **The preview follows the text, not the editor:** a template that classifies as basic is filled
+    in by the client, a script by the server (`hooks/useGuildCommandScriptPreview.ts`), and its
+    problem shows in the preview's place and as a mark in the editor.
+  - **Sample input** is a `LexicalRichInput`, so `@` offers real members and personas and
+    `{% if target %}` can be tried.
+  - **Reference:** a short panel under the editor (`components/GuildCommandScriptReference.tsx`)
+    with the variables and worked examples. The app links to upstream's documentation site, and the
+    fork's documentation is not public.
 
 ### Phase 1 on the web, as built
 
@@ -1034,7 +1067,8 @@ The root guide's three questions:
      same shared request.
    - Running a command sends one; presses while it is out send none.
    - The settings tab sends one list request, plus one per save or delete.
-   - The script preview sends at most one per 500 ms of typing.
+   - The script preview sends at most one per 500 ms of typing, none for a basic template, and one
+     per press of **Run again**. Its bucket is 30 per 10 s, outside the global limit.
    - On the server, a message read costs nothing extra in channels where no command was used, and
      one query per channel where one was.
    - `GET /users/@me/guild-commands` reads one partition per community the caller belongs to; it
