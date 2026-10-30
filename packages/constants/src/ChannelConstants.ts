@@ -207,6 +207,14 @@ export const Permissions = {
 	BYPASS_SLOWMODE: 1n << 52n,
 	UPDATE_RTC_REGION: 1n << 53n,
 	VIEW_CHANNEL_MEMBERS: 1n << 54n,
+
+	// Fork values.
+	// Fork: the fork's permission bits count down from 62 (63 is the sign bit of a signed 64-bit
+	// integer); upstream's grow upward from 54. 60 is skipped: upstream's tests use it as an unknown
+	// bit. Server commands, docs/design/server-commands.md.
+	CREATE_COMMANDS: 1n << 62n,
+	MANAGE_COMMANDS: 1n << 61n,
+	USE_EXTERNAL_COMMANDS: 1n << 59n,
 } as const;
 export const PermissionsDescriptions: Record<keyof typeof Permissions, string> = {
 	CREATE_INSTANT_INVITE: 'Allows creation of instant invites',
@@ -246,6 +254,11 @@ export const PermissionsDescriptions: Record<keyof typeof Permissions, string> =
 	BYPASS_SLOWMODE: 'Allows bypassing slowmode',
 	UPDATE_RTC_REGION: 'Allows updating the voice region',
 	VIEW_CHANNEL_MEMBERS: 'Allows viewing the member list in a channel',
+
+	// Fork values.
+	CREATE_COMMANDS: "Allows creating the guild's commands, and editing and deleting one's own",
+	MANAGE_COMMANDS: "Allows editing and deleting anyone's guild commands",
+	USE_EXTERNAL_COMMANDS: 'Allows using commands from other guilds',
 };
 export const ALL_PERMISSIONS = Object.values(Permissions).reduce((acc, p) => acc | p, 0n);
 export const DEFAULT_PERMISSIONS =
@@ -258,6 +271,7 @@ export const DEFAULT_PERMISSIONS =
 	Permissions.ATTACH_FILES |
 	Permissions.READ_MESSAGE_HISTORY |
 	Permissions.USE_EXTERNAL_EMOJIS |
+	Permissions.USE_EXTERNAL_COMMANDS |
 	Permissions.CONNECT |
 	Permissions.SPEAK |
 	Permissions.USE_VAD |
@@ -274,5 +288,6 @@ export const ElevatedPermissions =
 	Permissions.MANAGE_MESSAGES |
 	Permissions.MANAGE_WEBHOOKS |
 	Permissions.MANAGE_EXPRESSIONS |
+	Permissions.MANAGE_COMMANDS |
 	Permissions.MODERATE_MEMBERS;
 export const CHANNEL_REINDEX_AFTER_TIMESTAMP = 1779557400;
