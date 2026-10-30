@@ -18,9 +18,10 @@ Every file here is the fork's. What a command is, the rules and the run flow on 
 | `command` on a message, grouping | `messaging/models/MessagingMessage.ts`; a fork block in `messaging/utils/MessageGroupingUtils.ts` |
 | Settings tab | `components/GuildCommandsTab.tsx`, registered in `user/components/settings_utils/GuildSettingsConstants.ts` |
 | Custom emoji in a template | `utils/GuildCommandTemplateEmoji.ts` |
-| The script editor, loaded on demand | `components/GuildCommandScriptEditor.tsx` |
-| Suggestions in it, from the server's allowlists | `utils/GuildCommandLiquidCompletions.ts` |
-| The reference under it | `components/GuildCommandScriptReference.tsx` |
+| The template field: basic or script, loaded on demand | `components/GuildCommandTemplateEditor.tsx` |
+| Script suggestions, from the server's allowlists | `utils/GuildCommandLiquidCompletions.ts` |
+| Emoji suggestions, in both modes, from the message box's search | `utils/GuildCommandEmojiCompletions.ts` |
+| The reference under the script mode | `components/GuildCommandScriptReference.tsx` |
 | A script's preview, filled in by the server | `hooks/useGuildCommandScriptPreview.ts` |
 | The server's template problems, in words | `utils/GuildCommandTemplateIssues.ts` |
 | Permission labels | fork blocks in `permissions/utils/PermissionLabelDescriptors.ts` and `PermissionUtils.ts` |
