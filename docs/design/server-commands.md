@@ -5,7 +5,7 @@ Per-community slash commands: an admin writes `/tuck` once, and members post it 
 shown, and a small `/tuck` chip after the timestamp tells others how it was made.
 
 - **Issue:** tyne-chat/tyne#246 (the brainstorming, the Temple's command list and the decisions are
-  in its comments).
+  in its comments); the work is tracked per phase in #269, #270 and #271.
 - **Status:** draft, 2026-10-29. Nothing is built. Reviewed the same day by Argon (Antigravity)
   against the code; its findings are worked in (persona and variable semantics, the web submit
   path, string slots, hydration's guild, double submits, counter order).
@@ -99,6 +99,12 @@ Not now:
 | 2026-10-29 | Commands get permissions of their own: Create commands, Manage commands, Use external commands (fork bits 62, 61, 60). |
 | 2026-10-29 | The phone app's `allPermissions` mask covers every bit, not only upstream's. |
 | 2026-10-29 | Commands are usable where their community's emoji are, plus a membership check, with the precedence in [Where commands work](#where-commands-work). |
+| 2026-10-29 | Use external commands is on by default wherever Use External Emojis is, and is turned on once at release for every existing @everyone role. |
+| 2026-10-29 | Up to 500 commands per community; the input may be up to 10,000 characters. |
+| 2026-10-29 | Clicking the chip when the message box is not empty is refused, with a tooltip. |
+| 2026-10-29 | No conversion of Arcane syntax on paste: commands come from many bots, and none is favoured. |
+| 2026-10-29 | Phase 1 includes using commands in other communities and DMs. One issue per phase. Order of work: server, Dart SDK, web, phone. |
+| 2026-10-29 | `GUILD_COMMANDS_UPDATE` reaches passive sessions too. |
 
 Proposals in this document that are not in this table are not decided.
 
@@ -156,8 +162,8 @@ Like custom emoji: a member of a community can use its commands everywhere they 
   them).
 - Clicking or tapping the chip, when the member's message box in that channel is empty and they
   may use that command there, puts `/tuck` in it with the option bar open. When the box is not
-  empty, the tooltip says so and nothing changes (proposal; the issue left "caret at the start"
-  open). For anyone who may not use the command, the chip is not clickable.
+  empty, the tooltip says so and nothing changes. For anyone who may not use the command, the chip
+  is not clickable.
 - Editing the message removes the chip: the text no longer matches the command.
 - A deleted command's messages keep the chip with the name as it was, not clickable.
 
@@ -166,7 +172,7 @@ Like custom emoji: a member of a community can use its commands everywhere they 
 A **Commands** tab under **Message Tools** in community settings, after Signal Bar. Layout follows
 the Roles tab: a list beside an editor on wide windows, the list then the editor on narrow ones.
 
-- **List:** "Command slots 20 / 100", **New command**, a search box, and one row per command: `/name`,
+- **List:** "Command slots 20 / 500", **New command**, a search box, and one row per command: `/name`,
   its description, the creator's avatar.
 - **Editor**, top to bottom:
   - `Edit /tuck`, `Created by …`, **Delete command**.
@@ -237,10 +243,14 @@ custom tags and filters. Other options are under [Alternatives considered](#alte
   another persona's name or count.
 - Persona mentions are `<@USER_ID:PERSONA_ID>` (`packages/markdown_parser/rust/src/links.rs:199-231`;
   `fluxer_messages/src/mention_extractor.rs:145-154` keeps numeric, non-zero pairs).
-- **Input bounds:** `input` is at most 1,000 characters and one line (no `\r` or `\n`) in the run
+- **Input bounds:** `input` is at most 10,000 characters and one line (no `\r` or `\n`) in the run
   and preview schemas, matching what the clients' slots allow
   (`fluxer_app/src/features/lexical/composer/SlashSlotPersistence.ts:94-95`), so an API caller
-  cannot put a heading into a one-line template.
+  cannot put a heading into a one-line template. The filled-in message must still fit the
+  member's message limit (2,000 or 4,000 characters), so a long input fails at the send with
+  `CONTENT_EXCEEDS_MAX_LENGTH`. The web saves a draft's slot state in an id of at most 32,768
+  characters (`SlashSlotPersistence.ts:10-12`); check that a 10,000-character input with
+  non-ASCII text still fits, or accept that such a draft loses its slot state.
 - Counters add variables of their own ([Counters](#counters)).
 
 ### Tags and filters
@@ -394,7 +404,7 @@ from `Tables.ts:1521-1522`) with `defineTable` (`database/CassandraTableDsl.ts:7
   messages can appear in any channel, DMs included, so the hydration lookup reads this marker
   (cached) to skip channels where no command was ever used
   ([Attaching `command`](#attaching-command-to-messages)).
-- Names are unique per community, checked on write against the partition (at most 100 rows). Two
+- Names are unique per community, checked on write against the partition (at most 500 rows). Two
   simultaneous creates with one name can both succeed; the list then shows both and the composer
   uses the older. Acceptable at this size.
 - The KV layer stores every table as rows of one Postgres key/value table; there is no migration
@@ -552,15 +562,27 @@ message flag could remove it later (see [Alternatives considered](#alternatives-
    goes to every session in the community.
 4. Passive sessions (communities over 250 members): add a `bypasses_passive_filter/3` clause
    (`session/session_passive.erl:65-85`). Without it they miss the event, as they miss
-   `GUILD_EMOJIS_UPDATE`. The event is rare and small.
+   `GUILD_EMOJIS_UPDATE`. The event is rare (only when someone edits commands) and tiny
+   (`{guild_id}`), so delivering it to every session costs little.
 5. Sent with `gatewayService.dispatchGuild({guildId, event, data})` (`infrastructure/GatewayService.ts:510-516`;
    example `EmojiService.ts:301-307`).
 6. Documented in `fluxer_docs` `gateway/events.md`; tested in
    `fluxer_gateway/test/fork_session_passive_tests.erl`.
 
-Clients that hold the commands list refetch it, with one shared request. Joining or leaving a
-community also changes the list; clients refetch on their own `GUILD_CREATE` and `GUILD_DELETE` for
-a community while they hold the list.
+**Clients do not refetch when the event arrives** (proposal). The costly part is not the event
+but what follows it: in a community of 5,000 members, refetching at once would send up to 5,000
+requests within a second of one edit. Instead:
+
+- the event marks that community's commands stale;
+- the next time the member uses them (types `/`, clicks a chip, or sends `/name …`), the client
+  fetches that one community's list (`GET /guilds/:guild_id/commands`, summaries for members), with
+  one shared request, and waits for it before resolving a typed command;
+- a run that hits a command deleted meanwhile gets 404, which also marks the community stale; the
+  error says the command no longer exists;
+- joining a community marks it stale the same way; leaving drops its commands locally, with no
+  request.
+
+So members who never use commands send nothing, and the rest spread their requests over time.
 
 ### Permissions
 
@@ -616,10 +638,25 @@ Commands get permissions of their own (decided 2026-10-29), mirroring the emoji 
 - The gateway needs nothing: it checks only the bits it lists (`fluxer_gateway/src/utils/constants.erl:125-165`),
   and owners and administrators get `16#FFFFFFFFFFFFFFFF` (`guild_permissions.erl:25`). No Rust
   service reads permissions.
-- **Existing roles:** a new bit is off in every stored role. Default permissions apply only to new
-  communities and roles, so existing communities have Use external commands off until a manager
-  turns it on, unless a one-off update sets it on @everyone. That is a decision to make before
-  release ([open](#open-questions)).
+- **On by default, like Use External Emojis** (decided). Defaults come from one constant on each
+  side, and Use external commands goes wherever Use External Emojis is:
+  - server: `DEFAULT_PERMISSIONS` (`packages/constants/src/ChannelConstants.ts:251-266`), applied
+    to @everyone when a community is created (`GuildOperationsService.ts:993`), to new roles
+    (`GuildRoleService.ts:112`), and as a fallback (`GuildRoleService.ts:175`,
+    `GuildOperationsService.ts:1075`);
+  - web: the same constant, as a fallback when @everyone is missing
+    (`fluxer_app/src/features/permissions/utils/PermissionUtils.ts:133, 146`);
+  - phone: its own copy, `defaultPermissions` (`lib/core/permissions/permission.dart:50-65`).
+
+  There is no instance-level default, and nothing creates communities from templates or at instance
+  setup.
+- **Existing communities: turned on once at release** (decided). A new bit is off in every stored
+  role, and defaults apply only to new communities and roles. A one-off task sets Use external
+  commands on every community's @everyone role.
+  - It goes through the role service, not SQL on `row_data`, so caches are updated and
+    `GUILD_ROLE_UPDATE` is sent (`fluxer_api/AGENTS.md`, "Data changes").
+  - It only adds the bit. An @everyone role a manager has already changed keeps everything else.
+  - It runs on production by hand, with a backup first and Chiara's approval at that time.
 
 ### Rate limits
 
@@ -678,10 +715,10 @@ A fork feature folder, `fluxer_app/src/features/guild_commands/`, with an `AGENT
 
 - `GuildCommandsStore`: a MobX singleton like `signal_bar/state/SignalBarStore.ts`. It holds the
   summaries from `GET /users/@me/guild-commands` (all the member's communities), loaded on first
-  use with the request in flight shared (`??=`), and replaced on refetch.
+  use with the request in flight shared (`??=`), plus a set of stale communities.
 - `GUILD_COMMANDS_UPDATE`: one `registry.set` in `gateway/events/ForkEventRouter.ts:23-34`; it
-  refetches only when the list is loaded. The store also refetches after the member joins or
-  leaves a community.
+  only marks the community stale ([Events](#events)). Joining marks a community stale; leaving
+  drops its commands.
 - **Precedence** ([Where commands work](#where-commands-work)): built-ins, then the current
   community, then `GuildList.guilds` order (sidebar order, `guild/state/GuildList.ts:145-162`).
   Visiting a community without joining does not make its commands usable.
@@ -806,8 +843,6 @@ A fork feature folder, `fluxer_app/src/features/guild_commands/`, with an `AGENT
     `special` segment (`ComposerSerialization.ts:54-63`) with ids `template-var:person` and
     `template-var:input`. Its wire text is `{{ person }}` or `{{ input }}`. `LexicalRichInputProps`
     need no change.
-  - **Pasting Arcane text:** in the basic editor, `{member.mention}` and `{user.mention}` become the
-    person pill and `{args}` and `{message}` the input pill (proposal).
 - **Preview:** the appearance tab's pattern (`user/components/modals/tabs/appearance_tab/MessagesTab.tsx:104-213`):
   a fake `Channel` with the community's `guild_id`, a `MessageModel` with `skipUserCache` and
   `skipReactionHydration`, and `<Message … previewContext={MessagePreviewContext.SETTINGS}>`.
@@ -843,8 +878,8 @@ are in tyne-mobile.
 
 - A commands notifier holding the all-communities list, like
   `lib/features/signal_bar/providers/signal_bar_providers.dart:10-45`: the request in flight
-  shared, a failure keeping the old state, raw-Dio repository first. It refetches after joining or
-  leaving a community.
+  shared, a failure keeping the old state, raw-Dio repository first. Stale communities, joining
+  and leaving work as on the web.
 - **Precedence:** built-ins, then the active community, then sidebar order
   (`lib/features/guilds/providers/organized_guild_list_provider.dart:171,184`), the same as the
   web. Not the emoji send path's rule, which takes the oldest emoji of any community
@@ -942,11 +977,14 @@ The root guide's three questions:
 1. **Requests per action:**
    - Opening a channel or the app sends none.
    - The first `/` anywhere sends one request for the commands of all the member's communities,
-     shared by every composer, and none after that until `GUILD_COMMANDS_UPDATE`, joining or
-     leaving a community (one refetch each, only if loaded) or the next READY. A send of
-     `/name …` before the list has loaded waits on that same request. One request per community
-     would have sent dozens at once for someone in many communities, near the 50 per second that
-     signs a session out.
+     shared by every composer. One request per community would have sent dozens at once for
+     someone in many communities, near the 50 per second that signs a session out.
+   - After that, nothing until a community is marked stale (`GUILD_COMMANDS_UPDATE`, joining, or a
+     404 on a run); then one request for that community, the next time the member uses commands.
+     The event itself never triggers a request, so an edit in a large community does not set off
+     thousands of refetches. The next READY starts over.
+   - A send of `/name …` before the list has loaded, or while its community is stale, waits on that
+     same shared request.
    - Running a command sends one; presses while it is out send none.
    - The settings tab sends one list request, plus one per save or delete.
    - The script preview sends at most one per 500 ms of typing.
@@ -1065,43 +1103,39 @@ enum values last, and every one-line hook naming the fork function it calls.
 
 ## Phases
 
-1. **Basic commands**, enough for the Temple:
-   - tables, routes, event, run flow, `command` on messages;
+1. **Basic commands** (tyne-chat/tyne#269), enough for the Temple:
+   - the three permission bits on every side, the phone's mask covering every bit, and the
+     defaults;
+   - tables, routes (the all-communities list included), event, run flow, `command` on messages;
    - the settings tab with the basic editor, on web and phones;
-   - the composer on both;
+   - the composer on both, with the precedence rules, other communities' channels and DMs, and the
+     stale-list handling;
    - chip, grouping and chip click;
-   - personas, and mentions in the input.
+   - personas, and mentions in the input;
+   - at release, the one-off task turning on Use external commands for existing @everyone roles.
 
    Templates must be basic, but go through the Liquid engine from the start.
-2. **Scripts:**
+2. **Scripts** (tyne-chat/tyne#270):
    - the web script editor and the preview route;
    - `random`, `one_of`, `plural`, `ordinal`, conditions and `assign`;
    - phones show scripts read-only.
-3. **Counters:**
+3. **Counters** (tyne-chat/tyne#271):
    - the person input type;
-   - counter definitions in settings;
+   - counter definitions in the command editor;
    - increments in the send hook, once per new use row;
    - "first time" through `== 1`.
 
-Each phase ships on the server first, then the web, then an APK; the root guide's order applies to
-schema changes (tyne, then the SDK, then tyne-mobile).
+**Order of work in each phase** (decided): the server first, then the Dart SDK regenerated from its
+spec, then the web app, then the phone app, each checked on chat-dev before Chiara tests. That is
+also the root guide's order for schema changes (tyne, then the SDK, then tyne-mobile). Commits,
+deploys, the APK and the one-off production task each need Chiara's approval.
 
 ## Open questions
 
-- **Limits:** 100 commands per community, 5 counters per command, 4,000-character templates,
-  1,000-character input?
-- **Chip click** when the box is not empty: refuse with a tooltip (proposed), or insert when the
-  caret is at the start?
-- **Existing communities and Use external commands:** a new permission bit is off in every stored
-  role, and `DEFAULT_PERMISSIONS` applies only when a role or community is created
-  (`GuildRoleService.ts:112`, `GuildOperationsService.ts:993`). Turn it on for every existing
-  @everyone role once at release (proposed: it matches emoji, where the equivalent is on by
-  default), or leave each community to turn it on?
+- **Remaining limits:** 4,000-character templates and 5 counters per command?
+- **Event handling:** the lazy refetch in [Events](#events) is Claude's proposal, not yet agreed.
 - **Replies, later:** a command could be sent as a reply to the message in the reply bar (the send
   path takes `message_reference`). Phase 1 leaves the bar alone.
-- **Pasting Arcane templates** as pills in the basic editor (proposed for phase 1; cheap).
-- **Passive sessions:** bypass the filter for `GUILD_COMMANDS_UPDATE` (proposed), or let them catch
-  up at READY?
 - **The phone's mask:** confirm that no code sends `allPermissions` to the server before widening
   it.
 
@@ -1125,3 +1159,5 @@ schema changes (tyne, then the SDK, then tyne-mobile).
 | Counters shared between commands ("affection" for `/hug` and `/pat`) | No use case yet; each command owns its counters, and sharing can come later |
 | A fork message flag marking command messages, to skip the per-read lookup | Needs another hook in upstream's send path (`calculateMessageFlags` keeps only `SENDABLE_MESSAGE_FLAGS`); the per-channel marker is enough for now |
 | One list request per community | Dozens of requests at once for someone in many communities, near the limit that signs a session out |
+| Converting Arcane syntax (`{member.mention}`, `{args}`) on paste | Commands come from many bots; favouring one is not worth it |
+| Refetching the list as soon as `GUILD_COMMANDS_UPDATE` arrives | One edit in a large community would set off thousands of requests at once; marking stale and fetching on next use spreads them |
