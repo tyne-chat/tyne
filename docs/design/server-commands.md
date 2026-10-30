@@ -116,6 +116,8 @@ Proposals in this document that are not in this table are not decided.
    commands. Each row shows the name and description.
 2. A command with input opens the option bar upstream already has, with the command's hint as the
    placeholder (`Who are you tucking in?`). Mention autocomplete works there, personas included.
+   (The first web build inserts `/tuck ` as text instead:
+   [Phase 1 on the web, as built](#phase-1-on-the-web-as-built).)
 3. Enter sends. Nothing appears in the composer's place until the server's message arrives (there
    is no optimistic message; see [Open questions](#open-questions)). While the request is out, a
    second Enter or tap does nothing, and a retry of the same attempt reuses its nonce, so a double
@@ -161,7 +163,8 @@ Like custom emoji: a member of a community can use its commands everywhere they 
 - The chip's tooltip names the command's community (a `/tuck` in a DM could come from any of
   them).
 - Clicking or tapping the chip, when the member's message box in that channel is empty and they
-  may use that command there, puts `/tuck` in it with the option bar open. When the box is not
+  may use that command there, puts `/tuck` in it with the option bar open (on the web for now,
+  `/tuck ` as text). When the box is not
   empty, the tooltip says so and nothing changes. For anyone who may not use the command, the chip
   is not clickable.
 - Editing the message removes the chip: the text no longer matches the command.
@@ -177,7 +180,8 @@ the Roles tab: a list beside an editor on wide windows, the list then the editor
 - **Editor**, top to bottom:
   - `Edit /tuck`, `Created by …`, **Delete command**.
   - **Command:** Name (with a fixed `/`), Description.
-  - **Input:** None / Optional / Required, and a Hint.
+  - **Input:** None / Optional / Required as radio buttons, like the Moderation tab's choices, and a
+    Hint when the command takes input.
   - **Message:** the template. In the basic editor, two chips insert **Person running it** and **What
     they type**, shown as pills; markdown, emoji and mentions work as in a message. A link switches
     to the script editor (below).
@@ -861,6 +865,38 @@ A fork feature folder, `fluxer_app/src/features/guild_commands/`, with an `AGENT
 - **Script editor** (phase 2): CodeMirror 6, as `theme_settings/components/QuickCssEditor.tsx`
   sets it up, with `@codemirror/lang-liquid`.
 
+### Phase 1 on the web, as built
+
+Where the first web build differs from the plan above, and why. The code is in
+`fluxer_app/src/features/guild_commands/`.
+
+- **No option bar.** Picking a command inserts `/tuck ` as plain text, and the input is typed in
+  the normal composer. A string slot sends a mention as `@Name` and the user slot refuses personas
+  (see "Mentions in the input"); plain text keeps mentions, personas and emoji working with no
+  change to upstream's slot code.
+  - So typed, pasted, restored and picked commands all take one path: `runForkGuildCommand`
+    (`commands/RunGuildCommand.ts`), called from `useTextareaSubmit.ts` before the slowmode check.
+    It reads `/name input` from the composer's wire text. `LexicalMessageCommand.ts` and
+    `CommandUtils.ts` are not touched.
+  - The command's **hint is not shown yet**: it was to be the option bar's placeholder.
+  - Input on two lines is refused with a system message, like the server's rule.
+  - With slowmode active the submit goes to upstream's path, which blocks it as for any message.
+- **Autocomplete** lists only the command each name runs (precedence decides), with the
+  community's name after the description. No icon yet.
+- **Chip click** writes `/tuck ` as the draft's text, not a command segment, then focuses the box.
+  It is clickable only when that command is the one `/tuck` runs in the channel.
+- **Template field:** a plain text area. **Person running it** and **What they type** insert the
+  literal `{{ person }}` and `{{ input }}` at the cursor; there are no pills and no mention or emoji
+  autocomplete in the field yet. Custom emoji are typed as `:name:`, shown that way, and stored as
+  `<:name:id>`, resolved on save as in a message sent in the community
+  (`utils/GuildCommandTemplateEmoji.ts`); the preview resolves the template and the sample input the
+  same way.
+- **Preview:** shows the viewer's account, not their current persona.
+- **Not built yet:** the creator's avatar in the list, and the settings mark for a command hidden by
+  a newer built-in command of the same name (the autocomplete already skips it).
+- **Release task:** the Use external commands backfill runs by itself once (worker task
+  `backfillUseExternalCommands`, see [Permissions](#permissions)); nothing to run by hand.
+
 ## Mobile client
 
 A fork feature folder, `lib/features/guild_commands/`, with an `AGENTS.md` once built. Line numbers
@@ -992,7 +1028,8 @@ The root guide's three questions:
    - After that, nothing until a community is marked stale (`GUILD_COMMANDS_UPDATE`, joining, or a
      404 on a run); then one request for that community, the next time the member uses commands.
      The event itself never triggers a request, so an edit in a large community does not set off
-     thousands of refetches. The next READY starts over.
+     thousands of refetches. With more than three communities stale, the one list request reloads
+     them all instead, so a use never sends more than three. The next READY starts over.
    - A send of `/name …` before the list has loaded, or while its community is stale, waits on that
      same shared request.
    - Running a command sends one; presses while it is out send none.
