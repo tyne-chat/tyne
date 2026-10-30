@@ -24,6 +24,7 @@ import {useCallback, useLayoutEffect, useRef} from 'react';
 
 // Fork imports.
 
+import {GuildCommandChip} from '@app/features/guild_commands/components/GuildCommandChip';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {originalPosterTagAppliesToMessage} from '@app/features/persona/utils/OriginalPosterPersona';
 
@@ -257,6 +258,13 @@ export function CompactAuthorPrefix({
 						member={member}
 						isHovering={isHovering}
 						data-flx="channel.compact-message-layout.compact-author-prefix.persona-tag"
+					/>
+				)}
+				{message.command && (
+					<GuildCommandChip
+						command={message.command}
+						channelId={message.channelId}
+						data-flx="channel.compact-message-layout.compact-author-prefix.guild-command-chip"
 					/>
 				)}
 			</span>
