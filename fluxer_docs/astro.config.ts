@@ -226,6 +226,7 @@ export default defineConfig({
 						'http-api/forums',
 						'http-api/read-states',
 						'http-api/signal-bar',
+						'http-api/guild-commands',
 						'http-api/memes',
 						'http-api/gifs',
 						'http-api/webhooks',
