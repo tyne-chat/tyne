@@ -167,7 +167,7 @@ export class GuildCommandService {
 			guild_id: guildId,
 			command_id: await this.deps.nextId(),
 			name: request.name,
-			description: request.description,
+			description: request.description ?? '',
 			template: request.template,
 			kind,
 			input_mode: request.input_mode,
@@ -198,7 +198,7 @@ export class GuildCommandService {
 		const row: GuildCommandRow = {
 			...existing,
 			name: request.name ?? existing.name,
-			description: request.description ?? existing.description,
+			description: request.description !== undefined ? (request.description ?? '') : existing.description,
 			template,
 			kind: request.template !== undefined ? this.checkTemplate(template) : existing.kind,
 			input_mode: request.input_mode ?? existing.input_mode,
