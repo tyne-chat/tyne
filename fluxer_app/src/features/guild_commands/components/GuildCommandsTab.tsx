@@ -314,10 +314,20 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 		return null;
 	};
 
+	/** The next new command starts in the basic editor, whichever this one used. */
+	const forgetNewCommandEditor = useCallback(() => {
+		setEditors((previous) => {
+			const next = new Map(previous);
+			next.delete(NEW_ID);
+			return next;
+		});
+	}, []);
+
+	// A new command stays selected, as a blank one: its draft is only what `edits` holds.
 	const reset = useCallback(() => {
 		setEdits(new Map());
-		if (selectedId === NEW_ID) setSelectedId(null);
-	}, [selectedId]);
+		forgetNewCommandEditor();
+	}, [forgetNewCommandEditor]);
 
 	const saveProblem = useCallback(
 		(error: unknown) => {
@@ -350,7 +360,10 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 							? await http.post<GuildCommandResponse>(ForkEndpoints.GUILD_COMMANDS(guildId), {body})
 							: await http.patch<GuildCommandResponse>(ForkEndpoints.GUILD_COMMAND(guildId, pending.id), {body});
 					if (!res.ok) throw res;
-					if (pending.id === NEW_ID && res.body) setSelectedId(res.body.id);
+					if (pending.id === NEW_ID && res.body) {
+						setSelectedId(res.body.id);
+						forgetNewCommandEditor();
+					}
 				} catch (error) {
 					ToastCommands.createToast({
 						type: 'error',
@@ -365,7 +378,7 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 		} finally {
 			setSaving(false);
 		}
-	}, [commands, edits, guildId, i18n, load, previewChannel, saveProblem]);
+	}, [commands, edits, forgetNewCommandEditor, guildId, i18n, load, previewChannel, saveProblem]);
 
 	const hasInvalid = Array.from(edits.values()).some((d) => nameError(d) !== null || d.template.trim() === '');
 	useEffect(() => {
