@@ -53,6 +53,7 @@ import {useCallback} from 'react';
 
 // Fork imports.
 
+import {runForkGuildCommand} from '@app/features/guild_commands/commands/RunGuildCommand';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const COULDN_T_RUN_THAT_COMMAND_DESCRIPTOR = msg({
@@ -492,6 +493,20 @@ export const useTextareaSubmit = ({
 			MessageCommands.stopReply(channelId);
 			return;
 		}
+		if (
+			commandsEnabled &&
+			editingMessage === null &&
+			(await runForkGuildCommand({
+				channelId,
+				content: resolvedContent,
+				isSlowmodeActive,
+				i18n,
+				setValue,
+				clearSegments,
+				draftOwner,
+			}))
+		)
+			return;
 		if (
 			shouldBlockSubmissionForSlowmode(
 				isSlowmodeActive,

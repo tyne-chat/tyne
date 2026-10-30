@@ -56,6 +56,10 @@ msgstr "Tất cả persona"
 msgid "All time zones"
 msgstr "Tất cả múi giờ"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Một lệnh khác hoặc một lệnh có sẵn đã dùng tên này."
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Bạn có chắc muốn xóa <0>{0}</0> không? Không thể hoàn tác hành động này."
@@ -76,6 +80,10 @@ msgstr "Tự động hiện các thanh bên đã ẩn"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Không tải được ảnh đại diện: {error}. Persona đã được nhập mà không có ảnh đại diện."
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Quay lại danh sách lệnh"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Không tải được ảnh bìa: {error}. Persona đã được nhập mà không có ảnh bìa."
@@ -86,6 +94,27 @@ msgstr "Đổi persona"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Chọn tệp xuất PluralKit (.json) hoặc tệp xuất {productName} (.zip), hoặc kéo và thả"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "Xóa trống ô tin nhắn để dùng /{name}"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Lệnh"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Ô lệnh"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Lệnh"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Đã lưu lệnh"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "Sao chép dấu thời gian\\"
 msgid "Could not export your personas."
 msgstr "Không thể xuất các persona của bạn."
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "Không thể tải các lệnh."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "Không thể chạy /{name}: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "Không thể lưu /{name}: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Tạo lệnh"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Tạo lệnh cho cộng đồng này, và sửa hoặc xóa lệnh của bạn."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Do {name} tạo"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "Tắt persona"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "Xóa /{name}?"
+
 msgid "Delete Persona"
 msgstr "Xóa persona"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Xóa lệnh"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "Cặp thẻ bị trùng trên persona này"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Mỗi kênh giữ persona riêng của mình. Kênh mới bắt đầu bằng tài khoản của bạn."
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "Sửa /{name}"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Chỉnh sửa persona"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Sửa hoặc xóa lệnh của bất kỳ ai trong cộng đồng này."
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "Ẩn danh sách kênh"
 msgid "Hide signal bar"
 msgstr "Ẩn thanh tín hiệu"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "Gợi ý"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "Di chuột gần mép cửa sổ để tạm thời hiện các bảng đã thu gọn."
@@ -294,12 +367,20 @@ msgstr "Chèn"
 msgid "Insert timestamp"
 msgstr "Chèn dấu thời gian"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Chèn:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "Giữ persona hiện có và thêm mới (Khuyên dùng)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Giữ {existingCount} persona hiện tại của bạn và thêm toàn bộ {0} persona đã nhập bên cạnh chúng dưới dạng mục mới."
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "Được tạo bằng /{name}"
 
 msgid "Main account"
 msgstr "Tài khoản chính"
@@ -310,6 +391,10 @@ msgstr "Quản lý persona"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "Quản lý và tạo persona của bạn"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Quản lý lệnh"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "Thành viên có ảnh đại diện"
 msgid "Message Tools"
 msgstr "Công cụ tin nhắn"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Tin nhắn mà thành viên có thể đăng bằng cách gõ /name."
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Persona mới"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Lệnh mới"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "Cửa sổ mới"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Không tìm thấy mảng \"members\" trong tệp xuất này."
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "Không có lệnh nào"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Chưa cấu hình thẻ hiển thị. Tin nhắn sẽ hiển thị ảnh hồ sơ tài khoản của bạn."
@@ -379,6 +476,10 @@ msgstr "Chỉ bạn nhìn thấy. Người khác không thể xem tiểu sử đ
 msgid "Open in new window"
 msgstr "Mở trong cửa sổ mới"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "Không bắt buộc"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Huy hiệu hệ thống tùy chọn, vd: ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "Xem nhanh"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Xóa vĩnh viễn toàn bộ {existingCount} persona hiện có và thay thế hoàn toàn bằng các persona đã nhập."
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Người chạy lệnh"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "Đặt lại tín hiệu cho mọi người"
 msgid "Root Account (Default)"
 msgstr "Tài khoản gốc (Mặc định)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Nội dung mẫu"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Đang lưu persona..."
@@ -550,6 +659,10 @@ msgstr "Đang lưu persona..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "Kết quả tìm kiếm ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Tìm lệnh"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "Không thể đọc tệp .zip này."
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "Tệp .zip này không phải là tệp xuất persona từ {productName}."
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "Không thể hoàn tác. Tin nhắn được tạo bằng lệnh này vẫn cho biết lệnh nào đã tạo ra chúng."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "Cộng đồng này chưa có lệnh nào."
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "Biểu tượng cảm xúc này đã được thêm làm biểu tượng đặc trưng"
@@ -743,9 +864,41 @@ msgstr "Tin nhắn không có thẻ được gửi bằng persona bạn đã ch�
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "Tin nhắn không có thẻ được gửi bằng persona nói gần nhất. Dùng thẻ sẽ chuyển sang persona đó."
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "Dùng /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "Dùng /{name} từ {community}"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Dùng lệnh từ các cộng đồng khác trong kênh này."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Dùng lệnh từ các cộng đồng khác."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Dùng lệnh bên ngoài"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Dùng chữ thường, số, - và _, tối đa 32 ký tự."
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Xem persona của bạn"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "Nội dung họ gõ"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "Nội dung bạn gõ sau /{name} phải nằm trên một dòng."
 
 msgid "Where the signal bar appears"
 msgstr "Nơi hiển thị thanh tín hiệu"
