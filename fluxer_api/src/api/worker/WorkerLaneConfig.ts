@@ -124,6 +124,7 @@ const LANE_CONFIG = {
 			'operatorPassLabsGreeting',
 			'operatorPassLabsDelivery',
 			'sweepSignalBar',
+			'backfillUseExternalCommands',
 		] as const,
 		retiredTasks: ['operatorPassWallAutoApprove', 'operatorPassSaleBroadcast', 'operatorPassVisionaryNotice'],
 		concurrency: 12,
