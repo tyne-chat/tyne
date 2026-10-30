@@ -67,6 +67,8 @@ bypasses_passive_filter(guild_update, _EventData, _SessionData) ->
     true;
 bypasses_passive_filter(signal_bar_update, _EventData, _SessionData) ->
     true;
+bypasses_passive_filter(guild_commands_update, _EventData, _SessionData) ->
+    true;
 bypasses_passive_filter(guild_role_update, _EventData, _SessionData) ->
     true;
 bypasses_passive_filter(guild_role_update_bulk, _EventData, _SessionData) ->
