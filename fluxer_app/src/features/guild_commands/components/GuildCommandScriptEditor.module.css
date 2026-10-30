@@ -1,0 +1,21 @@
+.editor {
+	min-height: 8rem;
+	max-height: 24rem;
+	overflow: auto;
+	border: 1px solid var(--background-modifier-accent);
+	border-radius: 0.5rem;
+	background-color: var(--background-secondary);
+}
+
+.editor:focus-within {
+	border-color: var(--background-modifier-accent-focus);
+}
+
+.editor :global(.cm-editor) {
+	min-height: 8rem;
+}
+
+.editor :global(.cm-lintRange-error) {
+	background-image: none;
+	border-bottom: 2px solid var(--status-danger);
+}

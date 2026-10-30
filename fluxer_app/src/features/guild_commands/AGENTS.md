@@ -18,6 +18,11 @@ Every file here is the fork's. What a command is, the rules and the run flow on 
 | `command` on a message, grouping | `messaging/models/MessagingMessage.ts`; a fork block in `messaging/utils/MessageGroupingUtils.ts` |
 | Settings tab | `components/GuildCommandsTab.tsx`, registered in `user/components/settings_utils/GuildSettingsConstants.ts` |
 | Custom emoji in a template | `utils/GuildCommandTemplateEmoji.ts` |
+| The script editor, loaded on demand | `components/GuildCommandScriptEditor.tsx` |
+| Suggestions in it, from the server's allowlists | `utils/GuildCommandLiquidCompletions.ts` |
+| The reference under it | `components/GuildCommandScriptReference.tsx` |
+| A script's preview, filled in by the server | `hooks/useGuildCommandScriptPreview.ts` |
+| The server's template problems, in words | `utils/GuildCommandTemplateIssues.ts` |
 | Permission labels | fork blocks in `permissions/utils/PermissionLabelDescriptors.ts` and `PermissionUtils.ts` |
 | Routes | `app/constants/ForkEndpoints.ts` |
 
@@ -32,6 +37,9 @@ Every file here is the fork's. What a command is, the rules and the run flow on 
   order. `resolve(channel, name)` is the one place that decides; the menu, the run and the chip
   all use it. Another community's commands need Use External Commands in a community channel; in
   DMs every community's commands work.
+- **Right-clicking the chip** opens that command in community settings, for those who may edit it
+  (`commands/OpenGuildCommandSettings.tsx`, the server's rule); for anyone else it stays the
+  message's menu. The tab takes the request from the store, so upstream's modal needs no change.
 - **The chip** is clickable only when the message box is empty and its command is the one `/name`
   runs in that channel. It writes the draft and focuses the composer; the draft lags typing by
   400 ms, so a box typed into just now can look empty.
@@ -47,6 +55,9 @@ Every file here is the fork's. What a command is, the rules and the run flow on 
   (`GuildCommandsStore.test.ts`).
 - One run per channel at a time; a second Enter while it is out does nothing, and retrying the same
   text reuses its nonce (`RunGuildCommand.test.ts`).
+- A script's preview sends at most one request per 500 ms of typing, and none for a basic template,
+  which the tab fills in itself. A failed one waits for the next edit
+  (`useGuildCommandScriptPreview.test.tsx`).
 
 ## Traps
 
@@ -57,6 +68,10 @@ Every file here is the fork's. What a command is, the rules and the run flow on 
   compares with the first message of the group, so checking only the current message would put
   later plain messages under a `/tuck` header (`MessageGroupingUtilsGuildCommands.test.ts`).
 - The settings tab's `tabId` for `UnsavedChangesCommands` must equal the tab type, `'commands'`.
+- The editor a command shows stays as chosen; the preview follows the text. Do not switch editors as
+  the text changes: the field under the cursor would be replaced mid-word.
+- Keep suggestions fed from `GUILD_COMMAND_TEMPLATE_TAGS` and `_FILTERS`: `liquid()`'s own source
+  offers tags the server refuses.
 - The server posts a template as written, so a custom emoji must be stored as `<:name:id>`. The
   template field shows it as `:name:` and saving converts it back, keeping the stored emoji of a
   name the editor cannot look up; the preview converts the same way, so it shows what will be

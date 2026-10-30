@@ -92,6 +92,10 @@ msgstr "बैनर इमेज डाउनलोड नहीं हो स�
 msgid "Change persona"
 msgstr "परसोना बदलें"
 
+#. Help for an example in a command script.
+msgid "Change the message depending on what they typed"
+msgstr "उन्होंने जो टाइप किया, उसके हिसाब से मैसेज बदलें"
+
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "PluralKit एक्सपोर्ट (.json) या {productName} एक्सपोर्ट (.zip) चुनें, या खींचकर छोड़ें"
 
@@ -371,12 +375,20 @@ msgstr "समय टिकट डालें"
 msgid "Insert:"
 msgstr "डालें:"
 
+#. Why a community command could not run, shown after "Couldn't run /name:".
+msgid "Its script has a problem."
+msgstr "इसकी स्क्रिप्ट में कोई समस्या है।"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "मौजूदा रखें और नए जोड़ें (सुझाया गया)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "अपने {existingCount} मौजूदा परसोना रखें और सभी {0} इंपोर्ट किए गए परसोना उनके साथ नई एंट्री के रूप में जोड़ें।"
+
+#. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
+msgid "Line {line}, column {column}: {problem}"
+msgstr "पंक्ति {line}, कॉलम {column}: {problem}"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -551,6 +563,18 @@ msgstr "परसोना की दृश्यता"
 msgid "Personas"
 msgstr "परसोना"
 
+#. Help for an example in a command script.
+msgid "Pick one option at random"
+msgstr "कोई एक विकल्प रैंडम तरीके से चुनें"
+
+#. Help for an example in a command script.
+msgid "Pick one word at random"
+msgstr "कोई एक शब्द रैंडम तरीके से चुनें"
+
+#. Help for an example in a command script.
+msgid "Pick the word for a number"
+msgstr "संख्या के हिसाब से शब्द चुनें"
+
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
 msgstr "इमोजी पिन करें"
@@ -648,6 +672,10 @@ msgstr "सभी के लिए सिग्नल रीसेट करे�
 msgid "Root Account (Default)"
 msgstr "रूट अकाउंट (डिफ़ॉल्ट)"
 
+#. Button under the preview of a command script that picks at random: fills the preview in again.
+msgid "Run again"
+msgstr "फिर से चलाएँ"
+
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
 msgstr "नमूना इनपुट"
@@ -655,6 +683,14 @@ msgstr "नमूना इनपुट"
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "परसोना सेव हो रहे हैं..."
+
+#. Label of the code editor for a community command.
+msgid "Script"
+msgstr "स्क्रिप्ट"
+
+#. Title of the expandable help under the command script editor.
+msgid "Script reference"
+msgstr "स्क्रिप्ट गाइड"
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
@@ -784,13 +820,45 @@ msgstr "टास्कबार"
 msgid "Tell us about this persona..."
 msgstr "हमें इस परसोना के बारे में बताएँ..."
 
+#. Help for a command script variable.
+msgid "That person’s name"
+msgstr "उस व्यक्ति का नाम"
+
+#. Help for a command script variable.
+msgid "The channel, as a mention"
+msgstr "चैनल, मेंशन के रूप में"
+
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "चुनी गई फ़ाइल मान्य JSON ऑब्जेक्ट नहीं है।"
 
+#. Help for a command script variable.
+msgid "The first person they mention, if any"
+msgstr "पहला व्यक्ति जिसे वे मेंशन करें, अगर कोई हो"
+
+#. Help for a command script variable.
+msgid "The name of this community"
+msgstr "इस कम्युनिटी का नाम"
+
+#. Help for a command script variable.
+msgid "The person running it, as a mention"
+msgstr "इस्तेमाल करने वाला व्यक्ति, मेंशन के रूप में"
+
 #. Description of the persona option of the /persona slash command
 msgid "The persona to select."
 msgstr "चुनने के लिए परसोना।"
+
+#. Problem in a community command script: it produces more text than is allowed.
+msgid "The script builds too much text."
+msgstr "स्क्रिप्ट बहुत ज़्यादा टेक्स्ट बना रही है।"
+
+#. Problem in a community command script.
+msgid "The script is too long."
+msgstr "स्क्रिप्ट बहुत लंबी है।"
+
+#. Problem in a community command script.
+msgid "The script took too long to run."
+msgstr "स्क्रिप्ट चलाने में बहुत ज़्यादा समय लगा।"
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "जब तक आप यहाँ कोई चैनल नहीं चुनते, सिग्नल बार बंद रहता है। किसी श्रेणी या पूरी कम्युनिटी को चुनने पर वहाँ बाद में बनने वाले चैनल भी शामिल होते हैं।"
@@ -798,6 +866,18 @@ msgstr "जब तक आप यहाँ कोई चैनल नहीं �
 #. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "टैग आइकन सहेजा नहीं जा सका: {error}। इसे परसोना सेटिंग्स में फिर से सेट किया जा सकता है।"
+
+#. Help for a command script variable.
+msgid "Their name"
+msgstr "इस्तेमाल करने वाले का नाम"
+
+#. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
+msgid "There's no filter called {name}."
+msgstr "{name} नाम का कोई फ़िल्टर नहीं है।"
+
+#. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
+msgid "There's no tag called {name}."
+msgstr "{name} नाम का कोई टैग नहीं है।"
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -822,8 +902,20 @@ msgstr "यह इमोजी पहले से ही एक हस्ता
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "यह इस बात का पूर्वावलोकन है कि आपका डिस्प्ले टैग चैट में कैसा दिखेगा।"
 
+#. Problem in a community command script: a syntax error at the position given before this text.
+msgid "This part can't be read."
+msgstr "यह हिस्सा पढ़ा नहीं जा सकता।"
+
+#. Problem in a community command script: it failed while running, at the position given before this text.
+msgid "This part stopped with an error."
+msgstr "यह हिस्सा गड़बड़ी के साथ रुक गया।"
+
 msgid "This persona’s profile is private."
 msgstr "इस परसोना की प्रोफ़ाइल निजी है।"
+
+#. Shown instead of the preview when a command script produces no text.
+msgid "This would post nothing, so the command would fail."
+msgstr "इससे कुछ भी पोस्ट नहीं होगा, इसलिए कमांड विफल हो जाएगा।"
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
@@ -843,6 +935,10 @@ msgstr "{name} बंद करें"
 #. Direct message right-click menu action that shows the signal bar above the message box in this DM.
 msgid "Turn on signal bar"
 msgstr "सिग्नल बार चालू करें"
+
+#. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
+msgid "Type {output} or {tag} for suggestions."
+msgstr "सुझावों के लिए {output} या {tag} टाइप करें।"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
@@ -888,11 +984,20 @@ msgstr "बाहरी कमांड इस्तेमाल करें"
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
 msgstr "छोटे अक्षर, अंक, - और _ इस्तेमाल करें, अधिकतम 32 वर्ण।"
 
+#. Button in the command editor that switches back from the code editor to the plain message field.
+msgid "Use the basic editor"
+msgstr "बेसिक एडिटर इस्तेमाल करें"
+
+#. Button in the command editor that switches the message field to the code editor for scripts.
+msgid "Use the script editor"
+msgstr "स्क्रिप्ट एडिटर इस्तेमाल करें"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "अपने परसोना देखें"
 
 #. Button inserting the placeholder for what the member types after the command.
+#. Help for a command script variable.
 msgid "What they type"
 msgstr "वे जो टाइप करते हैं"
 
@@ -906,6 +1011,10 @@ msgstr "सिग्नल बार कहाँ दिखे"
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "आपका परसोना कहाँ याद रखा जाता है"
+
+#. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
+msgid "Write a number as 1st, 2nd, 3rd"
+msgstr "संख्या को 1st, 2nd, 3rd की तरह लिखें"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
@@ -979,6 +1088,10 @@ msgstr "{label}: {names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - परसोना बदलने के लिए क्लिक करें"
+
+#. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
+msgid "{name} is never closed."
+msgstr "{name} कभी बंद नहीं होता।"
 
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
