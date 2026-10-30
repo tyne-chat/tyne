@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {GuildCommandController} from '@app/api/guild_command/GuildCommandController';
 import {PersonaController} from '@app/api/persona/PersonaController';
 import {SignalBarController} from '@app/api/signal_bar/SignalBarController';
 import type {HonoApp} from '@app/api/types/HonoEnv';
@@ -9,4 +10,5 @@ import type {HonoApp} from '@app/api/types/HonoEnv';
 export function registerForkControllers(routes: HonoApp): void {
 	PersonaController(routes);
 	SignalBarController(routes);
+	GuildCommandController(routes);
 }
