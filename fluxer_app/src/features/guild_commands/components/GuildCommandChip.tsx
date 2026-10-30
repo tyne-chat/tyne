@@ -2,18 +2,27 @@
 
 import Channels from '@app/features/channel/state/Channels';
 import Guilds from '@app/features/guild/state/Guilds';
+import {
+	canEditGuildCommand,
+	openGuildCommandInSettings,
+} from '@app/features/guild_commands/commands/OpenGuildCommandSettings';
 import styles from '@app/features/guild_commands/components/GuildCommandChip.module.css';
 import GuildCommandsStore from '@app/features/guild_commands/state/GuildCommandsStore';
 import * as DraftCommands from '@app/features/messaging/commands/DraftCommands';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import SessionManager from '@app/features/platform/state/AuthSession';
 import {ComponentBus} from '@app/features/platform/utils/ComponentBus';
+import {EditIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
+import {MenuGroup} from '@app/features/ui/action_menu/MenuGroup';
+import {MenuItem} from '@app/features/ui/action_menu/MenuItem';
+import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import type {MessageGuildCommandResponse} from '@fluxer/schema/src/domains/guild_command/MessageGuildCommandSchemas';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
+import type React from 'react';
 
 // Fork: the chip after the timestamp of a message made by a server command
 // (docs/design/server-commands.md, "The message"). Clicking it puts `/name ` in an empty message box.
@@ -35,6 +44,11 @@ const MADE_BY_COMMAND_DESCRIPTOR = msg({
 	message: 'Made with /{name}',
 	comment:
 		'Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.',
+});
+
+const EDIT_COMMAND_DESCRIPTOR = msg({
+	message: 'Edit /{name}',
+	comment: 'Context menu action on the community command chip that opens that command in settings. Preserve {name}.',
 });
 
 export const GuildCommandChip = observer(function GuildCommandChip({
@@ -63,12 +77,30 @@ export const GuildCommandChip = observer(function GuildCommandChip({
 		ComponentBus.dispatch('FOCUS_TEXTAREA', {channelId});
 	};
 
+	// Without the right to edit it, a right click stays the message's own menu.
+	const onContextMenu = (event: React.MouseEvent) => {
+		void GuildCommandsStore.ensureLoaded();
+		if (!canEditGuildCommand(command)) return;
+		ContextMenuCommands.openFromEvent(event, ({onClose}) => (
+			<MenuGroup data-flx="guild-commands.guild-command-chip.menu-group">
+				<MenuItem
+					icon={<EditIcon data-flx="guild-commands.guild-command-chip.edit-icon" />}
+					onClick={() => openGuildCommandInSettings(command, onClose)}
+					data-flx="guild-commands.guild-command-chip.edit"
+				>
+					{i18n._(EDIT_COMMAND_DESCRIPTOR, {name: command.name})}
+				</MenuItem>
+			</MenuGroup>
+		));
+	};
+
 	return (
 		<Tooltip text={tooltip} data-flx="guild-commands.guild-command-chip.tooltip">
 			<button
 				type="button"
 				className={clsx(styles.chip, usable && empty && styles.usable)}
 				onClick={onClick}
+				onContextMenu={onContextMenu}
 				aria-disabled={!usable || !empty}
 				data-flx={dataFlx ?? 'guild-commands.guild-command-chip.chip'}
 			>
