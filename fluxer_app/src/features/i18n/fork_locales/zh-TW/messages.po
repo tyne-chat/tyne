@@ -217,6 +217,7 @@ msgstr "此人格上有重複的標籤組"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "每個頻道保留各自的人格。新頻道以你的帳號開始。"
 
+#. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
 msgid "Edit /{name}"
 msgstr "編輯 /{name}"
@@ -315,6 +316,10 @@ msgstr "上傳圖示到伺服器失敗"
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "格式預覽"
+
+#. Link at the end of the command script help to the complete guide on GitHub.
+msgid "Full script guide"
+msgstr "完整腳本指南"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
