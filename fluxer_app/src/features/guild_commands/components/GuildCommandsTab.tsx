@@ -4,12 +4,21 @@ import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import {Message} from '@app/features/channel/components/ChannelMessage';
 import Channels from '@app/features/channel/state/Channels';
+import type {GuildCommandScriptProblem} from '@app/features/guild_commands/components/GuildCommandScriptEditor';
+import {GuildCommandScriptReference} from '@app/features/guild_commands/components/GuildCommandScriptReference';
 import styles from '@app/features/guild_commands/components/GuildCommandsTab.module.css';
+import {useGuildCommandScriptPreview} from '@app/features/guild_commands/hooks/useGuildCommandScriptPreview';
+import GuildCommandsStore from '@app/features/guild_commands/state/GuildCommandsStore';
 import {
 	templateEmojiByName,
 	templateForEditing,
 	templateForSaving,
 } from '@app/features/guild_commands/utils/GuildCommandTemplateEmoji';
+import {
+	describeTemplateIssue,
+	templateIssueOfError,
+} from '@app/features/guild_commands/utils/GuildCommandTemplateIssues';
+import {LexicalRichInput} from '@app/features/lexical/composer/LexicalRichInput';
 import {Message as MessageModel} from '@app/features/messaging/models/MessagingMessage';
 import {resolveTypedEmojiShortcodes} from '@app/features/messaging/utils/TypedEmojiShortcodeUtils';
 import Permission from '@app/features/permissions/state/Permission';
@@ -21,6 +30,8 @@ import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import * as UnsavedChangesCommands from '@app/features/ui/commands/UnsavedChangesCommands';
 import {Input, Textarea} from '@app/features/ui/components/form/FormInput';
+import formStyles from '@app/features/ui/components/form/FormInput.module.css';
+import surfaceStyles from '@app/features/ui/components/form/FormSurface.module.css';
 import {Spinner} from '@app/features/ui/components/Spinner';
 import {RadioGroup} from '@app/features/ui/radio_group/RadioGroup';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
@@ -28,11 +39,14 @@ import Users from '@app/features/user/state/Users';
 import * as FormUtils from '@app/lib/forms';
 import {MessagePreviewContext, MessageStates, MessageTypes, Permissions} from '@fluxer/constants/src/ChannelConstants';
 import {
+	classifyGuildCommandTemplate,
 	GUILD_COMMAND_NAME_PATTERN,
 	type GuildCommandInputMode,
+	type GuildCommandKind,
 	type GuildCommandResponse,
 	MAX_GUILD_COMMAND_DESCRIPTION_LENGTH,
 	MAX_GUILD_COMMAND_HINT_LENGTH,
+	MAX_GUILD_COMMAND_INPUT_LENGTH,
 	MAX_GUILD_COMMAND_TEMPLATE_LENGTH,
 	MAX_GUILD_COMMANDS,
 	RESERVED_GUILD_COMMAND_NAMES,
@@ -41,7 +55,7 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState} from 'react';
 
 // Fork: the Commands tab in community settings (docs/design/server-commands.md, "Managing
 // commands"). A list beside an editor, like the Roles tab; edits wait for upstream's Save bar.
@@ -105,6 +119,28 @@ const INPUT_REQUIRED = msg({message: 'Required', comment: 'Choice: the command n
 const HINT = msg({
 	message: 'Hint',
 	comment: 'Label of the field holding the placeholder shown while a member fills the command in.',
+});
+const USE_SCRIPT_EDITOR = msg({
+	message: 'Use the script editor',
+	comment: 'Button in the command editor that switches the message field to the code editor for scripts.',
+});
+const USE_BASIC_EDITOR = msg({
+	message: 'Use the basic editor',
+	comment: 'Button in the command editor that switches back from the code editor to the plain message field.',
+});
+const SCRIPT = msg({message: 'Script', comment: 'Label of the code editor for a community command.'});
+const SCRIPT_PLACEHOLDER = msg({
+	message: 'Type {output} or {tag} for suggestions.',
+	comment:
+		'Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.',
+});
+const RUN_AGAIN = msg({
+	message: 'Run again',
+	comment: 'Button under the preview of a command script that picks at random: fills the preview in again.',
+});
+const EMPTY_PREVIEW = msg({
+	message: 'This would post nothing, so the command would fail.',
+	comment: 'Shown instead of the preview when a command script produces no text.',
 });
 const SECTION_MESSAGE = msg({message: 'Message', comment: 'Section label in the command editor: the template.'});
 const INSERT = msg({message: 'Insert:', comment: 'Label before the buttons that insert placeholders into a command.'});
@@ -178,6 +214,10 @@ function fillBasicTemplate(template: string, person: string, input: string): str
 	);
 }
 
+const GuildCommandScriptEditor = lazy(() => import('@app/features/guild_commands/components/GuildCommandScriptEditor'));
+
+const PICKS_AT_RANDOM = /\{%-?\s*random\b|\|\s*one_of\b/;
+
 export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {guildId: string}) {
 	const {i18n} = useLingui();
 	const [commands, setCommands] = useState<Array<GuildCommandResponse> | null>(null);
@@ -188,7 +228,10 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 	const [query, setQuery] = useState('');
 	const [sampleInput, setSampleInput] = useState('');
 	const [saving, setSaving] = useState(false);
+	const [editors, setEditors] = useState<Map<string, GuildCommandKind>>(new Map());
 	const templateRef = useRef<HTMLTextAreaElement | null>(null);
+	const sampleFieldRef = useRef<HTMLDivElement | null>(null);
+	const sampleLabelId = useId();
 	const currentUserId = Users.getCurrentUser()?.id ?? null;
 	const canCreate = Permission.can(Permissions.CREATE_COMMANDS, {guildId});
 	const canManage = Permission.can(Permissions.MANAGE_COMMANDS, {guildId});
@@ -214,6 +257,15 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 	useEffect(() => {
 		void load();
 	}, [load]);
+
+	// A command's chip asked to open that command here.
+	const editingRequest = GuildCommandsStore.editingRequest;
+	useEffect(() => {
+		if (editingRequest?.guildId !== guildId) return;
+		setSelectedId(editingRequest.commandId);
+		setShowEditorOnMobile(true);
+		GuildCommandsStore.clearEditingRequest();
+	}, [editingRequest, guildId]);
 
 	const canModify = useCallback(
 		(draft: Draft) => {
@@ -262,6 +314,14 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 		if (selectedId === NEW_ID) setSelectedId(null);
 	}, [selectedId]);
 
+	const saveProblem = useCallback(
+		(error: unknown) => {
+			const issue = templateIssueOfError(error);
+			return issue ? describeTemplateIssue(i18n, issue) : FormUtils.extractErrorMessage(i18n, error);
+		},
+		[i18n],
+	);
+
 	const save = useCallback(async () => {
 		setSaving(true);
 		try {
@@ -289,7 +349,7 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 				} catch (error) {
 					ToastCommands.createToast({
 						type: 'error',
-						children: i18n._(SAVE_FAILED, {name: pending.name, detail: FormUtils.extractErrorMessage(i18n, error)}),
+						children: i18n._(SAVE_FAILED, {name: pending.name, detail: saveProblem(error)}),
 					});
 					return;
 				}
@@ -300,7 +360,7 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 		} finally {
 			setSaving(false);
 		}
-	}, [commands, edits, guildId, i18n, load, previewChannel]);
+	}, [commands, edits, guildId, i18n, load, previewChannel, saveProblem]);
 
 	const hasInvalid = Array.from(edits.values()).some((d) => nameError(d) !== null || d.template.trim() === '');
 	useEffect(() => {
@@ -363,20 +423,52 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 	};
 
 	const currentUser = Users.getCurrentUser();
-	const previewMessage = useMemo(() => {
-		if (!draft || !previewChannel || !currentUser) return null;
-		const template = templateForSaving({
-			text: draft.template,
-			stored: templateEmojiByName(commands?.find((c) => c.id === draft.id)?.template ?? ''),
-			channel: previewChannel,
-			guildId,
-			i18n,
-		});
-		const input =
-			draft.input_mode === 'none'
+	const draftText = draft?.template ?? '';
+	const draftId = draft?.id;
+	const draftInputMode = draft?.input_mode;
+	const previewTemplate = useMemo(
+		() =>
+			templateForSaving({
+				text: draftText,
+				stored: templateEmojiByName(commands?.find((c) => c.id === draftId)?.template ?? ''),
+				channel: previewChannel,
+				guildId,
+				i18n,
+			}),
+		[commands, draftId, draftText, previewChannel, guildId, i18n],
+	);
+	const previewInput = useMemo(
+		() =>
+			draftInputMode === 'none'
 				? ''
-				: resolveTypedEmojiShortcodes({content: sampleInput, channel: previewChannel, guildIdFallback: guildId, i18n});
-		const content = fillBasicTemplate(template, `<@${currentUser.id}>`, input);
+				: resolveTypedEmojiShortcodes({content: sampleInput, channel: previewChannel, guildIdFallback: guildId, i18n}),
+		[draftInputMode, sampleInput, previewChannel, guildId, i18n],
+	);
+	const isScript = classifyGuildCommandTemplate(previewTemplate) === 'script';
+	const {result: scriptPreview, runAgain} = useGuildCommandScriptPreview({
+		guildId,
+		channelId: previewChannel?.id ?? null,
+		template: previewTemplate,
+		input: previewInput,
+		enabled: isScript,
+	});
+	const previewIssue = isScript ? scriptPreview.issue : null;
+	const previewContent = isScript
+		? scriptPreview.content
+		: fillBasicTemplate(previewTemplate, `<@${currentUser?.id ?? ''}>`, previewInput);
+	const scriptProblem = useMemo<GuildCommandScriptProblem | null>(
+		() =>
+			previewIssue?.line
+				? {
+						line: previewIssue.line,
+						column: previewIssue.column ?? 1,
+						message: describeTemplateIssue(i18n, previewIssue),
+					}
+				: null,
+		[previewIssue, i18n],
+	);
+	const previewMessage = useMemo(() => {
+		if (!previewChannel || !currentUser || !previewContent) return null;
 		return new MessageModel(
 			{
 				id: '1000000000000000051',
@@ -386,13 +478,13 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 				flags: 0,
 				pinned: false,
 				mention_everyone: false,
-				content,
+				content: previewContent,
 				timestamp: new Date().toISOString(),
 				state: MessageStates.SENT,
 			},
 			{skipUserCache: true, skipReactionHydration: true},
 		);
-	}, [commands, draft, previewChannel, currentUser, sampleInput, guildId, i18n]);
+	}, [previewChannel, currentUser, previewContent]);
 
 	if (failed) {
 		return (
@@ -410,6 +502,8 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 	const showList = !isMobile || !showEditorOnMobile;
 	const showEditor = draft !== null && (!isMobile || showEditorOnMobile);
 	const editable = draft !== null && canModify(draft);
+	const editor: GuildCommandKind =
+		(draft && (editors.get(draft.id) ?? commands?.find((c) => c.id === draft.id)?.kind)) ?? 'basic';
 	const creator = draft && draft.id !== NEW_ID ? commands.find((c) => c.id === draft.id)?.creator_id : null;
 	const creatorName = creator ? Users.getUser(creator)?.displayName : null;
 
@@ -560,7 +654,10 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 							]}
 							value={draft.input_mode}
 							disabled={!editable}
-							onChange={(mode) => update({input_mode: mode})}
+							onChange={(mode) => {
+								update({input_mode: mode});
+								if (mode === 'none') setSampleInput('');
+							}}
 							data-flx="guild-commands.guild-commands-tab.input-mode"
 						/>
 						{draft.input_mode !== 'none' && (
@@ -574,10 +671,24 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 							/>
 						)}
 
-						<div className={styles.sectionLabel} data-flx="guild-commands.guild-commands-tab.section-message">
-							{i18n._(SECTION_MESSAGE)}
+						<div className={styles.sectionRow} data-flx="guild-commands.guild-commands-tab.section-row">
+							<div className={styles.sectionLabel} data-flx="guild-commands.guild-commands-tab.section-message">
+								{i18n._(SECTION_MESSAGE)}
+							</div>
+							{editable && (editor === 'basic' || !isScript) && (
+								<button
+									type="button"
+									className={styles.switchEditor}
+									onClick={() =>
+										setEditors((previous) => new Map(previous).set(draft.id, editor === 'basic' ? 'script' : 'basic'))
+									}
+									data-flx="guild-commands.guild-commands-tab.switch-editor"
+								>
+									{i18n._(editor === 'basic' ? USE_SCRIPT_EDITOR : USE_BASIC_EDITOR)}
+								</button>
+							)}
 						</div>
-						{editable && (
+						{editable && editor === 'basic' && (
 							<div className={styles.insertRow} data-flx="guild-commands.guild-commands-tab.insert-row">
 								<span className={styles.muted} data-flx="guild-commands.guild-commands-tab.insert-label">
 									{i18n._(INSERT)}
@@ -600,29 +711,92 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 								</button>
 							</div>
 						)}
-						<Textarea
-							ref={templateRef}
-							label={i18n._(SECTION_MESSAGE)}
-							value={draft.template}
-							disabled={!editable}
-							minRows={3}
-							maxRows={10}
-							maxLength={MAX_GUILD_COMMAND_TEMPLATE_LENGTH}
-							showCharacterCount
-							onChange={(event) => update({template: event.target.value})}
-							data-flx="guild-commands.guild-commands-tab.template"
-						/>
+						{editor === 'basic' ? (
+							<Textarea
+								ref={templateRef}
+								label={i18n._(SECTION_MESSAGE)}
+								value={draft.template}
+								disabled={!editable}
+								minRows={3}
+								maxRows={10}
+								maxLength={MAX_GUILD_COMMAND_TEMPLATE_LENGTH}
+								showCharacterCount
+								onChange={(event) => update({template: event.target.value})}
+								data-flx="guild-commands.guild-commands-tab.template"
+							/>
+						) : (
+							<div className={styles.scriptField} data-flx="guild-commands.guild-commands-tab.script-field">
+								<div className={styles.scriptHeader} data-flx="guild-commands.guild-commands-tab.script-header">
+									<span className={formStyles.label} data-flx="guild-commands.guild-commands-tab.script-label">
+										{i18n._(SCRIPT)}
+									</span>
+									<span className={styles.scriptCount} data-flx="guild-commands.guild-commands-tab.script-count">
+										{i18n.number(draft.template.length)}/{i18n.number(MAX_GUILD_COMMAND_TEMPLATE_LENGTH)}
+									</span>
+								</div>
+								<Suspense
+									fallback={<Spinner data-flx="guild-commands.guild-commands-tab.script-spinner" />}
+									data-flx="guild-commands.guild-commands-tab.script-suspense"
+								>
+									<GuildCommandScriptEditor
+										key={draft.id}
+										value={draft.template}
+										disabled={!editable}
+										ariaLabel={i18n._(SCRIPT)}
+										placeholderText={i18n._(SCRIPT_PLACEHOLDER, {output: '{{', tag: '{%'})}
+										problem={scriptProblem}
+										onChange={(template) => update({template})}
+										data-flx="guild-commands.guild-commands-tab.script-editor"
+									/>
+								</Suspense>
+								<GuildCommandScriptReference data-flx="guild-commands.guild-commands-tab.script-reference" />
+							</div>
+						)}
 
 						<div className={styles.sectionLabel} data-flx="guild-commands.guild-commands-tab.section-preview">
 							{i18n._(SECTION_PREVIEW)}
 						</div>
 						{draft.input_mode !== 'none' && (
-							<Input
-								label={i18n._(SAMPLE_INPUT)}
-								value={sampleInput}
-								onChange={(event) => setSampleInput(event.target.value)}
-								data-flx="guild-commands.guild-commands-tab.sample-input"
-							/>
+							<div className={styles.scriptField} data-flx="guild-commands.guild-commands-tab.sample-field">
+								<span
+									id={sampleLabelId}
+									className={formStyles.label}
+									data-flx="guild-commands.guild-commands-tab.sample-label"
+								>
+									{i18n._(SAMPLE_INPUT)}
+								</span>
+								<div
+									ref={sampleFieldRef}
+									className={clsx(formStyles.textareaWrapper, surfaceStyles.surface, formStyles.focusable)}
+									data-flx="guild-commands.guild-commands-tab.sample-wrapper"
+								>
+									<LexicalRichInput
+										placeholder=""
+										channel={previewChannel}
+										allowSpecialMentions={false}
+										markdown={false}
+										singleLine
+										size="form"
+										maxLength={MAX_GUILD_COMMAND_INPUT_LENGTH}
+										className={styles.sampleInput}
+										autocompleteAnchor={sampleFieldRef.current}
+										ariaLabelledBy={sampleLabelId}
+										onChange={(_display, _segments, wire) => setSampleInput(wire)}
+										i18n={i18n}
+										data-flx="guild-commands.guild-commands-tab.sample-input"
+									/>
+								</div>
+							</div>
+						)}
+						{previewIssue && (
+							<p className={styles.problem} data-flx="guild-commands.guild-commands-tab.problem">
+								{describeTemplateIssue(i18n, previewIssue)}
+							</p>
+						)}
+						{isScript && previewContent === '' && (
+							<p className={styles.notice} data-flx="guild-commands.guild-commands-tab.empty-preview">
+								{i18n._(EMPTY_PREVIEW)}
+							</p>
 						)}
 						{previewChannel && previewMessage && (
 							<div className={styles.preview} data-flx="guild-commands.guild-commands-tab.preview">
@@ -633,6 +807,19 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 									shouldGroup={false}
 									data-flx="guild-commands.guild-commands-tab.preview-message"
 								/>
+							</div>
+						)}
+						{isScript && PICKS_AT_RANDOM.test(draft.template) && (
+							<div data-flx="guild-commands.guild-commands-tab.run-again-row">
+								<Button
+									variant="secondary"
+									compact
+									fitContent
+									onClick={runAgain}
+									data-flx="guild-commands.guild-commands-tab.run-again"
+								>
+									{i18n._(RUN_AGAIN)}
+								</Button>
 							</div>
 						)}
 					</section>
