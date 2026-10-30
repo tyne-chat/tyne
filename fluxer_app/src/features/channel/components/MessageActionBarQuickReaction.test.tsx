@@ -254,6 +254,12 @@ describe('EmojiRenderer Pinning', () => {
 		EmojiPins.reset();
 		EmojiPins.pinEmoji('unicode:heart');
 
+		const fullAvailability = {
+			canUse: true,
+			isLockedByPremium: false,
+			isLockedByPermission: false,
+		};
+
 		await act(async () => {
 			root.render(
 				<DndProvider backend={HTML5Backend} data-flx="channel.message-action-bar-quick-reaction-test.dnd-provider">
@@ -262,7 +268,7 @@ describe('EmojiRenderer Pinning', () => {
 						handleHover={vi.fn()}
 						handleSelect={vi.fn()}
 						skinTone=""
-						channel={null}
+						getAvailability={() => fullAvailability}
 						shouldAnimate={false}
 						data-flx="channel.message-action-bar-quick-reaction-test.emoji-renderer"
 					/>
@@ -283,7 +289,7 @@ describe('EmojiRenderer Pinning', () => {
 						handleHover={vi.fn()}
 						handleSelect={vi.fn()}
 						skinTone=""
-						channel={null}
+						getAvailability={() => fullAvailability}
 						shouldAnimate={false}
 						data-flx="channel.message-action-bar-quick-reaction-test.emoji-renderer--2"
 					/>
