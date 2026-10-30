@@ -60,6 +60,7 @@ import {type MouseEvent, useCallback, useMemo} from 'react';
 
 // Fork imports.
 
+import {GuildCommandChip} from '@app/features/guild_commands/components/GuildCommandChip';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {originalPosterTagAppliesToMessage} from '@app/features/persona/utils/OriginalPosterPersona';
@@ -572,6 +573,13 @@ export const UserMessage = observer(() => {
 					</span>
 					{formattedDate}
 				</TimestampWithTooltip>
+				{message.command && (
+					<GuildCommandChip
+						command={message.command}
+						channelId={message.channelId}
+						data-flx="channel.user-message.guild-command-chip"
+					/>
+				)}
 			</span>
 			{(message.flags & MessageFlags.SUPPRESS_NOTIFICATIONS) !== 0 && (
 				<Tooltip
