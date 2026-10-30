@@ -22,7 +22,52 @@ Running a command also needs everything posting a message needs: permission to s
 
 ## Templates
 
-A template is [Liquid](https://shopify.github.io/liquid/). For now a template may contain only text and the outputs `{{ person }}` (the member who ran it, as a mention) and `{{ input }}` (what they typed, with mentions kept as mentions); anything else is refused with 400 `GUILD_COMMAND_TEMPLATE_INVALID`. A command's `kind` says whether its template is `basic` or a `script`.
+A template is [Liquid](https://shopify.github.io/liquid/). A command's `kind` is `basic` when its template is only text and the outputs `{{ person }}` and `{{ input }}`, and `script` otherwise. A template that cannot be read is refused with 400 `GUILD_COMMAND_TEMPLATE_INVALID`, with a [template issue](#template-issue-object) as `template_issue`. The finished message is trimmed; a command that produces nothing, or stops while running, fails with the same code and no details.
+
+### Variables
+
+| Variable | Value |
+| --- | --- |
+| person | The member who ran it, as a mention; `person.name` is their name |
+| input | What they typed, with mentions kept as mentions |
+| target | The first member mentioned in the input, as a mention, or nothing; `target.name` is their name |
+| channel | The channel, as a mention; also `channel.name` and `channel.community.name` |
+| community | `community.name` is the name of the command's community |
+
+### Tags and filters
+
+Tags: `if`, `unless`, `case`, `assign`, `capture`, `echo`, `liquid`, `raw`, `comment`, and `random`, which picks one of its branches:
+
+```liquid
+{% random %}
+{{ person }} gently tucks {{ input }} in to sleep!
+{% or %}
+{{ person }} wraps {{ input }} in a giant burrito blanket!
+{% endrandom %}
+```
+
+Filters: `abs`, `append`, `at_least`, `at_most`, `capitalize`, `ceil`, `compact`, `concat`, `date`, `default`, `divided_by`, `downcase`, `first`, `floor`, `join`, `last`, `lstrip`, `minus`, `modulo`, `plus`, `prepend`, `remove`, `remove_first`, `remove_last`, `replace`, `replace_first`, `replace_last`, `reverse`, `round`, `rstrip`, `size`, `slice`, `sort`, `split`, `strip`, `strip_newlines`, `times`, `truncate`, `truncatewords`, `uniq`, `upcase`, `url_encode`, and:
+
+| Filter | Result |
+| --- | --- |
+| `{{ "warm" \| one_of: "gentle", "big" }}` | One of the three, at random. On a list, one of its items |
+| `{{ hugs \| plural: "time", "times" }}` | The first word for 1, the second otherwise |
+| `{{ hugs \| ordinal }}` | `12th`, in English |
+
+Loops, other templates and all other tags and filters are refused. A render may allocate 100,000 characters and take 50 milliseconds.
+
+## Template issue object
+
+What stopped a template.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| code | string | `unknown_tag`, `unknown_filter`, `not_closed`, `too_long`, `too_large`, `too_slow`, `invalid` or `failed` |
+| line | ?integer | The line of the problem, counted from 1 |
+| column | ?integer | The column of the problem, counted from 1 |
+| name | ?string | The tag or filter concerned |
 
 ## Guild command object
 
@@ -171,6 +216,37 @@ Deletes a command. The command's creator needs `CREATE_COMMANDS`; anyone else ne
 ### Rate limit
 
 30 requests per minute for each authenticated user, on the `guild_commands:write` bucket.
+
+## Preview a guild command
+
+<RouteHeader method="POST" path="/v1/guilds/{guild_id}/commands/preview" />
+
+Fills in a template without posting anything. Requires `CREATE_COMMANDS` or `MANAGE_COMMANDS`. A template with a problem is an answer here, not a failed request: the response is 200 with `issue` set.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The ID of the guild |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| template | string | At most 4000 characters |
+| input? | ?string | Sample input, as for running a command |
+| channel_id? | ?snowflake | A channel of this community to fill in as the channel; ignored if the member cannot see it |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | `content` (the filled-in message) and `issue` (null) | The template worked |
+| 200 | `content` (null) and `issue` (a [template issue](#template-issue-object)) | The template has a problem |
+
+### Rate limit
+
+30 requests per 10 seconds for each authenticated user, on the `guild_commands:preview` bucket, which does not count toward the global limit.
 
 ## Run a guild command
 
