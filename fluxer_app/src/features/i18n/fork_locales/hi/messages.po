@@ -56,6 +56,10 @@ msgstr "सभी परसोना"
 msgid "All time zones"
 msgstr "सभी समय क्षेत्र"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "यह नाम पहले से किसी दूसरे कमांड या बिल्ट-इन कमांड का है।"
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "क्या आप वाकई <0>{0}</0> को डिलीट करना चाहते हैं? यह कार्रवाई वापस नहीं ली जा सकती।"
@@ -76,6 +80,10 @@ msgstr "छिपे साइडबार अपने-आप दिखाए�
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "अवतार इमेज डाउनलोड नहीं हो सकी: {error}। परसोना बिना अवतार के इंपोर्ट हुआ।"
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "कमांड पर वापस जाएँ"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "बैनर इमेज डाउनलोड नहीं हो सकी: {error}। परसोना बिना बैनर के इंपोर्ट हुआ।"
@@ -86,6 +94,27 @@ msgstr "परसोना बदलें"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "PluralKit एक्सपोर्ट (.json) या {productName} एक्सपोर्ट (.zip) चुनें, या खींचकर छोड़ें"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "/{name} इस्तेमाल करने के लिए मैसेज बॉक्स खाली करें"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "कमांड"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "कमांड स्लॉट"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "कमांड"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "कमांड सेव हो गए"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "समय टिकट कॉपी करें\\"
 msgid "Could not export your personas."
 msgstr "आपके परसोना एक्सपोर्ट नहीं हो सके।"
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "कमांड लोड नहीं हो सके।"
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "/{name} नहीं चल सका: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "/{name} सेव नहीं हो सका: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "कमांड बनाएँ"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "इस कम्युनिटी के लिए कमांड बनाएँ, और अपने कमांड बदलें या मिटाएँ।"
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "{name} ने बनाया"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "परसोना निष्क्रिय करें"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "/{name} मिटाएँ?"
+
 msgid "Delete Persona"
 msgstr "परसोना डिलीट करें"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "कमांड मिटाएँ"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "इस परसोना पर टैग जोड़ी दोहर�
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "हर चैनल अपना परसोना रखता है। नए चैनल आपके अकाउंट से शुरू होते हैं।"
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "/{name} बदलें"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "परसोना एडिट करें"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "इस कम्युनिटी में किसी के भी कमांड बदलें या मिटाएँ।"
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "चैनल सूची छिपाएँ"
 msgid "Hide signal bar"
 msgstr "सिग्नल बार छिपाएँ"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "संकेत"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "सिकुड़े हुए पैनल कुछ देर के लिए दिखाने के लिए विंडो के किनारों के पास माउस ले जाएँ।"
@@ -294,12 +367,20 @@ msgstr "डालें"
 msgid "Insert timestamp"
 msgstr "समय टिकट डालें"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "डालें:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "मौजूदा रखें और नए जोड़ें (सुझाया गया)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "अपने {existingCount} मौजूदा परसोना रखें और सभी {0} इंपोर्ट किए गए परसोना उनके साथ नई एंट्री के रूप में जोड़ें।"
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "/{name} से बनाया गया"
 
 msgid "Main account"
 msgstr "मेन अकाउंट"
@@ -310,6 +391,10 @@ msgstr "परसोना मैनेज करें"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "अपने परसोना मैनेज करें और बनाएँ"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "कमांड प्रबंधित करें"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "अवतार वाले सदस्य"
 msgid "Message Tools"
 msgstr "संदेश टूल"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "ऐसे मैसेज जिन्हें सदस्य /name टाइप करके पोस्ट कर सकते हैं।"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "नया परसोना"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "नया कमांड"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "नई विंडो"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "इस एक्सपोर्ट फ़ाइल में कोई \"members\" ऐरे नहीं मिला।"
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "कोई कमांड नहीं"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "कोई डिस्प्ले टैग कॉन्फ़िगर नहीं है। संदेशों में आपके अकाउंट की प्रोफ़ाइल तस्वीर दिखेगी।"
@@ -379,6 +476,10 @@ msgstr "सिर्फ़ आपको दिखता है। दूसर�
 msgid "Open in new window"
 msgstr "नई विंडो में खोलें"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "वैकल्पिक"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "वैकल्पिक सिस्टम बैज, जैसे ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "झलक"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "सभी {existingCount} मौजूदा परसोना हमेशा के लिए डिलीट करें और उन्हें पूरी तरह इंपोर्ट किए गए परसोना से बदलें।"
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "इस्तेमाल करने वाला व्यक्ति"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "सभी के लिए सिग्नल रीसेट करे�
 msgid "Root Account (Default)"
 msgstr "रूट अकाउंट (डिफ़ॉल्ट)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "नमूना इनपुट"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "परसोना सेव हो रहे हैं..."
@@ -550,6 +659,10 @@ msgstr "परसोना सेव हो रहे हैं..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "खोज परिणाम ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "कमांड खोजें"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "यह .zip फ़ाइल पढ़ी नहीं जा सकी�
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "यह .zip फ़ाइल {productName} का परसोना एक्सपोर्ट नहीं है।"
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "इसे वापस नहीं किया जा सकता। इससे बने मैसेज अब भी दिखाते हैं कि उन्हें किस कमांड ने बनाया।"
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "इस कम्युनिटी में अभी कोई कमांड नहीं है।"
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "यह इमोजी पहले से ही एक हस्ताक्षर इमोजी के रूप में जोड़ा गया है"
@@ -743,9 +864,41 @@ msgstr "बिना टैग वाले संदेश आपके चु�
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "बिना टैग वाले संदेश उसी के रूप में भेजे जाते हैं जिसने आख़िरी बार बात की। टैग का उपयोग करने पर वही परसोना चुन लिया जाता है।"
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "/{name} इस्तेमाल करें"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "{community} का /{name} इस्तेमाल करें"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "इस चैनल में दूसरी कम्युनिटी के कमांड इस्तेमाल करें।"
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "दूसरी कम्युनिटी के कमांड इस्तेमाल करें।"
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "बाहरी कमांड इस्तेमाल करें"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "छोटे अक्षर, अंक, - और _ इस्तेमाल करें, अधिकतम 32 वर्ण।"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "अपने परसोना देखें"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "वे जो टाइप करते हैं"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "/{name} के बाद आप जो टाइप करें, वह एक पंक्ति में आना चाहिए।"
 
 msgid "Where the signal bar appears"
 msgstr "सिग्नल बार कहाँ दिखे"
