@@ -21,7 +21,7 @@ Every file here is the fork's. What a command is, the rules and the run flow on 
 | The template field: basic or script, loaded on demand | `components/GuildCommandTemplateEditor.tsx` |
 | Script suggestions, from the server's allowlists | `utils/GuildCommandLiquidCompletions.ts` |
 | Emoji suggestions, in both modes, from the message box's search | `utils/GuildCommandEmojiCompletions.ts` |
-| The reference under the script mode | `components/GuildCommandScriptReference.tsx` |
+| The reference under the script mode, with a link to `docs/server-command-scripts.md` | `components/GuildCommandScriptReference.tsx` |
 | A script's preview, filled in by the server | `hooks/useGuildCommandScriptPreview.ts` |
 | The server's template problems, in words | `utils/GuildCommandTemplateIssues.ts` |
 | Permission labels | fork blocks in `permissions/utils/PermissionLabelDescriptors.ts` and `PermissionUtils.ts` |
