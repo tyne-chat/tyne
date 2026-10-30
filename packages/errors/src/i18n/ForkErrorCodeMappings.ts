@@ -13,4 +13,9 @@ export const ForkErrorCodeToI18nKey = {
 	[APIErrorCodes.PERSONA_TAG_LIMIT_REACHED]: 'connections.limit_reached',
 	[APIErrorCodes.DUPLICATE_SIGNATURE_EMOJI]: 'usernames_and_tags.tag_already_taken',
 	[APIErrorCodes.SIGNATURE_EMOJI_LIMIT_REACHED]: 'connections.limit_reached',
+	[APIErrorCodes.UNKNOWN_GUILD_COMMAND]: 'http.not_found',
+	[APIErrorCodes.GUILD_COMMAND_NAME_TAKEN]: 'usernames_and_tags.tag_already_taken',
+	[APIErrorCodes.GUILD_COMMAND_LIMIT_REACHED]: 'connections.limit_reached',
+	[APIErrorCodes.GUILD_COMMAND_TEMPLATE_INVALID]: 'admin_and_system.invalid_form_body',
+	[APIErrorCodes.GUILD_COMMAND_INPUT_INVALID]: 'admin_and_system.invalid_form_body',
 } as const;
