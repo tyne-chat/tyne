@@ -19,8 +19,15 @@ describe('community settings signal bar tab', () => {
 	it('is not offered while the instance has the signal bar switched off', () => {
 		const tabs = getGuildSettingsTabs(i18n);
 		expect(tabs.some((tab) => tab.type === 'signal_bar')).toBe(false);
-		expect(tabs.some((tab) => tab.category === 'message_tools')).toBe(false);
+		expect(tabs.filter((tab) => tab.category === 'message_tools').map((tab) => tab.type)).toEqual(['commands']);
 		expect(tabs.some((tab) => tab.type === 'overview')).toBe(true);
+	});
+
+	it('always offers the Commands tab, to members who may create or manage commands', async () => {
+		const {Permissions} = await import('@fluxer/constants/src/ChannelConstants');
+		const commands = getGuildSettingsTabs(i18n).find((tab) => tab.type === 'commands');
+		expect(commands?.category).toBe('message_tools');
+		expect(commands?.permission).toEqual([Permissions.CREATE_COMMANDS, Permissions.MANAGE_COMMANDS]);
 	});
 
 	it('is offered in every community once the instance has a home community', () => {

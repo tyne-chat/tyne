@@ -56,6 +56,10 @@ msgstr "Semua Persona"
 msgid "All time zones"
 msgstr "Semua zona waktu"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Perintah lain atau perintah bawaan sudah memakai nama ini."
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Yakin ingin menghapus <0>{0}</0>? Tindakan ini tidak dapat dibatalkan."
@@ -76,6 +80,10 @@ msgstr "Tampilkan otomatis bilah sisi yang tersembunyi"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Gambar avatar gagal diunduh: {error}. Persona diimpor tanpa avatar."
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Kembali ke perintah"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Gambar banner gagal diunduh: {error}. Persona diimpor tanpa banner."
@@ -86,6 +94,27 @@ msgstr "Ganti persona"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Pilih ekspor PluralKit (.json) atau ekspor {productName} (.zip), atau seret & lepas"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "Kosongkan kotak pesan untuk menggunakan /{name}"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Perintah"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Slot perintah"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Perintah"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Perintah disimpan"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "Salin stempel waktu\\"
 msgid "Could not export your personas."
 msgstr "Persona Anda tidak dapat diekspor."
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "Tidak dapat memuat perintah."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "Tidak dapat menjalankan /{name}: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "Tidak dapat menyimpan /{name}: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Buat perintah"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Buat perintah untuk komunitas ini, dan ubah atau hapus perintah Anda sendiri."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Dibuat oleh {name}"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "Nonaktifkan persona"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "Hapus /{name}?"
+
 msgid "Delete Persona"
 msgstr "Hapus Persona"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Hapus perintah"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "Pasangan tag duplikat pada persona ini"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Setiap saluran menyimpan personanya sendiri. Saluran baru dimulai sebagai akunmu."
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "Ubah /{name}"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Edit Persona"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Ubah atau hapus perintah siapa pun di komunitas ini."
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "Sembunyikan daftar kanal"
 msgid "Hide signal bar"
 msgstr "Sembunyikan bilah sinyal"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "Petunjuk"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "Arahkan kursor ke dekat tepi jendela untuk menampilkan sementara panel yang diciutkan."
@@ -294,12 +367,20 @@ msgstr "Sisipkan"
 msgid "Insert timestamp"
 msgstr "Sisipkan stempel waktu"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Sisipkan:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "Pertahankan yang ada dan tambahkan yang baru (Disarankan)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Pertahankan {existingCount} persona milikmu saat ini dan tambahkan semua {0} persona yang diimpor di sampingnya sebagai entri baru."
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "Dibuat dengan /{name}"
 
 msgid "Main account"
 msgstr "Akun utama"
@@ -310,6 +391,10 @@ msgstr "Kelola Persona"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "Kelola dan buat personamu"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Kelola perintah"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "Anggota dengan Avatar"
 msgid "Message Tools"
 msgstr "Alat Pesan"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Pesan yang dapat dikirim anggota dengan mengetik /name."
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Persona Baru"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Perintah baru"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "Jendela baru"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Tidak ditemukan array \"members\" dalam file ekspor ini."
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "Tidak ada perintah"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Tag tampilan belum dikonfigurasi. Pesan akan menampilkan foto profil akunmu."
@@ -379,6 +476,10 @@ msgstr "Hanya terlihat olehmu. Orang lain tidak dapat melihat bio lengkap atau d
 msgid "Open in new window"
 msgstr "Buka di jendela baru"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "Opsional"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Lencana sistem opsional, mis. ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "Intip"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Hapus permanen semua {existingCount} persona yang ada dan ganti sepenuhnya dengan persona yang diimpor."
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Orang yang menjalankannya"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "Reset sinyal untuk semua orang"
 msgid "Root Account (Default)"
 msgstr "Akun Utama (Default)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Contoh masukan"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Menyimpan persona..."
@@ -550,6 +659,10 @@ msgstr "Menyimpan persona..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "Hasil Pencarian ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Cari perintah"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "File .zip ini tidak dapat dibaca."
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "File .zip ini bukan ekspor persona dari {productName}."
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "Ini tidak dapat dibatalkan. Pesan yang dibuat dengannya tetap menunjukkan perintah yang membuatnya."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "Komunitas ini belum punya perintah."
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "Emoji ini sudah ditambahkan sebagai emoji tanda tangan"
@@ -743,9 +864,41 @@ msgstr "Pesan tanpa tag dikirim sebagai persona yang kamu pilih. Tag hanya berla
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "Pesan tanpa tag dikirim sebagai yang terakhir berbicara. Menggunakan tag beralih ke persona itu."
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "Gunakan /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "Gunakan /{name} dari {community}"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Gunakan perintah dari komunitas lain di saluran ini."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Gunakan perintah dari komunitas lain."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Gunakan perintah eksternal"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Gunakan huruf kecil, angka, - dan _, maksimal 32 karakter."
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Lihat personamu"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "Yang mereka ketik"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "Yang Anda ketik setelah /{name} harus muat dalam satu baris."
 
 msgid "Where the signal bar appears"
 msgstr "Tempat bilah sinyal ditampilkan"

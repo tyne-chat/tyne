@@ -56,6 +56,10 @@ msgstr "Todas las personas"
 msgid "All time zones"
 msgstr "Todas las zonas horarias"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Otro comando o un comando integrado ya tiene este nombre."
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "¿Seguro que quieres eliminar <0>{0}</0>? Esta acción no se puede deshacer."
@@ -76,6 +80,10 @@ msgstr "Mostrar automáticamente las barras laterales ocultas"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "No se pudo descargar la imagen del avatar: {error}. La persona se importó sin avatar."
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Volver a los comandos"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "No se pudo descargar la imagen del banner: {error}. La persona se importó sin banner."
@@ -86,6 +94,27 @@ msgstr "Cambiar persona"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Elige una exportación de PluralKit (.json) o una exportación de {productName} (.zip), o arrástrala y suéltala"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "Vacía el cuadro de mensaje para usar /{name}"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Comando"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Espacios para comandos"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Comandos"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Comandos guardados"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "Copiar marca de tiempo\\"
 msgid "Could not export your personas."
 msgstr "No se pudieron exportar tus personas."
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "No se pudieron cargar los comandos."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "No se pudo ejecutar /{name}: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "No se pudo guardar /{name}: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Crear comandos"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Crear comandos para esta comunidad y editar o eliminar los tuyos."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Creado por {name}"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "Desactivar persona"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "¿Eliminar /{name}?"
+
 msgid "Delete Persona"
 msgstr "Eliminar persona"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Eliminar comando"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "Par de etiquetas duplicado en esta persona"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Cada canal conserva su propia persona. Los canales nuevos empiezan como tu cuenta."
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "Editar /{name}"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Editar persona"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Editar o eliminar los comandos de cualquier persona en esta comunidad."
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "Ocultar lista de canales"
 msgid "Hide signal bar"
 msgstr "Ocultar barra de señales"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "Pista"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "Acerca el cursor a los bordes de la ventana para mostrar temporalmente los paneles contraídos."
@@ -294,12 +367,20 @@ msgstr "Insertar"
 msgid "Insert timestamp"
 msgstr "Insertar marca de tiempo"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Insertar:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "Conservar las existentes y agregar las nuevas (recomendado)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Conserva tus {existingCount} persona(s) actuales y agrega las {0} personas importadas junto a ellas como entradas nuevas."
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "Hecho con /{name}"
 
 msgid "Main account"
 msgstr "Cuenta principal"
@@ -310,6 +391,10 @@ msgstr "Administrar personas"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "Administra y crea tus personas"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Administrar comandos"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "Miembros con avatar"
 msgid "Message Tools"
 msgstr "Herramientas de mensajes"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Mensajes que los miembros pueden publicar escribiendo /name."
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Nueva persona"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Nuevo comando"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "Nueva ventana"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "No se encontró ninguna matriz «members» en este archivo de exportación."
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "No hay comandos"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "No hay etiqueta de visualización configurada. Los mensajes mostrarán la foto de perfil de tu cuenta."
@@ -379,6 +476,10 @@ msgstr "Solo visible para ti. Los demás no pueden ver la biografía completa ni
 msgid "Open in new window"
 msgstr "Abrir en una ventana nueva"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "Opcional"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Insignia de sistema opcional, p. ej., ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "Vista rápida"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Elimina permanentemente las {existingCount} persona(s) existentes y reemplázalas por completo con las personas importadas."
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Quien lo usa"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "Restablecer señal para todos"
 msgid "Root Account (Default)"
 msgstr "Cuenta principal (Por defecto)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Texto de ejemplo"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Guardando personas..."
@@ -550,6 +659,10 @@ msgstr "Guardando personas..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "Resultados de búsqueda ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Buscar comandos"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "No se pudo leer este archivo .zip."
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "Este archivo .zip no es una exportación de personas de {productName}."
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "No se puede deshacer. Los mensajes hechos con él siguen mostrando qué comando los hizo."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "Esta comunidad todavía no tiene comandos."
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "Este emoji ya está agregado como emoji distintivo"
@@ -743,9 +864,41 @@ msgstr "Los mensajes sin etiqueta se envían como la persona que elegiste. Una e
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "Los mensajes sin etiqueta se envían como quien habló por última vez. Usar una etiqueta cambia a esa persona."
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "Usar /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "Usar /{name} de {community}"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Usar comandos de otras comunidades en este canal."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Usar comandos de otras comunidades."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Usar comandos externos"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Usa minúsculas, números, - y _, hasta 32 caracteres."
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Ver tus personas"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "Lo que escriben"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "Lo que escribas después de /{name} debe caber en una línea."
 
 msgid "Where the signal bar appears"
 msgstr "Dónde aparece la barra de señales"
