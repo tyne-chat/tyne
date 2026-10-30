@@ -4,7 +4,7 @@
 	"locales": {
 		"cs": ["(Prefix: {0})", "Persona", "text"],
 		"da": ["Alice", "Persona"],
-		"de": ["Account: @{username}", "Alice", "Persona", "Personas"],
+		"de": ["Account: @{username}", "Alice", "Optional", "Persona", "Personas"],
 		"el": ["Persona"],
 		"es-419": ["Manual", "Persona", "Personas"],
 		"es-ES": ["Manual", "Persona", "Personas"],
