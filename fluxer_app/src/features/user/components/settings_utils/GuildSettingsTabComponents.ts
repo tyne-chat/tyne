@@ -16,6 +16,7 @@ import type React from 'react';
 
 // Fork imports.
 
+import {GuildCommandsTab} from '@app/features/guild_commands/components/GuildCommandsTab';
 import {GuildSignalBarTab} from '@app/features/signal_bar/components/GuildSignalBarTab';
 
 type GuildSettingsTabComponent = React.ComponentType<{guildId: string}>;
@@ -36,6 +37,7 @@ const GUILD_SETTINGS_TAB_COMPONENTS: Record<GuildSettingsTabType, GuildSettingsT
 	invites: GuildInvitesTab,
 	bans: GuildBansTab,
 	signal_bar: GuildSignalBarTab,
+	commands: GuildCommandsTab,
 };
 
 export function getGuildSettingsTabComponent(tabType: GuildSettingsTabType): GuildSettingsTabComponent {
