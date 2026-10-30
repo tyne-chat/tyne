@@ -207,6 +207,15 @@ with time limits; events `SIGNAL_BAR_UPDATE` and `CHANNEL_SIGNAL_*`. Web `featur
 own lit signals there to that persona (`SignalBarStore.affirmPersona`). The design all clients share
 is in the server folder's `AGENTS.md`.
 
+### Server commands
+
+Slash commands a community defines (`/tuck`), usable by its members in its channels, in other
+communities' channels and in DMs. Server `api/guild_command/`: the server fills in the command's
+Liquid template and posts an ordinary message through upstream's send path, which records the
+command so messages carry a `command` field; fork tables, three fork permission bits, event
+`GUILD_COMMANDS_UPDATE`. The design, including the clients' part still to come, is
+`docs/design/server-commands.md` (tyne-chat/tyne#246).
+
 ### Other
 
 - Desktop (`fluxer_desktop/AGENTS.md`): built as Tyne with its own IDs and `tyne://`; extra app
@@ -269,6 +278,8 @@ the folder. A new folder guide is added to this list in the same commit.
 - `fluxer_api/src/api/channel/AGENTS.md`: channels and messages on the server, and where personas
   enter them.
 - `fluxer_api/src/api/persona/AGENTS.md`: personas on the server.
+- `fluxer_api/src/api/guild_command/AGENTS.md`: server commands on the server: the run flow, the
+  template engine's locks, `command` on messages.
 - `fluxer_api/src/api/signal_bar/AGENTS.md`: the signal bar on the server, and the design its
   clients share.
 - `fluxer_app/src/features/channel/AGENTS.md`: the channel view in the web app: views, message rows,
