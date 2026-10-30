@@ -1054,6 +1054,25 @@ are in tyne-mobile.
 - **Preview:** `UserAccessibilityPreview`'s pattern (`user_accessibility_preview.dart:80-122`) with
   `MessageMarkdown(data:, guildId:, channelId:)` (`message_markdown.dart:18`) so mentions resolve.
 
+### First phone build, as built
+
+The first slice is using commands and seeing the chip; settings, and so scripts on phones, come later.
+Where it differs from the plan above, and why. The code is in tyne-mobile's
+`lib/features/guild_commands/`.
+
+- **No slash session:** a command is a `ComposerActionSlashCommand` with no options, so picking it
+  inserts `/tuck ` as text, as on the web, and the input is typed in the normal composer.
+- **Through the SDK from the start,** not raw Dio: the SDK already had the routes.
+- **The message is not stored from the response:** `MESSAGE_CREATE` delivers it like any other, which
+  saves an edit to upstream's message repository.
+- **Three columns,** not two: `command_id`, `command_guild_id` and `command_name`.
+- **Use External Commands is a constant,** not a `Permission` value: upstream's switches over the enum
+  are exhaustive, and the role editor that would list it is not on phones yet. `allPermissions` now
+  covers every bit, and nothing sends it to the server.
+- **Errors** appear as a client system message in the channel, as a failed `/msg` does, with the same
+  wording as the web.
+- **Not built yet:** tapping the chip, the chip's community name, and the settings tab.
+
 ## Network calls
 
 The root guide's three questions:
