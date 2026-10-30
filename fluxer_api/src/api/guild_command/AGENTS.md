@@ -19,6 +19,7 @@ and 2, tyne-chat/tyne#269 and #270: basic templates and scripts; counters are ph
 | Shapes and limits | `packages/schema/src/domains/guild_command/` |
 | Error codes | `packages/constants/src/ForkApiErrorCodes.ts`, `packages/errors/src/i18n/ForkErrorCodeMappings.ts` |
 | Public docs | `fluxer_docs` `http-api/guild-commands.mdx`, `gateway/events.md`, `http-api/permissions.mdx` |
+| Script reference for LLMs and people | `docs/server-command-scripts.md`; keep it true when a tag, filter, variable or limit changes |
 
 ## Rules
 
