@@ -1054,9 +1054,8 @@ are in tyne-mobile.
 - **Preview:** `UserAccessibilityPreview`'s pattern (`user_accessibility_preview.dart:80-122`) with
   `MessageMarkdown(data:, guildId:, channelId:)` (`message_markdown.dart:18`) so mentions resolve.
 
-### First phone build, as built
+### The phone build, as built
 
-The first slice is using commands and seeing the chip; settings, and so scripts on phones, come later.
 Where it differs from the plan above, and why. The code is in tyne-mobile's
 `lib/features/guild_commands/`.
 
@@ -1066,12 +1065,17 @@ Where it differs from the plan above, and why. The code is in tyne-mobile's
 - **The message is not stored from the response:** `MESSAGE_CREATE` delivers it like any other, which
   saves an edit to upstream's message repository.
 - **Three columns,** not two: `command_id`, `command_guild_id` and `command_name`.
-- **Use External Commands is a constant,** not a `Permission` value: upstream's switches over the enum
-  are exhaustive, and the role editor that would list it is not on phones yet. `allPermissions` now
-  covers every bit, and nothing sends it to the server.
 - **Errors** appear as a client system message in the channel, as a failed `/msg` does, with the same
   wording as the web.
-- **Not built yet:** tapping the chip, the chip's community name, and the settings tab.
+- **The template field** is `ComposerAutocompleteField` over `EmojiTextEditingController`, as the
+  profile bio has it, with `:` emoji suggestions; custom emoji show as emoji. **Person running it** and
+  **What they type** insert the literal `{{ person }}` and `{{ input }}`, with no pills or mention
+  autocomplete.
+- **Scripts open read-only,** with a note to edit them on the web or desktop. There is no phone script
+  editor or server preview; the basic preview is filled in on the device.
+- **The chip:** a tap uses `pendingGuildCommandInsertProvider`, and writes `/tuck ` as text. A long
+  press offers **Edit /tuck** to those who may edit it, and opens the Commands tab on that command.
+- **Sample input** is a plain field, so `:name:` and `@` are not resolved in it.
 
 ## Network calls
 
