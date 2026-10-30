@@ -139,6 +139,7 @@ The session that made a change receives the Dispatch like any other session. The
 | [Signal Bar Update](#signal-bar-update) | The instance's signal bar is edited |
 | [Channel Signal Update](#channel-signal-update) | Signals are given or switched off in a channel |
 | [Channel Signal Bar Update](#channel-signal-bar-update) | The signal bar is switched on or off in a channel |
+| [Guild Commands Update](#guild-commands-update) | A community's commands are created, edited or deleted |
 
 ## Session and current user
 
@@ -1126,3 +1127,13 @@ The signal bar was switched on or off in a channel. Switching it off also clears
 | --- | --- | --- |
 | channel_id | snowflake | The channel |
 | enabled | boolean | Whether the signal bar now shows in the channel |
+
+### <span id="guild-commands-update"></span>GUILD_COMMANDS_UPDATE
+
+A community's [commands](/http-api/guild-commands/) were created, edited or deleted. Clients that hold the community's commands treat them as stale and fetch them again the next time they are used, with [List guild commands](/http-api/guild-commands/#list-guild-commands); they do not need to fetch them at once.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The community whose commands changed |
+
+Passive sessions receive it too.

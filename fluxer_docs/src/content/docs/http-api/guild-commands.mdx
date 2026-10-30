@@ -1,0 +1,204 @@
+---
+# SPDX-License-Identifier: AGPL-3.0-or-later
+title: Guild commands
+description: Slash commands a community defines, which post an ordinary message from the member who runs them.
+---
+
+import RouteHeader from '@/components/RouteHeader.astro';
+
+A community can define its own slash commands, such as `/tuck`. Running one fills in the command's template on the server and posts the result as an ordinary [message](/http-api/messages/) from the member who ran it, as themselves or as one of their [personas](/http-api/users/personas/). The message carries a [message command](#message-command-object) object, so clients can show which command made it.
+
+## Where commands work
+
+A member of a community can run its commands:
+
+- in the community's own channels;
+- in another community's channels, when they have `USE_EXTERNAL_COMMANDS` there (on for @everyone by default);
+- in direct messages and group direct messages, whoever else is in them.
+
+Running a command also needs everything posting a message needs: permission to send in the channel, no timeout, slowmode, and so on. Someone who is not a member of the command's community gets 404 `UNKNOWN_GUILD_COMMAND`.
+
+`CREATE_COMMANDS` lets a member create commands and edit or delete their own; `MANAGE_COMMANDS` lets them edit or delete anyone's. Every change is announced as [Guild Commands Update](/gateway/events/#guild-commands-update).
+
+## Templates
+
+A template is [Liquid](https://shopify.github.io/liquid/). For now a template may contain only text and the outputs `{{ person }}` (the member who ran it, as a mention) and `{{ input }}` (what they typed, with mentions kept as mentions); anything else is refused with 400 `GUILD_COMMAND_TEMPLATE_INVALID`. A command's `kind` says whether its template is `basic` or a `script`.
+
+## Guild command object
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | snowflake | The ID of the command |
+| guild_id | snowflake | The community the command belongs to |
+| name | string | The name typed after the slash: lowercase letters, digits, `-` and `_`, 1-32 characters |
+| description | string | Shown in autocomplete, at most 100 characters |
+| kind | string | `basic` or `script` |
+| input_mode | string | `none`, `optional` or `required` |
+| input_type | string | `text` |
+| input_hint | ?string | Placeholder shown while the command is filled in, at most 100 characters |
+| creator_id | snowflake | The member who created the command |
+| created_at | string | ISO 8601 timestamp |
+| updated_at | string | ISO 8601 timestamp |
+| template? | string | The template, at most 4000 characters; only for members who may create or manage commands |
+
+## Message command object
+
+The `command` field of a message made by a command.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | snowflake | The ID of the command |
+| guild_id | snowflake | The community the command belongs to |
+| name | string | The command's name when the message was posted |
+
+## List my guild commands
+
+<RouteHeader method="GET" path="/v1/users/@me/guild-commands" />
+
+Returns the commands of every community the caller is a member of, without their templates. Clients load this once and then refetch a single community when [Guild Commands Update](/gateway/events/#guild-commands-update) marks it stale.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[guild command](#guild-command-object) object] | Success |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `guild_commands:read` bucket.
+
+## List guild commands
+
+<RouteHeader method="GET" path="/v1/guilds/{guild_id}/commands" />
+
+Returns a community's commands. Only members may list them, and templates are included only for members holding `CREATE_COMMANDS` or `MANAGE_COMMANDS`.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The ID of the guild |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[guild command](#guild-command-object) object] | Success |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `guild_commands:read` bucket.
+
+## Create a guild command
+
+<RouteHeader method="POST" path="/v1/guilds/{guild_id}/commands" />
+
+Creates a command. Requires `CREATE_COMMANDS`. A community has at most 500 commands. A name that another of the community's commands has, or that a client's built-in command uses (such as `me` or `shrug`), is refused with 400 `GUILD_COMMAND_NAME_TAKEN`.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The ID of the guild |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name | string | Lowercase letters, digits, `-` and `_`, 1-32 characters |
+| description? | string | At most 100 characters |
+| template | string | At most 4000 characters |
+| input_mode | string | `none`, `optional` or `required` |
+| input_type? | string | `text` |
+| input_hint? | ?string | At most 100 characters |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [guild command](#guild-command-object) object | The command was created |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `guild_commands:write` bucket.
+
+## Update a guild command
+
+<RouteHeader method="PATCH" path="/v1/guilds/{guild_id}/commands/{command_id}" />
+
+Changes any of the fields of [Create a guild command](#create-a-guild-command). The command's creator needs `CREATE_COMMANDS`; anyone else needs `MANAGE_COMMANDS`.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The ID of the guild |
+| command_id | snowflake | The ID of the command |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [guild command](#guild-command-object) object | The command was updated |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `guild_commands:write` bucket.
+
+## Delete a guild command
+
+<RouteHeader method="DELETE" path="/v1/guilds/{guild_id}/commands/{command_id}" />
+
+Deletes a command. The command's creator needs `CREATE_COMMANDS`; anyone else needs `MANAGE_COMMANDS`. Messages it made keep their `command` field.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| guild_id | snowflake | The ID of the guild |
+| command_id | snowflake | The ID of the command |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The command was deleted |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `guild_commands:write` bucket.
+
+## Run a guild command
+
+<RouteHeader method="POST" path="/v1/channels/{channel_id}/commands/{command_id}" />
+
+Fills in the command's template and posts the result in the channel as an ordinary message from the caller. See [Where commands work](#where-commands-work). Input that a command does not take, or missing input that it requires, is refused with 400 `GUILD_COMMAND_INPUT_INVALID`.
+
+### Path parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel to post in |
+| command_id | snowflake | The ID of the command |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| input? | ?string | What the member typed, one line of at most 10000 characters, with mentions as `<@user_id>` or `<@user_id:persona_id>` |
+| persona_id? | ?snowflake | One of the caller's personas to post as |
+| nonce | string or integer | As for [Create a message](/http-api/messages/#create-message); a repeated nonce returns the message already posted |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [message](/http-api/messages/#message-object) object | The message was posted |
+
+### Rate limit
+
+20 requests per 10 seconds for each authenticated user in each channel, on the `guild_commands:run::channel_id` bucket.
