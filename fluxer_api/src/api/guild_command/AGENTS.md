@@ -3,8 +3,8 @@
 Per-community slash commands (`/tuck`): a community's members define them, and running one fills in
 its Liquid template here and posts an ordinary message from the member and their current persona,
 which then carries a `command` field. This folder is the fork's. The design, the decisions and the
-client side are in `docs/design/server-commands.md`; this guide is what the code does today (phase 1:
-basic templates only, tyne-chat/tyne#269).
+client side are in `docs/design/server-commands.md`; this guide is what the code does today (phases 1
+and 2, tyne-chat/tyne#269 and #270: basic templates and scripts; counters are phase 3).
 
 ## Where things are
 
@@ -33,11 +33,16 @@ basic templates only, tyne-chat/tyne#269).
 - **Names:** `^[a-z0-9_-]{1,32}$` (the web composer's draft persistence accepts nothing else), not a
   client built-in (`RESERVED_GUILD_COMMAND_NAMES`), unique per community (checked against the
   partition, so two simultaneous creates can both pass). At most 500 per community.
-- **Templates:** phase 1 accepts only text plus `{{ person }}` and `{{ input }}`
-  (`classifyGuildCommandTemplate`). The engine is locked down whatever the phase: loops, partials and
-  per-render counters removed, `templates: {}` so nothing reads files, `strictFilters`, and
-  liquidjs's `parseLimit`, `renderLimit` (checked between nodes) and `memoryLimit`. Variables are
-  `Drop`s: they print as mentions, compare by mention, and give escaped `.name`s.
+- **Templates:** anyone who creates a community can write them, and they render on the API's main
+  thread, so the engine is locked down: tags and filters are allowlists in the schema package (the
+  editors suggest from the same lists), there are no loops, `templates: {}` so nothing reads files,
+  `strictFilters`, and liquidjs's `parseLimit`, `renderLimit` (checked between nodes) and `memoryLimit`.
+  A new tag or filter must count what it allocates, as `CountedCaptureTag` and `random` do. Variables are `Drop`s: they print as mentions, compare by mention, and
+  give escaped `.name`s. `classifyGuildCommandTemplate` (schema package) says `basic` or `script`.
+- **Problems:** `describeTemplateProblem` turns liquidjs's English errors into an issue (code, name,
+  line, column) by their wording, which the engine's tests pin. A failed save sends it as
+  `template_issue`; the preview route returns it with a 200; someone running a broken command gets
+  `GuildCommandBrokenError`, with no details.
 - **`command` on messages:** the send hook writes `guild_command_uses` (and a per-channel marker)
   after the message is stored and before `MESSAGE_CREATE`; `hydratePersonas` looks it up, one query
   per channel, and only in channels whose marker exists (cached for 10 s when absent). An edit that

@@ -12,6 +12,7 @@ import {
 	getChannel,
 	updateRole,
 } from '@app/api/guild/tests/GuildTestUtils';
+import {escapeGuildCommandName} from '@app/api/guild_command/GuildCommandTemplateEngine';
 import {resetForkGuildCommandUseCache} from '@app/api/guild_command/GuildCommandUses';
 import {backfillUseExternalCommands} from '@app/api/guild_command/UseExternalCommandsBackfill';
 import {getGatewayService} from '@app/api/middleware/ServiceRegistry';
@@ -20,7 +21,10 @@ import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHa
 import {NoopGatewayService} from '@app/api/test/NoopGatewayService';
 import {createBuilder} from '@app/api/test/TestRequestBuilder';
 import {DEFAULT_PERMISSIONS, Permissions} from '@fluxer/constants/src/ChannelConstants';
-import type {GuildCommandResponse} from '@fluxer/schema/src/domains/guild_command/GuildCommandSchemas';
+import type {
+	GuildCommandPreviewResponse,
+	GuildCommandResponse,
+} from '@fluxer/schema/src/domains/guild_command/GuildCommandSchemas';
 import type {MessageResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
 
@@ -53,6 +57,14 @@ describe('server commands', () => {
 
 	const createCommand = (token: string, guildId: string, body: Record<string, unknown> = TUCK) =>
 		createBuilder<GuildCommandResponse>(harness, token).post(`/guilds/${guildId}/commands`).body(body);
+
+	/** The name templates print for an account with no nickname. */
+	const nameOf = async (token: string) => {
+		const me = await createBuilder<{global_name: string | null; username: string}>(harness, token)
+			.get('/users/@me')
+			.execute();
+		return escapeGuildCommandName(me.global_name ?? me.username);
+	};
 
 	const runCommand = (token: string, channelId: string, commandId: string, body: Record<string, unknown>) =>
 		createBuilder<MessageResponse>(harness, token)
@@ -87,14 +99,14 @@ describe('server commands', () => {
 		);
 	});
 
-	it('refuses built-in names, taken names and script templates', async () => {
+	it('refuses built-in names, taken names and templates with a problem', async () => {
 		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
 		await createCommand(owner.token, guild.id, {...TUCK, name: 'me'})
 			.expect(400, 'GUILD_COMMAND_NAME_TAKEN')
 			.execute();
 		await createCommand(owner.token, guild.id).execute();
 		await createCommand(owner.token, guild.id).expect(400, 'GUILD_COMMAND_NAME_TAKEN').execute();
-		await createCommand(owner.token, guild.id, {...TUCK, name: 'if', template: '{% if target %}x{% endif %}'})
+		await createCommand(owner.token, guild.id, {...TUCK, name: 'open', template: '{% if target %}x'})
 			.expect(400, 'GUILD_COMMAND_TEMPLATE_INVALID')
 			.execute();
 		await createCommand(owner.token, guild.id, {...TUCK, name: 'loop', template: '{% for i in (1..3) %}{% endfor %}'})
@@ -103,6 +115,135 @@ describe('server commands', () => {
 		await createCommand(owner.token, guild.id, {...TUCK, name: 'Tuck'})
 			.expect(400)
 			.execute();
+	});
+
+	it('says what is wrong with a template that cannot be saved', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		const {json} = await createCommand(owner.token, guild.id, {...TUCK, template: 'ok\n{% nosuch %}'})
+			.expect(400, 'GUILD_COMMAND_TEMPLATE_INVALID')
+			.executeRaw();
+		expect(json).toMatchObject({template_issue: {code: 'unknown_tag', line: 2, column: 1, name: 'nosuch'}});
+	});
+
+	it('saves a script as a script, and as basic once the logic is gone', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		const template = '{% if target %}{{ person }} hugs {{ target }}{% else %}{{ person }} hugs the air{% endif %}';
+		const command = await createCommand(owner.token, guild.id, {...TUCK, template}).execute();
+		expect(command.kind).toBe('script');
+		const path = `/guilds/${guild.id}/commands/${command.id}`;
+		const edited = await createBuilder<GuildCommandResponse>(harness, owner.token)
+			.patch(path)
+			.body({template: '{{ person }} hugs {{ input }}'})
+			.execute();
+		expect(edited.kind).toBe('basic');
+	});
+
+	it('runs a script, with the first mention as the target', async () => {
+		const {owner, members, guild} = await setupTestGuildWithMembers(harness, 1);
+		const friend = members[0]!;
+		const template = `{% assign size = input | size %}
+{% if target %}
+{{ person }} hugs {{ target }}, {{ target.name }}!
+{% else %}
+{{ person }} hugs {{ size | ordinal }} {{ size | plural: "thing", "things" }} in {{ channel.name }}
+{% endif %}`;
+		const command = await createCommand(owner.token, guild.id, {...TUCK, template}).execute();
+		const hugged = await runCommand(owner.token, guild.system_channel_id!, command.id, {
+			input: `<@${friend.userId}>`,
+		}).execute();
+		expect(hugged.content).toBe(`<@${owner.userId}> hugs <@${friend.userId}>, ${await nameOf(friend.token)}!`);
+		expect(hugged.command?.id).toBe(command.id);
+		const empty = await runCommand(owner.token, guild.system_channel_id!, command.id, {input: 'ab'}).execute();
+		expect(empty.content).toBe(`<@${owner.userId}> hugs 2nd things in general`);
+	});
+
+	it('tells someone running a broken command only that it is broken', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		const broken = await createCommand(owner.token, guild.id, {
+			...TUCK,
+			template: '{{ person.constructor }}',
+		}).execute();
+		const {json} = await runCommand(owner.token, guild.system_channel_id!, broken.id, {input: 'x'})
+			.expect(400, 'GUILD_COMMAND_TEMPLATE_INVALID')
+			.executeRaw();
+		expect(json).not.toHaveProperty('template_issue');
+		const silent = await createCommand(owner.token, guild.id, {
+			...TUCK,
+			name: 'silent',
+			template: '{% if false %}never{% endif %}',
+		}).execute();
+		await runCommand(owner.token, guild.system_channel_id!, silent.id, {input: 'x'})
+			.expect(400, 'GUILD_COMMAND_TEMPLATE_INVALID')
+			.execute();
+	});
+
+	describe('preview', () => {
+		const preview = (token: string, guildId: string, body: Record<string, unknown>) =>
+			createBuilder<GuildCommandPreviewResponse>(harness, token).post(`/guilds/${guildId}/commands/preview`).body(body);
+
+		it('fills in a template without posting it', async () => {
+			const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+			const channelId = guild.system_channel_id!;
+			const messages = () =>
+				createBuilder<Array<MessageResponse>>(harness, owner.token)
+					.get(`/channels/${channelId}/messages?limit=10`)
+					.execute();
+			const before = await messages();
+			const result = await preview(owner.token, guild.id, {
+				template: '{{ person.name }} in {{ channel }}: {{ input | upcase }}',
+				input: 'hello',
+				channel_id: channelId,
+			}).execute();
+			expect(result).toEqual({content: `${await nameOf(owner.token)} in <#${channelId}>: HELLO`, issue: null});
+			expect(await messages()).toHaveLength(before.length);
+		});
+
+		it('answers with the problem, not a failed request', async () => {
+			const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+			const result = await preview(owner.token, guild.id, {template: 'one\ntwo {{ input | nosuch }}'}).execute();
+			expect(result).toEqual({
+				content: null,
+				issue: {code: 'unknown_filter', line: 2, column: 5, name: 'nosuch'},
+			});
+		});
+
+		it('needs Create Commands or Manage Commands', async () => {
+			const {owner, members, guild} = await setupTestGuildWithMembers(harness, 2);
+			const [creator, manager] = members as [(typeof members)[0], (typeof members)[0]];
+			await preview(creator.token, guild.id, {template: 'x'}).expect(403).execute();
+			const give = async (userId: string, permission: bigint) => {
+				const role = await createRole(harness, owner.token, guild.id, {
+					name: 'editor',
+					permissions: permission.toString(),
+				});
+				await addMemberRole(harness, owner.token, guild.id, userId, role.id);
+			};
+			await give(creator.userId, Permissions.CREATE_COMMANDS);
+			await give(manager.userId, Permissions.MANAGE_COMMANDS);
+			await preview(creator.token, guild.id, {template: 'x'}).execute();
+			await preview(manager.token, guild.id, {template: 'x'}).execute();
+			const outsider = await createTestAccount(harness);
+			await preview(outsider.token, guild.id, {template: 'x'}).expect(403).execute();
+		});
+
+		it('fills in only a channel of this community that the member can see', async () => {
+			const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+			const other = await createGuild(harness, owner.token, 'Elsewhere');
+			const template = '[{{ channel }}]';
+			const elsewhere = await preview(owner.token, guild.id, {
+				template,
+				channel_id: other.system_channel_id,
+			}).execute();
+			expect(elsewhere.content).toBe('[]');
+			vi.spyOn(getGatewayService(), 'checkPermission').mockImplementation(
+				async ({permission}) => permission !== Permissions.VIEW_CHANNEL,
+			);
+			const hidden = await preview(owner.token, guild.id, {
+				template,
+				channel_id: guild.system_channel_id,
+			}).execute();
+			expect(hidden.content).toBe('[]');
+		});
 	});
 
 	it('lets a creator edit their own command, and only Manage Commands edit others', async () => {
