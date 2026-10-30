@@ -180,6 +180,10 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `GONE` | Gone |
 | `GROUP_DM_MATURE_CONTENT_INELIGIBLE` | Not everyone in this group is eligible for mature content |
 | `GROUP_DM_RECIPIENTS_NOT_ADDABLE` | One or more selected users can't be added to this group DM |
+| `GUILD_COMMAND_INPUT_INVALID` | Invalid form body |
+| `GUILD_COMMAND_LIMIT_REACHED` | A community can have at most 500 commands |
+| `GUILD_COMMAND_NAME_TAKEN` | This tag is already taken |
+| `GUILD_COMMAND_TEMPLATE_INVALID` | Invalid form body |
 | `GUILD_CREATION_EMAIL_VERIFICATION_REQUIRED` | Email verification is required for this action |
 | `GUILD_CREATION_PERMISSION_REQUIRED` | You don't have permission to create communities on this instance |
 | `GUILD_EMAIL_VERIFICATION_REQUIRED` | Email verification is required for this action |
@@ -369,6 +373,7 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `UNKNOWN_FORUM_TAG` | Tag wasn't found |
 | `UNKNOWN_GIFT_CODE` | Unknown gift code |
 | `UNKNOWN_GUILD` | Community wasn't found |
+| `UNKNOWN_GUILD_COMMAND` | Not found |
 | `UNKNOWN_HARVEST` | Unknown data export |
 | `UNKNOWN_INVITE` | Invite wasn't found or is no longer valid |
 | `UNKNOWN_MEMBER` | Member wasn't found in this community |
