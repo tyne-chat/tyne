@@ -217,6 +217,7 @@ msgstr "이 페르소나에 중복된 태그 쌍이 있어요"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "각 채널이 자신의 페르소나를 유지합니다. 새 채널은 내 계정으로 시작합니다."
 
+#. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
 msgid "Edit /{name}"
 msgstr "/{name} 수정"
@@ -315,6 +316,10 @@ msgstr "아이콘을 서버에 업로드하지 못했어요"
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "형식 미리보기"
+
+#. Link at the end of the command script help to the complete guide on GitHub.
+msgid "Full script guide"
+msgstr "스크립트 전체 가이드"
 
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
