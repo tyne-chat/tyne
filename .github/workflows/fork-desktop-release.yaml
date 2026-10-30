@@ -185,8 +185,8 @@ jobs:
           ${{ fromJSON(format('[{0}]',
           inputs.platform == 'windows' && '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"}'
           || inputs.platform == 'linux' && '{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"}'
-          || inputs.platform == 'macos' && '{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-14"}'
-          || '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"},{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"},{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-14"}')) }}
+          || inputs.platform == 'macos' && '{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-15"}'
+          || '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"},{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"},{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-15"}')) }}
     defaults:
       run:
         shell: bash
@@ -419,7 +419,7 @@ jobs:
     name: Sign and notarize macOS
     if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') && inputs.macos_signing != 'ad-hoc' }}
     needs: build
-    runs-on: macos-14
+    runs-on: macos-15
     # Two notarizations of up to two hours each (scripts/fork-sign-macos.sh).
     timeout-minutes: 300
     environment: desktop-release
