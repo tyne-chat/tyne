@@ -707,3 +707,48 @@ export function getPermissionDescriptionDescriptor(
 export function formatPermissionCategoryLabel(i18n: I18n, category: PermissionCategory): string {
 	return i18n._(PERMISSION_CATEGORY_DESCRIPTORS[category]);
 }
+
+// Fork: titles and descriptions of the fork's permissions (server commands,
+// docs/design/server-commands.md), added to upstream's maps.
+const CREATE_COMMANDS_DESCRIPTOR = msg({
+	message: 'Create commands',
+	comment: "Permission name: allows creating the community's slash commands and editing one's own.",
+});
+const MANAGE_COMMANDS_DESCRIPTOR = msg({
+	message: 'Manage commands',
+	comment: "Permission name: allows editing and deleting anyone's community slash commands.",
+});
+const USE_EXTERNAL_COMMANDS_DESCRIPTOR = msg({
+	message: 'Use external commands',
+	comment: 'Permission name: allows using slash commands made in other communities.',
+});
+const CREATE_COMMANDS_PERMISSION_DESCRIPTION_DESCRIPTOR = msg({
+	message: 'Create commands for this community, and edit or delete your own.',
+	comment: 'Permission description in the role editor for the Create commands permission.',
+});
+const MANAGE_COMMANDS_PERMISSION_DESCRIPTION_DESCRIPTOR = msg({
+	message: "Edit or delete anyone's commands in this community.",
+	comment: 'Permission description in the role editor for the Manage commands permission.',
+});
+const USE_EXTERNAL_COMMANDS_PERMISSION_DESCRIPTION_DESCRIPTOR = msg({
+	message: 'Use commands from other communities.',
+	comment:
+		'Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.',
+});
+const USE_EXTERNAL_COMMANDS_CHANNEL_PERMISSION_DESCRIPTION_DESCRIPTOR = msg({
+	message: 'Use commands from other communities in this channel.',
+	comment: 'Permission description in the channel permissions editor for the Use external commands permission.',
+});
+PERMISSION_TITLE_DESCRIPTORS.set(Permissions.CREATE_COMMANDS, CREATE_COMMANDS_DESCRIPTOR);
+PERMISSION_TITLE_DESCRIPTORS.set(Permissions.MANAGE_COMMANDS, MANAGE_COMMANDS_DESCRIPTOR);
+PERMISSION_TITLE_DESCRIPTORS.set(Permissions.USE_EXTERNAL_COMMANDS, USE_EXTERNAL_COMMANDS_DESCRIPTOR);
+PERMISSION_DESCRIPTION_DESCRIPTORS.set(Permissions.CREATE_COMMANDS, CREATE_COMMANDS_PERMISSION_DESCRIPTION_DESCRIPTOR);
+PERMISSION_DESCRIPTION_DESCRIPTORS.set(Permissions.MANAGE_COMMANDS, MANAGE_COMMANDS_PERMISSION_DESCRIPTION_DESCRIPTOR);
+PERMISSION_DESCRIPTION_DESCRIPTORS.set(
+	Permissions.USE_EXTERNAL_COMMANDS,
+	USE_EXTERNAL_COMMANDS_PERMISSION_DESCRIPTION_DESCRIPTOR,
+);
+CHANNEL_PERMISSION_DESCRIPTION_OVERRIDES.set(
+	Permissions.USE_EXTERNAL_COMMANDS,
+	USE_EXTERNAL_COMMANDS_CHANNEL_PERMISSION_DESCRIPTION_DESCRIPTOR,
+);
