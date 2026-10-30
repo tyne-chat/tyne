@@ -1,7 +1,7 @@
+/* No overflow here: the suggestions list is positioned inside this box on phones, and would be cut
+   off by it. The editor's own scroller does the scrolling. */
 .editor {
 	min-height: 5.5rem;
-	max-height: 24rem;
-	overflow: auto;
 	border: 1px solid var(--background-modifier-accent);
 	border-radius: 0.5rem;
 	background-color: var(--background-secondary);
@@ -19,6 +19,11 @@
 .editor :global(.cm-editor),
 .editor :global(.cm-scroller) {
 	min-height: inherit;
+}
+
+.editor :global(.cm-editor) {
+	max-height: 24rem;
+	border-radius: inherit;
 }
 
 .editor :global(.cm-lintRange-error) {
