@@ -1,11 +1,13 @@
 # The API and worker
 
 `fluxer_api` is the TypeScript HTTP API (Hono) and the background worker, built into one image. It is
-upstream's; the fork adds two domains of its own (`src/api/persona/`, `src/api/signal_bar/`) and
+upstream's; the fork adds three domains of its own (`src/api/persona/`, `src/api/signal_bar/`,
+`src/api/guild_command/`) and
 threads personas through upstream's, chiefly `channel` and `user`. This guide covers what every
 change here meets: how a route is put together, where fork code hooks in, and how to test without
 tripping over the shared test runtime. The domains with traps of their own have guides:
-`src/api/persona/AGENTS.md`, `src/api/channel/AGENTS.md`, `src/api/signal_bar/AGENTS.md`. Paths below
+`src/api/persona/AGENTS.md`, `src/api/channel/AGENTS.md`, `src/api/signal_bar/AGENTS.md`,
+`src/api/guild_command/AGENTS.md`. Paths below
 are under `src/api/` unless they start with `src/`, `scripts/` or the repository's other folders.
 
 ## Where things are
@@ -13,7 +15,7 @@ are under `src/api/` unless they start with `src/`, `scripts/` or the repository
 | Concern | File |
 |---|---|
 | Processes | `src/AppEntrypoint.ts` → `src/App.ts` (`createAPIApp`); `src/WorkerEntrypoint.ts` → `worker/WorkerMain.ts` |
-| Route registration | `app/ControllerRegistry.ts` (the fork's controllers in a block at the end) |
+| Route registration | `app/ControllerRegistry.ts`; the fork's controllers in `app/ForkControllerRegistry.ts`, which it calls once |
 | Services per request (`ctx.get('personaService')`) | `middleware/ServiceMiddleware.ts`; shared repositories in `middleware/ServiceSingletons.ts` (`getPersonaRepository()`) |
 | Configuration, logging | `Config.ts`, `Logger.ts` |
 | Tables | `Tables.ts` (the fork's in a block at the end) |
@@ -42,7 +44,7 @@ A domain has controllers, services and repositories, with models that build resp
 5. The handler: `ctx.get('user')` and a service from `ctx.get(...)`.
 
 **Where the fork's code hooks in:** a fork domain is its own folder; its controller goes in
-`ControllerRegistry.ts`'s fork block, its service getter in `ServiceMiddleware.ts` (under
+`app/ForkControllerRegistry.ts`, its service getter in `ServiceMiddleware.ts` (under
 `// Fork imports.`), its tables in `Tables.ts`'s fork block (the signal bar's two are an exception,
 declared in `SignalBarSettingsRepository.ts`), its buckets at the end of
 `UserRateLimitConfig.ts`'s object. A fork error code is added to `ApiErrorCodes.ts` and mapped in
