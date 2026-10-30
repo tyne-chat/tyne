@@ -2,6 +2,16 @@
 
 import {defineTable} from '@app/api/database/CassandraTableDsl';
 import {
+	GUILD_COMMAND_COLUMNS,
+	GUILD_COMMAND_ID_COLUMNS,
+	GUILD_COMMAND_USE_CHANNEL_COLUMNS,
+	GUILD_COMMAND_USE_COLUMNS,
+	type GuildCommandIdRow,
+	type GuildCommandRow,
+	type GuildCommandUseChannelRow,
+	type GuildCommandUseRow,
+} from '@app/api/database/types/GuildCommandTypes';
+import {
 	PERSONA_CHANNEL_STATE_COLUMNS,
 	PERSONA_COLUMNS,
 	PERSONA_IMAGE_SOURCE_COLUMNS,
@@ -50,4 +60,26 @@ export const PersonaImageSources = defineTable<PersonaImageSourceRow, 'user_id' 
 	columns: PERSONA_IMAGE_SOURCE_COLUMNS,
 	primaryKey: ['user_id', 'persona_id'],
 	partitionKey: ['user_id'],
+});
+export const GuildCommands = defineTable<GuildCommandRow, 'guild_id' | 'command_id', 'guild_id'>({
+	name: 'guild_commands',
+	columns: GUILD_COMMAND_COLUMNS,
+	primaryKey: ['guild_id', 'command_id'],
+	partitionKey: ['guild_id'],
+});
+export const GuildCommandIds = defineTable<GuildCommandIdRow, 'command_id'>({
+	name: 'guild_command_ids',
+	columns: GUILD_COMMAND_ID_COLUMNS,
+	primaryKey: ['command_id'],
+});
+export const GuildCommandUses = defineTable<GuildCommandUseRow, 'channel_id' | 'message_id', 'channel_id'>({
+	name: 'guild_command_uses',
+	columns: GUILD_COMMAND_USE_COLUMNS,
+	primaryKey: ['channel_id', 'message_id'],
+	partitionKey: ['channel_id'],
+});
+export const GuildCommandUseChannels = defineTable<GuildCommandUseChannelRow, 'channel_id'>({
+	name: 'guild_command_use_channels',
+	columns: GUILD_COMMAND_USE_CHANNEL_COLUMNS,
+	primaryKey: ['channel_id'],
 });
