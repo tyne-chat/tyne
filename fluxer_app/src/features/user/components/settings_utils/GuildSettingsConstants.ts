@@ -28,7 +28,7 @@ import {
 // Fork imports.
 
 import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
-import {LightbulbIcon} from '@phosphor-icons/react';
+import {LightbulbIcon, TerminalWindowIcon} from '@phosphor-icons/react';
 
 const EMOJI_DESCRIPTOR = msg({
 	message: 'Emoji',
@@ -75,6 +75,11 @@ const SIGNAL_BAR_DESCRIPTOR = msg({
 	context: 'community-settings-tab',
 	comment: 'Community settings tab for choosing the toggleable signal icons shown above the message box.',
 });
+const COMMANDS_DESCRIPTOR = msg({
+	message: 'Commands',
+	context: 'community-settings-tab',
+	comment: 'Community settings tab for the slash commands members of the community can use.',
+});
 const DISCOVERY_DESCRIPTOR = msg({
 	message: 'Explore',
 	context: 'community-settings-tab',
@@ -110,7 +115,8 @@ export type GuildSettingsTabType =
 	| 'members'
 	| 'invites'
 	| 'bans'
-	| 'signal_bar';
+	| 'signal_bar'
+	| 'commands';
 export type GuildSettingsTabCategories =
 	| 'guild_settings'
 	| 'expressions'
@@ -190,6 +196,13 @@ const GUILD_SETTINGS_TABS_DESCRIPTORS: Array<GuildSettingsTabDescriptor> = [
 		label: SIGNAL_BAR_DESCRIPTOR,
 		icon: LightbulbIcon,
 		permission: Permissions.MANAGE_GUILD,
+	},
+	{
+		type: 'commands',
+		category: 'message_tools',
+		label: COMMANDS_DESCRIPTOR,
+		icon: TerminalWindowIcon,
+		permission: [Permissions.CREATE_COMMANDS, Permissions.MANAGE_COMMANDS],
 	},
 	{
 		type: 'discovery',

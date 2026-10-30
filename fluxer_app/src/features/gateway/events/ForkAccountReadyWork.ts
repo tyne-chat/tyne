@@ -5,6 +5,7 @@
 // during the switch are cancelled when it completes. Like upstream's AccountReadyWork, wait for
 // the switch to be released and run them then.
 
+import GuildCommandsStore from '@app/features/guild_commands/state/GuildCommandsStore';
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
@@ -24,6 +25,7 @@ function runForkAccountReadyWork(): void {
 // switch has already dropped the previous account's personas (PersonaStore's cancellation).
 export function handleForkPromotedResume(): void {
 	SignalBarStore.invalidate();
+	GuildCommandsStore.invalidate();
 	scheduleForkAccountReadyWork();
 }
 
@@ -47,6 +49,7 @@ AccountScopedWork.registerTransition({
 		}
 		pending = false;
 		SignalBarStore.invalidate();
+		GuildCommandsStore.invalidate();
 		runForkAccountReadyWork();
 	},
 });
