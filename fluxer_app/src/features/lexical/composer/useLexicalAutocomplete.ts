@@ -118,6 +118,7 @@ import {
 	type AutocompleteMentionPersonaOption,
 	isMentionPersona,
 } from '@app/features/channel/components/AutocompleteTypes';
+import {requestGuildCommands, useWithGuildCommands} from '@app/features/guild_commands/hooks/useWithGuildCommands';
 import {
 	filterPersonaMentions,
 	useAutocompletePersonaSearch,
@@ -259,7 +260,7 @@ export function useLexicalAutocomplete({
 	onExceedMaxLength,
 	i18n,
 }: UseLexicalAutocompleteParams) {
-	const commands = useCommands();
+	const commands = useWithGuildCommands(useCommands(), channel);
 	const [textUpToCursor, setTextUpToCursor] = useState('');
 	const [expressionDataVersion, setExpressionDataVersion] = useState(0);
 	const [gifState, setGifState] = useState<GifAutocompleteSearchState>({
@@ -585,6 +586,7 @@ export function useLexicalAutocomplete({
 			}
 			case 'command': {
 				type = 'command';
+				requestGuildCommands();
 				options = filterCommandsByQuery(commands, matchedText)
 					.filter(canUseCommand)
 					.map((command) => ({
