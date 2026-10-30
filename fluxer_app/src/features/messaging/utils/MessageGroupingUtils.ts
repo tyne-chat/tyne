@@ -84,6 +84,11 @@ export function isNewMessageGroup(
 			return true;
 		}
 	}
+	// Fork: a message made by a server command starts its own group, and so does the message after
+	// it, so the /name chip in its header is always shown. `prevMessage` is the group's first message.
+	if (currentMessage.command || prevMessage.command) {
+		return true;
+	}
 	if (!prevMessage.timestamp || !currentMessage.timestamp) {
 		return true;
 	}

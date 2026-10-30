@@ -56,6 +56,10 @@ msgstr "所有人格"
 msgid "All time zones"
 msgstr "所有時區"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "已有其他指令或內建指令使用此名稱。"
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "確定要刪除 <0>{0}</0> 嗎？此操作無法復原。"
@@ -76,6 +80,10 @@ msgstr "自動顯示隱藏的側邊欄"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "頭像圖片下載失敗：{error}。已匯入不含頭像的人格。"
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "返回指令列表"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "橫幅圖片下載失敗：{error}。已匯入不含橫幅的人格。"
@@ -86,6 +94,27 @@ msgstr "變更人格"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "選擇 PluralKit 匯出檔（.json）或 {productName} 匯出檔（.zip），或拖放至此"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "清空訊息框後即可使用 /{name}"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "指令"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "指令欄位"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "指令"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "指令已儲存"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "複製時間戳記\\"
 msgid "Could not export your personas."
 msgstr "無法匯出你的人格。"
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "無法載入指令。"
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "無法執行 /{name}：{detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "無法儲存 /{name}：{detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "建立指令"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "為此社群建立指令，並編輯或刪除自己的指令。"
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "建立者：{name}"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "停用人格"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "要刪除 /{name} 嗎？"
+
 msgid "Delete Persona"
 msgstr "刪除人格"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "刪除指令"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "此人格上有重複的標籤組"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "每個頻道保留各自的人格。新頻道以你的帳號開始。"
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "編輯 /{name}"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "編輯人格"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "編輯或刪除此社群中任何人的指令。"
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "隱藏頻道清單"
 msgid "Hide signal bar"
 msgstr "隱藏訊號列"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "提示"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "將滑鼠移到視窗邊緣附近，可暫時顯示已收合的面板。"
@@ -294,12 +367,20 @@ msgstr "插入"
 msgid "Insert timestamp"
 msgstr "插入時間戳記"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "插入："
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "保留現有並新增新的（建議）"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "保留你目前的 {existingCount} 個人格，並將全部 {0} 個匯入的人格作為新項目一併加入。"
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "由 /{name} 產生"
 
 msgid "Main account"
 msgstr "主帳號"
@@ -310,6 +391,10 @@ msgstr "管理人格"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "管理和建立你的人格"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "管理指令"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "有頭像的成員"
 msgid "Message Tools"
 msgstr "訊息工具"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "成員輸入 /name 即可發佈的訊息。"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "新增人格"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "新增指令"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "新增視窗"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "此匯出檔中找不到「members」陣列。"
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "沒有指令"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "尚未設定顯示標籤。訊息將顯示你帳號的大頭貼。"
@@ -379,6 +476,10 @@ msgstr "僅你可見。其他人無法查看此人格的完整簡介或個人檔
 msgid "Open in new window"
 msgstr "在新視窗中開啟"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "選填"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "選用的系統徽章，例如 ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "預覽"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "永久刪除全部 {existingCount} 個現有人格，並以匯入的人格完全取代。"
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "使用者"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "為所有人重設訊號"
 msgid "Root Account (Default)"
 msgstr "根帳號 (預設)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "範例輸入"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "正在儲存人格..."
@@ -550,6 +659,10 @@ msgstr "正在儲存人格..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "搜尋結果（{0}）"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "搜尋指令"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "無法讀取此 .zip 檔案。"
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "此 .zip 檔案不是 {productName} 的人格匯出檔。"
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "此操作無法復原。由它產生的訊息仍會顯示是哪個指令產生的。"
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "此社群還沒有指令。"
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "此表情符號已新增為專屬表情符號"
@@ -743,9 +864,41 @@ msgstr "未加標籤的訊息以你選擇的人格傳送。標籤僅對該則訊
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "未加標籤的訊息以最後發言的人格傳送。使用標籤會切換到該人格。"
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "使用 /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "使用 {community} 的 /{name}"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "在此頻道中使用其他社群的指令。"
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "使用其他社群的指令。"
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "使用外部指令"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "請使用小寫字母、數字、- 和 _，最多 32 個字元。"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "查看你的人格"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "輸入的內容"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "/{name} 後輸入的內容必須在一行之內。"
 
 msgid "Where the signal bar appears"
 msgstr "訊號列顯示位置"

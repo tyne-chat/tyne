@@ -56,6 +56,10 @@ msgstr "Persona ทั้งหมด"
 msgid "All time zones"
 msgstr "เขตเวลาทั้งหมด"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "มีคำสั่งอื่นหรือคำสั่งในตัวที่ใช้ชื่อนี้อยู่แล้ว"
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบ <0>{0}</0> การดำเนินการนี้ไม่สามารถย้อนกลับได้"
@@ -76,6 +80,10 @@ msgstr "แสดงแถบด้านข้างที่ซ่อนอย
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "ดาวน์โหลดรูปอวาตาร์ไม่สำเร็จ: {error} นำเข้า Persona โดยไม่มีอวาตาร์"
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "กลับไปที่คำสั่ง"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "ดาวน์โหลดรูปแบนเนอร์ไม่สำเร็จ: {error} นำเข้า Persona โดยไม่มีแบนเนอร์"
@@ -86,6 +94,27 @@ msgstr "เปลี่ยน Persona"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "เลือกไฟล์ส่งออกของ PluralKit (.json) หรือไฟล์ส่งออกของ {productName} (.zip) หรือลากมาวาง"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "ล้างช่องข้อความเพื่อใช้ /{name}"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "คำสั่ง"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "ช่องคำสั่ง"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "คำสั่ง"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "บันทึกคำสั่งแล้ว"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "คัดลอกการประทับเวลา\\"
 msgid "Could not export your personas."
 msgstr "ส่งออก Persona ของคุณไม่สำเร็จ"
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "ไม่สามารถโหลดคำสั่งได้"
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "ไม่สามารถเรียกใช้ /{name} ได้: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "ไม่สามารถบันทึก /{name} ได้: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "สร้างคำสั่ง"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "สร้างคำสั่งสำหรับคอมมูนิตี้นี้ และแก้ไขหรือลบคำสั่งของคุณเอง"
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "สร้างโดย {name}"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "ปิดใช้งาน Persona"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "ลบ /{name} ไหม"
+
 msgid "Delete Persona"
 msgstr "ลบ Persona"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "ลบคำสั่ง"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "คู่แท็กซ้ำใน Persona นี้"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "แต่ละช่องเก็บ Persona ของตัวเอง ช่องใหม่จะเริ่มต้นเป็นบัญชีของคุณ"
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "แก้ไข /{name}"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "แก้ไข Persona"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "แก้ไขหรือลบคำสั่งของใครก็ได้ในคอมมูนิตี้นี้"
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "ซ่อนรายการช่อง"
 msgid "Hide signal bar"
 msgstr "ซ่อนแถบสัญญาณ"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "คำแนะนำ"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "วางเมาส์ใกล้ขอบหน้าต่างเพื่อแสดงแผงที่ย่อไว้ชั่วคราว"
@@ -294,12 +367,20 @@ msgstr "แทรก"
 msgid "Insert timestamp"
 msgstr "แทรกการประทับเวลา"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "แทรก:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "เก็บรายการเดิมและเพิ่มรายการใหม่ (แนะนำ)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "เก็บ Persona ปัจจุบัน {existingCount} รายการของคุณไว้ และเพิ่ม Persona ที่นำเข้าทั้ง {0} รายการเป็นรายการใหม่ควบคู่กัน"
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "สร้างด้วย /{name}"
 
 msgid "Main account"
 msgstr "บัญชีหลัก"
@@ -310,6 +391,10 @@ msgstr "จัดการ Persona"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "จัดการและสร้าง Persona ของคุณ"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "จัดการคำสั่ง"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "สมาชิกที่มีอวาตาร์"
 msgid "Message Tools"
 msgstr "เครื่องมือข้อความ"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "ข้อความที่สมาชิกโพสต์ได้โดยพิมพ์ /name"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Persona ใหม่"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "คำสั่งใหม่"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "หน้าต่างใหม่"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "ไม่พบอาร์เรย์ \"members\" ในไฟล์ส่งออกนี้"
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "ไม่มีคำสั่ง"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "ยังไม่ได้ตั้งค่าแท็กแสดงผล ข้อความจะแสดงรูปโปรไฟล์ของบัญชีคุณ"
@@ -379,6 +476,10 @@ msgstr "มองเห็นได้เฉพาะคุณ ผู้อื�
 msgid "Open in new window"
 msgstr "เปิดในหน้าต่างใหม่"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "ไม่บังคับ"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "ป้ายระบบ (ไม่บังคับ) เช่น ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "แอบดู"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "ลบ Persona ที่มีอยู่ทั้ง {existingCount} รายการอย่างถาวร และแทนที่ทั้งหมดด้วย Persona ที่นำเข้า"
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "ผู้ที่เรียกใช้"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "รีเซ็ตสัญญาณสำหรับทุกคน"
 msgid "Root Account (Default)"
 msgstr "บัญชีหลัก (ค่าเริ่มต้น)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "ข้อความตัวอย่าง"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "กำลังบันทึก Persona..."
@@ -550,6 +659,10 @@ msgstr "กำลังบันทึก Persona..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "ผลการค้นหา ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "ค้นหาคำสั่ง"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "ไม่สามารถอ่านไฟล์ .zip นี้ได
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "ไฟล์ .zip นี้ไม่ใช่ไฟล์ส่งออก Persona จาก {productName}"
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "การดำเนินการนี้ย้อนกลับไม่ได้ ข้อความที่สร้างด้วยคำสั่งนี้จะยังแสดงว่าคำสั่งใดสร้างข้อความนั้น"
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "คอมมูนิตี้นี้ยังไม่มีคำสั่ง"
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "อีโมจินี้ถูกเพิ่มเป็นอีโมจิประจำตัวแล้ว"
@@ -743,9 +864,41 @@ msgstr "ข้อความที่ไม่มีแท็กจะส่ง
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "ข้อความที่ไม่มีแท็กจะส่งในนามผู้ที่พูดล่าสุด การใช้แท็กจะสลับไปยัง Persona นั้น"
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "ใช้ /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "ใช้ /{name} จาก {community}"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "ใช้คำสั่งจากคอมมูนิตี้อื่นในช่องนี้"
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "ใช้คำสั่งจากคอมมูนิตี้อื่น"
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "ใช้คำสั่งจากภายนอก"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "ใช้ตัวพิมพ์เล็ก ตัวเลข - และ _ ไม่เกิน 32 ตัวอักษร"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "ดู Persona ของคุณ"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "สิ่งที่พวกเขาพิมพ์"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "ข้อความที่คุณพิมพ์หลัง /{name} ต้องอยู่ในบรรทัดเดียว"
 
 msgid "Where the signal bar appears"
 msgstr "ตำแหน่งที่แสดงแถบสัญญาณ"
