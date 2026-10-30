@@ -126,7 +126,7 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 	) => {
 		const emojiRef = useRef<HTMLButtonElement | null>(null);
 		const reactionContext = useContext(EmojiPickerReactionContext);
-		const resolvedChannelId = reactionContext?.channelId ?? channel?.id ?? ExpressionPicker.channelId ?? undefined;
+		const resolvedChannelId = reactionContext?.channelId ?? ExpressionPicker.channelId ?? undefined;
 		const draft = resolvedChannelId ? Drafts.getDraft(resolvedChannelId) : undefined;
 		const effectivePersona = PersonaStore.getEffectiveReactionPersona(resolvedChannelId ?? null, null, draft);
 		const isPinned = EmojiPins.isPinned(getEmojiUsageKey(emoji), effectivePersona?.id);
@@ -258,7 +258,7 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 			ContextMenuCommands.openFromEvent(e, (props) => (
 				<EmojiContextMenuItems
 					emoji={emoji}
-					channelId={reactionContext?.channelId ?? channel?.id}
+					channelId={resolvedChannelId}
 					messageId={reactionContext?.messageId}
 					onClose={props.onClose}
 					data-flx="channel.emoji-picker.emoji-renderer.handle-context-menu.emoji-context-menu-items"
