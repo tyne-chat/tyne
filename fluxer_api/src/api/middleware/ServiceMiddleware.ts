@@ -153,7 +153,12 @@ import {createMiddleware} from 'hono/factory';
 
 // Fork imports.
 
-import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
+import {GuildCommandService} from '@app/api/guild_command/GuildCommandService';
+import {
+	getGuildCommandRepository,
+	getGuildCommandTemplateEngine,
+	getPersonaRepository,
+} from '@app/api/middleware/ForkServiceSingletons';
 import {PersonaService} from '@app/api/persona/PersonaService';
 import {SignalBarService} from '@app/api/signal_bar/SignalBarService';
 import {SignalBarSettingsRepository} from '@app/api/signal_bar/SignalBarSettingsRepository';
@@ -243,6 +248,7 @@ class RequestServices implements RequestScopedServices {
 	private cachedFavoriteMemeRequestService: FavoriteMemeRequestService | undefined;
 	private cachedPersonaService: PersonaService | undefined;
 	private cachedSignalBarService: SignalBarService | undefined;
+	private cachedGuildCommandService: GuildCommandService | undefined;
 	private cachedSingleCommunityService: SingleCommunityService | undefined;
 	private cachedEmailChangeService: EmailChangeService | undefined;
 	private cachedMfaBackupCodesChallengeService: MfaBackupCodesChallengeService | undefined;
@@ -723,6 +729,22 @@ class RequestServices implements RequestScopedServices {
 			listGuildChannels: (guildId) => this.channelRepository.channelData.listGuildChannels(guildId, 'enrolled'),
 		});
 		return this.cachedSignalBarService;
+	}
+
+	get guildCommandService(): GuildCommandService {
+		this.cachedGuildCommandService ??= new GuildCommandService({
+			repository: getGuildCommandRepository(),
+			engine: getGuildCommandTemplateEngine(),
+			gatewayService: this.gatewayService,
+			guildRepository: this.requestGuildRepository,
+			personaRepository: getPersonaRepository(),
+			messageRequestService: () => this.messageRequestService,
+			findUser: (userId) => getUserRepository().findUnique(userId),
+			findChannel: (channelId) => this.channelRepository.channelData.findUnique(channelId),
+			getUserGuildIds: (userId) => getUserRepository().getUserGuildIds(userId),
+			nextId: () => getSnowflakeService().generate(),
+		});
+		return this.cachedGuildCommandService;
 	}
 
 	get emailChangeService(): EmailChangeService {

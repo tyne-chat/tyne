@@ -68,6 +68,7 @@
 		"ioredis": "catalog:",
 		"itty-time": "catalog:",
 		"jose": "catalog:",
+		"liquidjs": "catalog:",
 		"livekit-server-sdk": "catalog:",
 		"maxmind": "catalog:",
 		"mime": "catalog:",

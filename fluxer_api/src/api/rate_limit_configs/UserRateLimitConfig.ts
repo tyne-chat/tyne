@@ -310,4 +310,16 @@ export const UserRateLimitConfigs = {
 		bucket: 'signal_bar:mutate',
 		config: {limit: 30, windowMs: ms('1 minute')},
 	} as RouteRateLimitConfig,
+	GUILD_COMMANDS_READ: {
+		bucket: 'guild_commands:read',
+		config: {limit: 60, windowMs: ms('10 seconds')},
+	} as RouteRateLimitConfig,
+	GUILD_COMMANDS_WRITE: {
+		bucket: 'guild_commands:write',
+		config: {limit: 30, windowMs: ms('1 minute')},
+	} as RouteRateLimitConfig,
+	GUILD_COMMANDS_RUN: {
+		bucket: 'guild_commands:run::channel_id',
+		config: {limit: 20, windowMs: ms('10 seconds')},
+	} as RouteRateLimitConfig,
 } as const;
