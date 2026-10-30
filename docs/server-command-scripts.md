@@ -75,10 +75,10 @@ These fail silently or differ from what you may expect:
 - **`slice` with one number gives one item:** `{{ "hello" | slice: 1 }}` → `e`.
 - **`split` keeps spaces:** `"a, b" | split: ","` gives `"a"` and `" b"`. Write lists with no spaces
   after the separator, as `"a,b"`, or split on `", "`.
-- **Never write `target | default: person`.** It turns the person into text, so `.name` prints
-  nothing. For "the mentioned person, or else whoever ran it", write
-  `{% if target %}{% assign who = target %}{% else %}{% assign who = person %}{% endif %}`, or, for
-  only the name, `{% assign name = target.name | default: person.name %}`.
+- **"The mentioned person, or else whoever ran it":** write
+  `{% if target %}{% assign who = target %}{% else %}{% assign who = person %}{% endif %}`, not
+  `target | default: person`. For only the name, write
+  `{% assign name = target.name | default: person.name %}`.
 - **Only `person`, `target` and `channel` have `.name`.** Text, even text holding a mention, does not.
 - **`==` and `contains` respect capitals.** Use `downcase` first. `==` on people compares mentions,
   so one account under two personas counts as two people.
