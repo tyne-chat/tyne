@@ -1,21 +1,40 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import styles from '@app/features/guild_commands/components/GuildCommandScriptEditor.module.css';
+import type {Channel} from '@app/features/channel/models/Channel';
+import styles from '@app/features/guild_commands/components/GuildCommandTemplateEditor.module.css';
+import {
+	type GuildCommandEmojiCompletion,
+	guildCommandEmojiCompletions,
+	renderGuildCommandEmoji,
+} from '@app/features/guild_commands/utils/GuildCommandEmojiCompletions';
 import {guildCommandLiquidCompletions} from '@app/features/guild_commands/utils/GuildCommandLiquidCompletions';
 import {editorPhrases} from '@app/features/theme_settings/editor/EditorPhrases';
-import {autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap} from '@codemirror/autocomplete';
+import {
+	acceptCompletion,
+	autocompletion,
+	closeBrackets,
+	closeBracketsKeymap,
+	completionKeymap,
+} from '@codemirror/autocomplete';
 import {defaultKeymap, history, historyKeymap} from '@codemirror/commands';
 import {closePercentBrace, liquidLanguage} from '@codemirror/lang-liquid';
 import {HighlightStyle, syntaxHighlighting} from '@codemirror/language';
 import {setDiagnostics} from '@codemirror/lint';
 import {EditorState} from '@codemirror/state';
 import {drawSelection, EditorView, keymap, lineNumbers, placeholder} from '@codemirror/view';
+import {
+	type GuildCommandKind,
+	MAX_GUILD_COMMAND_TEMPLATE_LENGTH,
+} from '@fluxer/schema/src/domains/guild_command/GuildCommandSchemas';
 import {tags as t} from '@lezer/highlight';
 import {useLingui} from '@lingui/react/macro';
-import {useEffect, useRef} from 'react';
+import {clsx} from 'clsx';
+import type React from 'react';
+import {useEffect, useImperativeHandle, useRef} from 'react';
 
-// Fork: the code editor for command scripts (docs/design/server-commands.md, "Script editor"). Loaded
-// on demand: its grammars are only needed by people editing a script.
+// Fork: the field for a command's template (docs/design/server-commands.md, "Script editor"), plain in
+// the basic mode and a code editor in the script mode, with emoji suggestions in both. Loaded on
+// demand: its grammars are only needed in this settings tab.
 
 const highlightStyle = HighlightStyle.define([
 	{tag: t.comment, color: 'var(--text-tertiary)', fontStyle: 'italic'},
@@ -47,25 +66,43 @@ const editorTheme = EditorView.theme({
 	},
 });
 
-export interface GuildCommandScriptProblem {
+/** The basic mode reads as a message box, not as code. */
+const basicTheme = EditorView.theme({
+	'.cm-scroller': {fontFamily: 'inherit', lineHeight: '1.5'},
+	'.cm-content': {padding: '0.625rem 0.75rem'},
+});
+
+export interface GuildCommandTemplateEditorHandle {
+	/** Puts text at the cursor, in place of any selection. */
+	insert: (text: string) => void;
+}
+
+export interface GuildCommandTemplateProblem {
 	line: number;
 	column: number;
 	message: string;
 }
 
-export default function GuildCommandScriptEditor({
+export default function GuildCommandTemplateEditor({
+	mode,
 	value,
+	channel,
 	disabled,
 	ariaLabel,
 	placeholderText,
 	problem,
+	handleRef,
 	onChange,
 }: {
+	mode: GuildCommandKind;
 	value: string;
+	/** Where emoji suggestions are judged usable: a channel of the command's community. */
+	channel: Channel | null;
 	disabled: boolean;
 	ariaLabel: string;
-	placeholderText: string;
-	problem: GuildCommandScriptProblem | null;
+	placeholderText?: string;
+	problem: GuildCommandTemplateProblem | null;
+	handleRef?: React.Ref<GuildCommandTemplateEditorHandle>;
 	onChange: (value: string) => void;
 }) {
 	const {i18n} = useLingui();
@@ -76,31 +113,66 @@ export default function GuildCommandScriptEditor({
 	const latestValue = useRef(value);
 	latestValue.current = value;
 
-	// Built once: the parent remounts it for another command.
+	useImperativeHandle(
+		handleRef,
+		() => ({
+			insert: (text) => {
+				const current = view.current;
+				if (!current) return;
+				current.dispatch(current.state.replaceSelection(text));
+				current.focus();
+			},
+		}),
+		[],
+	);
+
+	// Built once: the parent remounts it for another command or mode.
 	useEffect(() => {
 		if (!parent.current) return;
+		const emoji = guildCommandEmojiCompletions(channel);
 		const created = new EditorView({
 			parent: parent.current,
 			state: EditorState.create({
 				doc: value,
 				extensions: [
-					liquidLanguage,
-					liquidLanguage.data.of({closeBrackets: {brackets: ['{']}}),
-					closePercentBrace,
-					closeBrackets(),
-					autocompletion({override: [guildCommandLiquidCompletions]}),
+					mode === 'script'
+						? [
+								liquidLanguage,
+								liquidLanguage.data.of({closeBrackets: {brackets: ['{']}}),
+								closePercentBrace,
+								closeBrackets(),
+								lineNumbers(),
+								syntaxHighlighting(highlightStyle),
+							]
+						: [],
+					autocompletion({
+						override: mode === 'script' ? [guildCommandLiquidCompletions, emoji] : [emoji],
+						addToOptions: [
+							{
+								render: (completion) => renderGuildCommandEmoji(completion as GuildCommandEmojiCompletion),
+								position: 20,
+							},
+						],
+					}),
 					history(),
-					lineNumbers(),
 					drawSelection(),
 					EditorView.lineWrapping,
-					syntaxHighlighting(highlightStyle),
+					// Earlier themes win.
+					mode === 'basic' ? basicTheme : [],
 					editorTheme,
 					editorPhrases(i18n),
-					placeholder(placeholderText),
+					placeholderText ? placeholder(placeholderText) : [],
+					EditorState.changeFilter.of((transaction) => transaction.newDoc.length <= MAX_GUILD_COMMAND_TEMPLATE_LENGTH),
 					EditorState.readOnly.of(disabled),
 					EditorView.editable.of(!disabled),
 					EditorView.contentAttributes.of({'aria-label': ariaLabel}),
-					keymap.of([...closeBracketsKeymap, ...completionKeymap, ...historyKeymap, ...defaultKeymap]),
+					keymap.of([
+						{key: 'Tab', run: acceptCompletion},
+						...closeBracketsKeymap,
+						...completionKeymap,
+						...historyKeymap,
+						...defaultKeymap,
+					]),
 					EditorView.updateListener.of((update) => {
 						if (!update.docChanged) return;
 						const text = update.state.doc.toString();
@@ -140,5 +212,11 @@ export default function GuildCommandScriptEditor({
 		);
 	}, [problem]);
 
-	return <div ref={parent} className={styles.editor} data-flx="guild-commands.guild-command-script-editor.editor" />;
+	return (
+		<div
+			ref={parent}
+			className={clsx(styles.editor, mode === 'script' && styles.script)}
+			data-flx="guild-commands.guild-command-template-editor.editor"
+		/>
+	);
 }

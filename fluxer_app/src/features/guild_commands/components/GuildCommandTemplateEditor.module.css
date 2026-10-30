@@ -1,5 +1,5 @@
 .editor {
-	min-height: 8rem;
+	min-height: 5.5rem;
 	max-height: 24rem;
 	overflow: auto;
 	border: 1px solid var(--background-modifier-accent);
@@ -7,12 +7,18 @@
 	background-color: var(--background-secondary);
 }
 
+.script {
+	min-height: 8rem;
+}
+
 .editor:focus-within {
 	border-color: var(--background-modifier-accent-focus);
 }
 
-.editor :global(.cm-editor) {
-	min-height: 8rem;
+/* So a click below the last line lands in the field. */
+.editor :global(.cm-editor),
+.editor :global(.cm-scroller) {
+	min-height: inherit;
 }
 
 .editor :global(.cm-lintRange-error) {
