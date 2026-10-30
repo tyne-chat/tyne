@@ -79,7 +79,6 @@ const EmojiPickerBase = observer(
 	({
 		channelId,
 		roleIconGuildId,
-		messageId,
 		handleSelect,
 		filterEmoji,
 	}: {
