@@ -87,6 +87,7 @@ import type {Hono} from 'hono';
 
 // Fork imports.
 
+import type {GuildCommandService} from '@app/api/guild_command/GuildCommandService';
 import type {PersonaService} from '@app/api/persona/PersonaService';
 import type {SignalBarService} from '@app/api/signal_bar/SignalBarService';
 
@@ -157,6 +158,7 @@ export interface HonoEnv {
 		reportRequestService: ReportRequestService;
 		personaService: PersonaService;
 		signalBarService: SignalBarService;
+		guildCommandService: GuildCommandService;
 		contactChangeLogService: UserContactChangeLogService;
 		requestCache: RequestCache;
 		rpcService: RpcService;
