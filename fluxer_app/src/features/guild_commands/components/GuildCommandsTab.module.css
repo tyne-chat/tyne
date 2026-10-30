@@ -185,6 +185,13 @@
 	gap: 0.5rem;
 }
 
+.editorLoading {
+	min-height: 5.5rem;
+	border: 1px solid var(--background-modifier-accent);
+	border-radius: 0.5rem;
+	background-color: var(--background-secondary);
+}
+
 .scriptHeader {
 	display: flex;
 	align-items: baseline;
