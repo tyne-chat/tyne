@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {GatewayHandlerRegistry} from '@app/features/gateway/events/EventRouter';
+import {handleGuildCommandsUpdate} from '@app/features/guild_commands/events/GuildCommandsEvents';
 import {
 	handleGuildPersonasDirty,
 	handleUserPersonaChannelStateUpdate,
@@ -31,4 +32,5 @@ export function registerForkGatewayHandlers(registry: GatewayHandlerRegistry): v
 	registry.set('CHANNEL_SIGNAL_UPDATE', handleChannelSignalUpdate as GatewayEventHandler);
 	registry.set('SIGNAL_BAR_UPDATE', handleSignalBarUpdate as GatewayEventHandler);
 	registry.set('CHANNEL_SIGNAL_BAR_UPDATE', handleChannelSignalBarUpdate as GatewayEventHandler);
+	registry.set('GUILD_COMMANDS_UPDATE', handleGuildCommandsUpdate as GatewayEventHandler);
 }

@@ -213,8 +213,10 @@ Slash commands a community defines (`/tuck`), usable by its members in its chann
 communities' channels and in DMs. Server `api/guild_command/`: the server fills in the command's
 Liquid template and posts an ordinary message through upstream's send path, which records the
 command so messages carry a `command` field; fork tables, three fork permission bits, event
-`GUILD_COMMANDS_UPDATE`. The design, including the clients' part still to come, is
-`docs/design/server-commands.md` (tyne-chat/tyne#246).
+`GUILD_COMMANDS_UPDATE`. Web `features/guild_commands/`: the commands join the composer's `/` menu,
+Enter runs `/name input` (`runForkGuildCommand` in `useTextareaSubmit.ts`), a chip after the
+timestamp, and a Commands tab under Message Tools. The design, including the mobile part still to
+come, is `docs/design/server-commands.md` (tyne-chat/tyne#246).
 
 ### Other
 
@@ -284,6 +286,8 @@ the folder. A new folder guide is added to this list in the same commit.
   clients share.
 - `fluxer_app/src/features/channel/AGENTS.md`: the channel view in the web app: views, message rows,
   composer, search.
+- `fluxer_app/src/features/guild_commands/AGENTS.md`: server commands in the web app: the store and
+  its requests, running from the composer, the chip.
 - `fluxer_app/src/features/lexical/AGENTS.md`: the web message editor (Lexical): what is sent,
   pills, persona mentions.
 - `fluxer_app/src/features/messaging/AGENTS.md`: messages in the web app: the store, sending,
