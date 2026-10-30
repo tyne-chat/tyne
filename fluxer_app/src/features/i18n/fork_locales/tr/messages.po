@@ -56,6 +56,10 @@ msgstr "Tüm Personalar"
 msgid "All time zones"
 msgstr "Tüm saat dilimleri"
 
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Başka bir komut veya yerleşik bir komut zaten bu ada sahip."
+
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "<0>{0}</0> öğesini silmek istediğinden emin misin? Bu işlem geri alınamaz."
@@ -76,6 +80,10 @@ msgstr "Gizli kenar çubuklarını otomatik göster"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Avatar görseli indirilemedi: {error}. Persona avatarsız içe aktarıldı."
 
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Komutlara dön"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Banner görseli indirilemedi: {error}. Persona bannersız içe aktarıldı."
@@ -86,6 +94,27 @@ msgstr "Persona değiştir"
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Bir PluralKit dışa aktarımı (.json) veya {productName} dışa aktarımı (.zip) seç ya da sürükleyip bırak"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "/{name} komutunu kullanmak için mesaj kutusunu boşaltın"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Komut"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Komut yuvaları"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Komutlar"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Komutlar kaydedildi"
 
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
@@ -103,12 +132,44 @@ msgstr "Zaman damgasını kopyala\\"
 msgid "Could not export your personas."
 msgstr "Personaların dışa aktarılamadı."
 
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "Komutlar yüklenemedi."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "/{name} çalıştırılamadı: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "/{name} kaydedilemedi: {detail}"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Komut oluştur"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Bu topluluk için komut oluşturun ve kendi komutlarınızı düzenleyin veya silin."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Oluşturan: {name}"
+
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
 msgstr "Personayı devre dışı bırak"
 
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "/{name} silinsin mi?"
+
 msgid "Delete Persona"
 msgstr "Personayı Sil"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Komutu sil"
 
 #. Aria label for deleting persona
 msgid "Delete persona"
@@ -152,9 +213,17 @@ msgstr "Bu personada yinelenen etiket çifti"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Her kanal kendi personasını korur. Yeni kanallar hesabınla başlar."
 
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "/{name} komutunu düzenle"
+
 #. Title for edit persona modal
 msgid "Edit Persona"
 msgstr "Personayı Düzenle"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Bu topluluktaki herkesin komutlarını düzenleyin veya silin."
 
 #. Action button to edit persona
 #. Aria label for editing persona
@@ -251,6 +320,10 @@ msgstr "Kanal listesini gizle"
 msgid "Hide signal bar"
 msgstr "Sinyal çubuğunu gizle"
 
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "İpucu"
+
 #. Settings section description in Advanced Settings for edge hover peek preference.
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "Daraltılmış panelleri geçici olarak göstermek için imleci pencere kenarlarına yaklaştır."
@@ -294,12 +367,20 @@ msgstr "Ekle"
 msgid "Insert timestamp"
 msgstr "Zaman damgası ekle"
 
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Ekle:"
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "Mevcutları koru ve yenilerini ekle (Önerilen)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Mevcut {existingCount} personanı koru ve içe aktarılan {0} personanın tümünü yeni girişler olarak yanlarına ekle."
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "/{name} ile yapıldı"
 
 msgid "Main account"
 msgstr "Ana hesap"
@@ -310,6 +391,10 @@ msgstr "Personaları Yönet"
 #. OAuth scope description shown on the consent screen for the personas.write scope.
 msgid "Manage and create your personas"
 msgstr "Personalarını yönet ve oluştur"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Komutları yönet"
 
 #. Active persona mode manual
 #. Active persona mode manual
@@ -332,9 +417,17 @@ msgstr "Avatarlı Üyeler"
 msgid "Message Tools"
 msgstr "Mesaj Araçları"
 
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Üyelerin /name yazarak gönderebileceği mesajlar."
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Yeni Persona"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Yeni komut"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -343,6 +436,10 @@ msgstr "Yeni pencere"
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Bu dışa aktarma dosyasında \"members\" dizisi bulunamadı."
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "Komut yok"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Görünen etiket yapılandırılmadı. Mesajlarda hesabının profil resmi gösterilir."
@@ -379,6 +476,10 @@ msgstr "Yalnızca sana görünür. Başkaları bu personanın tam biyografisini 
 msgid "Open in new window"
 msgstr "Yeni pencerede aç"
 
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "İsteğe bağlı"
+
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "İsteğe bağlı sistem rozeti, örn. ⚞Seraphim⚟"
@@ -393,6 +494,10 @@ msgstr "Göz at"
 
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Mevcut {existingCount} personanın tümünü kalıcı olarak sil ve bunları tamamen içe aktarılan personalarla değiştir."
+
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Kullanan kişi"
 
 #. Name shown in the persona preview card before a name is entered
 msgid "Persona"
@@ -543,6 +648,10 @@ msgstr "Sinyali herkes için sıfırla"
 msgid "Root Account (Default)"
 msgstr "Kök hesap (Varsayılan)"
 
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Örnek girdi"
+
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Personalar kaydediliyor..."
@@ -550,6 +659,10 @@ msgstr "Personalar kaydediliyor..."
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
 msgstr "Arama Sonuçları ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Komutları ara"
 
 #. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
@@ -694,6 +807,14 @@ msgstr "Bu .zip dosyası okunamadı."
 msgid "This .zip file is not a persona export from {productName}."
 msgstr "Bu .zip dosyası bir {productName} persona dışa aktarımı değil."
 
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "Bu işlem geri alınamaz. Bu komutla yapılan mesajlar, onları hangi komutun yaptığını göstermeye devam eder."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "Bu topluluğun henüz komutu yok."
+
 #. Validation error when signature emoji is duplicated within the same persona
 msgid "This emoji is already added as a signature emoji"
 msgstr "Bu emoji zaten imza emojisi olarak eklenmiş"
@@ -743,9 +864,41 @@ msgstr "Etiketsiz mesajlar seçtiğin persona olarak gönderilir. Bir etiket yal
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "Etiketsiz mesajlar en son konuşan olarak gönderilir. Bir etiket kullanmak o personaya geçer."
 
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "/{name} kullan"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "{community} topluluğundan /{name} kullan"
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Bu kanalda diğer toplulukların komutlarını kullanın."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Diğer toplulukların komutlarını kullanın."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Harici komutları kullan"
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Küçük harf, rakam, - ve _ kullanın; en fazla 32 karakter."
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Personalarını görüntüle"
+
+#. Button inserting the placeholder for what the member types after the command.
+msgid "What they type"
+msgstr "Yazdıkları"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "/{name} komutundan sonra yazdığınız metin tek satıra sığmalı."
 
 msgid "Where the signal bar appears"
 msgstr "Sinyal çubuğunun göründüğü yerler"
