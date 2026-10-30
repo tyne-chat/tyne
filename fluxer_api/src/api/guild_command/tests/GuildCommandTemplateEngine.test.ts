@@ -110,6 +110,17 @@ describe('GuildCommandTemplateEngine', () => {
 		expect(engine.render(template, scope()).replace(/\s+/g, ' ')).toBe('hi <@3> PLE! {{ left alone }} b-a 5 done');
 	});
 
+	it('keeps a person through default, with their name', () => {
+		const template = '{% assign who = target | default: person %}{{ who }} {{ who.name }}';
+		expect(engine.render(template, scope())).toBe('<@3> Yami');
+		expect(engine.render(template, scope({target: null}))).toBe('<@1:2> Chiara');
+	});
+
+	it('still falls back from an empty channel with default', () => {
+		const channel = new GuildCommandChannelDrop('', '', null);
+		expect(engine.render('{{ channel | default: "here" }}', scope({channel}))).toBe('here');
+	});
+
 	it('trims the spacing left by tags on lines of their own', () => {
 		const template = `{% if target %}
 {{ person }} hugs {{ target }}

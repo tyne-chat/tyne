@@ -13,6 +13,7 @@ import {
 	type Context,
 	Drop,
 	type Emitter,
+	type FilterImplOptions,
 	Liquid,
 	LiquidError,
 	type Parser,
@@ -139,6 +140,18 @@ function ordinal(value: unknown): unknown {
 	return `${number}${ORDINAL_SUFFIXES[ORDINAL_RULES.select(number)] ?? 'th'}`;
 }
 
+/**
+ * liquidjs's `default` turns a person into the text of their mention, which has no `.name`, so
+ * `target | default: person` would work only when it falls back. A person or channel stays what it is.
+ */
+function keepingPeople(builtIn: FilterImplOptions): FilterImplOptions {
+	const handler = typeof builtIn === 'function' ? builtIn : builtIn.handler;
+	return function (value, ...args) {
+		const isPresent = value instanceof GuildCommandMentionDrop && value.mention !== '';
+		return isPresent ? value : handler.call(this, value, ...args);
+	};
+}
+
 function createEngine(): Liquid {
 	const engine = new Liquid({
 		templates: {},
@@ -157,6 +170,7 @@ function createEngine(): Liquid {
 	}
 	engine.registerTag('capture', CountedCaptureTag);
 	engine.registerTag('random', RandomTag);
+	engine.registerFilter('default', keepingPeople(engine.filters['default']!));
 	engine.registerFilter('one_of', oneOf);
 	engine.registerFilter('plural', plural);
 	engine.registerFilter('ordinal', ordinal);
