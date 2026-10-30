@@ -117,6 +117,24 @@ describe('server commands', () => {
 			.execute();
 	});
 
+	it('keeps the description optional, and lets it be cleared', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		const command = await createCommand(owner.token, guild.id, {...TUCK, description: ''}).execute();
+		expect(command.description).toBe('');
+		const missing = await createCommand(owner.token, guild.id, {
+			name: 'plain',
+			template: 'x',
+			input_mode: 'none',
+		}).execute();
+		expect(missing.description).toBe('');
+		const path = `/guilds/${guild.id}/commands/${command.id}`;
+		const patch = (body: Record<string, unknown>) =>
+			createBuilder<GuildCommandResponse>(harness, owner.token).patch(path).body(body).execute();
+		expect((await patch({description: 'Tuck someone in'})).description).toBe('Tuck someone in');
+		expect((await patch({name: 'tuck2'})).description).toBe('Tuck someone in');
+		expect((await patch({description: ''})).description).toBe('');
+	});
+
 	it('says what is wrong with a template that cannot be saved', async () => {
 		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
 		const {json} = await createCommand(owner.token, guild.id, {...TUCK, template: 'ok\n{% nosuch %}'})
