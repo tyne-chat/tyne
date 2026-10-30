@@ -1,0 +1,183 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* Fork: the Commands tab in community settings. */
+
+.container {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.title {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--text-primary);
+}
+
+.subtitle,
+.muted,
+.notice {
+	margin: 0;
+	color: var(--text-tertiary);
+	font-size: 0.875rem;
+}
+
+.layout {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 1.5rem;
+}
+
+.list {
+	display: flex;
+	flex: 1 1 11rem;
+	flex-direction: column;
+	gap: 0.75rem;
+	max-width: 16rem;
+	min-width: 0;
+}
+
+.slots {
+	display: flex;
+	justify-content: space-between;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.count {
+	color: var(--text-tertiary);
+	font-variant-numeric: tabular-nums;
+}
+
+.rows {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.row {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 0.4rem 0.6rem;
+	border: 0;
+	border-radius: 0.375rem;
+	background: transparent;
+	color: var(--text-primary);
+	text-align: start;
+	cursor: pointer;
+}
+
+.row:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.rowSelected {
+	background-color: var(--background-modifier-selected);
+}
+
+.rowName {
+	font-weight: 600;
+}
+
+.rowDescription {
+	overflow: hidden;
+	color: var(--text-tertiary);
+	font-size: 0.75rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.empty {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding: 1rem 0;
+	color: var(--text-tertiary);
+}
+
+.editor {
+	display: flex;
+	flex: 3 1 20rem;
+	flex-direction: column;
+	gap: 0.875rem;
+	min-width: 0;
+	padding: 1.25rem;
+	border-radius: 0.625rem;
+	background-color: var(--background-secondary);
+}
+
+.editorHeader {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.editorTitle {
+	margin: 0;
+	font-size: 1.0625rem;
+	font-weight: 700;
+	color: var(--text-primary);
+}
+
+.sectionLabel {
+	margin-top: 0.5rem;
+	color: var(--text-tertiary);
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.fieldRow {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+	align-items: end;
+	gap: 1rem;
+}
+
+/* The input leaves 2.5rem for its left element; end the slash just before the name. */
+.slash {
+	display: inline-block;
+	width: 2rem;
+	text-align: end;
+	color: var(--text-tertiary);
+	font-weight: 600;
+}
+
+.insertRow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.insertButton {
+	padding: 0.2rem 0.65rem;
+	border: 1px dashed var(--text-link);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--text-link);
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.preview {
+	padding: 0.5rem 0;
+	border-radius: 0.5rem;
+	background-color: var(--background-primary);
+}

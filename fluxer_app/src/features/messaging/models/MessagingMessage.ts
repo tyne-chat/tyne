@@ -34,6 +34,7 @@ import type {
 // Fork imports.
 
 import {rememberMentionedPersonas} from '@app/features/persona/utils/MentionedPersonas';
+import type {MessageGuildCommandResponse} from '@fluxer/schema/src/domains/guild_command/MessageGuildCommandSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 type MessageInput = Omit<WireMessage, 'mentions' | 'mention_roles' | 'tts'> &
@@ -181,6 +182,7 @@ export class Message {
 	readonly _favoriteMemeId?: string;
 	readonly stickers?: ReadonlyArray<MessageStickerItem>;
 	readonly subprofile?: MessageSubprofileResponse | null;
+	readonly command?: MessageGuildCommandResponse | null;
 
 	constructor(message: MessageInput, options?: MessageRecordOptions) {
 		this.instanceId = options?.instanceId ?? RuntimeConfig.localInstanceDomain;
@@ -252,6 +254,7 @@ export class Message {
 		this._favoriteMemeId = message._favoriteMemeId;
 		this.stickers = message.stickers ? Object.freeze(message.stickers) : undefined;
 		this.subprofile = message.subprofile;
+		this.command = message.command;
 		// Fork: the personas the message mentions, kept as upstream keeps the users it mentions above.
 		if (!options?.skipUserCache) {
 			rememberMentionedPersonas(message.content, message.mention_personas);
@@ -356,6 +359,7 @@ export class Message {
 				_allowedMentions: updates._allowedMentions ?? this._allowedMentions,
 				_favoriteMemeId: updates._favoriteMemeId ?? this._favoriteMemeId,
 				subprofile: 'subprofile' in updates ? updates.subprofile : this.subprofile,
+				command: 'command' in updates ? updates.command : this.command,
 			},
 			{
 				skipUserCache: true,
@@ -520,6 +524,7 @@ export class Message {
 				return false;
 			}
 		}
+		if ((this.command?.id ?? null) !== (other.command?.id ?? null)) return false;
 		return true;
 	}
 
@@ -555,6 +560,7 @@ export class Message {
 			_allowedMentions: this._allowedMentions,
 			_favoriteMemeId: this._favoriteMemeId,
 			subprofile: this.subprofile,
+			command: this.command,
 		};
 	}
 
