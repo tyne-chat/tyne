@@ -92,6 +92,10 @@ msgstr "Banner görseli indirilemedi: {error}. Persona bannersız içe aktarıld
 msgid "Change persona"
 msgstr "Persona değiştir"
 
+#. Help for an example in a command script.
+msgid "Change the message depending on what they typed"
+msgstr "Mesajı yazdıklarına göre değiştir"
+
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Bir PluralKit dışa aktarımı (.json) veya {productName} dışa aktarımı (.zip) seç ya da sürükleyip bırak"
 
@@ -371,12 +375,20 @@ msgstr "Zaman damgası ekle"
 msgid "Insert:"
 msgstr "Ekle:"
 
+#. Why a community command could not run, shown after "Couldn't run /name:".
+msgid "Its script has a problem."
+msgstr "Betiğinde bir sorun var."
+
 msgid "Keep existing and add new (Recommended)"
 msgstr "Mevcutları koru ve yenilerini ekle (Önerilen)"
 
 #. placeholder {0}: members.length
 msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
 msgstr "Mevcut {existingCount} personanı koru ve içe aktarılan {0} personanın tümünü yeni girişler olarak yanlarına ekle."
+
+#. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
+msgid "Line {line}, column {column}: {problem}"
+msgstr "Satır {line}, sütun {column}: {problem}"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -551,6 +563,18 @@ msgstr "Persona görünürlüğü"
 msgid "Personas"
 msgstr "Personalar"
 
+#. Help for an example in a command script.
+msgid "Pick one option at random"
+msgstr "Rastgele bir seçenek seç"
+
+#. Help for an example in a command script.
+msgid "Pick one word at random"
+msgstr "Rastgele bir kelime seç"
+
+#. Help for an example in a command script.
+msgid "Pick the word for a number"
+msgstr "Sayıya uygun kelimeyi seç"
+
 #. Emoji context menu action that pins the emoji.
 msgid "Pin emoji"
 msgstr "Emojiyi sabitle"
@@ -648,6 +672,10 @@ msgstr "Sinyali herkes için sıfırla"
 msgid "Root Account (Default)"
 msgstr "Kök hesap (Varsayılan)"
 
+#. Button under the preview of a command script that picks at random: fills the preview in again.
+msgid "Run again"
+msgstr "Yeniden çalıştır"
+
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
 msgstr "Örnek girdi"
@@ -655,6 +683,14 @@ msgstr "Örnek girdi"
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Personalar kaydediliyor..."
+
+#. Label of the code editor for a community command.
+msgid "Script"
+msgstr "Betik"
+
+#. Title of the expandable help under the command script editor.
+msgid "Script reference"
+msgstr "Betik kılavuzu"
 
 #. placeholder {0}: filteredPersonas.length
 msgid "Search Results ({0})"
@@ -784,13 +820,45 @@ msgstr "Görev çubuğu"
 msgid "Tell us about this persona..."
 msgstr "Bize bu personadan bahset..."
 
+#. Help for a command script variable.
+msgid "That person’s name"
+msgstr "O kişinin adı"
+
+#. Help for a command script variable.
+msgid "The channel, as a mention"
+msgstr "Bahsetme olarak kanal"
+
 #. Error message when uploaded file is not valid JSON
 msgid "The chosen file is not a valid JSON object."
 msgstr "Seçilen dosya geçerli bir JSON nesnesi değil."
 
+#. Help for a command script variable.
+msgid "The first person they mention, if any"
+msgstr "Bahsettikleri ilk kişi, varsa"
+
+#. Help for a command script variable.
+msgid "The name of this community"
+msgstr "Bu topluluğun adı"
+
+#. Help for a command script variable.
+msgid "The person running it, as a mention"
+msgstr "Bahsetme olarak kullanan kişi"
+
 #. Description of the persona option of the /persona slash command
 msgid "The persona to select."
 msgstr "Seçilecek persona."
+
+#. Problem in a community command script: it produces more text than is allowed.
+msgid "The script builds too much text."
+msgstr "Betik çok fazla metin oluşturuyor."
+
+#. Problem in a community command script.
+msgid "The script is too long."
+msgstr "Betik çok uzun."
+
+#. Problem in a community command script.
+msgid "The script took too long to run."
+msgstr "Betiğin çalışması çok uzun sürdü."
 
 msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
 msgstr "Burada bir kanalı işaretleyene kadar sinyal çubuğu kapalıdır. Bir kategoriyi veya tüm topluluğu işaretlemek, orada daha sonra oluşturulan kanalları da kapsar."
@@ -798,6 +866,18 @@ msgstr "Burada bir kanalı işaretleyene kadar sinyal çubuğu kapalıdır. Bir 
 #. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "Etiket simgesi kaydedilemedi: {error}. Persona ayarlarından yeniden ayarlanabilir."
+
+#. Help for a command script variable.
+msgid "Their name"
+msgstr "Kullanan kişinin adı"
+
+#. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
+msgid "There's no filter called {name}."
+msgstr "{name} adında bir filtre yok."
+
+#. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
+msgid "There's no tag called {name}."
+msgstr "{name} adında bir etiket yok."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -822,8 +902,20 @@ msgstr "Bu emoji zaten imza emojisi olarak eklenmiş"
 msgid "This is a preview of how your display tag will look in chat."
 msgstr "Bu, görünen etiketinin sohbette nasıl görüneceğinin bir önizlemesidir."
 
+#. Problem in a community command script: a syntax error at the position given before this text.
+msgid "This part can't be read."
+msgstr "Bu bölüm okunamıyor."
+
+#. Problem in a community command script: it failed while running, at the position given before this text.
+msgid "This part stopped with an error."
+msgstr "Bu bölüm bir hatayla durdu."
+
 msgid "This persona’s profile is private."
 msgstr "Bu personanın profili özel."
+
+#. Shown instead of the preview when a command script produces no text.
+msgid "This would post nothing, so the command would fail."
+msgstr "Bu hiçbir şey göndermez, bu yüzden komut başarısız olur."
 
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
@@ -843,6 +935,10 @@ msgstr "{name} adına kapat"
 #. Direct message right-click menu action that shows the signal bar above the message box in this DM.
 msgid "Turn on signal bar"
 msgstr "Sinyal çubuğunu aç"
+
+#. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
+msgid "Type {output} or {tag} for suggestions."
+msgstr "Öneriler için {output} veya {tag} yazın."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
@@ -888,11 +984,20 @@ msgstr "Harici komutları kullan"
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
 msgstr "Küçük harf, rakam, - ve _ kullanın; en fazla 32 karakter."
 
+#. Button in the command editor that switches back from the code editor to the plain message field.
+msgid "Use the basic editor"
+msgstr "Temel düzenleyiciyi kullan"
+
+#. Button in the command editor that switches the message field to the code editor for scripts.
+msgid "Use the script editor"
+msgstr "Betik düzenleyicisini kullan"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Personalarını görüntüle"
 
 #. Button inserting the placeholder for what the member types after the command.
+#. Help for a command script variable.
 msgid "What they type"
 msgstr "Yazdıkları"
 
@@ -906,6 +1011,10 @@ msgstr "Sinyal çubuğunun göründüğü yerler"
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "Personanın hatırlandığı yer"
+
+#. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
+msgid "Write a number as 1st, 2nd, 3rd"
+msgstr "Sayıyı 1st, 2nd, 3rd şeklinde yaz"
 
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
@@ -979,6 +1088,10 @@ msgstr "{label}: {names}"
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - Persona değiştirmek için tıkla"
+
+#. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
+msgid "{name} is never closed."
+msgstr "{name} hiç kapatılmıyor."
 
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
