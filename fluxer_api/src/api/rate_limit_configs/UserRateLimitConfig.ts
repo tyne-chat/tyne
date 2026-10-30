@@ -322,4 +322,8 @@ export const UserRateLimitConfigs = {
 		bucket: 'guild_commands:run::channel_id',
 		config: {limit: 20, windowMs: ms('10 seconds')},
 	} as RouteRateLimitConfig,
+	GUILD_COMMANDS_PREVIEW: {
+		bucket: 'guild_commands:preview',
+		config: {limit: 30, windowMs: ms('10 seconds'), exemptFromGlobal: true},
+	} as RouteRateLimitConfig,
 } as const;
