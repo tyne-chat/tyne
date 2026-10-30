@@ -93,6 +93,7 @@ import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 // Fork imports.
 
 import type {PersonaID} from '@app/api/BrandedTypes';
+import {type ForkSendMessageOptions, recordForkGuildCommandUse} from '@app/api/guild_command/GuildCommandUses';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import {requestedPersonaId, resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
@@ -628,6 +629,7 @@ export class MessageSendService {
 		data,
 		requestCache,
 		forumStarter,
+		fork,
 	}: {
 		user: User;
 		viewer: ThreadViewer;
@@ -635,6 +637,7 @@ export class MessageSendService {
 		data: MessageRequest;
 		requestCache: RequestCache;
 		forumStarter?: {parentAuth: AuthenticatedChannel};
+		fork?: ForkSendMessageOptions;
 	}): Promise<SendMessageResult> {
 		const authChannel = await this.deps.channelAuthService.getChannelAuthenticated({
 			userId: user.id,
@@ -882,6 +885,7 @@ export class MessageSendService {
 					threadInsert: authChannel.thread !== undefined,
 					personaId,
 				});
+				await recordForkGuildCommandUse(message, fork);
 				await recordNonce(messageId);
 				this.cacheMentionChannels({
 					requestCache,
