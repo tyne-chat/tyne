@@ -1,0 +1,48 @@
+.reference {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	font-size: 0.875rem;
+}
+
+.title {
+	cursor: pointer;
+	color: var(--text-link);
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin: 0.75rem 0;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 0.75rem;
+	align-items: baseline;
+}
+
+.label {
+	margin: 0;
+	color: var(--text-tertiary);
+}
+
+.code,
+.block {
+	font-family: var(--font-mono, ui-monospace, monospace);
+	font-size: 0.8125rem;
+}
+
+.example {
+	margin-top: 0.75rem;
+}
+
+.block {
+	margin: 0.25rem 0 0;
+	padding: 0.5rem 0.75rem;
+	overflow-x: auto;
+	border-radius: 0.375rem;
+	background-color: var(--background-secondary);
+}
