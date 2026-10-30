@@ -96,7 +96,7 @@ Not now:
 | 2026-10-29 | Loops, partials and file access are removed from the engine; the engine's own limits stay on as a second layer. |
 | 2026-10-29 | Chiara agreed with the design's other contestable choices, which are therefore decided: server-side rendering; no optimistic message; the send-path hook; posting as the member's persona; loading the list on first use; Liquid with one template under both editors; phase 1 basic templates only; one one-line input with the first mention as target; built-ins winning; name rules; a command leaving attachments and the reply bar alone; the use table and per-read lookup; dropping the chip on edit; deleted commands keeping their chips; counts not lowered on delete, persona by default, simultaneous uses possibly showing the same number; templates visible only to editors; the Roles-style tab with one Save bar and local drafts; Message Tools; scripts edited on web and desktop only. |
 | 2026-10-29 | Each command owns its counters; counters are not shared between commands. |
-| 2026-10-29 | Commands get permissions of their own: Create commands, Manage commands, Use external commands (fork bits 62, 61, 60). |
+| 2026-10-29 | Commands get permissions of their own: Create commands, Manage commands, Use external commands (fork bits 62, 61, 60; Use external commands moved to 59 the same day, because upstream's tests use 60 as an unknown bit). |
 | 2026-10-29 | The phone app's `allPermissions` mask covers every bit, not only upstream's. |
 | 2026-10-29 | Commands are usable where their community's emoji are, plus a membership check, with the precedence in [Where commands work](#where-commands-work). |
 | 2026-10-29 | Use external commands is on by default wherever Use External Emojis is, and is turned on once at release for every existing @everyone role. |
@@ -592,7 +592,7 @@ Commands get permissions of their own (decided 2026-10-29), mirroring the emoji 
 |---|---|---|---|
 | 62 | `CREATE_COMMANDS`: create commands, edit and delete one's own | `CREATE_EXPRESSIONS` (43) | no |
 | 61 | `MANAGE_COMMANDS`: edit and delete anyone's | `MANAGE_EXPRESSIONS` (30) | no |
-| 60 | `USE_EXTERNAL_COMMANDS`: use other communities' commands in this community's channels | `USE_EXTERNAL_EMOJIS` (18) | yes |
+| 59 | `USE_EXTERNAL_COMMANDS`: use other communities' commands in this community's channels | `USE_EXTERNAL_EMOJIS` (18) | yes |
 
 - **Own versus anyone's** works like `checkModifyExpressionPermission`
   (`guild/services/content/ContentHelpers.ts:20-27`): the creator needs Create commands, anyone
@@ -611,6 +611,8 @@ Commands get permissions of their own (decided 2026-10-29), mirroring the emoji 
 - Bit 63 is the sign bit of a signed 64-bit integer (Postgres `bigint`, Rust `i64`, Dart `int`).
 - So the fork counts down from 62 (the root guide's "flag bits from the top"), declared in a
   `// Fork:` block at the end of `Permissions`. About eight bits lie between the two.
+- Bit 60 is skipped: upstream's tests use `1n << 60n` as an example of an unknown permission
+  (`packages/constants/src/BotPermissionUtils.test.ts`, `fluxer_api/src/api/oauth/tests/OAuth2BotGuildAdd.test.ts`).
 
 **Where the bits must be added:**
 
@@ -651,12 +653,20 @@ Commands get permissions of their own (decided 2026-10-29), mirroring the emoji 
   There is no instance-level default, and nothing creates communities from templates or at instance
   setup.
 - **Existing communities: turned on once at release** (decided). A new bit is off in every stored
-  role, and defaults apply only to new communities and roles. A one-off task sets Use external
-  commands on every community's @everyone role.
-  - It goes through the role service, not SQL on `row_data`, so caches are updated and
-    `GUILD_ROLE_UPDATE` is sent (`fluxer_api/AGENTS.md`, "Data changes").
-  - It only adds the bit. An @everyone role a manager has already changed keeps everything else.
-  - It runs on production by hand, with a backup first and Chiara's approval at that time.
+  role, and defaults apply only to new communities and roles. A one-off worker job sets Use
+  external commands on every community's @everyone role
+  (`fluxer_api/src/api/guild_command/UseExternalCommandsBackfill.ts`, task
+  `backfillUseExternalCommands`).
+  - It saves through the role repository and sends `GUILD_ROLE_UPDATE`, not SQL on `row_data`, so
+    the gateway's copy of the role changes too (`fluxer_api/AGENTS.md`, "Data changes").
+  - It only adds the bit; an @everyone role keeps everything else.
+  - It runs once: the worker's cron tries it every ten minutes, and it does nothing once the
+    instance configuration holds its marker (`fork_use_external_commands_backfill`, with the time
+    and the number of roles changed). A community that turns the bit off afterwards keeps it off.
+  - On production it therefore runs within ten minutes of the first deploy that contains it. That
+    deploy needs Chiara's approval like any other, and `deploy_prod.sh` takes a full database dump
+    before upgrading. Changed from the earlier plan of running it by hand: the API has no admin
+    route that edits roles or starts a job, and SQL would bypass the gateway.
 
 ### Rate limits
 
