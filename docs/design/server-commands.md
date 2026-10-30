@@ -881,11 +881,14 @@ A fork feature folder, `fluxer_app/src/features/guild_commands/`, with an `AGENT
   `skipReactionHydration`, and `<Message … previewContext={MessagePreviewContext.SETTINGS}>`.
   - Basic templates are substituted in the client: no request.
   - Scripts go to the preview route, debounced by 500 ms.
-- **Script editor** (phase 2, `components/GuildCommandScriptEditor.tsx`): CodeMirror 6, set up like
+- **Script editor** (phase 2, `components/GuildCommandTemplateEditor.tsx`): CodeMirror 6, set up like
   `theme_settings/components/QuickCssEditor.tsx`, with `liquidLanguage` from
   `@codemirror/lang-liquid` and loaded on demand, as its grammars weigh more than the rest of the tab.
   - **Suggestions** are the fork's (`utils/GuildCommandLiquidCompletions.ts`), from the server's
     allowlists: `liquid()`'s own source always offers Liquid's full list, `for` included.
+  - **Emoji:** `:` at the start of a word suggests emoji from the message box's search
+    (`utils/GuildCommandEmojiCompletions.ts`), in both modes; a pick inserts `:name:`, which saving
+    resolves.
   - **Which editor:** a command opens by the server's `kind`, and the choice then stays until
     changed, so a template does not change editor while it is typed. **Use the script editor** is
     always offered from the basic one; the way back only when the template is basic again.
@@ -918,9 +921,11 @@ Where the first web build differs from the plan above, and why. The code is in
   community's name after the description. No icon yet.
 - **Chip click** writes `/tuck ` as the draft's text, not a command segment, then focuses the box.
   It is clickable only when that command is the one `/tuck` runs in the channel.
-- **Template field:** a plain text area. **Person running it** and **What they type** insert the
-  literal `{{ person }}` and `{{ input }}` at the cursor; there are no pills and no mention or emoji
-  autocomplete in the field yet. Custom emoji are typed as `:name:`, shown that way, and stored as
+- **Template field:** the same CodeMirror field as the script editor, in a plain mode with no line
+  numbers, code font or highlighting, not `LexicalRichInput`. **Person running it** and **What they
+  type** insert the literal `{{ person }}` and `{{ input }}` at the cursor; there are no pills or
+  mention autocomplete, and `:` suggests emoji as in the script editor. Custom emoji are typed as
+  `:name:`, shown that way, and stored as
   `<:name:id>`, resolved on save as in a message sent in the community
   (`utils/GuildCommandTemplateEmoji.ts`); the preview resolves the template and the sample input the
   same way.
