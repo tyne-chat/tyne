@@ -179,6 +179,10 @@
 	color: var(--text-primary);
 }
 
+.bioField textarea {
+	resize: vertical;
+}
+
 .inputFooter {
 	color: var(--text-primary-muted);
 	font-size: 0.875rem;
