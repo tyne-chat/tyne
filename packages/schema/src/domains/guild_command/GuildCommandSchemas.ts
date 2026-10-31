@@ -37,7 +37,6 @@ export const RESERVED_GUILD_COMMAND_NAMES: ReadonlySet<string> = new Set([
 	'sticker',
 	'gif',
 	'persona',
-	'pagebreak',
 ]);
 
 /**
