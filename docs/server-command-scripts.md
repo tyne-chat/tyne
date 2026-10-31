@@ -14,7 +14,7 @@ Give these fields, for Community Settings > Commands > New command > Use the scr
 desktop):
 
 - **Name:** 1-32 lowercase letters, digits, `-` or `_`. Not one of: shrug, tableflip, unflip, me,
-  spoiler, tts, nick, kick, ban, dm, msg, saved, favorites, sticker, gif, persona, pagebreak.
+  spoiler, tts, nick, kick, ban, dm, msg, saved, favorites, sticker, gif, persona.
 - **Description:** optional, at most 100 characters.
 - **Input:** None (running it with text is refused), Optional, or Required (running it without text
   is refused).
