@@ -42,6 +42,10 @@ msgstr "Persona hozzáadása"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Címkepár hozzáadása ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Számláló hozzáadása"
+
 msgid "Add signal"
 msgstr "Jelzés hozzáadása"
 
@@ -147,6 +151,18 @@ msgstr "Nem sikerült futtatni: /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Nem sikerült menteni: /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Personák külön számlálása"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Külön számlálás mindegyikhez:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Számlálók"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Bepillantás"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Véglegesen törli mind a(z) {existingCount} meglévő personát, és teljesen lecseréli őket az importáltakra."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Megemlített személy"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Aki használja"
@@ -649,6 +670,10 @@ msgstr "Az aláírási hangulatjellel való reagálás mindig ezen személyként
 msgid "Recent Personas"
 msgstr "Legutóbbi personák"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Számláló eltávolítása"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Aláírási hangulatjel eltávolítása"
@@ -670,9 +695,17 @@ msgstr "Az összes meglévő persona cseréje (visszafordíthatatlan)"
 msgid "Request failed (HTTP {status})"
 msgstr "A kérés sikertelen (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Számok nullázása"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Jelzés visszaállítása mindenkinél"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Nullázod a(z) {name} számait? Ez nem vonható vissza."
 
 msgid "Root Account (Default)"
 msgstr "Fő fiók (Alapértelmezett)"
@@ -984,6 +1017,14 @@ msgstr "Más közösségek parancsainak használata."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Külső parancsok használata"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Szkriptben így használd: {variable}. Minden futás előbb hozzáad egyet, így az első 1-et olvas."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Használj kisbetűket, számokat és _ jelet, betűvel kezdj, és ne olyan nevet, amelyet a szkriptek már használnak."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."

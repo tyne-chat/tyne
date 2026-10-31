@@ -42,6 +42,10 @@ msgstr "परसोना जोड़ें"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "टैग जोड़ी जोड़ें ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "काउंटर जोड़ें"
+
 msgid "Add signal"
 msgstr "सिग्नल जोड़ें"
 
@@ -147,6 +151,18 @@ msgstr "/{name} नहीं चल सका: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name} सेव नहीं हो सका: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "पर्सोना अलग गिनें"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "हर एक के लिए अलग गिनें:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "काउंटर"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "झलक"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "सभी {existingCount} मौजूदा परसोना हमेशा के लिए डिलीट करें और उन्हें पूरी तरह इंपोर्ट किए गए परसोना से बदलें।"
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "उल्लेखित व्यक्ति"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "इस्तेमाल करने वाला व्यक्ति"
@@ -649,6 +670,10 @@ msgstr "हस्ताक्षर इमोजी के साथ प्र�
 msgid "Recent Personas"
 msgstr "हाल के परसोना"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "काउंटर हटाएं"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "हस्ताक्षर इमोजी हटाएं"
@@ -670,9 +695,17 @@ msgstr "सभी मौजूदा परसोना बदलें (वा�
 msgid "Request failed (HTTP {status})"
 msgstr "अनुरोध विफल रहा (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "गिनती रीसेट करें"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "सभी के लिए सिग्नल रीसेट करें"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "{name} की गिनती रीसेट करें? इसे पूर्ववत नहीं किया जा सकता।"
 
 msgid "Root Account (Default)"
 msgstr "रूट अकाउंट (डिफ़ॉल्ट)"
@@ -984,6 +1017,14 @@ msgstr "दूसरी कम्युनिटी के कमांड इ�
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "बाहरी कमांड इस्तेमाल करें"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "इसे स्क्रिप्ट में {variable} के रूप में इस्तेमाल करें। हर रन पहले एक जोड़ता है, इसलिए पहला रन 1 पढ़ता है।"
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "छोटे अंग्रेज़ी अक्षर, अंक और _ इस्तेमाल करें, अक्षर से शुरू करें, और ऐसा नाम न लें जो स्क्रिप्ट पहले से इस्तेमाल करती हैं।"
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
