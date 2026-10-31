@@ -37296,10 +37296,16 @@
 						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
 					},
 					"counters": {
-						"description": "The counters being edited, each filled in as the next run would see it",
+						"description": "The counters being edited, each filled in as a run would read it",
 						"maxItems": 5,
 						"type": "array",
 						"items": {"$ref": "#/components/schemas/GuildCommandCounterInputSchema"}
+					},
+					"run": {
+						"description": "What the counters read: which run this preview stands for, from 1",
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 1000000
 					}
 				},
 				"required": ["template"]
