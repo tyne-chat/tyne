@@ -1,0 +1,40 @@
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.title {
+	margin-top: 0.5rem;
+	color: var(--text-tertiary);
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.counter {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.75rem;
+	border-radius: 0.5rem;
+	background-color: var(--background-secondary);
+}
+
+.label {
+	color: var(--text-secondary);
+	font-size: 0.875rem;
+}
+
+.help {
+	margin: 0;
+	color: var(--text-tertiary);
+	font-size: 0.8125rem;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
