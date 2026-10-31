@@ -42,6 +42,10 @@ msgstr "Lisää persoona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Lisää tunnistepari ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Lisää laskuri"
+
 msgid "Add signal"
 msgstr "Lisää signaali"
 
@@ -147,6 +151,18 @@ msgstr "Komentoa /{name} ei voitu suorittaa: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Komentoa /{name} ei voitu tallentaa: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Laske persoonat erikseen"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Laske erikseen jokaiselle:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Laskurit"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Kurkista"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Poista kaikki {existingCount} nykyistä persoonaa pysyvästi ja korvaa ne kokonaan tuoduilla persoonilla."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Mainittu henkilö"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Käyttäjä"
@@ -649,6 +670,10 @@ msgstr "Nimikkoemojilla reagoiminen reagoi aina tällä persoonalla aktiivisesta
 msgid "Recent Personas"
 msgstr "Viimeisimmät persoonat"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Poista laskuri"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Poista nimikkoemoji"
@@ -670,9 +695,17 @@ msgstr "Korvaa kaikki nykyiset persoonat (tuhoava)"
 msgid "Request failed (HTTP {status})"
 msgstr "Pyyntö epäonnistui (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Nollaa laskennat"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Nollaa signaali kaikilta"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Nollataanko laskurin {name} laskennat? Tätä ei voi perua."
 
 msgid "Root Account (Default)"
 msgstr "Päätili (Oletus)"
@@ -984,6 +1017,14 @@ msgstr "Käytä muiden yhteisöjen komentoja."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Käytä ulkoisia komentoja"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Käytä sitä skriptissä muodossa {variable}. Jokainen suoritus lisää ensin yhden, joten ensimmäinen lukee 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Käytä pieniä kirjaimia, numeroita ja _-merkkiä, aloita kirjaimella äläkä käytä nimeä, jota skriptit jo käyttävät."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
