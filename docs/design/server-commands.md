@@ -382,7 +382,7 @@ be revisited). In the editor, a **Counters** section under the template lists th
 
 - a name, unique within the command;
 - what it is kept per, any combination of: the person running it, the recipient (`target`), the
-  pair (one direction), the channel, the typed text; or nothing (one count for the command);
+  pair (one direction), the channel; or nothing (one count for the command);
 - persona or account for the person and the recipient (persona by default);
 - a period: all time (phase 3), later today / this week / this month in the community's time zone.
 
@@ -396,9 +396,11 @@ that increment, so the first hug shows 1:
 
 Rules:
 
-- A counter kept per recipient needs a recipient: such a command's input is the **person** type
-  (exactly one member or persona, picked from autocomplete). Free text with no mention counts
-  nothing.
+- A counter kept per recipient needs a recipient: a run without a real mention is refused, and
+  counts nothing (decided 2026-10-30, in place of a **person** input type, which would have meant
+  changing the message box on both apps). Counts are kept by id, never by typed text, so there is no
+  "typed text" scope: a nickname can change and it is the same count.
+- The apps offer Reset counts; setting one count is in the API only for now.
 - Counts are uses. Deleting the message does not lower them; admins can set or reset a count in
   settings.
 - Counts survive members leaving and personas being renamed.
