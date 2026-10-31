@@ -153,12 +153,15 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 
 		const emojiUsageKey = useMemo(() => getEmojiUsageKey(emoji), [emoji]);
 		const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null);
+		// A Shift press picks an emoji and leaves the picker open, so it is never a drag. Over a custom
+		// emoji's image the browser would start one a few pixels in, and the click would never come.
+		const pressedWithShift = useRef(false);
 
 		const [{isDragging}, dragRef] = useDrag(
 			() => ({
 				type: FAVORITE_EMOJI_DND_TYPE,
 				item: (): FavoriteEmojiDragItem => ({key: emojiUsageKey}),
-				canDrag: () => Boolean(isFavoriteRow),
+				canDrag: () => Boolean(isFavoriteRow) && !pressedWithShift.current,
 				collect: (monitor) => ({
 					isDragging: monitor.isDragging(),
 				}),
@@ -284,6 +287,9 @@ const EmojiRendererBase = React.forwardRef<HTMLButtonElement, EmojiRendererProps
 						ref={mergedButtonRef}
 						onMouseEnter={() => handleHover(emoji)}
 						onMouseLeave={() => handleHover(null)}
+						onMouseDownCapture={(event) => {
+							pressedWithShift.current = event.shiftKey;
+						}}
 						onClick={handleClick}
 						onContextMenu={handleContextMenu}
 						className={className}
