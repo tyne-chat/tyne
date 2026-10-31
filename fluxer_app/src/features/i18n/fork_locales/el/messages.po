@@ -42,6 +42,10 @@ msgstr "Προσθήκη persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Προσθήκη ζεύγους ετικετών ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Προσθήκη μετρητή"
+
 msgid "Add signal"
 msgstr "Προσθήκη σήματος"
 
@@ -147,6 +151,18 @@ msgstr "Δεν ήταν δυνατή η εκτέλεση της /{name}: {detail
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Δεν ήταν δυνατή η αποθήκευση της /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Ξεχωριστή μέτρηση persona"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Ξεχωριστή μέτρηση για κάθε:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Μετρητές"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Γρήγορη ματιά"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Διαγράψτε οριστικά και τις {existingCount} υπάρχουσες persona και αντικαταστήστε τις πλήρως με τις εισαγόμενες."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Άτομο που αναφέρθηκε"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Όποιος τη χρησιμοποιεί"
@@ -649,6 +670,10 @@ msgstr "Η αντίδραση με ένα χαρακτηριστικό emoji θ�
 msgid "Recent Personas"
 msgstr "Πρόσφατες persona"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Αφαίρεση μετρητή"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Κατάργηση χαρακτηριστικού emoji"
@@ -670,9 +695,17 @@ msgstr "Αντικατάσταση όλων των υπαρχουσών persona 
 msgid "Request failed (HTTP {status})"
 msgstr "Το αίτημα απέτυχε (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Επαναφορά μετρήσεων"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Επαναφορά σήματος για όλους"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Επαναφορά των μετρήσεων του {name}; Αυτό δεν αναιρείται."
 
 msgid "Root Account (Default)"
 msgstr "Κύριος λογαριασμός (Προεπιλογή)"
@@ -984,6 +1017,14 @@ msgstr "Χρησιμοποιήστε εντολές από άλλες κοινό
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Χρήση εξωτερικών εντολών"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Χρησιμοποίησέ το σε σενάριο ως {variable}. Κάθε εκτέλεση προσθέτει πρώτα ένα, οπότε η πρώτη διαβάζει 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Χρησιμοποίησε πεζά λατινικά γράμματα, αριθμούς και _, ξεκίνα με γράμμα και απόφυγε ονόματα που χρησιμοποιούν ήδη τα σενάρια."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
