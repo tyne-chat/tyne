@@ -18,6 +18,7 @@ import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {Input, Textarea} from '@app/features/ui/components/form/FormInput';
+import {Switch} from '@app/features/ui/components/form/FormSwitch';
 import {Popout} from '@app/features/ui/popover/PopoverPopout';
 import {type SegmentedTab, SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
 import {AccentColorPicker} from '@app/features/user/components/modals/tabs/my_profile_tab/AccentColorPicker';
@@ -112,6 +113,14 @@ const NAME_PLACEHOLDER_DESCRIPTOR = msg({
 const PRONOUNS_PLACEHOLDER_DESCRIPTOR = msg({
 	message: 'e.g. she/her',
 	comment: 'Placeholder for persona pronouns',
+});
+const AUTO_TAG_DISABLED_LABEL_DESCRIPTOR = msg({
+	message: "Don't match this persona's tags",
+	comment: 'Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.',
+});
+const AUTO_TAG_DISABLED_DESCRIPTION_DESCRIPTOR = msg({
+	message: "Typing one of these tags won't switch to this persona. The tag is sent as written.",
+	comment: "Explanation under the persona editor's switch for not matching a persona's tags.",
 });
 const BIO_PLACEHOLDER_DESCRIPTOR = msg({
 	message: 'Tell us about this persona...',
@@ -274,6 +283,7 @@ interface PersonaFormState {
 	bio: string;
 	visibility: PersonaVisibility;
 	tags: Array<{prefix: string; suffix: string}>;
+	autoTagDisabled: boolean;
 	signatureEmojis: Array<SignatureEmoji>;
 	/** A picked image, as a data URL, not stored yet: Save uploads it first, Reset drops it. */
 	pendingAvatar: string | null;
@@ -290,6 +300,7 @@ const emptyFormState = (): PersonaFormState => ({
 	bio: '',
 	visibility: 'unlisted',
 	tags: [{prefix: '', suffix: ''}],
+	autoTagDisabled: false,
 	signatureEmojis: [],
 	pendingAvatar: null,
 	pendingBanner: null,
@@ -347,6 +358,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 							suffix: t.suffix ?? '',
 						}))
 					: [{prefix: '', suffix: ''}],
+			autoTagDisabled: persona.auto_tag_disabled ?? false,
 			signatureEmojis: (persona.signature_emojis ?? []).map((e) => ({
 				id: e.id ?? null,
 				name: e.name,
@@ -400,6 +412,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				formData.bio.trim() !== '' ||
 				formData.visibility !== 'unlisted' ||
 				hasNonEmptyTag ||
+				formData.autoTagDisabled ||
 				formData.signatureEmojis.length > 0
 			);
 		}
@@ -411,6 +424,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		if (formData.accentColor !== initial.accentColor) return true;
 		if (formData.bio.trim() !== initial.bio.trim()) return true;
 		if (formData.visibility !== initial.visibility) return true;
+		if (formData.autoTagDisabled !== initial.autoTagDisabled) return true;
 		if (!signatureEmojisEqual(formData.signatureEmojis, initial.signatureEmojis)) return true;
 
 		const formTags = formData.tags.map(normalizeTag).filter((t) => t.prefix || t.suffix);
@@ -709,6 +723,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
 					persona_tags: validTags,
+					auto_tag_disabled: formData.autoTagDisabled,
 					signature_emojis: formData.signatureEmojis,
 				});
 				ToastCommands.createToast({
@@ -726,6 +741,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
 					persona_tags: validTags,
+					auto_tag_disabled: formData.autoTagDisabled,
 					signature_emojis: formData.signatureEmojis,
 				});
 				ToastCommands.createToast({
@@ -1022,6 +1038,13 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 										</div>
 									);
 								})}
+								<Switch
+									label={i18n._(AUTO_TAG_DISABLED_LABEL_DESCRIPTOR)}
+									description={i18n._(AUTO_TAG_DISABLED_DESCRIPTION_DESCRIPTOR)}
+									value={formData.autoTagDisabled}
+									onChange={(value) => setFormData((prev) => ({...prev, autoTagDisabled: value}))}
+									data-flx="persona.persona-edit-modal.switch.auto-tag-disabled"
+								/>
 							</div>
 
 							{/* 7b. Signature Emojis */}
