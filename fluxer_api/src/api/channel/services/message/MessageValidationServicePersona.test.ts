@@ -6,12 +6,9 @@ import {CannotSendEmptyMessageError} from '@fluxer/errors/src/domains/channel/Ca
 import {describe, expect, it} from 'vitest';
 
 function createValidationService(): MessageValidationService {
-	return new MessageValidationService(
-		{} as never,
-		{
-			getConfigSnapshot: () => createDefaultLimitConfig({selfHosted: false}),
-		} as never,
-	);
+	return new MessageValidationService({
+		getConfigSnapshot: () => createDefaultLimitConfig({selfHosted: false}),
+	} as never);
 }
 
 describe("MessageValidationService.validateMessageContent when changing a message's persona", () => {
