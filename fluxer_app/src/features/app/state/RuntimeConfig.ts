@@ -1006,8 +1006,7 @@ function forkAdminBranding(
 ): InstanceAppPublic['branding'] {
 	return {
 		...branding,
-		status_page_instatus:
-			current.status_page_instatus && current.status_page_url === branding.status_page_url,
+		status_page_instatus: current.status_page_instatus && current.status_page_url === branding.status_page_url,
 		desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? current.desktop_app_prompt_enabled,
 	};
 }
