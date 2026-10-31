@@ -1076,8 +1076,9 @@ Where it differs from the plan above, and why. The code is in tyne-mobile's
 - **The editor is a sheet** over the command list, as the persona editor is, so Back returns to the
   list. Unsaved changes keep it open until Save or Reset, so the save bar is always shown once
   something changed, and Save explains what is wrong with a form it cannot save.
-- **Scripts open read-only,** with a note to edit them on the web or desktop. There is no phone script
-  editor or server preview; the basic preview is filled in on the device.
+- **Scripts** are written in the same field, in a script editor with a code font and no keyboard
+  corrections, with no `{{` or `{%` suggestions. The preview is the server's, at most one request per
+  500 ms of typing, and a failed one waits for the next edit.
 - **The chip:** a tap uses `pendingGuildCommandInsertProvider`, and writes `/tuck ` as text. A long
   press offers **Edit /tuck** to those who may edit it, and opens the Commands tab on that command.
 - **Sample input** is a plain field, so `:name:` and `@` are not resolved in it.
