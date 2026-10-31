@@ -48,6 +48,12 @@ and 2, tyne-chat/tyne#269 and #270: basic templates and scripts; counters are ph
   after the message is stored and before `MESSAGE_CREATE`; `hydratePersonas` looks it up, one query
   per channel, and only in channels whose marker exists (cached for 10 s when absent). An edit that
   changes the content deletes the use.
+- **Counters** (`GuildCommandCounters.ts`): a JSON list on the command, counts in
+  `guild_command_counts`, keyed by ids, never text. A run reads each count plus one before rendering
+  and adds one in the send hook, only for a new use row, so refused runs and repeated nonces count
+  nothing. `incrementCount` is one atomic add: `advanceRow` reports a row written even when its guard
+  stopped the change, so its guard can never fail. A counter kept per `target` makes a run without a
+  mention a 400.
 - **`GUILD_COMMANDS_UPDATE`** (`{guild_id}`) goes to every session, passive ones too. Clients mark the
   community stale and fetch it on next use, never on the event itself.
 
@@ -66,6 +72,7 @@ cron, and in the gateway `event_atoms.erl` and `session_passive.erl`. The shared
 `tests/GuildCommands.test.ts` (routes, permissions, running in another community and a DM,
 personas, input, the backfill), `tests/GuildCommandUses.test.ts` (query counts, edits),
 `tests/GuildCommandTemplateEngine.test.ts` (the engine's limits and semantics),
+`tests/GuildCommandCounters.test.ts` (scopes, persona or account, refusals, set and reset),
 `tests/GuildCommandScriptGuide.test.ts` (every example and claim in `docs/server-command-scripts.md`), and
 `fluxer_gateway/test/fork_session_passive_tests.erl`. After a change:
 `pnpm --filter fluxer_api test src/api/guild_command`, then `CHECKS.md`.
