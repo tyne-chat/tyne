@@ -11,6 +11,9 @@ import {Validator} from '@app/api/Validator';
 import {GuildIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {
 	ChannelGuildCommandParam,
+	GuildCommandCounterParam,
+	GuildCommandCountListResponseSchema,
+	GuildCommandCountSetRequestSchema,
 	GuildCommandCreateRequestSchema,
 	GuildCommandListResponseSchema,
 	GuildCommandParam,
@@ -157,6 +160,78 @@ export function GuildCommandController(app: HonoApp) {
 		async (ctx) => {
 			const {guild_id, command_id} = ctx.req.valid('param');
 			await ctx.get('guildCommandService').delete(ctx.get('user').id, createGuildID(guild_id), command_id);
+			return ctx.body(null, 204);
+		},
+	);
+
+	app.get(
+		'/guilds/:guild_id/commands/:command_id/counts',
+		RateLimitMiddleware(RateLimitConfigs.GUILD_COMMANDS_READ),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', GuildCommandParam),
+		OpenAPI({
+			operationId: 'list_guild_command_counts',
+			summary: 'List guild command counts',
+			responseSchema: GuildCommandCountListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Guild Commands'],
+			description: "Lists a command's counts, for those who may edit it.",
+		}),
+		async (ctx) => {
+			const {guild_id, command_id} = ctx.req.valid('param');
+			return ctx.json(
+				await ctx.get('guildCommandService').listCounts(ctx.get('user').id, createGuildID(guild_id), command_id),
+			);
+		},
+	);
+
+	app.put(
+		'/guilds/:guild_id/commands/:command_id/counts',
+		RateLimitMiddleware(RateLimitConfigs.GUILD_COMMANDS_WRITE),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', GuildCommandParam),
+		Validator('json', GuildCommandCountSetRequestSchema),
+		OpenAPI({
+			operationId: 'set_guild_command_count',
+			summary: 'Set guild command count',
+			responseSchema: null,
+			statusCode: 204,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Guild Commands'],
+			description: 'Sets one count, for those who may edit the command.',
+		}),
+		async (ctx) => {
+			const {guild_id, command_id} = ctx.req.valid('param');
+			await ctx
+				.get('guildCommandService')
+				.setCount(ctx.get('user').id, createGuildID(guild_id), command_id, ctx.req.valid('json'));
+			return ctx.body(null, 204);
+		},
+	);
+
+	app.delete(
+		'/guilds/:guild_id/commands/:command_id/counters/:counter_id/counts',
+		RateLimitMiddleware(RateLimitConfigs.GUILD_COMMANDS_WRITE),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', GuildCommandCounterParam),
+		OpenAPI({
+			operationId: 'reset_guild_command_counter',
+			summary: 'Reset guild command counter',
+			responseSchema: null,
+			statusCode: 204,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Guild Commands'],
+			description: "Deletes all of a counter's counts, for those who may edit the command.",
+		}),
+		async (ctx) => {
+			const {guild_id, command_id, counter_id} = ctx.req.valid('param');
+			await ctx
+				.get('guildCommandService')
+				.resetCounts(ctx.get('user').id, createGuildID(guild_id), command_id, counter_id);
 			return ctx.body(null, 204);
 		},
 	);
