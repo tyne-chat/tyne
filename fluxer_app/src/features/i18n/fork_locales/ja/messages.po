@@ -42,6 +42,10 @@ msgstr "ペルソナを追加"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "タグのペアを追加 ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "カウンターを追加"
+
 msgid "Add signal"
 msgstr "シグナルを追加"
 
@@ -147,6 +151,18 @@ msgstr "/{name} を実行できませんでした: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name} を保存できませんでした: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "ペルソナを別々に数える"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "次ごとに別々に数える:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "カウンター"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "のぞき見"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "既存の {existingCount} 件のペルソナをすべて完全に削除し、インポートしたペルソナに置き換えます。"
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "メンションされた人"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "使った人"
@@ -649,6 +670,10 @@ msgstr "シグネチャー絵文字でリアクションすると、アクティ
 msgid "Recent Personas"
 msgstr "最近のペルソナ"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "カウンターを削除"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "シグネチャー絵文字を削除"
@@ -670,9 +695,17 @@ msgstr "既存のペルソナをすべて置き換え (元に戻せません)"
 msgid "Request failed (HTTP {status})"
 msgstr "リクエストに失敗しました (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "カウントをリセット"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "全員のシグナルをリセット"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "{name} のカウントをリセットしますか?元に戻すことはできません。"
 
 msgid "Root Account (Default)"
 msgstr "ルートアカウント (デフォルト)"
@@ -984,6 +1017,14 @@ msgstr "他のコミュニティのコマンドを使用できます。"
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "外部のコマンドを使用"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "スクリプトでは {variable} として使います。実行のたびに先に1増えるので、最初の実行では1になります。"
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "小文字の英字、数字、_ を使い、英字で始めてください。スクリプトで既に使われている名前は使えません。"
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
