@@ -41,9 +41,9 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 ## Tags and escapes: matching
 
 - `matchPersona` picks the persona whose prefix and suffix are the longest match. A persona with
-  `auto_tag_disabled` is one whose tags are ignored (typing its tag sends the text as written).
-  `matchPersona` also ignores it when it is the selected (latched) persona, so its text goes out as
-  the account: a known gap (tyne-chat/tyne#130).
+  `auto_tag_disabled` is one whose tags are ignored (typing its tag sends the text as written). In
+  every other way it acts like any other persona, also when selected. The editor's "Don't match this
+  persona's tags" switch sets it.
 - Escapes, only while a persona is selected: `\\` alone clears the selection; `\\ text` sends as the
   account and clears it; `\ text` sends as the account and keeps it.
 - **`matchOutgoingMessage` is the send, not a question.** It records a use, may clear the
