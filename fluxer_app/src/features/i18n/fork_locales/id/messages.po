@@ -42,6 +42,10 @@ msgstr "Tambah Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Tambah Pasangan Tag ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Tambah penghitung"
+
 msgid "Add signal"
 msgstr "Tambah sinyal"
 
@@ -147,6 +151,18 @@ msgstr "Tidak dapat menjalankan /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Tidak dapat menyimpan /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Hitung persona secara terpisah"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Hitung terpisah untuk setiap:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Penghitung"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Intip"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Hapus permanen semua {existingCount} persona yang ada dan ganti sepenuhnya dengan persona yang diimpor."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Orang yang disebut"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Orang yang menjalankannya"
@@ -649,6 +670,10 @@ msgstr "Bereaksi dengan emoji tanda tangan akan selalu bereaksi sebagai persona 
 msgid "Recent Personas"
 msgstr "Persona Terbaru"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Hapus penghitung"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Hapus emoji tanda tangan"
@@ -670,9 +695,17 @@ msgstr "Ganti semua persona yang ada (Destruktif)"
 msgid "Request failed (HTTP {status})"
 msgstr "Permintaan gagal (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Atur ulang hitungan"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Reset sinyal untuk semua orang"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Atur ulang hitungan {name}? Ini tidak dapat dibatalkan."
 
 msgid "Root Account (Default)"
 msgstr "Akun Utama (Default)"
@@ -984,6 +1017,14 @@ msgstr "Gunakan perintah dari komunitas lain."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Gunakan perintah eksternal"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Gunakan dalam skrip sebagai {variable}. Setiap jalannya menambah satu lebih dulu, jadi yang pertama membaca 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Gunakan huruf kecil, angka, dan _, mulai dengan huruf, dan jangan gunakan nama yang sudah dipakai skrip."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."

@@ -42,6 +42,10 @@ msgstr "Přidat personu"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Přidat pár značek ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Přidat počítadlo"
+
 msgid "Add signal"
 msgstr "Přidat signál"
 
@@ -147,6 +151,18 @@ msgstr "Nepodařilo se spustit /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Nepodařilo se uložit /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Počítat persony zvlášť"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Počítat zvlášť pro každého:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Počítadla"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Nahlédnutí"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Trvale smažte všechny stávající persony ({existingCount}) a zcela je nahraďte importovanými."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Zmíněná osoba"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Kdo ho používá"
@@ -649,6 +670,10 @@ msgstr "Reagování podpisovým emoji vždy zareaguje jako tato persona, bez ohl
 msgid "Recent Personas"
 msgstr "Nedávné persony"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Odebrat počítadlo"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Odebrat podpisové emoji"
@@ -670,9 +695,17 @@ msgstr "Nahradit všechny stávající persony (destruktivní)"
 msgid "Request failed (HTTP {status})"
 msgstr "Požadavek selhal (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Vynulovat počty"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Resetovat signál pro všechny"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Vynulovat počty pro {name}? Tuto akci nelze vrátit zpět."
 
 msgid "Root Account (Default)"
 msgstr "Hlavní účet (Výchozí)"
@@ -984,6 +1017,14 @@ msgstr "Používat příkazy z jiných komunit."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Používat externí příkazy"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Ve skriptu ho použij jako {variable}. Každé spuštění nejdřív přičte jedničku, takže první spuštění přečte 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Použij malá písmena, číslice a _, začni písmenem a nepoužívej název, který už skripty používají."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
