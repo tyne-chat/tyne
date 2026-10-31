@@ -42,6 +42,10 @@ msgstr "Thêm persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Thêm cặp thẻ ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Thêm bộ đếm"
+
 msgid "Add signal"
 msgstr "Thêm tín hiệu"
 
@@ -147,6 +151,18 @@ msgstr "Không thể chạy /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Không thể lưu /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Đếm riêng từng persona"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Đếm riêng cho mỗi:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Bộ đếm"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Xem nhanh"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Xóa vĩnh viễn toàn bộ {existingCount} persona hiện có và thay thế hoàn toàn bằng các persona đã nhập."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Người được nhắc đến"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Người chạy lệnh"
@@ -649,6 +670,10 @@ msgstr "Bày tỏ cảm xúc bằng biểu tượng đặc trưng sẽ luôn ph�
 msgid "Recent Personas"
 msgstr "Persona gần đây"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Xóa bộ đếm"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Xóa biểu tượng cảm xúc đặc trưng"
@@ -670,9 +695,17 @@ msgstr "Thay thế toàn bộ persona hiện có (không thể khôi phục)"
 msgid "Request failed (HTTP {status})"
 msgstr "Yêu cầu thất bại (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Đặt lại số đếm"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Đặt lại tín hiệu cho mọi người"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Đặt lại số đếm của {name}? Không thể hoàn tác."
 
 msgid "Root Account (Default)"
 msgstr "Tài khoản gốc (Mặc định)"
@@ -984,6 +1017,14 @@ msgstr "Dùng lệnh từ các cộng đồng khác."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Dùng lệnh bên ngoài"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Dùng trong tập lệnh là {variable}. Mỗi lần chạy cộng một trước, nên lần đầu đọc được 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Dùng chữ thường, số và _, bắt đầu bằng chữ cái và không dùng tên mà tập lệnh đã dùng."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."

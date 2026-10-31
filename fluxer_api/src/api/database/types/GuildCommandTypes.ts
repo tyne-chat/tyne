@@ -14,6 +14,8 @@ export interface GuildCommandRow {
 	input_mode: string;
 	input_type: string;
 	input_hint: string | null;
+	/** JSON list of the command's counters; `GuildCommandCounters.ts` reads it. */
+	counters?: string | null;
 	creator_id: UserID;
 	created_at: Date;
 	updated_at: Date;
@@ -29,10 +31,30 @@ export const GUILD_COMMAND_COLUMNS = [
 	'input_mode',
 	'input_type',
 	'input_hint',
+	'counters',
 	'creator_id',
 	'created_at',
 	'updated_at',
 ] as const satisfies ReadonlyArray<keyof GuildCommandRow>;
+
+/** One count of a counter. */
+export interface GuildCommandCountRow {
+	guild_id: GuildID;
+	command_id: bigint;
+	counter_id: bigint;
+	scope_key: string;
+	value: number;
+	updated_ms: bigint;
+}
+
+export const GUILD_COMMAND_COUNT_COLUMNS = [
+	'guild_id',
+	'command_id',
+	'counter_id',
+	'scope_key',
+	'value',
+	'updated_ms',
+] as const satisfies ReadonlyArray<keyof GuildCommandCountRow>;
 
 /** Finds a command's community from its id alone, for the run route. */
 export interface GuildCommandIdRow {
