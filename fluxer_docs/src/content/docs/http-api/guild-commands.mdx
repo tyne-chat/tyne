@@ -56,6 +56,10 @@ Filters: `abs`, `append`, `at_least`, `at_most`, `capitalize`, `ceil`, `compact`
 
 Loops, other templates and all other tags and filters are refused. A render may allocate 100,000 characters and take 50 milliseconds.
 
+### Counters
+
+A command can have up to 5 counters, each read in the template by its name, such as `{{ hugs }}`. A run adds one to each, and the template reads the count with that run added, so the first run reads 1. A refused run or a repeated nonce counts nothing. Counts are kept by ID. `per` lists what a counter counts separately for: `person`, `target` and `channel`; empty for one count. `identity` is `persona` or `account`. A counter with `target` refuses a run whose input mentions nobody, and cannot be on a command with no input.
+
 ## Template issue object
 
 What stopped a template.
@@ -87,6 +91,7 @@ What stopped a template.
 | created_at | string | ISO 8601 timestamp |
 | updated_at | string | ISO 8601 timestamp |
 | template? | string | The template, at most 4000 characters; only for members who may create or manage commands |
+| counters? | array | The command's counters; only for members who may create or manage commands |
 
 ## Message command object
 
