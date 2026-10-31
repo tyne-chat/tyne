@@ -835,7 +835,7 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 								/>
 							</div>
 						)}
-						{isScript && PICKS_AT_RANDOM.test(draft.template) && (
+						{isScript && (PICKS_AT_RANDOM.test(draft.template) || draft.counters.length > 0) && (
 							<div data-flx="guild-commands.guild-commands-tab.run-again-row">
 								<Button
 									variant="secondary"

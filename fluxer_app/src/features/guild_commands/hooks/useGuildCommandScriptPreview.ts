@@ -28,6 +28,8 @@ export function useGuildCommandScriptPreview(params: {
 	const [attempt, setAttempt] = useState(0);
 	const latest = useRef(0);
 	const immediately = useRef(false);
+	/** Which run the preview stands for: Run again adds one, and any edit starts over. */
+	const run = useRef(1);
 
 	// `attempt` is here to ask for the same preview again.
 	useEffect(() => {
@@ -38,7 +40,9 @@ export function useGuildCommandScriptPreview(params: {
 			return;
 		}
 		const delay = immediately.current ? 0 : TYPING_DELAY_MS;
+		run.current = immediately.current ? run.current + 1 : 1;
 		immediately.current = false;
+		const previewedRun = run.current;
 		const timer = setTimeout(async () => {
 			try {
 				const res = await http.post<GuildCommandPreviewResponse>(ForkEndpoints.GUILD_COMMANDS_PREVIEW(guildId), {
@@ -46,7 +50,9 @@ export function useGuildCommandScriptPreview(params: {
 						template,
 						input: input === '' ? null : input,
 						channel_id: channelId,
-						...(counterNames === '' ? {} : {counters: counterNames.split(' ').map((name) => ({name, per: []}))}),
+						...(counterNames === ''
+							? {}
+							: {counters: counterNames.split(' ').map((name) => ({name, per: []})), run: previewedRun}),
 					},
 				});
 				if (request === latest.current && res.ok && res.body) setResult(res.body);

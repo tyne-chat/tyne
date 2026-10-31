@@ -232,5 +232,11 @@ describe('server command counters', () => {
 			.body({template: '{{ hugs }} {{ hugs | ordinal }}', counters: [{name: 'hugs', per: []}]})
 			.execute();
 		expect(preview.content).toBe('1 1st');
+
+		const later = await createBuilder<GuildCommandPreviewResponse>(harness, owner.token)
+			.post(`/guilds/${guild.id}/commands/preview`)
+			.body({template: '{{ hugs }}', counters: [{name: 'hugs', per: []}], run: 3})
+			.execute();
+		expect(later.content).toBe('3');
 	});
 });
