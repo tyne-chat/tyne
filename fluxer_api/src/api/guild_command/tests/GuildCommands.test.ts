@@ -2,6 +2,7 @@
 
 import {createTestAccount} from '@app/api/auth/tests/AuthTestUtils';
 import {createGuildID} from '@app/api/BrandedTypes';
+import {Config} from '@app/api/Config';
 import {createDmChannel, createFriendship, setupTestGuildWithMembers} from '@app/api/channel/tests/ChannelTestUtils';
 import {
 	acceptInvite,
@@ -12,6 +13,7 @@ import {
 	getChannel,
 	updateRole,
 } from '@app/api/guild/tests/GuildTestUtils';
+import {GuildCommandRepository} from '@app/api/guild_command/GuildCommandRepository';
 import {escapeGuildCommandName} from '@app/api/guild_command/GuildCommandTemplateEngine';
 import {resetForkGuildCommandUseCache} from '@app/api/guild_command/GuildCommandUses';
 import {backfillUseExternalCommands} from '@app/api/guild_command/UseExternalCommandsBackfill';
@@ -175,6 +177,112 @@ describe('server commands', () => {
 		expect(empty.content).toBe(`<@${owner.userId}> hugs 2nd things in general`);
 	});
 
+	describe('what a script sees', () => {
+		const SHOW = {name: 'show', template: '{{ target }}|{{ target.name }}', input_mode: 'required'};
+		const createPersona = (token: string, name: string) =>
+			createBuilder<{id: string}>(harness, token).post('/users/@me/personas').body({name}).expect(201).execute();
+
+		it("takes a mentioned persona's name when the persona is that person's", async () => {
+			const {owner, members, guild} = await setupTestGuildWithMembers(harness, 1);
+			const friend = members[0]!;
+			const persona = await createPersona(friend.token, 'Yami');
+			const command = await createCommand(owner.token, guild.id, SHOW).execute();
+
+			const message = await runCommand(owner.token, guild.system_channel_id!, command.id, {
+				input: `<@${friend.userId}:${persona.id}>`,
+			}).execute();
+
+			expect(message.content).toBe(`<@${friend.userId}:${persona.id}>|Yami`);
+		});
+
+		it("does not let a hand-written mention borrow someone else's persona", async () => {
+			const {owner, members, guild} = await setupTestGuildWithMembers(harness, 2);
+			const [friend, stranger] = [members[0]!, members[1]!];
+			const persona = await createPersona(stranger.token, 'Borrowed');
+			const command = await createCommand(owner.token, guild.id, SHOW).execute();
+
+			const message = await runCommand(owner.token, guild.system_channel_id!, command.id, {
+				input: `<@${friend.userId}:${persona.id}>`,
+			}).execute();
+
+			expect(message.content).toBe(`<@${friend.userId}>|${await nameOf(friend.token)}`);
+		});
+
+		it('sees an empty channel in a DM, and its own community still', async () => {
+			const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+			const command = await createCommand(owner.token, guild.id, {
+				name: 'where',
+				template: '[{{ channel }}][{{ channel.community.name }}]{{ community.name }}',
+				input_mode: 'none',
+			}).execute();
+			const friend = await createTestAccount(harness);
+			await createFriendship(harness, owner, friend);
+			const dm = await createDmChannel(harness, owner.token, friend.userId);
+
+			const message = await runCommand(owner.token, dm.id, command.id, {}).execute();
+
+			expect(message.content).toBe(`[][]${guild.name}`);
+		});
+
+		it("tells the channel's community from the command's own in another community", async () => {
+			const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+			const command = await createCommand(owner.token, guild.id, {
+				name: 'where',
+				template: '{{ channel.community.name }}/{{ community.name }}',
+				input_mode: 'none',
+			}).execute();
+			const other = await createGuild(harness, owner.token, 'Somewhere else');
+
+			const message = await runCommand(owner.token, other.system_channel_id!, command.id, {}).execute();
+
+			expect(message.content).toBe(`Somewhere else/${guild.name}`);
+		});
+
+		it('gives @everyone only to those allowed to use it', async () => {
+			const {owner, members, guild} = await setupTestGuildWithMembers(harness, 1);
+			const command = await createCommand(owner.token, guild.id, {
+				name: 'all',
+				template: '@everyone listen',
+				input_mode: 'none',
+			}).execute();
+
+			const byOwner = await runCommand(owner.token, guild.system_channel_id!, command.id, {}).execute();
+			const byMember = await runCommand(members[0]!.token, guild.system_channel_id!, command.id, {}).execute();
+
+			expect(byOwner.mention_everyone).toBe(true);
+			expect(byMember.mention_everyone).toBe(false);
+		});
+	});
+
+	it('refuses a message too long for the person running it, and posts nothing', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		const command = await createCommand(owner.token, guild.id, {
+			name: 'twice',
+			template: '{{ input }}{{ input }}',
+			input_mode: 'required',
+		}).execute();
+
+		await runCommand(owner.token, guild.system_channel_id!, command.id, {input: 'x'.repeat(2500)})
+			.expect(400)
+			.execute();
+
+		const messages = await createBuilder<Array<MessageResponse>>(harness, owner.token)
+			.get(`/channels/${guild.system_channel_id}/messages`)
+			.execute();
+		expect(messages.some((message) => message.command)).toBe(false);
+	});
+
+	it('stops at 500 commands in a community', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		const list = vi.spyOn(GuildCommandRepository.prototype, 'listByGuild').mockResolvedValue(new Array(499).fill({}));
+
+		await createCommand(owner.token, guild.id).expect(200).execute();
+		list.mockResolvedValue(new Array(500).fill({}));
+		await createCommand(owner.token, guild.id, {...TUCK, name: 'another'})
+			.expect(400, 'GUILD_COMMAND_LIMIT_REACHED')
+			.execute();
+	});
+
 	it('tells someone running a broken command only that it is broken', async () => {
 		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
 		const broken = await createCommand(owner.token, guild.id, {
@@ -223,6 +331,27 @@ describe('server commands', () => {
 				content: null,
 				issue: {code: 'unknown_filter', line: 2, column: 5, name: 'nosuch'},
 			});
+		});
+
+		it('slows down a flood of previews without signing anyone out', async () => {
+			const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+			const previous = {testMode: Config.dev.testModeEnabled, disabled: Config.dev.disableRateLimits};
+			Config.dev.testModeEnabled = false;
+			Config.dev.disableRateLimits = false;
+			try {
+				const preview = () =>
+					createBuilder(harness, owner.token)
+						.post(`/guilds/${guild.id}/commands/preview`)
+						.header('x-forwarded-for', '198.51.100.41')
+						.body({template: '{{ person.name }}'});
+				for (let request = 0; request < 30; request++) await preview().expect(200).execute();
+
+				await preview().expect(429).execute();
+			} finally {
+				Config.dev.testModeEnabled = previous.testMode;
+				Config.dev.disableRateLimits = previous.disabled;
+			}
+			await createBuilder(harness, owner.token).get('/users/@me').expect(200).execute();
 		});
 
 		it('needs Create Commands or Manage Commands', async () => {
