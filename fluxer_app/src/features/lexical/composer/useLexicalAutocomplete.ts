@@ -668,6 +668,7 @@ export function useLexicalAutocomplete({
 		memberSearchRank,
 		memberSearchResults,
 		permissionVersion,
+		personaSearchResults,
 		specialMentionsAllowed,
 	]);
 
