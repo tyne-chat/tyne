@@ -10,8 +10,7 @@ between runs, except counters.
 
 ## Writing a script for someone
 
-Give these fields, for Community Settings > Commands > New command > Use the script editor (web and
-desktop):
+Give these fields, for Community Settings > Commands > New command > Use the script editor:
 
 - **Name:** 1-32 lowercase letters, digits, `-` or `_`. Not one of: shrug, tableflip, unflip, me,
   spoiler, tts, nick, kick, ban, dm, msg, saved, favorites, sticker, gif, persona.
