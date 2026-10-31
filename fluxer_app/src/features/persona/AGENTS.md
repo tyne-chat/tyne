@@ -58,9 +58,10 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   goes on the wire (`persona_id`, built in `messaging/utils/MessageRequestUtils.ts`); the server
   checks ownership and builds the `subprofile` object itself.
 - Uploads and voice messages use the selection only (`getActiveSubprofile`). Stickers, GIFs and
-  memes match the draft: a draft that was only a tag is used up by the send, any other text stays in
-  the composer (`messaging/utils/ExpressionDraftPersona.ts`). A retry resends the message's own
-  persona. Threads and forum posts resolve against the parent channel.
+  memes match the draft (`resolveExpressionPersona`): a draft that was only a tag is used up by the
+  send, any other text stays in the composer (`messaging/utils/ExpressionDraftPersona.ts`), and a
+  backslash sends as the account. A retry resends the message's own persona. Threads and forum posts
+  resolve against the parent channel.
 - A forward and its comment are one speaker (`resolveForwardPersona`): a tag in the comment decides
   for both; otherwise the selection where the forward started, then the destination's, then the
   account.
