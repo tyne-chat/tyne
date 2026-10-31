@@ -209,6 +209,10 @@ msgstr "Etichetă de afișare"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Eticheta de afișare va apărea lângă numele tuturor personas din mesaje. Dacă nu setezi nicio etichetă, se va afișa poza de profil a contului tău."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Nu recunoaște etichetele acestei persona"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Dublu clic pentru editare"
@@ -977,6 +981,10 @@ msgstr "Pornește bara de semnale"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Scrie {output} sau {tag} pentru sugestii."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Dacă scrii una dintre aceste etichete, nu se va comuta la această persona. Eticheta este trimisă așa cum a fost scrisă."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
