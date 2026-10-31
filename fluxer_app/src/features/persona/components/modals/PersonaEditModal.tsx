@@ -49,6 +49,7 @@ import type React from 'react';
 import {useCallback, useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
 import {type Persona, PersonaStore} from '../../state/PersonaStore';
+import {pasteLinkOverSelection} from '../../utils/PersonaBioLinkPaste';
 import {PersonaTag} from '../PersonaTag';
 import styles from './PersonaEditModal.module.css';
 
@@ -289,6 +290,9 @@ interface PersonaFormState {
 	pendingAvatar: string | null;
 	pendingBanner: string | null;
 }
+
+// The field grows with its text up to here, and can be dragged to any height up to here.
+const BIO_MAX_ROWS = 30;
 
 const emptyFormState = (): PersonaFormState => ({
 	name: '',
@@ -954,22 +958,25 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 							/>
 
 							{/* 6. About me */}
-							<Textarea
-								label={<Trans>About me</Trans>}
-								placeholder={i18n._(BIO_PLACEHOLDER_DESCRIPTOR)}
-								maxLength={4096}
-								minRows={3}
-								maxRows={8}
-								showCharacterCount={true}
-								footer={
-									<div className={styles.inputFooter} data-flx="persona.persona-edit-modal.input-footer">
-										<Trans>You can use links, emoji, and Markdown.</Trans>
-									</div>
-								}
-								value={formData.bio}
-								onChange={(e) => setFormData((prev) => ({...prev, bio: e.target.value}))}
-								data-flx="persona.persona-edit-modal.textarea.bio"
-							/>
+							<div className={styles.bioField} data-flx="persona.persona-edit-modal.bio-field">
+								<Textarea
+									label={<Trans>About me</Trans>}
+									placeholder={i18n._(BIO_PLACEHOLDER_DESCRIPTOR)}
+									maxLength={4096}
+									minRows={3}
+									maxRows={BIO_MAX_ROWS}
+									showCharacterCount={true}
+									footer={
+										<div className={styles.inputFooter} data-flx="persona.persona-edit-modal.input-footer">
+											<Trans>You can use links, emoji, and Markdown.</Trans>
+										</div>
+									}
+									value={formData.bio}
+									onChange={(e) => setFormData((prev) => ({...prev, bio: e.target.value}))}
+									onPaste={pasteLinkOverSelection}
+									data-flx="persona.persona-edit-modal.textarea.bio"
+								/>
+							</div>
 
 							{/* 7. Persona Tags (Prefix & Suffix) */}
 							<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block">
