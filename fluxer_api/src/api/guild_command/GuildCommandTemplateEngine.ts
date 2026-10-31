@@ -211,11 +211,11 @@ export class GuildCommandTemplateEngine {
 	}
 
 	/** The filled-in message, without the spacing that tags on lines of their own leave around it. */
-	render(template: string, scope: GuildCommandScope): string {
+	render(template: string, scope: GuildCommandScope, counts: Readonly<Record<string, number>> = {}): string {
 		const parsed = this.parse(template);
 		let output: string;
 		try {
-			output = String(this.engine.renderSync(parsed, scope));
+			output = String(this.engine.renderSync(parsed, {...scope, ...counts}));
 		} catch (error) {
 			throw new GuildCommandTemplateError(describeTemplateProblem(error, 'failed'));
 		}
