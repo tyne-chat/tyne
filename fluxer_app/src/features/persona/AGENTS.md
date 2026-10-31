@@ -61,6 +61,9 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   memes match the draft: a draft that was only a tag is used up by the send, any other text stays in
   the composer (`messaging/utils/ExpressionDraftPersona.ts`). A retry resends the message's own
   persona. Threads and forum posts resolve against the parent channel.
+- A forward and its comment are one speaker (`resolveForwardPersona`): a tag in the comment decides
+  for both; otherwise the selection where the forward started, then the destination's, then the
+  account.
 - Editing (`matchEditMessage`): a leading `\` on a persona's message removes the persona, a tag
   switches to that persona, and anything else leaves the persona as it is (the request omits it).
   When the message's text already started with `\`, the backslash is text and removes nothing.
