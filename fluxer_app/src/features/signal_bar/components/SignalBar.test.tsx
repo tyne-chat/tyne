@@ -49,6 +49,7 @@ import {http} from '@app/features/platform/transport/RestTransport';
 import {SignalBar} from '@app/features/signal_bar/components/SignalBar';
 import styles from '@app/features/signal_bar/components/SignalBar.module.css';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
+import FocusRingContext, {FocusRingContextManager} from '@app/features/ui/focus_ring/FocusRingContext';
 import type {ChannelSignalEntry, SignalBarSignal} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
 import {runInAction} from 'mobx';
 import {act} from 'react';
@@ -191,6 +192,23 @@ describe('SignalBar', () => {
 			);
 		});
 		expect(container.innerHTML).toBe('');
+	});
+
+	it('moves the focus ring with the caret when the bar changes shape', async () => {
+		setSignals([READING]);
+		getMock.mockResolvedValue({ok: true, body: {enabled: true, bar_version: 1, entries: []}} as never);
+		const focusRing = new FocusRingContextManager();
+		const invalidate = vi.spyOn(focusRing, 'invalidate');
+		await act(async () => {
+			root.render(
+				<FocusRingContext.Provider value={focusRing}>
+					<SignalBar channel={channel()} attached={true} data-flx="signal-bar.signal-bar-test.signal-bar--focus-ring" />
+				</FocusRingContext.Provider>,
+			);
+		});
+		invalidate.mockClear();
+		await act(async () => button('Hide signal bar')?.click());
+		expect(invalidate).toHaveBeenCalled();
 	});
 
 	it('collapses to the caret when no signal is on', async () => {

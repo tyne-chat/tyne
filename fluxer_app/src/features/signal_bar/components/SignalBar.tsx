@@ -18,6 +18,8 @@ import {
 	moveSignal,
 } from '@app/features/signal_bar/utils/SignalUtils';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
+import FocusRing from '@app/features/ui/focus_ring/FocusRing';
+import FocusRingContext from '@app/features/ui/focus_ring/FocusRingContext';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import Users from '@app/features/user/state/Users';
 import {Permissions} from '@fluxer/constants/src/ChannelConstants';
@@ -28,7 +30,7 @@ import {CaretDownIcon, CaretUpIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useContext, useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useDrag, useDrop} from 'react-dnd';
 
 const SIGNAL_BAR_DESCRIPTOR = msg({
@@ -156,64 +158,69 @@ const SignalButton = observer(
 		}, [canToggle, mine, channel.id, signal.id]);
 		return (
 			<Tooltip text={tooltip} data-flx="signal-bar.signal-button.tooltip">
-				<button
-					ref={setRef}
-					type="button"
-					className={clsx(
-						styles.signal,
-						!canToggle && styles.signalReadOnly,
-						canManage && styles.signalDraggable,
-						isDragging && styles.signalDragging,
-					)}
-					aria-label={ariaLabel}
-					aria-pressed={mine}
-					onClick={handleClick}
-					onContextMenu={canReset ? openMenu : suppressMenu}
-					data-flx="signal-bar.signal-button.button"
-				>
-					{imageUrl ? (
-						<img
-							className={clsx(styles.emoji, !lit && styles.emojiOff)}
-							src={imageUrl}
-							alt=""
-							draggable={false}
-							data-flx="signal-bar.signal-button.emoji"
-						/>
-					) : (
-						<span className={clsx(styles.emojiText, !lit && styles.emojiOff)} data-flx="signal-bar.signal-button.span">
-							{signal.emoji_name}
-						</span>
-					)}
-					{lit && (
-						<span className={styles.badges} data-flx="signal-bar.signal-button.badges">
-							{entries.slice(0, MAX_BADGES).map((entry) => {
-								const user = Users.getUser(entry.user.id);
-								if (!user) return null;
-								return (
-									<span
-										className={styles.badge}
-										key={getSignalEntryKey(entry)}
-										data-flx="signal-bar.signal-button.badge"
-									>
-										<PersonaAvatar
-											user={user}
-											size={BADGE_SIZE}
-											persona={entry.subprofile}
-											guildId={guildId ?? undefined}
-											disableStatusTooltip={true}
-											data-flx="signal-bar.signal-button.avatar"
-										/>
+				<FocusRing offset={-2} data-flx="signal-bar.signal-button.focus-ring">
+					<button
+						ref={setRef}
+						type="button"
+						className={clsx(
+							styles.signal,
+							!canToggle && styles.signalReadOnly,
+							canManage && styles.signalDraggable,
+							isDragging && styles.signalDragging,
+						)}
+						aria-label={ariaLabel}
+						aria-pressed={mine}
+						onClick={handleClick}
+						onContextMenu={canReset ? openMenu : suppressMenu}
+						data-flx="signal-bar.signal-button.button"
+					>
+						{imageUrl ? (
+							<img
+								className={clsx(styles.emoji, !lit && styles.emojiOff)}
+								src={imageUrl}
+								alt=""
+								draggable={false}
+								data-flx="signal-bar.signal-button.emoji"
+							/>
+						) : (
+							<span
+								className={clsx(styles.emojiText, !lit && styles.emojiOff)}
+								data-flx="signal-bar.signal-button.span"
+							>
+								{signal.emoji_name}
+							</span>
+						)}
+						{lit && (
+							<span className={styles.badges} data-flx="signal-bar.signal-button.badges">
+								{entries.slice(0, MAX_BADGES).map((entry) => {
+									const user = Users.getUser(entry.user.id);
+									if (!user) return null;
+									return (
+										<span
+											className={styles.badge}
+											key={getSignalEntryKey(entry)}
+											data-flx="signal-bar.signal-button.badge"
+										>
+											<PersonaAvatar
+												user={user}
+												size={BADGE_SIZE}
+												persona={entry.subprofile}
+												guildId={guildId ?? undefined}
+												disableStatusTooltip={true}
+												data-flx="signal-bar.signal-button.avatar"
+											/>
+										</span>
+									);
+								})}
+								{entries.length > MAX_BADGES && (
+									<span className={styles.more} data-flx="signal-bar.signal-button.more">
+										+{entries.length - MAX_BADGES}
 									</span>
-								);
-							})}
-							{entries.length > MAX_BADGES && (
-								<span className={styles.more} data-flx="signal-bar.signal-button.more">
-									+{entries.length - MAX_BADGES}
-								</span>
-							)}
-						</span>
-					)}
-				</button>
+								)}
+							</span>
+						)}
+					</button>
+				</FocusRing>
 			</Tooltip>
 		);
 	},
@@ -245,6 +252,16 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 		if (!next) return;
 		void SignalBarStore.saveSignals(next).finally(() => setDraft(null));
 	}, []);
+	// Collapsed, the bar keeps the signals someone has on and drops the rest; with none on, only the
+	// caret is left. Each signal keeps its place in the whole list, which reordering by drag uses.
+	const shown = (draft ?? signals)
+		.map((signal, index) => ({signal, index}))
+		.filter(({signal}) => !collapsed || SignalBarStore.getEntries(channel.id, signal.id).length > 0);
+	// The caret moves when the bar changes shape, and its focus ring only follows a change of size.
+	const focusRing = useContext(FocusRingContext);
+	useLayoutEffect(() => {
+		focusRing.invalidate();
+	}, [focusRing, shown.length]);
 	if (!hasSignals || !SignalBarStore.isEnabled(channel.id)) return null;
 	const isGuildChannel = channel.guildId != null;
 	const canToggle = !isGuildChannel || Permission.can(Permissions.SEND_MESSAGES, channel);
@@ -252,11 +269,6 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 		? Permission.can(Permissions.MANAGE_GUILD, channel)
 		: !channel.isGroupDM() || channel.ownerId === Authentication.currentUserId;
 	const toggleLabel = i18n._(collapsed ? SHOW_SIGNAL_BAR_DESCRIPTOR : HIDE_SIGNAL_BAR_DESCRIPTOR);
-	// Collapsed, the bar keeps the signals someone has on and drops the rest; with none on, only the
-	// caret is left. Each signal keeps its place in the whole list, which reordering by drag uses.
-	const shown = (draft ?? signals)
-		.map((signal, index) => ({signal, index}))
-		.filter(({signal}) => !collapsed || SignalBarStore.getEntries(channel.id, signal.id).length > 0);
 	return (
 		<div
 			className={clsx(
@@ -287,20 +299,22 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 				</div>
 			)}
 			<Tooltip text={toggleLabel} data-flx="signal-bar.signal-bar.tooltip">
-				<button
-					type="button"
-					className={styles.caret}
-					aria-label={toggleLabel}
-					aria-expanded={!collapsed}
-					onClick={() => SignalBarStore.setCollapsed(!collapsed)}
-					data-flx="signal-bar.signal-bar.caret"
-				>
-					{collapsed ? (
-						<CaretUpIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-up-icon" />
-					) : (
-						<CaretDownIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-down-icon" />
-					)}
-				</button>
+				<FocusRing offset={-2} data-flx="signal-bar.signal-bar.focus-ring">
+					<button
+						type="button"
+						className={styles.caret}
+						aria-label={toggleLabel}
+						aria-expanded={!collapsed}
+						onClick={() => SignalBarStore.setCollapsed(!collapsed)}
+						data-flx="signal-bar.signal-bar.caret"
+					>
+						{collapsed ? (
+							<CaretUpIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-up-icon" />
+						) : (
+							<CaretDownIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-down-icon" />
+						)}
+					</button>
+				</FocusRing>
 			</Tooltip>
 		</div>
 	);
