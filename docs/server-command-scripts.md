@@ -6,7 +6,7 @@ people who know Liquid and want the differences. Every example was run on the se
 A server command is a slash command a community defines, such as `/tuck`. When a member runs it, the
 server fills in its script once and posts the result as an ordinary message from that member. A
 script is Liquid with most of it removed: no loops, no other files, and nothing is remembered
-between runs. There are no counters yet.
+between runs, except counters.
 
 ## Writing a script for someone
 
@@ -19,6 +19,7 @@ desktop):
 - **Input:** None (running it with text is refused), Optional, or Required (running it without text
   is refused).
 - **Script:** in a code block, at most 4,000 characters.
+- **Counters:** optional, see "Counters".
 
 Use only what this page lists. Liquid you remember from elsewhere may not work here, so read
 "Differences from standard Liquid" before answering. Then:
@@ -40,8 +41,8 @@ Use only what this page lists. Liquid you remember from elsewhere may not work h
 - `community.name`: the community that owns the command. It can run elsewhere: in another community,
   or a DM.
 
-Those are all the variables. Others (`user`, `author`, `args`, `count`, `now`) print nothing, with no
-error, and so does a misspelt name. Names are already escaped for Markdown, and when someone posts as
+Those are all the variables, with any counters the command has. Others (`user`, `author`, `args`,
+`count`, `now`) print nothing, with no error, and so does a misspelt name. Names are already escaped for Markdown, and when someone posts as
 a persona, `person.name` is the persona's name. To avoid notifying someone, use the name, not the
 mention.
 
@@ -193,6 +194,35 @@ ordinal suffix (th), `%Z` zone. `%-d` drops zeros. `%F`, `%T`, `%D`, `%R` and `%
 print as they are, so write `%Y-%m-%d` and `%H:%M:%S`.
 
 To show a time in each reader's own time zone, use a timestamp: `<t:{{ "now" | date: "%s" }}:R>`.
+
+## Counters
+
+A command can have up to 5 counters. They are not variables you create in the script: each is set up
+in the command's Counters section, then read by its name, such as `{{ hugs }}`. Names use lowercase
+letters, digits and `_`, start with a letter, and cannot be a variable's name.
+
+- Every run adds one to each counter, and the script reads the count with this run added: the first
+  run reads 1, so `{% if hugs == 1 %}` means the first time. The value is a number.
+- A counter counts separately for any mix of: the person running it, the person mentioned, the
+  channel. Choose none for one count for the whole command; the person running it and the person
+  mentioned together count each pair.
+- Counts are kept by account or persona, so changing a name changes nothing. Personas count
+  separately unless that option is turned off.
+- A counter kept per person mentioned needs a real mention: without one the command is refused and
+  counts nothing, so the command's input cannot be None.
+- A refused run counts nothing. Deleting a message does not lower a count.
+- Two people running a command at the same instant can both read the same number; the stored count
+  still goes up by two.
+
+Input: Required. Counters: `hugs`, for the person mentioned.
+
+```liquid
+{% if hugs == 1 %}
+{{ target.name }} just got their first hug!
+{% else %}
+{{ target.name }} has been hugged {{ hugs }} {{ hugs | plural: "time", "times" }}!
+{% endif %}
+```
 
 ## Message formatting
 
