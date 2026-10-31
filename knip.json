@@ -2,6 +2,7 @@
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"include": ["files", "exports", "types", "dependencies", "unlisted", "binaries", "catalog"],
 	"ignoreExportsUsedInFile": true,
+	"ignore": ["e2e/**"],
 	"ignoreDependencies": ["@bufbuild/protoc-gen-es", "@tailwindcss/cli", "@types/events", "events", "tailwindcss"],
 	"ignoreFiles": [
 		"fluxer_admin/src/styles/app.css",
@@ -9,8 +10,7 @@
 		"fluxer_app_proxy/src/routes/instance_brand_preboot.js",
 		"fluxer_app_proxy/src/routes/saturation_preboot.js",
 		"fluxer_app/src/features/voice/utils/camera-effects/models/selfie_segmentation_256x256.d.onnx.ts",
-		"fluxer_app/src/media/images/i-like-food.d.svg.ts",
-		"e2e/**"
+		"fluxer_app/src/media/images/i-like-food.d.svg.ts"
 	],
 	"ignoreIssues": {
 		"fluxer_api/src/api/infrastructure/activity/Contract.generated.ts": ["exports", "types"],
