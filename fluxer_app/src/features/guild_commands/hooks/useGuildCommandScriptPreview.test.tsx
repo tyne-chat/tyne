@@ -122,4 +122,26 @@ describe('useGuildCommandScriptPreview', () => {
 		await settle(0);
 		expect(post).toHaveBeenCalledTimes(2);
 	});
+
+	it('counts up with each Run again, and starts over on an edit', async () => {
+		const withCounter = {...initial, counterNames: ['hugs']};
+		const runs = () => post.mock.calls.map((call) => (call[1] as {body: {run?: number}}).body.run);
+		await show(withCounter);
+		await settle(600);
+		act(() => current.runAgain());
+		await settle(0);
+		act(() => current.runAgain());
+		await settle(0);
+		await show({...withCounter, input: 'there'});
+		await settle(600);
+
+		expect(runs()).toEqual([1, 2, 3, 1]);
+	});
+
+	it('sends no run for a script without counters', async () => {
+		await show(initial);
+		await settle(600);
+
+		expect((post.mock.calls[0]![1] as {body: object}).body).not.toHaveProperty('run');
+	});
 });

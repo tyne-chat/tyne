@@ -99,6 +99,7 @@ vi.mock('@app/features/ui/components/form/FormInput', () => ({
 		</div>
 	),
 }));
+vi.mock('@app/features/ui/checkbox/Checkbox', () => ({Checkbox: () => null}));
 vi.mock('@app/features/ui/components/Spinner', () => ({Spinner: () => <div data-flx="spinner" />}));
 vi.mock('@app/features/ui/radio_group/RadioGroup', () => ({
 	RadioGroup: () => <div data-flx="guild-commands.guild-commands-tab-test.radio-group.div" />,
@@ -358,6 +359,52 @@ describe('GuildCommandsTab', () => {
 
 		expect(nameField().value).toBe('hug');
 		expect(mocks.store.clearEditingRequest).not.toHaveBeenCalled();
+	});
+
+	const counterPart = (name: string) =>
+		container.querySelector<HTMLElement>(`[data-flx="guild-commands.guild-command-counters-section.${name}"]`);
+
+	it('adds a counter and saves it with the command', async () => {
+		await show([command('1', 'hug')]);
+		await click(counterPart('add'));
+		await type(counterPart('name'), 'hugs');
+
+		await press('onSave');
+
+		expect(mocks.patch.mock.calls[0]![1].body.counters).toEqual([
+			{id: null, name: 'hugs', per: [], identity: 'persona'},
+		]);
+	});
+
+	it.each([['person'], ['Has Space'], ['1st']])('does not save a counter called %s', async (name) => {
+		await show([command('1', 'hug')]);
+		await click(counterPart('add'));
+		await type(counterPart('name'), name);
+
+		await press('onSave');
+
+		expect(counterPart('name-error')).not.toBeNull();
+		expect(mocks.patch).not.toHaveBeenCalled();
+	});
+
+	it('offers no Reset for a counter not saved yet, and asks first for one that is', async () => {
+		const saved = {id: '5', name: 'hugs', per: [], identity: 'persona'} as const;
+		await show([command('1', 'hug', {counters: [{...saved, per: []}]})]);
+		await click(counterPart('reset'));
+		expect(mocks.push).toHaveBeenCalledTimes(1);
+		expect(mocks.delete).not.toHaveBeenCalled();
+
+		await click(counterPart('add'));
+		expect(container.querySelectorAll('[data-flx="guild-commands.guild-command-counters-section.reset"]')).toHaveLength(
+			1,
+		);
+	});
+
+	it('stops offering new counters at five', async () => {
+		await show([command('1', 'hug')]);
+		for (let count = 0; count < 5; count++) await click(counterPart('add'));
+
+		expect(counterPart('add')).toBeNull();
 	});
 
 	it('asks before deleting', async () => {
