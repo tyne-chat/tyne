@@ -209,6 +209,10 @@ msgstr "Таг за показване"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Тагът за показване ще се появява до имената на всички персони в съобщенията. Ако няма зададен таг, ще се показва профилната снимка на вашия акаунт."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Без разпознаване на таговете на тази персона"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Двойно щракване за редактиране"
@@ -977,6 +981,10 @@ msgstr "Включване на лентата със сигнали"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Напишете {output} или {tag} за предложения."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Въвеждането на някой от тези тагове няма да превключи към тази персона. Тагът се изпраща както е написан."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
