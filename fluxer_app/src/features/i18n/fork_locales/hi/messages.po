@@ -209,6 +209,10 @@ msgstr "डिस्प्ले टैग"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "डिस्प्ले टैग मैसेज में सभी परसोना नाम के आगे दिखाई देगा। यदि कोई डिस्प्ले टैग सेट नहीं है, तो आपकी अकाउंट प्रोफ़ाइल पिक्चर दिखाई जाएगी।"
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "इस परसोना के टैग से मिलान न करें"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "एडिट करने के लिए डबल-क्लिक करें"
@@ -977,6 +981,10 @@ msgstr "सिग्नल बार चालू करें"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "सुझावों के लिए {output} या {tag} टाइप करें।"
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "इनमें से कोई टैग लिखने पर इस परसोना पर स्विच नहीं होगा। टैग वैसा ही भेजा जाएगा जैसा लिखा गया है।"
 
 #. Persona visibility unlisted
 msgid "Unlisted"
