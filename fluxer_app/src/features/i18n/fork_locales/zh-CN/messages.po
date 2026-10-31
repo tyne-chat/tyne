@@ -42,6 +42,10 @@ msgstr "添加人格"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "添加标签对（{0}/5）"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "添加计数器"
+
 msgid "Add signal"
 msgstr "添加信号"
 
@@ -147,6 +151,18 @@ msgstr "无法运行 /{name}：{detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "无法保存 /{name}：{detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "分别计数人格"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "分别计数:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "计数器"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "预览"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "永久删除全部 {existingCount} 个现有人格，并用导入的人格完全替换。"
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "被提及的人"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "使用者"
@@ -649,6 +670,10 @@ msgstr "使用专属表情符号回应时，无论当前活跃角色是谁，都
 msgid "Recent Personas"
 msgstr "最近使用的人格"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "移除计数器"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "移除专属表情符号"
@@ -670,9 +695,17 @@ msgstr "替换所有现有人格（不可恢复）"
 msgid "Request failed (HTTP {status})"
 msgstr "请求失败（HTTP {status}）"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "重置计数"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "为所有人重置信号"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "要重置 {name} 的计数吗?此操作无法撤销。"
 
 msgid "Root Account (Default)"
 msgstr "根账户 (默认)"
@@ -984,6 +1017,14 @@ msgstr "使用其他社区的命令。"
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "使用外部命令"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "在脚本中以 {variable} 使用。每次运行会先加一,所以第一次读到的是 1。"
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "请使用小写字母、数字和 _,以字母开头,且不要使用脚本已占用的名称。"
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
