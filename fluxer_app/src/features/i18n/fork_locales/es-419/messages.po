@@ -209,6 +209,10 @@ msgstr "Etiqueta de visualización"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "La etiqueta de visualización aparecerá junto al nombre de todas las personas en los mensajes. Si no configuras ninguna, se mostrará la foto de perfil de tu cuenta."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "No reconocer las etiquetas de esta persona"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Doble clic para editar"
@@ -977,6 +981,10 @@ msgstr "Activar barra de señales"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Escribe {output} o {tag} para ver sugerencias."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Escribir una de estas etiquetas no cambiará a esta persona. La etiqueta se envía tal como está escrita."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
