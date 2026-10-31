@@ -30,7 +30,9 @@ installVoiceMenuTestBootstrap();
 
 const {PersonaStore} = await import('@app/features/persona/state/PersonaStore');
 const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
-const {consumePersonaCommand, resolveOutgoingPersona} = await import('@app/features/persona/utils/OutgoingPersona');
+const {consumePersonaCommand, resolveForwardPersona, resolveOutgoingPersona} = await import(
+	'@app/features/persona/utils/OutgoingPersona'
+);
 
 describe('resolveOutgoingPersona', () => {
 	let foxId: string;
@@ -105,6 +107,83 @@ describe('consumePersonaCommand', () => {
 		await PersonaStore.setActivePersona(fox.id, true);
 		expect(consumePersonaCommand(null, 'hello')).toBe(false);
 		expect(PersonaStore.activePersona?.id).toBe(fox.id);
+	});
+});
+
+describe('resolveForwardPersona', () => {
+	const SOURCE = '1500000000000000001';
+	const ROOM = '1500000000000000002';
+	let foxId: string;
+	let baoId: string;
+
+	beforeEach(() => {
+		PersonaStore.reset();
+		foxId = addTestPersona(PersonaStore, {name: 'Fox'}).id;
+		baoId = addTestPersona(PersonaStore, {name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]}).id;
+	});
+
+	afterEach(() => {
+		PersonaStore.reset();
+		vi.restoreAllMocks();
+	});
+
+	async function selectPerChannel(selections: Record<string, string>): Promise<void> {
+		await PersonaStore.setActivePersonaScope('channel');
+		for (const [channel_id, persona_id] of Object.entries(selections)) {
+			PersonaStore.handleChannelStateUpdate({channel_id, persona_id});
+		}
+	}
+
+	it('goes out as the account with nothing selected', () => {
+		expect(resolveForwardPersona(SOURCE, ROOM, '')).toEqual({content: '', subprofile: undefined});
+	});
+
+	it('goes out as the selected persona, also with no comment', async () => {
+		await PersonaStore.setActivePersona(foxId, true);
+		expect(resolveForwardPersona(SOURCE, ROOM, '').subprofile).toMatchObject({id: foxId, name: 'Fox'});
+		expect(resolveForwardPersona(SOURCE, ROOM, 'look').subprofile).toMatchObject({id: foxId, name: 'Fox'});
+	});
+
+	it("prefers the source channel's selection over the destination's", async () => {
+		await selectPerChannel({[SOURCE]: foxId, [ROOM]: baoId});
+		expect(resolveForwardPersona(SOURCE, ROOM, '').subprofile?.id).toBe(foxId);
+	});
+
+	it("falls back to the destination's selection", async () => {
+		await selectPerChannel({[ROOM]: baoId});
+		expect(resolveForwardPersona(SOURCE, ROOM, '').subprofile?.id).toBe(baoId);
+	});
+
+	it('goes out as the account with no selection on either side', async () => {
+		await selectPerChannel({'1500000000000000003': baoId});
+		expect(resolveForwardPersona(SOURCE, ROOM, '').subprofile).toBeUndefined();
+	});
+
+	it('lets a tag in the comment decide for the forward and the comment', async () => {
+		await PersonaStore.setActivePersona(foxId, true);
+		const outgoing = resolveForwardPersona(SOURCE, ROOM, 'B: look');
+		expect(outgoing.content).toBe('look');
+		expect(outgoing.subprofile?.id).toBe(baoId);
+	});
+
+	it('leaves nothing to send as a comment when the comment is only a tag', () => {
+		const outgoing = resolveForwardPersona(SOURCE, ROOM, 'B:');
+		expect(outgoing.content).toBe('');
+		expect(outgoing.subprofile?.id).toBe(baoId);
+	});
+
+	it('goes out as the account when the comment escapes the selection', async () => {
+		await PersonaStore.setActivePersona(foxId, true);
+		const outgoing = resolveForwardPersona(SOURCE, ROOM, '\\ look');
+		expect(outgoing.content).toBe('look');
+		expect(outgoing.subprofile).toBeUndefined();
+	});
+
+	it("escapes the destination's selection when it is the one that applies", async () => {
+		await selectPerChannel({[ROOM]: baoId});
+		const outgoing = resolveForwardPersona(SOURCE, ROOM, '\\ look');
+		expect(outgoing.content).toBe('look');
+		expect(outgoing.subprofile).toBeUndefined();
 	});
 });
 
