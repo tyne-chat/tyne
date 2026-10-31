@@ -33,7 +33,7 @@ import {useCallback} from 'react';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {isDraftUsedUpByExpression} from '@app/features/messaging/utils/ExpressionDraftPersona';
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
-import {resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
+import {resolveExpressionPersona, resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
 
 interface UseMessageSubmissionOptions {
 	accountKey: string | null;
@@ -231,22 +231,12 @@ export const useMessageSubmission = ({
 			const draft =
 				(sendOptions.draftOverride !== undefined ? sendOptions.draftOverride : Drafts.getDraft(channel.id)) || '';
 			const draftUsedUp = isDraftUsedUpByExpression(channel.id, draft);
-			const draftMatch = draft
-				? PersonaStore.matchOutgoingMessage(channel.id, draft, sendOptions.hasAttachments, {allowEmptyContent: true})
-				: null;
-			let matchedPersona = draftMatch?.matched && draftMatch.persona ? draftMatch.persona : null;
-
-			if (!matchedPersona) {
-				const fallbackMatch = PersonaStore.matchOutgoingMessage(
-					channel.id,
-					messageData.content,
-					sendOptions.hasAttachments,
-					{allowEmptyContent: true},
-				);
-				if (fallbackMatch.matched && fallbackMatch.persona) {
-					matchedPersona = fallbackMatch.persona;
-				}
-			}
+			const matchedPersona = resolveExpressionPersona(
+				channel.id,
+				draft,
+				messageData.content,
+				sendOptions.hasAttachments,
+			);
 
 			if (draftUsedUp) {
 				DraftCommands.deleteDraft(accountKey, channel.id);
