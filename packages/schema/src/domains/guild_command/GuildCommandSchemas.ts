@@ -12,6 +12,24 @@ export const MAX_GUILD_COMMAND_DESCRIPTION_LENGTH = 100;
 export const MAX_GUILD_COMMAND_HINT_LENGTH = 100;
 export const MAX_GUILD_COMMAND_TEMPLATE_LENGTH = 4000;
 export const MAX_GUILD_COMMAND_INPUT_LENGTH = 10_000;
+export const MAX_GUILD_COMMAND_COUNTERS = 5;
+
+/** A counter's name is a variable in the template, so it follows the same rules as one. */
+export const GUILD_COMMAND_COUNTER_NAME_PATTERN = /^[a-z][a-z0-9_]{0,31}$/;
+
+export const RESERVED_GUILD_COMMAND_COUNTER_NAMES: ReadonlySet<string> = new Set([
+	'person',
+	'input',
+	'target',
+	'channel',
+	'community',
+	'true',
+	'false',
+	'nil',
+	'null',
+	'blank',
+	'empty',
+]);
 
 /**
  * The composer's draft persistence accepts only these names (`SlashSlotPersistence.ts` in the web
@@ -146,6 +164,31 @@ export function classifyGuildCommandTemplate(template: string): GuildCommandKind
 	return rest.includes('{{') || rest.includes('{%') ? 'script' : 'basic';
 }
 
+export const GuildCommandCounterPart = z
+	.enum(['person', 'target', 'channel'])
+	.describe('What a count is kept per: the person running it, the person mentioned, or the channel');
+export type GuildCommandCounterPart = z.infer<typeof GuildCommandCounterPart>;
+
+export const GuildCommandCounterIdentity = z
+	.enum(['persona', 'account'])
+	.describe('Whether a persona counts as its own person, or as its account');
+export type GuildCommandCounterIdentity = z.infer<typeof GuildCommandCounterIdentity>;
+
+export const GuildCommandCounterInputSchema = z.object({
+	id: SnowflakeStringType.nullish().describe('Keeps the counts of an existing counter; empty for a new one'),
+	name: z.string().min(1).max(32).describe('The name the template reads it by'),
+	per: z.array(GuildCommandCounterPart).max(3).describe('What the count is kept per; empty for one count'),
+	identity: GuildCommandCounterIdentity.default('persona'),
+});
+export type GuildCommandCounterInput = z.infer<typeof GuildCommandCounterInputSchema>;
+
+export const GuildCommandCounterSchema = z.object({
+	id: SnowflakeStringType.describe('The ID of the counter'),
+	name: z.string(),
+	per: z.array(GuildCommandCounterPart),
+	identity: GuildCommandCounterIdentity,
+});
+
 export const GuildCommandTemplateIssueCode = z
 	.enum(['unknown_tag', 'unknown_filter', 'not_closed', 'too_long', 'too_large', 'too_slow', 'invalid', 'failed'])
 	.describe(
@@ -167,6 +210,7 @@ export const GuildCommandCreateRequestSchema = z.object({
 	template: GuildCommandTemplateSchema,
 	input_mode: GuildCommandInputMode,
 	input_type: GuildCommandInputType.default('text'),
+	counters: z.array(GuildCommandCounterInputSchema).max(MAX_GUILD_COMMAND_COUNTERS).optional(),
 	input_hint: z
 		.string()
 		.max(MAX_GUILD_COMMAND_HINT_LENGTH)
@@ -181,6 +225,7 @@ export const GuildCommandUpdateRequestSchema = z.object({
 	template: GuildCommandTemplateSchema.optional(),
 	input_mode: GuildCommandInputMode.optional(),
 	input_type: GuildCommandInputType.optional(),
+	counters: z.array(GuildCommandCounterInputSchema).max(MAX_GUILD_COMMAND_COUNTERS).optional(),
 	input_hint: z.string().max(MAX_GUILD_COMMAND_HINT_LENGTH).nullish(),
 });
 export type GuildCommandUpdateRequest = z.infer<typeof GuildCommandUpdateRequestSchema>;
@@ -203,6 +248,11 @@ export const GuildCommandPreviewRequestSchema = z.object({
 	template: GuildCommandTemplateSchema,
 	input: GuildCommandInputSchema,
 	channel_id: SnowflakeType.nullish().describe('A channel of this community to fill in as the channel'),
+	counters: z
+		.array(GuildCommandCounterInputSchema)
+		.max(MAX_GUILD_COMMAND_COUNTERS)
+		.optional()
+		.describe('The counters being edited, each filled in as the next run would see it'),
 });
 export type GuildCommandPreviewRequest = z.infer<typeof GuildCommandPreviewRequestSchema>;
 
@@ -228,10 +278,36 @@ export const GuildCommandResponseSchema = z.object({
 		.string()
 		.optional()
 		.describe("The template; only returned to those who may edit the community's commands"),
+	counters: z
+		.array(GuildCommandCounterSchema)
+		.optional()
+		.describe("The counters; only returned to those who may edit the community's commands"),
 });
 export type GuildCommandResponse = z.infer<typeof GuildCommandResponseSchema>;
 
 export const GuildCommandListResponseSchema = z.array(GuildCommandResponseSchema);
+
+export const GuildCommandCountSchema = z.object({
+	counter_id: SnowflakeStringType.describe('The counter'),
+	scope_key: z.string().describe('Who or what this count is for'),
+	value: z.number().int().describe('The count'),
+});
+export type GuildCommandCount = z.infer<typeof GuildCommandCountSchema>;
+
+export const GuildCommandCountListResponseSchema = z.array(GuildCommandCountSchema);
+
+export const GuildCommandCountSetRequestSchema = z.object({
+	counter_id: SnowflakeStringType.describe('The counter'),
+	scope_key: z.string().max(200).describe('The count to change, as listed'),
+	value: z.number().int().min(0).max(1_000_000_000).describe('The new count'),
+});
+export type GuildCommandCountSetRequest = z.infer<typeof GuildCommandCountSetRequestSchema>;
+
+export const GuildCommandCounterParam = z.object({
+	guild_id: SnowflakeType.describe('The ID of the guild'),
+	command_id: SnowflakeType.describe('The ID of the command'),
+	counter_id: SnowflakeType.describe('The ID of the counter'),
+});
 
 export const GuildCommandParam = z.object({
 	guild_id: SnowflakeType.describe('The ID of the guild'),

@@ -4,6 +4,11 @@ import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import {Message} from '@app/features/channel/components/ChannelMessage';
 import Channels from '@app/features/channel/state/Channels';
+import {
+	type CounterDraft,
+	counterNameError,
+	GuildCommandCountersSection,
+} from '@app/features/guild_commands/components/GuildCommandCountersSection';
 import {GuildCommandScriptReference} from '@app/features/guild_commands/components/GuildCommandScriptReference';
 import styles from '@app/features/guild_commands/components/GuildCommandsTab.module.css';
 import type {
@@ -178,6 +183,7 @@ interface Draft {
 	template: string;
 	input_mode: GuildCommandInputMode;
 	input_hint: string;
+	counters: Array<CounterDraft>;
 }
 
 function toDraft(command: GuildCommandResponse): Draft {
@@ -188,6 +194,7 @@ function toDraft(command: GuildCommandResponse): Draft {
 		template: templateForEditing(command.template ?? ''),
 		input_mode: command.input_mode,
 		input_hint: command.input_hint ?? '',
+		counters: (command.counters ?? []).map((counter) => ({...counter})),
 	};
 }
 
@@ -198,6 +205,7 @@ const EMPTY_DRAFT: Draft = {
 	template: '# **{{ person }} {{ input }}**',
 	input_mode: 'required',
 	input_hint: '',
+	counters: [],
 };
 
 function sameDraft(a: Draft, b: Draft): boolean {
@@ -206,7 +214,8 @@ function sameDraft(a: Draft, b: Draft): boolean {
 		a.description === b.description &&
 		a.template === b.template &&
 		a.input_mode === b.input_mode &&
-		a.input_hint === b.input_hint
+		a.input_hint === b.input_hint &&
+		JSON.stringify(a.counters) === JSON.stringify(b.counters)
 	);
 }
 
@@ -353,6 +362,7 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 					}),
 					input_mode: pending.input_mode,
 					input_hint: pending.input_hint === '' ? null : pending.input_hint,
+					counters: pending.counters,
 				};
 				try {
 					const res =
@@ -380,7 +390,12 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 		}
 	}, [commands, edits, forgetNewCommandEditor, guildId, i18n, load, previewChannel, saveProblem]);
 
-	const hasInvalid = Array.from(edits.values()).some((d) => nameError(d) !== null || d.template.trim() === '');
+	const hasInvalid = Array.from(edits.values()).some(
+		(d) =>
+			nameError(d) !== null ||
+			d.template.trim() === '' ||
+			d.counters.some((counter) => counterNameError(d.counters, counter)),
+	);
 	useEffect(() => {
 		UnsavedChangesCommands.setUnsavedChanges(TAB_ID, edits.size > 0);
 	}, [edits.size]);
@@ -456,6 +471,7 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 		channelId: previewChannel?.id ?? null,
 		template: previewTemplate,
 		input: previewInput,
+		counterNames: draft?.counters.map((counter) => counter.name),
 		enabled: isScript,
 	});
 	const previewIssue = isScript ? scriptPreview.issue : null;
@@ -752,6 +768,16 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 								<GuildCommandScriptReference data-flx="guild-commands.guild-commands-tab.script-reference" />
 							)}
 						</div>
+
+						<GuildCommandCountersSection
+							guildId={guildId}
+							commandId={draft.id === NEW_ID ? null : draft.id}
+							counters={draft.counters}
+							editable={editable}
+							takesInput={draft.input_mode !== 'none'}
+							onChange={(counters) => update({counters})}
+							data-flx="guild-commands.guild-commands-tab.guild-command-counters-section.update"
+						/>
 
 						<div className={styles.sectionLabel} data-flx="guild-commands.guild-commands-tab.section-preview">
 							{i18n._(SECTION_PREVIEW)}

@@ -42,6 +42,10 @@ msgstr "Ajouter une persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Ajouter une paire de balises ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Ajouter un compteur"
+
 msgid "Add signal"
 msgstr "Ajouter un signal"
 
@@ -147,6 +151,18 @@ msgstr "Impossible d'exécuter /{name} : {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Impossible d'enregistrer /{name} : {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Compter les personas séparément"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Compter séparément pour chaque :"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Compteurs"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Aperçu rapide"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Supprime définitivement l'ensemble des {existingCount} persona(s) existante(s) et les remplace intégralement par les personas importées."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Personne mentionnée"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Personne qui l'utilise"
@@ -649,6 +670,10 @@ msgstr "Réagir avec un emoji signature réagira toujours sous cette persona, qu
 msgid "Recent Personas"
 msgstr "Personas récentes"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Retirer le compteur"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Supprimer l'emoji signature"
@@ -670,9 +695,17 @@ msgstr "Remplacer toutes les personas existantes (Destructif)"
 msgid "Request failed (HTTP {status})"
 msgstr "Échec de la requête (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Réinitialiser les comptes"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Réinitialiser le signal pour tout le monde"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Réinitialiser les comptes de {name} ? Cette action est irréversible."
 
 msgid "Root Account (Default)"
 msgstr "Compte principal (par défaut)"
@@ -984,6 +1017,14 @@ msgstr "Utiliser les commandes d'autres communautés."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Utiliser des commandes externes"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Utilise-le dans un script sous la forme {variable}. Chaque exécution ajoute d’abord un, donc la première lit 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Utilise des minuscules, des chiffres et _, commence par une lettre et évite les noms déjà utilisés par les scripts."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
