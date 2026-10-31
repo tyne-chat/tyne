@@ -3,9 +3,11 @@
 import {defineTable} from '@app/api/database/CassandraTableDsl';
 import {
 	GUILD_COMMAND_COLUMNS,
+	GUILD_COMMAND_COUNT_COLUMNS,
 	GUILD_COMMAND_ID_COLUMNS,
 	GUILD_COMMAND_USE_CHANNEL_COLUMNS,
 	GUILD_COMMAND_USE_COLUMNS,
+	type GuildCommandCountRow,
 	type GuildCommandIdRow,
 	type GuildCommandRow,
 	type GuildCommandUseChannelRow,
@@ -66,6 +68,16 @@ export const GuildCommands = defineTable<GuildCommandRow, 'guild_id' | 'command_
 	columns: GUILD_COMMAND_COLUMNS,
 	primaryKey: ['guild_id', 'command_id'],
 	partitionKey: ['guild_id'],
+});
+export const GuildCommandCounts = defineTable<
+	GuildCommandCountRow,
+	'guild_id' | 'command_id' | 'counter_id' | 'scope_key',
+	'guild_id' | 'command_id'
+>({
+	name: 'guild_command_counts',
+	columns: GUILD_COMMAND_COUNT_COLUMNS,
+	primaryKey: ['guild_id', 'command_id', 'counter_id', 'scope_key'],
+	partitionKey: ['guild_id', 'command_id'],
 });
 export const GuildCommandIds = defineTable<GuildCommandIdRow, 'command_id'>({
 	name: 'guild_command_ids',
