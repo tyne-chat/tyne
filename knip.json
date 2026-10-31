@@ -2,9 +2,9 @@
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"include": ["files", "exports", "types", "dependencies", "unlisted", "binaries", "catalog"],
 	"ignoreExportsUsedInFile": true,
+	"ignore": ["e2e/**"],
 	"ignoreDependencies": ["@bufbuild/protoc-gen-es", "@tailwindcss/cli", "@types/events", "events", "tailwindcss"],
 	"ignoreFiles": [
-		"e2e/**",
 		"fluxer_admin/src/styles/app.css",
 		"fluxer_admin/static/htmx.min.js",
 		"fluxer_app/inline_scripts/*.js",
