@@ -273,6 +273,68 @@ describe('PersonaEditModal Component', () => {
 		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 
+	it("saves the switch for not matching the persona's tags", async () => {
+		const existingPersona = {id: '100000000000000088', name: 'Existing Persona', auto_tag_disabled: false} as any;
+		runInAction(() => {
+			PersonaStore.setPersonas([existingPersona]);
+		});
+		await act(async () => {
+			root.render(
+				<PersonaEditModal
+					persona={existingPersona}
+					onClose={vi.fn()}
+					data-flx="persona.persona-edit-modal-test.persona-edit-modal--auto-tag"
+				/>,
+			);
+		});
+		const saveButton = () =>
+			document.body.querySelector('[data-flx="persona.persona-edit-modal.button.save"]') as HTMLButtonElement | null;
+		expect(saveButton()).toBeNull();
+
+		const toggle = document.body.querySelector('[role="switch"]') as HTMLElement;
+		expect(toggle.getAttribute('aria-checked')).toBe('false');
+		await act(async () => {
+			toggle.click();
+		});
+		await act(async () => {
+			saveButton()?.click();
+		});
+
+		expect(PersonaCommands.updatePersona).toHaveBeenCalledWith(
+			existingPersona.id,
+			expect.objectContaining({auto_tag_disabled: true}),
+		);
+	});
+
+	it('shows the saved value of the switch and can turn it off', async () => {
+		const existingPersona = {id: '100000000000000088', name: 'Existing Persona', auto_tag_disabled: true} as any;
+		runInAction(() => {
+			PersonaStore.setPersonas([existingPersona]);
+		});
+		await act(async () => {
+			root.render(
+				<PersonaEditModal
+					persona={existingPersona}
+					onClose={vi.fn()}
+					data-flx="persona.persona-edit-modal-test.persona-edit-modal--auto-tag-on"
+				/>,
+			);
+		});
+		const toggle = document.body.querySelector('[role="switch"]') as HTMLElement;
+		expect(toggle.getAttribute('aria-checked')).toBe('true');
+		await act(async () => {
+			toggle.click();
+		});
+		await act(async () => {
+			(document.body.querySelector('[data-flx="persona.persona-edit-modal.button.save"]') as HTMLButtonElement).click();
+		});
+
+		expect(PersonaCommands.updatePersona).toHaveBeenCalledWith(
+			existingPersona.id,
+			expect.objectContaining({auto_tag_disabled: false}),
+		);
+	});
+
 	it('resets form data when reset button is clicked', async () => {
 		const onClose = vi.fn();
 		const existingPersona = {

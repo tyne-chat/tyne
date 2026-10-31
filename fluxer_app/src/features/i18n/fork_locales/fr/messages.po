@@ -209,6 +209,10 @@ msgstr "Badge d'affichage"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Le badge d'affichage apparaîtra à côté du nom de toutes vos personas dans les messages. Si aucun badge n'est configuré, votre photo de profil de compte sera affichée."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Ne pas reconnaître les balises de cette persona"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Double-clic pour modifier"
@@ -977,6 +981,10 @@ msgstr "Activer la barre de signaux"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Tapez {output} ou {tag} pour voir des suggestions."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Saisir l'une de ces balises ne basculera pas sur cette persona. La balise est envoyée telle quelle."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
