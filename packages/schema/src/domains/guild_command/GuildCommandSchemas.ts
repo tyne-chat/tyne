@@ -252,7 +252,14 @@ export const GuildCommandPreviewRequestSchema = z.object({
 		.array(GuildCommandCounterInputSchema)
 		.max(MAX_GUILD_COMMAND_COUNTERS)
 		.optional()
-		.describe('The counters being edited, each filled in as the next run would see it'),
+		.describe('The counters being edited, each filled in as a run would read it'),
+	run: z
+		.number()
+		.int()
+		.min(1)
+		.max(1_000_000)
+		.optional()
+		.describe('What the counters read: which run this preview stands for, from 1'),
 });
 export type GuildCommandPreviewRequest = z.infer<typeof GuildCommandPreviewRequestSchema>;
 

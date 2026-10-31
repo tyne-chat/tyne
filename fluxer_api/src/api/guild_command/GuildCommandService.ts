@@ -377,7 +377,7 @@ export class GuildCommandService {
 		const channel = await this.previewChannel(guildId, user.id, request.channel_id ?? null);
 		const scope = await this.buildScope({user, guildId, channel, input: request.input ?? '', personaId: null});
 		const values: Record<string, number> = {};
-		for (const counter of request.counters ?? []) values[counter.name] = 1;
+		for (const counter of request.counters ?? []) values[counter.name] = request.run ?? 1;
 		try {
 			return {content: this.deps.engine.render(request.template, scope, values), issue: null};
 		} catch (error) {
