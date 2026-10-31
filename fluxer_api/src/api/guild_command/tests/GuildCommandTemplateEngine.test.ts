@@ -14,7 +14,7 @@ import {
 	GUILD_COMMAND_TEMPLATE_TAGS,
 	type GuildCommandTemplateIssue,
 } from '@fluxer/schema/src/domains/guild_command/GuildCommandSchemas';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 
 function scope(overrides: Partial<GuildCommandScope> = {}): GuildCommandScope {
 	return {
@@ -218,6 +218,17 @@ describe('GuildCommandTemplateEngine', () => {
 			code: 'failed',
 			line: 2,
 		});
+	});
+
+	it('stops a script that runs for too long', () => {
+		let now = 0;
+		// A clock that runs fast, so the test needs no really slow script.
+		const clock = vi.spyOn(performance, 'now').mockImplementation(() => (now += 100));
+		try {
+			expect(problem(() => engine.render('a{{ 1 }}b{{ 2 }}c{{ 3 }}', scope())).code).toBe('too_slow');
+		} finally {
+			clock.mockRestore();
+		}
 	});
 
 	it('stops a template that doubles its output on every line', () => {
