@@ -18,9 +18,12 @@ export function useGuildCommandScriptPreview(params: {
 	channelId: string | null;
 	template: string;
 	input: string;
+	/** The names of the counters being edited, so a script can read them before they are saved. */
+	counterNames?: ReadonlyArray<string>;
 	enabled: boolean;
 }): {result: GuildCommandPreviewResponse; runAgain: () => void} {
 	const {guildId, channelId, template, input, enabled} = params;
+	const counterNames = (params.counterNames ?? []).filter((name) => name !== '').join(' ');
 	const [result, setResult] = useState(NOTHING);
 	const [attempt, setAttempt] = useState(0);
 	const latest = useRef(0);
@@ -39,7 +42,12 @@ export function useGuildCommandScriptPreview(params: {
 		const timer = setTimeout(async () => {
 			try {
 				const res = await http.post<GuildCommandPreviewResponse>(ForkEndpoints.GUILD_COMMANDS_PREVIEW(guildId), {
-					body: {template, input: input === '' ? null : input, channel_id: channelId},
+					body: {
+						template,
+						input: input === '' ? null : input,
+						channel_id: channelId,
+						...(counterNames === '' ? {} : {counters: counterNames.split(' ').map((name) => ({name, per: []}))}),
+					},
 				});
 				if (request === latest.current && res.ok && res.body) setResult(res.body);
 			} catch (error) {
@@ -47,7 +55,7 @@ export function useGuildCommandScriptPreview(params: {
 			}
 		}, delay);
 		return () => clearTimeout(timer);
-	}, [guildId, channelId, template, input, enabled, attempt]);
+	}, [guildId, channelId, template, input, counterNames, enabled, attempt]);
 
 	const runAgain = useCallback(() => {
 		immediately.current = true;

@@ -13,6 +13,13 @@ import type {GuildCommandRow} from '@app/api/database/types/GuildCommandTypes';
 import type {ThreadViewer} from '@app/api/experiment/ChannelThreadsGate';
 import type {GuildRepository} from '@app/api/guild/repositories/GuildRepository';
 import {
+	checkCounters,
+	counterScopeKey,
+	countersNeedTarget,
+	type GuildCommandCounter,
+	parseCounters,
+} from '@app/api/guild_command/GuildCommandCounters';
+import {
 	GuildCommandBrokenError,
 	GuildCommandInputError,
 	GuildCommandLimitReachedError,
@@ -37,7 +44,10 @@ import {Permissions} from '@fluxer/constants/src/ChannelConstants';
 import {MissingPermissionsError} from '@fluxer/errors/src/domains/core/MissingPermissionsError';
 import {
 	classifyGuildCommandTemplate,
+	type GuildCommandCount,
+	type GuildCommandCountSetRequest,
 	type GuildCommandCreateRequest,
+	type GuildCommandInputMode,
 	type GuildCommandKind,
 	type GuildCommandPreviewRequest,
 	type GuildCommandPreviewResponse,
@@ -82,7 +92,7 @@ function toResponse(row: GuildCommandRow, includeTemplate: boolean): GuildComman
 		creator_id: row.creator_id.toString(),
 		created_at: row.created_at.toISOString(),
 		updated_at: row.updated_at.toISOString(),
-		...(includeTemplate ? {template: row.template} : {}),
+		...(includeTemplate ? {template: row.template, counters: parseCounters(row.counters)} : {}),
 	};
 }
 
@@ -173,6 +183,9 @@ export class GuildCommandService {
 			input_mode: request.input_mode,
 			input_type: request.input_type,
 			input_hint: request.input_hint ?? null,
+			counters: JSON.stringify(
+				await checkCounters(request.counters ?? [], [], request.input_mode, async () => this.deps.nextId()),
+			),
 			creator_id: userId,
 			created_at: now,
 			updated_at: now,
@@ -195,6 +208,9 @@ export class GuildCommandService {
 			this.assertName(request.name, await this.deps.repository.listByGuild(guildId), commandId);
 		}
 		const template = request.template ?? existing.template;
+		const inputMode = (request.input_mode ?? existing.input_mode) as GuildCommandInputMode;
+		const before = parseCounters(existing.counters);
+		const counters = await checkCounters(request.counters ?? before, before, inputMode, async () => this.deps.nextId());
 		const row: GuildCommandRow = {
 			...existing,
 			name: request.name ?? existing.name,
@@ -204,9 +220,15 @@ export class GuildCommandService {
 			input_mode: request.input_mode ?? existing.input_mode,
 			input_type: request.input_type ?? existing.input_type,
 			input_hint: request.input_hint !== undefined ? request.input_hint : existing.input_hint,
+			counters: JSON.stringify(counters),
 			updated_at: this.now(),
 		};
 		await this.deps.repository.save(row);
+		await Promise.all(
+			before
+				.filter((counter) => !counters.some((kept) => kept.id === counter.id))
+				.map((counter) => this.deps.repository.deleteCounts(guildId, commandId, BigInt(counter.id))),
+		);
 		await this.announce(guildId);
 		return toResponse(row, true);
 	}
@@ -215,8 +237,71 @@ export class GuildCommandService {
 		const existing = await this.deps.repository.get(guildId, commandId);
 		if (!existing) throw new UnknownGuildCommandError();
 		await this.assertCanModify(existing, userId);
+		await this.deps.repository.deleteCounts(guildId, commandId);
 		await this.deps.repository.delete(guildId, commandId);
 		await this.announce(guildId);
+	}
+
+	private async editableCommand(userId: UserID, guildId: GuildID, commandId: bigint): Promise<GuildCommandRow> {
+		const row = await this.deps.repository.get(guildId, commandId);
+		if (!row) throw new UnknownGuildCommandError();
+		await this.assertCanModify(row, userId);
+		return row;
+	}
+
+	async listCounts(userId: UserID, guildId: GuildID, commandId: bigint): Promise<Array<GuildCommandCount>> {
+		await this.editableCommand(userId, guildId, commandId);
+		const rows = await this.deps.repository.listCounts(guildId, commandId);
+		return rows.map((row) => ({counter_id: row.counter_id.toString(), scope_key: row.scope_key, value: row.value}));
+	}
+
+	async setCount(
+		userId: UserID,
+		guildId: GuildID,
+		commandId: bigint,
+		request: GuildCommandCountSetRequest,
+	): Promise<void> {
+		const row = await this.editableCommand(userId, guildId, commandId);
+		if (!parseCounters(row.counters).some((counter) => counter.id === request.counter_id)) {
+			throw new UnknownGuildCommandError();
+		}
+		await this.deps.repository.setCount(
+			guildId,
+			commandId,
+			BigInt(request.counter_id),
+			request.scope_key,
+			request.value,
+		);
+	}
+
+	async resetCounts(userId: UserID, guildId: GuildID, commandId: bigint, counterId: bigint): Promise<void> {
+		await this.editableCommand(userId, guildId, commandId);
+		await this.deps.repository.deleteCounts(guildId, commandId, counterId);
+	}
+
+	/** What each counter reads on this run: its count with this run added. */
+	private async readCounts(
+		guildId: GuildID,
+		commandId: bigint,
+		counters: ReadonlyArray<GuildCommandCounter>,
+		scope: GuildCommandScope,
+		channelId: string,
+	): Promise<{values: Record<string, number>; counts: Array<{counterId: bigint; scopeKey: string}>}> {
+		const values: Record<string, number> = {};
+		const counts: Array<{counterId: bigint; scopeKey: string}> = [];
+		await Promise.all(
+			counters.map(async (counter) => {
+				const scopeKey = counterScopeKey(counter, scope, channelId);
+				if (scopeKey === null) {
+					values[counter.name] = 1;
+					return;
+				}
+				const counterId = BigInt(counter.id);
+				values[counter.name] = (await this.deps.repository.getCount(guildId, commandId, counterId, scopeKey)) + 1;
+				counts.push({counterId, scopeKey});
+			}),
+		);
+		return {values, counts};
 	}
 
 	async run(params: {
@@ -255,9 +340,14 @@ export class GuildCommandService {
 		}
 
 		const scope = await this.buildScope({user, guildId, channel, input, personaId: request.persona_id ?? null});
+		const counters = parseCounters(command.counters);
+		if (countersNeedTarget(counters) && !scope.target) {
+			throw new GuildCommandInputError('This command needs you to mention someone');
+		}
+		const {values, counts} = await this.readCounts(guildId, commandId, counters, scope, channelId.toString());
 		let content: string;
 		try {
-			content = this.deps.engine.render(command.template, scope);
+			content = this.deps.engine.render(command.template, scope, values);
 		} catch (error) {
 			throw error instanceof GuildCommandTemplateError ? new GuildCommandBrokenError() : error;
 		}
@@ -269,7 +359,7 @@ export class GuildCommandService {
 			channelId,
 			data: {content, persona_id: request.persona_id ? BigInt(request.persona_id) : undefined, nonce: request.nonce},
 			requestCache: params.requestCache,
-			fork: {guildCommandUse: {guildId, commandId, commandName: command.name}},
+			fork: {guildCommandUse: {guildId, commandId, commandName: command.name, counts}},
 		});
 	}
 
@@ -286,8 +376,10 @@ export class GuildCommandService {
 		if (!(await this.canEdit(guildId, user.id))) throw new MissingPermissionsError();
 		const channel = await this.previewChannel(guildId, user.id, request.channel_id ?? null);
 		const scope = await this.buildScope({user, guildId, channel, input: request.input ?? '', personaId: null});
+		const values: Record<string, number> = {};
+		for (const counter of request.counters ?? []) values[counter.name] = 1;
 		try {
-			return {content: this.deps.engine.render(request.template, scope), issue: null};
+			return {content: this.deps.engine.render(request.template, scope, values), issue: null};
 		} catch (error) {
 			if (error instanceof GuildCommandTemplateError) return {content: null, issue: error.issue};
 			throw error;

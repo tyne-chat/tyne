@@ -10028,6 +10028,220 @@
 				]
 			}
 		},
+		"/guilds/{guild_id}/commands/{command_id}/counters/{counter_id}/counts": {
+			"delete": {
+				"operationId": "reset_guild_command_counter",
+				"summary": "Reset guild command counter",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Deletes all of a counter's counts, for those who may edit the command.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					},
+					{
+						"name": "command_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the command"
+					},
+					{
+						"name": "counter_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the counter", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the counter"
+					}
+				]
+			}
+		},
+		"/guilds/{guild_id}/commands/{command_id}/counts": {
+			"get": {
+				"operationId": "list_guild_command_counts",
+				"summary": "List guild command counts",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandCountListResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Lists a command's counts, for those who may edit it.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					},
+					{
+						"name": "command_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the command"
+					}
+				]
+			},
+			"put": {
+				"operationId": "set_guild_command_count",
+				"summary": "Set guild command count",
+				"tags": ["Guild Commands"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Sets one count, for those who may edit the command.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "guild_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the guild", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the guild"
+					},
+					{
+						"name": "command_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the command", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the command"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {"schema": {"$ref": "#/components/schemas/GuildCommandCountSetRequestSchema"}}
+					}
+				}
+			}
+		},
 		"/guilds/{guild_id}/delete": {
 			"post": {
 				"operationId": "delete_guild",
@@ -36981,6 +37195,19 @@
 					"webauthn_challenge": {"description": "WebAuthn challenge string", "type": "string"}
 				}
 			},
+			"GuildCommandCountSetRequestSchema": {
+				"type": "object",
+				"properties": {
+					"counter_id": {"description": "The counter", "$ref": "#/components/schemas/SnowflakeStringType"},
+					"scope_key": {"type": "string", "maxLength": 200, "description": "The count to change, as listed"},
+					"value": {"type": "integer", "minimum": 0, "maximum": 1000000000, "description": "The new count"}
+				},
+				"required": ["counter_id", "scope_key", "value"]
+			},
+			"GuildCommandCountListResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/GuildCommandCountSchema"}
+			},
 			"GuildCommandUpdateRequestSchema": {
 				"type": "object",
 				"properties": {
@@ -36998,6 +37225,11 @@
 					},
 					"input_mode": {"$ref": "#/components/schemas/GuildCommandInputMode"},
 					"input_type": {"$ref": "#/components/schemas/GuildCommandInputType"},
+					"counters": {
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/GuildCommandCounterInputSchema"}
+					},
 					"input_hint": {"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]}
 				}
 			},
@@ -37024,6 +37256,11 @@
 					"template": {
 						"description": "The template; only returned to those who may edit the community's commands",
 						"type": "string"
+					},
+					"counters": {
+						"description": "The counters; only returned to those who may edit the community's commands",
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/GuildCommandCounterSchema"}
 					}
 				},
 				"required": [
@@ -37057,6 +37294,12 @@
 					"channel_id": {
 						"description": "A channel of this community to fill in as the channel",
 						"anyOf": [{"$ref": "#/components/schemas/SnowflakeType"}, {"type": "null"}]
+					},
+					"counters": {
+						"description": "The counters being edited, each filled in as the next run would see it",
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/GuildCommandCounterInputSchema"}
 					}
 				},
 				"required": ["template"]
@@ -37096,6 +37339,11 @@
 					},
 					"input_mode": {"$ref": "#/components/schemas/GuildCommandInputMode"},
 					"input_type": {"default": "text", "$ref": "#/components/schemas/GuildCommandInputType"},
+					"counters": {
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/GuildCommandCounterInputSchema"}
+					},
 					"input_hint": {
 						"description": "Placeholder shown in the input while the command is filled in",
 						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
@@ -45183,6 +45431,29 @@
 				},
 				"required": ["type", "name"]
 			},
+			"GuildCommandCounterInputSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "Keeps the counts of an existing counter; empty for a new one",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"name": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 32,
+						"description": "The name the template reads it by"
+					},
+					"per": {
+						"maxItems": 3,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/GuildCommandCounterPart"},
+						"description": "What the count is kept per; empty for one count"
+					},
+					"identity": {"default": "persona", "$ref": "#/components/schemas/GuildCommandCounterIdentity"}
+				},
+				"required": ["name", "per"]
+			},
 			"GuildCommandInputType": {
 				"type": "string",
 				"enum": ["text"],
@@ -45192,6 +45463,16 @@
 				"type": "string",
 				"enum": ["none", "optional", "required"],
 				"description": "Whether the command takes input: none, optional or required"
+			},
+			"GuildCommandCounterIdentity": {
+				"type": "string",
+				"enum": ["persona", "account"],
+				"description": "Whether a persona counts as its own person, or as its account"
+			},
+			"GuildCommandCounterPart": {
+				"type": "string",
+				"enum": ["person", "target", "channel"],
+				"description": "What a count is kept per: the person running it, the person mentioned, or the channel"
 			},
 			"GuildCommandTemplateIssueSchema": {
 				"type": "object",
@@ -45224,10 +45505,36 @@
 				],
 				"description": "unknown_tag, unknown_filter: not one of the template language; not_closed: a tag or output with no end; too_long: the template; too_large: the text it builds; too_slow: it ran out of time; invalid: it cannot be read; failed: it stopped while running"
 			},
+			"GuildCommandCounterSchema": {
+				"type": "object",
+				"properties": {
+					"id": {"description": "The ID of the counter", "$ref": "#/components/schemas/SnowflakeStringType"},
+					"name": {"type": "string"},
+					"per": {"type": "array", "items": {"$ref": "#/components/schemas/GuildCommandCounterPart"}},
+					"identity": {"$ref": "#/components/schemas/GuildCommandCounterIdentity"}
+				},
+				"required": ["id", "name", "per", "identity"],
+				"additionalProperties": false
+			},
 			"GuildCommandKind": {
 				"type": "string",
 				"enum": ["basic", "script"],
 				"description": "basic: only text and the person and input variables; script: anything else"
+			},
+			"GuildCommandCountSchema": {
+				"type": "object",
+				"properties": {
+					"counter_id": {"description": "The counter", "$ref": "#/components/schemas/SnowflakeStringType"},
+					"scope_key": {"type": "string", "description": "Who or what this count is for"},
+					"value": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991,
+						"description": "The count"
+					}
+				},
+				"required": ["counter_id", "scope_key", "value"],
+				"additionalProperties": false
 			},
 			"NSFWLevel": {
 				"description": "The NSFW level of the guild",

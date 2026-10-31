@@ -80,7 +80,7 @@ describe('docs/server-command-scripts.md', () => {
 		for (const input of INPUTS) {
 			// Repeated so random branches turn up.
 			for (let run = 0; run < 25; run++) {
-				expect(engine.render(block, scope(input))).not.toBe('');
+				expect(engine.render(block, scope(input), {hugs: 2})).not.toBe('');
 			}
 		}
 	});

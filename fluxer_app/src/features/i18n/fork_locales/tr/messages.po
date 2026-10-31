@@ -42,6 +42,10 @@ msgstr "Persona ekle"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Etiket çifti ekle ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Sayaç ekle"
+
 msgid "Add signal"
 msgstr "Sinyal ekle"
 
@@ -147,6 +151,18 @@ msgstr "/{name} çalıştırılamadı: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name} kaydedilemedi: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Personaları ayrı say"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Her biri için ayrı say:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Sayaçlar"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Göz at"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Mevcut {existingCount} personanın tümünü kalıcı olarak sil ve bunları tamamen içe aktarılan personalarla değiştir."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Bahsedilen kişi"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Kullanan kişi"
@@ -649,6 +670,10 @@ msgstr "İmza emojisiyle tepki vermek, etkin personadan bağımsız olarak her z
 msgid "Recent Personas"
 msgstr "Son Personalar"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Sayacı kaldır"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "İmza emojisini kaldır"
@@ -670,9 +695,17 @@ msgstr "Mevcut tüm personaları değiştir (Geri alınamaz)"
 msgid "Request failed (HTTP {status})"
 msgstr "İstek başarısız oldu (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Sayıları sıfırla"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Sinyali herkes için sıfırla"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "{name} sayıları sıfırlansın mı? Bu işlem geri alınamaz."
 
 msgid "Root Account (Default)"
 msgstr "Kök hesap (Varsayılan)"
@@ -984,6 +1017,14 @@ msgstr "Diğer toplulukların komutlarını kullanın."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Harici komutları kullan"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Betikte {variable} olarak kullan. Her çalıştırma önce bir ekler, yani ilk çalıştırma 1 okur."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Küçük harf, rakam ve _ kullan, harfle başla ve betiklerin zaten kullandığı bir ad seçme."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
