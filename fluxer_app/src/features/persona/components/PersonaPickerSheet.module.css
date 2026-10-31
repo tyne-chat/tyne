@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 
 .sheetContainer {
+	position: relative;
 	width: 360px;
 	max-height: 480px;
 	display: flex;
@@ -40,6 +41,12 @@
 .segmentedTabs {
 	padding-left: 0;
 	padding-right: 0;
+}
+
+/* The shared tabs have no focus style of their own. */
+.segmentedTabs button:focus-visible {
+	outline: 0.125rem solid var(--focus-primary);
+	outline-offset: -0.125rem;
 }
 
 .searchInputWrapper {
