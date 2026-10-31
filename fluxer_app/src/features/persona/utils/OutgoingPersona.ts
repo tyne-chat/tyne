@@ -34,6 +34,17 @@ export function resolveOutgoingPersona(
 	};
 }
 
+/**
+ * What a forward and its comment go out as. They are one thing said by one speaker, so a tag in the
+ * comment decides for both. Without one they use the persona selected where the forward started,
+ * which is the one on screen, and then the destination's, so that the account does not turn up in a
+ * channel where a persona was chosen. Call it once per destination.
+ */
+export function resolveForwardPersona(sourceChannelId: string, channelId: string, comment: string): OutgoingPersona {
+	const selectionChannelId = PersonaStore.latchedPersonaFor(sourceChannelId) ? sourceChannelId : channelId;
+	return resolveOutgoingPersona(selectionChannelId, comment, false, {allowEmptyContent: true});
+}
+
 /** See `PersonaStore.startChannelAs`. For the composers that create a thread or a forum post. */
 export function startChannelAsPersona(channelId: string, personaId: string | null | undefined): void {
 	PersonaStore.startChannelAs(channelId, personaId);
