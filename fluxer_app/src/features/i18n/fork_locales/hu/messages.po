@@ -209,6 +209,10 @@ msgstr "Megjelenítési címke"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "A megjelenítési címke minden persona neve mellett megjelenik az üzenetekben. Ha nincs beállítva megjelenítési címke, a fiókod profilképe fog megjelenni."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Ne ismerje fel ennek a personának a címkéit"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Dupla kattintás a szerkesztéshez"
@@ -977,6 +981,10 @@ msgstr "Jelzősáv bekapcsolása"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Írj be {output} vagy {tag} jelet a javaslatokhoz."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Ha beírod valamelyik címkét, nem vált erre a personára. A címke úgy kerül elküldésre, ahogy beírtad."
 
 #. Persona visibility unlisted
 msgid "Unlisted"

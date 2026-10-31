@@ -209,6 +209,10 @@ msgstr "Thẻ hiển thị"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Thẻ hiển thị sẽ xuất hiện cạnh tất cả tên persona trong tin nhắn. Nếu không có thẻ hiển thị, ảnh đại diện tài khoản của bạn sẽ được hiển thị."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Không khớp thẻ của persona này"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Nhấp đúp để chỉnh sửa"
@@ -977,6 +981,10 @@ msgstr "Bật thanh tín hiệu"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Gõ {output} hoặc {tag} để xem gợi ý."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Nhập một trong các thẻ này sẽ không chuyển sang persona này. Thẻ được gửi đúng như đã viết."
 
 #. Persona visibility unlisted
 msgid "Unlisted"

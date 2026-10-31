@@ -209,6 +209,10 @@ msgstr "Weergavetag"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "De weergavetag verschijnt naast alle personanamen in berichten. Als er geen weergavetag is ingesteld, wordt de profielfoto van je account weergegeven."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Tags van deze persona niet herkennen"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Dubbelklik om te bewerken"
@@ -977,6 +981,10 @@ msgstr "Signaalbalk aanzetten"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Typ {output} of {tag} voor suggesties."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Als je een van deze tags typt, wissel je niet naar deze persona. De tag wordt verzonden zoals die is geschreven."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
