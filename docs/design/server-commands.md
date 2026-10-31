@@ -82,6 +82,8 @@ Not now:
 - Welcome and goodbye messages, leveling, role changes, purge, redirect.
 - Page breaks (scene breaks). They get their own design; their style list will likely live in the
   same Message Tools category.
+  `pagebreak` is not a reserved command name, so a community can use it until then; the built-in's
+  design has to say how it lives alongside those commands.
 
 ## Decisions
 
@@ -1071,6 +1073,9 @@ Where it differs from the plan above, and why. The code is in tyne-mobile's
   profile bio has it, with `:` emoji suggestions; custom emoji show as emoji. **Person running it** and
   **What they type** insert the literal `{{ person }}` and `{{ input }}`, with no pills or mention
   autocomplete.
+- **The editor is a sheet** over the command list, as the persona editor is, so Back returns to the
+  list. Unsaved changes keep it open until Save or Reset, so the save bar is always shown once
+  something changed, and Save explains what is wrong with a form it cannot save.
 - **Scripts open read-only,** with a note to edit them on the web or desktop. There is no phone script
   editor or server preview; the basic preview is filled in on the device.
 - **The chip:** a tap uses `pendingGuildCommandInsertProvider`, and writes `/tuck ` as text. A long
