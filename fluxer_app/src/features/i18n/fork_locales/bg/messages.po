@@ -42,6 +42,10 @@ msgstr "Добавяне на персона"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Добавяне на двойка тагове ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Добавяне на брояч"
+
 msgid "Add signal"
 msgstr "Добавяне на сигнал"
 
@@ -147,6 +151,18 @@ msgstr "/{name} не можа да бъде изпълнена: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name} не можа да бъде запазена: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Отделно броене на персоните"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Отделно броене за всеки:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Броячи"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Бърз преглед"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Изтрийте завинаги всички съществуващи персони ({existingCount}) и ги заменете изцяло с импортираните."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Споменато лице"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Който я използва"
@@ -649,6 +670,10 @@ msgstr "Реагирането с подписано емоджи винаги �
 msgid "Recent Personas"
 msgstr "Скорошни персони"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Премахване на брояча"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Премахване на подписано емоджи"
@@ -670,9 +695,17 @@ msgstr "Замяна на всички съществуващи персони (
 msgid "Request failed (HTTP {status})"
 msgstr "Заявката е неуспешна (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Нулиране на броенето"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Нулиране на сигнала за всички"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Да се нулира ли броенето на {name}? Това не може да бъде отменено."
 
 msgid "Root Account (Default)"
 msgstr "Основен акаунт (По подразбиране)"
@@ -984,6 +1017,14 @@ msgstr "Използване на команди от други общност�
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Използване на външни команди"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Използвайте го в скрипт като {variable}. Всяко изпълнение първо добавя едно, така че първото чете 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Използвайте малки букви, цифри и _, започнете с буква и изберете име, което скриптовете още не използват."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."

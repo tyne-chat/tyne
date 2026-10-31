@@ -42,6 +42,10 @@ msgstr "Tilføj persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Tilføj tagpar ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Tilføj tæller"
+
 msgid "Add signal"
 msgstr "Tilføj signal"
 
@@ -147,6 +151,18 @@ msgstr "Kunne ikke køre /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Kunne ikke gemme /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Tæl personaer separat"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Tæl separat for hver:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Tællere"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Smugkig"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Slet alle {existingCount} eksisterende persona(er) permanent, og erstat dem fuldstændigt med de importerede personaer."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Nævnt person"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Den, der bruger den"
@@ -649,6 +670,10 @@ msgstr "Reaktion med en signatur-emoji vil altid reagere som denne persona, uans
 msgid "Recent Personas"
 msgstr "Seneste personaer"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Fjern tæller"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Fjern signatur-emoji"
@@ -670,9 +695,17 @@ msgstr "Erstat alle eksisterende personaer (destruktivt)"
 msgid "Request failed (HTTP {status})"
 msgstr "Anmodningen mislykkedes (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Nulstil optællinger"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Nulstil signal for alle"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Vil du nulstille optællingerne for {name}? Dette kan ikke fortrydes."
 
 msgid "Root Account (Default)"
 msgstr "Hovedkonto (standard)"
@@ -984,6 +1017,14 @@ msgstr "Brug kommandoer fra andre fællesskaber."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Brug eksterne kommandoer"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Brug den i et script som {variable}. Hver kørsel lægger først én til, så den første kørsel læser 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Brug små bogstaver, tal og _, start med et bogstav, og brug ikke et navn, scripts allerede bruger."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
