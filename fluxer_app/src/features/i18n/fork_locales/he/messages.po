@@ -42,6 +42,10 @@ msgstr "הוסף פרסונה"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "הוספת זוג תגיות ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "הוספת מונה"
+
 msgid "Add signal"
 msgstr "הוספת אות"
 
@@ -147,6 +151,18 @@ msgstr "לא ניתן היה להריץ את /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "לא ניתן היה לשמור את /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "ספירה נפרדת של פרסונות"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "ספירה נפרדת לכל:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "מונים"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "הצצה"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "מחקו לצמיתות את כל {existingCount} הפרסונות הקיימות והחליפו אותן לחלוטין בפרסונות המיובאות."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "האדם שאוזכר"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "מי שמשתמש בה"
@@ -649,6 +670,10 @@ msgstr "תגובה עם אימוג'י חתימה תגיב תמיד בתור פר
 msgid "Recent Personas"
 msgstr "פרסונות אחרונות"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "הסרת מונה"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "הסר אימוג'י חתימה"
@@ -670,9 +695,17 @@ msgstr "החלפת כל הפרסונות הקיימות (בלתי הפיך)"
 msgid "Request failed (HTTP {status})"
 msgstr "הבקשה נכשלה (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "איפוס ספירות"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "איפוס האות לכולם"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "לאפס את הספירות של {name}? אי אפשר לבטל פעולה זו."
 
 msgid "Root Account (Default)"
 msgstr "חשבון ראשי (ברירת מחדל)"
@@ -984,6 +1017,14 @@ msgstr "שימוש בפקודות מקהילות אחרות."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "שימוש בפקודות חיצוניות"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "אפשר להשתמש בו בסקריפט בתור {variable}. כל הרצה מוסיפה אחד קודם, כך שההרצה הראשונה קוראת 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "יש להשתמש באותיות לטיניות קטנות, ספרות ו־_, להתחיל באות ולבחור שם שסקריפטים לא משתמשים בו."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."

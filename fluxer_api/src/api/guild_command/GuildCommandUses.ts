@@ -15,6 +15,8 @@ interface ForkGuildCommandUse {
 	guildId: GuildID;
 	commandId: bigint;
 	commandName: string;
+	/** The counts this run adds one to. */
+	counts?: ReadonlyArray<{counterId: bigint; scopeKey: string}>;
 }
 
 /** The fork's options for upstream's send path; passed through `MessageRequestService.sendMessage`. */
@@ -29,7 +31,7 @@ export async function recordForkGuildCommandUse(
 ): Promise<void> {
 	const use = fork?.guildCommandUse;
 	if (!use) return;
-	await repository.recordUse({
+	const isNew = await repository.recordUse({
 		channel_id: message.channelId,
 		message_id: message.id,
 		guild_id: use.guildId,
@@ -38,6 +40,12 @@ export async function recordForkGuildCommandUse(
 		created_at: new Date(),
 	});
 	channelsWithUses.set(message.channelId.toString(), {hasUses: true, at: Date.now()});
+	if (!isNew) return;
+	await Promise.all(
+		(use.counts ?? []).map(({counterId, scopeKey}) =>
+			repository.incrementCount(use.guildId, use.commandId, counterId, scopeKey),
+		),
+	);
 }
 
 /** How long a channel's "no command used here" answer is trusted before it is read again. */

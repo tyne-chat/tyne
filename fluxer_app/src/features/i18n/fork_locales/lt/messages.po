@@ -42,6 +42,10 @@ msgstr "Pridėti personą"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Pridėti žymų porą ({0}/5)"
 
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Pridėti skaitiklį"
+
 msgid "Add signal"
 msgstr "Pridėti signalą"
 
@@ -147,6 +151,18 @@ msgstr "Nepavyko įvykdyti /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Nepavyko išsaugoti /{name}: {detail}"
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Skaičiuoti personas atskirai"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Skaičiuoti atskirai kiekvienam:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Skaitikliai"
 
 #. Permission name: allows creating the community's slash commands and editing one's own.
 msgid "Create commands"
@@ -512,6 +528,11 @@ msgstr "Žvilgtelėti"
 msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
 msgstr "Visam laikui ištrinkite visas esamas personas ({existingCount}) ir visiškai pakeiskite jas importuotomis."
 
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Paminėtas asmuo"
+
+#. A community command counter counts per person who runs it.
 #. Button inserting the placeholder for the member who runs the command.
 msgid "Person running it"
 msgstr "Ją naudojantis asmuo"
@@ -649,6 +670,10 @@ msgstr "Reagavimas su parašo jaustuku visada reaguos kaip šis profilis, neprik
 msgid "Recent Personas"
 msgstr "Naujausios personos"
 
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Pašalinti skaitiklį"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Pašalinti parašo jaustuką"
@@ -670,9 +695,17 @@ msgstr "Pakeisti visas esamas personas (negrįžtama)"
 msgid "Request failed (HTTP {status})"
 msgstr "Užklausa nepavyko (HTTP {status})"
 
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Nustatyti skaičius iš naujo"
+
 #. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
 msgid "Reset signal for everyone"
 msgstr "Atstatyti signalą visiems"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Nustatyti {name} skaičius iš naujo? To atšaukti negalima."
 
 msgid "Root Account (Default)"
 msgstr "Šakninė paskyra (Numatytoji)"
@@ -984,6 +1017,14 @@ msgstr "Naudoti kitų bendruomenių komandas."
 #. Permission name: allows using slash commands made in other communities.
 msgid "Use external commands"
 msgstr "Naudoti išorines komandas"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Scenarijuje naudok kaip {variable}. Kiekvienas paleidimas pirmiausia prideda vienetą, todėl pirmas nuskaito 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Naudok mažąsias raides, skaičius ir _, pradėk raide ir nerink vardo, kurį jau naudoja scenarijai."
 
 #. Error under the command name field when the name is not allowed.
 msgid "Use lowercase letters, numbers, - and _, up to 32 characters."

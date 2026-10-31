@@ -32,5 +32,7 @@ export const ForkEndpoints = {
 	GUILD_COMMANDS: (guildId: string) => `/guilds/${guildId}/commands`,
 	GUILD_COMMANDS_PREVIEW: (guildId: string) => `/guilds/${guildId}/commands/preview`,
 	GUILD_COMMAND: (guildId: string, commandId: string) => `/guilds/${guildId}/commands/${commandId}`,
+	GUILD_COMMAND_COUNTS: (guildId: string, commandId: string, counterId: string) =>
+		`/guilds/${guildId}/commands/${commandId}/counters/${counterId}/counts`,
 	CHANNEL_GUILD_COMMAND: (channelId: string, commandId: string) => `/channels/${channelId}/commands/${commandId}`,
 } as const;
