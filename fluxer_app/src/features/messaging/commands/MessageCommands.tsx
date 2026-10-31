@@ -93,6 +93,7 @@ import {
 	dropMessagePageThatNoLongerFits,
 	messageLoadGeneration,
 } from '@app/features/messaging/commands/ForkMessagePageFit';
+import {resolveForwardPersona} from '@app/features/persona/utils/OutgoingPersona';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
@@ -1179,6 +1180,7 @@ export async function forward(
 	const normalizedComment = optionalMessage == null ? null : normalizeMessageContent(optionalMessage);
 	try {
 		for (const channelId of channelIds) {
+			const outgoing = resolveForwardPersona(messageReference.channel_id, channelId, normalizedComment?.content ?? '');
 			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
 			const forwardedMessage = await send(channelId, {
 				content: '',
@@ -1192,18 +1194,20 @@ export async function forward(
 					type: 1,
 				},
 				flags: normalizedComment?.flags ?? 0,
+				subprofile: outgoing.subprofile,
 			});
 			if (!forwardedMessage) {
 				logger.warn(`Forward send failed in channel ${channelId}`);
 				return false;
 			}
 			SlowmodeCommands.confirmMessageSend(channelId, forwardedMessage.timestamp);
-			if (normalizedComment != null && normalizedComment.content.length > 0) {
+			if (normalizedComment != null && outgoing.content.length > 0) {
 				const commentNonce = SnowflakeUtils.fromTimestamp(Date.now() + 1);
 				const commentMessage = await send(channelId, {
-					content: normalizedComment.content,
+					content: outgoing.content,
 					nonce: commentNonce,
 					flags: normalizedComment.flags,
+					subprofile: outgoing.subprofile,
 				});
 				if (!commentMessage) {
 					logger.warn(`Forward comment send failed in channel ${channelId}`);
