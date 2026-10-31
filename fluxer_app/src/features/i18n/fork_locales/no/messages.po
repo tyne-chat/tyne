@@ -209,6 +209,10 @@ msgstr "Visningstag"
 msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
 msgstr "Visningstag vil vises ved siden av alle personanavn i meldinger. Hvis ingen visningstag er angitt, vises kontoprofilbildet ditt."
 
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Ikke gjenkjenn taggene til denne personaen"
+
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Dobbeltklikk for å redigere"
@@ -977,6 +981,10 @@ msgstr "Slå på signallinje"
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Skriv {output} eller {tag} for å få forslag."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Hvis du skriver en av disse taggene, byttes det ikke til denne personaen. Taggen sendes slik den er skrevet."
 
 #. Persona visibility unlisted
 msgid "Unlisted"
