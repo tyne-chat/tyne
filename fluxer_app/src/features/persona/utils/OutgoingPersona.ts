@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
+import type {MatchResult} from '@fluxer/schema/src/domains/persona/PersonaMatcher';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 export interface OutgoingPersona {
@@ -43,6 +44,25 @@ export function resolveOutgoingPersona(
 export function resolveForwardPersona(sourceChannelId: string, channelId: string, comment: string): OutgoingPersona {
 	const selectionChannelId = PersonaStore.latchedPersonaFor(sourceChannelId) ? sourceChannelId : channelId;
 	return resolveOutgoingPersona(selectionChannelId, comment, false, {allowEmptyContent: true});
+}
+
+/**
+ * What a sticker, GIF or meme goes out as. The draft decides: a tag names the persona and a backslash
+ * sends it as the account (tyne-chat/tyne#54). Only a draft that says neither leaves it to the
+ * message's own text. Call it once per message.
+ */
+export function resolveExpressionPersona(
+	channelId: string | null,
+	draft: string,
+	content: string,
+	hasAttachments?: boolean,
+): MatchResult['persona'] | null {
+	const options = {allowEmptyContent: true};
+	const draftMatch = draft ? PersonaStore.matchOutgoingMessage(channelId, draft, hasAttachments, options) : null;
+	if (draftMatch?.matched && draftMatch.persona) return draftMatch.persona;
+	if (draftMatch?.wasEscaped) return null;
+	const contentMatch = PersonaStore.matchOutgoingMessage(channelId, content, hasAttachments, options);
+	return contentMatch.matched && contentMatch.persona ? contentMatch.persona : null;
 }
 
 /** See `PersonaStore.startChannelAs`. For the composers that create a thread or a forum post. */

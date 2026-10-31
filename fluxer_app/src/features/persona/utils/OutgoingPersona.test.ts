@@ -30,7 +30,7 @@ installVoiceMenuTestBootstrap();
 
 const {PersonaStore} = await import('@app/features/persona/state/PersonaStore');
 const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
-const {consumePersonaCommand, resolveForwardPersona, resolveOutgoingPersona} = await import(
+const {consumePersonaCommand, resolveExpressionPersona, resolveForwardPersona, resolveOutgoingPersona} = await import(
 	'@app/features/persona/utils/OutgoingPersona'
 );
 
@@ -184,6 +184,51 @@ describe('resolveForwardPersona', () => {
 		const outgoing = resolveForwardPersona(SOURCE, ROOM, '\\ look');
 		expect(outgoing.content).toBe('look');
 		expect(outgoing.subprofile).toBeUndefined();
+	});
+});
+
+describe('resolveExpressionPersona', () => {
+	const ROOM = '1500000000000000001';
+	const GIF = 'https://example.com/fox.gif';
+	let foxId: string;
+	let baoId: string;
+
+	beforeEach(() => {
+		PersonaStore.reset();
+		foxId = addTestPersona(PersonaStore, {name: 'Fox'}).id;
+		baoId = addTestPersona(PersonaStore, {name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]}).id;
+	});
+
+	afterEach(() => {
+		PersonaStore.reset();
+		vi.restoreAllMocks();
+	});
+
+	it('goes out as the selected persona with an empty draft', async () => {
+		await PersonaStore.setActivePersona(foxId, true);
+		expect(resolveExpressionPersona(ROOM, '', GIF)?.id).toBe(foxId);
+	});
+
+	it('goes out as the persona a tag in the draft names', async () => {
+		await PersonaStore.setActivePersona(foxId, true);
+		expect(resolveExpressionPersona(ROOM, 'B:', GIF)?.id).toBe(baoId);
+	});
+
+	it.each([['\\'], ['\\ text']])('goes out as the account with the draft %j, keeping the selection', async (draft) => {
+		await PersonaStore.setActivePersona(foxId, true);
+		expect(resolveExpressionPersona(ROOM, draft, GIF)).toBeNull();
+		expect(PersonaStore.latchedPersonaFor(ROOM)?.id).toBe(foxId);
+	});
+
+	it('records one use, not one for the draft and one for the content', async () => {
+		await PersonaStore.setActivePersona(foxId, true);
+		const uses = PersonaStore.getPersona(foxId)?.use_count ?? 0;
+		resolveExpressionPersona(ROOM, 'plain text', GIF);
+		expect(PersonaStore.getPersona(foxId)?.use_count ?? 0).toBe(uses + 1);
+	});
+
+	it('goes out as the account with nothing selected', () => {
+		expect(resolveExpressionPersona(ROOM, 'plain text', GIF)).toBeNull();
 	});
 });
 
