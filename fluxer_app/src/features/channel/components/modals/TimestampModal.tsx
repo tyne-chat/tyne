@@ -61,6 +61,7 @@ export interface TimestampModalProps {
 	initialEpoch?: number;
 	initialFormat?: string;
 	onInsert: (markdown: string, meta?: {epoch: number; format: string}) => void;
+	onClosed?: () => void;
 }
 
 function formatRelativePreview(targetEpoch: number, locale: string): string {
@@ -175,8 +176,10 @@ function useIsCompactLayout(): boolean {
 	return isCompact;
 }
 
-export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert}: TimestampModalProps) => {
+export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, onClosed}: TimestampModalProps) => {
 	const {i18n} = useLingui();
+	// Unmounting is the one thing every way of closing shares: Insert, Cancel, Escape, the backdrop.
+	useEffect(() => onClosed, [onClosed]);
 	const locale = getCurrentLocale();
 	const hour12 = shouldUse12HourFormat(locale);
 	const dateInputId = useId();
