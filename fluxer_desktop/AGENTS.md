@@ -121,6 +121,15 @@ A handler that touches accounts, storage or windows checks its sender with
   question (`confirmRestart`); on macOS, which has no update feed yet (tyne-chat/tyne#202), it
   opens the releases page. Other Linux installs use upstream's manual check in `Updater.ts`, which
   reads the same JSON.
+- **Update prompts never take focus** (`ForkUpdatePrompt.ts`, tyne-chat/tyne#299): `askQuietly` takes
+  a native message box's options, so every update question goes through it, upstream's `ask`
+  included. Do not add a `dialog.showMessageBox` to the update flow: a native box takes focus from
+  the composer, and its default button can catch the next Enter. The window is a child of the focused
+  Tyne window, not `alwaysOnTop`, so it stays above Tyne but not other apps, and moves to whichever
+  Tyne window comes to the front. F6 and "Check for updates" move focus in; no button takes focus
+  until then, so a window system that focuses it anyway (Wayland may) cannot press one. A system
+  notification announces it to screen readers, which do not read an unfocused window. Linux X11 is
+  checked in real Electron; Windows, macOS, Wayland and real screen readers are checked by hand.
 - **`ShellDownloadFormats.ts` may import only `@electron/common/BuildChannel`**:
   `fork-release-assets.mjs` runs it in a `vm` and stops on any other import
   (`ForkReleaseFeed.test.mjs` stubs two more, so it does not catch those).
