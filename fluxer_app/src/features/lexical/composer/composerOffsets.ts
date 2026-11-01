@@ -303,7 +303,9 @@ export function $getTextUpToCursor(): string {
 	if (offset == null) {
 		return '';
 	}
-	return layout.text.slice(0, offset);
+	// Fork: masked, or with text after the caret, a finished mention before it reads as a half-typed
+	// `@name`: autocomplete opens and Enter picks from it instead of sending (tyne-chat/tyne#297).
+	return scanTextFromLayout(layout).slice(0, offset);
 }
 
 export function $getComposerDisplayText(): string {
