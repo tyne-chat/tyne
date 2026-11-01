@@ -191,4 +191,40 @@ describe('MessageChangePersona', () => {
 			expect(payload.display_tag_icon).toBeNull();
 		});
 	});
+
+	describe('a persona picked in the inline edit', () => {
+		const picked = {id: 'picked', name: 'Picked'} as MessageSubprofileResponse;
+		const typed = {id: 'typed', name: 'Typed'} as MessageSubprofileResponse;
+
+		it('leaves the persona alone until something is picked', () => {
+			expect(MessageChangePersona.resolveEditSubprofile('pending-1', undefined)).toBeUndefined();
+		});
+
+		it('waits for Save, and clearing it discards it', () => {
+			MessageChangePersona.setPendingSubprofile('pending-2', picked);
+			expect(MessageChangePersona.resolveEditSubprofile('pending-2', undefined)).toEqual(picked);
+
+			MessageChangePersona.clearPendingSubprofile('pending-2');
+			expect(MessageChangePersona.resolveEditSubprofile('pending-2', undefined)).toBeUndefined();
+		});
+
+		it('keeps picking the account apart from picking nothing', () => {
+			MessageChangePersona.setPendingSubprofile('pending-3', null);
+			expect(MessageChangePersona.resolveEditSubprofile('pending-3', undefined)).toBeNull();
+			MessageChangePersona.clearPendingSubprofile('pending-3');
+		});
+
+		it('gives way to a typed tag, and to a typed backslash that removes the persona', () => {
+			MessageChangePersona.setPendingSubprofile('pending-4', picked);
+			expect(MessageChangePersona.resolveEditSubprofile('pending-4', typed)).toBe(typed);
+			expect(MessageChangePersona.resolveEditSubprofile('pending-4', null)).toBeNull();
+			MessageChangePersona.clearPendingSubprofile('pending-4');
+		});
+
+		it('applies to its own message only', () => {
+			MessageChangePersona.setPendingSubprofile('pending-5', picked);
+			expect(MessageChangePersona.resolveEditSubprofile('pending-6', undefined)).toBeUndefined();
+			MessageChangePersona.clearPendingSubprofile('pending-5');
+		});
+	});
 });
