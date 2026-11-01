@@ -142,7 +142,8 @@ as part of the resolution and list those moves in the summary.
 
 **Keep each spot in few commits.** A rebase stops once for every fork commit that touched a spot
 upstream changed. So a fix to code an earlier fork commit wrote is a `fixup!` commit for it
-(`git commit --fixup=<commit>`), folded in at the next tidy-up, not a new fix commit; undoing a fork
+(`git commit --fixup=<commit>`), folded in at the next tidy-up, not a new fix commit (never with
+`--autosquash`: a clean merge can still break a commit); undoing a fork
 edit to an upstream file goes into the commit that made it; after a rebase by hand, each adaptation
 is folded into the commit it adapts. A fold must leave every commit it passes through working: a
 fix that uses something a later commit added, or removes something the commits in between still
