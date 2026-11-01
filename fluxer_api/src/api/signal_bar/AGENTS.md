@@ -89,7 +89,7 @@ toward the global limit.
 | `CHANNEL_SIGNAL_UPDATE` | lighting, re-pointing, turning off, reset, removal, the sweep | `{channel_id, bar_version, added: [entry], removed: [{signal_id, user_id}]}` | `dispatchChannelEvent`: channel-scoped in a community, each recipient in a DM |
 | `CHANNEL_SIGNAL_BAR_UPDATE` | a switch changing a channel's state | `{channel_id, enabled}` | as above. Switching off sends no `CHANNEL_SIGNAL_UPDATE` for the signals it clears |
 
-- Passive sessions (in communities over 250 members) miss the two channel events (tyne-chat/tyne#149).
+- Passive sessions (in communities over 250 members) miss the two channel events (tyne-chat/tyne#313).
 - Nothing is sent when the home community changes, a re-light keeps the persona, or an entry expires.
 - A new event needs its name in `constants/Gateway.ts` and `event_atoms.erl`, and a decision in
   `guild_dispatch_filter.erl` and `session_passive.erl`.
@@ -164,18 +164,18 @@ Where the clients differ today:
 
 ## Known gaps
 
-Tracked in tyne-chat/tyne#148 unless another issue is named.
-
 - Bar writes and community switches read, then write, without compare-and-set: concurrent edits can
-  lose one, and two bar writes can share a version.
+  lose one, and two bar writes can share a version (tyne-chat/tyne#307).
 - Nothing ends a signal when its owner loses access (kick, ban, removal from a group DM, a deleted
-  channel), and lighting in a DM does not check blocks (`validateDMSendPermissions` is not called).
+  channel; tyne-chat/tyne#305), and lighting in a DM does not check blocks (`validateDMSendPermissions` is not called).
 - Voice channels pass `ensureTextChannel` but are left out of the community switches: they follow
-  their category or the default, are never announced and are never cleared.
+  their category or the default, are never announced and are never cleared (tyne-chat/tyne#306).
 - The sweep does not renew the index sets, which expire 7 days after their last lighting or
   re-point. Then a channel's GET stops listing its signals (channel index), or the sweep stops
-  renewing an account's signals, or everyone's (`signalbar:users`), and they expire with no event.
-- The home community is not checked for existence; changing it reaches clients at their next READY.
+  renewing an account's signals, or everyone's (`signalbar:users`), and they expire with no event
+  (tyne-chat/tyne#304).
+- The home community is not checked for existence; changing it reaches clients at their next READY
+  (tyne-chat/tyne#308).
 
 ## Where this code hooks into upstream files
 

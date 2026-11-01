@@ -227,4 +227,4 @@ or rewrite upstream's code: an upstream fix there has to be carried over by hand
   `DEBOUNCE_MESSAGE_REACTIONS`) carry no persona and count as the account's (tyne-chat/tyne#120).
 - Both send paths resolve the persona before `reserveSend`, so a send the local limit refuses has
   already recorded the persona's use and, in `last` mode, moved the selection; and a failed send with
-  files comes back without its persona tag (tyne-chat/tyne#151).
+  files comes back without its persona tag (tyne-chat/tyne#322).
