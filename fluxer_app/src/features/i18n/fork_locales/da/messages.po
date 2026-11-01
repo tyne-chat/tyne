@@ -392,6 +392,7 @@ msgstr "Indsæt"
 
 #. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
 #. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
 #. Title of the timestamp insertion modal.
 msgid "Insert timestamp"
 msgstr "Indsæt tidsstempel"
@@ -628,6 +629,10 @@ msgstr "Præfiks (f.eks. [)"
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
 msgstr "Klargør samlet download af avatarer..."
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "Tryk på F6 for at nå dette vindue med tastaturet."
 
 #. Persona visibility private
 msgid "Private"
