@@ -392,6 +392,7 @@ msgstr "Lisää"
 
 #. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
 #. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
 #. Title of the timestamp insertion modal.
 msgid "Insert timestamp"
 msgstr "Lisää aikaleima"
@@ -628,6 +629,10 @@ msgstr "Etuliite (esim. [)"
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
 msgstr "Valmistellaan avatarien erälatausta..."
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "Paina F6 siirtyäksesi tähän ikkunaan näppäimistöllä."
 
 #. Persona visibility private
 msgid "Private"
