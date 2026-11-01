@@ -65,6 +65,10 @@ import {
 import type {Hono} from 'hono';
 import {getDomain} from 'tldts';
 
+// Fork imports.
+
+import {forkOmitEmptyHiddenBuiltInGuildBadges} from '@app/api/instance/ForkDiscoveryCompat';
+
 let discoveryValidators: DiscoveryValidators | null = null;
 
 function toAgePolicyDiscovery(agePolicy: AgePolicyConfig): InstanceAgePolicy {
@@ -363,7 +367,7 @@ export function InstanceController(app: Hono<HonoEnv>) {
 			) {
 				return ctx.body(null, 304);
 			}
-			return ctx.json(response);
+			return ctx.json(forkOmitEmptyHiddenBuiltInGuildBadges(response));
 		},
 	);
 	app.get(
