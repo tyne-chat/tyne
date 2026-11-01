@@ -60,6 +60,10 @@ import {
 } from '@fluxer/schema/src/domains/instance/InstanceSchemas';
 import type {Hono} from 'hono';
 
+// Fork imports.
+
+import {forkOmitEmptyHiddenBuiltInGuildBadges} from '@app/api/instance/ForkDiscoveryCompat';
+
 let discoveryValidators: DiscoveryValidators | null = null;
 
 function buildDiscoveryStaticInput(
@@ -319,7 +323,7 @@ export function InstanceController(app: Hono<HonoEnv>) {
 			) {
 				return ctx.body(null, 304);
 			}
-			return ctx.json(response);
+			return ctx.json(forkOmitEmptyHiddenBuiltInGuildBadges(response));
 		},
 	);
 	app.get(
