@@ -84,7 +84,8 @@ under `composer/` unless stated.
 - **`ComposerTimestampNode`** is a plain `DecoratorNode`: the highlighter sets no `literal` or
   `spoiler` on it and `$nodeWireText` has no case for it (the highlighter reads its label).
   `ComposerTimestampTransform.ts` turns a typed `<t:…>` or `<t:N:f> (<t:N:R>)` into one;
-  `ComposerHandle.insertTimestamp` serves the host's `TimestampModal`. `normalizeTimestampFormat`
+  `ComposerHandle.insertTimestamp` serves the host's `TimestampModal`, and `LexicalRichInputHandle`
+  passes it on for the inline edit. `normalizeTimestampFormat`
   turns `s`, `S` and a bare `<t:N>` into `:f`. Labels use the current locale and device time zone;
   relative ones re-render each second. Double-click and right-click are handled in both
   `ComposerTimestampPill` and `LexicalComposerInput`'s pointer handlers: change both.
@@ -127,6 +128,7 @@ upstream's files, each under `// Fork imports.`:
 | File | Fork change |
 |---|---|
 | `LexicalComposerInput.tsx` (upstream's most changed) | theme key, two nodes, two `register*` calls, `insertTimestamp`, timestamp branches in the pointer handlers |
+| `LexicalRichInput.tsx` | `insertTimestamp` and `getEditor` on its handle |
 | `useLexicalAutocomplete.ts` | `buildRecentPersonaOptions`, persona merge in the `mention` case, `optionToSlotPayload`, `optionToPayload` |
 | `nodes/ComposerMentionPill.tsx`, `nodes/ComposerMentionNode.tsx` | persona branch (in the persona's colour), plain-mode name; `getPersonaId`, two props |
 | `ComposerSerialization.ts`, `composerOffsets.ts`, `ComposerInsertion.ts`, `ComposerHandle.ts` | persona form; timestamp and anchor cases; `timestamp` payload (built only by a test) |
