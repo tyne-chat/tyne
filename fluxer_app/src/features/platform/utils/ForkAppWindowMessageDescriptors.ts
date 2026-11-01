@@ -19,6 +19,11 @@ export const UPDATE_READY_MESSAGE_DESCRIPTOR = msg({
 	comment:
 		'Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.',
 });
+export const UPDATE_KEYBOARD_HINT_DESCRIPTOR = msg({
+	message: 'Press F6 to reach this window with the keyboard.',
+	comment:
+		'Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.',
+});
 export const UPDATE_RESTART_NOW_DESCRIPTOR = msg({
 	message: 'Restart now',
 	comment:

@@ -17,7 +17,8 @@
 import {createChildLogger} from '@electron/common/Logger';
 import {ModuleSystemLaunchDecision, resolveModuleSystemLaunch} from '@electron/common/ModuleSystem';
 import {armDesktopUpdate, checkDesktopUpdateNow, type DesktopUpdateCheck} from '@electron/main/DesktopUpdateGate';
-import {t} from '@electron/main/MainI18n';
+import {askQuietly, openQuietWindow} from '@electron/main/ForkUpdatePrompt';
+import {getNativeLocale, t} from '@electron/main/MainI18n';
 import {compareModuleVersions, parseModuleVersion} from '@electron/main/ModuleVersion';
 import {openExternalDeduped} from '@electron/main/OpenExternal';
 import {forkLatestInfoUrl, forkReleasesPageUrl} from '@electron/main/ShellDownloadFormats';
@@ -26,7 +27,7 @@ import {
 	ShellUpdateCapability,
 	type ShellUpdatePlan,
 } from '@electron/main/ShellUpdateCapability';
-import {app, BrowserWindow, dialog, type MessageBoxOptions, net} from 'electron';
+import {app, BrowserWindow, type MessageBoxOptions, net} from 'electron';
 
 const logger = createChildLogger('ForkShellUpdate');
 const FIRST_CHECK_DELAY_MS = 2 * 60_000;
@@ -179,7 +180,7 @@ function escapeHtml(text: string): string {
 // The whole progress window: a sentence, a bar and a percentage. It runs no code but the two
 // functions below, loads nothing, and uses a session of its own.
 export function progressDocument(heading: string, detail: string): string {
-	return `<!doctype html><html><head><meta charset="utf-8">
+	return `<!doctype html><html lang="${escapeHtml(getNativeLocale())}"><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <style>
 :root{color-scheme:light dark}
@@ -190,13 +191,14 @@ p{margin:0 0 16px;opacity:.75;line-height:1.4}
 .bar{height:100%;width:0;border-radius:4px;background:#4e5fe4;transition:width .3s ease}
 .busy .bar{width:35%;animation:slide 1.4s ease-in-out infinite}
 @keyframes slide{0%{margin-left:-35%}100%{margin-left:100%}}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}.busy .bar{animation:none;width:100%;opacity:.6}}
 #percent{margin-top:8px;text-align:right;font-variant-numeric:tabular-nums;opacity:.75;min-height:1.2em}
 @media (prefers-color-scheme:dark){body{background:#1e1f24;color:#f2f2f4}}
 </style></head><body>
-<h1>${escapeHtml(heading)}</h1><p>${escapeHtml(detail)}</p>
-<div class="track" id="track"><div class="bar" id="bar"></div></div><div id="percent"></div>
+<h1 id="heading">${escapeHtml(heading)}</h1><p>${escapeHtml(detail)}</p>
+<div class="track" id="track" role="progressbar" aria-labelledby="heading" aria-valuemin="0" aria-valuemax="100"><div class="bar" id="bar"></div></div><div id="percent"></div>
 <script>
-function showProgress(percent){var known=typeof percent==='number';document.getElementById('track').className=known?'track':'track busy';document.getElementById('bar').style.width=known?Math.max(0,Math.min(100,percent))+'%':'';document.getElementById('percent').textContent=known?Math.round(percent)+'%':'';}
+function showProgress(percent){var known=typeof percent==='number';var track=document.getElementById('track');track.className=known?'track':'track busy';if(known){track.setAttribute('aria-valuenow',String(Math.round(percent)));}else{track.removeAttribute('aria-valuenow');}document.getElementById('bar').style.width=known?Math.max(0,Math.min(100,percent))+'%':'';document.getElementById('percent').textContent=known?Math.round(percent)+'%':'';}
 showProgress(0);
 </script></body></html>`;
 }
@@ -222,42 +224,15 @@ function openWindowProgressSurface(version: string | null): ForkUpdateProgressSu
 		open: () => {
 			const heading =
 				version == null ? t('desktop.update.availableMessage') : t('desktop.update.manualMessage', {version});
-			window = new BrowserWindow({
-				...PROGRESS_WINDOW_SIZE,
-				useContentSize: true,
-				resizable: false,
-				maximizable: false,
-				fullscreenable: false,
-				minimizable: true,
-				show: false,
-				title: app.getName(),
-				autoHideMenuBar: true,
-				webPreferences: {
-					partition: 'fork-update-progress',
-					sandbox: true,
-					contextIsolation: true,
-					nodeIntegration: false,
-					spellcheck: false,
-				},
-			});
-			window.setMenuBarVisibility(false);
-			const opened = window;
-			opened.webContents.setWindowOpenHandler(() => ({action: 'deny'}));
-			opened.webContents.on('will-navigate', (event) => {
-				event.preventDefault();
-			});
+			const page = progressDocument(heading, t('desktop.update.availableDetail'));
+			const opened = openQuietWindow(page, PROGRESS_WINDOW_SIZE);
+			window = opened;
 			opened.webContents.once('did-finish-load', () => {
-				if (opened.isDestroyed()) return;
-				opened.show();
-				run(lastScript);
+				if (!opened.isDestroyed()) run(lastScript);
 			});
 			// Closing the window only hides the progress; the update carries on.
 			opened.once('closed', () => {
 				if (window === opened) window = null;
-			});
-			const page = progressDocument(heading, t('desktop.update.availableDetail'));
-			void opened.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(page)}`).catch((error: unknown) => {
-				logger.warn('Could not load the update progress window', error);
 			});
 		},
 		downloading: (percent) => {
@@ -290,10 +265,7 @@ async function announceForkUpdate(version: string, plan: ForkSelfUpdatePlan): Pr
 		defaultId: 0,
 		cancelId: 1,
 	};
-	const focused = BrowserWindow.getFocusedWindow();
-	const parent = focused != null && !focused.isDestroyed() && focused.isVisible() ? focused : null;
-	const {response} =
-		parent == null ? await dialog.showMessageBox(options) : await dialog.showMessageBox(parent, options);
+	const response = await askQuietly(options);
 	if (response !== 0) {
 		logger.info('The user put off the update', {version});
 		return;
@@ -312,11 +284,7 @@ async function askToRestartForUpdate(version: string | null): Promise<boolean> {
 		defaultId: 0,
 		cancelId: 1,
 	};
-	const focused = BrowserWindow.getFocusedWindow();
-	const parent = focused != null && !focused.isDestroyed() && focused.isVisible() ? focused : null;
-	const {response} =
-		parent == null ? await dialog.showMessageBox(options) : await dialog.showMessageBox(parent, options);
-	return response === 0;
+	return (await askQuietly(options)) === 0;
 }
 
 export async function fetchLatestReleaseVersion(url: string): Promise<string> {
