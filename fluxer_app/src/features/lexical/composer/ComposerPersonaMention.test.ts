@@ -16,11 +16,12 @@ import {
 	$projectComposer,
 	isValidComposerSegment,
 } from '@app/features/lexical/composer/ComposerSerialization';
-import {$replaceComposerRange} from '@app/features/lexical/composer/composerOffsets';
+import {$getTextUpToCursor, $replaceComposerRange} from '@app/features/lexical/composer/composerOffsets';
 import {
 	$createComposerMentionNode,
 	ComposerMentionNode,
 } from '@app/features/lexical/composer/nodes/ComposerMentionNode';
+import {detectAutocompleteTrigger} from '@app/features/messaging/utils/SlashCommandUtils';
 import type {MentionSegment} from '@app/features/messaging/utils/TextareaSegmentManager';
 
 vi.mock('@app/features/lexical/composer/nodes/ComposerMentionPill', () => ({ComposerMentionPill: () => null}));
@@ -63,6 +64,32 @@ describe('ComposerPersonaMention', () => {
 			expect(node.getTextContent()).toBe('@Alice');
 			expect(node.getWireText()).toBe('<@123456789012345678>');
 		});
+	});
+
+	it('does not read a finished mention before the caret as one being typed', () => {
+		const editor = createEditor({
+			namespace: 'persona-mention-caret-test',
+			nodes: [ComposerMentionNode],
+			onError: (err) => {
+				throw err;
+			},
+		});
+
+		editor.update(
+			() => {
+				$replaceComposerRange(
+					0,
+					0,
+					{kind: 'mention', mentionType: 'user', id: '1', display: '@Bob', wire: '<@1:bob_id>'},
+					{leading: false, trailing: false},
+				);
+
+				const textBeforeCaret = $getTextUpToCursor();
+				expect(textBeforeCaret).toHaveLength('@Bob'.length);
+				expect(detectAutocompleteTrigger(textBeforeCaret)).toBeNull();
+			},
+			{discrete: true},
+		);
 	});
 
 	it('projects persona mention to correct wire format and valid segment', () => {
