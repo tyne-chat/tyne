@@ -17,6 +17,7 @@ import {useCallback, useId, useImperativeHandle, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {type ComposerMentionInsert, insertComposerMention} from '@app/features/lexical/composer/ComposerInsertion';
 import type {LexicalEditor} from 'lexical';
 
 export interface LexicalRichInputHandle {
@@ -29,6 +30,9 @@ export interface LexicalRichInputHandle {
 
 	// Fork: lets the inline edit add a paste command for files (tyne-chat/tyne#289).
 	getEditor: () => LexicalEditor | null;
+
+	// Fork: a mention from outside the box, at its caret (tyne-chat/tyne#287).
+	insertMention: (mention: ComposerMentionInsert) => void;
 }
 
 export interface LexicalRichInputProps {
@@ -177,8 +181,12 @@ export const LexicalRichInput = ({
 			},
 
 			getEditor: () => handleRef.current?.getEditor() ?? null,
+
+			insertMention: (mention) => {
+				insertComposerMention(handleRef.current, mention, {maxWireLength: maxLength, onExceedMaxLength});
+			},
 		}),
-		[insertEmoji],
+		[insertEmoji, maxLength, onExceedMaxLength],
 	);
 
 	const handleEnter = useCallback(() => {
