@@ -94,6 +94,7 @@ const FALLBACK_STRINGS: Readonly<Record<string, string>> = Object.freeze({
 	'desktop.update.stillDownloadingDetail': 'The update is still downloading. Try again in a few minutes.',
 	'desktop.update.readyMessage': '{appName} {version} is ready to install.',
 	'desktop.update.restartNow': 'Restart now',
+	'desktop.update.keyboardHint': 'Press F6 to reach this window with the keyboard.',
 	'desktop.tray.copyBuildInfo': 'Copy build info',
 	'desktop.tray.turnOffCustomCss': 'Turn off custom CSS',
 	'desktop.tray.turnOnCustomCss': 'Turn on custom CSS',
