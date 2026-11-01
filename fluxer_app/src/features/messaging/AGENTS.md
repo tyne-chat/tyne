@@ -129,7 +129,9 @@ restores files to the composer. The save does not lock the box, because a read-o
 focus and typing then goes to the composer: it saves what the box held at Enter, and what changed
 since stays open for the next Save. Removing, renaming or spoilering a file being saved cannot wait,
 so it stops the save, and so does closing the edit, but not opening another. While a save runs Enter
-does nothing, or a newer text edit could land first and be overwritten. The E2E stack has no presigned
+does nothing, or a newer text edit could land first and be overwritten. An `EditSession` says where the
+edit lives: its own key and `MessageEdit`, or, with the mobile layout, the composer and
+`MessageEditMobile`, so both share these rules. The E2E stack has no presigned
 uploads, unlike production and dev, so a change here needs a check on chat-dev too.
 It clears up after an edit through `MessageEdit.subscribe`, not the row, which can be unmounted when
 the edit closes. An edit must name every attachment it keeps: the server drops the rest, so the
