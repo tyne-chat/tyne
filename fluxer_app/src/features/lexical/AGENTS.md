@@ -123,8 +123,7 @@ under `composer/` unless stated.
   case in `$projectComposer`, `$createComposerSegmentNodes`, `isValidSegmentWire`, `$nodeWireText`
   and `$createComposerInsertNode`, plain mode included.
 - `baseAutocompleteMenu` in `useLexicalAutocomplete` lists its dependencies by hand and Biome's
-  `useExhaustiveDependencies` is off: add every input (`personaSearchResults` is missing today,
-  tyne-chat/tyne#150).
+  `useExhaustiveDependencies` is off: add every input.
 - Pills re-render often and remount on `hydrate`, a mode switch and a `literal`/`spoiler` change: no
   requests or store writes from `decorate()` or a pill.
 
@@ -153,7 +152,7 @@ one shared predicate.
   `GET /channels/:id/persona-mentions?q=…&limit=500`, 60 ms after the last change (at once for a
   bare `@`), unless the channel's cache is under 15 minutes old and matches. A word matching no
   persona costs one per pause. Not shared, not cancelled (late answers to old queries are dropped;
-  tyne-chat/tyne#150).
+  tyne-chat/tyne#317).
   A failure caches nothing and the next change asks again. The server lists the guild's members
   each time. `persona/events/PersonaEvents.ts` clears the cache.
 - **An unknown persona's pill** (a draft restored after a reload): `PersonaStore.fetchPersona` →
