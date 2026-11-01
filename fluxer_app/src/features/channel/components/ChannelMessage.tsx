@@ -56,6 +56,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {pressedAttachmentId} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
 import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
 import {PersonaPickerSheet} from '@app/features/persona/components/PersonaPickerSheet';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
@@ -246,6 +247,7 @@ export const Message: React.FC<MessageProps> = observer((props) => {
 	const [isLongPressing, setIsLongPressing] = useState(false);
 	const [isFocusedWithin, setIsFocusedWithin] = useState(false);
 	const [mobileLongPressLinkUrl, setMobileLongPressLinkUrl] = useState<string | undefined>(undefined);
+	const [mobileLongPressAttachmentId, setMobileLongPressAttachmentId] = useState<string | undefined>(undefined);
 	const messageRef = useRef<HTMLDivElement | null>(null);
 	const focusRingAnchorRef = useRef<HTMLDivElement | null>(null);
 	const disableContextMenuTracking = behaviorOverrides?.disableContextMenuTracking ?? false;
@@ -438,6 +440,7 @@ export const Message: React.FC<MessageProps> = observer((props) => {
 			setIsLongPressing(false);
 			if (!options?.preserveLinkUrl) {
 				setMobileLongPressLinkUrl(undefined);
+				setMobileLongPressAttachmentId(undefined);
 			}
 		},
 		[unsubscribeLongPressScrollCancel],
@@ -451,6 +454,7 @@ export const Message: React.FC<MessageProps> = observer((props) => {
 			if (!touch) return;
 			unsubscribeLongPressScrollCancel();
 			setMobileLongPressLinkUrl(getContextMenuLinkUrl(event.target));
+			setMobileLongPressAttachmentId(pressedAttachmentId(getElementFromEventTarget(event.target)));
 			unsubscribeLongPressScrollCancelRef.current = subscribeMobileLongPressScrollCancel(() => {
 				if (touchStartPos.current) {
 					clearLongPressState();
@@ -847,6 +851,7 @@ export const Message: React.FC<MessageProps> = observer((props) => {
 					sourceChannel={channel}
 					handleDelete={handleDelete}
 					linkUrl={mobileLongPressLinkUrl}
+					attachmentId={mobileLongPressAttachmentId}
 					data-flx="channel.message.message-action-bottom-sheet"
 				/>
 			)}
