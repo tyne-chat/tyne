@@ -129,7 +129,7 @@ The outline is in `ARCHITECTURE.md` ("Connecting to the gateway"). The details t
   updates, messages that mention it or that it wrote, guild deletes, audit-log entries, and
   PASSIVE_UPDATES every 30 s (`guild/guild_passive_sync.erl`). Turning active sends GUILD_SYNC.
 - It misses `GUILD_PERSONAS_DIRTY`, `CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE`, and
-  GUILD_SYNC does not make up for them (tyne-chat/tyne#149). Dev communities are small: test with `member_count` above
+  GUILD_SYNC does not make up for them (tyne-chat/tyne#313). Dev communities are small: test with `member_count` above
   250, as `test/fork_session_passive_tests.erl` does.
 
 ## Network calls
@@ -142,7 +142,7 @@ The gateway's requests go to the API's `/internal/rpc`:
   of an empty guild is armed only when a session leaves
   (`guild/guild_sessions_connect_cleanup.erl`), so a community loaded by a dispatch nobody joins
   stays loaded (read in the code, not observed). An API fan-out to every community, such as the
-  fork's `SIGNAL_BAR_UPDATE`, loads them all (tyne-chat/tyne#149).
+  fork's `SIGNAL_BAR_UPDATE`, loads them all (tyne-chat/tyne#314, #315).
 
 ## Erlang traps
 
