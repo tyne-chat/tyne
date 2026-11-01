@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import type {Channel} from '@app/features/channel/models/Channel';
 import * as MessageCommands from '@app/features/messaging/commands/MessageCommands';
 import type {Message} from '@app/features/messaging/models/MessagingMessage';
 import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
 import MessageEdit from '@app/features/messaging/state/MessageEdit';
+import MessageEditMobile from '@app/features/messaging/state/MessageEditMobile';
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import {
 	canUsePresignedAttachmentUploads,
@@ -22,7 +22,7 @@ import type {
 } from '@app/features/messaging/utils/MessageRequestUtils';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {isAbortError} from '@app/features/platform/utils/PlatformHelpers';
-import {makeAutoObservable} from 'mobx';
+import {compareStructural, makeAutoObservable, reaction} from 'mobx';
 
 interface PreparedUploads {
 	attachments: Array<ApiAttachmentMetadata>;
@@ -70,7 +70,23 @@ function isChangedOrGone(saving: CloudAttachment, inBox: CloudAttachment | undef
 	);
 }
 
-const abortControllers = new Map<string, AbortController>();
+// Where an edit lives. The inline edit has a box of its own. With the mobile layout there is none:
+// the edit happens in the channel composer, so its files are the composer's and its store differs.
+export interface EditSession {
+	attachmentKey: string;
+	openMessageId: () => string | null;
+	text: () => string | null;
+}
+
+export function mobileEditSession(channelId: string, text: () => string | null): EditSession {
+	return {
+		attachmentKey: channelId,
+		openMessageId: () => MessageEditMobile.getEditingMobileMessageId(channelId),
+		text,
+	};
+}
+
+const runningSaves = new Map<string, {abortController: AbortController; session: EditSession}>();
 const openEdits = new Map<string, string>();
 const filesBeingAdded = new Map<string, Set<Promise<unknown>>>();
 
@@ -80,6 +96,9 @@ class InlineEditUploads {
 	constructor() {
 		makeAutoObservable(this, {}, {autoBind: true});
 		MessageEdit.subscribe(this.dropClosedEdits);
+		reaction(() => Object.entries(MessageEditMobile.editingMessageIds), this.dropClosedEdits, {
+			equals: compareStructural,
+		});
 	}
 
 	attachmentKey(messageId: string): string {
@@ -121,7 +140,7 @@ class InlineEditUploads {
 	}
 
 	isSaving(messageId: string): boolean {
-		return abortControllers.has(messageId);
+		return runningSaves.has(messageId);
 	}
 
 	// Saves what the box holds now and stays out of the way until it lands: locking the editor would
@@ -130,16 +149,23 @@ class InlineEditUploads {
 	// cannot wait for that, because it would publish as it was, so it stops the save. Unlike a text
 	// edit, this keeps the edit open until the files have landed: closing first would lose them when
 	// an upload fails.
-	async save(params: {channel: Channel; message: Message; content: string; onSaved: () => void}): Promise<void> {
-		const {channel, message, content, onSaved} = params;
-		if (abortControllers.has(message.id)) {
+	async save(params: {
+		channelId: string;
+		message: Message;
+		content: string;
+		onSaved: () => void;
+		session?: EditSession;
+	}): Promise<void> {
+		const {channelId, message, content, onSaved} = params;
+		if (runningSaves.has(message.id)) {
 			return;
 		}
-		const key = this.attachmentKey(message.id);
-		const nonce = `${key}-${Date.now()}`;
+		const session = params.session ?? this.inlineEditSession(channelId, message.id);
+		const key = session.attachmentKey;
+		const nonce = `inline-edit:${message.id}-${Date.now()}`;
 		const abortController = new AbortController();
-		abortControllers.set(message.id, abortController);
-		const textAtSave = MessageEdit.getEditingContent(channel.id, message.id);
+		runningSaves.set(message.id, {abortController, session});
+		const textAtSave = session.text();
 		const pickAtSave = MessageChangePersona.resolveEditSubprofile(message.id, undefined);
 		this.setUploadingCount(message.id, Math.max(1, CloudUpload.getTextareaAttachments(key).length));
 		let stopWatchingBox = () => {};
@@ -158,7 +184,7 @@ class InlineEditUploads {
 				// Without preview URLs, because removing the upload revokes them and the box still shows them.
 				const claimed = pending.map((attachment) => ({...attachment, previewURL: null, thumbnailURL: null}));
 				CloudUpload.claimAttachmentsForMessage(key, nonce, claimed);
-				prepared = await prepareUploads(channel.id, nonce, abortController.signal);
+				prepared = await prepareUploads(channelId, nonce, abortController.signal);
 			}
 			const editMatch = PersonaStore.matchEditMessage(content, message.subprofile, {
 				hasAttachments: true,
@@ -167,7 +193,7 @@ class InlineEditUploads {
 			// The server drops every attachment an edit leaves out, so the ones it has go first. They are
 			// read now because an upload can be slow, and another device can change them meanwhile.
 			const allAttachments: Array<ApiMessageEditAttachmentMetadata> = [
-				...buildExistingAttachmentEditReferences(Messages.getMessage(channel.id, message.id) ?? message),
+				...buildExistingAttachmentEditReferences(Messages.getMessage(channelId, message.id) ?? message),
 				...prepared.attachments,
 			];
 			// Files already in storage make this a quick request that cannot be recalled, and stopping it
@@ -176,7 +202,7 @@ class InlineEditUploads {
 				stopWatchingBox();
 			}
 			const saved = await MessageCommands.editWithFiles(
-				channel.id,
+				channelId,
 				message.id,
 				{
 					content: editMatch.finalContent,
@@ -200,9 +226,10 @@ class InlineEditUploads {
 			}
 			const boxUnchanged =
 				pickUnchanged &&
-				!this.hasFiles(message.id) &&
-				MessageEdit.getEditingContent(channel.id, message.id) === textAtSave;
-			if (boxUnchanged && MessageEdit.isEditing(channel.id, message.id)) {
+				!filesBeingAdded.has(message.id) &&
+				CloudUpload.getTextareaAttachments(key).length === 0 &&
+				session.text() === textAtSave;
+			if (boxUnchanged && session.openMessageId() === message.id) {
 				onSaved();
 			}
 		} catch (error) {
@@ -212,26 +239,33 @@ class InlineEditUploads {
 		} finally {
 			stopWatchingBox();
 			CloudUpload.removeMessageUpload(nonce);
-			abortControllers.delete(message.id);
+			runningSaves.delete(message.id);
 			this.setUploadingCount(message.id, 0);
 			this.dropClosedEdits();
 		}
 	}
 
+	private inlineEditSession(channelId: string, messageId: string): EditSession {
+		return {
+			attachmentKey: this.attachmentKey(messageId),
+			openMessageId: () => MessageEdit.getEditingMessageId(channelId),
+			text: () => MessageEdit.getEditingContent(channelId, messageId),
+		};
+	}
+
 	private dropClosedEdits(): void {
-		for (const [messageId, channelId] of openEdits) {
-			if (MessageEdit.isEditing(channelId, messageId)) {
-				continue;
+		// Closing an edit cancels its save, by whichever way it closed. Opening another edit in the
+		// channel does not: that person still expects this one to land.
+		for (const {abortController, session} of runningSaves.values()) {
+			if (session.openMessageId() === null) {
+				abortController.abort();
 			}
-			const running = abortControllers.get(messageId);
-			if (running === undefined) {
+		}
+		for (const [messageId, channelId] of openEdits) {
+			if (!MessageEdit.isEditing(channelId, messageId) && !runningSaves.has(messageId)) {
 				openEdits.delete(messageId);
 				CloudUpload.clearTextarea(this.attachmentKey(messageId));
 				MessageChangePersona.clearPendingSubprofile(messageId);
-			} else if (MessageEdit.getEditingMessageId(channelId) === null) {
-				// Closing the edit cancels the save, by whichever way it closed. Opening another edit in the
-				// channel does not: that person still expects this one to land.
-				running.abort();
 			}
 		}
 	}
