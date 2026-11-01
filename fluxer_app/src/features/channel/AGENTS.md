@@ -104,7 +104,9 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   composer, where Enter sends it. Files for an edit are `messaging`'s `InlineEditUploads`: they wait
   under a key of their own, drawn by `ChannelAttachmentArea`, and the edit stays open until they
   land, so a failed upload can be retried. A pasted file lands there too (`InlineEditFiles.tsx`):
-  paste handling is registered per editor, so the composer's never sees a paste in the edit.
+  paste handling is registered per editor, so the composer's never sees a paste in the edit. With
+  the mobile layout there is no edit box: the composer edits, `useTextareaSubmit` sends its files
+  through the same save, and the composer's own plus menu is the edit's (tyne-chat/tyne#292).
 - **Plain paste** (`messaging/utils/PlainPasteUtils.ts`) is decided per paste event: ask
   `isPlainPasteEvent(event)`, never keep state of your own. It skips files and the composer's
   clipboard format; mentions and emoji still become pills, as in Discord. `TextareaContextMenu`'s
