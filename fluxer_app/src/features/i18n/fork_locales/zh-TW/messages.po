@@ -392,6 +392,7 @@ msgstr "插入"
 
 #. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
 #. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
 #. Title of the timestamp insertion modal.
 msgid "Insert timestamp"
 msgstr "插入時間戳記"
@@ -628,6 +629,10 @@ msgstr "前綴（例如 [）"
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
 msgstr "正在準備批次下載頭像..."
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "按 F6 即可用鍵盤進入此視窗。"
 
 #. Persona visibility private
 msgid "Private"
