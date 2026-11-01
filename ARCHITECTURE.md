@@ -172,8 +172,8 @@ tablet through `maxTouchPoints`.
 
 | Device | Tyne | Upstream |
 |---|---|---|
-| Phone | always mobile | always mobile (any iOS or Android user agent) |
-| Tablet | by width: mobile below 640 px, back to desktop at 768 px | always mobile, for the same reason |
+| Phone | always mobile | always mobile (user agent matches `iPad`, `iPhone`, `iPod` or `Android`) |
+| Tablet | by width: mobile below 640 px, back to desktop at 768 px | always mobile by the same match, except iPadOS, which reads as a Mac and goes by width |
 | Anything else, the desktop app included | never mobile, at any width | by width, as for tablets here |
 
 So a small window is not a phone here: to test mobile layout, use a phone user agent, as E2E's
