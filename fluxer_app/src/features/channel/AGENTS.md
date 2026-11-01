@@ -103,10 +103,10 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   timestamp) and a persona selector in the edit's footer row. They stay out of the box because beside the text they
   would narrow every line of a long message (tyne-chat/tyne#289). Each control acts on its own box:
   the channel composer's plus menu writes to the composer during an edit too. What has no box of
-  its own, like a mention, should follow the caret (tyne-chat/tyne#287). `useInlineEditCaret.ts`
-  knows which editor last held it, and gives the edit focus back when the composer's plus menu or
-  `TimestampModal` closes without inserting: left outside it, what is typed next goes to the
-  composer, where Enter sends it. Files for an edit are `messaging`'s `InlineEditUploads`: they wait
+  its own, like a mention from a name, follows the caret (tyne-chat/tyne#287). `useInlineEditCaret.ts`
+  knows which editor last held it: `INSERT_MENTION` asks it first and lands at the edit's caret, and
+  it gives the edit focus back when the composer's plus menu or `TimestampModal` closes without
+  inserting: left outside it, what is typed next goes to the composer, where Enter sends it. Files for an edit are `messaging`'s `InlineEditUploads`: they wait
   under a key of their own, drawn by `ChannelAttachmentArea`, and the edit stays open until they
   land, so a failed upload can be retried. A pasted file lands there too (`InlineEditFiles.tsx`):
   paste handling is registered per editor, so the composer's never sees a paste in the edit. With
