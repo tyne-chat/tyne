@@ -29,6 +29,7 @@ export type PersonaPayloadSource =
 
 class MessageChangePersona {
 	private editingMessageIds: Record<string, string> = {};
+	private pendingSubprofiles: Record<string, MessageSubprofileResponse | null> = {};
 
 	constructor() {
 		makeAutoObservable(this, {}, {autoBind: true});
@@ -65,6 +66,25 @@ class MessageChangePersona {
 			message.attachments?.length ? buildExistingAttachmentEditReferences(message) : undefined,
 			subprofile,
 		);
+	}
+
+	// A persona picked in the inline edit waits here for Save, so it survives a channel switch as the
+	// edit's text does. Null removes the message's persona.
+	setPendingSubprofile(messageId: string, subprofile: MessageSubprofileResponse | null): void {
+		this.pendingSubprofiles[messageId] = subprofile;
+	}
+
+	clearPendingSubprofile(messageId: string): void {
+		delete this.pendingSubprofiles[messageId];
+	}
+
+	// What saving the edit sets, undefined to leave the persona alone. A typed tag wins over a pick,
+	// as it does in the composer. Read this before closing the edit: closing clears the pick.
+	resolveEditSubprofile(
+		messageId: string,
+		typedSubprofile: MessageSubprofileResponse | null | undefined,
+	): MessageSubprofileResponse | null | undefined {
+		return typedSubprofile !== undefined ? typedSubprofile : this.pendingSubprofiles[messageId];
 	}
 
 	subscribe(callback: () => void): () => void {
