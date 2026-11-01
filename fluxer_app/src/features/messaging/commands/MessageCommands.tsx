@@ -93,6 +93,7 @@ import {
 	dropMessagePageThatNoLongerFits,
 	messageLoadGeneration,
 } from '@app/features/messaging/commands/ForkMessagePageFit';
+import type {MessageEditPayload, MessageEditRequest} from '@app/features/messaging/utils/MessageRequestUtils';
 import {resolveForwardPersona} from '@app/features/persona/utils/OutgoingPersona';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -1289,4 +1290,52 @@ export async function deleteAttachment(channelId: string, messageId: string, att
 		}
 		throw error;
 	}
+}
+
+// Fork: an edit that adds files (tyne-chat/tyne#289). With no files, they are already in storage
+// and the attachments name them; otherwise this is a multipart request, as upstream's send falls
+// back to. False when the request failed, with the failure already shown.
+export async function editWithFiles(
+	channelId: string,
+	messageId: string,
+	payload: MessageEditPayload,
+	files: Array<File> | undefined,
+	signal: AbortSignal,
+): Promise<boolean> {
+	const requestBody = buildMessageEditRequest(payload);
+	let body: MessageEditRequest | FormData = requestBody;
+	if (files !== undefined && files.length > 0) {
+		const formData = new FormData();
+		formData.append('payload_json', JSON.stringify(requestBody));
+		files.forEach((file, index) => {
+			formData.append(`files[${index}]`, file);
+		});
+		body = formData;
+	}
+	try {
+		const response = await http.patch<WireMessage>(Endpoints.CHANNEL_MESSAGE(channelId, messageId), {
+			body,
+			signal,
+			suppressContentBlockedModal: true,
+		});
+		if (response.body) {
+			const {subprofile} = payload;
+			const message: WireMessage =
+				subprofile !== undefined && response.body.subprofile === undefined
+					? {...response.body, subprofile}
+					: response.body;
+			Messages.handleMessageUpdate({message});
+		}
+		return true;
+	} catch (error) {
+		if (signal.aborted) {
+			return false;
+		}
+		showEditFailureModal(error);
+		return false;
+	}
+}
+
+export function showEditWithFilesFailure(error: unknown): void {
+	showEditFailureModal(error);
 }
