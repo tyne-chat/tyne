@@ -86,6 +86,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import type {MentionPersona} from '@app/features/messaging/utils/MentionInsert';
+
 const REMOVE_FROM_GROUP_DESCRIPTOR = msg({
 	message: 'Remove from group',
 	comment: 'Group DM action that removes the selected member from the group.',
@@ -129,10 +133,11 @@ interface UserContextMenuProps {
 	isCallContext?: boolean;
 	privateCallContext?: PrivateCallMenuContext;
 	message?: Message;
+	mentionPersona?: MentionPersona | null;
 }
 
 export const UserContextMenu: React.FC<UserContextMenuProps> = observer(
-	({user, onClose, guildId, channelId, isCallContext = false, privateCallContext, message}) => {
+	({user, onClose, guildId, channelId, isCallContext = false, privateCallContext, message, mentionPersona}) => {
 		const {i18n} = useLingui();
 		const channel = channelId ? Channels.getChannel(channelId) : null;
 		const canSendMessages = channel
@@ -595,6 +600,7 @@ export const UserContextMenu: React.FC<UserContextMenuProps> = observer(
 							<MentionUserMenuItem
 								user={user}
 								onClose={onClose}
+								persona={mentionPersona}
 								data-flx="ui.action-menu.user-context-menu.render-default-menu.mention-user-menu-item"
 							/>
 						)}
