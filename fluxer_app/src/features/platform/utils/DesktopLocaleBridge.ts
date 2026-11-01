@@ -18,6 +18,7 @@ import {msg} from '@lingui/core/macro';
 
 import {
 	NEW_WINDOW_DESCRIPTOR,
+	UPDATE_KEYBOARD_HINT_DESCRIPTOR,
 	UPDATE_READY_MESSAGE_DESCRIPTOR,
 	UPDATE_RESTART_NOW_DESCRIPTOR,
 } from '@app/features/platform/utils/ForkAppWindowMessageDescriptors';
@@ -600,6 +601,7 @@ const NATIVE_MESSAGES: Record<string, NativeMessage> = {
 	'desktop.update.stillDownloadingDetail': UPDATE_STILL_DOWNLOADING_DETAIL_DESCRIPTOR,
 	'desktop.update.readyMessage': UPDATE_READY_MESSAGE_DESCRIPTOR,
 	'desktop.update.restartNow': UPDATE_RESTART_NOW_DESCRIPTOR,
+	'desktop.update.keyboardHint': UPDATE_KEYBOARD_HINT_DESCRIPTOR,
 	'desktop.tray.copyBuildInfo': COPY_BUILD_INFO_DESCRIPTOR,
 	'desktop.tray.turnOffCustomCss': TURN_OFF_CUSTOM_CSS_DESCRIPTOR,
 	'desktop.tray.turnOnCustomCss': TURN_ON_CUSTOM_CSS_DESCRIPTOR,
