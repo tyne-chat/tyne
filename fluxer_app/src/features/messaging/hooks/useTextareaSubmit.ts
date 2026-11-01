@@ -54,6 +54,7 @@ import {useCallback} from 'react';
 // Fork imports.
 
 import {runForkGuildCommand} from '@app/features/guild_commands/commands/RunGuildCommand';
+import InlineEditUploads, {mobileEditSession} from '@app/features/messaging/state/InlineEditUploads';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const COULDN_T_RUN_THAT_COMMAND_DESCRIPTOR = msg({
@@ -522,11 +523,28 @@ export const useTextareaSubmit = ({
 			return;
 		}
 		if (editingMessage && isMobileEditMode) {
+			if (InlineEditUploads.isSaving(editingMessage.id)) {
+				return;
+			}
 			const finishMobileEdit = () => {
 				MessageCommands.stopEditMobile(channelId);
 				setValue('');
 				clearSegments();
 			};
+			if (uploadAttachmentsLength > 0) {
+				if (!checkCustomEmojiAvailability(resolvedContent)) {
+					MessageCommands.confirmPublishedMessageEdit(i18n, editingMessage, () => {
+						void InlineEditUploads.save({
+							channelId,
+							message: editingMessage,
+							content: resolvedContent,
+							onSaved: finishMobileEdit,
+							session: mobileEditSession(channelId, () => composerHandleRef?.current?.getWireValue() ?? null),
+						});
+					});
+				}
+				return;
+			}
 			if (!hasVisibleMessageContent(resolvedContent)) {
 				if (isAttachmentOnlyMessage(editingMessage)) {
 					finishMobileEdit();
