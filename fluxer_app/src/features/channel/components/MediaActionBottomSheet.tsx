@@ -14,6 +14,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo} from 'react';
 
+// Fork imports.
+
+import {useDeleteAttachmentMenuGroups} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
+
 const IMAGE_OPTIONS_DESCRIPTOR = msg({
 	message: 'Image options',
 	comment: 'Short label in the channel and chat media action bottom sheet. Keep it concise.',
@@ -133,13 +137,14 @@ const MediaActionBottomSheetContent: React.FC<MediaActionBottomSheetProps> = obs
 			() => (supportsReverseImageSearch ? buildReverseImageSearchMenuGroups(originalSrc, {i18n, onClose}) : []),
 			[supportsReverseImageSearch, originalSrc, i18n.locale, onClose],
 		);
+		const attachmentGroups = useDeleteAttachmentMenuGroups(message, attachmentId, onClose);
 		const combinedGroups = useMemo(() => {
-			const groups = [...mediaGroups, ...reverseImageSearchGroups];
+			const groups = [...mediaGroups, ...attachmentGroups, ...reverseImageSearchGroups];
 			if (visibleMessageGroups.length > 0) {
 				groups.push(...visibleMessageGroups);
 			}
 			return groups;
-		}, [mediaGroups, reverseImageSearchGroups, visibleMessageGroups]);
+		}, [attachmentGroups, mediaGroups, reverseImageSearchGroups, visibleMessageGroups]);
 		const title = useMemo(() => {
 			switch (type) {
 				case 'image':
