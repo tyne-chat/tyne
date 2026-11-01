@@ -166,6 +166,20 @@ and the mobile app builds it from its `fluxer` submodule.
   cross-cutting `platform`, `ui`, `app`, `lexical` (the editor) and `i18n` (the fork's strings in
   `fork_locales/`). Shared types are in `packages/schema` (Zod; also the source of the OpenAPI spec).
 
+**Mobile layout** (`MobileLayout.enabled`) depends on the device, which Bowser reads from
+`navigator.userAgent` (`platform/types/Platform.ts`); iPadOS, which claims to be a Mac, counts as a
+tablet through `maxTouchPoints`.
+
+| Device | Tyne | Upstream |
+|---|---|---|
+| Phone | always mobile | always mobile (any iOS or Android user agent) |
+| Tablet | by width: mobile below 640 px, back to desktop at 768 px | always mobile, for the same reason |
+| Anything else, the desktop app included | never mobile, at any width | by width, as for tablets here |
+
+So a small window is not a phone here: to test mobile layout, use a phone user agent, as E2E's
+`mobile-chromium` project does. Mobile layout is a different code path, not a narrower page: a
+message is edited in the channel composer, not an inline box.
+
 ## The fork's features
 
 ### Personas
