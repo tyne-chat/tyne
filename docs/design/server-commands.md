@@ -151,7 +151,7 @@ Like custom emoji: a member of a community can use its commands everywhere they 
   3. other communities' commands, in the member's sidebar order.
 
   The same order on the web and on phones. Emoji are not a model here: typed emoji names resolve
-  differently on the two (tyne-chat/tyne#170, #268).
+  differently on the two (tyne-chat/tyne#392, #453).
 - **Autocomplete** shows every usable command, each with its community's name and icon, ordered by
   the same precedence. Picking a row runs that exact command, whatever its name.
 
