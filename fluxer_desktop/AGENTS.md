@@ -72,7 +72,7 @@ A handler that touches accounts, storage or windows checks its sender with
 - **The packages' scheme comes from the environment**: `FLUXER_FORK_LINK_SCHEME`, which the
   workflow sets, because upstream's `ChannelIsolation.test.mjs` expects stable to declare `fluxer`.
   A stable package built without it declares `fluxer://`, and on Linux the package is the only
-  place `tyne://` is registered (tyne-chat/tyne#153).
+  place `tyne://` is registered (tyne-chat/tyne#332).
 - **In tests the defines are absent**, so upstream's tests see upstream's values; only the builder
   config's fork block is on (off only with `FLUXER_FORK_IDENTITY=0`). A fork test that needs Tyne's
   values sets `process.env.FLUXER_FORK_IDENTITY = '1'` before importing.
@@ -94,7 +94,7 @@ A handler that touches accounts, storage or windows checks its sender with
 - **`openAppWindow` copies `createWindow`'s per-window setup**, so a listener upstream adds there
   does not reach extra windows. Missing today: `unresponsive` logging, console forwarding, the
   Windows badge overlay, and the screen-share clean-up on navigation or crash
-  (`drainPendingDisplayMediaRequests`; tyne-chat/tyne#153). After a rebase that changes `createWindow`, compare the
+  (`drainPendingDisplayMediaRequests`; tyne-chat/tyne#337). After a rebase that changes `createWindow`, compare the
   two, and keep its window-open handlers as the named functions both share.
 - **Extra windows do not use upstream's account engine.** It serves one renderer, the one
   `getMainWindow()` returns, so `index.ts` answers an extra window's `account-engine:is-available`
