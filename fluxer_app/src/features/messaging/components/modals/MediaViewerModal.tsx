@@ -70,6 +70,10 @@ import {
 } from 'react';
 import {createPortal} from 'react-dom';
 
+// Fork imports.
+
+import {useDeleteAttachmentMenuGroups} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
+
 const MEDIA_OPTIONS_DESCRIPTOR = msg({
 	message: 'Media options',
 	comment: 'Accessible label for the overflow menu button in the media viewer modal.',
@@ -127,6 +131,8 @@ interface MobileMediaOptionsSheetProps {
 	onClose: () => void;
 	onDelete: (bypassConfirm?: boolean) => void;
 	sourceChannel?: Channel | null;
+	deletableAttachmentId?: string;
+	onAttachmentDeleted?: () => void;
 }
 
 const MEDIA_VIEWER_THUMBNAIL_SIZE = 44;
@@ -237,6 +243,8 @@ const MobileMediaOptionsSheet: FC<MobileMediaOptionsSheetProps> = observer(funct
 	onClose,
 	onDelete,
 	sourceChannel,
+	deletableAttachmentId,
+	onAttachmentDeleted,
 }: MobileMediaOptionsSheetProps) {
 	const {i18n} = useLingui();
 	const mediaMenuData = useMediaMenuData(
@@ -263,9 +271,10 @@ const MobileMediaOptionsSheet: FC<MobileMediaOptionsSheetProps> = observer(funct
 		sourceChannel,
 	});
 	const visibleMessageGroups = useMemo(() => messageGroups.filter((group) => group.items.length > 0), [messageGroups]);
+	const attachmentGroups = useDeleteAttachmentMenuGroups(message, deletableAttachmentId, onClose, onAttachmentDeleted);
 	const mediaMenuGroupsWithMessageActions = useMemo(
-		() => [...mediaMenuData.groups, ...visibleMessageGroups],
-		[mediaMenuData.groups, visibleMessageGroups],
+		() => [...mediaMenuData.groups, ...attachmentGroups, ...visibleMessageGroups],
+		[attachmentGroups, mediaMenuData.groups, visibleMessageGroups],
 	);
 	return (
 		<MenuBottomSheet
@@ -748,6 +757,8 @@ const MediaViewerModalComponent: FC = observer(() => {
 					onClose={() => setIsMediaMenuOpen(false)}
 					onDelete={handleDelete}
 					sourceChannel={sourceChannel}
+					deletableAttachmentId={deletableAttachmentId}
+					onAttachmentDeleted={handleAttachmentDeleted}
 					data-flx="messaging.media-viewer-modal.media-viewer-modal-component.mobile-media-options-sheet"
 				/>
 			)}
