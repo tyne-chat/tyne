@@ -147,7 +147,7 @@ upstream changed. So a fix to code an earlier fork commit wrote is a `fixup!` co
 edit to an upstream file goes into the commit that made it; after a rebase by hand, each adaptation
 is folded into the commit it adapts. A fold must leave every commit it passes through working: a
 fix that uses something a later commit added, or removes something the commits in between still
-use, stays a commit of its own. All fork changes to `fluxer_docs/` are in one commit,
+use, stays a commit with a subject of its own. All fork changes to `fluxer_docs/` are in one commit,
 `docs: Tyne's additions to the API documentation`; add to it with a fixup. (tyne-chat/tyne#220:
 folding such fixes anyway broke the type check of earlier commits, so the tidy-up of 2026-10-25
 was redone to fold only those that leave every commit working.)
