@@ -1,6 +1,7 @@
 import {expect, type Page, test} from '@playwright/test';
 import {FluxerApiClient} from '../../api-helpers/client.js';
 import {loginAs} from '../support/auth.js';
+import {longPress} from '../support/touch.js';
 
 const PNG = {
 	name: 'added.png',
@@ -36,17 +37,8 @@ test.describe('Editing a message with a file on the mobile layout', () => {
 		const composer = page.locator('flx-channel-textarea-composer [contenteditable="true"]').first();
 		await expect(message).toBeVisible({timeout: 20_000});
 
-		const box = await message.boundingBox();
-		if (box === null) {
-			throw new Error('The message has no box to press');
-		}
-		// Cancelled rather than ended: lifting the finger would tap whichever menu item opened under it.
-		const touch = await page.context().newCDPSession(page);
-		const point = {x: box.x + 12, y: box.y + box.height / 2};
 		const editItem = page.getByText(/^Edit( message)?$/).first();
-		await touch.send('Input.dispatchTouchEvent', {type: 'touchStart', touchPoints: [point]});
-		await expect(editItem).toBeVisible({timeout: 5_000});
-		await touch.send('Input.dispatchTouchEvent', {type: 'touchCancel', touchPoints: []});
+		await longPress(page, message, () => expect(editItem).toBeVisible({timeout: 5_000}));
 		await editItem.click();
 		await expect(page.getByText('Editing message')).toBeVisible({timeout: 5_000});
 		await expect(composer).toHaveText(content);
