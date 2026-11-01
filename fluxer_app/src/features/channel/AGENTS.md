@@ -68,6 +68,11 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   `MessageChangePersona.startChangePersona`; an effect in `ChannelMessage` opens
   `PersonaPickerSheet` on the row, and a pick sends one edit carrying only the persona. The inline
   edit's selector differs: its pick waits for Save in `MessageChangePersona`, and Escape discards it.
+- **Delete attachment on the mobile layout** (tyne-chat/tyne#294): the trash buttons are hover
+  actions, which touch never reaches, so `DeleteAttachmentMenuGroup.tsx` adds the item to the
+  long-press sheets: `MediaActionBottomSheet`, and `MessageActionBottomSheet` for an attachment with
+  no long press of its own, which `ChannelMessage` finds by the marker `Attachment.tsx` puts on it.
+  The media viewer's sheets carry it too (`MobileMediaActions`, and for video `MobileMediaOptionsSheet`).
 - **Reactions:** chips, quick reactions, the action bar, the message menu and the emoji picker ask
   `PersonaStore.getEffectiveReactionPersona(channelId, emoji, draft)` and toggle that persona's
   reaction (`hasPersonaReacted`), not `reaction.me`. Each reads the channel's draft, so all
@@ -131,7 +136,7 @@ DM list as an overlay (`isMemberListPeeking`, `data-peek-drawer`), driven by `ui
 - **Fork-owned:** `MessagePersonaAccount.tsx`, `channel_header/useCollapsedPanelBadges.ts`,
   `message_search_bar/PersonaSearchSuggestions.ts` and `PersonasSection.tsx`,
   `modals/TimestampModal.tsx`, `InlineEditControls.tsx`, `InlineEditFiles.tsx`, `useInlineEditCaret.ts`,
-  `emoji_picker/hooks/useForkSearchFirstResultSelection.ts`.
+  `DeleteAttachmentMenuGroup.tsx`, `emoji_picker/hooks/useForkSearchFirstResultSelection.ts`.
 - **Renamed and wrapped from outside:** `ChannelViewScaffold` (`ChannelViewScaffoldBase` in an
   `observer`), `EmojiPicker` (`EmojiPickerBase` inside the `EmojiPickerReactionContext` provider),
   `EmojiRenderer` (`EmojiRendererBase` in an `observer`). When upstream changes one, keep its body
