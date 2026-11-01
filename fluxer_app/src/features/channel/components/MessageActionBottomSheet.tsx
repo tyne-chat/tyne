@@ -30,6 +30,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {useDeleteAttachmentMenuGroups} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
+
 const ADD_ANOTHER_REACTION_DESCRIPTOR = msg({
 	message: 'Add another reaction',
 	comment: 'Button or menu action label in the channel and chat message action bottom sheet. Keep it concise.',
@@ -42,10 +46,11 @@ interface MessageActionBottomSheetProps {
 	sourceChannel?: Channel | null;
 	handleDelete: (bypassConfirm?: boolean) => void;
 	linkUrl?: string;
+	attachmentId?: string;
 }
 
 export const MessageActionBottomSheet: React.FC<MessageActionBottomSheetProps> = observer(
-	({isOpen, onClose, message, sourceChannel, handleDelete, linkUrl}) => {
+	({isOpen, onClose, message, sourceChannel, handleDelete, linkUrl, attachmentId}) => {
 		const {i18n} = useLingui();
 		const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 		const [isReactionsSheetOpen, setIsReactionsSheetOpen] = useState(false);
@@ -110,9 +115,10 @@ export const MessageActionBottomSheet: React.FC<MessageActionBottomSheetProps> =
 			];
 		}, [handleCopyLink, handleOpenLink, i18n.locale, linkUrl]);
 		useReactionMenuImagePreload(quickReactionEmojis);
+		const attachmentGroups = useDeleteAttachmentMenuGroups(message, attachmentId, onClose);
 		const visibleGroups = useMemo(
-			() => [...linkGroups, ...groups].filter((group) => group.items.length > 0),
-			[groups, linkGroups],
+			() => [...linkGroups, ...groups, ...attachmentGroups].filter((group) => group.items.length > 0),
+			[attachmentGroups, groups, linkGroups],
 		);
 		const quickReactionRow = quickReactionRowVisible ? (
 			<div
