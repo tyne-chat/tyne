@@ -15,7 +15,11 @@ import {openExternalDeduped} from '@electron/main/OpenExternal';
 import {resolveShellUpdatePlan, ShellUpdateCapability} from '@electron/main/ShellUpdateCapability';
 import {findNewerManualShell} from '@electron/main/Updater';
 import {DOWNLOAD_PAGE_URL} from '@electron/main/UpdaterDownloads';
-import {app, BrowserWindow, dialog, type MessageBoxOptions} from 'electron';
+import {app, type MessageBoxOptions} from 'electron';
+
+// Fork imports.
+
+import {askQuietly, focusQuietWindow} from '@electron/main/ForkUpdatePrompt';
 
 const logger = createChildLogger('DesktopUpdatePrompt');
 
@@ -32,11 +36,9 @@ const UpdatePromptChoice = Object.freeze({
 let checking: Promise<void> | null = null;
 let failurePrompt: Promise<void> | null = null;
 
-async function ask(options: MessageBoxOptions): Promise<number> {
-	const parent = BrowserWindow.getFocusedWindow();
-	const usable = parent != null && !parent.isDestroyed() && parent.isVisible() ? parent : null;
-	const result = usable == null ? await dialog.showMessageBox(options) : await dialog.showMessageBox(usable, options);
-	return result.response;
+// Fork: never a native box, which takes focus from whatever the person is typing (tyne-chat/tyne#299).
+function ask(options: MessageBoxOptions): Promise<number> {
+	return askQuietly(options);
 }
 
 async function runUpdateCheck(): Promise<void> {
@@ -134,6 +136,10 @@ async function offerDesktopUpdate(): Promise<void> {
 }
 
 export function checkForUpdatesFromShell(): Promise<void> {
+	// Fork: with a prompt open, this menu item is the keyboard's way into it.
+	if (focusQuietWindow()) {
+		return Promise.resolve();
+	}
 	checking ??= runUpdateCheck()
 		.catch((error: unknown) => {
 			logger.error('The native update prompt failed', error);
