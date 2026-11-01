@@ -15,10 +15,20 @@ import type {I18n} from '@lingui/core';
 import type React from 'react';
 import {useCallback, useId, useImperativeHandle, useRef, useState} from 'react';
 
+// Fork imports.
+
+import type {LexicalEditor} from 'lexical';
+
 export interface LexicalRichInputHandle {
 	focus: () => void;
 
 	insertEmoji: (emoji: FlatEmoji) => boolean;
+
+	// Fork: the inline edit's way in for the timestamp modal (tyne-chat/tyne#283).
+	insertTimestamp: (epoch: number, format?: string) => void;
+
+	// Fork: lets the inline edit add a paste command for files (tyne-chat/tyne#289).
+	getEditor: () => LexicalEditor | null;
 }
 
 export interface LexicalRichInputProps {
@@ -161,6 +171,12 @@ export const LexicalRichInput = ({
 			},
 
 			insertEmoji,
+
+			insertTimestamp: (epoch, format) => {
+				handleRef.current?.insertTimestamp(epoch, format);
+			},
+
+			getEditor: () => handleRef.current?.getEditor() ?? null,
 		}),
 		[insertEmoji],
 	);

@@ -134,6 +134,7 @@ import {useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useStat
 // Fork imports.
 
 import {openTimestampModal} from '@app/features/channel/components/modals/TimestampModal';
+import {focusWhenPossible, returnFocusToInlineEdit} from '@app/features/channel/components/useInlineEditCaret';
 import {PersonaComposerPill} from '@app/features/persona/components/PersonaComposerPill';
 import {SignalBar} from '@app/features/signal_bar/components/SignalBar';
 
@@ -1073,21 +1074,35 @@ export const LexicalChannelTextareaContent = observer(
 			return unsubscribe;
 		}, [composerKey, editingMessageId, textareaInputDisabled, mobileLayout.enabled]);
 		const wasEditingInlineRef = useRef(false);
+		const returnCaretToInlineEdit = useCallback(() => {
+			if (ownsChannelEdits) {
+				returnFocusToInlineEdit(channel.id);
+			}
+		}, [channel.id, ownsChannelEdits]);
 		const handleInsertTimestamp = useCallback(() => {
 			ContextMenuCommands.close();
 			if (!textareaInputDisabled) {
+				let inserted = false;
 				openTimestampModal({
 					onInsert: (markdown, meta) => {
+						inserted = true;
 						if (meta && handleRef.current?.insertTimestamp) {
 							handleRef.current.insertTimestamp(meta.epoch, meta.format);
 						} else {
 							handleRef.current?.insertTextAtCursor(markdown);
 						}
-						handleRef.current?.focus();
+					},
+					onClosed: () => {
+						if (!inserted) {
+							returnCaretToInlineEdit();
+						} else if (!mobileLayout.enabled) {
+							const handle = handleRef.current;
+							focusWhenPossible(handle?.getEditor().getRootElement(), () => handle?.focus());
+						}
 					},
 				});
 			}
-		}, [textareaInputDisabled]);
+		}, [mobileLayout.enabled, returnCaretToInlineEdit, textareaInputDisabled]);
 		useEffect(() => {
 			const isEditingInline = editingMessageId != null && !mobileLayout.enabled;
 			if (wasEditingInlineRef.current && !isEditingInline && !textareaInputDisabled) {
@@ -1136,7 +1151,8 @@ export const LexicalChannelTextareaContent = observer(
 		}, []);
 		const handlePlusMenuClosed = useCallback(() => {
 			plusMenuOpenedAtRef.current = 0;
-		}, []);
+			returnCaretToInlineEdit();
+		}, [returnCaretToInlineEdit]);
 		const closePlusMenuFromRepeatPress = useCallback(
 			(timeStamp: number, openedAt = plusMenuOpenedAtRef.current) => {
 				ContextMenuCommands.close();

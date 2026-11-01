@@ -123,6 +123,20 @@ carries only metadata; with the pre-upload privacy setting this starts when file
 (`MessageQueue.startTextareaAttachmentUploads`). Otherwise, or when that fails and the files are
 small enough, they go in a multipart POST with the message.
 
+Fork: `state/InlineEditUploads.ts` adds files to an existing message (tyne-chat/tyne#289). It uses
+the same plans and PUTs, but not `MessageQueue.prepareAttachmentsForSend`, whose failure path
+restores files to the composer. The save does not lock the box, because a read-only editor loses
+focus and typing then goes to the composer: it saves what the box held at Enter, and what changed
+since stays open for the next Save. Removing, renaming or spoilering a file being saved cannot wait,
+so it stops the save, and so does closing the edit, but not opening another. While a save runs Enter
+does nothing, or a newer text edit could land first and be overwritten. The E2E stack has no presigned
+uploads, unlike production and dev, so a change here needs a check on chat-dev too.
+It clears up after an edit through `MessageEdit.subscribe`, not the row, which can be unmounted when
+the edit closes. An edit must name every attachment it keeps: the server drops the rest, so the
+existing ones go first, read when the upload ends. In the API, `updateMessage` marks the message
+edited and gives the file its own expiry record: with none, a read dates it from the message, and on
+a message older than the file's lifetime the worker deletes it.
+
 ## Editing and deleting
 
 - `MessageCommands.edit` PATCHes. Its last parameter is the persona: absent leaves it, `null` makes
@@ -136,14 +150,15 @@ small enough, they go in a multipart POST with the message.
 
 ## Where the fork's code sits
 
-Fork-owned: `state/MessageChangePersona.ts`, `utils/ExpressionDraftPersona.ts`,
+Fork-owned: `state/MessageChangePersona.ts`, `state/InlineEditUploads.ts`,
+`utils/ExpressionDraftPersona.ts`,
 `utils/PlainPasteUtils.ts`, `utils/MarkdownPersonaMentionSegments.ts`, `commands/ForkMessagePageFit.ts`
 and the fork tests. Inside upstream's files, under `// Fork imports.`:
 
 | File | Fork change |
 |---|---|
 | `useMessageSubmission.tsx`, `useTextareaSubmit.ts`, `useTextareaExpressionHandlers.ts` | persona blocks in both send callbacks; `matchEditMessage` around the edit calls; the draft kept on expression sends |
-| `MessageCommands.tsx` | `subprofile` on `SendMessageParams`; `SignalBarStore.affirmPersona` in `send`; `edit`'s last parameter and response block; the page-fit check in `fetchMessages` |
+| `MessageCommands.tsx` | `subprofile` on `SendMessageParams`; `SignalBarStore.affirmPersona` in `send`; `edit`'s last parameter and response block; the page-fit check in `fetchMessages`; `editWithFiles` appended |
 | `MessageRequestUtils.ts`, `MessageSubmitUtils.ts`, `MessageRetryUtils.ts`, `MessageQueue.tsx` | `persona_id` in requests; `subprofile` carried through |
 | `MessagingMessage.ts`, `ChannelMessages.ts` | `subprofile` in constructor, `withUpdates`, `equals`, `toJSON`; `mention_personas` → `PersonaStore.recordKnownPersona`; `skipReactionHydration` |
 | `MessagingMessages.ts` | persona index inside upstream's index methods; `patchPersonaMessages` (a copy of `patchAuthorMessages`); `handlePersonaUpdate`, `handleAuthorDisplayTagUpdate` (from `persona/events/PersonaEvents.ts`) |
