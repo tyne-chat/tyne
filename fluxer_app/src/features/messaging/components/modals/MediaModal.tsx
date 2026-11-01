@@ -467,6 +467,7 @@ export const MediaModal: FC<MediaModalProps> = observer(
 				<MobileMediaActions
 					{...actionProps}
 					rootRef={topActionBarRef}
+					onDeleteAttachment={onDeleteAttachment}
 					data-flx="messaging.media-modal.mobile-media-actions"
 				/>
 			);
