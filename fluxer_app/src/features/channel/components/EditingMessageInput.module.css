@@ -46,3 +46,32 @@
 .editor [data-channel-textarea] {
 	max-height: 50svh;
 }
+
+/* Fork: the inline edit's own controls. They sit in the footer because beside the text they would
+   narrow every line of a long message, which is worst in a narrow window. */
+.controls {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: var(--spacing-1);
+	margin-inline-end: 0.5rem;
+}
+
+.controls + * {
+	margin-inline-end: auto;
+}
+
+.personaButton {
+	display: flex;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: none;
+	cursor: pointer;
+}
+
+.uploading {
+	margin-inline-start: 0.25rem;
+	color: var(--text-chat-muted);
+	font-size: 0.75rem;
+}

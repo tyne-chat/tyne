@@ -66,7 +66,8 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   thread's `Channel.ownerPersonaId`.
 - **"Change persona":** a `MessageActionMenu` item (when the account has personas) calls
   `MessageChangePersona.startChangePersona`; an effect in `ChannelMessage` opens
-  `PersonaPickerSheet` on the row, and a pick sends one edit carrying only the persona.
+  `PersonaPickerSheet` on the row, and a pick sends one edit carrying only the persona. The inline
+  edit's selector differs: its pick waits for Save in `MessageChangePersona`, and Escape discards it.
 - **Reactions:** chips, quick reactions, the action bar, the message menu and the emoji picker ask
   `PersonaStore.getEffectiveReactionPersona(channelId, emoji, draft)` and toggle that persona's
   reaction (`hasPersonaReacted`), not `reaction.me`. Each reads the channel's draft, so all
@@ -93,6 +94,17 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   `hasAttachments`; hidden by `showPersonasButton` and in a `bare` composer, whose host draws its
   own from `onWireValueChange`. `<SignalBar attached>` above the box (`signal_bar/AGENTS.md`).
   `handleInsertTimestamp` opens `TimestampModal` from both plus menus.
+- **The inline edit's controls:** `InlineEditControls.tsx` puts a plus menu (Upload file, Insert
+  timestamp) and a persona selector in the edit's footer row. They stay out of the box because beside the text they
+  would narrow every line of a long message (tyne-chat/tyne#289). Each control acts on its own box:
+  the channel composer's plus menu writes to the composer during an edit too. What has no box of
+  its own, like a mention, should follow the caret (tyne-chat/tyne#287). `useInlineEditCaret.ts`
+  knows which editor last held it, and gives the edit focus back when the composer's plus menu or
+  `TimestampModal` closes without inserting: left outside it, what is typed next goes to the
+  composer, where Enter sends it. Files for an edit are `messaging`'s `InlineEditUploads`: they wait
+  under a key of their own, drawn by `ChannelAttachmentArea`, and the edit stays open until they
+  land, so a failed upload can be retried. A pasted file lands there too (`InlineEditFiles.tsx`):
+  paste handling is registered per editor, so the composer's never sees a paste in the edit.
 - **Plain paste** (`messaging/utils/PlainPasteUtils.ts`) is decided per paste event: ask
   `isPlainPasteEvent(event)`, never keep state of your own. It skips files and the composer's
   clipboard format; mentions and emoji still become pills, as in Discord. `TextareaContextMenu`'s
@@ -116,7 +128,8 @@ DM list as an overlay (`isMemberListPeeking`, `data-peek-drawer`), driven by `ui
 
 - **Fork-owned:** `MessagePersonaAccount.tsx`, `channel_header/useCollapsedPanelBadges.ts`,
   `message_search_bar/PersonaSearchSuggestions.ts` and `PersonasSection.tsx`,
-  `modals/TimestampModal.tsx`, `emoji_picker/hooks/useForkSearchFirstResultSelection.ts`.
+  `modals/TimestampModal.tsx`, `InlineEditControls.tsx`, `InlineEditFiles.tsx`, `useInlineEditCaret.ts`,
+  `emoji_picker/hooks/useForkSearchFirstResultSelection.ts`.
 - **Renamed and wrapped from outside:** `ChannelViewScaffold` (`ChannelViewScaffoldBase` in an
   `observer`), `EmojiPicker` (`EmojiPickerBase` inside the `EmojiPickerReactionContext` provider),
   `EmojiRenderer` (`EmojiRendererBase` in an `observer`). When upstream changes one, keep its body
@@ -128,7 +141,8 @@ DM list as an overlay (`isMemberListPeeking`, `data-peek-drawer`), driven by `ui
 - **Inside upstream's lines** (conflicts first): `LexicalChannelTextareaContent.tsx` and
   `ChannelMessage.tsx` (both among upstream's most changed here; the picker effect could move to a
   fork hook), `MessageReactions.tsx`, `MessageActionBar.tsx`, `MessageActionMenu.tsx`,
-  `MessageActionUtils.tsx`, `UserMessage.tsx` (the inline edit runs `matchEditMessage`),
+  `MessageActionUtils.tsx`, `UserMessage.tsx` (the inline edit runs `matchEditMessage`, and hands
+  edits with files to `InlineEditUploads`), `EditingMessageInput.tsx` (its controls and files),
   `AutocompleteMention.tsx` (`renderPersona`), `EmojiRenderer.tsx` (drag-and-drop in upstream's
   render), `PreloadableUserPopout.tsx`, `DMChannelView.tsx` (upstream's barrier ternary re-indented
   in a fragment), the search-bar hook, `QuickReactionStore.ts`.
@@ -155,6 +169,7 @@ DM list as an overlay (`isMemberListPeeking`, `data-peek-drawer`), driven by `ui
 | Typing in search | per `from:`/`mentions:` value and per plain word, `GET /channels/:id/persona-mentions?q=…&limit=500` 60 ms after the last change, unless the 15-minute per-channel cache has a match (`lexical/composer/useAutocompletePersonaSearch.ts`). Not shared, failures not remembered: a word matching no persona costs one request per pause (tyne-chat/tyne#150) |
 | Opening pins | one GET the first time; a failure is recorded, not retried. Upstream's popout also acks unseen pins (one POST) and loads the authors' missing members |
 | A reaction, "Change persona" | one request each (429 retries are messaging's) |
+| Saving an inline edit with new files | one plan request, one PUT per file (or its parts), one completion when an upload was in parts, one PATCH; or, with no presigned uploads or when the plan request fails, one multipart PATCH. Only on Save. A failure shows once, is not retried, and leaves the files in the box |
 
 Nothing here fetches while rendering, but rows render mentions through messaging's
 `MentionRenderer`, which does (tyne-chat/tyne#121). Do not add persona-search callers without a test
@@ -165,6 +180,8 @@ that counts requests (root `AGENTS.md`, "Network calls").
 - **Here (fork):** `MessagePersonaAccount.test.tsx`, `MessageActionBarQuickReaction.test.tsx` (also
   `EmojiRenderer` pins), `MessageReactionsContextMenu.test.tsx`, `useCollapsedPanelBadges.test.ts`,
   `PersonaSearchSuggestions.test.ts`, `TimestampModal.test.tsx`,
+  `useInlineEditCaret.test.tsx`, `InlineEditFiles.test.tsx`, `InlineEditUploads.test.ts` (in
+  `messaging`),
   `MobileTextareaPlusBottomSheet.test.tsx`, `ChannelOwnerPersona.test.ts`. Upstream's:
   `ChannelFrecency.test.ts`, `useVirtualPickerGrid.test.tsx`, four benches. Component tests use
   `// @vitest-environment happy-dom`, `installVoiceMenuTestBootstrap`, mocked Lingui macros, and
@@ -172,7 +189,8 @@ that counts requests (root `AGENTS.md`, "Network calls").
 - **Elsewhere:** `PersonaComposerPill.test.tsx`, `PersonaTag.test.tsx`,
   `MessageChangePersona.test.ts`, `AutoAckPredicate.test.ts` (AFK).
 - **End to end:** `e2e/web/desktop/persona-*.spec.ts` (rows, replies, reactions, "Change persona",
-  typing, mentions), `channel-timestamp-pills.spec.ts`, `window-activation-quick-reaction.spec.ts`,
+  the inline edit's selector, typing, mentions), `channel-timestamp-pills.spec.ts`,
+  `channel-inline-edit-upload.spec.ts`, `window-activation-quick-reaction.spec.ts`,
   `signal-bar.spec.ts`, `e2e/web/mobile/persona-picker.spec.ts`.
 - **Not covered:** no unit tests for `ChannelMessages`, `ScrollManager`, the composer or
   `UserMessage`; nothing counts the search requests; no end-to-end test of persona search
