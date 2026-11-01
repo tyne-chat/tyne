@@ -145,6 +145,9 @@ test.describe('Server commands', () => {
 		await page.goto(channelPath);
 		await expect(composer(page)).toBeVisible({timeout: 20_000});
 		await send(page, `/${WAVE} again ${unique}`);
+		// The box empties when the command has run, which would wipe a chip clicked before that. A
+		// chip from an earlier test is already on screen, so waiting for one does not wait for this.
+		await expect(composer(page)).toHaveText('', {timeout: 15_000});
 		await expect(chip(page, WAVE)).toBeVisible({timeout: 15_000});
 
 		await chip(page, WAVE).click();
