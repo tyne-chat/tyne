@@ -40,6 +40,10 @@ import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import type {FC} from 'react';
 
+// Fork imports.
+
+import {attachmentMarker} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
+
 const THIS_ATTACHMENT_HAS_EXPIRED_DESCRIPTOR = msg({
 	message: 'This attachment has expired',
 	comment: 'Error message in the channel and chat attachment.',
@@ -354,6 +358,7 @@ export const Attachment: FC<AttachmentProps> = observer(
 		const renderWithFootnote = (content: React.ReactElement) => (
 			<div
 				className={styles.attachmentWrapper}
+				{...attachmentMarker(attachment.id)}
 				data-flx="channel.embeds.attachments.attachment.render-with-footnote.attachment-wrapper"
 			>
 				{content}

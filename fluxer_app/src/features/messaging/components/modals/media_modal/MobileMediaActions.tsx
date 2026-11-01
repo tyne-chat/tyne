@@ -52,7 +52,12 @@ import {
 import {observer} from 'mobx-react-lite';
 import {type FC, type ReactNode, useCallback, useMemo, useState} from 'react';
 
-type MobileMediaActionsProps = Omit<MediaOverlayActionsProps, 'onDeleteAttachment'>;
+// Fork imports.
+
+import {deleteAttachmentMenuGroup} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
+import type {MouseEvent} from 'react';
+
+type MobileMediaActionsProps = MediaOverlayActionsProps;
 
 const iconSize = remFromPx(20);
 
@@ -62,6 +67,7 @@ function compactGroups(groups: Array<MenuGroupType>): Array<MenuGroupType> {
 
 export const MobileMediaActions: FC<MobileMediaActionsProps> = observer(
 	({
+		onDeleteAttachment,
 		isFavorited,
 		onFavorite,
 		onDownload,
@@ -359,6 +365,17 @@ export const MobileMediaActions: FC<MobileMediaActionsProps> = observer(
 				onZoomOut,
 			],
 		);
+		// Fork: the bar has no room for the desktop viewer's trash button (tyne-chat/tyne#294).
+		const sheetGroups = useMemo(
+			() =>
+				onDeleteAttachment
+					? [
+							...groups,
+							deleteAttachmentMenuGroup(i18n, handleCloseSheet, onDeleteAttachment as (e: MouseEvent) => void),
+						]
+					: groups,
+			[groups, handleCloseSheet, i18n, i18n.locale, onDeleteAttachment],
+		);
 		return (
 			<>
 				<div
@@ -401,7 +418,7 @@ export const MobileMediaActions: FC<MobileMediaActionsProps> = observer(
 					isOpen={isSheetOpen}
 					onClose={handleCloseSheet}
 					title={i18n._(MEDIA_CONTROLS_DESCRIPTOR)}
-					groups={groups}
+					groups={sheetGroups}
 					data-flx="messaging.media-modal.mobile-media-actions.menu-bottom-sheet"
 				/>
 			</>

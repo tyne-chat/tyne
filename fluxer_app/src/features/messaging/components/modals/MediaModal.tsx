@@ -509,6 +509,7 @@ export const MediaModal: FC<MediaModalProps> = observer(
 		if (isMobile && !isMobileVideo) {
 			mediaActions = (
 				<MobileMediaActions
+					onDeleteAttachment={onDeleteAttachment}
 					{...actionProps}
 					rootRef={topActionBarRef}
 					closeButtonRef={closeButtonRef}
