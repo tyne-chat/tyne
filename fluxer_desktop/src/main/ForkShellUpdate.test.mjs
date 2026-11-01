@@ -249,6 +249,15 @@ describe('the update progress window', () => {
 		assert.ok(page.includes('&#60;img src=x onerror=alert(1)&#62;'));
 		assert.ok(page.includes('Fish &#38; &#34;chips&#34; &#39;n&#39; &#60;b&#62;'));
 	});
+
+	test('the progress window tells assistive technology what it shows', () => {
+		const page = progressDocument('Updating', 'Please wait');
+
+		assert.match(page, /role="progressbar" aria-labelledby="heading"/);
+		assert.match(page, /aria-valuenow/);
+		assert.match(page, /prefers-reduced-motion:reduce/);
+		assert.match(page, /<html lang="/);
+	});
 });
 
 describe('reading the latest fork release', () => {
