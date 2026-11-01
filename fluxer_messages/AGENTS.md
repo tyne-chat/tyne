@@ -102,15 +102,15 @@ separate processes, so for a while either may run an older build than the other.
 - **`DeletedUser`:** a missing user partial becomes `deleted_user(id)`, username `DeletedUser`. A
   failed or slow `svc.users` call does that to every author, silently, and the API's
   `isDeletedAuthor` then reads the username as a deleted account and shows a persona message as
-  "Deleted Persona" (tyne-chat/tyne#152).
+  "Deleted Persona" (tyne-chat/tyne#326).
 - **Absence:** `me_root` and `persona_reactions` are left out when false or empty. The web's
   hydration (`ReactionStateMachine.ts`) keeps its previous value when a field is absent, so it cannot
-  tell "none" from "not sent" (tyne-chat/tyne#152).
+  tell "none" from "not sent" (tyne-chat/tyne#327).
 - **Scylla is behind the fork.** `MESSAGE_COLUMNS` selects `persona_id`, which
   `tools/dev/cassandra_target_schema.json` does not have (it still lists the retired `subprofile`),
   and the two Scylla reaction statements do not select `persona_id`. Tyne runs Postgres (the compose
   files and `config/env/development.env` set it), but the image is built with `--features scylla`.
-  Clippy with `--all-features` compiles that code and cannot catch this (tyne-chat/tyne#152).
+  Clippy with `--all-features` compiles that code and cannot catch this (tyne-chat/tyne#329).
 
 ## Where the fork's code sits
 
