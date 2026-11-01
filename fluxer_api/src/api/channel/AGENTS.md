@@ -129,6 +129,10 @@ Fork-owned: `controllers/ChannelPersonaMentionController.ts` (one line in `contr
 - Reactions: `MessageReactionService.ts`, `MessageInteractionRepository.ts` (`removeReaction`
   rewritten), `MessageInteractionService.ts`, `MessageInteractionController.ts` (schemas swapped).
 - `MessageValidationService.ts`: upstream's empty-message condition rewritten.
+- A file added by an edit marks the message edited and gets its own expiry record dated by the edit
+  (`trackAttachmentsAddedByEdit` in `MessagePersistenceService.ts`, tyne-chat/tyne#289). Without the
+  record, a read dates it from the message, and `ExpireAttachments` deletes it on a message older
+  than the file's lifetime.
 - Smaller hand-overs: `MessageEditService.ts`, `MessagePersistenceService.ts`, `MessageRepository`,
   `MessageAuthorRepository.anonymizeMessage` (account deletion), typing, the thread files (imports
   under `// Fork: threads started as a persona.`, elsewhere `// Fork imports.`), and an `orderBy` in
