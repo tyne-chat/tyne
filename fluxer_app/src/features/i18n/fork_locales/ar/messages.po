@@ -392,6 +392,7 @@ msgstr "إدراج"
 
 #. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
 #. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
 #. Title of the timestamp insertion modal.
 msgid "Insert timestamp"
 msgstr "إدراج طابع زمني"
@@ -628,6 +629,10 @@ msgstr "البادئة (مثال: [)"
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
 msgstr "جارٍ تجهيز التنزيل المجمّع للأفاتار..."
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "اضغط F6 للوصول إلى هذه النافذة باستخدام لوحة المفاتيح."
 
 #. Persona visibility private
 msgid "Private"
