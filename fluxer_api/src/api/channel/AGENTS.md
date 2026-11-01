@@ -169,8 +169,8 @@ When upstream changes one of these, keep the hand-over shape and move fork lines
 - Reactions batched by the gateway (`MESSAGE_REACTION_ADD_MANY`) lose their persona
   (tyne-chat/tyne#120).
 - The reaction users list pages by user id, so a page that ends inside one user's persona rows skips
-  the rest of them (tyne-chat/tyne#152).
+  the rest of them (tyne-chat/tyne#328).
 - Upstream's `repositories/ThreadRepository.test.ts` compares the `messages` columns with
   `tools/dev/cassandra_target_schema.json`, whose fork entry still lists the retired `subprofile`
   column instead of `persona_id` and `mention_personas`, so that check fails on the fork
-  (tyne-chat/tyne#152).
+  (tyne-chat/tyne#329).
