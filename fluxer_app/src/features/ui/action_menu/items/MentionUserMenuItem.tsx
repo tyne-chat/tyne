@@ -10,6 +10,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import type {MentionPersona} from '@app/features/messaging/utils/MentionInsert';
+
 const MENTION_DESCRIPTOR = msg({
 	message: 'Mention',
 	comment: 'Action that inserts a mention of the selected user into the message composer.',
@@ -18,14 +22,15 @@ const MENTION_DESCRIPTOR = msg({
 interface MentionUserMenuItemProps {
 	user: User;
 	onClose: () => void;
+	persona?: MentionPersona | null;
 }
 
-export const MentionUserMenuItem: React.FC<MentionUserMenuItemProps> = observer(({user, onClose}) => {
+export const MentionUserMenuItem: React.FC<MentionUserMenuItemProps> = observer(({user, onClose, persona}) => {
 	const {i18n} = useLingui();
 	const handleMentionUser = useCallback(() => {
 		onClose();
-		ComponentBus.dispatch('INSERT_MENTION', {userId: user.id});
-	}, [user.id, onClose]);
+		ComponentBus.dispatch('INSERT_MENTION', {userId: user.id, persona});
+	}, [user.id, onClose, persona]);
 	return (
 		<MenuItem
 			icon={<MentionUserIcon size={16} data-flx="ui.action-menu.items.mention-user-menu-item.mention-user-icon" />}

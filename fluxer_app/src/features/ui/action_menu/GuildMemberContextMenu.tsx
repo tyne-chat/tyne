@@ -61,6 +61,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import type {MentionPersona} from '@app/features/messaging/utils/MentionInsert';
+
 const BAN_MEMBER_DESCRIPTOR = msg({
 	message: 'Ban member',
 	comment: 'Moderation action that bans the selected member from the community.',
@@ -73,10 +77,11 @@ interface GuildMemberContextMenuProps {
 	channelId?: string;
 	member?: GuildMember;
 	message?: Message;
+	mentionPersona?: MentionPersona | null;
 }
 
 export const GuildMemberContextMenu: React.FC<GuildMemberContextMenuProps> = observer(
-	({user, onClose, guildId, channelId, member: providedMember, message}) => {
+	({user, onClose, guildId, channelId, member: providedMember, message, mentionPersona}) => {
 		const {i18n} = useLingui();
 		const channel = channelId ? Channels.getChannel(channelId) : null;
 		const canSendMessages = channel ? Permission.can(Permissions.SEND_MESSAGES, {channelId, guildId}) : true;
@@ -191,6 +196,7 @@ export const GuildMemberContextMenu: React.FC<GuildMemberContextMenuProps> = obs
 						<MentionUserMenuItem
 							user={user}
 							onClose={onClose}
+							persona={mentionPersona}
 							data-flx="ui.action-menu.guild-member-context-menu.mention-user-menu-item"
 						/>
 					)}

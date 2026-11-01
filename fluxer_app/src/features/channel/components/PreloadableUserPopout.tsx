@@ -136,6 +136,7 @@ export const PreloadableUserPopout = React.forwardRef<
 							channelId={channelId}
 							member={member ?? undefined}
 							message={message}
+							mentionPersona={subprofile}
 							data-flx="channel.preloadable-user-popout.handle-context-menu.guild-member-context-menu"
 						/>
 					) : (
@@ -145,12 +146,13 @@ export const PreloadableUserPopout = React.forwardRef<
 							guildId={guildId}
 							channelId={channelId}
 							message={message}
+							mentionPersona={subprofile}
 							data-flx="channel.preloadable-user-popout.handle-context-menu.user-context-menu"
 						/>
 					),
 				);
 			},
-			[user, guildId, channelId, member, isWebhook, handleWebhookContextMenu, message],
+			[user, guildId, channelId, member, isWebhook, handleWebhookContextMenu, message, subprofile],
 		);
 		const handleLongPress = useCallback(() => {
 			if (isWebhook) return;
@@ -170,7 +172,7 @@ export const PreloadableUserPopout = React.forwardRef<
 					if (isShiftMentionClick(event)) {
 						event.preventDefault();
 						event.stopPropagation();
-						ComponentBus.dispatch('INSERT_MENTION', {userId: user.id});
+						ComponentBus.dispatch('INSERT_MENTION', {userId: user.id, persona: subprofile});
 						return;
 					}
 					handleMobileClick();
@@ -232,7 +234,7 @@ export const PreloadableUserPopout = React.forwardRef<
 			if (isShiftMentionClick(event)) {
 				event.preventDefault();
 				event.stopPropagation();
-				ComponentBus.dispatch('INSERT_MENTION', {userId: user.id});
+				ComponentBus.dispatch('INSERT_MENTION', {userId: user.id, persona: subprofile});
 				return;
 			}
 			if (originalOnClick) {
