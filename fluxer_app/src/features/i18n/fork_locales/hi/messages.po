@@ -392,6 +392,7 @@ msgstr "डालें"
 
 #. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
 #. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
 #. Title of the timestamp insertion modal.
 msgid "Insert timestamp"
 msgstr "समय टिकट डालें"
@@ -628,6 +629,10 @@ msgstr "उपसर्ग (जैसे [)"
 #. Progress status when preparing avatar batch download
 msgid "Preparing avatar batch download..."
 msgstr "अवतार का बैच डाउनलोड तैयार हो रहा है..."
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "कीबोर्ड से इस विंडो तक पहुँचने के लिए F6 दबाएँ।"
 
 #. Persona visibility private
 msgid "Private"
