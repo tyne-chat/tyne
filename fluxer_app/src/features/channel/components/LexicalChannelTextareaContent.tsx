@@ -755,6 +755,7 @@ export const LexicalChannelTextareaContent = observer(
 			sendOptimisticMessage: sendExpressionMessage,
 			enabled: !textareaInputDisabled,
 			channelId: draftChannelId ?? channel.id,
+			composerHandleRef: handleRef,
 		});
 		const {expressionPickerOpen, setExpressionPickerOpen, handleExpressionPickerTabToggle, selectedTab} =
 			useTextareaExpressionPicker({

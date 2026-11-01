@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import type {ComposerMentionInsert} from '@app/features/lexical/composer/ComposerInsertion';
 import type {LexicalRichInputHandle} from '@app/features/lexical/composer/LexicalRichInput';
 import type React from 'react';
 import {useEffect} from 'react';
 
 const MAX_INERT_FRAMES = 30;
 
-const returnFocusByChannelId = new Map<string, () => boolean>();
+const editsByChannelId = new Map<
+	string,
+	{returnFocus: () => boolean; insertMention: (mention: ComposerMentionInsert) => boolean}
+>();
 
 // A modal keeps the page behind it inert until it has gone, and an inert editor cannot take focus.
 function focusOnceNotInert(element: HTMLElement, focus: () => void, frame = 0): void {
@@ -30,7 +34,13 @@ export function focusWhenPossible(element: HTMLElement | null | undefined, focus
 // Going to the channel composer's plus menu takes focus out of the edit. Left there, what is typed
 // next goes to the composer, where Enter sends it. False when no edit in the channel holds the caret.
 export function returnFocusToInlineEdit(channelId: string): boolean {
-	return returnFocusByChannelId.get(channelId)?.() ?? false;
+	return editsByChannelId.get(channelId)?.returnFocus() ?? false;
+}
+
+// A mention starts from a name, not from a box, so it follows the caret. False when no edit in the
+// channel holds it.
+export function insertMentionInInlineEdit(channelId: string, mention: ComposerMentionInsert): boolean {
+	return editsByChannelId.get(channelId)?.insertMention(mention) ?? false;
 }
 
 export function useInlineEditCaret({
@@ -67,11 +77,18 @@ export function useInlineEditCaret({
 			});
 			return true;
 		};
+		const insertMention = (mention: ComposerMentionInsert) => {
+			if (disabled || !holdsCaret) {
+				return false;
+			}
+			composerRef.current?.insertMention(mention);
+			return returnFocus();
+		};
 		document.addEventListener('focusin', handleFocusIn);
-		returnFocusByChannelId.set(channelId, returnFocus);
+		editsByChannelId.set(channelId, {returnFocus, insertMention});
 		return () => {
 			document.removeEventListener('focusin', handleFocusIn);
-			returnFocusByChannelId.delete(channelId);
+			editsByChannelId.delete(channelId);
 		};
 	}, [channelId, composerRef, containerRef, disabled]);
 }
