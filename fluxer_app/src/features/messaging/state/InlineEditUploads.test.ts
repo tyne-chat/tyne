@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
 	isEditing: vi.fn(),
 	editingContent: vi.fn(),
 	editingMessageId: vi.fn(),
+	mobileEditingMessageId: vi.fn(),
 	onEditChange: undefined as (() => void) | undefined,
 	onBoxChange: undefined as (() => void) | undefined,
 	picks: new Map<string, unknown>(),
@@ -65,6 +66,9 @@ vi.mock('@app/features/messaging/state/MessageChangePersona', () => ({
 		clearPendingSubprofile: (id: string) => mocks.picks.delete(id),
 	},
 }));
+vi.mock('@app/features/messaging/state/MessageEditMobile', () => ({
+	default: {editingMessageIds: {}, getEditingMobileMessageId: mocks.mobileEditingMessageId},
+}));
 vi.mock('@app/features/messaging/state/MessageEdit', () => ({
 	default: {
 		isEditing: mocks.isEditing,
@@ -80,7 +84,7 @@ vi.mock('@app/features/persona/state/PersonaStore', () => ({
 	PersonaStore: {matchEditMessage: (content: string) => ({finalContent: content, subprofile: undefined})},
 }));
 
-import InlineEditUploads from '@app/features/messaging/state/InlineEditUploads';
+import InlineEditUploads, {mobileEditSession} from '@app/features/messaging/state/InlineEditUploads';
 
 const channel = {id: 'channel-1'} as Channel;
 const message = {id: 'message-1', attachments: [{id: 'kept'}], content: 'text', subprofile: null} as unknown as Message;
@@ -98,7 +102,7 @@ function deferred<T>() {
 
 describe('InlineEditUploads', () => {
 	const onSaved = vi.fn();
-	const save = () => InlineEditUploads.save({channel, message, content: 'text', onSaved});
+	const save = () => InlineEditUploads.save({channelId: channel.id, message, content: 'text', onSaved});
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -112,7 +116,8 @@ describe('InlineEditUploads', () => {
 		mocks.getMessage.mockReturnValue(undefined);
 		mocks.isEditing.mockReturnValue(true);
 		mocks.editingContent.mockReturnValue('text');
-		mocks.editingMessageId.mockReturnValue(null);
+		mocks.editingMessageId.mockReturnValue(message.id);
+		mocks.mobileEditingMessageId.mockReturnValue(message.id);
 		mocks.picks.clear();
 		InlineEditUploads.trackEdit(channel.id, message.id);
 	});
@@ -308,6 +313,88 @@ describe('InlineEditUploads', () => {
 		expect(mocks.picks.has(message.id)).toBe(false);
 	});
 
+	describe('with the mobile layout, where the edit is in the channel composer', () => {
+		const composerKey = channel.id;
+		let composerText: string | null;
+		const saveFromComposer = () =>
+			InlineEditUploads.save({
+				channelId: channel.id,
+				message,
+				content: 'text',
+				onSaved,
+				session: mobileEditSession(channel.id, () => composerText),
+			});
+
+		beforeEach(() => {
+			composerText = 'text';
+			mocks.pending.set(composerKey, [{id: 7}]);
+		});
+
+		it("saves the composer's files with the message's own, and closes the edit", async () => {
+			await saveFromComposer();
+
+			expect(mocks.claim.mock.calls[0][0]).toBe(composerKey);
+			expect(mocks.editWithFiles).toHaveBeenCalledTimes(1);
+			expect(mocks.editWithFiles.mock.calls[0][2].attachments[0]).toEqual({id: 'kept'});
+			expect(mocks.pending.get(composerKey)).toEqual([]);
+			expect(onSaved).toHaveBeenCalledTimes(1);
+		});
+
+		it('leaves text typed during the upload in the composer', async () => {
+			const upload = holdUpload();
+			const running = saveFromComposer();
+			await vi.waitFor(() => expect(mocks.uploadViaPlans).toHaveBeenCalled());
+
+			composerText = 'text and more';
+			upload.resolve(metadata);
+			await running;
+
+			expect(mocks.editWithFiles).toHaveBeenCalledTimes(1);
+			expect(onSaved).not.toHaveBeenCalled();
+		});
+
+		it('keeps the files in the composer when the save fails', async () => {
+			mocks.editWithFiles.mockResolvedValue(false);
+
+			await saveFromComposer();
+
+			expect(mocks.pending.get(composerKey)).toEqual([{id: 7}]);
+			expect(onSaved).not.toHaveBeenCalled();
+		});
+
+		it('cancels when the edit bar closes the edit', async () => {
+			mocks.uploadViaPlans.mockImplementation(
+				({signal}: {signal: AbortSignal}) =>
+					new Promise((_resolve, reject) => {
+						signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+					}),
+			);
+			const running = saveFromComposer();
+			await vi.waitFor(() => expect(mocks.uploadViaPlans).toHaveBeenCalled());
+
+			mocks.mobileEditingMessageId.mockReturnValue(null);
+			mocks.onEditChange?.();
+			await running;
+
+			expect(mocks.editWithFiles).not.toHaveBeenCalled();
+			expect(mocks.showFailure).not.toHaveBeenCalled();
+		});
+
+		it('finishes when another edit opens, and does not close it', async () => {
+			const upload = holdUpload();
+			const running = saveFromComposer();
+			await vi.waitFor(() => expect(mocks.uploadViaPlans).toHaveBeenCalled());
+
+			mocks.mobileEditingMessageId.mockReturnValue('another-message');
+			mocks.onEditChange?.();
+			upload.resolve(metadata);
+			await running;
+
+			expect(mocks.editWithFiles).toHaveBeenCalledTimes(1);
+			expect(onSaved).not.toHaveBeenCalled();
+		});
+	});
+
 	it('waits for a file still being read, and saves it', async () => {
 		mocks.pending.delete(key);
 		const reading = deferred<unknown>();
@@ -418,6 +505,7 @@ describe('InlineEditUploads', () => {
 		const running = save();
 		await vi.waitFor(() => expect(mocks.uploadViaPlans).toHaveBeenCalled());
 		mocks.isEditing.mockReturnValue(false);
+		mocks.editingMessageId.mockReturnValue(null);
 		mocks.onEditChange?.();
 		await running;
 
