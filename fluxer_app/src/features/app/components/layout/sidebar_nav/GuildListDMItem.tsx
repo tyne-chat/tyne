@@ -68,12 +68,14 @@ const ACTIVE_CALL_DESCRIPTOR = msg({
 	comment: 'Lowercase screen-reader fragment in the sidebar navigation guild list DM item.',
 });
 
+// Fork: muting a DM changes only its row in the DM list, as on Discord. Its rail item looks the same,
+// so a mention count shown elsewhere always has a visible source (tyne-chat/tyne#284).
 export function resolveDMListItemUnreadState(channelId: string): ChannelUnreadState {
 	return getChannelUnreadState({
 		hasUnread: ReadStates.hasUnread(channelId),
 		unreadCount: ReadStates.getUnreadCount(channelId),
 		mentionCount: ReadStates.getMentionCount(channelId),
-		isMuted: UserGuildSettings.isChannelDirectlyMuted(null, channelId),
+		isMuted: false,
 		showFadedUnreadOnMutedChannels: Accessibility.showFadedUnreadOnMutedChannels,
 		unreadBadgesLevel: null,
 	});
