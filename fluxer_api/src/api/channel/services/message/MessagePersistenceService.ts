@@ -663,6 +663,8 @@ export class MessagePersistenceService {
 				}
 				let processedNewAttachments: Array<MessageAttachment> = [];
 				if (newAttachments.length > 0) {
+					// Fork: readers can tell when a message gained a file (tyne-chat/tyne#289).
+					updatedRowData.edited_timestamp = new Date();
 					const uploadUserId = params.attachmentUploadUserId;
 					assert(
 						uploadUserId !== undefined,
@@ -743,6 +745,7 @@ export class MessagePersistenceService {
 		let updatedMessage = message;
 		if (hasChanges) {
 			updatedMessage = await this.channelRepository.messages.upsertMessage(updatedRowData, message.toRow());
+			await this.trackAttachmentsAddedByEdit(message, updatedMessage);
 		}
 		const enqueueDeferredEmbeds =
 			allowEmbeds && hasUncachedUrls
@@ -756,6 +759,27 @@ export class MessagePersistenceService {
 						)
 				: () => Promise.resolve();
 		return {message: updatedMessage, enqueueDeferredEmbeds};
+	}
+
+	// Fork: a file an edit adds is as old as the edit. With no record, the next read would date it from
+	// the message, and on a message older than the file's lifetime the file would be deleted.
+	private async trackAttachmentsAddedByEdit(before: Message, after: Message): Promise<void> {
+		const previousIds = new Set(collectMessageAttachments(before).map((attachment) => attachment.id));
+		const added = collectMessageAttachments(after).filter((attachment) => !previousIds.has(attachment.id));
+		if (added.length === 0) {
+			return;
+		}
+		const uploadedAt = new Date();
+		await this.attachmentDecayService.upsertMany(
+			added.map((attachment) => ({
+				attachmentId: attachment.id,
+				channelId: after.channelId,
+				messageId: after.id,
+				filename: attachment.filename,
+				sizeBytes: attachment.size,
+				uploadedAt,
+			})),
+		);
 	}
 
 	async handleNonAuthorEdit(params: {
