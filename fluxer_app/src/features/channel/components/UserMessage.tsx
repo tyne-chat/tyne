@@ -270,7 +270,7 @@ export const UserMessage = observer(() => {
 			}
 			MessageCommands.confirmPublishedMessageEdit(i18n, message, () => {
 				if (hasNewFiles) {
-					void InlineEditUploads.save({channel, message, content, onSaved: finishEditing});
+					void InlineEditUploads.save({channelId: channel.id, message, content, onSaved: finishEditing});
 					return;
 				}
 				finishEditing();
