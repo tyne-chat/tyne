@@ -19,3 +19,9 @@
 	color: var(--text-tertiary-muted);
 	opacity: 0.5;
 }
+
+/* Fork: muting a DM changes only its row in the DM list, as on Discord (tyne-chat/tyne#284). */
+.muted {
+	color: inherit;
+	opacity: 1;
+}
