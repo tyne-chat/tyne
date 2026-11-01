@@ -304,6 +304,14 @@ it. Frontend changes are hot-reloaded by Rspack, the API and worker by `tsx watc
 service by `cargo-watch`. Changes to other Rust services need `cargo build` and a restart of the
 orchestrator; gateway (Erlang) changes need the restart, which compiles them.
 
+**Mobile layout** (`MobileLayout.enabled`) depends on the device, which Bowser reads from
+`navigator.userAgent` (`Platform.ts`); iPadOS, which claims to be a Mac, counts as a tablet through
+`maxTouchPoints`. Phones always get it. Tablets get it below 640 px wide and lose it at 768 px.
+Everything else, the desktop app included, never gets it, at any width. Upstream differs: every iOS
+or Android user agent always gets it, tablets too, and any other device goes by width, so a narrow
+desktop window turns mobile. So a small window is not a phone here: to test mobile layout, use a
+phone user agent, as E2E's `mobile-chromium` project does.
+
 Do not run the web production build (`pnpm --filter fluxer_app build`) in the dev container. It shares
 `fluxer_app/dist` with the running dev server, which rewrites `dist/version.json` after every
 compile (upstream's `VersionJsonPlugin`), so the build's `rm -rf dist` fails now and then, and a build
