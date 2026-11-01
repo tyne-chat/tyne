@@ -18,10 +18,14 @@ import {useCallback, useEffect} from 'react';
 
 // Fork imports.
 
+import {insertMentionInInlineEdit} from '@app/features/channel/components/useInlineEditCaret';
+import type {ComposerHandle} from '@app/features/lexical/composer/ComposerHandle';
+import {insertComposerMention} from '@app/features/lexical/composer/ComposerInsertion';
 import {
 	clearComposerAfterExpression,
 	isDraftUsedUpByExpression,
 } from '@app/features/messaging/utils/ExpressionDraftPersona';
+import {type MentionPersona, personaMentionText} from '@app/features/messaging/utils/MentionInsert';
 
 interface UseTextareaExpressionHandlersOptions {
 	setValue: React.Dispatch<React.SetStateAction<string>>;
@@ -42,6 +46,7 @@ interface UseTextareaExpressionHandlersOptions {
 	clearComposer?: () => void;
 	enabled?: boolean;
 	channelId?: string;
+	composerHandleRef?: React.RefObject<ComposerHandle | null>;
 }
 
 export const useTextareaExpressionHandlers = ({
@@ -52,6 +57,7 @@ export const useTextareaExpressionHandlers = ({
 	clearComposer,
 	enabled = true,
 	channelId,
+	composerHandleRef,
 }: UseTextareaExpressionHandlersOptions) => {
 	const appendText = useCallback(
 		(text: string) => {
@@ -153,8 +159,9 @@ export const useTextareaExpressionHandlers = ({
 	useEffect(() => {
 		const handleInsertMention = (payload?: unknown) => {
 			if (!enabled || (channelId != null && !ActiveComposer.accepts(channelId))) return;
-			const {userId} = (payload ?? {}) as {
+			const {userId, persona} = (payload ?? {}) as {
 				userId?: string;
+				persona?: MentionPersona | null;
 			};
 			if (!userId) return;
 			const user = Users.getUser(userId);
@@ -162,8 +169,21 @@ export const useTextareaExpressionHandlers = ({
 				return;
 			}
 			const prevValue = previousValueRef.current;
-			const actualText = `<@${userId}>`;
-			const displayText = `@${NicknameUtils.formatUserTagForStreamerMode(user)}`;
+			const {display: displayText, wire: actualText} =
+				persona != null
+					? personaMentionText(userId, persona)
+					: {display: `@${NicknameUtils.formatUserTagForStreamerMode(user)}`, wire: `<@${userId}>`};
+			// Fork: a mention goes to the caret, in the inline edit if that holds it, else in the composer
+			// (tyne-chat/tyne#287, tyne-chat/tyne#296). Upstream's lines below append to the end.
+			const mention = {id: userId, display: displayText, wire: actualText};
+			if (channelId != null && insertMentionInInlineEdit(channelId, mention)) {
+				return;
+			}
+			const composerHandle = composerHandleRef?.current ?? null;
+			if (insertComposerMention(composerHandle, mention)) {
+				composerHandle?.focus();
+				return;
+			}
 			const needsSpace = prevValue.length > 0 && !prevValue.endsWith(' ');
 			const prefix = needsSpace ? ' ' : '';
 			const insertPosition = prevValue.length + prefix.length;
@@ -182,5 +202,5 @@ export const useTextareaExpressionHandlers = ({
 			setValue(newText);
 		};
 		return ComponentBus.subscribe('INSERT_MENTION', handleInsertMention);
-	}, [previousValueRef, setValue, segmentManagerRef, enabled, channelId]);
+	}, [previousValueRef, setValue, segmentManagerRef, enabled, channelId, composerHandleRef]);
 };
