@@ -107,7 +107,6 @@ import SidebarWidth from '@app/features/ui/state/SidebarWidth';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import * as UserSettingsCommands from '@app/features/user/commands/UserSettingsCommands';
 import StatusPage from '@app/features/user/state/StatusPage';
-import UserGuildSettings from '@app/features/user/state/UserGuildSettings';
 import UserSettings, {type GuildFolder} from '@app/features/user/state/UserSettings';
 import Users from '@app/features/user/state/Users';
 import VoiceRuntime from '@app/features/voice/engine/VoiceRuntime';
@@ -713,13 +712,14 @@ function resolveGuildTargetBounds({
 	return targetBounds;
 }
 
+// Fork: the rail ignores a DM's mute, as resolveDMListItemUnreadState does (tyne-chat/tyne#284).
 function getDMScrollIndicatorSeverity(channelId: string): ScrollIndicatorSeverity | null {
 	const mentionCount = ReadStates.getPrivateChannelMentionCount(channelId);
 	const unreadState = getChannelUnreadState({
 		hasUnread: ReadStates.hasUnreadPrivateChannel(channelId),
 		unreadCount: ReadStates.getPrivateChannelUnreadCount(channelId),
 		mentionCount,
-		isMuted: UserGuildSettings.isChannelDirectlyMuted(null, channelId),
+		isMuted: false,
 		showFadedUnreadOnMutedChannels: Accessibility.showFadedUnreadOnMutedChannels,
 	});
 	if (mentionCount > 0) return 'mention';
