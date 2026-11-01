@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // @vitest-environment happy-dom
 
-import {returnFocusToInlineEdit, useInlineEditCaret} from '@app/features/channel/components/useInlineEditCaret';
+import {
+	insertMentionInInlineEdit,
+	returnFocusToInlineEdit,
+	useInlineEditCaret,
+} from '@app/features/channel/components/useInlineEditCaret';
 import type {LexicalRichInputHandle} from '@app/features/lexical/composer/LexicalRichInput';
 import {act, useRef} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -58,7 +62,13 @@ describe('useInlineEditCaret', () => {
 		channelComposer.contentEditable = 'true';
 		document.body.append(host, channelComposer);
 		root = createRoot(host);
-		composer = {focus: vi.fn(), insertEmoji: vi.fn(), insertTimestamp: vi.fn(), getEditor: vi.fn()};
+		composer = {
+			focus: vi.fn(),
+			insertEmoji: vi.fn(),
+			insertTimestamp: vi.fn(),
+			getEditor: vi.fn(),
+			insertMention: vi.fn(),
+		};
 		frames = [];
 		vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
 			frames.push(callback);
@@ -72,6 +82,39 @@ describe('useInlineEditCaret', () => {
 		channelComposer.remove();
 		document.body.removeAttribute('inert');
 		vi.restoreAllMocks();
+	});
+
+	describe('a mention from outside the box', () => {
+		const mention = {id: 'user-1', display: '@Fox', wire: '<@user-1:persona-1>'};
+
+		it('goes to the edit while it holds the caret, and focus comes back to it', () => {
+			openEdit();
+
+			expect(insertMentionInInlineEdit(CHANNEL_ID, mention)).toBe(true);
+			runFrame();
+
+			expect(composer.insertMention).toHaveBeenCalledWith(mention);
+			expect(composer.focus).toHaveBeenCalledTimes(1);
+		});
+
+		it('is left to the composer once the composer has the caret', () => {
+			openEdit();
+			moveFocusTo(channelComposer);
+
+			expect(insertMentionInInlineEdit(CHANNEL_ID, mention)).toBe(false);
+			expect(composer.insertMention).not.toHaveBeenCalled();
+		});
+
+		it('is left to the composer while the edit is disabled', () => {
+			openEdit(true);
+
+			expect(insertMentionInInlineEdit(CHANNEL_ID, mention)).toBe(false);
+			expect(composer.insertMention).not.toHaveBeenCalled();
+		});
+
+		it('is left to the composer with no edit open', () => {
+			expect(insertMentionInInlineEdit(CHANNEL_ID, mention)).toBe(false);
+		});
 	});
 
 	it('keeps the caret while focus passes through the plus menu and the modal', () => {
