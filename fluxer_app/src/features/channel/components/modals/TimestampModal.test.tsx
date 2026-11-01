@@ -115,6 +115,21 @@ describe('TimestampModal', () => {
 		expect(mockPop).toHaveBeenCalledTimes(1);
 	});
 
+	it('reports closing once, when the modal goes, whether or not anything was inserted', async () => {
+		const onClosed = vi.fn();
+		await act(async () => {
+			root.render(
+				<TimestampModal onInsert={vi.fn()} onClosed={onClosed} data-flx="channel.timestamp-modal-test.closed" />,
+			);
+		});
+		expect(onClosed).not.toHaveBeenCalled();
+
+		await act(async () => {
+			root.render(null);
+		});
+		expect(onClosed).toHaveBeenCalledTimes(1);
+	});
+
 	function setInputValue(input: HTMLInputElement, value: string) {
 		const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
 		nativeInputValueSetter?.call(input, value);
