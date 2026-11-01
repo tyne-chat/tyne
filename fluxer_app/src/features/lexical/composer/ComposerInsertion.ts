@@ -204,3 +204,31 @@ export function insertComposerEmoji(
 		options,
 	);
 }
+
+// Fork: a mention at the caret, with a space before it where it would touch the text. None after
+// it, as in Discord (tyne-chat/tyne#287, tyne-chat/tyne#296).
+export interface ComposerMentionInsert {
+	id: string;
+	display: string;
+	wire: string;
+}
+
+export function insertComposerMention(
+	handle: ComposerHandle | null,
+	mention: ComposerMentionInsert,
+	limit: ComposerReplacementLimit = {},
+): boolean {
+	if (handle == null) {
+		return false;
+	}
+	const display = handle.getDisplayValue();
+	const selection = normalizeSelection(display, handle.getSelection());
+	const charBefore = selection.start > 0 ? display[selection.start - 1] : '';
+	return applyComposerReplacement(
+		handle,
+		selection,
+		{kind: 'mention', mentionType: 'user', ...mention},
+		{leading: charBefore !== '' && !/\s/.test(charBefore), trailing: false},
+		limit,
+	);
+}
