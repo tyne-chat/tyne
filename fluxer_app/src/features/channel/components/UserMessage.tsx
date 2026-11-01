@@ -62,6 +62,8 @@ import {type MouseEvent, useCallback, useMemo} from 'react';
 // Fork imports.
 
 import {GuildCommandChip} from '@app/features/guild_commands/components/GuildCommandChip';
+import InlineEditUploads from '@app/features/messaging/state/InlineEditUploads';
+import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {originalPosterTagAppliesToMessage} from '@app/features/persona/utils/OriginalPosterPersona';
@@ -225,12 +227,21 @@ export const UserMessage = observer(() => {
 	}, [channel.id, message.id]);
 	const onSubmit = useCallback(
 		(actualContent?: string) => {
-			if (message.messageSnapshots) {
+			if (message.messageSnapshots || InlineEditUploads.isSaving(message.id)) {
 				return;
 			}
 			const content = dropTrailingEmptyBlockquoteLines(actualContent ?? '').trim();
-			if (!content) {
+			const hasNewFiles = InlineEditUploads.hasFiles(message.id);
+			const pendingSubprofile = MessageChangePersona.resolveEditSubprofile(message.id, undefined);
+			if (!content && !hasNewFiles) {
 				if (isAttachmentOnlyMessage(message)) {
+					if (pendingSubprofile !== undefined) {
+						MessageCommands.confirmPublishedMessageEdit(i18n, message, () => {
+							finishEditing();
+							void MessageChangePersona.changePersona(channel, message, pendingSubprofile);
+						});
+						return;
+					}
 					finishEditing();
 					return;
 				}
@@ -244,6 +255,7 @@ export const UserMessage = observer(() => {
 							undefined,
 							message._allowedMentions,
 							buildExistingAttachmentEditReferences(message),
+							pendingSubprofile,
 						);
 					});
 					return;
@@ -255,6 +267,10 @@ export const UserMessage = observer(() => {
 				return;
 			}
 			MessageCommands.confirmPublishedMessageEdit(i18n, message, () => {
+				if (hasNewFiles) {
+					void InlineEditUploads.save({channel, message, content, onSaved: finishEditing});
+					return;
+				}
 				finishEditing();
 				const editMatch = PersonaStore.matchEditMessage(content, message.subprofile, {
 					hasAttachments: canSubmitEmptyMessageEdit(message),
@@ -267,7 +283,7 @@ export const UserMessage = observer(() => {
 					undefined,
 					message._allowedMentions,
 					canSubmitEmptyMessageEdit(message) ? buildExistingAttachmentEditReferences(message) : undefined,
-					editMatch.subprofile,
+					editMatch.subprofile !== undefined ? editMatch.subprofile : pendingSubprofile,
 				);
 			});
 		},
