@@ -68,7 +68,9 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 - Editing (`matchEditMessage`): a leading `\` on a persona's message removes the persona, a tag
   switches to that persona, and anything else leaves the persona as it is (the request omits it).
   When the message's text already started with `\`, the backslash is text and removes nothing.
-  "Change persona" on one's own message edits only the persona.
+  "Change persona" on one's own message edits only the persona. The inline edit's selector
+  (`channel/components/InlineEditControls.tsx`) keeps its pick in `MessageChangePersona` until Save;
+  a typed tag or `\` wins over it (`resolveEditSubprofile`), and the selector shows that as you type.
 
 ## Showing personas
 
