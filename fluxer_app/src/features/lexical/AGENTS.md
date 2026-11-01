@@ -67,6 +67,14 @@ under `composer/` unless stated.
   commands take them too (`optionToSlotPayload`).
 - **Picking** (`optionToPayload`) records the owner in `MentionFrecency` and the persona with
   `PersonaStore.recordKnownPersona`, then inserts the mention.
+- **From a name:** shift-click and right-click Mention on a persona's message send the persona in
+  `INSERT_MENTION` (`PreloadableUserPopout`, which leaves it out where it ignores the persona, as on
+  the account badge). Without one a mention is of the account (tyne-chat/tyne#288). The handler is in
+  `useTextareaExpressionHandlers`: it goes at the caret (`insertComposerMention`), in an inline edit
+  holding it or else in the composer, with no space after it, as Discord does (tyne-chat/tyne#287,
+  tyne-chat/tyne#296). With text after the caret and a pill right before it, autocomplete must not
+  take the pill for a half-typed `@name`, or Enter picks from the list and does not send:
+  `$getTextUpToCursor` masks pills, keeping their length (tyne-chat/tyne#297).
 - **The pill** takes `wire` and `personaId` in `...fork`. A branch atop the `user` case shows the
   current name: `PersonaStore.getKnownPersona`, else the persona on a cached message (recorded as
   known), else the stored `@Name` while it calls `fetchPersona` from render ("Network calls").
