@@ -76,6 +76,10 @@ import {
 } from 'react';
 import {createPortal} from 'react-dom';
 
+// Fork imports.
+
+import {useDeleteAttachmentMenuGroups} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
+
 const MEDIA_OPTIONS_DESCRIPTOR = msg({
 	message: 'Media options',
 	comment: 'Accessible label for the overflow menu button in the media viewer modal.',
@@ -126,6 +130,8 @@ const IMAGE_DESCRIPTOR = msg({
 });
 
 interface MobileMediaOptionsSheetProps {
+	deletableAttachmentId?: string;
+	onAttachmentDeleted?: () => void;
 	currentItem: MediaViewerItem;
 	defaultName: string;
 	isOpen: boolean;
@@ -239,6 +245,8 @@ const RenderReadyImage: FC<RenderReadyImageProps> = ({
 };
 
 const MobileMediaOptionsSheet: FC<MobileMediaOptionsSheetProps> = observer(function MobileMediaOptionsSheet({
+	deletableAttachmentId,
+	onAttachmentDeleted,
 	currentItem,
 	defaultName,
 	isOpen,
@@ -274,8 +282,9 @@ const MobileMediaOptionsSheet: FC<MobileMediaOptionsSheetProps> = observer(funct
 		hideReply: onViewPost != null,
 	});
 	const visibleMessageGroups = useMemo(() => messageGroups.filter((group) => group.items.length > 0), [messageGroups]);
+	const attachmentGroups = useDeleteAttachmentMenuGroups(message, deletableAttachmentId, onClose, onAttachmentDeleted);
 	const mediaMenuGroupsWithMessageActions = useMemo(() => {
-		const groups = [...mediaMenuData.groups, ...visibleMessageGroups];
+		const groups = [...mediaMenuData.groups, ...attachmentGroups, ...visibleMessageGroups];
 		if (!onViewPost) return groups;
 		const viewPostItem = {
 			id: 'media-view-post',
@@ -293,7 +302,7 @@ const MobileMediaOptionsSheet: FC<MobileMediaOptionsSheetProps> = observer(funct
 			},
 		};
 		return [{items: [viewPostItem]}, ...groups];
-	}, [i18n.locale, mediaMenuData.groups, onClose, onViewPost, visibleMessageGroups]);
+	}, [attachmentGroups, i18n.locale, mediaMenuData.groups, onClose, onViewPost, visibleMessageGroups]);
 	return (
 		<MenuBottomSheet
 			isOpen={isOpen}
@@ -782,6 +791,8 @@ const MediaViewerModalComponent: FC = observer(() => {
 			</MediaModal>
 			{isMobile && message && (
 				<MobileMediaOptionsSheet
+					deletableAttachmentId={deletableAttachmentId}
+					onAttachmentDeleted={handleAttachmentDeleted}
 					currentItem={currentItem}
 					defaultName={defaultName}
 					isOpen={isMediaMenuOpen}
