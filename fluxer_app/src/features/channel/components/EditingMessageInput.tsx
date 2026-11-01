@@ -38,6 +38,14 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {ChannelAttachmentArea} from '@app/features/channel/components/ChannelAttachmentArea';
+import {InlineEditControls} from '@app/features/channel/components/InlineEditControls';
+import {useInlineEditFilePaste} from '@app/features/channel/components/InlineEditFiles';
+import {useInlineEditCaret} from '@app/features/channel/components/useInlineEditCaret';
+import InlineEditUploads from '@app/features/messaging/state/InlineEditUploads';
+
 interface EditingFocusRequest {
 	requestedChannelId: string | null;
 	enterKeyboardMode: boolean | null;
@@ -116,6 +124,8 @@ export const EditingMessageInput = observer(
 		const editingDisabled =
 			channel.guildId != null &&
 			GuildVerification.getFailureReason(channel.guildId) === VerificationFailureReason.TIMED_OUT;
+		useInlineEditCaret({channelId: channel.id, disabled: editingDisabled, containerRef, composerRef});
+		useInlineEditFilePaste({channel, message, disabled: editingDisabled, composerRef});
 		let placeholderText = '';
 		if (editingDisabled) {
 			placeholderText = i18n._(CANNOT_SEND_MESSAGES_IN_CHANNEL_DESCRIPTOR);
@@ -334,7 +344,21 @@ export const EditingMessageInput = observer(
 						/>
 					</div>
 				</FocusRing>
+				<ChannelAttachmentArea
+					channelId={InlineEditUploads.attachmentKey(message.id)}
+					data-flx="channel.editing-message-input.channel-attachment-area"
+				/>
 				<div className={editingStyles.footer} data-flx="channel.editing-message-input.footer">
+					<InlineEditControls
+						channel={channel}
+						message={message}
+						text={actualContent}
+						disabled={editingDisabled}
+						containerRef={containerRef}
+						composerRef={composerRef}
+						editableRef={editableRef}
+						data-flx="channel.editing-message-input.inline-edit-controls"
+					/>
 					<div data-flx="channel.editing-message-input.hints">
 						<Trans>
 							Escape to{' '}
