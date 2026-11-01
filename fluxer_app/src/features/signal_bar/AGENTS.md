@@ -124,15 +124,14 @@ mount and each newer-version event tries the config again. No test counts these 
 
 ## Known gaps
 
-Tracked in tyne-chat/tyne#148 unless another issue is named.
-
-- Threads and forum posts mount the bar and send a GET the API refuses: one logged 400 per open.
+- Threads and forum posts mount the bar and send a GET the API refuses: one logged 400 per open (tyne-chat/tyne#309).
 - `affirmPersona` has no batch route and no cooldown. With many own lit signals in a channel, a
   persona change sends that many PUTs at once (the toggle bucket allows 30 per 10 s, and all count
   toward the global limit). A re-point the server refuses is sent again at the next keystroke,
-  because the failure refetch puts the old persona back.
+  because the failure refetch puts the old persona back (tyne-chat/tyne#310).
 - Lit signals carry copies made when they were lit, and `rememberEntries` writes them over newer data
-  in `Users` and `PersonaStore`: opening a channel can bring back an old name or avatar there.
+  in `Users` and `PersonaStore`: opening a channel can bring back an old name or avatar there
+  (tyne-chat/tyne#311).
 - Every READY empties all channels, so the bar disappears until the channel GET returns.
 - Keyboard use of the bar is tyne-chat/tyne#112.
 - The bar shows above a blocked recipient's barrier, and the server does not check blocks.
