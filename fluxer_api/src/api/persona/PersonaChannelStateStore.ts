@@ -12,6 +12,7 @@
 
 import type {ChannelID, PersonaID, UserID} from '@app/api/BrandedTypes';
 import {deleteOneOrMany, fetchMany, upsertOne} from '@app/api/database/CassandraQueryExecution';
+import type {PreparedQuery} from '@app/api/database/CassandraTypes';
 import type {PersonaChannelStateRow} from '@app/api/database/types/PersonaTypes';
 import {PersonaChannelStates} from '@app/api/Tables';
 
@@ -37,7 +38,12 @@ export async function storePersonaChannelState(
 }
 
 export async function forgetPersonaChannelState(userId: UserID, channelId: ChannelID): Promise<void> {
-	await deleteOneOrMany(PersonaChannelStates.deleteByPk({user_id: userId, channel_id: channelId}));
+	await deleteOneOrMany(forgetPersonaChannelStateWrite(userId, channelId));
+}
+
+/** The write `forgetPersonaChannelState` makes, for a batch. */
+export function forgetPersonaChannelStateWrite(userId: UserID, channelId: ChannelID): PreparedQuery {
+	return PersonaChannelStates.deleteByPk({user_id: userId, channel_id: channelId});
 }
 
 /** Clears a persona from every channel it is selected in. Returns those channels. */

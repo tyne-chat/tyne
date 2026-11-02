@@ -71,6 +71,7 @@ describe('PersonaService', () => {
 			create: vi.fn(),
 			update: vi.fn(),
 			delete: vi.fn(),
+			writeImport: vi.fn(),
 			deleteAllByUserId: vi.fn(),
 			hardDeleteAllByUserId: vi.fn(),
 			createTombstone: vi.fn(),
@@ -975,7 +976,7 @@ describe('PersonaService', () => {
 		it('ignores blank prefix and suffix tags in importPersonas', async () => {
 			vi.mocked(mockRepo.findByUserId).mockResolvedValueOnce([]);
 			const created = makeMockPersona(userId, defaultPersonaId, 'Blank Tags');
-			vi.mocked(mockRepo.create).mockResolvedValueOnce(created);
+			vi.mocked(mockRepo.writeImport).mockResolvedValueOnce([created]);
 
 			const results = await service.importPersonas(userId, [
 				{
