@@ -24608,8 +24608,21 @@
 						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
 					}
 				},
-				"description": "Imports or synchronizes personas in bulk (e.g. from PluralKit or Tupperbox).",
+				"description": "Imports or synchronizes personas in bulk (e.g. from PluralKit or Tupperbox). The whole request is checked first and written at once: if it is refused, nothing changes.",
 				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "replace",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"description": "Delete every live persona of the account and keep only the imported ones. The deletion and the import are written together, so if the import is refused the personas stay as they were",
+							"default": "false",
+							"type": "string"
+						},
+						"description": "Delete every live persona of the account and keep only the imported ones. The deletion and the import are written together, so if the import is refused the personas stay as they were"
+					}
+				],
 				"requestBody": {
 					"required": true,
 					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBulkImportRequestSchema"}}}
