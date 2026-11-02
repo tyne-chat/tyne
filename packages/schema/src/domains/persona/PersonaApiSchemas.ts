@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {QueryBooleanType} from '@fluxer/schema/src/primitives/QueryValidators';
 import {createStringType, SnowflakeStringType, SnowflakeType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {schemaMetadata} from '@fluxer/schema/src/SchemaMetadata';
 import {z} from 'zod';
@@ -178,6 +179,12 @@ export const PersonaBulkImportRequestSchema = z.preprocess(
 			: val,
 	z.array(PersonaImportItemSchema).max(250),
 );
+
+export const PersonaImportQuerySchema = z.object({
+	replace: QueryBooleanType.describe(
+		'Delete every live persona of the account and keep only the imported ones. The deletion and the import are written together, so if the import is refused the personas stay as they were',
+	),
+});
 
 export const PersonaIdParam = z.object({
 	persona_id: SnowflakeStringType.describe('Persona Snowflake ID'),
