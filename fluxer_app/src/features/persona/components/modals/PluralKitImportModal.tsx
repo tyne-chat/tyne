@@ -440,7 +440,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			}
 		}
 
-		// 4. The import requests.
+		// 4. What the import sends.
 		const importedPersonas: Array<PersonaImportItem> = [];
 		source.system.members.forEach((member, i) => {
 			if (member.name === null) {
@@ -516,47 +516,18 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			importedPersonas.push(personaImportItem({...member, name: displayName}, images, extras));
 		});
 
-		if (importMode === 'replace') {
-			const existing = [...PersonaStore.personas];
-			const totalExisting = existing.length;
-			let deleteFailures = 0;
-
-			for (let i = 0; i < totalExisting; i++) {
-				setProgress({
-					current: i + 1,
-					total: totalExisting,
-					currentName: i18n._(SAVING_PERSONAS_STATUS),
-					percent: Math.round(((i + 1) / totalExisting) * 100),
-					label: i18n._(SAVING_PERSONAS_LABEL),
-				});
-				try {
-					await PersonaCommands.deletePersona(existing[i].id);
-				} catch {
-					deleteFailures++;
-				}
-			}
-
-			if (deleteFailures > 0) {
-				ToastCommands.error(i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
-				setStep('select');
-				return;
-			}
-		}
-
-		const CHUNK_SIZE = 50;
+		// 5. One request. The server checks the whole file before it writes anything and writes it at
+		// once; "Replace all" deletes the existing personas in that same write. So if the import is
+		// refused or fails, the account's personas are as they were.
 		try {
-			for (let i = 0; i < importedPersonas.length; i += CHUNK_SIZE) {
-				const chunk = importedPersonas.slice(i, i + CHUNK_SIZE);
-				const currentCount = Math.min(i + chunk.length, importedPersonas.length);
-				setProgress({
-					current: currentCount,
-					total: importedPersonas.length,
-					currentName: i18n._(SAVING_PERSONAS_STATUS),
-					percent: Math.round((currentCount / importedPersonas.length) * 100),
-					label: i18n._(SAVING_PERSONAS_LABEL),
-				});
-				await PersonaCommands.importPersonas(chunk);
-			}
+			setProgress({
+				current: importedPersonas.length,
+				total: importedPersonas.length,
+				currentName: i18n._(SAVING_PERSONAS_STATUS),
+				percent: 100,
+				label: i18n._(SAVING_PERSONAS_LABEL),
+			});
+			await PersonaCommands.importPersonas(importedPersonas, {replace: importMode === 'replace'});
 
 			// A Tyne export also brings back the tag icon. Like a persona image, it is stored on this
 			// instance before it is used: the file from the zip, this account's own copy here, or a
