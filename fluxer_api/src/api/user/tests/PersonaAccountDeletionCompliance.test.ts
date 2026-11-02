@@ -325,6 +325,7 @@ describe('Persona Account Deletion Compliance', () => {
 				create: vi.fn(),
 				update: vi.fn(),
 				delete: vi.fn(),
+				writeImport: vi.fn(),
 				deleteAllByUserId: vi.fn(),
 				findSettings: vi.fn().mockResolvedValue(null),
 				findSettingsByUserIds: vi.fn().mockResolvedValue(new Map()),
