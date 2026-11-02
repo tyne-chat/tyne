@@ -70,6 +70,7 @@ vi.mock('@lingui/react/macro', () => ({
 vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
 	importPersonas: vi.fn().mockResolvedValue(undefined),
 	deletePersona: vi.fn().mockResolvedValue(undefined),
+	personaErrorMessage: vi.fn((_err: unknown, fallback: string) => fallback),
 	importPersonaImage: vi.fn(async (kind: string) => ({
 		hash: kind === 'avatar' ? 'aaaaaaaa' : 'bbbbbbbb',
 		avatarColor: 7,
@@ -265,6 +266,7 @@ describe('PluralKitImportModal Component', () => {
 						persona_tags: [{prefix: 'E:', suffix: undefined}],
 					}),
 				]),
+				{replace: false},
 			);
 
 			// Completed view
@@ -345,6 +347,68 @@ describe('PluralKitImportModal Component', () => {
 			window.FileReader = originalFileReader;
 		}
 	});
+
+	// "Replace all" is one import request with `replace`: the server deletes the old personas in the
+	// same write, so the dialog deletes none itself, and a refused import leaves them all
+	// (tyne-chat/tyne#359).
+	describe('replacing all personas', () => {
+		async function confirmReplace(): Promise<void> {
+			runInAction(() => {
+				PersonaStore.setPersonas([
+					{id: '100000000000000001', name: 'Existing 1'} as any,
+					{id: '100000000000000002', name: 'Existing 2'} as any,
+				]);
+			});
+			await act(async () => {
+				root.render(
+					<PluralKitImportModal
+						onClose={vi.fn()}
+						data-flx="persona.plural-kit-import-modal-test.plural-kit-import-modal--replace"
+					/>,
+				);
+			});
+			const file = new File([JSON.stringify({members: [{id: 'm1', name: 'New Member'}]})], 'pluralkit.json', {
+				type: 'application/json',
+			});
+			await chooseFile(file, 'Total Members1');
+			await act(async () => {
+				(document.body.querySelectorAll('input[type="radio"]')[1] as HTMLInputElement).click();
+			});
+			await act(async () => {
+				Array.from(document.body.querySelectorAll('button'))
+					.find((btn) => btn.textContent?.includes('Start Import'))
+					?.click();
+			});
+			const confirm = vi.mocked(ModalCommands.push).mock.results[0]?.value as React.ReactElement<{
+				onPrimary: () => Promise<void>;
+			}>;
+			await act(async () => {
+				await confirm.props.onPrimary();
+			});
+		}
+
+		it('sends one import with replace and deletes nothing itself', async () => {
+			await confirmReplace();
+			await settled(() => expect(document.body.textContent).toContain('Import Complete!'));
+
+			expect(PersonaCommands.importPersonas).toHaveBeenCalledTimes(1);
+			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith([expect.objectContaining({name: 'New Member'})], {
+				replace: true,
+			});
+			expect(PersonaCommands.deletePersona).not.toHaveBeenCalled();
+		});
+
+		it('keeps the existing personas when the import is refused', async () => {
+			vi.mocked(PersonaCommands.importPersonas).mockRejectedValueOnce(new Error('This tag is already taken.'));
+
+			await confirmReplace();
+			await settled(() => expect(document.body.textContent).toContain('Start Import'));
+
+			expect(PersonaCommands.deletePersona).not.toHaveBeenCalled();
+			expect(PersonaStore.personas.map((p) => p.name)).toEqual(['Existing 1', 'Existing 2']);
+			expect(document.body.textContent).not.toContain('Import Complete!');
+		});
+	});
 	// Picks a file in the dialog and waits for the summary.
 	async function chooseFile(file: File, summaryText: string): Promise<void> {
 		const fileInput = document.body.querySelector('input[type="file"]') as HTMLInputElement;
@@ -422,21 +486,24 @@ describe('PluralKitImportModal Component', () => {
 				{urls: ['https://cdn.example/proxy.png'], kind: 'avatar'},
 				{urls: ['https://cdn.example/banner.png'], kind: 'banner'},
 			]);
-			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith([
-				expect.objectContaining({
-					name: 'Open',
-					visibility: 'public',
-					avatar_hash: 'dddddddd',
-					banner_hash: 'cccccccc',
-					external_uuid: 'aaaaa',
-					image_sources: {
-						avatar: {url: 'https://cdn.example/proxy.png', field: 'webhook_avatar_url', main_avatar_empty: false},
-						banner: {url: 'https://cdn.example/banner.png'},
-					},
-				}),
-				expect.objectContaining({name: 'Hidden', visibility: 'unlisted'}),
-				expect.objectContaining({name: 'Closed', visibility: 'private'}),
-			]);
+			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith(
+				[
+					expect.objectContaining({
+						name: 'Open',
+						visibility: 'public',
+						avatar_hash: 'dddddddd',
+						banner_hash: 'cccccccc',
+						external_uuid: 'aaaaa',
+						image_sources: {
+							avatar: {url: 'https://cdn.example/proxy.png', field: 'webhook_avatar_url', main_avatar_empty: false},
+							banner: {url: 'https://cdn.example/banner.png'},
+						},
+					}),
+					expect.objectContaining({name: 'Hidden', visibility: 'unlisted'}),
+					expect.objectContaining({name: 'Closed', visibility: 'private'}),
+				],
+				{replace: false},
+			);
 		} finally {
 			fetchSpy.mockRestore();
 		}
@@ -505,17 +572,20 @@ describe('PluralKitImportModal Component', () => {
 				'avatar',
 				expect.stringMatching(/^data:image\/png;base64,/),
 			);
-			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith([
-				expect.objectContaining({
-					name: 'Alvis',
-					avatar_hash: 'aaaaaaaa',
-					avatar_color: 7,
-					bio: 'the whole bio',
-					auto_tag_disabled: true,
-					signature_emojis: [{name: '🌸'}],
-					external_uuid: '1428573920012345678',
-				}),
-			]);
+			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith(
+				[
+					expect.objectContaining({
+						name: 'Alvis',
+						avatar_hash: 'aaaaaaaa',
+						avatar_color: 7,
+						bio: 'the whole bio',
+						auto_tag_disabled: true,
+						signature_emojis: [{name: '🌸'}],
+						external_uuid: '1428573920012345678',
+					}),
+				],
+				{replace: false},
+			);
 			expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('T'.repeat(90), undefined);
 		} finally {
 			fetchSpy.mockRestore();

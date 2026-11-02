@@ -17,6 +17,7 @@ import type {
 	PersonaUpdateRequest,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {runInAction} from 'mobx';
 import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 
 const logger = new Logger('PersonaCommands');
@@ -183,6 +184,11 @@ export async function deletePersona(id: string): Promise<void> {
 	if (!res.ok && res.status !== 404) {
 		throw new PersonaRequestError(res, 'Failed to delete persona');
 	}
+	forgetDeletedPersona(id);
+}
+
+/** Drops a persona the server deleted: from the list, with its emoji pins and cached profile cards. */
+function forgetDeletedPersona(id: string): void {
 	PersonaStore.removePersona(id);
 	for (const key of personaProfileCache.keys()) {
 		if (key.endsWith(`:${id}`)) {
@@ -191,11 +197,31 @@ export async function deletePersona(id: string): Promise<void> {
 	}
 }
 
-export async function importPersonas(personas: Array<PersonaImportItem>): Promise<Array<PersonaResponse>> {
+/**
+ * Imports personas in one request, which the server writes whole or not at all. With `replace`, the
+ * server deletes the account's other personas in that same write, so a refused import keeps them.
+ */
+export async function importPersonas(
+	personas: Array<PersonaImportItem>,
+	options: {replace?: boolean} = {},
+): Promise<Array<PersonaResponse>> {
+	// Read before sending: the gateway's USER_PERSONAS_UPDATE may drop them from the list first.
+	const replaced = options.replace ? PersonaStore.personas.map((p) => p.id) : [];
 	const res = await sendPersonaRequest(
-		() => http.post<Array<PersonaResponse>>(ForkEndpoints.USER_PERSONA_IMPORT, {body: personas}),
+		() =>
+			http.post<Array<PersonaResponse>>(ForkEndpoints.USER_PERSONA_IMPORT, {
+				body: personas,
+				query: options.replace ? {replace: true} : undefined,
+			}),
 		'Failed to import personas',
 	);
+	const imported = new Set(res.body.map((p) => p.id));
+	// One action, so the pins they lose are one change to the synced preferences, not one each.
+	runInAction(() => {
+		for (const id of replaced) {
+			if (!imported.has(id)) forgetDeletedPersona(id);
+		}
+	});
 	PersonaStore.upsertPersonas(res.body);
 	return res.body;
 }
