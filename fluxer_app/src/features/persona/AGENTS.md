@@ -150,10 +150,14 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   from here exists only in the global scope.
 - `PluralKitImportModal` reads PluralKit JSON or a Tyne zip (`PersonaImportFile`), reuses images
   already on the instance by hash, uploads the zip's images, has the server fetch remote ones (a
-  streamed NDJSON response), then imports in chunks of 50. "Replace all" first deletes every
-  existing persona, one request each, in sequence. A link in the file is never stored: every image,
-  the tag icon included (the zip's file, or an older export's `tag_icon_url`), is stored on the
-  instance first, and only its hash is saved; an image that cannot be stored becomes a warning.
+  streamed NDJSON response), then imports the whole file in one request, which the server writes
+  whole or not at all. "Replace all" is that request with `replace`: the server deletes the existing
+  personas in the same write, so a refused import keeps them, and the dialog never deletes any
+  itself (tyne-chat/tyne#359). `importPersonas` then drops the replaced personas here in one MobX
+  action, so their emoji pins go in one synced-preferences change. A link in the file is never
+  stored: every image, the tag icon included (the zip's file, or an older export's `tag_icon_url`),
+  is stored on the instance first, and only its hash is saved; an image that cannot be stored
+  becomes a warning and does not stop the import.
 - `exportPersonas` downloads the server's zip, which this import reads back.
 
 ## Where persona code hooks into upstream
