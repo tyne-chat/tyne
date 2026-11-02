@@ -13,6 +13,7 @@ import {
 	PersonaIdParam,
 	PersonaImportImageRequest,
 	PersonaImportImageResponse,
+	PersonaImportQuerySchema,
 	PersonaListResponseSchema,
 	PersonaResponseSchema,
 	PersonaSettingsResponseSchema,
@@ -92,6 +93,7 @@ export function PersonaController(app: HonoApp) {
 		LoginRequired,
 		DefaultUserOnly,
 		Validator('json', PersonaBulkImportRequestSchema),
+		Validator('query', PersonaImportQuerySchema),
 		OpenAPI({
 			operationId: 'import_personas',
 			summary: 'Bulk import personas',
@@ -99,12 +101,14 @@ export function PersonaController(app: HonoApp) {
 			statusCode: 200,
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Personas'],
-			description: 'Imports or synchronizes personas in bulk (e.g. from PluralKit or Tupperbox).',
+			description:
+				'Imports or synchronizes personas in bulk (e.g. from PluralKit or Tupperbox). The whole request is checked first and written at once: if it is refused, nothing changes.',
 		}),
 		async (ctx) => {
 			const user = ctx.get('user');
 			const body = ctx.req.valid('json');
-			const personas = await ctx.get('personaService').importPersonas(user.id, body);
+			const {replace} = ctx.req.valid('query');
+			const personas = await ctx.get('personaService').importPersonas(user.id, body, {replace});
 			return ctx.json(personas.map((p) => p.toResponse()));
 		},
 	);
