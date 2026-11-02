@@ -15,7 +15,7 @@ import {type ApiTestHarness, createApiTestHarness} from '../../test/ApiTestHarne
 import {HTTP_STATUS} from '../../test/TestConstants';
 import {createBuilder} from '../../test/TestRequestBuilder';
 import type {UserAccountLookupService} from '../../user/services/UserAccountLookupService';
-import type {IPersonaRepository} from '../IPersonaRepository';
+import type {IPersonaRepository, PersonaImportWrite} from '../IPersonaRepository';
 import {PersonaService} from '../PersonaService';
 
 const SCOPES = ['global_name', 'bio', 'pronouns'] as const;
@@ -75,6 +75,9 @@ describe('PersonaService and the admin profile blocklist', () => {
 			create: vi.fn().mockImplementation(async (row: Partial<PersonaRow>) => makePersona({name: row.name})),
 			update: vi.fn().mockImplementation(async () => makePersona()),
 			delete: vi.fn(),
+			writeImport: vi
+				.fn()
+				.mockImplementation(async (_userId: UserID, write: PersonaImportWrite) => write.steps.map(() => makePersona())),
 			deleteAllByUserId: vi.fn(),
 			hardDeleteAllByUserId: vi.fn(),
 			createTombstone: vi.fn(),
@@ -138,8 +141,7 @@ describe('PersonaService and the admin profile blocklist', () => {
 		await expect(
 			service.importPersonas(userId, [{name: 'Fine'}, {name: 'Also fine', bio: `bio ${BANNED}`}]),
 		).rejects.toThrow(ContentBlockedError);
-		expect(repo.create).not.toHaveBeenCalled();
-		expect(repo.update).not.toHaveBeenCalled();
+		expect(repo.writeImport).not.toHaveBeenCalled();
 	});
 
 	it('refuses a display tag with banned text, and keeps an unchanged one', async () => {
