@@ -243,6 +243,9 @@ describe('PersonaRepository', () => {
 			async findByUserAndPersonaIds(): Promise<Map<string, any>> {
 				return new Map();
 			}
+			async writeImport(): Promise<Array<any>> {
+				return [];
+			}
 			async create(): Promise<any> {
 				return {} as any;
 			}
