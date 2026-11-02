@@ -432,7 +432,15 @@ Returns the caller's personas as a ZIP file. It holds a PluralKit export file (`
 
 <RouteHeader method="POST" path="/v1/users/@me/personas/import" oauth2="personas.write" />
 
-Creates or updates up to 250 personas in one request, for example from a PluralKit export. An item whose `external_uuid` matches an existing persona's `external_uuid` or ID updates that persona, and every other item creates one. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, in place of an event per persona.
+Creates or updates up to 250 personas in one request, for example from a PluralKit export. An item whose `external_uuid` matches an existing persona's `external_uuid` or ID updates that persona, and every other item creates one. The whole request is checked before anything is written and then written at once, so a refused or failed import changes nothing. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, in place of an event per persona.
+
+With `replace`, every live persona of the account is deleted in the same write, as [Delete persona](#delete-persona) deletes one, and every item creates a new persona. The tags, signature emojis and places under the limit of the deleted personas are free for the imported ones. A selection that named a deleted persona goes back to the account, with a [User Persona Settings Update](/gateway/events/#user-persona-settings-update) or a [User Persona Channel State Update](/gateway/events/#user-persona-channel-state-update). If the import is refused, the personas and selections stay as they were.
+
+### Query parameters
+
+| Field | Type | Description |
+| --- | --- | --- |
+| replace? | boolean | Whether to delete every live persona of the account and keep only the imported ones (default false) |
 
 ### JSON body
 
