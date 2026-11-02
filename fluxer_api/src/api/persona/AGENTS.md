@@ -137,12 +137,17 @@ personas), 10,000 signature emojis per persona (unique across personas).
 
 ## Import, export and images
 
-- **Import:** the client reads a PluralKit export or a Tyne zip, sends the images first, then
-  `POST /import` in chunks (the server takes at most 250 personas per request). `importPersonas`
+- **Import:** the client reads a PluralKit export or a Tyne zip, sends the images first, then the
+  whole file in one `POST /import` (at most 250 personas, the account's limit). `importPersonas`
   matches an existing persona by `external_uuid` or by its own id, so re-importing an export updates
-  it. It is not atomic: a failure leaves the personas already written. The zip's tag icon is stored
-  the same way, through `/import-image` or, for an older export's `tag_icon_url`, the batch link
-  import; the settings then get its hash.
+  it. It is all or nothing: everything is checked before anything is written, and
+  `IPersonaRepository.writeImport` writes the personas, their image sources and any settings or
+  channel selections that change as one atomic batch (one transaction on Postgres). With
+  `?replace=true` that batch also soft-deletes every live persona, so "Replace all" keeps them if the
+  import is refused (tyne-chat/tyne#359); events go out only after it is written. A new write that
+  has to go with an import joins that batch, through `alongside`. The zip's tag icon is stored the
+  same way as the images, through `/import-image` or, for an older export's `tag_icon_url`, the batch
+  link import; the settings then get its hash, in a request of their own after the import.
 - **Image sources are a record, not images.** `persona_image_sources` keeps the PluralKit link each
   imported image came from. A link there is never sent to a client, in a response or an event, and
   never used as an image address; the one place it leaves the server is the account's own export,
@@ -202,7 +207,9 @@ every persona row, setting and fork-table row.
   search): no network needed. `PersonaService.test.ts`, `PersonaErrors.test.ts` and
   `MessagePersonaMentions.test.ts` are unit tests with mocks.
 - `PersonaTagIcon.test.ts` covers the tag icon rule (route, rows holding a link, messages) and
-  `PersonaImageDeletion.test.ts` the image deletion.
+  `PersonaImageDeletion.test.ts` the image deletion. `PersonaImportAtomic.test.ts` covers the
+  all-or-nothing import, with a failing batch injected; the in-memory database does not roll back,
+  so it proves that nothing is written outside the batch, not the transaction itself.
 - Elsewhere: `user/tests/PersonaAvatarUpload.test.ts` and `PersonaAccountDeletionCompliance.test.ts`,
   `channel/tests/` (`MessagePersona*`, `ChannelPersonaMentions`, `MessageReactionPersona`),
   `search/message/PersonaMessageSearch.test.ts`, the schema package's tests, and the end-to-end specs

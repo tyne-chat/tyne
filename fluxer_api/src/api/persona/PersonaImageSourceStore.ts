@@ -20,7 +20,8 @@
 
 import type {PersonaID, UserID} from '@app/api/BrandedTypes';
 import {Config} from '@app/api/Config';
-import {deleteOneOrMany, fetchMany, upsertOne} from '@app/api/database/CassandraQueryExecution';
+import {deleteOneOrMany, fetchMany} from '@app/api/database/CassandraQueryExecution';
+import type {PreparedQuery} from '@app/api/database/CassandraTypes';
 import type {PersonaImageSourceRow} from '@app/api/database/types/PersonaTypes';
 import type {Persona} from '@app/api/models/Persona';
 import {PersonaImageSources} from '@app/api/Tables';
@@ -45,37 +46,40 @@ function externalSourceUrl(url: string | null | undefined): string | null {
 	}
 }
 
-/** Records what an import said about a persona's images, replacing what an earlier import said. */
-export async function storePersonaImageSources(
+/**
+ * The write that records what an import said about a persona's images, replacing what an earlier
+ * import said. The import adds it to the batch that writes the persona.
+ */
+export function personaImageSourcesWrite(
 	userId: UserID,
 	persona: Persona,
 	sources: PersonaImportImageSources | null,
-): Promise<void> {
+): PreparedQuery {
 	const avatar = sources?.avatar ?? null;
 	const banner = sources?.banner ?? null;
-	if (!avatar && !banner) {
-		await forgetPersonaImageSources(userId, persona.id);
-		return;
-	}
+	if (!avatar && !banner) return forgetPersonaImageSourcesWrite(userId, persona.id);
 	const avatarUrl = avatar ? externalSourceUrl(avatar.url) : null;
 	const bannerUrl = banner ? externalSourceUrl(banner.url) : null;
-	await upsertOne(
-		PersonaImageSources.upsertAll({
-			user_id: userId,
-			persona_id: persona.id,
-			avatar_field: avatar?.field ?? null,
-			avatar_main_empty: avatar ? avatar.main_avatar_empty === true : null,
-			avatar_url: avatarUrl,
-			avatar_hash: avatarUrl ? persona.avatarHash : null,
-			banner_url: bannerUrl,
-			banner_hash: bannerUrl ? persona.bannerHash : null,
-			updated_at: new Date(),
-		}),
-	);
+	return PersonaImageSources.upsertAll({
+		user_id: userId,
+		persona_id: persona.id,
+		avatar_field: avatar?.field ?? null,
+		avatar_main_empty: avatar ? avatar.main_avatar_empty === true : null,
+		avatar_url: avatarUrl,
+		avatar_hash: avatarUrl ? persona.avatarHash : null,
+		banner_url: bannerUrl,
+		banner_hash: bannerUrl ? persona.bannerHash : null,
+		updated_at: new Date(),
+	});
 }
 
 export async function forgetPersonaImageSources(userId: UserID, personaId: PersonaID): Promise<void> {
-	await deleteOneOrMany(PersonaImageSources.deleteByPk({user_id: userId, persona_id: personaId}));
+	await deleteOneOrMany(forgetPersonaImageSourcesWrite(userId, personaId));
+}
+
+/** The write `forgetPersonaImageSources` makes, for a batch. */
+export function forgetPersonaImageSourcesWrite(userId: UserID, personaId: PersonaID): PreparedQuery {
+	return PersonaImageSources.deleteByPk({user_id: userId, persona_id: personaId});
 }
 
 export async function forgetPersonaImageSourcesOfUser(userId: UserID): Promise<void> {

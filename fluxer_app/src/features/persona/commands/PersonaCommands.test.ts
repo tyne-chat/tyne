@@ -10,6 +10,7 @@ import type {
 	PersonaResponse,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {reaction} from 'mobx';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 vi.mock('@lingui/core/macro', () => {
@@ -33,6 +34,7 @@ installVoiceMenuTestBootstrap();
 
 const PersonaCommands = await import('./PersonaCommands');
 const {PersonaStore} = await import('../state/PersonaStore');
+const {default: EmojiPins} = await import('@app/features/emoji/state/EmojiPins');
 
 vi.mock('@app/features/platform/transport/RestTransport', () => ({
 	http: {
@@ -513,6 +515,73 @@ describe('PersonaCommands', () => {
 			} as any);
 
 			await expect(PersonaCommands.importPersonas([{name: 'Test'}])).rejects.toThrow('Too many personas');
+		});
+
+		// "Replace all" is one request: the server deletes the old personas in the write that brings in
+		// the new ones, so this side deletes nothing itself (tyne-chat/tyne#359).
+		describe('replacing', () => {
+			const personaResponse = (id: string, name: string): PersonaResponse => ({
+				id,
+				name,
+				avatar_hash: null,
+				banner_hash: null,
+				pronouns: null,
+				color: null,
+				bio: null,
+				auto_tag_disabled: false,
+				persona_tags: [],
+				signature_emojis: [],
+				use_count: 0,
+				last_used_at_ms: null,
+				visibility: 'unlisted',
+				external_uuid: null,
+				created_at: '2026-01-01T00:00:00Z',
+				updated_at: '2026-01-01T00:00:00Z',
+			});
+			const OLD_A = '1540000000000000020';
+			const OLD_B = '1540000000000000021';
+
+			beforeEach(() => {
+				EmojiPins.reset();
+				PersonaStore.setPersonas([personaResponse(OLD_A, 'Old A'), personaResponse(OLD_B, 'Old B')]);
+				EmojiPins.pinEmoji('unicode:fox', OLD_A);
+				EmojiPins.pinEmoji('unicode:owl', OLD_B);
+			});
+
+			it('sends one request and drops the replaced personas, with their pins in one change', async () => {
+				const imported = [personaResponse('1540000000000000030', 'New')];
+				vi.mocked(http.post).mockResolvedValueOnce({ok: true, status: 200, body: imported} as any);
+				const pinChanges = vi.fn();
+				const stop = reaction(() => EmojiPins.personaPinnedEmojis, pinChanges);
+
+				await PersonaCommands.importPersonas([{name: 'New'}], {replace: true});
+				stop();
+
+				expect(http.post).toHaveBeenCalledTimes(1);
+				expect(http.post).toHaveBeenCalledWith(ForkEndpoints.USER_PERSONA_IMPORT, {
+					body: [{name: 'New'}],
+					query: {replace: true},
+				});
+				expect(http.delete).not.toHaveBeenCalled();
+				expect(PersonaStore.personas.map((p) => p.name)).toEqual(['New']);
+				expect(EmojiPins.getPersonaPinnedEmojiKeys(OLD_A)).toEqual([]);
+				expect(EmojiPins.getPersonaPinnedEmojiKeys(OLD_B)).toEqual([]);
+				expect(pinChanges).toHaveBeenCalledTimes(1);
+			});
+
+			it('keeps the personas and their pins when the server refuses the import', async () => {
+				vi.mocked(http.post).mockResolvedValueOnce({
+					ok: false,
+					status: 400,
+					body: {code: 'DUPLICATE_PERSONA_TAG', message: 'This tag is already taken.'},
+				} as any);
+
+				await expect(PersonaCommands.importPersonas([{name: 'New'}], {replace: true})).rejects.toThrow();
+
+				expect(http.delete).not.toHaveBeenCalled();
+				expect(PersonaStore.personas.map((p) => p.name)).toEqual(['Old A', 'Old B']);
+				expect(EmojiPins.getPersonaPinnedEmojiKeys(OLD_A)).toEqual(['unicode:fox']);
+			});
 		});
 	});
 
