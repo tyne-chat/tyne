@@ -35,14 +35,19 @@ import {
 	PersonaTagLimitExceededError,
 	SignatureEmojiLimitExceededError,
 } from './errors/PersonaErrors';
-import type {IPersonaRepository} from './IPersonaRepository';
+import type {IPersonaRepository, PersonaImportStep} from './IPersonaRepository';
 import {
 	forgetPersonaChannelState,
 	forgetPersonaChannelStatesOfPersona,
+	forgetPersonaChannelStateWrite,
 	loadPersonaChannelStates,
 	storePersonaChannelState,
 } from './PersonaChannelStateStore';
-import {forgetPersonaImageSources, storePersonaImageSources} from './PersonaImageSourceStore';
+import {
+	forgetPersonaImageSources,
+	forgetPersonaImageSourcesWrite,
+	personaImageSourcesWrite,
+} from './PersonaImageSourceStore';
 
 export const MAX_PERSONAS_PER_USER = 250;
 
@@ -160,6 +165,18 @@ function getTagKey(tag: {prefix: string; suffix: string}): string {
 
 function formatTagDisplay(tag: {prefix: string; suffix: string}): string {
 	return `${tag.prefix || ''}text${tag.suffix || ''}`;
+}
+
+function personaSettingsResponse(row: UserPersonaSettingsRow): PersonaSettingsResponse {
+	return {
+		user_id: row.user_id.toString(),
+		active_persona_mode: (row.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
+		active_persona_scope: row.active_persona_scope === 'channel' ? 'channel' : 'global',
+		active_persona_id: row.active_persona_id ? row.active_persona_id.toString() : null,
+		is_latched: Boolean(row.is_latched),
+		display_tag_text: row.display_tag_text ?? '',
+		display_tag_icon: row.display_tag_icon ?? null,
+	};
 }
 
 export class PersonaService {
@@ -390,16 +407,7 @@ export class PersonaService {
 				version: (settings.version ?? 0) + 1,
 			};
 			await this.deps.personaRepository.upsertSettings(updatedSettingsRow);
-			const settingsResponse: PersonaSettingsResponse = {
-				user_id: userId.toString(),
-				active_persona_mode: (settings.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
-				active_persona_scope: settings.active_persona_scope === 'channel' ? 'channel' : 'global',
-				active_persona_id: null,
-				is_latched: false,
-				display_tag_text: settings.display_tag_text ?? '',
-				display_tag_icon: settings.display_tag_icon ?? null,
-			};
-			await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', settingsResponse);
+			await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', personaSettingsResponse(updatedSettingsRow));
 		}
 
 		// The channels that had this persona selected go back to the account.
@@ -414,8 +422,22 @@ export class PersonaService {
 		await this.dispatchToMutualGuilds(userId, existing, 'delete');
 	}
 
-	async importPersonas(userId: UserID, items: Array<PersonaImportItem>): Promise<Array<Persona>> {
-		const existingPersonas = await this.deps.personaRepository.findByUserId(userId);
+	/**
+	 * Brings in personas from an export file. Everything is checked before anything is written, and the
+	 * writes are one atomic batch, so a refused or failed import changes nothing. With `replace`, the
+	 * account's live personas are deleted in that same batch, so they are kept unless the import goes
+	 * through (tyne-chat/tyne#359).
+	 */
+	async importPersonas(
+		userId: UserID,
+		items: Array<PersonaImportItem>,
+		options: {replace?: boolean} = {},
+	): Promise<Array<Persona>> {
+		const livePersonas = await this.deps.personaRepository.findByUserId(userId);
+		// Replaced personas take no part in matching or in the checks: once the import is written they
+		// are gone, so their tags, signature emojis and places under the cap are free.
+		const retired = options.replace ? livePersonas : [];
+		const existingPersonas = options.replace ? [] : livePersonas;
 		const existingByUuid = new Map<string, Persona>();
 		const existingById = new Map<string, Persona>();
 		for (const p of existingPersonas) {
@@ -508,38 +530,30 @@ export class PersonaService {
 			}),
 		);
 
-		const results: Array<Persona> = [];
-		let currentCount = existingPersonas.length;
-
-		for (const item of items) {
+		const steps: Array<PersonaImportStep> = items.map((item) => {
 			const existing = findExisting(item);
 			if (existing) {
-				const updated = await this.deps.personaRepository.update(userId, existing.id, {
-					name: item.name,
-					avatar_hash: item.avatar_hash,
-					banner_hash: item.banner_hash,
-					pronouns: item.pronouns,
-					color: item.color,
-					avatar_color: item.avatar_color,
-					bio: item.bio,
-					auto_tag_disabled: item.auto_tag_disabled,
-					persona_tags: item.persona_tags,
-					signature_emojis: item.signature_emojis,
-					visibility: item.visibility ?? existing.visibility,
-					external_uuid:
-						existing.externalUuid ?? (item.external_uuid === existing.id.toString() ? null : item.external_uuid),
-				});
-				if (updated) {
-					if (item.image_sources !== undefined) {
-						await storePersonaImageSources(userId, updated, item.image_sources);
-					}
-					results.push(updated);
-				}
-			} else {
-				if (currentCount >= MAX_PERSONAS_PER_USER) {
-					throw new PersonaLimitReachedError(MAX_PERSONAS_PER_USER);
-				}
-				const created = await this.deps.personaRepository.create({
+				return {
+					update: existing,
+					params: {
+						name: item.name,
+						avatar_hash: item.avatar_hash,
+						banner_hash: item.banner_hash,
+						pronouns: item.pronouns,
+						color: item.color,
+						avatar_color: item.avatar_color,
+						bio: item.bio,
+						auto_tag_disabled: item.auto_tag_disabled,
+						persona_tags: item.persona_tags,
+						signature_emojis: item.signature_emojis,
+						visibility: item.visibility ?? existing.visibility,
+						external_uuid:
+							existing.externalUuid ?? (item.external_uuid === existing.id.toString() ? null : item.external_uuid),
+					},
+				};
+			}
+			return {
+				create: {
 					user_id: userId,
 					name: item.name,
 					avatar_hash: item.avatar_hash,
@@ -553,20 +567,67 @@ export class PersonaService {
 					signature_emojis: item.signature_emojis,
 					visibility: item.visibility ?? 'unlisted',
 					external_uuid: item.external_uuid,
-				});
-				if (item.image_sources !== undefined) {
-					await storePersonaImageSources(userId, created, item.image_sources);
-				}
-				results.push(created);
-				currentCount++;
-			}
+				},
+			};
+		});
+		const createdCount = steps.filter((step) => 'create' in step).length;
+		if (existingPersonas.length + createdCount > MAX_PERSONAS_PER_USER) {
+			throw new PersonaLimitReachedError(MAX_PERSONAS_PER_USER);
 		}
 
+		// What deleting the replaced personas one by one would clear: the selection, when it is one of
+		// them, and the channels they are selected in. Written in the same batch.
+		const retiredIds = new Set(retired.map((p) => p.id.toString()));
+		let settings: UserPersonaSettingsRow | undefined;
+		let clearedChannelIds: Array<ChannelID> = [];
+		if (retired.length > 0) {
+			const current = await this.deps.personaRepository.findSettings(userId);
+			if (current?.active_persona_id && retiredIds.has(current.active_persona_id.toString())) {
+				settings = {
+					...current,
+					active_persona_id: null,
+					is_latched: false,
+					updated_at: new Date(),
+					version: (current.version ?? 0) + 1,
+				};
+			}
+			clearedChannelIds = (await loadPersonaChannelStates(userId))
+				.filter((row) => retiredIds.has(row.persona_id.toString()))
+				.map((row) => row.channel_id);
+		}
+
+		const results = await this.deps.personaRepository.writeImport(userId, {
+			retire: retired,
+			steps,
+			settings,
+			alongside: (written) => [
+				...retired.map((p) => forgetPersonaImageSourcesWrite(userId, p.id)),
+				...written.flatMap((persona, i) => {
+					const sources = items[i]?.image_sources;
+					return sources === undefined ? [] : [personaImageSourcesWrite(userId, persona, sources)];
+				}),
+				...clearedChannelIds.map((channelId) => forgetPersonaChannelStateWrite(userId, channelId)),
+			],
+		});
+
+		// The cleared selection goes first: a client that sees its selected persona missing from the
+		// list clears the selection itself, with a request of its own.
+		if (settings) {
+			await this.dispatchToUser(userId, 'USER_PERSONA_SETTINGS_UPDATE', personaSettingsResponse(settings));
+		}
 		const allPersonas = await this.deps.personaRepository.findByUserId(userId);
 		await this.dispatchToUser(userId, 'USER_PERSONAS_UPDATE', {
 			personas: allPersonas.map((p) => p.toResponse()),
 		});
-		if (results.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
+		for (const channelId of clearedChannelIds) {
+			await this.dispatchToUser(userId, 'USER_PERSONA_CHANNEL_STATE_UPDATE', {
+				channel_id: channelId.toString(),
+				persona_id: null,
+			} satisfies PersonaChannelState);
+		}
+		// One refresh for everyone who sees this account, also for the replaced personas, whatever
+		// their visibility, as a deletion of each would have sent.
+		if (retired.length > 0 || results.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
 			await this.dispatchToMutualGuilds(userId);
 		}
 
@@ -695,15 +756,7 @@ export class PersonaService {
 			}
 		}
 
-		const response: PersonaSettingsResponse = {
-			user_id: updatedRow.user_id.toString(),
-			active_persona_mode: (updatedRow.active_persona_mode as 'manual' | 'last') === 'last' ? 'last' : 'manual',
-			active_persona_scope: updatedRow.active_persona_scope === 'channel' ? 'channel' : 'global',
-			active_persona_id: updatedRow.active_persona_id ? updatedRow.active_persona_id.toString() : null,
-			is_latched: Boolean(updatedRow.is_latched),
-			display_tag_text: updatedRow.display_tag_text ?? '',
-			display_tag_icon: updatedRow.display_tag_icon ?? null,
-		};
+		const response = personaSettingsResponse(updatedRow);
 
 		const displayTagChanged =
 			(updatedRow.display_tag_text ?? '') !== (existing?.display_tag_text ?? '') ||
