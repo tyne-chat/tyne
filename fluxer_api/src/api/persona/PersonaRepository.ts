@@ -2,13 +2,14 @@
 
 import {personaAssetHashOrNull} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {PersonaID, UserID} from '../BrandedTypes';
-import {deleteOneOrMany, fetchMany, fetchOne, upsertOne} from '../database/CassandraQueryExecution';
+import {BatchBuilder, deleteOneOrMany, fetchMany, fetchOne, upsertOne} from '../database/CassandraQueryExecution';
 import type {PersonaRow, UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import {Persona} from '../models/Persona';
 import {Personas, UserPersonaSettings} from '../Tables';
 import {
 	type CreatePersonaParams,
 	IPersonaRepository,
+	type PersonaImportWrite,
 	personaLookupKey,
 	type UpdatePersonaParams,
 } from './IPersonaRepository';
@@ -38,6 +39,67 @@ function normalizeSettingsRow(row: UserPersonaSettingsRow): UserPersonaSettingsR
 		active_persona_scope: row.active_persona_scope === 'channel' ? 'channel' : 'global',
 		display_tag_icon: personaAssetHashOrNull(row.display_tag_icon),
 	};
+}
+
+function createdPersonaRow(params: CreatePersonaParams, personaId: PersonaID, now: Date): PersonaRow {
+	return {
+		user_id: params.user_id,
+		persona_id: personaId,
+		name: params.name,
+		avatar_hash: params.avatar_hash ?? null,
+		banner_hash: params.banner_hash ?? null,
+		pronouns: params.pronouns ?? null,
+		color: params.color ?? null,
+		avatar_color: params.avatar_color ?? null,
+		bio: params.bio ?? null,
+		auto_tag_disabled: params.auto_tag_disabled ?? false,
+		persona_tags: params.persona_tags ? JSON.stringify(params.persona_tags) : JSON.stringify([]),
+		signature_emojis: params.signature_emojis ? JSON.stringify(params.signature_emojis) : JSON.stringify([]),
+		use_count: params.use_count ?? 0,
+		last_used_at_ms: params.last_used_at_ms ?? null,
+		visibility: params.visibility ?? 'unlisted',
+		external_uuid: params.external_uuid ?? null,
+		created_at: now,
+		updated_at: now,
+		version: 1,
+	};
+}
+
+function updatedPersonaRow(existing: Persona, params: UpdatePersonaParams, now: Date): PersonaRow {
+	return {
+		user_id: existing.userId,
+		persona_id: existing.id,
+		name: params.name !== undefined ? params.name : existing.name,
+		avatar_hash: params.avatar_hash !== undefined ? params.avatar_hash : existing.avatarHash,
+		banner_hash: params.banner_hash !== undefined ? params.banner_hash : existing.bannerHash,
+		pronouns: params.pronouns !== undefined ? params.pronouns : existing.pronouns,
+		color: params.color !== undefined ? params.color : existing.color,
+		avatar_color: params.avatar_color !== undefined ? params.avatar_color : existing.avatarColor,
+		bio: params.bio !== undefined ? params.bio : existing.bio,
+		auto_tag_disabled: params.auto_tag_disabled !== undefined ? params.auto_tag_disabled : existing.autoTagDisabled,
+		persona_tags:
+			params.persona_tags !== undefined ? JSON.stringify(params.persona_tags) : JSON.stringify(existing.personaTags),
+		signature_emojis:
+			params.signature_emojis !== undefined
+				? JSON.stringify(params.signature_emojis)
+				: JSON.stringify(existing.signatureEmojis),
+		use_count: params.use_count !== undefined ? params.use_count : existing.useCount,
+		last_used_at_ms: params.last_used_at_ms !== undefined ? params.last_used_at_ms : existing.lastUsedAtMs,
+		visibility: params.visibility !== undefined ? params.visibility : existing.visibility,
+		external_uuid: params.external_uuid !== undefined ? params.external_uuid : existing.externalUuid,
+		created_at: existing.createdAt,
+		updated_at: now,
+		version: existing.version + 1,
+	};
+}
+
+// Deletion is soft: the row stays, so old messages keep showing the persona.
+function deletedPersonaRow(existing: Persona, now: Date): PersonaRow {
+	const row = existing.toRow();
+	row.deleted_at = now;
+	row.updated_at = now;
+	row.version = existing.version + 1;
+	return row;
 }
 
 const FETCH_SETTINGS_CQL = UserPersonaSettings.selectCql({
@@ -128,29 +190,7 @@ export class PersonaRepository extends IPersonaRepository {
 	}
 
 	async create(params: CreatePersonaParams): Promise<Persona> {
-		const now = new Date();
-		const personaId = params.persona_id ?? (await generatePersonaId());
-		const row: PersonaRow = {
-			user_id: params.user_id,
-			persona_id: personaId,
-			name: params.name,
-			avatar_hash: params.avatar_hash ?? null,
-			banner_hash: params.banner_hash ?? null,
-			pronouns: params.pronouns ?? null,
-			color: params.color ?? null,
-			avatar_color: params.avatar_color ?? null,
-			bio: params.bio ?? null,
-			auto_tag_disabled: params.auto_tag_disabled ?? false,
-			persona_tags: params.persona_tags ? JSON.stringify(params.persona_tags) : JSON.stringify([]),
-			signature_emojis: params.signature_emojis ? JSON.stringify(params.signature_emojis) : JSON.stringify([]),
-			use_count: params.use_count ?? 0,
-			last_used_at_ms: params.last_used_at_ms ?? null,
-			visibility: params.visibility ?? 'unlisted',
-			external_uuid: params.external_uuid ?? null,
-			created_at: now,
-			updated_at: now,
-			version: 1,
-		};
+		const row = createdPersonaRow(params, params.persona_id ?? (await generatePersonaId()), new Date());
 		await upsertOne(Personas.upsertAll(row));
 		return new Persona(row);
 	}
@@ -159,32 +199,7 @@ export class PersonaRepository extends IPersonaRepository {
 		const existing = await this.findById(userId, personaId);
 		if (!existing) return null;
 
-		const now = new Date();
-		const row: PersonaRow = {
-			user_id: userId,
-			persona_id: personaId,
-			name: params.name !== undefined ? params.name : existing.name,
-			avatar_hash: params.avatar_hash !== undefined ? params.avatar_hash : existing.avatarHash,
-			banner_hash: params.banner_hash !== undefined ? params.banner_hash : existing.bannerHash,
-			pronouns: params.pronouns !== undefined ? params.pronouns : existing.pronouns,
-			color: params.color !== undefined ? params.color : existing.color,
-			avatar_color: params.avatar_color !== undefined ? params.avatar_color : existing.avatarColor,
-			bio: params.bio !== undefined ? params.bio : existing.bio,
-			auto_tag_disabled: params.auto_tag_disabled !== undefined ? params.auto_tag_disabled : existing.autoTagDisabled,
-			persona_tags:
-				params.persona_tags !== undefined ? JSON.stringify(params.persona_tags) : JSON.stringify(existing.personaTags),
-			signature_emojis:
-				params.signature_emojis !== undefined
-					? JSON.stringify(params.signature_emojis)
-					: JSON.stringify(existing.signatureEmojis),
-			use_count: params.use_count !== undefined ? params.use_count : existing.useCount,
-			last_used_at_ms: params.last_used_at_ms !== undefined ? params.last_used_at_ms : existing.lastUsedAtMs,
-			visibility: params.visibility !== undefined ? params.visibility : existing.visibility,
-			external_uuid: params.external_uuid !== undefined ? params.external_uuid : existing.externalUuid,
-			created_at: existing.createdAt,
-			updated_at: now,
-			version: existing.version + 1,
-		};
+		const row = updatedPersonaRow(existing, params, new Date());
 		await upsertOne(Personas.upsertAll(row));
 		return new Persona(row);
 	}
@@ -192,13 +207,35 @@ export class PersonaRepository extends IPersonaRepository {
 	async delete(userId: UserID, personaId: PersonaID): Promise<boolean> {
 		const existing = await this.findById(userId, personaId);
 		if (!existing || existing.isDeleted) return false;
-		const now = new Date();
-		const row = existing.toRow();
-		row.deleted_at = now;
-		row.updated_at = now;
-		row.version = existing.version + 1;
-		await upsertOne(Personas.upsertAll(row));
+		await upsertOne(Personas.upsertAll(deletedPersonaRow(existing, new Date())));
 		return true;
+	}
+
+	async writeImport(userId: UserID, write: PersonaImportWrite): Promise<Array<Persona>> {
+		const now = new Date();
+		const rows: Array<PersonaRow> = [];
+		for (const step of write.steps) {
+			if ('create' in step) {
+				rows.push(
+					createdPersonaRow(
+						{...step.create, user_id: userId},
+						step.create.persona_id ?? (await generatePersonaId()),
+						now,
+					),
+				);
+			} else {
+				rows.push(updatedPersonaRow(step.update, step.params, now));
+			}
+		}
+		const written = rows.map((row) => new Persona(row));
+
+		const batch = new BatchBuilder();
+		for (const persona of write.retire) batch.addPrepared(Personas.upsertAll(deletedPersonaRow(persona, now)));
+		for (const row of rows) batch.addPrepared(Personas.upsertAll(row));
+		if (write.settings) batch.addPrepared(UserPersonaSettings.upsertAll(write.settings));
+		for (const query of write.alongside?.(written) ?? []) batch.addPrepared(query);
+		await batch.execute();
+		return written;
 	}
 
 	async deleteAllByUserId(userId: UserID): Promise<void> {
