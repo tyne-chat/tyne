@@ -127,8 +127,12 @@ jobs:
 
       # The native libraries upstream's rust job installs (media proxy, desktop native), copied
       # from its tests.yaml: Clippy and the Rust tests in the gate build and run against them.
-      - name: Cache native media dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      # Restored here and saved straight after the build below, not at the end of the job: a cache
+      # step saves only when the whole job succeeds, so a failed night left the next one to download
+      # and compile FFmpeg again, and ffmpeg.org has reset that download (tyne-chat/tyne#480).
+      - name: Restore native media dependencies
+        id: media-native-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /opt/fluxer-native
           key: media-native-${{ runner.os }}-${{ hashFiles('fluxer_media_proxy/tools/install-native-deps.sh') }}
@@ -187,10 +191,29 @@ jobs:
             fi
           done
           sudo apt-get "${apt_opts[@]}" install -y --no-install-recommends "${packages[@]}"
-          sudo fluxer_media_proxy/tools/install-native-deps.sh /opt/fluxer-native
+          # Upstream's script downloads FFmpeg and libheif with curl --retry, which does not retry a
+          # reset connection; a library already built is skipped on the next try.
+          for attempt in 1 2 3; do
+            if sudo fluxer_media_proxy/tools/install-native-deps.sh /opt/fluxer-native; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::Building the native media dependencies failed three times."
+              exit 1
+            fi
+            echo "::warning::Building the native media dependencies failed (try $attempt of 3); retrying in 30 s."
+            sleep 30
+          done
           echo "PKG_CONFIG_PATH=/opt/fluxer-native/lib/pkgconfig:/opt/fluxer-native/lib64/pkgconfig" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=/opt/fluxer-native/lib:/opt/fluxer-native/lib64" >> "$GITHUB_ENV"
           echo "/opt/fluxer-native/bin" >> "$GITHUB_PATH"
+
+      - name: Save native media dependencies
+        if: steps.media-native-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /opt/fluxer-native
+          key: ${{ steps.media-native-cache.outputs.cache-primary-key }}
 
       # The cargo-deny version upstream's rust job installs. The cargo cache keeps the binary, so
       # this is quick after the first run.
