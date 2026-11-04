@@ -604,6 +604,7 @@ export function buildAPIConfigFromMaster(master: MasterConfig): APIConfig {
 			visionariesGuildId: master.instance.visionaries_guild_id,
 			visionariesGuildVisionaryRoleId: master.instance.visionaries_guild_visionary_role_id,
 			branding: {
+				desktopAppPromptEnabled: master.instance.branding.desktop_app_prompt_enabled,
 				productName: master.instance.branding.product_name,
 				iconUrl: master.instance.branding.icon_url,
 				symbolUrl: master.instance.branding.symbol_url,
@@ -615,7 +616,6 @@ export function buildAPIConfigFromMaster(master: MasterConfig): APIConfig {
 				themeColor: master.instance.branding.theme_color,
 				statusPageUrl: master.instance.branding.status_page_url,
 				statusPageIncidentHistoryUrl: master.instance.branding.status_page_incident_history_url,
-				desktopAppPromptEnabled: master.instance.branding.desktop_app_prompt_enabled,
 			},
 			setup: {
 				configured: master.instance.setup.configured,

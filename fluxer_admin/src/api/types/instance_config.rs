@@ -483,6 +483,8 @@ pub struct AppPublicConfigResponse {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AppBrandingConfigResponse {
+    #[serde(default = "default_desktop_app_prompt_enabled")]
+    pub desktop_app_prompt_enabled: bool,
     #[serde(default = "default_product_name")]
     pub product_name: String,
     pub icon_url: Option<String>,
@@ -504,13 +506,12 @@ pub struct AppBrandingConfigResponse {
     pub upload_limit_message: Option<String>,
     #[serde(default)]
     pub trusted_domains: Vec<String>,
-    #[serde(default = "default_desktop_app_prompt_enabled")]
-    pub desktop_app_prompt_enabled: bool,
 }
 
 impl Default for AppBrandingConfigResponse {
     fn default() -> Self {
         Self {
+            desktop_app_prompt_enabled: default_desktop_app_prompt_enabled(),
             product_name: default_product_name(),
             icon_url: None,
             symbol_url: None,
@@ -527,7 +528,6 @@ impl Default for AppBrandingConfigResponse {
             custom_css: None,
             upload_limit_message: None,
             trusted_domains: Vec::new(),
-            desktop_app_prompt_enabled: default_desktop_app_prompt_enabled(),
         }
     }
 }
@@ -1204,6 +1204,8 @@ pub struct AppPublicConfigUpdateRequest {
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AppBrandingConfigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub desktop_app_prompt_enabled: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub product_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub icon_url: Option<Option<String>>,
@@ -1235,8 +1237,6 @@ pub struct AppBrandingConfigUpdateRequest {
     pub upload_limit_message: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trusted_domains: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub desktop_app_prompt_enabled: Option<bool>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

@@ -524,6 +524,7 @@ function getDefaultPremiumProductName(): string {
 function getDefaultAppPublicConfig(): InstanceAppPublicConfig {
 	return {
 		branding: {
+			desktop_app_prompt_enabled: Config.instance.branding.desktopAppPromptEnabled ?? !Config.instance.selfHosted,
 			product_name: getDefaultProductName(),
 			icon_url: normalizeOptionalString(Config.instance.branding.iconUrl),
 			symbol_url: normalizeOptionalString(Config.instance.branding.symbolUrl),
@@ -542,7 +543,6 @@ function getDefaultAppPublicConfig(): InstanceAppPublicConfig {
 			custom_css: null,
 			upload_limit_message: null,
 			trusted_domains: [],
-			desktop_app_prompt_enabled: Config.instance.branding.desktopAppPromptEnabled ?? !Config.instance.selfHosted,
 		},
 		setup: {
 			configured: !Config.instance.selfHosted || Config.instance.setup.configured,
@@ -1042,6 +1042,7 @@ function buildAppPublicConfig(config: z.infer<typeof StoredInstanceAppPublicSche
 	const {branding = {}, setup = {}, legal = {}, registration = {}} = config;
 	return {
 		branding: {
+			desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? defaults.branding.desktop_app_prompt_enabled,
 			product_name: normalizeOptionalString(branding.product_name) ?? defaults.branding.product_name,
 			icon_url: normalizeOptionalPublicString(branding.icon_url, defaults.branding.icon_url),
 			symbol_url: normalizeOptionalPublicString(branding.symbol_url, defaults.branding.symbol_url),
@@ -1071,7 +1072,6 @@ function buildAppPublicConfig(config: z.infer<typeof StoredInstanceAppPublicSche
 			trusted_domains: Config.instance.selfHosted
 				? (branding.trusted_domains ?? defaults.branding.trusted_domains)
 				: defaults.branding.trusted_domains,
-			desktop_app_prompt_enabled: branding.desktop_app_prompt_enabled ?? defaults.branding.desktop_app_prompt_enabled,
 		},
 		setup: {
 			configured: setup.configured ?? defaults.setup.configured,

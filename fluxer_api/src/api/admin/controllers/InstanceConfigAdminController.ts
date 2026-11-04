@@ -790,6 +790,7 @@ const INSTANCE_CONFIG_SECTION_APPLIERS = {
 			const {releasedBrandingAssets} = await instanceConfigRepository.writeAppPublicConfig({
 				branding: appPublic.branding
 					? omitUndefinedFields({
+							desktop_app_prompt_enabled: readOptionalField(appPublic.branding, 'desktop_app_prompt_enabled'),
 							product_name: readOptionalField(appPublic.branding, 'product_name'),
 							icon_url: readOptionalField(appPublic.branding, 'icon_url'),
 							symbol_url: readOptionalField(appPublic.branding, 'symbol_url'),
@@ -809,7 +810,6 @@ const INSTANCE_CONFIG_SECTION_APPLIERS = {
 							custom_css: readOptionalField(appPublic.branding, 'custom_css'),
 							upload_limit_message: readOptionalField(appPublic.branding, 'upload_limit_message'),
 							trusted_domains: readTrustedDomains(appPublic.branding),
-							desktop_app_prompt_enabled: readOptionalField(appPublic.branding, 'desktop_app_prompt_enabled'),
 						})
 					: undefined,
 				legal: appPublic.legal
