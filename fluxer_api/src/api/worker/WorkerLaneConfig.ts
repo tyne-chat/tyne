@@ -79,6 +79,7 @@ const LANE_CONFIG = {
 	batch: {
 		consumerName: 'workers_batch',
 		tasks: [
+			'backfillUseExternalCommands',
 			'sweepSignalBar',
 			'expireAttachments',
 			'reconcileAttachmentDecay',
@@ -124,7 +125,6 @@ const LANE_CONFIG = {
 			'operatorPassLabsVisionaryRoleSync',
 			'operatorPassLabsGreeting',
 			'operatorPassLabsDelivery',
-			'backfillUseExternalCommands',
 		] as const,
 		retiredTasks: ['operatorPassWallAutoApprove', 'operatorPassSaleBroadcast', 'operatorPassVisionaryNotice'],
 		concurrency: 12,
