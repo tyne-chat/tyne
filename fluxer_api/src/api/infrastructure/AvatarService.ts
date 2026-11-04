@@ -14,7 +14,10 @@ import type {AssetKind} from '@fluxer/constants/src/AssetFormatPolicy';
 import type {LimitKey} from '@fluxer/constants/src/LimitConfigMetadata';
 import {AVATAR_MAX_SIZE, EMOJI_MAX_SIZE, STICKER_MAX_SIZE} from '@fluxer/constants/src/LimitConstants';
 import {ContentBlockedError} from '@fluxer/errors/src/domains/content/ContentBlockedError';
-import sharp from 'sharp';
+
+// Fork imports.
+
+import {forkStripImageMetadata} from '@app/api/infrastructure/ForkImageMetadataStrip';
 
 type ResourceType = 'attachment' | 'avatar' | 'emoji' | 'sticker' | 'banner' | 'other';
 type LimitConfigSnapshotProvider = Pick<LimitConfigService, 'getConfigSnapshot'>;
@@ -45,11 +48,7 @@ export class AvatarService {
 
 	private async stripImageMetadata(buffer: Uint8Array, format: string): Promise<Uint8Array> {
 		try {
-			const isJpeg = format === 'jpg' || format === 'jpeg';
-			if (isJpeg) {
-				return await sharp(buffer).jpeg({quality: 100}).toBuffer();
-			}
-			const stripped = await this.mediaService.stripImageMetadata(buffer);
+			const stripped = await forkStripImageMetadata(this.mediaService, buffer, format);
 			if (stripped) {
 				return stripped;
 			}
