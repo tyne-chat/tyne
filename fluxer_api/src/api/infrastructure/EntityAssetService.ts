@@ -17,7 +17,10 @@ import {AVATAR_MAX_SIZE} from '@fluxer/constants/src/LimitConstants';
 import {ValidationErrorCodes} from '@fluxer/constants/src/ValidationErrorCodes';
 import {InputValidationError} from '@fluxer/errors/src/domains/core/InputValidationError';
 import {ms} from 'itty-time';
-import sharp from 'sharp';
+
+// Fork imports.
+
+import {forkStripImageMetadata} from '@app/api/infrastructure/ForkImageMetadataStrip';
 
 type AssetType =
 	| 'avatar'
@@ -184,10 +187,7 @@ export class EntityAssetService {
 		if (newHash === previousHash) return prepared;
 		let uploadBuffer: Uint8Array = imageBuffer;
 		try {
-			const isJpeg = format === 'jpg' || format === 'jpeg';
-			const stripped = isJpeg
-				? await sharp(imageBuffer).jpeg({quality: 100}).toBuffer()
-				: await this.mediaService.stripImageMetadata(imageBuffer);
+			const stripped = await forkStripImageMetadata(this.mediaService, imageBuffer, format);
 			if (stripped) {
 				uploadBuffer = stripped;
 			} else {

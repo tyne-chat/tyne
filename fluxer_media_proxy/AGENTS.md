@@ -18,7 +18,7 @@ external fetches (persona avatar imports), a repair of MP3 uploads that Chromium
 | MP3 repair (fork) | `src/media_process/fork_mp3_repair.rs`; backfill tool `examples/fork_mp3_repair.rs` |
 | Native C code and what it links | `src/native_shim/`, listed in `build.rs`; FFmpeg and the libraries built from source by `tools/install-native-deps.sh` |
 | `?original=true` on avatars, banners and other image assets (fork) | `src/server/stored/fork_original_asset.rs`, one call in `serve_asset_image` (`src/server/stored/mod.rs`) |
-| The API's side | `fluxer_api/src/api/infrastructure/MediaService.ts` (`stripObjectMetadata`), `fluxer_api/src/api/channel/services/message/AttachmentProcessingService.ts` |
+| The API's side | `fluxer_api/src/api/infrastructure/MediaService.ts` (`stripObjectMetadata`, `stripImageMetadata`), `fluxer_api/src/api/channel/services/message/AttachmentProcessingService.ts`; for avatars, banners, emojis and stickers the fork's `ForkImageMetadataStrip.ts` |
 
 ## Uploads go through `/_strip`
 
@@ -29,6 +29,12 @@ Audio and video are remuxed by
 FFmpeg (`av_strip.c`): packets are copied, never re-encoded, into the muxer that `av_container`
 picks from the content type. For MP3 that muxer drops every tag, writes a small ID3v2 tag and an
 Info frame, and copies the frames byte for byte.
+
+Avatars, banners, emojis and stickers go through `/_strip` too (`stripImageMetadata`), JPEGs
+included since the fork's `ForkImageMetadataStrip.ts` (tyne-chat/tyne#476): upstream re-encoded
+them with sharp at quality 100. A JPEG keeps its image data, and only one that is not upright is
+re-encoded, upright, once. If the proxy cannot strip a JPEG, the API falls back to upstream's
+re-encode rather than store the metadata.
 
 ## The stored image: `?original=true`
 
