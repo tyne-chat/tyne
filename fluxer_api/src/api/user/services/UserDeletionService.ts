@@ -500,6 +500,7 @@ export async function processUserDeletion(
 	Logger.debug({userId}, 'Deleting user data');
 	const operatorPassRepository = deps.operatorPassServices.repository;
 	await Promise.all([
+		...forkUserDeletionCleanups(userId, personaRepository),
 		guildRepository.deleteAllBansForUser(userId),
 		guildVisitRepository().deleteAllForUser(userId),
 		userRepository.deleteUserSettings(userId),
@@ -524,7 +525,6 @@ export async function processUserDeletion(
 		}),
 		deps.operatorPassServices.wallService.forgetForDeletion(userId),
 		new BillingDocumentRepository().removeUserIndex(userId),
-		...forkUserDeletionCleanups(userId, personaRepository),
 	]);
 	await userRepository.deleteUserSecondaryIndices(userId);
 	const userForAnonymization = await userRepository.findUniqueAssert(userId);
