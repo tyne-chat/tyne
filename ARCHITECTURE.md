@@ -261,6 +261,10 @@ design, including the mobile part still to come, is `docs/design/server-commands
   use it (`fluxer_app/src/features/user/utils/ForkOriginalImageUrl.ts`, called from upstream's
   `UserImageMenuItems.tsx`), and persona profiles have the same menus
   (`features/persona/utils/usePersonaImageMenus.tsx`; tyne-chat/tyne#471, #473).
+- JPEG metadata: avatars, banners, emojis and stickers have their metadata stripped by the media
+  proxy without re-encoding, JPEGs included; upstream re-encoded JPEGs at quality 100. A JPEG that
+  is not upright is re-encoded upright once (`fluxer_api/src/api/infrastructure/ForkImageMetadataStrip.ts`,
+  called from `AvatarService.ts` and `EntityAssetService.ts`; tyne-chat/tyne#476).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
