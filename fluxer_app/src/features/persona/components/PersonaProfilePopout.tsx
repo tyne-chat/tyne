@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {UserSettingsModal} from '@app/features/app/components/dialogs/LoadableSettingsModals';
 import skeletonStyles from '@app/features/app/components/skeleton/Skeleton.module.css';
 import {useHover} from '@app/features/app/hooks/useHover';
 import Authentication from '@app/features/auth/state/Authentication';
@@ -11,6 +12,7 @@ import {MarkdownContext} from '@app/features/messaging/components/markdown/rende
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {personaColor} from '@app/features/persona/utils/PersonaColor';
+import {usePersonaImageMenus} from '@app/features/persona/utils/usePersonaImageMenus';
 import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {getUserAccentColor} from '@app/features/theme/utils/AccentColorUtils';
@@ -22,7 +24,6 @@ import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import FocusRingScope from '@app/features/ui/focus_ring/FocusRingScope';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
-import {UserSettingsModal} from '@app/features/app/components/dialogs/LoadableSettingsModals';
 import popoutStyles from '@app/features/user/components/popouts/UserProfilePopout.module.css';
 import sharedStyles from '@app/features/user/components/popouts/UserProfileShared.module.css';
 import {ProfileCardBanner} from '@app/features/user/components/profile/profile_card/ProfileCardBanner';
@@ -155,6 +156,11 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 		}, [subprofile.avatar, user]);
 
 		const personaBannerUrl = effectiveBannerUrl;
+		const {onAvatarContextMenu, onBannerContextMenu} = usePersonaImageMenus({
+			user,
+			avatarHash: subprofile.avatar,
+			bannerHash: rawBanner,
+		});
 		const hoverPersonaBannerUrl = useMemo(() => {
 			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner}, true);
 		}, [user.id, rawBanner]);
@@ -178,6 +184,8 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 							hoverAvatarUrl={hoverPersonaAvatarUrl}
 							disablePresence={true}
 							isClickable={false}
+							onAvatarContextMenu={onAvatarContextMenu}
+							onBannerContextMenu={onBannerContextMenu}
 							data-flx="persona.persona-profile-popout.profile-card-banner"
 						/>
 						<ProfileCardContent data-flx="persona.persona-profile-popout.profile-card-content">
