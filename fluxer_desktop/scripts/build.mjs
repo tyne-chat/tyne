@@ -64,11 +64,11 @@ const modulesEnabled = process.env.FLUXER_MODULES === '1' || process.env.FLUXER_
 const offlineBuild = process.env.FLUXER_OFFLINE === '1' || process.env.FLUXER_OFFLINE === 'true';
 function buildInfoDefines() {
 	return {
+		...forkPublicBuildDefines(),
 		'process.env.BUILD_VERSION': JSON.stringify(embeddedBuildVersion),
 		'process.env.BUILD_CHANNEL': JSON.stringify(embeddedBuildChannel),
 		'process.env.FLUXER_MODULES': JSON.stringify(modulesEnabled ? '1' : ''),
 		'process.env.FLUXER_OFFLINE': JSON.stringify(offlineBuild ? '1' : ''),
-		...forkPublicBuildDefines(),
 	};
 }
 const electronExternals = [
