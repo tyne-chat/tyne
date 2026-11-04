@@ -313,6 +313,7 @@ async function buildInstanceConfigResponse(warnings: Array<string> = []): Promis
 		},
 		app_public: appPublic,
 		policy: {
+			server_list_buttons: policy.server_list_buttons,
 			single_community_enabled: policy.single_community_enabled,
 			single_community_guild_id: policy.single_community_guild_id,
 			signal_bar_guild_id: policy.signal_bar_guild_id,
@@ -333,7 +334,6 @@ async function buildInstanceConfigResponse(warnings: Array<string> = []): Promis
 				youtube: integrations.youtube.effective_available,
 				bluesky: integrations.bluesky.effective_enabled,
 			},
-			server_list_buttons: policy.server_list_buttons,
 		},
 		integrations,
 		media,
