@@ -34,13 +34,23 @@ describe('passkey origins for the Tyne Android app', () => {
 		const origins = await allowedOriginsFromEnv({
 			FLUXER_PASSKEY_ADDITIONAL_ALLOWED_ORIGINS: 'https://chat.example',
 		});
-		expect(origins).toEqual(['https://chat.example', TYNE_ANDROID_PASSKEY_ORIGIN]);
+		expect(origins).toEqual([
+			'https://chat.example',
+			'android:apk-key-hash:keSY4bimyLqZQV7bKXgpa2xYuqXi0qZJzsYtp6gpx7w',
+			'android:apk-key-hash:Ld4qnT0TfBeHMT3Yu2H0WTwqlxgFs-32uDmwqtLndsk',
+			TYNE_ANDROID_PASSKEY_ORIGIN,
+		]);
 	});
 
 	it('is listed once when the operator lists it too', async () => {
 		const origins = await allowedOriginsFromEnv({
 			FLUXER_PASSKEY_ADDITIONAL_ALLOWED_ORIGINS: `https://chat.example,${TYNE_ANDROID_PASSKEY_ORIGIN}`,
 		});
-		expect(origins).toEqual(['https://chat.example', TYNE_ANDROID_PASSKEY_ORIGIN]);
+		expect(origins).toEqual([
+			'https://chat.example',
+			TYNE_ANDROID_PASSKEY_ORIGIN,
+			'android:apk-key-hash:keSY4bimyLqZQV7bKXgpa2xYuqXi0qZJzsYtp6gpx7w',
+			'android:apk-key-hash:Ld4qnT0TfBeHMT3Yu2H0WTwqlxgFs-32uDmwqtLndsk',
+		]);
 	});
 });
