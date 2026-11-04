@@ -423,10 +423,47 @@ jobs:
     # start happen here.
     if: ${{ always() }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    # Each step has a time limit of its own below the job's, so a hung step fails instead of the
+    # job being cut off: the last step then still reports it and starts the next link. The step
+    # limits add up to 40 minutes; the rest is for setting up and cleaning up the job.
+    timeout-minutes: 50
 
     steps:
+      # Escalations and the absorbed-commits issue are opened as tyne-rebase[bot] (the Tyne Rebase
+      # App: Issues only, installed on tyne-chat/tyne), not as WORKFLOW_TOKEN's account. If this
+      # step fails, they fall back to WORKFLOW_TOKEN (tyne-tools rebase/pipeline_issues.py). First,
+      # so that the last-resort step below has it too.
+      - name: Token for the pipeline's issues
+        id: issues-token
+        continue-on-error: true
+        timeout-minutes: 2
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: Iv23lislBoXAblKx3tR3
+          private-key: ${{ secrets.REBASE_APP_KEY }}
+          owner: tyne-chat
+          repositories: tyne
+          permission-issues: write
+
+      # The checkouts are tried more than once, each with a time limit: on 2026-11-03 the checkout
+      # of the branch hung in `git fetch` for the whole job during an outage of GitHub's git
+      # service, so nothing was pushed, no issue was opened and the next link never started
+      # (tyne-chat/tyne#486).
       - name: Checkout shared rebase tools
+        id: tools-1
+        continue-on-error: true
+        timeout-minutes: 3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: tyne-chat/tyne-tools
+          ref: main
+          ssh-key: ${{ secrets.TOOLS_DEPLOY_KEY }}
+          persist-credentials: false
+          path: tools
+
+      - name: Checkout shared rebase tools (second try)
+        if: ${{ steps.tools-1.outcome == 'failure' }}
+        timeout-minutes: 3
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: tyne-chat/tyne-tools
@@ -436,6 +473,31 @@ jobs:
           path: tools
 
       - name: Checkout tyne
+        id: repo-1
+        continue-on-error: true
+        timeout-minutes: 4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: tyne
+          fetch-depth: 0
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          path: repo
+
+      - name: Checkout tyne (second try)
+        id: repo-2
+        if: ${{ steps.repo-1.outcome == 'failure' }}
+        continue-on-error: true
+        timeout-minutes: 4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: tyne
+          fetch-depth: 0
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          path: repo
+
+      - name: Checkout tyne (third try)
+        if: ${{ steps.repo-2.outcome == 'failure' }}
+        timeout-minutes: 4
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: tyne
@@ -446,31 +508,20 @@ jobs:
       # Missing when the rebase job stopped before it wrote anything; the next step escalates then.
       - name: Download the rebase job's result
         continue-on-error: true
+        timeout-minutes: 3
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: rebase-result
           path: result
 
-      # Escalations and the absorbed-commits issue are opened as tyne-rebase[bot] (the Tyne Rebase
-      # App: Issues only, installed on tyne-chat/tyne), not as WORKFLOW_TOKEN's account. If this
-      # step fails, they fall back to WORKFLOW_TOKEN (tyne-tools rebase/pipeline_issues.py).
-      - name: Token for the pipeline's issues
-        id: issues-token
-        continue-on-error: true
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: Iv23lislBoXAblKx3tR3
-          private-key: ${{ secrets.REBASE_APP_KEY }}
-          owner: tyne-chat
-          repositories: tyne
-          permission-issues: write
-
       - name: Check, push, report and start the next repository
+        timeout-minutes: 12
         working-directory: repo
         env:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
           ISSUES_GH_TOKEN: ${{ steps.issues-token.outputs.token }}
           REBASE_JOB: ${{ needs.nightly-rebase.result }}
+          REBASE_PUBLISH_STATE: ${{ runner.temp }}/publish-state
           TEST_ISSUE: ${{ inputs.test_issue }}
           DRY_RUN: ${{ inputs.dry_run || inputs.smoke }}
         run: |
@@ -483,3 +534,33 @@ jobs:
             FLAGS="--test-issue"
           fi
           python3 ../tools/rebase/publish_result.py --profile subprofiles --result-dir ../result --rebase-job "$REBASE_JOB" $FLAGS
+
+      # Only when a step above failed or ran out of its time. The publishing step leaves a mark when
+      # it finishes (it also fails on purpose after an escalation), so this reports only what it did
+      # not get to: the issue, and the next link unless it was already started.
+      - name: Report a publishing job that did not get through
+        if: ${{ failure() && !inputs.test_issue }}
+        timeout-minutes: 5
+        env:
+          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          ISSUES_GH_TOKEN: ${{ steps.issues-token.outputs.token }}
+          REBASE_PUBLISH_STATE: ${{ runner.temp }}/publish-state
+          DRY_RUN: ${{ inputs.dry_run || inputs.smoke }}
+          NEXT_REPO: "tyne-chat/tyne-dart-sdk"
+        run: |
+          FLAGS=""
+          if [ "$DRY_RUN" = "true" ]; then
+            FLAGS="--dry-run"
+          fi
+          if [ -f tools/rebase/publish_result.py ]; then
+            python3 tools/rebase/publish_result.py --profile subprofiles --result-dir result --fallback $FLAGS
+            exit $?
+          fi
+          echo "::error::The rebase tools could not be checked out; nothing was pushed."
+          if [ -n "$NEXT_REPO" ] && [ "$DRY_RUN" != "true" ]; then
+            gh workflow run nightly-rebase.yaml --repo "$NEXT_REPO" --ref automation || true
+          fi
+          GH_TOKEN="${ISSUES_GH_TOKEN:-$GH_TOKEN}" gh issue create --repo tyne-chat/tyne \
+            --title "⚠️ Nightly Rebase Failed (${GITHUB_REPOSITORY#*/}): Human Intervention Required ($(date -u +%F))" \
+            --body "The publishing job of run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} could not check out the rebase tools, so nothing was pushed. \`gh run rerun ${GITHUB_RUN_ID} --repo ${GITHUB_REPOSITORY} --failed\` runs it again." || true
+          exit 1
