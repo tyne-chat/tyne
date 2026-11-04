@@ -22,6 +22,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | Avatars | `utils/PersonaAvatarUrls.ts`, `components/PersonaAvatar.tsx` |
 | Display tag icon | `utils/PersonaTagIconUrls.ts` |
 | Profile popout and sheet | `components/PersonaProfilePopout.tsx`, `PersonaProfileMobileSheet.tsx`, `utils/usePersonaProfile.ts` |
+| Avatar and banner menus (popout) | `utils/usePersonaImageMenus.tsx` |
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
 | Tag matching | `packages/schema/src/domains/persona/PersonaMatcher.ts` (`matchPersona`) |
 
@@ -81,6 +82,11 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   `personaAvatarUrls` or `<PersonaAvatar>`; never pass it to upstream's `<Avatar>`.
   `utils/PersonaAvatarUsage.test.ts` scans the sources and fails if a hash reaches `<Avatar>`.
   Without a hash, the account's avatar shows.
+- **Image menus:** right-clicking the avatar or banner in the persona popout opens upstream's
+  `UserImageMenuItems`, the account profile's menu, with the persona's images handed in as preview
+  overrides (`usePersonaImageMenus`). A persona without an avatar offers the account's, as the
+  popout shows it, and without a banner there is no banner menu. The mobile sheet has no menus,
+  like upstream's account sheet.
 - **The display tag icon** is also a media hash, of an image stored under the account. Turn it into
   an address only with `personaTagIconUrls(ownerUserId, icon)`, which gives nothing for any other
   value: never use the value as an image source, even when it looks like a link. A link would make
