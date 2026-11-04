@@ -264,7 +264,10 @@ design, including the mobile part still to come, is `docs/design/server-commands
 - JPEG metadata: avatars, banners, emojis and stickers have their metadata stripped by the media
   proxy without re-encoding, JPEGs included; upstream re-encoded JPEGs at quality 100. A JPEG that
   is not upright is re-encoded upright once (`fluxer_api/src/api/infrastructure/ForkImageMetadataStrip.ts`,
-  called from `AvatarService.ts` and `EntityAssetService.ts`; tyne-chat/tyne#476).
+  called from `AvatarService.ts` and `EntityAssetService.ts`; tyne-chat/tyne#476). For every
+  stripped JPEG, uploads and attachments alike, the fork also drops what upstream's strip keeps:
+  segments between progressive scans and JFIF/JFXX thumbnails
+  (`fluxer_media_proxy/src/media_process/strip/fork_jpeg_strip.rs`).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
