@@ -104,6 +104,8 @@ pub fn strip_image_metadata(
         "image/avif" | "image/heic" | "image/heif" => heif::strip_items(input)?,
         _ => reencode_tiff(input, media_limits, deadline_ms)?,
     };
+    // Fork: the JPEG metadata upstream's strip leaves in place (fork_jpeg_strip.rs).
+    let bytes = fork_jpeg_strip::finish(sniffed, bytes, input, media_limits, deadline_ms);
     Ok(StrippedImage {
         bytes,
         content_type: sniffed,
@@ -111,3 +113,7 @@ pub fn strip_image_metadata(
         height: dims.height,
     })
 }
+
+// Fork: JPEG metadata upstream's strip leaves in place: segments between progressive scans and
+// JFIF/JFXX thumbnails.
+mod fork_jpeg_strip;

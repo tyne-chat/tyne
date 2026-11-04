@@ -2,9 +2,10 @@
 
 `fluxer_media_proxy` is the Rust service (Axum, with native code on libvips and FFmpeg) that serves
 stored and signed external media under `/media/*`, transforms images, and answers the API's internal
-requests. It is upstream's. The fork adds three things: a size cap an internal caller can ask for on
+requests. It is upstream's. The fork adds four things: a size cap an internal caller can ask for on
 external fetches (persona avatar imports), a repair of MP3 uploads that Chromium cannot decode
-(tyne-chat/tyne#245), and `?original=true`, which serves a stored image itself (tyne-chat/tyne#471).
+(tyne-chat/tyne#245), `?original=true`, which serves a stored image itself (tyne-chat/tyne#471),
+and a finishing pass over upstream's JPEG strip.
 
 ## Where things are
 
@@ -14,6 +15,7 @@ external fetches (persona avatar imports), a repair of MP3 uploads that Chromium
 | Internal handlers | `src/server/routes/internal.rs`; the fork's tests of them in `fork_internal_tests.rs` |
 | Loading an input (stored object, external URL, request body) | `src/server/media_operations/input.rs` (the fork's `external_input_limit`) |
 | Stripping metadata from uploads | `src/server/media_operations/strip.rs` → `src/media_process/strip/` |
+| The fork's pass over a stripped JPEG | `src/media_process/strip/fork_jpeg_strip.rs`, one statement in `strip_image_metadata` (`strip/mod.rs`) |
 | Audio and video remux (strip), audio duration | `src/media_process/strip/av.rs` → `src/native_shim/av_strip.c` |
 | MP3 repair (fork) | `src/media_process/fork_mp3_repair.rs`; backfill tool `examples/fork_mp3_repair.rs` |
 | Native C code and what it links | `src/native_shim/`, listed in `build.rs`; FFmpeg and the libraries built from source by `tools/install-native-deps.sh` |
@@ -35,6 +37,12 @@ included since the fork's `ForkImageMetadataStrip.ts` (tyne-chat/tyne#476): upst
 them with sharp at quality 100. A JPEG keeps its image data, and only one that is not upright is
 re-encoded, upright, once. If the proxy cannot strip a JPEG, the API falls back to upstream's
 re-encode rather than store the metadata.
+
+Upstream's JPEG strip filters only the segments before the first scan and keeps JFIF and JFXX
+whole. The fork's pass (`fork_jpeg_strip.rs`) also drops APPn and COM segments between the scans of
+a progressive JPEG, keeps JFIF without its thumbnail, and drops JFXX; a JPEG with none of these
+comes back byte for byte. It never fails an upload: if it cannot read upstream's output it
+re-encodes the upload upright, and if that fails too it keeps upstream's output.
 
 ## The stored image: `?original=true`
 
