@@ -98,6 +98,8 @@ Rules with a mechanical answer; follow them every time:
   rest parameter); no comments inside upstream's expressions; add fork behaviour as a separate
   statement. To format an upstream file, run
   `pnpm exec biome check --write --linter-enabled=false <file>` and check that only fork lines moved.
+- **Lists and objects:** fork entries go first in upstream's lists, objects and argument lists,
+  not last where upstream appends; where the order shows or matters, spread in a fork list.
 - **Numbers upstream hands out:** where upstream numbers things in sequence or by position (protobuf
   fields, schema and migration versions, enum values and binary tags, bit flags, opcodes, numeric
   error codes, the column order of a table's key), the fork never takes the next free value and
