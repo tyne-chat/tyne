@@ -2,9 +2,9 @@
 
 `fluxer_media_proxy` is the Rust service (Axum, with native code on libvips and FFmpeg) that serves
 stored and signed external media under `/media/*`, transforms images, and answers the API's internal
-requests. It is upstream's. The fork adds two things: a size cap an internal caller can ask for on
-external fetches (persona avatar imports), and a repair of MP3 uploads that Chromium cannot decode
-(tyne-chat/tyne#245).
+requests. It is upstream's. The fork adds three things: a size cap an internal caller can ask for on
+external fetches (persona avatar imports), a repair of MP3 uploads that Chromium cannot decode
+(tyne-chat/tyne#245), and `?original=true`, which serves a stored image itself (tyne-chat/tyne#471).
 
 ## Where things are
 
@@ -17,6 +17,7 @@ external fetches (persona avatar imports), and a repair of MP3 uploads that Chro
 | Audio and video remux (strip), audio duration | `src/media_process/strip/av.rs` → `src/native_shim/av_strip.c` |
 | MP3 repair (fork) | `src/media_process/fork_mp3_repair.rs`; backfill tool `examples/fork_mp3_repair.rs` |
 | Native C code and what it links | `src/native_shim/`, listed in `build.rs`; FFmpeg and the libraries built from source by `tools/install-native-deps.sh` |
+| `?original=true` on avatars, banners and other image assets (fork) | `src/server/stored/fork_original_asset.rs`, one call in `serve_asset_image` (`src/server/stored/mod.rs`) |
 | The API's side | `fluxer_api/src/api/infrastructure/MediaService.ts` (`stripObjectMetadata`), `fluxer_api/src/api/channel/services/message/AttachmentProcessingService.ts` |
 
 ## Uploads go through `/_strip`
@@ -28,6 +29,22 @@ Audio and video are remuxed by
 FFmpeg (`av_strip.c`): packets are copied, never re-encoded, into the muxer that `av_container`
 picks from the content type. For MP3 that muxer drops every tag, writes a small ID3v2 tag and an
 Info frame, and copies the frames byte for byte.
+
+## The stored image: `?original=true`
+
+The apps show avatars and banners as small WebP copies. With `original=true`, an image asset's URL
+returns the stored image instead: the upload when the app's crop step kept it, otherwise the crop.
+The URL's extension and `size` are ignored.
+
+- PNG, APNG, JPEG, GIF, WebP and AVIF are sent byte for byte, with the sniffed content type and a
+  filename with the real extension (stored objects have no extension and no content type). Upstream
+  already sends the stored bytes for a request in the stored format at its size or larger, so this
+  exposes nothing new.
+- SVG is never sent as it is from the media origin, since it can carry scripts. HEIC, HEIF and
+  JPEG XL would not display. All of them become a lossless PNG. A raster image keeps its own size.
+  An SVG is drawn at its declared size, shrunk to at most 1024×1024 for avatars or 2048×1152 for
+  banners (the transform never enlarges).
+- The app's side: `fluxer_app/src/features/user/utils/ForkOriginalImageUrl.ts`.
 
 ## The MP3 repair
 
