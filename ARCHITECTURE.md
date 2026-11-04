@@ -259,7 +259,8 @@ design, including the mobile part still to come, is `docs/design/server-commands
   image itself rather than a resized copy (`fluxer_media_proxy/src/server/stored/fork_original_asset.rs`,
   called from `serve_asset_image`). The avatar and banner menus' "Copy URL" and "Open in browser"
   use it (`fluxer_app/src/features/user/utils/ForkOriginalImageUrl.ts`, called from upstream's
-  `UserImageMenuItems.tsx`; tyne-chat/tyne#471).
+  `UserImageMenuItems.tsx`), and persona profiles have the same menus
+  (`features/persona/utils/usePersonaImageMenus.tsx`; tyne-chat/tyne#471, #473).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
