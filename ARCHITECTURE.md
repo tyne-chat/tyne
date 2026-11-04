@@ -255,6 +255,11 @@ design, including the mobile part still to come, is `docs/design/server-commands
   frame; FFmpeg decodes the result unchanged (`fluxer_media_proxy/src/media_process/fork_mp3_repair.rs`,
   called from `server/media_operations/strip.rs`; `examples/fork_mp3_repair.rs` repairs stored
   files; `fluxer_media_proxy/AGENTS.md`; tyne-chat/tyne#245).
+- Stored images: `?original=true` on an image asset makes the media proxy answer with the stored
+  image itself rather than a resized copy (`fluxer_media_proxy/src/server/stored/fork_original_asset.rs`,
+  called from `serve_asset_image`). The avatar and banner menus' "Copy URL" and "Open in browser"
+  use it (`fluxer_app/src/features/user/utils/ForkOriginalImageUrl.ts`, called from upstream's
+  `UserImageMenuItems.tsx`; tyne-chat/tyne#471).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
