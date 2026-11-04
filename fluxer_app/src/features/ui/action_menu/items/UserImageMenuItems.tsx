@@ -9,6 +9,10 @@ import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 
+// Fork imports.
+
+import {toOriginalImageUrl} from '@app/features/user/utils/ForkOriginalImageUrl';
+
 const COPY_AVATAR_URL_DESCRIPTOR = msg({
 	message: 'Copy avatar URL',
 	comment: 'Action that copies the selected user avatar URL.',
@@ -70,8 +74,8 @@ export const UserImageMenuItems: React.FC<UserImageMenuItemsProps> = observer(
 	({user, profile, profileContext, previewOverrides, onClose, variant = 'all'}) => {
 		const {i18n} = useLingui();
 		const menuUrlOptions = {user, profile, profileContext, previewOverrides};
-		const avatarUrl = getUserMenuAvatarUrl(menuUrlOptions);
-		const bannerUrl = getUserMenuBannerUrl(menuUrlOptions);
+		const avatarUrl = toOriginalImageUrl(getUserMenuAvatarUrl(menuUrlOptions));
+		const bannerUrl = toOriginalImageUrl(getUserMenuBannerUrl(menuUrlOptions));
 		const showAvatar = variant !== 'banner';
 		const showBanner = variant !== 'avatar';
 		return (
