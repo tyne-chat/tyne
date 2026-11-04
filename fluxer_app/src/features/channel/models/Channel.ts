@@ -49,6 +49,7 @@ interface ChannelRecordOptions {
 }
 
 export interface ThreadChannelFields {
+	readonly owner_persona_id?: string | null;
 	readonly flags?: number;
 	readonly thread_metadata?: ThreadMetadataResponse;
 	readonly applied_tags?: ReadonlyArray<string>;
@@ -62,7 +63,6 @@ export interface ThreadChannelFields {
 	readonly default_sort_order?: number | null;
 	readonly default_forum_layout?: number;
 	readonly default_tag_setting?: 'match_some' | 'match_all';
-	readonly owner_persona_id?: string | null;
 }
 
 export interface ChannelWire extends WireChannel, ThreadChannelFields {
@@ -71,6 +71,7 @@ export interface ChannelWire extends WireChannel, ThreadChannelFields {
 }
 
 const THREAD_FIELD_KEYS: ReadonlyArray<keyof ThreadChannelFields> = [
+	'owner_persona_id',
 	'flags',
 	'thread_metadata',
 	'applied_tags',
@@ -84,7 +85,6 @@ const THREAD_FIELD_KEYS: ReadonlyArray<keyof ThreadChannelFields> = [
 	'default_sort_order',
 	'default_forum_layout',
 	'default_tag_setting',
-	'owner_persona_id',
 ];
 
 function pickThreadFields(source: ThreadChannelFields, base?: ThreadChannelFields | null): ThreadChannelFields | null {
