@@ -331,6 +331,7 @@ class RequestServices implements RequestScopedServices {
 
 	private get guildStack(): GuildStackServices {
 		this.cachedGuildStack ??= createGuildStackServices({
+			personaRepository: getPersonaRepository(),
 			apiContext: this.context,
 			channelRepository: this.channelRepository,
 			userRepository: getUserRepository(),
@@ -353,7 +354,6 @@ class RequestServices implements RequestScopedServices {
 			voiceRoomStore: this.voiceRooms,
 			liveKitService: this.liveKit,
 			voiceAvailabilityService: getVoiceAvailabilityService(),
-			personaRepository: getPersonaRepository(),
 		});
 		return this.cachedGuildStack;
 	}

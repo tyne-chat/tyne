@@ -31,6 +31,7 @@ import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 
 interface GuildStackServiceFactoryDependencies {
+	personaRepository?: IPersonaRepository;
 	apiContext: ApiContext;
 	channelRepository: ChannelRepository;
 	userRepository: UserRepository;
@@ -53,7 +54,6 @@ interface GuildStackServiceFactoryDependencies {
 	voiceRoomStore: IVoiceRoomStore;
 	liveKitService: ILiveKitService;
 	voiceAvailabilityService: VoiceAvailabilityService | null;
-	personaRepository?: IPersonaRepository;
 }
 
 export interface GuildStackServices {
