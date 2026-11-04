@@ -9,11 +9,11 @@
 	"type": "module",
 	"main": "dist/main/index.js",
 	"scripts": {
+		"test": "pnpm set-channel && node --test 'src/**/*.test.mjs'",
 		"build": "node scripts/build.mjs",
 		"generate:windows-badges": "electron scripts/generate-windows-badges.mjs",
 		"set-channel": "../tools/ci/run.sh build-desktop --step set_build_channel",
-		"typecheck": "pnpm set-channel && tsc --noEmit",
-		"test": "pnpm set-channel && node --test 'src/**/*.test.mjs'"
+		"typecheck": "pnpm set-channel && tsc --noEmit"
 	},
 	"dependencies": {
 		"@fluxer/constants": "workspace:*",
