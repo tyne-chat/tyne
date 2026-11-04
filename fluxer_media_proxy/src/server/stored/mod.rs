@@ -106,6 +106,20 @@ pub(in crate::server) async fn serve_asset_image(
             .unwrap_or(asset.original_ext)
     };
     let serve_content_type = original_image_content_type(&object.content_type, Some(source_format));
+    // Fork: `?original=true` answers with the stored image itself (tyne-chat/tyne#471).
+    if fork_original_asset::requested(params) {
+        return fork_original_asset::serve(fork_original_asset::OriginalAssetRequest {
+            app,
+            method,
+            asset: &asset,
+            object,
+            content_identity: &content_identity,
+            sniffed,
+            range_header,
+            requested_download,
+        })
+        .await;
+    }
     let out_ext =
         effective_animated_image_output_format(Some(source_format), selected.format, animated);
     let quality = requested_quality
@@ -444,3 +458,7 @@ pub(in crate::server) async fn serve_stored_with_override(
         disposition: None,
     })
 }
+
+// Fork: `?original=true`, the stored image itself for the apps' "Open in browser" and "Copy URL"
+// (tyne-chat/tyne#471).
+mod fork_original_asset;
