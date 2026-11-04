@@ -371,6 +371,9 @@ function readRegistration(value: unknown): InstanceRegistration {
 function readCommunity(value: unknown): InstanceCommunity {
 	const source = readRecord(value, 'community');
 	const community: InstanceCommunity = {
+		...(Object.hasOwn(source, 'server_list_buttons')
+			? {server_list_buttons: readServerListButtons(source.server_list_buttons)}
+			: {}),
 		...(Object.hasOwn(source, 'signal_bar_guild_id')
 			? {
 					signal_bar_guild_id: readNullableNonEmptyString(
@@ -390,9 +393,6 @@ function readCommunity(value: unknown): InstanceCommunity {
 		guild_create_access: readOptionalBoolean(source, 'guild_create_access', 'community.guild_create_access') ?? true,
 		personal_notes_enabled:
 			readOptionalBoolean(source, 'personal_notes_enabled', 'community.personal_notes_enabled') ?? true,
-		...(Object.hasOwn(source, 'server_list_buttons')
-			? {server_list_buttons: readServerListButtons(source.server_list_buttons)}
-			: {}),
 	};
 	const friendsDisabled = readOptionalBoolean(source, 'friends_disabled', 'community.friends_disabled');
 	if (friendsDisabled !== undefined) {
@@ -506,6 +506,9 @@ function readAppPublic(value: unknown): InstanceAppPublic {
 	const accountIdentityLockReason = readOptionalLockReason(setup);
 	return {
 		branding: {
+			desktop_app_prompt_enabled:
+				readOptionalBoolean(branding, 'desktop_app_prompt_enabled', 'appPublic.branding.desktop_app_prompt_enabled') ??
+				true,
 			product_name: readNonEmptyString(branding, 'product_name', 'appPublic.branding.product_name'),
 			icon_url: readNullableAbsoluteHttpUrl(branding, 'icon_url', 'appPublic.branding.icon_url'),
 			symbol_url: readNullableAbsoluteHttpUrl(branding, 'symbol_url', 'appPublic.branding.symbol_url'),
@@ -532,9 +535,6 @@ function readAppPublic(value: unknown): InstanceAppPublic {
 			trusted_domains: Object.hasOwn(branding, 'trusted_domains')
 				? readStringArray(branding.trusted_domains, 'appPublic.branding.trusted_domains')
 				: [],
-			desktop_app_prompt_enabled:
-				readOptionalBoolean(branding, 'desktop_app_prompt_enabled', 'appPublic.branding.desktop_app_prompt_enabled') ??
-				true,
 		},
 		setup: {
 			configured: readBoolean(setup, 'configured', 'appPublic.setup.configured'),

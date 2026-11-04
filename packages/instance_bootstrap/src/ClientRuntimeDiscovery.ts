@@ -154,6 +154,7 @@ function projectAppPublic(appPublic: InstanceDiscoveryDocument['appPublic']): In
 	const value = requireValue(appPublic, 'app_public');
 	return {
 		branding: {
+			desktop_app_prompt_enabled: value.branding.desktop_app_prompt_enabled ?? true,
 			product_name: requireDefined(value.branding.product_name, 'app_public.branding.product_name'),
 			icon_url: requireDefined(value.branding.icon_url, 'app_public.branding.icon_url'),
 			symbol_url: requireDefined(value.branding.symbol_url, 'app_public.branding.symbol_url'),
@@ -171,7 +172,6 @@ function projectAppPublic(appPublic: InstanceDiscoveryDocument['appPublic']): In
 			custom_css: value.branding.custom_css ?? null,
 			upload_limit_message: value.branding.upload_limit_message ?? null,
 			trusted_domains: value.branding.trusted_domains ?? [],
-			desktop_app_prompt_enabled: value.branding.desktop_app_prompt_enabled ?? true,
 		},
 		setup: {
 			...value.setup,
