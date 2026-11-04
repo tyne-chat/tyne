@@ -755,6 +755,7 @@ class RuntimeConfig {
 				admin_registration_urls_enabled: config.registration.admin_registration_urls_enabled,
 			},
 			community: {
+				signal_bar_guild_id: config.policy.signal_bar_guild_id,
 				single_community: config.policy.single_community_enabled,
 				single_community_guild_id: config.policy.single_community_enabled
 					? config.policy.single_community_guild_id
@@ -764,7 +765,6 @@ class RuntimeConfig {
 				personal_notes_enabled: config.policy.personal_notes_enabled,
 				guild_create_access: config.policy.guild_create_access,
 				server_list_buttons: config.policy.server_list_buttons,
-				signal_bar_guild_id: config.policy.signal_bar_guild_id,
 			},
 			services: {
 				gif_enabled: config.policy.services_resolved.gif_enabled,

@@ -3085,6 +3085,7 @@ export class InstanceConfigRepository {
 	async getInstanceCommunityPublicConfig(): Promise<InstanceCommunity> {
 		const policy = await this.getInstancePolicyConfig();
 		return {
+			signal_bar_guild_id: policy.signal_bar_guild_id,
 			single_community: policy.single_community_enabled,
 			single_community_guild_id: policy.single_community_enabled ? policy.single_community_guild_id : null,
 			direct_messages_disabled: policy.direct_messages_disabled,
@@ -3092,7 +3093,6 @@ export class InstanceConfigRepository {
 			personal_notes_enabled: policy.personal_notes_enabled,
 			guild_create_access: policy.guild_create_access,
 			server_list_buttons: policy.server_list_buttons,
-			signal_bar_guild_id: policy.signal_bar_guild_id,
 		};
 	}
 

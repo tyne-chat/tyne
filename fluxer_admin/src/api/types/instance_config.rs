@@ -1027,6 +1027,8 @@ pub struct InstanceConfigUpdateRequest {
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct InstancePolicyUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub signal_bar_guild_id: Option<Option<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub single_community_enabled: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub single_community_name: Option<String>,
@@ -1050,8 +1052,6 @@ pub struct InstancePolicyUpdateRequest {
     pub services: Option<InstanceServicesUpdateRequest>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub server_list_buttons: Option<ServerListButtonsUpdateRequest>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub signal_bar_guild_id: Option<Option<String>>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

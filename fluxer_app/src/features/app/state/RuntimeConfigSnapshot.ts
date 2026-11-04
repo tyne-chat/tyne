@@ -371,6 +371,15 @@ function readRegistration(value: unknown): InstanceRegistration {
 function readCommunity(value: unknown): InstanceCommunity {
 	const source = readRecord(value, 'community');
 	const community: InstanceCommunity = {
+		...(Object.hasOwn(source, 'signal_bar_guild_id')
+			? {
+					signal_bar_guild_id: readNullableNonEmptyString(
+						source,
+						'signal_bar_guild_id',
+						'community.signal_bar_guild_id',
+					),
+				}
+			: {}),
 		single_community: readBoolean(source, 'single_community', 'community.single_community'),
 		single_community_guild_id: readNullableNonEmptyString(
 			source,
@@ -381,15 +390,6 @@ function readCommunity(value: unknown): InstanceCommunity {
 		guild_create_access: readOptionalBoolean(source, 'guild_create_access', 'community.guild_create_access') ?? true,
 		personal_notes_enabled:
 			readOptionalBoolean(source, 'personal_notes_enabled', 'community.personal_notes_enabled') ?? true,
-		...(Object.hasOwn(source, 'signal_bar_guild_id')
-			? {
-					signal_bar_guild_id: readNullableNonEmptyString(
-						source,
-						'signal_bar_guild_id',
-						'community.signal_bar_guild_id',
-					),
-				}
-			: {}),
 		...(Object.hasOwn(source, 'server_list_buttons')
 			? {server_list_buttons: readServerListButtons(source.server_list_buttons)}
 			: {}),
