@@ -23,6 +23,9 @@ const configuredMaxWorkers = parseParallelInteger(process.env.API_TEST_MAX_WORKE
 const configuredMaxConcurrency = parseParallelInteger(process.env.API_TEST_MAX_CONCURRENCY, configuredMaxWorkers);
 
 const MODULE_REGISTRY_TEST_FILES = [
+	// Fork: its vi.mock of the Logger misses a service another file in the same worker already
+	// loaded, which fails three of its tests in some file orders (tyne-chat/tyne#485).
+	'src/api/operator_pass/OperatorPassFulfilmentService.test.ts',
 	'src/api/voice/tests/VoiceAvailabilityService.test.ts',
 	'src/api/billing_documents/BillingDocuments.test.ts',
 	'src/api/database/CassandraDriverPath.test.ts',
