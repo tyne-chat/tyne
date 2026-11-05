@@ -110,3 +110,16 @@
 	line-height: 1rem;
 	color: var(--text-primary-muted);
 }
+
+/* Fork: each section is a size container, so its emoji rows choose between the table and the compact
+   rows by the room they have, not by the window's width (EmojiListItem.module.css, tyne-chat/tyne#522). */
+.emojiSection {
+	container-type: inline-size;
+}
+
+/* Fork: compact emoji rows (EmojiListItem.module.css) sit closer together (tyne-chat/tyne#522). */
+@container not (min-width: 32rem) {
+	.emojiItemsList {
+		gap: 0.375rem;
+	}
+}
