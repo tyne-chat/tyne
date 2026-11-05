@@ -66,7 +66,9 @@ test.describe('Rich Composer Timestamp Pills & Formatting', () => {
 		await composer.click();
 		await page.keyboard.type(content);
 		await page.keyboard.press('Enter');
-		await expect(page.getByText(content)).toBeVisible({timeout: 15_000});
+		// The up arrow edits only a message the server has accepted (getLastEditableMessage skips one
+		// still sending, which already shows its text), so wait for that (tyne-chat/tyne#496).
+		await expect(page.locator('[class*="messageSent"]', {hasText: content})).toBeVisible({timeout: 15_000});
 
 		await composer.click();
 		await page.keyboard.press('ArrowUp');
