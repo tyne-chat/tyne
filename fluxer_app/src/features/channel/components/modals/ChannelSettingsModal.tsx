@@ -29,6 +29,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {SettingsNarrowStartOnList} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+
 export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = observer(({channelId, initialMobileTab}) => {
 	const {i18n} = useLingui();
 	const channel = Channels.getChannel(channelId);
@@ -105,6 +109,7 @@ export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = observe
 				data-flx="channel.channel-settings-modal.modal-screen-reader-label"
 			/>
 			<SettingsModalContainer fullscreen={true} data-flx="channel.channel-settings-modal.settings-modal-container">
+				<SettingsNarrowStartOnList data-flx="channel.channel-settings-modal.settings-narrow-start-on-list" />
 				{isMobile ? (
 					<MobileChannelSettingsView
 						channel={channel}

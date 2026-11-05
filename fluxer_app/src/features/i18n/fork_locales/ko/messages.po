@@ -88,6 +88,10 @@ msgstr "아바타 이미지를 다운로드하지 못했어요: {error}. 페르�
 msgid "Back to commands"
 msgstr "명령 목록으로 돌아가기"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "{section}(으)로 돌아가기"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "배너 이미지를 다운로드하지 못했어요: {error}. 페르소나를 배너 없이 가져왔어요."
