@@ -17,6 +17,13 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useRef} from 'react';
 
+// Fork imports.
+
+import {
+	SettingsNarrowNavButton,
+	SettingsNarrowTitle,
+} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+
 interface SettingsModalHeaderProps {
 	title: React.ReactNode;
 	pageLinkHref?: string | null;
@@ -82,9 +89,14 @@ export const SettingsModalHeader: React.FC<SettingsModalHeaderProps> = observer(
 							className={styles.titleContent}
 							data-flx="app.settings-modal-header.title-content"
 						>
+							<SettingsNarrowNavButton
+								onClose={onClose}
+								title={title}
+								data-flx="app.settings-modal-header.settings-narrow-nav-button"
+							/>
 							<div className={styles.titleWrapper} data-flx="app.settings-modal-header.title-wrapper">
 								<h1 className={styles.title} data-flx="app.settings-modal-header.title">
-									{title}
+									<SettingsNarrowTitle title={title} data-flx="app.settings-modal-header.settings-narrow-title" />
 								</h1>
 								{pageLinkHref ? (
 									<SettingsHeadingLinkButton
