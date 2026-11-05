@@ -107,6 +107,10 @@ msgstr "Valitse PluralKit-vienti (.json) tai {productName}-vienti (.zip), tai ve
 msgid "Clear the message box to use /{name}"
 msgstr "Tyhjennä viestikenttä käyttääksesi komentoa /{name}"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Sulje haku"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Komento"
