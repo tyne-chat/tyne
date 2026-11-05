@@ -86,6 +86,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {forwardRef, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {HeaderOverflow} from '@app/features/channel/components/channel_header/HeaderOverflow';
+
 const CONNECTING_DESCRIPTOR = msg({
 	message: 'Connecting...',
 	comment: 'Overlay status in the voice call view while joining. Trailing ellipsis indicates in-progress.',
@@ -606,6 +610,10 @@ const VoiceCallViewInner = observer(
 									data-flx="voice.voice-call-view.voice-call-view-inner.inbox-button"
 								/>
 							)}
+							<HeaderOverflow
+								buttonClassName={styles.voiceHeaderIconButton}
+								data-flx="voice.voice-call-view.voice-call-view-inner.header-overflow"
+							/>
 						</div>
 					</NativeDragRegion>
 					<div className={mainContentClassName} data-flx="voice.voice-call-view.voice-call-view-inner.div--5">
