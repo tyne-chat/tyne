@@ -5,14 +5,16 @@
 	flex-direction: column;
 	max-height: 90vh;
 	width: 100%;
+	/* The layout follows the dialog's width, not the window's: the dialog can be narrower than the
+	   window, and desktop app zoom changes rem but not the window's px (tyne-chat/tyne#232). */
+	container: persona-edit-modal / inline-size;
 }
 
 .header {
 	display: flex;
 	align-items: center;
-	height: 3.5rem;
 	min-height: 3.5rem;
-	padding: 0 1.25rem;
+	padding: 0.5rem 1.25rem;
 	border-bottom: 1px solid var(--border-color);
 	border-top-left-radius: inherit;
 	border-top-right-radius: inherit;
@@ -34,9 +36,11 @@
 
 .bannerContent {
 	display: flex;
+	flex-wrap: wrap;
 	width: 100%;
 	align-items: center;
 	justify-content: space-between;
+	gap: 0.5rem;
 }
 
 .bannerTextContainer {
@@ -60,6 +64,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
+	margin-inline-start: auto;
 }
 
 .titleContent {
@@ -113,6 +118,18 @@
 
 .contentContainer {
 	padding: 1.5rem;
+	container: persona-edit-content / inline-size;
+}
+
+/* Narrow enough that the 1.5rem margins would leave the preview card no room. */
+@container persona-edit-modal (max-width: 25rem) {
+	.header {
+		padding-inline: 0.75rem;
+	}
+
+	.contentContainer {
+		padding: 1rem 0.5rem;
+	}
 }
 
 .layout {
@@ -121,7 +138,8 @@
 	gap: 1.5rem;
 }
 
-@media (min-width: 900px) {
+/* Side by side once the form keeps about 25rem next to the preview card, as at the dialog's full width. */
+@container persona-edit-content (min-width: 46rem) {
 	.layout {
 		flex-direction: row;
 		gap: clamp(2rem, 3vw, 3.5rem);
@@ -144,6 +162,8 @@
 
 .tagsHeader {
 	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 0.5rem;
@@ -178,6 +198,7 @@
 
 .tagInput {
 	flex: 1;
+	min-width: 0;
 	background-color: var(--bg-tertiary);
 	border: 1px solid var(--border-color);
 	border-radius: 4px;
@@ -203,13 +224,14 @@
 	display: flex;
 	flex: 1;
 	justify-content: center;
-	position: sticky;
-	top: 0;
 }
 
-@media (min-width: 900px) {
+/* Stacked under the form, the preview scrolls with it; beside the form it stays in view. */
+@container persona-edit-content (min-width: 46rem) {
 	.previewColumn {
 		justify-content: flex-end;
+		position: sticky;
+		top: 0;
 	}
 }
 
@@ -226,6 +248,17 @@
 	padding-top: 1rem;
 	border-top: 1px solid var(--border-color);
 	margin-top: 8px;
+}
+
+/* Stacked, the preview follows the fields it shows, and deleting the persona comes last. */
+@container persona-edit-content not (min-width: 46rem) {
+	.formColumn {
+		display: contents;
+	}
+
+	.detailBottomActions {
+		order: 1;
+	}
 }
 
 .modeHelperText {
