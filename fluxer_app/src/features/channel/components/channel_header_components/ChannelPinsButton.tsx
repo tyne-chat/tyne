@@ -61,6 +61,7 @@ export const ChannelPinsButton = observer(({channel}: ChannelPinsButtonProps) =>
 					data-flx="channel.channel-header-components.channel-pins-button.icon-button-wrapper"
 				>
 					<ChannelHeaderIcon
+						data-header-label={i18n._(PINNED_MESSAGES_DESCRIPTOR)}
 						icon={PushPinIcon}
 						label={pinsLabel}
 						isSelected={isBottomSheetOpen}
@@ -101,6 +102,7 @@ export const ChannelPinsButton = observer(({channel}: ChannelPinsButtonProps) =>
 				subscribeFilter={isOwnPinsOpen}
 			>
 				<ChannelHeaderIcon
+					data-header-label={i18n._(PINNED_MESSAGES_DESCRIPTOR)}
 					icon={PushPinIcon}
 					label={pinsLabel}
 					isSelected={isOpen}

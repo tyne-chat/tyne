@@ -1,0 +1,54 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* Fork: the magnifier that stands for a collapsed search box, and the icons in the "More options"
+   menu (tyne-chat/tyne#233). The header's own rules for both are in the fork block at the end of
+   ChannelHeader.module.css. */
+
+.magnifier {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.menuIcon {
+	display: flex;
+	width: 1.125rem;
+	height: 1.125rem;
+}
+
+.menuIcon > svg {
+	width: 100%;
+	height: 100%;
+}
+
+/* A folded button's mark in the menu (tyne-chat/tyne#704): its red count, or its dot. */
+.menuMark {
+	display: inline-flex;
+	margin-inline-start: 0.5rem;
+	vertical-align: middle;
+}
+
+.menuDot {
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	margin-inline-start: 0.5rem;
+	border-radius: var(--radius-full);
+	background-color: var(--text-primary);
+	vertical-align: middle;
+}
+
+/* What a folded button's mark says, for screen readers: the menu item's dot alone says nothing. */
+.srOnly {
+	position: absolute;
+	width: 0.0625rem;
+	height: 0.0625rem;
+	padding: 0;
+	margin: -0.0625rem;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
