@@ -47,9 +47,9 @@ on:
     branches:
       - "desktop-test/**"
 
-# Read-only by default. Only the publish job can write, and it runs nothing but gh and GitHub's own
-# actions. Every action is pinned to a commit, with its version in a comment; move a pin by looking
-# up the new version's commit.
+# Read-only by default. Only the publish and retire-feeds jobs can write, and they run nothing but
+# gh and GitHub's own actions. Every action is pinned to a commit, with its version in a comment;
+# move a pin by looking up the new version's commit.
 permissions:
   contents: read
 
@@ -614,15 +614,77 @@ jobs:
           --latest
           release_assets/*
 
+  # Velopack's GitHub source reads the ten newest releases and downloads the update feed of every
+  # one that has it, one after another: 21 connections per check once ten desktop releases carry a
+  # feed, which overran the app's check deadline while GitHub was slow (tyne-chat/tyne#508, #511).
+  # Windows packages are built without deltas, so only the newest feed is ever needed. The older
+  # feeds are renamed rather than deleted: the files stay attached, and a rename is undone by
+  # naming the file back. Its own job, after the release exists (so installed apps always see a
+  # feed), that can be rerun alone if GitHub fails it.
+  retire-feeds:
+    name: Retire older releases' update feeds
+    if: ${{ !cancelled() && needs.publish.result == 'success' }}
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Rename the feeds of older releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # "<tag> <asset id>" for every desktop release that still has a feed.
+          feeds() {
+            # $tag is jq's variable, not the shell's.
+            # shellcheck disable=SC2016
+            gh api --paginate "repos/$GH_REPO/releases?per_page=100" \
+              --jq '.[] | select(.tag_name | startswith("desktop-v")) | .tag_name as $tag
+                | .assets[] | select(.name == "releases.win.json") | "\($tag) \(.id)"'
+          }
+          has_feed() { awk -v tag="desktop-v$VERSION" '$1 == tag { found = 1 } END { exit !found }' <<< "$1"; }
+          older() { [ "$1" != "$VERSION" ] && [ "$(printf '%s\n%s\n' "$1" "$VERSION" | sort -V | head -1)" = "$1" ]; }
+          # Never leave installed apps without a feed: rename nothing until this release's is listed.
+          for attempt in $(seq 1 12); do
+            list="$(feeds)"
+            has_feed "$list" && break
+            if [ "$attempt" = 12 ]; then
+              echo "::error::desktop-v$VERSION has no releases.win.json, so nothing was renamed."
+              exit 1
+            fi
+            sleep 10
+          done
+          while read -r tag id; do
+            [ -n "$tag" ] || continue
+            if older "${tag#desktop-v}"; then
+              gh api -X PATCH "repos/$GH_REPO/releases/assets/$id" -f name=releases.win.json.old --silent < /dev/null
+              echo "Renamed the feed of $tag (asset $id) to releases.win.json.old."
+            elif [ "$tag" != "desktop-v$VERSION" ]; then
+              echo "Left the feed of $tag, which is newer than $VERSION."
+            fi
+          done <<< "$list"
+          left="$(feeds)"
+          printf 'Releases with a feed now:\n%s\n' "$left"
+          while read -r tag id; do
+            if [ -n "$tag" ] && older "${tag#desktop-v}"; then
+              echo "::error::The feed of $tag was not renamed."
+              exit 1
+            fi
+          done <<< "$left"
+
   # The updater library decides for itself how to read the update source, so ask it. This fails
   # the run when an installed app could not find the release that was just published. It installs
-  # that library from npm, so it runs apart from the publish job and its token.
+  # that library from npm, so it runs apart from the publish job and its token. It runs after the
+  # older feeds are retired, so it checks what installed apps will find from now on.
   verify:
     name: Check that installed apps see the release
     # Without a condition a job runs only if every job before it succeeded, and with
-    # macos_signing=ad-hoc the macOS signing is skipped; so this asks only for the publish job.
+    # macos_signing=ad-hoc the macOS signing is skipped; so this asks only for the publish job
+    # (and still checks when retiring the older feeds failed).
     if: ${{ !cancelled() && needs.publish.result == 'success' }}
-    needs: publish
+    needs: [publish, retire-feeds]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
