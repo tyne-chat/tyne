@@ -46,6 +46,7 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 
 import {withoutPersonaOptions} from '@app/features/channel/components/message_search_bar/PersonaSearchSuggestions';
 import {PersonasSection} from '@app/features/channel/components/message_search_bar/PersonasSection';
+import {shift} from '@floating-ui/react';
 
 export type {SearchBarProps} from '@app/features/channel/components/message_search_bar/MessageSearchBarTypes';
 
@@ -221,13 +222,17 @@ export const MessageSearchBar = observer(
 			onCloseResults,
 		});
 		const portalHost = usePortalHost();
+		// Fork: the dropdown stays inside the window. `flip` flips only above and below the box, since
+		// its sideways flip swapped which edge it stuck out of, and `shift` moves it in from either
+		// edge; `size` still narrows it to the window (tyne-chat/tyne#232).
 		const {refs, floatingStyles, isPositioned} = useFloating({
 			placement: 'bottom-start',
 			open: isFocused && autocompleteType !== null,
 			whileElementsMounted: autoUpdate,
 			middleware: [
 				offset(8),
-				flip({padding: 16}),
+				flip({padding: 16, crossAxis: false}),
+				shift({padding: 16}),
 				size({
 					apply({rects, elements}) {
 						const minWidth = 380;
