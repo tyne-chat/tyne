@@ -81,7 +81,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.375rem;
-	margin-right: var(--spacing-2);
+	margin-inline-end: var(--spacing-2);
 	flex-shrink: 0;
 }
 
