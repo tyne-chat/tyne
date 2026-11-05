@@ -43,6 +43,13 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {
+	useSettingsNarrow,
+	useSettingsNarrowSubLevel,
+} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+
 const RoleDeleteFailedModal_FAILED_TO_DELETE_ROLE_DESCRIPTOR = msg({
 	message: "Couldn't delete role",
 	comment: 'Error modal title shown when role deletion fails.',
@@ -110,7 +117,10 @@ const GuildRolesTab: React.FC<{guildId: string}> = observer(({guildId}) => {
 	const {i18n} = useLingui();
 	const guild = Guilds.getGuild(guildId);
 	const currentUser = Users.currentUser;
-	const isMobile = MobileLayout.enabled;
+	// Fork: a narrow settings dialog uses the phone layout's role list and editor, one level each
+	// (tyne-chat/tyne#232).
+	const forkNarrowSettings = useSettingsNarrow();
+	const isMobile = MobileLayout.enabled || forkNarrowSettings;
 	const overrideOwnerId = useMemo(() => `guild-roles-${guildId}`, [guildId]);
 	const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 	const [mobileShowEditor, setMobileShowEditor] = useState(false);
@@ -733,6 +743,26 @@ const GuildRolesTab: React.FC<{guildId: string}> = observer(({guildId}) => {
 		}
 		previousRoleIdsRef.current = currentIds;
 	}, [roles, isMobile, handleMobileRoleSelect]);
+	// Fork: in a narrow settings dialog the editor is the level below Roles, named in the header.
+	useSettingsNarrowSubLevel(
+		forkNarrowSettings && mobileShowEditor && selectedRole
+			? {title: selectedRoleWithUpdates?.name ?? selectedRole.name, back: handleMobileBack}
+			: null,
+	);
+	// Fork: in the drill-down, a deleted role's editor goes back to the role list instead of opening
+	// the next role. Deleting asks first and then waits for the server, so this waits for the role to
+	// go from the list; cancelling leaves it there.
+	const forkDeletingRoleIdRef = useRef<string | null>(null);
+	const forkDeleteRole = useCallback(() => {
+		forkDeletingRoleIdRef.current = selectedRole?.id ?? null;
+		handleDeleteRole();
+	}, [selectedRole, handleDeleteRole]);
+	useEffect(() => {
+		const deletingId = forkDeletingRoleIdRef.current;
+		if (deletingId == null || roles.some((role: GuildRole) => role.id === deletingId)) return;
+		forkDeletingRoleIdRef.current = null;
+		if (isMobile) handleMobileBack();
+	}, [roles, isMobile, handleMobileBack]);
 	if (!guild || !currentUser) return null;
 	if (isMobile && !mobileShowEditor) {
 		return (
@@ -759,7 +789,7 @@ const GuildRolesTab: React.FC<{guildId: string}> = observer(({guildId}) => {
 			permissionSearchQuery={permissionSearchQuery}
 			filteredPermissionSpecs={filteredPermissionSpecs}
 			onMobileBack={handleMobileBack}
-			onDeleteRole={handleDeleteRole}
+			onDeleteRole={forkDeleteRole}
 			onRoleUpdate={handleRoleUpdate}
 			onClearPermissions={handleClearPermissions}
 			onPermissionToggle={handlePermissionToggle}
