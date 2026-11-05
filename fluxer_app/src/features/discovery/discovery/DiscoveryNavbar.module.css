@@ -173,3 +173,22 @@
 		width: 100%;
 	}
 }
+
+/* Fork: in a narrow window the search box narrows by the bar's own width (tyne-chat/tyne#506), as
+   upstream's 640 px rule above does by the window's. A container query in rem also follows the
+   desktop app's zoom, which @media rules in px ignore. */
+.navbar {
+	container-type: inline-size;
+}
+
+@container (max-width: 48rem) {
+	.searchForm {
+		width: 10rem;
+	}
+}
+
+@container (max-width: 32rem) {
+	.searchForm {
+		width: 7rem;
+	}
+}
