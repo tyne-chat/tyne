@@ -17,7 +17,14 @@ import {Spinner} from '@app/features/ui/components/Spinner';
 import {useLingui} from '@lingui/react/macro';
 import type React from 'react';
 
+// Fork imports.
+
+import {SearchResultsCloseButton} from '@app/features/channel/components/channel_search_results/SearchResultsCloseButton';
+import type {Channel} from '@app/features/channel/models/Channel';
+
 interface SearchResultsHeaderProps {
+	// Fork: the search the close button closes (tyne-chat/tyne#518).
+	channel: Channel;
 	machineState: SearchMachineState;
 	scopeOptions: Array<{value: MessageSearchScope; label: string}>;
 	activeScope: MessageSearchScope | null;
@@ -28,6 +35,7 @@ interface SearchResultsHeaderProps {
 }
 
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
+	channel,
 	machineState,
 	scopeOptions,
 	activeScope,
@@ -83,6 +91,10 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
 					/>
 				</div>
 			)}
+			<SearchResultsCloseButton
+				channel={channel}
+				data-flx="channel.channel-search-results.search-results-header.search-results-close-button"
+			/>
 		</div>
 	);
 };

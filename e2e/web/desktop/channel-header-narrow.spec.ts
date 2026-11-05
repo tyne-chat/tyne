@@ -128,4 +128,31 @@ test.describe('Channel header in a narrow window', () => {
 		await input.blur();
 		await expect(header(page)).not.toHaveAttribute('data-header-search-open', '');
 	});
+
+	// tyne-chat/tyne#518: clicking away collapses the box and hides its ✕ while the results stay
+	// open, so the results panel has a close of its own that clears the search like the box's ✕.
+	test('closes the search from the results panel once the box has collapsed', async ({page}) => {
+		await openLongChannel(page);
+		await page.setViewportSize({width: 760, height: 900});
+		await expect(header(page)).toHaveAttribute('data-header-search', 'icon');
+		await page.locator('[data-flx="channel.channel-header.left-content-container"]').click();
+		await page.keyboard.press('ControlOrMeta+f');
+		const input = page.locator('[data-flx="channel.message-search-bar.message-search-bar.input.text"]');
+		await expect(input).toBeFocused();
+		await page.keyboard.type('anything');
+		await page.keyboard.press('Enter');
+		const results = page.locator('[data-flx="channel.channel-search-results.container"]');
+		const close = page.locator('[data-flx="channel.search-results-close-button.button"]');
+		await expect(close).toBeVisible();
+
+		const resultsBox = await results.boundingBox();
+		await results.click({position: {x: resultsBox!.width / 2, y: resultsBox!.height - 20}});
+		await expect(header(page)).not.toHaveAttribute('data-header-search-open', '');
+		await expect(results).toBeVisible();
+
+		await close.click();
+		await expect(results).toHaveCount(0);
+		await expect(input).toHaveText('');
+		await expect(page.locator('flx-channel-textarea-composer [contenteditable="true"]')).toBeFocused();
+	});
 });

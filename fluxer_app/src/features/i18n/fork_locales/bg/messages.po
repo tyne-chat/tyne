@@ -107,6 +107,10 @@ msgstr "Изберете експорт от PluralKit (.json) или експо
 msgid "Clear the message box to use /{name}"
 msgstr "Изпразнете полето за съобщение, за да използвате /{name}"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Затваряне на търсенето"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Команда"

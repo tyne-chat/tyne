@@ -107,6 +107,10 @@ msgstr "Odaberite PluralKit izvoz (.json) ili {productName} izvoz (.zip), ili ga
 msgid "Clear the message box to use /{name}"
 msgstr "Ispraznite okvir poruke da biste upotrijebili /{name}"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Zatvori pretragu"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Naredba"

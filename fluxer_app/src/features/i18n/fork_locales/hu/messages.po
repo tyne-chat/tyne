@@ -107,6 +107,10 @@ msgstr "Válassz egy PluralKit-exportot (.json) vagy egy {productName}-exportot 
 msgid "Clear the message box to use /{name}"
 msgstr "Ürítsd ki az üzenetmezőt a(z) /{name} használatához"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Keresés bezárása"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Parancs"

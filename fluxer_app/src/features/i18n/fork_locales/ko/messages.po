@@ -107,6 +107,10 @@ msgstr "PluralKit 내보내기 파일(.json)이나 {productName} 내보내기 �
 msgid "Clear the message box to use /{name}"
 msgstr "/{name}을(를) 사용하려면 메시지 입력란을 비우세요"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "검색 닫기"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "명령"
