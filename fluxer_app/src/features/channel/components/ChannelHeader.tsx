@@ -136,6 +136,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {HeaderOverflow} from '@app/features/channel/components/channel_header/HeaderOverflow';
 import {
 	HIDE_CHANNELS_DESCRIPTOR,
 	SHOW_CHANNELS_DESCRIPTOR,
@@ -1185,6 +1186,10 @@ export const ChannelHeader = observer(
 							{!isMobile && <UpdaterIcon data-flx="channel.channel-header.updater-icon" />}
 							{!isMobile && <StaffToolsButton data-flx="channel.channel-header.staff-tools-button" />}
 							{!isMobile && <InboxButton data-flx="channel.channel-header.inbox-button" />}
+							<HeaderOverflow
+								searchActive={searchPanelOpen || searchQuery.length > 0}
+								data-flx="channel.channel-header.header-overflow"
+							/>
 						</div>
 					</NativeDragRegion>
 				</header>
