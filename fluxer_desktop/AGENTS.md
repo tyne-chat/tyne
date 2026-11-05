@@ -142,8 +142,17 @@ A handler that touches accounts, storage or windows checks its sender with
   build when notarization is too slow), publishes the release as latest, and
   `fork-verify-update-feed.cjs` asks Velopack (the version in `package.json`) whether an installed
   Tyne is offered it. Versions are semver, higher than the last. Its token is read-only except in
-  the publish job, which runs only `gh` and GitHub's own actions; keep builds, installs and anything
-  from npm out of it. Every action is pinned to a commit.
+  the publish and `retire-feeds` jobs, which run only `gh` and GitHub's own actions; keep builds,
+  installs and anything from npm out of them. Every action is pinned to a commit.
+- **Only the newest release keeps its update feed.** Velopack's GitHub source reads the ten newest
+  releases and downloads `releases.win.json` from each one that has it, one after another: with ten
+  that is 21 connections per check, which overran the check deadline while GitHub was slow
+  (tyne-chat/tyne#508). Windows packages are built with `--delta None`, so only the newest feed is
+  needed. After publishing, the `retire-feeds` job renames every older desktop release's feed to
+  `releases.win.json.old`, then `verify` runs. If a release is ever deleted, name the previous
+  release's feed back (`releases.win.json`), or installed Windows apps find no update. Publish no
+  other kind of release in this repository: Velopack reads only the first page of ten, so ten of
+  them after the last desktop release would hide its feed.
 - **When GitHub has no macOS runner**, the macOS build is dropped unbuilt and the release run
   fails. `fork-desktop-release-retry.yaml` then waits 20 minutes and reruns only the failed jobs
   (the other platforms' builds are kept), up to six attempts of the run in all; it leaves any
