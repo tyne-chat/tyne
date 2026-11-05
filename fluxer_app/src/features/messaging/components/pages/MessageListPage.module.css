@@ -118,3 +118,20 @@
 	font-size: 1rem;
 	color: var(--text-primary);
 }
+
+/* Fork: in a narrow header the title stays on one line and ends in an ellipsis instead of being cut
+   off (tyne-chat/tyne#505). */
+.header {
+	min-width: 0;
+}
+
+.header > :not(.title) {
+	flex-shrink: 0;
+}
+
+.title {
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
