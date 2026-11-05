@@ -409,7 +409,7 @@
 .headerButtonBadge {
 	position: absolute;
 	top: -0.125rem;
-	right: -0.25rem;
+	inset-inline-end: -0.25rem;
 	pointer-events: none;
 	z-index: 1;
 }
@@ -417,7 +417,7 @@
 .headerButtonUnreadDot {
 	position: absolute;
 	top: 0.25rem;
-	right: 0.25rem;
+	inset-inline-end: 0.25rem;
 	width: 0.5rem;
 	height: 0.5rem;
 	border-radius: var(--radius-full);
