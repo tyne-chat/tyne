@@ -131,9 +131,22 @@ The member toggle shows at every width (`useCanFitMemberList() || true`, so upst
 branches are dead). With a panel collapsed, hovering the edge shows a second mount of the member or
 DM list as an overlay (`isMemberListPeeking`, `data-peek-drawer`), driven by `ui`'s `LayoutState`.
 
+**A narrow header** (tyne-chat/tyne#233): `channel_header/HeaderOverflow.tsx`, one line at the end of
+the action row in `ChannelHeader.tsx` and in `voice/components/VoiceCallView.tsx`, measures the
+header and gives way in the order `HeaderOverflowLayout.ts` sets: the topic and a call's screen-share
+info hide, the search box narrows and becomes a magnifier, a long name shortens to 10 rem, then actions
+move into a "More options" menu. It works on its sibling elements in the DOM (attributes
+`data-header-*`, styled by the fork block at the end of `ChannelHeader.module.css`), recognising each
+by its `data-flx` (`HEADER_ITEM_RULES`). A folded action stays mounted, inert and invisible where the
+menu button is, so its popout, menu and keybind work as before and open there; the menu clicks it,
+and focus that would return to it goes to the menu button. Nothing moves while a header popout or
+menu is open. The loading skeletons clip their action rows (fork blocks at the end of
+`BootShell.css` and `ChatSkeleton.module.css`).
+
 ## Where the fork's code sits
 
 - **Fork-owned:** `MessagePersonaAccount.tsx`, `channel_header/useCollapsedPanelBadges.ts`,
+  `channel_header/HeaderOverflow.tsx` and `HeaderOverflowLayout.ts`,
   `message_search_bar/PersonaSearchSuggestions.ts` and `PersonasSection.tsx`,
   `modals/TimestampModal.tsx`, `InlineEditControls.tsx`, `InlineEditFiles.tsx`, `useInlineEditCaret.ts`,
   `DeleteAttachmentMenuGroup.tsx`, `emoji_picker/hooks/useForkSearchFirstResultSelection.ts`.
@@ -143,8 +156,9 @@ DM list as an overlay (`isMemberListPeeking`, `data-peek-drawer`), driven by `ui
   under the `…Base` name and the fork's export at the end of the file.
 - **One fork element beside an upstream call:** `<PersonaTag>`, `<PersonaComposerPill>`,
   `<SignalBar>`, `withSignalBar(renderChatArea())` in `GuildChannelView`. `QuickReactionButton`
-  takes the fork's props in `...fork`. `channel_header/shared.ts` and `MessageReactions.module.css`
-  end with appended blocks.
+  takes the fork's props in `...fork`. `<HeaderOverflow>` at the end of the header's action rows.
+  `channel_header/shared.ts`, `ChannelHeader.module.css` and `MessageReactions.module.css` end with
+  appended blocks.
 - **Inside upstream's lines** (conflicts first): `LexicalChannelTextareaContent.tsx` and
   `ChannelMessage.tsx` (both among upstream's most changed here; the picker effect could move to a
   fork hook), `MessageReactions.tsx`, `MessageActionBar.tsx`, `MessageActionMenu.tsx`,
@@ -186,6 +200,7 @@ that counts requests (root `AGENTS.md`, "Network calls").
 
 - **Here (fork):** `MessagePersonaAccount.test.tsx`, `MessageActionBarQuickReaction.test.tsx` (also
   `EmojiRenderer` pins), `MessageReactionsContextMenu.test.tsx`, `useCollapsedPanelBadges.test.ts`,
+  `HeaderOverflowLayout.test.ts`,
   `PersonaSearchSuggestions.test.ts`, `TimestampModal.test.tsx`,
   `useInlineEditCaret.test.tsx`, `InlineEditFiles.test.tsx`, `InlineEditUploads.test.ts` (in
   `messaging`),
@@ -198,6 +213,7 @@ that counts requests (root `AGENTS.md`, "Network calls").
 - **End to end:** `e2e/web/desktop/persona-*.spec.ts` (rows, replies, reactions, "Change persona",
   the inline edit's selector, typing, mentions), `channel-timestamp-pills.spec.ts`,
   `channel-inline-edit-upload.spec.ts`, `window-activation-quick-reaction.spec.ts`,
+  `channel-header-narrow.spec.ts`,
   `signal-bar.spec.ts`, `e2e/web/mobile/persona-picker.spec.ts`.
 - **Not covered:** no unit tests for `ChannelMessages`, `ScrollManager`, the composer or
   `UserMessage`; nothing counts the search requests; no end-to-end test of persona search
