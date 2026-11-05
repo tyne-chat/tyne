@@ -32,7 +32,7 @@ on:
       agent:
         description: 'The agent that resolves conflicts and repairs failed gates: claude (Claude Opus 5.5 through Claude Code, with a review of its conflict resolution) or gemini (Gemini 3.8 Flash). The next repository is started with the same one.'
         required: false
-        default: 'gemini'
+        default: 'claude'
         type: choice
         options:
           - claude
