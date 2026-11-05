@@ -509,3 +509,99 @@
 	inset-inline-end: 0.35rem;
 	box-shadow: 0 0 0 0.08rem var(--channel-header-background);
 }
+
+/* Fork: narrow headers (tyne-chat/tyne#233). channel_header/HeaderOverflow.tsx measures the header,
+   sets these attributes on it and on its items, and HeaderOverflowLayout.ts decides the order in
+   which they give way. With it active, the title side gets the room the action row leaves (set as
+   --header-title-min once measured, 10rem until then) and the row is clipped, not drawn over the
+   title and the sidebar toggle. */
+.headerContainer[data-header-overflow] {
+	grid-template-columns: minmax(min(100%, var(--header-title-min, 10rem)), 1fr) minmax(0, auto);
+}
+
+.headerContainer[data-header-overflow] .headerRightSection {
+	overflow-x: clip;
+}
+
+.headerContainer[data-header-search-open] .headerRightSection {
+	overflow-x: visible;
+}
+
+/* An action in the "More options" menu waits, invisible, where the menu button is, so that what it
+   opens appears there. The search box stays visible: its own rules hide it until it is opened. */
+.headerRightSection > [data-header-folded] {
+	position: absolute;
+	inset-inline-end: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	visibility: hidden;
+	pointer-events: none;
+}
+
+/* Raised above the search box's own position rule below, so that the folded box leaves the row. */
+.headerContainer[data-header-search] .headerRightSection > .messageSearchFocusWrapper[data-header-folded] {
+	position: absolute;
+	visibility: visible;
+}
+
+.headerRightSection > [data-header-hidden],
+.channelInfoContainer > [data-header-folded],
+.headerContainer[data-header-topic-hidden] .topicDivider,
+.headerContainer[data-header-topic-hidden] .topicContainer {
+	display: none;
+}
+
+.headerContainer[data-header-search='full'] {
+	--header-search-slot: 15.25rem;
+}
+
+.headerContainer[data-header-search='narrow'] {
+	--header-search-slot: 9rem;
+}
+
+.headerContainer[data-header-search='icon'] {
+	--header-search-slot: var(--channel-header-action-size);
+}
+
+.headerContainer[data-header-search] .messageSearchFocusWrapper {
+	flex: 0 0 var(--header-search-slot);
+	width: var(--header-search-slot);
+	min-width: var(--header-search-slot);
+	max-width: var(--header-search-slot);
+}
+
+.headerContainer[data-header-search] .messageSearchFocusWrapper > :first-child {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+}
+
+/* Collapsed, the search box is a magnifier; opened, it lies over the icons beside it, and over the
+   name if it must, but never over the sidebar toggle. */
+.headerContainer[data-header-search='icon'] .messageSearchFocusWrapper {
+	position: relative;
+}
+
+.headerContainer[data-header-search='icon'] .messageSearchFocusWrapper > :first-child {
+	position: absolute;
+	inset-inline-end: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: var(--header-search-open-width, 15.25rem);
+	max-width: none;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.headerContainer[data-header-search-open] .messageSearchFocusWrapper > :first-child {
+	opacity: 1;
+	pointer-events: auto;
+	z-index: 2;
+}
+
+/* In a thread's header, the parent channel's name gives way before the thread's own, down to the
+   parent's icon. */
+.channelInfoContainer > [data-flx^='threads.thread-parent-crumb.crumb'] {
+	flex-shrink: 1000;
+	min-width: var(--channel-header-icon-size);
+}
