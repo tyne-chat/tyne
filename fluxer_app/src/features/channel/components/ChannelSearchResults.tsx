@@ -779,6 +779,7 @@ export const ChannelSearchResults = observer(
 		return (
 			<div className={styles.container} data-flx="channel.channel-search-results.container">
 				<SearchResultsHeader
+					channel={channel}
 					machineState={machineState}
 					scopeOptions={scopeOptions}
 					activeScope={activeScope}
