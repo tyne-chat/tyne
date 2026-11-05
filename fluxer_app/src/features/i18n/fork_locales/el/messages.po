@@ -88,6 +88,10 @@ msgstr "Η λήψη της εικόνας avatar απέτυχε: {error}. Η per
 msgid "Back to commands"
 msgstr "Πίσω στις εντολές"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Επιστροφή: {section}"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Η λήψη της εικόνας πανό απέτυχε: {error}. Η persona εισήχθη χωρίς πανό."

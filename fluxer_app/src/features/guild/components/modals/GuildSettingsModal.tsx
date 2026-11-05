@@ -27,6 +27,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {SettingsNarrowStartOnList} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+
 interface GuildSettingsModalProps {
 	guildId: string;
 	initialTab?: GuildSettingsTabType;
@@ -170,6 +174,9 @@ export const GuildSettingsModal: React.FC<GuildSettingsModalProps> = observer(
 					data-flx="guild.guild-settings-modal.modal-screen-reader-label"
 				/>
 				<SettingsModalContainer fullscreen={true} data-flx="guild.guild-settings-modal.settings-modal-container">
+					{initialTabProp == null && (
+						<SettingsNarrowStartOnList data-flx="guild.guild-settings-modal.settings-narrow-start-on-list" />
+					)}
 					{isMobile ? (
 						<MobileGuildSettingsView
 							guild={guild}

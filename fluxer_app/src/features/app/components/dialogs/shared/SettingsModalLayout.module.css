@@ -675,3 +675,25 @@
 		transition: none;
 	}
 }
+
+/* Fork: a narrow settings dialog shows the sidebar or the open section, not both. When it is narrow
+   is decided in shared/SettingsNarrowNav.tsx (tyne-chat/tyne#232). Stacked in a column, the list
+   only scrolls if it may shrink below its content (tyne-chat/tyne#649). */
+[data-settings-narrow] > .desktopSidebar {
+	flex: 1 1 auto;
+	min-height: 0;
+	border-inline-end: none;
+}
+
+[data-settings-narrow][data-settings-narrow-view='section'] > .desktopSidebar {
+	display: none;
+}
+
+/* Hidden but still laid out: the section keeps its scroll position, and the list still marks the
+   subsection in view. */
+[data-settings-narrow][data-settings-narrow-view='list'] > .desktopContent {
+	position: absolute;
+	inset: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
