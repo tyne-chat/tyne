@@ -107,6 +107,10 @@ msgstr "Alege un export PluralKit (.json) sau un export {productName} (.zip), or
 msgid "Clear the message box to use /{name}"
 msgstr "Golește caseta de mesaj ca să folosești /{name}"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Închide căutarea"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Comandă"
