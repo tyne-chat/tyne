@@ -494,3 +494,18 @@
 :global(html.mobile-layout) .formFooter button {
 	width: 100% !important;
 }
+
+/* Fork: a dialog is never wider than the window. Upstream counts on narrow windows switching to the
+   mobile layout, where dialogs fill the screen; in Tyne a computer keeps the desktop layout at any width,
+   and app zoom on desktop makes every rem width larger (tyne-chat/tyne#232). */
+.root.small {
+	width: min(27.5rem, calc(100vw - 2rem));
+}
+
+.root.medium {
+	width: min(37.5rem, calc(100vw - 2rem));
+}
+
+.root.large {
+	width: min(50rem, calc(100vw - 2rem));
+}
