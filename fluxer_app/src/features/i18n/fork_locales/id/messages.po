@@ -107,6 +107,10 @@ msgstr "Pilih ekspor PluralKit (.json) atau ekspor {productName} (.zip), atau se
 msgid "Clear the message box to use /{name}"
 msgstr "Kosongkan kotak pesan untuk menggunakan /{name}"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Tutup pencarian"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Perintah"

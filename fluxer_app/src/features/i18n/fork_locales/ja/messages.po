@@ -107,6 +107,10 @@ msgstr "PluralKit のエクスポート (.json) または {productName} のエ�
 msgid "Clear the message box to use /{name}"
 msgstr "/{name} を使うには、メッセージ欄を空にしてください"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "検索を閉じる"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "コマンド"
