@@ -175,7 +175,8 @@ search like that ✕, at every width, and moves focus to the message box.
   edits with files to `InlineEditUploads`), `EditingMessageInput.tsx` (its controls and files),
   `AutocompleteMention.tsx` (`renderPersona`), `EmojiRenderer.tsx` (drag-and-drop in upstream's
   render), `PreloadableUserPopout.tsx`, `DMChannelView.tsx` (upstream's barrier ternary re-indented
-  in a fragment), the search-bar hook, `QuickReactionStore.ts`.
+  in a fragment), the search-bar hook, `MessageSearchBar.tsx` (the suggestions dropdown's
+  `flip`/`shift` keep it inside the window, tyne-chat/tyne#232), `QuickReactionStore.ts`.
 - **Copies to keep in step:** `usePresentableTypists` copies upstream's `usePresentableTypingUsers`;
   the display-tag icon address is worked out in `PersonaTag`, `MessagePersonaAccount` and
   `AutocompleteMention`.
