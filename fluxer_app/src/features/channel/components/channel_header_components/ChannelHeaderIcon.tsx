@@ -65,6 +65,7 @@ export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHead
 			data-flx="channel.channel-header-components.channel-header-icon.focus-ring"
 		>
 			<button
+				data-header-label={label}
 				data-flx="channel.channel-header-components.channel-header-icon.icon-button.undefined"
 				{...rest}
 				ref={mergedRef}
@@ -84,6 +85,7 @@ export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHead
 				{showBadge ? (
 					<div
 						className={styles.headerButtonBadge}
+						data-header-badge={badgeCount}
 						data-flx="channel.channel-header-components.channel-header-icon.header-button-badge"
 					>
 						<MentionBadge
