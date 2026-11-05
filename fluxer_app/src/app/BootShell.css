@@ -1709,3 +1709,13 @@ html #fluxer-boot-shell.fluxer-boot-auth[data-mobile='1'] {
 	justify-content: center;
 	margin-top: 0.5rem;
 }
+
+/* Fork: narrow windows (tyne-chat/tyne#233). As the channel header's own fork rules do, the loading
+   screen's desktop header keeps room for the title and clips its action row instead of drawing it
+   over the title; the real header then folds its actions into a menu. */
+#fluxer-boot-shell:not([data-mobile='1']) .fluxer-boot-chat-header {
+	grid-template-columns: minmax(min(100%, 10rem), 1fr) minmax(0, auto);
+}
+#fluxer-boot-shell:not([data-mobile='1']) .fluxer-boot-header-actions {
+	overflow-x: clip;
+}

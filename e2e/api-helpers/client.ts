@@ -103,6 +103,16 @@ export class FluxerApiClient {
 		});
 	}
 
+	public async createGuildChannel(
+		guildId: string,
+		body: {name: string; type?: number; topic?: string},
+	): Promise<{id: string; name: string; type: number}> {
+		return this.request<{id: string; name: string; type: number}>(`/api/v1/guilds/${guildId}/channels`, {
+			method: 'POST',
+			body: JSON.stringify({type: 0, ...body}),
+		});
+	}
+
 	public async getGuildChannels(guildId: string): Promise<Array<{id: string; name: string; type: number}>> {
 		return this.request<Array<{id: string; name: string; type: number}>>(`/api/v1/guilds/${guildId}/channels`);
 	}
