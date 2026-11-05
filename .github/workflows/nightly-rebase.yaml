@@ -25,10 +25,18 @@ on:
         default: false
         type: boolean
       force_test_agent:
-        description: 'Run self-test on Gemini 3.8 Flash API connectivity'
+        description: 'Run a self-test of the agent model connection before the rebase'
         required: false
         default: false
         type: boolean
+      agent:
+        description: 'The agent that resolves conflicts and repairs failed gates: claude (Claude Opus 5.5 through Claude Code, with a review of its conflict resolution) or gemini (Gemini 3.8 Flash). The next repository is started with the same one.'
+        required: false
+        default: 'gemini'
+        type: choice
+        options:
+          - claude
+          - gemini
       force_tests:
         description: 'Force execution of baseline, unit, and E2E tests even if 0 commits behind upstream'
         required: false
@@ -67,6 +75,10 @@ jobs:
     # each publish job, ends 07:30, before the 07:40 mobile sync.
     timeout-minutes: 195
 
+    # The agent this run uses (tyne-tools rebase/pipeline_issues.py); the publish job needs it too, for
+    # the model its issues name and for starting the next repository with the same agent.
+    env:
+      REBASE_AGENT_PROVIDER: ${{ inputs.agent }}
     steps:
       - name: Checkout tyne
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -96,12 +108,23 @@ jobs:
           python-version: '3.12'
 
       - name: Install Google Antigravity SDK
+        if: ${{ inputs.agent != 'claude' }}
         run: pip install google-antigravity
 
-      - name: Verify Gemini Flash API Connectivity
+      # The Claude agent (tyne-tools rebase/claude_agent.py) runs Claude Code, pinned to the version
+      # its rules were checked with, into a directory of its own.
+      - name: Install Claude Code
+        if: ${{ inputs.agent == 'claude' }}
+        run: |
+          npm install --no-audit --no-fund --prefix "$RUNNER_TEMP/claude-code" @anthropic-ai/claude-code@2.1.310
+          echo "$RUNNER_TEMP/claude-code/node_modules/.bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/claude-code/node_modules/.bin/claude" --version
+
+      - name: Verify the agent's model connection
         if: ${{ inputs.force_test_agent == true }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
           python /tmp/rebase_tools/rebase/rebase_agent.py --self-test
           echo "Resting 10s to ensure clean quota before rebase..."
@@ -294,10 +317,12 @@ jobs:
           fi
           echo "REBASE_ARGS=--profile subprofiles --time-budget-minutes 185 --result-dir /tmp/rebase_result $FLAGS" >> "$GITHUB_ENV"
 
+      # Only the agent steps (3a, 4a, ...) get the model credentials: the other steps run upstream's
+      # installs, builds and tests. Within an agent step, the orchestrator keeps them from every command
+      # but the agent's, and Claude Code from the commands it runs (CLAUDE_CODE_SUBPROCESS_ENV_SCRUB).
       - name: "1. Check upstream and tag a backup"
         id: prepare
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase prepare
 
@@ -305,7 +330,6 @@ jobs:
         id: baseline
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase baseline
 
@@ -313,7 +337,6 @@ jobs:
         id: rebase
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase rebase
 
@@ -322,6 +345,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.rebase.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase resolve-conflicts
 
@@ -329,7 +353,6 @@ jobs:
         id: codegen
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase codegen
 
@@ -338,6 +361,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.codegen.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase repair-codegen
 
@@ -345,7 +369,6 @@ jobs:
         id: unit
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase unit
 
@@ -354,6 +377,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.unit.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase repair-unit
 
@@ -361,7 +385,6 @@ jobs:
         id: e2e
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase e2e
 
@@ -370,6 +393,7 @@ jobs:
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' && steps.e2e.outputs.needs_agent == 'true' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase repair-e2e
 
@@ -377,7 +401,6 @@ jobs:
         id: push
         if: ${{ steps.prepare.outputs.skip_rebase != 'true' }}
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: python /tmp/rebase_tools/rebase/rebase_orchestrator.py $REBASE_ARGS --phase push
 
@@ -428,6 +451,10 @@ jobs:
     # limits add up to 40 minutes; the rest is for setting up and cleaning up the job.
     timeout-minutes: 50
 
+    # The agent this run uses (tyne-tools rebase/pipeline_issues.py); the publish job needs it too, for
+    # the model its issues name and for starting the next repository with the same agent.
+    env:
+      REBASE_AGENT_PROVIDER: ${{ inputs.agent }}
     steps:
       # Escalations and the absorbed-commits issue are opened as tyne-rebase[bot] (the Tyne Rebase
       # App: Issues only, installed on tyne-chat/tyne), not as WORKFLOW_TOKEN's account. If this
