@@ -160,9 +160,9 @@ and gives screen readers what the button's aria-label says of that mark (tyne-ch
 - **One fork element beside an upstream call:** `<PersonaTag>`, `<PersonaComposerPill>`,
   `<SignalBar>`, `withSignalBar(renderChatArea())` in `GuildChannelView`. `QuickReactionButton`
   takes the fork's props in `...fork`. `<HeaderOverflow>` at the end of the header's action rows.
-  `channel_header/shared.ts`, `ChannelHeader.module.css`, `MessageReactions.module.css` and
-  `direct_message/DMFriendsView.module.css` (the tabs fade where they scroll, tyne-chat/tyne#504) end
-  with appended blocks.
+  `channel_header/shared.ts`, `ChannelHeader.module.css`, `MessageReactions.module.css`,
+  `direct_message/DMFriendsView.module.css` (the tabs fade where they scroll, tyne-chat/tyne#504) and
+  `GuildMembersPage.module.css` (the title's ellipsis, tyne-chat/tyne#505) end with appended blocks.
 - **Inside upstream's lines** (conflicts first): `LexicalChannelTextareaContent.tsx` and
   `ChannelMessage.tsx` (both among upstream's most changed here; the picker effect could move to a
   fork hook), `MessageReactions.tsx`, `MessageActionBar.tsx`, `MessageActionMenu.tsx`,
