@@ -141,12 +141,16 @@ by its `data-flx` (`HEADER_ITEM_RULES`). A folded action stays mounted, inert an
 menu button is, so its popout, menu and keybind work as before and open there; the menu clicks it,
 and focus that would return to it goes to the menu button. Nothing moves while a header popout or
 menu is open. The loading skeletons clip their action rows (fork blocks at the end of
-`BootShell.css` and `ChatSkeleton.module.css`).
+`BootShell.css` and `ChatSkeleton.module.css`). A collapsed search box closes when it loses focus and
+takes its ✕ with it, so the results panel ends its header with a close of its own,
+`channel_search_results/SearchResultsCloseButton.tsx` (tyne-chat/tyne#518): it clears and closes the
+search like that ✕, at every width, and moves focus to the message box.
 
 ## Where the fork's code sits
 
 - **Fork-owned:** `MessagePersonaAccount.tsx`, `channel_header/useCollapsedPanelBadges.ts`,
   `channel_header/HeaderOverflow.tsx` and `HeaderOverflowLayout.ts`,
+  `channel_search_results/SearchResultsCloseButton.tsx`,
   `message_search_bar/PersonaSearchSuggestions.ts` and `PersonasSection.tsx`,
   `modals/TimestampModal.tsx`, `InlineEditControls.tsx`, `InlineEditFiles.tsx`, `useInlineEditCaret.ts`,
   `DeleteAttachmentMenuGroup.tsx`, `emoji_picker/hooks/useForkSearchFirstResultSelection.ts`.
@@ -157,9 +161,13 @@ menu is open. The loading skeletons clip their action rows (fork blocks at the e
 - **One fork element beside an upstream call:** `<PersonaTag>`, `<PersonaComposerPill>`,
   `<SignalBar>`, `withSignalBar(renderChatArea())` in `GuildChannelView`. `QuickReactionButton`
   takes the fork's props in `...fork`. `<HeaderOverflow>` at the end of the header's action rows.
+  `<SearchResultsCloseButton>` at the end of `SearchResultsHeader`, which takes the channel as its
+  first prop.
   `channel_header/shared.ts`, `ChannelHeader.module.css`, `MessageReactions.module.css`,
-  `direct_message/DMFriendsView.module.css` (the tabs fade where they scroll, tyne-chat/tyne#504) and
-  `GuildMembersPage.module.css` (the title's ellipsis, tyne-chat/tyne#505) end with appended blocks.
+  `direct_message/DMFriendsView.module.css` (the tabs fade where they scroll, tyne-chat/tyne#504),
+  `GuildMembersPage.module.css` (the title's ellipsis, tyne-chat/tyne#505) and
+  `ChannelSearchResults.module.css` (room for the close button, tyne-chat/tyne#518) end with appended
+  blocks.
 - **Inside upstream's lines** (conflicts first): `LexicalChannelTextareaContent.tsx` and
   `ChannelMessage.tsx` (both among upstream's most changed here; the picker effect could move to a
   fork hook), `MessageReactions.tsx`, `MessageActionBar.tsx`, `MessageActionMenu.tsx`,
