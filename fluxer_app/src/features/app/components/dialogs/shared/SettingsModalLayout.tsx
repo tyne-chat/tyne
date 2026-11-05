@@ -21,6 +21,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import React, {useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {SettingsNarrowNav} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+
 const SIDEBAR_TREE_INSTRUCTIONS_DESCRIPTOR = msg({
 	message:
 		'Use the Up and Down arrow keys to move between items and Space or Enter to open one. Where a tab has sections, the Right arrow expands it and the Left arrow collapses it.',
@@ -56,7 +60,9 @@ export const SettingsModalContainer: React.FC<{children: React.ReactNode; fullsc
 					className={clsx(styles.container, {[styles.containerFullscreen]: fullscreen})}
 					data-flx="app.settings-modal-layout.settings-modal-container.container"
 				>
-					{children}
+					<SettingsNarrowNav data-flx="app.settings-modal-layout.settings-modal-container.settings-narrow-nav">
+						{children}
+					</SettingsNarrowNav>
 				</div>
 			</SettingsModalContext.Provider>
 		);
