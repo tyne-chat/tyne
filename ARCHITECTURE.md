@@ -180,6 +180,15 @@ So a small window is not a phone here: to test mobile layout, use a phone user a
 `mobile-chromium` project does. Mobile layout is a different code path, not a narrower page: a
 message is edited in the channel composer, not an inline box.
 
+**Narrow windows** keep the desktop UI, and the desktop app has no minimum window width (upstream's
+is 800 px), so desktop UI has to fit any width by itself (tyne-chat/tyne#232). Dialogs are never
+wider than the window (a fork block in `app/components/dialogs/Modal.module.css`), and a narrow
+settings dialog shows its list of sections or the open section, not both
+(`app/components/dialogs/shared/SettingsNarrowNav.tsx`). Desktop app zoom scales the root font size
+(`ui/utils/AppZoomUtils.ts`): rem widths grow while the window's px stay the same, so a
+`@media (min-width: …px)` rule ignores zoom. Decide layout on the element's own width in rem, with a
+container query (as `persona/components/modals/PersonaEditModal.module.css` does) or by measuring it.
+
 ## The fork's features
 
 ### Personas
