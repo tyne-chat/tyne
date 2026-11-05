@@ -75,3 +75,21 @@
 	--sticker-card-padding: 0.75rem;
 	--sticker-card-gap: 0.75rem;
 }
+
+/* Fork: the tab is a size container, so a narrow one keeps two sticker columns with smaller cards
+   instead of one card as wide as the dialog. Below 24.75rem two columns of the usual width do not fit
+   (tyne-chat/tyne#523). */
+.container {
+	container-type: inline-size;
+}
+
+@container not (min-width: 24.75rem) {
+	.stickerGrid.cozyGrid,
+	.stickerGrid.compactGrid {
+		--sticker-grid-gap: 0.75rem;
+		--sticker-card-min-width: 7.5rem;
+		--sticker-card-height: 11.25rem;
+		--sticker-card-padding: 0.5rem;
+		--sticker-card-gap: 0.5rem;
+	}
+}
