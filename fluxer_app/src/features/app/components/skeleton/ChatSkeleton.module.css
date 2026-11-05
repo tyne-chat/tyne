@@ -239,3 +239,14 @@
 	padding-inline-end: var(--member-list-scroller-padding-inline);
 	padding-bottom: var(--member-list-scroller-padding-block-end);
 }
+
+/* Fork: narrow windows (tyne-chat/tyne#233). As the channel header's own fork rules do, the desktop
+   skeleton's header (the one with the desktop back button) keeps room for the title and clips its
+   action row instead of drawing it over the title. */
+.header:has(.identityBackDesktop) {
+	grid-template-columns: minmax(min(100%, 10rem), 1fr) minmax(0, auto);
+}
+
+.header:has(.identityBackDesktop) .headerActions {
+	overflow-x: clip;
+}
