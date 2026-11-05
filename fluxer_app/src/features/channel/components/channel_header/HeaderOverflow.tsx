@@ -495,13 +495,18 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 	}, []);
 
 	// As a click on the search box does. Ctrl+F's handler (MESSAGE_SEARCH_OPEN) also adds an in: filter
-	// for the channel, which a click does not.
+	// for the channel, which a click does not. The box's pointer-down lets its suggestions open again
+	// after Escape closed them; without it they stayed closed until a click in the box. Not primary,
+	// so the box's touch and caret handling ignore it.
 	const openSearch = useCallback(() => {
 		const field = searchSlot?.querySelector<HTMLElement>('[role="combobox"]');
 		if (field == null) {
 			ComponentBus.dispatch('MESSAGE_SEARCH_OPEN');
 			return;
 		}
+		field
+			.closest('flx-lexical-search-input')
+			?.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true, isPrimary: false, button: 0}));
 		field.focus();
 	}, [searchSlot]);
 
