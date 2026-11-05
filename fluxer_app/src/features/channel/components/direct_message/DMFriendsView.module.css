@@ -157,3 +157,60 @@
 		padding: 0.25rem 0.5rem;
 	}
 }
+
+/* Fork: in a narrow window the tabs scroll sideways; fade the edge that has more to scroll
+   (tyne-chat/tyne#504), as upstream's account switcher does for its list. The fades follow the
+   scroll position, so they show only while the tabs overflow. */
+@property --friends-tabs-fade-start {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --friends-tabs-fade-end {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+
+.tabsScroller {
+	--friends-tabs-fade-direction: to right;
+	mask-image: linear-gradient(
+		var(--friends-tabs-fade-direction),
+		transparent 0,
+		#000 var(--friends-tabs-fade-start),
+		#000 calc(100% - var(--friends-tabs-fade-end)),
+		transparent 100%
+	);
+	animation:
+		friends-tabs-fade-start linear both,
+		friends-tabs-fade-end linear both;
+	animation-timeline: scroll(self inline), scroll(self inline);
+	animation-range:
+		0 2rem,
+		calc(100% - 2rem) 100%;
+}
+
+.tabsScroller:dir(rtl) {
+	--friends-tabs-fade-direction: to left;
+}
+
+@keyframes friends-tabs-fade-start {
+	from {
+		--friends-tabs-fade-start: 0px;
+	}
+
+	to {
+		--friends-tabs-fade-start: 2rem;
+	}
+}
+
+@keyframes friends-tabs-fade-end {
+	from {
+		--friends-tabs-fade-end: 2rem;
+	}
+
+	to {
+		--friends-tabs-fade-end: 0px;
+	}
+}
