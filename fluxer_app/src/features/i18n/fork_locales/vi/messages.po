@@ -107,6 +107,10 @@ msgstr "Chọn tệp xuất PluralKit (.json) hoặc tệp xuất {productName} 
 msgid "Clear the message box to use /{name}"
 msgstr "Xóa trống ô tin nhắn để dùng /{name}"
 
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Đóng tìm kiếm"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Lệnh"
