@@ -509,3 +509,12 @@
 .root.large {
 	width: min(50rem, calc(100vw - 2rem));
 }
+
+/* Fork: a dialog's scroll area stretches to the room its wrapper gets (the Scroller's wrapper is a row
+   flexbox) instead of taking `height: 100%` of it. Firefox's engine up to 153, the current ESR that
+   Waterfox is built on, resolves that percentage against the content, so the scroll area stuck out of
+   the dialog by the header's and footer's height and its end could not be scrolled into view
+   (tyne-chat/tyne#521). Two classes, so it wins over the Scroller's own `height: 100%`. */
+.root .content {
+	height: auto;
+}
