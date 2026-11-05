@@ -29,6 +29,7 @@ fn admin_config() -> AdminConfig {
             trust_client_ip_header: false,
             client_ip_header_name: String::new(),
         },
+        sso: None,
     }
 }
 
