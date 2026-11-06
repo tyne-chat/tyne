@@ -88,6 +88,10 @@ msgstr "Avatarafbeelding kon niet worden gedownload: {error}. De persona is zond
 msgid "Back to commands"
 msgstr "Terug naar opdrachten"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Terug naar {section}"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Bannerafbeelding kon niet worden gedownload: {error}. De persona is zonder banner geïmporteerd."

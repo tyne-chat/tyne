@@ -88,6 +88,10 @@ msgstr "Không tải được ảnh đại diện: {error}. Persona đã đượ
 msgid "Back to commands"
 msgstr "Quay lại danh sách lệnh"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Quay lại {section}"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Không tải được ảnh bìa: {error}. Persona đã được nhập mà không có ảnh bìa."
