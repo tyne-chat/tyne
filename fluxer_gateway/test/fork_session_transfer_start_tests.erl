@@ -84,6 +84,116 @@ an_exited_socket_holds_the_session_for_resume_test() ->
 start_received_ignores_an_invalid_session_id_test() ->
     ?assertEqual(ok, fork_session_transfer_start:start_received(undefined)).
 
+%% Through upstream's handoff on the receiving node: the state the old node pushes
+%% (session_state_transfer) starts its session in its shard (session_manager_shard) at once, with
+%% no RESUME. The session holds the state's seq and waits for its client as one whose socket
+%% dropped; the old node's forwarder then finds it (started_pid/1, as fork_session_handoff asks).
+a_received_state_starts_its_session_at_once_test() ->
+    with_transfer_and_shard(fun(Shard) ->
+        ok = report_replies(Shard),
+        Exported = session_lifecycle:serialize_transfer_state(session_state(<<"s1">>, 7)),
+        ok = session_state_transfer:push_state(node(), <<"s1">>, Exported),
+        {success, Session} = shard_reply(Shard),
+        #{seq := Seq, socket_pid := SocketPid, resume_timer := ResumeTimer} = sys:get_state(
+            Session
+        ),
+        ?assertEqual(7, Seq),
+        ?assertEqual(undefined, SocketPid),
+        ?assertNotEqual(undefined, ResumeTimer),
+        ?assertEqual({error, not_found}, session_state_transfer:pop_state(<<"s1">>)),
+        ?assertEqual({ok, Session}, fork_session_transfer_start:started_pid(<<"s1">>))
+    end).
+
+started_pid_finds_nothing_without_a_state_or_a_session_test() ->
+    with_transfer_and_shard(fun(_Shard) ->
+        ?assertEqual({error, not_found}, fork_session_transfer_start:started_pid(<<"s2">>))
+    end).
+
+%% session_state_transfer and one session_manager_shard, both upstream's servers, the shard
+%% entered with the state its init/1 builds and put in upstream's shard table, so that
+%% session_manager_routing finds it. Every session it started is stopped afterwards.
+with_transfer_and_shard(Fun) ->
+    Key = {fluxer_gateway, runtime_config},
+    PreviousConfig = persistent_term:get(Key, undefined),
+    persistent_term:put(Key, #{}),
+    ok = process_registry:init(),
+    {ok, Transfer} = session_state_transfer:start_link(),
+    Shard = proc_lib:spawn(fun() ->
+        process_flag(trap_exit, true),
+        gen_server:enter_loop(session_manager_shard, [], #{
+            sessions => #{},
+            session_refs => #{},
+            pending_identifies => #{},
+            identify_workers => #{},
+            shard_index => 0
+        })
+    end),
+    ok = session_manager_shards:sync_shard_table(#{
+        shard_count => 1, shards => #{0 => #{pid => Shard, ref => make_ref()}}
+    }),
+    try
+        Fun(Shard)
+    after
+        Sessions = maps:get(sessions, sys:get_state(Shard)),
+        lists:foreach(fun stop_session/1, maps:to_list(Sessions)),
+        stop(Shard, kill),
+        ok = session_manager_shards:delete_shard_table(),
+        ok = gen_server:stop(Transfer),
+        case PreviousConfig of
+            undefined -> persistent_term:erase(Key);
+            _ -> persistent_term:put(Key, PreviousConfig)
+        end
+    end.
+
+%% Tells the test what the shard answers to each call.
+report_replies(Shard) ->
+    Test = self(),
+    sys:install(Shard, {
+        fun
+            (Acc, {out, Reply, _From, _State}, _ProcState) ->
+                Test ! {shard_reply, Shard, Reply},
+                Acc;
+            (Acc, _Event, _ProcState) ->
+                Acc
+        end,
+        ok
+    }).
+
+shard_reply(Shard) ->
+    receive
+        {shard_reply, Shard, Reply} -> Reply
+    after 4000 -> error(no_shard_reply)
+    end.
+
+stop_session({SessionId, {Pid, _Ref}}) ->
+    stop(Pid, kill),
+    process_registry:safe_unregister(process_registry:build_process_key(session, SessionId)).
+
+stop(Pid, Reason) ->
+    Ref = monitor(process, Pid),
+    exit(Pid, Reason),
+    receive
+        {'DOWN', Ref, process, Pid, _} -> ok
+    after 4000 -> error(not_stopped)
+    end.
+
+%% The fields upstream's export (session_lifecycle:serialize_transfer_state/1) requires.
+session_state(SessionId, Seq) ->
+    #{
+        id => SessionId,
+        user_id => 42,
+        user_data => #{},
+        version => 1,
+        token_hash => <<"token">>,
+        auth_session_id_hash => <<"auth">>,
+        properties => #{},
+        status => online,
+        afk => false,
+        mobile => false,
+        ready => undefined,
+        seq => Seq
+    }.
+
 assert_exits(Pid) ->
     Ref = monitor(process, Pid),
     receive
