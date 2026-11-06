@@ -88,6 +88,10 @@ msgstr "头像图片下载失败：{error}。已导入不带头像的人格。"
 msgid "Back to commands"
 msgstr "返回命令列表"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "返回{section}"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "横幅图片下载失败：{error}。已导入不带横幅的人格。"
