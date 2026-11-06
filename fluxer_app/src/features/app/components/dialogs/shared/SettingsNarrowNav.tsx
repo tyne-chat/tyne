@@ -9,6 +9,7 @@
 
 import styles from '@app/features/app/components/dialogs/shared/SettingsNarrowNav.module.css';
 import {CLOSE_DESCRIPTOR, SETTINGS_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
+import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {CaretLeftIcon, XIcon} from '@phosphor-icons/react';
 import type React from 'react';
@@ -16,10 +17,27 @@ import {createContext, useCallback, useContext, useEffect, useLayoutEffect, useM
 
 type SettingsNarrowView = 'section' | 'list';
 
+// A level below a section, such as one permission override's editor under Permissions: while a
+// section shows one, the header's back button goes up to the section and the title ends with it.
+export interface SettingsNarrowSubLevel {
+	title: string;
+	back: () => void;
+}
+
 interface SettingsNarrowNavValue {
+	narrow: boolean;
+	subLevel: SettingsNarrowSubLevel | null;
+	setSubLevel: (level: SettingsNarrowSubLevel | null) => void;
+	startOnList: () => void;
 	showList: () => void;
 	setClose: (close: () => void) => void;
 }
+
+const BACK_TO_SECTION_DESCRIPTOR = msg({
+	message: 'Back to {section}',
+	comment:
+		'Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".',
+});
 
 const SettingsNarrowNavContext = createContext<SettingsNarrowNavValue | null>(null);
 
@@ -43,6 +61,7 @@ export const SettingsNarrowNav: React.FC<{children: React.ReactNode}> = ({childr
 	const [view, setView] = useState<SettingsNarrowView>('section');
 	const [narrow, setNarrow] = useState(false);
 	const [tight, setTight] = useState(false);
+	const [subLevel, setSubLevel] = useState<SettingsNarrowSubLevel | null>(null);
 	const rootRef = useRef<HTMLDivElement>(null);
 	const remProbeRef = useRef<HTMLDivElement>(null);
 	const closeRef = useRef<(() => void) | null>(null);
@@ -51,7 +70,13 @@ export const SettingsNarrowNav: React.FC<{children: React.ReactNode}> = ({childr
 		movedRef.current = true;
 		setView(next);
 	}, []);
+	// Null until the first measurement, which decides how a dialog opens.
+	const narrowRef = useRef<boolean | null>(null);
+	// Set by SettingsNarrowStartOnList, whose layout effect runs before this component's.
+	const startOnListRef = useRef(false);
 	// The probe is 1rem wide, so it reports zoom changes, which need not change the dialog's px width.
+	// A dialog that opens narrow with no section asked for starts on the list; wide again, the dialog
+	// shows the open section beside the list, and narrowed later it starts there.
 	useLayoutEffect(() => {
 		const root = rootRef.current;
 		const probe = remProbeRef.current;
@@ -60,8 +85,13 @@ export const SettingsNarrowNav: React.FC<{children: React.ReactNode}> = ({childr
 			const remPx = probe.getBoundingClientRect().width;
 			if (remPx <= 0) return;
 			const rem = root.getBoundingClientRect().width / remPx;
-			setNarrow((was) => (was ? rem < WIDE_ABOVE_REM : rem < NARROW_BELOW_REM));
-			setTight((was) => (was ? rem < ROOMY_ABOVE_REM : rem < TIGHT_BELOW_REM));
+			const was = narrowRef.current;
+			const now = was ? rem < WIDE_ABOVE_REM : rem < NARROW_BELOW_REM;
+			if (was == null && now && startOnListRef.current) setView('list');
+			if (!now) setView('section');
+			narrowRef.current = now;
+			setNarrow(now);
+			setTight((tightWas) => (tightWas ? rem < ROOMY_ABOVE_REM : rem < TIGHT_BELOW_REM));
 		};
 		measure();
 		const observer = new ResizeObserver(measure);
@@ -69,10 +99,6 @@ export const SettingsNarrowNav: React.FC<{children: React.ReactNode}> = ({childr
 		observer.observe(probe);
 		return () => observer.disconnect();
 	}, []);
-	// Wide again, the dialog shows the open section beside the list; narrowed later, it starts there.
-	useEffect(() => {
-		if (!narrow) setView('section');
-	}, [narrow]);
 	// Focus left on something the switch hid goes to what took its place: the open section's entry in
 	// the list, or the open section.
 	useLayoutEffect(() => {
@@ -117,12 +143,18 @@ export const SettingsNarrowNav: React.FC<{children: React.ReactNode}> = ({childr
 	);
 	const value = useMemo<SettingsNarrowNavValue>(
 		() => ({
+			narrow,
+			subLevel,
+			setSubLevel,
+			startOnList: () => {
+				startOnListRef.current = true;
+			},
 			showList: () => show('list'),
 			setClose: (close) => {
 				closeRef.current = close;
 			},
 		}),
-		[show],
+		[narrow, subLevel, show],
 	);
 	return (
 		<SettingsNarrowNavContext.Provider value={value}>
@@ -161,19 +193,67 @@ export const SettingsNarrowNav: React.FC<{children: React.ReactNode}> = ({childr
 	);
 };
 
-// The "Settings" button at the start of the open section's header, shown in a narrow dialog. It
-// also hands the header's close action to the list's own close button.
-export const SettingsNarrowNavButton: React.FC<{onClose: () => void}> = ({onClose}) => {
+// Put inside a settings dialog opened with no section asked for: when it opens narrow, it starts on
+// the list of sections instead of the first section.
+export const SettingsNarrowStartOnList: React.FC = () => {
+	const startOnList = useContext(SettingsNarrowNavContext)?.startOnList;
+	useLayoutEffect(() => {
+		startOnList?.();
+	}, [startOnList]);
+	return null;
+};
+
+// Whether the settings dialog is narrow, for a section that lays itself out differently then.
+export function useSettingsNarrow(): boolean {
+	return useContext(SettingsNarrowNavContext)?.narrow ?? false;
+}
+
+// Shows a level below the open section while `level` is set (pass null otherwise).
+export function useSettingsNarrowSubLevel(level: SettingsNarrowSubLevel | null): void {
+	const setSubLevel = useContext(SettingsNarrowNavContext)?.setSubLevel;
+	const title = level?.title;
+	const back = level?.back;
+	useEffect(() => {
+		if (setSubLevel == null || title == null || back == null) return;
+		setSubLevel({title, back});
+		return () => setSubLevel(null);
+	}, [setSubLevel, title, back]);
+}
+
+// The open section's title, ending with the level below it when a section shows one:
+// "Permissions › @everyone".
+export const SettingsNarrowTitle: React.FC<{title: React.ReactNode}> = ({title}) => {
+	const subLevel = useContext(SettingsNarrowNavContext)?.subLevel;
+	if (subLevel == null) return <>{title}</>;
+	return (
+		<>
+			{title}
+			<span className={styles.crumbSeparator} aria-hidden data-flx="app.settings-narrow-nav.crumb-separator">
+				{' › '}
+			</span>
+			{subLevel.title}
+		</>
+	);
+};
+
+// The back button at the start of the open section's header, shown in a narrow dialog: "Settings",
+// which brings up the list, or the section's title while it shows a level below it, which goes back
+// up to the section. It also hands the header's close action to the list's own close button.
+export const SettingsNarrowNavButton: React.FC<{onClose: () => void; title?: React.ReactNode}> = ({onClose, title}) => {
 	const {i18n} = useLingui();
 	const nav = useContext(SettingsNarrowNavContext);
 	useEffect(() => {
 		nav?.setClose(onClose);
 	}, [nav, onClose]);
 	if (nav == null) return null;
+	const subLevel = nav.subLevel;
+	// Below a section the title already names it ("Permissions › @everyone"): the button keeps its arrow.
+	const sectionLabel = subLevel != null && typeof title === 'string' ? title : null;
 	return (
 		<button
 			type="button"
-			onClick={nav.showList}
+			onClick={subLevel?.back ?? nav.showList}
+			aria-label={sectionLabel != null ? i18n._(BACK_TO_SECTION_DESCRIPTOR, {section: sectionLabel}) : undefined}
 			className={styles.backButton}
 			data-flx="app.settings-narrow-nav.settings-narrow-nav-button.back-button.show-list"
 		>
@@ -182,9 +262,11 @@ export const SettingsNarrowNavButton: React.FC<{onClose: () => void}> = ({onClos
 				className={styles.backIcon}
 				data-flx="app.settings-narrow-nav.settings-narrow-nav-button.back-icon"
 			/>
-			<span className={styles.backLabel} data-flx="app.settings-narrow-nav.settings-narrow-nav-button.back-label">
-				{i18n._(SETTINGS_DESCRIPTOR)}
-			</span>
+			{subLevel == null && (
+				<span className={styles.backLabel} data-flx="app.settings-narrow-nav.settings-narrow-nav-button.back-label">
+					{i18n._(SETTINGS_DESCRIPTOR)}
+				</span>
+			)}
 		</button>
 	);
 };
