@@ -115,6 +115,107 @@ tick(Pid) ->
         tick(Pid)
     end.
 
+%% Through upstream's export_state call (session:handle_call/3), in a session process started by
+%% its shard: the drain gets the state at once, the client is told to reconnect, and the old
+%% process handles nothing itself from then on. With no other node to find the new process on,
+%% it waits for one until its shard goes, and then stops with it.
+the_export_answers_and_tells_the_client_to_reconnect_test() ->
+    Socket = forwarding_socket(),
+    {Shard, Session} = start_session(Socket, undefined),
+    {ok, Exported} = gen_server:call(Session, export_state),
+    ?assertEqual(<<"s1">>, maps:get(id, Exported)),
+    ?assertEqual(7, maps:get(seq, Exported)),
+    ?assertEqual(session_reconnect, socket_message(Socket)),
+    gen_server:cast(Session, {dispatch, message_create, #{}}),
+    ?assertEqual(shutdown, stop_shard(Shard, Session)).
+
+%% A session held for its RESUME has no client to tell. Its shard is registered here, so the
+%% session's ancestors name the shard instead of giving its pid.
+a_session_without_a_client_under_a_registered_shard_stops_with_it_test() ->
+    {Shard, Session} = start_session(undefined, fork_session_handoff_tests_shard),
+    {ok, Exported} = gen_server:call(Session, export_state),
+    ?assertEqual(<<"s1">>, maps:get(id, Exported)),
+    ?assertEqual(shutdown, stop_shard(Shard, Session)).
+
+the_forwarder_stops_with_its_shard_test() ->
+    New = collector(),
+    Shard = self(),
+    Opts = #{
+        parent => Shard, lookup => fun() -> undefined end, poll_ms => 10, idle_ms => 60000
+    },
+    Forwarder = spawn(fun() ->
+        fork_session_handoff:forward_loop(New, Opts, now_ms() + 60000)
+    end),
+    Ref = monitor(process, Forwarder),
+    Forwarder ! {'EXIT', Shard, shutdown},
+    receive
+        {'DOWN', Ref, process, Forwarder, Reason} -> ?assertEqual(shutdown, Reason)
+    after 4000 -> error(still_forwarding)
+    end,
+    ?assertEqual([], collected(New)).
+
+%% A session gen_server with a minimal state, linked to a shard process that started it as
+%% upstream's shard does (session_manager_shard_lifecycle, through proc_lib), optionally
+%% registered under ShardName.
+start_session(SocketPid, ShardName) ->
+    Test = self(),
+    State = #{
+        id => <<"s1">>,
+        user_id => 42,
+        user_data => #{},
+        version => 1,
+        token_hash => <<"token">>,
+        auth_session_id_hash => <<"auth">>,
+        properties => #{},
+        status => online,
+        afk => false,
+        mobile => false,
+        ready => undefined,
+        seq => 7,
+        socket_pid => SocketPid
+    },
+    Shard = spawn(fun() ->
+        case ShardName of
+            undefined -> ok;
+            _ -> true = register(ShardName, self())
+        end,
+        Session = proc_lib:spawn_link(fun() ->
+            process_flag(trap_exit, true),
+            gen_server:enter_loop(session, [], State)
+        end),
+        Test ! {session, self(), Session},
+        receive
+            stop -> ok
+        end
+    end),
+    receive
+        {session, Shard, Session} -> {Shard, Session}
+    after 4000 -> error(no_session)
+    end.
+
+stop_shard(Shard, Session) ->
+    Ref = monitor(process, Session),
+    exit(Shard, shutdown),
+    receive
+        {'DOWN', Ref, process, Session, Reason} -> Reason
+    after 4000 -> error(session_still_running)
+    end.
+
+%% A socket process that passes what it receives on to the test.
+forwarding_socket() ->
+    Test = self(),
+    spawn(fun() ->
+        receive
+            Msg -> Test ! {socket, self(), Msg}
+        end
+    end).
+
+socket_message(Socket) ->
+    receive
+        {socket, Socket, Msg} -> Msg
+    after 4000 -> error(no_socket_message)
+    end.
+
 run_await(Opts) ->
     Test = self(),
     spawn(fun() ->
