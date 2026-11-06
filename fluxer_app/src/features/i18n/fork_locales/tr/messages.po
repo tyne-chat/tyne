@@ -88,6 +88,10 @@ msgstr "Avatar görseli indirilemedi: {error}. Persona avatarsız içe aktarıld
 msgid "Back to commands"
 msgstr "Komutlara dön"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Geri dön: {section}"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Banner görseli indirilemedi: {error}. Persona bannersız içe aktarıldı."
