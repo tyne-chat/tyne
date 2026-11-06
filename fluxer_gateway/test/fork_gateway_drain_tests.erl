@@ -102,11 +102,95 @@ alone_the_api_subscription_is_left_on_test() ->
 
 with_another_node_the_api_subscription_goes_off_and_back_on_test() ->
     with_members([node(), ?NEW], fun() ->
+        with_stub(gateway_nats_rpc, ok, fun(Rpc) ->
+            ok = fork_gateway_drain:announce(),
+            ?assertEqual([disable_rpc_subscription], calls(Rpc)),
+            ?assertEqual(true, persistent_term:get({fork_gateway_drain, rpc_off}, false)),
+            ok = fork_gateway_drain:withdraw(),
+            ?assertEqual([enable_rpc_subscription], calls(Rpc)),
+            ?assertEqual(false, persistent_term:get({fork_gateway_drain, rpc_off}, false))
+        end)
+    end).
+
+%% Without gateway_nats_rpc (not started, or crashed), the drain goes on and only logs a warning.
+a_drain_goes_on_when_the_subscription_cannot_be_switched_test() ->
+    undefined = whereis(gateway_nats_rpc),
+    with_members([node(), ?NEW], fun() ->
         ok = fork_gateway_drain:announce(),
         ?assertEqual(true, persistent_term:get({fork_gateway_drain, rpc_off}, false)),
         ok = fork_gateway_drain:withdraw(),
         ?assertEqual(false, persistent_term:get({fork_gateway_drain, rpc_off}, false))
     end).
+
+%% /_health/undrain on a node that never left the queue group does not touch the subscription.
+withdrawing_without_a_drain_leaves_the_subscription_alone_test() ->
+    with_stub(gateway_nats_rpc, ok, fun(Rpc) ->
+        ok = fork_gateway_drain:withdraw(),
+        ?assertEqual([], calls(Rpc))
+    end).
+
+%% On a peer: a node that announces its drain owns no key here, through upstream's owner
+%% selection, until it withdraws. The mark is also meant to go when the node disconnects
+%% (clear_on_nodedown/1), which needs distribution: in this test node, which has none, that
+%% watcher exits with notalive and an error report, and the mark stays until peer_undrained.
+a_peer_that_drains_owns_no_key_here_until_it_withdraws_test() ->
+    Nodes = [node(), ?NEW],
+    ok = fork_gateway_drain:peer_draining(?NEW),
+    try
+        ?assertEqual([node()], fork_gateway_drain:owners(Nodes)),
+        Owners = [gateway_node_router:select_owner_node(Key, Nodes) || Key <- lists:seq(1, 50)],
+        ?assertEqual([node()], lists:usort(Owners))
+    after
+        ok = fork_gateway_drain:peer_undrained(?NEW)
+    end,
+    ?assertEqual(Nodes, fork_gateway_drain:owners(Nodes)).
+
+%% Alone, the drain tells every client to reconnect itself, through upstream's session_manager.
+alone_the_node_tells_its_clients_to_reconnect_itself_test() ->
+    with_members([node()], fun() ->
+        with_stub(session_manager, {ok, 2}, fun(Manager) ->
+            ?assertEqual({ok, 2}, fork_gateway_drain:reconnect_drain()),
+            ?assertEqual([reconnect_drain], calls(Manager))
+        end)
+    end).
+
+%% A process registered as Name, standing in for one of upstream's servers: it answers every
+%% gen_server call with Reply and tells the test what it was asked, before answering.
+with_stub(Name, Reply, Fun) ->
+    Test = self(),
+    Stub = spawn(fun() -> stub_loop(Test, Reply) end),
+    true = register(Name, Stub),
+    try
+        Fun(Stub)
+    after
+        stop(Stub)
+    end.
+
+stub_loop(Test, Reply) ->
+    receive
+        {'$gen_call', From, Request} ->
+            Test ! {stub_called, self(), Request},
+            gen_server:reply(From, Reply),
+            stub_loop(Test, Reply);
+        stop ->
+            ok
+    end.
+
+%% What the stub was asked so far. The calls are synchronous and the stub reports each one
+%% before it answers, so every call made before this one is already in the mailbox.
+calls(Stub) ->
+    receive
+        {stub_called, Stub, Request} -> [Request | calls(Stub)]
+    after 0 -> []
+    end.
+
+stop(Pid) ->
+    Ref = monitor(process, Pid),
+    Pid ! stop,
+    receive
+        {'DOWN', Ref, process, Pid, _} -> ok
+    after 4000 -> error(not_stopped)
+    end.
 
 with_members(Members, Fun) ->
     Key = {gateway_cluster_membership, members},
