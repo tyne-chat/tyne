@@ -155,4 +155,66 @@ test.describe('Channel header in a narrow window', () => {
 		await expect(input).toHaveText('');
 		await expect(page.locator('flx-channel-textarea-composer [contenteditable="true"]')).toBeFocused();
 	});
+
+	const searchInput = (page: Page) =>
+		page.locator('[data-flx="channel.message-search-bar.message-search-bar.input.text"]');
+	const suggestions = (page: Page) =>
+		page.locator('[data-flx="channel.message-search-bar.message-search-bar.popout-container"]');
+	const magnifier = (page: Page) => page.locator('[data-flx="channel.header-overflow.magnifier-button"]');
+
+	// cf7e333cfa: the suggestions dropdown (380px and up) flips only above and below the box and
+	// shifts in from either edge, so it never sticks out of the window. Below 480px the channel list
+	// leaves the chat too little room for the header's menu, so the check stops there.
+	test('keeps the search suggestions inside the window', async ({page}) => {
+		await openLongChannel(page);
+		const inBox = () => searchInput(page).click();
+		const byMagnifier = () => magnifier(page).click();
+		const fromMenu = async () => {
+			await moreButton(page).click();
+			await page.getByRole('menuitem', {name: 'Search', exact: true}).click();
+		};
+		const widths: Array<[number, () => Promise<void>]> = [
+			[1400, inBox],
+			[1000, byMagnifier],
+			[760, byMagnifier],
+			[600, fromMenu],
+			[520, fromMenu],
+			[480, fromMenu],
+		];
+		for (const [width, openSearch] of widths) {
+			await page.setViewportSize({width, height: 900});
+			await openSearch();
+			await expect(suggestions(page)).toBeVisible();
+			await expect
+				.poll(async () => {
+					const box = await suggestions(page).boundingBox();
+					return box !== null && box.x >= 0 && box.x + box.width <= width;
+				})
+				.toBe(true);
+			await page.keyboard.press('Escape');
+			await expect(suggestions(page)).toHaveCount(0);
+			await searchInput(page).blur();
+			await expect(header(page)).not.toHaveAttribute('data-header-search-open', '');
+		}
+	});
+
+	// 5283ed5343: the magnifier opens the search as a click in the box does, so after Escape has
+	// closed the suggestions they open again the next time (focusing the box alone left them closed).
+	test('the magnifier opens the suggestions again after Escape closed them', async ({page}) => {
+		await openLongChannel(page);
+		await page.setViewportSize({width: 760, height: 900});
+		await expect(header(page)).toHaveAttribute('data-header-search', 'icon');
+
+		await magnifier(page).click();
+		await expect(searchInput(page)).toBeFocused();
+		await expect(suggestions(page)).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(suggestions(page)).toHaveCount(0);
+		await searchInput(page).blur();
+		await expect(header(page)).not.toHaveAttribute('data-header-search-open', '');
+
+		await magnifier(page).click();
+		await expect(searchInput(page)).toBeFocused();
+		await expect(suggestions(page)).toBeVisible();
+	});
 });
