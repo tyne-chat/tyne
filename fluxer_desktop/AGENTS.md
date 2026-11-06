@@ -240,11 +240,14 @@ deleted; `forkReleaseAssetName` uses them. A main-process string needs `FALLBACK
 - `pnpm --filter fluxer_desktop typecheck` and `test` (`CHECKS.md`) first write the
   git-ignored `src/common/BuildChannel.ts` from `BUILD_CHANNEL` (default `stable`). The tests are
   `node --test` over `src/{main,preload,common}/*.test.mjs`, with Electron stubbed
-  (`installElectronStub` in `src/main/LocalAppTestSupport.test.mjs`).
+  (`installElectronStub` in `src/main/ForkLocalAppTestSupport.test.mjs`, a copy of the helper
+  upstream removed).
 - Fork tests: `src/main/Fork*.test.mjs`; web side `ForkAppWindows.test.ts`,
   `ForkAppWindowBridge.test.ts`. Put logic that needs no Electron in a `Fork*.ts` module so it can
-  be tested; the `Window.ts` block has no test. A `packages/desktop_ipc` change also needs the root
-  guide's "every other workspace package" loop and the web typecheck.
+  be tested. The `Window.ts` block is tested through upstream's `createWindow` with fake windows
+  (`ForkExtraAppWindows.test.mjs`, a fresh copy of the module per test); a new step in the block
+  gets a case there. A `packages/desktop_ipc` change also needs the root guide's "every other
+  workspace package" loop and the web typecheck.
 - Native code: the `fmt`, `clippy` and cargo-deny lines in `CHECKS.md`, plus
   `tools/ci/check-desktop-native-workspaces.sh test`. The host `cargo test --workspace` there
   runs `tools/ci`'s tests of the add-on registry and of the preload's imports
