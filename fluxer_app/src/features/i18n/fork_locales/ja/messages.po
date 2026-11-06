@@ -88,6 +88,10 @@ msgstr "アバター画像のダウンロードに失敗しました: {error}。
 msgid "Back to commands"
 msgstr "コマンド一覧に戻る"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "{section}に戻る"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "バナー画像のダウンロードに失敗しました: {error}。ペルソナはバナーなしでインポートされました。"
