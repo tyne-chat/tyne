@@ -71,3 +71,46 @@ carried_over_sessions_are_marked_unless_pending_test() ->
 
 a_state_without_sessions_is_left_alone_test() ->
     ?assertEqual(#{id => 1}, fork_guild_handoff:mark_carried_over(#{id => 1})).
+
+%% Through upstream's start of a guild that arrives in a handoff
+%% (guild_manager_shard_lifecycle:start_transferred_guild/3): the started guild process holds the
+%% marks. This starts a real guild, and with it upstream's counts cache and voice server, which
+%% all stop with it.
+a_transferred_guild_starts_with_its_sessions_marked_test() ->
+    with_config(#{}, fun() ->
+        ok = process_registry:init(),
+        SessionA = spawn_idle(),
+        SessionB = spawn_idle(),
+        Transferred = #{
+            data => #{},
+            sessions => #{
+                <<"a">> => #{user_id => 1, pid => SessionA, pending_connect => false},
+                <<"b">> => #{user_id => 2, pid => SessionB, pending_connect => true}
+            }
+        },
+        {ok, Guild, _State} = guild_manager_shard_lifecycle:start_transferred_guild(
+            ?GUILD, Transferred, #{guilds => #{}}
+        ),
+        try
+            #{sessions := #{<<"a">> := A, <<"b">> := B}} = sys:get_state(Guild),
+            ?assertEqual(true, maps:get(fork_carried_over, A, false)),
+            ?assertNot(maps:is_key(fork_carried_over, B))
+        after
+            ok = gen_server:stop(Guild),
+            process_registry:safe_unregister(process_registry:build_process_key(guild, ?GUILD)),
+            stop_idle([SessionA, SessionB])
+        end
+    end).
+
+with_config(Config, Fun) ->
+    Key = {fluxer_gateway, runtime_config},
+    Previous = persistent_term:get(Key, undefined),
+    persistent_term:put(Key, Config),
+    try
+        Fun()
+    after
+        case Previous of
+            undefined -> persistent_term:erase(Key);
+            _ -> persistent_term:put(Key, Previous)
+        end
+    end.
