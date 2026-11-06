@@ -17,6 +17,7 @@ and follow the placement rules in the root `AGENTS.md`.
 | New persona IDs | `PersonaIdGenerator.ts` |
 | The three response shapes | `models/Persona.ts` (outside this folder) |
 | Which persona a request names, and whether the caller owns it | `PersonaOwnership.ts` |
+| A new message sent as whoever is selected (`use_persona_selection`) | `PersonaSelection.ts` |
 | Who is typing as whom | `TypingPersona.ts` |
 | Image import from links | `PersonaAvatarImporter.ts`; the upload and link routes are in `user/controllers/UserAccountController.ts` |
 | Deleting the images with the account | `PersonaImageDeletion.ts`, called from `UserDeletionService` |
@@ -47,9 +48,14 @@ and follow the placement rules in the root `AGENTS.md`.
   selection (`PersonaService`) repeat the check inline: change all of them together. The reaction
   check runs only when `MessageReactionService` was given a persona repository; unlike send and edit
   it has no fallback to `getPersonaRepository()`.
-- **The server stores the selection but never applies it.** Which persona a user has selected,
-  globally or per channel, is kept for their clients. The server never picks a persona for a
-  message: a request without `persona_id` is sent as the account.
+- **The server stores the selection and applies it only when asked.** Which persona a user has
+  selected, globally or per channel, is kept for their clients, which decide a message's persona
+  themselves: a request without `persona_id` is sent as the account. The one exception is a new
+  message with `use_persona_selection` and no `persona_id`, for senders that cannot see the
+  selection (notification replies, tyne-chat/tyne#343): `PersonaSelection.ts` decides by the
+  clients' rule (the channel's selection with the per-channel scope, else the latched persona, and a
+  tag in the text first, through the shared `matchPersona`) and takes the tag out of the content. It
+  changes nothing: the unlatch escape only sends as the account, and "last" mode does not move.
 - **Deletion is soft.** `delete` stamps `deleted_at`. `findById`, `findByUserId` and `count` skip
   deleted rows, so a deletion frees the 250-persona cap, the tags and the signature emojis.
   `findByUserAndPersonaIds`, which hydration uses, does not skip them, so old messages keep showing
