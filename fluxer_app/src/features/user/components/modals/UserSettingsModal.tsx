@@ -30,6 +30,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {SettingsNarrowStartOnList} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+
 interface UserSettingsModalProps {
 	initialTab?: UserSettingsTabType;
 	initialSubtab?: string;
@@ -187,6 +191,9 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = observer(
 						data-flx="user.user-settings-modal.modal-screen-reader-label"
 					/>
 					<SettingsModalContainer fullscreen={true} data-flx="user.user-settings-modal.settings-modal-container">
+						{initialTab == null && initialSubtab == null && (
+							<SettingsNarrowStartOnList data-flx="user.user-settings-modal.settings-narrow-start-on-list" />
+						)}
 						{isMobile ? (
 							<MobileSettingsView
 								groupedSettingsTabs={groupedSettingsTabs}

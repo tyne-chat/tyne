@@ -19,7 +19,10 @@ import {useRef} from 'react';
 
 // Fork imports.
 
-import {SettingsNarrowNavButton} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+import {
+	SettingsNarrowNavButton,
+	SettingsNarrowTitle,
+} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
 
 interface SettingsModalHeaderProps {
 	title: React.ReactNode;
@@ -88,11 +91,12 @@ export const SettingsModalHeader: React.FC<SettingsModalHeaderProps> = observer(
 						>
 							<SettingsNarrowNavButton
 								onClose={onClose}
+								title={title}
 								data-flx="app.settings-modal-header.settings-narrow-nav-button"
 							/>
 							<div className={styles.titleWrapper} data-flx="app.settings-modal-header.title-wrapper">
 								<h1 className={styles.title} data-flx="app.settings-modal-header.title">
-									{title}
+									<SettingsNarrowTitle title={title} data-flx="app.settings-modal-header.settings-narrow-title" />
 								</h1>
 								{pageLinkHref ? (
 									<SettingsHeadingLinkButton
