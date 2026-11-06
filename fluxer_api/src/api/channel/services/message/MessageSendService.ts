@@ -97,6 +97,7 @@ import {type ForkSendMessageOptions, recordForkGuildCommandUse} from '@app/api/g
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import {requestedPersonaId, resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
+import {applyPersonaSelection} from '@app/api/persona/PersonaSelection';
 
 interface MessageSendServiceDeps {
 	threadActivity: ThreadMessageActivity;
@@ -329,6 +330,27 @@ export class MessageSendService {
 		const requested = requestedPersonaId(data, user.id);
 		if (requested == null) return null;
 		return resolveOwnedPersonaId(this.deps.personaRepository ?? getPersonaRepository(), user.id, requested);
+	}
+
+	/**
+	 * The persona a message is sent as. Only here, at the send, does a request without a persona of
+	 * its own get the selected one: applying it also takes a tag out of the content, which a
+	 * validation before the send must not do.
+	 */
+	private async resolveSentPersonaId({
+		user,
+		channelId,
+		data,
+	}: {
+		user: User;
+		channelId: ChannelID;
+		data: MessageRequest;
+	}): Promise<PersonaID | null> {
+		if (data.use_persona_selection && data.persona_id === undefined && data.subprofile === undefined) {
+			const personaRepository = this.deps.personaRepository ?? getPersonaRepository();
+			return applyPersonaSelection({personaRepository, userId: user.id, channelId, data});
+		}
+		return this.resolveMessagePersonaId({user, data});
 	}
 
 	private assertNotThreadStarterReference(
@@ -658,7 +680,7 @@ export class MessageSendService {
 		if (!user.isBot && user.id !== SYSTEM_USER_ID && !(user.flags & UserFlags.HAS_SESSION_STARTED)) {
 			throw InputValidationError.fromCode('content', ValidationErrorCodes.MUST_START_SESSION_BEFORE_SENDING);
 		}
-		const personaId = await this.resolveMessagePersonaId({user, data});
+		const personaId = await this.resolveSentPersonaId({user, channelId, data});
 		if (isPersonalNotesChannelId({userId: user.id, channelId})) {
 			const message = await this.sendPersonalNoteMessage({
 				authChannel,
