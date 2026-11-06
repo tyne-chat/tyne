@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import {beforeEach, describe, expect, it, type MockInstance, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, type MockInstance, vi} from 'vitest';
 
 await vi.hoisted(async () => {
 	const {installVoiceMenuTestBootstrap} = await import(
@@ -283,5 +283,236 @@ describe('moveSignal', () => {
 		expect(moveSignal(input, 0, 2)).toEqual(['b', 'c', 'a']);
 		expect(moveSignal(input, 2, 0)).toEqual(['c', 'a', 'b']);
 		expect(input).toEqual(['a', 'b', 'c']);
+	});
+});
+
+// "Network calls" in the root AGENTS.md and the table in signal_bar/AGENTS.md: how many requests
+// the store sends, with the data missing and with the request failing. Each request is held until
+// the test answers it.
+describe('the requests SignalBarStore sends', () => {
+	interface HeldRequest {
+		method: 'GET' | 'PUT' | 'DELETE';
+		path: string;
+		answer: (body?: unknown) => Promise<void>;
+		refuse: (status: number) => Promise<void>;
+		fail: () => Promise<void>;
+	}
+
+	let requests: Array<HeldRequest>;
+	let getMock: MockInstance<typeof http.get>;
+	let putMock: MockInstance<typeof http.put>;
+	let deleteMock: MockInstance<typeof http.delete>;
+
+	// Lets every promise chain the answer started run to its end, as the store's `void` calls do.
+	const drain = async () => {
+		for (let i = 0; i < 10; i += 1) await Promise.resolve();
+	};
+
+	function hold(method: HeldRequest['method']) {
+		return ((path: string) =>
+			new Promise((resolve, reject) => {
+				requests.push({
+					method,
+					path,
+					answer: async (body) => {
+						resolve({ok: true, status: 200, body});
+						await drain();
+					},
+					refuse: async (status) => {
+						resolve({ok: false, status, body: {code: 'ERROR'}});
+						await drain();
+					},
+					fail: async () => {
+						reject(new Error('offline'));
+						await drain();
+					},
+				});
+			})) as never;
+	}
+
+	const sent = (method: HeldRequest['method'], path?: string) =>
+		requests.filter((request) => request.method === method && (path === undefined || request.path === path));
+	const configGets = () => sent('GET', ForkEndpoints.INSTANCE_SIGNAL_BAR);
+	const channelGets = (channelId: string) => sent('GET', ForkEndpoints.CHANNEL_SIGNALS(channelId));
+	const config = (version: number) => ({signals: [signal('a')], version, guild_id: 'home', can_manage: false});
+	const channelBody = (barVersion: number, entries: Array<ChannelSignalEntry> = []) => ({
+		enabled: true,
+		bar_version: barVersion,
+		entries,
+	});
+
+	beforeEach(() => {
+		requests = [];
+		getMock = vi.spyOn(http, 'get').mockImplementation(hold('GET'));
+		putMock = vi.spyOn(http, 'put').mockImplementation(hold('PUT'));
+		deleteMock = vi.spyOn(http, 'delete').mockImplementation(hold('DELETE'));
+		runInAction(() => {
+			SignalBarStore.version = 3;
+		});
+	});
+
+	afterEach(async () => {
+		// Nothing may stay in flight into the next test: a held config request would be shared.
+		for (const request of requests) await request.fail();
+		getMock.mockRestore();
+		putMock.mockRestore();
+		deleteMock.mockRestore();
+	});
+
+	describe('the bar itself', () => {
+		it('shares one request among callers while it is in flight, and asks anew after it settles', async () => {
+			void SignalBarStore.fetchConfig();
+			void SignalBarStore.fetchConfig();
+			SignalBarStore.handleBarUpdate(9);
+			expect(configGets()).toHaveLength(1);
+
+			await configGets()[0]?.answer(config(9));
+			expect(SignalBarStore.version).toBe(9);
+			expect(SignalBarStore.guildId).toBe('home');
+
+			void SignalBarStore.fetchConfig();
+			expect(configGets()).toHaveLength(2);
+		});
+
+		it('asks only for a version newer than the one it has', async () => {
+			SignalBarStore.handleBarUpdate(3);
+			SignalBarStore.handleBarUpdate(2);
+			expect(configGets()).toHaveLength(0);
+
+			SignalBarStore.handleChannelUpdate({channel_id: 'not-loaded', bar_version: 4, added: [], removed: []});
+			SignalBarStore.handleChannelUpdate({channel_id: 'not-loaded', bar_version: 5, added: [], removed: []});
+			expect(configGets()).toHaveLength(1);
+		});
+
+		it('gives up after a failed request: it keeps what it had and sends nothing more by itself', async () => {
+			runInAction(() => {
+				SignalBarStore.signals = [signal('kept')];
+			});
+			void SignalBarStore.fetchConfig();
+			await configGets()[0]?.fail();
+			void SignalBarStore.fetchConfig();
+			await configGets()[1]?.refuse(429);
+
+			expect(configGets()).toHaveLength(2);
+			expect(SignalBarStore.version).toBe(3);
+			expect(SignalBarStore.signals.map((item) => item.id)).toEqual(['kept']);
+		});
+
+		it('empties every channel and asks for the bar once when invalidated', async () => {
+			void SignalBarStore.fetchChannel('loaded');
+			await channelGets('loaded')[0]?.answer(channelBody(3, [entry('a', '1')]));
+			const epoch = SignalBarStore.epoch;
+
+			SignalBarStore.invalidate();
+			SignalBarStore.invalidate();
+
+			expect(SignalBarStore.getEntries('loaded', 'a')).toEqual([]);
+			expect(SignalBarStore.isEnabled('loaded')).toBe(false);
+			expect(SignalBarStore.epoch).toBe(epoch + 2);
+			expect(configGets()).toHaveLength(1);
+			expect(channelGets('loaded')).toHaveLength(1);
+		});
+	});
+
+	describe('a channel', () => {
+		it('sends one request per call, neither shared nor cached', async () => {
+			void SignalBarStore.fetchChannel('one');
+			void SignalBarStore.fetchChannel('two');
+			void SignalBarStore.fetchChannel('one');
+			expect(channelGets('one')).toHaveLength(2);
+			expect(channelGets('two')).toHaveLength(1);
+
+			for (const request of [...requests]) await request.answer(channelBody(3));
+			expect(requests).toHaveLength(3);
+		});
+
+		it('asks for the bar once when channels report a newer bar, and not for the same one', async () => {
+			void SignalBarStore.fetchChannel('one');
+			void SignalBarStore.fetchChannel('two');
+			void SignalBarStore.fetchChannel('three');
+			await channelGets('one')[0]?.answer(channelBody(3));
+			expect(configGets()).toHaveLength(0);
+
+			await channelGets('two')[0]?.answer(channelBody(4));
+			await channelGets('three')[0]?.answer(channelBody(4));
+			expect(configGets()).toHaveLength(1);
+		});
+
+		it('keeps what it showed and sends nothing more after a failed or refused request', async () => {
+			void SignalBarStore.fetchChannel('flaky');
+			await channelGets('flaky')[0]?.answer(channelBody(3, [entry('a', '1')]));
+
+			void SignalBarStore.fetchChannel('flaky');
+			await channelGets('flaky')[1]?.fail();
+			void SignalBarStore.fetchChannel('flaky');
+			await channelGets('flaky')[2]?.refuse(400);
+
+			expect(requests).toHaveLength(3);
+			expect(SignalBarStore.getEntries('flaky', 'a')).toHaveLength(1);
+			expect(SignalBarStore.isEnabled('flaky')).toBe(true);
+		});
+
+		it('remembers the accounts and personas of the signals it loads', async () => {
+			const lit = {
+				...entry('a', '1000000000000000077'),
+				persona_id: '1000000000000000078',
+				subprofile: {id: '1000000000000000078', name: 'Kit'} as ChannelSignalEntry['subprofile'],
+			};
+			void SignalBarStore.fetchChannel('remembered');
+			await channelGets('remembered')[0]?.answer(channelBody(3, [lit]));
+
+			expect(PersonaStore.getKnownPersona('1000000000000000078')?.name).toBe('Kit');
+			expect(requests).toHaveLength(1);
+		});
+
+		it('counts a channel it could not load as off', async () => {
+			void SignalBarStore.fetchChannel('thread');
+			await channelGets('thread')[0]?.refuse(400);
+
+			expect(SignalBarStore.isEnabled('thread')).toBe(false);
+			expect(SignalBarStore.getEntries('thread', 'a')).toEqual([]);
+		});
+	});
+
+	describe('a write the server refuses', () => {
+		const writes: Array<[string, () => Promise<void>, HeldRequest['method']]> = [
+			['switching the bar in a DM', () => SignalBarStore.setDmEnabled('chan', false), 'PUT'],
+			['giving a signal', () => SignalBarStore.activate('chan', 'a', null), 'PUT'],
+			['withdrawing a signal', () => SignalBarStore.deactivate('chan', 'a'), 'DELETE'],
+			['resetting a signal', () => SignalBarStore.reset('chan', 'a'), 'DELETE'],
+		];
+
+		for (const [action, write, method] of writes) {
+			it(`reloads the channel once after ${action} fails, and not again when that fails too`, async () => {
+				const done = write();
+				expect(sent(method)).toHaveLength(1);
+				expect(channelGets('chan')).toHaveLength(0);
+
+				await sent(method)[0]?.fail();
+				await done;
+				expect(channelGets('chan')).toHaveLength(1);
+
+				await channelGets('chan')[0]?.fail();
+				expect(requests).toHaveLength(2);
+			});
+		}
+
+		it('sends nothing more after switching the bar in a DM succeeds', async () => {
+			const done = SignalBarStore.setDmEnabled('chan', true);
+			await sent('PUT')[0]?.answer();
+			await done;
+			expect(requests).toHaveLength(1);
+		});
+
+		it("answers null for a community's settings it could not load or save", async () => {
+			const loading = SignalBarStore.fetchGuildSettings('guild');
+			await sent('GET')[0]?.fail();
+			expect(await loading).toBeNull();
+
+			const saving = SignalBarStore.saveGuildSettings('guild', {} as never);
+			await sent('PUT')[0]?.refuse(403);
+			expect(await saving).toBeNull();
+			expect(requests).toHaveLength(2);
+		});
 	});
 });
