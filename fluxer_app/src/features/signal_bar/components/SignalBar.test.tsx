@@ -42,6 +42,7 @@ vi.mock('@app/features/ui/components/Avatar', () => ({
 	Avatar: () => <span data-testid="badge-avatar" data-flx="signal-bar.signal-bar-test.avatar.badge-avatar" />,
 }));
 
+import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import type {Channel} from '@app/features/channel/models/Channel';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import SessionManager from '@app/features/platform/state/AuthSession';
@@ -233,5 +234,96 @@ describe('SignalBar', () => {
 
 		await act(async () => button('Show signal bar')?.click());
 		expect(button('Reading')).toBeDefined();
+	});
+});
+
+// "Network calls" in the root AGENTS.md: the requests a mounted bar sends as channels are opened,
+// with the data missing and with the request failing (the table in signal_bar/AGENTS.md).
+describe('the requests a mounted bar sends', () => {
+	let container: HTMLDivElement;
+	let root: Root;
+	const getMock = vi.spyOn(http, 'get');
+	let failChannels = false;
+
+	const paths = () => getMock.mock.calls.map(([path]) => path);
+	const channelPaths = () => paths().filter((path) => path !== ForkEndpoints.INSTANCE_SIGNAL_BAR);
+	const configPaths = () => paths().filter((path) => path === ForkEndpoints.INSTANCE_SIGNAL_BAR);
+	const show = async (id: string) => {
+		await act(async () => {
+			root.render(
+				<SignalBar
+					channel={channel({id} as Partial<Channel>)}
+					attached={true}
+					data-flx="signal-bar.signal-bar-test.signal-bar--requests"
+				/>,
+			);
+		});
+	};
+
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+		root = createRoot(container);
+		failChannels = false;
+		getMock.mockReset().mockImplementation(((path: string) => {
+			if (path === ForkEndpoints.INSTANCE_SIGNAL_BAR) return Promise.reject(new Error('offline'));
+			if (failChannels) return Promise.reject(new Error('offline'));
+			return Promise.resolve({ok: true, body: {enabled: true, bar_version: 1, entries: []}});
+		}) as never);
+		runInAction(() => {
+			SignalBarStore.signals = [READING];
+			SignalBarStore.version = 1;
+			SignalBarStore.collapsed = false;
+		});
+	});
+
+	afterEach(() => {
+		act(() => root.unmount());
+		container.remove();
+	});
+
+	it('sends one channel request per channel opened, every time, and none for a render of the same channel', async () => {
+		await show('a');
+		await show('b');
+		await show('a');
+		await show('a');
+
+		expect(channelPaths()).toEqual(['/channels/a/signals', '/channels/b/signals', '/channels/a/signals']);
+		expect(configPaths()).toEqual([]);
+	});
+
+	it('does not send a failed channel request again on the next render', async () => {
+		failChannels = true;
+		await show('never-loaded');
+		await show('never-loaded');
+		await show('never-loaded');
+
+		expect(channelPaths()).toEqual(['/channels/never-loaded/signals']);
+		expect(container.innerHTML).toBe('');
+	});
+
+	it('asks once more for the channel after READY empties the store', async () => {
+		await show('a');
+		await act(async () => SignalBarStore.invalidate());
+
+		expect(channelPaths()).toEqual(['/channels/a/signals', '/channels/a/signals']);
+		expect(configPaths()).toHaveLength(1);
+	});
+
+	it('asks for a bar it does not have once per mount, sends nothing for channels meanwhile, and gives up when it fails', async () => {
+		runInAction(() => {
+			SignalBarStore.signals = [];
+			SignalBarStore.version = -1;
+		});
+		await show('a');
+		await show('b');
+		expect(configPaths()).toHaveLength(1);
+
+		act(() => root.unmount());
+		root = createRoot(container);
+		await show('a');
+
+		expect(configPaths()).toHaveLength(2);
+		expect(channelPaths()).toEqual([]);
 	});
 });
