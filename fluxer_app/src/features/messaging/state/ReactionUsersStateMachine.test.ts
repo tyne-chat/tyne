@@ -205,3 +205,179 @@ describe('ReactionUsersStateMachine: persona support', () => {
 		expect(snapshot.context.userSnapshot[0].subprofile?.display_tag_icon).toBe('2b3c4d5e');
 	});
 });
+
+const OTHER_USER_ID = '1546374142368940099';
+
+function otherUserPartial(): UserPartial {
+	return {
+		id: OTHER_USER_ID,
+		username: 'robin',
+		discriminator: '0002',
+		global_name: 'Robin',
+		avatar: null,
+		persona_id: null,
+		subprofile: null,
+	} as any;
+}
+
+const nameOf = (user: {subprofile?: {name?: string} | null; globalName?: string | null}) =>
+	user.subprofile?.name ?? user.globalName;
+
+describe('ReactionUsersStateMachine: pages of reactors with personas', () => {
+	function withReactors(...users: Array<UserPartial>) {
+		let snapshot = createReactionUsersSnapshot();
+		for (const user of users)
+			snapshot = transitionReactionUsersSnapshot(snapshot, {type: 'user.add', user: new User(user)});
+		return snapshot;
+	}
+
+	it('puts a first page that is not the whole list before the reactors it already had', () => {
+		let snapshot = withReactors(makeUserPartial(null), makeUserPartial(PERSONA_1_ID, 'Alice'));
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [otherUserPartial(), makeUserPartial(PERSONA_1_ID, 'Alice renamed')],
+			responseHasMore: true,
+		});
+
+		expect(snapshot.context.userSnapshot.map(nameOf)).toEqual(['Robin', 'Alice renamed', 'Chiara']);
+		expect(snapshot.context.lastUserId).toBe(ROOT_USER_ID);
+	});
+
+	it('replaces the reactors with a first page that is the whole list', () => {
+		let snapshot = withReactors(makeUserPartial(null), makeUserPartial(PERSONA_1_ID, 'Alice'));
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [otherUserPartial()],
+			responseHasMore: false,
+		});
+
+		expect(snapshot.context.userSnapshot.map(nameOf)).toEqual(['Robin']);
+	});
+
+	it('keeps the reactors it had when a first page comes back empty without saying it is the end', () => {
+		let snapshot = withReactors(makeUserPartial(PERSONA_1_ID, 'Alice'));
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {type: 'fetch.success', mode: 'replace', users: []});
+
+		expect(snapshot.context.userSnapshot.map(nameOf)).toEqual(['Alice']);
+		expect(snapshot.context.hasMore).toBe(false);
+	});
+
+	it('adds a later page after the reactors shown, each persona of one account apart and once', () => {
+		let snapshot = withReactors(makeUserPartial(null));
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'append',
+			users: [makeUserPartial(PERSONA_1_ID, 'Alice'), makeUserPartial(null), makeUserPartial(PERSONA_2_ID, 'Bob')],
+			requestedLimit: 3,
+		});
+
+		expect(snapshot.context.userSnapshot.map(nameOf)).toEqual(['Chiara', 'Alice', 'Bob']);
+		expect(snapshot.context.users.size).toBe(3);
+		expect(snapshot.context.hasMore).toBe(true);
+
+		const before = snapshot.context.userSnapshot;
+		snapshot = transitionReactionUsersSnapshot(snapshot, {type: 'fetch.success', mode: 'append', users: []});
+		expect(snapshot.context.userSnapshot).toBe(before);
+		expect(snapshot.context.hasMore).toBe(false);
+	});
+});
+
+describe('ReactionUsersStateMachine: removing reactors with personas', () => {
+	it("keeps the account's persona reactions when its own reaction is removed and only those are listed", () => {
+		let snapshot = createReactionUsersSnapshot();
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [makeUserPartial(PERSONA_1_ID, 'Alice'), otherUserPartial()],
+		});
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {type: 'user.remove', userId: ROOT_USER_ID, personaId: null});
+
+		expect(snapshot.context.userSnapshot.map(nameOf)).toEqual(['Alice', 'Robin']);
+	});
+
+	it('changes nothing for a reactor or a persona that is not listed', () => {
+		let snapshot = createReactionUsersSnapshot();
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [makeUserPartial(null), makeUserPartial(PERSONA_1_ID, 'Alice')],
+		});
+		const version = snapshot.context.version;
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'user.remove',
+			userId: OTHER_USER_ID,
+			personaId: null,
+		});
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'user.remove',
+			userId: ROOT_USER_ID,
+			personaId: PERSONA_2_ID,
+		});
+
+		expect(snapshot.context.version).toBe(version);
+		expect(snapshot.context.userSnapshot.map(nameOf)).toEqual(['Chiara', 'Alice']);
+	});
+
+	it("removes the account's own reaction by its root key, and treats persona '0' as the account", () => {
+		let snapshot = createReactionUsersSnapshot();
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [makeUserPartial(null), makeUserPartial(PERSONA_1_ID, 'Alice')],
+		});
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {type: 'user.remove', userId: ROOT_USER_ID, personaId: '0'});
+
+		expect(snapshot.context.userSnapshot.map(nameOf)).toEqual(['Alice']);
+	});
+});
+
+describe('ReactionUsersStateMachine: display tag updates', () => {
+	it("changes only the persona reactors of that account, and leaves the account's own reaction and others alone", () => {
+		let snapshot = createReactionUsersSnapshot();
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [otherUserPartial(), makeUserPartial(null), makeUserPartial(PERSONA_1_ID, 'Alice')],
+		});
+		const [robin, chiara] = snapshot.context.userSnapshot;
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'displayTag.update',
+			userId: ROOT_USER_ID,
+			display_tag_text: 'NEW TAG',
+		});
+
+		const [robinAfter, chiaraAfter, alice] = snapshot.context.userSnapshot;
+		expect(robinAfter).toBe(robin);
+		expect(chiaraAfter).toBe(chiara);
+		expect(alice?.subprofile?.display_tag_text).toBe('NEW TAG');
+		expect(alice?.subprofile?.display_tag_icon).toBeUndefined();
+	});
+
+	it('changes nothing for an account with no persona reactors listed', () => {
+		let snapshot = createReactionUsersSnapshot();
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'fetch.success',
+			mode: 'replace',
+			users: [otherUserPartial(), makeUserPartial(null)],
+		});
+		const version = snapshot.context.version;
+
+		snapshot = transitionReactionUsersSnapshot(snapshot, {
+			type: 'displayTag.update',
+			userId: ROOT_USER_ID,
+			display_tag_text: 'NEW TAG',
+		});
+
+		expect(snapshot.context.version).toBe(version);
+	});
+});
