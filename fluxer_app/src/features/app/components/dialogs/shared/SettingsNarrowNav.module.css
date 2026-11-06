@@ -115,3 +115,17 @@
 	clip-path: inset(50%);
 	white-space: nowrap;
 }
+
+.crumbSeparator {
+	color: var(--text-primary-muted);
+}
+
+/* Upstream's phone editor has its own "Back to overrides" row; in a narrow dialog the header's back
+   button does that, so the row would only repeat it. */
+.root[data-settings-narrow] [data-flx='channel.channel-tabs.channel-permissions-tab.mobile-back-row'] {
+	display: none;
+}
+
+.root[data-settings-narrow] [data-flx='guild.guild-tabs.guild-roles-tab.mobile-back-row'] {
+	display: none;
+}
