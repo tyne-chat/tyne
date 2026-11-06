@@ -40528,6 +40528,10 @@
 			"MessageRequestSchema": {
 				"type": "object",
 				"properties": {
+					"use_persona_selection": {
+						"description": "Send as the persona your clients have selected for this channel, and read a persona tag in content as they do. For senders that cannot see the selection, such as a reply typed in a notification. Ignored when persona_id or subprofile is sent",
+						"type": "boolean"
+					},
 					"content": {"anyOf": [{"$ref": "#/components/schemas/MessageContentRequest"}, {"type": "null"}]},
 					"embeds": {
 						"maxItems": 100,
@@ -45877,6 +45881,10 @@
 					},
 					"message": {
 						"properties": {
+							"use_persona_selection": {
+								"description": "Send as the persona your clients have selected for this channel, and read a persona tag in content as they do. For senders that cannot see the selection, such as a reply typed in a notification. Ignored when persona_id or subprofile is sent",
+								"type": "boolean"
+							},
 							"content": {"anyOf": [{"$ref": "#/components/schemas/MessageContentRequest"}, {"type": "null"}]},
 							"embeds": {
 								"maxItems": 100,
@@ -45962,6 +45970,10 @@
 			"ForumThreadMessageRequest": {
 				"type": "object",
 				"properties": {
+					"use_persona_selection": {
+						"description": "Send as the persona your clients have selected for this channel, and read a persona tag in content as they do. For senders that cannot see the selection, such as a reply typed in a notification. Ignored when persona_id or subprofile is sent",
+						"type": "boolean"
+					},
 					"content": {"anyOf": [{"$ref": "#/components/schemas/MessageContentRequest"}, {"type": "null"}]},
 					"embeds": {
 						"maxItems": 100,
