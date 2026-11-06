@@ -88,6 +88,10 @@ msgstr "Obrázek avataru se nepodařilo stáhnout: {error}. Persona byla importo
 msgid "Back to commands"
 msgstr "Zpět na příkazy"
 
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Zpět: {section}"
+
 #. Import warning when a persona banner fails to download
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Obrázek banneru se nepodařilo stáhnout: {error}. Persona byla importována bez banneru."
