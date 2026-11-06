@@ -101,16 +101,16 @@ describe('resolveShouldAnimateDecision', () => {
 		keptUnderReducedMotion: false,
 		isInteracting: false,
 		saveData: false,
-		animatedMediaPlaybackAllowed: true,
+		windowActive: true,
 	};
 
-	describe('when animatedMediaPlaybackAllowed is false (window unfocused & stayInteractiveWhenUnfocused is false)', () => {
+	describe('when windowActive is false (window unfocused & stayInteractiveWhenUnfocused is false)', () => {
 		it('returns false for allowance ALWAYS (e.g. emojis, GIFs)', () => {
 			expect(
 				resolveShouldAnimateDecision({
 					...baseInput,
 					allowance: 'ALWAYS',
-					animatedMediaPlaybackAllowed: false,
+					windowActive: false,
 				}),
 			).toBe(false);
 		});
@@ -121,7 +121,7 @@ describe('resolveShouldAnimateDecision', () => {
 					...baseInput,
 					allowance: 'ON_INTERACTION',
 					isInteracting: true,
-					animatedMediaPlaybackAllowed: false,
+					windowActive: false,
 				}),
 			).toBe(false);
 		});
@@ -132,7 +132,7 @@ describe('resolveShouldAnimateDecision', () => {
 					...baseInput,
 					allowance: 'ON_INTERACTION',
 					isInteracting: false,
-					animatedMediaPlaybackAllowed: false,
+					windowActive: false,
 				}),
 			).toBe(false);
 		});
@@ -142,19 +142,19 @@ describe('resolveShouldAnimateDecision', () => {
 				resolveShouldAnimateDecision({
 					...baseInput,
 					allowance: 'NEVER',
-					animatedMediaPlaybackAllowed: false,
+					windowActive: false,
 				}),
 			).toBe(false);
 		});
 	});
 
-	describe('when animatedMediaPlaybackAllowed is true (window focused or stayInteractiveWhenUnfocused is true)', () => {
+	describe('when windowActive is true (window focused or stayInteractiveWhenUnfocused is true)', () => {
 		it('returns true for allowance ALWAYS', () => {
 			expect(
 				resolveShouldAnimateDecision({
 					...baseInput,
 					allowance: 'ALWAYS',
-					animatedMediaPlaybackAllowed: true,
+					windowActive: true,
 				}),
 			).toBe(true);
 		});
@@ -165,7 +165,7 @@ describe('resolveShouldAnimateDecision', () => {
 					...baseInput,
 					allowance: 'ON_INTERACTION',
 					isInteracting: true,
-					animatedMediaPlaybackAllowed: true,
+					windowActive: true,
 				}),
 			).toBe(true);
 		});
@@ -176,7 +176,7 @@ describe('resolveShouldAnimateDecision', () => {
 					...baseInput,
 					allowance: 'ON_INTERACTION',
 					isInteracting: false,
-					animatedMediaPlaybackAllowed: true,
+					windowActive: true,
 				}),
 			).toBe(false);
 		});
@@ -186,24 +186,19 @@ describe('resolveShouldAnimateDecision', () => {
 				resolveShouldAnimateDecision({
 					...baseInput,
 					allowance: 'NEVER',
-					animatedMediaPlaybackAllowed: true,
+					windowActive: true,
 				}),
 			).toBe(false);
 		});
 	});
 
 	describe('defaults and standard overrides', () => {
-		it('defaults animatedMediaPlaybackAllowed to true if omitted', () => {
-			const {animatedMediaPlaybackAllowed, ...withoutPlayback} = baseInput;
-			expect(resolveShouldAnimateDecision(withoutPlayback)).toBe(true);
-		});
-
 		it('returns false when isAnimated is false regardless of focus', () => {
 			expect(
 				resolveShouldAnimateDecision({
 					...baseInput,
 					isAnimated: false,
-					animatedMediaPlaybackAllowed: true,
+					windowActive: true,
 				}),
 			).toBe(false);
 		});
@@ -213,7 +208,7 @@ describe('resolveShouldAnimateDecision', () => {
 				resolveShouldAnimateDecision({
 					...baseInput,
 					saveData: true,
-					animatedMediaPlaybackAllowed: true,
+					windowActive: true,
 				}),
 			).toBe(false);
 		});
@@ -270,6 +265,17 @@ describe('useShouldAnimate hook', () => {
 			getValue: () => latestValue,
 		};
 	}
+
+	it('allows playback when animatedMediaPlaybackAllowed is omitted and the window is focused', () => {
+		const origHasFocus = document.hasFocus;
+		document.hasFocus = () => true;
+		try {
+			const result = renderHook({kind: 'emoji'});
+			expect(result.getValue()).toBe(true);
+		} finally {
+			document.hasFocus = origHasFocus;
+		}
+	});
 
 	it('returns false when animatedMediaPlaybackAllowed is explicitly false', () => {
 		const result = renderHook({
