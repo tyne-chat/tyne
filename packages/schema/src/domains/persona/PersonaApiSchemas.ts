@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {withBase64Binary} from '@fluxer/schema/src/primitives/Base64BinaryFields';
 import {QueryBooleanType} from '@fluxer/schema/src/primitives/QueryValidators';
 import {createStringType, SnowflakeStringType, SnowflakeType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
 import {schemaMetadata} from '@fluxer/schema/src/SchemaMetadata';
@@ -293,7 +294,7 @@ export const ChannelPersonaMentionsQuerySchema = z.object({
 });
 
 export const PersonaAvatarUploadRequest = z.object({
-	avatar: z.string().describe('Base64 data URI of the avatar image'),
+	avatar: withBase64Binary(z.string().describe('Base64 data URI of the avatar image')),
 });
 export const PersonaAvatarUploadResponse = z.object({
 	avatar_hash: PersonaAssetHashType.describe('Hash of the uploaded avatar'),
@@ -301,7 +302,7 @@ export const PersonaAvatarUploadResponse = z.object({
 });
 
 export const PersonaBannerUploadRequest = z.object({
-	banner: z.string().describe('Base64 data URI of the banner image'),
+	banner: withBase64Binary(z.string().describe('Base64 data URI of the banner image')),
 });
 export const PersonaBannerUploadResponse = z.object({
 	banner_hash: PersonaAssetHashType.describe('Hash of the uploaded banner'),
@@ -332,7 +333,7 @@ export const PersonaBatchAvatarImportStream = z
 
 export const PersonaImportImageRequest = z.object({
 	kind: PersonaImportImageKindSchema.describe('Whether the image is an avatar or a banner'),
-	image: z.string().describe('Base64 data URI of the image'),
+	image: withBase64Binary(z.string().describe('Base64 data URI of the image')),
 });
 export const PersonaImportImageResponse = z.object({
 	hash: PersonaAssetHashType.describe('Hash of the stored image'),
