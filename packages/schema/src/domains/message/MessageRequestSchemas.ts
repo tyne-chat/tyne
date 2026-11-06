@@ -344,6 +344,12 @@ export type MessageContentRequest = z.infer<typeof MessageContentRequest>;
 
 export const MessageRequestSchema = z
 	.object({
+		use_persona_selection: z
+			.boolean()
+			.optional()
+			.describe(
+				'Send as the persona your clients have selected for this channel, and read a persona tag in content as they do. For senders that cannot see the selection, such as a reply typed in a notification. Ignored when persona_id or subprofile is sent',
+			),
 		content: MessageContentRequest.nullish(),
 		embeds: z.array(RichEmbedRequest).max(100).describe('Array of embed objects to include in the message'),
 		attachments: z
