@@ -83,3 +83,7 @@ pub(super) fn signal_bar_form(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "fork_tests.rs"]
+mod tests;
