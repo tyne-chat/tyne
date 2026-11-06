@@ -184,7 +184,9 @@ message is edited in the channel composer, not an inline box.
 is 800 px), so desktop UI has to fit any width by itself (tyne-chat/tyne#232). Dialogs are never
 wider than the window (a fork block in `app/components/dialogs/Modal.module.css`), and a narrow
 settings dialog shows its list of sections or the open section, not both
-(`app/components/dialogs/shared/SettingsNarrowNav.tsx`). A narrow channel header keeps the name and
+(`app/components/dialogs/shared/SettingsNarrowNav.tsx`); it opens on the list unless a section was
+asked for, and the two tabs that replace the sidebar wide (channel Permissions, community Roles) take
+upstream's phone list and editor narrow, the editor a level below with the path in the title. A narrow channel header keeps the name and
 the sidebar toggle: its search box collapses to a magnifier and its actions move into a "More options"
 menu (`channel/components/channel_header/HeaderOverflow.tsx`, tyne-chat/tyne#233). Desktop app zoom scales the root font size
 (`ui/utils/AppZoomUtils.ts`): rem widths grow while the window's px stay the same, so a

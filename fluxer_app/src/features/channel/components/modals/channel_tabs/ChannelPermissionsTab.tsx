@@ -43,6 +43,13 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {
+	useSettingsNarrow,
+	useSettingsNarrowSubLevel,
+} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+
 const YOU_NEED_THE_PERMISSION_TO_EDIT_THESE_PERMISSIONS_DESCRIPTOR = msg({
 	message: 'You need the "{manageChannelsPermissionLabel}" permission to edit these permissions.',
 	comment:
@@ -77,7 +84,10 @@ const ChannelPermissionsTab: React.FC<{channelId: string}> = observer(({channelI
 	const parentChannel = Channels.getChannel(channel?.parentId || '');
 	const guild = Guilds.getGuild(channel?.guildId || '');
 	const currentUser = Users.currentUser;
-	const isMobile = MobileLayout.enabled;
+	// Fork: a narrow settings dialog uses the phone layout's override list and editor, one level each
+	// (tyne-chat/tyne#232).
+	const forkNarrowSettings = useSettingsNarrow();
+	const isMobile = MobileLayout.enabled || forkNarrowSettings;
 	const overrideOwnerId = useMemo(() => `channel-permissions-${channelId}`, [channelId]);
 	const [selectedOverwriteId, setSelectedOverwriteId] = useState<string | null>(null);
 	const [mobileShowEditor, setMobileShowEditor] = useState(false);
@@ -660,6 +670,28 @@ const ChannelPermissionsTab: React.FC<{channelId: string}> = observer(({channelI
 			SettingsSidebar.updateOverride(overrideOwnerId, sidebarContent);
 		}
 	}, [sidebarContent, channel, guild, currentUser, overrideOwnerId, isMobile]);
+	// Fork: in a narrow settings dialog the editor is the level below Permissions, named in the header.
+	useSettingsNarrowSubLevel(
+		forkNarrowSettings && mobileShowEditor && selectedOverwrite
+			? {title: getOverwriteName(selectedOverwrite), back: handleMobileBack}
+			: null,
+	);
+	// Fork: in the drill-down, removing the open override goes back to the override list instead of
+	// opening the override next to it.
+	const forkDeleteOverride = useCallback(() => {
+		handleDeleteOverride();
+		if (isMobile) handleMobileBack();
+	}, [handleDeleteOverride, isMobile, handleMobileBack]);
+	// Fork: upstream's phone list never makes its "Add override" button the picker's anchor (the
+	// sidebar does), so the picker opened at the dialog's top corner; anchor it while it is open.
+	useLayoutEffect(() => {
+		if (!isMobile || !isAddOverrideOpen) return;
+		addOverrideRefs.setReference(
+			document.querySelector<HTMLElement>(
+				'[data-flx="channel.channel-tabs.channel-permissions-tab.button.set-is-add-override-open"]',
+			),
+		);
+	}, [isMobile, isAddOverrideOpen, addOverrideRefs]);
 	const isComfyLayout = PermissionLayout.isComfy;
 	const isGridLayout = PermissionLayout.isGrid;
 	const permissionsScrollerKey = useMemo(
@@ -722,7 +754,7 @@ const ChannelPermissionsTab: React.FC<{channelId: string}> = observer(({channelI
 								canManageRoles={canManageRoles}
 								onMobileBack={handleMobileBack}
 								getOverwriteName={getOverwriteName}
-								onDeleteOverride={handleDeleteOverride}
+								onDeleteOverride={forkDeleteOverride}
 								allPermissionsState={allPermissionsState}
 								onSetAllPermissions={handleSetAllPermissions}
 								permissionSearchQuery={permissionSearchQuery}

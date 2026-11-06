@@ -15,6 +15,10 @@ vi.mock('@lingui/react/macro', () => ({
 import {
 	SettingsNarrowNav,
 	SettingsNarrowNavButton,
+	SettingsNarrowStartOnList,
+	SettingsNarrowTitle,
+	useSettingsNarrow,
+	useSettingsNarrowSubLevel,
 } from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
 import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -216,6 +220,95 @@ describe('SettingsNarrowNav', () => {
 		click(backButton());
 		click(container.querySelector('[data-settings-narrow-list-header] button')!);
 		expect(onClose).toHaveBeenCalledTimes(1);
+	});
+
+	// A section with a level below it, as Permissions with one override's editor (tyne-chat/tyne#232).
+	function LevelSection({open, onBack}: {open: boolean; onBack: () => void}) {
+		const narrow = useSettingsNarrow();
+		useSettingsNarrowSubLevel(open ? {title: '@everyone', back: onBack} : null);
+		return (
+			<div
+				role="region"
+				tabIndex={-1}
+				data-narrow={String(narrow)}
+				data-flx="app.settings-narrow-nav-test.level-region"
+			>
+				<SettingsNarrowNavButton
+					onClose={onClose}
+					title="Permissions"
+					data-flx="app.settings-narrow-nav-test.level-region.settings-narrow-nav-button"
+				/>
+				<h1 data-flx="app.settings-narrow-nav-test.level-region.title">
+					<SettingsNarrowTitle
+						title="Permissions"
+						data-flx="app.settings-narrow-nav-test.level-region.settings-narrow-title"
+					/>
+				</h1>
+			</div>
+		);
+	}
+
+	function renderLevel(open: boolean, onBack: () => void): void {
+		act(() => {
+			root.render(
+				<SettingsNarrowNav data-flx="app.settings-narrow-nav-test.level-nav">
+					<LevelSection open={open} onBack={onBack} data-flx="app.settings-narrow-nav-test.level-section" />
+				</SettingsNarrowNav>,
+			);
+		});
+	}
+
+	it('goes up one level from a level below the section, and names it in the title', () => {
+		dialogWidthPx = 30 * 16;
+		const onBack = vi.fn();
+		renderLevel(true, onBack);
+		const region = () => container.querySelector('[role="region"]')!;
+		expect(region().getAttribute('data-narrow')).toBe('true');
+		expect(region().querySelector('h1')!.textContent).toBe('Permissions › @everyone');
+		// The title names the section, so the button keeps its arrow and says where it goes to screen readers.
+		expect(backButton().textContent).toBe('');
+		expect(backButton().getAttribute('aria-label')).toContain('Back to');
+		click(backButton());
+		expect(onBack).toHaveBeenCalledTimes(1);
+		expect(view()).toBe('section');
+
+		renderLevel(false, onBack);
+		expect(region().querySelector('h1')!.textContent).toBe('Permissions');
+		expect(backButton().textContent).toBe('Settings');
+		expect(backButton().hasAttribute('aria-label')).toBe(false);
+		click(backButton());
+		expect(view()).toBe('list');
+		expect(onBack).toHaveBeenCalledTimes(1);
+	});
+
+	it('opens on the list when it opens narrow with no section asked for', () => {
+		dialogWidthPx = 30 * 16;
+		act(() => {
+			root.render(
+				<SettingsNarrowNav data-flx="app.settings-narrow-nav-test.start-nav">
+					<SettingsNarrowStartOnList data-flx="app.settings-narrow-nav-test.start-on-list" />
+					<div role="region" tabIndex={-1} data-flx="app.settings-narrow-nav-test.start-region" />
+				</SettingsNarrowNav>,
+			);
+		});
+		expect(view()).toBe('list');
+		resize(50 * 16);
+		expect(view()).toBe('section');
+	});
+
+	it('opens on the section when it opens wide, even with no section asked for', () => {
+		dialogWidthPx = 50 * 16;
+		act(() => {
+			root.render(
+				<SettingsNarrowNav data-flx="app.settings-narrow-nav-test.wide-nav">
+					<SettingsNarrowStartOnList data-flx="app.settings-narrow-nav-test.wide-start-on-list" />
+					<div role="region" tabIndex={-1} data-flx="app.settings-narrow-nav-test.wide-region" />
+				</SettingsNarrowNav>,
+			);
+		});
+		expect(view()).toBe('section');
+		resize(30 * 16);
+		expect(view()).toBe('section');
 	});
 
 	it('shows the section again once the dialog is wide', () => {
