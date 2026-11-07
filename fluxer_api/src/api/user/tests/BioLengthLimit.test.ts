@@ -62,7 +62,8 @@ describe('bio length limit', () => {
 	});
 
 	it('accepts bios up to a limit an instance raised to 1000', async () => {
-		await putMaxBioLength(1001, HTTP_STATUS.BAD_REQUEST);
+		// Fork: the fork's ceiling is 10000, so a limit of 1001 is accepted (BioLengthLimitFork.test.ts).
+		await putMaxBioLength(1001, HTTP_STATUS.OK);
 		await putMaxBioLength(1000, HTTP_STATUS.OK);
 		const account = await createTestAccount(harness);
 		await setBio(account, 1000).expect(HTTP_STATUS.OK).execute();
