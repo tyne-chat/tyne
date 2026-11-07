@@ -60,7 +60,8 @@ export const MAX_CODE_HIGHLIGHT_SOURCE_LENGTH = 50_000;
 export const MAX_CODE_HIGHLIGHT_OUTPUT_LENGTH = 200_000;
 
 export const MAX_BIO_LENGTH = 320;
-export const MAX_BIO_LENGTH_CEILING = 1000;
+// Fork: an instance may raise the bio limit to 10000 characters (tyne-chat/tyne#537).
+export const MAX_BIO_LENGTH_CEILING = 10_000;
 export const AVATAR_MAX_SIZE = ASSET_FORMAT_POLICY.avatar.maxBytes;
 export const MAX_RELATIONSHIPS = 1000;
 const MAX_GROUP_DM_MEMBERS = 50;
