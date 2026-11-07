@@ -41,7 +41,8 @@ message SyncedPreferences {
 
   PrivacyPreferences privacy = 80;
   LocalUserSpamOverrides local_spam_overrides = 81;
-  bool sanitize_urls = 82;
+  // Fork: optional, so that a missing value reads as on (tyne-chat/tyne#535). Same wire format.
+  optional bool sanitize_urls = 82;
 
   SoundSettings sound = 100;
   SpellcheckSettings spellcheck = 101;
