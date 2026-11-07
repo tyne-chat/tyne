@@ -976,7 +976,8 @@ class Accessibility {
 				if (m.mobileMessageGroupSpacing !== undefined) s.mobileMessageGroupSpacing = m.mobileMessageGroupSpacing;
 				if (m.mobileCompactMessageGroupSpacing !== undefined)
 					s.mobileCompactMessageGroupSpacing = m.mobileCompactMessageGroupSpacing;
-				s.autoSendKlipyGifs = m.autoSendKlipyGifs;
+				// Fork: a record without it leaves the setting as it is, which starts on (tyne-chat/tyne#536).
+				if (m.autoSendKlipyGifs !== undefined) s.autoSendKlipyGifs = m.autoSendKlipyGifs;
 				if (m.showGifButton !== undefined) s.showGifButton = m.showGifButton;
 				if (m.showMemesButton !== undefined) s.showMemesButton = m.showMemesButton;
 				if (m.showStickersButton !== undefined) s.showStickersButton = m.showStickersButton;

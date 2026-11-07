@@ -38,7 +38,8 @@ message AccessibilitySettings {
   optional bool mobile_gif_autoplay_value = 18;
   optional bool mobile_animate_emoji_value = 19;
 
-  bool auto_send_klipy_gifs = 20;
+  // Fork: optional, so that a missing value reads as on (tyne-chat/tyne#536). Same wire format.
+  optional bool auto_send_klipy_gifs = 20;
   optional bool show_gif_button = 21;
   optional bool show_memes_button = 22;
   optional bool show_stickers_button = 23;
