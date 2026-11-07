@@ -175,7 +175,7 @@ and the fork tests. Inside upstream's files, under `// Fork imports.`:
 Smaller fork changes: emoji autocomplete limit, typed shortcode case, `<t:>` in the profile's
 time zone, plain paste, an emptied composer deleting its draft. The mention parser is in
 `packages/markdown_parser/rust`; `pnpm --filter fluxer_app wasm:codegen` rebuilds the gitignored
-`MarkdownParserWasmBytes.ts` from it. `patchPersonaMessages` and the reaction state machines copy
+`pkgs/markdown_parser/markdown_parser.wasm` from it, which `MarkdownParserWasm.ts` fetches at run time. `patchPersonaMessages` and the reaction state machines copy
 or rewrite upstream's code: an upstream fix there has to be carried over by hand.
 
 ## Rules and traps

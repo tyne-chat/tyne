@@ -11,7 +11,7 @@ places in two repositories. The fork adds two things: a user mention may name a 
 
 | Consumer | How it gets the crate | What it reads |
 |---|---|---|
-| Web app, and the desktop app that bundles it | `pnpm --filter fluxer_app wasm:codegen` (`tools/ci/src/app_wasm.rs`) builds wasm32 into the gitignored `fluxer_app/src/features/messaging/utils/markdown/parser/MarkdownParserWasmBytes.ts`; `MarkdownParserWasm.ts` calls it | the JSON tree, typed in `Nodes.ts`; messages and the Lexical composer |
+| Web app, and the desktop app that bundles it | `pnpm --filter fluxer_app wasm:codegen` (`tools/ci/src/app_wasm.rs`) builds wasm32 into the gitignored `fluxer_app/pkgs/markdown_parser/markdown_parser.wasm`; `MarkdownParserWasm.ts` fetches it by URL and loads it in the background (until then a parse returns the text unparsed, and `isMarkdownParserReady()` says so) | the JSON tree, typed in `Nodes.ts`; messages and the Lexical composer |
 | `fluxer_messages` | path dependency | mentions, in `mention_extractor.rs` (`fluxer_messages/AGENTS.md`) |
 | Gateway push previews | `fluxer_gateway/native/push_markdown_plaintext_nif`, a path dependency with its own `Cargo.lock`, built by the gateway's compile step | `plaintext::parse_and_render_plaintext` |
 | tyne-mobile | `packages/fluxer_markdown_native/hook/build.dart` compiles `fluxer/packages/markdown_parser/rust` from its `fluxer` submodule | the binary tree through the C ABI, read by `packages/fluxer_markdown_native/lib/src/decode_binary.dart` |
@@ -119,9 +119,10 @@ upstream changes `MentionKind::User`, keep the writer's and the reader's 255 arm
 
 ## Rules and traps
 
-- **`MarkdownParserWasmBytes.ts` is build output:** never edit or commit it. `wasm:codegen`,
-  `typecheck` and `build` (through `codegen`) in `fluxer_app` rebuild it; `test` and
-  `typecheck:only` (the web typecheck in `CHECKS.md`) do not. The web dev server runs `wasm:codegen`
+- **`fluxer_app/pkgs/markdown_parser/markdown_parser.wasm` is build output:** never commit it.
+  `wasm:codegen`, `typecheck` and `build` (through `codegen`) in `fluxer_app` rebuild it; `test` and
+  `typecheck:only` (the web typecheck in `CHECKS.md`) do not, and the fork's web tests read it
+  (`vitest.fork.setup.ts` answers the app's fetch of it from disk), so it must exist before they run. The web dev server runs `wasm:codegen`
   at start-up when the crate's files changed (`gather_wasm_inputs` in
   `tools/ci/src/app_dev_server.rs`) and does not watch them after. After a change, run
   `pnpm --filter fluxer_app wasm:codegen` before the web checks.
