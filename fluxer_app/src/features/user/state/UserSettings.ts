@@ -922,7 +922,8 @@ class UserSettingsState {
 	}
 
 	getSanitizeUrls(): boolean {
-		return this.syncedPreferences.sanitizeUrls;
+		// Fork: on unless turned off (tyne-chat/tyne#535).
+		return this.syncedPreferences.sanitizeUrls ?? true;
 	}
 
 	async setSanitizeUrls(value: boolean): Promise<void> {
