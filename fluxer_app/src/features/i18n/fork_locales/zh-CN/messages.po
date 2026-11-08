@@ -406,6 +406,9 @@ msgstr "编辑人格"
 msgid "Edit timestamp"
 msgstr "编辑时间戳\\"
 
+msgid "Everyone else"
+msgstr "其他人"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "其他一切都与之前完全相同。"
@@ -471,6 +474,9 @@ msgstr "更新显示标签失败"
 
 msgid "Failed to update persona mode"
 msgstr "更新人格模式失败"
+
+msgid "Failed to update the reaction setting"
+msgstr "无法更新反应设置"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "更改人格的记忆范围失败"
@@ -768,6 +774,9 @@ msgstr "未配置显示标签。消息将显示你账号的头像。"
 msgid "No matching personas found."
 msgstr "未找到匹配的人格。"
 
+msgid "No one matches."
+msgstr "没有匹配项。"
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "尚未配置人格。请在设置中创建一个。"
 
@@ -987,9 +996,16 @@ msgstr "公开"
 msgid "Public persona"
 msgstr "公开人格"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "同时以多个人格做出反应"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "回应身份..."
+
+msgid "Reacted"
+msgstr "已添加反应"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "正在以 <0>{reactorName}</0> 身份回应"
@@ -1000,6 +1016,9 @@ msgstr "以 {name} 的身份回应"
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "使用专属表情符号回应时，无论当前活跃角色是谁，都将始终以此角色身份回应。"
+
+msgid "Recent"
+msgstr "最近"
 
 msgid "Recent Personas"
 msgstr "最近使用的人格"
@@ -1053,6 +1072,9 @@ msgstr "如果你改变主意，可以在设置的“已删除的人格”中恢
 msgid "Restored"
 msgstr "已恢复"
 
+msgid "Results"
+msgstr "结果"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "导入前审核"
@@ -1104,7 +1126,6 @@ msgstr "搜索结果（{0}）"
 msgid "Search commands"
 msgstr "搜索命令"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "搜索人格、标签、代词..."
@@ -1549,6 +1570,13 @@ msgstr "你的账号只有一个显示标签，显示在每个人格名称之后
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "你的人格保持不变；它会与此成员关联。"
 
+msgid "Your reactions"
+msgstr "你的反应"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "你的 {emojiName} 反应"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "添加 {count} 个"
@@ -1617,6 +1645,10 @@ msgstr "名字"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "图片未比较"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "轻触以查看你的反应"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, other {已使用 # 次}}"
 
 msgid "{count} notice(s) during import"
 msgstr "导入期间有 {count} 条提示"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count}/{total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "{count}/{total} 已添加反应"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"

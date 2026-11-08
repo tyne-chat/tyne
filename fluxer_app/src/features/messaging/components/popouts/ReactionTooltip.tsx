@@ -18,11 +18,17 @@ import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {useHideTooltipWhile} from '@app/features/persona/components/reactions/useHideTooltipWhile';
+
 const CLICK_TO_VIEW_ALL_REACTIONS_DESCRIPTOR = msg({
 	message: 'Click to view all reactions',
 	comment: 'Label in the reaction tooltip popout.',
 });
 interface ReactionTooltipProps {
+	// Fork: closes the tooltip while the chip's "Your reactions" popout is open (tyne-chat/tyne#86).
+	suppressed?: boolean;
 	message: Message;
 	reaction: MessageReaction;
 	children: React.ReactElement<
@@ -67,6 +73,7 @@ const ArmedReactionTooltip = observer(
 		hoveredEmojiUrl,
 		onTooltipHoverChange,
 		focusTarget,
+		...fork
 	}: ReactionTooltipProps & {focusTarget: HTMLElement | null}) => {
 		const {i18n} = useLingui();
 		const tooltip = useHoverFloatingTooltip(500);
@@ -74,6 +81,8 @@ const ArmedReactionTooltip = observer(
 		useLayoutEffect(() => {
 			if (focusTarget?.matches(':focus-within') && KeyboardMode.keyboardModeEnabled) show();
 		}, [focusTarget, show]);
+		// Fork: closed while the chip's "Your reactions" popout is open (tyne-chat/tyne#86).
+		useHideTooltipWhile(tooltip, fork.suppressed === true);
 		useEffect(() => {
 			onTooltipHoverChange?.(tooltip.state.isOpen);
 		}, [tooltip.state.isOpen, onTooltipHoverChange]);
