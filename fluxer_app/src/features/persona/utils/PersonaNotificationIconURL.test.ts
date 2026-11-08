@@ -35,9 +35,20 @@ describe('getPersonaNotificationIconURL', () => {
 	});
 
 	it("builds the icon from the persona's hash under the owning account, with no server avatar", () => {
-		expect(getPersonaNotificationIconURL(account, 'guild_1', {avatar: 'a_persona_hash'})).toBe(
-			'icon:100000000000000001:a_persona_hash:no-guild',
+		expect(getPersonaNotificationIconURL(account, 'guild_1', {avatar: 'a_1a2b3c4d'})).toBe(
+			'icon:100000000000000001:a_1a2b3c4d:no-guild',
 		);
-		expect(getNotificationIconURL).toHaveBeenCalledWith({id: '100000000000000001', avatar: 'a_persona_hash'});
+		expect(getNotificationIconURL).toHaveBeenCalledWith({id: '100000000000000001', avatar: 'a_1a2b3c4d'});
+	});
+
+	it.each([
+		'https://tracker.example/pixel.png',
+		'data:image/png;base64,iVBORw0KGgo=',
+		'../../1a2b3c4d',
+		'persona_hash',
+	])("gives the account's icon for a value that is not a hash: %s", (avatar) => {
+		expect(getPersonaNotificationIconURL(account, 'guild_1', {avatar})).toBe(
+			'icon:100000000000000001:account_hash:guild_1',
+		);
 	});
 });
