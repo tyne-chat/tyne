@@ -33020,6 +33020,10 @@
 					"display_tag_icon": {
 						"description": "Hash of the display tag icon, from the persona avatar upload or import routes",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"multi_persona_reactions": {
+						"description": "Whether several of the account's identities may react with one emoji",
+						"type": "boolean"
 					}
 				}
 			},
@@ -33040,9 +33044,14 @@
 						"description": "Hash of the display tag icon, an image stored under the account",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
 					},
+					"multi_persona_reactions": {
+						"default": true,
+						"description": "Whether several of the account's identities may react with one emoji. Off, the clients keep at most one: a reaction chip of yours removes it, and picking another persona replaces it",
+						"type": "boolean"
+					},
 					"updated_at": {"type": "string"}
 				},
-				"required": ["user_id", "active_persona_mode", "active_persona_scope", "is_latched"],
+				"required": ["user_id", "active_persona_mode", "active_persona_scope", "is_latched", "multi_persona_reactions"],
 				"additionalProperties": false
 			},
 			"PersonaImportPreviewRequestSchema": {

@@ -1,0 +1,284 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.root {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.searchWrapper {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	height: 2.25rem;
+	box-sizing: border-box;
+	margin: 0 0.75rem 0.5rem;
+	padding: 0 0.625rem;
+	background-color: var(--background-tertiary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md, 6px);
+}
+
+.searchWrapper:focus-within {
+	border-color: var(--brand-primary);
+}
+
+.searchIcon {
+	flex-shrink: 0;
+	color: var(--text-primary-muted);
+}
+
+.searchInput {
+	flex: 1;
+	min-width: 0;
+	border: none;
+	background: transparent;
+	color: var(--text-primary);
+	font-size: 0.8125rem;
+	line-height: 1.25;
+	outline: none;
+}
+
+.searchInput::placeholder {
+	color: var(--text-primary-muted);
+}
+
+.sectionTitle {
+	padding: 0.5rem 0.625rem 0.25rem;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--text-primary-muted);
+}
+
+.recentBlock {
+	padding: 0 0.5rem 0.375rem;
+}
+
+.recentRow {
+	display: flex;
+	gap: 0.125rem;
+	overflow-x: auto;
+	padding: 0.125rem 0.125rem 0.25rem;
+}
+
+.recentItem {
+	flex: none;
+	width: 3.5rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.3125rem;
+	padding: 0.375rem 0 0.25rem;
+	border: none;
+	border-radius: var(--radius-md, 6px);
+	background: transparent;
+	color: var(--text-primary-muted);
+	cursor: pointer;
+}
+
+.recentItem:hover,
+.recentItem:focus-visible {
+	background-color: var(--background-modifier-hover);
+}
+
+.recentAvatar {
+	position: relative;
+	display: inline-flex;
+	border-radius: 50%;
+}
+
+.recentItemOn .recentAvatar {
+	box-shadow:
+		0 0 0 2px var(--background-primary),
+		0 0 0 4px var(--brand-primary);
+}
+
+.recentItemOn {
+	color: var(--text-primary);
+}
+
+.recentBadge {
+	position: absolute;
+	right: -0.3125rem;
+	bottom: -0.3125rem;
+	width: 1.25rem;
+	height: 1.25rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background-color: var(--brand-tint);
+	border: 2px solid var(--background-primary);
+}
+
+.recentBadge img {
+	width: 0.75rem;
+	height: 0.75rem;
+	object-fit: contain;
+}
+
+.recentName {
+	max-width: 3.25rem;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-size: 0.6875rem;
+	font-weight: 600;
+}
+
+.scroller {
+	overflow-y: auto;
+	max-height: clamp(14rem, 48vh, 24rem);
+	padding: 0 0.5rem 0.5rem;
+	border-top: 1px solid var(--background-modifier-accent);
+}
+
+.compact .scroller {
+	max-height: clamp(12rem, 40vh, 16rem);
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	width: 100%;
+	min-height: 2.5rem;
+	padding: 0.1875rem 0.375rem 0.1875rem 0.5rem;
+	border: none;
+	border-radius: var(--radius-md, 6px);
+	background: transparent;
+	color: var(--text-primary);
+	text-align: start;
+	cursor: pointer;
+	user-select: none;
+}
+
+.compact .row {
+	gap: 0.625rem;
+	min-height: 2.125rem;
+	padding-block: 0.125rem;
+}
+
+.rowActive,
+.row:focus-visible {
+	background-color: var(--background-modifier-hover);
+}
+
+.details {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.nameRow {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	min-width: 0;
+}
+
+.name {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+.currentBadge {
+	flex: none;
+	padding: 0 0.3125rem;
+	border-radius: 0.25rem;
+	background-color: var(--background-modifier-accent);
+	color: var(--text-primary-muted);
+	font-size: 0.625rem;
+	font-weight: 700;
+	line-height: 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.accountLabel {
+	flex: none;
+	font-size: 0.75rem;
+	color: var(--text-primary-muted);
+}
+
+/* The emoji itself is the toggle: dashed and grey when this identity has not reacted, filled when it has. */
+.pill {
+	flex: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.25rem;
+	min-width: 2.75rem;
+	height: 1.75rem;
+	box-sizing: border-box;
+	padding: 0 0.4375rem;
+	border: 1px dashed var(--background-modifier-accent);
+	border-radius: 0.5rem;
+}
+
+.compact .pill {
+	min-width: 2.5rem;
+	height: 1.5rem;
+	padding: 0 0.375rem;
+}
+
+.pillEmoji {
+	width: 1.125rem;
+	height: 1.125rem;
+	object-fit: contain;
+}
+
+.pill:not(.pillOn) .pillEmoji {
+	opacity: 0.45;
+	filter: grayscale(1);
+}
+
+.pillPlus {
+	display: none;
+	color: var(--text-primary-muted);
+}
+
+.rowActive .pill:not(.pillOn),
+.row:focus-visible .pill:not(.pillOn) {
+	border-color: var(--text-primary-muted);
+}
+
+.rowActive .pill:not(.pillOn) .pillPlus,
+.row:focus-visible .pill:not(.pillOn) .pillPlus {
+	display: block;
+}
+
+.rowActive .pill:not(.pillOn) .pillEmoji,
+.row:focus-visible .pill:not(.pillOn) .pillEmoji {
+	opacity: 0.85;
+	filter: none;
+}
+
+.pillOn {
+	border-style: solid;
+	border-color: var(--brand-tint-border);
+	background-color: var(--brand-tint);
+}
+
+.pillCheck {
+	color: var(--text-on-brand-tint);
+}
+
+.empty {
+	padding: 1.5rem 0.75rem;
+	text-align: center;
+	font-size: 0.8125rem;
+	color: var(--text-primary-muted);
+}

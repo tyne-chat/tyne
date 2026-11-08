@@ -42,6 +42,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {requestDeleteMessage} from '@app/features/channel/components/MessageActionUtils';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {hasPersonaReacted} from '@app/features/messaging/utils/ReactionUtils';
+import {usePersonaReactionChip} from '@app/features/persona/components/reactions/PersonaReactionChip';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {EmojiInlineMenuItems} from '@app/features/ui/action_menu/items/EmojiContextMenuItems';
 import {MessageContextMenu} from '@app/features/ui/action_menu/MessageContextMenu';
@@ -100,8 +101,12 @@ const MessageReactionItem = observer(
 		const effectivePersona = PersonaStore.getEffectiveReactionPersona(message.channelId, reaction.emoji, draft);
 		const effectivePersonaId = effectivePersona?.id ?? null;
 		const hasEffectivePersonaReacted = hasPersonaReacted(reaction, effectivePersonaId);
+		const personaChip = usePersonaReactionChip(message, reaction, effectivePersonaId);
 		const handleClick = () => {
 			if (isDisabled) {
+				return;
+			}
+			if (personaChip.handleClick()) {
 				return;
 			}
 			if (hasEffectivePersonaReacted) {
@@ -182,19 +187,24 @@ const MessageReactionItem = observer(
 				other: '# reactions',
 			},
 		);
-		const actionText = hasEffectivePersonaReacted
-			? i18n._(PRESS_TO_REMOVE_REACTION_DESCRIPTOR)
-			: i18n._(PRESS_TO_ADD_REACTION_DESCRIPTOR);
+		const actionText =
+			personaChip.actionText ??
+			(hasEffectivePersonaReacted
+				? i18n._(PRESS_TO_REMOVE_REACTION_DESCRIPTOR)
+				: i18n._(PRESS_TO_ADD_REACTION_DESCRIPTOR));
 		const ariaLabel = isDisabled
 			? i18n._(MESSAGE_DESCRIPTOR, {emojiName, reactionCountText})
 			: i18n._(MESSAGE_2_DESCRIPTOR, {emojiName, reactionCountText, actionText});
 		const buttonContent = (
 			<FocusRing offset={-2} data-flx="channel.message-reactions.message-reaction-item.focus-ring">
 				<button
+					{...personaChip.buttonProps}
 					type="button"
 					className={clsx(styles.reactionButton, isDisabled && styles.reactionButtonDisabled)}
 					aria-label={ariaLabel}
-					aria-pressed={isDisabled ? undefined : hasEffectivePersonaReacted}
+					aria-pressed={
+						isDisabled || personaChip.opensMenu ? undefined : (personaChip.pressed ?? hasEffectivePersonaReacted)
+					}
 					aria-disabled={isDisabled || undefined}
 					disabled={disableInteraction}
 					tabIndex={isDisabled ? -1 : undefined}
@@ -237,6 +247,7 @@ const MessageReactionItem = observer(
 								</motion.div>
 							</AnimatePresence>
 						</div>
+						{personaChip.caret}
 					</div>
 				</button>
 			</FocusRing>
@@ -273,6 +284,7 @@ const MessageReactionItem = observer(
 		}
 		return (
 			<ReactionTooltip
+				suppressed={personaChip.isOpen}
 				message={message}
 				reaction={reaction}
 				hoveredEmojiUrl={emojiUrl}
