@@ -15,6 +15,7 @@ import {
 	galleryItemsFromPublic,
 } from '@app/features/persona/utils/PersonaGalleryItems';
 import * as M from '@app/features/persona/utils/PersonaGalleryMessages';
+import {usePersonaImageMenus} from '@app/features/persona/utils/usePersonaImageMenus';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
@@ -45,6 +46,8 @@ export interface PersonaGalleryDetailProps {
 	onBack: () => void;
 	onNavigate: (personaId: string) => void;
 	onClose?: () => void;
+	/** The gallery's Expand or Restore button, last in the nav row as in the list's toolbar; unset on phones. */
+	expandButton?: React.ReactNode;
 }
 
 /**
@@ -66,6 +69,7 @@ export const PersonaGalleryDetail = observer(
 		onBack,
 		onNavigate,
 		onClose,
+		expandButton,
 	}: PersonaGalleryDetailProps) => {
 		const {i18n} = useLingui();
 		const rootRef = useRef<HTMLDivElement>(null);
@@ -77,6 +81,11 @@ export const PersonaGalleryDetail = observer(
 		if (!persona && ownPersona) persona = galleryItemsFromOwn([ownPersona])[0] ?? null;
 		if (!persona && fetched.profile) persona = galleryItemsFromPublic([fetched.profile])[0] ?? null;
 		const canStep = index >= 0 && list.length > 1;
+		const {onAvatarContextMenu, onBannerContextMenu} = usePersonaImageMenus({
+			user,
+			avatarHash: persona?.avatar ?? null,
+			bannerHash: persona?.banner ?? null,
+		});
 
 		const step = useCallback(
 			(delta: number) => {
@@ -185,6 +194,14 @@ export const PersonaGalleryDetail = observer(
 							</button>
 						</>
 					)}
+					{expandButton && (
+						<span
+							className={clsx(styles.detailNavExpand, !canStep && styles.detailNavEnd)}
+							data-flx="persona.gallery.detail.expand"
+						>
+							{expandButton}
+						</span>
+					)}
 				</div>
 				{!persona && fetched.isLoading && (
 					<div className={styles.state} data-flx="persona.gallery.detail.loading">
@@ -204,8 +221,10 @@ export const PersonaGalleryDetail = observer(
 					<div className={styles.detailBody} data-flx="persona.gallery.detail.body">
 						<div className={styles.detailBannerWrap} data-flx="persona.gallery.detail.banner-wrap">
 							<div
+								role="group"
 								className={styles.detailBanner}
 								style={{backgroundColor: color ?? undefined}}
+								onContextMenu={onBannerContextMenu}
 								data-flx="persona.gallery.detail.banner"
 							>
 								{bannerUrl && (
@@ -217,7 +236,12 @@ export const PersonaGalleryDetail = observer(
 									/>
 								)}
 							</div>
-							<span className={styles.detailAvatar} data-flx="persona.gallery.detail.avatar">
+							<span
+								role="group"
+								className={styles.detailAvatar}
+								onContextMenu={onAvatarContextMenu}
+								data-flx="persona.gallery.detail.avatar"
+							>
 								<PersonaAvatar
 									user={user}
 									persona={{avatar: persona.avatar}}
