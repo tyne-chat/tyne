@@ -11,6 +11,7 @@ import type {
 	PersonaSettingsUpdateRequest,
 	PersonaTag,
 	PersonaUpdateRequest,
+	PublicPersonaListResponse,
 	PublicPersonaResponse,
 	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
@@ -634,13 +635,30 @@ export class PersonaService {
 		return results;
 	}
 
-	async getPublicPersonas(viewerUserId: UserID, targetUserId: UserID): Promise<Array<PublicPersonaResponse>> {
+	/**
+	 * An account's public personas, the most used first, with the account's display tag. The order is
+	 * the only thing the caller learns of the usage counters: the counts and last-used times stay out,
+	 * since for a system they would show who is fronting.
+	 */
+	async getPublicPersonas(viewerUserId: UserID, targetUserId: UserID): Promise<PublicPersonaListResponse> {
 		if (viewerUserId !== targetUserId && this.deps.userAccountLookupService) {
 			await this.deps.userAccountLookupService.validateProfileAccess(viewerUserId, targetUserId);
 		}
 
-		const personas = await this.deps.personaRepository.findByUserId(targetUserId);
-		return personas.filter((p) => p.visibility === 'public').map((p) => p.toPublicResponse());
+		const [personas, settings] = await Promise.all([
+			this.deps.personaRepository.findByUserId(targetUserId),
+			this.deps.personaRepository.findSettings(targetUserId),
+		]);
+		const tagText = settings?.display_tag_text?.trim();
+		const tagIcon = settings?.display_tag_icon?.trim();
+		return {
+			display_tag_text: tagText ? tagText : null,
+			display_tag_icon: tagIcon ? tagIcon : null,
+			personas: personas
+				.filter((p) => p.visibility === 'public')
+				.sort((a, b) => b.useCount - a.useCount || (a.id < b.id ? -1 : 1))
+				.map((p) => p.toPublicResponse()),
+		};
 	}
 
 	async getPublicPersonaById(
