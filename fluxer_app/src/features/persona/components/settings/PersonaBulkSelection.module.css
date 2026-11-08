@@ -118,6 +118,7 @@
 }
 
 .cardCheckbox {
+	display: flex;
 	flex: none;
 }
 
