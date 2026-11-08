@@ -38,6 +38,7 @@ function normalizeSettingsRow(row: UserPersonaSettingsRow): UserPersonaSettingsR
 		...row,
 		active_persona_scope: row.active_persona_scope === 'channel' ? 'channel' : 'global',
 		display_tag_icon: personaAssetHashOrNull(row.display_tag_icon),
+		multi_persona_reactions: row.multi_persona_reactions !== false,
 	};
 }
 
