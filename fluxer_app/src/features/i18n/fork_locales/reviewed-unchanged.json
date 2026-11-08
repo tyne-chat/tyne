@@ -1,9 +1,19 @@
 {
 	"version": 1,
-	"msgids": ["Dev (Staging)"],
+	"msgids": ["Dev (Staging)", "Fedora, openSUSE", "Ubuntu, Debian, Linux Mint"],
 	"locales": {
 		"cs": ["(Prefix: {0})", "avatar", "banner", "Persona", "text"],
-		"da": ["Alice", "avatar", "banner", "Persona", "Script"],
+		"da": [
+			"Alice",
+			"avatar",
+			"banner",
+			"Download .deb",
+			"Download .rpm",
+			"Download AppImage",
+			"Download Tyne",
+			"Persona",
+			"Script"
+		],
 		"de": ["Account: @{username}", "Alice", "Name (A–Z)", "Optional", "Persona", "Personas", "Personas ({count})"],
 		"el": ["Persona"],
 		"es-419": [
