@@ -149,7 +149,8 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   popout is open.
 - **Upstream hooks:** `ProfileBody.tsx` (the tab), `UserProfileModalShared.ts` (`ProfileTab`),
   `UserProfileModalUserInfo.tsx`, `ProfileCardUserInfo.tsx` (`personaNameExtras`, under the name),
-  `UserProfilePopout.tsx`, `UserProfileMobileSheet.tsx`, and `Modals.tsx` (the sheet).
+  `UserProfilePopout.tsx`, `UserAreaPopout.tsx` (one's own avatar at the bottom left),
+  `UserProfileMobileSheet.tsx`, and `Modals.tsx` (the sheet).
 
 ## Reactions
 
