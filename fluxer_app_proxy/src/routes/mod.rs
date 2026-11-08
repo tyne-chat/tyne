@@ -15,6 +15,7 @@ pub use spa_index::present_local_asset_prefixes;
 
 mod fork_android_association;
 mod fork_apple_association;
+mod fork_downloads;
 
 use crate::state::AppState;
 use axum::{
@@ -53,6 +54,7 @@ pub fn build_router(state: AppState) -> Router {
             "/apple-app-site-association",
             get(fork_apple_association::apple_app_site_association),
         )
+        .route("/download/{target}", get(fork_downloads::download))
         .route("/assets/{*path}", get(assets_proxy::proxy_assets))
         .route("/module-map.json", get(spa_static::module_map))
         .route("/version.json", get(spa_static::version_json))
