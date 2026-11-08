@@ -11,14 +11,16 @@ const PNG =
 
 const FIXTURE = resolve(process.cwd(), 'fixtures/pluralkit-roundtrip.json');
 
+// Both accounts start with no personas, so the import has nothing to decide and runs without a review.
 async function importThroughDialog(page: Page, filePath: string, summary?: RegExp): Promise<void> {
-	await page.getByRole('button', {name: /Import from PluralKit/i}).click();
-	await page.locator('input[type="file"]').setInputFiles(filePath);
-	await expect(page.getByText(/Total Members/i)).toBeVisible({timeout: 10_000});
-	if (summary) await expect(page.getByText(summary)).toBeVisible();
-	await page.getByRole('button', {name: /^Start Import$/i}).click();
-	await expect(page.getByRole('heading', {name: /Import Complete/i})).toBeVisible({timeout: 30_000});
-	await page.getByRole('button', {name: /^Done$/i}).click();
+	await page.getByRole('button', {name: 'Import', exact: true}).click();
+	const dialog = page.locator('[data-flx="persona.plural-kit-import-modal.modal-root"]');
+	await dialog.locator('input[type="file"]').setInputFiles(filePath);
+	await expect(dialog.getByText(/Total Members/i)).toBeVisible({timeout: 10_000});
+	if (summary) await expect(dialog.getByText(summary)).toBeVisible();
+	await dialog.getByRole('button', {name: 'Import', exact: true}).click();
+	await expect(dialog.getByRole('heading', {name: 'Import finished'})).toBeVisible({timeout: 30_000});
+	await dialog.getByRole('button', {name: /^Done$/i}).click();
 }
 
 async function exportThroughButton(page: Page, name: string): Promise<{path: string; files: Map<string, Buffer>}> {
