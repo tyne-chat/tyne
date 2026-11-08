@@ -74,6 +74,10 @@ import clsx from 'clsx';
 import {observer} from 'mobx-react-lite';
 import React, {useCallback, useMemo, useRef} from 'react';
 
+// Fork imports.
+
+import {AccountPersonaNameExtras} from '@app/features/persona/components/PersonasPill';
+
 const STATUS_ORDER = [StatusTypes.ONLINE, StatusTypes.IDLE, StatusTypes.DND, StatusTypes.INVISIBLE];
 const STATUS_EXPIRY_LABEL_MESSAGES: Record<TimeWindowKey, MessageDescriptor> = {
 	...TIME_WINDOW_FOR_LABEL_MESSAGES,
@@ -449,6 +453,13 @@ export const UserAreaPopout = observer(() => {
 					/>
 					<ProfileCardContent isWebhook={false} data-flx="app.floating.user-area-popout.profile-card-content">
 						<ProfileCardUserInfo
+							personaNameExtras={
+								<AccountPersonaNameExtras
+									user={currentUser}
+									onBeforeOpen={PopoutCommands.close}
+									data-flx="app.floating.user-area-popout.account-persona-name-extras"
+								/>
+							}
 							displayName={displayName}
 							user={currentUser}
 							pronouns={profileData?.pronouns}
