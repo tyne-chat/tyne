@@ -1,49 +1,47 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import i18n from '@app/app/I18n';
-import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
+// The persona import (tyne-chat/tyne#243): choose a file and press Import. The server classifies
+// every member first (one request, which changes nothing); when nothing needs a decision the import
+// is applied at once, otherwise the review opens, every member on its safest choice. Pictures are
+// stored only for the members whose choice needs them, then the whole import is one request, written
+// whole or not at all. Nothing in here deletes a persona.
+
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
-import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
-import SessionManager from '@app/features/platform/state/AuthSession';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import Users from '@app/features/user/state/Users';
-import type {PersonaImportItem} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {
-	imageFileExtension,
-	ownTyneMediaImageHash,
-	type PersonaImageKind,
-	type PersonaImportStoredImages,
-	type PluralKitImportedMember,
-	personaImportItem,
-} from '@fluxer/schema/src/domains/persona/PluralKitFormat';
+import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {PersonaImportPreviewResponse} from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
-import {CheckCircle, UploadSimple, Warning} from '@phosphor-icons/react';
-import {clsx} from 'clsx';
+import {CheckCircle, ShieldCheck, UploadSimple, Warning} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
 import {PersonaStore} from '../../state/PersonaStore';
 import {type PersonaImportSource, readPersonaImportFile} from '../../utils/PersonaImportFile';
+import {type PictureProgress, storeMemberPictures, storeTagIcon} from '../../utils/PersonaImportImages';
+import {
+	buildActions,
+	buildPreviewRequest,
+	defaultDecision,
+	findConflicts,
+	picturesNeeded,
+	type ReviewDecision,
+	type ReviewMember,
+	type ReviewSummary,
+	sourceKindOf,
+	summarize,
+} from '../../utils/PersonaImportReview';
+import {PersonaImportReview} from './PersonaImportReview';
+import reviewStyles from './PersonaImportReview.module.css';
 import styles from './PluralKitImportModal.module.css';
 
-const IMPORT_NETWORK_ERROR_DESCRIPTOR = msg({
-	message: 'Network error',
-	comment: 'Why an image could not be imported when the request to the server failed',
-});
-const IMPORT_HTTP_ERROR_DESCRIPTOR = msg({
-	message: 'Request failed (HTTP {status})',
-	comment: 'Why an image could not be imported when the server answered with HTTP status {status}',
-});
-const IMPORT_UNKNOWN_ERROR_DESCRIPTOR = msg({
-	message: 'Unknown error',
-	comment: 'Why an image could not be imported when no reason is known',
-});
 const PROGRESS_ITEMS_DESCRIPTOR = msg({
 	message: 'items',
 	comment: 'What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"',
@@ -64,17 +62,9 @@ const FILE_READ_FAILED_DESCRIPTOR = msg({
 	message: 'Failed to read the selected file.',
 	comment: 'Error message when reading uploaded file fails',
 });
-const PREPARING_BATCH_DESCRIPTOR = msg({
-	message: 'Preparing avatar batch download...',
-	comment: 'Progress status when preparing avatar batch download',
-});
 const AVATARS_DOWNLOADED_LABEL = msg({
 	message: 'avatars downloaded',
 	comment: 'Progress label for avatar downloads',
-});
-const PERSONAS_PREPARED_LABEL = msg({
-	message: 'personas prepared',
-	comment: 'Progress label for prepared personas',
 });
 const SAVING_PERSONAS_STATUS = msg({
 	message: 'Saving personas...',
@@ -91,10 +81,6 @@ const SKIPPED_NO_NAME_DESCRIPTOR = msg({
 const FAILED_TO_IMPORT_DESCRIPTOR = msg({
 	message: 'Failed to import personas',
 	comment: 'Toast error message on persona import failure',
-});
-const SYSTEM_TAG_PLACEHOLDER_DESCRIPTOR = msg({
-	message: 'Optional system badge, e.g. ⚞Seraphim⚟',
-	comment: 'Placeholder for system badge in import modal',
 });
 const ZIP_UNREADABLE_DESCRIPTOR = msg({
 	message: 'This .zip file could not be read.',
@@ -127,6 +113,91 @@ const DROPPED_TAGS_DESCRIPTOR = msg({
 	comment:
 		'Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.',
 });
+const AVATAR_FAILED_DESCRIPTOR = msg({
+	message: 'Avatar image failed to download: {error}. Persona was imported without an avatar.',
+	comment: 'Import warning when avatar fails to download',
+});
+const BANNER_FAILED_DESCRIPTOR = msg({
+	message: 'Banner image failed to download: {error}. Persona was imported without a banner.',
+	comment: 'Import warning when a persona banner fails to download',
+});
+const AVATAR_KEPT_DESCRIPTOR = msg({
+	message: 'Avatar image failed to download: {error}. The persona kept the avatar it had.',
+	comment: "Import warning when the file's avatar for an existing persona fails to download, so the old one stays",
+});
+const BANNER_KEPT_DESCRIPTOR = msg({
+	message: 'Banner image failed to download: {error}. The persona kept the banner it had.',
+	comment: "Import warning when the file's banner for an existing persona fails to download, so the old one stays",
+});
+const RESTORED_WITHOUT_DESCRIPTOR = msg({
+	message: 'Came back without {items}: another persona has them now.',
+	comment: 'Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile',
+});
+const MEMBER_INDEX_DESCRIPTOR = msg({
+	message: 'Member #{index}',
+	comment: 'Placeholder name for unnamed member in import',
+});
+const STORING_FROM_FILE_DESCRIPTOR = msg({
+	message: 'Storing image {current} of {total} from the file...',
+	comment: 'Progress status while the images inside an imported persona export are stored',
+});
+const DOWNLOADING_AVATAR_DESCRIPTOR = msg({
+	message: 'Downloading avatar {current} of {total}...',
+	comment: 'Progress status during avatar download',
+});
+const DOWNLOADING_BANNER_DESCRIPTOR = msg({
+	message: 'Downloading banner {current} of {total}...',
+	comment: 'Progress status during banner download in the persona import',
+});
+const SUMMARY_LINK_DESCRIPTOR = msg({
+	message: 'link {count}',
+	comment: 'Part of the import summary "Import will link 17, add 7, skip 3"',
+});
+const SUMMARY_ADD_DESCRIPTOR = msg({
+	message: 'add {count}',
+	comment: 'Part of the import summary "Import will link 17, add 7, skip 3"',
+});
+const SUMMARY_RESTORE_DESCRIPTOR = msg({
+	message: 'restore {count}',
+	comment: 'Part of the import summary "Import will link 17, restore 2, skip 3"',
+});
+const SUMMARY_USE_FILE_DESCRIPTOR = msg({
+	message: "use the file's version for {count}",
+	comment: 'Part of the import summary "Import will link 17, use the file\'s version for 2"',
+});
+const SUMMARY_SKIP_DESCRIPTOR = msg({
+	message: 'skip {count}',
+	comment: 'Part of the import summary "Import will link 17, add 7, skip 3"',
+});
+const SUMMARY_DISPLAY_TAG_DESCRIPTOR = msg({
+	message: 'change your display tag',
+	comment: 'Part of the import summary "Import will add 7 and change your display tag"',
+});
+const SUMMARY_MAIN_DESCRIPTOR = msg({
+	message: 'Import will {actions}',
+	comment: 'Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"',
+});
+const SUMMARY_NOTHING_DESCRIPTOR = msg({
+	message: 'Import will change nothing',
+	comment: 'Summary in the import review footer when every choice leaves things as they are',
+});
+const SUMMARY_KEPT_DESCRIPTOR = msg({
+	message: '{count, plural, one {# persona stays as it is} other {# personas stay as they are}}',
+	comment: 'Second line of the import review footer',
+});
+const SUMMARY_STAY_DELETED_DESCRIPTOR = msg({
+	message: '{count} stay deleted',
+	comment: 'Second line of the import review footer: deleted personas that are not restored',
+});
+
+const PROGRESS_STATUS = {
+	zip: STORING_FROM_FILE_DESCRIPTOR,
+	avatar: DOWNLOADING_AVATAR_DESCRIPTOR,
+	banner: DOWNLOADING_BANNER_DESCRIPTOR,
+};
+const PROGRESS_LABEL = {zip: IMAGES_STORED_LABEL, avatar: AVATARS_DOWNLOADED_LABEL, banner: BANNERS_DOWNLOADED_LABEL};
+const PICTURE_FAILED = {avatar: AVATAR_FAILED_DESCRIPTOR, banner: BANNER_FAILED_DESCRIPTOR};
+const PICTURE_KEPT = {avatar: AVATAR_KEPT_DESCRIPTOR, banner: BANNER_KEPT_DESCRIPTOR};
 
 interface ImportWarning {
 	displayName: string;
@@ -134,481 +205,290 @@ interface ImportWarning {
 	reason: string;
 }
 
-type StoredImage = {hash: string; avatarColor: number | null};
-
-interface BatchImportResult {
-	avatar_hash?: string;
-	avatar_color?: number | null;
-	banner_hash?: string;
-	error?: string;
+interface ImportResult {
+	reviewed: boolean;
+	summary: ReviewSummary;
+	added: Array<{name: string; tags: Array<PersonaTag>}>;
+	warnings: Array<ImportWarning>;
 }
 
-const IMAGE_MIME_TYPES: Record<string, string> = {
-	png: 'image/png',
-	jpg: 'image/jpeg',
-	gif: 'image/gif',
-	webp: 'image/webp',
-	avif: 'image/avif',
-	heic: 'image/heic',
-	jxl: 'image/jxl',
-	svg: 'image/svg+xml',
-};
-
-// Asks the server to fetch remote images (avatars or banners) in batches, and reads its NDJSON
-// progress stream. Returns what was stored and what failed, by URL.
-async function fetchRemoteImages(
-	urls: ReadonlyArray<string>,
-	kind: PersonaImageKind,
-	onProgress: (completed: number) => void,
-): Promise<{stored: Map<string, StoredImage>; errors: Map<string, string>}> {
-	const stored = new Map<string, StoredImage>();
-	const errors = new Map<string, string>();
-	const record = (url: string, result: BatchImportResult) => {
-		const hash = kind === 'avatar' ? result.avatar_hash : result.banner_hash;
-		if (hash)
-			stored.set(url, {hash, avatarColor: typeof result.avatar_color === 'number' ? result.avatar_color : null});
-		if (result.error) errors.set(url, result.error);
-	};
-	const BATCH_LIMIT = 500;
-	for (let start = 0; start < urls.length; start += BATCH_LIMIT) {
-		const batch = urls.slice(start, start + BATCH_LIMIT);
-		const handleLine = (line: string) => {
-			const trimmed = line.trim();
-			if (!trimmed) return;
-			let event: {type?: string; url?: string; completed?: number; results?: Record<string, BatchImportResult>};
-			try {
-				event = JSON.parse(trimmed);
-			} catch {
-				return;
-			}
-			if (event.type === 'progress') {
-				if (event.url) record(event.url, event as BatchImportResult);
-				if (typeof event.completed === 'number') onProgress(start + event.completed);
-			} else if (event.type === 'complete' && event.results) {
-				for (const [url, result] of Object.entries(event.results)) record(url, result);
-			}
-		};
-		try {
-			const res = await fetch(`/api/v1${ForkEndpoints.USER_PERSONA_IMPORT_BATCH_AVATARS}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					...(SessionManager.token ? {Authorization: SessionManager.token} : {}),
-				},
-				body: JSON.stringify({urls: batch, kind}),
-			});
-			if (!res.ok) {
-				let errorMessage = i18n._(IMPORT_HTTP_ERROR_DESCRIPTOR, {status: res.status});
-				try {
-					const errorJson = await res.json();
-					if (errorJson.message) errorMessage = errorJson.message;
-				} catch {}
-				for (const url of batch) errors.set(url, errorMessage);
-				continue;
-			}
-			const reader = res.body?.getReader();
-			if (!reader) continue;
-			const decoder = new TextDecoder();
-			let buffer = '';
-			while (true) {
-				const {done, value} = await reader.read();
-				if (done) break;
-				buffer += decoder.decode(value, {stream: true});
-				const lines = buffer.split('\n');
-				buffer = lines.pop() ?? '';
-				for (const line of lines) handleLine(line);
-			}
-			buffer += decoder.decode();
-			for (const line of buffer.split('\n')) handleLine(line);
-		} catch (err: unknown) {
-			const errorMsg = err instanceof Error ? err.message : i18n._(IMPORT_NETWORK_ERROR_DESCRIPTOR);
-			for (const url of batch) errors.set(url, errorMsg);
-		}
+function listFormat(locale: string, items: ReadonlyArray<string>): string {
+	try {
+		return new Intl.ListFormat(locale, {type: 'conjunction'}).format(items);
+	} catch {
+		return items.join(', ');
 	}
-	return {stored, errors};
 }
 
-function imageDataUri(bytes: Uint8Array): string {
-	const type = IMAGE_MIME_TYPES[imageFileExtension(bytes)] ?? 'application/octet-stream';
-	let binary = '';
-	const CHUNK = 0x8000;
-	for (let i = 0; i < bytes.length; i += CHUNK) {
-		binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-	}
-	return `data:${type};base64,${btoa(binary)}`;
-}
-
-/** Runs `task` on each item, a few at a time. */
-async function forEachLimited<T>(items: ReadonlyArray<T>, limit: number, task: (item: T) => Promise<void>) {
-	let next = 0;
-	const worker = async () => {
-		while (next < items.length) {
-			const item = items[next++] as T;
-			await task(item);
-		}
+function summaryLines(i18n: I18n, summary: ReviewSummary, changesTag: boolean): {main: string; rest: string} {
+	const parts: Array<string> = [];
+	if (summary.link) parts.push(i18n._(SUMMARY_LINK_DESCRIPTOR, {count: summary.link}));
+	if (summary.add) parts.push(i18n._(SUMMARY_ADD_DESCRIPTOR, {count: summary.add}));
+	if (summary.restore) parts.push(i18n._(SUMMARY_RESTORE_DESCRIPTOR, {count: summary.restore}));
+	if (summary.useFile) parts.push(i18n._(SUMMARY_USE_FILE_DESCRIPTOR, {count: summary.useFile}));
+	if (summary.skip) parts.push(i18n._(SUMMARY_SKIP_DESCRIPTOR, {count: summary.skip}));
+	if (changesTag) parts.push(i18n._(SUMMARY_DISPLAY_TAG_DESCRIPTOR));
+	const rest: Array<string> = [];
+	if (summary.kept) rest.push(i18n._(SUMMARY_KEPT_DESCRIPTOR, {count: summary.kept}));
+	if (summary.stayDeleted) rest.push(i18n._(SUMMARY_STAY_DELETED_DESCRIPTOR, {count: summary.stayDeleted}));
+	return {
+		main:
+			parts.length > 0
+				? i18n._(SUMMARY_MAIN_DESCRIPTOR, {actions: listFormat(i18n.locale, parts)})
+				: i18n._(SUMMARY_NOTHING_DESCRIPTOR),
+		rest: rest.join(' · '),
 	};
-	await Promise.all(Array.from({length: Math.min(limit, items.length)}, worker));
+}
+
+function tagText(tag: PersonaTag): string {
+	return `${(tag.prefix ?? '').trim()}text${(tag.suffix ?? '').trim()}`;
 }
 
 export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({onClose}) => {
 	const {i18n} = useLingui();
-	const [step, setStep] = useState<'select' | 'importing' | 'completed'>('select');
+	const [step, setStep] = useState<'select' | 'checking' | 'review' | 'importing' | 'completed'>('select');
 	const [fileName, setFileName] = useState<string | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [source, setSource] = useState<PersonaImportSource | null>(null);
-	const [systemTagOverride, setSystemTagOverride] = useState<string>('');
-	const [importMode, setImportMode] = useState<'replace' | 'append'>('append');
+	const [preview, setPreview] = useState<PersonaImportPreviewResponse | null>(null);
+	const [reviewMembers, setReviewMembers] = useState<Array<ReviewMember>>([]);
+	const [decisions, setDecisions] = useState<ReadonlyMap<number, ReviewDecision>>(new Map());
+	const [displayTagChoice, setDisplayTagChoice] = useState<'keep' | 'file'>('keep');
+	const [fileTagText, setFileTagText] = useState<string | null>(null);
 	const [progress, setProgress] = useState<{
 		current: number;
 		total: number;
 		currentName: string;
 		percent: number;
 		label?: string;
-	}>({
-		current: 0,
-		total: 0,
-		currentName: '',
-		percent: 0,
-		label: undefined,
-	});
-	const [importResults, setImportResults] = useState<{
-		successCount: number;
-		warnings: Array<ImportWarning>;
-	}>({successCount: 0, warnings: []});
+	}>({current: 0, total: 0, currentName: '', percent: 0});
+	const [result, setResult] = useState<ImportResult | null>(null);
 
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
-	const existingCount = PersonaStore.personas.length;
 	const productName = PRODUCT_NAME;
 	const members = source?.system.members ?? [];
+	const namedCount = members.filter((member) => member.name !== null).length;
+
+	const conflicts = useMemo(
+		() =>
+			preview && source
+				? findConflicts(preview.entries, decisions, reviewMembers, PersonaStore.personas, source.kind === 'bundle')
+				: [],
+		[preview, source, decisions, reviewMembers, PersonaStore.personas],
+	);
 
 	const handleFileChosen = async (file: File) => {
 		setFileError(null);
 		setFileName(file.name);
 		setSource(null);
-		setSystemTagOverride('');
-		let result: Awaited<ReturnType<typeof readPersonaImportFile>>;
+		let read: Awaited<ReturnType<typeof readPersonaImportFile>>;
 		try {
-			result = await readPersonaImportFile(file);
+			read = await readPersonaImportFile(file);
 		} catch {
 			setFileError(i18n._(FILE_READ_FAILED_DESCRIPTOR));
 			return;
 		}
-		if (!result.ok) {
+		if (!read.ok) {
 			const descriptor = {
 				not_object: FILE_INVALID_JSON_DESCRIPTOR,
 				no_members: FILE_NO_MEMBERS_DESCRIPTOR,
 				invalid_json: FILE_PARSE_FAILED_DESCRIPTOR,
 				zip_unreadable: ZIP_UNREADABLE_DESCRIPTOR,
 				zip_not_export: ZIP_NOT_EXPORT_DESCRIPTOR,
-			}[result.error];
+			}[read.error];
 			setFileError(i18n._(descriptor, {productName: PRODUCT_NAME}));
 			return;
 		}
-		setSource(result.source);
-		const manifestTag = result.source.kind === 'bundle' ? result.source.manifest.tag_text : undefined;
-		const candidateTag = manifestTag ?? result.source.system.tag ?? result.source.system.name ?? '';
-		if (candidateTag) {
-			setSystemTagOverride(candidateTag);
+		setSource(read.source);
+	};
+
+	const showPictureProgress = (p: PictureProgress) => {
+		const descriptor = PROGRESS_STATUS[p.phase];
+		const label = PROGRESS_LABEL[p.phase];
+		setProgress({
+			current: p.done,
+			total: p.total,
+			currentName: i18n._(descriptor, {current: p.done, total: p.total}),
+			percent: p.total > 0 ? Math.round((p.done / p.total) * 100) : 100,
+			label: i18n._(label),
+		});
+	};
+
+	const applyImport = async (
+		chosenSource: PersonaImportSource,
+		answer: PersonaImportPreviewResponse,
+		memberList: ReadonlyArray<ReviewMember>,
+		chosen: ReadonlyMap<number, ReviewDecision>,
+		tagChoice: 'keep' | 'file',
+		fileTag: string | null,
+	) => {
+		setStep('importing');
+		const warnings: Array<ImportWarning> = [];
+		const ownUserId = Users.currentUser?.id ?? null;
+		const mediaEndpoint = RuntimeConfig.mediaEndpoint;
+		chosenSource.system.members.forEach((member, i) => {
+			if (member.name === null) {
+				warnings.push({
+					displayName: i18n._(MEMBER_INDEX_DESCRIPTOR, {index: i + 1}),
+					reason: i18n._(SKIPPED_NO_NAME_DESCRIPTOR),
+				});
+			}
+		});
+
+		// 1. Pictures, only for the members whose choice needs them.
+		const needed = new Map<number, {avatar: boolean; banner: boolean}>();
+		for (const entry of answer.entries) {
+			const want = picturesNeeded(entry, chosen.get(entry.index) ?? defaultDecision(entry));
+			if (want.avatar || want.banner) needed.set(entry.index, want);
+		}
+		let pictures: Awaited<ReturnType<typeof storeMemberPictures>>;
+		try {
+			pictures = await storeMemberPictures(
+				chosenSource,
+				memberList,
+				needed,
+				ownUserId,
+				mediaEndpoint,
+				showPictureProgress,
+			);
+		} catch (err: unknown) {
+			const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
+			if (message) ToastCommands.error(message);
+			setStep(answer.needs_review ? 'review' : 'select');
+			return;
+		}
+		const {stored, failures} = pictures;
+		for (const entry of answer.entries) {
+			const member = memberList[entry.index];
+			if (!member) continue;
+			const decision = chosen.get(entry.index) ?? defaultDecision(entry);
+			const prefix = member.member.personaTags[0]?.prefix;
+			for (const kind of ['avatar', 'banner'] as const) {
+				const error = failures.get(`${entry.index}:${kind}`);
+				if (!error) continue;
+				const descriptor = (decision.choice === 'use_file' ? PICTURE_KEPT : PICTURE_FAILED)[kind];
+				warnings.push({displayName: member.member.name, prefix, reason: i18n._(descriptor, {error})});
+			}
+			if (member.member.droppedTagCount > 0 && (decision.choice === 'add' || decision.choice === 'use_file')) {
+				warnings.push({
+					displayName: member.member.name,
+					prefix,
+					reason: i18n._(DROPPED_TAGS_DESCRIPTOR, {productName: PRODUCT_NAME}),
+				});
+			}
+		}
+
+		// 2. One request, written whole or not at all.
+		const actions = buildActions(answer.entries, chosen, memberList, stored);
+		setProgress({
+			current: actions.length,
+			total: actions.length,
+			currentName: i18n._(SAVING_PERSONAS_STATUS),
+			percent: 100,
+			label: i18n._(SAVING_PERSONAS_LABEL),
+		});
+		try {
+			const applied =
+				actions.length > 0
+					? await PersonaCommands.applyPersonaImport({source: sourceKindOf(chosenSource), actions})
+					: {personas: [], dropped: []};
+			for (const dropped of applied.dropped) {
+				const persona = applied.personas.find((p) => p.id === dropped.persona_id);
+				const items = [...dropped.tags.map(tagText), ...dropped.signature_emojis.map((emoji) => emoji.name)];
+				if (persona && items.length > 0) {
+					warnings.push({
+						displayName: persona.name,
+						reason: i18n._(RESTORED_WITHOUT_DESCRIPTOR, {items: listFormat(i18n.locale, items)}),
+					});
+				}
+			}
+
+			// 3. The display tag, when the file's is used: its icon is stored first, never linked.
+			if (tagChoice === 'file') {
+				const icon = await storeTagIcon(chosenSource, ownUserId, mediaEndpoint);
+				if (icon.error) {
+					warnings.push({
+						displayName: i18n._(TAG_ICON_LABEL_DESCRIPTOR),
+						reason: i18n._(TAG_ICON_FAILED_DESCRIPTOR, {error: icon.error}),
+					});
+				}
+				if (fileTag || icon.hash !== undefined) {
+					try {
+						await PersonaStore.setDisplayTag(fileTag || PersonaStore.displayTagText, icon.hash);
+					} catch {
+						// The personas are in; the tag can be set again in Settings.
+					}
+				}
+			}
+
+			const added = answer.entries.flatMap((entry) => {
+				const decision = chosen.get(entry.index) ?? defaultDecision(entry);
+				const member = memberList[entry.index];
+				return decision.choice === 'add' && member ? [{name: member.member.name, tags: member.member.personaTags}] : [];
+			});
+			setResult({reviewed: answer.needs_review, summary: summarize(answer.entries, chosen), added, warnings});
+			setStep('completed');
+		} catch (err: unknown) {
+			const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
+			if (message) ToastCommands.error(message);
+			setStep(answer.needs_review ? 'review' : 'select');
 		}
 	};
+
+	const handleImport = async () => {
+		if (!source || namedCount === 0) return;
+		setStep('checking');
+		const {request, members: memberList} = buildPreviewRequest(
+			source,
+			Users.currentUser?.id ?? null,
+			RuntimeConfig.mediaEndpoint,
+		);
+		const tagText = request.display_tag?.text ?? null;
+		setFileTagText(tagText);
+		let answer: PersonaImportPreviewResponse;
+		try {
+			answer = await PersonaCommands.previewPersonaImport(request);
+		} catch (err: unknown) {
+			const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
+			if (message) ToastCommands.error(message);
+			setStep('select');
+			return;
+		}
+		setPreview(answer);
+		setReviewMembers(memberList);
+		setDecisions(new Map());
+		setDisplayTagChoice('keep');
+		if (answer.needs_review) {
+			setStep('review');
+			return;
+		}
+		await applyImport(
+			source,
+			answer,
+			memberList,
+			new Map(),
+			answer.display_tag.decision === 'auto_apply' ? 'file' : 'keep',
+			tagText,
+		);
+	};
+
+	const handleApplyReviewed = () => {
+		if (!source || !preview || conflicts.length > 0) return;
+		void applyImport(source, preview, reviewMembers, decisions, displayTagChoice, fileTagText);
+	};
+
+	const decide = (changes: ReadonlyArray<[number, ReviewDecision]>) =>
+		setDecisions((current) => {
+			const next = new Map(current);
+			for (const [index, decision] of changes) next.set(index, decision);
+			return next;
+		});
 
 	const handleDrop = (e: React.DragEvent) => {
 		e.preventDefault();
 		if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
 			void handleFileChosen(e.dataTransfer.files[0]);
 		}
-	};
-
-	const handleDragOver = (e: React.DragEvent) => {
-		e.preventDefault();
-	};
-
-	const executeImport = async () => {
-		if (!source || source.system.members.length === 0) return;
-
-		setStep('importing');
-		const warnings: Array<ImportWarning> = [];
-		const bundle = source.kind === 'bundle' ? source : null;
-		const ownUserId = Users.currentUser?.id ?? null;
-		const mediaEndpoint = RuntimeConfig.mediaEndpoint;
-		const named = source.system.members.filter(
-			(member): member is PluralKitImportedMember & {name: string} => member.name !== null,
-		);
-
-		// 1. Where each image comes from: the export's zip, this account's own copy on this instance
-		// (a re-imported Tyne export without its zip), or a download by the server.
-		const stored = new Map<string, StoredImage>();
-		const imageFailures = new Map<string, string>();
-		const uploads: Array<{key: string; kind: PersonaImageKind; bytes: Uint8Array}> = [];
-		const remote: Record<PersonaImageKind, Map<string, Array<string>>> = {avatar: new Map(), banner: new Map()};
-		for (const member of named) {
-			const extras = bundle && member.id ? bundle.manifest.members[member.id] : undefined;
-			for (const kind of ['avatar', 'banner'] as const) {
-				const key = `${member.index}:${kind}`;
-				const bytes = extras?.[kind] ? bundle?.images.get(extras[kind] as string) : undefined;
-				const url = kind === 'avatar' ? member.avatarUrl : member.bannerUrl;
-				if (bytes) {
-					uploads.push({key, kind, bytes});
-					continue;
-				}
-				if (!url) continue;
-				const ownHash = ownUserId && mediaEndpoint ? ownTyneMediaImageHash(url, mediaEndpoint, kind, ownUserId) : null;
-				if (ownHash) {
-					stored.set(key, {hash: ownHash, avatarColor: null});
-				} else if (url.startsWith('http://') || url.startsWith('https://')) {
-					remote[kind].set(url, [...(remote[kind].get(url) ?? []), key]);
-				}
-			}
-		}
-
-		// 2. Images from the zip.
-		if (uploads.length > 0) {
-			let done = 0;
-			const showUploadProgress = () =>
-				setProgress({
-					current: done,
-					total: uploads.length,
-					currentName: i18n._(
-						msg({
-							message: 'Storing image {current} of {total} from the file...',
-							comment: 'Progress status while the images inside an imported persona export are stored',
-						}),
-						{current: done, total: uploads.length},
-					),
-					percent: Math.round((done / uploads.length) * 100),
-					label: i18n._(IMAGES_STORED_LABEL),
-				});
-			showUploadProgress();
-			await forEachLimited(uploads, 4, async (upload) => {
-				try {
-					stored.set(upload.key, await PersonaCommands.importPersonaImage(upload.kind, imageDataUri(upload.bytes)));
-				} catch (err: unknown) {
-					const unknownError = i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
-					imageFailures.set(upload.key, PersonaCommands.personaErrorMessage(err, unknownError) ?? unknownError);
-				}
-				done++;
-				showUploadProgress();
-			});
-		}
-
-		// 3. Images the server has to download.
-		for (const kind of ['avatar', 'banner'] as const) {
-			const urls = Array.from(remote[kind].keys());
-			if (urls.length === 0) continue;
-			const label = i18n._(kind === 'avatar' ? AVATARS_DOWNLOADED_LABEL : BANNERS_DOWNLOADED_LABEL);
-			const showDownloadProgress = (completed: number) =>
-				setProgress({
-					current: completed,
-					total: urls.length,
-					currentName:
-						kind === 'avatar'
-							? i18n._(
-									msg({
-										message: 'Downloading avatar {current} of {total}...',
-										comment: 'Progress status during avatar download',
-									}),
-									{current: completed, total: urls.length},
-								)
-							: i18n._(
-									msg({
-										message: 'Downloading banner {current} of {total}...',
-										comment: 'Progress status during banner download in the persona import',
-									}),
-									{current: completed, total: urls.length},
-								),
-					percent: Math.round((completed / urls.length) * 100),
-					label,
-				});
-			if (kind === 'avatar') {
-				setProgress({
-					current: 0,
-					total: urls.length,
-					currentName: i18n._(PREPARING_BATCH_DESCRIPTOR),
-					percent: 0,
-					label,
-				});
-			} else {
-				showDownloadProgress(0);
-			}
-			const fetched = await fetchRemoteImages(urls, kind, showDownloadProgress);
-			for (const [url, keys] of remote[kind]) {
-				const image = fetched.stored.get(url);
-				for (const key of keys) {
-					if (image) stored.set(key, image);
-					else imageFailures.set(key, fetched.errors.get(url) ?? i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR));
-				}
-			}
-		}
-
-		// 4. What the import sends.
-		const importedPersonas: Array<PersonaImportItem> = [];
-		source.system.members.forEach((member, i) => {
-			if (member.name === null) {
-				warnings.push({
-					displayName: i18n._(
-						msg({
-							message: 'Member #{index}',
-							comment: 'Placeholder name for unnamed member in import',
-						}),
-						{index: i + 1},
-					),
-					reason: i18n._(SKIPPED_NO_NAME_DESCRIPTOR),
-				});
-				return;
-			}
-			const displayName = member.name;
-			const primaryPrefix = member.personaTags[0]?.prefix;
-			setProgress({
-				current: i + 1,
-				total: members.length,
-				currentName: i18n._(
-					msg({
-						message: 'Configuring {name}...',
-						comment: 'Progress status for configuring persona',
-					}),
-					{name: displayName},
-				),
-				percent: Math.round(((i + 1) / members.length) * 100),
-				label: i18n._(PERSONAS_PREPARED_LABEL),
-			});
-			const avatar = stored.get(`${member.index}:avatar`) ?? null;
-			const banner = stored.get(`${member.index}:banner`) ?? null;
-			const avatarError = imageFailures.get(`${member.index}:avatar`);
-			if (avatarError) {
-				warnings.push({
-					displayName,
-					prefix: primaryPrefix,
-					reason: i18n._(
-						msg({
-							message: 'Avatar image failed to download: {error}. Persona was imported without an avatar.',
-							comment: 'Import warning when avatar fails to download',
-						}),
-						{error: avatarError},
-					),
-				});
-			}
-			const bannerError = imageFailures.get(`${member.index}:banner`);
-			if (bannerError) {
-				warnings.push({
-					displayName,
-					prefix: primaryPrefix,
-					reason: i18n._(
-						msg({
-							message: 'Banner image failed to download: {error}. Persona was imported without a banner.',
-							comment: 'Import warning when a persona banner fails to download',
-						}),
-						{error: bannerError},
-					),
-				});
-			}
-			if (member.droppedTagCount > 0) {
-				warnings.push({
-					displayName,
-					prefix: primaryPrefix,
-					reason: i18n._(DROPPED_TAGS_DESCRIPTOR, {productName: PRODUCT_NAME}),
-				});
-			}
-			const images: PersonaImportStoredImages = {
-				avatar,
-				banner: banner ? {hash: banner.hash} : null,
-			};
-			const extras = bundle && member.id ? bundle.manifest.members[member.id] : undefined;
-			importedPersonas.push(personaImportItem({...member, name: displayName}, images, extras));
-		});
-
-		// 5. One request. The server checks the whole file before it writes anything and writes it at
-		// once; "Replace all" deletes the existing personas in that same write. So if the import is
-		// refused or fails, the account's personas are as they were.
-		try {
-			setProgress({
-				current: importedPersonas.length,
-				total: importedPersonas.length,
-				currentName: i18n._(SAVING_PERSONAS_STATUS),
-				percent: 100,
-				label: i18n._(SAVING_PERSONAS_LABEL),
-			});
-			await PersonaCommands.importPersonas(importedPersonas, {replace: importMode === 'replace'});
-
-			// A Tyne export also brings back the tag icon. Like a persona image, it is stored on this
-			// instance before it is used: the file from the zip, this account's own copy here, or a
-			// copy the server downloads. The settings take only the stored image's hash, never a link.
-			let tagIcon: string | undefined;
-			let tagIconError: string | null = null;
-			const tagIconBytes = bundle?.manifest.tag_icon ? bundle.images.get(bundle.manifest.tag_icon) : undefined;
-			const tagIconUrl = bundle?.manifest.tag_icon_url;
-			if (tagIconBytes) {
-				try {
-					tagIcon = (await PersonaCommands.importPersonaImage('avatar', imageDataUri(tagIconBytes))).hash;
-				} catch (err: unknown) {
-					const unknownError = i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
-					tagIconError = PersonaCommands.personaErrorMessage(err, unknownError) ?? unknownError;
-				}
-			} else if (tagIconUrl) {
-				const ownHash =
-					ownUserId && mediaEndpoint ? ownTyneMediaImageHash(tagIconUrl, mediaEndpoint, 'avatar', ownUserId) : null;
-				if (ownHash) {
-					tagIcon = ownHash;
-				} else if (tagIconUrl.startsWith('http://') || tagIconUrl.startsWith('https://')) {
-					const fetched = await fetchRemoteImages([tagIconUrl], 'avatar', () => {});
-					tagIcon = fetched.stored.get(tagIconUrl)?.hash;
-					if (!tagIcon) tagIconError = fetched.errors.get(tagIconUrl) ?? i18n._(IMPORT_UNKNOWN_ERROR_DESCRIPTOR);
-				}
-			}
-			if (tagIconError) {
-				warnings.push({
-					displayName: i18n._(TAG_ICON_LABEL_DESCRIPTOR),
-					reason: i18n._(TAG_ICON_FAILED_DESCRIPTOR, {error: tagIconError}),
-				});
-			}
-			const tagText = systemTagOverride.trim();
-			if (tagText || tagIcon !== undefined) {
-				try {
-					await PersonaStore.setDisplayTag(tagText || PersonaStore.displayTagText, tagIcon);
-				} catch {
-					// Non-fatal if setting update fails
-				}
-			}
-
-			setImportResults({
-				successCount: importedPersonas.length,
-				warnings,
-			});
-			setStep('completed');
-		} catch (err: unknown) {
-			const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
-			if (message) ToastCommands.error(message);
-			setStep('select');
-		}
-	};
-
-	const handleStartImport = () => {
-		if (!source || source.system.members.length === 0) return;
-
-		if (importMode === 'replace' && existingCount > 0) {
-			ModalCommands.push(
-				ModalCommands.modal(() => (
-					<ConfirmModal
-						title={<Trans>Replace All Personas</Trans>}
-						description={
-							<Trans>
-								Are you sure you want to replace all{' '}
-								<strong data-flx="persona.plural-kit-import-modal.handle-start-import.strong">{existingCount}</strong>{' '}
-								existing persona(s)? This will permanently delete them from your account and cannot be undone.
-							</Trans>
-						}
-						primaryText={<Trans>Replace All</Trans>}
-						primaryVariant="danger"
-						onPrimary={async () => {
-							await executeImport();
-						}}
-						data-flx="persona.plural-kit-import-modal.handle-start-import.confirm-modal"
-					/>
-				)),
-			);
-			return;
-		}
-
-		void executeImport();
 	};
 
 	const visibilityCounts = {public: 0, unlisted: 0, private: 0};
@@ -621,44 +501,40 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		if (source?.kind !== 'bundle' || !member.id) return false;
 		return Boolean(source.manifest.members[member.id]?.avatar);
 	}).length;
+	const systemName = source?.system.name ?? null;
+	const systemTag = source?.system.tag ?? null;
 
-	let modalTitle = i18n._(
-		msg({
-			message: 'Import Complete',
-			comment: 'Modal title for PluralKit import step completed',
+	const titles = {
+		select: msg({message: 'Import personas', comment: 'Title of the persona import dialog'}),
+		checking: msg({
+			message: 'Checking your file...',
+			comment: 'Title of the persona import dialog while the file is checked',
 		}),
-	);
-	if (step === 'select') {
-		modalTitle = i18n._(
-			msg({
-				message: 'Import from PluralKit',
-				comment: 'Modal title for PluralKit import step select',
-			}),
-		);
-	} else if (step === 'importing') {
-		modalTitle = i18n._(
-			msg({
-				message: 'Importing Personas...',
-				comment: 'Modal title for PluralKit import step importing',
-			}),
-		);
-	}
+		review: msg({message: 'Review before importing', comment: 'Title of the persona import review'}),
+		importing: msg({message: 'Importing Personas...', comment: 'Modal title for PluralKit import step importing'}),
+		completed: msg({message: 'Import finished', comment: 'Title of the persona import dialog when the import is done'}),
+	};
+	const busy = step === 'checking' || step === 'importing';
+	const footerSummary =
+		step === 'review' && preview
+			? summaryLines(i18n, summarize(preview.entries, decisions), displayTagChoice === 'file')
+			: null;
+	const addedCount = result?.added.length ?? 0;
 
 	return (
 		<Modal.Root
-			size="medium"
-			onClose={step === 'importing' ? () => {} : onClose}
+			size={step === 'review' ? 'large' : 'medium'}
+			onClose={busy ? () => {} : onClose}
 			data-flx="persona.plural-kit-import-modal.modal-root"
 		>
 			<Modal.Header
-				title={modalTitle}
-				hideCloseButton={step === 'importing'}
+				title={i18n._(titles[step])}
+				hideCloseButton={busy}
 				data-flx="persona.plural-kit-import-modal.modal-header"
 			/>
 
 			<Modal.Content data-flx="persona.plural-kit-import-modal.modal-content">
 				<div className={styles.container} data-flx="persona.plural-kit-import-modal.container">
-					{/* STEP 1: SELECT & CONFIGURE */}
 					{step === 'select' && (
 						<>
 							<div
@@ -666,7 +542,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 								role="button"
 								tabIndex={0}
 								onDrop={handleDrop}
-								onDragOver={handleDragOver}
+								onDragOver={(e) => e.preventDefault()}
 								onClick={() => fileInputRef.current?.click()}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter' || e.key === ' ') {
@@ -712,169 +588,118 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 							)}
 
 							{source && (
-								<>
-									<div className={styles.summaryBox} data-flx="persona.plural-kit-import-modal.summary-box">
-										<div className={styles.summaryTitle} data-flx="persona.plural-kit-import-modal.summary-title">
-											<Trans>Export Summary</Trans>
-										</div>
-										<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row">
-											<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label">
-												<Trans>Detected System Name / Tag</Trans>
-											</span>
-											<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value">
-												{`${source.system.name || i18n._(msg({message: 'None', comment: 'None value'}))}${source.system.tag ? ` (${source.system.tag})` : ''}`}
-											</span>
-										</div>
-										<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--2">
-											<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--2">
-												<Trans>Total Members</Trans>
-											</span>
-											<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--2">
-												{members.length}
-											</span>
-										</div>
-										<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--3">
-											<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--3">
-												<Trans>Members with Avatars</Trans>
-											</span>
-											<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--3">
-												{membersWithAvatars}
-											</span>
-										</div>
-										<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--4">
-											<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--4">
-												<Trans>Privacy</Trans>
-											</span>
-											<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--4">
-												<Trans>
-													{publicCount} public, {unlistedCount} unlisted, {privateCount} private
-												</Trans>
-											</span>
-										</div>
+								<div className={styles.summaryBox} data-flx="persona.plural-kit-import-modal.summary-box">
+									<div className={styles.summaryTitle} data-flx="persona.plural-kit-import-modal.summary-title">
+										<Trans>Export Summary</Trans>
 									</div>
-
-									<div className={styles.formField} data-flx="persona.plural-kit-import-modal.form-field">
-										<div className={styles.formLabel} data-flx="persona.plural-kit-import-modal.form-label">
-											<Trans>System Tag (Applied to imported personas)</Trans>
-										</div>
-										<input
-											type="text"
-											className={styles.textInput}
-											value={systemTagOverride}
-											onChange={(e) => setSystemTagOverride(e.target.value)}
-											placeholder={i18n._(SYSTEM_TAG_PLACEHOLDER_DESCRIPTOR)}
-											maxLength={100}
-											data-flx="persona.plural-kit-import-modal.text-input.set-system-tag-override"
-										/>
+									<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row">
+										<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label">
+											<Trans>Detected System Name / Tag</Trans>
+										</span>
+										<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value">
+											{`${systemName || i18n._(msg({message: 'None', comment: 'None value'}))}${systemTag ? ` (${systemTag})` : ''}`}
+										</span>
 									</div>
-
-									{existingCount > 0 && (
-										<div className={styles.formField} data-flx="persona.plural-kit-import-modal.form-field--2">
-											<div className={styles.formLabel} data-flx="persona.plural-kit-import-modal.form-label--2">
-												<Trans>Import Strategy</Trans>
-											</div>
-											<div className={styles.optionsGroup} data-flx="persona.plural-kit-import-modal.options-group">
-												<label
-													className={clsx(styles.radioOption, importMode === 'append' && styles.radioOptionSelected)}
-													data-flx="persona.plural-kit-import-modal.radio-option"
-												>
-													<input
-														type="radio"
-														name="importMode"
-														checked={importMode === 'append'}
-														onChange={() => setImportMode('append')}
-														style={{marginTop: 3}}
-														data-flx="persona.plural-kit-import-modal.input.set-import-mode.radio"
-													/>
-													<div data-flx="persona.plural-kit-import-modal.div">
-														<div className={styles.radioTitle} data-flx="persona.plural-kit-import-modal.radio-title">
-															<Trans>Keep existing and add new (Recommended)</Trans>
-														</div>
-														<div className={styles.radioDesc} data-flx="persona.plural-kit-import-modal.radio-desc">
-															<Trans>
-																Keep your {existingCount} current persona(s) and add all {members.length} imported
-																personas alongside them as new entries.
-															</Trans>
-														</div>
-													</div>
-												</label>
-												<label
-													className={clsx(
-														styles.radioOption,
-														styles.radioOptionDanger,
-														importMode === 'replace' && styles.radioOptionDangerSelected,
-													)}
-													data-flx="persona.plural-kit-import-modal.radio-option--2"
-												>
-													<input
-														type="radio"
-														name="importMode"
-														checked={importMode === 'replace'}
-														onChange={() => setImportMode('replace')}
-														style={{marginTop: 3}}
-														data-flx="persona.plural-kit-import-modal.input.set-import-mode.radio--2"
-													/>
-													<div data-flx="persona.plural-kit-import-modal.div--2">
-														<div
-															className={styles.radioTitleDanger}
-															data-flx="persona.plural-kit-import-modal.radio-title-danger"
-														>
-															<Warning
-																size={16}
-																weight="fill"
-																className={styles.dangerIcon}
-																data-flx="persona.plural-kit-import-modal.danger-icon"
-															/>
-															<span data-flx="persona.plural-kit-import-modal.span">
-																<Trans>Replace all existing personas (Destructive)</Trans>
-															</span>
-														</div>
-														<div className={styles.radioDesc} data-flx="persona.plural-kit-import-modal.radio-desc--2">
-															<Trans>
-																Permanently delete all {existingCount} existing persona(s) and replace them completely
-																with the imported personas.
-															</Trans>
-														</div>
-													</div>
-												</label>
-											</div>
-										</div>
-									)}
-								</>
+									<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--2">
+										<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--2">
+											<Trans>Total Members</Trans>
+										</span>
+										<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--2">
+											{members.length}
+										</span>
+									</div>
+									<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--3">
+										<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--3">
+											<Trans>Members with Avatars</Trans>
+										</span>
+										<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--3">
+											{membersWithAvatars}
+										</span>
+									</div>
+									<div className={styles.summaryRow} data-flx="persona.plural-kit-import-modal.summary-row--4">
+										<span className={styles.summaryLabel} data-flx="persona.plural-kit-import-modal.summary-label--4">
+											<Trans>Privacy</Trans>
+										</span>
+										<span className={styles.summaryValue} data-flx="persona.plural-kit-import-modal.summary-value--4">
+											<Trans>
+												{publicCount} public, {unlistedCount} unlisted, {privateCount} private
+											</Trans>
+										</span>
+									</div>
+								</div>
 							)}
+
+							<div className={reviewStyles.infoLine} data-flx="persona.plural-kit-import-modal.div">
+								<ShieldCheck
+									size={20}
+									aria-hidden="true"
+									style={{flex: 'none', color: 'var(--brand-primary)'}}
+									data-flx="persona.plural-kit-import-modal.shield-check"
+								/>
+								<span data-flx="persona.plural-kit-import-modal.span">
+									<Trans comment="Information line in the persona import dialog, above the Import button">
+										Importing never changes or removes a persona you already have unless you choose it. New members are
+										added straight away. If any member might match or clash with one of your personas, you'll review it
+										before anything is imported.
+									</Trans>
+								</span>
+							</div>
 						</>
 					)}
 
-					{/* STEP 2: IMPORTING PROGRESS */}
-					{step === 'importing' && (
-						<div style={{padding: '16px 0'}} data-flx="persona.plural-kit-import-modal.div--3">
+					{step === 'review' && preview && source && (
+						<PersonaImportReview
+							preview={preview}
+							members={reviewMembers}
+							source={source}
+							decisions={decisions}
+							onDecide={decide}
+							fileTagText={fileTagText}
+							displayTagChoice={displayTagChoice}
+							onDisplayTagChoice={setDisplayTagChoice}
+							conflicts={conflicts}
+							data-flx="persona.plural-kit-import-modal.persona-import-review"
+						/>
+					)}
+
+					{busy && (
+						<div style={{padding: '16px 0'}} data-flx="persona.plural-kit-import-modal.div--2">
 							<div
 								className={styles.progressCurrentName}
 								data-flx="persona.plural-kit-import-modal.progress-current-name"
 							>
-								<Trans>Processing: {progress.currentName}</Trans>
+								{step === 'checking' ? (
+									<Trans comment="Status while the import file is compared with the account's personas">
+										Comparing your file with your personas...
+									</Trans>
+								) : (
+									<Trans>Processing: {progress.currentName}</Trans>
+								)}
 							</div>
-							<div
-								className={styles.progressBarContainer}
-								data-flx="persona.plural-kit-import-modal.progress-bar-container"
-							>
-								<div
-									className={styles.progressBarFill}
-									style={{width: `${progress.percent}%`}}
-									data-flx="persona.plural-kit-import-modal.progress-bar-fill"
-								/>
-							</div>
-							<div className={styles.progressDetail} data-flx="persona.plural-kit-import-modal.progress-detail">
-								<Trans>
-									{progress.current} of {progress.total} {progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)} (
-									{progress.percent}%)
-								</Trans>
-							</div>
+							{step === 'importing' && (
+								<>
+									<div
+										className={styles.progressBarContainer}
+										data-flx="persona.plural-kit-import-modal.progress-bar-container"
+									>
+										<div
+											className={styles.progressBarFill}
+											style={{width: `${progress.percent}%`}}
+											data-flx="persona.plural-kit-import-modal.progress-bar-fill"
+										/>
+									</div>
+									<div className={styles.progressDetail} data-flx="persona.plural-kit-import-modal.progress-detail">
+										<Trans>
+											{progress.current} of {progress.total} {progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)} (
+											{progress.percent}%)
+										</Trans>
+									</div>
+								</>
+							)}
 						</div>
 					)}
 
-					{/* STEP 3: COMPLETED & WARNINGS */}
-					{step === 'completed' && (
+					{step === 'completed' && result && (
 						<>
 							<div className={styles.successBox} data-flx="persona.plural-kit-import-modal.success-box">
 								<CheckCircle
@@ -883,58 +708,57 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 									data-flx="persona.plural-kit-import-modal.check-circle"
 								/>
 								<div className={styles.successTitle} data-flx="persona.plural-kit-import-modal.success-title">
-									<Trans>Import Complete!</Trans>
+									{result.reviewed ? (
+										<Trans comment="Heading when a reviewed persona import is done">Here is what changed</Trans>
+									) : (
+										<Trans comment="Heading when a persona import with nothing to decide is done. {addedCount} is a number">
+											{addedCount} personas added
+										</Trans>
+									)}
 								</div>
 								<div className={styles.successDesc} data-flx="persona.plural-kit-import-modal.success-desc">
-									<Trans>
-										Successfully imported {importResults.successCount} persona(s) into your account. All avatar images
-										are safely stored on your local server.
-									</Trans>
+									{result.reviewed ? (
+										<Trans comment="Text under the heading when a reviewed persona import is done">
+											Everything else is exactly as it was.
+										</Trans>
+									) : (
+										<Trans comment="Text when a persona import with nothing to decide is done">
+											Everything in the file was either new or already matched a persona exactly, so there was nothing
+											to decide. Nothing else changed.
+										</Trans>
+									)}
 								</div>
 							</div>
-
-							{importResults.warnings.length > 0 && (
-								<div className={styles.warningBox} data-flx="persona.plural-kit-import-modal.warning-box">
-									<div className={styles.warningHeader} data-flx="persona.plural-kit-import-modal.warning-header">
-										<Warning size={18} data-flx="persona.plural-kit-import-modal.warning" />
-										<span data-flx="persona.plural-kit-import-modal.span--2">
-											<Trans>{importResults.warnings.length} notice(s) during import</Trans>
-										</span>
-									</div>
-									<div className={styles.warningList} data-flx="persona.plural-kit-import-modal.warning-list">
-										{importResults.warnings.map((w, idx) => (
+							{result.reviewed ? (
+								<ResultCounts summary={result.summary} data-flx="persona.plural-kit-import-modal.result-counts" />
+							) : (
+								result.added.length > 0 && (
+									<div className={reviewStyles.resultList} data-flx="persona.plural-kit-import-modal.div--3">
+										{result.added.map((persona, index) => (
 											<div
-												key={idx}
-												className={styles.warningItem}
-												data-flx="persona.plural-kit-import-modal.warning-item"
+												key={`${persona.name}-${index}`}
+												className={reviewStyles.resultRow}
+												data-flx="persona.plural-kit-import-modal.div--4"
 											>
-												<div
-													className={styles.warningItemName}
-													data-flx="persona.plural-kit-import-modal.warning-item-name"
-												>
-													{w.displayName}
-													{w.prefix && (
-														<>
-															{' '}
-															<span
-																style={{fontWeight: 400, color: 'var(--text-primary-muted)'}}
-																data-flx="persona.plural-kit-import-modal.span--3"
-															>
-																<Trans>(Prefix: {w.prefix})</Trans>
-															</span>
-														</>
-													)}
-												</div>
-												<div
-													className={styles.warningItemDetail}
-													data-flx="persona.plural-kit-import-modal.warning-item-detail"
-												>
-													{w.reason}
-												</div>
+												<span className={reviewStyles.rowName} data-flx="persona.plural-kit-import-modal.span--2">
+													{persona.name}
+												</span>
+												{persona.tags.map((tag) => (
+													<code
+														key={tagText(tag)}
+														className={reviewStyles.tag}
+														data-flx="persona.plural-kit-import-modal.code"
+													>
+														{tagText(tag)}
+													</code>
+												))}
 											</div>
 										))}
 									</div>
-								</div>
+								)
+							)}
+							{result.warnings.length > 0 && (
+								<Warnings warnings={result.warnings} data-flx="persona.plural-kit-import-modal.warnings" />
 							)}
 						</>
 					)}
@@ -949,21 +773,52 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 						</Button>
 						<Button
 							variant="primary"
-							disabled={!source || members.length === 0}
-							onClick={handleStartImport}
-							data-flx="persona.plural-kit-import-modal.button.start-import"
+							disabled={!source || namedCount === 0}
+							onClick={() => void handleImport()}
+							data-flx="persona.plural-kit-import-modal.button"
 						>
-							<Trans>Start Import</Trans>
+							<Trans comment="Button that starts the persona import">Import</Trans>
 						</Button>
 					</>
 				)}
-
-				{step === 'importing' && (
-					<Button variant="secondary" disabled data-flx="persona.plural-kit-import-modal.button">
-						<Trans>Importing...</Trans>
+				{step === 'review' && footerSummary && (
+					<>
+						<div className={reviewStyles.summary} aria-live="polite" data-flx="persona.plural-kit-import-modal.div--5">
+							<span className={reviewStyles.summaryMain} data-flx="persona.plural-kit-import-modal.span--3">
+								{footerSummary.main}
+							</span>
+							{footerSummary.rest && (
+								<span className={reviewStyles.summaryRest} data-flx="persona.plural-kit-import-modal.span--4">
+									{footerSummary.rest}
+								</span>
+							)}
+						</div>
+						<Button
+							variant="secondary"
+							onClick={() => setStep('select')}
+							data-flx="persona.plural-kit-import-modal.button.set-step"
+						>
+							<Trans comment="Button in the import review that goes back to choosing the file">Back</Trans>
+						</Button>
+						<Button
+							variant="primary"
+							disabled={conflicts.length > 0}
+							onClick={handleApplyReviewed}
+							data-flx="persona.plural-kit-import-modal.button.apply-reviewed"
+						>
+							<Trans comment="Button that starts the persona import">Import</Trans>
+						</Button>
+					</>
+				)}
+				{busy && (
+					<Button variant="secondary" disabled data-flx="persona.plural-kit-import-modal.button--2">
+						{step === 'checking' ? (
+							<Trans comment="Disabled button while the import file is checked">Checking...</Trans>
+						) : (
+							<Trans>Importing...</Trans>
+						)}
 					</Button>
 				)}
-
 				{step === 'completed' && (
 					<Button variant="primary" onClick={onClose} data-flx="persona.plural-kit-import-modal.button.close--2">
 						<Trans>Done</Trans>
@@ -975,6 +830,153 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 });
 
 PluralKitImportModal.displayName = 'PluralKitImportModal';
+
+function ResultCounts({summary}: {summary: ReviewSummary}) {
+	const {i18n} = useLingui();
+	const lines: Array<{count: number; label: string; hint: string}> = [];
+	const push = (count: number, label: string, hint: string) => {
+		if (count > 0) lines.push({count, label, hint});
+	};
+	push(
+		summary.link,
+		i18n._(msg({message: 'Linked', comment: 'Line of the import result: personas connected to their file members'})),
+		i18n._(
+			msg({
+				message: 'Connected to their members in the file. Nothing in them changed.',
+				comment: 'Explanation of the "Linked" line of the import result',
+			}),
+		),
+	);
+	push(
+		summary.add,
+		i18n._(msg({message: 'Added', comment: 'Line of the import result: new personas'})),
+		i18n._(
+			msg({message: 'New personas from your file.', comment: 'Explanation of the "Added" line of the import result'}),
+		),
+	);
+	push(
+		summary.restore,
+		i18n._(msg({message: 'Restored', comment: 'Line of the import result: deleted personas brought back'})),
+		i18n._(
+			msg({
+				message: 'Back as they were, with their old messages.',
+				comment: 'Explanation of the "Restored" line of the import result',
+			}),
+		),
+	);
+	push(
+		summary.useFile,
+		i18n._(
+			msg({message: 'Updated from the file', comment: "Line of the import result: personas given the file's details"}),
+		),
+		i18n._(
+			msg({
+				message: "Their details are the file's now; their messages and history stayed.",
+				comment: 'Explanation of the "Updated from the file" line of the import result',
+			}),
+		),
+	);
+	push(
+		summary.skip,
+		i18n._(msg({message: 'Skipped', comment: 'Line of the import result: members left out'})),
+		i18n._(
+			msg({
+				message: 'Still in your file. Import it again any time to decide about them.',
+				comment: 'Explanation of the "Skipped" line of the import result',
+			}),
+		),
+	);
+	push(
+		summary.kept,
+		i18n._(msg({message: 'Kept as they were', comment: 'Line of the import result: personas left unchanged'})),
+		i18n._(
+			msg({
+				message: 'Including any that differ from the file, where you kept the version you had.',
+				comment: 'Explanation of the "Kept as they were" line of the import result',
+			}),
+		),
+	);
+	push(
+		summary.stayDeleted,
+		i18n._(msg({message: 'Still deleted', comment: 'Line of the import result: deleted personas not restored'})),
+		i18n._(
+			msg({
+				message: 'Restore them from Deleted personas in Settings if you change your mind.',
+				comment: 'Explanation of the "Still deleted" line of the import result',
+			}),
+		),
+	);
+	return (
+		<div className={reviewStyles.resultList} data-flx="persona.plural-kit-import-modal.result-counts.div">
+			{lines.map((line) => (
+				<div
+					key={line.label}
+					className={reviewStyles.resultRow}
+					data-flx="persona.plural-kit-import-modal.result-counts.div--2"
+				>
+					<span className={reviewStyles.resultCount} data-flx="persona.plural-kit-import-modal.result-counts.span">
+						{line.count}
+					</span>
+					<span className={reviewStyles.rowText} data-flx="persona.plural-kit-import-modal.result-counts.span--2">
+						<span className={reviewStyles.rowName} data-flx="persona.plural-kit-import-modal.result-counts.span--3">
+							{line.label}
+						</span>
+						<span className={reviewStyles.rowMeta} data-flx="persona.plural-kit-import-modal.result-counts.span--4">
+							{line.hint}
+						</span>
+					</span>
+				</div>
+			))}
+		</div>
+	);
+}
+
+function Warnings({warnings}: {warnings: ReadonlyArray<ImportWarning>}) {
+	const count = warnings.length;
+	return (
+		<div className={styles.warningBox} data-flx="persona.plural-kit-import-modal.warnings.warning-box">
+			<div className={styles.warningHeader} data-flx="persona.plural-kit-import-modal.warnings.warning-header">
+				<Warning size={18} data-flx="persona.plural-kit-import-modal.warnings.warning" />
+				<span data-flx="persona.plural-kit-import-modal.warnings.span">
+					<Trans>{count} notice(s) during import</Trans>
+				</span>
+			</div>
+			<div className={styles.warningList} data-flx="persona.plural-kit-import-modal.warnings.warning-list">
+				{warnings.map((w, idx) => (
+					<div
+						key={idx}
+						className={styles.warningItem}
+						data-flx="persona.plural-kit-import-modal.warnings.warning-item"
+					>
+						<div
+							className={styles.warningItemName}
+							data-flx="persona.plural-kit-import-modal.warnings.warning-item-name"
+						>
+							{w.displayName}
+							{w.prefix && (
+								<>
+									{' '}
+									<span
+										style={{fontWeight: 400, color: 'var(--text-primary-muted)'}}
+										data-flx="persona.plural-kit-import-modal.warnings.span--2"
+									>
+										<Trans>(Prefix: {w.prefix})</Trans>
+									</span>
+								</>
+							)}
+						</div>
+						<div
+							className={styles.warningItemDetail}
+							data-flx="persona.plural-kit-import-modal.warnings.warning-item-detail"
+						>
+							{w.reason}
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
 
 export function openPluralKitImportModal(): void {
 	ModalCommands.push(

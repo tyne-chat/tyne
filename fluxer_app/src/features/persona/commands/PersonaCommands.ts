@@ -11,13 +11,19 @@ import {Logger} from '@app/features/platform/utils/AppLogger';
 import {APIErrorCodes} from '@fluxer/constants/src/ApiErrorCodes';
 import type {
 	PersonaCreateRequest,
-	PersonaImportItem,
 	PersonaResponse,
 	PersonaSettingsResponse,
 	PersonaUpdateRequest,
 	PersonaVisibility,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {
+	PersonaImportApplyRequest,
+	PersonaImportApplyResponse,
+	PersonaImportPreviewRequest,
+	PersonaImportPreviewResponse,
+	PersonaRestoreResponse,
+} from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
 import {runInAction} from 'mobx';
 import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 
@@ -199,31 +205,48 @@ function forgetDeletedPersona(id: string): void {
 }
 
 /**
- * Imports personas in one request, which the server writes whole or not at all. With `replace`, the
- * server deletes the account's other personas in that same write, so a refused import keeps them.
+ * Classifies an import file's members against the account's personas (tyne-chat/tyne#243). One
+ * request, which changes nothing; the review is built from its answer.
  */
-export async function importPersonas(
-	personas: Array<PersonaImportItem>,
-	options: {replace?: boolean} = {},
-): Promise<Array<PersonaResponse>> {
-	// Read before sending: the gateway's USER_PERSONAS_UPDATE may drop them from the list first.
-	const replaced = options.replace ? PersonaStore.personas.map((p) => p.id) : [];
+export async function previewPersonaImport(
+	request: PersonaImportPreviewRequest,
+): Promise<PersonaImportPreviewResponse> {
 	const res = await sendPersonaRequest(
-		() =>
-			http.post<Array<PersonaResponse>>(ForkEndpoints.USER_PERSONA_IMPORT, {
-				body: personas,
-				query: options.replace ? {replace: true} : undefined,
-			}),
+		() => http.post<PersonaImportPreviewResponse>(ForkEndpoints.USER_PERSONA_IMPORT_PREVIEW, {body: request}),
+		'Failed to check the import',
+	);
+	return res.body;
+}
+
+/**
+ * Applies a reviewed import: one action per member, written by the server whole or not at all. The
+ * personas written go into the store at once, before the gateway's list arrives.
+ */
+export async function applyPersonaImport(request: PersonaImportApplyRequest): Promise<PersonaImportApplyResponse> {
+	const res = await sendPersonaRequest(
+		() => http.post<PersonaImportApplyResponse>(ForkEndpoints.USER_PERSONA_IMPORT_APPLY, {body: request}),
 		'Failed to import personas',
 	);
-	const imported = new Set(res.body.map((p) => p.id));
-	// One action, so the pins they lose are one change to the synced preferences, not one each.
-	runInAction(() => {
-		for (const id of replaced) {
-			if (!imported.has(id)) forgetDeletedPersona(id);
-		}
-	});
-	PersonaStore.upsertPersonas(res.body);
+	PersonaStore.upsertPersonas(res.body.personas);
+	return res.body;
+}
+
+/** The account's deleted personas, the most recently deleted first. */
+export async function fetchDeletedPersonas(): Promise<Array<PersonaResponse>> {
+	const res = await sendPersonaRequest(
+		() => http.get<Array<PersonaResponse>>(ForkEndpoints.USER_PERSONAS_DELETED),
+		'Failed to load deleted personas',
+	);
+	return res.body;
+}
+
+/** Brings back a deleted persona as itself; the answer says which tags it came back without. */
+export async function restorePersona(personaId: string): Promise<PersonaRestoreResponse> {
+	const res = await sendPersonaRequest(
+		() => http.post<PersonaRestoreResponse>(ForkEndpoints.USER_PERSONA_RESTORE(personaId)),
+		'Failed to restore the persona',
+	);
+	PersonaStore.upsertPersonas([res.body.persona]);
 	return res.body;
 }
 
