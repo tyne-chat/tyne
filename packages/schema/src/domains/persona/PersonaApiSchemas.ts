@@ -48,8 +48,9 @@ export function isPersonaAssetHash(value: string | null | undefined): value is s
 
 /**
  * A persona image value as received, cleaned: the hash, trimmed, when it is one, and null for
- * anything else. The server applies it to what it reads from storage and the clients to what they
- * receive, so a link never travels on from wherever it got in.
+ * anything else. The server applies it to what it reads from storage, so a value that is not a hash
+ * (a link above all) never leaves the server. The clients build an image address only from a hash
+ * (`isPersonaAssetHash`).
  */
 export function personaAssetHashOrNull(value: unknown): string | null {
 	if (typeof value !== 'string') return null;
