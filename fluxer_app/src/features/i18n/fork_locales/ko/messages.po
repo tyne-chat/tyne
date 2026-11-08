@@ -406,6 +406,9 @@ msgstr "페르소나 편집"
 msgid "Edit timestamp"
 msgstr "타임스탬프 수정\\"
 
+msgid "Everyone else"
+msgstr "그 외 모두"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "나머지는 모두 그대로예요."
@@ -471,6 +474,9 @@ msgstr "표시 태그를 업데이트하지 못했어요"
 
 msgid "Failed to update persona mode"
 msgstr "페르소나 모드를 업데이트하지 못했어요"
+
+msgid "Failed to update the reaction setting"
+msgstr "반응 설정을 업데이트하지 못했습니다"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "페르소나를 기억하는 범위를 변경하지 못했어요"
@@ -768,6 +774,9 @@ msgstr "표시 태그가 설정되지 않았어요. 메시지에 계정 프로�
 msgid "No matching personas found."
 msgstr "일치하는 페르소나를 찾을 수 없습니다."
 
+msgid "No one matches."
+msgstr "일치하는 항목이 없습니다."
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "아직 설정된 페르소나가 없어요. 설정에서 만들어 보세요."
 
@@ -987,9 +996,16 @@ msgstr "공개"
 msgid "Public persona"
 msgstr "공개 페르소나"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "여러 페르소나로 동시에 반응하기"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "다른 프로필로 반응하기..."
+
+msgid "Reacted"
+msgstr "반응함"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "<0>{reactorName}</0>(으)로 반응 중"
@@ -1000,6 +1016,9 @@ msgstr "{name}(으)로 반응하기"
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "시그니처 이모지로 반응하면 활성 페르소나와 관계없이 항상 이 페르소나로 반응합니다."
+
+msgid "Recent"
+msgstr "최근"
 
 msgid "Recent Personas"
 msgstr "최근 페르소나"
@@ -1053,6 +1072,9 @@ msgstr "마음이 바뀌면 설정의 삭제된 페르소나에서 복원하세�
 msgid "Restored"
 msgstr "복원됨"
 
+msgid "Results"
+msgstr "결과"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "가져오기 전에 검토"
@@ -1104,7 +1126,6 @@ msgstr "검색 결과 ({0})"
 msgid "Search commands"
 msgstr "명령 검색"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "페르소나, 태그, 대명사 검색..."
@@ -1549,6 +1570,13 @@ msgstr "계정에는 표시 태그가 하나 있으며, 모든 페르소나 이�
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "내 페르소나는 그대로이며, 이 멤버와 연결돼요."
 
+msgid "Your reactions"
+msgstr "내 반응"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "내 {emojiName} 반응"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "{count}개 추가"
@@ -1617,6 +1645,10 @@ msgstr "이름"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "사진 비교 안 됨"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "눌러서 내 반응 보기"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, other {#회 사용됨}}"
 
 msgid "{count} notice(s) during import"
 msgstr "가져오는 동안 알림 {count}개"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{total}개 중 {count}개"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "{total}개 중 {count}개 반응함"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
