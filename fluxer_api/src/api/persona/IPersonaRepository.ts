@@ -43,8 +43,14 @@ export interface UpdatePersonaParams {
 	last_used_at_ms?: bigint | null;
 }
 
-/** What an import does to one persona it brings in: make a new one, or update the one it matched. */
-export type PersonaImportStep = {create: CreatePersonaParams} | {update: Persona; params: UpdatePersonaParams};
+/**
+ * What an import does to one persona it brings in: make a new one, update the one it matched, or
+ * bring back a deleted one (the same row, with `deleted_at` cleared) with these changes.
+ */
+export type PersonaImportStep =
+	| {create: CreatePersonaParams}
+	| {update: Persona; params: UpdatePersonaParams}
+	| {restore: Persona; params: UpdatePersonaParams};
 
 export interface PersonaImportWrite {
 	/** Live personas the import replaces. They are soft-deleted, as `delete` does. */

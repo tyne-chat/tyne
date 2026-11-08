@@ -223,6 +223,8 @@ export class PersonaRepository extends IPersonaRepository {
 						now,
 					),
 				);
+			} else if ('restore' in step) {
+				rows.push({...updatedPersonaRow(step.restore, step.params, now), deleted_at: null});
 			} else {
 				rows.push(updatedPersonaRow(step.update, step.params, now));
 			}

@@ -26,6 +26,14 @@ import {
 	UserIdPersonaIdParam,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {
+	DeletedPersonaListResponseSchema,
+	PersonaImportApplyRequestSchema,
+	PersonaImportApplyResponseSchema,
+	PersonaImportPreviewRequestSchema,
+	PersonaImportPreviewResponseSchema,
+	PersonaRestoreResponseSchema,
+} from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import {
 	PersonaLookupRequestSchema,
 	PersonaLookupResponseSchema,
 } from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -112,6 +120,101 @@ export function PersonaController(app: HonoApp) {
 			const {replace} = ctx.req.valid('query');
 			const personas = await ctx.get('personaService').importPersonas(user.id, body, {replace});
 			return ctx.json(personas.map((p) => p.toResponse()));
+		},
+	);
+
+	// Fork: the reviewed import (tyne-chat/tyne#243). The older import above stays for desktop apps
+	// that have not updated yet.
+	app.post(
+		'/users/@me/personas/import/preview',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_READ),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaImportPreviewRequestSchema),
+		OpenAPI({
+			operationId: 'preview_persona_import',
+			summary: 'Preview a persona import',
+			responseSchema: PersonaImportPreviewResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				"Classifies each member of an import file against the account's personas, deleted ones included: linked and identical, linked and different, deleted, probably the same, can't tell, tag in use, or new. Changes nothing. Pictures are compared only where their origin is known; links in the request are never fetched.",
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			return ctx.json(await ctx.get('personaService').previewImport(user.id, ctx.req.valid('json')));
+		},
+	);
+
+	app.post(
+		'/users/@me/personas/import/apply',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaImportApplyRequestSchema),
+		OpenAPI({
+			operationId: 'apply_persona_import',
+			summary: 'Apply a reviewed persona import',
+			responseSchema: PersonaImportApplyResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				"Applies one action per member: add, link (record the member's id only), restore (bring back the same deleted persona) or use_file (replace a linked persona's details, never its visibility). Checked against the account as it is now and written at once: if it is refused, nothing changes. Nothing is deleted.",
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			return ctx.json(await ctx.get('personaService').applyImport(user.id, ctx.req.valid('json')));
+		},
+	);
+
+	app.get(
+		'/users/@me/personas/deleted',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_READ),
+		requireOAuth2ScopeForBearer('personas.read'),
+		LoginRequired,
+		DefaultUserOnly,
+		OpenAPI({
+			operationId: 'list_my_deleted_personas',
+			summary: 'List own deleted personas',
+			responseSchema: DeletedPersonaListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Lists the deleted personas of the authenticated user, the most recently deleted first. They still show on their old messages and can be restored.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const personas = await ctx.get('personaService').listDeletedPersonas(user.id);
+			return ctx.json(personas.map((p) => p.toResponse()));
+		},
+	);
+
+	app.post(
+		'/users/@me/personas/deleted/:persona_id/restore',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', PersonaIdParam),
+		OpenAPI({
+			operationId: 'restore_persona',
+			summary: 'Restore a deleted persona',
+			responseSchema: PersonaRestoreResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Brings back a deleted persona as it was, so its old messages and usage are its own again. Tags and signature emojis another persona holds now are left off and listed in the response.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {persona_id} = ctx.req.valid('param');
+			return ctx.json(await ctx.get('personaService').restorePersona(user.id, createPersonaID(BigInt(persona_id))));
 		},
 	);
 

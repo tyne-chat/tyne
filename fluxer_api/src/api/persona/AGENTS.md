@@ -22,6 +22,8 @@ and follow the placement rules in the root `AGENTS.md`.
 | Image import from links | `PersonaAvatarImporter.ts`; the upload and link routes are in `user/controllers/UserAccountController.ts` |
 | Deleting the images with the account | `PersonaImageDeletion.ts`, called from `UserDeletionService` |
 | Export zip | `PersonaExportService.ts`, with the PluralKit mapping in `packages/schema/src/domains/persona/PluralKitFormat.ts` |
+| Reviewed import: classifying a file's members | `PersonaImportPlanner.ts` (pure), called by `PersonaService.previewImport`; `applyImport` writes the actions |
+| How tags compare | `PersonaTagKeys.ts` (trimmed, case-sensitive), shared by the service and the planner |
 | Persona mentions on message rows | `MessagePersonaMentions.ts` |
 | Old settings bytes | `RetiredSyncedPreferenceFields.ts` (a workaround; removal is tyne-chat/tyne#127) |
 | Request and response schemas | `packages/schema/src/domains/persona/` |
@@ -59,7 +61,11 @@ and follow the placement rules in the root `AGENTS.md`.
 - **Deletion is soft.** `delete` stamps `deleted_at`. `findById`, `findByUserId` and `count` skip
   deleted rows, so a deletion frees the 250-persona cap, the tags and the signature emojis.
   `findByUserAndPersonaIds`, which hydration uses, does not skip them, so old messages keep showing
-  the persona. Rows are removed only when the account is deleted.
+  the persona. Rows are removed only when the account is deleted. A deleted persona can come back as
+  itself: `restorePersona` (Settings) and the import's `restore` action clear `deleted_at` on the same
+  row (`writeImport`'s `restore` step), leaving off tags and signature emojis another persona holds
+  by then. Its image sources stay through the deletion, so a restored persona's pictures still
+  compare at the next import.
 - **Private hides the profile, not the identity.** Visibility is `public`, `unlisted` (the default)
   or `private`. A private persona still speaks: its name and avatar appear on its messages,
   reactions, typing and signals, and in `mention_personas`. Only its profile (bio, banner, pronouns,
@@ -111,8 +117,10 @@ personas), 10,000 signature emojis per persona (unique across personas).
 
 ## Routes and OAuth
 
-- `@me` routes: list and create, `/:persona_id`, `/import`, `/visibility`, `/bulk-delete`, `/settings`,
-  `/channel-states[/:channel_id]`, `/export`, `/import-image`.
+- `@me` routes: list and create, `/:persona_id`, `/import`, `/import/preview`, `/import/apply`,
+  `/deleted`, `/deleted/:persona_id/restore`, `/visibility`, `/bulk-delete`, `/settings`,
+  `/channel-states[/:channel_id]`, `/export`, `/import-image`. Restore lives under `/deleted` because the
+  OpenAPI check refuses `/{persona_id}/restore` as ambiguous with `/channel-states/{channel_id}`.
 - `/visibility` (PATCH) and `/bulk-delete` (POST) change or delete many personas in one write
   (tyne-chat/tyne#542), through `writeImport` like the import: all or nothing (`liveByIds` refuses a
   persona that is not the caller's and live), the whole list to the account's sessions and one
@@ -154,7 +162,18 @@ personas), 10,000 signature emojis per persona (unique across personas).
 
 ## Import, export and images
 
-- **Import:** the client reads a PluralKit export or a Tyne zip, sends the images first, then the
+- **Reviewed import** (tyne-chat/tyne#243; the design is tyne-tools `notes/persona-import-redesign.md`):
+  `POST /import/preview` classifies each member against the live and deleted personas and changes
+  nothing (`PersonaImportPlanner`): identity is the member's id, never the name; then name and tag,
+  one to one; then name or tag (can't tell); then tags held elsewhere or shared by two members; else
+  new. Pictures compare only where their origin is known (own media, or an image source with its
+  hash); otherwise `not_compared`, which never makes a persona "differs". `POST /import/apply` takes
+  one action per member (`add`, `link`, `restore`, `use_file`), re-checks tags, emojis and the cap
+  on the end state, and writes one batch; nothing is deleted, `link` writes only `external_uuid`, and
+  `use_file` never changes visibility, nor signature emojis or tag matching from a PluralKit file.
+  Conflicting actions answer `PERSONA_IMPORT_CONFLICT`.
+- **Older import**, kept for desktop apps that have not updated: the client reads a PluralKit export
+  or a Tyne zip, sends the images first, then the
   whole file in one `POST /import` (at most 250 personas, the account's limit). `importPersonas`
   matches an existing persona by `external_uuid` or by its own id, so re-importing an export updates
   it. It is all or nothing: everything is checked before anything is written, and
@@ -168,8 +187,9 @@ personas), 10,000 signature emojis per persona (unique across personas).
 - **Image sources are a record, not images.** `persona_image_sources` keeps the PluralKit link each
   imported image came from. A link there is never sent to a client, in a response or an event, and
   never used as an image address; the one place it leaves the server is the account's own export,
-  in `pluralkit.json`, so PluralKit keeps its links. Keep `loadPersonaImageSources` out of every
-  other path.
+  in `pluralkit.json`, so PluralKit keeps its links. The import preview reads them only to compare
+  pictures, and answers with hashes, never links. Keep `loadPersonaImageSources` out of every other
+  path.
 - **Images from links** (`PersonaAvatarImporter`): the fetch goes through the media proxy, which
   enforces the network policy (public addresses only, redirects checked hop by hop, a size cap).
   This code refuses only non-http(s) links, links with credentials and links on the media
