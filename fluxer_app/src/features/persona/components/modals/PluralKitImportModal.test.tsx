@@ -68,7 +68,15 @@ vi.mock('@lingui/react/macro', () => ({
 }));
 
 vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
-	importPersonas: vi.fn().mockResolvedValue(undefined),
+	// Every member new and nothing to decide, unless a test says otherwise.
+	previewPersonaImport: vi.fn(async (request: {members: Array<unknown>; display_tag?: unknown}) => ({
+		entries: request.members.map((_member, index) => ({index, kind: 'new'})),
+		personas: [],
+		display_tag: {decision: request.display_tag ? 'auto_apply' : 'none', current_text: null},
+		untouched: 0,
+		needs_review: false,
+	})),
+	applyPersonaImport: vi.fn(async () => ({personas: [], dropped: []})),
 	deletePersona: vi.fn().mockResolvedValue(undefined),
 	personaErrorMessage: vi.fn((_err: unknown, fallback: string) => fallback),
 	importPersonaImage: vi.fn(async (kind: string) => ({
@@ -91,7 +99,6 @@ vi.mock('@app/features/ui/commands/ModalCommands', () => ({
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PluralKitImportModal} from '@app/features/persona/components/modals/PluralKitImportModal';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {zipSync} from 'fflate';
 
 describe('PluralKitImportModal Component', () => {
@@ -129,7 +136,7 @@ describe('PluralKitImportModal Component', () => {
 			);
 		});
 
-		expect(document.body.textContent).toContain('Import from PluralKit');
+		expect(document.body.textContent).toContain('Import personas');
 		expect(document.body.textContent).toContain(
 			'Choose a PluralKit export (.json) or a Tyne export (.zip), or drag & drop',
 		);
@@ -238,18 +245,11 @@ describe('PluralKitImportModal Component', () => {
 			expect(document.body.textContent).toContain('Total Members2');
 			expect(document.body.textContent).toContain('Solar System (SOLAR)');
 
-			// Find start import button
-			const importBtn = Array.from(document.body.querySelectorAll('button')).find((btn) =>
-				btn.textContent?.includes('Start Import'),
-			);
-			expect(importBtn).toBeDefined();
+			await startImport();
 
-			await act(async () => {
-				importBtn?.click();
-			});
-			await settled(() => expect(document.body.textContent).toContain('Import Complete!'));
-
-			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith(
+			expect(PersonaCommands.previewPersonaImport).toHaveBeenCalledTimes(1);
+			expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1);
+			expect(appliedItems()).toEqual(
 				expect.arrayContaining([
 					expect.objectContaining({
 						name: 'Sun',
@@ -266,149 +266,137 @@ describe('PluralKitImportModal Component', () => {
 						persona_tags: [{prefix: 'E:', suffix: undefined}],
 					}),
 				]),
-				{replace: false},
 			);
-
-			// Completed view
-			expect(document.body.textContent).toContain('Import Complete!');
-			expect(document.body.textContent).toContain('Successfully imported 2 persona(s)');
+			// Nothing to decide on an account without personas: the system's tag (never its name) is used.
+			expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('SOLAR', undefined);
+			expect(document.body.textContent).toContain('2 personas added');
+			expect(document.body.textContent).toContain('Earth');
 		} finally {
 			window.FileReader = originalFileReader;
 		}
 	});
 
-	it('prompts confirmation when using replace mode with existing personas', async () => {
-		const onClose = vi.fn();
-
-		runInAction(() => {
-			PersonaStore.setPersonas([{id: '100000000000000001', name: 'Existing Persona 1'} as any]);
-		});
-
-		await act(async () => {
-			root.render(
-				<PluralKitImportModal
-					onClose={onClose}
-					data-flx="persona.plural-kit-import-modal-test.plural-kit-import-modal--4"
-				/>,
+	// The review opens only when something needs a decision; pictures are stored and personas written
+	// only after Import, for the members whose choice needs them (tyne-chat/tyne#243).
+	describe('the review', () => {
+		const file = () =>
+			new File(
+				[
+					JSON.stringify({
+						members: [
+							{
+								id: 'aaaaa',
+								name: 'Sun',
+								description: 'Star',
+								avatar_url: 'https://cdn.example/sun.png',
+								privacy: PUBLIC,
+							},
+							{id: 'bbbbb', name: 'Earth', avatar_url: 'https://cdn.example/earth.png', privacy: PUBLIC},
+						],
+					}),
+				],
+				'pk.json',
+				{type: 'application/json'},
 			);
+
+		beforeEach(() => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [
+					{
+						index: 0,
+						kind: 'differs',
+						persona_id: '100000000000000001',
+						differences: [{field: 'bio', change: 'changed'}],
+					},
+					{index: 1, kind: 'new'},
+				],
+				personas: [
+					{
+						id: '100000000000000001',
+						name: 'Sun',
+						bio: 'Old star',
+						persona_tags: [],
+						signature_emojis: [],
+						use_count: 3,
+						visibility: 'unlisted',
+						auto_tag_disabled: false,
+						created_at: '2026-09-01T00:00:00.000Z',
+						updated_at: '2026-09-01T00:00:00.000Z',
+					},
+				],
+				display_tag: {decision: 'none', current_text: null},
+				untouched: 0,
+				needs_review: true,
+			});
 		});
 
-		const validExport = JSON.stringify({
-			name: 'Test System',
-			members: [
-				{
-					id: 'm1',
-					name: 'New Member',
-				},
-			],
-		});
-
-		const file = new File([validExport], 'pluralkit.json', {type: 'application/json'});
-		const fileInput = document.body.querySelector('input[type="file"]') as HTMLInputElement;
-
-		const originalFileReader = window.FileReader;
-		try {
-			window.FileReader = class MockFileReader {
-				onload: ((e: any) => void) | null = null;
-				readAsText() {
-					setTimeout(() => {
-						this.onload?.({target: {result: validExport}});
-					}, 0);
-				}
-			} as any;
-
-			await act(async () => {
-				Object.defineProperty(fileInput, 'files', {value: [file]});
-				fileInput.dispatchEvent(new Event('change', {bubbles: true}));
-			});
-			await settled(() => expect(document.body.querySelectorAll('input[type="radio"]').length).toBe(2));
-
-			// Select "Replace existing personas" radio (the second radio option)
-			const radios = document.body.querySelectorAll('input[type="radio"]');
-			expect(radios.length).toBe(2);
-			const replaceRadio = radios[1] as HTMLInputElement;
-
-			await act(async () => {
-				replaceRadio.click();
-			});
-
-			const importBtn = Array.from(document.body.querySelectorAll('button')).find((btn) =>
-				btn.textContent?.includes('Start Import'),
-			);
-			expect(importBtn).toBeDefined();
-
-			await act(async () => {
-				importBtn?.click();
-			});
-
-			// Should prompt ConfirmModal
-			expect(ModalCommands.push).toHaveBeenCalledTimes(1);
-		} finally {
-			window.FileReader = originalFileReader;
-		}
-	});
-
-	// "Replace all" is one import request with `replace`: the server deletes the old personas in the
-	// same write, so the dialog deletes none itself, and a refused import leaves them all
-	// (tyne-chat/tyne#359).
-	describe('replacing all personas', () => {
-		async function confirmReplace(): Promise<void> {
-			runInAction(() => {
-				PersonaStore.setPersonas([
-					{id: '100000000000000001', name: 'Existing 1'} as any,
-					{id: '100000000000000002', name: 'Existing 2'} as any,
-				]);
-			});
+		async function openReview(fetchSpy: ReturnType<typeof vi.spyOn>): Promise<void> {
 			await act(async () => {
 				root.render(
 					<PluralKitImportModal
 						onClose={vi.fn()}
-						data-flx="persona.plural-kit-import-modal-test.plural-kit-import-modal--replace"
+						data-flx="persona.plural-kit-import-modal-test.plural-kit-import-modal--review"
 					/>,
 				);
 			});
-			const file = new File([JSON.stringify({members: [{id: 'm1', name: 'New Member'}]})], 'pluralkit.json', {
-				type: 'application/json',
-			});
-			await chooseFile(file, 'Total Members1');
+			await chooseFile(file(), 'Total Members2');
 			await act(async () => {
-				(document.body.querySelectorAll('input[type="radio"]')[1] as HTMLInputElement).click();
+				importButton()?.click();
 			});
-			await act(async () => {
-				Array.from(document.body.querySelectorAll('button'))
-					.find((btn) => btn.textContent?.includes('Start Import'))
-					?.click();
-			});
-			const confirm = vi.mocked(ModalCommands.push).mock.results[0]?.value as React.ReactElement<{
-				onPrimary: () => Promise<void>;
-			}>;
-			await act(async () => {
-				await confirm.props.onPrimary();
-			});
+			await settled(() => expect(document.body.textContent).toContain('Review before importing'));
+			expect(fetchSpy).not.toHaveBeenCalled();
+			expect(PersonaCommands.applyPersonaImport).not.toHaveBeenCalled();
 		}
 
-		it('sends one import with replace and deletes nothing itself', async () => {
-			await confirmReplace();
-			await settled(() => expect(document.body.textContent).toContain('Import Complete!'));
-
-			expect(PersonaCommands.importPersonas).toHaveBeenCalledTimes(1);
-			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith([expect.objectContaining({name: 'New Member'})], {
-				replace: true,
+		it('opens with the safest choices and applies only what they say, storing only the pictures needed', async () => {
+			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
+				const results = Object.fromEntries(body.urls.map((url) => [url, {avatar_hash: 'eeeeeeee'}]));
+				return new Response(`${JSON.stringify({type: 'complete', total: body.urls.length, results})}\n`, {status: 200});
 			});
-			expect(PersonaCommands.deletePersona).not.toHaveBeenCalled();
+			try {
+				await openReview(fetchSpy);
+				expect(document.body.textContent).toContain('Different in your file');
+				expect(document.body.textContent).toContain('Import will {actions}'.replace('{actions}', 'add 1'));
+
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+
+				// Sun keeps its own details (no action); only Earth is added, with only its picture fetched.
+				expect(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]?.[0].actions).toEqual([
+					{action: 'add', item: expect.objectContaining({name: 'Earth', avatar_hash: 'eeeeeeee'})},
+				]);
+				expect(fetchSpy.mock.calls.map(([, init]) => JSON.parse(String(init?.body)))).toEqual([
+					{urls: ['https://cdn.example/earth.png'], kind: 'avatar'},
+				]);
+			} finally {
+				fetchSpy.mockRestore();
+			}
 		});
 
-		it('keeps the existing personas when the import is refused', async () => {
-			vi.mocked(PersonaCommands.importPersonas).mockRejectedValueOnce(new Error('This tag is already taken.'));
-
-			await confirmReplace();
-			await settled(() => expect(document.body.textContent).toContain('Start Import'));
-
-			expect(PersonaCommands.deletePersona).not.toHaveBeenCalled();
-			expect(PersonaStore.personas.map((p) => p.name)).toEqual(['Existing 1', 'Existing 2']);
-			expect(document.body.textContent).not.toContain('Import Complete!');
+		it('stays on the review when the import is refused', async () => {
+			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
+				const results = Object.fromEntries(body.urls.map((url) => [url, {avatar_hash: 'eeeeeeee'}]));
+				return new Response(`${JSON.stringify({type: 'complete', total: body.urls.length, results})}\n`, {status: 200});
+			});
+			vi.mocked(PersonaCommands.applyPersonaImport).mockRejectedValueOnce(new Error('This tag is already taken.'));
+			try {
+				await openReview(fetchSpy);
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+				await settled(() => expect(document.body.textContent).toContain('Review before importing'));
+				expect(document.body.textContent).not.toContain('personas added');
+			} finally {
+				fetchSpy.mockRestore();
+			}
 		});
 	});
+
 	// Picks a file in the dialog and waits for the summary.
 	async function chooseFile(file: File, summaryText: string): Promise<void> {
 		const fileInput = document.body.querySelector('input[type="file"]') as HTMLInputElement;
@@ -419,14 +407,22 @@ describe('PluralKitImportModal Component', () => {
 		await settled(() => expect(document.body.textContent).toContain(summaryText));
 	}
 
+	function importButton(): HTMLButtonElement | undefined {
+		return Array.from(document.body.querySelectorAll('button')).find((btn) => btn.textContent?.trim() === 'Import');
+	}
+
+	// Presses Import on a file with nothing to decide and waits for the result.
 	async function startImport(): Promise<void> {
-		const importBtn = Array.from(document.body.querySelectorAll('button')).find((btn) =>
-			btn.textContent?.includes('Start Import'),
-		);
 		await act(async () => {
-			importBtn?.click();
+			importButton()?.click();
 		});
-		await settled(() => expect(document.body.textContent).toContain('Import Complete!'));
+		await settled(() => expect(document.body.textContent).toContain('personas added'));
+	}
+
+	// The personas the import added, from the actions it sent.
+	function appliedItems(): Array<unknown> {
+		const request = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls.at(-1)?.[0];
+		return (request?.actions ?? []).map((action) => action.item);
 	}
 
 	const PNG = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
@@ -486,24 +482,21 @@ describe('PluralKitImportModal Component', () => {
 				{urls: ['https://cdn.example/proxy.png'], kind: 'avatar'},
 				{urls: ['https://cdn.example/banner.png'], kind: 'banner'},
 			]);
-			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith(
-				[
-					expect.objectContaining({
-						name: 'Open',
-						visibility: 'public',
-						avatar_hash: 'dddddddd',
-						banner_hash: 'cccccccc',
-						external_uuid: 'aaaaa',
-						image_sources: {
-							avatar: {url: 'https://cdn.example/proxy.png', field: 'webhook_avatar_url', main_avatar_empty: false},
-							banner: {url: 'https://cdn.example/banner.png'},
-						},
-					}),
-					expect.objectContaining({name: 'Hidden', visibility: 'unlisted'}),
-					expect.objectContaining({name: 'Closed', visibility: 'private'}),
-				],
-				{replace: false},
-			);
+			expect(appliedItems()).toEqual([
+				expect.objectContaining({
+					name: 'Open',
+					visibility: 'public',
+					avatar_hash: 'dddddddd',
+					banner_hash: 'cccccccc',
+					external_uuid: 'aaaaa',
+					image_sources: {
+						avatar: {url: 'https://cdn.example/proxy.png', field: 'webhook_avatar_url', main_avatar_empty: false},
+						banner: {url: 'https://cdn.example/banner.png'},
+					},
+				}),
+				expect.objectContaining({name: 'Hidden', visibility: 'unlisted'}),
+				expect.objectContaining({name: 'Closed', visibility: 'private'}),
+			]);
 		} finally {
 			fetchSpy.mockRestore();
 		}
@@ -562,8 +555,7 @@ describe('PluralKitImportModal Component', () => {
 				'README.txt': encoder.encode('read me'),
 			});
 			await chooseFile(new File([zip as BlobPart], 'Tyne personas.zip', {type: 'application/zip'}), 'Total Members1');
-			const tagInput = Array.from(document.body.querySelectorAll('input[type="text"]')).at(-1) as HTMLInputElement;
-			expect(tagInput.value).toBe('T'.repeat(90));
+			expect(document.body.querySelectorAll('input[type="text"]').length).toBe(0);
 
 			await startImport();
 
@@ -572,20 +564,21 @@ describe('PluralKitImportModal Component', () => {
 				'avatar',
 				expect.stringMatching(/^data:image\/png;base64,/),
 			);
-			expect(PersonaCommands.importPersonas).toHaveBeenCalledWith(
-				[
-					expect.objectContaining({
-						name: 'Alvis',
-						avatar_hash: 'aaaaaaaa',
-						avatar_color: 7,
-						bio: 'the whole bio',
-						auto_tag_disabled: true,
-						signature_emojis: [{name: '🌸'}],
-						external_uuid: '1428573920012345678',
-					}),
-				],
-				{replace: false},
-			);
+			expect(vi.mocked(PersonaCommands.previewPersonaImport).mock.calls[0]?.[0].display_tag).toEqual({
+				text: 'T'.repeat(90),
+				has_icon: false,
+			});
+			expect(appliedItems()).toEqual([
+				expect.objectContaining({
+					name: 'Alvis',
+					avatar_hash: 'aaaaaaaa',
+					avatar_color: 7,
+					bio: 'the whole bio',
+					auto_tag_disabled: true,
+					signature_emojis: [{name: '🌸'}],
+					external_uuid: '1428573920012345678',
+				}),
+			]);
 			expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('T'.repeat(90), undefined);
 		} finally {
 			fetchSpy.mockRestore();

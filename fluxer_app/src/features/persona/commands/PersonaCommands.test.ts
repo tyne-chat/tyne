@@ -10,7 +10,6 @@ import type {
 	PersonaResponse,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
-import {reaction} from 'mobx';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 vi.mock('@lingui/core/macro', () => {
@@ -34,7 +33,6 @@ installVoiceMenuTestBootstrap();
 
 const PersonaCommands = await import('./PersonaCommands');
 const {PersonaStore} = await import('../state/PersonaStore');
-const {default: EmojiPins} = await import('@app/features/emoji/state/EmojiPins');
 
 vi.mock('@app/features/platform/transport/RestTransport', () => ({
 	http: {
@@ -438,153 +436,6 @@ describe('PersonaCommands', () => {
 		});
 	});
 
-	describe('importPersonas', () => {
-		it('imports personas by sending personas array directly in request body', async () => {
-			const toImport: Array<PersonaCreateRequest> = [
-				{
-					name: 'Imported 1',
-					visibility: 'unlisted',
-				},
-				{
-					name: 'Imported 2',
-					visibility: 'public',
-				},
-			];
-
-			const importedResponses: Array<PersonaResponse> = [
-				{
-					id: '1540000000000000010',
-					name: 'Imported 1',
-					avatar_hash: null,
-					banner_hash: null,
-					pronouns: null,
-					color: null,
-					bio: null,
-					auto_tag_disabled: false,
-					persona_tags: [],
-					signature_emojis: [],
-					use_count: 0,
-					last_used_at_ms: null,
-					visibility: 'unlisted',
-					external_uuid: null,
-					created_at: '2026-01-01T00:00:00Z',
-					updated_at: '2026-01-01T00:00:00Z',
-				},
-				{
-					id: '1540000000000000011',
-					name: 'Imported 2',
-					avatar_hash: null,
-					banner_hash: null,
-					pronouns: null,
-					color: null,
-					bio: null,
-					auto_tag_disabled: false,
-					persona_tags: [],
-					signature_emojis: [],
-					use_count: 0,
-					last_used_at_ms: null,
-					visibility: 'public',
-					external_uuid: null,
-					created_at: '2026-01-01T00:00:00Z',
-					updated_at: '2026-01-01T00:00:00Z',
-				},
-			];
-
-			vi.mocked(http.post).mockResolvedValueOnce({
-				ok: true,
-				status: 200,
-				body: importedResponses,
-			} as any);
-
-			const result = await PersonaCommands.importPersonas(toImport);
-
-			expect(http.post).toHaveBeenCalledWith(ForkEndpoints.USER_PERSONA_IMPORT, {
-				body: toImport,
-			});
-			expect(result).toHaveLength(2);
-			expect(PersonaStore.personas).toHaveLength(2);
-			expect(PersonaStore.personas[0].name).toBe('Imported 1');
-			expect(PersonaStore.personas[1].name).toBe('Imported 2');
-		});
-
-		it('throws an error when import request fails', async () => {
-			vi.mocked(http.post).mockResolvedValueOnce({
-				ok: false,
-				status: 400,
-				body: {message: 'Too many personas'},
-			} as any);
-
-			await expect(PersonaCommands.importPersonas([{name: 'Test'}])).rejects.toThrow('Too many personas');
-		});
-
-		// "Replace all" is one request: the server deletes the old personas in the write that brings in
-		// the new ones, so this side deletes nothing itself (tyne-chat/tyne#359).
-		describe('replacing', () => {
-			const personaResponse = (id: string, name: string): PersonaResponse => ({
-				id,
-				name,
-				avatar_hash: null,
-				banner_hash: null,
-				pronouns: null,
-				color: null,
-				bio: null,
-				auto_tag_disabled: false,
-				persona_tags: [],
-				signature_emojis: [],
-				use_count: 0,
-				last_used_at_ms: null,
-				visibility: 'unlisted',
-				external_uuid: null,
-				created_at: '2026-01-01T00:00:00Z',
-				updated_at: '2026-01-01T00:00:00Z',
-			});
-			const OLD_A = '1540000000000000020';
-			const OLD_B = '1540000000000000021';
-
-			beforeEach(() => {
-				EmojiPins.reset();
-				PersonaStore.setPersonas([personaResponse(OLD_A, 'Old A'), personaResponse(OLD_B, 'Old B')]);
-				EmojiPins.pinEmoji('unicode:fox', OLD_A);
-				EmojiPins.pinEmoji('unicode:owl', OLD_B);
-			});
-
-			it('sends one request and drops the replaced personas, with their pins in one change', async () => {
-				const imported = [personaResponse('1540000000000000030', 'New')];
-				vi.mocked(http.post).mockResolvedValueOnce({ok: true, status: 200, body: imported} as any);
-				const pinChanges = vi.fn();
-				const stop = reaction(() => EmojiPins.personaPinnedEmojis, pinChanges);
-
-				await PersonaCommands.importPersonas([{name: 'New'}], {replace: true});
-				stop();
-
-				expect(http.post).toHaveBeenCalledTimes(1);
-				expect(http.post).toHaveBeenCalledWith(ForkEndpoints.USER_PERSONA_IMPORT, {
-					body: [{name: 'New'}],
-					query: {replace: true},
-				});
-				expect(http.delete).not.toHaveBeenCalled();
-				expect(PersonaStore.personas.map((p) => p.name)).toEqual(['New']);
-				expect(EmojiPins.getPersonaPinnedEmojiKeys(OLD_A)).toEqual([]);
-				expect(EmojiPins.getPersonaPinnedEmojiKeys(OLD_B)).toEqual([]);
-				expect(pinChanges).toHaveBeenCalledTimes(1);
-			});
-
-			it('keeps the personas and their pins when the server refuses the import', async () => {
-				vi.mocked(http.post).mockResolvedValueOnce({
-					ok: false,
-					status: 400,
-					body: {code: 'DUPLICATE_PERSONA_TAG', message: 'This tag is already taken.'},
-				} as any);
-
-				await expect(PersonaCommands.importPersonas([{name: 'New'}], {replace: true})).rejects.toThrow();
-
-				expect(http.delete).not.toHaveBeenCalled();
-				expect(PersonaStore.personas.map((p) => p.name)).toEqual(['Old A', 'Old B']);
-				expect(EmojiPins.getPersonaPinnedEmojiKeys(OLD_A)).toEqual(['unicode:fox']);
-			});
-		});
-	});
-
 	describe('fetchPersonaProfile', () => {
 		const publicData: PublicPersonaResponse = {
 			id: '1540000000000000099',
@@ -683,7 +534,7 @@ describe('PersonaCommands', () => {
 				refused('POST', 403, {code: 'CONTENT_BLOCKED', message: 'This content was blocked by safety systems.'}),
 			);
 
-			const err = await PersonaCommands.importPersonas([{name: 'Bob'}]).catch((e: unknown) => e);
+			const err = await PersonaCommands.applyPersonaImport({source: 'pluralkit', actions: []}).catch((e: unknown) => e);
 
 			expect(err).toBeInstanceOf(PersonaCommands.PersonaRequestError);
 			expect(PersonaCommands.personaErrorMessage(err, 'Failed to import personas')).toBeNull();
