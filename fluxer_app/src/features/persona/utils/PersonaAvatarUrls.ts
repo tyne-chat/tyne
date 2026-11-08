@@ -2,6 +2,7 @@
 
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import type {MediaProxyImageSize} from '@fluxer/constants/src/MediaProxyImageSizes';
+import {isPersonaAssetHash} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 /** What a persona avatar needs: the persona's display copy, whose `avatar` is a media hash. */
@@ -17,7 +18,9 @@ export type PersonaAvatarSource = Pick<MessageSubprofileResponse, 'avatar'>;
  *
  * No persona, or a persona without an avatar of its own, gives no override, so `<Avatar>` shows
  * the account's avatar (a persona inherits it). Otherwise the persona's avatar is served through
- * the media proxy under the owning account, with an animated variant for hover.
+ * the media proxy under the owning account, with an animated variant for hover. A value that is
+ * not a persona image hash gives no override either: the server sends only hashes, and nothing
+ * else is put into an image address.
  */
 export function personaAvatarUrls(
 	ownerUserId: string,
@@ -25,7 +28,7 @@ export function personaAvatarUrls(
 	mediaSize?: MediaProxyImageSize,
 ): {avatarUrl?: string; hoverAvatarUrl?: string} {
 	const avatarHash = persona?.avatar;
-	if (!avatarHash) return {};
+	if (!isPersonaAssetHash(avatarHash)) return {};
 	return {
 		avatarUrl: AvatarUtils.getUserAvatarURL({id: ownerUserId, avatar: avatarHash}, false, mediaSize),
 		hoverAvatarUrl: AvatarUtils.getUserAvatarURL({id: ownerUserId, avatar: avatarHash}, true, mediaSize),
