@@ -6,10 +6,12 @@
 
 import i18n from '@app/app/I18n';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
+import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import type {PersonaImportSource} from '@app/features/persona/utils/PersonaImportFile';
 import type {ReviewMember, StoredPictures} from '@app/features/persona/utils/PersonaImportReview';
 import SessionManager from '@app/features/platform/state/AuthSession';
+import {withoutTrailingSlashes} from '@app/features/platform/transport/RestTransport';
 import {
 	imageFileExtension,
 	ownTyneMediaImageHash,
@@ -50,6 +52,15 @@ const IMAGE_MIME_TYPES: Record<string, string> = {
 	svg: 'image/svg+xml',
 };
 
+// The batch answers with a progress stream, which the REST client cannot read, so it is fetched
+// directly. Its URL is built as the REST client builds one (`resolveUrl` in RestTransport.ts), so on
+// desktop it takes the instance's own local route, not `/api/v1`, which the desktop proxy reads as
+// an instance named "v1" (tyne-chat/tyne#360).
+export function personaImportBatchURL(): string {
+	const base = withoutTrailingSlashes(RuntimeConfig.transportApiEndpoint);
+	return `${base}/v${RuntimeConfig.apiCodeVersion}${ForkEndpoints.USER_PERSONA_IMPORT_BATCH_AVATARS}`;
+}
+
 // Asks the server to fetch remote images (avatars or banners) in batches, and reads its NDJSON
 // progress stream. Returns what was stored and what failed, by URL.
 async function fetchRemoteImages(
@@ -85,7 +96,7 @@ async function fetchRemoteImages(
 			}
 		};
 		try {
-			const res = await fetch(`/api/v1${ForkEndpoints.USER_PERSONA_IMPORT_BATCH_AVATARS}`, {
+			const res = await fetch(personaImportBatchURL(), {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
