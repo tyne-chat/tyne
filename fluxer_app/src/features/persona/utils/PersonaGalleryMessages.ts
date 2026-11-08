@@ -123,3 +123,11 @@ export const NO_PUBLIC_PERSONAS_OTHERS_DESCRIPTOR = msg({
 	message: 'No public personas.',
 	comment: 'Shown in another account’s Personas list when it lists none.',
 });
+export const EXPAND_PERSONAS_DESCRIPTOR = msg({
+	message: 'Expand',
+	comment: 'Button that gives the whole profile window to the Personas list, hiding the profile header.',
+});
+export const COLLAPSE_PERSONAS_DESCRIPTOR = msg({
+	message: 'Collapse',
+	comment: 'Button that brings the profile header back above the Personas list.',
+});
