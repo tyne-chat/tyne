@@ -16,6 +16,8 @@ export const ForkEndpoints = {
 	USER_PERSONAS: '/users/@me/personas',
 	USER_PERSONA: (personaId: string) => `/users/@me/personas/${personaId}`,
 	USER_PERSONA_IMPORT: '/users/@me/personas/import',
+	USER_PERSONA_VISIBILITY: '/users/@me/personas/visibility',
+	USER_PERSONA_BULK_DELETE: '/users/@me/personas/bulk-delete',
 	USER_PUBLIC_PERSONAS: (userId: string) => `/users/${userId}/personas`,
 	USER_PUBLIC_PERSONA: (userId: string, personaId: string) => `/users/${userId}/personas/${personaId}`,
 	PERSONA_LOOKUP: '/personas/lookup',
