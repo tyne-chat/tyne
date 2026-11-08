@@ -2,7 +2,7 @@
 
 This folder is the web half of personas (see "Personas" in the root `AGENTS.md`): `PersonaStore`
 with the account's own personas and selection, the REST commands and gateway handlers, the settings
-page with the PluralKit import and export, the composer pill and picker, "React as…", the persona
+page with the import (and its review) and export, the composer pill and picker, "React as…", the persona
 profile popout and mobile sheet, and `PersonaTag`, the badge after a persona's name. Every file
 here is the fork's. Rendering, sending, reactions and mentions happen in upstream components, which
 call into this folder; those hooks follow the placement rules in the root `AGENTS.md`. The server
@@ -25,6 +25,8 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | An account's personas: Personas tab, sheet and pill | `components/gallery/`, `components/PersonasPill.tsx`, `state/PersonaDirectory.ts`, `utils/usePersonaDirectory.ts`, `utils/PersonaProfileTab.ts` |
 | Avatar and banner menus (popout) | `utils/usePersonaImageMenus.tsx` |
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
+| Import review and its decisions | `components/modals/PersonaImportReview.tsx`, `utils/PersonaImportReview.ts` (pure), `utils/PersonaImportImages.ts` |
+| Deleted personas, Restore | `components/settings/DeletedPersonasSection.tsx` |
 | Tag matching | `packages/schema/src/domains/persona/PersonaMatcher.ts` (`matchPersona`) |
 
 ## Which persona: the selection
@@ -198,16 +200,43 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   Public, private and delete ask first (delete in red, pointing to Deleted personas); a visibility
   change ends in a toast with Undo, one request that puts each persona back as it was. The
   `feature` subtab (the Personas tab's "Choose personas to feature") opens on Unlisted with Select on.
-- `PluralKitImportModal` reads PluralKit JSON or a Tyne zip (`PersonaImportFile`), reuses images
-  already on the instance by hash, uploads the zip's images, has the server fetch remote ones (a
-  streamed NDJSON response), then imports the whole file in one request, which the server writes
-  whole or not at all. "Replace all" is that request with `replace`: the server deletes the existing
-  personas in the same write, so a refused import keeps them, and the dialog never deletes any
-  itself (tyne-chat/tyne#359). `importPersonas` then drops the replaced personas here in one MobX
-  action, so their emoji pins go in one synced-preferences change. A link in the file is never
-  stored: every image, the tag icon included (the zip's file, or an older export's `tag_icon_url`),
-  is stored on the instance first, and only its hash is saved; an image that cannot be stored
-  becomes a warning and does not stop the import.
+- **Import** (tyne-chat/tyne#243): `PluralKitImportModal` reads PluralKit JSON or a Tyne zip
+  (`PersonaImportFile`) and has one Import button, no strategy to pick. It first stores every
+  picture in the file (`storeMemberPictures`: the zip's files, this account's own copies, or the
+  server's streamed download; a failure is not retried, and the result is kept for the file, so Back
+  and Import again stores nothing twice), then sends the members to `previewPersonaImport` (one
+  request, which changes nothing) with each stored picture's hash, so pictures are compared by hash
+  and the review shows the real ones (tyne-chat/tyne#567). When `needs_review` is false (every member
+  new without a clash, or already identical) it applies at once; otherwise `PersonaImportReview`
+  opens, laid out as "Pick a side" (tyne-chat/tyne#563): one line each at the top for what needs no
+  decision (new members and the probably-the-same ones it connects, both untickable behind Show;
+  those already identical; personas not in the file), then one question per member that needs a
+  choice, hardest first (can't tell, tag in use, different in the file, deleted, then the display
+  tag), each sorted by name and set off by a thin line, with the file's version on the left and Tyne's on the right:
+  the card is the choice and the other greys out. Each card starts with the banner and avatar
+  together, as a profile card shows them; a picture that differs is marked, and avatar and banner
+  are not in the list of compared details. Personas different in the file are one list of
+  collapsed rows (what differs, and the current choice), each opened to a three-way switch over the
+  two versions: Use the file's, Keep both (the file's is added unlinked as a copy, "Name (2)" with a
+  free tag, both editable; `keepBothDecision`), Use Tyne's (tyne-chat/tyne#568). Members whose tag
+  is taken are such rows too, with Skip / Keep over the file's card; Keep adds it linked (#570). Every member
+  starts on `defaultDecision`, the choice that changes nothing, and the footer says what Import will
+  do. While the review is open, closing the dialog asks first (tyne-chat/tyne#564); while checking
+  or importing it cannot be closed. A member whose tag
+  another persona or member has can be added with a tag of its own (`replacements` on the add
+  decision, sent in the action's item): the field starts on a free tag in the same style
+  (`suggestTag`) and says who has one typed in (`tagHolder`). `findConflicts` blocks Import while two choices would give one tag to two
+  personas. `applyPersonaImport` then sends one action per member, written whole or not at all,
+  with the pictures stored before the review; a failed picture is reported only where the choice
+  used it. A link in the file is never shown: the review shows a member's picture only from a stored
+  hash the preview returned or from the zip in memory, else a placeholder and a note. Pictures stored
+  for members that end up skipped stay in storage unused. The display tag is the
+  file's system tag, never the system's name; it is applied without asking only on an account with no
+  personas and no display tag. The older `importPersonas` (with `replace`) stays in the commands for
+  reference by older code paths only; the dialog no longer uses it.
+- **Deleted personas** (`DeletedPersonasSection`, at the end of the Personas settings): the list is
+  fetched once, when the person opens it, and a failure waits for Retry. Restore brings back the
+  same persona (`restorePersona`), and the toast names any tag it came back without.
 - `exportPersonas` downloads the server's zip, which this import reads back.
 
 ## Where persona code hooks into upstream

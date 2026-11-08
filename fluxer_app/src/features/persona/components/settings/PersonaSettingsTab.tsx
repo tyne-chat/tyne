@@ -59,6 +59,7 @@ import {openPersonaEditModal} from '../modals/PersonaEditModal';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
 import {SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR} from '../PersonaPickerSheet';
 import {PersonaTag} from '../PersonaTag';
+import {DeletedPersonasSection} from './DeletedPersonasSection';
 import {
 	PersonaBulkActionBar,
 	PersonaCardCheckbox,
@@ -705,7 +706,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									onClick={openPluralKitImportModal}
 									data-flx="persona.settings.persona-settings-tab.button.open-plural-kit-import-modal"
 								>
-									<Trans>Import from PluralKit</Trans>
+									<Trans comment="Button that starts the persona import">Import</Trans>
 								</Button>
 								<Button
 									variant="secondary"
@@ -989,6 +990,8 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 							data-flx="persona.settings.persona-settings-tab.bulk-action-bar"
 						/>
 					</SettingsSection>
+
+					<DeletedPersonasSection data-flx="persona.settings.persona-settings-tab.deleted-personas-section" />
 				</div>
 			</SettingsTabContent>
 		</SettingsTabContainer>
