@@ -432,7 +432,7 @@ Returns the caller's personas as a ZIP file. It holds a PluralKit export file (`
 
 <RouteHeader method="POST" path="/v1/users/@me/personas/import" oauth2="personas.write" />
 
-Creates or updates up to 250 personas in one request, for example from a PluralKit export. An item whose `external_uuid` matches an existing persona's `external_uuid` or ID updates that persona, and every other item creates one. The whole request is checked before anything is written and then written at once, so a refused or failed import changes nothing. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, in place of an event per persona.
+The older import, kept for apps that have not updated: Tyne's apps now [preview](#preview-a-persona-import) the file and [apply](#apply-a-reviewed-persona-import) one action per member. Creates or updates up to 250 personas in one request, for example from a PluralKit export. An item whose `external_uuid` matches an existing persona's `external_uuid` or ID updates that persona, and every other item creates one. The whole request is checked before anything is written and then written at once, so a refused or failed import changes nothing. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, in place of an event per persona.
 
 With `replace`, every live persona of the account is deleted in the same write, as [Delete persona](#delete-persona) deletes one, and every item creates a new persona. The tags, signature emojis and places under the limit of the deleted personas are free for the imported ones. A selection that named a deleted persona goes back to the account, with a [User Persona Settings Update](/gateway/events/#user-persona-settings-update) or a [User Persona Channel State Update](/gateway/events/#user-persona-channel-state-update). If the import is refused, the personas and selections stay as they were.
 
@@ -451,6 +451,99 @@ An array of up to 250 [persona import item](#persona-import-item-object) objects
 | Status | Body | Condition |
 | --- | --- | --- |
 | 200 | array[[persona](#persona-object) object] | Every persona the import created or updated |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Preview a persona import
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import/preview" oauth2="personas.write" />
+
+Classifies each member of an import file against the caller's personas, deleted ones included, and changes nothing. Identity is the member's `external_uuid` (the PluralKit member ID, or a Tyne export's persona ID), never the name. The rules, each over every member still open before the next:
+
+1. **The ID.** A live persona linked to the member is `up_to_date` when its details match and `differs` otherwise; failing that, a deleted one is `deleted` (the most used, if several are). Two live personas with the member's ID make it `cant_tell`.
+2. **Name and tag, one to one.** The only live persona that no member of the file is linked to, with the same name and a shared tag, is `probably_same`, when no other member matches it that way and it is linked to no other member.
+3. **Name or tag.** Such personas with the same name, or a tag in common (also one differing only in case), make the member `cant_tell`, with them as `candidates`.
+4. **Tags.** A tag (or, from a Tyne export, a signature emoji) another live persona holds, or that another member still open has too, makes the member `tag_in_use`; both members sharing one are. Every other member is `new`.
+
+Names compare after trimming and Unicode normalisation; tags compare as Tyne enforces them, trimmed and case-sensitive. Pictures are compared only where their origin is known (a link to the caller's own media, or one an earlier import recorded); otherwise the difference is `not_compared` and does not make a persona `differs`. A visibility difference is `info` only: applying never changes visibility. Links in the request are never fetched.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| source | string | `pluralkit` for a PluralKit export; `tyne` for a Tyne export, which also carries signature emojis and tag matching |
+| members | array[object] | Up to 250 members in file order, each with the [create persona](#create-persona) fields `name`, `pronouns`, `color`, `bio`, `persona_tags`, `visibility`, `external_uuid`, `signature_emojis` and `auto_tag_disabled`, and `avatar` and `banner` objects with the file's `url` and a `hash` the client already knows is stored under the account |
+| display_tag? | ?object | The file's system tag: `text` and `has_icon` |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object | `entries` (one per member: `index`, `kind`, `persona_id`, `candidates`, `differences`, `clashes`, and the stored `avatar_hash` and `banner_hash` that are safe to show), `personas` (every persona the entries name, deleted ones included), `display_tag` (`decision`: `none`, `auto_apply` for an account with no personas and no display tag, or `ask`), `untouched` (live personas no member matched) and `needs_review` |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Apply a reviewed persona import
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/import/apply" oauth2="personas.write" />
+
+Applies one action per member, checked against the account as it is now and written at once: if it is refused, nothing changes. Nothing is deleted.
+
+- `add` creates a persona from `item`, leaving out `drop_tags` and `drop_signature_emojis`.
+- `link` records `external_uuid` on `persona_id` and changes nothing else. It is refused with 400 `PERSONA_IMPORT_CONFLICT` when another live persona is linked to that member already.
+- `restore` brings back the deleted `persona_id` as it was, the same persona, so its old messages and usage are its own again. Tags and signature emojis another persona holds by then are left off and listed in `dropped`.
+- `use_file` replaces the details of `persona_id`, which must be linked to the item's member: name, pronouns, bio, colour and tags (an empty one clears Tyne's), the avatar and banner unless `keep_avatar` or `keep_banner` (sent when the file's picture is the same, or could not be stored), and from a Tyne export signature emojis and tag matching. Visibility is never changed.
+
+A persona named by two actions is refused with 400 `PERSONA_IMPORT_CONFLICT`. If the result would put a tag or signature emoji on two personas, or go over the limit, it is refused with 400 `DUPLICATE_PERSONA_TAG`, `DUPLICATE_SIGNATURE_EMOJI` or `PERSONA_LIMIT_REACHED`, naming them in the message. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| source | string | `pluralkit` or `tyne`, as for the preview |
+| actions | array[object] | Up to 250 actions; skipped members are left out. Each has `action` and, by action, `persona_id`, `external_uuid`, `item` (a [persona import item](#persona-import-item-object) with its pictures stored), `drop_tags`, `drop_signature_emojis`, `keep_avatar` and `keep_banner` |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object | `personas` (the personas written, in action order) and `dropped` (for restored personas, the tags and signature emojis left off) |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## List own deleted personas
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/deleted" oauth2="personas.read" />
+
+Returns the caller's deleted personas, the most recently deleted first. They still show on their old messages and can be [restored](#restore-a-deleted-persona). [List own personas](#list-own-personas) never includes them.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | The deleted personas, each with `deleted_at` |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Restore a deleted persona
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/deleted/{persona_id}/restore" oauth2="personas.write" />
+
+Brings back one of the caller's deleted personas as it was, so its old messages and usage are its own again. Tags and signature emojis another persona holds by then are left off and listed in the response. Refused with 404 `UNKNOWN_PERSONA` when the persona is not a deleted persona of the caller, and with 400 `PERSONA_LIMIT_REACHED` when the account is at the limit. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object | `persona` (the [persona](#persona-object)), `dropped_tags` and `dropped_signature_emojis` |
 
 ### Rate limit
 
@@ -692,7 +785,7 @@ Changes one of the caller's personas. Only the fields present in the body change
 
 <RouteHeader method="DELETE" path="/v1/users/@me/personas/{persona_id}" oauth2="personas.write" />
 
-Deletes one of the caller's personas. Messages already sent as it keep their snapshot. Sends [User Persona Delete](/gateway/events/#user-persona-delete) to the caller's sessions. Where the persona was selected, in the settings or in a channel, the account itself is selected again and the matching settings or channel state event is sent.
+Deletes one of the caller's personas. Messages already sent as it keep their snapshot, and it can be [restored](#restore-a-deleted-persona). Sends [User Persona Delete](/gateway/events/#user-persona-delete) to the caller's sessions. Where the persona was selected, in the settings or in a channel, the account itself is selected again and the matching settings or channel state event is sent.
 
 ### Path parameters
 
