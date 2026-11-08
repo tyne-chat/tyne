@@ -157,6 +157,36 @@ export const PersonaSelectionHeader = observer(
 	},
 );
 
+/**
+ * A persona card's checkbox. The card toggles on click too, so the click stops here: otherwise one
+ * click on the box toggles twice and nothing changes (tyne-chat/tyne#560).
+ */
+export const PersonaCardCheckbox = ({
+	checked,
+	label,
+	onToggle,
+}: {
+	checked: boolean;
+	label: string;
+	onToggle: () => void;
+}) => (
+	// biome-ignore lint/a11y/noStaticElementInteractions: only keeps the checkbox's clicks from also reaching the card.
+	// biome-ignore lint/a11y/useKeyWithClickEvents: only keeps the checkbox's clicks from also reaching the card.
+	<span
+		className={styles.cardCheckbox}
+		onClick={(e) => e.stopPropagation()}
+		data-flx="persona.bulk.card-checkbox.stop-propagation"
+	>
+		<Checkbox
+			checked={checked}
+			onChange={onToggle}
+			size="small"
+			aria-label={label}
+			data-flx="persona.settings.persona-settings-tab.select-checkbox"
+		/>
+	</span>
+);
+
 const VISIBILITY_ICONS = {public: GlobeSimpleIcon, unlisted: EyeSlashIcon, private: LockSimpleIcon} as const;
 const VISIBILITY_ICON_CLASSES = {
 	public: styles.iconPublic,

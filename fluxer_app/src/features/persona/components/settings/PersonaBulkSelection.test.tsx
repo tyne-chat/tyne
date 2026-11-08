@@ -33,6 +33,7 @@ import type {I18n} from '@lingui/core';
 import {act, type ReactElement, type ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
+	PersonaCardCheckbox,
 	type PersonaSelection,
 	PersonaVisibilityChips,
 	requestDelete,
@@ -162,6 +163,47 @@ describe('selecting many personas (tyne-chat/tyne#542)', () => {
 
 		await act(async () => root.render(<Probe personas={[A, B]} data-flx="persona.bulk-test.probe" />));
 		expect(selection!.selected.size).toBe(0);
+	});
+
+	it('changes the selection once per click on a card, whether on its checkbox or elsewhere (tyne-chat/tyne#560)', async () => {
+		let selection: PersonaSelection | null = null;
+		let cardClicks = 0;
+		const Card = () => {
+			selection = usePersonaSelection([A]);
+			return (
+				// biome-ignore lint/a11y/noStaticElementInteractions: stands in for the settings tab's persona card.
+				// biome-ignore lint/a11y/useKeyWithClickEvents: stands in for the settings tab's persona card.
+				<div
+					onClick={() => {
+						cardClicks++;
+						selection!.toggle(A.id);
+					}}
+					data-flx="persona.bulk-test.card"
+				>
+					<PersonaCardCheckbox
+						checked={selection.selected.has(A.id)}
+						label={A.name}
+						onToggle={() => selection!.toggle(A.id)}
+						data-flx="persona.bulk-test.card-checkbox"
+					/>
+					<span data-flx="persona.bulk-test.card-name">{A.name}</span>
+				</div>
+			);
+		};
+		await act(async () => root.render(<Card data-flx="persona.bulk-test.card-root" />));
+		await act(async () => selection!.start());
+		const click = async (selector: string) =>
+			act(async () => (container.querySelector(selector) as HTMLElement).click());
+		const isSelected = () => selection!.selected.has(A.id);
+
+		for (const target of ['button[role="checkbox"]', 'label', '[data-flx="persona.bulk-test.card-name"]']) {
+			await click(target);
+			expect(isSelected(), `first click on ${target}`).toBe(true);
+			await click(target);
+			expect(isSelected(), `second click on ${target}`).toBe(false);
+		}
+		expect(cardClicks).toBe(2);
+		expect(container.querySelector('button[role="checkbox"]')?.getAttribute('aria-label')).toBe(A.name);
 	});
 
 	it('counts each visibility on its chip', async () => {
