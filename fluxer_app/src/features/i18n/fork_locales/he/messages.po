@@ -406,6 +406,9 @@ msgstr "ערוך פרסונה"
 msgid "Edit timestamp"
 msgstr "עריכת חותמת זמן\\"
 
+msgid "Everyone else"
+msgstr "כל השאר"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "כל השאר נשאר בדיוק כפי שהיה."
@@ -471,6 +474,9 @@ msgstr "עדכון תגית התצוגה נכשל"
 
 msgid "Failed to update persona mode"
 msgstr "עדכון מצב הפרסונה נכשל"
+
+msgid "Failed to update the reaction setting"
+msgstr "לא ניתן היה לעדכן את הגדרת הריאקציות"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "שינוי המקום שבו הפרסונה שלכם נזכרת נכשל"
@@ -768,6 +774,9 @@ msgstr "לא הוגדרה תגית תצוגה. ההודעות יציגו את ת
 msgid "No matching personas found."
 msgstr "לא נמצאו פרסונות תואמות."
 
+msgid "No one matches."
+msgstr "אין התאמות."
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "עדיין לא הוגדרו פרסונות. צרו אחת בהגדרות."
 
@@ -987,9 +996,16 @@ msgstr "ציבורי"
 msgid "Public persona"
 msgstr "פרסונה ציבורית"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "הגב בתור כמה פרסונות בבת אחת"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "הגב בתור..."
+
+msgid "Reacted"
+msgstr "הגיבו"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "מגיב בתור <0>{reactorName}</0>"
@@ -1000,6 +1016,9 @@ msgstr "מגיב/ה בתור {name}"
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "תגובה עם אימוג'י חתימה תגיב תמיד בתור פרסונה זו, ללא קשר לפרסונה הפעילה."
+
+msgid "Recent"
+msgstr "אחרונים"
 
 msgid "Recent Personas"
 msgstr "פרסונות אחרונות"
@@ -1053,6 +1072,9 @@ msgstr "אם תתחרטו, תוכלו לשחזר אותן מתוך \"פרסונ�
 msgid "Restored"
 msgstr "שוחזרו"
 
+msgid "Results"
+msgstr "תוצאות"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "בדיקה לפני ייבוא"
@@ -1104,7 +1126,6 @@ msgstr "תוצאות חיפוש ({0})"
 msgid "Search commands"
 msgstr "חיפוש פקודות"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "חפש פרסונות, תגיות, כינויי גוף..."
@@ -1549,6 +1570,13 @@ msgstr "לחשבון שלכם יש תגית תצוגה אחת, שמוצגת אח
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "הפרסונה שלכם נשארת כפי שהיא; היא מקושרת לחבר הזה."
 
+msgid "Your reactions"
+msgstr "הריאקציות שלך"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "הריאקציות שלך עם {emojiName}"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "יוסיף {count}"
@@ -1617,6 +1645,10 @@ msgstr "שם"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "התמונה לא הושוותה"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "לחץ כדי לראות את הריאקציות שלך"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, one {שימוש אחד} two {שני שימושים} othe
 
 msgid "{count} notice(s) during import"
 msgstr "הודעות במהלך הייבוא: {count}"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count} מתוך {total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "{count} מתוך {total} הגיבו"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
