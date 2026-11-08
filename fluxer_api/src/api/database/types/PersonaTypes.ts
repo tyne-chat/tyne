@@ -59,6 +59,8 @@ export interface UserPersonaSettingsRow {
 	is_latched: boolean;
 	display_tag_text: Nullish<string>;
 	display_tag_icon: Nullish<string>;
+	/** Whether several of the account's identities may react with one emoji. Rows written before this existed have none and read as on. */
+	multi_persona_reactions?: Nullish<boolean>;
 	updated_at: Date;
 	version: number;
 }
@@ -71,6 +73,7 @@ export const USER_PERSONA_SETTINGS_COLUMNS = [
 	'is_latched',
 	'display_tag_text',
 	'display_tag_icon',
+	'multi_persona_reactions',
 	'updated_at',
 	'version',
 ] as const satisfies ReadonlyArray<keyof UserPersonaSettingsRow>;

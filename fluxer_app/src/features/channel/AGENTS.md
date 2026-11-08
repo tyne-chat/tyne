@@ -77,7 +77,8 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   `PersonaStore.getEffectiveReactionPersona(channelId, emoji, draft)` and toggle that persona's
   reaction (`hasPersonaReacted`), not `reaction.me`. Each reads the channel's draft, so all
   re-render when the draft is saved. Quick reactions follow that persona's pinned and frequent
-  emojis.
+  emojis. Exception: once any of the account's identities reacted with a chip's emoji, a click on
+  that chip opens "Your reactions" instead (`persona/AGENTS.md`, "Reactions").
 
 ## The composer
 
@@ -201,7 +202,7 @@ search like that ✕, at every width, and moves focus to the message box.
 | Scrolling | one page per entry into a trigger region, none while one loads; a page that grew the list under 100 px pauses loading until the user scrolls away |
 | Typing in search | per `from:`/`mentions:` value and per plain word, `GET /channels/:id/persona-mentions?q=…&limit=500` 60 ms after the last change, unless the 15-minute per-channel cache has a match (`lexical/composer/useAutocompletePersonaSearch.ts`). Not shared, failures not remembered: a word matching no persona costs one request per pause (tyne-chat/tyne#317) |
 | Opening pins | one GET the first time; a failure is recorded, not retried. Upstream's popout also acks unseen pins (one POST) and loads the authors' missing members |
-| A reaction, "Change persona" | one request each (429 retries are messaging's) |
+| A reaction, "Change persona" | one request each (429 retries are messaging's). In "Your reactions" and "React as…", one per toggle; opening them sends none ("React as…" refreshes the personas, behind `fetchPersonas`' 2 s cooldown) |
 | Saving an inline edit with new files | one plan request, one PUT per file (or its parts), one completion when an upload was in parts, one PATCH; or, with no presigned uploads or when the plan request fails, one multipart PATCH. Only on Save. A failure shows once, is not retried, and leaves the files in the box |
 
 Nothing here fetches while rendering, but rows render mentions through messaging's

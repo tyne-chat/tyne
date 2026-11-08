@@ -37,6 +37,7 @@ const PERSONA_MODE_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update persona mode`
 const SET_ACTIVE_PERSONA_FAILED_DESCRIPTOR = msg`Failed to set active persona`;
 const CLEAR_ACTIVE_PERSONA_FAILED_DESCRIPTOR = msg`Failed to clear active persona`;
 const PERSONA_SCOPE_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update where your persona is remembered`;
+const MULTI_PERSONA_REACTIONS_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update the reaction setting`;
 const CHANNEL_PERSONA_UPDATE_FAILED_DESCRIPTOR = msg`Failed to set the persona for this channel`;
 const ACTIVE_PERSONA_CLEARED_DESCRIPTOR = msg`Active persona cleared`;
 const ACTIVE_PERSONA_CLEARED_ROOT_DESCRIPTOR = msg`Active persona cleared (sending as root account)`;
@@ -143,6 +144,8 @@ export class PersonaStoreClass {
 	private _activePersonaId: string | null = null;
 	private _isPersonaLatched: boolean = false;
 	private _activePersonaScope: ActivePersonaScope = 'global';
+	/** Several of the account's identities may react with one emoji (tyne-chat/tyne#86). On unless the account turned it off. */
+	private _multiPersonaReactions = true;
 	/** With the per-channel scope: the persona selected in each channel. No entry means the account. */
 	private readonly _channelPersonaIds = observable.map<string, string>();
 	private _knownPersonas = new Map<string, MessageSubprofileResponse>();
@@ -162,6 +165,7 @@ export class PersonaStoreClass {
 			this._activePersonaId = null;
 			this._isPersonaLatched = false;
 			this._activePersonaScope = 'global';
+			this._multiPersonaReactions = true;
 			this._channelPersonaIds.clear();
 			this._knownPersonas.clear();
 			this._knownPersonaOwners.clear();
@@ -364,6 +368,9 @@ export class PersonaStoreClass {
 			}
 			if (settings.active_persona_scope !== undefined) {
 				this._activePersonaScope = settings.active_persona_scope;
+			}
+			if (settings.multi_persona_reactions !== undefined) {
+				this._multiPersonaReactions = settings.multi_persona_reactions;
 			}
 			if (settings.active_persona_id !== undefined) {
 				this._activePersonaId = settings.active_persona_id;
@@ -570,6 +577,26 @@ export class PersonaStoreClass {
 				this._activePersonaScope = previous;
 			});
 			Toast.error(i18n._(PERSONA_SCOPE_UPDATE_FAILED_DESCRIPTOR));
+		}
+	}
+
+	get multiPersonaReactions(): boolean {
+		return this._multiPersonaReactions;
+	}
+
+	async setMultiPersonaReactions(enabled: boolean): Promise<void> {
+		const previous = this._multiPersonaReactions;
+		if (previous === enabled) return;
+		runInAction(() => {
+			this._multiPersonaReactions = enabled;
+		});
+		try {
+			await http.patch(ForkEndpoints.USER_PERSONA_SETTINGS, {body: {multi_persona_reactions: enabled}});
+		} catch {
+			runInAction(() => {
+				this._multiPersonaReactions = previous;
+			});
+			Toast.error(i18n._(MULTI_PERSONA_REACTIONS_UPDATE_FAILED_DESCRIPTOR));
 		}
 	}
 
