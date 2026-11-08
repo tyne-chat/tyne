@@ -8,6 +8,10 @@ import FluxerLogoAsset from '@app/media/images/fluxer-logo-color.svg?react';
 import type React from 'react';
 import {useCallback, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {AuthGetAppPanel} from '@app/features/app_download/components/AuthGetAppPanel';
+
 const LOGO_BOX_PX = 128;
 const WORDMARK_TEXT_STYLE: React.CSSProperties = {display: 'block', lineHeight: 1.1};
 
@@ -150,6 +154,10 @@ export function AuthBrandPanel({brand, logo, onLogoError, layout}: AuthBrandPane
 					{brand.host}
 				</span>
 			)}
+			<AuthGetAppPanel
+				inSplitCard={layout === AuthBrandLayout.CARD && logo != null}
+				data-flx="auth.auth-brand-panel.auth-get-app-panel"
+			/>
 		</flx-auth-card-brand>
 	);
 }

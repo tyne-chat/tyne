@@ -1,0 +1,17 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* Fork: "Get the Tyne app" under the logo on the login and invite pages (tyne-chat/tyne#242). */
+
+.panel {
+	align-self: stretch;
+	margin-top: 2rem;
+	padding-top: 1.5rem;
+	border-top: 0.0625rem solid var(--background-modifier-accent);
+}
+
+/* The card has two columns only from this width (AuthBrandPanel.module.css's `.split`). */
+@media not all and (min-width: 55rem) {
+	.panel {
+		display: none;
+	}
+}

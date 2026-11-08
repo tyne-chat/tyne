@@ -7,6 +7,10 @@ import {connectionCallbackRoute, premiumCallbackRoute} from '@app/app/router/rou
 import {appRoute, homeRoute, notFoundRoute} from '@app/app/router/routes/RootRoutes';
 import type {RouteConfig} from '@app/features/platform/components/router/RouterTypes';
 
+// Fork imports.
+
+import {appDownloadRoute} from '@app/features/app_download/routes/AppDownloadRoute';
+
 const routeTree = rootRoute.addChildren([
 	homeRoute,
 	appRoute,
@@ -15,5 +19,6 @@ const routeTree = rootRoute.addChildren([
 	connectionCallbackRoute,
 	authRouteTree,
 	appRouteTree,
+	appDownloadRoute,
 ]);
 export const buildRoutes = (): Array<RouteConfig> => routeTree.build();

@@ -5,6 +5,10 @@ import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import {formatAssetUploadExtensions, formatKnownAnimatedAssetExtensions} from '@fluxer/constants/src/AssetFormatPolicy';
 import {THE_OTHER_PLATFORM} from '@fluxer/constants/src/ExternalPlatformConstants';
 
+// Fork imports.
+
+import {forkAppDownloadPageUrl} from '@app/features/app_download/utils/AppDownloadPlatform';
+
 export {PRODUCT_NAME};
 export const PRODUCT_LABS_COMMUNITY_NAME = `${PRODUCT_NAME} Labs`;
 export const OPERATOR_PASS_NAME = 'Operator Pass';
@@ -46,7 +50,8 @@ const DESKTOP_DOWNLOAD_URLS: Record<string, string> = {
 	development: 'http://localhost:8088/download',
 };
 
-export const DESKTOP_DOWNLOAD_URL = DESKTOP_DOWNLOAD_URLS[Config.RELEASE_CHANNEL] ?? DESKTOP_DOWNLOAD_URLS.stable;
+export const DESKTOP_DOWNLOAD_URL =
+	forkAppDownloadPageUrl() ?? DESKTOP_DOWNLOAD_URLS[Config.RELEASE_CHANNEL] ?? DESKTOP_DOWNLOAD_URLS.stable;
 export const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.fluxer';
 export const FLUXER_DOCS_DOMAIN = 'fluxer.dev';
 export const FLUXER_DOCS_URL = `https://${FLUXER_DOCS_DOMAIN}`;
