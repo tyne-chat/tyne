@@ -456,6 +456,50 @@ An array of up to 250 [persona import item](#persona-import-item-object) objects
 
 30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
 
+## Change the visibility of several personas
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/visibility" oauth2="personas.write" />
+
+Gives up to 250 of the caller's personas a new [visibility](#visibility) in one write. Each entry names its own visibility, so putting several personas back as they were is one request too. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing changes. A persona that already has the visibility asked for is left as it is. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, and one [Guild Personas Dirty](/gateway/events/#guild-personas-dirty) per community, in place of events per persona.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| personas | array[object] | Between 1 and 250 objects, each with `id` (snowflake, one of your personas) and `visibility` (`public`, `unlisted` or `private`) |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | The personas whose visibility changed |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Delete several personas
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/bulk-delete" oauth2="personas.write" />
+
+Deletes up to 250 of the caller's personas in one write, as [Delete persona](#delete-persona) deletes one: messages already sent as them keep showing them, and their tags, signature emojis and places under the limit become free. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing is deleted. A selection that named a deleted persona goes back to the account, with a [User Persona Settings Update](/gateway/events/#user-persona-settings-update) or a [User Persona Channel State Update](/gateway/events/#user-persona-channel-state-update). Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, in place of an event per persona.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_ids | array[snowflake] | The IDs of between 1 and 250 of your personas |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The personas were deleted |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
 ## Import persona avatar from remote URL
 
 <RouteHeader method="POST" path="/v1/users/@me/personas/import-avatar" />
@@ -670,7 +714,7 @@ Deletes one of the caller's personas. Messages already sent as it keep their sna
 
 <RouteHeader method="GET" path="/v1/users/{user_id}/personas" />
 
-Returns another account's `public` personas. The caller must be allowed to see that account's profile.
+Returns another account's `public` personas, the most used first, with the account's display tag. The caller must be allowed to see that account's profile. The order is all the response tells of how much each persona is used: it carries no counts or times.
 
 ### Path parameters
 
@@ -682,7 +726,15 @@ Returns another account's `public` personas. The caller must be allowed to see t
 
 | Status | Body | Condition |
 | --- | --- | --- |
-| 200 | array[[public persona](#public-persona-object) object] | The account's public personas, possibly none |
+| 200 | [public persona list](#public-persona-list-object) object | The account's display tag and public personas, possibly none |
+
+### Public persona list object
+
+| Field | Type | Description |
+| --- | --- | --- |
+| display_tag_text | ?string | The account's display tag text, or null when it has none |
+| display_tag_icon | ?string | Hash of the account's display tag icon, or null when it has none |
+| personas | array[[public persona](#public-persona-object) object] | The account's `public` personas, the most used first; `unlisted` and `private` ones are left out |
 
 ### Rate limit
 
