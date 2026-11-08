@@ -46,6 +46,10 @@ vi.mock('@app/features/channel/commands/PrivateChannelCommands', () => ({
 	openDMChannel: vi.fn().mockResolvedValue(undefined),
 }));
 vi.mock('@app/features/ui/commands/ModalCommands', () => ({push: vi.fn(), modal: vi.fn((fn) => fn), pop: vi.fn()}));
+vi.mock('@app/features/ui/commands/ContextMenuCommands', async (importOriginal) => ({
+	...(await importOriginal<typeof import('@app/features/ui/commands/ContextMenuCommands')>()),
+	openFromEvent: vi.fn(),
+}));
 vi.mock('@app/features/messaging/components/markdown', () => ({
 	SafeMarkdown: ({content}: {content?: string}) => <div data-flx="persona.gallery-test.safe-markdown">{content}</div>,
 }));
@@ -54,6 +58,7 @@ import {PersonaGallery} from '@app/features/persona/components/gallery/PersonaGa
 import {PersonaGalleryNav} from '@app/features/persona/state/PersonaGalleryNav';
 import {PersonaGalleryPrefs} from '@app/features/persona/state/PersonaGalleryPrefs';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
 import {User} from '@app/features/user/models/User';
 import {runInAction} from 'mobx';
 import {act} from 'react';
@@ -105,6 +110,8 @@ describe('PersonaGallery', () => {
 						pronouns: 'she/her',
 						bio: 'Keeps the **calendar**',
 						visibility: 'public',
+						avatar_hash: 'a1b2c3d4',
+						banner_hash: 'e5f6a7b8',
 					},
 					{id: '200000000000000001', name: 'Ash', bio: 'Night-shift writer', visibility: 'public'},
 				],
@@ -230,5 +237,79 @@ describe('PersonaGallery', () => {
 
 		act(() => modalReactRoot.unmount());
 		modalRoot.remove();
+	});
+	it('expands from an open persona too, and keeps it open', async () => {
+		const modalRoot = document.createElement('div');
+		modalRoot.setAttribute('data-flx', 'user.user-profile-modal.modal-root');
+		document.body.appendChild(modalRoot);
+		const modalContainer = document.createElement('div');
+		modalRoot.appendChild(modalContainer);
+		const modalReactRoot = createRoot(modalContainer);
+		await act(async () => {
+			modalReactRoot.render(<PersonaGallery user={other} data-flx="persona.gallery-test.gallery" />);
+		});
+		const query = (flx: string) => modalContainer.querySelector(`[data-flx="${flx}"]`) as HTMLElement | null;
+		await act(async () => query('persona.gallery.card.button')!.click());
+
+		await act(async () => query('persona.gallery.detail.expand')!.click());
+		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		expect(query('persona.gallery.expanded-bar')).not.toBeNull();
+		expect(query('persona.gallery.detail.name')?.textContent).toBe('Ash');
+		expect(query('persona.gallery.detail.expand')).toBeNull();
+
+		await act(async () => query('persona.gallery.collapse')!.click());
+		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		expect(query('persona.gallery.detail.name')?.textContent).toBe('Ash');
+		expect(query('persona.gallery.detail.expand')).not.toBeNull();
+
+		act(() => modalReactRoot.unmount());
+		modalRoot.remove();
+	});
+
+	it('opens the avatar and banner menus on right-click in every view and in a persona, as profile cards do', async () => {
+		const openFromEvent = vi.mocked(ContextMenuCommands.openFromEvent);
+		// The variant of the menu each right-click opened ('avatar' or 'banner'), in order.
+		const opened = () =>
+			openFromEvent.mock.calls.map(([, renderMenu]) => (renderMenu({onClose: () => {}}) as any).props.variant);
+		const rightClick = async (selector: string, index = 0) => {
+			const target = container.querySelectorAll(selector)[index] as HTMLElement;
+			await act(async () => {
+				target.dispatchEvent(new MouseEvent('contextmenu', {bubbles: true, cancelable: true}));
+			});
+		};
+		const show = async (view: 'gallery' | 'list' | 'avatars') => {
+			runInAction(() => PersonaGalleryPrefs.setView(view));
+			await render(other);
+		};
+
+		// Gallery, in name order. Ash has no pictures of its own: its avatar is the account's default one
+		// and it has no banner, so neither has a menu, as on an account's profile card.
+		await show('gallery');
+		await rightClick('[data-flx="persona.gallery.card.avatar"]', 0);
+		await rightClick('[data-flx="persona.gallery.card.banner"]', 0);
+		expect(opened()).toEqual([]);
+		await rightClick('[data-flx="persona.gallery.card.avatar"]', 1);
+		await rightClick('[data-flx="persona.gallery.card.banner"]', 1);
+		expect(opened()).toEqual(['avatar', 'banner']);
+
+		openFromEvent.mockClear();
+		await show('list');
+		await rightClick('[data-flx="persona.gallery.row.avatar-menu-target"]', 1);
+		await rightClick('[data-flx="persona.gallery.row.strip"]', 1);
+		expect(opened()).toEqual(['avatar', 'banner']);
+
+		openFromEvent.mockClear();
+		await show('avatars');
+		await rightClick('[data-flx="persona.gallery.tile.image"]', 1);
+		expect(opened()).toEqual(['avatar']);
+
+		openFromEvent.mockClear();
+		await act(async () =>
+			(container.querySelectorAll('[data-flx="persona.gallery.tile.button"]')[1] as HTMLElement).click(),
+		);
+		expect(container.querySelector('[data-flx="persona.gallery.detail.name"]')?.textContent).toBe('Wren');
+		await rightClick('[data-flx="persona.gallery.detail.avatar"]');
+		await rightClick('[data-flx="persona.gallery.detail.banner"]');
+		expect(opened()).toEqual(['avatar', 'banner']);
 	});
 });

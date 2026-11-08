@@ -23,7 +23,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | Display tag icon | `utils/PersonaTagIconUrls.ts` |
 | Profile popout and sheet | `components/PersonaProfilePopout.tsx`, `PersonaProfileMobileSheet.tsx`, `utils/usePersonaProfile.ts` |
 | An account's personas: Personas tab, sheet and pill | `components/gallery/`, `components/PersonasPill.tsx`, `state/PersonaDirectory.ts`, `utils/usePersonaDirectory.ts`, `utils/PersonaProfileTab.ts` |
-| Avatar and banner menus (popout) | `utils/usePersonaImageMenus.tsx` |
+| Avatar and banner menus (popout, Personas tab) | `utils/usePersonaImageMenus.tsx` |
 | Reacting as several personas: chip, "Your reactions", "React as…" | `components/reactions/`, `components/PersonaReactAsModal.tsx`, `utils/PersonaReactionIdentities.ts` (pure) |
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
 | Import review and its decisions | `components/modals/PersonaImportReview.tsx`, `utils/PersonaImportReview.ts` (pure), `utils/PersonaImportImages.ts` |
@@ -86,9 +86,11 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   `personaAvatarUrls` or `<PersonaAvatar>`; never pass it to upstream's `<Avatar>`.
   `utils/PersonaAvatarUsage.test.ts` scans the sources and fails if a hash reaches `<Avatar>`.
   Without a hash, the account's avatar shows.
-- **Image menus:** right-clicking the avatar or banner in the persona popout opens upstream's
-  `UserImageMenuItems`, the account profile's menu, with the persona's images handed in as preview
-  overrides (`usePersonaImageMenus`). A persona without an avatar offers the account's, as the
+- **Image menus:** right-clicking the avatar or banner in the persona popout, and in the Personas
+  tab's three views and one persona's page, opens upstream's `UserImageMenuItems`, the account
+  profile's menu, with the persona's images handed in as preview overrides (`usePersonaImageMenus`).
+  In the tab they are right-click only, like the profile card's: each card there is already a
+  button. A persona without an avatar offers the account's, as the
   popout shows it, and without a banner there is no banner menu. The mobile sheet has no menus,
   like upstream's account sheet.
 - **The display tag icon** is also a media hash, of an image stored under the account. Turn it into
@@ -144,7 +146,7 @@ sheet (`openPersonaGallery`); mobile web also has a button before the mutual fri
   keys and a swipe on phones. Clicking a name in a persona's popout opens it there too
   (`PersonaGalleryNav` carries the request to the profile window); a persona the list does not hold
   (an unlisted one) is fetched on its own, and the tab then stays for it.
-- **Expand** (not on phones, not remembered): an attribute on the profile window hides upstream's
+- **Expand** (not on phones, not remembered; from the list or one persona's page): an attribute on the profile window hides upstream's
   banner, name block and tabs by their `data-flx` names (`utils/PersonaGalleryExpand.ts`, whose test
   fails if upstream renames one), and a slim bar takes their place; Escape folds it back unless a
   menu or popout is open.

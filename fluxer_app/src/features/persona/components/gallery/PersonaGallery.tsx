@@ -24,6 +24,7 @@ import {
 } from '@app/features/persona/utils/PersonaGalleryItems';
 import * as M from '@app/features/persona/utils/PersonaGalleryMessages';
 import {usePersonaDirectory} from '@app/features/persona/utils/usePersonaDirectory';
+import {usePersonaImageMenus} from '@app/features/persona/utils/usePersonaImageMenus';
 import {BottomSheet} from '@app/features/ui/bottom_sheet/BottomSheet';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
@@ -189,6 +190,7 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 					onBack={() => setOpenId(null)}
 					onNavigate={setOpenId}
 					onClose={onClose}
+					onExpand={!isMobile && !expanded ? () => setExpanded(true) : undefined}
 					data-flx="persona.gallery.detail"
 				/>
 			</div>
@@ -543,6 +545,11 @@ const PersonaCard = observer(({persona, user, isOwn, onOpen, hideFooter}: Person
 	const color = galleryPersonaColor(persona);
 	const bannerUrl = galleryBannerUrl(user, persona);
 	const bio = plainBio(persona.bio);
+	const {onAvatarContextMenu, onBannerContextMenu} = usePersonaImageMenus({
+		user,
+		avatarHash: persona.avatar,
+		bannerHash: persona.banner,
+	});
 	return (
 		<li className={styles.cardItem} data-flx="persona.gallery.card.item">
 			<button
@@ -553,8 +560,10 @@ const PersonaCard = observer(({persona, user, isOwn, onOpen, hideFooter}: Person
 			>
 				<span className={styles.cardBannerWrap} data-flx="persona.gallery.card.banner-wrap">
 					<span
+						role="group"
 						className={styles.cardBanner}
 						style={{backgroundColor: color ?? undefined}}
+						onContextMenu={onBannerContextMenu}
 						data-flx="persona.gallery.card.banner"
 					>
 						{bannerUrl && (
@@ -567,7 +576,12 @@ const PersonaCard = observer(({persona, user, isOwn, onOpen, hideFooter}: Person
 							/>
 						)}
 					</span>
-					<span className={styles.cardAvatar} data-flx="persona.gallery.card.avatar">
+					<span
+						role="group"
+						className={styles.cardAvatar}
+						onContextMenu={onAvatarContextMenu}
+						data-flx="persona.gallery.card.avatar"
+					>
 						<PersonaAvatar
 							user={user}
 							persona={{avatar: persona.avatar}}
@@ -625,6 +639,11 @@ const PersonaRow = observer(({persona, user, isOwn, onOpen}: PersonaItemProps) =
 	const color = galleryPersonaColor(persona);
 	const bannerUrl = galleryBannerUrl(user, persona);
 	const bio = plainBio(persona.bio);
+	const {onAvatarContextMenu, onBannerContextMenu} = usePersonaImageMenus({
+		user,
+		avatarHash: persona.avatar,
+		bannerHash: persona.banner,
+	});
 	return (
 		<li className={styles.rowItem} data-flx="persona.gallery.row.item">
 			<button
@@ -633,14 +652,21 @@ const PersonaRow = observer(({persona, user, isOwn, onOpen}: PersonaItemProps) =
 				onClick={() => onOpen(persona.id)}
 				data-flx="persona.gallery.row.button"
 			>
-				<PersonaAvatar
-					user={user}
-					persona={{avatar: persona.avatar}}
-					size={40}
-					disableStatusTooltip
-					className={styles.rowAvatar}
-					data-flx="persona.gallery.row.avatar"
-				/>
+				<span
+					role="group"
+					className={styles.imageMenuTarget}
+					onContextMenu={onAvatarContextMenu}
+					data-flx="persona.gallery.row.avatar-menu-target"
+				>
+					<PersonaAvatar
+						user={user}
+						persona={{avatar: persona.avatar}}
+						size={40}
+						disableStatusTooltip
+						className={styles.rowAvatar}
+						data-flx="persona.gallery.row.avatar"
+					/>
+				</span>
 				<span className={styles.rowText} data-flx="persona.gallery.row.text">
 					<span className={styles.rowLine1} data-flx="persona.gallery.row.line1">
 						<span className={styles.rowName} data-flx="persona.gallery.row.name">
@@ -678,8 +704,10 @@ const PersonaRow = observer(({persona, user, isOwn, onOpen}: PersonaItemProps) =
 						</span>
 					)}
 					<span
+						role="group"
 						className={clsx(styles.rowStrip, !bannerUrl && !color && styles.rowStripEmpty)}
 						style={{backgroundColor: color ?? undefined}}
+						onContextMenu={onBannerContextMenu}
 						data-flx="persona.gallery.row.strip"
 					>
 						{bannerUrl && (
@@ -701,6 +729,7 @@ const PersonaRow = observer(({persona, user, isOwn, onOpen}: PersonaItemProps) =
 
 const PersonaTile = observer(({persona, user, isOwn, onOpen}: PersonaItemProps) => {
 	const color = galleryPersonaColor(persona);
+	const {onAvatarContextMenu} = usePersonaImageMenus({user, avatarHash: persona.avatar, bannerHash: null});
 	const src =
 		personaAvatarUrls(user.id, {avatar: persona.avatar}, 256).avatarUrl ??
 		AvatarUtils.getUserAvatarURL(user, false, 256);
@@ -713,7 +742,14 @@ const PersonaTile = observer(({persona, user, isOwn, onOpen}: PersonaItemProps) 
 				onClick={() => onOpen(persona.id)}
 				data-flx="persona.gallery.tile.button"
 			>
-				<img src={src} alt="" loading="lazy" className={styles.tileImage} data-flx="persona.gallery.tile.image" />
+				<span
+					role="group"
+					className={styles.imageMenuTarget}
+					onContextMenu={onAvatarContextMenu}
+					data-flx="persona.gallery.tile.image-menu-target"
+				>
+					<img src={src} alt="" loading="lazy" className={styles.tileImage} data-flx="persona.gallery.tile.image" />
+				</span>
 				<span className={styles.tileName} data-flx="persona.gallery.tile.name">
 					<span className={styles.tileNameText} data-flx="persona.gallery.tile.name-text">
 						{persona.name}
