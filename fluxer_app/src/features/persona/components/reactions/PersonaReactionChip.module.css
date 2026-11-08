@@ -1,0 +1,16 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* Always there on a chip that opens "Your reactions", quiet until the chip is hovered, focused or open. */
+.caret {
+	display: inline-flex;
+	align-items: center;
+	margin-inline-start: 0.1875rem;
+	opacity: 0.6;
+	transition: opacity 0.1s ease;
+}
+
+button:hover .caret,
+button:focus-visible .caret,
+.caretOpen {
+	opacity: 1;
+}

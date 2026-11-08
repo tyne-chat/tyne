@@ -406,6 +406,9 @@ msgstr "Edit persona"
 msgid "Edit timestamp"
 msgstr "Edit stempel waktu\\"
 
+msgid "Everyone else"
+msgstr "Semua yang lain"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "Semua yang lain tetap persis seperti sebelumnya."
@@ -471,6 +474,9 @@ msgstr "Gagal memperbarui tag tampilan"
 
 msgid "Failed to update persona mode"
 msgstr "Gagal memperbarui mode persona"
+
+msgid "Failed to update the reaction setting"
+msgstr "Gagal memperbarui pengaturan reaksi"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "Gagal mengubah tempat persona kamu diingat"
@@ -768,6 +774,9 @@ msgstr "Tag tampilan belum dikonfigurasi. Pesan akan menampilkan foto profil aku
 msgid "No matching personas found."
 msgstr "Tidak ditemukan persona yang cocok."
 
+msgid "No one matches."
+msgstr "Tidak ada yang cocok."
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "Belum ada persona yang dikonfigurasi. Buat satu di Pengaturan."
 
@@ -987,9 +996,16 @@ msgstr "Publik"
 msgid "Public persona"
 msgstr "Persona publik"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "Bereaksi sebagai beberapa persona sekaligus"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "Bereaksi sebagai..."
+
+msgid "Reacted"
+msgstr "Sudah bereaksi"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "Bereaksi sebagai <0>{reactorName}</0>"
@@ -1000,6 +1016,9 @@ msgstr "Bereaksi sebagai {name}"
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "Bereaksi dengan emoji tanda tangan akan selalu bereaksi sebagai persona ini, terlepas dari persona yang aktif."
+
+msgid "Recent"
+msgstr "Terbaru"
 
 msgid "Recent Personas"
 msgstr "Persona Terbaru"
@@ -1053,6 +1072,9 @@ msgstr "Pulihkan dari Persona yang dihapus di Pengaturan jika kamu berubah pikir
 msgid "Restored"
 msgstr "Dipulihkan"
 
+msgid "Results"
+msgstr "Hasil"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "Tinjau sebelum mengimpor"
@@ -1104,7 +1126,6 @@ msgstr "Hasil Pencarian ({0})"
 msgid "Search commands"
 msgstr "Cari perintah"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Cari persona, tag, kata ganti..."
@@ -1549,6 +1570,13 @@ msgstr "Akunmu punya satu tag tampilan, yang ditampilkan setelah nama setiap per
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "Personamu tetap seperti semula; persona itu ditautkan ke anggota ini."
 
+msgid "Your reactions"
+msgstr "Reaksi Anda"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "Reaksi {emojiName} Anda"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "menambahkan {count}"
@@ -1617,6 +1645,10 @@ msgstr "nama"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "gambar tidak dibandingkan"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "tekan untuk melihat reaksi Anda"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, other {Dipakai # kali}}"
 
 msgid "{count} notice(s) during import"
 msgstr "{count} pemberitahuan selama impor"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count} dari {total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "{count} dari {total} sudah bereaksi"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
