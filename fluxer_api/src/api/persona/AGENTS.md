@@ -103,7 +103,7 @@ single Postgres key/value table.
 | Table | Key | Holds |
 |---|---|---|
 | `personas` | (user_id, persona_id) | profile fields; tags and signature emojis as JSON strings; usage counters; `visibility`; `external_uuid` (the PluralKit member id); `deleted_at` |
-| `user_persona_settings` | user_id | mode (`manual` or `last`), scope (`global` or `channel`), the selected persona and whether it is latched, the account-wide display tag |
+| `user_persona_settings` | user_id | mode (`manual` or `last`), scope (`global` or `channel`), the selected persona and whether it is latched, the account-wide display tag, `multi_persona_reactions` (several identities may react with one emoji; a row without it means on) |
 | `persona_channel_states` | (user_id, channel_id) | the per-channel selection; no row means the account |
 | `thread_owner_personas`, `thread_owner_personas_by_user` | thread_id; (user_id, thread_id) | which persona started a thread; the by-user row is written first, so account deletion finds it |
 | `persona_image_sources` | (user_id, persona_id) | the PluralKit link an image came from, and the hash it produced; only the export reads it |

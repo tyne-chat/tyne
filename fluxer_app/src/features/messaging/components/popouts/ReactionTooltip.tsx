@@ -18,6 +18,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useRef} from 'react';
 
+// Fork imports.
+
+import {useHideTooltipWhile} from '@app/features/persona/components/reactions/useHideTooltipWhile';
+
 const CLICK_TO_VIEW_ALL_REACTIONS_DESCRIPTOR = msg({
 	message: 'Click to view all reactions',
 	comment: 'Label in the reaction tooltip popout.',
@@ -29,15 +33,18 @@ export const ReactionTooltip = observer(
 		children,
 		hoveredEmojiUrl,
 		onTooltipHoverChange,
+		...fork
 	}: {
 		message: Message;
 		reaction: MessageReaction;
 		children: React.ReactElement<Record<string, unknown> & {ref?: React.Ref<HTMLElement>}>;
 		hoveredEmojiUrl?: string | null;
 		onTooltipHoverChange?: (hovering: boolean) => void;
-	}) => {
+	} & {suppressed?: boolean}) => {
 		const {i18n} = useLingui();
 		const tooltip = useHoverFloatingTooltip(500);
+		// Fork: closed while the chip's "Your reactions" popout is open (tyne-chat/tyne#86).
+		useHideTooltipWhile(tooltip, fork.suppressed === true);
 		useEffect(() => {
 			onTooltipHoverChange?.(tooltip.state.isOpen);
 		}, [tooltip.state.isOpen, onTooltipHoverChange]);
