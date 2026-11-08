@@ -7,6 +7,10 @@ import {Logger} from '@app/features/platform/utils/AppLogger';
 import {ME} from '@fluxer/constants/src/AppConstants';
 import {makeAutoObservable} from 'mobx';
 
+// Fork imports.
+
+import {FAVORITES_GUILD_ID} from '@fluxer/constants/src/AppConstants';
+
 type NavigationMode = 'push' | 'replace';
 
 const logger = new Logger('Navigation');
@@ -47,6 +51,8 @@ class Navigation {
 		}
 		const params = match.params;
 		this.guildId = (params.guildId as string) ?? null;
+		// Fork: the Favorites routes have no :guildId; name them as a Favorites message link does (tyne-chat/tyne#543).
+		if (this.guildId === null && Routes.isFavoritesRoute(state.location.pathname)) this.guildId = FAVORITES_GUILD_ID;
 		this.channelId = (params.channelId as string) ?? null;
 		this.messageId = (params.messageId as string) ?? null;
 		this.threadId = (params.threadId as string) ?? null;
