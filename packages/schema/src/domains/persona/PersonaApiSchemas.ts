@@ -94,7 +94,19 @@ export const PublicPersonaResponseSchema = z.object({
 });
 export type PublicPersonaResponse = z.infer<typeof PublicPersonaResponseSchema>;
 
-export const PublicPersonaListResponseSchema = z.array(PublicPersonaResponseSchema);
+export const PublicPersonaListResponseSchema = z.object({
+	display_tag_text: z
+		.string()
+		.nullish()
+		.describe("The account's display tag text, shown after its name and its personas' names"),
+	display_tag_icon: PersonaAssetHashType.nullish().describe(
+		'Hash of the display tag icon, an image stored under the account',
+	),
+	personas: z
+		.array(PublicPersonaResponseSchema)
+		.describe("The account's public personas, the most used first. Private and unlisted personas are left out"),
+});
+export type PublicPersonaListResponse = z.infer<typeof PublicPersonaListResponseSchema>;
 
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),

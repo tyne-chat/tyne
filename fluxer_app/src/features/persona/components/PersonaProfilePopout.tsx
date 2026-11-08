@@ -9,9 +9,12 @@ import type {GuildMember} from '@app/features/member/models/GuildMember';
 import GuildMembers from '@app/features/member/state/GuildMembers';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
+import {PersonaNameExtras, PersonasPill} from '@app/features/persona/components/PersonasPill';
+import pillStyles from '@app/features/persona/components/PersonasPill.module.css';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {personaColor} from '@app/features/persona/utils/PersonaColor';
+import {openPersonaGallery} from '@app/features/persona/utils/PersonaGalleryOpen';
 import {usePersonaImageMenus} from '@app/features/persona/utils/usePersonaImageMenus';
 import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
@@ -119,6 +122,12 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			UserProfileCommands.openUserProfile(user.id, guildId);
 		}, [user.id, guildId, onClose]);
 
+		// The persona's full profile is its page in the account's Personas tab (tyne-chat/tyne#108, #189).
+		const handleOpenFullProfile = useCallback(() => {
+			onClose?.();
+			openPersonaGallery(user, {guildId, personaId: subprofile.id});
+		}, [user, guildId, subprofile.id, onClose]);
+
 		const handleEditPersona = useCallback(() => {
 			onClose?.();
 			ModalCommands.push(
@@ -195,20 +204,30 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 								user={user}
 								pronouns={effectivePronouns}
 								showUsername={false}
-								isClickable={false}
-								actions={
-									effectiveDisplayTagText || effectiveDisplayTagIcon ? (
-										<PersonaTag
-											subprofile={{
-												...subprofile,
-												display_tag_text: effectiveDisplayTagText,
-												display_tag_icon: effectiveDisplayTagIcon,
-											}}
-											rootUser={user}
-											isHovering={isCardHovering}
-											data-flx="persona.persona-profile-popout.persona-tag"
+								isClickable={true}
+								onDisplayNameClick={handleOpenFullProfile}
+								personaNameExtras={
+									<PersonaNameExtras data-flx="persona.persona-profile-popout.name-extras">
+										{effectiveDisplayTagText || effectiveDisplayTagIcon ? (
+											<PersonaTag
+												subprofile={{
+													...subprofile,
+													display_tag_text: effectiveDisplayTagText,
+													display_tag_icon: effectiveDisplayTagIcon,
+												}}
+												rootUser={user}
+												isHovering={isCardHovering}
+												className={pillStyles.tag}
+												data-flx="persona.persona-profile-popout.persona-tag"
+											/>
+										) : null}
+										<PersonasPill
+											user={user}
+											guildId={guildId}
+											onBeforeOpen={onClose}
+											data-flx="persona.persona-profile-popout.personas-pill"
 										/>
-									) : undefined
+									</PersonaNameExtras>
 								}
 								data-flx="persona.persona-profile-popout.profile-card-user-info"
 							/>
