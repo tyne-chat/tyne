@@ -253,6 +253,16 @@ design, including the mobile part still to come, is `docs/design/server-commands
   (`ShellDownloadFormats.ts`, `ForkShellUpdate.ts`), built by `fork-desktop-release.yaml`, and
   installed only if the release's signed checksums list them (`ForkReleaseSignature.ts`). Each
   release carries the web app of its commit.
+- Getting the apps: `/download/<target>` (`windows`, `mac`, `linux-deb`, `linux-rpm`,
+  `linux-appimage`, `android`) is a fixed link the app proxy redirects to the newest release's file
+  on GitHub, looked up at most every 10 minutes (`fluxer_app_proxy/src/routes/fork_downloads.rs`).
+  The web app's public `/download` page (`fluxer_app/src/features/app_download/`, added to both
+  root route trees in `RouterRoutes.ts` and `AuthRootRoutes.tsx`) offers the visitor's platform
+  first, with install steps for unsigned Windows and un-notarized macOS builds. The same "Get the
+  Tyne app" panel sits under the logo on the login and invite pages (one line in
+  `AuthBrandPanel.tsx`) and in the dialog the sidebar's download button opens (`DownloadButton.tsx`);
+  upstream's `DESKTOP_DOWNLOAD_URL` points at the page. The iPhone link waits for a public
+  TestFlight link (`IOS_TESTFLIGHT_URL` in `utils/AppDownloadPlatform.ts`; tyne-chat/tyne#242).
 - Community creation: the web app hides it from accounts the API would refuse, by evaluating
   upstream's rule itself (`packages/limits/src/ForkCommunityCreation.ts`); the API test
   `ForkCommunityCreationClientRule.test.ts` checks that the two agree.
