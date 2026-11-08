@@ -21,9 +21,19 @@ describe('personaAvatarUrls', () => {
 	});
 
 	it("turns the persona's hash into a static and an animated address under the owning account", () => {
-		expect(personaAvatarUrls('1', {avatar: 'a_abc123'})).toEqual({
-			avatarUrl: 'https://media.test/avatars/1/a_abc123.webp',
-			hoverAvatarUrl: 'https://media.test/avatars/1/a_abc123.gif',
+		expect(personaAvatarUrls('1', {avatar: 'a_1a2b3c4d'})).toEqual({
+			avatarUrl: 'https://media.test/avatars/1/a_1a2b3c4d.webp',
+			hoverAvatarUrl: 'https://media.test/avatars/1/a_1a2b3c4d.gif',
 		});
+	});
+
+	it.each([
+		'https://tracker.example/pixel.png',
+		'data:image/png;base64,iVBORw0KGgo=',
+		'../../1a2b3c4d',
+		'1a2b3c4d?size=4096',
+		'abc123',
+	])('gives no override for a value that is not a hash, so the account avatar shows: %s', (avatar) => {
+		expect(personaAvatarUrls('1', {avatar})).toEqual({});
 	});
 });
