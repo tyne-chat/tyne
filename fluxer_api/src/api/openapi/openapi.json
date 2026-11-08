@@ -25453,6 +25453,123 @@
 				}
 			}
 		},
+		"/users/@me/personas/deleted": {
+			"get": {
+				"operationId": "list_my_deleted_personas",
+				"summary": "List own deleted personas",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/DeletedPersonaListResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Lists the deleted personas of the authenticated user, the most recently deleted first. They still show on their old messages and can be restored.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
+			}
+		},
+		"/users/@me/personas/deleted/{persona_id}/restore": {
+			"post": {
+				"operationId": "restore_persona",
+				"summary": "Restore a deleted persona",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaRestoreResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Brings back a deleted persona as it was, so its old messages and usage are its own again. Tags and signature emojis another persona holds now are left off and listed in the response.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "persona_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "Persona Snowflake ID", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "Persona Snowflake ID"
+					}
+				]
+			}
+		},
 		"/users/@me/personas/export": {
 			"get": {
 				"operationId": "export_my_personas",
@@ -25746,6 +25863,126 @@
 				"requestBody": {
 					"required": true,
 					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaImportImageRequest"}}}
+				}
+			}
+		},
+		"/users/@me/personas/import/apply": {
+			"post": {
+				"operationId": "apply_persona_import",
+				"summary": "Apply a reviewed persona import",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/PersonaImportApplyResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Applies one action per member: add, link (record the member's id only), restore (bring back the same deleted persona) or use_file (replace a linked persona's details, never its visibility). Checked against the account as it is now and written at once: if it is refused, nothing changes. Nothing is deleted.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaImportApplyRequestSchema"}}}
+				}
+			}
+		},
+		"/users/@me/personas/import/preview": {
+			"post": {
+				"operationId": "preview_persona_import",
+				"summary": "Preview a persona import",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/PersonaImportPreviewResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Classifies each member of an import file against the account's personas, deleted ones included: linked and identical, linked and different, deleted, probably the same, can't tell, tag in use, or new. Changes nothing. Pictures are compared only where their origin is known; links in the request are never fetched.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {"schema": {"$ref": "#/components/schemas/PersonaImportPreviewRequestSchema"}}
+					}
 				}
 			}
 		},
@@ -32744,6 +32981,114 @@
 				"required": ["user_id", "active_persona_mode", "active_persona_scope", "is_latched"],
 				"additionalProperties": false
 			},
+			"PersonaImportPreviewRequestSchema": {
+				"type": "object",
+				"properties": {
+					"source": {"$ref": "#/components/schemas/PersonaImportSourceKindSchema"},
+					"members": {
+						"maxItems": 250,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaImportPreviewMemberSchema"},
+						"description": "The members, in file order"
+					},
+					"display_tag": {
+						"description": "The file's system tag, if it has one",
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"text": {
+										"description": "The file's system tag",
+										"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
+									},
+									"has_icon": {"description": "Whether the file carries a tag icon", "type": "boolean"}
+								}
+							},
+							{"type": "null"}
+						]
+					}
+				},
+				"required": ["source", "members"]
+			},
+			"PersonaImportPreviewResponseSchema": {
+				"type": "object",
+				"properties": {
+					"entries": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaImportPreviewEntrySchema"},
+						"description": "One per member, in request order"
+					},
+					"personas": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaResponseSchema"},
+						"description": "Every persona the entries name, deleted ones included, so the review can show them"
+					},
+					"display_tag": {
+						"type": "object",
+						"properties": {
+							"decision": {
+								"type": "string",
+								"enum": ["none", "auto_apply", "ask"],
+								"description": "none: the file has no tag, or the same one. auto_apply: the account has no personas and no display tag, so the file's is used. ask: it differs"
+							},
+							"current_text": {"type": ["string", "null"]}
+						},
+						"required": ["decision"],
+						"additionalProperties": false
+					},
+					"untouched": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991,
+						"description": "Live personas no member of the file matched; they stay as they are"
+					},
+					"needs_review": {
+						"type": "boolean",
+						"description": "Whether anything needs a decision; if not, the client can apply at once"
+					}
+				},
+				"required": ["entries", "personas", "display_tag", "untouched", "needs_review"],
+				"additionalProperties": false
+			},
+			"PersonaImportApplyRequestSchema": {
+				"type": "object",
+				"properties": {
+					"source": {"$ref": "#/components/schemas/PersonaImportSourceKindSchema"},
+					"actions": {
+						"maxItems": 250,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaImportActionSchema"},
+						"description": "Skipped members are left out"
+					}
+				},
+				"required": ["source", "actions"]
+			},
+			"PersonaImportApplyResponseSchema": {
+				"type": "object",
+				"properties": {
+					"personas": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaResponseSchema"},
+						"description": "The personas written, in action order"
+					},
+					"dropped": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"persona_id": {"$ref": "#/components/schemas/SnowflakeStringType"},
+								"tags": {"type": "array", "items": {"$ref": "#/components/schemas/PersonaTagSchema"}},
+								"signature_emojis": {"type": "array", "items": {"$ref": "#/components/schemas/SignatureEmojiSchema"}}
+							},
+							"required": ["persona_id", "tags", "signature_emojis"],
+							"additionalProperties": false
+						},
+						"description": "For restored personas: tags and signature emojis left off because another persona holds them now"
+					}
+				},
+				"required": ["personas", "dropped"],
+				"additionalProperties": false
+			},
 			"PersonaImportImageRequest": {
 				"type": "object",
 				"properties": {
@@ -32825,6 +33170,29 @@
 				"format": "binary",
 				"contentEncoding": "binary",
 				"description": "A ZIP file with the personas as a PluralKit export (pluralkit.json), their images, tyne.json and a README"
+			},
+			"PersonaRestoreResponseSchema": {
+				"type": "object",
+				"properties": {
+					"persona": {"$ref": "#/components/schemas/PersonaResponseSchema"},
+					"dropped_tags": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaTagSchema"},
+						"description": "Tags left off because another persona holds them now"
+					},
+					"dropped_signature_emojis": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SignatureEmojiSchema"},
+						"description": "Signature emojis left off for the same reason"
+					}
+				},
+				"required": ["persona", "dropped_tags", "dropped_signature_emojis"],
+				"additionalProperties": false
+			},
+			"DeletedPersonaListResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/PersonaResponseSchema"},
+				"description": "The account's deleted personas, the most recently deleted first"
 			},
 			"PersonaChannelStateUpdateRequestSchema": {
 				"type": "object",
@@ -50465,6 +50833,27 @@
 					"suffix": {"type": "string", "minLength": 1, "maxLength": 32}
 				}
 			},
+			"SignatureEmojiSchema": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"description": "Custom emoji ID (null for Unicode)",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"name": {"type": "string", "minLength": 1, "maxLength": 64, "description": "Emoji name or Unicode character"},
+					"animated": {"description": "Whether the emoji is animated", "type": ["boolean", "null"]}
+				},
+				"required": ["name"],
+				"additionalProperties": false
+			},
+			"PersonaTagSchema": {
+				"type": "object",
+				"properties": {
+					"prefix": {"type": "string", "minLength": 1, "maxLength": 32},
+					"suffix": {"type": "string", "minLength": 1, "maxLength": 32}
+				},
+				"additionalProperties": false
+			},
 			"PersonaImportItemSchema": {
 				"type": "object",
 				"properties": {
@@ -50565,29 +50954,235 @@
 				}
 			},
 			"PersonaImportImageKindSchema": {"type": "string", "enum": ["avatar", "banner"]},
-			"ActivePersonaScopeSchema": {"type": "string", "enum": ["global", "channel"]},
-			"ActivePersonaModeSchema": {"type": "string", "enum": ["manual", "last"]},
-			"SignatureEmojiSchema": {
+			"PersonaImportActionSchema": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"description": "Custom emoji ID (null for Unicode)",
+					"action": {"$ref": "#/components/schemas/PersonaImportActionKindSchema"},
+					"persona_id": {
+						"description": "For link, restore and use_file",
 						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
 					},
-					"name": {"type": "string", "minLength": 1, "maxLength": 64, "description": "Emoji name or Unicode character"},
-					"animated": {"description": "Whether the emoji is animated", "type": ["boolean", "null"]}
+					"external_uuid": {
+						"description": "The member's PluralKit id, for link",
+						"anyOf": [{"type": "string", "maxLength": 64}, {"type": "null"}]
+					},
+					"item": {
+						"description": "For add and use_file: the member with its pictures stored (hashes), as the older import sends it",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaImportItemSchema"}, {"type": "null"}]
+					},
+					"drop_tags": {
+						"description": "Tags to leave out, for add and use_file",
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaTagSchemaInput"}
+					},
+					"drop_signature_emojis": {
+						"description": "Signature emojis to leave out, for add and use_file",
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SignatureEmojiSchemaInput"}
+					},
+					"keep_avatar": {
+						"description": "For use_file: keep the persona's avatar, because the file's could not be stored",
+						"type": "boolean"
+					},
+					"keep_banner": {
+						"description": "For use_file: keep the persona's banner, because the file's could not be stored",
+						"type": "boolean"
+					}
 				},
-				"required": ["name"],
-				"additionalProperties": false
+				"required": ["action"]
 			},
-			"PersonaTagSchema": {
+			"PersonaImportSourceKindSchema": {
+				"type": "string",
+				"enum": ["pluralkit", "tyne"],
+				"description": "pluralkit for a PluralKit export; tyne for a Tyne export, which also carries signature emojis and auto-tag"
+			},
+			"PersonaImportActionKindSchema": {
+				"type": "string",
+				"enum": ["add", "link", "restore", "use_file"],
+				"description": "add: a new persona from the item (drop_tags leaves tags out). link: record the member's PluralKit id on persona_id, nothing else. restore: bring the deleted persona_id back as it was. use_file: replace persona_id's details with the item's, by the documented field rules"
+			},
+			"PersonaImportPreviewEntrySchema": {
 				"type": "object",
 				"properties": {
-					"prefix": {"type": "string", "minLength": 1, "maxLength": 32},
-					"suffix": {"type": "string", "minLength": 1, "maxLength": 32}
+					"index": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991,
+						"description": "The member's position in the request"
+					},
+					"kind": {"$ref": "#/components/schemas/PersonaImportKindSchema"},
+					"persona_id": {
+						"description": "The persona it is linked to, deleted in Tyne as, or probably the same as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"candidates": {
+						"description": "For cant_tell, the personas it may be",
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaImportCandidateSchema"}
+					},
+					"differences": {
+						"description": "For differs and up_to_date, field by field",
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaImportDifferenceSchema"}
+					},
+					"clashes": {
+						"description": "Tags and signature emojis a plain add would clash on",
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaImportClashSchema"}
+					},
+					"avatar_hash": {
+						"description": "A stored copy of the member's avatar, safe to show",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"banner_hash": {
+						"description": "A stored copy of the member's banner, safe to show",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					}
+				},
+				"required": ["index", "kind"],
+				"additionalProperties": false
+			},
+			"PersonaImportClashSchema": {
+				"type": "object",
+				"properties": {
+					"tag": {
+						"description": "The tag that clashes",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaTagSchema"}, {"type": "null"}]
+					},
+					"emoji": {
+						"description": "The signature emoji that clashes",
+						"anyOf": [{"$ref": "#/components/schemas/SignatureEmojiSchema"}, {"type": "null"}]
+					},
+					"held_by_persona_id": {
+						"description": "The live persona that holds it",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"shared_with_member": {
+						"description": "The other member of the file that has it",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					}
 				},
 				"additionalProperties": false
 			},
+			"PersonaImportDifferenceSchema": {
+				"type": "object",
+				"properties": {
+					"field": {"$ref": "#/components/schemas/PersonaImportFieldSchema"},
+					"change": {
+						"type": "string",
+						"enum": ["changed", "removed", "not_compared", "info"],
+						"description": "changed: the file has another value. removed: Tyne has a value and the file has none. not_compared: the picture's origin is unknown, so it cannot be compared. info: shown only, never written (visibility)"
+					}
+				},
+				"required": ["field", "change"],
+				"additionalProperties": false
+			},
+			"PersonaImportCandidateSchema": {
+				"type": "object",
+				"properties": {
+					"persona_id": {"$ref": "#/components/schemas/SnowflakeStringType"},
+					"matched_on": {
+						"type": "string",
+						"enum": ["name", "tag", "name_and_tag", "tag_case"],
+						"description": "What the member has in common with it"
+					},
+					"linked_elsewhere": {
+						"type": "boolean",
+						"description": "Whether the persona is linked to a PluralKit member that is not this one"
+					}
+				},
+				"required": ["persona_id", "matched_on", "linked_elsewhere"],
+				"additionalProperties": false
+			},
+			"PersonaImportKindSchema": {
+				"type": "string",
+				"enum": ["up_to_date", "differs", "deleted", "probably_same", "cant_tell", "tag_in_use", "new"],
+				"description": "up_to_date: linked and identical. differs: linked, with different details. deleted: linked only to a deleted persona. probably_same: the one unlinked persona with the same name and tag. cant_tell: a name or tag in common, but not one-to-one or not both. tag_in_use: a tag is held by another persona or shared with another member. new: none of these"
+			},
+			"PersonaImportFieldSchema": {
+				"type": "string",
+				"enum": [
+					"name",
+					"pronouns",
+					"bio",
+					"color",
+					"persona_tags",
+					"avatar",
+					"banner",
+					"signature_emojis",
+					"auto_tag_disabled",
+					"visibility"
+				]
+			},
+			"PersonaImportPreviewMemberSchema": {
+				"type": "object",
+				"properties": {
+					"name": {"description": "Persona display name", "type": "string"},
+					"pronouns": {
+						"description": "Optional pronouns",
+						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]
+					},
+					"color": {
+						"description": "Optional color integer",
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}]
+					},
+					"bio": {
+						"description": "Optional persona bio",
+						"anyOf": [{"type": "string", "maxLength": 4096}, {"type": "null"}]
+					},
+					"auto_tag_disabled": {"description": "Whether auto-tagging is disabled", "type": "boolean"},
+					"persona_tags": {
+						"description": "Persona prefix/suffix tags",
+						"maxItems": 5,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PersonaTagSchemaInput"}
+					},
+					"signature_emojis": {
+						"description": "Signature emojis for this persona",
+						"maxItems": 10000,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SignatureEmojiSchemaInput"}
+					},
+					"visibility": {
+						"description": "Visibility: unlisted (default), public, or private",
+						"$ref": "#/components/schemas/PersonaVisibilitySchema"
+					},
+					"external_uuid": {
+						"description": "Optional external UUID (e.g. PluralKit)",
+						"anyOf": [{"type": "string", "maxLength": 64}, {"type": "null"}]
+					},
+					"avatar": {
+						"description": "The member's avatar, if the file has one",
+						"$ref": "#/components/schemas/PersonaImportImageRefSchema"
+					},
+					"banner": {
+						"description": "The member's banner, if the file has one",
+						"$ref": "#/components/schemas/PersonaImportImageRefSchema"
+					}
+				},
+				"required": ["name"]
+			},
+			"PersonaImportImageRefSchema": {
+				"anyOf": [
+					{
+						"type": "object",
+						"properties": {
+							"url": {
+								"description": "The file's link to the picture",
+								"anyOf": [{"type": "string", "maxLength": 2048}, {"type": "null"}]
+							},
+							"hash": {
+								"description": "The hash of a copy already stored under the account",
+								"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+							}
+						}
+					},
+					{"type": "null"}
+				]
+			},
+			"ActivePersonaScopeSchema": {"type": "string", "enum": ["global", "channel"]},
+			"ActivePersonaModeSchema": {"type": "string", "enum": ["manual", "last"]},
 			"OwnProfileBadgeResponse": {
 				"type": "object",
 				"properties": {
@@ -51535,6 +52130,7 @@
 					"PERSONA_TAG_LIMIT_REACHED",
 					"DUPLICATE_SIGNATURE_EMOJI",
 					"SIGNATURE_EMOJI_LIMIT_REACHED",
+					"PERSONA_IMPORT_CONFLICT",
 					"UNKNOWN_GUILD_COMMAND",
 					"GUILD_COMMAND_NAME_TAKEN",
 					"GUILD_COMMAND_LIMIT_REACHED",
@@ -51939,6 +52535,7 @@
 					"You can't have more than {limit} connections.",
 					"This tag is already taken.",
 					"You can't have more than {limit} connections.",
+					"Invalid form body.",
 					"Not found.",
 					"This tag is already taken.",
 					"You can't have more than {limit} connections.",
