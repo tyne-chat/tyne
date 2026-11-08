@@ -15,7 +15,7 @@ interface LocaleExpectation {
 	/** Fork catalogue: settings sidebar label and buttons of the personas tab. */
 	personasTabLabel: string;
 	addPersona: string;
-	importFromPluralKit: string;
+	showDeletedPersonas: string;
 }
 
 const ENGLISH: LocaleExpectation = {
@@ -24,7 +24,7 @@ const ENGLISH: LocaleExpectation = {
 	interfaceLanguageTitle: 'Interface language',
 	personasTabLabel: 'Personas',
 	addPersona: 'Add Persona',
-	importFromPluralKit: 'Import from PluralKit',
+	showDeletedPersonas: 'Show deleted personas',
 };
 
 const GERMAN: LocaleExpectation = {
@@ -33,7 +33,7 @@ const GERMAN: LocaleExpectation = {
 	interfaceLanguageTitle: 'Sprache der Benutzeroberfläche',
 	personasTabLabel: 'Personas',
 	addPersona: 'Persona hinzufügen',
-	importFromPluralKit: 'Aus PluralKit importieren',
+	showDeletedPersonas: 'Gelöschte Personas anzeigen',
 };
 
 const JAPANESE: LocaleExpectation = {
@@ -42,7 +42,7 @@ const JAPANESE: LocaleExpectation = {
 	interfaceLanguageTitle: 'インターフェース言語',
 	personasTabLabel: 'ペルソナ',
 	addPersona: 'ペルソナを追加',
-	importFromPluralKit: 'PluralKit からインポート',
+	showDeletedPersonas: '削除したペルソナを表示',
 };
 
 async function openSettingsTab(page: Page, label: string): Promise<void> {
@@ -76,7 +76,7 @@ async function expectTranslatedUi(page: Page, locale: LocaleExpectation): Promis
 	// Fork catalogue: the personas tab and its actions.
 	await openSettingsTab(page, locale.personasTabLabel);
 	await expect(page.getByRole('button', {name: locale.addPersona, exact: true})).toBeVisible({timeout: 15_000});
-	await expect(page.getByRole('button', {name: locale.importFromPluralKit, exact: true})).toBeVisible();
+	await expect(page.getByRole('button', {name: locale.showDeletedPersonas, exact: true})).toBeVisible();
 }
 
 test.describe('Fork translation catalogue', () => {
