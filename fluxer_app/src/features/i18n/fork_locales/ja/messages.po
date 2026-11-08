@@ -111,6 +111,10 @@ msgstr "入力された内容に応じてメッセージを変える"
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "PluralKit のエクスポート (.json) または {productName} のエクスポート (.zip) を選択するか、ドラッグ＆ドロップ"
 
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "紹介するペルソナを選ぶ"
+
 #. Tooltip on the community command chip when the message box already has text. Preserve {name}.
 msgid "Clear the message box to use /{name}"
 msgstr "/{name} を使うには、メッセージ欄を空にしてください"
@@ -163,6 +167,10 @@ msgstr "/{name} を実行できませんでした: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name} を保存できませんでした: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "ペルソナを変更できませんでした。もう一度お試しください。"
 
 #. Shown in the Personas list when the request for them failed.
 msgid "Couldn’t load personas."
@@ -218,6 +226,10 @@ msgstr "ペルソナを削除"
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "タイムスタンプを削除\\"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "{count, plural, other {# 件のペルソナ}}を削除しますか？"
 
 msgid "Detected System Name / Tag"
 msgstr "検出されたシステム名 / タグ"
@@ -353,6 +365,10 @@ msgstr "バナー画像をサーバーにアップロードできませんでし
 msgid "Failed to upload icon to server"
 msgstr "アイコンをサーバーにアップロードできませんでした"
 
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "公開範囲で絞り込む"
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "形式のプレビュー"
@@ -443,6 +459,26 @@ msgstr "/{name} で作成"
 msgid "Main account"
 msgstr "メインアカウント"
 
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "非公開にする"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "公開にする"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "限定公開にする"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "{count, plural, other {# 件のペルソナ}}を非公開にしますか？"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "{count, plural, other {# 件のペルソナ}}を公開にしますか？"
+
 msgid "Manage Personas"
 msgstr "ペルソナを管理"
 
@@ -531,6 +567,10 @@ msgstr "ペルソナがまだ設定されていません。設定で作成して
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "ペルソナがまだ作成されていません。「ペルソナを追加」をクリックして最初のペルソナを作成しましょう！"
 
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "ここにはペルソナがありません。"
+
 #. Shown in the Personas list when the search matches nothing.
 msgid "No personas match your search."
 msgstr "検索に一致するペルソナはありません。"
@@ -577,6 +617,10 @@ msgstr "任意のシステムバッジ、例: ⚞Seraphim⚟"
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "ほかの人には {count, plural, other {# 件の公開ペルソナ}} が表示されます。"
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "ほかの人があなたのペルソナ一覧で見られるようになり、プロフィールを開けるようになります。いつでも元に戻せます。"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -1001,9 +1045,17 @@ msgstr "ここでチャンネルにチェックを入れるまで、シグナル
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "タグアイコンを保存できませんでした: {error}。ペルソナ設定で再度設定できます。"
 
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "メッセージには名前とアバターが引き続き表示されますが、そのペルソナとして送信できなくなり、タグとシグネチャー絵文字は解放されます。この操作は取り消せません。"
+
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "使った人の名前"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "プロフィールはほかの人から見えなくなります。名前とアバターはメッセージとリアクションに引き続き表示されます。"
 
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
@@ -1226,9 +1278,29 @@ msgstr "{1} 件中 {0} 件 {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} をインストールする準備ができました。"
 
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, other {# 件のペルソナを非公開にしました}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, other {# 件のペルソナを公開にしました}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, other {# 件のペルソナを限定公開にしました}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, other {# 件のペルソナ}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, other {# 件のペルソナを削除しました}}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "{count} 件選択中"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
