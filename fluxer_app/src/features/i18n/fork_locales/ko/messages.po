@@ -111,6 +111,10 @@ msgstr "입력한 내용에 따라 메시지 바꾸기"
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "PluralKit 내보내기 파일(.json)이나 {productName} 내보내기 파일(.zip)을 선택하거나 끌어다 놓으세요"
 
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "보여 줄 페르소나 선택"
+
 #. Tooltip on the community command chip when the message box already has text. Preserve {name}.
 msgid "Clear the message box to use /{name}"
 msgstr "/{name}을(를) 사용하려면 메시지 입력란을 비우세요"
@@ -163,6 +167,10 @@ msgstr "/{name}을(를) 실행할 수 없습니다: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name}을(를) 저장할 수 없습니다: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "페르소나를 변경하지 못했습니다. 다시 시도해 주세요."
 
 #. Shown in the Personas list when the request for them failed.
 msgid "Couldn’t load personas."
@@ -218,6 +226,10 @@ msgstr "페르소나 삭제"
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "타임스탬프 삭제\\"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "{count, plural, other {페르소나 #개}}를 삭제할까요?"
 
 msgid "Detected System Name / Tag"
 msgstr "감지된 시스템 이름 / 태그"
@@ -353,6 +365,10 @@ msgstr "배너 이미지를 서버에 업로드하지 못했어요"
 msgid "Failed to upload icon to server"
 msgstr "아이콘을 서버에 업로드하지 못했어요"
 
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "공개 범위로 필터"
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "형식 미리보기"
@@ -443,6 +459,26 @@ msgstr "/{name}(으)로 만든 메시지"
 msgid "Main account"
 msgstr "기본 계정"
 
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "비공개로 설정"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "공개로 설정"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "일부 공개로 설정"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "{count, plural, other {페르소나 #개}}를 비공개로 설정할까요?"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "{count, plural, other {페르소나 #개}}를 공개로 설정할까요?"
+
 msgid "Manage Personas"
 msgstr "페르소나 관리"
 
@@ -531,6 +567,10 @@ msgstr "아직 설정된 페르소나가 없어요. 설정에서 만들어 보�
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "아직 만든 페르소나가 없어요. \"페르소나 추가\"를 클릭해 첫 페르소나를 만들어 보세요!"
 
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "여기에는 페르소나가 없습니다."
+
 #. Shown in the Personas list when the search matches nothing.
 msgid "No personas match your search."
 msgstr "검색과 일치하는 페르소나가 없습니다."
@@ -577,6 +617,10 @@ msgstr "선택 사항인 시스템 배지, 예: ⚞Seraphim⚟"
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "다른 사람에게는 {count, plural, other {공개 페르소나 #개}}가 보입니다."
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "다른 사람이 내 페르소나 목록에서 볼 수 있고 프로필을 열 수 있게 됩니다. 언제든 다시 바꿀 수 있습니다."
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -1001,9 +1045,17 @@ msgstr "여기에서 채널을 선택하기 전까지 시그널 바는 꺼져 �
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "태그 아이콘을 저장하지 못했어요: {error}. 페르소나 설정에서 다시 설정할 수 있어요."
 
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "메시지에는 이름과 아바타가 계속 표시되지만, 이제 해당 페르소나로 보낼 수 없으며 태그와 시그니처 이모지는 다시 쓸 수 있게 됩니다. 되돌릴 수 없습니다."
+
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "실행한 사람의 이름"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "프로필이 다른 사람에게 숨겨집니다. 이름과 아바타는 메시지와 반응에 계속 표시됩니다."
 
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
@@ -1226,9 +1278,29 @@ msgstr "{1}개 중 {0}개 {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version}을(를) 설치할 준비가 되었습니다."
 
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, other {페르소나 #개가 비공개로 설정됨}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, other {페르소나 #개가 공개로 설정됨}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, other {페르소나 #개가 일부 공개로 설정됨}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, other {페르소나 #개}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, other {페르소나 #개 삭제됨}}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "{count}개 선택됨"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
