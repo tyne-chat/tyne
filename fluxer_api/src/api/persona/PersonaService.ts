@@ -6,6 +6,7 @@ import type {
 	PersonaChannelState,
 	PersonaChannelStatesResponse,
 	PersonaCreateRequest,
+	PersonaImportImageSources,
 	PersonaImportItem,
 	PersonaSettingsResponse,
 	PersonaSettingsUpdateRequest,
@@ -17,8 +18,18 @@ import type {
 	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {MAX_SIGNATURE_EMOJIS_PER_PERSONA} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {
+	PersonaImportAction,
+	PersonaImportApplyRequest,
+	PersonaImportApplyResponse,
+	PersonaImportPreviewRequest,
+	PersonaImportPreviewResponse,
+	PersonaRestoreResponse,
+} from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
 import type {PersonaLookupItem} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {ownTyneMediaImageHash} from '@fluxer/schema/src/domains/persona/PluralKitFormat';
 import {type ChannelID, createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
+import {Config} from '../Config';
 import {SYSTEM_USER_ID} from '../constants/Core';
 import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
@@ -31,13 +42,19 @@ import {isProfileSubstringExempt} from '../user/UserHelpers';
 import {
 	DuplicatePersonaTagError,
 	DuplicateSignatureEmojiError,
+	PersonaImportConflictError,
 	PersonaLimitReachedError,
 	PersonaNotFoundError,
 	PersonaPrivateError,
 	PersonaTagLimitExceededError,
 	SignatureEmojiLimitExceededError,
 } from './errors/PersonaErrors';
-import type {IPersonaRepository, PersonaImportStep} from './IPersonaRepository';
+import type {
+	CreatePersonaParams,
+	IPersonaRepository,
+	PersonaImportStep,
+	UpdatePersonaParams,
+} from './IPersonaRepository';
 import {
 	forgetPersonaChannelState,
 	forgetPersonaChannelStatesOfPersona,
@@ -45,11 +62,9 @@ import {
 	loadPersonaChannelStates,
 	storePersonaChannelState,
 } from './PersonaChannelStateStore';
-import {
-	forgetPersonaImageSources,
-	forgetPersonaImageSourcesWrite,
-	personaImageSourcesWrite,
-} from './PersonaImageSourceStore';
+import {loadPersonaImageSources, personaImageSourcesWrite} from './PersonaImageSourceStore';
+import {planPersonaImport} from './PersonaImportPlanner';
+import {formatTagDisplay, getTagKey, normalizeTag} from './PersonaTagKeys';
 
 export const MAX_PERSONAS_PER_USER = 250;
 
@@ -59,13 +74,6 @@ export interface PersonaServiceDeps {
 	gatewayService?: IGatewayService;
 	userGuildRepository?: UserGuildRepository;
 	userChannelRepository?: UserChannelRepository;
-}
-
-function normalizeTag(tag: PersonaTag): {prefix: string; suffix: string} {
-	return {
-		prefix: (tag.prefix ?? '').trim(),
-		suffix: (tag.suffix ?? '').trim(),
-	};
 }
 
 export function calculatePersonaFrecencyScore(
@@ -158,15 +166,6 @@ function changedProfileText(
 	if (data.bio != null && data.bio !== existing.bio) fields.push(['bio', data.bio]);
 	if (data.pronouns != null && data.pronouns !== existing.pronouns) fields.push(['pronouns', data.pronouns]);
 	return fields;
-}
-
-// A JSON pair, so no prefix or suffix can be read as part of the other.
-function getTagKey(tag: {prefix: string; suffix: string}): string {
-	return JSON.stringify([tag.prefix, tag.suffix]);
-}
-
-function formatTagDisplay(tag: {prefix: string; suffix: string}): string {
-	return `${tag.prefix || ''}text${tag.suffix || ''}`;
 }
 
 function personaSettingsResponse(row: UserPersonaSettingsRow): PersonaSettingsResponse {
@@ -392,7 +391,8 @@ export class PersonaService {
 		if (!deleted) {
 			throw new PersonaNotFoundError();
 		}
-		await forgetPersonaImageSources(userId, personaId);
+		// The image sources stay: a restored persona still knows where its pictures came from, so the
+		// next import compares them instead of listing the persona as changed (tyne-chat/tyne#243).
 
 		await this.dispatchToUser(userId, 'USER_PERSONA_DELETE', {
 			persona_id: personaId.toString(),
@@ -584,7 +584,6 @@ export class PersonaService {
 			steps,
 			settings,
 			alongside: (written) => [
-				...retired.map((p) => forgetPersonaImageSourcesWrite(userId, p.id)),
 				...written.flatMap((persona, i) => {
 					const sources = items[i]?.image_sources;
 					return sources === undefined ? [] : [personaImageSourcesWrite(userId, persona, sources)];
@@ -631,8 +630,8 @@ export class PersonaService {
 
 	/**
 	 * Deletes many of the account's personas at once (tyne-chat/tyne#542), as deleting each would:
-	 * soft-deleted (their messages keep showing them), the selection and channel selections that
-	 * named them cleared, and their image sources forgotten, all in one atomic write. Every persona
+	 * soft-deleted (their messages keep showing them) and the selection and channel selections that
+	 * named them cleared, in one atomic write. Their image sources stay, for a restore. Every persona
 	 * named must be the caller's and live, or nothing changes.
 	 */
 	async deletePersonas(userId: UserID, personaIds: ReadonlyArray<PersonaID>): Promise<void> {
@@ -642,13 +641,319 @@ export class PersonaService {
 			retire: retired,
 			steps: [],
 			settings,
-			alongside: () => [
-				...retired.map((p) => forgetPersonaImageSourcesWrite(userId, p.id)),
-				...clearedChannelIds.map((channelId) => forgetPersonaChannelStateWrite(userId, channelId)),
-			],
+			alongside: () => clearedChannelIds.map((channelId) => forgetPersonaChannelStateWrite(userId, channelId)),
 		});
 		await this.dispatchListToOwnSessions(userId, settings, clearedChannelIds);
 		await this.dispatchToMutualGuilds(userId);
+	}
+
+	/**
+	 * Classifies every member of an import file against the account's personas, deleted ones
+	 * included, and changes nothing (tyne-chat/tyne#243). The rules are in `PersonaImportPlanner`.
+	 */
+	async previewImport(userId: UserID, request: PersonaImportPreviewRequest): Promise<PersonaImportPreviewResponse> {
+		const all = await this.deps.personaRepository.findByUserId(userId, {includeDeleted: true});
+		const live = all.filter((p) => !p.isDeleted);
+		const deleted = all.filter((p) => p.isDeleted);
+		const plan = planPersonaImport({
+			source: request.source,
+			members: request.members,
+			live,
+			deleted,
+			imageSources: await loadPersonaImageSources(userId),
+			ownImageHash: (url, kind) => ownTyneMediaImageHash(url, Config.endpoints.media, kind, userId.toString()),
+		});
+
+		const settings = await this.deps.personaRepository.findSettings(userId);
+		const currentText = settings?.display_tag_text?.trim() || null;
+		const fileText = request.display_tag?.text?.trim() || null;
+		const fileHasTag = Boolean(fileText || request.display_tag?.has_icon);
+		let decision: PersonaImportPreviewResponse['display_tag']['decision'] = 'none';
+		if (fileHasTag) {
+			if (live.length === 0 && !currentText && !settings?.display_tag_icon) decision = 'auto_apply';
+			else if (fileText && fileText !== currentText) decision = 'ask';
+		}
+
+		return {
+			entries: plan.entries,
+			personas: all.filter((p) => plan.referencedIds.has(p.id.toString())).map((p) => p.toResponse()),
+			display_tag: {decision, current_text: currentText},
+			untouched: plan.untouched,
+			needs_review:
+				decision === 'ask' || plan.entries.some((entry) => entry.kind !== 'new' && entry.kind !== 'up_to_date'),
+		};
+	}
+
+	/**
+	 * Applies a reviewed import: one explicit action per member, checked against the account as it is
+	 * now and written in one atomic batch, so a refused import changes nothing. Nothing is deleted. A
+	 * link records the PluralKit id only; a restore brings back the same row, leaving off tags and
+	 * signature emojis another persona holds now; `use_file` replaces a linked persona's details but
+	 * never its visibility, and from a PluralKit file never its signature emojis or auto-tag setting.
+	 */
+	async applyImport(userId: UserID, request: PersonaImportApplyRequest): Promise<PersonaImportApplyResponse> {
+		const fromTyne = request.source === 'tyne';
+		const all = await this.deps.personaRepository.findByUserId(userId, {includeDeleted: true});
+		const byId = new Map(all.map((p) => [p.id.toString(), p] as const));
+		const imageSources = await loadPersonaImageSources(userId);
+		const targeted = new Set<string>();
+		const target = (action: PersonaImportAction, wantDeleted: boolean): Persona => {
+			const id = action.persona_id ?? '';
+			const persona = byId.get(id);
+			if (!persona || persona.isDeleted !== wantDeleted) throw new PersonaNotFoundError();
+			if (targeted.has(id)) throw new PersonaImportConflictError(`Persona ${id} is named by more than one action`);
+			targeted.add(id);
+			return persona;
+		};
+		const withoutKeys = <T>(values: ReadonlyArray<T>, drop: ReadonlyArray<T>, key: (value: T) => string) => {
+			const dropped = new Set(drop.map(key));
+			return values.filter((value) => !dropped.has(key(value)));
+		};
+		const tagKeyOf = (tag: PersonaTag) => getTagKey(normalizeTag(tag));
+		const emojiKeyOf = (emoji: SignatureEmoji) => (emoji.id ? `custom:${emoji.id}` : `unicode:${emoji.name}`);
+
+		// The personas as they will be once written, to check tags, emojis and the cap on the end state.
+		const finalState = new Map<string, {name: string; tags: Array<PersonaTag>; emojis: Array<SignatureEmoji>}>();
+		for (const persona of all) {
+			if (!persona.isDeleted) {
+				finalState.set(persona.id.toString(), {
+					name: persona.name,
+					tags: persona.personaTags,
+					emojis: persona.signatureEmojis,
+				});
+			}
+		}
+		type Planned =
+			| {kind: 'create'; params: CreatePersonaParams; sources: PersonaImportImageSources | null | undefined}
+			| {kind: 'update'; persona: Persona; params: UpdatePersonaParams; sources?: PersonaImportImageSources | null}
+			| {kind: 'restore'; persona: Persona};
+		const planned: Array<Planned> = [];
+		const profileText: Array<PersonaProfileText> = [];
+		let created = 0;
+
+		for (const action of request.actions) {
+			switch (action.action) {
+				case 'add': {
+					const item = action.item;
+					if (!item) throw new PersonaImportConflictError('An add needs the member');
+					const tags = withoutKeys(item.persona_tags ?? [], action.drop_tags ?? [], tagKeyOf);
+					const emojis = fromTyne
+						? withoutKeys(item.signature_emojis ?? [], action.drop_signature_emojis ?? [], emojiKeyOf)
+						: [];
+					const key = `new:${created++}`;
+					finalState.set(key, {name: item.name, tags, emojis});
+					profileText.push(['global_name', item.name], ['bio', item.bio], ['pronouns', item.pronouns]);
+					planned.push({
+						kind: 'create',
+						params: {
+							user_id: userId,
+							name: item.name,
+							avatar_hash: item.avatar_hash,
+							banner_hash: item.banner_hash,
+							pronouns: item.pronouns,
+							color: item.color,
+							avatar_color: item.avatar_color,
+							bio: item.bio,
+							auto_tag_disabled: fromTyne ? item.auto_tag_disabled : undefined,
+							persona_tags: tags,
+							signature_emojis: emojis,
+							visibility: item.visibility ?? 'unlisted',
+							external_uuid: item.external_uuid,
+						},
+						sources: item.image_sources,
+					});
+					break;
+				}
+				case 'link': {
+					const persona = target(action, false);
+					const externalId = action.external_uuid?.trim();
+					if (!externalId) throw new PersonaImportConflictError('A link needs the member id');
+					const other = all.find(
+						(p) =>
+							!p.isDeleted && p.id !== persona.id && (p.externalUuid === externalId || p.id.toString() === externalId),
+					);
+					if (other) {
+						throw new PersonaImportConflictError(`Persona '${other.name}' is already linked to member ${externalId}`);
+					}
+					planned.push({kind: 'update', persona, params: {external_uuid: externalId}});
+					break;
+				}
+				case 'restore': {
+					const persona = target(action, true);
+					finalState.set(persona.id.toString(), {
+						name: persona.name,
+						tags: persona.personaTags,
+						emojis: persona.signatureEmojis,
+					});
+					planned.push({kind: 'restore', persona});
+					break;
+				}
+				case 'use_file': {
+					const persona = target(action, false);
+					const item = action.item;
+					if (!item) throw new PersonaImportConflictError("Using the file's version needs the member");
+					const externalId = item.external_uuid?.trim();
+					if (!externalId || (persona.externalUuid !== externalId && persona.id.toString() !== externalId)) {
+						throw new PersonaImportConflictError(`Persona '${persona.name}' is not linked to this member`);
+					}
+					const tags = withoutKeys(item.persona_tags ?? [], action.drop_tags ?? [], tagKeyOf);
+					const params: UpdatePersonaParams = {
+						name: item.name,
+						pronouns: item.pronouns ?? null,
+						bio: item.bio ?? null,
+						color: item.color ?? null,
+						persona_tags: tags,
+					};
+					if (!action.keep_avatar) {
+						params.avatar_hash = item.avatar_hash ?? null;
+						params.avatar_color = item.avatar_hash ? (item.avatar_color ?? null) : null;
+					}
+					if (!action.keep_banner) params.banner_hash = item.banner_hash ?? null;
+					let emojis = persona.signatureEmojis;
+					if (fromTyne) {
+						emojis = withoutKeys(item.signature_emojis ?? [], action.drop_signature_emojis ?? [], emojiKeyOf);
+						params.signature_emojis = emojis;
+						params.auto_tag_disabled = Boolean(item.auto_tag_disabled);
+					}
+					finalState.set(persona.id.toString(), {name: item.name, tags, emojis});
+					profileText.push(...changedProfileText(persona, item));
+					// Pictures kept because the file's could not be stored keep their recorded origin too.
+					const recorded = imageSources.get(persona.id.toString());
+					const recordedAvatar: PersonaImportImageSources['avatar'] = recorded?.avatar_url
+						? {
+								url: recorded.avatar_url,
+								field: recorded.avatar_field === 'webhook_avatar_url' ? 'webhook_avatar_url' : 'avatar_url',
+								main_avatar_empty: recorded.avatar_main_empty ?? undefined,
+							}
+						: null;
+					const recordedBanner: PersonaImportImageSources['banner'] = recorded?.banner_url
+						? {url: recorded.banner_url}
+						: null;
+					const sources: PersonaImportImageSources = {
+						avatar: action.keep_avatar ? recordedAvatar : (item.image_sources?.avatar ?? null),
+						banner: action.keep_banner ? recordedBanner : (item.image_sources?.banner ?? null),
+					};
+					planned.push({kind: 'update', persona, params, sources});
+					break;
+				}
+			}
+		}
+
+		// Restored personas give up what another persona holds in the end state.
+		const dropped: PersonaImportApplyResponse['dropped'] = [];
+		const restoredIds = new Set(planned.flatMap((p) => (p.kind === 'restore' ? [p.persona.id.toString()] : [])));
+		const heldElsewhere = (key: string, own: string, of: 'tags' | 'emojis') => {
+			for (const [id, state] of finalState) {
+				if (id === own || restoredIds.has(id)) continue;
+				const keys = of === 'tags' ? state.tags.map(tagKeyOf) : state.emojis.map(emojiKeyOf);
+				if (keys.includes(key)) return true;
+			}
+			return false;
+		};
+		const restoreParams = new Map<string, UpdatePersonaParams>();
+		const claimedByRestores = {tags: new Set<string>(), emojis: new Set<string>()};
+		for (const step of planned) {
+			if (step.kind !== 'restore') continue;
+			const id = step.persona.id.toString();
+			const keepTag = (tag: PersonaTag) =>
+				!heldElsewhere(tagKeyOf(tag), id, 'tags') && !claimedByRestores.tags.has(tagKeyOf(tag));
+			const keepEmoji = (emoji: SignatureEmoji) =>
+				!heldElsewhere(emojiKeyOf(emoji), id, 'emojis') && !claimedByRestores.emojis.has(emojiKeyOf(emoji));
+			const tags = step.persona.personaTags.filter(keepTag);
+			const emojis = step.persona.signatureEmojis.filter(keepEmoji);
+			for (const tag of tags) claimedByRestores.tags.add(tagKeyOf(tag));
+			for (const emoji of emojis) claimedByRestores.emojis.add(emojiKeyOf(emoji));
+			finalState.set(id, {name: step.persona.name, tags, emojis});
+			const lostTags = step.persona.personaTags.filter((tag) => !tags.includes(tag));
+			const lostEmojis = step.persona.signatureEmojis.filter((emoji) => !emojis.includes(emoji));
+			if (lostTags.length > 0 || lostEmojis.length > 0) {
+				dropped.push({persona_id: id, tags: lostTags, signature_emojis: lostEmojis});
+				restoreParams.set(id, {persona_tags: tags, signature_emojis: emojis});
+			} else {
+				restoreParams.set(id, {});
+			}
+		}
+
+		// The end state: each tag and signature emoji on one persona, and no more than the cap.
+		const tagOwners = new Map<string, string>();
+		const emojiOwners = new Map<string, string>();
+		for (const state of finalState.values()) {
+			for (const tag of state.tags) {
+				const norm = normalizeTag(tag);
+				if (!norm.prefix && !norm.suffix) continue;
+				const key = getTagKey(norm);
+				const owner = tagOwners.get(key);
+				if (owner !== undefined) {
+					throw new DuplicatePersonaTagError(
+						`Tag pair '${formatTagDisplay(norm)}' would be on both '${owner}' and '${state.name}'`,
+					);
+				}
+				tagOwners.set(key, state.name);
+			}
+			for (const emoji of state.emojis) {
+				const key = emojiKeyOf(emoji);
+				const owner = emojiOwners.get(key);
+				if (owner !== undefined) {
+					throw new DuplicateSignatureEmojiError(
+						`Signature emoji '${emoji.name}' would be on both '${owner}' and '${state.name}'`,
+					);
+				}
+				emojiOwners.set(key, state.name);
+			}
+		}
+		if (finalState.size > MAX_PERSONAS_PER_USER) throw new PersonaLimitReachedError(MAX_PERSONAS_PER_USER);
+		await this.assertProfileTextAllowed(userId, profileText);
+
+		if (planned.length === 0) return {personas: [], dropped: []};
+		const steps: Array<PersonaImportStep> = planned.map((step) => {
+			if (step.kind === 'create') return {create: step.params};
+			if (step.kind === 'restore') {
+				return {restore: step.persona, params: restoreParams.get(step.persona.id.toString()) ?? {}};
+			}
+			return {update: step.persona, params: step.params};
+		});
+		const written = await this.deps.personaRepository.writeImport(userId, {
+			retire: [],
+			steps,
+			alongside: (personas) =>
+				personas.flatMap((persona, i) => {
+					const step = planned[i];
+					if (!step || step.kind === 'restore') return [];
+					if (step.kind === 'update' && step.sources === undefined) return [];
+					return [personaImageSourcesWrite(userId, persona, step.sources ?? null)];
+				}),
+		});
+
+		await this.dispatchListToOwnSessions(userId);
+		if (restoredIds.size > 0 || written.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
+			await this.dispatchToMutualGuilds(userId);
+		}
+		return {personas: written.map((p) => p.toResponse()), dropped};
+	}
+
+	/** The account's deleted personas, the most recently deleted first. Only the owner sees these. */
+	async listDeletedPersonas(userId: UserID): Promise<Array<Persona>> {
+		const all = await this.deps.personaRepository.findByUserId(userId, {includeDeleted: true});
+		return all.filter((p) => p.isDeleted).sort((a, b) => (b.deletedAt?.getTime() ?? 0) - (a.deletedAt?.getTime() ?? 0));
+	}
+
+	/**
+	 * Brings back a deleted persona: the same row, so its old messages and usage are its own again.
+	 * Tags and signature emojis another persona holds now are left off and reported.
+	 */
+	async restorePersona(userId: UserID, personaId: PersonaID): Promise<PersonaRestoreResponse> {
+		const result = await this.applyImport(userId, {
+			source: 'tyne',
+			actions: [{action: 'restore', persona_id: personaId.toString()}],
+		});
+		const persona = result.personas[0];
+		if (!persona) throw new PersonaNotFoundError();
+		const dropped = result.dropped[0];
+		return {
+			persona,
+			dropped_tags: dropped?.tags ?? [],
+			dropped_signature_emojis: dropped?.signature_emojis ?? [],
+		};
 	}
 
 	/** The caller's live personas with these IDs, by ID; one that is not answers `UNKNOWN_PERSONA`. */
