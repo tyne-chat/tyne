@@ -9,6 +9,7 @@ import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import {PersonaGalleryNav} from '@app/features/persona/state/PersonaGalleryNav';
 import {PersonaGalleryPrefs} from '@app/features/persona/state/PersonaGalleryPrefs';
 import {personaAvatarUrls} from '@app/features/persona/utils/PersonaAvatarUrls';
+import * as BulkMessages from '@app/features/persona/utils/PersonaBulkMessages';
 import {
 	filterGalleryItems,
 	type GalleryPersona,
@@ -87,6 +88,20 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 	const shown =
 		directory.isOwn && !showHidden ? directory.items.filter((p) => p.visibility === 'public') : directory.items;
 	const list = sortGalleryItems(filterGalleryItems(shown, query), effectiveSort, i18n.locale);
+
+	// Persona settings with the unlisted personas shown and Select on (tyne-chat/tyne#542).
+	const handleChooseFeatured = () => {
+		onClose?.();
+		ModalCommands.push(
+			modal(() => (
+				<UserSettingsModal
+					initialTab="personas"
+					initialSubtab="feature"
+					data-flx="persona.gallery.choose-featured.user-settings-modal"
+				/>
+			)),
+		);
+	};
 
 	const handleManage = () => {
 		onClose?.();
@@ -214,6 +229,17 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 					<p data-flx="persona.gallery.none-public.text">
 						{directory.isOwn ? i18n._(M.NO_PUBLIC_PERSONAS_DESCRIPTOR) : i18n._(M.NO_PUBLIC_PERSONAS_OTHERS_DESCRIPTOR)}
 					</p>
+					{directory.isOwn && directory.items.length > 0 && (
+						<Button
+							variant="primary"
+							small
+							fitContent
+							onClick={handleChooseFeatured}
+							data-flx="persona.gallery.choose-featured"
+						>
+							{i18n._(BulkMessages.CHOOSE_PERSONAS_TO_FEATURE_DESCRIPTOR)}
+						</Button>
+					)}
 				</div>
 			);
 		}
