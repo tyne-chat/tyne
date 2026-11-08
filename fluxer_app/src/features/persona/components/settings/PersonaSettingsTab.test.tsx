@@ -149,13 +149,13 @@ describe('PersonaSettingsTab Component', () => {
 		expect(openPersonaEditModal).toHaveBeenCalledWith();
 	});
 
-	it('opens PluralKitImportModal when Import from PluralKit button is clicked', async () => {
+	it('opens the import dialog when the Import button is clicked', async () => {
 		await act(async () => {
 			root.render(<PersonaSettingsTab data-flx="persona.settings.persona-settings-tab-test.persona-settings-tab--3" />);
 		});
 
-		const importBtn = Array.from(container.querySelectorAll('button')).find((btn) =>
-			btn.textContent?.includes('Import from PluralKit'),
+		const importBtn = Array.from(container.querySelectorAll('button')).find(
+			(btn) => btn.textContent?.trim() === 'Import',
 		);
 		expect(importBtn).toBeDefined();
 

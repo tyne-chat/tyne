@@ -10,6 +10,14 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Awalan: {0})"
 
+#. Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona
+msgid "<0>{tag}</0> already belongs to your persona {name}."
+msgstr "<0>{tag}</0> sudah dimiliki oleh personamu, {name}."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file
+msgid "<0>{tag}</0> is also used by {name} in your file."
+msgstr "<0>{tag}</0> juga dipakai oleh {name} di filemu."
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "Persona dapat memiliki paling banyak 5 tag"
@@ -42,12 +50,28 @@ msgstr "Tambah Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Tambah Pasangan Tag ({0}/5)"
 
+#. Choice in the import review: add the member as a new persona next to the existing one
+msgid "Add as a separate persona"
+msgstr "Tambahkan sebagai persona terpisah"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Tambah penghitung"
 
 msgid "Add signal"
 msgstr "Tambah sinyal"
+
+#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
+msgid "Add with the tag"
+msgstr "Tambahkan dengan tag tersebut"
+
+#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
+msgid "Add without {tags}"
+msgstr "Tambahkan tanpa {tags}"
+
+#. Line of the import result: new personas
+msgid "Added"
+msgstr "Ditambahkan"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -72,9 +96,6 @@ msgstr "Perintah lain atau perintah bawaan sudah memakai nama ini."
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Yakin ingin menghapus <0>{0}</0>? Tindakan ini tidak dapat dibatalkan."
 
-msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Yakin ingin mengganti semua <0>{existingCount}</0> persona yang ada? Semuanya akan dihapus permanen dari akunmu dan tidak dapat dibatalkan."
-
 #. Settings search synonym.
 msgid "Auto-hide"
 msgstr "Sembunyikan otomatis"
@@ -88,6 +109,14 @@ msgstr "Tampilkan otomatis bilah sisi yang tersembunyi"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Gambar avatar gagal diunduh: {error}. Persona diimpor tanpa avatar."
 
+#. Import warning when the file's avatar for an existing persona fails to download, so the old one stays
+msgid "Avatar image failed to download: {error}. The persona kept the avatar it had."
+msgstr "Gambar avatar gagal diunduh: {error}. Persona tetap memakai avatar sebelumnya."
+
+#. Explanation of the "Restored" line of the import result
+msgid "Back as they were, with their old messages."
+msgstr "Kembali seperti semula, beserta pesan-pesan lamanya."
+
 #. Button on narrow screens that returns to the command list.
 msgid "Back to commands"
 msgstr "Kembali ke perintah"
@@ -100,6 +129,27 @@ msgstr "Kembali ke {section}"
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "Gambar banner gagal diunduh: {error}. Persona diimpor tanpa banner."
 
+#. Import warning when the file's banner for an existing persona fails to download, so the old one stays
+msgid "Banner image failed to download: {error}. The persona kept the banner it had."
+msgstr "Gambar banner gagal diunduh: {error}. Persona tetap memakai banner sebelumnya."
+
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+msgid "Came back without {items}: another persona has them now."
+msgstr "Kembali tanpa {items}: sekarang dimiliki persona lain."
+
+#. Comparison of a persona picture with the import file: it can't be compared
+msgid "Can't compare"
+msgstr "Tidak bisa dibandingkan"
+
+#. Short name of a section of the import review
+msgid "Can't tell"
+msgstr "Tidak pasti"
+
+#. Section of the import review
+msgid "Can't tell if it's the same persona"
+msgstr "Tidak pasti apakah ini persona yang sama"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Ganti persona"
@@ -107,6 +157,14 @@ msgstr "Ganti persona"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "Ubah pesan sesuai yang mereka ketik"
+
+#. Title of the persona import dialog while the file is checked
+msgid "Checking your file..."
+msgstr "Memeriksa filemu..."
+
+#. Disabled button while the import file is checked
+msgid "Checking..."
+msgstr "Memeriksa..."
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Pilih ekspor PluralKit (.json) atau ekspor {productName} (.zip), atau seret & lepas"
@@ -122,6 +180,10 @@ msgstr "Kosongkan kotak pesan untuk menggunakan /{name}"
 #. Button at the end of the search results panel header. Clears the search and closes the panel.
 msgid "Close search"
 msgstr "Tutup pencarian"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Colour"
+msgstr "Warna"
 
 #. Section label in the command editor: name and description.
 msgid "Command"
@@ -140,13 +202,21 @@ msgstr "Perintah"
 msgid "Commands saved"
 msgstr "Perintah disimpan"
 
+#. Button that shows a persona next to its version in the import file
+msgid "Compare"
+msgstr "Bandingkan"
+
+#. Status while the import file is compared with the account's personas
+msgid "Comparing your file with your personas..."
+msgstr "Membandingkan filemu dengan personamu..."
+
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Persona Terkonfigurasi ({count})"
 
-#. Progress status for configuring persona
-msgid "Configuring {name}..."
-msgstr "Mengonfigurasi {name}..."
+#. Explanation of the "Linked" line of the import result
+msgid "Connected to their members in the file. Nothing in them changed."
+msgstr "Ditautkan ke anggotanya di file. Tidak ada yang berubah pada persona tersebut."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -231,9 +301,45 @@ msgstr "Hapus stempel waktu\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "Hapus {count, plural, other {# persona}}?"
 
+#. Short name of a section of the import review
+msgid "Deleted"
+msgstr "Dihapus"
+
+#. Title of the section in Settings › Personas that lists deleted personas
+msgid "Deleted personas"
+msgstr "Persona yang dihapus"
+
+#. Explanation of the deleted personas section in Settings › Personas
+msgid "Deleted personas still show on their old messages, but nobody can pick them and they don't count towards your limit. Restoring one brings the same persona back, with its history."
+msgstr "Persona yang dihapus tetap tampil di pesan-pesan lamanya, tetapi tidak ada yang bisa memilihnya dan tidak dihitung dalam batasmu. Memulihkan salah satunya akan mengembalikan persona yang sama, beserta riwayatnya."
+
+#. When a persona was deleted, in the import review. {date} is a date
+#. When a persona was deleted, in the import review. {date} is a date
+msgid "Deleted {date}"
+msgstr "Dihapus {date}"
+
 msgid "Detected System Name / Tag"
 msgstr "Nama / Tag Sistem Terdeteksi"
 
+#. Section of the import review
+msgid "Different in your file"
+msgstr "Berbeda di filemu"
+
+#. Comparison of a persona picture with the import file: they differ
+msgid "Different picture"
+msgstr "Gambar berbeda"
+
+#. Short name of a section of the import review
+msgid "Differs"
+msgstr "Berbeda"
+
+#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
+msgid "Differs: {fields}"
+msgstr "Berbeda: {fields}"
+
+#. Heading of the display tag choice in the import review
+#. Section of the import review
+#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "Tag Tampilan"
@@ -269,6 +375,14 @@ msgstr "Pasangan tag duplikat pada persona ini"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Setiap saluran menyimpan personanya sendiri. Saluran baru dimulai sebagai akunmu."
 
+#. Explanation of a section of the import review
+msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
+msgstr "Masing-masing memiliki nama atau tag yang sama dengan salah satu personamu, tetapi tidak keduanya, jadi bisa jadi karakter yang sama atau karakter lain. Bandingkan lalu pilih. Anggota yang dilewati tetap ada di filemu untuk lain kali."
+
+#. Explanation at the top of the import review
+msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
+msgstr "Masing-masing sudah diberi pilihan paling aman, jadi tidak ada yang kamu miliki yang berubah kecuali kamu memilihnya. Baca setiap bagian sebelum mengimpor. Yang paling sulit ada di atas."
+
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
 msgid "Edit /{name}"
@@ -291,6 +405,14 @@ msgstr "Edit persona"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Edit stempel waktu\\"
+
+#. Text under the heading when a reviewed persona import is done
+msgid "Everything else is exactly as it was."
+msgstr "Semua yang lain tetap persis seperti sebelumnya."
+
+#. Text when a persona import with nothing to decide is done
+msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
+msgstr "Semua isi file itu baru atau sudah sama persis dengan sebuah persona, jadi tidak ada yang perlu diputuskan. Tidak ada hal lain yang berubah."
 
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
@@ -377,9 +499,17 @@ msgstr "Pratinjau format"
 msgid "Full script guide"
 msgstr "Panduan lengkap skrip"
 
+#. Heading when a reviewed persona import is done
+msgid "Here is what changed"
+msgstr "Ini yang berubah"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Sembunyikan daftar kanal"
+
+#. Button that hides the comparison of a persona with the import file
+msgid "Hide comparison"
+msgstr "Sembunyikan perbandingan"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -397,23 +527,29 @@ msgstr "Arahkan kursor ke dekat tepi jendela untuk menampilkan sementara panel y
 msgid "Icon file is too large. Choose an image smaller than 10MB."
 msgstr "File ikon terlalu besar. Pilih gambar yang lebih kecil dari 10 MB."
 
-#. Modal title for PluralKit import step completed
-msgid "Import Complete"
-msgstr "Impor Selesai"
+#. Title of the persona import dialog when the import is done
+msgid "Import finished"
+msgstr "Impor selesai"
 
-msgid "Import Complete!"
-msgstr "Impor Selesai!"
+#. Title of the persona import dialog
+msgid "Import personas"
+msgstr "Impor persona"
 
-msgid "Import Strategy"
-msgstr "Strategi Impor"
+#. Summary in the import review footer when every choice leaves things as they are
+msgid "Import will change nothing"
+msgstr "Impor tidak akan mengubah apa pun"
 
-#. Modal title for PluralKit import step select
-msgid "Import from PluralKit"
-msgstr "Impor dari PluralKit"
+#. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
+msgid "Import will {actions}"
+msgstr "Impor akan {actions}"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Mengimpor Persona..."
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Importing never changes or removes a persona you already have unless you choose it. New members are added straight away. If any member might match or clash with one of your personas, you'll review it before anything is imported."
+msgstr "Impor tidak pernah mengubah atau menghapus persona yang sudah kamu miliki kecuali kamu memilihnya. Anggota baru langsung ditambahkan. Jika ada anggota yang mungkin cocok atau bentrok dengan salah satu personamu, kamu akan meninjaunya sebelum apa pun diimpor."
 
 msgid "Importing..."
 msgstr "Mengimpor..."
@@ -421,6 +557,27 @@ msgstr "Mengimpor..."
 #. Option for where the selected persona applies: each channel remembers its own persona
 msgid "In each channel"
 msgstr "Di setiap saluran"
+
+#. Column heading in the import review
+msgid "In this app"
+msgstr "Di aplikasi ini"
+
+#. Explanation of a section of the import review
+msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
+msgstr "Di aplikasi ini setiap tag proxy hanya dimiliki satu persona. Anggota-anggota ini punya tag yang sudah dimiliki persona lain, atau yang juga dimiliki anggota lain di filemu."
+
+#. Column heading in the table comparing a persona with the import file
+msgid "In this app now"
+msgstr "Di aplikasi ini sekarang"
+
+#. Column heading in the import review
+#. Column heading in the table comparing a persona with the import file
+msgid "In your file"
+msgstr "Di filemu"
+
+#. Explanation of the "Kept as they were" line of the import result
+msgid "Including any that differ from the file, where you kept the version you had."
+msgstr "Termasuk yang berbeda dari file, tetapi kamu mempertahankan versi yang sudah kamu punya."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -441,16 +598,42 @@ msgstr "Sisipkan:"
 msgid "Its script has a problem."
 msgstr "Skripnya bermasalah."
 
-msgid "Keep existing and add new (Recommended)"
-msgstr "Pertahankan yang ada dan tambahkan yang baru (Disarankan)"
+#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
+msgid "Keep this version"
+msgstr "Pertahankan versi ini"
 
-#. placeholder {0}: members.length
-msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Pertahankan {existingCount} persona milikmu saat ini dan tambahkan semua {0} persona yang diimpor di sampingnya sebagai entri baru."
+#. Button in the import review: keep every listed persona as it is
+msgid "Keep this version for all"
+msgstr "Pertahankan versi ini untuk semua"
+
+#. Choice in the import review: keep the display tag {tag}
+msgid "Keep yours: {tag}"
+msgstr "Pertahankan tag milikmu: {tag}"
+
+#. Line of the import result: personas left unchanged
+msgid "Kept as they were"
+msgstr "Tetap seperti semula"
+
+#. Choice in the import review for a persona that was deleted: keep it deleted
+msgid "Leave deleted"
+msgstr "Biarkan terhapus"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "Baris {line}, kolom {column}: {problem}"
+
+#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
+msgctxt "persona-import-choice"
+msgid "Link"
+msgstr "Tautkan"
+
+#. Button in the import review that links every persona listed
+msgid "Link all {count}"
+msgstr "Tautkan semua {count}"
+
+#. Shown on a persona in the import review that is already connected to a different member
+msgid "Linked to another PluralKit member"
+msgstr "Ditautkan ke anggota PluralKit lain"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -511,6 +694,10 @@ msgstr "Anggota #{index}"
 msgid "Members with Avatars"
 msgstr "Anggota dengan Avatar"
 
+#. Explanation of a section of the import review
+msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
+msgstr "Anggota yang belum kamu miliki, tanpa bentrok nama atau tag. Hapus centang yang tidak kamu inginkan."
+
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "Alat Pesan"
@@ -527,6 +714,10 @@ msgstr "Paling sering dipakai"
 msgid "Name (A–Z)"
 msgstr "Nama (A–Z)"
 
+#. Badge on a section of the import review where every member needs a choice
+msgid "Needs a decision"
+msgstr "Perlu keputusan"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Persona Baru"
@@ -534,6 +725,18 @@ msgstr "Persona Baru"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "Perintah baru"
+
+#. Section of the import review
+msgid "New in your file"
+msgstr "Baru di filemu"
+
+#. Explanation of the "Added" line of the import result
+msgid "New personas from your file."
+msgstr "Persona baru dari filemu."
+
+#. Shown instead of a picture from the import file, which isn't loaded until it is stored on this server
+msgid "New picture in the file, shown once imported"
+msgstr "Gambar baru di file, ditampilkan setelah diimpor"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -554,6 +757,10 @@ msgstr "Belum ada bio."
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "Tidak ada perintah"
+
+#. Shown in Settings › Personas when there are no deleted personas
+msgid "No deleted personas."
+msgstr "Tidak ada persona yang dihapus."
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Tag tampilan belum dikonfigurasi. Pesan akan menampilkan foto profil akunmu."
@@ -590,6 +797,10 @@ msgstr "Belum ada yang menyalakan sinyal ini"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Belum ada personamu yang publik. Orang lain melihat persona di sini setelah kamu mengatur visibilitasnya ke Publik."
 
+#. Hint on the choice to skip a member in the import review
+msgid "Nothing changes. It stays in your file for next time."
+msgstr "Tidak ada yang berubah. Anggota ini tetap ada di filemu untuk lain kali."
+
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
 msgstr "Satu persona untuk semua saluran."
@@ -610,10 +821,6 @@ msgstr "Buka di jendela baru"
 msgid "Optional"
 msgstr "Opsional"
 
-#. Placeholder for system badge in import modal
-msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Lencana sistem opsional, mis. ⚞Seraphim⚟"
-
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "Orang lain melihat {count, plural, other {# persona publik}}."
@@ -629,9 +836,6 @@ msgstr "Tempel sebagai teks biasa"
 #. Settings search synonym.
 msgid "Peek"
 msgstr "Intip"
-
-msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Hapus permanen semua {existingCount} persona yang ada dan ganti sepenuhnya dengan persona yang diimpor."
 
 #. A community command counter counts per person mentioned. The command then needs a mention to run.
 msgid "Person mentioned"
@@ -734,10 +938,6 @@ msgstr "Didukung oleh KLIPY"
 msgid "Prefix (e.g. [)"
 msgstr "Awalan (mis. [)"
 
-#. Progress status when preparing avatar batch download
-msgid "Preparing avatar batch download..."
-msgstr "Menyiapkan unduhan avatar massal..."
-
 #. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "Tekan F6 untuk membuka jendela ini dengan papan ketik."
@@ -748,6 +948,7 @@ msgstr "Persona sebelumnya"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
+#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "Privat"
@@ -755,6 +956,14 @@ msgstr "Privat"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "Persona pribadi"
+
+#. Short name of a section of the import review
+msgid "Probably the same"
+msgstr "Mungkin sama"
+
+#. Section of the import review
+msgid "Probably the same persona"
+msgstr "Mungkin persona yang sama"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -769,6 +978,7 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "Kartu profil dapat diakses saat mengeklik pesan dan terlihat di daftar persona publikmu oleh teman dan server bersama."
 
 #. Chip above the persona list: public personas.
+#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "Publik"
@@ -810,15 +1020,6 @@ msgstr "Hapus emoji tanda tangan"
 msgid "Remove tag pair"
 msgstr "Hapus pasangan tag"
 
-msgid "Replace All"
-msgstr "Ganti Semua"
-
-msgid "Replace All Personas"
-msgstr "Ganti Semua Persona"
-
-msgid "Replace all existing personas (Destructive)"
-msgstr "Ganti semua persona yang ada (Destruktif)"
-
 #. Why an image could not be imported when the server answered with HTTP status {status}
 msgid "Request failed (HTTP {status})"
 msgstr "Permintaan gagal (HTTP {status})"
@@ -835,12 +1036,49 @@ msgstr "Reset sinyal untuk semua orang"
 msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Atur ulang hitungan {name}? Ini tidak dapat dibatalkan."
 
+#. Button that brings back a deleted persona
+#. Choice in the import review: bring a deleted persona back, with its old messages
+msgid "Restore"
+msgstr "Pulihkan"
+
+#. Button in the import review that restores every deleted persona listed
+msgid "Restore all {count}"
+msgstr "Pulihkan semua {count}"
+
+#. Explanation of the "Still deleted" line of the import result
+msgid "Restore them from Deleted personas in Settings if you change your mind."
+msgstr "Pulihkan dari Persona yang dihapus di Pengaturan jika kamu berubah pikiran."
+
+#. Line of the import result: deleted personas brought back
+msgid "Restored"
+msgstr "Dipulihkan"
+
+#. Title of the persona import review
+msgid "Review before importing"
+msgstr "Tinjau sebelum mengimpor"
+
 msgid "Root Account (Default)"
 msgstr "Akun Utama (Default)"
 
 #. Button under the preview of a command script that picks at random: fills the preview in again.
 msgid "Run again"
 msgstr "Jalankan lagi"
+
+#. Badge on the safest choice in the import review
+msgid "Safest"
+msgstr "Paling aman"
+
+#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
+msgid "Same as your {name}: link them"
+msgstr "Sama dengan {name} milikmu: tautkan"
+
+#. Explanation of a section of the import review
+msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
+msgstr "Nama dan tag sama dengan salah satu personamu, tetapi belum tertaut ke filemu, misalnya karena kamu membuatnya secara manual. Menautkan hanya mencatat anggota file mana yang sesuai dengan masing-masing persona, sehingga impor berikutnya mengenalinya. Tidak ada yang berubah pada persona."
+
+#. Comparison of a persona picture with the import file: they are the same
+msgid "Same picture"
+msgstr "Gambar sama"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -898,6 +1136,14 @@ msgstr "Jadikan persona aktif"
 msgid "Show copy button"
 msgstr "Tampilkan tombol salin"
 
+#. Button that loads the list of deleted personas in Settings › Personas
+msgid "Show deleted personas"
+msgstr "Tampilkan persona yang dihapus"
+
+#. Button that collapses a list in the import review again
+msgid "Show fewer"
+msgstr "Tampilkan lebih sedikit"
+
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
@@ -910,6 +1156,10 @@ msgstr "Tampilkan bilah sinyal"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "Tampilkan yang tidak terdaftar dan privat"
+
+#. Button that shows the rest of a list in the import review
+msgid "Show {count} more"
+msgstr "Tampilkan {count} lagi"
 
 msgid "Signal Bar"
 msgstr "Bilah Sinyal"
@@ -937,6 +1187,18 @@ msgstr "Emoji Tanda Tangan"
 msgid "Signature emoji already in use by persona \"{name}\""
 msgstr "Emoji tanda tangan sudah digunakan oleh persona \"{name}\""
 
+#. Row heading in the table comparing a persona with the import file
+msgid "Signature emojis"
+msgstr "Emoji tanda tangan"
+
+#. Choice in the import review: do nothing with this member of the import file
+msgid "Skip this member"
+msgstr "Lewati anggota ini"
+
+#. Line of the import result: members left out
+msgid "Skipped"
+msgstr "Dilewati"
+
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "Anggota dilewati karena tidak memiliki nama yang dikonfigurasi."
@@ -945,16 +1207,17 @@ msgstr "Anggota dilewati karena tidak memiliki nama yang dikonfigurasi."
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Beberapa tag proxy tidak disertakan: {productName} mengizinkan hingga 5 per persona, masing-masing maksimal 32 karakter."
 
-msgid "Start Import"
-msgstr "Mulai Impor"
+#. Line of the import result: deleted personas not restored
+msgid "Still deleted"
+msgstr "Masih dihapus"
+
+#. Explanation of the "Skipped" line of the import result
+msgid "Still in your file. Import it again any time to decide about them."
+msgstr "Masih ada di filemu. Impor lagi kapan saja untuk memutuskannya."
 
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "Menyimpan gambar {current} dari {total} dari file..."
-
-#. placeholder {0}: importResults.successCount
-msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "Berhasil mengimpor {0} persona ke akunmu. Semua gambar avatar tersimpan dengan aman di server lokalmu."
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
@@ -971,9 +1234,6 @@ msgstr "Mendukung file ekspor sistem PluralKit"
 msgid "Switch the active persona"
 msgstr "Ganti persona aktif"
 
-msgid "System Tag (Applied to imported personas)"
-msgstr "Tag Sistem (Diterapkan ke persona yang diimpor)"
-
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -981,6 +1241,18 @@ msgstr "Ikon Tag"
 
 msgid "Tag Text"
 msgstr "Teks Tag"
+
+#. Section of the import review
+msgid "Tag already in use"
+msgstr "Tag sudah digunakan"
+
+#. Short name of a section of the import review
+msgid "Tag in use"
+msgstr "Tag dipakai"
+
+#. Row heading in the table comparing a persona with the import file: whether its tags are matched
+msgid "Tag matching"
+msgstr "Pengenalan tag"
 
 #. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
 msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
@@ -1010,6 +1282,10 @@ msgstr "Saluran, sebagai sebutan"
 msgid "The chosen file is not a valid JSON object."
 msgstr "File yang dipilih bukan objek JSON yang valid."
 
+#. Error in Settings › Personas when the list of deleted personas fails to load
+msgid "The deleted personas could not be loaded."
+msgstr "Persona yang dihapus tidak dapat dimuat."
+
 #. Help for a command script variable.
 msgid "The first person they mention, if any"
 msgstr "Orang pertama yang mereka sebut, jika ada"
@@ -1021,6 +1297,10 @@ msgstr "Nama komunitas ini"
 #. Help for a command script variable.
 msgid "The person running it, as a mention"
 msgstr "Orang yang menjalankannya, sebagai sebutan"
+
+#. Error toast when restoring a deleted persona fails
+msgid "The persona could not be restored."
+msgstr "Persona tidak dapat dipulihkan."
 
 #. Description of the persona option of the /persona slash command
 msgid "The persona to select."
@@ -1045,6 +1325,10 @@ msgstr "Bilah sinyal mati sampai kamu mencentang saluran di sini. Mencentang kat
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "Ikon tag tidak dapat disimpan: {error}. Ikon dapat diatur lagi di pengaturan persona."
 
+#. Explanation of the "Updated from the file" line of the import result
+msgid "Their details are the file's now; their messages and history stayed."
+msgstr "Detailnya kini mengikuti file; pesan dan riwayatnya tetap ada."
+
 #. Explains what deleting personas does, in its confirmation.
 msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
 msgstr "Pesannya tetap menampilkan nama dan avatarnya, tetapi kamu tidak bisa lagi mengirim sebagai persona tersebut, dan tag serta emoji tanda tangannya menjadi bebas. Ini tidak dapat dibatalkan."
@@ -1064,6 +1348,14 @@ msgstr "Tidak ada filter bernama {name}."
 #. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
 msgid "There's no tag called {name}."
 msgstr "Tidak ada tag bernama {name}."
+
+#. Explanation of a section of the import review
+msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
+msgstr "Persona ini sebelumnya berasal dari filemu, tetapi sekarang file berisi detail yang berbeda, atau kamu mengubahnya di sini sejak itu. Tidak ada cara untuk tahu sisi mana yang berubah, jadi versi aplikasi ini dipertahankan kecuali kamu memilih versi file untuk suatu persona. Versi file menggantikan detail persona tersebut; pesan, riwayat, visibilitas, dan emoji tanda tangannya tetap ada, begitu pula gambar yang tidak bisa diunduh."
+
+#. Explanation of a section of the import review
+msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
+msgstr "Persona ini tetap terhapus kecuali kamu memulihkannya. Memulihkan akan mengembalikan persona yang sama seperti semula, beserta pesan lama dan riwayat pemakaiannya, alih-alih membuat salinan."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1132,6 +1424,7 @@ msgstr "Mengetik salah satu tag ini tidak akan beralih ke persona ini. Tag dikir
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
+#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Tidak terdaftar"
@@ -1151,6 +1444,10 @@ msgstr "Pesan tanpa tag dikirim sebagai persona yang kamu pilih. Tag hanya berla
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "Pesan tanpa tag dikirim sebagai yang terakhir berbicara. Menggunakan tag beralih ke persona itu."
+
+#. Line of the import result: personas given the file's details
+msgid "Updated from the file"
+msgstr "Diperbarui dari file"
 
 #. Tooltip on the chip that shows which community command made a message. Preserve {name}.
 msgid "Use /{name}"
@@ -1188,6 +1485,14 @@ msgstr "Gunakan huruf kecil, angka, - dan _, maksimal 32 karakter."
 msgid "Use the basic editor"
 msgstr "Gunakan editor dasar"
 
+#. Choice in the import review: replace the persona's details with those in the import file
+msgid "Use the file's version"
+msgstr "Gunakan versi file"
+
+#. Choice in the import review: use the import file's system tag {tag} as the display tag
+msgid "Use the file's: {tag}"
+msgstr "Gunakan tag dari file: {tag}"
+
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "Gunakan editor skrip"
@@ -1196,10 +1501,18 @@ msgstr "Gunakan editor skrip"
 msgid "View your personas"
 msgstr "Lihat personamu"
 
+#. Heading of the choices for one member of the import file
+msgid "What should happen to {name} from your file?"
+msgstr "Apa yang harus dilakukan dengan {name} dari filemu?"
+
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "Yang mereka ketik"
+
+#. Accessible label of the menu of choices for one persona in the import review
+msgid "What to do with {name}"
+msgstr "Apa yang dilakukan dengan {name}"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1216,13 +1529,57 @@ msgstr "Tempat persona kamu diingat"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Tulis angka sebagai 1st, 2nd, 3rd"
 
+#. Hint on the choice to add a member without its proxy tag, in the import review
+msgid "You can give it another tag later in Settings."
+msgstr "Kamu bisa memberinya tag lain nanti di Pengaturan."
+
+#. Section of the import review
+msgid "You deleted these"
+msgstr "Kamu menghapus ini"
+
+#. Hint on the choice to add a member as a separate persona, in the import review
+msgid "You will have one more {name}."
+msgstr "Kamu akan punya satu {name} lagi."
+
+#. Explanation of a section of the import review
+msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
+msgstr "Akunmu punya satu tag tampilan, yang ditampilkan setelah nama setiap persona. Tag sistem di file berbeda."
+
+#. Hint on the choice to link a member to an existing persona, in the import review
+msgid "Your persona stays as it is; it is connected to this member."
+msgstr "Personamu tetap seperti semula; persona itu ditautkan ke anggota ini."
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "add {count}"
+msgstr "menambahkan {count}"
+
+#. A persona field, listed in "Differs: name, avatar"
+msgid "avatar"
+msgstr "avatar"
+
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "avatar diunduh"
 
+#. A persona field, listed in "Differs: name, banner"
+msgid "banner"
+msgstr "banner"
+
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "banner diunduh"
+
+#. A persona field, listed in "Differs: name, bio"
+msgid "bio"
+msgstr "bio"
+
+#. Part of the import summary "Import will add 7 and change your display tag"
+msgid "change your display tag"
+msgstr "mengubah tag tampilanmu"
+
+#. A persona field (its accent colour), listed in "Differs: name, colour"
+msgid "colour"
+msgstr "warna"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1248,13 +1605,50 @@ msgstr "gambar disimpan"
 msgid "items"
 msgstr "item"
 
-#. Progress label for prepared personas
-msgid "personas prepared"
-msgstr "persona disiapkan"
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "link {count}"
+msgstr "menautkan {count}"
+
+#. A persona's name as a field, listed in "Differs: name, bio"
+msgctxt "persona-field"
+msgid "name"
+msgstr "nama"
+
+#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
+msgid "picture not compared"
+msgstr "gambar tidak dibandingkan"
+
+#. A persona field, listed in "Differs: name, pronouns"
+msgid "pronouns"
+msgstr "kata ganti"
+
+#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
+msgid "removes {fields}"
+msgstr "menghapus {fields}"
+
+#. Part of the import summary "Import will link 17, restore 2, skip 3"
+msgid "restore {count}"
+msgstr "memulihkan {count}"
 
 #. Progress label when saving personas
 msgid "saving personas"
 msgstr "persona disimpan"
+
+#. A persona field, listed in "Differs: name, signature emojis"
+msgid "signature emojis"
+msgstr "emoji tanda tangan"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "skip {count}"
+msgstr "melewati {count}"
+
+#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
+msgid "tag matching"
+msgstr "pengenalan tag"
+
+#. A persona field (its proxy tags), listed in "Differs: name, tags"
+msgid "tags"
+msgstr "tag"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1263,9 +1657,13 @@ msgstr "persona disimpan"
 msgid "text"
 msgstr "teks"
 
-#. placeholder {0}: importResults.warnings.length
-msgid "{0} notice(s) during import"
-msgstr "{0} catatan selama impor"
+#. Part of the import summary "Import will link 17, use the file's version for 2"
+msgid "use the file's version for {count}"
+msgstr "memakai versi file untuk {count}"
+
+#. A persona field, listed in "Differs: name, visibility"
+msgid "visibility"
+msgstr "visibilitas"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1273,6 +1671,10 @@ msgstr "{0} catatan selama impor"
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} dari {1} {2} ({3}%)"
+
+#. Heading when a persona import with nothing to decide is done. {addedCount} is a number
+msgid "{addedCount} personas added"
+msgstr "{addedCount} persona ditambahkan"
 
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
@@ -1290,6 +1692,10 @@ msgstr "{count, plural, other {# persona kini publik}}"
 msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
 msgstr "{count, plural, other {# persona kini tidak terdaftar}}"
 
+#. Second line of the import review footer
+msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
+msgstr "{count, plural, other {# persona tetap seperti semula}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, other {# persona}}"
@@ -1298,9 +1704,21 @@ msgstr "{count, plural, other {# persona}}"
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, other {# persona dihapus}}"
 
+#. How often a persona has been used, shown in the import review
+#. How often a persona has been used, shown in the import review
+msgid "{count, plural, one {Used once} other {Used # times}}"
+msgstr "{count, plural, other {Dipakai # kali}}"
+
+msgid "{count} notice(s) during import"
+msgstr "{count} pemberitahuan selama impor"
+
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
 msgstr "{count} dipilih"
+
+#. Second line of the import review footer: deleted personas that are not restored
+msgid "{count} stay deleted"
+msgstr "{count} tetap terhapus"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
@@ -1310,13 +1728,29 @@ msgstr "{domain} menjalankan versi {productName} yang lebih baru daripada aplika
 msgid "{label}: {names}"
 msgstr "{label}: {names}"
 
+#. A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names
+msgid "{names} would all have {label}. Change one of the choices."
+msgstr "{names} semuanya akan memiliki {label}. Ubah salah satu pilihan."
+
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - Klik untuk berganti persona"
 
+#. Toast after a deleted persona was restored
+msgid "{name} is back."
+msgstr "{name} sudah kembali."
+
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "{name} tidak pernah ditutup."
+
+#. Heading of the import review. {needCount} is a number of members
+msgid "{needCount} members and your display tag need a look"
+msgstr "{needCount} anggota dan tag tampilanmu perlu ditinjau"
+
+#. Heading of the import review. {needCount} is a number of members
+msgid "{needCount} members need a look"
+msgstr "{needCount} anggota perlu ditinjau"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -1332,6 +1766,18 @@ msgstr "{publicCount} publik, {unlistedCount} tidak terdaftar, {privateCount} pr
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "{shown} dari {total} persona"
+
+#. Closing line of the import review. {untouched} is a number of personas
+msgid "{untouched} of your personas aren't in this file. They stay as they are."
+msgstr "{untouched} personamu tidak ada di file ini. Semuanya tetap seperti semula."
+
+#. Closing line of the import review. {upToDate} is a number of members
+msgid "{upToDate} members match their persona exactly. Nothing to do."
+msgstr "{upToDate} anggota sama persis dengan personanya. Tidak ada yang perlu dilakukan."
+
+#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
+msgid "{visibility} (this app's is kept)"
+msgstr "{visibility} (visibilitas di aplikasi ini dipertahankan)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Hari ini pukul 12.00"
