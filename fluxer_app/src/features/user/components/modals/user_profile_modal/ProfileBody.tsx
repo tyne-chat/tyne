@@ -47,6 +47,11 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {PersonaGallery} from '@app/features/persona/components/gallery/PersonaGallery';
+import {addPersonaProfileTab, usePersonaProfileTab} from '@app/features/persona/utils/PersonaProfileTab';
+
 const MUTUAL_FRIENDS_DESCRIPTOR = msg({
 	message: 'Mutual friends ({count})',
 	comment: 'Short label in the user profile modal. Keep it concise. Preserve {count}; it is inserted by code.',
@@ -99,6 +104,7 @@ export const ProfileBody: React.FC<ProfileBodyProps> = observer(
 		const mutualCommunitiesGroupsCount = mutualGroupsCount + mutualCommunitiesCount;
 		const contextMenuTarget = useContextMenuTarget();
 		const isCurrentUser = user.id === Authentication.currentUserId;
+		const personasTab = usePersonaProfileTab(user, setActiveTab);
 		const isContextMenuOpenFor = useCallback(
 			(target: EventTarget | null) => isContextMenuOpenForTarget(contextMenuTarget, target),
 			[contextMenuTarget],
@@ -122,8 +128,11 @@ export const ProfileBody: React.FC<ProfileBodyProps> = observer(
 					{count: mutualCommunitiesGroupsCount},
 				),
 			});
+			addPersonaProfileTab(items, personasTab, isCurrentUser);
 			return items;
 		}, [
+			personasTab,
+			isCurrentUser,
 			showMutualFriendsTab,
 			mutualFriends.length,
 			mutualCommunitiesCount,
@@ -334,6 +343,14 @@ export const ProfileBody: React.FC<ProfileBodyProps> = observer(
 			</div>
 		);
 		const renderActiveTabContent = () => {
+			if (activeTab === 'personas')
+				return (
+					<PersonaGallery
+						user={user}
+						onClose={ModalCommands.pop}
+						data-flx="user.user-profile-modal.profile-body.render-active-tab-content.persona-gallery"
+					/>
+				);
 			switch (activeTab) {
 				case 'overview':
 					return (
@@ -361,7 +378,7 @@ export const ProfileBody: React.FC<ProfileBodyProps> = observer(
 					showProfileDataWarning={showProfileDataWarning}
 					data-flx="user.user-profile-modal.profile-body.user-info"
 				/>
-				{!isCurrentUser ? (
+				{!isCurrentUser || personasTab ? (
 					<div
 						ref={tabsWrapperRef}
 						className={userProfileModalStyles.tabsWrapper}
