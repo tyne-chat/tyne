@@ -111,8 +111,15 @@ personas), 10,000 signature emojis per persona (unique across personas).
 
 ## Routes and OAuth
 
-- `@me` routes: list and create, `/:persona_id`, `/import`, `/settings`,
+- `@me` routes: list and create, `/:persona_id`, `/import`, `/visibility`, `/bulk-delete`, `/settings`,
   `/channel-states[/:channel_id]`, `/export`, `/import-image`.
+- `/visibility` (PATCH) and `/bulk-delete` (POST) change or delete many personas in one write
+  (tyne-chat/tyne#542), through `writeImport` like the import: all or nothing (`liveByIds` refuses a
+  persona that is not the caller's and live), the whole list to the account's sessions and one
+  `GUILD_PERSONAS_DIRTY` per community, never one per persona. A bulk delete clears what deleting
+  each would (`planRetirement`, shared with the import's `replace`). Each visibility entry names its
+  own value, so an undo is one request. Other people's: `/users/:user_id/personas`
+  and `/users/:user_id/personas/:persona_id`.
 - `/users/:user_id/personas` feeds the Personas tab, sheet and pill (tyne-chat/tyne#189): the
   account's display tag and its public personas, the most used first, also for the owner. The order
   is the only thing it gives away of the usage counters; never add `use_count` or `last_used_at_ms`
