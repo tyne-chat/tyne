@@ -66,3 +66,17 @@ export class SignatureEmojiLimitExceededError extends BadRequestError {
 		});
 	}
 }
+
+/**
+ * A reviewed import whose actions contradict each other or the account as it is now: a persona
+ * named by two actions, a link to a persona another one is already linked as, or an update of a
+ * persona that is not linked to that member (tyne-chat/tyne#243). The review never sends one.
+ */
+export class PersonaImportConflictError extends BadRequestError {
+	constructor(message: string) {
+		super({
+			code: APIErrorCodes.PERSONA_IMPORT_CONFLICT,
+			message,
+		});
+	}
+}
