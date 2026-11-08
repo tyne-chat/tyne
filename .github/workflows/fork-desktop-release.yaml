@@ -315,6 +315,16 @@ jobs:
       # renderer into the app, so run the same build without that flag.
       - name: Build Electron main process
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        # Fork: build.mjs runs the CI helper (tools/ci) first from fluxer_desktop/, then once per
+        # native add-on from inside fluxer_desktop/native/, whose .cargo/config.toml gives the
+        # Windows target two rustflags. Cargo applies them to the helper too, sees flags that
+        # differ from its first build and compiles the whole helper again: about two and a half
+        # minutes on every Windows release (tyne-chat/tyne#556). build.rustflags gives the first
+        # build the same two flags; inside native/ the folder config takes precedence with the same
+        # values, so the helper is built once and the add-ons get exactly the flags they had. Empty
+        # on Linux and macOS, where nothing sets rustflags for their targets.
+        env:
+          CARGO_BUILD_RUSTFLAGS: ${{ matrix.platform == 'windows' && '-C target-feature=+crt-static -C link-arg=/DEPENDENTLOADFLAG:0x800' || '' }}
         run: pnpm exec node scripts/build.mjs --use-shared-renderer
 
       - name: Build Electron app (Windows)
