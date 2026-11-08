@@ -15,6 +15,7 @@ import type {
 	PersonaResponse,
 	PersonaSettingsResponse,
 	PersonaUpdateRequest,
+	PersonaVisibility,
 	PublicPersonaResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {runInAction} from 'mobx';
@@ -224,6 +225,46 @@ export async function importPersonas(
 	});
 	PersonaStore.upsertPersonas(res.body);
 	return res.body;
+}
+
+/**
+ * Gives many personas a new visibility in one request (tyne-chat/tyne#542), which the server writes
+ * whole or not at all. Each entry names its own visibility, so an undo is one request too. Returns
+ * the personas that changed; the store takes them at once, before the gateway's list arrives.
+ */
+export async function setPersonaVisibilities(
+	changes: ReadonlyArray<{id: string; visibility: PersonaVisibility}>,
+): Promise<Array<PersonaResponse>> {
+	if (changes.length === 0) return [];
+	const res = await sendPersonaRequest(
+		() =>
+			http.patch<Array<PersonaResponse>>(ForkEndpoints.USER_PERSONA_VISIBILITY, {
+				body: {personas: changes},
+			}),
+		'Failed to change the visibility of personas',
+	);
+	PersonaStore.upsertPersonas(res.body);
+	return res.body;
+}
+
+/**
+ * Deletes many personas in one request (tyne-chat/tyne#542), whole or not at all, then drops them
+ * here with their emoji pins and profile cards, in one action so the pins are one change.
+ */
+export async function deletePersonas(ids: ReadonlyArray<string>): Promise<void> {
+	if (ids.length === 0) return;
+	// 204 with no body, so not through sendPersonaRequest.
+	let res: RestResponse;
+	try {
+		res = await http.post(ForkEndpoints.USER_PERSONA_BULK_DELETE, {body: {persona_ids: ids}});
+	} catch (err) {
+		if (err instanceof HttpError) throw new PersonaRequestError(err, 'Failed to delete personas');
+		throw err;
+	}
+	if (!res.ok) throw new PersonaRequestError(res, 'Failed to delete personas');
+	runInAction(() => {
+		for (const id of ids) forgetDeletedPersona(id);
+	});
 }
 
 /** Downloads the zip of all personas the server builds (`pluralkit.json`, images, `tyne.json`, README). */
