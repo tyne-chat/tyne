@@ -406,6 +406,25 @@
 	overflow-wrap: anywhere;
 }
 
+.compareTable th[scope='row'] {
+	width: 1%;
+	white-space: nowrap;
+	overflow-wrap: normal;
+	padding-right: 14px;
+}
+
+.compareTable td {
+	width: 50%;
+}
+
+.compareBanner {
+	display: block;
+	height: 32px;
+	max-width: 120px;
+	object-fit: cover;
+	border-radius: 4px;
+}
+
 .compareTable th[scope='col'] {
 	font-size: 12px;
 	text-transform: uppercase;

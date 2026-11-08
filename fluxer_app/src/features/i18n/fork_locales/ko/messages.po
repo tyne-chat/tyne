@@ -1744,12 +1744,12 @@ msgstr "{name}이(가) 돌아왔어요."
 msgid "{name} is never closed."
 msgstr "{name}이(가) 닫히지 않았습니다."
 
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount} members and your display tag need a look"
+#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
+msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
 msgstr "멤버 {needCount}명과 표시 태그를 확인해야 해요"
 
 #. Heading of the import review. {needCount} is a number of members
-msgid "{needCount} members need a look"
+msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
 msgstr "멤버 {needCount}명을 확인해야 해요"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.

@@ -18,6 +18,7 @@ import {
 } from '@app/features/persona/utils/PersonaImportReview';
 import {Button} from '@app/features/ui/button/Button';
 import Users from '@app/features/user/state/Users';
+import {getPersonaBannerURL} from '@app/features/user/utils/AvatarUtils';
 import type {PersonaResponse, PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {
 	PersonaImportField,
@@ -80,6 +81,15 @@ const FIELD_HEADING: Record<PersonaImportField, MessageDescriptor> = {
 	}),
 };
 
+const NEED_LOOK_DESCRIPTOR = msg({
+	message: '{needCount, plural, one {# member needs a look} other {# members need a look}}',
+	comment: 'Heading of the import review. {needCount} is a number of members',
+});
+const NEED_LOOK_WITH_TAG_DESCRIPTOR = msg({
+	message:
+		'{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}',
+	comment: 'Heading of the import review when the display tag needs a choice too. {needCount} is a number of members',
+});
 const DIFFERS_DESCRIPTOR = msg({
 	message: 'Differs: {fields}',
 	comment: 'What differs between a persona and the import file. {fields} is a list such as "name, bio"',
@@ -532,24 +542,54 @@ function CompareTable({
 }) {
 	const {i18n} = useLingui();
 	const differs = new Map((entry.differences ?? []).map((d) => [d.field, d.change]));
-	const picture = (field: 'avatar' | 'banner', tyneHash: string | null | undefined, fileHas: boolean) => {
+	const user = Users.currentUser;
+	// A stored picture as a thumbnail; never one from a link in the file.
+	const thumbnail = (field: 'avatar' | 'banner', hash: string | null | undefined): React.ReactNode => {
+		if (!hash || !user) return null;
+		if (field === 'avatar')
+			return (
+				<PersonaAvatar
+					user={user}
+					persona={{avatar: hash}}
+					size={32}
+					data-flx="persona.persona-import-review.thumbnail.persona-avatar"
+				/>
+			);
+		const url = getPersonaBannerURL({userId: user.id, banner: hash}, false, 320);
+		return url ? (
+			<img
+				className={styles.compareBanner}
+				src={url}
+				alt=""
+				data-flx="persona.persona-import-review.thumbnail.compare-banner"
+			/>
+		) : null;
+	};
+	const picture = (
+		field: 'avatar' | 'banner',
+		tyneHash: string | null | undefined,
+		fileHas: boolean,
+		fileHash: string | null | undefined,
+	): [React.ReactNode, React.ReactNode] => {
 		const change = differs.get(field);
-		if (change === 'not_compared')
-			return [tyneHash ? '•' : i18n._(NO_PICTURE_DESCRIPTOR), i18n._(UNKNOWN_PICTURE_DESCRIPTOR)];
-		if (change === 'removed') return ['•', i18n._(NO_PICTURE_DESCRIPTOR)];
-		if (change === 'changed')
-			return [tyneHash ? '•' : i18n._(NO_PICTURE_DESCRIPTOR), i18n._(DIFFERENT_PICTURE_DESCRIPTOR)];
-		if (!tyneHash && !fileHas) return [i18n._(NO_PICTURE_DESCRIPTOR), i18n._(NO_PICTURE_DESCRIPTOR)];
-		return [i18n._(SAME_PICTURE_DESCRIPTOR), i18n._(SAME_PICTURE_DESCRIPTOR)];
+		const none = i18n._(NO_PICTURE_DESCRIPTOR);
+		const tyne = thumbnail(field, tyneHash) ?? none;
+		if (change === 'not_compared') return [tyne, i18n._(UNKNOWN_PICTURE_DESCRIPTOR)];
+		if (change === 'removed') return [tyne, none];
+		if (change === 'changed') {
+			return [tyne, thumbnail(field, fileHash) ?? (fileHas ? i18n._(DIFFERENT_PICTURE_DESCRIPTOR) : none)];
+		}
+		if (!tyneHash && !fileHas) return [none, none];
+		return [tyne, i18n._(SAME_PICTURE_DESCRIPTOR)];
 	};
 	const tags = (list: ReadonlyArray<PersonaTag> | null | undefined) => (list ?? []).map(tagText).join('  ') || '—';
-	const rows: Array<[PersonaImportField, string, string]> = [
+	const rows: Array<[PersonaImportField, React.ReactNode, React.ReactNode]> = [
 		['name', persona.name, member.preview.name],
 		['pronouns', persona.pronouns ?? '—', member.preview.pronouns ?? '—'],
 		['persona_tags', tags(persona.persona_tags), tags(member.preview.persona_tags)],
 		['bio', persona.bio ?? '—', member.preview.bio ?? '—'],
-		['avatar', ...(picture('avatar', persona.avatar_hash, Boolean(member.preview.avatar)) as [string, string])],
-		['banner', ...(picture('banner', persona.banner_hash, Boolean(member.preview.banner)) as [string, string])],
+		['avatar', ...picture('avatar', persona.avatar_hash, Boolean(member.preview.avatar), entry.avatar_hash)],
+		['banner', ...picture('banner', persona.banner_hash, Boolean(member.preview.banner), entry.banner_hash)],
 		[
 			'color',
 			persona.color != null ? `#${persona.color.toString(16).padStart(6, '0')}` : '—',
@@ -762,15 +802,9 @@ export const PersonaImportReview = observer(
 					/>
 					<div data-flx="persona.persona-import-review.div">
 						<div className={styles.bannerTitle} data-flx="persona.persona-import-review.banner-title">
-							{tagNeedsChoice ? (
-								<Trans comment="Heading of the import review. {needCount} is a number of members">
-									{needCount} members and your display tag need a look
-								</Trans>
-							) : (
-								<Trans comment="Heading of the import review. {needCount} is a number of members">
-									{needCount} members need a look
-								</Trans>
-							)}
+							{tagNeedsChoice
+								? i18n._(NEED_LOOK_WITH_TAG_DESCRIPTOR, {needCount})
+								: i18n._(NEED_LOOK_DESCRIPTOR, {needCount})}
 						</div>
 						<div className={styles.bannerText} data-flx="persona.persona-import-review.banner-text">
 							<Trans comment="Explanation at the top of the import review">

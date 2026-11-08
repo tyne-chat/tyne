@@ -1744,12 +1744,12 @@ msgstr "Персона {name} восстановлена."
 msgid "{name} is never closed."
 msgstr "{name} нигде не закрывается."
 
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount} members and your display tag need a look"
+#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
+msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
 msgstr "Нужно проверить участников ({needCount}) и ваш отображаемый тег"
 
 #. Heading of the import review. {needCount} is a number of members
-msgid "{needCount} members need a look"
+msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
 msgstr "Нужно проверить участников: {needCount}"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
