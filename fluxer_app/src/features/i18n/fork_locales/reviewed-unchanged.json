@@ -4,11 +4,33 @@
 	"locales": {
 		"cs": ["(Prefix: {0})", "Persona", "text"],
 		"da": ["Alice", "Persona", "Script"],
-		"de": ["Account: @{username}", "Alice", "Optional", "Persona", "Personas"],
+		"de": ["Account: @{username}", "Alice", "Name (A–Z)", "Optional", "Persona", "Personas", "Personas ({count})"],
 		"el": ["Persona"],
-		"es-419": ["Manual", "Persona", "Personas", "Script"],
-		"es-ES": ["Manual", "Persona", "Personas", "Script"],
-		"fr": ["Alice", "Persona", "Personas", "Public", "Script"],
+		"es-419": [
+			"Manual",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Script",
+			"{count, plural, one {# persona} other {# personas}}"
+		],
+		"es-ES": [
+			"Manual",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Script",
+			"{count, plural, one {# persona} other {# personas}}"
+		],
+		"fr": [
+			"Alice",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Public",
+			"Script",
+			"{count, plural, one {# persona} other {# personas}}"
+		],
 		"hr": ["Persona"],
 		"hu": ["Persona"],
 		"id": ["Alice", "Edit Persona", "Edit persona", "Manual", "Persona"],
@@ -17,9 +39,25 @@
 		"nl": ["Account: @{username}", "Alice", "Persona", "Script"],
 		"no": ["Alice", "Persona"],
 		"pl": ["Persona"],
-		"pt-BR": ["Alice", "Manual", "Persona", "Personas", "Script"],
-		"ro": ["(Prefix: {0})", "Alice", "Manual", "Persona", "Personas", "Script", "text"],
-		"sv-SE": ["(Prefix: {0})", "Alice", "Persona", "Personas", "text"],
+		"pt-BR": [
+			"Alice",
+			"Manual",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Script",
+			"{count, plural, one {# persona} other {# personas}}"
+		],
+		"ro": ["(Prefix: {0})", "Alice", "Manual", "Persona", "Personas", "Personas ({count})", "Script", "text"],
+		"sv-SE": [
+			"(Prefix: {0})",
+			"Alice",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"text",
+			"{count, plural, one {# persona} other {# personas}}"
+		],
 		"th": ["Persona"],
 		"tr": ["Alice", "Persona"],
 		"vi": ["Alice", "Persona"]
