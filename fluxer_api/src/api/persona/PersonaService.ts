@@ -11,6 +11,7 @@ import type {
 	PersonaSettingsUpdateRequest,
 	PersonaTag,
 	PersonaUpdateRequest,
+	PersonaVisibility,
 	PublicPersonaListResponse,
 	PublicPersonaResponse,
 	SignatureEmoji,
@@ -576,26 +577,7 @@ export class PersonaService {
 			throw new PersonaLimitReachedError(MAX_PERSONAS_PER_USER);
 		}
 
-		// What deleting the replaced personas one by one would clear: the selection, when it is one of
-		// them, and the channels they are selected in. Written in the same batch.
-		const retiredIds = new Set(retired.map((p) => p.id.toString()));
-		let settings: UserPersonaSettingsRow | undefined;
-		let clearedChannelIds: Array<ChannelID> = [];
-		if (retired.length > 0) {
-			const current = await this.deps.personaRepository.findSettings(userId);
-			if (current?.active_persona_id && retiredIds.has(current.active_persona_id.toString())) {
-				settings = {
-					...current,
-					active_persona_id: null,
-					is_latched: false,
-					updated_at: new Date(),
-					version: (current.version ?? 0) + 1,
-				};
-			}
-			clearedChannelIds = (await loadPersonaChannelStates(userId))
-				.filter((row) => retiredIds.has(row.persona_id.toString()))
-				.map((row) => row.channel_id);
-		}
+		const {settings, clearedChannelIds} = await this.planRetirement(userId, retired);
 
 		const results = await this.deps.personaRepository.writeImport(userId, {
 			retire: retired,
@@ -611,6 +593,111 @@ export class PersonaService {
 			],
 		});
 
+		await this.dispatchListToOwnSessions(userId, settings, clearedChannelIds);
+		// One refresh for everyone who sees this account, also for the replaced personas, whatever
+		// their visibility, as a deletion of each would have sent.
+		if (retired.length > 0 || results.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
+			await this.dispatchToMutualGuilds(userId);
+		}
+
+		return results;
+	}
+
+	/**
+	 * Gives many of the account's personas a new visibility at once (tyne-chat/tyne#542): every
+	 * persona named must be the caller's and live, or nothing changes. One atomic write, the whole
+	 * list to the account's own sessions, and one refresh for everyone who sees the account, where
+	 * saving each persona would send one request and one refresh per persona. A persona named twice
+	 * takes its last visibility; one that already has it is left as it is. Returns the personas changed.
+	 */
+	async setPersonaVisibilities(
+		userId: UserID,
+		changes: ReadonlyArray<{personaId: PersonaID; visibility: PersonaVisibility}>,
+	): Promise<Array<Persona>> {
+		const live = await this.liveByIds(
+			userId,
+			changes.map((c) => c.personaId),
+		);
+		const wanted = new Map(changes.map((c) => [c.personaId.toString(), c.visibility]));
+		const steps = Array.from(wanted, ([id, visibility]) => ({persona: live.get(id)!, visibility}))
+			.filter(({persona, visibility}) => persona.visibility !== visibility)
+			.map(({persona, visibility}) => ({update: persona, params: {visibility}}));
+		if (steps.length === 0) return [];
+		const results = await this.deps.personaRepository.writeImport(userId, {retire: [], steps});
+		await this.dispatchListToOwnSessions(userId);
+		await this.dispatchToMutualGuilds(userId);
+		return results;
+	}
+
+	/**
+	 * Deletes many of the account's personas at once (tyne-chat/tyne#542), as deleting each would:
+	 * soft-deleted (their messages keep showing them), the selection and channel selections that
+	 * named them cleared, and their image sources forgotten, all in one atomic write. Every persona
+	 * named must be the caller's and live, or nothing changes.
+	 */
+	async deletePersonas(userId: UserID, personaIds: ReadonlyArray<PersonaID>): Promise<void> {
+		const retired = Array.from((await this.liveByIds(userId, personaIds)).values());
+		const {settings, clearedChannelIds} = await this.planRetirement(userId, retired);
+		await this.deps.personaRepository.writeImport(userId, {
+			retire: retired,
+			steps: [],
+			settings,
+			alongside: () => [
+				...retired.map((p) => forgetPersonaImageSourcesWrite(userId, p.id)),
+				...clearedChannelIds.map((channelId) => forgetPersonaChannelStateWrite(userId, channelId)),
+			],
+		});
+		await this.dispatchListToOwnSessions(userId, settings, clearedChannelIds);
+		await this.dispatchToMutualGuilds(userId);
+	}
+
+	/** The caller's live personas with these IDs, by ID; one that is not answers `UNKNOWN_PERSONA`. */
+	private async liveByIds(userId: UserID, personaIds: ReadonlyArray<PersonaID>): Promise<Map<string, Persona>> {
+		const live = new Map(
+			(await this.deps.personaRepository.findByUserId(userId)).map((p) => [p.id.toString(), p] as const),
+		);
+		const found = new Map<string, Persona>();
+		for (const personaId of personaIds) {
+			const persona = live.get(personaId.toString());
+			if (!persona) throw new PersonaNotFoundError();
+			found.set(personaId.toString(), persona);
+		}
+		return found;
+	}
+
+	/**
+	 * What deleting these personas one by one would clear, to write in the same batch: the selection,
+	 * when it is one of them, and the channels they are selected in.
+	 */
+	private async planRetirement(
+		userId: UserID,
+		retired: ReadonlyArray<Persona>,
+	): Promise<{settings: UserPersonaSettingsRow | undefined; clearedChannelIds: Array<ChannelID>}> {
+		if (retired.length === 0) return {settings: undefined, clearedChannelIds: []};
+		const retiredIds = new Set(retired.map((p) => p.id.toString()));
+		let settings: UserPersonaSettingsRow | undefined;
+		const current = await this.deps.personaRepository.findSettings(userId);
+		if (current?.active_persona_id && retiredIds.has(current.active_persona_id.toString())) {
+			settings = {
+				...current,
+				active_persona_id: null,
+				is_latched: false,
+				updated_at: new Date(),
+				version: (current.version ?? 0) + 1,
+			};
+		}
+		const clearedChannelIds = (await loadPersonaChannelStates(userId))
+			.filter((row) => retiredIds.has(row.persona_id.toString()))
+			.map((row) => row.channel_id);
+		return {settings, clearedChannelIds};
+	}
+
+	/** After a write to many personas: the account's own sessions get the whole list, and what it cleared. */
+	private async dispatchListToOwnSessions(
+		userId: UserID,
+		settings?: UserPersonaSettingsRow,
+		clearedChannelIds: ReadonlyArray<ChannelID> = [],
+	): Promise<void> {
 		// The cleared selection goes first: a client that sees its selected persona missing from the
 		// list clears the selection itself, with a request of its own.
 		if (settings) {
@@ -626,13 +713,6 @@ export class PersonaService {
 				persona_id: null,
 			} satisfies PersonaChannelState);
 		}
-		// One refresh for everyone who sees this account, also for the replaced personas, whatever
-		// their visibility, as a deletion of each would have sent.
-		if (retired.length > 0 || results.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
-			await this.dispatchToMutualGuilds(userId);
-		}
-
-		return results;
 	}
 
 	/**

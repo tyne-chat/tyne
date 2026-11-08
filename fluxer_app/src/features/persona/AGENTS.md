@@ -183,6 +183,14 @@ sheet (`openPersonaGallery`); mobile web also has a button before the mutual fri
 - `PersonaSettingsTab`: mode, scope, the display tag (its icon is uploaded with
   `POST …/personas/avatar`), search, and the persona list, sorted by name. Setting a persona active
   from here exists only in the global scope.
+- **Selecting many** (tyne-chat/tyne#542, `components/settings/PersonaBulkSelection.tsx`): chips
+  with counts (All, Public, Unlisted, Private) filter the list; Select puts a checkbox on every row
+  and hides the row's buttons; "Select all" takes what the search and chip show. The action bar
+  makes the selection public, unlisted or private (`setPersonaVisibilities`, one request) or
+  deletes it (`deletePersonas`, one request, dropping the personas and their pins in one action).
+  Public, private and delete ask first (delete in red, saying it cannot be undone); a visibility
+  change ends in a toast with Undo, one request that puts each persona back as it was. The
+  `feature` subtab (the Personas tab's "Choose personas to feature") opens on Unlisted with Select on.
 - `PluralKitImportModal` reads PluralKit JSON or a Tyne zip (`PersonaImportFile`), reuses images
   already on the instance by hash, uploads the zip's images, has the server fetch remote ones (a
   streamed NDJSON response), then imports the whole file in one request, which the server writes

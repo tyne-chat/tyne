@@ -22,6 +22,7 @@ import {http} from '@app/features/platform/transport/RestTransport';
 import {readBlobAsDataUrl} from '@app/features/platform/utils/BlobDataUrl';
 import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
 import {Button} from '@app/features/ui/button/Button';
+import {Checkbox} from '@app/features/ui/checkbox/Checkbox';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
@@ -54,10 +55,20 @@ import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
 import {type ActivePersonaMode, type Persona, PersonaStore} from '../../state/PersonaStore';
+import * as BulkMessages from '../../utils/PersonaBulkMessages';
 import {openPersonaEditModal} from '../modals/PersonaEditModal';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
 import {SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR} from '../PersonaPickerSheet';
 import {PersonaTag} from '../PersonaTag';
+import {
+	PersonaBulkActionBar,
+	PersonaSelectionHeader,
+	PersonaVisibilityChips,
+	type PersonaVisibilityFilter,
+	usePersonaSelection,
+	visibilityOf,
+} from './PersonaBulkSelection';
+import bulkStyles from './PersonaBulkSelection.module.css';
 import styles from './PersonaSettingsTab.module.css';
 
 const TAG_ICON_DESCRIPTOR = msg({
@@ -190,6 +201,9 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const currentUser = Users.currentUser;
 
 	const [searchQuery, setSearchQuery] = useState('');
+	// Selecting many personas to change or delete at once (tyne-chat/tyne#542).
+	const [visibilityFilter, setVisibilityFilter] = useState<PersonaVisibilityFilter>('all');
+	const selection = usePersonaSelection(personas);
 
 	// Display tag state
 	const [tagText, setTagText] = useState(PersonaStore.displayTagText);
@@ -283,6 +297,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		if (initialSubtab === 'new') {
 			lastHandledSubtabRef.current = initialSubtab;
 			openPersonaEditModal();
+		} else if (initialSubtab === 'feature') {
+			// From the Personas tab with none public: pick which unlisted personas to make public.
+			lastHandledSubtabRef.current = initialSubtab;
+			setVisibilityFilter('unlisted');
+			selection.start();
 		} else {
 			const target = personas.find((p) => p.id === initialSubtab);
 			if (target) {
@@ -290,7 +309,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 				openPersonaEditModal(target);
 			}
 		}
-	}, [initialSubtab, personas]);
+	}, [initialSubtab, personas, selection.start]);
 
 	const activePersonaTabs = useMemo(() => getActivePersonaTabs(i18n), [i18n]);
 	const activePersonaDescriptions = useMemo(() => getActivePersonaDescriptions(i18n), [i18n]);
@@ -307,9 +326,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	);
 
 	const query = searchQuery.trim().toLowerCase();
+	const chipPersonas =
+		visibilityFilter === 'all' ? personas : personas.filter((p) => visibilityOf(p) === visibilityFilter);
 	const filteredPersonaIds = (
 		query
-			? personas.filter((p) => {
+			? chipPersonas.filter((p) => {
 					const nameMatch = p.name.toLowerCase().includes(query);
 					const pronounsMatch = (p.pronouns ?? '').toLowerCase().includes(query);
 					const tags = p.persona_tags ?? [];
@@ -318,7 +339,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 					);
 					return nameMatch || pronounsMatch || tagMatch;
 				})
-			: personas
+			: chipPersonas
 	).map((p) => p.id);
 
 	const handleTagTextChange = (value: string) => {
@@ -740,6 +761,32 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									className={styles.searchInput}
 									data-flx="user.persona-settings-tab.search-input"
 								/>
+								<div className={styles.bulkRow} data-flx="persona.settings.persona-settings-tab.bulk-row">
+									<PersonaVisibilityChips
+										personas={personas}
+										value={visibilityFilter}
+										onChange={setVisibilityFilter}
+										data-flx="persona.settings.persona-settings-tab.visibility-chips"
+									/>
+									{!selection.selecting && (
+										<Button
+											variant="secondary"
+											small
+											fitContent
+											onClick={() => selection.start()}
+											data-flx="persona.settings.persona-settings-tab.button.select"
+										>
+											{i18n._(BulkMessages.SELECT_DESCRIPTOR)}
+										</Button>
+									)}
+								</div>
+								{selection.selecting && (
+									<PersonaSelectionHeader
+										selection={selection}
+										shownIds={filteredPersonaIds}
+										data-flx="persona.settings.persona-settings-tab.selection-header"
+									/>
+								)}
 							</div>
 						)}
 
@@ -750,7 +797,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 						) : null}
 						{personas.length > 0 && filteredPersonaIds.length === 0 ? (
 							<div className={styles.emptyState} data-flx="persona.settings.persona-settings-tab.empty-state--2">
-								<Trans>No matching personas found.</Trans>
+								{query ? <Trans>No matching personas found.</Trans> : i18n._(BulkMessages.NO_PERSONAS_HERE_DESCRIPTOR)}
 							</div>
 						) : null}
 						{personas.length > 0 && filteredPersonaIds.length > 0 ? (
@@ -760,15 +807,30 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									if (!persona) return null;
 									// With a persona per channel there is no single active one to show or set from here.
 									const isThisActive = activePersonaScope === 'global' && activePersonaId === persona.id && isLatched;
+									const isSelected = selection.selected.has(persona.id);
 									return (
 										// biome-ignore lint/a11y/noStaticElementInteractions: mouse convenience; the card's edit button is the keyboard affordance.
 										// biome-ignore lint/a11y/useKeyWithClickEvents: mouse convenience; the card's edit button is the keyboard affordance.
 										<div
 											key={persona.id}
-											className={clsx(styles.compactPersonaCard, isThisActive && styles.activeCard)}
-											onClick={() => handleStartEdit(persona)}
+											className={clsx(
+												styles.compactPersonaCard,
+												isThisActive && styles.activeCard,
+												isSelected && bulkStyles.selectedCard,
+											)}
+											onClick={() => (selection.selecting ? selection.toggle(persona.id) : handleStartEdit(persona))}
 											data-flx="persona.settings.persona-settings-tab.compact-persona-card.start-edit"
 										>
+											{selection.selecting && (
+												<Checkbox
+													checked={isSelected}
+													onChange={() => selection.toggle(persona.id)}
+													size="small"
+													aria-label={persona.name}
+													className={bulkStyles.cardCheckbox}
+													data-flx="persona.settings.persona-settings-tab.select-checkbox"
+												/>
+											)}
 											{currentUser && (
 												<PersonaAvatar
 													user={currentUser}
@@ -870,6 +932,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 											{/* biome-ignore lint/a11y/noStaticElementInteractions: only keeps clicks on the buttons inside from also opening the editor. */}
 											{/* biome-ignore lint/a11y/useKeyWithClickEvents: only keeps clicks on the buttons inside from also opening the editor. */}
 											<div
+												hidden={selection.selecting}
 												className={styles.cardActions}
 												onClick={(e) => e.stopPropagation()}
 												data-flx="persona.settings.persona-settings-tab.card-actions.stop-propagation"
@@ -922,6 +985,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								})}
 							</div>
 						) : null}
+						<PersonaBulkActionBar
+							selection={selection}
+							personas={personas}
+							data-flx="persona.settings.persona-settings-tab.bulk-action-bar"
+						/>
 					</SettingsSection>
 				</div>
 			</SettingsTabContent>

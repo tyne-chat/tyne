@@ -3,6 +3,7 @@
 import {Readable} from 'node:stream';
 import {UserIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {
+	PersonaBulkDeleteRequestSchema,
 	PersonaBulkImportRequestSchema,
 	PersonaChannelStateParam,
 	PersonaChannelStateSchema,
@@ -19,6 +20,7 @@ import {
 	PersonaSettingsResponseSchema,
 	PersonaSettingsUpdateRequestSchema,
 	PersonaUpdateRequestSchema,
+	PersonaVisibilityBulkRequestSchema,
 	PublicPersonaListResponseSchema,
 	PublicPersonaResponseSchema,
 	UserIdPersonaIdParam,
@@ -110,6 +112,62 @@ export function PersonaController(app: HonoApp) {
 			const {replace} = ctx.req.valid('query');
 			const personas = await ctx.get('personaService').importPersonas(user.id, body, {replace});
 			return ctx.json(personas.map((p) => p.toResponse()));
+		},
+	);
+
+	app.patch(
+		'/users/@me/personas/visibility',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaVisibilityBulkRequestSchema),
+		OpenAPI({
+			operationId: 'set_persona_visibilities',
+			summary: 'Change the visibility of several personas',
+			responseSchema: PersonaListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Gives each named persona its own new visibility, in one write: if one of them is not yours or is deleted, nothing changes. Returns the personas that changed.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {personas} = ctx.req.valid('json');
+			const changed = await ctx.get('personaService').setPersonaVisibilities(
+				user.id,
+				personas.map(({id, visibility}) => ({personaId: createPersonaID(BigInt(id)), visibility})),
+			);
+			return ctx.json(changed.map((p) => p.toResponse()));
+		},
+	);
+
+	app.post(
+		'/users/@me/personas/bulk-delete',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaBulkDeleteRequestSchema),
+		OpenAPI({
+			operationId: 'delete_personas',
+			summary: 'Delete several personas',
+			responseSchema: null,
+			statusCode: 204,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Deletes the named personas in one write, as deleting each would: their messages keep showing them. If one of them is not yours or is already deleted, nothing changes.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {persona_ids} = ctx.req.valid('json');
+			await ctx.get('personaService').deletePersonas(
+				user.id,
+				persona_ids.map((id) => createPersonaID(BigInt(id))),
+			);
+			return ctx.body(null, 204);
 		},
 	);
 

@@ -108,6 +108,25 @@ export const PublicPersonaListResponseSchema = z.object({
 });
 export type PublicPersonaListResponse = z.infer<typeof PublicPersonaListResponseSchema>;
 
+/** Many visibility changes in one request (tyne-chat/tyne#542); each persona names its own, so an undo is one request too. */
+export const PersonaVisibilityBulkRequestSchema = z.object({
+	personas: z
+		.array(
+			z.object({
+				id: SnowflakeStringType.describe('The ID of one of your personas'),
+				visibility: PersonaVisibilitySchema.describe('The visibility to give it'),
+			}),
+		)
+		.min(1)
+		.max(250)
+		.describe('The personas to change, each with its new visibility'),
+});
+
+/** Many deletions in one request (tyne-chat/tyne#542). */
+export const PersonaBulkDeleteRequestSchema = z.object({
+	persona_ids: z.array(SnowflakeStringType).min(1).max(250).describe('The IDs of the personas to delete'),
+});
+
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),
 	avatar_hash: PersonaAssetHashType.nullish().optional().describe('Avatar asset hash'),
