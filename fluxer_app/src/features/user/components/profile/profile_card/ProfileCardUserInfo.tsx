@@ -13,9 +13,13 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useRef} from 'react';
 
+// Fork imports.
+
+import type {ForkProfileCardUserInfoProps} from '@app/features/persona/components/PersonasPill';
+
 type DisplayNameStyle = React.CSSProperties & {'--profile-display-name-length': number};
 
-interface ProfileCardUserInfoProps {
+interface ProfileCardUserInfoProps extends ForkProfileCardUserInfoProps {
 	displayName: string;
 	displayNameClassName?: string;
 	user: User;
@@ -42,6 +46,7 @@ export const ProfileCardUserInfo: React.FC<ProfileCardUserInfoProps> = observer(
 		onUsernameClick,
 		actions,
 		usernameActions,
+		...fork
 	}) => {
 		const displayNameRef = useRef<HTMLButtonElement>(null);
 		const isDisplayNameOverflowing = useTextOverflow(displayNameRef, {
@@ -105,6 +110,7 @@ export const ProfileCardUserInfo: React.FC<ProfileCardUserInfoProps> = observer(
 						</div>
 					)}
 				</div>
+				{fork.personaNameExtras}
 				{showUsername && (
 					<div className={styles.usernameRow} data-flx="user.profile.profile-card.profile-card-user-info.username-row">
 						<FocusRing offset={-2} data-flx="user.profile.profile-card.profile-card-user-info.focus-ring--2">

@@ -56,6 +56,10 @@ msgstr "อลิซ"
 msgid "All Personas"
 msgstr "Persona ทั้งหมด"
 
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "Persona ทั้งหมด"
+
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
 msgstr "เขตเวลาทั้งหมด"
@@ -160,6 +164,10 @@ msgstr "ไม่สามารถเรียกใช้ /{name} ได้: {
 msgid "Couldn't save /{name}: {detail}"
 msgstr "ไม่สามารถบันทึก /{name} ได้: {detail}"
 
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "โหลด Persona ไม่ได้"
+
 #. Option of a community command counter: a persona counts as its own person, not as its account.
 msgid "Count personas separately"
 msgstr "นับเพอร์โซนาแยกกัน"
@@ -183,6 +191,10 @@ msgstr "สร้างคำสั่งสำหรับคอมมูนิ
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "สร้างโดย {name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "สร้างเมื่อ {date}"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -442,6 +454,10 @@ msgstr "จัดการและสร้าง Persona ของคุณ"
 msgid "Manage commands"
 msgstr "จัดการคำสั่ง"
 
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "จัดการ Persona"
+
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
@@ -467,6 +483,14 @@ msgstr "เครื่องมือข้อความ"
 msgid "Messages members can post by typing /name."
 msgstr "ข้อความที่สมาชิกโพสต์ได้โดยพิมพ์ /name"
 
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "ใช้บ่อยที่สุด"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "ชื่อ (A–Z)"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Persona ใหม่"
@@ -479,9 +503,17 @@ msgstr "คำสั่งใหม่"
 msgid "New window"
 msgstr "หน้าต่างใหม่"
 
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "Persona ถัดไป"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "ไม่พบอาร์เรย์ \"members\" ในไฟล์ส่งออกนี้"
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "ยังไม่มีประวัติ"
 
 #. Empty state title in the Commands tab.
 msgid "No commands"
@@ -499,12 +531,24 @@ msgstr "ยังไม่มี Persona ที่ตั้งค่าไว้
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "ยังไม่ได้สร้าง Persona คลิก \"เพิ่ม Persona\" เพื่อสร้าง Persona แรกของคุณ!"
 
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "ไม่มี Persona ที่ตรงกับการค้นหาของคุณ"
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "ไม่มี Persona สาธารณะ"
+
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "ยังไม่มีสัญญาณ แถบจะถูกซ่อนไว้จนกว่าคุณจะเพิ่มสัญญาณ"
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "ยังไม่มีใครเปิดสัญญาณนี้"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "ยังไม่มี Persona ของคุณที่เป็นสาธารณะ ผู้อื่นจะเห็น Persona ที่นี่เมื่อคุณตั้งค่าการมองเห็นเป็นสาธารณะ"
 
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
@@ -529,6 +573,10 @@ msgstr "ไม่บังคับ"
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "ป้ายระบบ (ไม่บังคับ) เช่น ⚞Seraphim⚟"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "ผู้อื่นเห็น {count, plural, other {Persona สาธารณะ # รายการ}}"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -589,6 +637,10 @@ msgstr "โปรไฟล์ Persona"
 msgid "Persona profile: {name}"
 msgstr "โปรไฟล์ Persona: {name}"
 
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "เป็น Persona ตั้งแต่"
+
 #. Toast when persona is updated
 msgid "Persona updated"
 msgstr "อัปเดต Persona แล้ว"
@@ -601,6 +653,10 @@ msgstr "การมองเห็น Persona"
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Persona"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "Persona ({count})"
 
 #. Help for an example in a command script.
 msgid "Pick one option at random"
@@ -642,6 +698,12 @@ msgstr "กำลังเตรียมดาวน์โหลดอวาต
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "กด F6 เพื่อไปยังหน้าต่างนี้ด้วยแป้นพิมพ์"
 
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "Persona ก่อนหน้า"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
 #. Persona visibility private
 msgid "Private"
 msgstr "ส่วนตัว"
@@ -662,6 +724,7 @@ msgstr "การ์ดโปรไฟล์เข้าถึงได้เฉ
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
 msgstr "การ์ดโปรไฟล์เข้าถึงได้เมื่อคลิกข้อความ และเพื่อนกับเซิร์ฟเวอร์ที่มีร่วมกันมองเห็นได้ในรายการ Persona สาธารณะของคุณ"
 
+#. Chip above the persona list: public personas.
 #. Persona visibility public
 msgid "Public"
 msgstr "สาธารณะ"
@@ -686,6 +749,10 @@ msgstr "การแสดงความรู้สึกด้วยอีโ
 
 msgid "Recent Personas"
 msgstr "Persona ล่าสุด"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "ใช้ล่าสุด"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"
@@ -760,6 +827,14 @@ msgstr "ค้นหาคำสั่ง"
 msgid "Search personas, tags, pronouns..."
 msgstr "ค้นหา Persona, แท็ก, คำสรรพนาม..."
 
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "ค้นหา Persona ของคุณ"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "ค้นหา Persona ของ {name}"
+
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
 msgstr "กำลังส่งในชื่อ @{username} ({mode}) - คลิกเพื่อสลับ Persona"
@@ -787,6 +862,10 @@ msgstr "แสดงปุ่ม Persona"
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
 msgstr "แสดงแถบสัญญาณ"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "แสดงที่ไม่แสดงในรายการและส่วนตัว"
 
 msgid "Signal Bar"
 msgstr "แถบสัญญาณ"
@@ -999,6 +1078,8 @@ msgstr "พิมพ์ {output} หรือ {tag} เพื่อดูคำ�
 msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
 msgstr "การพิมพ์แท็กเหล่านี้จะไม่สลับไปใช้ Persona นี้ แท็กจะถูกส่งตามที่พิมพ์"
 
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "ไม่แสดงในรายการ"
@@ -1126,6 +1207,7 @@ msgstr "Persona ที่บันทึกแล้ว"
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 msgid "text"
 msgstr "ข้อความ"
 
@@ -1144,6 +1226,10 @@ msgstr "{0} จาก {1} {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} เวอร์ชัน {version} พร้อมติดตั้งแล้ว"
 
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, other {Persona # รายการ}}"
+
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
 msgstr "{domain} ใช้ {productName} เวอร์ชันที่ใหม่กว่าแอปนี้ โปรดอัปเดต {productName} แล้วลองอีกครั้ง"
@@ -1160,12 +1246,20 @@ msgstr "{name} ({mode}) - คลิกเพื่อสลับ Persona"
 msgid "{name} is never closed."
 msgstr "ไม่มีการปิด {name}"
 
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "{position} จาก {total}"
+
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} หยุดตรวจสอบว่าเบราว์เซอร์อนุมัติการลงชื่อเข้านี้หรือไม่ ไม่ได้ลบโค้ดของคุณไป"
 
 msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
 msgstr "สาธารณะ {publicCount}, ไม่แสดงในรายการ {unlistedCount}, ส่วนตัว {privateCount}"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "Persona {shown} จาก {total} รายการ"
 
 msgid "— Today at 12:00 PM"
 msgstr "— วันนี้ เวลา 12:00"

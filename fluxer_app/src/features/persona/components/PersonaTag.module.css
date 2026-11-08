@@ -66,3 +66,18 @@
 .standaloneIcon:hover {
 	opacity: 0.85;
 }
+
+/* Inside the account's own profile window the tag is not a button (tyne-chat/tyne#576). */
+.tag.inProfile,
+.standaloneIcon.inProfile {
+	cursor: default;
+}
+
+.tag.inProfile:hover {
+	background-color: var(--background-modifier-accent);
+	color: var(--text-primary-muted);
+}
+
+.standaloneIcon.inProfile:hover {
+	opacity: 1;
+}
