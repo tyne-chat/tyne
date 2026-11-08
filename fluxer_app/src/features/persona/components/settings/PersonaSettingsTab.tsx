@@ -28,6 +28,7 @@ import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import * as UnsavedChangesCommands from '@app/features/ui/commands/UnsavedChangesCommands';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {Input} from '@app/features/ui/components/form/FormInput';
+import {Switch} from '@app/features/ui/components/form/FormSwitch';
 import {RadioGroup, type RadioOption} from '@app/features/ui/radio_group/RadioGroup';
 import type {SegmentedTab} from '@app/features/ui/segmented_tabs/SegmentedTabs';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
@@ -530,6 +531,26 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 							}}
 							aria-label={i18n._(SCOPE_ARIA_DESCRIPTOR)}
 							data-flx="user.personas-settings-tab.scope.radio-group"
+						/>
+					</SettingsSection>
+
+					<SettingsSection
+						id="personas_reactions"
+						title={<Trans>Reactions</Trans>}
+						linkable={false}
+						data-flx="persona.settings.persona-settings-tab.personas-reactions"
+					>
+						<Switch
+							label={
+								<Trans comment="Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message">
+									React as several personas at once
+								</Trans>
+							}
+							value={PersonaStore.multiPersonaReactions}
+							onChange={(enabled) => {
+								void PersonaStore.setMultiPersonaReactions(enabled);
+							}}
+							data-flx="persona.settings.persona-settings-tab.multi-persona-reactions"
 						/>
 					</SettingsSection>
 
