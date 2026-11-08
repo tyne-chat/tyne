@@ -102,6 +102,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {AccountPersonaNameExtras, PersonasProfileSheetButton} from '@app/features/persona/components/PersonasPill';
+
 const logger = new Logger('UserProfileMobileSheet');
 export const UserProfileMobileSheet: React.FC = observer(function UserProfileMobileSheet() {
 	const store = UserProfileMobile;
@@ -591,6 +595,10 @@ const UserProfileMobileSheetContent: React.FC<UserProfileMobileSheetContentProps
 															{NicknameUtils.formatTagForStreamerMode(`#${user.discriminator}`)}
 														</span>
 													)}
+													<AccountPersonaNameExtras
+														user={user}
+														data-flx="user.user-profile-mobile-sheet.user-profile-mobile-sheet-content.account-persona-name-extras"
+													/>
 												</div>
 												<div
 													className={styles.tagBadgeRow}
@@ -797,6 +805,10 @@ const UserProfileMobileSheetContent: React.FC<UserProfileMobileSheetContentProps
 													/>
 												</div>
 											)}
+											<PersonasProfileSheetButton
+												user={user}
+												data-flx="user.user-profile-mobile-sheet.user-profile-mobile-sheet-content.personas-profile-sheet-button"
+											/>
 											{!isCurrentUser && hasMutuals && (
 												<div
 													className={styles.mutualButtonsGroup}

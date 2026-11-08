@@ -31,10 +31,30 @@ interface PersonaTagProps {
 	guild?: Guild;
 	member?: GuildMember;
 	isHovering?: boolean;
+	/** The server to open the account's profile in, where no `guild` is given (profiles and popouts). */
+	guildId?: string;
+	/** Runs before the account's profile opens, such as closing the popout the tag is in. */
+	onBeforeOpenProfile?: () => void;
+	/**
+	 * The tag is inside the account's own profile window, which a click would open again on top
+	 * (tyne-chat/tyne#576): it is not a button there.
+	 */
+	inProfile?: boolean;
 }
 
 export const PersonaTag: React.FC<PersonaTagProps> = observer(
-	({subprofile, rootUser, className, message, guild, member, isHovering: propIsHovering}) => {
+	({
+		subprofile,
+		rootUser,
+		className,
+		message,
+		guild,
+		member,
+		isHovering: propIsHovering,
+		guildId,
+		onBeforeOpenProfile,
+		inProfile = false,
+	}) => {
 		const {i18n} = useLingui();
 		const currentUserId = Authentication.currentUserId ?? Users.currentUser?.id;
 		const isCurrentUser = Boolean(currentUserId && rootUser?.id && rootUser.id === currentUserId);
@@ -100,28 +120,37 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 					{username: rootUser.username},
 				)
 			: undefined;
+		const openRootProfile = () => {
+			onBeforeOpenProfile?.();
+			UserProfileCommands.openUserProfile(rootUser.id, guild?.id ?? guildId);
+		};
 		const handleFallbackClick = (e: React.MouseEvent) => {
 			e.stopPropagation();
-			UserProfileCommands.openUserProfile(rootUser.id, guild?.id);
+			openRootProfile();
 		};
 		const handleFallbackKeyDown = (e: React.KeyboardEvent) => {
 			if (isKeyboardActivationKey(e.key)) {
 				e.preventDefault();
 				e.stopPropagation();
-				UserProfileCommands.openUserProfile(rootUser.id, guild?.id);
+				openRootProfile();
 			}
+		};
+		const buttonProps = inProfile
+			? {}
+			: {onClick: handleFallbackClick, onKeyDown: handleFallbackKeyDown, role: 'button', tabIndex: 0};
+		const wrapperStyle: React.CSSProperties = {
+			cursor: inProfile ? 'default' : 'pointer',
+			display: 'inline-flex',
+			verticalAlign: 'middle',
 		};
 
 		if (tagText) {
 			const pill = (
 				<span
 					ref={tagHoverRef}
-					className={clsx(styles.tag, className)}
+					className={clsx(styles.tag, inProfile && styles.inProfile, className)}
 					data-flx="persona.tag"
-					onClick={handleFallbackClick}
-					onKeyDown={handleFallbackKeyDown}
-					role="button"
-					tabIndex={0}
+					{...buttonProps}
 				>
 					{resolvedTagIcon && (
 						<img src={resolvedTagIcon} alt="" className={styles.icon} data-flx="persona.persona-tag.icon--2" />
@@ -143,19 +172,11 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 
 		if (resolvedTagIcon) {
 			const iconElement = (
-				<span
-					ref={tagHoverRef}
-					onClick={handleFallbackClick}
-					onKeyDown={handleFallbackKeyDown}
-					role="button"
-					tabIndex={0}
-					style={{cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle'}}
-					data-flx="persona.standalone-icon"
-				>
+				<span ref={tagHoverRef} {...buttonProps} style={wrapperStyle} data-flx="persona.standalone-icon">
 					<img
 						src={resolvedTagIcon}
 						alt=""
-						className={clsx(styles.standaloneIcon, className)}
+						className={clsx(styles.standaloneIcon, inProfile && styles.inProfile, className)}
 						data-flx="persona.persona-tag.standalone-icon"
 					/>
 				</span>
@@ -172,17 +193,14 @@ export const PersonaTag: React.FC<PersonaTagProps> = observer(
 		const avatarElement = (
 			<span
 				ref={tagHoverRef}
-				onClick={handleFallbackClick}
-				onKeyDown={handleFallbackKeyDown}
-				role="button"
-				tabIndex={0}
-				style={{cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle'}}
+				{...buttonProps}
+				style={wrapperStyle}
 				data-flx="persona.persona-tag.button.fallback-click"
 			>
 				<Avatar
 					user={rootUser}
 					size={16}
-					className={clsx(styles.standaloneIcon, className)}
+					className={clsx(styles.standaloneIcon, inProfile && styles.inProfile, className)}
 					disableStatusTooltip={true}
 					forceAnimate={isTagHovering || Boolean(propIsHovering)}
 					data-flx="persona.persona-tag.standalone-icon--2"
