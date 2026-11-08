@@ -14,6 +14,7 @@ import type {
 	PersonaSettingsResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {forgetPersonaProfilesOf} from '../commands/PersonaCommands';
+import {PersonaDirectory} from '../state/PersonaDirectory';
 import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 import {applyPersonaUpdate, requestPersonaRefresh} from './PersonaRefresh';
 
@@ -120,6 +121,7 @@ export function handleGuildPersonasDirty(
 	}
 	invalidatePersonaMentionCache(data?.guild_id);
 	if (data?.user_id) forgetPersonaProfilesOf(data.user_id);
+	if (data?.user_id) PersonaDirectory.forget(data.user_id);
 	if (data?.action === 'update' || data?.action === 'sync') {
 		if (data.persona) {
 			const subprofile = normalizeSubprofile(data.persona);
