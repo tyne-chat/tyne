@@ -21,6 +21,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 
+// Fork imports.
+
+import {AccountPersonaNameExtras} from '@app/features/persona/components/PersonasPill';
+
 export const UserInfo: React.FC<UserInfoProps> = observer(({user, profile, guildId, showProfileDataWarning}) => {
 	const membership = resolveProfileGuildMembership(profile);
 	const displayName = getProfileMembershipDisplayName(user, membership, guildId);
@@ -65,6 +69,12 @@ export const UserInfo: React.FC<UserInfoProps> = observer(({user, profile, guild
 								data-flx="user.user-profile-modal.user-info.user-tag"
 							/>
 						)}
+						<AccountPersonaNameExtras
+							user={user}
+							guildId={guildId}
+							inProfile
+							data-flx="user.user-profile-modal.user-profile-modal-user-info.user-info.account-persona-name-extras"
+						/>
 					</div>
 					<div className={userProfileModalStyles.tagBadgeRow} data-flx="user.user-profile-modal.user-info.div--6">
 						<div className={userProfileModalStyles.usernameRow} data-flx="user.user-profile-modal.user-info.div--7">

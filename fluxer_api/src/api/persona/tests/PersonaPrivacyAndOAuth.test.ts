@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import type {PersonaResponse, PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {
+	PersonaResponse,
+	PublicPersonaListResponse,
+	PublicPersonaResponse,
+} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {afterEach, beforeEach, describe, expect, test} from 'vitest';
 import {createTestAccount, type TestAccount} from '../../auth/tests/AuthTestUtils';
 import {Config} from '../../Config';
@@ -121,13 +125,13 @@ describe('Persona Privacy and OAuth2 Scope Enforcement', () => {
 				.expect(HTTP_STATUS.CREATED)
 				.execute();
 
-			const list = await createBuilder<Array<PublicPersonaResponse>>(harness, userB.token)
+			const list = await createBuilder<PublicPersonaListResponse>(harness, userB.token)
 				.get(`/users/${userA.userId}/personas`)
 				.expect(HTTP_STATUS.OK)
 				.execute();
 
-			expect(list).toHaveLength(1);
-			expect(list[0]!.name).toBe('Shared Persona');
+			expect(list.personas).toHaveLength(1);
+			expect(list.personas[0]!.name).toBe('Shared Persona');
 
 			const card = await createBuilder<PublicPersonaResponse>(harness, userB.token)
 				.get(`/users/${userA.userId}/personas/${created.id}`)
@@ -162,14 +166,14 @@ describe('Persona Privacy and OAuth2 Scope Enforcement', () => {
 				.execute();
 
 			// 1. Directory Listing (GET /users/:id/personas): Only public personas appear
-			const directory = await createBuilder<Array<PublicPersonaResponse>>(harness, userB.token)
+			const directory = await createBuilder<PublicPersonaListResponse>(harness, userB.token)
 				.get(`/users/${userA.userId}/personas`)
 				.expect(HTTP_STATUS.OK)
 				.execute();
 
-			expect(directory).toHaveLength(1);
-			expect(directory[0]!.id).toBe(pPublic.id);
-			expect(directory[0]!.name).toBe('Public One');
+			expect(directory.personas).toHaveLength(1);
+			expect(directory.personas[0]!.id).toBe(pPublic.id);
+			expect(directory.personas[0]!.name).toBe('Public One');
 
 			// 2. Direct Query for Public: Returns 200
 			const publicCard = await createBuilder<PublicPersonaResponse>(harness, userB.token)

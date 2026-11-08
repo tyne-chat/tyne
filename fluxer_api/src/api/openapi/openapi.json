@@ -27930,7 +27930,7 @@
 						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
 					}
 				},
-				"description": "Retrieves public personas for a target user if mutual context permits.",
+				"description": "Retrieves a user's public personas, the most used first, with the user's display tag, if mutual context permits.",
 				"security": [{"sessionToken": []}],
 				"parameters": [
 					{
@@ -31175,8 +31175,24 @@
 				"additionalProperties": false
 			},
 			"PublicPersonaListResponseSchema": {
-				"type": "array",
-				"items": {"$ref": "#/components/schemas/PublicPersonaResponseSchema"}
+				"type": "object",
+				"properties": {
+					"display_tag_text": {
+						"description": "The account's display tag text, shown after its name and its personas' names",
+						"type": ["string", "null"]
+					},
+					"display_tag_icon": {
+						"description": "Hash of the display tag icon, an image stored under the account",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
+					},
+					"personas": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/PublicPersonaResponseSchema"},
+						"description": "The account's public personas, the most used first. Private and unlisted personas are left out"
+					}
+				},
+				"required": ["personas"],
+				"additionalProperties": false
 			},
 			"UserPartialResponse": {
 				"type": "object",

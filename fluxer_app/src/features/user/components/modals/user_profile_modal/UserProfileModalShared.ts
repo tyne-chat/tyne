@@ -10,10 +10,14 @@ import {autorun} from 'mobx';
 import type React from 'react';
 import {useEffect, useState} from 'react';
 
+// Fork imports.
+
+import type {PersonaProfileTab} from '@app/features/persona/utils/PersonaProfileTab';
+
 export const NOTE_MIN_ROWS = 2;
 export const NOTE_MAX_ROWS = 8;
 
-export type ProfileTab = 'overview' | 'mutual_friends' | 'mutual_communities_groups';
+export type ProfileTab = 'overview' | 'mutual_friends' | 'mutual_communities_groups' | PersonaProfileTab;
 
 export interface UserInfoProps {
 	user: User;
