@@ -22,7 +22,6 @@ import {http} from '@app/features/platform/transport/RestTransport';
 import {readBlobAsDataUrl} from '@app/features/platform/utils/BlobDataUrl';
 import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
 import {Button} from '@app/features/ui/button/Button';
-import {Checkbox} from '@app/features/ui/checkbox/Checkbox';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
@@ -63,6 +62,7 @@ import {PersonaTag} from '../PersonaTag';
 import {DeletedPersonasSection} from './DeletedPersonasSection';
 import {
 	PersonaBulkActionBar,
+	PersonaCardCheckbox,
 	PersonaSelectionHeader,
 	PersonaVisibilityChips,
 	type PersonaVisibilityFilter,
@@ -823,13 +823,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 											data-flx="persona.settings.persona-settings-tab.compact-persona-card.start-edit"
 										>
 											{selection.selecting && (
-												<Checkbox
+												<PersonaCardCheckbox
 													checked={isSelected}
-													onChange={() => selection.toggle(persona.id)}
-													size="small"
-													aria-label={persona.name}
-													className={bulkStyles.cardCheckbox}
-													data-flx="persona.settings.persona-settings-tab.select-checkbox"
+													label={persona.name}
+													onToggle={() => selection.toggle(persona.id)}
+													data-flx="persona.settings.persona-settings-tab.persona-card-checkbox"
 												/>
 											)}
 											{currentUser && (
