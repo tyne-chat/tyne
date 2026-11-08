@@ -13,6 +13,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useRef} from 'react';
 
+// Fork imports.
+
+import {APP_DOWNLOAD_PAGE_PATH} from '@app/features/app_download/utils/AppDownloadPlatform';
+
 const SelfHostedSetupWizardGate = createNamedLoadableComponent({
 	displayName: 'SelfHostedSetupWizardGate',
 	load: async () =>
@@ -36,6 +40,7 @@ const STANDALONE_AUTH_PREFIXES = [
 	'/invite/',
 	'/gift/',
 	'/theme/',
+	APP_DOWNLOAD_PAGE_PATH,
 ];
 
 function isStandaloneAuthPath(pathname: string): boolean {
