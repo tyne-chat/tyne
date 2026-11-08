@@ -2,11 +2,13 @@
 	"version": 1,
 	"msgids": ["Dev (Staging)"],
 	"locales": {
-		"cs": ["(Prefix: {0})", "Persona", "text"],
-		"da": ["Alice", "Persona", "Script"],
+		"cs": ["(Prefix: {0})", "avatar", "banner", "Persona", "text"],
+		"da": ["Alice", "avatar", "banner", "Persona", "Script"],
 		"de": ["Account: @{username}", "Alice", "Name (A–Z)", "Optional", "Persona", "Personas", "Personas ({count})"],
 		"el": ["Persona"],
 		"es-419": [
+			"avatar",
+			"banner",
 			"Manual",
 			"Persona",
 			"Personas",
@@ -15,6 +17,7 @@
 			"{count, plural, one {# persona} other {# personas}}"
 		],
 		"es-ES": [
+			"avatar",
 			"Manual",
 			"Persona",
 			"Personas",
@@ -24,6 +27,7 @@
 		],
 		"fr": [
 			"Alice",
+			"avatar",
 			"Persona",
 			"Personas",
 			"Personas ({count})",
@@ -31,16 +35,18 @@
 			"Script",
 			"{count, plural, one {# persona} other {# personas}}"
 		],
-		"hr": ["Persona"],
+		"hr": ["avatar", "Persona"],
 		"hu": ["Persona"],
-		"id": ["Alice", "Edit Persona", "Edit persona", "Manual", "Persona"],
-		"it": ["Account: @{username}", "Alice", "Persona", "Script"],
+		"id": ["Alice", "avatar", "banner", "bio", "Edit Persona", "Edit persona", "Manual", "Persona"],
+		"it": ["Account: @{username}", "Alice", "avatar", "banner", "Persona", "Script"],
 		"lt": ["Persona"],
-		"nl": ["Account: @{username}", "Alice", "Persona", "Script"],
-		"no": ["Alice", "Persona"],
+		"nl": ["Account: @{username}", "Alice", "avatar", "banner", "bio", "Persona", "Script", "tags"],
+		"no": ["Alice", "avatar", "banner", "bio", "Persona"],
 		"pl": ["Persona"],
 		"pt-BR": [
 			"Alice",
+			"avatar",
+			"banner",
 			"Manual",
 			"Persona",
 			"Personas",
@@ -48,10 +54,23 @@
 			"Script",
 			"{count, plural, one {# persona} other {# personas}}"
 		],
-		"ro": ["(Prefix: {0})", "Alice", "Manual", "Persona", "Personas", "Personas ({count})", "Script", "text"],
+		"ro": [
+			"(Prefix: {0})",
+			"Alice",
+			"avatar",
+			"banner",
+			"Manual",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Script",
+			"text"
+		],
 		"sv-SE": [
 			"(Prefix: {0})",
 			"Alice",
+			"avatar",
+			"banner",
 			"Persona",
 			"Personas",
 			"Personas ({count})",
@@ -59,7 +78,7 @@
 			"{count, plural, one {# persona} other {# personas}}"
 		],
 		"th": ["Persona"],
-		"tr": ["Alice", "Persona"],
+		"tr": ["Alice", "avatar", "banner", "Persona"],
 		"vi": ["Alice", "Persona"]
 	}
 }
