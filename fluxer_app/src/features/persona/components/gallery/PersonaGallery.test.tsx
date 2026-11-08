@@ -199,4 +199,36 @@ describe('PersonaGallery', () => {
 		expect(mockDirectory.retry).toHaveBeenCalledWith(other.id);
 		expect(mockDirectory.ensure.mock.calls.length).toBe(ensureCalls);
 	});
+
+	it('expands to the whole profile window and folds back with the button or Escape', async () => {
+		const modalRoot = document.createElement('div');
+		modalRoot.setAttribute('data-flx', 'user.user-profile-modal.modal-root');
+		document.body.appendChild(modalRoot);
+		const modalContainer = document.createElement('div');
+		modalRoot.appendChild(modalContainer);
+		const modalReactRoot = createRoot(modalContainer);
+		await act(async () => {
+			modalReactRoot.render(<PersonaGallery user={other} data-flx="persona.gallery-test.gallery" />);
+		});
+		const query = (flx: string) => modalContainer.querySelector(`[data-flx="${flx}"]`) as HTMLElement | null;
+
+		expect(query('persona.gallery.expanded-bar')).toBeNull();
+		await act(async () => query('persona.gallery.expand')!.click());
+		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		expect(query('persona.gallery.expanded-bar')?.textContent).toContain('bob');
+		expect(query('persona.gallery.expand')).toBeNull();
+
+		await act(async () => query('persona.gallery.collapse')!.click());
+		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+
+		await act(async () => query('persona.gallery.expand')!.click());
+		await act(async () => {
+			window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));
+		});
+		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		expect(query('persona.gallery.expanded-bar')).toBeNull();
+
+		act(() => modalReactRoot.unmount());
+		modalRoot.remove();
+	});
 });
