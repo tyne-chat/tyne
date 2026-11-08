@@ -406,6 +406,9 @@ msgstr "Chỉnh sửa persona"
 msgid "Edit timestamp"
 msgstr "Chỉnh sửa dấu thời gian\\"
 
+msgid "Everyone else"
+msgstr "Những người khác"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "Mọi thứ khác vẫn giữ nguyên như cũ."
@@ -471,6 +474,9 @@ msgstr "Không cập nhật được thẻ hiển thị"
 
 msgid "Failed to update persona mode"
 msgstr "Không cập nhật được chế độ persona"
+
+msgid "Failed to update the reaction setting"
+msgstr "Không thể cập nhật cài đặt cảm xúc"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "Không thay đổi được nơi ghi nhớ persona của bạn"
@@ -768,6 +774,9 @@ msgstr "Chưa cấu hình thẻ hiển thị. Tin nhắn sẽ hiển thị ảnh
 msgid "No matching personas found."
 msgstr "Không tìm thấy persona nào phù hợp."
 
+msgid "No one matches."
+msgstr "Không có kết quả phù hợp."
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "Chưa cấu hình persona nào. Hãy tạo một persona trong Cài đặt."
 
@@ -987,9 +996,16 @@ msgstr "Công khai"
 msgid "Public persona"
 msgstr "Persona công khai"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "Thả cảm xúc dưới tên nhiều persona cùng lúc"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "Thả cảm xúc dưới tên..."
+
+msgid "Reacted"
+msgstr "Đã bày tỏ cảm xúc"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "Đang bày tỏ cảm xúc với tư cách <0>{reactorName}</0>"
@@ -1000,6 +1016,9 @@ msgstr "Đang thả cảm xúc dưới tên {name}"
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "Bày tỏ cảm xúc bằng biểu tượng đặc trưng sẽ luôn phản hồi dưới tư cách nhân cách này, bất kể nhân cách đang hoạt động là gì."
+
+msgid "Recent"
+msgstr "Gần đây"
 
 msgid "Recent Personas"
 msgstr "Persona gần đây"
@@ -1053,6 +1072,9 @@ msgstr "Nếu đổi ý, hãy khôi phục chúng từ mục Persona đã xóa t
 msgid "Restored"
 msgstr "Đã khôi phục"
 
+msgid "Results"
+msgstr "Kết quả"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "Xem lại trước khi nhập"
@@ -1104,7 +1126,6 @@ msgstr "Kết quả tìm kiếm ({0})"
 msgid "Search commands"
 msgstr "Tìm lệnh"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Tìm kiếm persona, thẻ, đại từ..."
@@ -1549,6 +1570,13 @@ msgstr "Tài khoản của bạn có một thẻ hiển thị, hiện sau tên c
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "Persona của bạn giữ nguyên; nó được kết nối với thành viên này."
 
+msgid "Your reactions"
+msgstr "Cảm xúc của bạn"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "Cảm xúc {emojiName} của bạn"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "thêm {count}"
@@ -1617,6 +1645,10 @@ msgstr "tên"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "chưa so sánh ảnh"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "nhấn để xem cảm xúc của bạn"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, other {Đã dùng # lần}}"
 
 msgid "{count} notice(s) during import"
 msgstr "{count} thông báo trong khi nhập"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count}/{total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "{count}/{total} đã bày tỏ cảm xúc"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"

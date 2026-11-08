@@ -177,6 +177,7 @@ function personaSettingsResponse(row: UserPersonaSettingsRow): PersonaSettingsRe
 		is_latched: Boolean(row.is_latched),
 		display_tag_text: row.display_tag_text ?? '',
 		display_tag_icon: row.display_tag_icon ?? null,
+		multi_persona_reactions: row.multi_persona_reactions !== false,
 	};
 }
 
@@ -1095,6 +1096,7 @@ export class PersonaService {
 				is_latched: false,
 				display_tag_text: '',
 				display_tag_icon: null,
+				multi_persona_reactions: true,
 			};
 		}
 
@@ -1123,6 +1125,7 @@ export class PersonaService {
 			is_latched: isLatched,
 			display_tag_text: row.display_tag_text ?? '',
 			display_tag_icon: row.display_tag_icon ?? null,
+			multi_persona_reactions: row.multi_persona_reactions !== false,
 		};
 	}
 
@@ -1144,6 +1147,10 @@ export class PersonaService {
 				data.display_tag_text !== undefined ? (data.display_tag_text ?? '') : (existing?.display_tag_text ?? ''),
 			display_tag_icon:
 				data.display_tag_icon !== undefined ? data.display_tag_icon : (existing?.display_tag_icon ?? null),
+			multi_persona_reactions:
+				data.multi_persona_reactions !== undefined
+					? data.multi_persona_reactions
+					: existing?.multi_persona_reactions !== false,
 			updated_at: new Date(),
 			version: (existing?.version ?? 0) + 1,
 		};
