@@ -111,6 +111,10 @@ msgstr "根据输入的内容更改消息"
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "选择 PluralKit 导出文件（.json）或 {productName} 导出文件（.zip），或拖放到此处"
 
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "选择要展示的人格"
+
 #. Tooltip on the community command chip when the message box already has text. Preserve {name}.
 msgid "Clear the message box to use /{name}"
 msgstr "清空消息框后即可使用 /{name}"
@@ -163,6 +167,10 @@ msgstr "无法运行 /{name}：{detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "无法保存 /{name}：{detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "无法更改这些人格。请重试。"
 
 #. Shown in the Personas list when the request for them failed.
 msgid "Couldn’t load personas."
@@ -218,6 +226,10 @@ msgstr "删除人格"
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "删除时间戳\\"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "删除 {count, plural, other {# 个人格}}？"
 
 msgid "Detected System Name / Tag"
 msgstr "检测到的系统名称 / 标签"
@@ -353,6 +365,10 @@ msgstr "上传横幅图片到服务器失败"
 msgid "Failed to upload icon to server"
 msgstr "上传图标到服务器失败"
 
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "按可见性筛选"
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "格式预览"
@@ -443,6 +459,26 @@ msgstr "由 /{name} 生成"
 msgid "Main account"
 msgstr "主账户"
 
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "设为私密"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "设为公开"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "设为未列出"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "将 {count, plural, other {# 个人格}}设为私密？"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "将 {count, plural, other {# 个人格}}设为公开？"
+
 msgid "Manage Personas"
 msgstr "管理人格"
 
@@ -531,6 +567,10 @@ msgstr "尚未配置人格。请在设置中创建一个。"
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "尚未创建人格。点击“添加人格”来创建你的第一个人格！"
 
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "这里没有人格。"
+
 #. Shown in the Personas list when the search matches nothing.
 msgid "No personas match your search."
 msgstr "没有与你的搜索匹配的人格。"
@@ -577,6 +617,10 @@ msgstr "可选的系统徽章，例如 ⚞Seraphim⚟"
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "其他人能看到 {count, plural, other {# 个公开人格}}。"
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "其他人会在你的人格列表中看到它们，并能打开它们的资料。你可以随时改回来。"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -1001,9 +1045,17 @@ msgstr "在此勾选频道之前，信号栏处于关闭状态。勾选分类或
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "无法保存标签图标：{error}。可在人格设置中重新设置。"
 
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "它们的消息仍会显示名称和头像，但你将无法再以它们的身份发送，它们的标签和专属表情符号也会释放出来。此操作无法撤销。"
+
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "使用者的名称"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "它们的资料将对他人隐藏。名称和头像仍会显示在它们的消息和回应上。"
 
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
@@ -1226,9 +1278,29 @@ msgstr "{0} / {1} {2}（{3}%）"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} 已准备好安装。"
 
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, other {# 个人格已设为私密}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, other {# 个人格已设为公开}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, other {# 个人格已设为未列出}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, other {# 个人格}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, other {已删除 # 个人格}}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "已选择 {count} 个"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."

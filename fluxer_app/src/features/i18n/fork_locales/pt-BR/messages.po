@@ -111,6 +111,10 @@ msgstr "Mudar a mensagem conforme o que digitaram"
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Escolha uma exportação do PluralKit (.json) ou uma exportação do {productName} (.zip), ou arraste e solte"
 
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "Escolher personas para destacar"
+
 #. Tooltip on the community command chip when the message box already has text. Preserve {name}.
 msgid "Clear the message box to use /{name}"
 msgstr "Esvazie a caixa de mensagem para usar /{name}"
@@ -163,6 +167,10 @@ msgstr "Não foi possível executar /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Não foi possível salvar /{name}: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "Não foi possível alterar as personas. Tente novamente."
 
 #. Shown in the Personas list when the request for them failed.
 msgid "Couldn’t load personas."
@@ -218,6 +226,10 @@ msgstr "Excluir persona"
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "Excluir carimbo de data/hora\\"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "Excluir {count, plural, one {# persona} other {# personas}}?"
 
 msgid "Detected System Name / Tag"
 msgstr "Nome / tag do sistema detectados"
@@ -353,6 +365,10 @@ msgstr "Falha ao enviar a imagem do banner para o servidor"
 msgid "Failed to upload icon to server"
 msgstr "Falha ao enviar o ícone para o servidor"
 
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "Filtrar por visibilidade"
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "Prévia do formato"
@@ -443,6 +459,26 @@ msgstr "Feito com /{name}"
 msgid "Main account"
 msgstr "Conta principal"
 
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "Tornar privadas"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "Tornar públicas"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "Tornar não listadas"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "Tornar {count, plural, one {# persona privada} other {# personas privadas}}?"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "Tornar {count, plural, one {# persona pública} other {# personas públicas}}?"
+
 msgid "Manage Personas"
 msgstr "Gerenciar personas"
 
@@ -531,6 +567,10 @@ msgstr "Nenhuma persona configurada ainda. Crie uma nas Configurações."
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "Nenhuma persona criada ainda. Clique em \"Adicionar persona\" para criar a sua primeira persona!"
 
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "Nenhuma persona aqui."
+
 #. Shown in the Personas list when the search matches nothing.
 msgid "No personas match your search."
 msgstr "Nenhuma persona corresponde à sua pesquisa."
@@ -577,6 +617,10 @@ msgstr "Emblema de sistema opcional, ex.: ⚞Seraphim⚟"
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "Os outros veem {count, plural, one {# persona pública} other {# personas públicas}}."
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "Os outros vão vê-las na sua lista de personas e poderão abrir os perfis delas. Você pode mudar isso a qualquer momento."
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -1001,9 +1045,17 @@ msgstr "A barra de sinais fica desligada até você marcar um canal aqui. Marcar
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "Não foi possível salvar o ícone da tag: {error}. Você pode defini-lo novamente nas configurações de personas."
 
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "As mensagens delas continuam mostrando os nomes e avatares, mas você não poderá mais enviar como elas, e as tags e emojis de assinatura delas ficarão livres. Isso não pode ser desfeito."
+
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "O nome de quem usa"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "Os perfis delas ficarão ocultos para os outros. Os nomes e avatares delas continuam aparecendo nas mensagens e reações."
 
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
@@ -1226,9 +1278,29 @@ msgstr "{0} de {1} {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} está pronto para ser instalado."
 
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, one {# persona agora é privada} other {# personas agora são privadas}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, one {# persona agora é pública} other {# personas agora são públicas}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, one {# persona agora não está listada} other {# personas agora não estão listadas}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, one {# persona} other {# personas}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, one {# persona excluída} other {# personas excluídas}}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "{count, plural, one {# selecionada} other {# selecionadas}}"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
