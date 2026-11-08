@@ -11,6 +11,10 @@ import {PersonaGalleryPrefs} from '@app/features/persona/state/PersonaGalleryPre
 import {personaAvatarUrls} from '@app/features/persona/utils/PersonaAvatarUrls';
 import * as BulkMessages from '@app/features/persona/utils/PersonaBulkMessages';
 import {
+	PERSONA_GALLERY_EXPANDED_ATTRIBUTE,
+	PROFILE_MODAL_ROOT_SELECTOR,
+} from '@app/features/persona/utils/PersonaGalleryExpand';
+import {
 	filterGalleryItems,
 	type GalleryPersona,
 	type PersonaGallerySort,
@@ -24,18 +28,22 @@ import {BottomSheet} from '@app/features/ui/bottom_sheet/BottomSheet';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
+import {Avatar} from '@app/features/ui/components/Avatar';
 import {Input} from '@app/features/ui/components/form/FormInput';
 import {Switch} from '@app/features/ui/components/form/FormSwitch';
 import {Spinner} from '@app/features/ui/components/Spinner';
 import {Popout} from '@app/features/ui/popover/PopoverPopout';
 import {RadioGroup} from '@app/features/ui/radio_group/RadioGroup';
 import {SegmentedTabs} from '@app/features/ui/segmented_tabs/SegmentedTabs';
+import LayerManager from '@app/features/ui/state/LayerManager';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import type {User} from '@app/features/user/models/User';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
 import {getFormattedShortDate} from '@app/features/user/utils/DateFormatting';
 import {useLingui} from '@lingui/react/macro';
 import {
+	ArrowsInSimpleIcon,
+	ArrowsOutSimpleIcon,
 	CaretDownIcon,
 	CaretRightIcon,
 	EyeSlashIcon,
@@ -51,7 +59,7 @@ import {
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import styles from './PersonaGallery.module.css';
 
 export interface PersonaGalleryProps {
@@ -83,6 +91,62 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 		if (personaId) setOpenId(personaId);
 	}, [pendingPersona, user.id]);
 
+	// Expanded, the list has the whole profile window: upstream's header and tabs are hidden (by
+	// PersonaGallery.module.css, on the mark set here) and a slim bar names the account. Not
+	// remembered: every profile opens with its header (Chiara, 2026-11-07).
+	const [expanded, setExpanded] = useState(false);
+	const rootRef = useRef<HTMLDivElement>(null);
+	const collapseRef = useRef<HTMLButtonElement>(null);
+	useEffect(() => {
+		if (!expanded) return;
+		const modalRoot = rootRef.current?.closest(PROFILE_MODAL_ROOT_SELECTOR) ?? null;
+		modalRoot?.setAttribute(PERSONA_GALLERY_EXPANDED_ATTRIBUTE, 'true');
+		collapseRef.current?.focus({preventScroll: true});
+		// Escape folds the list back first; it runs before upstream's LayerManager, which listens on
+		// the document, and leaves Escape to an open popout or menu.
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key !== 'Escape') return;
+			if (LayerManager.hasType('popout') || LayerManager.hasType('contextmenu')) return;
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			setExpanded(false);
+		};
+		window.addEventListener('keydown', handleKeyDown, {capture: true});
+		return () => {
+			modalRoot?.removeAttribute(PERSONA_GALLERY_EXPANDED_ATTRIBUTE);
+			window.removeEventListener('keydown', handleKeyDown, {capture: true});
+		};
+	}, [expanded]);
+	const expandedBar =
+		expanded && !isMobile ? (
+			<div className={styles.expandedBar} data-flx="persona.gallery.expanded-bar">
+				<Avatar user={user} size={24} disableStatusTooltip data-flx="persona.gallery.expanded-bar.avatar" />
+				<span className={styles.expandedName} data-flx="persona.gallery.expanded-bar.name">
+					{user.displayName}
+				</span>
+				<span className={styles.expandedCount} data-flx="persona.gallery.expanded-bar.count">
+					{i18n._(M.PERSONAS_COUNT_DESCRIPTOR, {count: directory.publicCount})}
+				</span>
+				<span className={styles.expandedSpacer} data-flx="persona.gallery.expanded-bar.spacer" />
+				<Tooltip
+					text={i18n._(M.COLLAPSE_PERSONAS_DESCRIPTOR)}
+					position="top"
+					data-flx="persona.gallery.collapse.tooltip"
+				>
+					<button
+						ref={collapseRef}
+						type="button"
+						className={styles.expandButton}
+						aria-label={i18n._(M.COLLAPSE_PERSONAS_DESCRIPTOR)}
+						onClick={() => setExpanded(false)}
+						data-flx="persona.gallery.collapse"
+					>
+						<ArrowsInSimpleIcon size={18} weight="bold" data-flx="persona.gallery.collapse-icon" />
+					</button>
+				</Tooltip>
+			</div>
+		) : null;
+
 	const view = PersonaGalleryPrefs.currentView;
 	const effectiveSort: PersonaGallerySort = sort === 'recent' && !directory.isOwn ? 'name' : sort;
 	const shown =
@@ -112,19 +176,22 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 
 	if (openId) {
 		return (
-			<PersonaGalleryDetail
-				user={user}
-				personaId={openId}
-				list={list}
-				isOwn={directory.isOwn}
-				displayTagText={directory.displayTagText}
-				displayTagIcon={directory.displayTagIcon}
-				isMobile={isMobile}
-				onBack={() => setOpenId(null)}
-				onNavigate={setOpenId}
-				onClose={onClose}
-				data-flx="persona.gallery.detail"
-			/>
+			<div ref={rootRef} className={clsx(expanded && styles.galleryExpanded)} data-flx="persona.gallery.detail-wrap">
+				{expandedBar}
+				<PersonaGalleryDetail
+					user={user}
+					personaId={openId}
+					list={list}
+					isOwn={directory.isOwn}
+					displayTagText={directory.displayTagText}
+					displayTagIcon={directory.displayTagIcon}
+					isMobile={isMobile}
+					onBack={() => setOpenId(null)}
+					onNavigate={setOpenId}
+					onClose={onClose}
+					data-flx="persona.gallery.detail"
+				/>
+			</div>
 		);
 	}
 
@@ -279,7 +346,12 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 	};
 
 	return (
-		<div className={clsx(styles.gallery, isMobile && styles.galleryMobile)} data-flx="persona.gallery">
+		<div
+			ref={rootRef}
+			className={clsx(styles.gallery, isMobile && styles.galleryMobile, expanded && styles.galleryExpanded)}
+			data-flx="persona.gallery"
+		>
+			{expandedBar}
 			{directory.isOwn && (
 				<div className={styles.ownerBar} data-flx="persona.gallery.owner-bar">
 					<span className={styles.ownerBarText} data-flx="persona.gallery.owner-bar.text">
@@ -350,6 +422,19 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 						onChange={PersonaGalleryPrefs.setView}
 						data-flx="persona.gallery.view-switch"
 					/>
+				)}
+				{!isMobile && !expanded && (
+					<Tooltip text={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)} position="top" data-flx="persona.gallery.expand.tooltip">
+						<button
+							type="button"
+							className={styles.expandButton}
+							aria-label={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)}
+							onClick={() => setExpanded(true)}
+							data-flx="persona.gallery.expand"
+						>
+							<ArrowsOutSimpleIcon size={18} weight="bold" data-flx="persona.gallery.expand-icon" />
+						</button>
+					</Tooltip>
 				)}
 			</div>
 			{isMobile && (
