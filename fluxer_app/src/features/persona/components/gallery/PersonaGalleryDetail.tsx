@@ -15,16 +15,18 @@ import {
 	galleryItemsFromPublic,
 } from '@app/features/persona/utils/PersonaGalleryItems';
 import * as M from '@app/features/persona/utils/PersonaGalleryMessages';
+import {usePersonaImageMenus} from '@app/features/persona/utils/usePersonaImageMenus';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import {Spinner} from '@app/features/ui/components/Spinner';
+import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import type {User} from '@app/features/user/models/User';
 import {getFormattedShortDate} from '@app/features/user/utils/DateFormatting';
 import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {Trans, useLingui} from '@lingui/react/macro';
-import {CaretLeftIcon, CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
+import {ArrowsOutSimpleIcon, CaretLeftIcon, CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
@@ -45,6 +47,8 @@ export interface PersonaGalleryDetailProps {
 	onBack: () => void;
 	onNavigate: (personaId: string) => void;
 	onClose?: () => void;
+	/** Gives the profile window to the gallery, as the list's own Expand does; unset when expanded or on phones. */
+	onExpand?: () => void;
 }
 
 /**
@@ -66,6 +70,7 @@ export const PersonaGalleryDetail = observer(
 		onBack,
 		onNavigate,
 		onClose,
+		onExpand,
 	}: PersonaGalleryDetailProps) => {
 		const {i18n} = useLingui();
 		const rootRef = useRef<HTMLDivElement>(null);
@@ -77,6 +82,11 @@ export const PersonaGalleryDetail = observer(
 		if (!persona && ownPersona) persona = galleryItemsFromOwn([ownPersona])[0] ?? null;
 		if (!persona && fetched.profile) persona = galleryItemsFromPublic([fetched.profile])[0] ?? null;
 		const canStep = index >= 0 && list.length > 1;
+		const {onAvatarContextMenu, onBannerContextMenu} = usePersonaImageMenus({
+			user,
+			avatarHash: persona?.avatar ?? null,
+			bannerHash: persona?.banner ?? null,
+		});
 
 		const step = useCallback(
 			(delta: number) => {
@@ -185,6 +195,23 @@ export const PersonaGalleryDetail = observer(
 							</button>
 						</>
 					)}
+					{onExpand && (
+						<Tooltip
+							text={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)}
+							position="top"
+							data-flx="persona.gallery.detail.expand.tooltip"
+						>
+							<button
+								type="button"
+								className={clsx(styles.expandButton, !canStep && styles.detailNavEnd)}
+								aria-label={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)}
+								onClick={onExpand}
+								data-flx="persona.gallery.detail.expand"
+							>
+								<ArrowsOutSimpleIcon size={18} weight="bold" data-flx="persona.gallery.detail.expand-icon" />
+							</button>
+						</Tooltip>
+					)}
 				</div>
 				{!persona && fetched.isLoading && (
 					<div className={styles.state} data-flx="persona.gallery.detail.loading">
@@ -204,8 +231,10 @@ export const PersonaGalleryDetail = observer(
 					<div className={styles.detailBody} data-flx="persona.gallery.detail.body">
 						<div className={styles.detailBannerWrap} data-flx="persona.gallery.detail.banner-wrap">
 							<div
+								role="group"
 								className={styles.detailBanner}
 								style={{backgroundColor: color ?? undefined}}
+								onContextMenu={onBannerContextMenu}
 								data-flx="persona.gallery.detail.banner"
 							>
 								{bannerUrl && (
@@ -217,7 +246,12 @@ export const PersonaGalleryDetail = observer(
 									/>
 								)}
 							</div>
-							<span className={styles.detailAvatar} data-flx="persona.gallery.detail.avatar">
+							<span
+								role="group"
+								className={styles.detailAvatar}
+								onContextMenu={onAvatarContextMenu}
+								data-flx="persona.gallery.detail.avatar"
+							>
 								<PersonaAvatar
 									user={user}
 									persona={{avatar: persona.avatar}}
