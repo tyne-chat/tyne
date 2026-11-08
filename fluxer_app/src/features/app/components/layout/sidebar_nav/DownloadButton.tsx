@@ -2,9 +2,7 @@
 
 import {GuildListActionButton} from '@app/features/app/components/layout/sidebar_nav/GuildListActionButton';
 import styles from '@app/features/app/components/layout/sidebar_nav/GuildListActionButton.module.css';
-import {DESKTOP_DOWNLOAD_URL} from '@app/features/app/config/I18nDisplayConstants';
 import HiddenGuildListButtons from '@app/features/guild/state/HiddenGuildListButtons';
-import {openExternalUrlWithWarning} from '@app/features/messaging/utils/ExternalLinkUtils';
 import {MenuGroup} from '@app/features/ui/action_menu/MenuGroup';
 import {MenuItem} from '@app/features/ui/action_menu/MenuItem';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
@@ -13,6 +11,10 @@ import {Trans, useLingui} from '@lingui/react/macro';
 import {DownloadSimpleIcon, EyeSlashIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
+
+// Fork imports.
+
+import {openGetAppModal} from '@app/features/app_download/components/GetAppModal';
 
 const DOWNLOAD_DESCRIPTOR = msg({
 	message: 'Download desktop app',
@@ -24,7 +26,7 @@ export const DownloadButton = observer(() => {
 		return null;
 	}
 	const handleDownload = () => {
-		openExternalUrlWithWarning(DESKTOP_DOWNLOAD_URL);
+		openGetAppModal();
 	};
 	const handleContextMenu = (e: React.MouseEvent) => {
 		e.preventDefault();

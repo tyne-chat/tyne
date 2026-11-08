@@ -10,6 +10,14 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Prefixo: {0})"
 
+#. Install step on Linux for .deb and .rpm packages.
+msgid "<0>.deb or .rpm:</0> open the file you downloaded and click <1>Install</1>."
+msgstr "<0>.deb ou .rpm:</0> abra o arquivo que você baixou e clique em <1>Instalar</1>."
+
+#. Install step on Linux for the AppImage.
+msgid "<0>AppImage:</0> right-click it, open <1>Properties</1> and allow it to run as a program."
+msgstr "<0>AppImage:</0> clique nele com o botão direito, abra <1>Propriedades</1> e permita que ele seja executado como programa."
+
 #. Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona
 msgid "<0>{tag}</0> already belongs to your persona {name}."
 msgstr "<0>{tag}</0> já pertence à sua persona {name}."
@@ -84,13 +92,29 @@ msgstr "Todas as personas"
 msgid "All personas"
 msgstr "Todas as personas"
 
+#. Heading of the list of every platform on the download page.
+msgid "All platforms"
+msgstr "Todas as plataformas"
+
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
 msgstr "Todos os fusos horários"
 
+#. Heading of the QR code box on the download page.
+msgid "Also on your phone"
+msgstr "Também no seu celular"
+
 #. Error under the command name field.
 msgid "Another command or a built-in command already has this name."
 msgstr "Outro comando ou um comando integrado já tem esse nome."
+
+#. Under the AppImage download button: it works on every other Linux distribution.
+msgid "Any other Linux"
+msgstr "Qualquer outro Linux"
+
+#. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
+msgid "Apple silicon (M1 or newer)"
+msgstr "Apple silicon (M1 ou mais recente)"
 
 #. placeholder {0}: formData.name
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
@@ -169,6 +193,10 @@ msgstr "Verificando..."
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Escolha uma exportação do PluralKit (.json) ou uma exportação do {productName} (.zip), ou arraste e solte"
 
+#. Link on the download page to the list of every platform.
+msgid "Choose another platform"
+msgstr "Escolher outra plataforma"
+
 #. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
 msgid "Choose personas to feature"
 msgstr "Escolher personas para destacar"
@@ -184,6 +212,10 @@ msgstr "Fechar pesquisa"
 #. Row heading in the table comparing a persona with the import file
 msgid "Colour"
 msgstr "Cor"
+
+#. Install step on iPhone. 'Get Tyne in TestFlight' is the button on this page; 'Install' is TestFlight's button.
+msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
+msgstr "Volte aqui e toque em <0>Obter o Tyne no TestFlight</0> e depois em <1>Instalar</1>."
 
 #. Section label in the command editor: name and description.
 msgid "Command"
@@ -355,6 +387,41 @@ msgstr "Não reconhecer as tags desta persona"
 msgid "Double-click to edit"
 msgstr "Clique duplo para editar"
 
+#. Button that downloads the Tyne app as a .deb package for Linux.
+msgid "Download .deb"
+msgstr "Baixar .deb"
+
+#. Button that downloads the Tyne app as an .rpm package for Linux.
+msgid "Download .rpm"
+msgstr "Baixar .rpm"
+
+#. Button that downloads the Tyne app as an AppImage for Linux.
+msgid "Download AppImage"
+msgstr "Baixar AppImage"
+
+#. Button that opens the Tyne download page when the visitor's platform is not known.
+msgid "Download Tyne"
+msgstr "Baixar o Tyne"
+
+#. Button that downloads the Tyne app for Android.
+#. Button that downloads the Tyne app for Android.
+msgid "Download for Android"
+msgstr "Baixar para Android"
+
+#. Button that opens the Linux downloads of the Tyne app.
+msgid "Download for Linux"
+msgstr "Baixar para Linux"
+
+#. Button that downloads the Tyne app for macOS.
+#. Button that downloads the Tyne app for macOS.
+msgid "Download for Mac"
+msgstr "Baixar para Mac"
+
+#. Button that downloads the Tyne app for Windows.
+#. Button that downloads the Tyne app for Windows.
+msgid "Download for Windows"
+msgstr "Baixar para Windows"
+
 #. Progress status during avatar download
 msgid "Downloading avatar {current} of {total}..."
 msgstr "Baixando avatar {current} de {total}..."
@@ -493,6 +560,10 @@ msgstr "Falha ao enviar a imagem do banner para o servidor"
 msgid "Failed to upload icon to server"
 msgstr "Falha ao enviar o ícone para o servidor"
 
+#. Under the .rpm download button: the Linux distributions that use .rpm packages.
+msgid "Fedora, openSUSE"
+msgstr "Fedora, openSUSE"
+
 #. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
 msgid "Filter by visibility"
 msgstr "Filtrar por visibilidade"
@@ -504,6 +575,36 @@ msgstr "Prévia do formato"
 #. Link at the end of the command script help to the complete guide on GitHub.
 msgid "Full script guide"
 msgstr "Guia completo de scripts"
+
+#. Heading of the download page for Android.
+msgid "Get Tyne for Android"
+msgstr "Obtenha o Tyne para Android"
+
+#. Heading of the download page for Linux.
+msgid "Get Tyne for Linux"
+msgstr "Obtenha o Tyne para Linux"
+
+#. Heading of the download page for macOS.
+msgid "Get Tyne for Mac"
+msgstr "Obtenha o Tyne para Mac"
+
+#. Heading of the download page for Windows.
+msgid "Get Tyne for Windows"
+msgstr "Obtenha o Tyne para Windows"
+
+#. Button that shows how to install the Tyne app on an iPhone or iPad.
+#. Heading of the download page for iPhone and iPad.
+msgid "Get Tyne for iPhone"
+msgstr "Obtenha o Tyne para iPhone"
+
+#. Button that opens the Tyne beta in Apple's TestFlight app.
+msgid "Get Tyne in TestFlight"
+msgstr "Obter o Tyne no TestFlight"
+
+#. Heading of the download page when the visitor's platform is not known.
+#. Heading of the panel (and title of the dialog) that offers the Tyne desktop and phone apps.
+msgid "Get the Tyne app"
+msgstr "Baixe o app Tyne"
 
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
@@ -529,9 +630,21 @@ msgstr "Dica"
 msgid "Hover near window edges to temporarily reveal collapsed panels."
 msgstr "Aproxime o cursor das bordas da janela para revelar temporariamente os painéis recolhidos."
 
+#. Heading of the install steps on the download page.
+msgid "How to install"
+msgstr "Como instalar"
+
 #. Toast when icon file exceeds size limit
 msgid "Icon file is too large. Choose an image smaller than 10MB."
 msgstr "O arquivo do ícone é grande demais. Escolha uma imagem menor que 10 MB."
+
+#. Install step on Windows. 'More info' and 'Run anyway' are the links and buttons of Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "If Windows shows this warning, click <0>More info</0>, then <1>Run anyway</1>."
+msgstr "Se o Windows mostrar este aviso, clique em <0>Mais informações</0> e depois em <1>Executar assim mesmo</1>."
+
+#. Install step on Android. 'Settings', 'Allow from this source' and 'Install' are Android's own words: use Android's wording in this language.
+msgid "If your phone asks, tap <0>Settings</0>, turn on <1>Allow from this source</1>, go back and tap <2>Install</2>."
+msgstr "Se o celular pedir, toque em <0>Configurações</0>, ative <1>Permitir desta fonte</1>, volte e toque em <2>Instalar</2>."
 
 #. Title of the persona import dialog when the import is done
 msgid "Import finished"
@@ -599,6 +712,10 @@ msgstr "Inserir carimbo de data/hora"
 #. Label before the buttons that insert placeholders into a command.
 msgid "Insert:"
 msgstr "Inserir:"
+
+#. Install step on iPhone. TestFlight is the name of Apple's app for testing apps.
+msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
+msgstr "Instale o app gratuito <0>TestFlight</0> da Apple pela App Store."
 
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
@@ -712,9 +829,17 @@ msgstr "Ferramentas de mensagem"
 msgid "Messages members can post by typing /name."
 msgstr "Mensagens que os membros podem publicar digitando /name."
 
+#. Link in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "More info"
+msgstr "Mais informações"
+
 #. Sort order of the Personas list: the personas used most often first.
 msgid "Most used"
 msgstr "Mais usadas"
+
+#. Button in macOS' warning that an app was not opened: use macOS' own wording.
+msgid "Move to Trash"
+msgstr "Mover para o Lixo"
 
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -810,6 +935,14 @@ msgstr "Nenhuma das suas personas é pública ainda. Os outros veem uma persona 
 msgid "Nothing changes. It stays in your file for next time."
 msgstr "Nada muda. O membro continua no seu arquivo para a próxima vez."
 
+#. Link on the download page to every earlier release of the app.
+msgid "Older versions"
+msgstr "Versões anteriores"
+
+#. Heading next to a QR code that opens the Tyne download page on a phone.
+msgid "On your phone?"
+msgstr "Está no celular?"
+
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
 msgstr "Uma persona para todos os canais."
@@ -822,13 +955,43 @@ msgstr "Somente para este canal"
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Visível apenas para você. Outras pessoas não podem ver a bio completa nem os detalhes do perfil desta persona."
 
+#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
+msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
+msgstr "Abra os <0>Ajustes do Sistema</0> e depois <1>Privacidade e Segurança</1>. Role para baixo e clique em <2>Abrir Mesmo Assim</2>. Você só precisa fazer isso uma vez."
+
+#. Button in macOS' Privacy & Security settings: use macOS' own wording.
+msgid "Open Anyway"
+msgstr "Abrir Mesmo Assim"
+
+#. Last install step on a phone.
+#. Last install step on a phone.
+msgid "Open Tyne and sign in."
+msgstr "Abra o Tyne e entre na sua conta."
+
+#. Last install step on Linux.
+msgid "Open Tyne from your applications menu, or open the AppImage. Sign in and you're done."
+msgstr "Abra o Tyne pelo menu de aplicativos ou abra o AppImage. Entre na sua conta e pronto."
+
 #. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
 msgid "Open in new window"
 msgstr "Abrir em uma nova janela"
 
+#. Install step on macOS. 'Applications' is the Mac's Applications folder: use macOS' own name for it.
+msgid "Open the file you downloaded and drag Tyne into <0>Applications</0>. Then open Tyne."
+msgstr "Abra o arquivo que você baixou e arraste o Tyne para <0>Aplicativos</0>. Depois, abra o Tyne."
+
+#. Install step: open the installer that was just downloaded.
+#. Install step: open the installer that was just downloaded.
+msgid "Open the file you downloaded."
+msgstr "Abra o arquivo que você baixou."
+
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "Opcional"
+
+#. Link from the Tyne app download button to the downloads for every platform.
+msgid "Other platforms"
+msgstr "Outras plataformas"
 
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
@@ -915,6 +1078,10 @@ msgstr "Personas"
 msgid "Personas ({count})"
 msgstr "Personas ({count})"
 
+#. Under "Android" in the list of platforms.
+msgid "Phones and tablets"
+msgstr "Celulares e tablets"
+
 #. Help for an example in a command script.
 msgid "Pick one option at random"
 msgstr "Escolher uma opção ao acaso"
@@ -995,6 +1162,11 @@ msgstr "Pública"
 #. Tooltip on public persona badge
 msgid "Public persona"
 msgstr "Persona pública"
+
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+msgid "QR code that opens the Tyne download page"
+msgstr "Código QR que abre a página de download do Tyne"
 
 #. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
 msgid "React as several personas at once"
@@ -1086,6 +1258,10 @@ msgstr "Conta principal (Padrão)"
 msgid "Run again"
 msgstr "Executar novamente"
 
+#. Button in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "Run anyway"
+msgstr "Executar assim mesmo"
+
 #. Badge on the safest choice in the import review
 msgid "Safest"
 msgstr "Mais segura"
@@ -1109,6 +1285,14 @@ msgstr "Texto de exemplo"
 #. Progress status when saving personas
 msgid "Saving personas..."
 msgstr "Salvando personas..."
+
+#. Under 'On your phone?', next to the QR code.
+msgid "Scan with your camera."
+msgstr "Escaneie com a câmera."
+
+#. Under the QR code on the download page.
+msgid "Scan with your phone's camera."
+msgstr "Escaneie com a câmera do celular."
 
 #. Label of the code editor for a community command.
 msgid "Script"
@@ -1435,6 +1619,10 @@ msgstr "Desligar {name}"
 msgid "Turn on signal bar"
 msgstr "Ligar barra de sinais"
 
+#. Last install step: the app starts after installing.
+msgid "Tyne opens by itself. Sign in and you're done."
+msgstr "O Tyne abre sozinho. Entre na sua conta e pronto."
+
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Digite {output} ou {tag} para ver sugestões."
@@ -1442,6 +1630,14 @@ msgstr "Digite {output} ou {tag} para ver sugestões."
 #. Explanation under the persona editor's switch for not matching a persona's tags.
 msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
 msgstr "Digitar uma dessas tags não muda para esta persona. A tag é enviada como foi escrita."
+
+#. Under the .deb download button: the Linux distributions that use .deb packages.
+msgid "Ubuntu, Debian, Linux Mint"
+msgstr "Ubuntu, Debian, Linux Mint"
+
+#. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
+msgid "Ubuntu, Fedora and more"
+msgstr "Ubuntu, Fedora e outros"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
@@ -1539,12 +1735,24 @@ msgstr "O que fazer com {name}"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "O que você digitar depois de /{name} precisa caber em uma linha."
 
+#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
+msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
+msgstr "Quando o macOS disser que o Tyne não foi aberto, clique em <0>OK</0>."
+
 msgid "Where the signal bar appears"
 msgstr "Onde a barra de sinais aparece"
 
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "Onde sua persona é lembrada"
+
+#. Which Windows versions the Tyne app needs.
+msgid "Windows 10 or 11"
+msgstr "Windows 10 ou 11"
+
+#. Title of Windows' SmartScreen warning, drawn on the download page: use Windows' own wording in this language.
+msgid "Windows protected your PC"
+msgstr "O Windows protegeu o computador"
 
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
@@ -1565,6 +1773,10 @@ msgstr "Você terá mais uma {name}."
 #. Explanation of a section of the import review
 msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
 msgstr "Sua conta tem uma tag de exibição, mostrada depois do nome de cada persona. A tag do sistema no arquivo é diferente."
+
+#. On the download page after the visitor chose to download the app elsewhere.
+msgid "Your download should start in a moment. If it doesn't, use the button above."
+msgstr "O download deve começar em instantes. Se não começar, use o botão acima."
 
 #. Hint on the choice to link a member to an existing persona, in the import review
 msgid "Your persona stays as it is; it is connected to this member."
@@ -1624,6 +1836,10 @@ msgstr "ex.: ela/dela"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "ex.: amanhã às 15h, em 2 horas, agora"
+
+#. Which iPhone and iPad system versions the Tyne app needs.
+msgid "iOS 16 or newer"
+msgstr "iOS 16 ou mais recente"
 
 #. Progress label while the images inside an imported persona export are stored
 msgid "images stored"
@@ -1821,3 +2037,11 @@ msgstr "{visibility} (a deste app é mantida)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Hoje às 12:00"
+
+#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” Not Opened"
+msgstr "“Tyne” não foi aberto"
+
+#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
+msgid "“Tyne” was blocked."
+msgstr "“Tyne” foi bloqueado."
