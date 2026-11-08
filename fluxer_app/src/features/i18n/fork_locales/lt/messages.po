@@ -111,6 +111,10 @@ msgstr "Keisti žinutę pagal tai, kas įvesta"
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Pasirinkite „PluralKit“ eksportą (.json) arba „{productName}“ eksportą (.zip), arba nuvilkite jį čia"
 
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "Pasirinkite rodomas personas"
+
 #. Tooltip on the community command chip when the message box already has text. Preserve {name}.
 msgid "Clear the message box to use /{name}"
 msgstr "Išvalykite žinutės laukelį, kad galėtumėte naudoti /{name}"
@@ -163,6 +167,10 @@ msgstr "Nepavyko įvykdyti /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Nepavyko išsaugoti /{name}: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "Nepavyko pakeisti personų. Bandykite dar kartą."
 
 #. Shown in the Personas list when the request for them failed.
 msgid "Couldn’t load personas."
@@ -218,6 +226,10 @@ msgstr "Ištrinti personą"
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "Ištrinti laiko žymą\\"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "Ištrinti {count, plural, one {# personą} few {# personas} many {# personos} other {# personų}}?"
 
 msgid "Detected System Name / Tag"
 msgstr "Aptiktas sistemos pavadinimas / žyma"
@@ -353,6 +365,10 @@ msgstr "Nepavyko įkelti reklamjuostės vaizdo į serverį"
 msgid "Failed to upload icon to server"
 msgstr "Nepavyko įkelti piktogramos į serverį"
 
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "Filtruoti pagal matomumą"
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "Formato peržiūra"
@@ -443,6 +459,26 @@ msgstr "Sukurta su /{name}"
 msgid "Main account"
 msgstr "Pagrindinė paskyra"
 
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "Padaryti privačias"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "Padaryti viešas"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "Pašalinti iš sąrašo"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "Padaryti {count, plural, one {# personą privačia} few {# personas privačiomis} many {# personos privačiomis} other {# personų privačiomis}}?"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "Padaryti {count, plural, one {# personą vieša} few {# personas viešomis} many {# personos viešomis} other {# personų viešomis}}?"
+
 msgid "Manage Personas"
 msgstr "Tvarkyti personas"
 
@@ -531,6 +567,10 @@ msgstr "Personų dar nesukonfigūruota. Sukurkite ją nustatymuose."
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "Personų dar nesukurta. Spustelėkite „Pridėti personą“, kad sukurtumėte pirmąją!"
 
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "Čia personų nėra."
+
 #. Shown in the Personas list when the search matches nothing.
 msgid "No personas match your search."
 msgstr "Paieškos neatitinka nė viena persona."
@@ -577,6 +617,10 @@ msgstr "Neprivalomas sistemos ženklelis, pvz., ⚞Seraphim⚟"
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "Kiti mato {count, plural, one {# viešą personą} few {# viešas personas} many {# viešos personos} other {# viešų personų}}."
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "Kiti jas matys jūsų personų sąraše ir galės atidaryti jų profilius. Bet kada galite tai pakeisti atgal."
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -1001,9 +1045,17 @@ msgstr "Signalų juosta išjungta, kol čia nepažymėsi kanalo. Pažymėjus kat
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "Nepavyko išsaugoti žymos piktogramos: {error}. Ją galite vėl nustatyti personų nustatymuose."
 
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "Jų žinutėse ir toliau bus rodomi jų vardai ir avatarai, bet nebegalėsite rašyti jų vardu, o jų žymos ir parašo jaustukai atsilaisvins. To atšaukti negalima."
+
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "Ją naudojančio asmens vardas"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "Jų profiliai bus paslėpti nuo kitų. Jų vardai ir avatarai ir toliau bus rodomi prie jų žinučių ir reakcijų."
 
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
@@ -1226,9 +1278,29 @@ msgstr "{0} iš {1} {2} ({3} %)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} paruošta įdiegti."
 
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, one {# persona dabar privati} few {# personos dabar privačios} many {# personos dabar privačios} other {# personų dabar privačios}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, one {# persona dabar vieša} few {# personos dabar viešos} many {# personos dabar viešos} other {# personų dabar viešos}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, one {# persona dabar neįtraukta į sąrašą} few {# personos dabar neįtrauktos į sąrašą} many {# personos dabar neįtrauktos į sąrašą} other {# personų dabar neįtrauktos į sąrašą}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, one {# persona} few {# personos} many {# personos} other {# personų}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, one {Ištrinta # persona} few {Ištrintos # personos} many {Ištrinta # personos} other {Ištrinta # personų}}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "Pasirinkta: {count}"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
