@@ -10,6 +10,14 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(プレフィックス: {0})"
 
+#. Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona
+msgid "<0>{tag}</0> already belongs to your persona {name}."
+msgstr "<0>{tag}</0> はすでにあなたのペルソナ {name} のものです。"
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file
+msgid "<0>{tag}</0> is also used by {name} in your file."
+msgstr "<0>{tag}</0> はファイル内の {name} も使用しています。"
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "ペルソナに設定できるタグは5個までです"
@@ -42,12 +50,28 @@ msgstr "ペルソナを追加"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "タグのペアを追加 ({0}/5)"
 
+#. Choice in the import review: add the member as a new persona next to the existing one
+msgid "Add as a separate persona"
+msgstr "別のペルソナとして追加"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "カウンターを追加"
 
 msgid "Add signal"
 msgstr "シグナルを追加"
+
+#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
+msgid "Add with the tag"
+msgstr "タグ付きで追加"
+
+#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
+msgid "Add without {tags}"
+msgstr "{tags} なしで追加"
+
+#. Line of the import result: new personas
+msgid "Added"
+msgstr "追加済み"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -72,9 +96,6 @@ msgstr "この名前は、別のコマンドまたは組み込みコマンドで
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "<0>{0}</0> を削除してもよろしいですか？この操作は元に戻せません。"
 
-msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "既存の <0>{existingCount}</0> 件のペルソナをすべて置き換えてもよろしいですか？アカウントから完全に削除され、元に戻せません。"
-
 #. Settings search synonym.
 msgid "Auto-hide"
 msgstr "自動的に隠す"
@@ -88,6 +109,14 @@ msgstr "隠れたサイドバーを自動的に表示"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "アバター画像のダウンロードに失敗しました: {error}。ペルソナはアバターなしでインポートされました。"
 
+#. Import warning when the file's avatar for an existing persona fails to download, so the old one stays
+msgid "Avatar image failed to download: {error}. The persona kept the avatar it had."
+msgstr "アバター画像のダウンロードに失敗しました: {error}。ペルソナは元のアバターのままです。"
+
+#. Explanation of the "Restored" line of the import result
+msgid "Back as they were, with their old messages."
+msgstr "以前のメッセージとともに、元の状態で戻りました。"
+
 #. Button on narrow screens that returns to the command list.
 msgid "Back to commands"
 msgstr "コマンド一覧に戻る"
@@ -100,6 +129,27 @@ msgstr "{section}に戻る"
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "バナー画像のダウンロードに失敗しました: {error}。ペルソナはバナーなしでインポートされました。"
 
+#. Import warning when the file's banner for an existing persona fails to download, so the old one stays
+msgid "Banner image failed to download: {error}. The persona kept the banner it had."
+msgstr "バナー画像のダウンロードに失敗しました: {error}。ペルソナは元のバナーのままです。"
+
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+msgid "Came back without {items}: another persona has them now."
+msgstr "{items} なしで戻りました: 現在は別のペルソナが使用しています。"
+
+#. Comparison of a persona picture with the import file: it can't be compared
+msgid "Can't compare"
+msgstr "比較できません"
+
+#. Short name of a section of the import review
+msgid "Can't tell"
+msgstr "判断できない"
+
+#. Section of the import review
+msgid "Can't tell if it's the same persona"
+msgstr "同じペルソナか判断できません"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "ペルソナを変更"
@@ -107,6 +157,14 @@ msgstr "ペルソナを変更"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "入力された内容に応じてメッセージを変える"
+
+#. Title of the persona import dialog while the file is checked
+msgid "Checking your file..."
+msgstr "ファイルを確認中..."
+
+#. Disabled button while the import file is checked
+msgid "Checking..."
+msgstr "確認中..."
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "PluralKit のエクスポート (.json) または {productName} のエクスポート (.zip) を選択するか、ドラッグ＆ドロップ"
@@ -122,6 +180,10 @@ msgstr "/{name} を使うには、メッセージ欄を空にしてください"
 #. Button at the end of the search results panel header. Clears the search and closes the panel.
 msgid "Close search"
 msgstr "検索を閉じる"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Colour"
+msgstr "色"
 
 #. Section label in the command editor: name and description.
 msgid "Command"
@@ -140,13 +202,21 @@ msgstr "コマンド"
 msgid "Commands saved"
 msgstr "コマンドを保存しました"
 
+#. Button that shows a persona next to its version in the import file
+msgid "Compare"
+msgstr "比較"
+
+#. Status while the import file is compared with the account's personas
+msgid "Comparing your file with your personas..."
+msgstr "ファイルとあなたのペルソナを比較中..."
+
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "設定済みのペルソナ ({count})"
 
-#. Progress status for configuring persona
-msgid "Configuring {name}..."
-msgstr "{name} を設定中..."
+#. Explanation of the "Linked" line of the import result
+msgid "Connected to their members in the file. Nothing in them changed."
+msgstr "ファイル内の対応するメンバーにリンクされました。内容は何も変わっていません。"
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -231,9 +301,45 @@ msgstr "タイムスタンプを削除\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "{count, plural, other {# 件のペルソナ}}を削除しますか？"
 
+#. Short name of a section of the import review
+msgid "Deleted"
+msgstr "削除済み"
+
+#. Title of the section in Settings › Personas that lists deleted personas
+msgid "Deleted personas"
+msgstr "削除したペルソナ"
+
+#. Explanation of the deleted personas section in Settings › Personas
+msgid "Deleted personas still show on their old messages, but nobody can pick them and they don't count towards your limit. Restoring one brings the same persona back, with its history."
+msgstr "削除したペルソナは過去のメッセージには引き続き表示されますが、誰も選択できず、上限にも含まれません。復元すると、同じペルソナが履歴ごと戻ります。"
+
+#. When a persona was deleted, in the import review. {date} is a date
+#. When a persona was deleted, in the import review. {date} is a date
+msgid "Deleted {date}"
+msgstr "{date} に削除"
+
 msgid "Detected System Name / Tag"
 msgstr "検出されたシステム名 / タグ"
 
+#. Section of the import review
+msgid "Different in your file"
+msgstr "ファイル内で異なる"
+
+#. Comparison of a persona picture with the import file: they differ
+msgid "Different picture"
+msgstr "異なる画像"
+
+#. Short name of a section of the import review
+msgid "Differs"
+msgstr "相違あり"
+
+#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
+msgid "Differs: {fields}"
+msgstr "相違: {fields}"
+
+#. Heading of the display tag choice in the import review
+#. Section of the import review
+#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "表示タグ"
@@ -269,6 +375,14 @@ msgstr "このペルソナでタグのペアが重複しています"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "各チャンネルがそれぞれのペルソナを保持します。新しいチャンネルはアカウントから始まります。"
 
+#. Explanation of a section of the import review
+msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
+msgstr "これらはそれぞれ、名前かタグのどちらか一方だけがあなたのペルソナのいずれかと一致しているため、同じキャラクターかもしれませんし、別のキャラクターかもしれません。比較して選んでください。スキップしたメンバーは次回のためにファイルに残ります。"
+
+#. Explanation at the top of the import review
+msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
+msgstr "それぞれ最も安全な選択肢がすでに選ばれているため、自分で選ばない限り、既存のものは何も変わりません。インポートする前に、すべてのセクションをお読みください。難しいものほど上にあります。"
+
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
 msgid "Edit /{name}"
@@ -291,6 +405,14 @@ msgstr "ペルソナを編集"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "タイムスタンプを編集\\"
+
+#. Text under the heading when a reviewed persona import is done
+msgid "Everything else is exactly as it was."
+msgstr "その他はすべて元のままです。"
+
+#. Text when a persona import with nothing to decide is done
+msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
+msgstr "ファイル内の項目はすべて新規か、すでにペルソナと完全に一致していたため、決めることはありませんでした。その他は何も変わっていません。"
 
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
@@ -377,9 +499,17 @@ msgstr "形式のプレビュー"
 msgid "Full script guide"
 msgstr "スクリプトの完全ガイド"
 
+#. Heading when a reviewed persona import is done
+msgid "Here is what changed"
+msgstr "変更内容"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "チャンネルリストを隠す"
+
+#. Button that hides the comparison of a persona with the import file
+msgid "Hide comparison"
+msgstr "比較を隠す"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -397,23 +527,29 @@ msgstr "ウィンドウの端にカーソルを近づけると、折りたたん
 msgid "Icon file is too large. Choose an image smaller than 10MB."
 msgstr "アイコンファイルが大きすぎます。10MB 未満の画像を選択してください。"
 
-#. Modal title for PluralKit import step completed
-msgid "Import Complete"
+#. Title of the persona import dialog when the import is done
+msgid "Import finished"
 msgstr "インポート完了"
 
-msgid "Import Complete!"
-msgstr "インポート完了！"
+#. Title of the persona import dialog
+msgid "Import personas"
+msgstr "ペルソナをインポート"
 
-msgid "Import Strategy"
-msgstr "インポート方法"
+#. Summary in the import review footer when every choice leaves things as they are
+msgid "Import will change nothing"
+msgstr "インポートしても何も変わりません"
 
-#. Modal title for PluralKit import step select
-msgid "Import from PluralKit"
-msgstr "PluralKit からインポート"
+#. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
+msgid "Import will {actions}"
+msgstr "インポート内容: {actions}"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "ペルソナをインポート中..."
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Importing never changes or removes a persona you already have unless you choose it. New members are added straight away. If any member might match or clash with one of your personas, you'll review it before anything is imported."
+msgstr "あなたが選ばない限り、インポートによって既存のペルソナが変更・削除されることはありません。新しいメンバーはすぐに追加されます。あなたのペルソナと一致または競合する可能性のあるメンバーがいる場合は、インポートの前に確認できます。"
 
 msgid "Importing..."
 msgstr "インポート中..."
@@ -421,6 +557,27 @@ msgstr "インポート中..."
 #. Option for where the selected persona applies: each channel remembers its own persona
 msgid "In each channel"
 msgstr "チャンネルごと"
+
+#. Column heading in the import review
+msgid "In this app"
+msgstr "このアプリ内"
+
+#. Explanation of a section of the import review
+msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
+msgstr "このアプリでは、各プロキシタグは 1 つのペルソナにのみ属します。これらのメンバーには、別のペルソナがすでに持っているタグ、またはファイル内の別のメンバーも持っているタグがあります。"
+
+#. Column heading in the table comparing a persona with the import file
+msgid "In this app now"
+msgstr "このアプリ内 (現在)"
+
+#. Column heading in the import review
+#. Column heading in the table comparing a persona with the import file
+msgid "In your file"
+msgstr "ファイル内"
+
+#. Explanation of the "Kept as they were" line of the import result
+msgid "Including any that differ from the file, where you kept the version you had."
+msgstr "ファイルと異なっていても、元のバージョンを残したものも含みます。"
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -441,16 +598,42 @@ msgstr "挿入:"
 msgid "Its script has a problem."
 msgstr "スクリプトに問題があります。"
 
-msgid "Keep existing and add new (Recommended)"
-msgstr "既存を残して新規を追加 (推奨)"
+#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
+msgid "Keep this version"
+msgstr "このバージョンを残す"
 
-#. placeholder {0}: members.length
-msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "現在の {existingCount} 件のペルソナを残し、インポートした {0} 件のペルソナをすべて新しい項目として追加します。"
+#. Button in the import review: keep every listed persona as it is
+msgid "Keep this version for all"
+msgstr "すべてこのバージョンを残す"
+
+#. Choice in the import review: keep the display tag {tag}
+msgid "Keep yours: {tag}"
+msgstr "今のタグを残す: {tag}"
+
+#. Line of the import result: personas left unchanged
+msgid "Kept as they were"
+msgstr "変更なし"
+
+#. Choice in the import review for a persona that was deleted: keep it deleted
+msgid "Leave deleted"
+msgstr "削除したままにする"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "{line} 行目、{column} 列目: {problem}"
+
+#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
+msgctxt "persona-import-choice"
+msgid "Link"
+msgstr "リンクする"
+
+#. Button in the import review that links every persona listed
+msgid "Link all {count}"
+msgstr "{count} 件すべてリンク"
+
+#. Shown on a persona in the import review that is already connected to a different member
+msgid "Linked to another PluralKit member"
+msgstr "別の PluralKit メンバーにリンク済み"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -511,6 +694,10 @@ msgstr "メンバー #{index}"
 msgid "Members with Avatars"
 msgstr "アバターのあるメンバー"
 
+#. Explanation of a section of the import review
+msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
+msgstr "まだ持っていない、名前やタグの重複がないメンバーです。不要なものはチェックを外してください。"
+
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "メッセージツール"
@@ -527,6 +714,10 @@ msgstr "よく使う順"
 msgid "Name (A–Z)"
 msgstr "名前順（A–Z）"
 
+#. Badge on a section of the import review where every member needs a choice
+msgid "Needs a decision"
+msgstr "判断が必要"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "新しいペルソナ"
@@ -534,6 +725,18 @@ msgstr "新しいペルソナ"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "新しいコマンド"
+
+#. Section of the import review
+msgid "New in your file"
+msgstr "ファイル内の新規"
+
+#. Explanation of the "Added" line of the import result
+msgid "New personas from your file."
+msgstr "ファイルからの新しいペルソナです。"
+
+#. Shown instead of a picture from the import file, which isn't loaded until it is stored on this server
+msgid "New picture in the file, shown once imported"
+msgstr "ファイル内の新しい画像 (インポート後に表示)"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -554,6 +757,10 @@ msgstr "自己紹介はまだありません。"
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "コマンドがありません"
+
+#. Shown in Settings › Personas when there are no deleted personas
+msgid "No deleted personas."
+msgstr "削除したペルソナはありません。"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "表示タグが設定されていません。メッセージにはアカウントのプロフィール画像が表示されます。"
@@ -590,6 +797,10 @@ msgstr "このシグナルをオンにしている人はいません"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "公開しているペルソナはまだありません。ペルソナの公開範囲を「公開」にすると、ほかの人にもここに表示されます。"
 
+#. Hint on the choice to skip a member in the import review
+msgid "Nothing changes. It stays in your file for next time."
+msgstr "何も変わりません。次回のためにファイルに残ります。"
+
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
 msgstr "すべてのチャンネルで1つのペルソナ。"
@@ -610,10 +821,6 @@ msgstr "新しいウィンドウで開く"
 msgid "Optional"
 msgstr "任意"
 
-#. Placeholder for system badge in import modal
-msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "任意のシステムバッジ、例: ⚞Seraphim⚟"
-
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "ほかの人には {count, plural, other {# 件の公開ペルソナ}} が表示されます。"
@@ -629,9 +836,6 @@ msgstr "プレーンテキストとして貼り付け"
 #. Settings search synonym.
 msgid "Peek"
 msgstr "のぞき見"
-
-msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "既存の {existingCount} 件のペルソナをすべて完全に削除し、インポートしたペルソナに置き換えます。"
 
 #. A community command counter counts per person mentioned. The command then needs a mention to run.
 msgid "Person mentioned"
@@ -734,10 +938,6 @@ msgstr "KLIPY 提供"
 msgid "Prefix (e.g. [)"
 msgstr "プレフィックス (例: [)"
 
-#. Progress status when preparing avatar batch download
-msgid "Preparing avatar batch download..."
-msgstr "アバターの一括ダウンロードを準備中..."
-
 #. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "F6 キーを押すと、キーボードでこのウィンドウに移動できます。"
@@ -748,6 +948,7 @@ msgstr "前のペルソナ"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
+#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "非公開"
@@ -755,6 +956,14 @@ msgstr "非公開"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "非公開ペルソナ"
+
+#. Short name of a section of the import review
+msgid "Probably the same"
+msgstr "おそらく同じ"
+
+#. Section of the import review
+msgid "Probably the same persona"
+msgstr "おそらく同じペルソナ"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -769,6 +978,7 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "プロフィールカードはメッセージをクリックすると表示でき、フレンドや共通のサーバーに向けて公開ペルソナリストに表示されます。"
 
 #. Chip above the persona list: public personas.
+#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "公開"
@@ -810,15 +1020,6 @@ msgstr "シグネチャー絵文字を削除"
 msgid "Remove tag pair"
 msgstr "タグのペアを削除"
 
-msgid "Replace All"
-msgstr "すべて置き換え"
-
-msgid "Replace All Personas"
-msgstr "すべてのペルソナを置き換え"
-
-msgid "Replace all existing personas (Destructive)"
-msgstr "既存のペルソナをすべて置き換え (元に戻せません)"
-
 #. Why an image could not be imported when the server answered with HTTP status {status}
 msgid "Request failed (HTTP {status})"
 msgstr "リクエストに失敗しました (HTTP {status})"
@@ -835,12 +1036,49 @@ msgstr "全員のシグナルをリセット"
 msgid "Reset the counts of {name}? This can't be undone."
 msgstr "{name} のカウントをリセットしますか?元に戻すことはできません。"
 
+#. Button that brings back a deleted persona
+#. Choice in the import review: bring a deleted persona back, with its old messages
+msgid "Restore"
+msgstr "復元"
+
+#. Button in the import review that restores every deleted persona listed
+msgid "Restore all {count}"
+msgstr "{count} 件すべて復元"
+
+#. Explanation of the "Still deleted" line of the import result
+msgid "Restore them from Deleted personas in Settings if you change your mind."
+msgstr "気が変わったら、設定の「削除したペルソナ」から復元できます。"
+
+#. Line of the import result: deleted personas brought back
+msgid "Restored"
+msgstr "復元済み"
+
+#. Title of the persona import review
+msgid "Review before importing"
+msgstr "インポート前に確認"
+
 msgid "Root Account (Default)"
 msgstr "ルートアカウント (デフォルト)"
 
 #. Button under the preview of a command script that picks at random: fills the preview in again.
 msgid "Run again"
 msgstr "もう一度実行"
+
+#. Badge on the safest choice in the import review
+msgid "Safest"
+msgstr "最も安全"
+
+#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
+msgid "Same as your {name}: link them"
+msgstr "あなたの {name} と同じ: リンクする"
+
+#. Explanation of a section of the import review
+msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
+msgstr "名前もタグもあなたのペルソナの 1 つと同じですが、手動で作成したなどの理由で、まだファイルとリンクされていません。リンクでは、それぞれがファイル内のどのメンバーにあたるかを記録するだけなので、今後のインポートで認識されるようになります。ペルソナの内容は何も変わりません。"
+
+#. Comparison of a persona picture with the import file: they are the same
+msgid "Same picture"
+msgstr "同じ画像"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -898,6 +1136,14 @@ msgstr "アクティブなペルソナに設定"
 msgid "Show copy button"
 msgstr "コピーボタンを表示"
 
+#. Button that loads the list of deleted personas in Settings › Personas
+msgid "Show deleted personas"
+msgstr "削除したペルソナを表示"
+
+#. Button that collapses a list in the import review again
+msgid "Show fewer"
+msgstr "表示を減らす"
+
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
@@ -910,6 +1156,10 @@ msgstr "シグナルバーを表示"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "限定公開と非公開も表示"
+
+#. Button that shows the rest of a list in the import review
+msgid "Show {count} more"
+msgstr "さらに {count} 件表示"
 
 msgid "Signal Bar"
 msgstr "シグナルバー"
@@ -937,6 +1187,18 @@ msgstr "シグネチャー絵文字"
 msgid "Signature emoji already in use by persona \"{name}\""
 msgstr "シグネチャー絵文字はすでにペルソナ「{name}」で使用されています"
 
+#. Row heading in the table comparing a persona with the import file
+msgid "Signature emojis"
+msgstr "シグネチャー絵文字"
+
+#. Choice in the import review: do nothing with this member of the import file
+msgid "Skip this member"
+msgstr "このメンバーをスキップ"
+
+#. Line of the import result: members left out
+msgid "Skipped"
+msgstr "スキップ済み"
+
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "名前が設定されていないため、メンバーをスキップしました。"
@@ -945,16 +1207,17 @@ msgstr "名前が設定されていないため、メンバーをスキップし
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "一部のプロキシタグは省略されました: {productName} ではペルソナごとに最大 5 個、各 32 文字までです。"
 
-msgid "Start Import"
-msgstr "インポートを開始"
+#. Line of the import result: deleted personas not restored
+msgid "Still deleted"
+msgstr "削除したまま"
+
+#. Explanation of the "Skipped" line of the import result
+msgid "Still in your file. Import it again any time to decide about them."
+msgstr "ファイルに残っています。いつでも再度インポートして決められます。"
 
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "ファイルから画像を保存中 {current}/{total}..."
-
-#. placeholder {0}: importResults.successCount
-msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "{0} 件のペルソナをアカウントにインポートしました。すべてのアバター画像はローカルサーバーに安全に保存されています。"
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
@@ -971,9 +1234,6 @@ msgstr "PluralKit のシステムエクスポートファイルに対応"
 msgid "Switch the active persona"
 msgstr "アクティブなペルソナを切り替える"
 
-msgid "System Tag (Applied to imported personas)"
-msgstr "システムタグ (インポートしたペルソナに適用)"
-
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -981,6 +1241,18 @@ msgstr "タグアイコン"
 
 msgid "Tag Text"
 msgstr "タグテキスト"
+
+#. Section of the import review
+msgid "Tag already in use"
+msgstr "タグはすでに使用中"
+
+#. Short name of a section of the import review
+msgid "Tag in use"
+msgstr "タグ使用中"
+
+#. Row heading in the table comparing a persona with the import file: whether its tags are matched
+msgid "Tag matching"
+msgstr "タグの認識"
 
 #. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
 msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
@@ -1010,6 +1282,10 @@ msgstr "チャンネルのメンション"
 msgid "The chosen file is not a valid JSON object."
 msgstr "選択したファイルは有効な JSON オブジェクトではありません。"
 
+#. Error in Settings › Personas when the list of deleted personas fails to load
+msgid "The deleted personas could not be loaded."
+msgstr "削除したペルソナを読み込めませんでした。"
+
 #. Help for a command script variable.
 msgid "The first person they mention, if any"
 msgstr "メンションされた最初の人（いる場合）"
@@ -1021,6 +1297,10 @@ msgstr "このコミュニティの名前"
 #. Help for a command script variable.
 msgid "The person running it, as a mention"
 msgstr "使った人のメンション"
+
+#. Error toast when restoring a deleted persona fails
+msgid "The persona could not be restored."
+msgstr "ペルソナを復元できませんでした。"
 
 #. Description of the persona option of the /persona slash command
 msgid "The persona to select."
@@ -1045,6 +1325,10 @@ msgstr "ここでチャンネルにチェックを入れるまで、シグナル
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "タグアイコンを保存できませんでした: {error}。ペルソナ設定で再度設定できます。"
 
+#. Explanation of the "Updated from the file" line of the import result
+msgid "Their details are the file's now; their messages and history stayed."
+msgstr "詳細はファイルの内容になりました。メッセージと履歴はそのままです。"
+
 #. Explains what deleting personas does, in its confirmation.
 msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
 msgstr "メッセージには名前とアバターが引き続き表示されますが、そのペルソナとして送信できなくなり、タグとシグネチャー絵文字は解放されます。この操作は取り消せません。"
@@ -1064,6 +1348,14 @@ msgstr "{name} というフィルターはありません。"
 #. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
 msgid "There's no tag called {name}."
 msgstr "{name} というタグはありません。"
+
+#. Explanation of a section of the import review
+msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
+msgstr "これらは以前ファイルから取り込まれましたが、現在ファイルの詳細が異なるか、その後ここで変更されています。どちら側が変わったのか判断できないため、ペルソナごとにファイルのバージョンを選ばない限り、このアプリのバージョンが残ります。ファイルのバージョンはそのペルソナの詳細を置き換えますが、メッセージ、履歴、公開範囲、シグネチャー絵文字はそのまま残り、ダウンロードできない画像も残ります。"
+
+#. Explanation of a section of the import review
+msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
+msgstr "復元しない限り、削除されたままです。復元するとコピーを作るのではなく、同じペルソナが以前のメッセージや使用履歴とともに元の状態で戻ります。"
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1132,6 +1424,7 @@ msgstr "これらのタグを入力してもこのペルソナには切り替わ
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
+#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "限定公開"
@@ -1151,6 +1444,10 @@ msgstr "タグのないメッセージは選択したペルソナとして送信
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "タグのないメッセージは最後に発言したペルソナとして送信されます。タグを使うとそのペルソナに切り替わります。"
+
+#. Line of the import result: personas given the file's details
+msgid "Updated from the file"
+msgstr "ファイルから更新"
 
 #. Tooltip on the chip that shows which community command made a message. Preserve {name}.
 msgid "Use /{name}"
@@ -1188,6 +1485,14 @@ msgstr "小文字、数字、-、_ を使い、32文字以内にしてくださ�
 msgid "Use the basic editor"
 msgstr "基本エディターを使う"
 
+#. Choice in the import review: replace the persona's details with those in the import file
+msgid "Use the file's version"
+msgstr "ファイルのバージョンを使う"
+
+#. Choice in the import review: use the import file's system tag {tag} as the display tag
+msgid "Use the file's: {tag}"
+msgstr "ファイルのタグを使う: {tag}"
+
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "スクリプトエディターを使う"
@@ -1196,10 +1501,18 @@ msgstr "スクリプトエディターを使う"
 msgid "View your personas"
 msgstr "ペルソナを表示"
 
+#. Heading of the choices for one member of the import file
+msgid "What should happen to {name} from your file?"
+msgstr "ファイルの {name} をどうしますか？"
+
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "入力された内容"
+
+#. Accessible label of the menu of choices for one persona in the import review
+msgid "What to do with {name}"
+msgstr "{name} の処理"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1216,13 +1529,57 @@ msgstr "ペルソナを記憶する範囲"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "数を 1st, 2nd, 3rd の形で書く"
 
+#. Hint on the choice to add a member without its proxy tag, in the import review
+msgid "You can give it another tag later in Settings."
+msgstr "後で設定から別のタグを付けられます。"
+
+#. Section of the import review
+msgid "You deleted these"
+msgstr "削除したもの"
+
+#. Hint on the choice to add a member as a separate persona, in the import review
+msgid "You will have one more {name}."
+msgstr "{name} がもう 1 つ増えます。"
+
+#. Explanation of a section of the import review
+msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
+msgstr "アカウントの表示タグは 1 つで、すべてのペルソナ名の後に表示されます。ファイルのシステムタグはこれとは異なります。"
+
+#. Hint on the choice to link a member to an existing persona, in the import review
+msgid "Your persona stays as it is; it is connected to this member."
+msgstr "あなたのペルソナはそのままで、このメンバーにリンクされます。"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "add {count}"
+msgstr "{count} 件を追加"
+
+#. A persona field, listed in "Differs: name, avatar"
+msgid "avatar"
+msgstr "アバター"
+
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "アバターをダウンロード済み"
 
+#. A persona field, listed in "Differs: name, banner"
+msgid "banner"
+msgstr "バナー"
+
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "バナーをダウンロード済み"
+
+#. A persona field, listed in "Differs: name, bio"
+msgid "bio"
+msgstr "自己紹介"
+
+#. Part of the import summary "Import will add 7 and change your display tag"
+msgid "change your display tag"
+msgstr "表示タグを変更"
+
+#. A persona field (its accent colour), listed in "Differs: name, colour"
+msgid "colour"
+msgstr "色"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1248,13 +1605,50 @@ msgstr "画像を保存済み"
 msgid "items"
 msgstr "件"
 
-#. Progress label for prepared personas
-msgid "personas prepared"
-msgstr "ペルソナを準備済み"
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "link {count}"
+msgstr "{count} 件をリンク"
+
+#. A persona's name as a field, listed in "Differs: name, bio"
+msgctxt "persona-field"
+msgid "name"
+msgstr "名前"
+
+#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
+msgid "picture not compared"
+msgstr "画像は未比較"
+
+#. A persona field, listed in "Differs: name, pronouns"
+msgid "pronouns"
+msgstr "代名詞"
+
+#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
+msgid "removes {fields}"
+msgstr "{fields} を削除"
+
+#. Part of the import summary "Import will link 17, restore 2, skip 3"
+msgid "restore {count}"
+msgstr "{count} 件を復元"
 
 #. Progress label when saving personas
 msgid "saving personas"
 msgstr "ペルソナを保存済み"
+
+#. A persona field, listed in "Differs: name, signature emojis"
+msgid "signature emojis"
+msgstr "シグネチャー絵文字"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "skip {count}"
+msgstr "{count} 件をスキップ"
+
+#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
+msgid "tag matching"
+msgstr "タグの認識"
+
+#. A persona field (its proxy tags), listed in "Differs: name, tags"
+msgid "tags"
+msgstr "タグ"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1263,9 +1657,13 @@ msgstr "ペルソナを保存済み"
 msgid "text"
 msgstr "テキスト"
 
-#. placeholder {0}: importResults.warnings.length
-msgid "{0} notice(s) during import"
-msgstr "インポート中に {0} 件の通知"
+#. Part of the import summary "Import will link 17, use the file's version for 2"
+msgid "use the file's version for {count}"
+msgstr "{count} 件にファイルのバージョンを使用"
+
+#. A persona field, listed in "Differs: name, visibility"
+msgid "visibility"
+msgstr "公開範囲"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1273,6 +1671,10 @@ msgstr "インポート中に {0} 件の通知"
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{1} 件中 {0} 件 {2} ({3}%)"
+
+#. Heading when a persona import with nothing to decide is done. {addedCount} is a number
+msgid "{addedCount} personas added"
+msgstr "{addedCount} 件のペルソナを追加しました"
 
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
@@ -1290,6 +1692,10 @@ msgstr "{count, plural, other {# 件のペルソナを公開にしました}}"
 msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
 msgstr "{count, plural, other {# 件のペルソナを限定公開にしました}}"
 
+#. Second line of the import review footer
+msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
+msgstr "{count, plural, other {# 件のペルソナは変更なし}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, other {# 件のペルソナ}}"
@@ -1298,9 +1704,21 @@ msgstr "{count, plural, other {# 件のペルソナ}}"
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, other {# 件のペルソナを削除しました}}"
 
+#. How often a persona has been used, shown in the import review
+#. How often a persona has been used, shown in the import review
+msgid "{count, plural, one {Used once} other {Used # times}}"
+msgstr "{count, plural, other {# 回使用}}"
+
+msgid "{count} notice(s) during import"
+msgstr "インポート中のお知らせ: {count} 件"
+
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
 msgstr "{count} 件選択中"
+
+#. Second line of the import review footer: deleted personas that are not restored
+msgid "{count} stay deleted"
+msgstr "{count} 件は削除したまま"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
@@ -1310,13 +1728,29 @@ msgstr "{domain} はこのアプリより新しいバージョンの {productNam
 msgid "{label}: {names}"
 msgstr "{label}：{names}"
 
+#. A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names
+msgid "{names} would all have {label}. Change one of the choices."
+msgstr "{names} がすべて {label} を持つことになります。選択肢のいずれかを変更してください。"
+
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - クリックしてペルソナを切り替え"
 
+#. Toast after a deleted persona was restored
+msgid "{name} is back."
+msgstr "{name} が戻りました。"
+
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "{name} が閉じられていません。"
+
+#. Heading of the import review. {needCount} is a number of members
+msgid "{needCount} members and your display tag need a look"
+msgstr "{needCount} 人のメンバーと表示タグの確認が必要です"
+
+#. Heading of the import review. {needCount} is a number of members
+msgid "{needCount} members need a look"
+msgstr "{needCount} 人のメンバーの確認が必要です"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -1332,6 +1766,18 @@ msgstr "公開 {publicCount}、限定公開 {unlistedCount}、非公開 {private
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "{total} 件中 {shown} 件のペルソナ"
+
+#. Closing line of the import review. {untouched} is a number of personas
+msgid "{untouched} of your personas aren't in this file. They stay as they are."
+msgstr "あなたのペルソナのうち {untouched} 件はこのファイルにありません。そのまま残ります。"
+
+#. Closing line of the import review. {upToDate} is a number of members
+msgid "{upToDate} members match their persona exactly. Nothing to do."
+msgstr "{upToDate} 人のメンバーはペルソナと完全に一致しています。対応は不要です。"
+
+#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
+msgid "{visibility} (this app's is kept)"
+msgstr "{visibility} (このアプリの設定を維持)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— 今日 12:00"
