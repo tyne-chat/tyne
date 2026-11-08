@@ -202,6 +202,7 @@ describe('PersonaEvents', () => {
 				is_latched: true,
 				display_tag_text: 'SYS',
 				display_tag_icon: '3c4d5e6f',
+				multi_persona_reactions: false,
 			},
 			mockContext,
 		);
@@ -211,6 +212,7 @@ describe('PersonaEvents', () => {
 		expect(PersonaStore.isPersonaLatched).toBe(true);
 		expect(PersonaStore.displayTagText).toBe('SYS');
 		expect(PersonaStore.displayTagIcon).toBe('3c4d5e6f');
+		expect(PersonaStore.multiPersonaReactions).toBe(false);
 	});
 
 	it('notifies MessageReactions and Messages on USER_PERSONA_UPDATE', () => {

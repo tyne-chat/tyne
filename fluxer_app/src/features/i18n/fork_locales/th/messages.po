@@ -406,6 +406,9 @@ msgstr "แก้ไข Persona"
 msgid "Edit timestamp"
 msgstr "แก้ไขการประทับเวลา\\"
 
+msgid "Everyone else"
+msgstr "คนอื่นทั้งหมด"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "อย่างอื่นทั้งหมดยังเหมือนเดิมทุกประการ"
@@ -471,6 +474,9 @@ msgstr "อัปเดตแท็กแสดงผลไม่สำเร็
 
 msgid "Failed to update persona mode"
 msgstr "อัปเดตโหมด Persona ไม่สำเร็จ"
+
+msgid "Failed to update the reaction setting"
+msgstr "อัปเดตการตั้งค่ารีแอ็กชันไม่สำเร็จ"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "เปลี่ยนตำแหน่งที่จดจำ Persona ของคุณไม่สำเร็จ"
@@ -768,6 +774,9 @@ msgstr "ยังไม่ได้ตั้งค่าแท็กแสดง
 msgid "No matching personas found."
 msgstr "ไม่พบ Persona ที่ตรงกัน"
 
+msgid "No one matches."
+msgstr "ไม่มีรายการที่ตรงกัน"
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "ยังไม่มี Persona ที่ตั้งค่าไว้ สร้างได้ในการตั้งค่า"
 
@@ -987,9 +996,16 @@ msgstr "สาธารณะ"
 msgid "Public persona"
 msgstr "Persona สาธารณะ"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "รีแอ็กชันในฐานะหลาย Persona พร้อมกัน"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "แสดงความรู้สึกในฐานะ..."
+
+msgid "Reacted"
+msgstr "รีแอ็กชันแล้ว"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "กำลังแสดงความรู้สึกในฐานะ <0>{reactorName}</0>"
@@ -1000,6 +1016,9 @@ msgstr "โต้ตอบในฐานะ {name}"
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "การแสดงความรู้สึกด้วยอีโมจิประจำตัวจะแสดงความรู้สึกในฐานะตัวตนนี้เสมอ ไม่ว่าจะใช้ตัวตนใดอยู่ก็ตาม"
+
+msgid "Recent"
+msgstr "ล่าสุด"
 
 msgid "Recent Personas"
 msgstr "Persona ล่าสุด"
@@ -1053,6 +1072,9 @@ msgstr "หากเปลี่ยนใจ กู้คืนได้จา�
 msgid "Restored"
 msgstr "กู้คืนแล้ว"
 
+msgid "Results"
+msgstr "ผลลัพธ์"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "ตรวจสอบก่อนนำเข้า"
@@ -1104,7 +1126,6 @@ msgstr "ผลการค้นหา ({0})"
 msgid "Search commands"
 msgstr "ค้นหาคำสั่ง"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "ค้นหา Persona, แท็ก, คำสรรพนาม..."
@@ -1549,6 +1570,13 @@ msgstr "บัญชีของคุณมีแท็กแสดงผลเ
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "Persona ของคุณคงเดิม และเชื่อมโยงกับสมาชิกนี้"
 
+msgid "Your reactions"
+msgstr "รีแอ็กชันของคุณ"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "รีแอ็กชัน {emojiName} ของคุณ"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "เพิ่ม {count} รายการ"
@@ -1617,6 +1645,10 @@ msgstr "ชื่อ"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "ไม่ได้เปรียบเทียบรูป"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "กดเพื่อดูรีแอ็กชันของคุณ"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, other {ใช้แล้ว # ครั้ง}}"
 
 msgid "{count} notice(s) during import"
 msgstr "มีการแจ้งเตือน {count} รายการระหว่างนำเข้า"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count} จาก {total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "รีแอ็กชันแล้ว {count} จาก {total}"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
