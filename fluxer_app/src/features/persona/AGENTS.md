@@ -24,6 +24,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | Profile popout and sheet | `components/PersonaProfilePopout.tsx`, `PersonaProfileMobileSheet.tsx`, `utils/usePersonaProfile.ts` |
 | An account's personas: Personas tab, sheet and pill | `components/gallery/`, `components/PersonasPill.tsx`, `state/PersonaDirectory.ts`, `utils/usePersonaDirectory.ts`, `utils/PersonaProfileTab.ts` |
 | Avatar and banner menus (popout) | `utils/usePersonaImageMenus.tsx` |
+| Reacting as several personas: chip, "Your reactions", "React as…" | `components/reactions/`, `components/PersonaReactAsModal.tsx`, `utils/PersonaReactionIdentities.ts` (pure) |
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
 | Import review and its decisions | `components/modals/PersonaImportReview.tsx`, `utils/PersonaImportReview.ts` (pure), `utils/PersonaImportImages.ts` |
 | Deleted personas, Restore | `components/settings/DeletedPersonasSection.tsx` |
@@ -155,7 +156,32 @@ sheet (`openPersonaGallery`); mobile web also has a button before the mutual fri
 ## Reactions
 
 - `getEffectiveReactionPersona` picks, in order: the persona whose signature emoji it is, a tag in
-  the draft, then the selection. "React as…" (`PersonaReactAsModal`) picks explicitly.
+  the draft, then the selection. A plain click on a reaction chip reacts as that persona.
+- **The chip** (`reactions/PersonaReactionChip.tsx`, hooked into upstream's `MessageReactions.tsx`):
+  for an account with personas, once any of its identities reacted with the emoji
+  (`opensOwnReactionsMenu`), the chip shows a caret and a click opens "Your reactions"
+  (`reactions/OwnReactionsPopout.tsx`) instead of reacting; in the mobile layout it opens "React as…".
+  Before that, and for accounts without personas, the chip is upstream's toggle. While the popout
+  is open, the chip's hover tooltip (upstream's `ReactionTooltip`, on a layer above popouts) is kept
+  closed (`reactions/useHideTooltipWhile.ts`), or it would take the clicks meant for the rows.
+- **"Your reactions" and "React as…"** share `reactions/PersonaReactionList.tsx`: search, a Recent
+  row (frecency, only with 7 or more personas), then those who reacted and everyone else, in an order
+  fixed when it opens (the current persona, then the account, then by name). Rows are one line: name,
+  display tag, Current, and "Account" on the account's. Each row's toggle is the emoji. A click,
+  Enter or Space toggles and the list stays open, everywhere; clicking outside, Escape, the close
+  button or the dialog's Done closes it (one rule, chosen in review over a click that closes and
+  Shift+click to stay). One toggle is one request, and there is no
+  select-all: a list of 60 personas would go over the reactions limit (30 per 10 s per channel) and
+  near the global one. The rows read the reaction through `useMessageReactions`, which stays current.
+- **"React as several personas at once"** (`multi_persona_reactions` in the persona settings, on by
+  default; the switch is on the Personas settings page). Off, an emoji keeps one reaction from the
+  account: a chip any of its identities reacted with has no caret and a click removes all of the
+  account's reactions with it (one request each); a chip only others reacted with reacts as the
+  current persona; the emoji picker and quick reactions follow the same rule (`toggleOwnReaction`,
+  `utils/OwnReactions.ts`, through `handleEmojiSelect`); "React as…" is a single choice that
+  closes on a pick and replaces the account's other reactions with the emoji (`reactAsOnly`). The
+  composer's `+:emoji:` shorthand, emoji autocomplete reactions and forum posts still add as the
+  current persona whatever the setting.
 - `ReactionCommands` sends the persona in the body when adding, and in the query when removing, where
   `'0'` means the account. Several personas of one account may each react to the same message.
 - Open: tyne-chat/tyne#120 (`MESSAGE_REACTION_ADD_MANY` drops the persona), #123 (removing a
@@ -241,8 +267,8 @@ The signal bar follows the composer's persona through `SignalBarStore.affirmPers
 
 - Next to the code: `PersonaStore.test.ts`, `PersonaStorePerChannel.test.ts`,
   `PersonaEvents.test.ts`, `PersonaCommands.test.ts`, `OutgoingPersona.test.ts`, the component tests,
-  and `PersonaAvatarUsage.test.ts`. Fixtures: `state/__fixtures__/PersonaTestFixtures.ts`
-  (`addTestPersona`) and `__fixtures__/IntervalTracker.ts`.
+  `PersonaReactionIdentities.test.ts` and `PersonaAvatarUsage.test.ts`. Fixtures:
+  `state/__fixtures__/PersonaTestFixtures.ts` (`addTestPersona`) and `__fixtures__/IntervalTracker.ts`.
 - Beside upstream files: the `*Persona*.test.ts(x)` files in `messaging`, `channel`, `lexical` and
   elsewhere.
 - End to end: `e2e/web/*/persona-*.spec.ts` (26 specs).
