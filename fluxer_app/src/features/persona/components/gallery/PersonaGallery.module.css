@@ -1,0 +1,693 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* The Personas tab and sheet (tyne-chat/tyne#189). Cards follow Discovery's community card
+   (DiscoveryGuildCard.module.css) with the profile's 17:6 banner; rows follow the persona settings
+   list; the sort panel is the forum's. Column counts follow the width of the gallery itself
+   (container queries in rem), as narrow windows need (tyne-chat/tyne#232). */
+
+.gallery {
+	container-type: inline-size;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	padding-bottom: 1rem;
+}
+
+.galleryMobile {
+	padding-bottom: 0.5rem;
+}
+
+.ownerBar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.25rem 0.75rem;
+	margin: 0.625rem 1rem 0;
+	padding: 0.375rem 0.625rem;
+	border: 0.0625rem solid var(--background-modifier-accent);
+	border-radius: var(--radius-lg);
+	background: var(--background-secondary);
+	font-size: 0.8125rem;
+	color: var(--text-secondary);
+}
+
+.ownerBarText {
+	flex: 0 1 auto;
+	min-width: 0;
+}
+
+.ownerSwitch {
+	flex: 0 0 auto;
+	margin-inline-start: auto;
+}
+
+.ownerManage {
+	flex: 0 0 auto;
+	padding: 0.125rem 0.25rem;
+	border-radius: var(--radius-sm, 0.25rem);
+	color: var(--text-link);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.ownerManage:hover {
+	text-decoration: underline;
+}
+
+/* Not sticky: in the profile window the header already takes most of the height, so the search row
+   scrolls away with the list. */
+.toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.625rem 1rem 0.375rem;
+}
+
+.searchWrap {
+	flex: 1 1 10rem;
+	min-width: 0;
+}
+
+.search {
+	width: 100%;
+}
+
+.clearSearch {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.25rem;
+	border-radius: var(--radius-sm, 0.25rem);
+	color: var(--text-tertiary);
+	cursor: pointer;
+}
+
+.clearSearch:hover {
+	color: var(--text-primary);
+}
+
+.viewTabs {
+	flex: 0 0 auto;
+}
+
+.viewSwitch {
+	display: inline-flex;
+	flex: 0 0 auto;
+	gap: 0.125rem;
+	padding: 0.125rem;
+	border: 0.0625rem solid var(--background-modifier-accent);
+	border-radius: var(--radius-md, 0.375rem);
+	background: var(--background-secondary);
+}
+
+.viewButton {
+	display: inline-grid;
+	place-items: center;
+	width: 2rem;
+	height: 1.875rem;
+	border-radius: var(--radius-sm, 0.25rem);
+	color: var(--text-tertiary);
+	cursor: pointer;
+}
+
+.viewButton:hover {
+	color: var(--text-primary);
+	background: var(--background-modifier-hover);
+}
+
+.viewButtonActive,
+.viewButtonActive:hover {
+	color: var(--text-primary);
+	background: var(--background-modifier-selected);
+}
+
+.mobileViewTabs {
+	padding: 0 1rem 0.5rem;
+}
+
+.countLine {
+	padding: 0 1rem 0.375rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: var(--text-tertiary);
+}
+
+.body {
+	padding: 0 1rem;
+	min-width: 0;
+}
+
+.state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 2rem 1rem;
+	text-align: center;
+	color: var(--text-tertiary);
+	font-size: 0.875rem;
+}
+
+.state p {
+	margin: 0;
+	max-width: 28rem;
+}
+
+.stateIcon {
+	color: var(--text-tertiary);
+}
+
+.muted {
+	color: var(--text-tertiary);
+	font-style: italic;
+}
+
+.dim .cardBannerWrap,
+.dim .rowAvatar,
+.dim .tileImage {
+	opacity: 0.55;
+}
+
+.visibility {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.1875rem;
+	padding: 0.0625rem 0.375rem;
+	border-radius: 0.25rem;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.visibilityUnlisted {
+	background: color-mix(in srgb, var(--status-warning, #f0b232) 18%, transparent);
+	color: var(--status-warning, #f0b232);
+}
+
+.visibilityPrivate {
+	background: color-mix(in srgb, var(--status-danger, #f23f43) 18%, transparent);
+	color: var(--status-danger, #f23f43);
+}
+
+.bannerImage {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+}
+
+/* Gallery */
+
+.cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+	gap: 0.75rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cardsMobile {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.5rem;
+}
+
+@container (max-width: 26rem) {
+	.cards:not(.cardsMobile) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.cardItem {
+	display: flex;
+	min-width: 0;
+}
+
+.card {
+	--persona-card-surface: var(--background-secondary);
+	position: relative;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0.0625rem solid var(--background-modifier-accent);
+	border-radius: var(--radius-lg);
+	background: var(--persona-card-surface);
+	color: inherit;
+	font: inherit;
+	text-align: start;
+	overflow: hidden;
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease-out,
+		border-color 0.15s ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.card:hover {
+		--persona-card-surface: var(--background-secondary-alt);
+		border-color: var(--background-modifier-accent-focus);
+	}
+}
+
+.cardBannerWrap {
+	position: relative;
+	display: block;
+	flex: 0 0 auto;
+}
+
+.cardBanner {
+	display: block;
+	aspect-ratio: 17 / 6;
+	overflow: hidden;
+	background-color: var(--background-tertiary);
+}
+
+.cardAvatar {
+	position: absolute;
+	inset-inline-start: 0.75rem;
+	bottom: 0;
+	display: inline-flex;
+	border-radius: 50%;
+	box-shadow: 0 0 0 0.25rem var(--persona-card-surface);
+	transform: translateY(50%);
+	transition: box-shadow 0.15s ease-out;
+}
+
+.galleryMobile .cardAvatar {
+	inset-inline-start: 0.5rem;
+}
+
+.cardBody {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+	padding: 1.75rem 0.75rem 0.5rem;
+}
+
+.galleryMobile .cardBody {
+	padding: 1.75rem 0.5rem 0.5rem;
+}
+
+.cardName {
+	display: flex;
+	align-items: baseline;
+	gap: 0.375rem;
+	min-width: 0;
+}
+
+.cardNameText {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.cardPronouns {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.8125rem;
+	color: var(--text-tertiary);
+}
+
+.cardBio {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	min-height: 2.6em;
+	font-size: 0.8125rem;
+	line-height: 1.3;
+	color: var(--text-secondary);
+}
+
+.cardFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 0.3125rem 0.75rem;
+	border-top: 0.0625rem solid var(--background-modifier-accent);
+	font-size: 0.75rem;
+	color: var(--text-tertiary);
+}
+
+.cardBadgeCorner {
+	position: absolute;
+	top: 0.375rem;
+	inset-inline-end: 0.375rem;
+}
+
+/* List */
+
+.rows {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.rowItem {
+	border-bottom: 0.0625rem solid var(--background-modifier-accent);
+}
+
+.rowItem:last-child {
+	border-bottom: 0;
+}
+
+.row {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 0.75rem;
+	width: 100%;
+	margin: 0;
+	padding: 0.625rem 0.5rem;
+	border: 0;
+	border-radius: var(--radius-md, 0.375rem);
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+}
+
+.row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.rowAvatar {
+	flex: none;
+}
+
+.rowText {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	min-width: 0;
+}
+
+.rowLine1 {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.25rem 0.375rem;
+	min-width: 0;
+}
+
+.rowName {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.rowPronouns {
+	font-size: 0.8125rem;
+	color: var(--text-tertiary);
+}
+
+.colorDot {
+	display: inline-block;
+	width: 0.625rem;
+	height: 0.625rem;
+	border-radius: 50%;
+}
+
+.tagPill {
+	padding: 0 0.3125rem;
+	border-radius: 0.25rem;
+	background: var(--background-modifier-selected, var(--background-tertiary));
+	font-family: var(--font-mono);
+	font-size: 0.6875rem;
+	color: var(--text-secondary);
+}
+
+.rowBio {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.8125rem;
+	color: var(--text-secondary);
+}
+
+.rowSide {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	font-size: 0.75rem;
+	color: var(--text-tertiary);
+}
+
+.rowStrip {
+	display: block;
+	width: 6rem;
+	aspect-ratio: 17 / 6;
+	overflow: hidden;
+	border-radius: var(--radius-md, 0.375rem);
+	background-color: var(--background-tertiary);
+}
+
+.rowStripEmpty {
+	visibility: hidden;
+}
+
+.rowCaret {
+	color: var(--text-tertiary);
+}
+
+@container (max-width: 32rem) {
+	.rowStrip,
+	.rowDate {
+		display: none;
+	}
+}
+
+/* Avatars */
+
+.tiles {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+	gap: 0.625rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.galleryMobile .tiles {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.5rem;
+}
+
+.tileItem {
+	display: flex;
+	min-width: 0;
+}
+
+.tile {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0.125rem solid var(--background-modifier-accent);
+	border-radius: var(--radius-lg);
+	background: var(--background-secondary);
+	color: inherit;
+	font: inherit;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.tile:hover {
+	background: var(--background-secondary-alt);
+}
+
+.tileImage {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1;
+	object-fit: cover;
+}
+
+.tileName {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.1875rem;
+	min-width: 0;
+	padding: 0.375rem 0.375rem 0.4375rem;
+}
+
+.tileNameText {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+/* One persona */
+
+.detail {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	outline: none;
+}
+
+.detailNav {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.625rem 0.75rem;
+	border-bottom: 0.0625rem solid var(--background-modifier-accent);
+	background: var(--background-primary);
+}
+
+.detailBack {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.375rem;
+	border-radius: var(--radius-md, 0.375rem);
+	font-weight: 600;
+	color: var(--text-primary);
+	cursor: pointer;
+}
+
+.detailBack:hover,
+.detailStep:hover {
+	background: var(--background-modifier-hover);
+}
+
+.detailPosition {
+	margin-inline-start: auto;
+	font-size: 0.8125rem;
+	color: var(--text-tertiary);
+}
+
+.detailStep {
+	display: inline-grid;
+	place-items: center;
+	width: 1.875rem;
+	height: 1.875rem;
+	border: 0.0625rem solid var(--background-modifier-accent);
+	border-radius: var(--radius-md, 0.375rem);
+	color: var(--text-primary);
+	cursor: pointer;
+}
+
+.detailBody {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.detailBannerWrap {
+	position: relative;
+}
+
+.detailBanner {
+	aspect-ratio: 17 / 6;
+	overflow: hidden;
+	background-color: var(--background-tertiary);
+}
+
+.detailAvatar {
+	position: absolute;
+	inset-inline-start: 1rem;
+	bottom: 0;
+	display: inline-flex;
+	border-radius: 50%;
+	box-shadow: 0 0 0 0.375rem var(--background-primary);
+	transform: translateY(50%);
+}
+
+.detailInfo {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	min-width: 0;
+	padding: 3.25rem 1rem 1rem;
+}
+
+.detailNameRow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.25rem 0.5rem;
+	min-width: 0;
+}
+
+.detailName {
+	margin: 0;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	font-size: 1.375rem;
+	font-weight: 700;
+	color: var(--text-primary);
+}
+
+.detailPronouns {
+	font-size: 0.9375rem;
+	color: var(--text-tertiary);
+}
+
+.detailActions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.25rem;
+}
+
+.detailSeparator {
+	height: 0.0625rem;
+	margin: 0.25rem 0;
+	background: var(--background-modifier-accent);
+}
+
+.detailBio {
+	margin: 0;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	font-size: 0.9375rem;
+	color: var(--text-secondary);
+}
+
+.detailFact {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	margin-top: 0.5rem;
+	font-size: 0.875rem;
+	color: var(--text-secondary);
+}
+
+.detailFactLabel {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: var(--text-primary);
+}

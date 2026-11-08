@@ -22,6 +22,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | Avatars | `utils/PersonaAvatarUrls.ts`, `components/PersonaAvatar.tsx` |
 | Display tag icon | `utils/PersonaTagIconUrls.ts` |
 | Profile popout and sheet | `components/PersonaProfilePopout.tsx`, `PersonaProfileMobileSheet.tsx`, `utils/usePersonaProfile.ts` |
+| An account's personas: Personas tab, sheet and pill | `components/gallery/`, `components/PersonasPill.tsx`, `state/PersonaDirectory.ts`, `utils/usePersonaDirectory.ts`, `utils/PersonaProfileTab.ts` |
 | Avatar and banner menus (popout) | `utils/usePersonaImageMenus.tsx` |
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
 | Tag matching | `packages/schema/src/domains/persona/PersonaMatcher.ts` (`matchPersona`) |
@@ -115,6 +116,34 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   personas) through `PersonaLookupBatcher`: lookups within 50 ms share one request, a lookup in
   flight is shared, and a failed or empty answer is not asked again for a while. It may be called
   while rendering for that reason.
+
+## An account's personas: the Personas tab, sheet and pill
+
+tyne-chat/tyne#189. Wherever a display tag shows on a profile, the "Personas (N)" pill follows it
+(`PersonasPill`, `AccountPersonaNameExtras`; since 2026-11-07 the account's own profile shows its
+display tag too). The pill opens the full profile's "Personas (N)" tab, or on phones the Personas
+sheet (`openPersonaGallery`); mobile web also has a button before the mutual friends.
+
+- **Data:** `usePersonaDirectory(userId)`. Someone else's list comes from `PersonaDirectory`
+  (`GET /users/:id/personas`: the display tag and the public personas, most used first): one
+  request per account, shared while in flight, kept a minute, a failure left alone a minute unless
+  Retry is pressed, a 403 hides the pill. `GUILD_PERSONAS_DIRTY` marks it out of date at once (a
+  profile opened then asks again) and, a second after the last copy (one arrives per shared
+  community), tells the components showing it, which ask once; a request on its way then is followed
+  by one more. Entries are keyed by the signed-in account too. One's own personas come from `PersonaStore`, with no request. Never ask
+  for the list per persona or per message.
+- **Counts:** N is the number of public personas, for the owner too. Others see public personas
+  only; the owner sees them as others do, and a switch adds the unlisted and private ones, marked,
+  with their proxy tags. "Recently used" is the owner's only: it would show who is fronting.
+- **Views:** Gallery (Discovery's card with the profile's 17:6 banner and corner avatar), List (the
+  settings row) and Avatars (PluralKit's "tiny"), kept per device in `PersonaGalleryPrefs`.
+- **One persona:** `PersonaGalleryDetail`, in place of the list, with Back, previous/next, the arrow
+  keys and a swipe on phones. Clicking a name in a persona's popout opens it there too
+  (`PersonaGalleryNav` carries the request to the profile window); a persona the list does not hold
+  (an unlisted one) is fetched on its own, and the tab then stays for it.
+- **Upstream hooks:** `ProfileBody.tsx` (the tab), `UserProfileModalShared.ts` (`ProfileTab`),
+  `UserProfileModalUserInfo.tsx`, `ProfileCardUserInfo.tsx` (`personaNameExtras`, under the name),
+  `UserProfilePopout.tsx`, `UserProfileMobileSheet.tsx`, and `Modals.tsx` (the sheet).
 
 ## Reactions
 

@@ -56,6 +56,10 @@ msgstr "爱丽丝"
 msgid "All Personas"
 msgstr "所有人格"
 
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "全部人格"
+
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
 msgstr "所有时区"
@@ -160,6 +164,10 @@ msgstr "无法运行 /{name}：{detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "无法保存 /{name}：{detail}"
 
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "无法加载人格。"
+
 #. Option of a community command counter: a persona counts as its own person, not as its account.
 msgid "Count personas separately"
 msgstr "分别计数人格"
@@ -183,6 +191,10 @@ msgstr "为此社区创建命令，并编辑或删除自己的命令。"
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "创建者：{name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "创建于 {date}"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -442,6 +454,10 @@ msgstr "管理和创建你的人格"
 msgid "Manage commands"
 msgstr "管理命令"
 
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "管理人格"
+
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
@@ -467,6 +483,14 @@ msgstr "消息工具"
 msgid "Messages members can post by typing /name."
 msgstr "成员输入 /name 即可发布的消息。"
 
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "最常使用"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "名称（A–Z）"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "新建人格"
@@ -479,9 +503,17 @@ msgstr "新建命令"
 msgid "New window"
 msgstr "新建窗口"
 
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "下一个人格"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "此导出文件中未找到“members”数组。"
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "还没有简介。"
 
 #. Empty state title in the Commands tab.
 msgid "No commands"
@@ -499,12 +531,24 @@ msgstr "尚未配置人格。请在设置中创建一个。"
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "尚未创建人格。点击“添加人格”来创建你的第一个人格！"
 
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "没有与你的搜索匹配的人格。"
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "没有公开的人格。"
+
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "还没有信号。添加信号后才会显示信号栏。"
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "还没有人开启此信号"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "你还没有公开的人格。将人格的可见性设为“公开”后，其他人就能在这里看到它。"
 
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
@@ -529,6 +573,10 @@ msgstr "可选"
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "可选的系统徽章，例如 ⚞Seraphim⚟"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "其他人能看到 {count, plural, other {# 个公开人格}}。"
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -589,6 +637,10 @@ msgstr "人格资料"
 msgid "Persona profile: {name}"
 msgstr "人格资料：{name}"
 
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "人格创建于"
+
 #. Toast when persona is updated
 msgid "Persona updated"
 msgstr "人格已更新"
@@ -601,6 +653,10 @@ msgstr "人格可见性"
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "人格"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "人格（{count}）"
 
 #. Help for an example in a command script.
 msgid "Pick one option at random"
@@ -642,6 +698,12 @@ msgstr "正在准备批量下载头像..."
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "按 F6 可用键盘进入此窗口。"
 
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "上一个人格"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
 #. Persona visibility private
 msgid "Private"
 msgstr "私密"
@@ -662,6 +724,7 @@ msgstr "只有点击此人格发送的消息时才能访问资料卡。不会列
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
 msgstr "点击消息即可访问资料卡，并且好友和共同服务器可在你的公开人格列表中看到。"
 
+#. Chip above the persona list: public personas.
 #. Persona visibility public
 msgid "Public"
 msgstr "公开"
@@ -686,6 +749,10 @@ msgstr "使用专属表情符号回应时，无论当前活跃角色是谁，都
 
 msgid "Recent Personas"
 msgstr "最近使用的人格"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "最近使用"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"
@@ -760,6 +827,14 @@ msgstr "搜索命令"
 msgid "Search personas, tags, pronouns..."
 msgstr "搜索人格、标签、代词..."
 
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "搜索你的人格"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "搜索 {name} 的人格"
+
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
 msgstr "正在以 @{username} 的身份发送（{mode}）- 点击切换人格"
@@ -787,6 +862,10 @@ msgstr "显示人格按钮"
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
 msgstr "显示信号栏"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "显示未列出和私密的人格"
 
 msgid "Signal Bar"
 msgstr "信号栏"
@@ -999,6 +1078,8 @@ msgstr "输入 {output} 或 {tag} 查看建议。"
 msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
 msgstr "输入这些标签不会切换到此人格。标签将按原样发送。"
 
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "未列出"
@@ -1126,6 +1207,7 @@ msgstr "个人格已保存"
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 msgid "text"
 msgstr "文本"
 
@@ -1144,6 +1226,10 @@ msgstr "{0} / {1} {2}（{3}%）"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} 已准备好安装。"
 
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, other {# 个人格}}"
+
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
 msgstr "{domain} 运行的 {productName} 版本比此应用新。请更新 {productName}，然后重试。"
@@ -1160,12 +1246,20 @@ msgstr "{name}（{mode}）- 点击切换人格"
 msgid "{name} is never closed."
 msgstr "{name} 始终未闭合。"
 
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "第 {position} 个，共 {total} 个"
+
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} 停止检查浏览器是否已批准此登录。您的代码未丢失。"
 
 msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
 msgstr "{publicCount} 个公开，{unlistedCount} 个未列出，{privateCount} 个私密"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "{shown} / {total} 个人格"
 
 msgid "— Today at 12:00 PM"
 msgstr "— 今天 12:00"

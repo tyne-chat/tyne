@@ -183,7 +183,8 @@ export class FluxerApiClient {
 	}
 
 	public async getPublicPersonas(userId: string): Promise<Array<any>> {
-		return this.request<Array<any>>(`/api/v1/users/${userId}/personas`);
+		const list = await this.request<{personas: Array<any>}>(`/api/v1/users/${userId}/personas`);
+		return list.personas;
 	}
 
 	public async getPublicPersona(userId: string, personaId: string): Promise<any> {

@@ -8,6 +8,7 @@ import {observer} from 'mobx-react-lite';
 
 // Fork imports.
 
+import {PersonaGallerySheet} from '@app/features/persona/components/gallery/PersonaGallerySheet';
 import {PersonaProfileMobileSheet} from '@app/features/persona/components/PersonaProfileMobileSheet';
 
 export const Modals = observer(() => {
@@ -16,6 +17,7 @@ export const Modals = observer(() => {
 			<MediaViewerModal data-flx="app.modals.media-viewer-modal" />
 			<UserProfileMobileSheet data-flx="app.modals.user-profile-mobile-sheet" />
 			<PersonaProfileMobileSheet data-flx="app.modals.persona-profile-mobile-sheet" />
+			<PersonaGallerySheet data-flx="app.modals.persona-gallery-sheet" />
 			<ModalStack data-flx="app.modals.modal-stack" />
 		</div>
 	);

@@ -56,6 +56,10 @@ msgstr "Аліса"
 msgid "All Personas"
 msgstr "Усі персони"
 
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "Усі персони"
+
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
 msgstr "Усі часові пояси"
@@ -160,6 +164,10 @@ msgstr "Не вдалося виконати /{name}: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Не вдалося зберегти /{name}: {detail}"
 
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "Не вдалося завантажити персони."
+
 #. Option of a community command counter: a persona counts as its own person, not as its account.
 msgid "Count personas separately"
 msgstr "Рахувати персони окремо"
@@ -183,6 +191,10 @@ msgstr "Створювати команди для цієї спільноти, 
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "Створено: {name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "Створено {date}"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -442,6 +454,10 @@ msgstr "Створюйте персони та керуйте ними"
 msgid "Manage commands"
 msgstr "Керувати командами"
 
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "Керування персонами"
+
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
@@ -467,6 +483,14 @@ msgstr "Інструменти повідомлень"
 msgid "Messages members can post by typing /name."
 msgstr "Повідомлення, які учасники можуть надіслати, ввівши /name."
 
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "Найчастіше використовувані"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "Ім’я (А–Я)"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Нова персона"
@@ -479,9 +503,17 @@ msgstr "Нова команда"
 msgid "New window"
 msgstr "Нове вікно"
 
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "Наступна персона"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "У цьому файлі експорту не знайдено масив «members»."
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "Опису ще немає."
 
 #. Empty state title in the Commands tab.
 msgid "No commands"
@@ -499,12 +531,24 @@ msgstr "Персони ще не налаштовано. Створіть пер
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "Персони ще не створено. Натисніть «Додати персону», щоб створити першу!"
 
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "Жодна персона не відповідає вашому запиту."
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "Немає публічних персон."
+
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Сигналів поки немає. Панель залишається прихованою, доки ти не додаси хоча б один."
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Ніхто не ввімкнув цей сигнал"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "Жодна з ваших персон ще не публічна. Інші побачать персону тут, коли ви встановите для неї видимість «Публічна»."
 
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
@@ -529,6 +573,10 @@ msgstr "Необов'язково"
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Необов'язковий значок системи, напр. ⚞Seraphim⚟"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "Інші бачать {count, plural, one {# публічну персону} few {# публічні персони} many {# публічних персон} other {# публічної персони}}."
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -589,6 +637,10 @@ msgstr "Профіль персони"
 msgid "Persona profile: {name}"
 msgstr "Профіль персони: {name}"
 
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "Персона з"
+
 #. Toast when persona is updated
 msgid "Persona updated"
 msgstr "Персону оновлено"
@@ -601,6 +653,10 @@ msgstr "Видимість персони"
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Персони"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "Персони ({count})"
 
 #. Help for an example in a command script.
 msgid "Pick one option at random"
@@ -642,6 +698,12 @@ msgstr "Підготовка пакетного завантаження ава�
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "Натисніть F6, щоб перейти до цього вікна з клавіатури."
 
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "Попередня персона"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
 #. Persona visibility private
 msgid "Private"
 msgstr "Приватна"
@@ -662,6 +724,7 @@ msgstr "Картки профілю доступні лише після нат�
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
 msgstr "Картки профілю доступні після натискання на повідомлення та видимі у вашому публічному списку персон для друзів і спільних серверів."
 
+#. Chip above the persona list: public personas.
 #. Persona visibility public
 msgid "Public"
 msgstr "Публічна"
@@ -686,6 +749,10 @@ msgstr "Реакція фірмовим емодзі завжди залишає
 
 msgid "Recent Personas"
 msgstr "Нещодавні персони"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "Нещодавно використані"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"
@@ -760,6 +827,14 @@ msgstr "Пошук команд"
 msgid "Search personas, tags, pronouns..."
 msgstr "Пошук персон, тегів, займенників..."
 
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "Пошук у ваших персонах"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "Пошук у персонах {name}"
+
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
 msgstr "Надсилання від імені @{username} ({mode}) — натисніть, щоб змінити персону"
@@ -787,6 +862,10 @@ msgstr "Показувати кнопку персон"
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
 msgstr "Показати панель сигналів"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "Показати приховані та приватні"
 
 msgid "Signal Bar"
 msgstr "Панель сигналів"
@@ -999,6 +1078,8 @@ msgstr "Введіть {output} або {tag}, щоб побачити підка
 msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
 msgstr "Введення одного з цих тегів не перемкне на цю персону. Тег буде надіслано так, як написано."
 
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Прихована"
@@ -1126,6 +1207,7 @@ msgstr "персон збережено"
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 msgid "text"
 msgstr "текст"
 
@@ -1144,6 +1226,10 @@ msgstr "{0} з {1} {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "Версія {version} для {appName} готова до встановлення."
 
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, one {# персона} few {# персони} many {# персон} other {# персони}}"
+
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
 msgstr "{domain} працює на новішій версії {productName}, ніж ця програма. Оновіть {productName}, а потім спробуйте ще раз."
@@ -1160,12 +1246,20 @@ msgstr "{name} ({mode}) — натисніть, щоб змінити персо
 msgid "{name} is never closed."
 msgstr "{name} ніде не закривається."
 
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "{position} з {total}"
+
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} припинив перевіряти, чи браузер схвалив цей вхід. Ваш код не втрачено."
 
 msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
 msgstr "{publicCount} публічних, {unlistedCount} прихованих, {privateCount} приватних"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "{shown} з {total} персон"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Сьогодні о 12:00"

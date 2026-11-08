@@ -9,6 +9,8 @@ import type {GuildMember} from '@app/features/member/models/GuildMember';
 import GuildMembers from '@app/features/member/state/GuildMembers';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
+import {PersonaNameExtras, PersonasPill} from '@app/features/persona/components/PersonasPill';
+import pillStyles from '@app/features/persona/components/PersonasPill.module.css';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobile';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
@@ -330,24 +332,28 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 												{subprofile.name}
 											</span>
 										</div>
-										{(effectiveDisplayTagText || effectiveDisplayTagIcon) && (
-											<div className={styles.tagBadgeRow} data-flx="persona.persona-profile-mobile-sheet.tag-badge-row">
-												<div
-													className={styles.badgesWrapper}
-													data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.badges-wrapper"
-												>
-													<PersonaTag
-														subprofile={{
-															...subprofile,
-															display_tag_text: effectiveDisplayTagText,
-															display_tag_icon: effectiveDisplayTagIcon,
-														}}
-														rootUser={user}
-														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.persona-tag"
-													/>
-												</div>
+										<div className={styles.tagBadgeRow} data-flx="persona.persona-profile-mobile-sheet.tag-badge-row">
+											<div
+												className={styles.badgesWrapper}
+												data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.badges-wrapper"
+											>
+												<PersonaNameExtras data-flx="persona.persona-profile-mobile-sheet.name-extras">
+													{(effectiveDisplayTagText || effectiveDisplayTagIcon) && (
+														<PersonaTag
+															subprofile={{
+																...subprofile,
+																display_tag_text: effectiveDisplayTagText,
+																display_tag_icon: effectiveDisplayTagIcon,
+															}}
+															rootUser={user}
+															className={pillStyles.tag}
+															data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.persona-tag"
+														/>
+													)}
+													<PersonasPill user={user} data-flx="persona.persona-profile-mobile-sheet.personas-pill" />
+												</PersonaNameExtras>
 											</div>
-										)}
+										</div>
 										{effectivePronouns && (
 											<div
 												className={styles.customStatusRow}

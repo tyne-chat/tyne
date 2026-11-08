@@ -369,7 +369,8 @@ export function PersonaController(app: HonoApp) {
 			statusCode: 200,
 			security: ['sessionToken'],
 			tags: ['Personas'],
-			description: 'Retrieves public personas for a target user if mutual context permits.',
+			description:
+				"Retrieves a user's public personas, the most used first, with the user's display tag, if mutual context permits.",
 		}),
 		async (ctx) => {
 			const user = ctx.get('user');

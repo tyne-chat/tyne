@@ -65,6 +65,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 
+// Fork imports.
+
+import {AccountPersonaNameExtras} from '@app/features/persona/components/PersonasPill';
+
 const logger = new Logger('UserProfilePopout');
 
 interface UserProfilePopoutProps {
@@ -298,6 +302,16 @@ export const UserProfilePopout: React.FC<UserProfilePopoutProps> = observer(
 					</div>
 				)}
 				<ProfileCardUserInfo
+					personaNameExtras={
+						!isWebhook && (
+							<AccountPersonaNameExtras
+								user={user}
+								guildId={guildId}
+								onBeforeOpen={requestClose}
+								data-flx="user.user-profile-popout.account-persona-name-extras"
+							/>
+						)
+					}
 					displayName={displayName}
 					displayNameClassName={styles.profileDisplayName}
 					user={user}

@@ -56,6 +56,10 @@ msgstr "Aliz"
 msgid "All Personas"
 msgstr "Összes persona"
 
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "Összes persona"
+
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
 msgstr "Összes időzóna"
@@ -160,6 +164,10 @@ msgstr "Nem sikerült futtatni: /{name}: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Nem sikerült menteni: /{name}: {detail}"
 
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "Nem sikerült betölteni a personákat."
+
 #. Option of a community command counter: a persona counts as its own person, not as its account.
 msgid "Count personas separately"
 msgstr "Personák külön számlálása"
@@ -183,6 +191,10 @@ msgstr "Parancsok létrehozása ehhez a közösséghez, a sajátjaid szerkeszté
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "Létrehozta: {name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "Létrehozva: {date}"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -442,6 +454,10 @@ msgstr "Kezeld és hozd létre a personáidat"
 msgid "Manage commands"
 msgstr "Parancsok kezelése"
 
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "Personák kezelése"
+
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
@@ -467,6 +483,14 @@ msgstr "Üzeneteszközök"
 msgid "Messages members can post by typing /name."
 msgstr "Üzenetek, amelyeket a tagok a /name beírásával küldhetnek."
 
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "Leggyakrabban használt"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "Név (A–Z)"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Új persona"
@@ -479,9 +503,17 @@ msgstr "Új parancs"
 msgid "New window"
 msgstr "Új ablak"
 
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "Következő persona"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "Ebben az exportfájlban nem található „members” tömb."
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "Még nincs bemutatkozás."
 
 #. Empty state title in the Commands tab.
 msgid "No commands"
@@ -499,12 +531,24 @@ msgstr "Még nincs persona beállítva. Hozz létre egyet a Beállításokban."
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "Még nincs létrehozott persona. Kattints a „Persona hozzáadása” gombra az első personád létrehozásához!"
 
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "Egy persona sem felel meg a keresésnek."
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "Nincsenek nyilvános personák."
+
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Még nincsenek jelzések. A sáv rejtve marad, amíg nem adsz hozzá egyet."
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Senkinél sincs bekapcsolva ez a jelzés"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "Még egyik personád sem nyilvános. Mások akkor látnak itt egy personát, ha a láthatóságát Nyilvánosra állítod."
 
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
@@ -529,6 +573,10 @@ msgstr "Nem kötelező"
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Nem kötelező rendszerjelvény, pl. ⚞Seraphim⚟"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "Mások {count, plural, one {# nyilvános personát} other {# nyilvános personát}} látnak."
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -589,6 +637,10 @@ msgstr "Persona-profil"
 msgid "Persona profile: {name}"
 msgstr "Persona-profil: {name}"
 
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "Persona ekkortól"
+
 #. Toast when persona is updated
 msgid "Persona updated"
 msgstr "Persona frissítve"
@@ -601,6 +653,10 @@ msgstr "Persona láthatósága"
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personák"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "Personák ({count})"
 
 #. Help for an example in a command script.
 msgid "Pick one option at random"
@@ -642,6 +698,12 @@ msgstr "Avatárok csoportos letöltésének előkészítése..."
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "Nyomd meg az F6 billentyűt, hogy billentyűzettel elérd ezt az ablakot."
 
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "Előző persona"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
 #. Persona visibility private
 msgid "Private"
 msgstr "Privát"
@@ -662,6 +724,7 @@ msgstr "A profilkártyák csak az e persona által küldött üzenetekre kattint
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
 msgstr "A profilkártyák az üzenetekre kattintva érhetők el, és a nyilvános personalistádon láthatók a barátok és a közös szerverek számára."
 
+#. Chip above the persona list: public personas.
 #. Persona visibility public
 msgid "Public"
 msgstr "Nyilvános"
@@ -686,6 +749,10 @@ msgstr "Az aláírási hangulatjellel való reagálás mindig ezen személyként
 
 msgid "Recent Personas"
 msgstr "Legutóbbi personák"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "Nemrég használt"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"
@@ -760,6 +827,14 @@ msgstr "Parancsok keresése"
 msgid "Search personas, tags, pronouns..."
 msgstr "Personák, címkék, pronév keresése..."
 
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "Keresés a personáid között"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "Keresés {name} personái között"
+
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
 msgstr "Küldés mint @{username} ({mode}) – Kattints a persona váltásához"
@@ -787,6 +862,10 @@ msgstr "Personák gomb megjelenítése"
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
 msgstr "Jelzősáv megjelenítése"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "Nem listázott és privát personák mutatása"
 
 msgid "Signal Bar"
 msgstr "Jelzősáv"
@@ -999,6 +1078,8 @@ msgstr "Írj be {output} vagy {tag} jelet a javaslatokhoz."
 msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
 msgstr "Ha beírod valamelyik címkét, nem vált erre a personára. A címke úgy kerül elküldésre, ahogy beírtad."
 
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Nem listázott"
@@ -1126,6 +1207,7 @@ msgstr "persona mentve"
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 msgid "text"
 msgstr "szöveg"
 
@@ -1144,6 +1226,10 @@ msgstr "{0} / {1} {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "A(z) {appName} {version} verziója készen áll a telepítésre."
 
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, one {# persona} other {# persona}}"
+
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
 msgstr "A(z) {domain} a {productName}nél újabb verziót futtat, mint ez az alkalmazás. Frissítse a {productName}t, majd próbálkozzon újra."
@@ -1160,12 +1246,20 @@ msgstr "{name} ({mode}) – Kattints a persona váltásához"
 msgid "{name} is never closed."
 msgstr "{name} soha nem záródik le."
 
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "{position}/{total}"
+
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "A {productName} abbahagyta annak ellenőrzését, hogy a böngésző jóváhagyta-e ezt a bejelentkezést. Nem veszítette el a kódodat."
 
 msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
 msgstr "{publicCount} nyilvános, {unlistedCount} nem listázott, {privateCount} privát"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "{shown}/{total} persona"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Ma 12:00-kor"
