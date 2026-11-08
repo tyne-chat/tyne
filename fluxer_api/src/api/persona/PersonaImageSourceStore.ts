@@ -73,12 +73,10 @@ export function personaImageSourcesWrite(
 	});
 }
 
-export async function forgetPersonaImageSources(userId: UserID, personaId: PersonaID): Promise<void> {
-	await deleteOneOrMany(forgetPersonaImageSourcesWrite(userId, personaId));
-}
-
-/** The write `forgetPersonaImageSources` makes, for a batch. */
-export function forgetPersonaImageSourcesWrite(userId: UserID, personaId: PersonaID): PreparedQuery {
+// Deleting a persona keeps its sources, so a restored persona still matches its pictures at the next
+// import (tyne-chat/tyne#243); only an import that records none for it, and the account's deletion,
+// remove them.
+function forgetPersonaImageSourcesWrite(userId: UserID, personaId: PersonaID): PreparedQuery {
 	return PersonaImageSources.deleteByPk({user_id: userId, persona_id: personaId});
 }
 
