@@ -10,6 +10,14 @@ msgstr ""
 msgid "(Prefix: {0})"
 msgstr "(Előtag: {0})"
 
+#. Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona
+msgid "<0>{tag}</0> already belongs to your persona {name}."
+msgstr "A(z) <0>{tag}</0> címke már a(z) {name} personádhoz tartozik."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file
+msgid "<0>{tag}</0> is also used by {name} in your file."
+msgstr "A(z) <0>{tag}</0> címkét a fájlodban {name} is használja."
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "Egy personának legfeljebb 5 címkéje lehet"
@@ -42,12 +50,28 @@ msgstr "Persona hozzáadása"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Címkepár hozzáadása ({0}/5)"
 
+#. Choice in the import review: add the member as a new persona next to the existing one
+msgid "Add as a separate persona"
+msgstr "Hozzáadás külön personaként"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Számláló hozzáadása"
 
 msgid "Add signal"
 msgstr "Jelzés hozzáadása"
+
+#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
+msgid "Add with the tag"
+msgstr "Hozzáadás a címkével"
+
+#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
+msgid "Add without {tags}"
+msgstr "Hozzáadás {tags} nélkül"
+
+#. Line of the import result: new personas
+msgid "Added"
+msgstr "Hozzáadva"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -72,9 +96,6 @@ msgstr "Egy másik parancsnak vagy egy beépített parancsnak már ez a neve."
 msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
 msgstr "Biztosan törlöd ezt: <0>{0}</0>? Ez a művelet nem vonható vissza."
 
-msgid "Are you sure you want to replace all <0>{existingCount}</0> existing persona(s)? This will permanently delete them from your account and cannot be undone."
-msgstr "Biztosan lecseréled mind a(z) <0>{existingCount}</0> meglévő personát? Véglegesen törlődnek a fiókodból, és ez nem vonható vissza."
-
 #. Settings search synonym.
 msgid "Auto-hide"
 msgstr "Automatikus elrejtés"
@@ -88,6 +109,14 @@ msgstr "Rejtett oldalsávok automatikus megjelenítése"
 msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
 msgstr "Az avatárkép letöltése nem sikerült: {error}. A persona avatár nélkül lett importálva."
 
+#. Import warning when the file's avatar for an existing persona fails to download, so the old one stays
+msgid "Avatar image failed to download: {error}. The persona kept the avatar it had."
+msgstr "Az avatárkép letöltése nem sikerült: {error}. A persona megtartotta a korábbi avatárját."
+
+#. Explanation of the "Restored" line of the import result
+msgid "Back as they were, with their old messages."
+msgstr "Ugyanúgy tértek vissza, ahogy voltak, a régi üzeneteikkel együtt."
+
 #. Button on narrow screens that returns to the command list.
 msgid "Back to commands"
 msgstr "Vissza a parancsokhoz"
@@ -100,6 +129,27 @@ msgstr "Vissza: {section}"
 msgid "Banner image failed to download: {error}. Persona was imported without a banner."
 msgstr "A borítókép letöltése nem sikerült: {error}. A persona borítókép nélkül lett importálva."
 
+#. Import warning when the file's banner for an existing persona fails to download, so the old one stays
+msgid "Banner image failed to download: {error}. The persona kept the banner it had."
+msgstr "A borítókép letöltése nem sikerült: {error}. A persona megtartotta a korábbi borítóképét."
+
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+msgid "Came back without {items}: another persona has them now."
+msgstr "{items} nélkül tért vissza: ezek most egy másik personáé."
+
+#. Comparison of a persona picture with the import file: it can't be compared
+msgid "Can't compare"
+msgstr "Nem összehasonlítható"
+
+#. Short name of a section of the import review
+msgid "Can't tell"
+msgstr "Bizonytalan"
+
+#. Section of the import review
+msgid "Can't tell if it's the same persona"
+msgstr "Nem egyértelmű, hogy ugyanaz a persona-e"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Persona váltása"
@@ -107,6 +157,14 @@ msgstr "Persona váltása"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "Az üzenet módosítása a beírtak alapján"
+
+#. Title of the persona import dialog while the file is checked
+msgid "Checking your file..."
+msgstr "Fájl ellenőrzése..."
+
+#. Disabled button while the import file is checked
+msgid "Checking..."
+msgstr "Ellenőrzés..."
 
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "Válassz egy PluralKit-exportot (.json) vagy egy {productName}-exportot (.zip), vagy húzd ide"
@@ -122,6 +180,10 @@ msgstr "Ürítsd ki az üzenetmezőt a(z) /{name} használatához"
 #. Button at the end of the search results panel header. Clears the search and closes the panel.
 msgid "Close search"
 msgstr "Keresés bezárása"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Colour"
+msgstr "Szín"
 
 #. Section label in the command editor: name and description.
 msgid "Command"
@@ -140,13 +202,21 @@ msgstr "Parancsok"
 msgid "Commands saved"
 msgstr "Parancsok mentve"
 
+#. Button that shows a persona next to its version in the import file
+msgid "Compare"
+msgstr "Összehasonlítás"
+
+#. Status while the import file is compared with the account's personas
+msgid "Comparing your file with your personas..."
+msgstr "A fájl összevetése a personáiddal..."
+
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Beállított personák ({count})"
 
-#. Progress status for configuring persona
-msgid "Configuring {name}..."
-msgstr "{name} beállítása..."
+#. Explanation of the "Linked" line of the import result
+msgid "Connected to their members in the file. Nothing in them changed."
+msgstr "Összekapcsolva a fájlban lévő tagjaikkal. Semmi sem változott bennük."
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
@@ -231,9 +301,45 @@ msgstr "Időbélyegző törlése\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "{count, plural, one {# persona} other {# persona}} törlése?"
 
+#. Short name of a section of the import review
+msgid "Deleted"
+msgstr "Törölt"
+
+#. Title of the section in Settings › Personas that lists deleted personas
+msgid "Deleted personas"
+msgstr "Törölt personák"
+
+#. Explanation of the deleted personas section in Settings › Personas
+msgid "Deleted personas still show on their old messages, but nobody can pick them and they don't count towards your limit. Restoring one brings the same persona back, with its history."
+msgstr "A törölt personák továbbra is látszanak a régi üzeneteiken, de senki sem választhatja őket, és nem számítanak bele a korlátodba. Ha visszaállítasz egyet, ugyanaz a persona tér vissza, az előzményeivel együtt."
+
+#. When a persona was deleted, in the import review. {date} is a date
+#. When a persona was deleted, in the import review. {date} is a date
+msgid "Deleted {date}"
+msgstr "Törölve: {date}"
+
 msgid "Detected System Name / Tag"
 msgstr "Észlelt rendszernév / címke"
 
+#. Section of the import review
+msgid "Different in your file"
+msgstr "Eltér a fájlodban"
+
+#. Comparison of a persona picture with the import file: they differ
+msgid "Different picture"
+msgstr "Eltérő kép"
+
+#. Short name of a section of the import review
+msgid "Differs"
+msgstr "Eltér"
+
+#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
+msgid "Differs: {fields}"
+msgstr "Eltér: {fields}"
+
+#. Heading of the display tag choice in the import review
+#. Section of the import review
+#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "Megjelenítési címke"
@@ -269,6 +375,14 @@ msgstr "Ismétlődő címkepár ennél a personánál"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Minden csatorna megtartja a saját personáját. Az új csatornák a fiókoddal indulnak."
 
+#. Explanation of a section of the import review
+msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
+msgstr "Ezek mindegyikének ugyanaz a neve vagy a címkéje, mint valamelyik personádnak, de nem mindkettő, így lehet ugyanaz a karakter, de lehet egy másik is. Hasonlítsd össze őket, és válassz. A kihagyott tagok a fájlodban maradnak a következő alkalomra."
+
+#. Explanation at the top of the import review
+msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
+msgstr "Mindegyiknél már a legbiztonságosabb lehetőség van kiválasztva, így semmi sem változik abból, ami már megvan, hacsak nem te választod. Importálás előtt olvass el minden szakaszt. A legnehezebbek vannak felül."
+
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
 msgid "Edit /{name}"
@@ -291,6 +405,14 @@ msgstr "Persona szerkesztése"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Időbélyegző szerkesztése\\"
+
+#. Text under the heading when a reviewed persona import is done
+msgid "Everything else is exactly as it was."
+msgstr "Minden más pontosan úgy maradt, ahogy volt."
+
+#. Text when a persona import with nothing to decide is done
+msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
+msgstr "A fájlban minden vagy új volt, vagy már pontosan egyezett egy personával, így nem volt miről dönteni. Semmi más nem változott."
 
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
@@ -377,9 +499,17 @@ msgstr "Formátum előnézete"
 msgid "Full script guide"
 msgstr "Teljes szkriptútmutató"
 
+#. Heading when a reviewed persona import is done
+msgid "Here is what changed"
+msgstr "Ez változott"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Csatornalista elrejtése"
+
+#. Button that hides the comparison of a persona with the import file
+msgid "Hide comparison"
+msgstr "Összehasonlítás elrejtése"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -397,23 +527,29 @@ msgstr "Vidd az egeret az ablak széléhez az összecsukott panelek ideiglenes m
 msgid "Icon file is too large. Choose an image smaller than 10MB."
 msgstr "Az ikonfájl túl nagy. Válassz 10 MB-nál kisebb képet."
 
-#. Modal title for PluralKit import step completed
-msgid "Import Complete"
-msgstr "Importálás kész"
+#. Title of the persona import dialog when the import is done
+msgid "Import finished"
+msgstr "Az importálás befejeződött"
 
-msgid "Import Complete!"
-msgstr "Importálás kész!"
+#. Title of the persona import dialog
+msgid "Import personas"
+msgstr "Personák importálása"
 
-msgid "Import Strategy"
-msgstr "Importálási stratégia"
+#. Summary in the import review footer when every choice leaves things as they are
+msgid "Import will change nothing"
+msgstr "Az importálás semmit sem változtat"
 
-#. Modal title for PluralKit import step select
-msgid "Import from PluralKit"
-msgstr "Importálás a PluralKitből"
+#. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
+msgid "Import will {actions}"
+msgstr "Importálás: {actions}"
 
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Personák importálása..."
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Importing never changes or removes a persona you already have unless you choose it. New members are added straight away. If any member might match or clash with one of your personas, you'll review it before anything is imported."
+msgstr "Az importálás soha nem módosít és nem töröl olyan personát, amely már megvan, hacsak nem te választod így. Az új tagok azonnal hozzáadódnak. Ha egy tag egyezhet valamelyik personáddal vagy ütközhet vele, még az importálás előtt átnézheted."
 
 msgid "Importing..."
 msgstr "Importálás..."
@@ -421,6 +557,27 @@ msgstr "Importálás..."
 #. Option for where the selected persona applies: each channel remembers its own persona
 msgid "In each channel"
 msgstr "Minden csatornában"
+
+#. Column heading in the import review
+msgid "In this app"
+msgstr "Ebben az alkalmazásban"
+
+#. Explanation of a section of the import review
+msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
+msgstr "Ebben az alkalmazásban minden proxycímke egyetlen personához tartozik. Ezeknek a tagoknak olyan címkéjük van, amely már egy másik personáé, vagy amely a fájlod egy másik tagjának is megvan."
+
+#. Column heading in the table comparing a persona with the import file
+msgid "In this app now"
+msgstr "Most ebben az alkalmazásban"
+
+#. Column heading in the import review
+#. Column heading in the table comparing a persona with the import file
+msgid "In your file"
+msgstr "A fájlodban"
+
+#. Explanation of the "Kept as they were" line of the import result
+msgid "Including any that differ from the file, where you kept the version you had."
+msgstr "Beleértve azokat is, amelyek eltérnek a fájltól, de megtartottad a saját verziódat."
 
 #. Button to insert timestamp into message composer.
 msgid "Insert"
@@ -441,16 +598,42 @@ msgstr "Beszúrás:"
 msgid "Its script has a problem."
 msgstr "A szkriptjével probléma van."
 
-msgid "Keep existing and add new (Recommended)"
-msgstr "Meglévők megtartása és újak hozzáadása (ajánlott)"
+#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
+msgid "Keep this version"
+msgstr "Ez a verzió marad"
 
-#. placeholder {0}: members.length
-msgid "Keep your {existingCount} current persona(s) and add all {0} imported personas alongside them as new entries."
-msgstr "Tartsd meg a(z) {existingCount} jelenlegi personádat, és add hozzá mellé mind a(z) {0} importált personát új bejegyzésként."
+#. Button in the import review: keep every listed persona as it is
+msgid "Keep this version for all"
+msgstr "Mindegyiknél ez a verzió marad"
+
+#. Choice in the import review: keep the display tag {tag}
+msgid "Keep yours: {tag}"
+msgstr "A saját címkéd marad: {tag}"
+
+#. Line of the import result: personas left unchanged
+msgid "Kept as they were"
+msgstr "Változatlanul maradt"
+
+#. Choice in the import review for a persona that was deleted: keep it deleted
+msgid "Leave deleted"
+msgstr "Törölve marad"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "{line}. sor, {column}. oszlop: {problem}"
+
+#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
+msgctxt "persona-import-choice"
+msgid "Link"
+msgstr "Összekapcsolás"
+
+#. Button in the import review that links every persona listed
+msgid "Link all {count}"
+msgstr "Mind a(z) {count} összekapcsolása"
+
+#. Shown on a persona in the import review that is already connected to a different member
+msgid "Linked to another PluralKit member"
+msgstr "Egy másik PluralKit-taghoz kapcsolva"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -511,6 +694,10 @@ msgstr "{index}. tag"
 msgid "Members with Avatars"
 msgstr "Avatárral rendelkező tagok"
 
+#. Explanation of a section of the import review
+msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
+msgstr "Tagok, akik még nincsenek meg neked, név- vagy címkeütközés nélkül. Vedd ki a pipát azok mellől, akiket nem szeretnél."
+
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "Üzeneteszközök"
@@ -527,6 +714,10 @@ msgstr "Leggyakrabban használt"
 msgid "Name (A–Z)"
 msgstr "Név (A–Z)"
 
+#. Badge on a section of the import review where every member needs a choice
+msgid "Needs a decision"
+msgstr "Döntés szükséges"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Új persona"
@@ -534,6 +725,18 @@ msgstr "Új persona"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "Új parancs"
+
+#. Section of the import review
+msgid "New in your file"
+msgstr "Új a fájlodban"
+
+#. Explanation of the "Added" line of the import result
+msgid "New personas from your file."
+msgstr "Új personák a fájlodból."
+
+#. Shown instead of a picture from the import file, which isn't loaded until it is stored on this server
+msgid "New picture in the file, shown once imported"
+msgstr "Új kép a fájlban, az importálás után jelenik meg"
 
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
@@ -554,6 +757,10 @@ msgstr "Még nincs bemutatkozás."
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "Nincsenek parancsok"
+
+#. Shown in Settings › Personas when there are no deleted personas
+msgid "No deleted personas."
+msgstr "Nincsenek törölt personák."
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Nincs megjelenítési címke beállítva. Az üzenetek a fiókod profilképét mutatják."
@@ -590,6 +797,10 @@ msgstr "Senkinél sincs bekapcsolva ez a jelzés"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Még egyik personád sem nyilvános. Mások akkor látnak itt egy personát, ha a láthatóságát Nyilvánosra állítod."
 
+#. Hint on the choice to skip a member in the import review
+msgid "Nothing changes. It stays in your file for next time."
+msgstr "Semmi sem változik. A tag a fájlodban marad a következő alkalomra."
+
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
 msgstr "Egy persona minden csatornához."
@@ -610,10 +821,6 @@ msgstr "Megnyitás új ablakban"
 msgid "Optional"
 msgstr "Nem kötelező"
 
-#. Placeholder for system badge in import modal
-msgid "Optional system badge, e.g. ⚞Seraphim⚟"
-msgstr "Nem kötelező rendszerjelvény, pl. ⚞Seraphim⚟"
-
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "Mások {count, plural, one {# nyilvános personát} other {# nyilvános personát}} látnak."
@@ -629,9 +836,6 @@ msgstr "Beillesztés egyszerű szövegként"
 #. Settings search synonym.
 msgid "Peek"
 msgstr "Bepillantás"
-
-msgid "Permanently delete all {existingCount} existing persona(s) and replace them completely with the imported personas."
-msgstr "Véglegesen törli mind a(z) {existingCount} meglévő personát, és teljesen lecseréli őket az importáltakra."
 
 #. A community command counter counts per person mentioned. The command then needs a mention to run.
 msgid "Person mentioned"
@@ -734,10 +938,6 @@ msgstr "A szolgáltatást a KLIPY nyújtja"
 msgid "Prefix (e.g. [)"
 msgstr "Előtag (pl. [)"
 
-#. Progress status when preparing avatar batch download
-msgid "Preparing avatar batch download..."
-msgstr "Avatárok csoportos letöltésének előkészítése..."
-
 #. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "Nyomd meg az F6 billentyűt, hogy billentyűzettel elérd ezt az ablakot."
@@ -748,6 +948,7 @@ msgstr "Előző persona"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
+#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "Privát"
@@ -755,6 +956,14 @@ msgstr "Privát"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "Privát persona"
+
+#. Short name of a section of the import review
+msgid "Probably the same"
+msgstr "Valószínűleg ugyanaz"
+
+#. Section of the import review
+msgid "Probably the same persona"
+msgstr "Valószínűleg ugyanaz a persona"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -769,6 +978,7 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "A profilkártyák az üzenetekre kattintva érhetők el, és a nyilvános personalistádon láthatók a barátok és a közös szerverek számára."
 
 #. Chip above the persona list: public personas.
+#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "Nyilvános"
@@ -810,15 +1020,6 @@ msgstr "Aláírási hangulatjel eltávolítása"
 msgid "Remove tag pair"
 msgstr "Címkepár eltávolítása"
 
-msgid "Replace All"
-msgstr "Összes cseréje"
-
-msgid "Replace All Personas"
-msgstr "Az összes persona cseréje"
-
-msgid "Replace all existing personas (Destructive)"
-msgstr "Az összes meglévő persona cseréje (visszafordíthatatlan)"
-
 #. Why an image could not be imported when the server answered with HTTP status {status}
 msgid "Request failed (HTTP {status})"
 msgstr "A kérés sikertelen (HTTP {status})"
@@ -835,12 +1036,49 @@ msgstr "Jelzés visszaállítása mindenkinél"
 msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Nullázod a(z) {name} számait? Ez nem vonható vissza."
 
+#. Button that brings back a deleted persona
+#. Choice in the import review: bring a deleted persona back, with its old messages
+msgid "Restore"
+msgstr "Visszaállítás"
+
+#. Button in the import review that restores every deleted persona listed
+msgid "Restore all {count}"
+msgstr "Mind a(z) {count} visszaállítása"
+
+#. Explanation of the "Still deleted" line of the import result
+msgid "Restore them from Deleted personas in Settings if you change your mind."
+msgstr "Ha meggondolod magad, a Beállítások Törölt personák részében visszaállíthatod őket."
+
+#. Line of the import result: deleted personas brought back
+msgid "Restored"
+msgstr "Visszaállítva"
+
+#. Title of the persona import review
+msgid "Review before importing"
+msgstr "Átnézés importálás előtt"
+
 msgid "Root Account (Default)"
 msgstr "Fő fiók (Alapértelmezett)"
 
 #. Button under the preview of a command script that picks at random: fills the preview in again.
 msgid "Run again"
 msgstr "Futtatás újra"
+
+#. Badge on the safest choice in the import review
+msgid "Safest"
+msgstr "Legbiztonságosabb"
+
+#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
+msgid "Same as your {name}: link them"
+msgstr "Ugyanaz, mint a(z) {name} personád: összekapcsolás"
+
+#. Explanation of a section of the import review
+msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
+msgstr "Ugyanaz a név és ugyanaz a címke, mint valamelyik personádnak, de még nincs összekapcsolva a fájloddal, például mert kézzel hoztad létre. Az összekapcsolás csak azt jegyzi fel, hogy a fájl melyik tagjának felel meg, így a későbbi importálások felismerik. A personában semmi sem változik."
+
+#. Comparison of a persona picture with the import file: they are the same
+msgid "Same picture"
+msgstr "Ugyanaz a kép"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -898,6 +1136,14 @@ msgstr "Beállítás aktív personaként"
 msgid "Show copy button"
 msgstr "Másolás gomb megjelenítése"
 
+#. Button that loads the list of deleted personas in Settings › Personas
+msgid "Show deleted personas"
+msgstr "Törölt personák megjelenítése"
+
+#. Button that collapses a list in the import review again
+msgid "Show fewer"
+msgstr "Kevesebb megjelenítése"
+
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
 msgid "Show personas button"
@@ -910,6 +1156,10 @@ msgstr "Jelzősáv megjelenítése"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "Nem listázott és privát personák mutatása"
+
+#. Button that shows the rest of a list in the import review
+msgid "Show {count} more"
+msgstr "További {count} megjelenítése"
 
 msgid "Signal Bar"
 msgstr "Jelzősáv"
@@ -937,6 +1187,18 @@ msgstr "Aláírási hangulatjelek"
 msgid "Signature emoji already in use by persona \"{name}\""
 msgstr "Ezt az aláírási hangulatjelet már használja a(z) \"{name}\" személy"
 
+#. Row heading in the table comparing a persona with the import file
+msgid "Signature emojis"
+msgstr "Aláírási hangulatjelek"
+
+#. Choice in the import review: do nothing with this member of the import file
+msgid "Skip this member"
+msgstr "A tag kihagyása"
+
+#. Line of the import result: members left out
+msgid "Skipped"
+msgstr "Kihagyva"
+
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "A tag kihagyva, mert nincs név beállítva hozzá."
@@ -945,16 +1207,17 @@ msgstr "A tag kihagyva, mert nincs név beállítva hozzá."
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Néhány proxycímke kimaradt: a {productName} personánként legfeljebb 5 címkét enged, egyenként legfeljebb 32 karakterrel."
 
-msgid "Start Import"
-msgstr "Importálás indítása"
+#. Line of the import result: deleted personas not restored
+msgid "Still deleted"
+msgstr "Továbbra is törölve"
+
+#. Explanation of the "Skipped" line of the import result
+msgid "Still in your file. Import it again any time to decide about them."
+msgstr "Továbbra is a fájlodban vannak. Bármikor importáld újra, hogy dönts róluk."
 
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "Kép mentése a fájlból: {current} / {total}..."
-
-#. placeholder {0}: importResults.successCount
-msgid "Successfully imported {0} persona(s) into your account. All avatar images are safely stored on your local server."
-msgstr "{0} persona sikeresen importálva a fiókodba. Minden avatárkép biztonságosan tárolódik a helyi szervereden."
 
 #. Placeholder for persona tag suffix
 msgid "Suffix (e.g. ])"
@@ -971,9 +1234,6 @@ msgstr "Támogatja a PluralKit rendszerexport-fájljait"
 msgid "Switch the active persona"
 msgstr "Aktív persona váltása"
 
-msgid "System Tag (Applied to imported personas)"
-msgstr "Rendszercímke (az importált personákra kerül)"
-
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -981,6 +1241,18 @@ msgstr "Címkeikon"
 
 msgid "Tag Text"
 msgstr "Címkeszöveg"
+
+#. Section of the import review
+msgid "Tag already in use"
+msgstr "A címke már használatban van"
+
+#. Short name of a section of the import review
+msgid "Tag in use"
+msgstr "Foglalt címke"
+
+#. Row heading in the table comparing a persona with the import file: whether its tags are matched
+msgid "Tag matching"
+msgstr "Címkefelismerés"
 
 #. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
 msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
@@ -1010,6 +1282,10 @@ msgstr "A csatorna említésként"
 msgid "The chosen file is not a valid JSON object."
 msgstr "A kiválasztott fájl nem érvényes JSON-objektum."
 
+#. Error in Settings › Personas when the list of deleted personas fails to load
+msgid "The deleted personas could not be loaded."
+msgstr "A törölt personákat nem sikerült betölteni."
+
 #. Help for a command script variable.
 msgid "The first person they mention, if any"
 msgstr "Az első említett személy, ha van ilyen"
@@ -1021,6 +1297,10 @@ msgstr "Ennek a közösségnek a neve"
 #. Help for a command script variable.
 msgid "The person running it, as a mention"
 msgstr "Aki használja, említésként"
+
+#. Error toast when restoring a deleted persona fails
+msgid "The persona could not be restored."
+msgstr "A personát nem sikerült visszaállítani."
 
 #. Description of the persona option of the /persona slash command
 msgid "The persona to select."
@@ -1045,6 +1325,10 @@ msgstr "A jelzősáv ki van kapcsolva, amíg itt be nem jelölsz egy csatornát.
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "A címkeikont nem sikerült menteni: {error}. A persona-beállításokban újra beállíthatod."
 
+#. Explanation of the "Updated from the file" line of the import result
+msgid "Their details are the file's now; their messages and history stayed."
+msgstr "Az adataik most a fájlból származnak; az üzeneteik és az előzményeik megmaradtak."
+
 #. Explains what deleting personas does, in its confirmation.
 msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
 msgstr "Az üzeneteik továbbra is a nevüket és avatarjukat mutatják, de már nem küldhetsz a nevükben, és a címkéik és aláírási hangulatjeleik felszabadulnak. Ez nem vonható vissza."
@@ -1064,6 +1348,14 @@ msgstr "Nincs {name} nevű szűrő."
 #. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
 msgid "There's no tag called {name}."
 msgstr "Nincs {name} nevű címke."
+
+#. Explanation of a section of the import review
+msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
+msgstr "Ezek korábban a fájlodból érkeztek, de a fájlban most mások az adatok, vagy azóta itt módosítottad őket. Nem lehet tudni, melyik oldal változott, ezért ennek az alkalmazásnak a verziója marad, hacsak egy personánál nem a fájlét választod. A fájl verziója lecseréli az adott persona adatait; az üzenetei, előzményei, láthatósága és aláírási hangulatjelei megmaradnak, ahogy minden olyan kép is, amelyet nem sikerül letölteni."
+
+#. Explanation of a section of the import review
+msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
+msgstr "Törölve maradnak, hacsak vissza nem állítod őket. A visszaállítás ugyanazt a personát hozza vissza, ahogy volt, a régi üzeneteivel és használati adataival együtt, ahelyett hogy másolatot készítene."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1132,6 +1424,7 @@ msgstr "Ha beírod valamelyik címkét, nem vált erre a personára. A címke ú
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
+#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Nem listázott"
@@ -1151,6 +1444,10 @@ msgstr "A címke nélküli üzenetek a kiválasztott personaként mennek el. A c
 #. Helper description for Last Used persona mode
 msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
 msgstr "A címke nélküli üzenetek annak a nevében mennek el, aki utoljára írt. Címke használata arra a personára vált."
+
+#. Line of the import result: personas given the file's details
+msgid "Updated from the file"
+msgstr "Frissítve a fájlból"
 
 #. Tooltip on the chip that shows which community command made a message. Preserve {name}.
 msgid "Use /{name}"
@@ -1188,6 +1485,14 @@ msgstr "Használj kisbetűket, számokat, - és _ jelet, legfeljebb 32 karaktert
 msgid "Use the basic editor"
 msgstr "Alapszerkesztő használata"
 
+#. Choice in the import review: replace the persona's details with those in the import file
+msgid "Use the file's version"
+msgstr "A fájl verziójának használata"
+
+#. Choice in the import review: use the import file's system tag {tag} as the display tag
+msgid "Use the file's: {tag}"
+msgstr "A fájl címkéje: {tag}"
+
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "Szkriptszerkesztő használata"
@@ -1196,10 +1501,18 @@ msgstr "Szkriptszerkesztő használata"
 msgid "View your personas"
 msgstr "Personáid megtekintése"
 
+#. Heading of the choices for one member of the import file
+msgid "What should happen to {name} from your file?"
+msgstr "Mi történjen a fájlodban szereplő {name} taggal?"
+
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "Amit beírnak"
+
+#. Accessible label of the menu of choices for one persona in the import review
+msgid "What to do with {name}"
+msgstr "Teendő ezzel: {name}"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1216,13 +1529,57 @@ msgstr "Hol van megjegyezve a personád"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Szám írása így: 1st, 2nd, 3rd"
 
+#. Hint on the choice to add a member without its proxy tag, in the import review
+msgid "You can give it another tag later in Settings."
+msgstr "Később a Beállításokban adhatsz neki másik címkét."
+
+#. Section of the import review
+msgid "You deleted these"
+msgstr "Ezeket törölted"
+
+#. Hint on the choice to add a member as a separate persona, in the import review
+msgid "You will have one more {name}."
+msgstr "Eggyel több {name} lesz."
+
+#. Explanation of a section of the import review
+msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
+msgstr "A fiókodnak egy megjelenítési címkéje van, amely minden persona neve után megjelenik. A fájl rendszercímkéje ettől eltér."
+
+#. Hint on the choice to link a member to an existing persona, in the import review
+msgid "Your persona stays as it is; it is connected to this member."
+msgstr "A personád változatlan marad; ehhez a taghoz lesz kapcsolva."
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "add {count}"
+msgstr "{count} hozzáadás"
+
+#. A persona field, listed in "Differs: name, avatar"
+msgid "avatar"
+msgstr "avatár"
+
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "avatár letöltve"
 
+#. A persona field, listed in "Differs: name, banner"
+msgid "banner"
+msgstr "borítókép"
+
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "borítókép letöltve"
+
+#. A persona field, listed in "Differs: name, bio"
+msgid "bio"
+msgstr "bemutatkozás"
+
+#. Part of the import summary "Import will add 7 and change your display tag"
+msgid "change your display tag"
+msgstr "a megjelenítési címkéd módosítása"
+
+#. A persona field (its accent colour), listed in "Differs: name, colour"
+msgid "colour"
+msgstr "szín"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1248,13 +1605,50 @@ msgstr "kép mentve"
 msgid "items"
 msgstr "elem"
 
-#. Progress label for prepared personas
-msgid "personas prepared"
-msgstr "persona előkészítve"
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "link {count}"
+msgstr "{count} összekapcsolás"
+
+#. A persona's name as a field, listed in "Differs: name, bio"
+msgctxt "persona-field"
+msgid "name"
+msgstr "név"
+
+#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
+msgid "picture not compared"
+msgstr "a kép nincs összehasonlítva"
+
+#. A persona field, listed in "Differs: name, pronouns"
+msgid "pronouns"
+msgstr "névmások"
+
+#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
+msgid "removes {fields}"
+msgstr "{fields} törlődne"
+
+#. Part of the import summary "Import will link 17, restore 2, skip 3"
+msgid "restore {count}"
+msgstr "{count} visszaállítás"
 
 #. Progress label when saving personas
 msgid "saving personas"
 msgstr "persona mentve"
+
+#. A persona field, listed in "Differs: name, signature emojis"
+msgid "signature emojis"
+msgstr "aláírási hangulatjelek"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "skip {count}"
+msgstr "{count} kihagyás"
+
+#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
+msgid "tag matching"
+msgstr "címkefelismerés"
+
+#. A persona field (its proxy tags), listed in "Differs: name, tags"
+msgid "tags"
+msgstr "címkék"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1263,9 +1657,13 @@ msgstr "persona mentve"
 msgid "text"
 msgstr "szöveg"
 
-#. placeholder {0}: importResults.warnings.length
-msgid "{0} notice(s) during import"
-msgstr "{0} megjegyzés az importálás során"
+#. Part of the import summary "Import will link 17, use the file's version for 2"
+msgid "use the file's version for {count}"
+msgstr "{count} esetben a fájl verziója"
+
+#. A persona field, listed in "Differs: name, visibility"
+msgid "visibility"
+msgstr "láthatóság"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1273,6 +1671,10 @@ msgstr "{0} megjegyzés az importálás során"
 #. placeholder {3}: progress.percent
 msgid "{0} of {1} {2} ({3}%)"
 msgstr "{0} / {1} {2} ({3}%)"
+
+#. Heading when a persona import with nothing to decide is done. {addedCount} is a number
+msgid "{addedCount} personas added"
+msgstr "{addedCount} persona hozzáadva"
 
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
@@ -1290,6 +1692,10 @@ msgstr "{count, plural, one {# persona mostantól nyilvános} other {# persona m
 msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
 msgstr "{count, plural, one {# persona mostantól nem listázott} other {# persona mostantól nem listázott}}"
 
+#. Second line of the import review footer
+msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
+msgstr "{count, plural, one {# persona változatlan marad} other {# persona változatlan marad}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, one {# persona} other {# persona}}"
@@ -1298,9 +1704,21 @@ msgstr "{count, plural, one {# persona} other {# persona}}"
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, one {# persona törölve} other {# persona törölve}}"
 
+#. How often a persona has been used, shown in the import review
+#. How often a persona has been used, shown in the import review
+msgid "{count, plural, one {Used once} other {Used # times}}"
+msgstr "{count, plural, one {Egyszer használva} other {# alkalommal használva}}"
+
+msgid "{count} notice(s) during import"
+msgstr "{count} megjegyzés az importálás során"
+
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
 msgstr "{count} kiválasztva"
+
+#. Second line of the import review footer: deleted personas that are not restored
+msgid "{count} stay deleted"
+msgstr "{count} törölve marad"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
@@ -1310,13 +1728,29 @@ msgstr "A(z) {domain} a {productName}nél újabb verziót futtat, mint ez az alk
 msgid "{label}: {names}"
 msgstr "{label}: {names}"
 
+#. A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names
+msgid "{names} would all have {label}. Change one of the choices."
+msgstr "{names} mind megkapná ezt: {label}. Módosítsd valamelyik választást."
+
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) – Kattints a persona váltásához"
 
+#. Toast after a deleted persona was restored
+msgid "{name} is back."
+msgstr "{name} visszatért."
+
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "{name} soha nem záródik le."
+
+#. Heading of the import review. {needCount} is a number of members
+msgid "{needCount} members and your display tag need a look"
+msgstr "{needCount} tag és a megjelenítési címkéd átnézésre vár"
+
+#. Heading of the import review. {needCount} is a number of members
+msgid "{needCount} members need a look"
+msgstr "{needCount} tag átnézésre vár"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -1332,6 +1766,18 @@ msgstr "{publicCount} nyilvános, {unlistedCount} nem listázott, {privateCount}
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "{shown}/{total} persona"
+
+#. Closing line of the import review. {untouched} is a number of personas
+msgid "{untouched} of your personas aren't in this file. They stay as they are."
+msgstr "{untouched} personád nem szerepel ebben a fájlban. Ezek változatlanok maradnak."
+
+#. Closing line of the import review. {upToDate} is a number of members
+msgid "{upToDate} members match their persona exactly. Nothing to do."
+msgstr "{upToDate} tag pontosan egyezik a personájával. Nincs teendő."
+
+#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
+msgid "{visibility} (this app's is kept)"
+msgstr "{visibility} (az alkalmazásbeli marad)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Ma 12:00-kor"
