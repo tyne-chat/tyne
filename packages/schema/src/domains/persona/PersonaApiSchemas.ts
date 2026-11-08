@@ -250,6 +250,12 @@ export const PersonaSettingsResponseSchema = z.object({
 	display_tag_icon: PersonaAssetHashType.nullish().describe(
 		'Hash of the display tag icon, an image stored under the account',
 	),
+	multi_persona_reactions: z
+		.boolean()
+		.default(true)
+		.describe(
+			"Whether several of the account's identities may react with one emoji. Off, the clients keep at most one: a reaction chip of yours removes it, and picking another persona replaces it",
+		),
 	updated_at: z.string().optional(),
 });
 export type PersonaSettingsResponse = z.infer<typeof PersonaSettingsResponseSchema>;
@@ -263,6 +269,10 @@ export const PersonaSettingsUpdateRequestSchema = z.object({
 	display_tag_icon: PersonaAssetHashType.nullish()
 		.optional()
 		.describe('Hash of the display tag icon, from the persona avatar upload or import routes'),
+	multi_persona_reactions: z
+		.boolean()
+		.optional()
+		.describe("Whether several of the account's identities may react with one emoji"),
 });
 export type PersonaSettingsUpdateRequest = z.infer<typeof PersonaSettingsUpdateRequestSchema>;
 

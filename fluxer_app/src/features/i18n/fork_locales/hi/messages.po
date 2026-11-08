@@ -406,6 +406,9 @@ msgstr "परसोना एडिट करें"
 msgid "Edit timestamp"
 msgstr "समय टिकट एडिट करें\\"
 
+msgid "Everyone else"
+msgstr "बाकी सभी"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "बाकी सब कुछ बिल्कुल पहले जैसा है।"
@@ -471,6 +474,9 @@ msgstr "डिस्प्ले टैग अपडेट नहीं हो �
 
 msgid "Failed to update persona mode"
 msgstr "परसोना मोड अपडेट नहीं हो सका"
+
+msgid "Failed to update the reaction setting"
+msgstr "रिएक्शन सेटिंग अपडेट नहीं हो सकी"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "आपका परसोना कहाँ याद रखा जाता है, यह बदला नहीं जा सका"
@@ -768,6 +774,9 @@ msgstr "कोई डिस्प्ले टैग कॉन्फ़िगर
 msgid "No matching personas found."
 msgstr "कोई मेल खाने वाला परसोना नहीं मिला।"
 
+msgid "No one matches."
+msgstr "कोई मेल नहीं खाता।"
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "अभी तक कोई परसोना कॉन्फ़िगर नहीं है। सेटिंग्स में एक बनाएँ।"
 
@@ -987,9 +996,16 @@ msgstr "पब्लिक"
 msgid "Public persona"
 msgstr "सार्वजनिक परसोना"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "एक साथ कई परसोना के रूप में रिएक्ट करें"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "के रूप में प्रतिक्रिया दें..."
+
+msgid "Reacted"
+msgstr "रिएक्ट किया"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "<0>{reactorName}</0> के रूप में प्रतिक्रिया दे रहे हैं"
@@ -1000,6 +1016,9 @@ msgstr "{name} के रूप में प्रतिक्रिया द�
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "हस्ताक्षर इमोजी के साथ प्रतिक्रिया देने पर हमेशा इस व्यक्तित्व के रूप में प्रतिक्रिया होगी, चाहे कोई भी सक्रिय व्यक्तित्व हो।"
+
+msgid "Recent"
+msgstr "हाल के"
 
 msgid "Recent Personas"
 msgstr "हाल के परसोना"
@@ -1053,6 +1072,9 @@ msgstr "अगर आपका मन बदले, तो सेटिंग्
 msgid "Restored"
 msgstr "रीस्टोर किए गए"
 
+msgid "Results"
+msgstr "नतीजे"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "इंपोर्ट से पहले समीक्षा करें"
@@ -1104,7 +1126,6 @@ msgstr "खोज परिणाम ({0})"
 msgid "Search commands"
 msgstr "कमांड खोजें"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "परसोना, टैग, प्रोनाउन खोजें..."
@@ -1549,6 +1570,13 @@ msgstr "आपके अकाउंट का एक ही डिस्प्�
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "आपका परसोना जैसा है वैसा ही रहता है; उसे इस सदस्य से लिंक कर दिया जाता है।"
 
+msgid "Your reactions"
+msgstr "आपके रिएक्शन"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "आपके {emojiName} रिएक्शन"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "{count} जोड़ेगा"
@@ -1617,6 +1645,10 @@ msgstr "नाम"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "तस्वीर की तुलना नहीं हुई"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "अपने रिएक्शन देखने के लिए दबाएँ"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, one {# बार इस्तेमाल हुआ} oth
 
 msgid "{count} notice(s) during import"
 msgstr "इंपोर्ट के दौरान सूचनाएँ: {count}"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{total} में से {count}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "{total} में से {count} ने रिएक्ट किया"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
