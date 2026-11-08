@@ -103,10 +103,17 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		await expect(reactAsModal.getByText(bobBeta.name)).toBeVisible({timeout: 5_000});
 
 		// 10. Select Bob-Alpha
-		const alphaOption = reactAsModal.locator('[class*="personaItem"]').filter({hasText: bobAlpha.name}).first();
+		const alphaOption = reactAsModal
+			.locator('[data-flx="persona.reaction-list.row"]')
+			.filter({hasText: bobAlpha.name})
+			.first();
 		await alphaOption.click();
 
-		// Verify modal closes
+		// The dialog stays open after a pick (tyne-chat/tyne#86); Done closes it.
+		await expect(alphaOption).toHaveAttribute('aria-pressed', 'true', {timeout: 10_000});
+		await expect(reactAsModal).toBeVisible();
+		const doneButton = reactAsModal.locator('[data-flx="persona.persona-react-as-modal.done"]');
+		await doneButton.click();
 		await expect(reactAsModal).toBeHidden({timeout: 5_000});
 
 		// 11. Verify reaction button appears on the message
@@ -133,8 +140,13 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		await reactAsMenuItem.click();
 
 		await expect(reactAsModal).toBeVisible({timeout: 5_000});
-		const betaOption = reactAsModal.locator('[class*="personaItem"]').filter({hasText: bobBeta.name}).first();
+		const betaOption = reactAsModal
+			.locator('[data-flx="persona.reaction-list.row"]')
+			.filter({hasText: bobBeta.name})
+			.first();
 		await betaOption.click();
+		await expect(betaOption).toHaveAttribute('aria-pressed', 'true', {timeout: 10_000});
+		await doneButton.click();
 		await expect(reactAsModal).toBeHidden({timeout: 5_000});
 
 		// 14. Verify second reaction appears
@@ -150,7 +162,33 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 			page.locator('[data-flx*="emoji-tooltip-content"]').filter({hasText: bobBeta.name}).first(),
 		).toBeVisible({timeout: 10_000});
 
-		// 16. Re-open React as modal to toggle Bob-Alpha's reaction off
+		// 16. Bob-Alpha is one of Bob's personas, so a click on the first chip opens "Your reactions"
+		// instead of reacting (tyne-chat/tyne#86).
+		await page.mouse.move(0, 0);
+		const firstReaction = allReactionButtons.first();
+		await firstReaction.click();
+		const ownReactions = page.locator('[data-flx="persona.own-reactions-popout.root"]');
+		await expect(ownReactions).toBeVisible({timeout: 5_000});
+		const betaRow = ownReactions
+			.locator('[data-flx="persona.reaction-list.row"]')
+			.filter({hasText: bobBeta.name})
+			.first();
+		await expect(betaRow).toHaveAttribute('aria-pressed', 'false');
+
+		// A click adds Bob-Beta's reaction too, and the popout stays open.
+		await betaRow.click();
+		await expect(betaRow).toHaveAttribute('aria-pressed', 'true', {timeout: 10_000});
+		await expect(ownReactions).toBeVisible();
+		await expect(firstReaction).toHaveAttribute('aria-label', /\b2 reactions\b/, {timeout: 10_000});
+
+		// A second click removes it again; Escape closes the popout.
+		await betaRow.click();
+		await expect(betaRow).toHaveAttribute('aria-pressed', 'false', {timeout: 10_000});
+		await expect(firstReaction).toHaveAttribute('aria-label', /\b1 reaction\b/, {timeout: 10_000});
+		await page.keyboard.press('Escape');
+		await expect(ownReactions).toBeHidden({timeout: 5_000});
+
+		// 17. Re-open React as modal to toggle Bob-Alpha's reaction off
 		await page.mouse.move(0, 0);
 		await messageLocator.hover();
 		await expect(quickReactionBtn).toBeVisible({timeout: 10_000});
@@ -159,8 +197,13 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		await reactAsMenuItem.click();
 
 		await expect(reactAsModal).toBeVisible({timeout: 5_000});
-		const alphaOptionToToggle = reactAsModal.locator('[class*="personaItem"]').filter({hasText: bobAlpha.name}).first();
+		const alphaOptionToToggle = reactAsModal
+			.locator('[data-flx="persona.reaction-list.row"]')
+			.filter({hasText: bobAlpha.name})
+			.first();
 		await alphaOptionToToggle.click();
+		await expect(alphaOptionToToggle).toHaveAttribute('aria-pressed', 'false', {timeout: 10_000});
+		await doneButton.click();
 		await expect(reactAsModal).toBeHidden({timeout: 5_000});
 
 		// Verify Bob-Alpha reaction is removed (only 1 reaction remains: Bob-Beta)

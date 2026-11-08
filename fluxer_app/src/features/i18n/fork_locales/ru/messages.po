@@ -406,6 +406,9 @@ msgstr "Редактировать персону"
 msgid "Edit timestamp"
 msgstr "Изменить метку времени\\"
 
+msgid "Everyone else"
+msgstr "Все остальные"
+
 #. Text under the heading when a reviewed persona import is done
 msgid "Everything else is exactly as it was."
 msgstr "Всё остальное осталось в точности как было."
@@ -471,6 +474,9 @@ msgstr "Не удалось обновить отображаемый тег"
 
 msgid "Failed to update persona mode"
 msgstr "Не удалось обновить режим персоны"
+
+msgid "Failed to update the reaction setting"
+msgstr "Не удалось обновить настройку реакций"
 
 msgid "Failed to update where your persona is remembered"
 msgstr "Не удалось изменить, где запоминается ваша персона"
@@ -768,6 +774,9 @@ msgstr "Отображаемый тег не настроен. В сообщен
 msgid "No matching personas found."
 msgstr "Подходящих персон не найдено."
 
+msgid "No one matches."
+msgstr "Совпадений нет."
+
 msgid "No personas configured yet. Create one in Settings."
 msgstr "Персоны ещё не настроены. Создайте персону в настройках."
 
@@ -987,9 +996,16 @@ msgstr "Публичная"
 msgid "Public persona"
 msgstr "Публичная персона"
 
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "Реагировать сразу как несколько персон"
+
 #. Title of the modal and context menu item to react as a persona.
 msgid "React as..."
 msgstr "Реагировать как..."
+
+msgid "Reacted"
+msgstr "Отреагировали"
 
 msgid "Reacting as <0>{reactorName}</0>"
 msgstr "Реакция от имени <0>{reactorName}</0>"
@@ -1000,6 +1016,9 @@ msgstr "Реакция от имени {name}"
 
 msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
 msgstr "Реакция фирменным эмодзи всегда ставится от имени этой персоны независимо от активной."
+
+msgid "Recent"
+msgstr "Недавние"
 
 msgid "Recent Personas"
 msgstr "Недавние персоны"
@@ -1053,6 +1072,9 @@ msgstr "Если передумаете, восстановите их в раз
 msgid "Restored"
 msgstr "Восстановлено"
 
+msgid "Results"
+msgstr "Результаты"
+
 #. Title of the persona import review
 msgid "Review before importing"
 msgstr "Проверка перед импортом"
@@ -1104,7 +1126,6 @@ msgstr "Результаты поиска ({0})"
 msgid "Search commands"
 msgstr "Поиск команд"
 
-#. Search placeholder in persona picker sheet
 #. Search placeholder in persona picker sheet
 msgid "Search personas, tags, pronouns..."
 msgstr "Поиск персон, тегов, местоимений..."
@@ -1549,6 +1570,13 @@ msgstr "У вашего аккаунта один отображаемый те�
 msgid "Your persona stays as it is; it is connected to this member."
 msgstr "Ваша персона остаётся как есть; она связывается с этим участником."
 
+msgid "Your reactions"
+msgstr "Ваши реакции"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "Ваши реакции {emojiName}"
+
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "add {count}"
 msgstr "добавит {count}"
@@ -1617,6 +1645,10 @@ msgstr "имя"
 #. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
 msgid "picture not compared"
 msgstr "изображение не сравнивалось"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "нажмите, чтобы увидеть свои реакции"
 
 #. A persona field, listed in "Differs: name, pronouns"
 msgid "pronouns"
@@ -1711,6 +1743,14 @@ msgstr "{count, plural, one {Использована # раз} few {Испол�
 
 msgid "{count} notice(s) during import"
 msgstr "Замечаний при импорте: {count}"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count} из {total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "Отреагировали {count} из {total}"
 
 #. How many personas are selected in settings. Preserve {count}.
 msgid "{count} selected"
