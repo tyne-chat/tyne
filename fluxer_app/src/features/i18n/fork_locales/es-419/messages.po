@@ -56,6 +56,10 @@ msgstr "Alicia"
 msgid "All Personas"
 msgstr "Todas las personas"
 
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "Todas las personas"
+
 #. Section header for all time zones in the timestamp modal.
 msgid "All time zones"
 msgstr "Todas las zonas horarias"
@@ -160,6 +164,10 @@ msgstr "No se pudo ejecutar /{name}: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "No se pudo guardar /{name}: {detail}"
 
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "No se pudieron cargar las personas."
+
 #. Option of a community command counter: a persona counts as its own person, not as its account.
 msgid "Count personas separately"
 msgstr "Contar las personas por separado"
@@ -183,6 +191,10 @@ msgstr "Crear comandos para esta comunidad y editar o eliminar los tuyos."
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "Creado por {name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "Creada el {date}"
 
 #. Aria label for deactivating active persona
 msgid "Deactivate persona"
@@ -442,6 +454,10 @@ msgstr "Administra y crea tus personas"
 msgid "Manage commands"
 msgstr "Administrar comandos"
 
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "Administrar personas"
+
 #. Active persona mode manual
 #. Active persona mode manual
 #. Active persona mode manual
@@ -467,6 +483,14 @@ msgstr "Herramientas de mensajes"
 msgid "Messages members can post by typing /name."
 msgstr "Mensajes que los miembros pueden publicar escribiendo /name."
 
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "Más usadas"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "Nombre (A–Z)"
+
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Nueva persona"
@@ -479,9 +503,17 @@ msgstr "Nuevo comando"
 msgid "New window"
 msgstr "Nueva ventana"
 
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "Siguiente persona"
+
 #. Error message when PluralKit export lacks members array
 msgid "No \"members\" array found in this export file."
 msgstr "No se encontró ninguna matriz «members» en este archivo de exportación."
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "Aún no hay biografía."
 
 #. Empty state title in the Commands tab.
 msgid "No commands"
@@ -499,12 +531,24 @@ msgstr "Aún no hay personas configuradas. Crea una en Configuración."
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "Aún no has creado ninguna persona. Haz clic en «Agregar persona» para crear la primera."
 
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "Ninguna persona coincide con tu búsqueda."
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "No hay personas públicas."
+
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Aún no hay señales. La barra permanece oculta hasta que agregues una."
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Nadie tiene esta señal activada"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "Ninguna de tus personas es pública todavía. Los demás ven una persona aquí cuando cambias su visibilidad a Pública."
 
 #. Helper description for the Everywhere option of the persona scope setting
 msgid "One persona for all channels."
@@ -529,6 +573,10 @@ msgstr "Opcional"
 #. Placeholder for system badge in import modal
 msgid "Optional system badge, e.g. ⚞Seraphim⚟"
 msgstr "Insignia de sistema opcional, p. ej., ⚞Seraphim⚟"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "Los demás ven {count, plural, one {# persona pública} other {# personas públicas}}."
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -589,6 +637,10 @@ msgstr "Perfil de persona"
 msgid "Persona profile: {name}"
 msgstr "Perfil de persona: {name}"
 
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "Persona desde"
+
 #. Toast when persona is updated
 msgid "Persona updated"
 msgstr "Persona actualizada"
@@ -601,6 +653,10 @@ msgstr "Visibilidad de la persona"
 #. User settings tab for personas.
 msgid "Personas"
 msgstr "Personas"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "Personas ({count})"
 
 #. Help for an example in a command script.
 msgid "Pick one option at random"
@@ -642,6 +698,12 @@ msgstr "Preparando la descarga por lotes de avatares..."
 msgid "Press F6 to reach this window with the keyboard."
 msgstr "Presiona F6 para llegar a esta ventana con el teclado."
 
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "Persona anterior"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
 #. Persona visibility private
 msgid "Private"
 msgstr "Privada"
@@ -662,6 +724,7 @@ msgstr "Las tarjetas de perfil solo son accesibles al hacer clic en los mensajes
 msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
 msgstr "Las tarjetas de perfil son accesibles al hacer clic en los mensajes y visibles en tu lista pública de personas para amigos y servidores en común."
 
+#. Chip above the persona list: public personas.
 #. Persona visibility public
 msgid "Public"
 msgstr "Pública"
@@ -686,6 +749,10 @@ msgstr "Reaccionar con un emoji distintivo siempre reaccionará como esta person
 
 msgid "Recent Personas"
 msgstr "Personas recientes"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "Usadas recientemente"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"
@@ -760,6 +827,14 @@ msgstr "Buscar comandos"
 msgid "Search personas, tags, pronouns..."
 msgstr "Buscar personas, etiquetas, pronombres..."
 
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "Buscar en tus personas"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "Buscar en las personas de {name}"
+
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
 msgstr "Enviando como @{username} ({mode}) - Haz clic para cambiar de persona"
@@ -787,6 +862,10 @@ msgstr "Mostrar botón de personas"
 #. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
 msgid "Show signal bar"
 msgstr "Mostrar barra de señales"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "Mostrar no listadas y privadas"
 
 msgid "Signal Bar"
 msgstr "Barra de señales"
@@ -999,6 +1078,8 @@ msgstr "Escribe {output} o {tag} para ver sugerencias."
 msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
 msgstr "Escribir una de estas etiquetas no cambiará a esta persona. La etiqueta se envía tal como está escrita."
 
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "No listada"
@@ -1126,6 +1207,7 @@ msgstr "personas guardadas"
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
 msgid "text"
 msgstr "texto"
 
@@ -1144,6 +1226,10 @@ msgstr "{0} de {1} {2} ({3} %)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} está listo para instalarse."
 
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, one {# persona} other {# personas}}"
+
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
 msgstr "{domain} ejecuta una versión más reciente de {productName} que esta app. Actualiza {productName} y vuelve a intentarlo."
@@ -1160,12 +1246,20 @@ msgstr "{name} ({mode}) - Haz clic para cambiar de persona"
 msgid "{name} is never closed."
 msgstr "{name} nunca se cierra."
 
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "{position} de {total}"
+
 #. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
 msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
 msgstr "{productName} dejó de verificar si el navegador aprobó este inicio de sesión. No perdió tu código."
 
 msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
 msgstr "{publicCount} públicas, {unlistedCount} no listadas, {privateCount} privadas"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "{shown} de {total} personas"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Hoy a las 12:00"
