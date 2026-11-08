@@ -142,6 +142,11 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   keys and a swipe on phones. Clicking a name in a persona's popout opens it there too
   (`PersonaGalleryNav` carries the request to the profile window); a persona the list does not hold
   (an unlisted one) is fetched on its own, and the tab then stays for it.
+- **Expand** (not on phones, not remembered): an attribute on the profile window hides upstream's
+  banner, name block and tabs by their `data-flx` names (`utils/PersonaGalleryExpand.ts`, whose test
+  fails if upstream renames one), and a slim bar takes their place. Expand turns into Restore in the
+  same place, last in the toolbar or the persona's row (#589); Escape folds it back unless a menu or
+  popout is open.
 - **Upstream hooks:** `ProfileBody.tsx` (the tab), `UserProfileModalShared.ts` (`ProfileTab`),
   `UserProfileModalUserInfo.tsx`, `ProfileCardUserInfo.tsx` (`personaNameExtras`, under the name),
   `UserProfilePopout.tsx`, `UserProfileMobileSheet.tsx`, and `Modals.tsx` (the sheet).
