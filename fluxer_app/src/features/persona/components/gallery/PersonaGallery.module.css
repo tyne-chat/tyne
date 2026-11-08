@@ -691,3 +691,69 @@
 	font-weight: 700;
 	color: var(--text-primary);
 }
+
+/* Expanded: the list has the whole profile window (PersonaGalleryExpand.ts). Upstream's banner, name
+   block and tab row are hidden by their data-flx attributes on the window the gallery marks. */
+
+:global([data-persona-gallery-expanded='true'])
+	:global([data-flx='user.user-profile-modal.profile-media-header.header']),
+:global([data-persona-gallery-expanded='true']) :global([data-flx='user.user-profile-modal.user-info.div']),
+:global([data-persona-gallery-expanded='true']) :global([data-flx='user.user-profile-modal.profile-body.div--2']) {
+	display: none !important;
+}
+
+.expandButton {
+	display: inline-grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 2.125rem;
+	height: 2.125rem;
+	border: 0.0625rem solid var(--background-modifier-accent);
+	border-radius: var(--radius-md, 0.375rem);
+	background: var(--background-secondary);
+	color: var(--text-tertiary);
+	cursor: pointer;
+}
+
+.expandButton:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-primary);
+}
+
+.expandedBar {
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	height: 3rem;
+	padding: 0 0.75rem 0 1rem;
+	border-bottom: 0.0625rem solid var(--background-modifier-accent);
+	background: var(--background-primary);
+}
+
+.expandedName {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 700;
+	color: var(--text-primary);
+}
+
+.expandedCount {
+	flex: 0 0 auto;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--text-tertiary);
+}
+
+.expandedSpacer {
+	flex: 1;
+}
+
+/* A persona opened while expanded keeps its nav bar under the slim bar. */
+.galleryExpanded .detailNav {
+	top: 3rem;
+}
