@@ -589,6 +589,10 @@
 	color: var(--text-tertiary);
 }
 
+.detailNavEnd {
+	margin-inline-start: auto;
+}
+
 .detailStep {
 	display: inline-grid;
 	place-items: center;
@@ -756,4 +760,9 @@
 /* A persona opened while expanded keeps its nav bar under the slim bar. */
 .galleryExpanded .detailNav {
 	top: 3rem;
+}
+
+/* A wrapper that only carries the image menu's right-click; it adds no box of its own. */
+.imageMenuTarget {
+	display: contents;
 }
