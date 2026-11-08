@@ -1,0 +1,438 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* Fork: the public /download page (tyne-chat/tyne#242). */
+
+.page {
+	/* The app's root does not scroll, so the page is its own scrolling area. */
+	height: 100dvh;
+	box-sizing: border-box;
+	overflow-y: auto;
+	background-color: var(--background-primary);
+	color: var(--text-primary);
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.header {
+	border-bottom: 0.0625rem solid var(--background-modifier-accent);
+	background-color: var(--background-secondary);
+}
+
+.headerInner,
+.main {
+	max-width: 67.5rem;
+	margin: 0 auto;
+	box-sizing: border-box;
+	padding-inline: clamp(1rem, 4vw, 1.5rem);
+}
+
+.headerInner {
+	display: flex;
+	align-items: baseline;
+	gap: 0.625rem;
+	padding-block: 0.875rem;
+}
+
+.wordmark {
+	font-size: 1.375rem;
+	font-weight: 700;
+}
+
+.host {
+	font-size: 0.875rem;
+	color: var(--text-secondary);
+}
+
+.main {
+	display: flex;
+	flex-direction: column;
+	gap: 3.5rem;
+	padding-block: 3rem 4rem;
+}
+
+.hero {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2rem 3rem;
+	align-items: stretch;
+}
+
+.heroText {
+	flex: 999 1 30rem;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.title {
+	margin: 0;
+	font-size: clamp(2.125rem, 5vw, 3rem);
+	line-height: 1.1;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+}
+
+.mainAction {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.625rem;
+}
+
+.mainButton,
+.secondaryButton {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	min-height: 3.5rem;
+	box-sizing: border-box;
+	justify-content: center;
+	padding: 0.75rem 1.5rem;
+	border-radius: 0.5rem;
+	border: 0.0625rem solid transparent;
+	font-size: 1.125rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background-color 0.12s ease;
+}
+
+.mainButton {
+	border-color: color-mix(in srgb, var(--brand-primary) 82%, white 18%);
+	background-color: var(--brand-primary);
+	color: var(--brand-primary-fill);
+}
+
+.mainButton:hover {
+	background-color: var(--brand-primary-pressed);
+	text-decoration: none;
+}
+
+.secondaryButton {
+	border-color: var(--background-modifier-accent);
+	background-color: var(--background-tertiary);
+	color: var(--text-primary);
+}
+
+.secondaryButton:hover {
+	background-color: color-mix(in srgb, var(--background-tertiary) 88%, var(--text-primary) 12%);
+	text-decoration: none;
+}
+
+.mainButton:focus-visible,
+.secondaryButton:focus-visible,
+.link:focus-visible,
+.platformCard:focus-visible {
+	outline: 0.125rem solid var(--text-link);
+	outline-offset: 0.125rem;
+}
+
+.buttonLabel {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.buttonIcon {
+	width: 1.375rem;
+	height: 1.375rem;
+	flex: none;
+}
+
+.buttonHint {
+	font-size: 0.8125rem;
+	font-weight: 400;
+	opacity: 0.85;
+}
+
+.linuxButtons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.linuxButtons > a {
+	min-width: 12.5rem;
+	font-size: 1.0625rem;
+}
+
+.requirement {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--text-secondary);
+}
+
+.note {
+	margin: 0;
+	max-width: 36rem;
+	font-size: 0.9375rem;
+	color: var(--text-secondary);
+}
+
+.links {
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem 1.25rem;
+	font-size: 0.9375rem;
+}
+
+.link {
+	color: var(--text-link);
+	text-decoration: none;
+}
+
+.link:hover,
+.linkButton:hover {
+	text-decoration: underline;
+}
+
+.linkButton {
+	padding: 0;
+	border: none;
+	background: none;
+	color: var(--text-link);
+	font: inherit;
+	cursor: pointer;
+}
+
+.linkButton:focus-visible {
+	outline: 0.125rem solid var(--text-link);
+	outline-offset: 0.125rem;
+}
+
+/* "Choose another platform" outlines the list briefly, in case it is already in view. */
+.highlightPlatforms .platformCard {
+	animation: platformsHighlight 1.4s ease-out;
+}
+
+@keyframes platformsHighlight {
+	0%,
+	40% {
+		border-color: var(--brand-primary);
+		box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--brand-primary) 45%, transparent);
+	}
+	100% {
+		box-shadow: 0 0 0 0 transparent;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.highlightPlatforms .platformCard {
+		animation-duration: 0.01s;
+	}
+}
+
+.qrCard {
+	flex: 1 1 16rem;
+	max-width: 20rem;
+	box-sizing: border-box;
+	padding: 1.5rem;
+	border-radius: 0.75rem;
+	border: 0.0625rem solid var(--background-modifier-accent);
+	background-color: var(--background-secondary);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.875rem;
+}
+
+.qrTitle {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+.qrCode {
+	line-height: 0;
+}
+
+.qrHint {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: var(--text-secondary);
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	scroll-margin-top: 1rem;
+}
+
+.sectionTitle {
+	margin: 0;
+	font-size: 1.625rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.steps {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(16.25rem, 1fr));
+	gap: 1rem;
+}
+
+.step {
+	box-sizing: border-box;
+	padding: 1.25rem;
+	border-radius: 0.75rem;
+	border: 0.0625rem solid var(--background-modifier-accent);
+	background-color: var(--background-secondary);
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+}
+
+.warningStep {
+	border-color: color-mix(in srgb, #f0b84a 45%, var(--background-modifier-accent));
+	background-color: color-mix(in srgb, #f0b84a 8%, var(--background-secondary));
+}
+
+.stepNumber {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	background-color: color-mix(in srgb, var(--brand-primary) 30%, var(--background-secondary));
+	color: var(--text-primary);
+}
+
+.stepText {
+	margin: 0;
+}
+
+/* Simplified drawings of the warnings Windows and macOS show, with the control to use outlined. */
+
+.sketch {
+	box-sizing: border-box;
+	padding: 0.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	font-size: 0.8125rem;
+}
+
+.windowsSketch {
+	border-radius: 0.375rem;
+	border: 0.0625rem solid #2d5179;
+	background-color: #17324f;
+	color: #dbe8f6;
+}
+
+.macSketch {
+	border-radius: 0.625rem;
+	border: 0.0625rem solid #45434b;
+	background-color: #2c2b30;
+	color: #d9d7de;
+	align-items: center;
+	text-align: center;
+}
+
+.sketchRow {
+	flex-direction: row;
+	justify-content: space-between;
+	text-align: start;
+}
+
+.sketchTitle {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.sketchLink {
+	align-self: flex-start;
+	padding: 0.0625rem 0.25rem;
+	border-radius: 0.1875rem;
+	text-decoration: underline;
+}
+
+.sketchButtons {
+	display: flex;
+	gap: 0.5rem;
+	align-self: stretch;
+}
+
+.sketchButtons > .sketchButton {
+	flex: 1;
+}
+
+.sketchButton {
+	flex: none;
+	padding: 0.25rem 0.75rem;
+	border-radius: 0.3125rem;
+	background-color: #46454c;
+	color: #ffffff;
+}
+
+.windowsSketch .sketchButton {
+	background-color: #2d5179;
+	border-radius: 0.1875rem;
+}
+
+.sketchEnd {
+	align-self: flex-end;
+}
+
+.sketchPrimary {
+	background-color: #3a7bd5;
+}
+
+.highlight {
+	outline: 0.125rem solid #f0b84a;
+}
+
+.platformGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+	gap: 0.75rem;
+}
+
+.platformCard {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.375rem;
+	min-height: 7rem;
+	box-sizing: border-box;
+	padding: 1rem;
+	border-radius: 0.75rem;
+	border: 0.125rem solid var(--background-modifier-accent);
+	background-color: var(--background-secondary);
+	color: var(--text-secondary);
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+}
+
+.platformCard:hover {
+	border-color: color-mix(in srgb, var(--brand-primary) 50%, var(--background-modifier-accent));
+}
+
+.platformCardSelected {
+	border-color: var(--brand-primary);
+	background-color: color-mix(in srgb, var(--brand-primary) 14%, var(--background-secondary));
+}
+
+.platformIcon {
+	width: 1.75rem;
+	height: 1.75rem;
+	color: var(--text-primary);
+}
+
+.platformName {
+	font-size: 1.0625rem;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.platformDetail {
+	font-size: 0.875rem;
+}
