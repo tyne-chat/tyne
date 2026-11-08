@@ -9,6 +9,10 @@ import {appRoute, homeRoute, notFoundRoute} from '@app/app/router/routes/RootRou
 import {createRootRoute, createRoute} from '@app/features/platform/components/router/RouterBuilder';
 import type {RouteConfig} from '@app/features/platform/components/router/RouterTypes';
 
+// Fork imports.
+
+import {appDownloadRoute} from '@app/features/app_download/routes/AppDownloadRoute';
+
 const authRootRoute = createRootRoute({
 	layout: ({children}) => (
 		<AuthRootComponent data-flx="app.router.auth-root-routes.layout.auth-root-component">{children}</AuthRootComponent>
@@ -34,5 +38,6 @@ const authRootRouteTree = authRootRoute.addChildren([
 	connectionCallbackRoute,
 	authRouteTree,
 	...signedInAppRoutes,
+	appDownloadRoute,
 ]);
 export const buildAuthRoutes = (): Array<RouteConfig> => authRootRouteTree.build();
