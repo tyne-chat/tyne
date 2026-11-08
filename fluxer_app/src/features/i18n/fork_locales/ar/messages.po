@@ -111,6 +111,10 @@ msgstr "تغيير الرسالة حسب ما كتبوه"
 msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
 msgstr "اختر ملف تصدير PluralKit (.json) أو ملف تصدير {productName} (.zip)، أو اسحبه وأفلته هنا"
 
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "اختر الشخصيات التي تريد إبرازها"
+
 #. Tooltip on the community command chip when the message box already has text. Preserve {name}.
 msgid "Clear the message box to use /{name}"
 msgstr "أفرغ مربع الرسالة لاستخدام /{name}"
@@ -163,6 +167,10 @@ msgstr "تعذر تنفيذ /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "تعذر حفظ /{name}: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "تعذّر تغيير الشخصيات. حاول مرة أخرى."
 
 #. Shown in the Personas list when the request for them failed.
 msgid "Couldn’t load personas."
@@ -218,6 +226,10 @@ msgstr "حذف الشخصية"
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
 msgstr "حذف الطابع الزمني\\"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "حذف {count, plural, zero {لا شخصيات} one {شخصية واحدة} two {شخصيتين} few {# شخصيات} many {# شخصية} other {# شخصية}}؟"
 
 msgid "Detected System Name / Tag"
 msgstr "اسم / علامة النظام المكتشفة"
@@ -353,6 +365,10 @@ msgstr "تعذّر رفع صورة اللافتة إلى الخادم"
 msgid "Failed to upload icon to server"
 msgstr "تعذّر رفع الأيقونة إلى الخادم"
 
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "التصفية حسب الظهور"
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "معاينة التنسيق"
@@ -443,6 +459,26 @@ msgstr "صُنعت باستخدام /{name}"
 msgid "Main account"
 msgstr "الحساب الرئيسي"
 
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "اجعلها خاصة"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "اجعلها عامة"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "اجعلها غير مدرجة"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "جعل {count, plural, zero {لا شخصيات} one {شخصية واحدة} two {شخصيتين} few {# شخصيات} many {# شخصية} other {# شخصية}} خاصة؟"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "جعل {count, plural, zero {لا شخصيات} one {شخصية واحدة} two {شخصيتين} few {# شخصيات} many {# شخصية} other {# شخصية}} عامة؟"
+
 msgid "Manage Personas"
 msgstr "إدارة الشخصيات"
 
@@ -531,6 +567,10 @@ msgstr "لم يتم إعداد أي شخصيات بعد. أنشئ واحدة م�
 msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
 msgstr "لم يتم إنشاء أي شخصيات بعد. انقر على \"إضافة شخصية\" لإنشاء أول شخصية لك!"
 
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "لا توجد شخصيات هنا."
+
 #. Shown in the Personas list when the search matches nothing.
 msgid "No personas match your search."
 msgstr "لا توجد شخصيات تطابق بحثك."
@@ -577,6 +617,10 @@ msgstr "شارة نظام اختيارية، مثال: ⚞Seraphim⚟"
 #. Shown above one’s own Personas list: how many of one’s personas others can see there.
 msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
 msgstr "يرى الآخرون {count, plural, zero {لا شخصيات عامة} one {شخصية عامة واحدة} two {شخصيتين عامتين} few {# شخصيات عامة} many {# شخصية عامة} other {# شخصية عامة}}."
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "سيراها الآخرون في قائمة شخصياتك ويمكنهم فتح ملفاتها الشخصية. يمكنك تغيير ذلك في أي وقت."
 
 #. Textarea right-click context menu item that pastes clipboard contents without formatting.
 msgid "Paste as plain text"
@@ -1001,9 +1045,17 @@ msgstr "شريط الإشارات متوقف إلى أن تحدد قناة هن�
 msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
 msgstr "تعذّر حفظ أيقونة العلامة: {error}. يمكن تعيينها مجددًا من إعدادات الشخصيات."
 
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "ستظل رسائلها تعرض أسماءها وصورها الرمزية، لكن لن يعود بإمكانك الإرسال باسمها، وتصبح علاماتها ورموزها التعبيرية المميزة متاحة. لا يمكن التراجع عن ذلك."
+
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "اسم من يستخدمه"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "ستُخفى ملفاتها الشخصية عن الآخرين. ستظل أسماؤها وصورها الرمزية تظهر على رسائلها وتفاعلاتها."
 
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
@@ -1226,9 +1278,29 @@ msgstr "{0} من {1} {2} ({3}%)"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} الإصدار {version} جاهز للتثبيت."
 
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, zero {لا شخصيات خاصة الآن} one {أصبحت شخصية واحدة خاصة} two {أصبحت شخصيتان خاصتين} few {أصبحت # شخصيات خاصة} many {أصبحت # شخصية خاصة} other {أصبحت # شخصية خاصة}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, zero {لا شخصيات عامة الآن} one {أصبحت شخصية واحدة عامة} two {أصبحت شخصيتان عامتين} few {أصبحت # شخصيات عامة} many {أصبحت # شخصية عامة} other {أصبحت # شخصية عامة}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, zero {لا شخصيات غير مدرجة الآن} one {أصبحت شخصية واحدة غير مدرجة} two {أصبحت شخصيتان غير مدرجتين} few {أصبحت # شخصيات غير مدرجة} many {أصبحت # شخصية غير مدرجة} other {أصبحت # شخصية غير مدرجة}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, zero {لا شخصيات} one {شخصية واحدة} two {شخصيتان} few {# شخصيات} many {# شخصية} other {# شخصية}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, zero {لم تُحذف أي شخصية} one {حُذفت شخصية واحدة} two {حُذفت شخصيتان} few {حُذفت # شخصيات} many {حُذفت # شخصية} other {حُذفت # شخصية}}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "تم تحديد {count}"
 
 #. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
 msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
