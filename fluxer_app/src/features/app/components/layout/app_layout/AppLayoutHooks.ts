@@ -58,6 +58,10 @@ import {UserPremiumTypes} from '@fluxer/constants/src/UserConstants';
 import {MS_PER_DAY} from '@fluxer/date_utils/src/DateConstants';
 import {useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {forkAllowsFluxerAndroidAppNagbar} from '@app/features/app/components/layout/app_layout/nagbars/ForkAndroidAppNagbar';
+
 function sortNagbarsByPriority(a: NagbarState, b: NagbarState): number {
 	return a.priority - b.priority;
 }
@@ -206,6 +210,8 @@ export const useNagbarConditions = (): NagbarConditions => {
 	})();
 	const androidAppNagbarStarted = useAndroidAppNagbarStarted();
 	const canShowAndroidApp = (() => {
+		// Fork: it advertises Fluxer's Android app, not Tyne's (tyne-chat/tyne#546).
+		if (!forkAllowsFluxerAndroidAppNagbar()) return false;
 		if (nagbarState.forceHideAndroidApp) return false;
 		if (nagbarState.forceAndroidApp) return true;
 		if (hasBrokenElectronNativeContext) return false;
