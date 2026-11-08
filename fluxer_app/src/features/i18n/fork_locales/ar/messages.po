@@ -1744,12 +1744,12 @@ msgstr "عادت {name}."
 msgid "{name} is never closed."
 msgstr "لم يُغلق {name} أبدًا."
 
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount} members and your display tag need a look"
+#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
+msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
 msgstr "{needCount, plural, zero {تحتاج علامة العرض الخاصة بك إلى مراجعة} one {يحتاج عضو واحد وعلامة العرض الخاصة بك إلى مراجعة} two {يحتاج عضوان وعلامة العرض الخاصة بك إلى مراجعة} few {يحتاج # أعضاء وعلامة العرض الخاصة بك إلى مراجعة} many {يحتاج # عضوًا وعلامة العرض الخاصة بك إلى مراجعة} other {يحتاج # عضو وعلامة العرض الخاصة بك إلى مراجعة}}"
 
 #. Heading of the import review. {needCount} is a number of members
-msgid "{needCount} members need a look"
+msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
 msgstr "{needCount, plural, zero {لا أعضاء يحتاجون إلى مراجعة} one {يحتاج عضو واحد إلى مراجعة} two {يحتاج عضوان إلى مراجعة} few {يحتاج # أعضاء إلى مراجعة} many {يحتاج # عضوًا إلى مراجعة} other {يحتاج # عضو إلى مراجعة}}"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
