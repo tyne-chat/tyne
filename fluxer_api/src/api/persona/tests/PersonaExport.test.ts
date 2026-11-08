@@ -350,7 +350,7 @@ describe('Persona export', () => {
 			.execute();
 	});
 
-	it('forgets image sources with the persona and with the account', async () => {
+	it('keeps image sources through a delete, for a restore, leaves them out of the export, and forgets them with the account', async () => {
 		const imported = await importLikeTheApp(account.token, PLURALKIT_FILE);
 		const userId = createUserID(BigInt(account.userId));
 		expect((await loadPersonaImageSources(userId)).size).toBe(2);
@@ -359,9 +359,10 @@ describe('Persona export', () => {
 			.delete(`/users/@me/personas/${imported.find((p) => p.external_uuid === 'abcde')!.id}`)
 			.expect(HTTP_STATUS.NO_CONTENT)
 			.execute();
-		expect([...(await loadPersonaImageSources(userId)).values()].map((row) => row.avatar_field)).toEqual([
-			'webhook_avatar_url',
-		]);
+		// Kept so a restored persona still matches its pictures at the next import (tyne-chat/tyne#243).
+		expect((await loadPersonaImageSources(userId)).size).toBe(2);
+		const {files} = await exportZip(account.token);
+		expect(pluralKitJsonOf(files).members.map((m: {id: string}) => m.id)).not.toContain('abcde');
 
 		await forgetPersonaImageSourcesOfUser(userId);
 		expect((await loadPersonaImageSources(userId)).size).toBe(0);
