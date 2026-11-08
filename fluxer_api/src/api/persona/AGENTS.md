@@ -112,8 +112,12 @@ personas), 10,000 signature emojis per persona (unique across personas).
 ## Routes and OAuth
 
 - `@me` routes: list and create, `/:persona_id`, `/import`, `/settings`,
-  `/channel-states[/:channel_id]`, `/export`, `/import-image`. Other people's: `/users/:user_id/personas`
-  (public personas only) and `/users/:user_id/personas/:persona_id`.
+  `/channel-states[/:channel_id]`, `/export`, `/import-image`.
+- `/users/:user_id/personas` feeds the Personas tab, sheet and pill (tyne-chat/tyne#189): the
+  account's display tag and its public personas, the most used first, also for the owner. The order
+  is the only thing it gives away of the usage counters; never add `use_count` or `last_used_at_ms`
+  to it, since for a system they would show who is fronting. One's own unlisted and private
+  personas come from the `@me` list.
 - **Route order:** a new literal path (`/users/@me/personas/<word>`) must be registered before
   `/:persona_id`, or the parameter route takes it.
 - **OAuth:** the `@me` routes check `personas.read` or `personas.write` with
