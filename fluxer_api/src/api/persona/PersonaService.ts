@@ -709,15 +709,25 @@ export class PersonaService {
 			return persona;
 		};
 		// Connecting a persona to a member leaves no other live persona connected to it: any other one
-		// (duplicates an older import left, tyne-chat/tyne#571) keeps its details and loses the link.
+		// (duplicates an older import left, tyne-chat/tyne#571) keeps its details and loses the link,
+		// unless an action of its own connects it, which then decides its link (one of two duplicates
+		// given to another member).
+		const connecting = new Set(
+			request.actions.flatMap((action) =>
+				(action.action === 'link' || action.action === 'use_file') && action.persona_id ? [action.persona_id] : [],
+			),
+		);
+		const connectedMembers = new Set<string>();
 		const unlinkOthers = (persona: Persona, externalId: string) => {
+			if (connectedMembers.has(externalId)) {
+				throw new PersonaImportConflictError(`More than one action connects member ${externalId}`);
+			}
+			connectedMembers.add(externalId);
 			for (const other of all) {
 				if (other.isDeleted || other.id === persona.id) continue;
 				if (other.externalUuid !== externalId && other.id.toString() !== externalId) continue;
 				const id = other.id.toString();
-				if (targeted.has(id)) {
-					throw new PersonaImportConflictError(`Persona '${other.name}' is already linked to member ${externalId}`);
-				}
+				if (connecting.has(id) || targeted.has(id)) continue;
 				targeted.add(id);
 				planned.push({kind: 'update', persona: other, params: {external_uuid: null}});
 			}
