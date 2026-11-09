@@ -847,6 +847,10 @@ msgstr "Pas de bio"
 msgid "No bio yet."
 msgstr "Pas encore de bio."
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Pas de couleur"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "Aucune commande"
