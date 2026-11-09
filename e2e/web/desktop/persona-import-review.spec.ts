@@ -56,12 +56,16 @@ test.describe('PluralKit Import Review', () => {
 		await expect(dialog.getByText(/Total Members/i)).toBeVisible({timeout: 10_000});
 		await dialog.getByRole('button', {name: 'Import', exact: true}).click();
 
-		// 3. The review opens before anything changes: Alpha is probably the same persona, and the
-		// file's system tag differs from the account's display tag
-		await expect(dialog.getByRole('heading', {name: 'Review before importing'})).toBeVisible({timeout: 15_000});
-		await expect(dialog.getByRole('heading', {name: 'Probably the same persona'})).toBeVisible();
-		await expect(dialog.getByRole('heading', {name: 'Display tag'})).toBeVisible();
-		await expect(dialog.getByRole('heading', {name: 'New in your file'})).toBeVisible();
+		// 3. The review opens before anything changes. No member needs a choice (Alpha is probably the
+		// same persona, which is listed, not asked), but the file's system tag differs from the
+		// account's display tag. The lines at the top say what happens to everyone else.
+		await expect(dialog.getByRole('heading', {name: 'Check before importing'})).toBeVisible({timeout: 15_000});
+		await expect(dialog.getByText('1 new member will be added')).toBeVisible();
+		await expect(dialog.getByText(/^1 persona you made by hand will be connected to its member\./)).toBeVisible();
+		await expect(dialog.getByText(/^1 persona in Tyne isn.t in your file\./)).toBeVisible();
+		await expect(
+			dialog.getByRole('heading', {name: /Your display tag shows after every persona.s name/}),
+		).toBeVisible();
 
 		// 4. Import with the choices already picked
 		await dialog.getByRole('button', {name: 'Import', exact: true}).click();
