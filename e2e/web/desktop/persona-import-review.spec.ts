@@ -56,6 +56,12 @@ test.describe('PluralKit Import Review', () => {
 		await expect(dialog.getByText(/Total Members/i)).toBeVisible({timeout: 10_000});
 		await dialog.getByRole('button', {name: 'Import', exact: true}).click();
 
+		// The account has personas, so a backup is offered first; Export downloads it and carries on.
+		await expect(dialog.getByText('Use Export to make a backup before continuing.')).toBeVisible({timeout: 10_000});
+		const download = page.waitForEvent('download');
+		await dialog.getByRole('button', {name: 'Export', exact: true}).click();
+		expect((await download).suggestedFilename()).toMatch(/\.zip$/);
+
 		// 3. The review opens before anything changes. No member needs a choice (Alpha is probably the
 		// same persona, which is listed, not asked), but the file's system tag differs from the
 		// account's display tag. The lines at the top say what happens to everyone else.
