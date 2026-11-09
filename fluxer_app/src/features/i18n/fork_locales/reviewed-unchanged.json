@@ -2,6 +2,18 @@
 	"version": 1,
 	"msgids": ["Dev (Staging)", "Fedora, openSUSE", "Ubuntu, Debian, Linux Mint"],
 	"locales": {
+		"be": ["Fedora, openSUSE", "Ubuntu, Debian, Linux Mint", "{label}: {names}"],
+		"bn": ["Fedora, openSUSE", "Ubuntu, Debian, Linux Mint", "{label}: {names}"],
+		"ca": [
+			"(Prefix: {0})",
+			"Fedora, openSUSE",
+			"Manual",
+			"Persona",
+			"Script",
+			"Ubuntu, Debian, Linux Mint",
+			"text",
+			"{label}: {names}"
+		],
 		"cs": ["(Prefix: {0})", "avatar", "banner", "Persona", "text"],
 		"da": [
 			"Alice",
@@ -45,6 +57,20 @@
 			"Script",
 			"{count, plural, one {# persona} other {# personas}}"
 		],
+		"fil": [
+			"Alice",
+			"Command",
+			"Fedora, openSUSE",
+			"Move to Trash",
+			"Open Anyway",
+			"Persona",
+			"Script",
+			"Taskbar",
+			"Ubuntu, Debian, Linux Mint",
+			"{label}: {names}",
+			"“Tyne” Not Opened",
+			"“Tyne” was blocked."
+		],
 		"fr": [
 			"Alice",
 			"avatar",
@@ -60,6 +86,14 @@
 		"id": ["Alice", "avatar", "banner", "bio", "Edit Persona", "Edit persona", "Manual", "Persona", "Tag"],
 		"it": ["Account: @{username}", "Alice", "avatar", "banner", "Persona", "Script", "Tag"],
 		"lt": ["Persona"],
+		"lv": [
+			"Fedora, openSUSE",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Ubuntu, Debian, Linux Mint",
+			"{label}: {names}"
+		],
 		"nl": ["Account: @{username}", "Alice", "avatar", "banner", "bio", "Persona", "Script", "Tag", "tags"],
 		"no": ["Alice", "avatar", "banner", "bio", "Persona"],
 		"pl": ["Persona", "Tag"],
@@ -74,6 +108,17 @@
 			"Script",
 			"{count, plural, one {# persona} other {# personas}}"
 		],
+		"pt-PT": [
+			"Alice",
+			"Fedora, openSUSE",
+			"Manual",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Script",
+			"Ubuntu, Debian, Linux Mint",
+			"{label}: {names}"
+		],
 		"ro": [
 			"(Prefix: {0})",
 			"Alice",
@@ -85,6 +130,19 @@
 			"Personas ({count})",
 			"Script",
 			"text"
+		],
+		"sk": ["Fedora, openSUSE", "Persona", "Ubuntu, Debian, Linux Mint", "text", "{label}: {names}"],
+		"sl": ["Fedora, openSUSE", "Persona", "Ubuntu, Debian, Linux Mint", "{label}: {names}"],
+		"sq": [
+			"Fedora, openSUSE",
+			"Move to Trash",
+			"Open Anyway",
+			"Persona",
+			"Private",
+			"Ubuntu, Debian, Linux Mint",
+			"{label}: {names}",
+			"“Tyne” Not Opened",
+			"“Tyne” was blocked."
 		],
 		"sv-SE": [
 			"(Prefix: {0})",
@@ -98,6 +156,18 @@
 			"{count, plural, one {# persona} other {# personas}}"
 		],
 		"th": ["Persona"],
+		"tok": [
+			"Fedora, openSUSE",
+			"More info",
+			"Move to Trash",
+			"Open Anyway",
+			"Run anyway",
+			"Ubuntu, Debian, Linux Mint",
+			"Windows protected your PC",
+			"{label}: {names}",
+			"“Tyne” Not Opened",
+			"“Tyne” was blocked."
+		],
 		"tr": ["Alice", "avatar", "banner", "Persona"],
 		"vi": ["Alice", "Persona"]
 	}

@@ -1,0 +1,2012 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+msgid ""
+msgstr ""
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. placeholder {0}: w.prefix
+msgid "(Prefix: {0})"
+msgstr "(Predpona: {0})"
+
+#. Install step on Linux for .deb and .rpm packages.
+msgid "<0>.deb or .rpm:</0> open the file you downloaded and click <1>Install</1>."
+msgstr "<0>.deb alebo .rpm:</0> otvorte stiahnutý súbor a kliknite na <1>Inštalovať</1>."
+
+#. Install step on Linux for the AppImage.
+msgid "<0>AppImage:</0> right-click it, open <1>Properties</1> and allow it to run as a program."
+msgstr "<0>AppImage:</0> kliknite naň pravým tlačidlom, otvorte <1>Vlastnosti</1> a povoľte jeho spúšťanie ako programu."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona
+msgid "<0>{tag}</0> already belongs to your persona {name}."
+msgstr "Značka <0>{tag}</0> už patrí vašej persone {name}."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file
+msgid "<0>{tag}</0> is also used by {name} in your file."
+msgstr "Značku <0>{tag}</0> vo vašom súbore používa aj {name}."
+
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "Persona môže mať najviac 5 značiek"
+
+#. Tooltip showing root account username
+#. Tooltip showing root account username
+msgid "Account: @{username}"
+msgstr "Účet: @{username}"
+
+msgid "Active persona cleared"
+msgstr "Aktívna persona zrušená"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "Aktívna persona zrušená (odosielate ako hlavný účet)"
+
+#. Aria label for active persona mode tabs
+#. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
+msgid "Active persona mode"
+msgstr "Režim aktívnej persony"
+
+#. placeholder {0}: formData.signatureEmojis.length
+msgid "Add Emoji ({0})"
+msgstr "Pridať emoji ({0})"
+
+msgid "Add Persona"
+msgstr "Pridať personu"
+
+#. placeholder {0}: formData.tags.length
+msgid "Add Tag Pair ({0}/5)"
+msgstr "Pridať pár značiek ({0}/5)"
+
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Pridať počítadlo"
+
+msgid "Add signal"
+msgstr "Pridať signál"
+
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "Pridať {name}"
+
+#. Line of the import result: new personas
+msgid "Added"
+msgstr "Pridané"
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Added as a new persona"
+msgstr "Pridá sa ako nová persona"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "Alica"
+
+msgid "All Personas"
+msgstr "Všetky persony"
+
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "Všetky persony"
+
+#. Heading of the list of every platform on the download page.
+msgid "All platforms"
+msgstr "Všetky platformy"
+
+#. Section header for all time zones in the timestamp modal.
+msgid "All time zones"
+msgstr "Všetky časové pásma"
+
+#. Heading of the QR code box on the download page.
+msgid "Also on your phone"
+msgstr "Aj v telefóne"
+
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Tento názov už má iný príkaz alebo vstavaný príkaz."
+
+#. Under the AppImage download button: it works on every other Linux distribution.
+msgid "Any other Linux"
+msgstr "Akýkoľvek iný Linux"
+
+#. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
+msgid "Apple silicon (M1 or newer)"
+msgstr "Čip Apple (M1 alebo novší)"
+
+#. placeholder {0}: formData.name
+msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Naozaj chcete odstrániť <0>{0}</0>? Túto akciu nie je možné vrátiť späť."
+
+#. Settings search synonym.
+msgid "Auto-hide"
+msgstr "Automatické skrývanie"
+
+#. Settings section label in Advanced Settings for edge hover peek preference.
+#. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
+msgid "Auto-peek hidden sidebars"
+msgstr "Automaticky ukazovať skryté bočné panely"
+
+#. Import warning when avatar fails to download
+msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Obrázok avatara sa nepodarilo stiahnuť: {error}. Persona bola importovaná bez avatara."
+
+#. Import warning when the file's avatar for an existing persona fails to download, so the old one stays
+msgid "Avatar image failed to download: {error}. The persona kept the avatar it had."
+msgstr "Obrázok avatara sa nepodarilo stiahnuť: {error}. Persona si ponechala doterajší avatar."
+
+#. Explanation of the "Restored" line of the import result
+msgid "Back as they were, with their old messages."
+msgstr "Vrátené v pôvodnej podobe aj so svojimi starými správami."
+
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Späť na príkazy"
+
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Späť: {section}"
+
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "Obrázok bannera sa nepodarilo stiahnuť: {error}. Persona bola importovaná bez bannera."
+
+#. Import warning when the file's banner for an existing persona fails to download, so the old one stays
+msgid "Banner image failed to download: {error}. The persona kept the banner it had."
+msgstr "Obrázok bannera sa nepodarilo stiahnuť: {error}. Persona si ponechala doterajší banner."
+
+#. Option of the switch on a deleted persona in the import review: it is restored
+msgctxt "persona-import-switch"
+msgid "Bring back"
+msgstr "Vrátiť späť"
+
+#. Badge on a collapsed deleted persona in the import review: it comes back as it was
+msgid "Bringing back"
+msgstr "Vráti sa späť"
+
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+msgid "Came back without {items}: another persona has them now."
+msgstr "Vrátila sa bez {items}: teraz ich má iná persona."
+
+#. Generic action label that opens the persona picker.
+msgid "Change persona"
+msgstr "Zmeniť personu"
+
+#. Help for an example in a command script.
+msgid "Change the message depending on what they typed"
+msgstr "Zmeniť správu podľa toho, čo bolo napísané"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "Kontrola pred importom"
+
+#. Title of the persona import dialog while the file is checked
+msgid "Checking your file..."
+msgstr "Kontroluje sa váš súbor…"
+
+#. Disabled button while the import file is checked
+msgid "Checking..."
+msgstr "Kontroluje sa…"
+
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "Vyberte export z PluralKit (.json) alebo export z {productName} (.zip), prípadne ho sem presuňte"
+
+#. Link on the download page to the list of every platform.
+msgid "Choose another platform"
+msgstr "Vybrať inú platformu"
+
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "Vyberte persony, ktoré chcete ukázať"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "Ak chcete použiť /{name}, vyprázdnite pole správy"
+
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Zavrieť vyhľadávanie"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Colour"
+msgstr "Farba"
+
+#. Install step on iPhone. 'Get Tyne in TestFlight' is the button on this page; 'Install' is TestFlight's button.
+msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
+msgstr "Vráťte sa sem a klepnite na <0>Získať Tyne cez TestFlight</0> a potom na <1>Inštalovať</1>."
+
+#. What happens to the app's deleted persona in the import review when it is brought back
+msgid "Comes back as it was"
+msgstr "Vráti sa v pôvodnej podobe"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Príkaz"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Miesta na príkazy"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Príkazy"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Príkazy uložené"
+
+#. Status while the import file is compared with the account's personas
+msgid "Comparing your file with your personas..."
+msgstr "Porovnáva sa váš súbor s vašimi personami…"
+
+#. Header for configured personas list with count
+msgid "Configured Personas ({count})"
+msgstr "Nastavené persony ({count})"
+
+#. Explanation of the "Linked" line of the import result
+msgid "Connected to their members in the file. Nothing in them changed."
+msgstr "Prepojené so svojimi členmi v súbore. Nič sa na nich nezmenilo."
+
+#. Context menu action to copy a timestamp markdown tag in the message composer.
+msgid "Copy timestamp"
+msgstr "Kopírovať časovú pečiatku"
+
+#. Toast when downloading the persona export fails
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "Vaše persony sa nepodarilo exportovať."
+
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "Príkazy sa nepodarilo načítať."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "Príkaz /{name} sa nepodarilo spustiť: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "Príkaz /{name} sa nepodarilo uložiť: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "Persony sa nepodarilo zmeniť. Skúste to znova."
+
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "Persony sa nepodarilo načítať."
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Počítať persony samostatne"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Samostatne počítať podľa:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Počítadlá"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Vytvárať príkazy"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Vytvárať príkazy pre túto komunitu a upravovať alebo odstraňovať vlastné."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Autor: {name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "Vytvorená {date}"
+
+#. Aria label for deactivating active persona
+msgid "Deactivate persona"
+msgstr "Deaktivovať personu"
+
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "Odstrániť /{name}?"
+
+msgid "Delete Persona"
+msgstr "Odstrániť personu"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Odstrániť príkaz"
+
+#. Aria label for deleting persona
+msgid "Delete persona"
+msgstr "Odstrániť personu"
+
+#. Context menu action to delete a timestamp from the message composer.
+msgid "Delete timestamp"
+msgstr "Odstrániť časovú pečiatku"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "Odstrániť {count, plural, one {# personu} few {# persony} many {# persony} other {# persón}}?"
+
+#. Title of the section in Settings › Personas that lists deleted personas
+msgid "Deleted personas"
+msgstr "Odstránené persony"
+
+#. Explanation of the deleted personas section in Settings › Personas
+msgid "Deleted personas still show on their old messages, but nobody can pick them and they don't count towards your limit. Restoring one brings the same persona back, with its history."
+msgstr "Odstránené persony sa naďalej zobrazujú pri svojich starých správach, ale nikto ich nemôže vybrať a nezapočítavajú sa do vášho limitu. Obnovením sa vráti tá istá persona aj s celou svojou históriou."
+
+#. When a persona was deleted, in the import review. {date} is a date
+#. When a persona was deleted, in the import review. {date} is a date
+msgid "Deleted {date}"
+msgstr "Odstránená {date}"
+
+msgid "Detected System Name / Tag"
+msgstr "Zistený názov / značka systému"
+
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
+msgstr "Zobrazovaná značka"
+
+msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "Zobrazovaná značka sa ukáže vedľa mien všetkých persón v správach. Ak nie je nastavená, ukáže sa profilový obrázok vášho účtu."
+
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Nerozpoznávať značky tejto persony"
+
+#. Tooltip hint on timestamp pill in message composer.
+msgid "Double-click to edit"
+msgstr "Upravíte dvojitým kliknutím"
+
+#. Button that downloads the Tyne app as a .deb package for Linux.
+msgid "Download .deb"
+msgstr "Stiahnuť .deb"
+
+#. Button that downloads the Tyne app as an .rpm package for Linux.
+msgid "Download .rpm"
+msgstr "Stiahnuť .rpm"
+
+#. Button that downloads the Tyne app as an AppImage for Linux.
+msgid "Download AppImage"
+msgstr "Stiahnuť AppImage"
+
+#. Button that opens the Tyne download page when the visitor's platform is not known.
+msgid "Download Tyne"
+msgstr "Stiahnuť Tyne"
+
+#. Button that downloads the Tyne app for Android.
+#. Button that downloads the Tyne app for Android.
+msgid "Download for Android"
+msgstr "Stiahnuť pre Android"
+
+#. Button that opens the Linux downloads of the Tyne app.
+msgid "Download for Linux"
+msgstr "Stiahnuť pre Linux"
+
+#. Button that downloads the Tyne app for macOS.
+#. Button that downloads the Tyne app for macOS.
+msgid "Download for Mac"
+msgstr "Stiahnuť pre Mac"
+
+#. Button that downloads the Tyne app for Windows.
+#. Button that downloads the Tyne app for Windows.
+msgid "Download for Windows"
+msgstr "Stiahnuť pre Windows"
+
+#. Progress status during avatar download
+msgid "Downloading avatar {current} of {total}..."
+msgstr "Sťahuje sa avatar {current} z {total}…"
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "Sťahuje sa banner {current} z {total}…"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "Pár značiek „{tag}“ nemôže byť pri jednej persone uvedený viackrát"
+
+#. Validation error when tag pair is duplicated within the same persona
+msgid "Duplicate tag pair on this persona"
+msgstr "Duplicitný pár značiek pri tejto persone"
+
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Každý kanál si pamätá vlastnú personu. Nové kanály začínajú ako váš účet."
+
+#. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "Upraviť /{name}"
+
+#. Title for edit persona modal
+msgid "Edit Persona"
+msgstr "Upraviť personu"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Upravovať alebo odstraňovať príkazy kohokoľvek v tejto komunite."
+
+#. Action button to edit persona
+#. Aria label for editing persona
+msgid "Edit persona"
+msgstr "Upraviť personu"
+
+#. Context menu action to edit a timestamp in the message composer.
+#. Title of the timestamp modal when editing an existing timestamp.
+msgid "Edit timestamp"
+msgstr "Upraviť časovú pečiatku"
+
+msgid "Everyone else"
+msgstr "Ostatní"
+
+#. Text under the heading when a reviewed persona import is done
+msgid "Everything else is exactly as it was."
+msgstr "Všetko ostatné zostalo presne tak, ako bolo."
+
+#. Text when a persona import with nothing to decide is done
+msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
+msgstr "Všetko v súbore bolo buď nové, alebo už presne zodpovedalo niektorej persone, takže nebolo o čom rozhodovať. Nič iné sa nezmenilo."
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Všade"
+
+msgid "Export Summary"
+msgstr "Súhrn exportu"
+
+msgid "Failed to clear active persona"
+msgstr "Aktívnu personu sa nepodarilo zrušiť"
+
+#. Toast when persona deletion fails
+msgid "Failed to delete persona"
+msgstr "Personu sa nepodarilo odstrániť"
+
+#. Toast error message on persona import failure
+msgid "Failed to import personas"
+msgstr "Persony sa nepodarilo importovať"
+
+#. Error message when parsing PluralKit JSON fails
+msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Súbor JSON sa nepodarilo spracovať. Uistite sa, že ide o platný export z PluralKit."
+
+#. Error message when reading uploaded file fails
+msgid "Failed to read the selected file."
+msgstr "Vybraný súbor sa nepodarilo prečítať."
+
+#. Toast when persona save fails
+msgid "Failed to save persona"
+msgstr "Personu sa nepodarilo uložiť"
+
+#. Error toast in the community Message Tools settings tab when saving the signal bar fails.
+msgid "Failed to save the signal bar. Try again."
+msgstr "Lištu signálov sa nepodarilo uložiť. Skúste to znova."
+
+#. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
+msgid "Failed to save where the signal bar appears. Try again."
+msgstr "Nepodarilo sa uložiť, kde sa lišta signálov zobrazuje. Skúste to znova."
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "Ikonu GIF sa nepodarilo vybrať"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "Obrázok ikony sa nepodarilo vybrať"
+
+msgid "Failed to set active persona"
+msgstr "Aktívnu personu sa nepodarilo nastaviť"
+
+msgid "Failed to set the persona for this channel"
+msgstr "Personu pre tento kanál sa nepodarilo nastaviť"
+
+msgid "Failed to update display tag"
+msgstr "Zobrazovanú značku sa nepodarilo aktualizovať"
+
+msgid "Failed to update persona mode"
+msgstr "Režim persony sa nepodarilo aktualizovať"
+
+msgid "Failed to update the reaction setting"
+msgstr "Nastavenie reakcií sa nepodarilo aktualizovať"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "Nepodarilo sa zmeniť, kde sa pamätá vaša persona"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "Obrázok avatara sa nepodarilo nahrať na server"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "Obrázok bannera sa nepodarilo nahrať na server"
+
+#. Toast when icon upload fails
+msgid "Failed to upload icon to server"
+msgstr "Ikonu sa nepodarilo nahrať na server"
+
+#. Under the .rpm download button: the Linux distributions that use .rpm packages.
+msgid "Fedora, openSUSE"
+msgstr "Fedora, openSUSE"
+
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "Filtrovať podľa viditeľnosti"
+
+#. Label for format preview selection in timestamp modal.
+msgid "Format preview"
+msgstr "Ukážka formátu"
+
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "Voľná"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "Z vášho súboru"
+
+#. Link at the end of the command script help to the complete guide on GitHub.
+msgid "Full script guide"
+msgstr "Úplná príručka k skriptom"
+
+#. Heading of the download page for Android.
+msgid "Get Tyne for Android"
+msgstr "Tyne pre Android"
+
+#. Heading of the download page for Linux.
+msgid "Get Tyne for Linux"
+msgstr "Tyne pre Linux"
+
+#. Heading of the download page for macOS.
+msgid "Get Tyne for Mac"
+msgstr "Tyne pre Mac"
+
+#. Heading of the download page for Windows.
+msgid "Get Tyne for Windows"
+msgstr "Tyne pre Windows"
+
+#. Button that shows how to install the Tyne app on an iPhone or iPad.
+#. Heading of the download page for iPhone and iPad.
+msgid "Get Tyne for iPhone"
+msgstr "Tyne pre iPhone"
+
+#. Button that opens the Tyne beta in Apple's TestFlight app.
+msgid "Get Tyne in TestFlight"
+msgstr "Získať Tyne cez TestFlight"
+
+#. Heading of the download page when the visitor's platform is not known.
+#. Heading of the panel (and title of the dialog) that offers the Tyne desktop and phone apps.
+msgid "Get the Tyne app"
+msgstr "Získajte aplikáciu Tyne"
+
+#. What happens to the app's version of a persona in the import review when the file's version is used
+msgid "Gets overwritten"
+msgstr "Prepíše sa"
+
+#. Heading when a reviewed persona import is done
+msgid "Here is what changed"
+msgstr "Toto sa zmenilo"
+
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "Skryť"
+
+#. Tooltip on the channel header channel list toggle when the channel list is currently shown.
+msgid "Hide channel list"
+msgstr "Skryť zoznam kanálov"
+
+#. Tooltip for the small arrow button that collapses the signal bar above the message box.
+msgid "Hide signal bar"
+msgstr "Skryť lištu signálov"
+
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "Nápoveda"
+
+#. Settings section description in Advanced Settings for edge hover peek preference.
+msgid "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Prejdením myšou k okrajom okna dočasne zobrazíte zbalené panely."
+
+#. Heading of the install steps on the download page.
+msgid "How to install"
+msgstr "Ako nainštalovať"
+
+#. Toast when icon file exceeds size limit
+msgid "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Súbor ikony je príliš veľký. Vyberte obrázok menší ako 10 MB."
+
+#. Install step on Windows. 'More info' and 'Run anyway' are the links and buttons of Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "If Windows shows this warning, click <0>More info</0>, then <1>Run anyway</1>."
+msgstr "Ak Windows zobrazí toto upozornenie, kliknite na <0>Ďalšie informácie</0> a potom na <1>Spustiť aj tak</1>."
+
+#. Install step on Android. 'Settings', 'Allow from this source' and 'Install' are Android's own words: use Android's wording in this language.
+msgid "If your phone asks, tap <0>Settings</0>, turn on <1>Allow from this source</1>, go back and tap <2>Install</2>."
+msgstr "Ak sa telefón opýta, klepnite na <0>Nastavenia</0>, zapnite <1>Povoliť z tohto zdroja</1>, vráťte sa späť a klepnite na <2>Inštalovať</2>."
+
+#. Title of the persona import dialog when the import is done
+msgid "Import finished"
+msgstr "Import dokončený"
+
+#. Title of the persona import dialog
+#. Title of the persona import dialog
+msgid "Import personas"
+msgstr "Importovať persony"
+
+#. Summary in the import review footer when every choice leaves things as they are
+msgid "Import will change nothing"
+msgstr "Import nič nezmení"
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Import will never overwrite existing personas without your permission."
+msgstr "Import nikdy neprepíše existujúce persony bez vášho súhlasu."
+
+#. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
+msgid "Import will {actions}"
+msgstr "Import {actions}"
+
+#. Modal title for PluralKit import step importing
+msgid "Importing Personas..."
+msgstr "Importujú sa persony…"
+
+msgid "Importing..."
+msgstr "Importuje sa…"
+
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "V každom kanáli"
+
+#. Explanation of the "Kept as they were" line of the import result
+msgid "Including any that differ from the file, where you kept the version you had."
+msgstr "Vrátane tých, ktoré sa od súboru líšia a pri ktorých ste si ponechali svoju verziu."
+
+#. Button to insert timestamp into message composer.
+msgid "Insert"
+msgstr "Vložiť"
+
+#. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Title of the timestamp insertion modal.
+msgid "Insert timestamp"
+msgstr "Vložiť časovú pečiatku"
+
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Vložiť:"
+
+#. Install step on iPhone. TestFlight is the name of Apple's app for testing apps.
+msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
+msgstr "Z obchodu App Store si nainštalujte bezplatnú aplikáciu <0>TestFlight</0> od spoločnosti Apple."
+
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "Namiesto {tag}"
+
+#. Why a community command could not run, shown after "Couldn't run /name:".
+msgid "Its script has a problem."
+msgstr "V jeho skripte je chyba."
+
+#. Option of the switch for a member whose tag is already taken: import it with a name and tag of its own
+msgctxt "persona-import-switch"
+msgid "Keep"
+msgstr "Ponechať"
+
+#. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
+msgid "Keep both"
+msgstr "Ponechať obe"
+
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "Pokračovať v kontrole"
+
+#. Badge on a collapsed member in the import review: it is imported with a tag of its own
+msgid "Keeping"
+msgstr "Ponechá sa"
+
+#. Badge on a collapsed persona in the import review: the file's version is added next to the app's
+msgid "Keeping both"
+msgstr "Ponechajú sa obe"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "Ponechá sa verzia z {productName}"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "Ponechá si svoju značku"
+
+#. Line of the import result: personas left unchanged
+msgid "Kept as they were"
+msgstr "Ponechané bez zmeny"
+
+#. Option of the switch on a deleted persona in the import review: it stays deleted
+msgctxt "persona-import-switch"
+msgid "Leave deleted"
+msgstr "Nechať odstránenú"
+
+#. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
+msgid "Line {line}, column {column}: {problem}"
+msgstr "Riadok {line}, stĺpec {column}: {problem}"
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "Vytvorené pomocou /{name}"
+
+msgid "Main account"
+msgstr "Hlavný účet"
+
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "Nastaviť ako súkromné"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "Nastaviť ako verejné"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "Nastaviť ako nezaradené"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "Nastaviť {count, plural, one {# personu ako súkromnú} few {# persony ako súkromné} many {# persony ako súkromné} other {# persón ako súkromné}}?"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "Nastaviť {count, plural, one {# personu ako verejnú} few {# persony ako verejné} many {# persony ako verejné} other {# persón ako verejné}}?"
+
+msgid "Manage Personas"
+msgstr "Spravovať persony"
+
+#. OAuth scope description shown on the consent screen for the personas.write scope.
+msgid "Manage and create your personas"
+msgstr "Spravovať a vytvárať vaše persony"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Spravovať príkazy"
+
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "Spravovať persony"
+
+#. Active persona mode manual
+#. Active persona mode manual
+#. Active persona mode manual
+msgid "Manual"
+msgstr "Ručne"
+
+#. Validation error when signature emoji limit is reached
+msgid "Maximum {max} signature emojis allowed per persona"
+msgstr "Persona môže mať najviac {max} podpisových emoji"
+
+#. Placeholder name for unnamed member in import
+msgid "Member #{index}"
+msgstr "Člen č. {index}"
+
+msgid "Members with Avatars"
+msgstr "Členovia s avatarmi"
+
+#. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
+msgid "Message Tools"
+msgstr "Nástroje správ"
+
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Správy, ktoré môžu členovia poslať napísaním /name."
+
+#. Link in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "More info"
+msgstr "Ďalšie informácie"
+
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "Najpoužívanejšie"
+
+#. Button in macOS' warning that an app was not opened: use macOS' own wording.
+msgid "Move to Trash"
+msgstr "Presunúť do koša"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "Meno (A–Z)"
+
+#. Title for new persona modal
+msgid "New Persona"
+msgstr "Nová persona"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Nový príkaz"
+
+#. Explanation of the "Added" line of the import result
+msgid "New personas from your file."
+msgstr "Nové persony z vášho súboru."
+
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "Nové okno"
+
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "Ďalšia persona"
+
+#. Error message when PluralKit export lacks members array
+msgid "No \"members\" array found in this export file."
+msgstr "V tomto exportovanom súbore sa nenašlo pole „members“."
+
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "Bez popisu"
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "Zatiaľ bez popisu."
+
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Bez farby"
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "Žiadne príkazy"
+
+#. Shown in Settings › Personas when there are no deleted personas
+msgid "No deleted personas."
+msgstr "Žiadne odstránené persony."
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "Bez zobrazovanej značky"
+
+msgid "No display tag configured. Messages will show your account profile picture."
+msgstr "Nie je nastavená žiadna zobrazovaná značka. Pri správach sa ukáže profilový obrázok vášho účtu."
+
+msgid "No matching personas found."
+msgstr "Nenašli sa žiadne zodpovedajúce persony."
+
+msgid "No one matches."
+msgstr "Nikto sa nenašiel."
+
+msgid "No personas configured yet. Create one in Settings."
+msgstr "Zatiaľ nemáte nastavené žiadne persony. Vytvorte si nejakú v Nastaveniach."
+
+msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Zatiaľ ste nevytvorili žiadne persony. Kliknutím na „Pridať personu“ vytvoríte svoju prvú!"
+
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "Žiadne persony."
+
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "Vyhľadávaniu nezodpovedá žiadna persona."
+
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "Bez zámen"
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "Žiadne verejné persony."
+
+msgid "No signals yet. The bar stays hidden until you add one."
+msgstr "Zatiaľ žiadne signály. Lišta zostane skrytá, kým nejaký nepridáte."
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "Bez značky: pridá sa bez nej"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "Bez značiek"
+
+#. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
+msgid "Nobody has this signal on"
+msgstr "Tento signál nemá nikto zapnutý"
+
+#. Choice beside the personas a member of the import file might be: it is none of them
+msgid "None of these"
+msgstr "Žiadna z nich"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "Žiadna z vašich persón zatiaľ nie je verejná. Ostatní tu personu uvidia, keď jej nastavíte viditeľnosť na „Verejné“."
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Not imported"
+msgstr "Neimportuje sa"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "Neviete sa rozhodnúť? Nechajte to tak, ako je: nič sa nezmení."
+
+#. Link on the download page to every earlier release of the app.
+msgid "Older versions"
+msgstr "Staršie verzie"
+
+#. Heading next to a QR code that opens the Tyne download page on a phone.
+msgid "On your phone?"
+msgstr "Používate telefón?"
+
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Jedna persona pre všetky kanály."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Len pre tento kanál"
+
+#. Helper description for private persona visibility
+msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Viditeľné len pre vás. Ostatní nemôžu zobraziť celý popis ani podrobnosti profilu tejto persony."
+
+#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
+msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
+msgstr "Otvorte <0>Systémové nastavenia</0> a potom <1>Súkromie a bezpečnosť</1>. Posuňte sa nadol a kliknite na <2>Napriek tomu otvoriť</2>. Stačí to urobiť iba raz."
+
+#. Button in macOS' Privacy & Security settings: use macOS' own wording.
+msgid "Open Anyway"
+msgstr "Napriek tomu otvoriť"
+
+#. Last install step on a phone.
+#. Last install step on a phone.
+msgid "Open Tyne and sign in."
+msgstr "Otvorte Tyne a prihláste sa."
+
+#. Last install step on Linux.
+msgid "Open Tyne from your applications menu, or open the AppImage. Sign in and you're done."
+msgstr "Otvorte Tyne z ponuky aplikácií alebo otvorte AppImage. Prihláste sa a máte hotovo."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "Otvoriť v novom okne"
+
+#. Install step on macOS. 'Applications' is the Mac's Applications folder: use macOS' own name for it.
+msgid "Open the file you downloaded and drag Tyne into <0>Applications</0>. Then open Tyne."
+msgstr "Otvorte stiahnutý súbor a presuňte Tyne do priečinka <0>Aplikácie</0>. Potom Tyne otvorte."
+
+#. Install step: open the installer that was just downloaded.
+#. Install step: open the installer that was just downloaded.
+msgid "Open the file you downloaded."
+msgstr "Otvorte stiahnutý súbor."
+
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "Voliteľný"
+
+#. Link from the Tyne app download button to the downloads for every platform.
+msgid "Other platforms"
+msgstr "Ďalšie platformy"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "Ostatní vidia {count, plural, one {# verejnú personu} few {# verejné persony} many {# verejnej persony} other {# verejných persón}}."
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "Ostatní ich uvidia vo vašom zozname persón a budú môcť otvoriť ich profily. Kedykoľvek to môžete zmeniť späť."
+
+#. Textarea right-click context menu item that pastes clipboard contents without formatting.
+msgid "Paste as plain text"
+msgstr "Prilepiť ako obyčajný text"
+
+#. Settings search synonym.
+msgid "Peek"
+msgstr "Nahliadnutie"
+
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Spomenutá osoba"
+
+#. A community command counter counts per person who runs it.
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Kto ho spúšťa"
+
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "Persona"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "Persona „{name}“ je vybraná."
+
+msgid "Persona Tags (Prefix & Suffix)"
+msgstr "Značky persony (predpona a prípona)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Kde platí persona"
+
+#. Toast when persona is created
+msgid "Persona created"
+msgstr "Persona vytvorená"
+
+#. Toast when persona is deleted
+msgid "Persona deleted"
+msgstr "Persona odstránená"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "Výber persony zrušený."
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "Meno persony nemôže byť prázdne"
+
+#. Fallback screen reader label for the persona profile modal. Keep it concise.
+msgid "Persona profile"
+msgstr "Profil persony"
+
+#. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
+msgid "Persona profile: {name}"
+msgstr "Profil persony: {name}"
+
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "Personou od"
+
+#. Toast when persona is updated
+msgid "Persona updated"
+msgstr "Persona aktualizovaná"
+
+#. Aria label for persona visibility tabs
+msgid "Persona visibility"
+msgstr "Viditeľnosť persony"
+
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
+#. User settings tab for personas.
+msgid "Personas"
+msgstr "Persony"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "Persony ({count})"
+
+#. Under "Android" in the list of platforms.
+msgid "Phones and tablets"
+msgstr "Telefóny a tablety"
+
+#. Help for an example in a command script.
+msgid "Pick one option at random"
+msgstr "Náhodne vybrať jednu možnosť"
+
+#. Help for an example in a command script.
+msgid "Pick one word at random"
+msgstr "Náhodne vybrať jedno slovo"
+
+#. Help for an example in a command script.
+msgid "Pick the word for a number"
+msgstr "Vybrať slovo podľa čísla"
+
+#. Emoji context menu action that pins the emoji.
+msgid "Pin emoji"
+msgstr "Pripnúť emoji"
+
+#. Emoji context menu action that pins the emoji for the active persona.
+msgid "Pin for this persona"
+msgstr "Pripnúť pre túto personu"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "Pred uložením opravte chyby v značkách"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "Využíva KLIPY"
+
+#. Placeholder for persona tag prefix
+msgid "Prefix (e.g. [)"
+msgstr "Predpona (napr. [)"
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "Stlačením klávesu F6 sa na toto okno dostanete z klávesnice."
+
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "Predchádzajúca persona"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
+#. Persona visibility private
+msgid "Private"
+msgstr "Súkromné"
+
+#. Tooltip on private persona badge
+msgid "Private persona"
+msgstr "Súkromná persona"
+
+#. placeholder {0}: progress.currentName
+msgid "Processing: {0}"
+msgstr "Spracúva sa: {0}"
+
+#. Helper description for unlisted persona visibility
+msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Karty profilu sú dostupné len po kliknutí na správy odoslané touto personou. Nezobrazuje sa vo vašom verejnom zozname persón."
+
+#. Helper description for public persona visibility
+msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Karty profilu sú dostupné po kliknutí na správy a vo vašom verejnom zozname persón ich vidia priatelia a členovia spoločných komunít."
+
+#. Chip above the persona list: public personas.
+#. Persona visibility public
+msgid "Public"
+msgstr "Verejné"
+
+#. Tooltip on public persona badge
+msgid "Public persona"
+msgstr "Verejná persona"
+
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+msgid "QR code that opens the Tyne download page"
+msgstr "QR kód, ktorý otvorí stránku na stiahnutie Tyne"
+
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "Reagovať ako viacero persón naraz"
+
+#. Title of the modal and context menu item to react as a persona.
+msgid "React as..."
+msgstr "Reagovať ako…"
+
+msgid "Reacted"
+msgstr "Reagovali"
+
+msgid "Reacting as <0>{reactorName}</0>"
+msgstr "Reagujete ako <0>{reactorName}</0>"
+
+#. Tooltip hint showing effective reacting persona or user on quick reaction hover.
+msgid "Reacting as {name}"
+msgstr "Reagujete ako {name}"
+
+msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
+msgstr "Keď reagujete podpisovým emoji, vždy reagujete ako táto persona bez ohľadu na aktívnu personu."
+
+msgid "Recent"
+msgstr "Nedávne"
+
+msgid "Recent Personas"
+msgstr "Nedávne persony"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "Naposledy použité"
+
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Odobrať počítadlo"
+
+#. Aria label for removing signature emoji
+msgid "Remove signature emoji"
+msgstr "Odobrať podpisové emoji"
+
+#. Aria label for removing a tag pair
+msgid "Remove tag pair"
+msgstr "Odobrať pár značiek"
+
+#. What happens to the import file's display tag in the import review when it is used
+msgid "Replaces your display tag"
+msgstr "Nahradí vašu zobrazovanú značku"
+
+#. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
+msgid "Replaces {productName}'s {name}"
+msgstr "Nahradí {name} v {productName}"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "Požiadavka zlyhala (HTTP {status})"
+
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Vynulovať počty"
+
+#. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
+msgid "Reset signal for everyone"
+msgstr "Vypnúť signál pre všetkých"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Vynulovať počty pre {name}? Túto akciu nie je možné vrátiť späť."
+
+#. Button that brings back a deleted persona
+msgid "Restore"
+msgstr "Obnoviť"
+
+#. Explanation of the "Still deleted" line of the import result
+msgid "Restore them from Deleted personas in Settings if you change your mind."
+msgstr "Ak si to rozmyslíte, obnovíte ich v Nastaveniach v časti Odstránené persony."
+
+#. Line of the import result: deleted personas brought back
+msgid "Restored"
+msgstr "Obnovené"
+
+msgid "Results"
+msgstr "Výsledky"
+
+msgid "Root Account (Default)"
+msgstr "Hlavný účet (predvolený)"
+
+#. Button under the preview of a command script that picks at random: fills the preview in again.
+msgid "Run again"
+msgstr "Spustiť znova"
+
+#. Button in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "Run anyway"
+msgstr "Spustiť aj tak"
+
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Ukážkový vstup"
+
+#. Progress status when saving personas
+msgid "Saving personas..."
+msgstr "Ukladajú sa persony…"
+
+#. Under 'On your phone?', next to the QR code.
+msgid "Scan with your camera."
+msgstr "Naskenujte fotoaparátom."
+
+#. Under the QR code on the download page.
+msgid "Scan with your phone's camera."
+msgstr "Naskenujte fotoaparátom telefónu."
+
+#. Label of the code editor for a community command.
+msgid "Script"
+msgstr "Skript"
+
+#. Title of the expandable help under the command script editor.
+msgid "Script reference"
+msgstr "Prehľad skriptovania"
+
+#. placeholder {0}: filteredPersonas.length
+msgid "Search Results ({0})"
+msgstr "Výsledky vyhľadávania ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Hľadať príkazy"
+
+#. Search placeholder in persona picker sheet
+msgid "Search personas, tags, pronouns..."
+msgstr "Hľadať persony, značky, zámená…"
+
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "Hľadať vo vašich personách"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "Hľadať v personách používateľa {name}"
+
+#. Tooltip when sending as root account with persona mode active
+msgid "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Odosielate ako @{username} ({mode}) – kliknutím prepnete personu"
+
+#. Tooltip when sending as a persona matched by persona tag
+msgid "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Odosielate ako {name} (podľa značky) – kliknutím prepnete personu"
+
+msgid "Set Active"
+msgstr "Nastaviť ako aktívnu"
+
+#. Aria label for setting active persona
+msgid "Set as active persona"
+msgstr "Nastaviť ako aktívnu personu"
+
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "Zobraziť"
+
+#. Short label for an advanced message action bar preference.
+msgid "Show copy button"
+msgstr "Zobraziť tlačidlo Kopírovať"
+
+#. Button that loads the list of deleted personas in Settings › Personas
+msgid "Show deleted personas"
+msgstr "Zobraziť odstránené persony"
+
+#. Plus menu submenu toggle that shows the persona selector next to the textarea.
+#. Short label for an advanced message input preference.
+msgid "Show personas button"
+msgstr "Zobraziť tlačidlo persón"
+
+#. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
+msgid "Show signal bar"
+msgstr "Zobraziť lištu signálov"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "Zobraziť nezaradené a súkromné"
+
+msgid "Signal Bar"
+msgstr "Lišta signálov"
+
+#. Community settings tab for choosing the toggleable signal icons shown above the message box.
+msgctxt "community-settings-tab"
+msgid "Signal Bar"
+msgstr "Lišta signálov"
+
+#. Accessible label for the row of toggleable signal icons above the message box.
+msgid "Signal bar"
+msgstr "Lišta signálov"
+
+#. Accessible label for the text field that names a signal in the Message Tools settings tab.
+msgid "Signal label"
+msgstr "Názov signálu"
+
+msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
+msgstr "Signály sú ikony nad poľom správy. Ktokoľvek ich môže zapnúť a vypnúť a všetci v konverzácii vidia, kto ich má zapnuté. Túto lištu zdieľajú všetky komunity a priame správy na tejto inštancii. Poradie zmeníte presunutím."
+
+msgid "Signature Emojis"
+msgstr "Podpisové emoji"
+
+#. Validation error when signature emoji is already used by another persona
+msgid "Signature emoji already in use by persona \"{name}\""
+msgstr "Toto podpisové emoji už používa persona „{name}“"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Signature emojis"
+msgstr "Podpisové emoji"
+
+#. Option of the switch for a member whose tag is already taken: do not import it
+msgctxt "persona-import-switch"
+msgid "Skip"
+msgstr "Preskočiť"
+
+#. Line of the import result: members left out
+msgid "Skipped"
+msgstr "Preskočení"
+
+#. Import warning when member has no name
+msgid "Skipped member because they have no name configured."
+msgstr "Člen bol preskočený, pretože nemá nastavené meno."
+
+#. Badge on a collapsed member in the import review: it is not imported
+msgid "Skipping"
+msgstr "Preskočí sa"
+
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "Niektoré značky boli vynechané: {productName} povoľuje najviac 5 značiek na personu, každú s najviac 32 znakmi."
+
+#. Badge on a collapsed deleted persona in the import review: it stays deleted
+msgid "Staying deleted"
+msgstr "Zostane odstránená"
+
+#. What happens to the app's version of a persona in the import review
+msgid "Stays as it is"
+msgstr "Zostane bez zmeny"
+
+#. What happens to the app's deleted persona in the import review
+msgid "Stays deleted"
+msgstr "Zostane odstránená"
+
+#. Line of the import result: deleted personas not restored
+msgid "Still deleted"
+msgstr "Stále odstránené"
+
+#. Explanation of the "Skipped" line of the import result
+msgid "Still in your file. Import it again any time to decide about them."
+msgstr "Stále sú vo vašom súbore. Kedykoľvek ho importujte znova a rozhodnite o nich."
+
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "Zastaviť import"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "Zastaviť tento import?"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "Ukladá sa obrázok {current} z {total} zo súboru…"
+
+#. Placeholder for persona tag suffix
+msgid "Suffix (e.g. ])"
+msgstr "Prípona (napr. ])"
+
+#. Section header for suggested time zones in the timestamp modal.
+msgid "Suggested"
+msgstr "Navrhované"
+
+msgid "Supports PluralKit system export files"
+msgstr "Podporuje súbory s exportom systému z PluralKit"
+
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "Prepnúť aktívnu personu"
+
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "Značka"
+
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
+msgid "Tag Icon"
+msgstr "Ikona značky"
+
+msgid "Tag Text"
+msgstr "Text značky"
+
+#. Row heading in the table comparing a persona with the import file: whether its tags are matched
+msgid "Tag matching"
+msgstr "Rozpoznávanie značiek"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "Pár značiek „{tag}“ už používa persona „{name}“"
+
+#. Validation error when tag pair is already used by another persona
+msgid "Tag pair already in use by persona \"{name}\""
+msgstr "Tento pár značiek už používa persona „{name}“"
+
+#. Settings search synonym.
+msgid "Taskbar"
+msgstr "Panel úloh"
+
+#. Placeholder for persona bio
+msgid "Tell us about this persona..."
+msgstr "Povedzte nám niečo o tejto persone…"
+
+#. Help for a command script variable.
+msgid "That person’s name"
+msgstr "Meno tejto osoby"
+
+#. Help for a command script variable.
+msgid "The channel, as a mention"
+msgstr "Kanál ako zmienka"
+
+#. Error message when uploaded file is not valid JSON
+msgid "The chosen file is not a valid JSON object."
+msgstr "Vybraný súbor nie je platný objekt JSON."
+
+#. Error in Settings › Personas when the list of deleted personas fails to load
+msgid "The deleted personas could not be loaded."
+msgstr "Odstránené persony sa nepodarilo načítať."
+
+#. Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown
+msgid "The file's picture couldn't be loaded"
+msgstr "Obrázok zo súboru sa nepodarilo načítať"
+
+#. Help for a command script variable.
+msgid "The first person they mention, if any"
+msgstr "Prvá spomenutá osoba, ak nejaká je"
+
+#. Help for a command script variable.
+msgid "The name of this community"
+msgstr "Názov tejto komunity"
+
+#. Help for a command script variable.
+msgid "The person running it, as a mention"
+msgstr "Kto ho spúšťa, ako zmienka"
+
+#. Error toast when restoring a deleted persona fails
+msgid "The persona could not be restored."
+msgstr "Personu sa nepodarilo obnoviť."
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "Persona, ktorú chcete vybrať."
+
+#. Problem in a community command script: it produces more text than is allowed.
+msgid "The script builds too much text."
+msgstr "Skript vytvára príliš veľa textu."
+
+#. Problem in a community command script.
+msgid "The script is too long."
+msgstr "Skript je príliš dlhý."
+
+#. Problem in a community command script.
+msgid "The script took too long to run."
+msgstr "Skript bežal príliš dlho."
+
+msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
+msgstr "Lišta signálov je vypnutá, kým tu nezačiarknete nejaký kanál. Začiarknutie kategórie alebo celej komunity platí aj pre kanály, ktoré v nej vzniknú neskôr."
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "Ikonu značky sa nepodarilo uložiť: {error}. Môžete ju znova nastaviť v nastaveniach persón."
+
+#. Explanation of the "Updated from the file" line of the import result
+msgid "Their details are the file's now; their messages and history stayed."
+msgstr "Ich údaje sú teraz zo súboru; ich správy a história zostali."
+
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "Ich správy budú naďalej zobrazovať ich mená a avatary, ale už nebudete môcť posielať správy ako ony a ich značky a podpisové emoji sa uvoľnia. Túto akciu nie je možné vrátiť späť."
+
+#. Help for a command script variable.
+msgid "Their name"
+msgstr "Meno toho, kto ho spúšťa"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "Ich profily budú pred ostatnými skryté. Ich mená a avatary sa budú naďalej zobrazovať pri ich správach a reakciách."
+
+#. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
+msgid "There's no filter called {name}."
+msgstr "Filter s názvom {name} neexistuje."
+
+#. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
+msgid "There's no tag called {name}."
+msgstr "Značka s názvom {name} neexistuje."
+
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "Títo členovia vyzerajú ako persony, ktoré už v {productName} máte. Pri každom vyberte, čo má mať {productName}. Neviete sa rozhodnúť? Nechajte to tak, ako je: nič sa nezmení."
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "Tento súbor .zip sa nepodarilo prečítať."
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "Tento súbor .zip nie je export persón z {productName}."
+
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "Túto akciu nie je možné vrátiť späť. Správy vytvorené týmto príkazom budú naďalej ukazovať, ktorý príkaz ich vytvoril."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "Táto komunita zatiaľ nemá žiadne príkazy."
+
+#. Validation error when signature emoji is duplicated within the same persona
+msgid "This emoji is already added as a signature emoji"
+msgstr "Toto emoji už je pridané ako podpisové emoji"
+
+msgid "This is a preview of how your display tag will look in chat."
+msgstr "Takto bude vaša zobrazovaná značka vyzerať v chate."
+
+#. Problem in a community command script: a syntax error at the position given before this text.
+msgid "This part can't be read."
+msgstr "Túto časť nie je možné prečítať."
+
+#. Problem in a community command script: it failed while running, at the position given before this text.
+msgid "This part stopped with an error."
+msgstr "Táto časť skončila chybou."
+
+msgid "This persona’s profile is private."
+msgstr "Profil tejto persony je súkromný."
+
+#. Shown instead of the preview when a command script produces no text.
+msgid "This would post nothing, so the command would fail."
+msgstr "Nič by sa neodoslalo, takže príkaz by zlyhal."
+
+#. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
+msgid "Toggle the channel list"
+msgstr "Prepnúť zoznam kanálov"
+
+msgid "Total Members"
+msgstr "Členov celkom"
+
+#. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
+msgid "Turn off signal bar"
+msgstr "Vypnúť lištu signálov"
+
+#. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
+msgid "Turn off {name}"
+msgstr "Vypnúť signál pre {name}"
+
+#. Direct message right-click menu action that shows the signal bar above the message box in this DM.
+msgid "Turn on signal bar"
+msgstr "Zapnúť lištu signálov"
+
+#. Last install step: the app starts after installing.
+msgid "Tyne opens by itself. Sign in and you're done."
+msgstr "Tyne sa otvorí automaticky. Prihláste sa a máte hotovo."
+
+#. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
+msgid "Type {output} or {tag} for suggestions."
+msgstr "Napíšte {output} alebo {tag} a zobrazia sa návrhy."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Napísanie niektorej z týchto značiek neprepne na túto personu. Značka sa odošle tak, ako je napísaná."
+
+#. Under the .deb download button: the Linux distributions that use .deb packages.
+msgid "Ubuntu, Debian, Linux Mint"
+msgstr "Ubuntu, Debian, Linux Mint"
+
+#. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
+msgid "Ubuntu, Fedora and more"
+msgstr "Ubuntu, Fedora a ďalšie"
+
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
+#. Persona visibility unlisted
+msgid "Unlisted"
+msgstr "Nezaradené"
+
+#. Emoji context menu action that unpins the emoji.
+msgid "Unpin emoji"
+msgstr "Odopnúť emoji"
+
+#. Emoji context menu action that unpins the emoji for the active persona.
+msgid "Unpin for this persona"
+msgstr "Odopnúť pre túto personu"
+
+#. Helper description for Manual persona mode
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Správy bez značky sa odošlú ako persona, ktorú ste vybrali. Značka platí len pre danú správu."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Správy bez značky sa odošlú ako ten, kto písal naposledy. Použitie značky prepne na danú personu."
+
+#. Line of the import result: personas given the file's details
+msgid "Updated from the file"
+msgstr "Aktualizované zo súboru"
+
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "Použiť /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "Použiť /{name} z komunity {community}"
+
+#. Shown after pressing Import in the persona import dialog, before anything happens
+msgid "Use Export to make a backup before continuing."
+msgstr "Skôr než budete pokračovať, vytvorte si zálohu tlačidlom Exportovať."
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Používať príkazy z iných komunít v tomto kanáli."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Používať príkazy z iných komunít."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Používať externé príkazy"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "V skripte ho použite ako {variable}. Každé spustenie najprv pripočíta jednotku, takže pri prvom spustení bude mať hodnotu 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Použite malé písmená, číslice a _, začnite písmenom a nepoužívajte názov, ktorý už skripty používajú."
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Použite malé písmená, číslice, - a _, najviac 32 znakov."
+
+#. Button in the command editor that switches back from the code editor to the plain message field.
+msgid "Use the basic editor"
+msgstr "Použiť základný editor"
+
+#. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
+msgctxt "persona-import-switch"
+msgid "Use the file's"
+msgstr "Použiť zo súboru"
+
+#. Button in the command editor that switches the message field to the code editor for scripts.
+msgid "Use the script editor"
+msgstr "Použiť editor skriptov"
+
+#. Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name
+msgid "Use {productName}'s"
+msgstr "Použiť z {productName}"
+
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "Použije sa verzia zo súboru"
+
+#. OAuth scope description shown on the consent screen for the personas.read scope.
+msgid "View your personas"
+msgstr "Zobraziť vaše persony"
+
+#. Button inserting the placeholder for what the member types after the command.
+#. Help for a command script variable.
+msgid "What they type"
+msgstr "Čo napíše"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "To, čo napíšete za /{name}, sa musí zmestiť na jeden riadok."
+
+#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
+msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
+msgstr "Keď macOS oznámi, že aplikácia Tyne nebola otvorená, kliknite na <0>Hotovo</0>."
+
+msgid "Where the signal bar appears"
+msgstr "Kde sa zobrazuje lišta signálov"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Kde sa pamätá vaša persona"
+
+#. Question over the personas a member of the import file might be. {name} is the member
+msgid "Which persona is {name}?"
+msgstr "Ktorá persona je {name}?"
+
+#. Which Windows versions the Tyne app needs.
+msgid "Windows 10 or 11"
+msgstr "Windows 10 alebo 11"
+
+#. Title of Windows' SmartScreen warning, drawn on the download page: use Windows' own wording in this language.
+msgid "Windows protected your PC"
+msgstr "Systém Windows ochránil váš počítač"
+
+#. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
+msgid "Write a number as 1st, 2nd, 3rd"
+msgstr "Napísať číslo ako 1st, 2nd, 3rd"
+
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "Personu {name} ste v {productName} odstránili {date}. Vrátiť {name} späť?"
+
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "Personu {name} ste v {productName} odstránili. Vrátiť {name} späť?"
+
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "Vaše voľby pre týchto členov sa stratia a nič sa neimportuje."
+
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "Vaša zobrazovaná značka sa ukazuje za menom každej persony. Ktorú má {productName} používať?"
+
+#. On the download page after the visitor chose to download the app elsewhere.
+msgid "Your download should start in a moment. If it doesn't, use the button above."
+msgstr "Sťahovanie by sa malo o chvíľu začať. Ak sa nezačne, použite tlačidlo vyššie."
+
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "Váš súbor"
+
+msgid "Your reactions"
+msgstr "Vaše reakcie"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "Vaše reakcie {emojiName}"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "add {count}"
+msgstr "pridá {count}"
+
+#. Progress label for avatar downloads
+msgid "avatars downloaded"
+msgstr "Stiahnuté avatary"
+
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "Stiahnuté bannery"
+
+#. Part of the import summary "Import will add 7 and change your display tag"
+msgid "change your display tag"
+msgstr "zmení vašu zobrazovanú značku"
+
+#. Placeholder for persona name
+msgid "e.g. Alice"
+msgstr "napr. Alica"
+
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "napr. Krajina zázrakov"
+
+#. Placeholder for persona pronouns
+msgid "e.g. she/her"
+msgstr "napr. ona/jej"
+
+#. Placeholder text for natural language timestamp input.
+msgid "e.g. tomorrow at 3pm, in 2 hours, now"
+msgstr "napr. tomorrow at 3pm, in 2 hours, now"
+
+#. Which iPhone and iPad system versions the Tyne app needs.
+msgid "iOS 16 or newer"
+msgstr "iOS 16 alebo novší"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "Uložené obrázky"
+
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "Položky"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "link {count}"
+msgstr "prepojí {count}"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "stlačením zobrazíte svoje reakcie"
+
+#. Part of the import summary "Import will link 17, restore 2, skip 3"
+msgid "restore {count}"
+msgstr "obnoví {count}"
+
+#. Progress label when saving personas
+msgid "saving personas"
+msgstr "Ukladanie persón"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "skip {count}"
+msgstr "preskočí {count}"
+
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "text"
+
+#. Part of the import summary "Import will link 17, use the file's version for 2"
+msgid "use the file's version for {count}"
+msgstr "pri {count} použije verziu zo súboru"
+
+#. placeholder {0}: progress.current
+#. placeholder {1}: progress.total
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
+#. placeholder {3}: progress.percent
+msgid "{0} of {1} {2} ({3}%)"
+msgstr "{2}: {0} z {1} ({3} %)"
+
+#. Heading when a persona import with nothing to decide is done. {addedCount} is a number
+msgid "{addedCount} personas added"
+msgstr "Pridané persony: {addedCount}"
+
+#. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
+msgid "{appName} {version} is ready to install."
+msgstr "Verzia {version} aplikácie {appName} je pripravená na inštaláciu."
+
+#. Line at the top of the import review: members already linked to an identical persona, or connected to one with the same name and tag. {count} is a number
+msgid "{count, plural, one {# exact match} other {# exact matches}}"
+msgstr "{count, plural, one {# presná zhoda} few {# presné zhody} many {# presnej zhody} other {# presných zhôd}}"
+
+#. Heading in the import review over the list of members whose proxy tag another persona already has
+msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
+msgstr "{count, plural, one {# člen má značku, ktorá je už obsadená} few {# členovia majú značku, ktorá je už obsadená} many {# člena má značku, ktorá je už obsadená} other {# členov má značku, ktorá je už obsadená}}"
+
+#. Heading in the import review over the members that share a name or tag with personas of the account
+msgid "{count, plural, one {# member might be a persona you already have} other {# members might be personas you already have}}"
+msgstr "{count, plural, one {# člen sa možno zhoduje s personou, ktorú už máte} few {# členovia sa možno zhodujú s personami, ktoré už máte} many {# člena sa možno zhoduje s personami, ktoré už máte} other {# členov sa možno zhoduje s personami, ktoré už máte}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member} other {# new members}}"
+msgstr "{count, plural, one {# nový člen} few {# noví členovia} many {# nového člena} other {# nových členov}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file} other {# personas in {productName} aren't in your file}}"
+msgstr "{count, plural, one {# persona v {productName} nie je vo vašom súbore} few {# persony v {productName} nie sú vo vašom súbore} many {# persony v {productName} nie je vo vašom súbore} other {# persón v {productName} nie je vo vašom súbore}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, one {# persona sa vo vašom súbore líši} few {# persony sa vo vašom súbore líšia} many {# persony sa vo vašom súbore líši} other {# persón sa vo vašom súbore líši}}"
+
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, one {# persona je teraz súkromná} few {# persony sú teraz súkromné} many {# persony je teraz súkromných} other {# persón je teraz súkromných}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, one {# persona je teraz verejná} few {# persony sú teraz verejné} many {# persony je teraz verejných} other {# persón je teraz verejných}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, one {# persona je teraz nezaradená} few {# persony sú teraz nezaradené} many {# persony je teraz nezaradených} other {# persón je teraz nezaradených}}"
+
+#. Second line of the import review footer
+msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
+msgstr "{count, plural, one {# persona zostane bez zmeny} few {# persony zostanú bez zmeny} many {# persony zostane bez zmeny} other {# persón zostane bez zmeny}}"
+
+#. Heading in the import review over the members whose persona was deleted. {productName} is the app name
+msgid "{count, plural, one {# persona was deleted in {productName}} other {# personas were deleted in {productName}}}"
+msgstr "{count, plural, one {# persona bola v {productName} odstránená} few {# persony boli v {productName} odstránené} many {# persony bolo v {productName} odstránených} other {# persón bolo v {productName} odstránených}}"
+
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, one {# persona} few {# persony} many {# persony} other {# persón}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, one {Odstránená # persona} few {Odstránené # persony} many {Odstránené # persony} other {Odstránených # persón}}"
+
+#. On a collapsed member in the import review: how many personas of the account it might be
+msgid "{count, plural, one {# possible match} other {# possible matches}}"
+msgstr "{count, plural, one {# možná zhoda} few {# možné zhody} many {# možnej zhody} other {# možných zhôd}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, one {Pred importom skontrolujte # člena} few {Pred importom skontrolujte # členov} many {Pred importom skontrolujte # člena} other {Pred importom skontrolujte # členov}}"
+
+#. How often a persona has been used, shown in the import review
+#. How often a persona has been used, shown in the import review
+msgid "{count, plural, one {Used once} other {Used # times}}"
+msgstr "{count, plural, one {Použitá raz} few {Použitá #-krát} many {Použitá #-krát} other {Použitá #-krát}}"
+
+msgid "{count} notice(s) during import"
+msgstr "{count, plural, one {# upozornenie počas importu} few {# upozornenia počas importu} many {# upozornenia počas importu} other {# upozornení počas importu}}"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count} z {total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "Reagovalo {count} z {total}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "Vybrané: {count}"
+
+#. Second line of the import review footer: deleted personas that are not restored
+msgid "{count} stay deleted"
+msgstr "{count, plural, one {# zostane odstránená} few {# zostanú odstránené} many {# zostane odstránených} other {# zostane odstránených}}"
+
+#. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
+msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
+msgstr "Na {domain} beží novšia verzia {productName}, než má táto aplikácia. Aktualizujte {productName} a skúste to znova."
+
+#. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
+msgid "{label}: {names}"
+msgstr "{label}: {names}"
+
+#. A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names
+msgid "{names} would all have {label}. Change one of the choices."
+msgstr "{label} by mali všetky tieto persony: {names}. Zmeňte jednu z volieb."
+
+#. Tooltip when sending as a latched persona
+msgid "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) – kliknutím prepnete personu"
+
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "Už ju má {name}"
+
+#. Toast after a deleted persona was restored
+msgid "{name} is back."
+msgstr "{name} je späť."
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "Persona {name} je vo vašom súbore iná. Ktorú verziu má mať {productName}?"
+
+#. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
+msgid "{name} is never closed."
+msgstr "Blok {name} nie je nikde uzavretý."
+
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "Značka člena {name} je už obsadená"
+
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "{position} z {total}"
+
+#. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
+msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
+msgstr "Aplikácia {productName} prestala kontrolovať, či prehliadač schválil toto prihlásenie. Váš kód sa nestratil."
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "Verejné: {publicCount}, nezaradené: {unlistedCount}, súkromné: {privateCount}"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "Persony: {shown} z {total}"
+
+msgid "— Today at 12:00 PM"
+msgstr "— Dnes o 12:00"
+
+#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” Not Opened"
+msgstr "Aplikácia „Tyne“ nebola otvorená"
+
+#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
+msgid "“Tyne” was blocked."
+msgstr "Aplikácia „Tyne“ bola zablokovaná."
