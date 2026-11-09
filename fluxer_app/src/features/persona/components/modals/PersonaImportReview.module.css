@@ -200,6 +200,7 @@
 }
 
 .card {
+	--import-card-bg: var(--bg-secondary);
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -207,7 +208,7 @@
 	padding: 12px 14px;
 	border-radius: 12px;
 	border: 2px solid var(--border-color);
-	background: var(--bg-secondary);
+	background: var(--import-card-bg);
 	color: var(--text-primary);
 }
 
@@ -224,8 +225,9 @@
 }
 
 .cardChosen {
+	--import-card-bg: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-secondary));
 	border-color: var(--brand-primary);
-	background: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-secondary));
+	background: var(--import-card-bg);
 }
 
 .cardDimmed {
@@ -242,6 +244,7 @@
 }
 
 .cardGhost {
+	--import-card-bg: var(--background-secondary);
 	border-style: dashed;
 	background: transparent;
 }
@@ -337,14 +340,6 @@
 	font-weight: 600;
 }
 
-.localAvatar {
-	flex: none;
-	width: 40px;
-	height: 40px;
-	border-radius: 50%;
-	object-fit: cover;
-}
-
 /* The details of a differing persona: rows that differ are marked alike on both sides. */
 .versionRow {
 	display: flex;
@@ -381,15 +376,6 @@
 .empty {
 	font-style: italic;
 	color: var(--text-primary-muted);
-}
-
-.bannerThumb {
-	display: block;
-	width: 100%;
-	max-width: 220px;
-	aspect-ratio: 17 / 6;
-	border-radius: 6px;
-	object-fit: cover;
 }
 
 .colorValue {
@@ -506,11 +492,6 @@
 .tagStatusTaken {
 	color: var(--accent-danger);
 	font-weight: 600;
-}
-
-.tagExample {
-	font-size: 13px;
-	color: var(--text-primary-muted);
 }
 
 /* "Bring back" on a deleted persona: a switch, as it turns one thing on or off. */
@@ -818,4 +799,199 @@
 	font-size: 14px;
 	line-height: 1.45;
 	color: var(--text-secondary);
+}
+
+/* Banner and avatar together, as a profile card shows them (tyne-chat/tyne#567). The avatar's ring is
+   the card's own background, so it reads as cut out of the banner. */
+.profileHeader {
+	--profile-avatar: 64px;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	padding-bottom: calc(var(--profile-avatar) * 0.5);
+}
+
+.profileHeaderCompact {
+	--profile-avatar: 48px;
+}
+
+.profileBanner {
+	aspect-ratio: 300 / 105;
+	border-radius: 8px;
+	background-color: var(--bg-tertiary);
+	background-position: center;
+	background-size: cover;
+}
+
+.profileHeaderCompact .profileBanner {
+	aspect-ratio: 300 / 80;
+}
+
+.profileAvatar {
+	position: absolute;
+	inset-inline-start: 10px;
+	bottom: 0;
+	display: grid;
+	place-items: center;
+	width: var(--profile-avatar);
+	height: var(--profile-avatar);
+	overflow: hidden;
+	border-radius: 50%;
+	background: var(--bg-tertiary);
+	box-shadow: 0 0 0 4px var(--import-card-bg);
+}
+
+.profileAvatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.profileAvatar .placeholderAvatar {
+	width: 100%;
+	height: 100%;
+}
+
+/* A picture that differs from the other side, marked as differing text is. */
+.profileDiffers {
+	box-shadow: 0 0 0 3px var(--accent-warning);
+}
+
+.profileAvatarDiffers {
+	box-shadow:
+		0 0 0 4px var(--import-card-bg),
+		0 0 0 7px var(--accent-warning);
+}
+
+.profileMissing {
+	position: absolute;
+	inset-inline-end: 0;
+	bottom: 0;
+	max-width: calc(100% - var(--profile-avatar) - 20px);
+	font-size: 12px;
+	line-height: 1.3;
+	color: var(--text-secondary);
+	text-align: end;
+}
+
+/* A differing persona: a three-way switch over the two versions (tyne-chat/tyne#568). */
+.switch {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 4px;
+	margin: 0 0 12px;
+	padding: 4px;
+	border: 0;
+	border-radius: 10px;
+	background: var(--bg-tertiary);
+}
+
+.switchOption {
+	position: relative;
+	display: grid;
+	place-items: center;
+	min-height: 40px;
+	padding: 4px 8px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	text-align: center;
+	color: var(--text-secondary);
+	cursor: pointer;
+}
+
+.switchOption:hover {
+	color: var(--text-primary);
+}
+
+.switchOptionOn {
+	background: var(--brand-primary);
+	color: var(--brand-primary-fill);
+}
+
+.switchOptionOn:hover {
+	color: var(--brand-primary-fill);
+}
+
+.switchRadio {
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.switchOption:has(.switchRadio:focus-visible) {
+	outline: 2px solid var(--focus-primary, var(--brand-primary));
+	outline-offset: 2px;
+}
+
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+.sides {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.sideHead {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.sideTitle {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-secondary);
+}
+
+.sideStatus {
+	font-size: 12px;
+	font-weight: 600;
+	text-align: end;
+	color: var(--text-primary);
+}
+
+.copyFields {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.copyFields .tagFields {
+	padding-inline-start: 0;
+}
+
+.copyNameInput {
+	min-height: 36px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	font: inherit;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.choicePillBoth {
+	background: color-mix(in srgb, var(--brand-primary) 26%, transparent);
+}
+
+@container (max-width: 34rem) {
+	.sides {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }
