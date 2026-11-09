@@ -16,8 +16,8 @@
 	height: 11.5rem;
 	width: 100%;
 	overflow: hidden;
-	border-top-left-radius: 1.5rem;
-	border-top-right-radius: 1.5rem;
+	border-start-start-radius: 1.5rem;
+	border-start-end-radius: 1.5rem;
 }
 
 .bannerImage {
@@ -61,7 +61,7 @@
 
 .avatarContainer {
 	position: absolute;
-	left: 1rem;
+	inset-inline-start: 1rem;
 	z-index: 20;
 	top: -2.5rem;
 }
@@ -74,15 +74,15 @@
 }
 
 .contentPadding {
-	padding-left: 1rem;
-	padding-right: 1rem;
+	padding-inline-start: 1rem;
+	padding-inline-end: 1rem;
 	padding-top: 3rem;
 }
 
 .actionsContainer {
 	position: absolute;
 	top: 1rem;
-	right: 1rem;
+	inset-inline-end: 1rem;
 	z-index: 10;
 	display: flex;
 	gap: 0.5rem;
@@ -163,8 +163,8 @@
 	gap: 0.5rem;
 	border-radius: 0.75rem;
 	background-color: var(--brand-primary);
-	padding-left: 1rem;
-	padding-right: 1rem;
+	padding-inline-start: 1rem;
+	padding-inline-end: 1rem;
 	padding-top: 0.75rem;
 	padding-bottom: 0.75rem;
 	cursor: pointer;
@@ -247,7 +247,7 @@
 	overscroll-behavior: contain;
 	scrollbar-width: thin;
 	scrollbar-color: var(--scrollbar-thumb-bg) transparent;
-	padding-right: 0.25rem;
+	padding-inline-end: 0.25rem;
 }
 
 .rolesSection {
@@ -257,7 +257,7 @@
 .rootAccountButton {
 	width: 100%;
 	cursor: pointer;
-	text-align: left;
+	text-align: start;
 	font-family: inherit;
 	box-sizing: border-box;
 	gap: 0.5rem;
