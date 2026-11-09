@@ -847,6 +847,10 @@ msgstr "ไม่มีประวัติ"
 msgid "No bio yet."
 msgstr "ยังไม่มีประวัติ"
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "ไม่มีสี"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "ไม่มีคำสั่ง"

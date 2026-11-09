@@ -847,6 +847,10 @@ msgstr "لا توجد نبذة"
 msgid "No bio yet."
 msgstr "لا توجد نبذة بعد."
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "لا يوجد لون"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "لا توجد أوامر"
