@@ -90,15 +90,23 @@ export function buildPreviewRequest(
 
 /**
  * What happens to one member. `keep` leaves a linked persona as it is (or a deleted one deleted);
- * `add` makes a new persona, without the clashing tags when `withTags` is false.
+ * `add` makes a new persona, without the clashing tags when `withTags` is false, and with
+ * `replacements` in their place: the tags the person gave it instead.
  */
 export type ReviewDecision =
 	| {choice: 'keep'}
 	| {choice: 'use_file'}
 	| {choice: 'restore'}
 	| {choice: 'link'; personaId: string}
-	| {choice: 'add'; withTags: boolean}
+	| {choice: 'add'; withTags: boolean; replacements?: ReadonlyArray<PersonaTag>}
 	| {choice: 'skip'};
+
+/** How many members need a choice, the dialog's title count: probably-the-same and new ones are listed only. */
+export function reviewNeedCount(entries: ReadonlyArray<PersonaImportPreviewEntry>): number {
+	return entries.filter(
+		(e) => e.kind === 'cant_tell' || e.kind === 'tag_in_use' || e.kind === 'differs' || e.kind === 'deleted',
+	).length;
+}
 
 /** The safest choice for each kind: nothing existing changes, and no likely duplicate is made. */
 export function defaultDecision(entry: PersonaImportPreviewEntry): ReviewDecision {
@@ -141,6 +149,18 @@ function sharedEmojis(entry: PersonaImportPreviewEntry): Array<SignatureEmoji> {
 function droppedTags(entry: PersonaImportPreviewEntry, decision: ReviewDecision): Array<PersonaTag> {
 	if (decision.choice !== 'add') return [];
 	return [...heldTags(entry), ...(decision.withTags ? [] : sharedTags(entry))];
+}
+
+/** The tags a new persona for this member gets: the file's, less those left out, plus the replacements. */
+export function addedTags(
+	entry: PersonaImportPreviewEntry,
+	decision: ReviewDecision,
+	fileTags: ReadonlyArray<PersonaTag>,
+): Array<PersonaTag> {
+	if (decision.choice !== 'add') return [];
+	const drop = new Set(droppedTags(entry, decision).map(tagKey));
+	const replacements = (decision.replacements ?? []).filter((tag) => !isEmptyTag(tag)).map(cleanTag);
+	return [...fileTags.filter((tag) => !drop.has(tagKey(tag))), ...replacements];
 }
 
 function droppedEmojis(entry: PersonaImportPreviewEntry, decision: ReviewDecision): Array<SignatureEmoji> {
@@ -215,14 +235,18 @@ function emojiKey(emoji: SignatureEmoji): string {
  * would refuse: for example a linked persona taking the file's tags while a new member with one of
  * them is added. Restores never count: the server leaves off what another persona holds.
  */
-export function findConflicts(
+type LivePersona = Pick<PersonaResponse, 'id' | 'name' | 'persona_tags' | 'signature_emojis'>;
+type TagState = {name: string; tags: Array<PersonaTag>; emojis: Array<SignatureEmoji>};
+
+/** Every persona's tags and emojis once the decisions are applied, keyed by persona id or `member:<index>`. */
+function tagStates(
 	entries: ReadonlyArray<PersonaImportPreviewEntry>,
 	decisions: ReadonlyMap<number, ReviewDecision>,
 	members: ReadonlyArray<ReviewMember>,
-	livePersonas: ReadonlyArray<Pick<PersonaResponse, 'id' | 'name' | 'persona_tags' | 'signature_emojis'>>,
+	livePersonas: ReadonlyArray<LivePersona>,
 	fromTyne: boolean,
-): Array<ReviewConflict> {
-	const tags = new Map<string, {name: string; tags: Array<PersonaTag>; emojis: Array<SignatureEmoji>}>();
+): Map<string, TagState> {
+	const tags = new Map<string, TagState>();
 	for (const persona of livePersonas) {
 		tags.set(persona.id, {
 			name: persona.name,
@@ -244,15 +268,25 @@ export function findConflicts(
 				emojis: fromTyne ? fileEmojis : (current?.emojis ?? []),
 			});
 		} else if (decision.choice === 'add') {
-			const dropTags = new Set(droppedTags(entry, decision).map(tagKey));
 			const dropEmojis = new Set(droppedEmojis(entry, decision).map(emojiKey));
 			tags.set(`member:${entry.index}`, {
 				name: member.preview.name,
-				tags: fileTags.filter((tag) => !dropTags.has(tagKey(tag))),
+				tags: addedTags(entry, decision, fileTags),
 				emojis: fileEmojis.filter((emoji) => !dropEmojis.has(emojiKey(emoji))),
 			});
 		}
 	}
+	return tags;
+}
+
+export function findConflicts(
+	entries: ReadonlyArray<PersonaImportPreviewEntry>,
+	decisions: ReadonlyMap<number, ReviewDecision>,
+	members: ReadonlyArray<ReviewMember>,
+	livePersonas: ReadonlyArray<Pick<PersonaResponse, 'id' | 'name' | 'persona_tags' | 'signature_emojis'>>,
+	fromTyne: boolean,
+): Array<ReviewConflict> {
+	const tags = tagStates(entries, decisions, members, livePersonas, fromTyne);
 	const owners = new Map<string, {label: string; names: Array<string>}>();
 	for (const state of tags.values()) {
 		for (const tag of state.tags) {
@@ -270,6 +304,95 @@ export function findConflicts(
 		}
 	}
 	return [...owners.values()].filter((owner) => owner.names.length > 1);
+}
+
+/**
+ * Who would hold `tag` once the decisions are applied, leaving out the member at `exceptIndex` (whose
+ * field is being checked), or null when it is free.
+ */
+export function tagHolder(
+	tag: PersonaTag,
+	exceptIndex: number,
+	entries: ReadonlyArray<PersonaImportPreviewEntry>,
+	decisions: ReadonlyMap<number, ReviewDecision>,
+	members: ReadonlyArray<ReviewMember>,
+	livePersonas: ReadonlyArray<LivePersona>,
+	fromTyne: boolean,
+): string | null {
+	if (isEmptyTag(tag)) return null;
+	const key = tagKey(tag);
+	for (const [owner, state] of tagStates(entries, decisions, members, livePersonas, fromTyne)) {
+		if (owner === `member:${exceptIndex}`) continue;
+		if (state.tags.some((t) => tagKey(t) === key)) return state.name;
+	}
+	return null;
+}
+
+function isEmptyTag(tag: PersonaTag): boolean {
+	return !(tag.prefix ?? '').trim() && !(tag.suffix ?? '').trim();
+}
+
+/**
+ * A tag as the API takes it: each side trimmed, and an empty side left out, never sent as "" (the
+ * schema wants a side to be absent or at least one character; "" made the import fail with
+ * "Invalid form body").
+ */
+export function cleanTag(tag: PersonaTag): PersonaTag {
+	const prefix = (tag.prefix ?? '').trim();
+	const suffix = (tag.suffix ?? '').trim();
+	return {...(prefix ? {prefix} : {}), ...(suffix ? {suffix} : {})};
+}
+
+/** A tag as typed in one field: `ly:` is a prefix, `-ly` a suffix; `[text]` uses the word text for the message. */
+export function parseTagInput(value: string): PersonaTag {
+	const trimmed = value.trim();
+	const marker = trimmed.indexOf('text');
+	if (marker >= 0) return cleanTag({prefix: trimmed.slice(0, marker), suffix: trimmed.slice(marker + 'text'.length)});
+	return cleanTag({prefix: trimmed});
+}
+
+/** The tag as one field shows it: the prefix alone, or with `text` where the message goes when it has a suffix. */
+export function tagInputText(tag: PersonaTag): string {
+	const prefix = (tag.prefix ?? '').trim();
+	const suffix = (tag.suffix ?? '').trim();
+	return suffix ? `${prefix}text${suffix}` : prefix;
+}
+
+/**
+ * A free tag in the style of `tag` for a member called `name`: the letters of the side that has them
+ * become more of the name (`ly:` for Lyra gives `lyr:`, then `lyra:`, then `lyra2:`), keeping the
+ * punctuation around them. Null when none of those is free.
+ */
+export function suggestTag(tag: PersonaTag, name: string, isTaken: (tag: PersonaTag) => boolean): PersonaTag | null {
+	const split = (side: string) => {
+		const match = /^(\P{L}*?)([\p{L}\p{N}]+)(\P{L}*)$/u.exec(side);
+		return match ? {lead: match[1]!, core: match[2]!, trail: match[3]!} : null;
+	};
+	const prefix = (tag.prefix ?? '').trim();
+	const suffix = (tag.suffix ?? '').trim();
+	const onPrefix = split(prefix);
+	const onSuffix = onPrefix ? null : split(suffix);
+	const letters = Array.from(name.toLowerCase().replace(/[^\p{L}\p{N}]/gu, ''));
+	if (letters.length === 0) letters.push('p');
+	const shortest = Array.from((onPrefix ?? onSuffix)?.core ?? '').length + 1;
+	const cores: Array<string> = [];
+	for (let length = shortest; length <= letters.length; length++) cores.push(letters.slice(0, length).join(''));
+	for (let n = 2; n < 100; n++) cores.push(`${letters.join('')}${n}`);
+	// Keep the tag's capital: "Ly:" for Lyra gives "Lyr:".
+	const original = (onPrefix ?? onSuffix)?.core ?? '';
+	const capital = original !== '' && original[0] !== original[0]!.toLowerCase();
+	const styled = (core: string) => (capital ? core.charAt(0).toUpperCase() + core.slice(1) : core);
+	const candidateFor = (core: string): PersonaTag => {
+		if (onPrefix) return cleanTag({prefix: `${onPrefix.lead}${styled(core)}${onPrefix.trail}`, suffix});
+		if (onSuffix) return cleanTag({prefix, suffix: `${onSuffix.lead}${styled(core)}${onSuffix.trail}`});
+		// A tag with no letters at all (brackets around the text) gets a plain prefix such as "lyr:".
+		return {prefix: `${core}:`};
+	};
+	for (const core of cores) {
+		const candidate = candidateFor(core);
+		if (!isTaken(candidate)) return candidate;
+	}
+	return null;
 }
 
 /** Which of a member's pictures have to be stored before applying its choice. */
@@ -308,11 +431,17 @@ export function buildActions(
 			personaImportItem(member.member, pictures?.images ?? {avatar: null, banner: null}, member.extras);
 		switch (decision.choice) {
 			case 'add': {
-				const dropTags = droppedTags(entry, decision);
 				const dropEmojis = droppedEmojis(entry, decision);
+				const replaced = (decision.replacements ?? []).some((tag) => !isEmptyTag(tag));
+				// With tags of its own, the item carries the tags it gets; otherwise the server leaves the
+				// clashing ones out.
+				const dropTags = replaced ? [] : droppedTags(entry, decision);
+				const base = item();
 				actions.push({
 					action: 'add',
-					item: item(),
+					item: replaced
+						? {...base, persona_tags: addedTags(entry, decision, member.preview.persona_tags ?? [])}
+						: base,
 					...(dropTags.length > 0 ? {drop_tags: dropTags} : {}),
 					...(dropEmojis.length > 0 ? {drop_signature_emojis: dropEmojis} : {}),
 				});

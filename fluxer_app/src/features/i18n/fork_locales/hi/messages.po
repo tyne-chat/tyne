@@ -26,6 +26,10 @@ msgstr "<0>{tag}</0> पहले से आपके परसोना {name} 
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "आपकी फ़ाइल में {name} भी <0>{tag}</0> इस्तेमाल करता है।"
 
+#. Choice in the import review: the member of the file is someone else, add it as a new persona
+msgid "A different persona: add it"
+msgstr "कोई दूसरा परसोना: इसे जोड़ें"
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "एक परसोना में अधिकतम 5 टैग हो सकते हैं"
@@ -58,10 +62,6 @@ msgstr "परसोना जोड़ें"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "टैग जोड़ी जोड़ें ({0}/5)"
 
-#. Choice in the import review: add the member as a new persona next to the existing one
-msgid "Add as a separate persona"
-msgstr "अलग परसोना के रूप में जोड़ें"
-
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "काउंटर जोड़ें"
@@ -69,13 +69,13 @@ msgstr "काउंटर जोड़ें"
 msgid "Add signal"
 msgstr "सिग्नल जोड़ें"
 
-#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
-msgid "Add with the tag"
-msgstr "टैग के साथ जोड़ें"
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "{name} जोड़ें"
 
-#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
-msgid "Add without {tags}"
-msgstr "{tags} के बिना जोड़ें"
+#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
+msgid "Add {name} with a tag of its own"
+msgstr "{name} को उसके अपने टैग के साथ जोड़ें"
 
 #. Line of the import result: new personas
 msgid "Added"
@@ -157,6 +157,10 @@ msgstr "बैनर इमेज डाउनलोड नहीं हो स�
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "बैनर इमेज डाउनलोड नहीं हो सकी: {error}। परसोना का पहले वाला बैनर बना रहा।"
 
+#. Switch on a deleted persona in the import review that restores it. {name} is its name
+msgid "Bring {name} back"
+msgstr "{name} को वापस लाएँ"
+
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
@@ -166,14 +170,6 @@ msgstr "{items} के बिना वापस आया: अब ये कि
 msgid "Can't compare"
 msgstr "तुलना नहीं हो सकती"
 
-#. Short name of a section of the import review
-msgid "Can't tell"
-msgstr "अनिश्चित"
-
-#. Section of the import review
-msgid "Can't tell if it's the same persona"
-msgstr "पता नहीं कि यह वही परसोना है या नहीं"
-
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "परसोना बदलें"
@@ -181,6 +177,10 @@ msgstr "परसोना बदलें"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "उन्होंने जो टाइप किया, उसके हिसाब से मैसेज बदलें"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "इंपोर्ट करने से पहले जाँचें"
 
 #. Title of the persona import dialog while the file is checked
 msgid "Checking your file..."
@@ -217,6 +217,10 @@ msgstr "रंग"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "यहाँ वापस आएँ और <0>TestFlight में Tyne पाएँ</0> पर टैप करें, फिर <1>इंस्टॉल करें</1> पर।"
 
+#. Small line on a deleted persona in the import review once it is set to come back
+msgid "Comes back as it was, with its old messages"
+msgstr "पहले जैसा, अपने पुराने संदेशों के साथ वापस आएगा"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "कमांड"
@@ -234,10 +238,6 @@ msgstr "कमांड"
 msgid "Commands saved"
 msgstr "कमांड सेव हो गए"
 
-#. Button that shows a persona next to its version in the import file
-msgid "Compare"
-msgstr "तुलना करें"
-
 #. Status while the import file is compared with the account's personas
 msgid "Comparing your file with your personas..."
 msgstr "आपकी फ़ाइल की तुलना आपके परसोना से की जा रही है..."
@@ -245,6 +245,10 @@ msgstr "आपकी फ़ाइल की तुलना आपके पर�
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "कॉन्फ़िगर किए गए परसोना ({count})"
+
+#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
+msgid "Connect {name}"
+msgstr "{name} को लिंक करें"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -333,10 +337,6 @@ msgstr "समय टिकट मिटाएँ\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "{count, plural, one {# परसोना} other {# परसोना}} हटाएँ?"
 
-#. Short name of a section of the import review
-msgid "Deleted"
-msgstr "डिलीट किए गए"
-
 #. Title of the section in Settings › Personas that lists deleted personas
 msgid "Deleted personas"
 msgstr "डिलीट किए गए परसोना"
@@ -353,25 +353,10 @@ msgstr "{date} को डिलीट किया गया"
 msgid "Detected System Name / Tag"
 msgstr "पहचाना गया सिस्टम नाम / टैग"
 
-#. Section of the import review
-msgid "Different in your file"
-msgstr "आपकी फ़ाइल में अलग"
-
 #. Comparison of a persona picture with the import file: they differ
 msgid "Different picture"
 msgstr "अलग तस्वीर"
 
-#. Short name of a section of the import review
-msgid "Differs"
-msgstr "अलग"
-
-#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
-msgid "Differs: {fields}"
-msgstr "अंतर: {fields}"
-
-#. Heading of the display tag choice in the import review
-#. Section of the import review
-#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "डिस्प्ले टैग"
@@ -442,13 +427,9 @@ msgstr "इस परसोना पर टैग जोड़ी दोहर�
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "हर चैनल अपना परसोना रखता है। नए चैनल आपके अकाउंट से शुरू होते हैं।"
 
-#. Explanation of a section of the import review
-msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
-msgstr "इनमें से हर एक का नाम या टैग आपके किसी परसोना से मिलता है, लेकिन दोनों नहीं, इसलिए यह वही किरदार हो सकता है या कोई और। इनकी तुलना करें और चुनें। छोड़े गए सदस्य अगली बार के लिए आपकी फ़ाइल में रहते हैं।"
-
-#. Explanation at the top of the import review
-msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
-msgstr "हर एक के लिए सबसे सुरक्षित विकल्प पहले से चुना हुआ है, इसलिए जब तक आप खुद न चुनें, आपके पास जो है उसमें कुछ नहीं बदलेगा। इंपोर्ट करने से पहले कृपया हर सेक्शन पढ़ें। सबसे मुश्किल वाले सबसे ऊपर हैं।"
+#. Hint under the list of differing personas in the import review. {productName} is the app name
+msgid "Each keeps {productName}'s version unless you open it and choose the file's."
+msgstr "हर एक {productName} वाला रूप रखता है, जब तक आप उसे खोलकर फ़ाइल वाला न चुनें।"
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -572,6 +553,15 @@ msgstr "दृश्यता के अनुसार फ़िल्टर �
 msgid "Format preview"
 msgstr "प्रारूप पूर्वावलोकन"
 
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "उपलब्ध"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "आपकी फ़ाइल से"
+
 #. Link at the end of the command script help to the complete guide on GitHub.
 msgid "Full script guide"
 msgstr "पूरी स्क्रिप्ट गाइड"
@@ -610,13 +600,14 @@ msgstr "Tyne ऐप पाएँ"
 msgid "Here is what changed"
 msgstr "यह बदला है"
 
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "छिपाएँ"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "चैनल सूची छिपाएँ"
-
-#. Button that hides the comparison of a persona with the import file
-msgid "Hide comparison"
-msgstr "तुलना छिपाएँ"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -677,23 +668,6 @@ msgstr "इंपोर्ट हो रहा है..."
 msgid "In each channel"
 msgstr "हर चैनल में"
 
-#. Column heading in the import review
-msgid "In this app"
-msgstr "इस ऐप में"
-
-#. Explanation of a section of the import review
-msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
-msgstr "इस ऐप में हर प्रॉक्सी टैग एक ही परसोना का होता है। इन सदस्यों के पास ऐसा टैग है जो पहले से किसी दूसरे परसोना के पास है, या जो आपकी फ़ाइल के किसी दूसरे सदस्य के पास भी है।"
-
-#. Column heading in the table comparing a persona with the import file
-msgid "In this app now"
-msgstr "अभी इस ऐप में"
-
-#. Column heading in the import review
-#. Column heading in the table comparing a persona with the import file
-msgid "In your file"
-msgstr "आपकी फ़ाइल में"
-
 #. Explanation of the "Kept as they were" line of the import result
 msgid "Including any that differ from the file, where you kept the version you had."
 msgstr "इनमें वे भी शामिल हैं जो फ़ाइल से अलग हैं, जहाँ आपने अपना पहले वाला वर्शन रखा।"
@@ -717,42 +691,49 @@ msgstr "डालें:"
 msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
 msgstr "App Store से Apple का मुफ़्त <0>TestFlight</0> ऐप इंस्टॉल करें।"
 
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "{tag} की जगह"
+
+#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
+msgid "Is {name} from your file one of these personas in {productName}?"
+msgstr "क्या आपकी फ़ाइल का {name}, {productName} के इन परसोना में से एक है?"
+
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "इसकी स्क्रिप्ट में कोई समस्या है।"
 
-#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
-msgid "Keep this version"
-msgstr "यह वर्शन रखें"
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "जाँच जारी रखें"
 
-#. Button in the import review: keep every listed persona as it is
-msgid "Keep this version for all"
-msgstr "सभी के लिए यह वर्शन रखें"
+#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
+msgid "Keep {productName}'s"
+msgstr "{productName} वाला रखें"
 
-#. Choice in the import review: keep the display tag {tag}
-msgid "Keep yours: {tag}"
-msgstr "अपना टैग रखें: {tag}"
+#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
+msgid "Keep {productName}'s {name}"
+msgstr "{productName} वाला {name} रखें"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "{productName} वाला रहेगा"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "अपना टैग बनाए रखता है"
 
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "पहले जैसे रखे गए"
 
-#. Choice in the import review for a persona that was deleted: keep it deleted
-msgid "Leave deleted"
-msgstr "डिलीट ही रहने दें"
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Leave {name} out this time"
+msgstr "इस बार {name} को छोड़ दें"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "पंक्ति {line}, कॉलम {column}: {problem}"
-
-#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
-msgctxt "persona-import-choice"
-msgid "Link"
-msgstr "लिंक करें"
-
-#. Button in the import review that links every persona listed
-msgid "Link all {count}"
-msgstr "सभी {count} लिंक करें"
 
 #. Shown on a persona in the import review that is already connected to a different member
 msgid "Linked to another PluralKit member"
@@ -817,10 +798,6 @@ msgstr "सदस्य #{index}"
 msgid "Members with Avatars"
 msgstr "अवतार वाले सदस्य"
 
-#. Explanation of a section of the import review
-msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
-msgstr "ऐसे सदस्य जो अभी आपके पास नहीं हैं, और जिनके नाम या टैग का कोई टकराव नहीं है। जो आप नहीं चाहते, उनका निशान हटा दें।"
-
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "संदेश टूल"
@@ -845,10 +822,6 @@ msgstr "ट्रैश में ले जाएँ"
 msgid "Name (A–Z)"
 msgstr "नाम (A–Z)"
 
-#. Badge on a section of the import review where every member needs a choice
-msgid "Needs a decision"
-msgstr "फ़ैसला ज़रूरी है"
-
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "नया परसोना"
@@ -856,10 +829,6 @@ msgstr "नया परसोना"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "नया कमांड"
-
-#. Section of the import review
-msgid "New in your file"
-msgstr "आपकी फ़ाइल में नए"
 
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
@@ -881,6 +850,10 @@ msgstr "अगला परसोना"
 msgid "No \"members\" array found in this export file."
 msgstr "इस एक्सपोर्ट फ़ाइल में कोई \"members\" ऐरे नहीं मिला।"
 
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "कोई बायो नहीं"
+
 #. Shown on a persona’s card in the Personas list when it has no bio.
 msgid "No bio yet."
 msgstr "अभी कोई बायो नहीं है।"
@@ -892,6 +865,10 @@ msgstr "कोई कमांड नहीं"
 #. Shown in Settings › Personas when there are no deleted personas
 msgid "No deleted personas."
 msgstr "कोई डिलीट किया गया परसोना नहीं है।"
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "कोई डिस्प्ले टैग नहीं"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "कोई डिस्प्ले टैग कॉन्फ़िगर नहीं है। संदेशों में आपके अकाउंट की प्रोफ़ाइल तस्वीर दिखेगी।"
@@ -916,12 +893,24 @@ msgstr "यहाँ कोई परसोना नहीं है।"
 msgid "No personas match your search."
 msgstr "आपकी खोज से कोई परसोना मेल नहीं खाता।"
 
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "कोई प्रोनाउन नहीं"
+
 #. Shown in another account’s Personas list when it lists none.
 msgid "No public personas."
 msgstr "कोई पब्लिक परसोना नहीं।"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "अभी कोई सिग्नल नहीं है। जब तक आप एक नहीं जोड़ते, बार छिपा रहेगा।"
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "कोई टैग नहीं: बिना टैग के जोड़ा जाएगा"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "कोई टैग नहीं"
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
@@ -931,9 +920,17 @@ msgstr "किसी ने यह सिग्नल चालू नहीं 
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "आपका कोई भी परसोना अभी पब्लिक नहीं है। जब आप किसी परसोना की दृश्यता पब्लिक पर सेट करते हैं, तब दूसरे उसे यहाँ देखते हैं।"
 
-#. Hint on the choice to skip a member in the import review
-msgid "Nothing changes. It stays in your file for next time."
-msgstr "कुछ नहीं बदलता। यह सदस्य अगली बार के लिए आपकी फ़ाइल में रहता है।"
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Not sure: leave {name} out this time"
+msgstr "पक्का नहीं: इस बार {name} को छोड़ दें"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "पक्का नहीं पता? इसे जैसा है वैसा ही छोड़ दें: कुछ नहीं बदलेगा।"
+
+#. Badge on the choice in the import review that leaves everything as it is
+msgid "Nothing changes"
+msgstr "कोई बदलाव नहीं"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1124,7 +1121,6 @@ msgstr "पिछला परसोना"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
-#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "प्राइवेट"
@@ -1132,14 +1128,6 @@ msgstr "प्राइवेट"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "निजी परसोना"
-
-#. Short name of a section of the import review
-msgid "Probably the same"
-msgstr "शायद वही"
-
-#. Section of the import review
-msgid "Probably the same persona"
-msgstr "शायद वही परसोना"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -1154,7 +1142,6 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "प्रोफ़ाइल कार्ड संदेशों पर क्लिक करने से खुलते हैं और आपकी सार्वजनिक परसोना सूची में दोस्तों और साझा सर्वरों को दिखते हैं।"
 
 #. Chip above the persona list: public personas.
-#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "पब्लिक"
@@ -1228,13 +1215,8 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "{name} की गिनती रीसेट करें? इसे पूर्ववत नहीं किया जा सकता।"
 
 #. Button that brings back a deleted persona
-#. Choice in the import review: bring a deleted persona back, with its old messages
 msgid "Restore"
 msgstr "रीस्टोर करें"
-
-#. Button in the import review that restores every deleted persona listed
-msgid "Restore all {count}"
-msgstr "सभी {count} रीस्टोर करें"
 
 #. Explanation of the "Still deleted" line of the import result
 msgid "Restore them from Deleted personas in Settings if you change your mind."
@@ -1247,10 +1229,6 @@ msgstr "रीस्टोर किए गए"
 msgid "Results"
 msgstr "नतीजे"
 
-#. Title of the persona import review
-msgid "Review before importing"
-msgstr "इंपोर्ट से पहले समीक्षा करें"
-
 msgid "Root Account (Default)"
 msgstr "रूट अकाउंट (डिफ़ॉल्ट)"
 
@@ -1262,21 +1240,25 @@ msgstr "फिर से चलाएँ"
 msgid "Run anyway"
 msgstr "फिर भी चलाएँ"
 
-#. Badge on the safest choice in the import review
-msgid "Safest"
-msgstr "सबसे सुरक्षित"
+#. Why a persona in the import review may be the member: same name
+msgid "Same name"
+msgstr "वही नाम"
 
-#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
-msgid "Same as your {name}: link them"
-msgstr "आपके {name} जैसा ही: इन्हें लिंक करें"
+#. Why a persona in the import review may be the member: same name and proxy tag
+msgid "Same name and tag"
+msgstr "वही नाम और टैग"
 
-#. Explanation of a section of the import review
-msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
-msgstr "नाम और टैग आपके किसी परसोना जैसे ही हैं, लेकिन अभी आपकी फ़ाइल से लिंक नहीं हैं, उदाहरण के लिए क्योंकि आपने उन्हें खुद बनाया था। लिंक करने से सिर्फ़ यह दर्ज होता है कि हर एक फ़ाइल का कौन सा सदस्य है, ताकि आगे के इंपोर्ट उसे पहचान सकें। परसोना में कुछ नहीं बदलता।"
+#. Choice on a persona's card in the import review: the member of the import file is this persona
+msgid "Same persona as this one"
+msgstr "यह वही परसोना है"
 
 #. Comparison of a persona picture with the import file: they are the same
 msgid "Same picture"
 msgstr "वही तस्वीर"
+
+#. Why a persona in the import review may be the member: same proxy tag
+msgid "Same tag"
+msgstr "वही टैग"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1337,6 +1319,11 @@ msgstr "एक्टिव सेट करें"
 msgid "Set as active persona"
 msgstr "सक्रिय परसोना बनाएँ"
 
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "दिखाएँ"
+
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
 msgstr "कॉपी बटन दिखाएं"
@@ -1344,10 +1331,6 @@ msgstr "कॉपी बटन दिखाएं"
 #. Button that loads the list of deleted personas in Settings › Personas
 msgid "Show deleted personas"
 msgstr "डिलीट किए गए परसोना दिखाएँ"
-
-#. Button that collapses a list in the import review again
-msgid "Show fewer"
-msgstr "कम दिखाएँ"
 
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
@@ -1361,10 +1344,6 @@ msgstr "सिग्नल बार दिखाएँ"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "अनलिस्टेड और प्राइवेट दिखाएँ"
-
-#. Button that shows the rest of a list in the import review
-msgid "Show {count} more"
-msgstr "{count} और दिखाएँ"
 
 msgid "Signal Bar"
 msgstr "सिग्नल बार"
@@ -1396,9 +1375,9 @@ msgstr "हस्ताक्षर इमोजी का उपयोग प�
 msgid "Signature emojis"
 msgstr "हस्ताक्षर इमोजी"
 
-#. Choice in the import review: do nothing with this member of the import file
-msgid "Skip this member"
-msgstr "इस सदस्य को छोड़ें"
+#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
+msgid "Similar tag"
+msgstr "मिलता-जुलता टैग"
 
 #. Line of the import result: members left out
 msgid "Skipped"
@@ -1420,6 +1399,14 @@ msgstr "अब भी डिलीट"
 msgid "Still in your file. Import it again any time to decide about them."
 msgstr "अब भी आपकी फ़ाइल में हैं। उनके बारे में तय करने के लिए इसे कभी भी फिर से इंपोर्ट करें।"
 
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "इंपोर्ट रोकें"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "यह इंपोर्ट रोकें?"
+
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "फ़ाइल से इमेज {current}/{total} सेव हो रही है..."
@@ -1439,6 +1426,11 @@ msgstr "PluralKit सिस्टम एक्सपोर्ट फ़ाइल
 msgid "Switch the active persona"
 msgstr "सक्रिय परसोना बदलें"
 
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "टैग"
+
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -1446,14 +1438,6 @@ msgstr "टैग आइकन"
 
 msgid "Tag Text"
 msgstr "टैग टेक्स्ट"
-
-#. Section of the import review
-msgid "Tag already in use"
-msgstr "टैग पहले से इस्तेमाल में है"
-
-#. Short name of a section of the import review
-msgid "Tag in use"
-msgstr "टैग इस्तेमाल में"
 
 #. Row heading in the table comparing a persona with the import file: whether its tags are matched
 msgid "Tag matching"
@@ -1554,13 +1538,9 @@ msgstr "{name} नाम का कोई फ़िल्टर नहीं ह
 msgid "There's no tag called {name}."
 msgstr "{name} नाम का कोई टैग नहीं है।"
 
-#. Explanation of a section of the import review
-msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
-msgstr "ये पहले आपकी फ़ाइल से आए थे, लेकिन अब फ़ाइल में अलग जानकारी है, या आपने तब से इन्हें यहाँ बदला है। यह जानने का कोई तरीका नहीं कि किस तरफ़ बदलाव हुआ, इसलिए इस ऐप का वर्शन रखा जाता है, जब तक आप किसी परसोना के लिए फ़ाइल वाला वर्शन न चुनें। फ़ाइल वाला वर्शन उस परसोना की जानकारी की जगह ले लेता है; उसके संदेश, इतिहास, दृश्यता और हस्ताक्षर इमोजी बने रहते हैं, और ऐसी कोई भी तस्वीर भी जो डाउनलोड नहीं हो सकती।"
-
-#. Explanation of a section of the import review
-msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
-msgstr "जब तक आप उन्हें रीस्टोर न करें, वे डिलीट ही रहेंगे। रीस्टोर करने पर कॉपी बनाने के बजाय वही परसोना अपने पुराने संदेशों और इस्तेमाल के साथ पहले जैसा वापस आता है।"
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "ये ऐसे परसोना लगते हैं जो {productName} में आपके पास पहले से हैं। हर एक के लिए चुनें कि {productName} में कौन-सा रहे। पक्का नहीं पता? इसे जैसा है वैसा ही छोड़ दें: कुछ नहीं बदलेगा।"
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1623,6 +1603,10 @@ msgstr "सिग्नल बार चालू करें"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne अपने-आप खुल जाता है। साइन इन करें, बस हो गया।"
 
+#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
+msgid "Type {example} to post as {name}"
+msgstr "{name} के रूप में भेजने के लिए {example} टाइप करें"
+
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "सुझावों के लिए {output} या {tag} टाइप करें।"
@@ -1641,7 +1625,6 @@ msgstr "Ubuntu, Fedora और भी बहुत कुछ"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
-#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "अनलिस्टेड"
@@ -1702,34 +1685,30 @@ msgstr "छोटे अक्षर, अंक, - और _ इस्तेम�
 msgid "Use the basic editor"
 msgstr "बेसिक एडिटर इस्तेमाल करें"
 
-#. Choice in the import review: replace the persona's details with those in the import file
-msgid "Use the file's version"
-msgstr "फ़ाइल वाला वर्शन इस्तेमाल करें"
+#. Choice on the import file's card in the import review: use the file's display tag
+msgid "Use the file's"
+msgstr "फ़ाइल वाला इस्तेमाल करें"
 
-#. Choice in the import review: use the import file's system tag {tag} as the display tag
-msgid "Use the file's: {tag}"
-msgstr "फ़ाइल वाला टैग इस्तेमाल करें: {tag}"
+#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
+msgid "Use the file's {name}"
+msgstr "फ़ाइल वाला {name} इस्तेमाल करें"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "स्क्रिप्ट एडिटर इस्तेमाल करें"
 
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "फ़ाइल वाला"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "अपने परसोना देखें"
-
-#. Heading of the choices for one member of the import file
-msgid "What should happen to {name} from your file?"
-msgstr "आपकी फ़ाइल के {name} के साथ क्या होना चाहिए?"
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "वे जो टाइप करते हैं"
-
-#. Accessible label of the menu of choices for one persona in the import review
-msgid "What to do with {name}"
-msgstr "{name} के साथ क्या करें"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1758,29 +1737,29 @@ msgstr "Windows ने आपके PC की सुरक्षा की"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "संख्या को 1st, 2nd, 3rd की तरह लिखें"
 
-#. Hint on the choice to add a member without its proxy tag, in the import review
-msgid "You can give it another tag later in Settings."
-msgstr "आप बाद में सेटिंग्स में इसे कोई दूसरा टैग दे सकते हैं।"
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "आपने {date} को {productName} में {name} को डिलीट किया था। {name} को वापस लाएँ?"
 
-#. Section of the import review
-msgid "You deleted these"
-msgstr "इन्हें आपने डिलीट किया था"
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "आपने {productName} में {name} को डिलीट किया था। {name} को वापस लाएँ?"
 
-#. Hint on the choice to add a member as a separate persona, in the import review
-msgid "You will have one more {name}."
-msgstr "आपके पास एक और {name} होगा।"
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "इन सदस्यों के लिए आपके चुनाव खो जाएँगे, और कुछ भी इंपोर्ट नहीं होगा।"
 
-#. Explanation of a section of the import review
-msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
-msgstr "आपके अकाउंट का एक ही डिस्प्ले टैग है, जो हर परसोना के नाम के बाद दिखता है। फ़ाइल का सिस्टम टैग अलग है।"
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "आपका डिस्प्ले टैग हर परसोना के नाम के बाद दिखता है। {productName} कौन-सा इस्तेमाल करे?"
 
 #. On the download page after the visitor chose to download the app elsewhere.
 msgid "Your download should start in a moment. If it doesn't, use the button above."
 msgstr "आपका डाउनलोड कुछ ही पलों में शुरू हो जाना चाहिए। अगर न हो, तो ऊपर दिए गए बटन का इस्तेमाल करें।"
 
-#. Hint on the choice to link a member to an existing persona, in the import review
-msgid "Your persona stays as it is; it is connected to this member."
-msgstr "आपका परसोना जैसा है वैसा ही रहता है; उसे इस सदस्य से लिंक कर दिया जाता है।"
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "आपकी फ़ाइल"
 
 msgid "Your reactions"
 msgstr "आपके रिएक्शन"
@@ -1793,33 +1772,17 @@ msgstr "आपके {emojiName} रिएक्शन"
 msgid "add {count}"
 msgstr "{count} जोड़ेगा"
 
-#. A persona field, listed in "Differs: name, avatar"
-msgid "avatar"
-msgstr "अवतार"
-
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "अवतार डाउनलोड हुए"
-
-#. A persona field, listed in "Differs: name, banner"
-msgid "banner"
-msgstr "बैनर"
 
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "बैनर डाउनलोड हुए"
 
-#. A persona field, listed in "Differs: name, bio"
-msgid "bio"
-msgstr "बायो"
-
 #. Part of the import summary "Import will add 7 and change your display tag"
 msgid "change your display tag"
 msgstr "आपका डिस्प्ले टैग बदलेगा"
-
-#. A persona field (its accent colour), listed in "Differs: name, colour"
-msgid "colour"
-msgstr "रंग"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1853,26 +1816,9 @@ msgstr "आइटम"
 msgid "link {count}"
 msgstr "{count} को लिंक करेगा"
 
-#. A persona's name as a field, listed in "Differs: name, bio"
-msgctxt "persona-field"
-msgid "name"
-msgstr "नाम"
-
-#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
-msgid "picture not compared"
-msgstr "तस्वीर की तुलना नहीं हुई"
-
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
 msgstr "अपने रिएक्शन देखने के लिए दबाएँ"
-
-#. A persona field, listed in "Differs: name, pronouns"
-msgid "pronouns"
-msgstr "सर्वनाम"
-
-#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
-msgid "removes {fields}"
-msgstr "{fields} हटा देगा"
 
 #. Part of the import summary "Import will link 17, restore 2, skip 3"
 msgid "restore {count}"
@@ -1882,21 +1828,9 @@ msgstr "{count} रीस्टोर करेगा"
 msgid "saving personas"
 msgstr "परसोना सेव हुए"
 
-#. A persona field, listed in "Differs: name, signature emojis"
-msgid "signature emojis"
-msgstr "हस्ताक्षर इमोजी"
-
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "skip {count}"
 msgstr "{count} छोड़ेगा"
-
-#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
-msgid "tag matching"
-msgstr "टैग पहचान"
-
-#. A persona field (its proxy tags), listed in "Differs: name, tags"
-msgid "tags"
-msgstr "टैग"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1908,10 +1842,6 @@ msgstr "टेक्स्ट"
 #. Part of the import summary "Import will link 17, use the file's version for 2"
 msgid "use the file's version for {count}"
 msgstr "{count} के लिए फ़ाइल वाला वर्शन इस्तेमाल करेगा"
-
-#. A persona field, listed in "Differs: name, visibility"
-msgid "visibility"
-msgstr "दृश्यता"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1927,6 +1857,22 @@ msgstr "जोड़े गए परसोना: {addedCount}"
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} इंस्टॉल करने के लिए तैयार है।"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
+msgstr "{count, plural, one {# सदस्य पहले से {productName} में अपने परसोना से मेल खाता है। कुछ करने की ज़रूरत नहीं है।} other {# सदस्य पहले से {productName} में अपने परसोना से मेल खाते हैं। कुछ करने की ज़रूरत नहीं है।}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
+msgstr "{count, plural, one {# नया सदस्य जोड़ा जाएगा} other {# नए सदस्य जोड़े जाएँगे}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
+msgstr "{count, plural, one {{productName} का # परसोना आपकी फ़ाइल में नहीं है। वह जैसा है वैसा ही रहेगा।} other {{productName} के # परसोना आपकी फ़ाइल में नहीं हैं। वे जैसे हैं वैसे ही रहेंगे।}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, one {आपकी फ़ाइल में # परसोना अलग है} other {आपकी फ़ाइल में # परसोना अलग हैं}}"
 
 #. Toast after making personas private; it has an Undo button.
 msgid "{count, plural, one {# persona is} other {# personas are}} now private"
@@ -1944,6 +1890,10 @@ msgstr "{count, plural, one {# परसोना अब अनलिस्ट�
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, one {# परसोना जैसा है वैसा ही रहेगा} other {# परसोना जैसे हैं वैसे ही रहेंगे}}"
 
+#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
+msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
+msgstr "{count, plural, one {आपका खुद बनाया गया # परसोना अपने सदस्य से लिंक किया जाएगा। उसमें कुछ नहीं बदलेगा।} other {आपके खुद बनाए गए # परसोना अपने सदस्यों से लिंक किए जाएँगे। उनमें कुछ नहीं बदलेगा।}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, one {# परसोना} other {# परसोना}}"
@@ -1951,6 +1901,10 @@ msgstr "{count, plural, one {# परसोना} other {# परसोना}}
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, one {# परसोना हटाया गया} other {# परसोना हटाए गए}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, one {इंपोर्ट करने से पहले # सदस्य जाँचें} other {इंपोर्ट करने से पहले # सदस्य जाँचें}}"
 
 #. How often a persona has been used, shown in the import review
 #. How often a persona has been used, shown in the import review
@@ -1992,21 +1946,25 @@ msgstr "{names} सभी को {label} मिलेगा। कोई एक 
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - परसोना बदलने के लिए क्लिक करें"
 
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "{name} पहले से इसका इस्तेमाल करता है"
+
 #. Toast after a deleted persona was restored
 msgid "{name} is back."
 msgstr "{name} वापस आ गया।"
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "आपकी फ़ाइल में {name} अलग है। {productName} में कौन-सा रहना चाहिए?"
 
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "{name} कभी बंद नहीं होता।"
 
-#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
-msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
-msgstr "ध्यान देने की ज़रूरत: {needCount} सदस्य और आपका डिस्प्ले टैग"
-
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
-msgstr "ध्यान देने की ज़रूरत: {needCount} सदस्य"
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "{name} का टैग पहले से इस्तेमाल में है"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -2022,18 +1980,6 @@ msgstr "{publicCount} पब्लिक, {unlistedCount} अनलिस्ट�
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "{total} में से {shown} परसोना"
-
-#. Closing line of the import review. {untouched} is a number of personas
-msgid "{untouched} of your personas aren't in this file. They stay as they are."
-msgstr "आपके {untouched} परसोना इस फ़ाइल में नहीं हैं। वे जैसे हैं वैसे ही रहेंगे।"
-
-#. Closing line of the import review. {upToDate} is a number of members
-msgid "{upToDate} members match their persona exactly. Nothing to do."
-msgstr "{upToDate} सदस्य अपने परसोना से बिल्कुल मेल खाते हैं। कुछ करने की ज़रूरत नहीं।"
-
-#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
-msgid "{visibility} (this app's is kept)"
-msgstr "{visibility} (इस ऐप की दृश्यता ही रखी जाती है)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— आज दोपहर 12:00 बजे"

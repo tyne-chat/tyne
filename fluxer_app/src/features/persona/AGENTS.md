@@ -231,9 +231,19 @@ sheet (`openPersonaGallery`); mobile web also has a button before the mutual fri
   `previewPersonaImport` (one request, which changes nothing; links in the file go as links, or as
   the hash when they point at this account's own media). When `needs_review` is false (every member
   new without a clash, or already identical) it applies at once; otherwise `PersonaImportReview`
-  opens: sections hardest first (can't tell, tag in use, different in the file, deleted, probably the
-  same, display tag, new), every member on `defaultDecision`, the safest choice, and a footer that
-  says what Import will do. `findConflicts` blocks Import while two choices would give one tag to two
+  opens, laid out as "Pick a side" (tyne-chat/tyne#563): one line each at the top for what needs no
+  decision (new members and the probably-the-same ones it connects, both untickable behind Show;
+  those already identical; personas not in the file), then one question per member that needs a
+  choice, hardest first (can't tell, tag in use, different in the file, deleted, then the display
+  tag), each set off by a thin line, with the file's version on the left and Tyne's on the right:
+  the card is the choice and the other greys out. Personas different in the file are one list of
+  collapsed rows (what differs, and the current choice), each opened to pick a side. Every member
+  starts on `defaultDecision`, the choice that changes nothing, and the footer says what Import will
+  do. While the review is open, closing the dialog asks first (tyne-chat/tyne#564); while checking
+  or importing it cannot be closed. A member whose tag
+  another persona or member has can be added with a tag of its own (`replacements` on the add
+  decision, sent in the action's item): the field starts on a free tag in the same style
+  (`suggestTag`) and says who has one typed in (`tagHolder`). `findConflicts` blocks Import while two choices would give one tag to two
   personas. Only then are pictures stored, for the members whose choice needs them
   (`storeMemberPictures`: the zip's files, this account's own copies, or the server's streamed
   download), and `applyPersonaImport` sends one action per member, written whole or not at all. A

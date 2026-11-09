@@ -94,11 +94,16 @@ vi.mock('@app/features/ui/commands/ToastCommands', () => ({
 vi.mock('@app/features/ui/commands/ModalCommands', () => ({
 	push: vi.fn((m) => (typeof m === 'function' ? m() : m)),
 	modal: vi.fn((fn) => fn),
+	getTopModalKey: vi.fn(() => 'import-modal-key'),
+	popWithKey: vi.fn(),
 }));
 
+import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PluralKitImportModal} from '@app/features/persona/components/modals/PluralKitImportModal';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
+import {PersonaImportApplyRequestSchema} from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
 import {zipSync} from 'fflate';
 
 describe('PluralKitImportModal Component', () => {
@@ -343,7 +348,7 @@ describe('PluralKitImportModal Component', () => {
 			await act(async () => {
 				importButton()?.click();
 			});
-			await settled(() => expect(document.body.textContent).toContain('Review before importing'));
+			await settled(() => expect(differsToggle('Sun')).toBeDefined());
 			expect(fetchSpy).not.toHaveBeenCalled();
 			expect(PersonaCommands.applyPersonaImport).not.toHaveBeenCalled();
 		}
@@ -356,7 +361,12 @@ describe('PluralKitImportModal Component', () => {
 			});
 			try {
 				await openReview(fetchSpy);
-				expect(document.body.textContent).toContain('Different in your file');
+				// Sun is listed collapsed, naming what differs and the safe choice.
+				const toggle = differsToggle('Sun')!;
+				expect(toggle.getAttribute('aria-expanded')).toBe('false');
+				expect(toggle.textContent).toContain('Bio');
+				expect(toggle.textContent).toContain("Keeping {productName}'s".replace('{productName}', PRODUCT_NAME));
+				expect(differsBody()).toBeNull();
 				expect(document.body.textContent).toContain('Import will {actions}'.replace('{actions}', 'add 1'));
 
 				await act(async () => {
@@ -376,6 +386,84 @@ describe('PluralKitImportModal Component', () => {
 			}
 		});
 
+		it("opens a differing persona to compare, and takes the file's version when chosen", async () => {
+			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
+				const results = Object.fromEntries(body.urls.map((url) => [url, {avatar_hash: 'eeeeeeee'}]));
+				return new Response(`${JSON.stringify({type: 'complete', total: body.urls.length, results})}\n`, {status: 200});
+			});
+			try {
+				await openReview(fetchSpy);
+				await act(async () => {
+					differsToggle('Sun')!.click();
+				});
+				expect(differsToggle('Sun')!.getAttribute('aria-expanded')).toBe('true');
+				expect(differsBody()?.getAttribute('aria-label')).toContain('Sun is different in your file');
+				const useFile = Array.from(document.body.querySelectorAll<HTMLInputElement>('input[name="import-0"]'))[0]!;
+				await act(async () => {
+					useFile.click();
+				});
+				expect(differsToggle('Sun')!.textContent).toContain("Using the file's");
+
+				// Closed again, the choice stays.
+				await act(async () => {
+					differsToggle('Sun')!.click();
+				});
+				expect(differsBody()).toBeNull();
+				expect(differsToggle('Sun')!.textContent).toContain("Using the file's");
+
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+				expect(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]?.[0].actions).toEqual(
+					expect.arrayContaining([expect.objectContaining({action: 'use_file', persona_id: '100000000000000001'})]),
+				);
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
+		it('asks before closing the review, and closes only this dialog when told to stop', async () => {
+			const fetchSpy = vi.spyOn(globalThis, 'fetch');
+			const onClose = vi.fn();
+			try {
+				await act(async () => {
+					root.render(
+						<PluralKitImportModal
+							onClose={onClose}
+							data-flx="persona.plural-kit-import-modal-test.plural-kit-import-modal--close"
+						/>,
+					);
+				});
+				await chooseFile(file(), 'Total Members2');
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(differsToggle('Sun')).toBeDefined());
+				vi.mocked(ModalCommands.push).mockClear();
+
+				await act(async () => {
+					document.querySelector<HTMLButtonElement>('[data-flx="app.modal.header.button.close"]')?.click();
+				});
+				expect(onClose).not.toHaveBeenCalled();
+				expect(ModalCommands.push).toHaveBeenCalledTimes(1);
+				expect(differsToggle('Sun')).toBeDefined();
+
+				// "Stop importing" closes the import dialog by its own key (the confirmation closes itself).
+				const confirm = vi.mocked(ModalCommands.push).mock.results[0]?.value as React.ReactElement<{
+					title: string;
+					onPrimary: () => void;
+				}>;
+				expect(confirm.props.title).toBe('Stop this import?');
+				confirm.props.onPrimary();
+				expect(ModalCommands.popWithKey).toHaveBeenCalledWith('import-modal-key');
+				expect(PersonaCommands.applyPersonaImport).not.toHaveBeenCalled();
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
 		it('stays on the review when the import is refused', async () => {
 			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
 				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
@@ -389,11 +477,90 @@ describe('PluralKitImportModal Component', () => {
 					importButton()?.click();
 				});
 				await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
-				await settled(() => expect(document.body.textContent).toContain('Review before importing'));
+				await settled(() => expect(differsToggle('Sun')).toBeDefined());
 				expect(document.body.textContent).not.toContain('personas added');
 			} finally {
 				fetchSpy.mockRestore();
 			}
+		});
+	});
+
+	describe('a member whose tag is taken', () => {
+		beforeEach(() => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [
+					{index: 0, kind: 'tag_in_use', clashes: [{tag: {prefix: 'ly:'}, held_by_persona_id: '100000000000000009'}]},
+				],
+				personas: [
+					{
+						id: '100000000000000009',
+						name: 'Lyra ✦',
+						persona_tags: [{prefix: 'ly:'}],
+						signature_emojis: [],
+						use_count: 88,
+						visibility: 'public',
+						auto_tag_disabled: false,
+						created_at: '2026-09-01T00:00:00.000Z',
+						updated_at: '2026-09-01T00:00:00.000Z',
+					},
+				],
+				display_tag: {decision: 'none', current_text: null},
+				untouched: 0,
+				needs_review: true,
+			});
+		});
+
+		it('is left out by default, and added with the suggested tag or one typed in its place', async () => {
+			const file = new File(
+				[JSON.stringify({members: [{id: 'ccccc', name: 'Lyra ✧', proxy_tags: [{prefix: 'ly:'}], privacy: PUBLIC}]})],
+				'pk.json',
+				{type: 'application/json'},
+			);
+			await act(async () => {
+				root.render(
+					<PluralKitImportModal onClose={vi.fn()} data-flx="persona.plural-kit-import-modal-test.tag-taken" />,
+				);
+			});
+			await chooseFile(file, 'Total Members1');
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(document.body.textContent).toContain("Lyra ✧'s tag is already taken"));
+			const field = document.body.querySelector('input[type="text"][id^="import-tag-"]') as HTMLInputElement;
+			expect(field.value).toBe('lyr:');
+			const [leaveOut, addOwn] = Array.from(document.body.querySelectorAll<HTMLInputElement>('input[name="import-0"]'));
+			expect(leaveOut?.checked).toBe(true);
+			expect(addOwn?.checked).toBe(false);
+
+			// Typing a tag picks "add with a tag of its own"; a taken one is flagged.
+			const type = async (value: string) => {
+				await act(async () => {
+					const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+					setter.call(field, value);
+					field.dispatchEvent(new Event('input', {bubbles: true}));
+				});
+			};
+			await type('ly:');
+			expect(document.body.textContent).toContain('Lyra ✦ already has it');
+			await type('lyx:');
+			expect(document.body.textContent).not.toContain('already has it');
+			expect(addOwn?.checked).toBe(true);
+
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+			const [action] = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions;
+			expect(action).toMatchObject({
+				action: 'add',
+				item: {name: 'Lyra ✧', persona_tags: [{prefix: 'lyx:'}]},
+			});
+			expect(action).not.toHaveProperty('drop_tags');
+			// Regression: the whole request passes the API's schema (an empty suffix "" used to fail it).
+			expect(
+				PersonaImportApplyRequestSchema.safeParse(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0])
+					.success,
+			).toBe(true);
 		});
 	});
 
@@ -405,6 +572,17 @@ describe('PluralKitImportModal Component', () => {
 			fileInput.dispatchEvent(new Event('change', {bubbles: true}));
 		});
 		await settled(() => expect(document.body.textContent).toContain(summaryText));
+	}
+
+	// The collapsed row of a persona that differs from the file.
+	function differsToggle(name: string): HTMLButtonElement | undefined {
+		return Array.from(
+			document.body.querySelectorAll<HTMLButtonElement>('[data-flx="persona.persona-import-review.differs.toggle"]'),
+		).find((button) => button.textContent?.includes(name));
+	}
+
+	function differsBody(): HTMLElement | null {
+		return document.body.querySelector('[data-flx="persona.persona-import-review.differs.body"]');
 	}
 
 	function importButton(): HTMLButtonElement | undefined {
