@@ -767,7 +767,7 @@
 	font-size: 18px;
 	font-weight: 600;
 	min-width: 32px;
-	text-align: right;
+	text-align: end;
 	font-variant-numeric: tabular-nums;
 	color: var(--text-primary);
 }
