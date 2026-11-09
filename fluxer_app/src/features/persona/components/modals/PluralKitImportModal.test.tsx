@@ -691,7 +691,7 @@ describe('PluralKitImportModal Component', () => {
 			});
 		});
 
-		it('is left out by default, and added with the suggested tag or one typed in its place', async () => {
+		it('is skipped by default, and kept with the suggested tag or one typed in its place', async () => {
 			const file = new File(
 				[JSON.stringify({members: [{id: 'ccccc', name: 'Lyra ✧', proxy_tags: [{prefix: 'ly:'}], privacy: PUBLIC}]})],
 				'pk.json',
@@ -706,14 +706,26 @@ describe('PluralKitImportModal Component', () => {
 			await act(async () => {
 				importButton()?.click();
 			});
-			await settled(() => expect(document.body.textContent).toContain("Lyra ✧'s tag is already taken"));
+			const toggle = () =>
+				document.body.querySelector<HTMLButtonElement>('[data-flx="persona.persona-import-review.taken.toggle"]');
+			await settled(() => expect(toggle()?.textContent).toContain('Lyra ✧'));
+			expect(toggle()?.textContent).toContain('Skipping');
+			await act(async () => {
+				toggle()!.click();
+			});
+			expect(document.body.textContent).toContain('already belongs to your persona Lyra ✦');
+			const [skip, keep] = Array.from(document.body.querySelectorAll<HTMLInputElement>('input[name="import-0"]'));
+			expect(skip?.checked).toBe(true);
+			expect(document.body.querySelector('input[id^="import-tag-"]')).toBeNull();
+
+			// Keep: the name stays (no other persona has it) and the tag field starts on a free one.
+			await act(async () => {
+				keep!.click();
+			});
+			expect(toggle()?.textContent).toContain('Keeping');
+			expect(document.body.querySelector<HTMLInputElement>('#import-copy-name-0')?.value).toBe('Lyra ✧');
 			const field = document.body.querySelector('input[type="text"][id^="import-tag-"]') as HTMLInputElement;
 			expect(field.value).toBe('lyr:');
-			const [leaveOut, addOwn] = Array.from(document.body.querySelectorAll<HTMLInputElement>('input[name="import-0"]'));
-			expect(leaveOut?.checked).toBe(true);
-			expect(addOwn?.checked).toBe(false);
-
-			// Typing a tag picks "add with a tag of its own"; a taken one is flagged.
 			const type = async (value: string) => {
 				await act(async () => {
 					const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
@@ -725,16 +737,16 @@ describe('PluralKitImportModal Component', () => {
 			expect(document.body.textContent).toContain('Lyra ✦ already has it');
 			await type('lyx:');
 			expect(document.body.textContent).not.toContain('already has it');
-			expect(addOwn?.checked).toBe(true);
 
 			await act(async () => {
 				importButton()?.click();
 			});
 			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
 			const [action] = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions;
+			// Added as a new persona linked to its member, with the new tag in place of the taken one.
 			expect(action).toMatchObject({
 				action: 'add',
-				item: {name: 'Lyra ✧', persona_tags: [{prefix: 'lyx:'}]},
+				item: {name: 'Lyra ✧', persona_tags: [{prefix: 'lyx:'}], external_uuid: 'ccccc'},
 			});
 			expect(action).not.toHaveProperty('drop_tags');
 			// Regression: the whole request passes the API's schema (an empty suffix "" used to fail it).
