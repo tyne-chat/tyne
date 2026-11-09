@@ -141,7 +141,7 @@
 .tooltipPinnedBadge {
 	position: absolute;
 	top: -0.1875rem;
-	right: -0.375rem;
+	inset-inline-end: -0.375rem;
 	display: flex;
 	align-items: center;
 	justify-content: center;
