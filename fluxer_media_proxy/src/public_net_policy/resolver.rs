@@ -48,7 +48,8 @@ impl Resolve for PinnedDnsResolver {
             let looked_up = lookup_host((host.as_str(), 0))
                 .await
                 .map_err(|_| ResolveError::LookupFailed)?;
-            let resolved = screen_resolved_addresses(looked_up)?;
+            let resolved =
+                super::fork_dev_private_hosts::screen_resolved_addresses_for(&host, looked_up)?;
             Ok(Box::new(resolved.into_iter()) as Addrs)
         })
     }
