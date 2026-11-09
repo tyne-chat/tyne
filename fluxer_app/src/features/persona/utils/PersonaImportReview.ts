@@ -25,6 +25,7 @@ import {
 	type PluralKitImportedMember,
 	personaImportItem,
 	type TyneBundleMemberEntry,
+	tyneMediaLinkHash,
 } from '@fluxer/schema/src/domains/persona/PluralKitFormat';
 
 /** A member of the file with a name, as the preview and the apply see it. Unnamed members are left out. */
@@ -107,11 +108,13 @@ export function allPictures(members: ReadonlyArray<ReviewMember>): Map<number, {
  */
 export type ReviewDecision =
 	| {choice: 'keep'}
-	| {choice: 'use_file'}
+	/** `personaId`: a persona the review asked about, connected to the member by the same action. */
+	| {choice: 'use_file'; personaId?: string}
 	| {choice: 'restore'}
 	| {choice: 'link'; personaId: string}
 	| {choice: 'add'; withTags: boolean; replacements?: ReadonlyArray<PersonaTag>; copy?: PersonaCopy}
-	| {choice: 'skip'};
+	/** `none`: the member was said to be none of the personas the review asked about. */
+	| {choice: 'skip'; none?: boolean};
 
 /**
  * The file's version of a persona, added under a name and tags of its own: next to Tyne's version of a
@@ -121,6 +124,10 @@ export interface PersonaCopy {
 	name: string;
 	/** Added linked to its member, as a new member is; otherwise unlinked, leaving the link where it is. */
 	linked?: boolean;
+	/** A persona the review asked about, connected to the member as it is while the copy is added. */
+	connectTo?: string;
+	/** A deleted persona brought back as it was while the copy is added. */
+	restore?: string;
 	/** The file's tags another persona keeps; `replacements` stand in their place. */
 	replacedTags: ReadonlyArray<PersonaTag>;
 	/** The file's signature emojis another persona keeps, left off the copy. */
@@ -290,9 +297,10 @@ function tagStates(
 		if (!member) continue;
 		const fileTags = member.preview.persona_tags ?? [];
 		const fileEmojis = fromTyne ? (member.preview.signature_emojis ?? []) : [];
-		if (decision.choice === 'use_file' && entry.persona_id) {
-			const current = tags.get(entry.persona_id);
-			tags.set(entry.persona_id, {
+		const usedId = decision.choice === 'use_file' ? (decision.personaId ?? entry.persona_id) : undefined;
+		if (decision.choice === 'use_file' && usedId) {
+			const current = tags.get(usedId);
+			tags.set(usedId, {
 				name: member.preview.name,
 				tags: fileTags,
 				emojis: fromTyne ? fileEmojis : (current?.emojis ?? []),
@@ -475,6 +483,8 @@ export function keepBothDecision(
 	livePersonas: ReadonlyArray<LivePersona>,
 	fromTyne: boolean,
 	linked = false,
+	/** A persona not live yet that keeps its name and tags too: a deleted one brought back. */
+	alsoKept?: Pick<PersonaResponse, 'name' | 'persona_tags' | 'signature_emojis'>,
 ): ReviewDecision {
 	const member = members[entry.index];
 	if (!member) return {choice: 'keep'};
@@ -484,6 +494,13 @@ export function keepBothDecision(
 	const others = [...tagStates(entries, kept, members, livePersonas, fromTyne)]
 		.filter(([owner]) => owner !== `member:${entry.index}`)
 		.map(([, state]) => state);
+	if (alsoKept) {
+		others.push({
+			name: alsoKept.name,
+			tags: [...(alsoKept.persona_tags ?? [])],
+			emojis: [...(alsoKept.signature_emojis ?? [])],
+		});
+	}
 	const held = (tag: PersonaTag) => others.some((state) => state.tags.some((t) => tagKey(t) === tagKey(tag)));
 	const replacedTags = (member.preview.persona_tags ?? []).filter(held);
 	const replacements: Array<PersonaTag> = [];
@@ -507,6 +524,24 @@ export function keepBothDecision(
 	};
 }
 
+/**
+ * Whether the file's picture is the very file a persona has: the hash a Tyne media link names, or the
+ * hash of the copy stored from the file (exact matches only, tyne-chat/tyne#572).
+ */
+export function samePictureFile(
+	member: ReviewMember,
+	entry: PersonaImportPreviewEntry,
+	kind: 'avatar' | 'banner',
+	personaHash: string | null | undefined,
+): boolean {
+	if (!personaHash) return false;
+	const plain = (hash: string) => hash.replace(/^a_/, '');
+	const url = kind === 'avatar' ? member.member.avatarUrl : member.member.bannerUrl;
+	const linked = url ? tyneMediaLinkHash(url, kind) : null;
+	const stored = kind === 'avatar' ? entry.avatar_hash : entry.banner_hash;
+	return [linked, stored].some((hash) => hash && plain(hash) === plain(personaHash));
+}
+
 /** Which of a member's pictures have to be stored before applying its choice. */
 export function picturesNeeded(
 	entry: PersonaImportPreviewEntry,
@@ -514,6 +549,9 @@ export function picturesNeeded(
 ): {avatar: boolean; banner: boolean} {
 	if (decision.choice === 'add') return {avatar: true, banner: true};
 	if (decision.choice !== 'use_file') return {avatar: false, banner: false};
+	// A persona the review asked about has no compared differences: the file's pictures are taken, unless
+	// the same file (checked when the actions are built).
+	if (decision.personaId) return {avatar: true, banner: true};
 	const changes = (field: 'avatar' | 'banner') =>
 		(entry.differences ?? []).some((d) => d.field === field && (d.change === 'changed' || d.change === 'not_compared'));
 	return {avatar: changes('avatar'), banner: changes('banner')};
@@ -532,7 +570,10 @@ export function buildActions(
 	decisions: ReadonlyMap<number, ReviewDecision>,
 	members: ReadonlyArray<ReviewMember>,
 	stored: ReadonlyMap<number, StoredPictures>,
+	/** The personas the preview named, for the pictures of one the review asked about. */
+	personas: ReadonlyArray<Pick<PersonaResponse, 'id' | 'avatar_hash' | 'banner_hash'>> = [],
 ): Array<PersonaImportAction> {
+	const byId = new Map(personas.map((persona) => [persona.id, persona]));
 	const actions: Array<PersonaImportAction> = [];
 	for (const entry of entries) {
 		const decision = decisions.get(entry.index) ?? defaultDecision(entry);
@@ -557,6 +598,12 @@ export function buildActions(
 							...(decision.copy.linked ? {} : {external_uuid: null}),
 						}
 					: base;
+				// Keep both for a persona the review asked about: it is connected as it is, and the copy added;
+				// for a deleted one, it is brought back as it was.
+				if (decision.copy?.connectTo && member.member.id) {
+					actions.push({action: 'link', persona_id: decision.copy.connectTo, external_uuid: member.member.id});
+				}
+				if (decision.copy?.restore) actions.push({action: 'restore', persona_id: decision.copy.restore});
 				actions.push({
 					action: 'add',
 					item: replaced
@@ -574,16 +621,21 @@ export function buildActions(
 				if (entry.persona_id) actions.push({action: 'restore', persona_id: entry.persona_id});
 				break;
 			case 'use_file': {
-				if (!entry.persona_id) break;
+				const personaId = decision.personaId ?? entry.persona_id;
+				if (!personaId) break;
 				const needed = picturesNeeded(entry, decision);
 				const fileHas = {avatar: Boolean(member.preview.avatar), banner: Boolean(member.preview.banner)};
+				const asked = decision.personaId ? byId.get(decision.personaId) : undefined;
+				const same = (kind: 'avatar' | 'banner') =>
+					Boolean(asked) &&
+					samePictureFile(member, entry, kind, kind === 'avatar' ? asked?.avatar_hash : asked?.banner_hash);
 				actions.push({
 					action: 'use_file',
-					persona_id: entry.persona_id,
+					persona_id: personaId,
 					item: item(),
 					// A picture that is the same already, or that could not be stored, stays as it is.
-					keep_avatar: fileHas.avatar && (!needed.avatar || (pictures?.avatarFailed ?? false)),
-					keep_banner: fileHas.banner && (!needed.banner || (pictures?.bannerFailed ?? false)),
+					keep_avatar: fileHas.avatar && (!needed.avatar || same('avatar') || (pictures?.avatarFailed ?? false)),
+					keep_banner: fileHas.banner && (!needed.banner || same('banner') || (pictures?.bannerFailed ?? false)),
 				});
 				break;
 			}
