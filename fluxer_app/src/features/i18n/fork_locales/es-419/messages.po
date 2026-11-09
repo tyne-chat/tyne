@@ -81,6 +81,10 @@ msgstr "Agregar {name} con una etiqueta propia"
 msgid "Added"
 msgstr "Agregadas"
 
+#. What happens to the import file's version of a persona in the import review
+msgid "Added as a new persona"
+msgstr "Se agrega como persona nueva"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "Alicia"
@@ -165,10 +169,6 @@ msgstr "Recuperar a {name}"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "Volvió sin {items}: ahora los tiene otra persona."
-
-#. Comparison of a persona picture with the import file: it can't be compared
-msgid "Can't compare"
-msgstr "No se puede comparar"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -258,6 +258,7 @@ msgstr "Vinculadas a sus miembros del archivo. No cambió nada en ellas."
 msgid "Copy timestamp"
 msgstr "Copiar marca de tiempo\\"
 
+#. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "No se pudieron exportar tus personas."
@@ -352,10 +353,6 @@ msgstr "Eliminada el {date}"
 
 msgid "Detected System Name / Tag"
 msgstr "Nombre / etiqueta del sistema detectados"
-
-#. Comparison of a persona picture with the import file: they differ
-msgid "Different picture"
-msgstr "Imagen distinta"
 
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
@@ -596,6 +593,10 @@ msgstr "Obtener Tyne en TestFlight"
 msgid "Get the Tyne app"
 msgstr "Descarga la aplicación de Tyne"
 
+#. What happens to the app's version of a persona in the import review when the file's version is used
+msgid "Gets overwritten"
+msgstr "Se sobrescribe"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "Esto es lo que cambió"
@@ -642,12 +643,17 @@ msgid "Import finished"
 msgstr "Importación terminada"
 
 #. Title of the persona import dialog
+#. Title of the persona import dialog
 msgid "Import personas"
 msgstr "Importar personas"
 
 #. Summary in the import review footer when every choice leaves things as they are
 msgid "Import will change nothing"
 msgstr "La importación no cambiará nada"
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Import will never overwrite existing personas without your permission."
+msgstr "La importación nunca sobrescribirá personas existentes sin tu permiso."
 
 #. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
 msgid "Import will {actions}"
@@ -656,10 +662,6 @@ msgstr "La importación va a {actions}"
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Importando personas..."
-
-#. Information line in the persona import dialog, above the Import button
-msgid "Importing never changes or removes a persona you already have unless you choose it. New members are added straight away. If any member might match or clash with one of your personas, you'll review it before anything is imported."
-msgstr "Importar nunca cambia ni elimina una persona que ya tienes, a menos que lo elijas. Los miembros nuevos se agregan directamente. Si algún miembro puede coincidir o chocar con una de tus personas, lo revisarás antes de que se importe nada."
 
 msgid "Importing..."
 msgstr "Importando..."
@@ -703,6 +705,10 @@ msgstr "¿Es {name}, de tu archivo, una de estas personas de {productName}?"
 msgid "Its script has a problem."
 msgstr "El script del comando tiene un problema."
 
+#. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
+msgid "Keep both"
+msgstr "Conservar las dos"
+
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "Seguir revisando"
@@ -711,9 +717,9 @@ msgstr "Seguir revisando"
 msgid "Keep {productName}'s"
 msgstr "Conservar la de {productName}"
 
-#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
-msgid "Keep {productName}'s {name}"
-msgstr "Conservar {name} de {productName}"
+#. Badge on a collapsed persona in the import review: the file's version is added next to the app's
+msgid "Keeping both"
+msgstr "Se quedan las dos"
 
 #. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
 msgid "Keeping {productName}'s"
@@ -834,10 +840,6 @@ msgstr "Nuevo comando"
 msgid "New personas from your file."
 msgstr "Personas nuevas de tu archivo."
 
-#. Shown instead of a picture from the import file, which isn't loaded until it is stored on this server
-msgid "New picture in the file, shown once imported"
-msgstr "Imagen nueva en el archivo; se mostrará al importar"
-
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
 msgstr "Nueva ventana"
@@ -919,6 +921,10 @@ msgstr "Nadie tiene esta señal activada"
 #. Shown in one’s own Personas list when none of them is public.
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Ninguna de tus personas es pública todavía. Los demás ven una persona aquí cuando cambias su visibilidad a Pública."
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Not imported"
+msgstr "No se importa"
 
 #. Choice in the import review: do nothing with this member of the import file. {name} is its name
 msgid "Not sure: leave {name} out this time"
@@ -1198,6 +1204,10 @@ msgstr "Eliminar emoji distintivo"
 msgid "Remove tag pair"
 msgstr "Quitar par de etiquetas"
 
+#. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
+msgid "Replaces {productName}'s {name}"
+msgstr "Reemplaza a {name} de {productName}"
+
 #. Why an image could not be imported when the server answered with HTTP status {status}
 msgid "Request failed (HTTP {status})"
 msgstr "La solicitud falló (HTTP {status})"
@@ -1251,10 +1261,6 @@ msgstr "Mismo nombre y etiqueta"
 #. Choice on a persona's card in the import review: the member of the import file is this persona
 msgid "Same persona as this one"
 msgstr "La misma persona que esta"
-
-#. Comparison of a persona picture with the import file: they are the same
-msgid "Same picture"
-msgstr "Misma imagen"
 
 #. Why a persona in the import review may be the member: same proxy tag
 msgid "Same tag"
@@ -1391,6 +1397,10 @@ msgstr "Se omitió un miembro porque no tiene un nombre configurado."
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Se omitieron algunas etiquetas de proxy: {productName} permite hasta 5 por persona, de 32 caracteres como máximo cada una."
 
+#. What happens to the app's version of a persona in the import review
+msgid "Stays as it is"
+msgstr "Se queda como está"
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "Siguen eliminadas"
@@ -1474,6 +1484,10 @@ msgstr "El archivo elegido no es un objeto JSON válido."
 #. Error in Settings › Personas when the list of deleted personas fails to load
 msgid "The deleted personas could not be loaded."
 msgstr "No se pudieron cargar las personas eliminadas."
+
+#. Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown
+msgid "The file's picture couldn't be loaded"
+msgstr "No se pudo cargar la imagen del archivo"
 
 #. Help for a command script variable.
 msgid "The first person they mention, if any"
@@ -1603,10 +1617,6 @@ msgstr "Activar barra de señales"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne se abre solo. Inicia sesión y listo."
 
-#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
-msgid "Type {example} to post as {name}"
-msgstr "Escribe {example} para enviar como {name}"
-
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Escribe {output} o {tag} para ver sugerencias."
@@ -1657,6 +1667,10 @@ msgstr "Usar /{name}"
 msgid "Use /{name} from {community}"
 msgstr "Usar /{name} de {community}"
 
+#. Shown after pressing Import in the persona import dialog, before anything happens
+msgid "Use Export to make a backup before continuing."
+msgstr "Usa Exportar para hacer una copia de seguridad antes de continuar."
+
 #. Permission description in the channel permissions editor for the Use external commands permission.
 msgid "Use commands from other communities in this channel."
 msgstr "Usar comandos de otras comunidades en este canal."
@@ -1689,13 +1703,18 @@ msgstr "Usar el editor básico"
 msgid "Use the file's"
 msgstr "Usar la del archivo"
 
-#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
-msgid "Use the file's {name}"
-msgstr "Usar {name} del archivo"
+#. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
+msgctxt "persona-import-switch"
+msgid "Use the file's"
+msgstr "Usar la del archivo"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "Usar el editor de scripts"
+
+#. Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name
+msgid "Use {productName}'s"
+msgstr "Usar la de {productName}"
 
 #. Badge on a collapsed persona in the import review: the import file's version replaces it
 msgid "Using the file's"

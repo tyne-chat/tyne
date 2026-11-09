@@ -81,6 +81,10 @@ msgstr "為 {name} 設定專屬標籤並新增"
 msgid "Added"
 msgstr "已新增"
 
+#. What happens to the import file's version of a persona in the import review
+msgid "Added as a new persona"
+msgstr "作為新人格新增"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "愛麗絲"
@@ -165,10 +169,6 @@ msgstr "還原 {name}"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "還原時缺少 {items}：它們現在屬於另一個人格。"
-
-#. Comparison of a persona picture with the import file: it can't be compared
-msgid "Can't compare"
-msgstr "無法比較"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -258,6 +258,7 @@ msgstr "已與檔案中對應的成員連結。它們沒有任何變更。"
 msgid "Copy timestamp"
 msgstr "複製時間戳記\\"
 
+#. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "無法匯出你的人格。"
@@ -352,10 +353,6 @@ msgstr "刪除於 {date}"
 
 msgid "Detected System Name / Tag"
 msgstr "偵測到的系統名稱 / 標籤"
-
-#. Comparison of a persona picture with the import file: they differ
-msgid "Different picture"
-msgstr "圖片不同"
 
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
@@ -596,6 +593,10 @@ msgstr "在 TestFlight 中取得 Tyne"
 msgid "Get the Tyne app"
 msgstr "取得 Tyne 應用程式"
 
+#. What happens to the app's version of a persona in the import review when the file's version is used
+msgid "Gets overwritten"
+msgstr "將被覆寫"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "以下是變更內容"
@@ -642,12 +643,17 @@ msgid "Import finished"
 msgstr "匯入完成"
 
 #. Title of the persona import dialog
+#. Title of the persona import dialog
 msgid "Import personas"
 msgstr "匯入人格"
 
 #. Summary in the import review footer when every choice leaves things as they are
 msgid "Import will change nothing"
 msgstr "匯入不會變更任何內容"
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Import will never overwrite existing personas without your permission."
+msgstr "未經你的允許，匯入絕不會覆寫現有的人格。"
 
 #. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
 msgid "Import will {actions}"
@@ -656,10 +662,6 @@ msgstr "匯入將{actions}"
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "正在匯入人格..."
-
-#. Information line in the persona import dialog, above the Import button
-msgid "Importing never changes or removes a persona you already have unless you choose it. New members are added straight away. If any member might match or clash with one of your personas, you'll review it before anything is imported."
-msgstr "除非你選擇，否則匯入絕不會變更或移除你已有的人格。新成員會直接新增。如果有成員可能與你的某個人格相符或衝突，你會在匯入任何內容之前先進行檢閱。"
 
 msgid "Importing..."
 msgstr "正在匯入..."
@@ -703,6 +705,10 @@ msgstr "你檔案中的 {name} 是 {productName} 中的這些人格之一嗎？"
 msgid "Its script has a problem."
 msgstr "它的腳本有問題。"
 
+#. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
+msgid "Keep both"
+msgstr "兩個都保留"
+
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "繼續檢查"
@@ -711,9 +717,9 @@ msgstr "繼續檢查"
 msgid "Keep {productName}'s"
 msgstr "保留 {productName} 的"
 
-#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
-msgid "Keep {productName}'s {name}"
-msgstr "保留 {productName} 的 {name}"
+#. Badge on a collapsed persona in the import review: the file's version is added next to the app's
+msgid "Keeping both"
+msgstr "保留兩者"
 
 #. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
 msgid "Keeping {productName}'s"
@@ -834,10 +840,6 @@ msgstr "新增指令"
 msgid "New personas from your file."
 msgstr "來自你檔案的新人格。"
 
-#. Shown instead of a picture from the import file, which isn't loaded until it is stored on this server
-msgid "New picture in the file, shown once imported"
-msgstr "檔案中的新圖片，匯入後顯示"
-
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
 msgstr "新增視窗"
@@ -919,6 +921,10 @@ msgstr "還沒有人開啟此訊號"
 #. Shown in one’s own Personas list when none of them is public.
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "你還沒有公開的人格。將人格的可見度設為「公開」後，其他人就能在這裡看到它。"
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Not imported"
+msgstr "不匯入"
 
 #. Choice in the import review: do nothing with this member of the import file. {name} is its name
 msgid "Not sure: leave {name} out this time"
@@ -1198,6 +1204,10 @@ msgstr "移除專屬表情符號"
 msgid "Remove tag pair"
 msgstr "移除標籤組"
 
+#. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
+msgid "Replaces {productName}'s {name}"
+msgstr "取代 {productName} 的 {name}"
+
 #. Why an image could not be imported when the server answered with HTTP status {status}
 msgid "Request failed (HTTP {status})"
 msgstr "請求失敗（HTTP {status}）"
@@ -1251,10 +1261,6 @@ msgstr "名稱和標籤相同"
 #. Choice on a persona's card in the import review: the member of the import file is this persona
 msgid "Same persona as this one"
 msgstr "就是這個人格"
-
-#. Comparison of a persona picture with the import file: they are the same
-msgid "Same picture"
-msgstr "圖片相同"
 
 #. Why a persona in the import review may be the member: same proxy tag
 msgid "Same tag"
@@ -1391,6 +1397,10 @@ msgstr "已略過成員，因為未設定名稱。"
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "部分代理標籤未匯入：{productName} 每個人格最多允許 5 個標籤，每個標籤最多 32 個字元。"
 
+#. What happens to the app's version of a persona in the import review
+msgid "Stays as it is"
+msgstr "保持不變"
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "仍為已刪除"
@@ -1474,6 +1484,10 @@ msgstr "所選檔案不是有效的 JSON 物件。"
 #. Error in Settings › Personas when the list of deleted personas fails to load
 msgid "The deleted personas could not be loaded."
 msgstr "無法載入已刪除的人格。"
+
+#. Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown
+msgid "The file's picture couldn't be loaded"
+msgstr "無法載入檔案中的圖片"
 
 #. Help for a command script variable.
 msgid "The first person they mention, if any"
@@ -1603,10 +1617,6 @@ msgstr "開啟訊號列"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne 會自動開啟。登入就完成了。"
 
-#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
-msgid "Type {example} to post as {name}"
-msgstr "輸入 {example} 即可以 {name} 的身分傳送"
-
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "輸入 {output} 或 {tag} 以查看建議。"
@@ -1657,6 +1667,10 @@ msgstr "使用 /{name}"
 msgid "Use /{name} from {community}"
 msgstr "使用 {community} 的 /{name}"
 
+#. Shown after pressing Import in the persona import dialog, before anything happens
+msgid "Use Export to make a backup before continuing."
+msgstr "繼續之前，請使用匯出功能進行備份。"
+
 #. Permission description in the channel permissions editor for the Use external commands permission.
 msgid "Use commands from other communities in this channel."
 msgstr "在此頻道中使用其他社群的指令。"
@@ -1689,13 +1703,18 @@ msgstr "使用基本編輯器"
 msgid "Use the file's"
 msgstr "使用檔案中的"
 
-#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
-msgid "Use the file's {name}"
-msgstr "使用檔案中的 {name}"
+#. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
+msgctxt "persona-import-switch"
+msgid "Use the file's"
+msgstr "使用檔案中的"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "使用腳本編輯器"
+
+#. Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name
+msgid "Use {productName}'s"
+msgstr "使用 {productName} 中的"
 
 #. Badge on a collapsed persona in the import review: the import file's version replaces it
 msgid "Using the file's"

@@ -227,28 +227,35 @@ sheet (`openPersonaGallery`); mobile web also has a button before the mutual fri
   change ends in a toast with Undo, one request that puts each persona back as it was. The
   `feature` subtab (the Personas tab's "Choose personas to feature") opens on Unlisted with Select on.
 - **Import** (tyne-chat/tyne#243): `PluralKitImportModal` reads PluralKit JSON or a Tyne zip
-  (`PersonaImportFile`) and has one Import button, no strategy to pick. It sends the members to
-  `previewPersonaImport` (one request, which changes nothing; links in the file go as links, or as
-  the hash when they point at this account's own media). When `needs_review` is false (every member
+  (`PersonaImportFile`) and has one Import button, no strategy to pick. It first stores every
+  picture in the file (`storeMemberPictures`: the zip's files, this account's own copies, or the
+  server's streamed download; a failure is not retried, and the result is kept for the file, so Back
+  and Import again stores nothing twice), then sends the members to `previewPersonaImport` (one
+  request, which changes nothing) with each stored picture's hash, so pictures are compared by hash
+  and the review shows the real ones (tyne-chat/tyne#567). When `needs_review` is false (every member
   new without a clash, or already identical) it applies at once; otherwise `PersonaImportReview`
   opens, laid out as "Pick a side" (tyne-chat/tyne#563): one line each at the top for what needs no
   decision (new members and the probably-the-same ones it connects, both untickable behind Show;
   those already identical; personas not in the file), then one question per member that needs a
   choice, hardest first (can't tell, tag in use, different in the file, deleted, then the display
   tag), each set off by a thin line, with the file's version on the left and Tyne's on the right:
-  the card is the choice and the other greys out. Personas different in the file are one list of
-  collapsed rows (what differs, and the current choice), each opened to pick a side. Every member
+  the card is the choice and the other greys out. Each card starts with the banner and avatar
+  together, as a profile card shows them; a picture that differs is marked, and avatar and banner
+  are not in the list of compared details. Personas different in the file are one list of
+  collapsed rows (what differs, and the current choice), each opened to a three-way switch over the
+  two versions: Use the file's, Keep both (the file's is added unlinked as a copy, "Name (2)" with a
+  free tag, both editable; `keepBothDecision`), Use Tyne's (tyne-chat/tyne#568). Every member
   starts on `defaultDecision`, the choice that changes nothing, and the footer says what Import will
   do. While the review is open, closing the dialog asks first (tyne-chat/tyne#564); while checking
   or importing it cannot be closed. A member whose tag
   another persona or member has can be added with a tag of its own (`replacements` on the add
   decision, sent in the action's item): the field starts on a free tag in the same style
   (`suggestTag`) and says who has one typed in (`tagHolder`). `findConflicts` blocks Import while two choices would give one tag to two
-  personas. Only then are pictures stored, for the members whose choice needs them
-  (`storeMemberPictures`: the zip's files, this account's own copies, or the server's streamed
-  download), and `applyPersonaImport` sends one action per member, written whole or not at all. A
-  link in the file is never stored or shown: the review shows a member's picture only from a stored
-  hash the preview returned or from the zip in memory, else a placeholder. The display tag is the
+  personas. `applyPersonaImport` then sends one action per member, written whole or not at all,
+  with the pictures stored before the review; a failed picture is reported only where the choice
+  used it. A link in the file is never shown: the review shows a member's picture only from a stored
+  hash the preview returned or from the zip in memory, else a placeholder and a note. Pictures stored
+  for members that end up skipped stay in storage unused. The display tag is the
   file's system tag, never the system's name; it is applied without asking only on an account with no
   personas and no display tag. The older `importPersonas` (with `replace`) stays in the commands for
   reference by older code paths only; the dialog no longer uses it.
