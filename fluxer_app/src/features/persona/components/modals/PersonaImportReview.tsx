@@ -1,26 +1,35 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// The review of an import (tyne-chat/tyne#243): one section per kind of decision, the hardest first,
-// each member on the safest choice until the person picks another. Nothing here writes; the dialog
-// applies the decisions. Pictures come only from this instance (a stored hash) or from the export's
-// zip in memory, never from a link in the file.
+// The review of an import (tyne-chat/tyne#243, laid out as "Pick a side", tyne-chat/tyne#563): what
+// needs no decision is one line each at the top; every member that needs one is a question with the
+// file's version on the left and Tyne's on the right, and the person taps the one Tyne should have.
+// Each member starts on the choice that changes nothing, and a sentence under it says what will
+// happen. Nothing here writes; the dialog applies the decisions. Pictures come only from this
+// instance (a stored hash) or from the export's zip in memory, never from a link in the file.
 
+import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
+import * as GalleryMessages from '@app/features/persona/utils/PersonaGalleryMessages';
 import type {PersonaImportSource} from '@app/features/persona/utils/PersonaImportFile';
 import {bundlePictureBytes} from '@app/features/persona/utils/PersonaImportImages';
 import {
 	defaultDecision,
 	heldTags,
+	parseTagInput,
 	type ReviewConflict,
 	type ReviewDecision,
 	type ReviewMember,
+	reviewNeedCount,
 	sharedTags,
+	suggestTag,
+	tagHolder,
+	tagInputText,
 } from '@app/features/persona/utils/PersonaImportReview';
-import {Button} from '@app/features/ui/button/Button';
 import Users from '@app/features/user/state/Users';
 import {getPersonaBannerURL} from '@app/features/user/utils/AvatarUtils';
 import type {PersonaResponse, PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {
+	PersonaImportCandidate,
 	PersonaImportField,
 	PersonaImportPreviewEntry,
 	PersonaImportPreviewResponse,
@@ -29,35 +38,21 @@ import {imageFileExtension} from '@fluxer/schema/src/domains/persona/PluralKitFo
 import type {MessageDescriptor} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
-import {CheckCircle, ShieldCheck, Warning} from '@phosphor-icons/react';
+import {
+	ArrowRightIcon,
+	CaretDownIcon,
+	ChatTeardropIcon,
+	CheckIcon,
+	FileTextIcon,
+	LinkSimpleIcon,
+	PlusIcon,
+	ShieldCheckIcon,
+} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 import styles from './PersonaImportReview.module.css';
-
-const FIELD_IN_SENTENCE: Record<PersonaImportField, MessageDescriptor> = {
-	name: msg({
-		message: 'name',
-		context: 'persona-field',
-		comment: 'A persona\'s name as a field, listed in "Differs: name, bio"',
-	}),
-	pronouns: msg({message: 'pronouns', comment: 'A persona field, listed in "Differs: name, pronouns"'}),
-	bio: msg({message: 'bio', comment: 'A persona field, listed in "Differs: name, bio"'}),
-	color: msg({message: 'colour', comment: 'A persona field (its accent colour), listed in "Differs: name, colour"'}),
-	persona_tags: msg({message: 'tags', comment: 'A persona field (its proxy tags), listed in "Differs: name, tags"'}),
-	avatar: msg({message: 'avatar', comment: 'A persona field, listed in "Differs: name, avatar"'}),
-	banner: msg({message: 'banner', comment: 'A persona field, listed in "Differs: name, banner"'}),
-	signature_emojis: msg({
-		message: 'signature emojis',
-		comment: 'A persona field, listed in "Differs: name, signature emojis"',
-	}),
-	auto_tag_disabled: msg({
-		message: 'tag matching',
-		comment: 'A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"',
-	}),
-	visibility: msg({message: 'visibility', comment: 'A persona field, listed in "Differs: name, visibility"'}),
-};
 
 const FIELD_HEADING: Record<PersonaImportField, MessageDescriptor> = {
 	name: msg({message: 'Name', comment: 'Row heading in the table comparing a persona with the import file'}),
@@ -81,28 +76,61 @@ const FIELD_HEADING: Record<PersonaImportField, MessageDescriptor> = {
 	}),
 };
 
-const NEED_LOOK_DESCRIPTOR = msg({
-	message: '{needCount, plural, one {# member needs a look} other {# members need a look}}',
-	comment: 'Heading of the import review. {needCount} is a number of members',
-});
-const NEED_LOOK_WITH_TAG_DESCRIPTOR = msg({
+const INTRO_MEMBERS_DESCRIPTOR = msg({
 	message:
-		'{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}',
-	comment: 'Heading of the import review when the display tag needs a choice too. {needCount} is a number of members',
+		'These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes.',
+	comment: 'Explanation at the top of the import review. {productName} is the app name',
 });
-const DIFFERS_DESCRIPTOR = msg({
-	message: 'Differs: {fields}',
-	comment: 'What differs between a persona and the import file. {fields} is a list such as "name, bio"',
+const INTRO_NONE_DESCRIPTOR = msg({
+	message: 'Not sure? Leave it as it is: nothing changes.',
+	comment: 'Explanation at the top of the import review when no member needs a choice, only the display tag',
 });
-const REMOVES_DESCRIPTOR = msg({
-	message: 'removes {fields}',
+const READY_NEW_DESCRIPTOR = msg({
+	message: '{count, plural, one {# new member will be added} other {# new members will be added}}',
+	comment: 'Line at the top of the import review. {count} is a number of members of the import file',
+});
+const READY_LINKED_DESCRIPTOR = msg({
+	message:
+		'{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}',
 	comment:
-		'Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list',
+		'Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number',
 });
-const PICTURE_NOT_COMPARED_DESCRIPTOR = msg({
-	message: 'picture not compared',
+const READY_SAME_DESCRIPTOR = msg({
+	message:
+		'{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}',
+	comment: 'Line at the top of the import review. {count} is a number, {productName} the app name',
+});
+const READY_UNTOUCHED_DESCRIPTOR = msg({
+	message:
+		"{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}",
+	comment: 'Line at the top of the import review. {count} is a number, {productName} the app name',
+});
+const SHOW_DESCRIPTOR = msg({
+	message: 'Show',
+	context: 'persona-import-list',
+	comment: 'Button that shows the list behind a line at the top of the import review',
+});
+const HIDE_DESCRIPTOR = msg({
+	message: 'Hide',
+	context: 'persona-import-list',
+	comment: 'Button that hides the list behind a line at the top of the import review again',
+});
+const ADD_TOGGLE_DESCRIPTOR = msg({
+	message: 'Add {name}',
+	comment: 'Accessible label of the checkbox that adds a new member of the import file. {name} is its name',
+});
+const CONNECT_TOGGLE_DESCRIPTOR = msg({
+	message: 'Connect {name}',
 	comment:
-		'Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from',
+		'Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name',
+});
+const YOUR_FILE_DESCRIPTOR = msg({
+	message: 'Your file',
+	comment: 'Column heading in the import review, above the import file side; the other column is the app name',
+});
+const FROM_FILE_DESCRIPTOR = msg({
+	message: 'From your file',
+	comment: 'Small line on a card in the import review showing a member of the import file',
 });
 const USED_TIMES_DESCRIPTOR = msg({
 	message: '{count, plural, one {Used once} other {Used # times}}',
@@ -111,72 +139,6 @@ const USED_TIMES_DESCRIPTOR = msg({
 const DELETED_ON_DESCRIPTOR = msg({
 	message: 'Deleted {date}',
 	comment: 'When a persona was deleted, in the import review. {date} is a date',
-});
-const SHOW_MORE_DESCRIPTOR = msg({
-	message: 'Show {count} more',
-	comment: 'Button that shows the rest of a list in the import review',
-});
-const SHOW_FEWER_DESCRIPTOR = msg({
-	message: 'Show fewer',
-	comment: 'Button that collapses a list in the import review again',
-});
-const COMPARE_DESCRIPTOR = msg({
-	message: 'Compare',
-	comment: 'Button that shows a persona next to its version in the import file',
-});
-const HIDE_COMPARISON_DESCRIPTOR = msg({
-	message: 'Hide comparison',
-	comment: 'Button that hides the comparison of a persona with the import file',
-});
-const KEEP_TYNE_DESCRIPTOR = msg({
-	message: 'Keep this version',
-	comment: "Choice in the import review: keep the persona as it is in this app, ignoring the import file's version",
-});
-const USE_FILE_DESCRIPTOR = msg({
-	message: "Use the file's version",
-	comment: "Choice in the import review: replace the persona's details with those in the import file",
-});
-const LEAVE_DELETED_DESCRIPTOR = msg({
-	message: 'Leave deleted',
-	comment: 'Choice in the import review for a persona that was deleted: keep it deleted',
-});
-const RESTORE_DESCRIPTOR = msg({
-	message: 'Restore',
-	comment: 'Choice in the import review: bring a deleted persona back, with its old messages',
-});
-const LINK_DESCRIPTOR = msg({
-	message: 'Link',
-	context: 'persona-import-choice',
-	comment:
-		'Choice in the import review: connect an existing persona to its member in the import file, changing nothing else',
-});
-const ADD_WITHOUT_TAG_DESCRIPTOR = msg({
-	message: 'Add without {tags}',
-	comment: 'Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}',
-});
-const ADD_SEPARATELY_DESCRIPTOR = msg({
-	message: 'Add as a separate persona',
-	comment: 'Choice in the import review: add the member as a new persona next to the existing one',
-});
-const SKIP_DESCRIPTOR = msg({
-	message: 'Skip this member',
-	comment: 'Choice in the import review: do nothing with this member of the import file',
-});
-const SKIP_SHORT_DESCRIPTOR = msg({
-	message: 'Skip',
-	comment: 'Choice in the import review, in a short menu: do nothing with this member of the import file',
-});
-const SAME_AS_DESCRIPTOR = msg({
-	message: 'Same as your {name}: link them',
-	comment: 'Choice in the import review: the member in the import file is the existing persona {name}; connect them',
-});
-const WHAT_TO_DO_DESCRIPTOR = msg({
-	message: 'What should happen to {name} from your file?',
-	comment: 'Heading of the choices for one member of the import file',
-});
-const WHAT_TO_DO_SHORT_DESCRIPTOR = msg({
-	message: 'What to do with {name}',
-	comment: 'Accessible label of the menu of choices for one persona in the import review',
 });
 const LINKED_ELSEWHERE_DESCRIPTOR = msg({
 	message: 'Linked to another PluralKit member',
@@ -202,35 +164,191 @@ const UNKNOWN_PICTURE_DESCRIPTOR = msg({
 	message: "Can't compare",
 	comment: "Comparison of a persona picture with the import file: it can't be compared",
 });
-const VISIBILITY_KEPT_DESCRIPTOR = msg({
-	message: "{visibility} (this app's is kept)",
+const NO_PRONOUNS_DESCRIPTOR = msg({
+	message: 'No pronouns',
+	comment: 'Shown in the import review where a persona or a member of the file has no pronouns',
+});
+const NO_TAGS_DESCRIPTOR = msg({
+	message: 'No tags',
+	comment: 'Shown in the import review where a persona or a member of the file has no proxy tags',
+});
+const NO_BIO_DESCRIPTOR = msg({
+	message: 'No bio',
+	comment: 'Shown in the import review where a persona or a member of the file has no bio',
+});
+const NOTHING_CHANGES_DESCRIPTOR = msg({
+	message: 'Nothing changes',
+	comment: 'Badge on the choice in the import review that leaves everything as it is',
+});
+const DIFFERS_QUESTION_DESCRIPTOR = msg({
+	message: '{name} is different in your file. Which one should {productName} have?',
 	comment:
-		"The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import",
+		'Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name',
 });
-const RESTORE_ALL_DESCRIPTOR = msg({
-	message: 'Restore all {count}',
-	comment: 'Button in the import review that restores every deleted persona listed',
+const DIFFERS_GROUP_DESCRIPTOR = msg({
+	message: '{count, plural, one {# persona is different in your file} other {# personas are different in your file}}',
+	comment:
+		'Heading in the import review over the list of personas whose details differ from the import file. {count} is how many',
 });
-const LINK_ALL_DESCRIPTOR = msg({
-	message: 'Link all {count}',
-	comment: 'Button in the import review that links every persona listed',
+const DIFFERS_HINT_DESCRIPTOR = msg({
+	message: "Each keeps {productName}'s version unless you open it and choose the file's.",
+	comment: 'Hint under the list of differing personas in the import review. {productName} is the app name',
 });
-const VISIBILITY_NAMES: Record<string, MessageDescriptor> = {
-	public: msg({message: 'Public', comment: 'Persona visibility'}),
-	unlisted: msg({message: 'Unlisted', comment: 'Persona visibility'}),
-	private: msg({message: 'Private', comment: 'Persona visibility'}),
+const KEEPING_TYNE_DESCRIPTOR = msg({
+	message: "Keeping {productName}'s",
+	comment:
+		"Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name",
+});
+const USING_FILE_DESCRIPTOR = msg({
+	message: "Using the file's",
+	comment: "Badge on a collapsed persona in the import review: the import file's version replaces it",
+});
+const USE_FILE_NAMED_DESCRIPTOR = msg({
+	message: "Use the file's {name}",
+	comment:
+		"Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name",
+});
+const KEEP_TYNE_NAMED_DESCRIPTOR = msg({
+	message: "Keep {productName}'s {name}",
+	comment:
+		"Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in \"Keep Tyne's Wren\"",
+});
+const CANT_TELL_QUESTION_DESCRIPTOR = msg({
+	message: 'Is {name} from your file one of these personas in {productName}?',
+	comment:
+		'Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name',
+});
+const SAME_PERSONA_DESCRIPTOR = msg({
+	message: 'Same persona as this one',
+	comment: "Choice on a persona's card in the import review: the member of the import file is this persona",
+});
+const MATCHED_ON_DESCRIPTORS: Record<PersonaImportCandidate['matched_on'], MessageDescriptor> = {
+	name: msg({message: 'Same name', comment: 'Why a persona in the import review may be the member: same name'}),
+	tag: msg({message: 'Same tag', comment: 'Why a persona in the import review may be the member: same proxy tag'}),
+	name_and_tag: msg({
+		message: 'Same name and tag',
+		comment: 'Why a persona in the import review may be the member: same name and proxy tag',
+	}),
+	tag_case: msg({
+		message: 'Similar tag',
+		comment: 'Why a persona in the import review may be the member: the proxy tags differ only in letter case',
+	}),
 };
+const ADD_DIFFERENT_DESCRIPTOR = msg({
+	message: 'A different persona: add it',
+	comment: 'Choice in the import review: the member of the file is someone else, add it as a new persona',
+});
+const NOT_SURE_SKIP_DESCRIPTOR = msg({
+	message: 'Not sure: leave {name} out this time',
+	comment: 'Choice in the import review: do nothing with this member of the import file. {name} is its name',
+});
+const TAG_TAKEN_QUESTION_DESCRIPTOR = msg({
+	message: "{name}'s tag is already taken",
+	comment:
+		'Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name',
+});
+const LEAVE_OUT_DESCRIPTOR = msg({
+	message: 'Leave {name} out this time',
+	comment: 'Choice in the import review: do nothing with this member of the import file. {name} is its name',
+});
+const ADD_OWN_TAG_DESCRIPTOR = msg({
+	message: 'Add {name} with a tag of its own',
+	comment: 'Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name',
+});
+const KEEPS_TAG_DESCRIPTOR = msg({
+	message: 'Keeps its tag',
+	comment: 'Small line on the card of the persona in the import review that already has the proxy tag',
+});
+const TAG_FIELD_DESCRIPTOR = msg({
+	message: 'Tag',
+	context: 'persona-import-field',
+	comment: 'Label of the field for a new proxy tag in the import review',
+});
+const TAG_INSTEAD_DESCRIPTOR = msg({
+	message: 'Instead of {tag}',
+	comment:
+		'Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces',
+});
+const TAG_FREE_DESCRIPTOR = msg({
+	message: 'Free',
+	context: 'persona-import-tag-status',
+	comment: 'Status beside the field for a new proxy tag in the import review: no persona has this tag',
+});
+const TAG_HELD_DESCRIPTOR = msg({
+	message: '{name} already has it',
+	comment: 'Status beside the field for a new proxy tag in the import review. {name} is the persona that has it',
+});
+const TAG_NONE_DESCRIPTOR = msg({
+	message: 'No tag: added without one',
+	comment: 'Status beside an empty field for a new proxy tag in the import review',
+});
+const TAG_EXAMPLE_DESCRIPTOR = msg({
+	message: 'Type {example} to post as {name}',
+	comment: 'Hint under the field for a new proxy tag in the import review. {example} is the tag around a word',
+});
+const DELETED_QUESTION_DESCRIPTOR = msg({
+	message: 'You deleted {name} in {productName} on {date}. Bring {name} back?',
+	comment:
+		'Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date',
+});
+const DELETED_QUESTION_NO_DATE_DESCRIPTOR = msg({
+	message: 'You deleted {name} in {productName}. Bring {name} back?',
+	comment:
+		'Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name',
+});
+const BRING_BACK_DESCRIPTOR = msg({
+	message: 'Bring {name} back',
+	comment: 'Switch on a deleted persona in the import review that restores it. {name} is its name',
+});
+const COMES_BACK_DESCRIPTOR = msg({
+	message: 'Comes back as it was, with its old messages',
+	comment: 'Small line on a deleted persona in the import review once it is set to come back',
+});
+const DISPLAY_TAG_QUESTION_DESCRIPTOR = msg({
+	message: "Your display tag shows after every persona's name. Which one should {productName} use?",
+	comment: 'Question in the import review when the import file has another display tag. {productName} is the app name',
+});
+const USE_FILES_TAG_DESCRIPTOR = msg({
+	message: "Use the file's",
+	comment: "Choice on the import file's card in the import review: use the file's display tag",
+});
+const KEEP_TYNES_TAG_DESCRIPTOR = msg({
+	message: "Keep {productName}'s",
+	comment: "Choice on the app's card in the import review: keep the display tag. {productName} is the app name",
+});
+const NO_DISPLAY_TAG_DESCRIPTOR = msg({
+	message: 'No display tag',
+	comment: 'Shown on a card in the import review when the account has no display tag',
+});
 
 function tagText(tag: PersonaTag): string {
 	return `${(tag.prefix ?? '').trim()}text${(tag.suffix ?? '').trim()}`;
 }
 
-function Tags({tags}: {tags: ReadonlyArray<PersonaTag> | null | undefined}) {
+function listFormat(locale: string, items: ReadonlyArray<string>): string {
+	try {
+		return new Intl.ListFormat(locale, {type: 'conjunction', style: 'narrow'}).format(items);
+	} catch {
+		return items.join(', ');
+	}
+}
+
+function Tags({
+	tags,
+	highlight,
+}: {
+	tags: ReadonlyArray<PersonaTag> | null | undefined;
+	highlight?: ReadonlySet<string>;
+}) {
 	if (!tags || tags.length === 0) return null;
 	return (
-		<span data-flx="persona.persona-import-review.tags.span">
+		<span className={styles.tags} data-flx="persona.persona-import-review.tags.span">
 			{tags.map((tag) => (
-				<code key={tagText(tag)} className={styles.tag} data-flx="persona.persona-import-review.tags.tag">
+				<code
+					key={tagText(tag)}
+					className={clsx(styles.tag, highlight?.has(tagText(tag)) && styles.tagClash)}
+					data-flx="persona.persona-import-review.tags.tag"
+				>
 					{tagText(tag)}
 				</code>
 			))}
@@ -254,6 +372,12 @@ function useLocalPictures(source: PersonaImportSource, members: ReadonlyArray<Re
 	return urls;
 }
 
+const Initial = ({name}: {name: string}) => (
+	<span className={styles.placeholderAvatar} aria-hidden="true" data-flx="persona.persona-import-review.initial">
+		{Array.from(name.trim())[0] ?? '?'}
+	</span>
+);
+
 const MemberPicture = observer(
 	({entry, member, localUrl}: {entry: PersonaImportPreviewEntry; member: ReviewMember; localUrl?: string}) => {
 		const user = Users.currentUser;
@@ -276,370 +400,363 @@ const MemberPicture = observer(
 					data-flx="persona.persona-import-review.member-picture.local-avatar"
 				/>
 			);
-		return (
-			<span
-				className={styles.placeholderAvatar}
-				aria-hidden="true"
-				data-flx="persona.persona-import-review.member-picture.placeholder-avatar"
-			>
-				{Array.from(member.member.name.trim())[0] ?? '?'}
-			</span>
-		);
+		return <Initial name={member.member.name} data-flx="persona.persona-import-review.member-picture.initial" />;
 	},
 );
 
-const PersonaPicture = observer(({persona, size = 40}: {persona: PersonaResponse; size?: number}) => {
+const PersonaPicture = observer(({persona}: {persona: PersonaResponse}) => {
 	const user = Users.currentUser;
-	if (!user) return null;
-	if (!persona.avatar_hash) {
-		return (
-			<span
-				className={styles.placeholderAvatar}
-				aria-hidden="true"
-				data-flx="persona.persona-import-review.persona-picture.placeholder-avatar"
-			>
-				{Array.from(persona.name.trim())[0] ?? '?'}
-			</span>
-		);
-	}
+	if (!user || !persona.avatar_hash)
+		return <Initial name={persona.name} data-flx="persona.persona-import-review.persona-picture.initial" />;
 	return (
 		<PersonaAvatar
 			user={user}
 			persona={{avatar: persona.avatar_hash}}
-			size={size}
+			size={40}
 			data-flx="persona.persona-import-review.persona-picture.persona-avatar"
 		/>
 	);
 });
 
-function MemberIdentity({
+/** The file's member: picture, name, pronouns, tags and bio. */
+function MemberBlock({
 	entry,
 	member,
 	localUrl,
+	clashing,
 }: {
 	entry: PersonaImportPreviewEntry;
 	member: ReviewMember;
 	localUrl?: string;
+	clashing?: ReadonlySet<string>;
 }) {
 	const {i18n} = useLingui();
 	const showsPicture = Boolean(entry.avatar_hash || localUrl);
 	return (
-		<div className={styles.identity} data-flx="persona.persona-import-review.member-identity.identity">
-			<MemberPicture
-				entry={entry}
-				member={member}
-				localUrl={localUrl}
-				data-flx="persona.persona-import-review.member-identity.member-picture"
-			/>
-			<div className={styles.identityText} data-flx="persona.persona-import-review.member-identity.identity-text">
-				<span className={styles.identityName} data-flx="persona.persona-import-review.member-identity.identity-name">
-					{member.preview.name}
-				</span>
-				{member.preview.pronouns && (
-					<span className={styles.identityMeta} data-flx="persona.persona-import-review.member-identity.identity-meta">
-						{member.preview.pronouns}
+		<div className={styles.block} data-flx="persona.persona-import-review.member-block">
+			<div className={styles.blockHead} data-flx="persona.persona-import-review.member-block.head">
+				<MemberPicture
+					entry={entry}
+					member={member}
+					localUrl={localUrl}
+					data-flx="persona.persona-import-review.member-block.picture"
+				/>
+				<div className={styles.blockTitle} data-flx="persona.persona-import-review.member-block.title">
+					<span className={styles.blockName} data-flx="persona.persona-import-review.member-block.name">
+						{member.preview.name}
 					</span>
-				)}
-				<Tags tags={member.preview.persona_tags} data-flx="persona.persona-import-review.member-identity.tags" />
-				{member.preview.bio && (
-					<span className={styles.identityBio} data-flx="persona.persona-import-review.member-identity.identity-bio">
-						{member.preview.bio}
-					</span>
-				)}
-				{member.preview.avatar && !showsPicture && (
-					<span
-						className={styles.identityMeta}
-						data-flx="persona.persona-import-review.member-identity.identity-meta--2"
-					>
-						{i18n._(NEW_PICTURE_DESCRIPTOR)}
-					</span>
-				)}
-			</div>
-		</div>
-	);
-}
-
-function PersonaIdentity({persona, linkedElsewhere}: {persona: PersonaResponse; linkedElsewhere?: boolean}) {
-	const {i18n} = useLingui();
-	return (
-		<div className={styles.identity} data-flx="persona.persona-import-review.persona-identity.identity">
-			<PersonaPicture persona={persona} data-flx="persona.persona-import-review.persona-identity.persona-picture" />
-			<div className={styles.identityText} data-flx="persona.persona-import-review.persona-identity.identity-text">
-				<span className={styles.identityName} data-flx="persona.persona-import-review.persona-identity.identity-name">
-					{persona.name}
-				</span>
-				{persona.pronouns && (
-					<span className={styles.identityMeta} data-flx="persona.persona-import-review.persona-identity.identity-meta">
-						{persona.pronouns}
-					</span>
-				)}
-				<Tags tags={persona.persona_tags} data-flx="persona.persona-import-review.persona-identity.tags" />
-				{persona.bio && (
-					<span className={styles.identityBio} data-flx="persona.persona-import-review.persona-identity.identity-bio">
-						{persona.bio}
-					</span>
-				)}
-				<span
-					className={styles.identityMeta}
-					data-flx="persona.persona-import-review.persona-identity.identity-meta--2"
-				>
-					{i18n._(USED_TIMES_DESCRIPTOR, {count: persona.use_count ?? 0})}
-				</span>
-				{linkedElsewhere && (
-					<span
-						className={styles.identityMeta}
-						data-flx="persona.persona-import-review.persona-identity.identity-meta--3"
-					>
-						{i18n._(LINKED_ELSEWHERE_DESCRIPTOR)}
-					</span>
-				)}
-			</div>
-		</div>
-	);
-}
-
-interface ChoiceOption {
-	key: string;
-	label: string;
-	hint?: string;
-	safest?: boolean;
-	disabled?: boolean;
-	decision: ReviewDecision;
-}
-
-function sameDecision(a: ReviewDecision, b: ReviewDecision): boolean {
-	if (a.choice !== b.choice) return false;
-	if (a.choice === 'link' && b.choice === 'link') return a.personaId === b.personaId;
-	if (a.choice === 'add' && b.choice === 'add') return a.withTags === b.withTags;
-	return true;
-}
-
-function Choices({
-	name,
-	legend,
-	options,
-	current,
-	onChange,
-}: {
-	name: string;
-	legend: string;
-	options: ReadonlyArray<ChoiceOption>;
-	current: ReviewDecision;
-	onChange: (decision: ReviewDecision) => void;
-}) {
-	const {i18n} = useLingui();
-	return (
-		<fieldset className={styles.choices} data-flx="persona.persona-import-review.choices.choices">
-			<legend className={styles.legend} data-flx="persona.persona-import-review.choices.legend">
-				{legend}
-			</legend>
-			{options.map((option) => (
-				<label key={option.key} className={styles.choice} data-flx="persona.persona-import-review.choices.choice">
-					<input
-						type="radio"
-						className={styles.choiceInput}
-						name={name}
-						checked={sameDecision(option.decision, current)}
-						disabled={option.disabled}
-						onChange={() => onChange(option.decision)}
-						data-flx="persona.persona-import-review.choices.choice-input.change.radio"
-					/>
-					<span className={styles.choiceText} data-flx="persona.persona-import-review.choices.choice-text">
-						<span className={styles.choiceLabel} data-flx="persona.persona-import-review.choices.choice-label">
-							{option.label}
-						</span>
-						{option.hint && (
-							<span className={styles.choiceHint} data-flx="persona.persona-import-review.choices.choice-hint">
-								{option.hint}
-							</span>
-						)}
-					</span>
-					{option.safest && (
-						<span className={styles.safest} data-flx="persona.persona-import-review.choices.safest">
-							{i18n._(msg({message: 'Safest', comment: 'Badge on the safest choice in the import review'}))}
+					{member.preview.pronouns && (
+						<span className={styles.blockMeta} data-flx="persona.persona-import-review.member-block.pronouns">
+							{member.preview.pronouns}
 						</span>
 					)}
-				</label>
-			))}
-		</fieldset>
-	);
-}
-
-function SectionHeader({
-	id,
-	number,
-	hard,
-	title,
-	count,
-}: {
-	id: string;
-	number: number;
-	hard?: boolean;
-	title: React.ReactNode;
-	count?: number;
-}) {
-	return (
-		<div className={styles.sectionHeader} data-flx="persona.persona-import-review.section-header.section-header">
-			<span
-				className={clsx(styles.sectionNumber, hard && styles.sectionNumberHard)}
-				aria-hidden="true"
-				data-flx="persona.persona-import-review.section-header.section-number"
-			>
-				{number}
+				</div>
+			</div>
+			<Tags
+				tags={member.preview.persona_tags}
+				highlight={clashing}
+				data-flx="persona.persona-import-review.member-block.tags"
+			/>
+			{member.preview.bio && (
+				<span className={styles.blockBio} data-flx="persona.persona-import-review.member-block.bio">
+					{member.preview.bio}
+				</span>
+			)}
+			<span className={styles.blockMeta} data-flx="persona.persona-import-review.member-block.meta">
+				{member.preview.avatar && !showsPicture ? i18n._(NEW_PICTURE_DESCRIPTOR) : i18n._(FROM_FILE_DESCRIPTOR)}
 			</span>
-			<h3 className={styles.sectionTitle} id={id} data-flx="persona.persona-import-review.section-header.section-title">
-				{title}
-			</h3>
-			{count !== undefined && (
-				<span className={styles.sectionCount} data-flx="persona.persona-import-review.section-header.section-count">
-					{count}
-				</span>
-			)}
-			{hard && (
-				<span className={styles.needsDecision} data-flx="persona.persona-import-review.section-header.needs-decision">
-					<Trans comment="Badge on a section of the import review where every member needs a choice">
-						Needs a decision
-					</Trans>
-				</span>
-			)}
 		</div>
 	);
 }
 
-function listFormat(locale: string, items: ReadonlyArray<string>): string {
-	try {
-		return new Intl.ListFormat(locale, {type: 'conjunction', style: 'narrow'}).format(items);
-	} catch {
-		return items.join(', ');
-	}
-}
-
-/** "Differs: name, bio · removes banner", or nothing when only information differs. */
-function useDifferenceText(entry: PersonaImportPreviewEntry): string {
+/** A persona in Tyne: picture, name, pronouns, tags, bio and how often it was used. */
+function PersonaBlock({
+	persona,
+	note,
+	compact,
+	clashing,
+}: {
+	persona: PersonaResponse;
+	note?: string;
+	compact?: boolean;
+	clashing?: ReadonlySet<string>;
+}) {
 	const {i18n} = useLingui();
-	const changed = (entry.differences ?? [])
-		.filter((d) => d.change === 'changed')
-		.map((d) => i18n._(FIELD_IN_SENTENCE[d.field]));
-	const removed = (entry.differences ?? [])
-		.filter((d) => d.change === 'removed')
-		.map((d) => i18n._(FIELD_IN_SENTENCE[d.field]));
-	const notCompared = (entry.differences ?? []).some((d) => d.change === 'not_compared');
-	const parts: Array<string> = [];
-	if (changed.length > 0) parts.push(i18n._(DIFFERS_DESCRIPTOR, {fields: listFormat(i18n.locale, changed)}));
-	if (removed.length > 0) parts.push(i18n._(REMOVES_DESCRIPTOR, {fields: listFormat(i18n.locale, removed)}));
-	if (notCompared) parts.push(i18n._(PICTURE_NOT_COMPARED_DESCRIPTOR));
-	return parts.join(' · ');
+	return (
+		<div className={styles.block} data-flx="persona.persona-import-review.persona-block">
+			<div className={styles.blockHead} data-flx="persona.persona-import-review.persona-block.head">
+				<PersonaPicture persona={persona} data-flx="persona.persona-import-review.persona-block.picture" />
+				<div className={styles.blockTitle} data-flx="persona.persona-import-review.persona-block.title">
+					<span className={styles.blockName} data-flx="persona.persona-import-review.persona-block.name">
+						{persona.name}
+					</span>
+					{persona.pronouns && (
+						<span className={styles.blockMeta} data-flx="persona.persona-import-review.persona-block.pronouns">
+							{persona.pronouns}
+						</span>
+					)}
+				</div>
+			</div>
+			<Tags
+				tags={persona.persona_tags}
+				highlight={clashing}
+				data-flx="persona.persona-import-review.persona-block.tags"
+			/>
+			{!compact && persona.bio && (
+				<span className={styles.blockBio} data-flx="persona.persona-import-review.persona-block.bio">
+					{persona.bio}
+				</span>
+			)}
+			<span className={styles.blockMeta} data-flx="persona.persona-import-review.persona-block.meta">
+				{note ?? i18n._(USED_TIMES_DESCRIPTOR, {count: persona.use_count ?? 0})}
+			</span>
+		</div>
+	);
 }
 
-function CompareTable({
+/** A card that is itself the choice: picked, it is lit; another option picked, it greys out. */
+function SideCard({
+	name,
+	label,
+	checked,
+	dimmed,
+	disabled,
+	dashed,
+	onSelect,
+	children,
+}: {
+	name: string;
+	label: string;
+	checked: boolean;
+	dimmed: boolean;
+	disabled?: boolean;
+	dashed?: boolean;
+	onSelect: () => void;
+	children?: React.ReactNode;
+}) {
+	return (
+		<label
+			className={clsx(
+				styles.card,
+				styles.cardChoice,
+				checked && styles.cardChosen,
+				dimmed && styles.cardDimmed,
+				dashed && styles.cardDashed,
+				disabled && styles.cardDisabled,
+			)}
+			data-flx="persona.persona-import-review.side-card"
+		>
+			<span className={styles.cardChoiceHead} data-flx="persona.persona-import-review.side-card.head">
+				<input
+					type="radio"
+					className={styles.radio}
+					name={name}
+					checked={checked}
+					disabled={disabled}
+					onChange={onSelect}
+					data-flx="persona.persona-import-review.side-card.radio"
+				/>
+				<span className={styles.cardChoiceLabel} data-flx="persona.persona-import-review.side-card.label">
+					{label}
+				</span>
+			</span>
+			{children}
+		</label>
+	);
+}
+
+/** A full-width option under a question, such as leaving the member out. */
+function OptionRow({
+	name,
+	label,
+	checked,
+	safe,
+	onSelect,
+	children,
+}: {
+	name: string;
+	label: string;
+	checked: boolean;
+	safe?: boolean;
+	onSelect: () => void;
+	children?: React.ReactNode;
+}) {
+	const {i18n} = useLingui();
+	return (
+		<div className={clsx(styles.option, checked && styles.cardChosen)} data-flx="persona.persona-import-review.option">
+			<label className={styles.optionHead} data-flx="persona.persona-import-review.option.head">
+				<input
+					type="radio"
+					className={styles.radio}
+					name={name}
+					checked={checked}
+					onChange={onSelect}
+					data-flx="persona.persona-import-review.option.radio"
+				/>
+				<span className={styles.optionLabel} data-flx="persona.persona-import-review.option.label">
+					{label}
+				</span>
+				{safe && (
+					<span className={styles.safeChip} data-flx="persona.persona-import-review.option.safe-chip">
+						{i18n._(NOTHING_CHANGES_DESCRIPTOR)}
+					</span>
+				)}
+			</label>
+			{children}
+		</div>
+	);
+}
+
+/** The two sides of a question with the import's direction between them. */
+function Pair({left, right, top}: {left: React.ReactNode; right: React.ReactNode; top?: boolean}) {
+	return (
+		<div className={clsx(styles.pair, top && styles.pairTop)} data-flx="persona.persona-import-review.pair">
+			{left}
+			<ArrowRightIcon
+				size={20}
+				weight="bold"
+				className={styles.pairArrow}
+				aria-hidden="true"
+				data-flx="persona.persona-import-review.pair.arrow"
+			/>
+			{right}
+		</div>
+	);
+}
+
+function Question({id, children}: {id: string; children: React.ReactNode}) {
+	return (
+		<h3 id={id} className={styles.question} data-flx="persona.persona-import-review.question">
+			{children}
+		</h3>
+	);
+}
+
+interface ReviewContext {
+	entries: ReadonlyArray<PersonaImportPreviewEntry>;
+	members: ReadonlyArray<ReviewMember>;
+	decisions: ReadonlyMap<number, ReviewDecision>;
+	livePersonas: ReadonlyArray<PersonaResponse>;
+	fromTyne: boolean;
+}
+
+/** The tags a new persona for this member cannot keep: those another persona holds, and shared ones. */
+function clashingTags(entry: PersonaImportPreviewEntry): Array<PersonaTag> {
+	return [...heldTags(entry), ...sharedTags(entry)];
+}
+
+/** Fields for new tags in place of the clashing ones, each filled in with a free one until changed. */
+function TagFields({
 	entry,
 	member,
-	persona,
+	context,
+	replacements,
+	onChange,
 }: {
 	entry: PersonaImportPreviewEntry;
 	member: ReviewMember;
-	persona: PersonaResponse;
+	context: ReviewContext;
+	replacements: ReadonlyArray<PersonaTag>;
+	onChange: (replacements: Array<PersonaTag>) => void;
 }) {
 	const {i18n} = useLingui();
-	const differs = new Map((entry.differences ?? []).map((d) => [d.field, d.change]));
-	const user = Users.currentUser;
-	// A stored picture as a thumbnail; never one from a link in the file.
-	const thumbnail = (field: 'avatar' | 'banner', hash: string | null | undefined): React.ReactNode => {
-		if (!hash || !user) return null;
-		if (field === 'avatar')
-			return (
-				<PersonaAvatar
-					user={user}
-					persona={{avatar: hash}}
-					size={32}
-					data-flx="persona.persona-import-review.thumbnail.persona-avatar"
-				/>
-			);
-		const url = getPersonaBannerURL({userId: user.id, banner: hash}, false, 320);
-		return url ? (
-			<img
-				className={styles.compareBanner}
-				src={url}
-				alt=""
-				data-flx="persona.persona-import-review.thumbnail.compare-banner"
-			/>
-		) : null;
-	};
-	const picture = (
-		field: 'avatar' | 'banner',
-		tyneHash: string | null | undefined,
-		fileHas: boolean,
-		fileHash: string | null | undefined,
-	): [React.ReactNode, React.ReactNode] => {
-		const change = differs.get(field);
-		const none = i18n._(NO_PICTURE_DESCRIPTOR);
-		const tyne = thumbnail(field, tyneHash) ?? none;
-		if (change === 'not_compared') return [tyne, i18n._(UNKNOWN_PICTURE_DESCRIPTOR)];
-		if (change === 'removed') return [tyne, none];
-		if (change === 'changed') {
-			return [tyne, thumbnail(field, fileHash) ?? (fileHas ? i18n._(DIFFERENT_PICTURE_DESCRIPTOR) : none)];
-		}
-		if (!tyneHash && !fileHas) return [none, none];
-		return [tyne, i18n._(SAME_PICTURE_DESCRIPTOR)];
-	};
-	const tags = (list: ReadonlyArray<PersonaTag> | null | undefined) => (list ?? []).map(tagText).join('  ') || '—';
-	const rows: Array<[PersonaImportField, React.ReactNode, React.ReactNode]> = [
-		['name', persona.name, member.preview.name],
-		['pronouns', persona.pronouns ?? '—', member.preview.pronouns ?? '—'],
-		['persona_tags', tags(persona.persona_tags), tags(member.preview.persona_tags)],
-		['bio', persona.bio ?? '—', member.preview.bio ?? '—'],
-		['avatar', ...picture('avatar', persona.avatar_hash, Boolean(member.preview.avatar), entry.avatar_hash)],
-		['banner', ...picture('banner', persona.banner_hash, Boolean(member.preview.banner), entry.banner_hash)],
-		[
-			'color',
-			persona.color != null ? `#${persona.color.toString(16).padStart(6, '0')}` : '—',
-			member.preview.color != null ? `#${member.preview.color.toString(16).padStart(6, '0')}` : '—',
-		],
-		[
-			'visibility',
-			i18n._(VISIBILITY_NAMES[persona.visibility] ?? VISIBILITY_NAMES.unlisted!),
-			member.preview.visibility
-				? i18n._(VISIBILITY_KEPT_DESCRIPTOR, {
-						visibility: i18n._(VISIBILITY_NAMES[member.preview.visibility] ?? VISIBILITY_NAMES.unlisted!),
-					})
-				: '—',
-		],
-	];
+	const clashing = clashingTags(entry);
+	const example = i18n._(GalleryMessages.TAG_EXAMPLE_TEXT_DESCRIPTOR);
 	return (
-		<table className={styles.compareTable} data-flx="persona.persona-import-review.compare-table.compare-table">
-			<thead data-flx="persona.persona-import-review.compare-table.thead">
-				<tr data-flx="persona.persona-import-review.compare-table.tr">
-					<th scope="col" data-flx="persona.persona-import-review.compare-table.th" />
-					<th scope="col" data-flx="persona.persona-import-review.compare-table.th--2">
-						<Trans comment="Column heading in the table comparing a persona with the import file">
-							In this app now
-						</Trans>
-					</th>
-					<th scope="col" data-flx="persona.persona-import-review.compare-table.th--3">
-						<Trans comment="Column heading in the table comparing a persona with the import file">In your file</Trans>
-					</th>
-				</tr>
-			</thead>
-			<tbody data-flx="persona.persona-import-review.compare-table.tbody">
-				{rows.map(([field, tyne, file]) => {
-					const change = differs.get(field);
-					return (
-						<tr
-							key={field}
-							className={change === 'changed' || change === 'removed' ? styles.compareDiffers : undefined}
-							data-flx="persona.persona-import-review.compare-table.compare-differs"
-						>
-							<th scope="row" data-flx="persona.persona-import-review.compare-table.th--4">
-								{i18n._(FIELD_HEADING[field])}
-							</th>
-							<td data-flx="persona.persona-import-review.compare-table.td">{tyne}</td>
-							<td data-flx="persona.persona-import-review.compare-table.td--2">{file}</td>
-						</tr>
-					);
-				})}
-			</tbody>
-		</table>
+		<div className={styles.tagFields} data-flx="persona.persona-import-review.tag-fields">
+			{clashing.map((tag, position) => {
+				const value = replacements[position] ?? {};
+				const empty = !(value.prefix ?? '').trim() && !(value.suffix ?? '').trim();
+				const holder = empty
+					? null
+					: tagHolder(
+							value,
+							entry.index,
+							context.entries,
+							context.decisions,
+							context.members,
+							context.livePersonas,
+							context.fromTyne,
+						);
+				const fieldId = `import-tag-${entry.index}-${position}`;
+				let status = i18n._(TAG_FREE_DESCRIPTOR);
+				if (empty) status = i18n._(TAG_NONE_DESCRIPTOR);
+				else if (holder) status = i18n._(TAG_HELD_DESCRIPTOR, {name: holder});
+				return (
+					<div key={tagText(tag)} className={styles.tagField} data-flx="persona.persona-import-review.tag-field">
+						<div className={styles.tagFieldRow} data-flx="persona.persona-import-review.tag-field.row">
+							<label
+								htmlFor={fieldId}
+								className={styles.tagFieldLabel}
+								data-flx="persona.persona-import-review.tag-field.label"
+							>
+								{clashing.length > 1
+									? i18n._(TAG_INSTEAD_DESCRIPTOR, {tag: tagText(tag)})
+									: i18n._(TAG_FIELD_DESCRIPTOR)}
+							</label>
+							<input
+								id={fieldId}
+								type="text"
+								className={clsx(styles.tagInput, holder && styles.tagInputTaken)}
+								value={tagInputText(value)}
+								spellCheck={false}
+								autoComplete="off"
+								onChange={(event) => {
+									const next = clashing.map((_, i) => replacements[i] ?? {});
+									next[position] = parseTagInput(event.target.value);
+									onChange(next);
+								}}
+								data-flx="persona.persona-import-review.tag-field.input"
+							/>
+							<span
+								className={clsx(styles.tagStatus, holder ? styles.tagStatusTaken : !empty && styles.tagStatusFree)}
+								aria-live="polite"
+								data-flx="persona.persona-import-review.tag-field.status"
+							>
+								{!empty && !holder && (
+									<CheckIcon
+										size={14}
+										weight="bold"
+										aria-hidden="true"
+										data-flx="persona.persona-import-review.tag-field.check"
+									/>
+								)}
+								<span data-flx="persona.persona-import-review.tag-field.status-text">{status}</span>
+							</span>
+						</div>
+						{!empty && !holder && (
+							<span className={styles.tagExample} data-flx="persona.persona-import-review.tag-field.example">
+								{i18n._(TAG_EXAMPLE_DESCRIPTOR, {
+									example: `${(value.prefix ?? '').trim()}${example}${(value.suffix ?? '').trim()}`,
+									name: member.preview.name,
+								})}
+							</span>
+						)}
+					</div>
+				);
+			})}
+		</div>
 	);
+}
+
+/** Free tags for a member's clashing ones, each checked against what the import will leave in place. */
+function suggestedReplacements(entry: PersonaImportPreviewEntry, member: ReviewMember, context: ReviewContext) {
+	const chosen: Array<PersonaTag> = [];
+	for (const tag of clashingTags(entry)) {
+		const isTaken = (candidate: PersonaTag) =>
+			chosen.some((t) => tagText(t) === tagText(candidate)) ||
+			tagHolder(
+				candidate,
+				entry.index,
+				context.entries,
+				context.decisions,
+				context.members,
+				context.livePersonas,
+				context.fromTyne,
+			) !== null;
+		chosen.push(suggestTag(tag, member.preview.name, isTaken) ?? {});
+	}
+	return chosen;
 }
 
 interface PersonaImportReviewProps {
@@ -652,6 +769,8 @@ interface PersonaImportReviewProps {
 	displayTagChoice: 'keep' | 'file';
 	onDisplayTagChoice: (choice: 'keep' | 'file') => void;
 	conflicts: ReadonlyArray<ReviewConflict>;
+	/** The account's live personas, for checking new tags. */
+	livePersonas: ReadonlyArray<PersonaResponse>;
 }
 
 export const PersonaImportReview = observer(
@@ -665,11 +784,11 @@ export const PersonaImportReview = observer(
 		displayTagChoice,
 		onDisplayTagChoice,
 		conflicts,
+		livePersonas,
 	}: PersonaImportReviewProps) => {
 		const {i18n} = useLingui();
-		const [showAllDiffers, setShowAllDiffers] = useState(false);
-		const [showAllProbable, setShowAllProbable] = useState(false);
-		const [comparing, setComparing] = useState<ReadonlySet<number>>(new Set());
+		const productName = PRODUCT_NAME;
+		const [openDiffers, setOpenDiffers] = useState<ReadonlySet<number>>(() => new Set());
 		const localPictures = useLocalPictures(source, members);
 		const personas = useMemo(() => new Map(preview.personas.map((p) => [p.id, p])), [preview.personas]);
 		const byKind = (kind: PersonaImportPreviewEntry['kind']) => preview.entries.filter((e) => e.kind === kind);
@@ -680,153 +799,59 @@ export const PersonaImportReview = observer(
 		const probable = byKind('probably_same');
 		const fresh = byKind('new');
 		const upToDate = byKind('up_to_date').length;
-		const untouched = preview.untouched;
 		const decisionOf = (entry: PersonaImportPreviewEntry) => decisions.get(entry.index) ?? defaultDecision(entry);
 		const decide = (entry: PersonaImportPreviewEntry, decision: ReviewDecision) => onDecide([[entry.index, decision]]);
+		// The account's personas, with the live ones the preview names: those are current for sure.
+		const allLive = useMemo(() => {
+			const byId = new Map(livePersonas.map((p) => [p.id, p]));
+			for (const persona of preview.personas) if (!persona.deleted_at) byId.set(persona.id, persona);
+			return [...byId.values()];
+		}, [livePersonas, preview.personas]);
+		const context: ReviewContext = {
+			entries: preview.entries,
+			members,
+			decisions,
+			livePersonas: allLive,
+			fromTyne: source.kind === 'bundle',
+		};
 		const linkedByOthers = (personaId: string, except: number) =>
 			preview.entries.some((other) => {
 				if (other.index === except) return false;
 				const decision = decisions.get(other.index) ?? defaultDecision(other);
 				return decision.choice === 'link' && decision.personaId === personaId;
 			});
-		const toggleCompare = (index: number) =>
-			setComparing((current) => {
-				const next = new Set(current);
-				if (next.has(index)) next.delete(index);
-				else next.add(index);
-				return next;
-			});
-		const needCount = cantTell.length + tagInUse.length + differs.length + deleted.length + probable.length;
+		const needCount = reviewNeedCount(preview.entries);
 		const tagNeedsChoice = preview.display_tag.decision === 'ask';
-		let sectionNumber = 0;
-		const links: Array<{id: string; label: string; hard?: boolean}> = [];
-		const addLink = (id: string, label: MessageDescriptor, count: number | null, hard?: boolean) =>
-			links.push({id, label: count === null ? i18n._(label) : `${i18n._(label)} · ${count}`, hard});
-		if (cantTell.length)
-			addLink(
-				'import-cant-tell',
-				msg({message: "Can't tell", comment: 'Short name of a section of the import review'}),
-				cantTell.length,
-				true,
-			);
-		if (tagInUse.length)
-			addLink(
-				'import-tag-in-use',
-				msg({message: 'Tag in use', comment: 'Short name of a section of the import review'}),
-				tagInUse.length,
-				true,
-			);
-		if (differs.length)
-			addLink(
-				'import-differs',
-				msg({message: 'Differs', comment: 'Short name of a section of the import review'}),
-				differs.length,
-			);
-		if (deleted.length)
-			addLink(
-				'import-deleted',
-				msg({message: 'Deleted', comment: 'Short name of a section of the import review'}),
-				deleted.length,
-			);
-		if (probable.length)
-			addLink(
-				'import-probable',
-				msg({message: 'Probably the same', comment: 'Short name of a section of the import review'}),
-				probable.length,
-			);
-		if (tagNeedsChoice)
-			addLink(
-				'import-display-tag',
-				msg({message: 'Display tag', comment: 'Short name of a section of the import review'}),
-				null,
-			);
-		if (fresh.length)
-			addLink(
-				'import-new',
-				msg({message: 'New', comment: 'Short name of a section of the import review'}),
-				fresh.length,
-			);
-
-		const removedChoice = (entry: PersonaImportPreviewEntry, member: ReviewMember): ChoiceOption | null => {
-			const held = heldTags(entry);
-			const shared = sharedTags(entry);
-			const dropping = [...held, ...shared];
-			if (dropping.length > 0) {
-				return {
-					key: 'add-without',
-					label: i18n._(ADD_WITHOUT_TAG_DESCRIPTOR, {tags: listFormat(i18n.locale, dropping.map(tagText))}),
-					hint: i18n._(
-						msg({
-							message: 'You can give it another tag later in Settings.',
-							comment: 'Hint on the choice to add a member without its proxy tag, in the import review',
-						}),
-					),
-					decision: {choice: 'add', withTags: false},
-				};
-			}
-			return {
-				key: 'add',
-				label: i18n._(ADD_SEPARATELY_DESCRIPTOR),
-				hint: i18n._(
-					msg({
-						message: 'You will have one more {name}.',
-						comment: 'Hint on the choice to add a member as a separate persona, in the import review',
-					}),
-					{name: member.preview.name},
-				),
-				decision: {choice: 'add', withTags: true},
-			};
+		const addWithSuggestions = (entry: PersonaImportPreviewEntry, member: ReviewMember): ReviewDecision => {
+			const current = decisionOf(entry);
+			if (current.choice === 'add') return current;
+			if (clashingTags(entry).length === 0) return {choice: 'add', withTags: true};
+			return {choice: 'add', withTags: false, replacements: suggestedReplacements(entry, member, context)};
 		};
-		const skipChoice: ChoiceOption = {
-			key: 'skip',
-			label: i18n._(SKIP_DESCRIPTOR),
-			hint: i18n._(
-				msg({
-					message: 'Nothing changes. It stays in your file for next time.',
-					comment: 'Hint on the choice to skip a member in the import review',
-				}),
-			),
-			safest: true,
-			decision: {choice: 'skip'},
+		const replacementsOf = (entry: PersonaImportPreviewEntry, member: ReviewMember) => {
+			const decision = decisionOf(entry);
+			return decision.choice === 'add' && decision.replacements
+				? decision.replacements
+				: suggestedReplacements(entry, member, context);
 		};
 
 		return (
 			<div className={styles.review} data-flx="persona.persona-import-review.review">
-				<div className={styles.banner} role="note" data-flx="persona.persona-import-review.banner">
-					<Warning
-						size={22}
-						weight="bold"
-						className={styles.bannerIcon}
-						aria-hidden="true"
-						data-flx="persona.persona-import-review.banner-icon"
-					/>
-					<div data-flx="persona.persona-import-review.div">
-						<div className={styles.bannerTitle} data-flx="persona.persona-import-review.banner-title">
-							{tagNeedsChoice
-								? i18n._(NEED_LOOK_WITH_TAG_DESCRIPTOR, {needCount})
-								: i18n._(NEED_LOOK_DESCRIPTOR, {needCount})}
-						</div>
-						<div className={styles.bannerText} data-flx="persona.persona-import-review.banner-text">
-							<Trans comment="Explanation at the top of the import review">
-								Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please
-								read every section before importing. The hardest ones are at the top.
-							</Trans>
-						</div>
-						<nav className={styles.sectionLinks} data-flx="persona.persona-import-review.section-links">
-							{links.map((link) => (
-								<button
-									key={link.id}
-									type="button"
-									className={clsx(styles.sectionLink, link.hard && styles.sectionLinkHard)}
-									onClick={() => document.getElementById(link.id)?.scrollIntoView({behavior: 'smooth', block: 'start'})}
-									data-flx="persona.persona-import-review.section-link.scroll-into-view.button"
-								>
-									{link.label}
-								</button>
-							))}
-						</nav>
-					</div>
-				</div>
+				<p className={styles.intro} data-flx="persona.persona-import-review.intro">
+					{needCount > 0 ? i18n._(INTRO_MEMBERS_DESCRIPTOR, {productName}) : i18n._(INTRO_NONE_DESCRIPTOR)}
+				</p>
+
+				<ReadyLines
+					fresh={fresh}
+					probable={probable}
+					upToDate={upToDate}
+					untouched={preview.untouched}
+					members={members}
+					personas={personas}
+					decisionOf={decisionOf}
+					decide={decide}
+					data-flx="persona.persona-import-review.ready-lines"
+				/>
 
 				{conflicts.length > 0 && (
 					<div className={styles.conflicts} role="alert" data-flx="persona.persona-import-review.conflicts">
@@ -834,7 +859,7 @@ export const PersonaImportReview = observer(
 							const names = listFormat(i18n.locale, conflict.names);
 							const label = conflict.label;
 							return (
-								<div key={label} data-flx="persona.persona-import-review.div--2">
+								<div key={label} data-flx="persona.persona-import-review.conflict">
 									<Trans comment="A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names">
 										{names} would all have {label}. Change one of the choices.
 									</Trans>
@@ -844,551 +869,382 @@ export const PersonaImportReview = observer(
 					</div>
 				)}
 
-				{cantTell.length > 0 && (
-					<section
-						className={styles.section}
-						aria-labelledby="import-cant-tell"
-						data-flx="persona.persona-import-review.section"
-					>
-						<SectionHeader
-							id="import-cant-tell"
-							number={++sectionNumber}
-							hard
-							title={<Trans comment="Section of the import review">Can't tell if it's the same persona</Trans>}
-							count={cantTell.length}
-							data-flx="persona.persona-import-review.import-cant-tell"
+				{(needCount > 0 || tagNeedsChoice) && (
+					<div className={styles.pair} aria-hidden="true" data-flx="persona.persona-import-review.column-heads">
+						<span className={styles.columnHead} data-flx="persona.persona-import-review.column-head-file">
+							<FileTextIcon size={16} weight="bold" data-flx="persona.persona-import-review.column-head-file.icon" />
+							{i18n._(YOUR_FILE_DESCRIPTOR)}
+						</span>
+						<ArrowRightIcon
+							size={20}
+							weight="bold"
+							className={styles.pairArrow}
+							data-flx="persona.persona-import-review.column-heads.arrow"
 						/>
-						<p className={styles.explanation} data-flx="persona.persona-import-review.explanation">
-							<Trans comment="Explanation of a section of the import review">
-								Each of these shares a name or a tag with one of your personas, but not both, so it may be the same
-								character or a different one. Compare them and choose. Skipped members stay in your file for next time.
-							</Trans>
-						</p>
-						{cantTell.map((entry) => {
-							const member = members[entry.index];
-							if (!member) return null;
-							const options: Array<ChoiceOption> = (entry.candidates ?? []).flatMap((candidate) => {
-								const persona = personas.get(candidate.persona_id);
-								if (!persona || !member.member.id) return [];
-								return [
-									{
-										key: `link-${candidate.persona_id}`,
-										label: i18n._(SAME_AS_DESCRIPTOR, {name: persona.name}),
-										hint: candidate.linked_elsewhere
-											? i18n._(LINKED_ELSEWHERE_DESCRIPTOR)
-											: i18n._(
-													msg({
-														message: 'Your persona stays as it is; it is connected to this member.',
-														comment: 'Hint on the choice to link a member to an existing persona, in the import review',
-													}),
-												),
-										disabled: linkedByOthers(candidate.persona_id, entry.index),
-										decision: {choice: 'link', personaId: candidate.persona_id},
-									},
-								];
-							});
-							const add = removedChoice(entry, member);
-							if (add) options.push(add);
-							options.push(skipChoice);
-							return (
-								<div key={entry.index} className={styles.card} data-flx="persona.persona-import-review.card">
-									<div className={styles.compareGrid} data-flx="persona.persona-import-review.compare-grid">
-										<div data-flx="persona.persona-import-review.div--3">
-											<div className={styles.columnLabel} data-flx="persona.persona-import-review.column-label">
-												<Trans comment="Column heading in the import review">In your file</Trans>
-											</div>
-											<MemberIdentity
+						<span className={styles.columnHead} data-flx="persona.persona-import-review.column-head-tyne">
+							<ChatTeardropIcon
+								size={16}
+								weight="bold"
+								data-flx="persona.persona-import-review.column-head-tyne.icon"
+							/>
+							{productName}
+						</span>
+					</div>
+				)}
+
+				<div className={styles.items} data-flx="persona.persona-import-review.items">
+					{cantTell.map((entry) => {
+						const member = members[entry.index];
+						if (!member) return null;
+						const decision = decisionOf(entry);
+						const questionId = `import-q-${entry.index}`;
+						const group = `import-${entry.index}`;
+						return (
+							<section
+								key={entry.index}
+								className={styles.item}
+								aria-labelledby={questionId}
+								data-flx="persona.persona-import-review.cant-tell"
+							>
+								<Question id={questionId} data-flx="persona.persona-import-review.cant-tell.question">
+									{i18n._(CANT_TELL_QUESTION_DESCRIPTOR, {name: member.preview.name, productName})}
+								</Question>
+								<Pair
+									left={
+										<div className={styles.card} data-flx="persona.persona-import-review.cant-tell.file">
+											<MemberBlock
 												entry={entry}
 												member={member}
 												localUrl={localPictures.get(entry.index)}
-												data-flx="persona.persona-import-review.member-identity"
+												data-flx="persona.persona-import-review.cant-tell.member-block"
 											/>
 										</div>
-										<div data-flx="persona.persona-import-review.div--4">
-											<div className={styles.columnLabel} data-flx="persona.persona-import-review.column-label--2">
-												<Trans comment="Column heading in the import review">In this app</Trans>
-											</div>
+									}
+									right={
+										<div className={styles.stack} data-flx="persona.persona-import-review.cant-tell.candidates">
 											{(entry.candidates ?? []).map((candidate) => {
 												const persona = personas.get(candidate.persona_id);
-												return persona ? (
-													<PersonaIdentity
+												if (!persona || !member.member.id) return null;
+												const chosen = decision.choice === 'link' && decision.personaId === candidate.persona_id;
+												return (
+													<SideCard
 														key={candidate.persona_id}
-														persona={persona}
-														linkedElsewhere={candidate.linked_elsewhere}
-														data-flx="persona.persona-import-review.persona-identity"
-													/>
-												) : null;
+														name={group}
+														label={i18n._(SAME_PERSONA_DESCRIPTOR)}
+														checked={chosen}
+														dimmed={decision.choice !== 'skip' && !chosen}
+														disabled={linkedByOthers(candidate.persona_id, entry.index)}
+														onSelect={() => decide(entry, {choice: 'link', personaId: candidate.persona_id})}
+														data-flx="persona.persona-import-review.cant-tell.candidate"
+													>
+														<PersonaBlock
+															persona={persona}
+															compact
+															note={
+																candidate.linked_elsewhere
+																	? i18n._(LINKED_ELSEWHERE_DESCRIPTOR)
+																	: `${i18n._(MATCHED_ON_DESCRIPTORS[candidate.matched_on])} · ${i18n._(USED_TIMES_DESCRIPTOR, {count: persona.use_count ?? 0})}`
+															}
+															data-flx="persona.persona-import-review.cant-tell.persona-block"
+														/>
+													</SideCard>
+												);
 											})}
+											<SideCard
+												name={group}
+												label={i18n._(ADD_DIFFERENT_DESCRIPTOR)}
+												checked={decision.choice === 'add'}
+												dimmed={decision.choice === 'link'}
+												dashed
+												onSelect={() => decide(entry, addWithSuggestions(entry, member))}
+												data-flx="persona.persona-import-review.cant-tell.add"
+											>
+												{decision.choice === 'add' && clashingTags(entry).length > 0 && (
+													<TagFields
+														entry={entry}
+														member={member}
+														context={context}
+														replacements={replacementsOf(entry, member)}
+														onChange={(replacements) => decide(entry, {choice: 'add', withTags: false, replacements})}
+														data-flx="persona.persona-import-review.cant-tell.tag-fields"
+													/>
+												)}
+											</SideCard>
 										</div>
-									</div>
-									<Choices
-										name={`import-${entry.index}`}
-										legend={i18n._(WHAT_TO_DO_DESCRIPTOR, {name: member.preview.name})}
-										options={options}
-										current={decisionOf(entry)}
-										onChange={(decision) => decide(entry, decision)}
-										data-flx="persona.persona-import-review.choices.decide"
-									/>
-								</div>
-							);
-						})}
-					</section>
-				)}
+									}
+									top
+									data-flx="persona.persona-import-review.cant-tell.pair"
+								/>
+								<OptionRow
+									name={group}
+									label={i18n._(NOT_SURE_SKIP_DESCRIPTOR, {name: member.preview.name})}
+									checked={decision.choice === 'skip'}
+									safe
+									onSelect={() => decide(entry, {choice: 'skip'})}
+									data-flx="persona.persona-import-review.cant-tell.skip"
+								/>
+							</section>
+						);
+					})}
 
-				{tagInUse.length > 0 && (
-					<section
-						className={styles.section}
-						aria-labelledby="import-tag-in-use"
-						data-flx="persona.persona-import-review.section--2"
-					>
-						<SectionHeader
-							id="import-tag-in-use"
-							number={++sectionNumber}
-							hard
-							title={<Trans comment="Section of the import review">Tag already in use</Trans>}
-							count={tagInUse.length}
-							data-flx="persona.persona-import-review.import-tag-in-use"
-						/>
-						<p className={styles.explanation} data-flx="persona.persona-import-review.explanation--2">
-							<Trans comment="Explanation of a section of the import review">
-								In this app each proxy tag belongs to one persona. These members have a tag another persona already has,
-								or that another member of your file has too.
-							</Trans>
-						</p>
-						{tagInUse.map((entry) => {
-							const member = members[entry.index];
-							if (!member) return null;
-							const holders = (entry.clashes ?? []).flatMap((clash) => {
-								if (!clash.tag) return [];
-								const holder = clash.held_by_persona_id ? personas.get(clash.held_by_persona_id) : undefined;
-								const other = clash.shared_with_member != null ? members[clash.shared_with_member] : undefined;
-								return [{tag: clash.tag, name: holder?.name ?? other?.preview.name ?? '?', shared: !holder}];
-							});
-							const options: Array<ChoiceOption> = [skipChoice];
-							const add = removedChoice(entry, member);
-							if (add) options.push(add);
-							if (heldTags(entry).length === 0 && sharedTags(entry).length > 0) {
-								options.push({
-									key: 'add-with',
-									label: i18n._(
-										msg({
-											message: 'Add with the tag',
-											comment:
-												'Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)',
-										}),
-									),
-									decision: {choice: 'add', withTags: true},
-								});
-							}
-							return (
-								<div key={entry.index} className={styles.card} data-flx="persona.persona-import-review.card--2">
-									<MemberIdentity
+					{tagInUse.map((entry) => {
+						const member = members[entry.index];
+						if (!member) return null;
+						const decision = decisionOf(entry);
+						const questionId = `import-q-${entry.index}`;
+						const group = `import-${entry.index}`;
+						const clashes = (entry.clashes ?? []).filter((clash) => clash.tag);
+						const clashing = new Set(clashingTags(entry).map(tagText));
+						const holderId = clashes.find((clash) => clash.held_by_persona_id)?.held_by_persona_id;
+						const holder = holderId ? personas.get(holderId) : undefined;
+						const otherIndex = clashes.find((clash) => clash.shared_with_member != null)?.shared_with_member;
+						const otherEntry = otherIndex != null ? preview.entries[otherIndex] : undefined;
+						const other = otherIndex != null ? members[otherIndex] : undefined;
+						const adding = decision.choice === 'add';
+						return (
+							<section
+								key={entry.index}
+								className={styles.item}
+								aria-labelledby={questionId}
+								data-flx="persona.persona-import-review.tag-in-use"
+							>
+								<Question id={questionId} data-flx="persona.persona-import-review.tag-in-use.question">
+									{i18n._(TAG_TAKEN_QUESTION_DESCRIPTOR, {name: member.preview.name})}
+								</Question>
+								{clashes.map((clash) => {
+									const tag = tagText(clash.tag!);
+									const name =
+										(clash.held_by_persona_id ? personas.get(clash.held_by_persona_id)?.name : undefined) ??
+										(clash.shared_with_member != null ? members[clash.shared_with_member]?.preview.name : undefined) ??
+										'?';
+									return (
+										<p key={tag} className={styles.why} data-flx="persona.persona-import-review.tag-in-use.why">
+											{clash.held_by_persona_id ? (
+												<Trans comment="Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona">
+													<code className={styles.tag} data-flx="persona.persona-import-review.tag-in-use.why-tag">
+														{tag}
+													</code>{' '}
+													already belongs to your persona {name}.
+												</Trans>
+											) : (
+												<Trans comment="Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file">
+													<code className={styles.tag} data-flx="persona.persona-import-review.tag-in-use.why-tag--2">
+														{tag}
+													</code>{' '}
+													is also used by {name} in your file.
+												</Trans>
+											)}
+										</p>
+									);
+								})}
+								<Pair
+									left={
+										<div className={styles.card} data-flx="persona.persona-import-review.tag-in-use.file">
+											<MemberBlock
+												entry={entry}
+												member={member}
+												localUrl={localPictures.get(entry.index)}
+												clashing={clashing}
+												data-flx="persona.persona-import-review.tag-in-use.member-block"
+											/>
+										</div>
+									}
+									right={
+										<div className={styles.card} data-flx="persona.persona-import-review.tag-in-use.holder">
+											{holder && (
+												<PersonaBlock
+													persona={holder}
+													compact
+													clashing={clashing}
+													note={i18n._(KEEPS_TAG_DESCRIPTOR)}
+													data-flx="persona.persona-import-review.tag-in-use.persona-block"
+												/>
+											)}
+											{!holder && other && otherEntry && (
+												<MemberBlock
+													entry={otherEntry}
+													member={other}
+													localUrl={localPictures.get(otherEntry.index)}
+													clashing={clashing}
+													data-flx="persona.persona-import-review.tag-in-use.other-member"
+												/>
+											)}
+										</div>
+									}
+									data-flx="persona.persona-import-review.tag-in-use.pair"
+								/>
+								<OptionRow
+									name={group}
+									label={i18n._(LEAVE_OUT_DESCRIPTOR, {name: member.preview.name})}
+									checked={!adding}
+									safe
+									onSelect={() => decide(entry, {choice: 'skip'})}
+									data-flx="persona.persona-import-review.tag-in-use.skip"
+								/>
+								<OptionRow
+									name={group}
+									label={i18n._(ADD_OWN_TAG_DESCRIPTOR, {name: member.preview.name})}
+									checked={adding}
+									onSelect={() => decide(entry, addWithSuggestions(entry, member))}
+									data-flx="persona.persona-import-review.tag-in-use.add"
+								>
+									<TagFields
 										entry={entry}
 										member={member}
-										localUrl={localPictures.get(entry.index)}
-										data-flx="persona.persona-import-review.member-identity--2"
+										context={context}
+										replacements={replacementsOf(entry, member)}
+										onChange={(replacements) => decide(entry, {choice: 'add', withTags: false, replacements})}
+										data-flx="persona.persona-import-review.tag-in-use.tag-fields"
 									/>
-									{holders.map((holder) => {
-										const tag = tagText(holder.tag);
-										const name = holder.name;
-										return (
-											<div key={tag} className={styles.why} data-flx="persona.persona-import-review.why">
-												{holder.shared ? (
-													<Trans comment="Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file">
-														<code className={styles.tag} data-flx="persona.persona-import-review.tag">
-															{tag}
-														</code>{' '}
-														is also used by {name} in your file.
-													</Trans>
-												) : (
-													<Trans comment="Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona">
-														<code className={styles.tag} data-flx="persona.persona-import-review.tag--2">
-															{tag}
-														</code>{' '}
-														already belongs to your persona {name}.
-													</Trans>
-												)}
-											</div>
-										);
-									})}
-									<Choices
-										name={`import-${entry.index}`}
-										legend={i18n._(WHAT_TO_DO_DESCRIPTOR, {name: member.preview.name})}
-										options={options}
-										current={decisionOf(entry)}
-										onChange={(decision) => decide(entry, decision)}
-										data-flx="persona.persona-import-review.choices.decide--2"
-									/>
-								</div>
-							);
-						})}
-					</section>
-				)}
+								</OptionRow>
+							</section>
+						);
+					})}
 
-				{differs.length > 0 && (
-					<section
-						className={styles.section}
-						aria-labelledby="import-differs"
-						data-flx="persona.persona-import-review.section--3"
-					>
-						<SectionHeader
-							id="import-differs"
-							number={++sectionNumber}
-							title={<Trans comment="Section of the import review">Different in your file</Trans>}
-							count={differs.length}
-							data-flx="persona.persona-import-review.import-differs"
-						/>
-						<p className={styles.explanation} data-flx="persona.persona-import-review.explanation--3">
-							<Trans comment="Explanation of a section of the import review">
-								These came from your file before, but the file has different details now, or you changed them here
-								since. There is no telling which side changed, so this app's version is kept unless you choose the
-								file's for a persona. The file's version replaces that persona's details; its messages, history,
-								visibility and signature emojis stay, and so does any picture that can't be downloaded.
-							</Trans>
-						</p>
-						<div className={styles.groupButtons} data-flx="persona.persona-import-review.group-buttons">
-							<Button
-								variant="secondary"
-								small
-								onClick={() => onDecide(differs.map((entry) => [entry.index, {choice: 'keep'}]))}
-								data-flx="persona.persona-import-review.button.decide"
-							>
-								<Trans comment="Button in the import review: keep every listed persona as it is">
-									Keep this version for all
-								</Trans>
-							</Button>
-						</div>
-						<div className={styles.rows} data-flx="persona.persona-import-review.rows">
-							{(showAllDiffers ? differs : differs.slice(0, 3)).map((entry) => (
-								<DiffersRow
-									key={entry.index}
-									entry={entry}
-									member={members[entry.index]}
-									persona={entry.persona_id ? personas.get(entry.persona_id) : undefined}
-									decision={decisionOf(entry)}
-									onDecide={(decision) => decide(entry, decision)}
-									comparing={comparing.has(entry.index)}
-									onToggleCompare={() => toggleCompare(entry.index)}
-									data-flx="persona.persona-import-review.differs-row"
-								/>
-							))}
-							{differs.length > 3 && (
-								<button
-									type="button"
-									className={styles.moreButton}
-									onClick={() => setShowAllDiffers((v) => !v)}
-									data-flx="persona.persona-import-review.more-button.set-show-all-differs"
-								>
-									{showAllDiffers
-										? i18n._(SHOW_FEWER_DESCRIPTOR)
-										: i18n._(SHOW_MORE_DESCRIPTOR, {count: differs.length - 3})}
-								</button>
-							)}
-						</div>
-					</section>
-				)}
-
-				{deleted.length > 0 && (
-					<section
-						className={styles.section}
-						aria-labelledby="import-deleted"
-						data-flx="persona.persona-import-review.section--4"
-					>
-						<SectionHeader
-							id="import-deleted"
-							number={++sectionNumber}
-							title={<Trans comment="Section of the import review">You deleted these</Trans>}
-							count={deleted.length}
-							data-flx="persona.persona-import-review.import-deleted"
-						/>
-						<p className={styles.explanation} data-flx="persona.persona-import-review.explanation--4">
-							<Trans comment="Explanation of a section of the import review">
-								They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its
-								old messages and usage, instead of making a copy.
-							</Trans>
-						</p>
-						{deleted.length > 1 && (
-							<div className={styles.groupButtons} data-flx="persona.persona-import-review.group-buttons--2">
-								<Button
-									variant="secondary"
-									small
-									onClick={() => onDecide(deleted.map((entry) => [entry.index, {choice: 'restore'}]))}
-									data-flx="persona.persona-import-review.button.decide--2"
-								>
-									{i18n._(RESTORE_ALL_DESCRIPTOR, {count: deleted.length})}
-								</Button>
-							</div>
-						)}
-						<div className={styles.rows} data-flx="persona.persona-import-review.rows--2">
-							{deleted.map((entry) => {
-								const persona = entry.persona_id ? personas.get(entry.persona_id) : undefined;
-								if (!persona) return null;
-								const deletedAt = persona.deleted_at ? new Date(persona.deleted_at) : null;
-								return (
-									<div key={entry.index} className={styles.row} data-flx="persona.persona-import-review.row">
-										<div className={styles.rowMain} data-flx="persona.persona-import-review.row-main">
-											<PersonaPicture
-												persona={persona}
-												size={36}
-												data-flx="persona.persona-import-review.persona-picture"
-											/>
-											<div className={styles.rowText} data-flx="persona.persona-import-review.row-text">
-												<span className={styles.rowName} data-flx="persona.persona-import-review.row-name">
-													{persona.name}
-												</span>
-												<span className={styles.rowMeta} data-flx="persona.persona-import-review.row-meta">
-													{[
-														deletedAt
-															? i18n._(DELETED_ON_DESCRIPTOR, {date: deletedAt.toLocaleDateString(i18n.locale)})
-															: null,
-														i18n._(USED_TIMES_DESCRIPTOR, {count: persona.use_count ?? 0}),
-													]
-														.filter(Boolean)
-														.join(' · ')}
-												</span>
-											</div>
-											<select
-												className={styles.select}
-												aria-label={i18n._(WHAT_TO_DO_SHORT_DESCRIPTOR, {name: persona.name})}
-												value={decisionOf(entry).choice === 'restore' ? 'restore' : 'keep'}
-												onChange={(e) => decide(entry, {choice: e.target.value === 'restore' ? 'restore' : 'keep'})}
-												data-flx="persona.persona-import-review.select.decide"
-											>
-												<option value="keep" data-flx="persona.persona-import-review.option">
-													{i18n._(LEAVE_DELETED_DESCRIPTOR)}
-												</option>
-												<option value="restore" data-flx="persona.persona-import-review.option--2">
-													{i18n._(RESTORE_DESCRIPTOR)}
-												</option>
-											</select>
-										</div>
-									</div>
-								);
-							})}
-						</div>
-					</section>
-				)}
-
-				{probable.length > 0 && (
-					<section
-						className={styles.section}
-						aria-labelledby="import-probable"
-						data-flx="persona.persona-import-review.section--5"
-					>
-						<SectionHeader
-							id="import-probable"
-							number={++sectionNumber}
-							title={<Trans comment="Section of the import review">Probably the same persona</Trans>}
-							count={probable.length}
-							data-flx="persona.persona-import-review.import-probable"
-						/>
-						<p className={styles.explanation} data-flx="persona.persona-import-review.explanation--5">
-							<Trans comment="Explanation of a section of the import review">
-								Same name and same tag as one of your personas, but not connected to your file yet, for example because
-								you made them by hand. Linking only records which member of the file each one is, so future imports
-								recognise it. Nothing in the persona changes.
-							</Trans>
-						</p>
-						{probable.length > 1 && (
-							<div className={styles.groupButtons} data-flx="persona.persona-import-review.group-buttons--3">
-								<Button
-									variant="secondary"
-									small
-									onClick={() =>
-										onDecide(
-											probable.flatMap((entry) =>
-												entry.persona_id ? [[entry.index, {choice: 'link', personaId: entry.persona_id}]] : [],
-											),
-										)
-									}
-									data-flx="persona.persona-import-review.button.decide--3"
-								>
-									{i18n._(LINK_ALL_DESCRIPTOR, {count: probable.length})}
-								</Button>
-							</div>
-						)}
-						<div className={styles.rows} data-flx="persona.persona-import-review.rows--3">
-							{(showAllProbable ? probable : probable.slice(0, 4)).map((entry) => {
-								const persona = entry.persona_id ? personas.get(entry.persona_id) : undefined;
-								const member = members[entry.index];
-								if (!persona || !member) return null;
-								const decision = decisionOf(entry);
-								const held = heldTags(entry);
-								return (
-									<div key={entry.index} className={styles.row} data-flx="persona.persona-import-review.row--2">
-										<div className={styles.rowMain} data-flx="persona.persona-import-review.row-main--2">
-											<PersonaPicture
-												persona={persona}
-												size={36}
-												data-flx="persona.persona-import-review.persona-picture--2"
-											/>
-											<div className={styles.rowText} data-flx="persona.persona-import-review.row-text--2">
-												<span className={styles.rowName} data-flx="persona.persona-import-review.row-name--2">
-													{persona.name}
-												</span>
-												<span className={styles.rowMeta} data-flx="persona.persona-import-review.row-meta--2">
-													<Tags tags={member.preview.persona_tags} data-flx="persona.persona-import-review.tags" />
-												</span>
-											</div>
-											<select
-												className={styles.select}
-												aria-label={i18n._(WHAT_TO_DO_SHORT_DESCRIPTOR, {name: persona.name})}
-												value={decision.choice}
-												onChange={(e) => {
-													const value = e.target.value;
-													if (value === 'link') decide(entry, {choice: 'link', personaId: persona.id});
-													else if (value === 'add') decide(entry, {choice: 'add', withTags: false});
-													else decide(entry, {choice: 'skip'});
-												}}
-												data-flx="persona.persona-import-review.select"
-											>
-												<option value="link" data-flx="persona.persona-import-review.option--3">
-													{i18n._(LINK_DESCRIPTOR)}
-												</option>
-												<option value="add" data-flx="persona.persona-import-review.option--4">
-													{held.length > 0
-														? i18n._(ADD_WITHOUT_TAG_DESCRIPTOR, {tags: listFormat(i18n.locale, held.map(tagText))})
-														: i18n._(ADD_SEPARATELY_DESCRIPTOR)}
-												</option>
-												<option value="skip" data-flx="persona.persona-import-review.option--5">
-													{i18n._(SKIP_SHORT_DESCRIPTOR)}
-												</option>
-											</select>
-										</div>
-									</div>
-								);
-							})}
-							{probable.length > 4 && (
-								<button
-									type="button"
-									className={styles.moreButton}
-									onClick={() => setShowAllProbable((v) => !v)}
-									data-flx="persona.persona-import-review.more-button.set-show-all-probable"
-								>
-									{showAllProbable
-										? i18n._(SHOW_FEWER_DESCRIPTOR)
-										: i18n._(SHOW_MORE_DESCRIPTOR, {count: probable.length - 4})}
-								</button>
-							)}
-						</div>
-					</section>
-				)}
-
-				{tagNeedsChoice && (
-					<section
-						className={styles.section}
-						aria-labelledby="import-display-tag"
-						data-flx="persona.persona-import-review.section--6"
-					>
-						<SectionHeader
-							id="import-display-tag"
-							number={++sectionNumber}
-							title={<Trans comment="Section of the import review">Display tag</Trans>}
-							data-flx="persona.persona-import-review.import-display-tag"
-						/>
-						<p className={styles.explanation} data-flx="persona.persona-import-review.explanation--6">
-							<Trans comment="Explanation of a section of the import review">
-								Your account has one display tag, shown after every persona's name. The file's system tag is different.
-							</Trans>
-						</p>
-						<Choices
-							name="import-display-tag-choice"
-							legend={i18n._(
-								msg({message: 'Display tag', comment: 'Heading of the display tag choice in the import review'}),
-							)}
-							options={[
-								{
-									key: 'keep',
-									label: i18n._(
-										msg({
-											message: 'Keep yours: {tag}',
-											comment: 'Choice in the import review: keep the display tag {tag}',
-										}),
-										{tag: preview.display_tag.current_text ?? '—'},
-									),
-									safest: true,
-									decision: {choice: 'keep'},
-								},
-								{
-									key: 'file',
-									label: i18n._(
-										msg({
-											message: "Use the file's: {tag}",
-											comment: "Choice in the import review: use the import file's system tag {tag} as the display tag",
-										}),
-										{tag: fileTagText ?? '—'},
-									),
-									decision: {choice: 'use_file'},
-								},
-							]}
-							current={displayTagChoice === 'file' ? {choice: 'use_file'} : {choice: 'keep'}}
-							onChange={(decision) => onDisplayTagChoice(decision.choice === 'use_file' ? 'file' : 'keep')}
-							data-flx="persona.persona-import-review.choices.display-tag-choice"
-						/>
-					</section>
-				)}
-
-				{fresh.length > 0 && (
-					<section
-						className={styles.section}
-						aria-labelledby="import-new"
-						data-flx="persona.persona-import-review.section--7"
-					>
-						<SectionHeader
-							id="import-new"
-							number={++sectionNumber}
-							title={<Trans comment="Section of the import review">New in your file</Trans>}
-							count={fresh.length}
-							data-flx="persona.persona-import-review.import-new"
-						/>
-						<p className={styles.explanation} data-flx="persona.persona-import-review.explanation--7">
-							<Trans comment="Explanation of a section of the import review">
-								Members you don't have yet, with no name or tag clash. Untick any you don't want.
-							</Trans>
-						</p>
-						<div className={styles.newGrid} data-flx="persona.persona-import-review.new-grid">
-							{fresh.map((entry) => {
-								const member = members[entry.index];
-								if (!member) return null;
-								const checked = decisionOf(entry).choice === 'add';
-								return (
-									<label key={entry.index} className={styles.choice} data-flx="persona.persona-import-review.choice">
-										<input
-											type="checkbox"
-											className={styles.choiceInput}
-											checked={checked}
-											onChange={() => decide(entry, checked ? {choice: 'skip'} : {choice: 'add', withTags: true})}
-											data-flx="persona.persona-import-review.choice-input.decide.checkbox"
+					{differs.length > 0 && (
+						<section
+							className={styles.item}
+							aria-labelledby="import-differs-heading"
+							data-flx="persona.persona-import-review.differs-group"
+						>
+							<Question id="import-differs-heading" data-flx="persona.persona-import-review.differs-group.question">
+								{i18n._(DIFFERS_GROUP_DESCRIPTOR, {count: differs.length})}
+							</Question>
+							<p className={styles.why} data-flx="persona.persona-import-review.differs-group.hint">
+								{i18n._(DIFFERS_HINT_DESCRIPTOR, {productName})}
+							</p>
+							<ul className={styles.differsList} data-flx="persona.persona-import-review.differs-group.list">
+								{differs.map((entry) => {
+									const member = members[entry.index];
+									const persona = entry.persona_id ? personas.get(entry.persona_id) : undefined;
+									if (!member || !persona) return null;
+									return (
+										<DiffersItem
+											key={entry.index}
+											entry={entry}
+											member={member}
+											persona={persona}
+											localUrl={localPictures.get(entry.index)}
+											decision={decisionOf(entry)}
+											onDecide={(decision) => decide(entry, decision)}
+											expanded={openDiffers.has(entry.index)}
+											onToggle={() =>
+												setOpenDiffers((open) => {
+													const next = new Set(open);
+													if (!next.delete(entry.index)) next.add(entry.index);
+													return next;
+												})
+											}
+											data-flx="persona.persona-import-review.differs-item"
 										/>
-										<span className={styles.choiceText} data-flx="persona.persona-import-review.choice-text">
-											<span className={styles.choiceLabel} data-flx="persona.persona-import-review.choice-label">
-												{member.preview.name}
-											</span>
-											<Tags tags={member.preview.persona_tags} data-flx="persona.persona-import-review.tags--2" />
-										</span>
-									</label>
-								);
-							})}
-						</div>
-					</section>
-				)}
-
-				<div className={styles.closing} data-flx="persona.persona-import-review.closing">
-					{upToDate > 0 && (
-						<div className={styles.closingLine} data-flx="persona.persona-import-review.closing-line">
-							<CheckCircle size={18} aria-hidden="true" data-flx="persona.persona-import-review.check-circle" />
-							<Trans comment="Closing line of the import review. {upToDate} is a number of members">
-								{upToDate} members match their persona exactly. Nothing to do.
-							</Trans>
-						</div>
+									);
+								})}
+							</ul>
+						</section>
 					)}
-					{preview.untouched > 0 && (
-						<div className={styles.closingLine} data-flx="persona.persona-import-review.closing-line--2">
-							<ShieldCheck size={18} aria-hidden="true" data-flx="persona.persona-import-review.shield-check" />
-							<Trans comment="Closing line of the import review. {untouched} is a number of personas">
-								{untouched} of your personas aren't in this file. They stay as they are.
-							</Trans>
-						</div>
+
+					{deleted.map((entry) => {
+						const member = members[entry.index];
+						const persona = entry.persona_id ? personas.get(entry.persona_id) : undefined;
+						if (!member || !persona) return null;
+						const restoring = decisionOf(entry).choice === 'restore';
+						const deletedAt = persona.deleted_at ? new Date(persona.deleted_at) : null;
+						const date = deletedAt ? deletedAt.toLocaleDateString(i18n.locale) : null;
+						const questionId = `import-q-${entry.index}`;
+						const switchId = `import-restore-${entry.index}`;
+						return (
+							<section
+								key={entry.index}
+								className={styles.item}
+								aria-labelledby={questionId}
+								data-flx="persona.persona-import-review.deleted"
+							>
+								<Question id={questionId} data-flx="persona.persona-import-review.deleted.question">
+									{date
+										? i18n._(DELETED_QUESTION_DESCRIPTOR, {name: persona.name, productName, date})
+										: i18n._(DELETED_QUESTION_NO_DATE_DESCRIPTOR, {name: persona.name, productName})}
+								</Question>
+								<Pair
+									left={
+										<div className={styles.card} data-flx="persona.persona-import-review.deleted.file">
+											<MemberBlock
+												entry={entry}
+												member={member}
+												localUrl={localPictures.get(entry.index)}
+												data-flx="persona.persona-import-review.deleted.member-block"
+											/>
+										</div>
+									}
+									right={
+										<label
+											htmlFor={switchId}
+											className={clsx(styles.card, styles.cardChoice, restoring ? styles.cardChosen : styles.cardGhost)}
+											data-flx="persona.persona-import-review.deleted.tyne"
+										>
+											<div
+												className={restoring ? undefined : styles.ghostBody}
+												data-flx="persona.persona-import-review.deleted.body"
+											>
+												<PersonaBlock
+													persona={persona}
+													compact
+													note={
+														restoring
+															? i18n._(COMES_BACK_DESCRIPTOR)
+															: [
+																	date ? i18n._(DELETED_ON_DESCRIPTOR, {date}) : null,
+																	i18n._(USED_TIMES_DESCRIPTOR, {count: persona.use_count ?? 0}),
+																]
+																	.filter(Boolean)
+																	.join(' · ')
+													}
+													data-flx="persona.persona-import-review.deleted.persona-block"
+												/>
+											</div>
+											<span className={styles.switchRow} data-flx="persona.persona-import-review.deleted.switch-row">
+												<input
+													id={switchId}
+													type="checkbox"
+													role="switch"
+													aria-checked={restoring}
+													className={styles.switchInput}
+													checked={restoring}
+													onChange={() => decide(entry, {choice: restoring ? 'keep' : 'restore'})}
+													data-flx="persona.persona-import-review.deleted.switch"
+												/>
+												<span
+													className={clsx(styles.switchTrack, restoring && styles.switchTrackOn)}
+													aria-hidden="true"
+													data-flx="persona.persona-import-review.deleted.switch-track"
+												>
+													<span
+														className={styles.switchKnob}
+														data-flx="persona.persona-import-review.deleted.switch-knob"
+													/>
+												</span>
+												<span
+													className={styles.cardChoiceLabel}
+													data-flx="persona.persona-import-review.deleted.switch-label"
+												>
+													{i18n._(BRING_BACK_DESCRIPTOR, {name: persona.name})}
+												</span>
+											</span>
+										</label>
+									}
+									data-flx="persona.persona-import-review.deleted.pair"
+								/>
+							</section>
+						);
+					})}
+
+					{tagNeedsChoice && (
+						<DisplayTagItem
+							fileTagText={fileTagText}
+							currentText={preview.display_tag.current_text ?? null}
+							choice={displayTagChoice}
+							onChoice={onDisplayTagChoice}
+							data-flx="persona.persona-import-review.display-tag-item"
+						/>
 					)}
 				</div>
 			</div>
@@ -1396,74 +1252,531 @@ export const PersonaImportReview = observer(
 	},
 );
 
-function DiffersRow({
+/** One line each for what needs no decision, with the lists of new and connected members behind Show. */
+function ReadyLines({
+	fresh,
+	probable,
+	upToDate,
+	untouched,
+	members,
+	personas,
+	decisionOf,
+	decide,
+}: {
+	fresh: ReadonlyArray<PersonaImportPreviewEntry>;
+	probable: ReadonlyArray<PersonaImportPreviewEntry>;
+	upToDate: number;
+	untouched: number;
+	members: ReadonlyArray<ReviewMember>;
+	personas: ReadonlyMap<string, PersonaResponse>;
+	decisionOf: (entry: PersonaImportPreviewEntry) => ReviewDecision;
+	decide: (entry: PersonaImportPreviewEntry, decision: ReviewDecision) => void;
+}) {
+	const {i18n} = useLingui();
+	const productName = PRODUCT_NAME;
+	const [open, setOpen] = useState<'new' | 'linked' | null>(null);
+	const adding = fresh.filter((entry) => decisionOf(entry).choice === 'add').length;
+	const linking = probable.filter((entry) => decisionOf(entry).choice === 'link').length;
+	if (fresh.length === 0 && probable.length === 0 && upToDate === 0 && untouched === 0) return null;
+	const toggle = (which: 'new' | 'linked') => setOpen((current) => (current === which ? null : which));
+	return (
+		<div className={styles.ready} data-flx="persona.persona-import-review.ready">
+			{fresh.length > 0 && (
+				<div className={styles.readyLine} data-flx="persona.persona-import-review.ready.new">
+					<div className={styles.readyHead} data-flx="persona.persona-import-review.ready.new.head">
+						<PlusIcon
+							size={18}
+							weight="bold"
+							className={styles.readyIconAdd}
+							aria-hidden="true"
+							data-flx="persona.persona-import-review.ready.new.icon"
+						/>
+						<span className={styles.readyText} data-flx="persona.persona-import-review.ready.new.text">
+							{i18n._(READY_NEW_DESCRIPTOR, {count: adding})}
+						</span>
+						<button
+							type="button"
+							className={styles.readyToggle}
+							aria-expanded={open === 'new'}
+							onClick={() => toggle('new')}
+							data-flx="persona.persona-import-review.ready.new.toggle"
+						>
+							{open === 'new' ? i18n._(HIDE_DESCRIPTOR) : i18n._(SHOW_DESCRIPTOR)}
+						</button>
+					</div>
+					{open === 'new' && (
+						<ul className={styles.readyList} data-flx="persona.persona-import-review.ready.new.list">
+							{fresh.map((entry) => {
+								const member = members[entry.index];
+								if (!member) return null;
+								const checked = decisionOf(entry).choice === 'add';
+								return (
+									<li
+										key={entry.index}
+										className={styles.readyItem}
+										data-flx="persona.persona-import-review.ready.new.item"
+									>
+										<label
+											className={styles.readyItemLabel}
+											data-flx="persona.persona-import-review.ready.new.item-label"
+										>
+											<input
+												type="checkbox"
+												className={styles.checkbox}
+												checked={checked}
+												aria-label={i18n._(ADD_TOGGLE_DESCRIPTOR, {name: member.preview.name})}
+												onChange={() => decide(entry, checked ? {choice: 'skip'} : {choice: 'add', withTags: true})}
+												data-flx="persona.persona-import-review.ready.new.checkbox"
+											/>
+											<span className={styles.readyItemName} data-flx="persona.persona-import-review.ready.new.name">
+												{member.preview.name}
+											</span>
+											<Tags
+												tags={member.preview.persona_tags}
+												data-flx="persona.persona-import-review.ready.new.tags"
+											/>
+										</label>
+									</li>
+								);
+							})}
+						</ul>
+					)}
+				</div>
+			)}
+			{probable.length > 0 && (
+				<div className={styles.readyLine} data-flx="persona.persona-import-review.ready.linked">
+					<div className={styles.readyHead} data-flx="persona.persona-import-review.ready.linked.head">
+						<LinkSimpleIcon
+							size={18}
+							weight="bold"
+							className={styles.readyIcon}
+							aria-hidden="true"
+							data-flx="persona.persona-import-review.ready.linked.icon"
+						/>
+						<span className={styles.readyText} data-flx="persona.persona-import-review.ready.linked.text">
+							{i18n._(READY_LINKED_DESCRIPTOR, {count: linking})}
+						</span>
+						<button
+							type="button"
+							className={styles.readyToggle}
+							aria-expanded={open === 'linked'}
+							onClick={() => toggle('linked')}
+							data-flx="persona.persona-import-review.ready.linked.toggle"
+						>
+							{open === 'linked' ? i18n._(HIDE_DESCRIPTOR) : i18n._(SHOW_DESCRIPTOR)}
+						</button>
+					</div>
+					{open === 'linked' && (
+						<ul className={styles.readyList} data-flx="persona.persona-import-review.ready.linked.list">
+							{probable.map((entry) => {
+								const member = members[entry.index];
+								const persona = entry.persona_id ? personas.get(entry.persona_id) : undefined;
+								if (!member || !persona) return null;
+								const checked = decisionOf(entry).choice === 'link';
+								return (
+									<li
+										key={entry.index}
+										className={styles.readyItem}
+										data-flx="persona.persona-import-review.ready.linked.item"
+									>
+										<label
+											className={styles.readyItemLabel}
+											data-flx="persona.persona-import-review.ready.linked.item-label"
+										>
+											<input
+												type="checkbox"
+												className={styles.checkbox}
+												checked={checked}
+												aria-label={i18n._(CONNECT_TOGGLE_DESCRIPTOR, {name: persona.name})}
+												onChange={() =>
+													decide(entry, checked ? {choice: 'skip'} : {choice: 'link', personaId: persona.id})
+												}
+												data-flx="persona.persona-import-review.ready.linked.checkbox"
+											/>
+											<span className={styles.readyItemName} data-flx="persona.persona-import-review.ready.linked.name">
+												{persona.name}
+											</span>
+											<Tags tags={persona.persona_tags} data-flx="persona.persona-import-review.ready.linked.tags" />
+										</label>
+									</li>
+								);
+							})}
+						</ul>
+					)}
+				</div>
+			)}
+			{upToDate > 0 && (
+				<div className={styles.readyLine} data-flx="persona.persona-import-review.ready.same">
+					<div className={styles.readyHead} data-flx="persona.persona-import-review.ready.same.head">
+						<CheckIcon
+							size={18}
+							weight="bold"
+							className={styles.readyIcon}
+							aria-hidden="true"
+							data-flx="persona.persona-import-review.ready.same.icon"
+						/>
+						<span
+							className={clsx(styles.readyText, styles.readyMuted)}
+							data-flx="persona.persona-import-review.ready.same.text"
+						>
+							{i18n._(READY_SAME_DESCRIPTOR, {count: upToDate, productName})}
+						</span>
+					</div>
+				</div>
+			)}
+			{untouched > 0 && (
+				<div className={styles.readyLine} data-flx="persona.persona-import-review.ready.untouched">
+					<div className={styles.readyHead} data-flx="persona.persona-import-review.ready.untouched.head">
+						<ShieldCheckIcon
+							size={18}
+							weight="bold"
+							className={styles.readyIcon}
+							aria-hidden="true"
+							data-flx="persona.persona-import-review.ready.untouched.icon"
+						/>
+						<span
+							className={clsx(styles.readyText, styles.readyMuted)}
+							data-flx="persona.persona-import-review.ready.untouched.text"
+						>
+							{i18n._(READY_UNTOUCHED_DESCRIPTOR, {count: untouched, productName})}
+						</span>
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}
+
+/**
+ * One persona whose details differ from the file, as a row that names what differs and the current
+ * choice; opened, the two versions side by side, the chosen one lit.
+ */
+function DiffersItem({
 	entry,
 	member,
 	persona,
+	localUrl,
 	decision,
 	onDecide,
-	comparing,
-	onToggleCompare,
+	expanded,
+	onToggle,
 }: {
 	entry: PersonaImportPreviewEntry;
-	member: ReviewMember | undefined;
-	persona: PersonaResponse | undefined;
+	member: ReviewMember;
+	persona: PersonaResponse;
+	localUrl?: string;
 	decision: ReviewDecision;
 	onDecide: (decision: ReviewDecision) => void;
-	comparing: boolean;
-	onToggleCompare: () => void;
+	expanded: boolean;
+	onToggle: () => void;
 }) {
 	const {i18n} = useLingui();
-	const text = useDifferenceText(entry);
-	if (!member || !persona) return null;
+	const productName = PRODUCT_NAME;
+	const useFile = decision.choice === 'use_file';
+	const bodyId = `import-differs-${entry.index}`;
+	const group = `import-${entry.index}`;
+	const differs = new Map((entry.differences ?? []).map((d) => [d.field, d.change]));
+	const isDifferent = (field: PersonaImportField) => {
+		const change = differs.get(field);
+		return change === 'changed' || change === 'removed' || change === 'not_compared';
+	};
+	const differentFields = (entry.differences ?? [])
+		.filter((d) => isDifferent(d.field))
+		.map((d) => i18n._(FIELD_HEADING[d.field]));
 	return (
-		<div className={styles.row} data-flx="persona.persona-import-review.differs-row.row">
-			<div className={styles.rowMain} data-flx="persona.persona-import-review.differs-row.row-main">
-				<PersonaPicture
-					persona={persona}
-					size={36}
-					data-flx="persona.persona-import-review.differs-row.persona-picture"
-				/>
-				<div className={styles.rowText} data-flx="persona.persona-import-review.differs-row.row-text">
-					<span className={styles.rowName} data-flx="persona.persona-import-review.differs-row.row-name">
-						{persona.name}
-					</span>
-					<span className={styles.rowMeta} data-flx="persona.persona-import-review.differs-row.row-meta">
-						{text}
-					</span>
-				</div>
+		<li className={styles.differsRow} data-flx="persona.persona-import-review.differs">
+			<h4 className={styles.differsHeading} data-flx="persona.persona-import-review.differs.heading">
 				<button
 					type="button"
-					className={styles.linkButton}
-					aria-expanded={comparing}
-					onClick={onToggleCompare}
-					data-flx="persona.persona-import-review.differs-row.link-button.toggle-compare"
+					className={styles.differsToggle}
+					aria-expanded={expanded}
+					aria-controls={bodyId}
+					onClick={onToggle}
+					data-flx="persona.persona-import-review.differs.toggle"
 				>
-					{comparing ? i18n._(HIDE_COMPARISON_DESCRIPTOR) : i18n._(COMPARE_DESCRIPTOR)}
+					<PersonaPicture persona={persona} data-flx="persona.persona-import-review.differs.picture" />
+					<span className={styles.differsSummary} data-flx="persona.persona-import-review.differs.summary">
+						<span className={styles.differsName} data-flx="persona.persona-import-review.differs.name">
+							{persona.name}
+						</span>
+						<span className={styles.differsFields} data-flx="persona.persona-import-review.differs.fields">
+							{listFormat(i18n.locale, differentFields)}
+						</span>
+					</span>
+					<span
+						className={clsx(styles.choicePill, useFile && styles.choicePillChange)}
+						data-flx="persona.persona-import-review.differs.choice"
+					>
+						{useFile ? i18n._(USING_FILE_DESCRIPTOR) : i18n._(KEEPING_TYNE_DESCRIPTOR, {productName})}
+					</span>
+					<CaretDownIcon
+						size={16}
+						weight="bold"
+						className={clsx(styles.caret, expanded && styles.caretOpen)}
+						aria-hidden="true"
+						data-flx="persona.persona-import-review.differs.caret"
+					/>
 				</button>
-				<select
-					className={styles.select}
-					aria-label={i18n._(WHAT_TO_DO_SHORT_DESCRIPTOR, {name: persona.name})}
-					value={decision.choice === 'use_file' ? 'use_file' : 'keep'}
-					onChange={(e) => onDecide({choice: e.target.value === 'use_file' ? 'use_file' : 'keep'})}
-					data-flx="persona.persona-import-review.differs-row.select.decide"
+			</h4>
+			{expanded && (
+				<div
+					id={bodyId}
+					className={styles.differsBody}
+					role="group"
+					aria-label={i18n._(DIFFERS_QUESTION_DESCRIPTOR, {name: persona.name, productName})}
+					data-flx="persona.persona-import-review.differs.body"
 				>
-					<option value="keep" data-flx="persona.persona-import-review.differs-row.option">
-						{i18n._(KEEP_TYNE_DESCRIPTOR)}
-					</option>
-					<option value="use_file" data-flx="persona.persona-import-review.differs-row.option--2">
-						{i18n._(USE_FILE_DESCRIPTOR)}
-					</option>
-				</select>
-			</div>
-			{comparing && (
-				<CompareTable
-					entry={entry}
-					member={member}
-					persona={persona}
-					data-flx="persona.persona-import-review.differs-row.compare-table"
-				/>
+					<Pair
+						left={
+							<SideCard
+								name={group}
+								label={i18n._(USE_FILE_NAMED_DESCRIPTOR, {name: member.preview.name})}
+								checked={useFile}
+								dimmed={!useFile}
+								onSelect={() => onDecide({choice: 'use_file'})}
+								data-flx="persona.persona-import-review.differs.file"
+							>
+								<VersionDetails
+									side="file"
+									entry={entry}
+									member={member}
+									persona={persona}
+									localUrl={localUrl}
+									isDifferent={isDifferent}
+									data-flx="persona.persona-import-review.differs.file-details"
+								/>
+							</SideCard>
+						}
+						right={
+							<SideCard
+								name={group}
+								label={i18n._(KEEP_TYNE_NAMED_DESCRIPTOR, {productName, name: persona.name})}
+								checked={!useFile}
+								dimmed={useFile}
+								onSelect={() => onDecide({choice: 'keep'})}
+								data-flx="persona.persona-import-review.differs.tyne"
+							>
+								<VersionDetails
+									side="tyne"
+									entry={entry}
+									member={member}
+									persona={persona}
+									localUrl={localUrl}
+									isDifferent={isDifferent}
+									data-flx="persona.persona-import-review.differs.tyne-details"
+								/>
+							</SideCard>
+						}
+						data-flx="persona.persona-import-review.differs.pair"
+					/>
+				</div>
 			)}
+		</li>
+	);
+}
+
+/** One side of a differing persona: every detail, the ones that differ marked on both sides alike. */
+function VersionDetails({
+	side,
+	entry,
+	member,
+	persona,
+	localUrl,
+	isDifferent,
+}: {
+	side: 'file' | 'tyne';
+	entry: PersonaImportPreviewEntry;
+	member: ReviewMember;
+	persona: PersonaResponse;
+	localUrl?: string;
+	isDifferent: (field: PersonaImportField) => boolean;
+}) {
+	const {i18n} = useLingui();
+	const user = Users.currentUser;
+	const fromFile = side === 'file';
+	const name = fromFile ? member.preview.name : persona.name;
+	const pronouns = fromFile ? member.preview.pronouns : persona.pronouns;
+	const tags = fromFile ? member.preview.persona_tags : persona.persona_tags;
+	const bio = fromFile ? member.preview.bio : persona.bio;
+	const empty = (descriptor: MessageDescriptor) => (
+		<span className={styles.empty} data-flx="persona.persona-import-review.version.empty">
+			{i18n._(descriptor)}
+		</span>
+	);
+	const picture = (field: 'avatar' | 'banner'): React.ReactNode => {
+		const hashes = fromFile
+			? {avatar: entry.avatar_hash, banner: entry.banner_hash}
+			: {avatar: persona.avatar_hash, banner: persona.banner_hash};
+		const hash = hashes[field];
+		if (hash && user) {
+			if (field === 'avatar')
+				return (
+					<PersonaAvatar
+						user={user}
+						persona={{avatar: hash}}
+						size={32}
+						data-flx="persona.persona-import-review.version.avatar"
+					/>
+				);
+			const url = getPersonaBannerURL({userId: user.id, banner: hash}, false, 320);
+			if (url)
+				return (
+					<img
+						className={styles.bannerThumb}
+						src={url}
+						alt=""
+						data-flx="persona.persona-import-review.version.banner"
+					/>
+				);
+		}
+		const change = entry.differences?.find((d) => d.field === field)?.change;
+		const fileHas = Boolean(field === 'avatar' ? member.preview.avatar : member.preview.banner);
+		if (fromFile && change === 'not_compared') return i18n._(UNKNOWN_PICTURE_DESCRIPTOR);
+		if (fromFile && change === 'changed' && fileHas) return i18n._(DIFFERENT_PICTURE_DESCRIPTOR);
+		if (!change && (fromFile ? fileHas : hash)) return i18n._(SAME_PICTURE_DESCRIPTOR);
+		return empty(NO_PICTURE_DESCRIPTOR);
+	};
+	const rows: Array<[PersonaImportField, React.ReactNode]> = [
+		['pronouns', pronouns || empty(NO_PRONOUNS_DESCRIPTOR)],
+		[
+			'persona_tags',
+			tags && tags.length > 0 ? (
+				<Tags tags={tags} data-flx="persona.persona-import-review.version.tags" />
+			) : (
+				empty(NO_TAGS_DESCRIPTOR)
+			),
+		],
+		['bio', bio || empty(NO_BIO_DESCRIPTOR)],
+	];
+	if (isDifferent('avatar')) rows.push(['avatar', picture('avatar')]);
+	if (isDifferent('banner')) rows.push(['banner', picture('banner')]);
+	if (isDifferent('color')) {
+		const color = fromFile ? member.preview.color : persona.color;
+		rows.push([
+			'color',
+			color != null ? (
+				<span className={styles.colorValue} data-flx="persona.persona-import-review.version.color">
+					<span
+						className={styles.colorSwatch}
+						style={{backgroundColor: `#${color.toString(16).padStart(6, '0')}`}}
+						data-flx="persona.persona-import-review.version.color-swatch"
+					/>
+					{`#${color.toString(16).padStart(6, '0')}`}
+				</span>
+			) : (
+				empty(NO_PICTURE_DESCRIPTOR)
+			),
+		]);
+	}
+	return (
+		<div className={styles.version} data-flx="persona.persona-import-review.version">
+			<div className={styles.blockHead} data-flx="persona.persona-import-review.version.head">
+				{fromFile ? (
+					<MemberPicture
+						entry={entry}
+						member={member}
+						localUrl={localUrl}
+						data-flx="persona.persona-import-review.version.member-picture"
+					/>
+				) : (
+					<PersonaPicture persona={persona} data-flx="persona.persona-import-review.version.persona-picture" />
+				)}
+				<span
+					className={clsx(styles.blockName, isDifferent('name') && styles.differs)}
+					data-flx="persona.persona-import-review.version.name"
+				>
+					{name}
+				</span>
+			</div>
+			{rows.map(([field, value]) => (
+				<div
+					key={field}
+					className={clsx(styles.versionRow, isDifferent(field) && styles.differs)}
+					data-flx="persona.persona-import-review.version.row"
+				>
+					<span className={styles.versionLabel} data-flx="persona.persona-import-review.version.label">
+						{i18n._(FIELD_HEADING[field])}
+					</span>
+					<span className={styles.versionValue} data-flx="persona.persona-import-review.version.value">
+						{value}
+					</span>
+				</div>
+			))}
+			<span className={styles.blockMeta} data-flx="persona.persona-import-review.version.meta">
+				{fromFile ? i18n._(FROM_FILE_DESCRIPTOR) : i18n._(USED_TIMES_DESCRIPTOR, {count: persona.use_count ?? 0})}
+			</span>
 		</div>
+	);
+}
+
+/** The display tag, when the file's differs: two cards with the name line each would give. */
+function DisplayTagItem({
+	fileTagText,
+	currentText,
+	choice,
+	onChoice,
+}: {
+	fileTagText: string | null;
+	currentText: string | null;
+	choice: 'keep' | 'file';
+	onChoice: (choice: 'keep' | 'file') => void;
+}) {
+	const {i18n} = useLingui();
+	const productName = PRODUCT_NAME;
+	const user = Users.currentUser;
+	const sample = (text: string | null) => (
+		<span className={styles.namePreview} data-flx="persona.persona-import-review.display-tag.preview">
+			{user && <Initial name={user.displayName} data-flx="persona.persona-import-review.display-tag.initial" />}
+			<span className={styles.blockName} data-flx="persona.persona-import-review.display-tag.name">
+				{user?.displayName}
+			</span>
+			{text ? (
+				<span className={styles.displayTagText} data-flx="persona.persona-import-review.display-tag.text">
+					{text}
+				</span>
+			) : (
+				<span className={styles.empty} data-flx="persona.persona-import-review.display-tag.none">
+					{i18n._(NO_DISPLAY_TAG_DESCRIPTOR)}
+				</span>
+			)}
+		</span>
+	);
+	return (
+		<section
+			className={styles.item}
+			aria-labelledby="import-q-display-tag"
+			data-flx="persona.persona-import-review.display-tag"
+		>
+			<Question id="import-q-display-tag" data-flx="persona.persona-import-review.display-tag.question">
+				{i18n._(DISPLAY_TAG_QUESTION_DESCRIPTOR, {productName})}
+			</Question>
+			<Pair
+				left={
+					<SideCard
+						name="import-display-tag"
+						label={i18n._(USE_FILES_TAG_DESCRIPTOR)}
+						checked={choice === 'file'}
+						dimmed={choice !== 'file'}
+						onSelect={() => onChoice('file')}
+						data-flx="persona.persona-import-review.display-tag.file"
+					>
+						{sample(fileTagText)}
+					</SideCard>
+				}
+				right={
+					<SideCard
+						name="import-display-tag"
+						label={i18n._(KEEP_TYNES_TAG_DESCRIPTOR, {productName})}
+						checked={choice === 'keep'}
+						dimmed={choice !== 'keep'}
+						onSelect={() => onChoice('keep')}
+						data-flx="persona.persona-import-review.display-tag.tyne"
+					>
+						{sample(currentText)}
+					</SideCard>
+				}
+				data-flx="persona.persona-import-review.display-tag.pair"
+			/>
+		</section>
 	);
 }
