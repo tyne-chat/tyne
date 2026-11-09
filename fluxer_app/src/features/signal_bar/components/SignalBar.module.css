@@ -21,8 +21,8 @@
 .barAttached {
 	margin-inline: calc(-1 * var(--composer-box-padding-inline, 0px));
 	border-bottom: 0.0625rem solid var(--composer-divider-color, var(--background-modifier-accent));
-	border-top-left-radius: var(--composer-box-radius, 0px);
-	border-top-right-radius: var(--composer-box-radius, 0px);
+	border-start-start-radius: var(--composer-box-radius, 0px);
+	border-start-end-radius: var(--composer-box-radius, 0px);
 }
 
 .barStandalone {
@@ -108,7 +108,7 @@
 
 .badge + .badge,
 .badge + .more {
-	margin-left: -5px;
+	margin-inline-start: -5px;
 }
 
 .more {
@@ -145,7 +145,7 @@
 	justify-content: center;
 	width: 20px;
 	height: 20px;
-	margin-left: auto;
+	margin-inline-start: auto;
 	padding: 0;
 	border: 0;
 	border-radius: var(--radius-md);
