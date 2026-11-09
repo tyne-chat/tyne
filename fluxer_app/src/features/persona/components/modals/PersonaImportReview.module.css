@@ -85,8 +85,6 @@
 	margin: 0 0 10px;
 	padding: 0;
 	list-style: none;
-	max-height: 240px;
-	overflow-y: auto;
 	border: 1px solid var(--border-color);
 	border-radius: 8px;
 }
@@ -278,20 +276,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	min-width: 0;
-}
-
-.blockHead {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	min-width: 0;
-}
-
-.blockTitle {
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
 	min-width: 0;
 }
 
@@ -852,17 +836,6 @@
 	height: 100%;
 }
 
-/* A picture that differs from the other side, marked as differing text is. */
-.profileDiffers {
-	box-shadow: 0 0 0 3px var(--accent-warning);
-}
-
-.profileAvatarDiffers {
-	box-shadow:
-		0 0 0 4px var(--import-card-bg),
-		0 0 0 7px var(--accent-warning);
-}
-
 .profileMissing {
 	position: absolute;
 	inset-inline-end: 0;
@@ -1033,4 +1006,98 @@
 	.takenSpacer {
 		display: none;
 	}
+}
+
+/* Which persona a member might be: a card per persona, and None of these (tyne-chat/tyne#573). */
+.pick {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0 0 12px;
+	padding: 0;
+	border: 0;
+}
+
+.pickQuestion {
+	padding: 0;
+	margin-bottom: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.pickGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 8px;
+}
+
+.pickCard {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+	padding: 10px;
+	border: 2px solid var(--border-color);
+	border-radius: 10px;
+	background: var(--bg-secondary);
+	cursor: pointer;
+}
+
+.pickCard:hover {
+	border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--border-color));
+}
+
+.pickCardOn {
+	border-color: var(--brand-primary);
+	background: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-secondary));
+}
+
+.pickCardNone {
+	border-style: dashed;
+	justify-content: center;
+}
+
+.pickCardHead {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* The lists of what needs no decision show small pictures. */
+.readyItem .rowAvatar,
+.readyItem .placeholderAvatar {
+	width: 28px;
+	height: 28px;
+	font-size: 13px;
+}
+
+/* A bio keeps its line breaks, as a profile card shows it; words the other side lacks are marked. */
+.bioText {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.bioChanged {
+	padding: 0 1px;
+	border-radius: 3px;
+	background: color-mix(in srgb, var(--brand-primary) 38%, transparent);
+	color: inherit;
+}
+
+/* Where the persona a member might be goes, until one is picked. */
+.emptyCard {
+	min-height: 160px;
+	border-style: dashed;
+	background: transparent;
+}
+
+/* The app turns text selection off as a whole; the details people compare can be selected and copied. */
+.version,
+.why,
+.readyItemName,
+.readyItemLabel .tags,
+.namePreview {
+	user-select: text;
+	-webkit-user-select: text;
 }
