@@ -12,9 +12,19 @@
 			"Download AppImage",
 			"Download Tyne",
 			"Persona",
-			"Script"
+			"Script",
+			"Tag"
 		],
-		"de": ["Account: @{username}", "Alice", "Name (A–Z)", "Optional", "Persona", "Personas", "Personas ({count})"],
+		"de": [
+			"Account: @{username}",
+			"Alice",
+			"Name (A–Z)",
+			"Optional",
+			"Persona",
+			"Personas",
+			"Personas ({count})",
+			"Tag"
+		],
 		"el": ["Persona"],
 		"es-419": [
 			"avatar",
@@ -47,12 +57,12 @@
 		],
 		"hr": ["avatar", "Persona"],
 		"hu": ["Persona"],
-		"id": ["Alice", "avatar", "banner", "bio", "Edit Persona", "Edit persona", "Manual", "Persona"],
-		"it": ["Account: @{username}", "Alice", "avatar", "banner", "Persona", "Script"],
+		"id": ["Alice", "avatar", "banner", "bio", "Edit Persona", "Edit persona", "Manual", "Persona", "Tag"],
+		"it": ["Account: @{username}", "Alice", "avatar", "banner", "Persona", "Script", "Tag"],
 		"lt": ["Persona"],
-		"nl": ["Account: @{username}", "Alice", "avatar", "banner", "bio", "Persona", "Script", "tags"],
+		"nl": ["Account: @{username}", "Alice", "avatar", "banner", "bio", "Persona", "Script", "Tag", "tags"],
 		"no": ["Alice", "avatar", "banner", "bio", "Persona"],
-		"pl": ["Persona"],
+		"pl": ["Persona", "Tag"],
 		"pt-BR": [
 			"Alice",
 			"avatar",

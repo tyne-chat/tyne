@@ -26,6 +26,10 @@ msgstr "<0>{tag}</0> este deja folosită de persona ta {name}."
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "<0>{tag}</0> este folosită și de {name} în fișierul tău."
 
+#. Choice in the import review: the member of the file is someone else, add it as a new persona
+msgid "A different persona: add it"
+msgstr "O altă persona: adaug-o"
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "O persona poate avea cel mult 5 etichete"
@@ -58,10 +62,6 @@ msgstr "Adaugă persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Adaugă pereche de etichete ({0}/5)"
 
-#. Choice in the import review: add the member as a new persona next to the existing one
-msgid "Add as a separate persona"
-msgstr "Adaugă ca persona separată"
-
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Adaugă contor"
@@ -69,13 +69,13 @@ msgstr "Adaugă contor"
 msgid "Add signal"
 msgstr "Adaugă semnal"
 
-#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
-msgid "Add with the tag"
-msgstr "Adaugă cu eticheta"
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "Adaugă {name}"
 
-#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
-msgid "Add without {tags}"
-msgstr "Adaugă fără {tags}"
+#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
+msgid "Add {name} with a tag of its own"
+msgstr "Adaugă {name} cu o etichetă proprie"
 
 #. Line of the import result: new personas
 msgid "Added"
@@ -157,6 +157,10 @@ msgstr "Imaginea bannerului nu a putut fi descărcată: {error}. Persona a fost 
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "Imaginea bannerului nu a putut fi descărcată: {error}. Persona și-a păstrat bannerul pe care îl avea."
 
+#. Switch on a deleted persona in the import review that restores it. {name} is its name
+msgid "Bring {name} back"
+msgstr "Readu {name}"
+
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
@@ -166,14 +170,6 @@ msgstr "A revenit fără {items}: acum le are altă persona."
 msgid "Can't compare"
 msgstr "Nu se poate compara"
 
-#. Short name of a section of the import review
-msgid "Can't tell"
-msgstr "Neclar"
-
-#. Section of the import review
-msgid "Can't tell if it's the same persona"
-msgstr "Nu se știe dacă e aceeași persona"
-
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Schimbă persona"
@@ -181,6 +177,10 @@ msgstr "Schimbă persona"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "Schimbă mesajul în funcție de ce au scris"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "Verifică înainte de import"
 
 #. Title of the persona import dialog while the file is checked
 msgid "Checking your file..."
@@ -217,6 +217,10 @@ msgstr "Culoare"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "Revino aici și atinge <0>Obține Tyne în TestFlight</0>, apoi <1>Instalează</1>."
 
+#. Small line on a deleted persona in the import review once it is set to come back
+msgid "Comes back as it was, with its old messages"
+msgstr "Revine așa cum era, cu mesajele ei vechi"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Comandă"
@@ -234,10 +238,6 @@ msgstr "Comenzi"
 msgid "Commands saved"
 msgstr "Comenzi salvate"
 
-#. Button that shows a persona next to its version in the import file
-msgid "Compare"
-msgstr "Compară"
-
 #. Status while the import file is compared with the account's personas
 msgid "Comparing your file with your personas..."
 msgstr "Se compară fișierul cu personas tale..."
@@ -245,6 +245,10 @@ msgstr "Se compară fișierul cu personas tale..."
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Personas configurate ({count})"
+
+#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
+msgid "Connect {name}"
+msgstr "Conectează {name}"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -333,10 +337,6 @@ msgstr "Șterge marcajul de timp\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "Ștergi {count, plural, one {# persona} few {# personas} other {# de personas}}?"
 
-#. Short name of a section of the import review
-msgid "Deleted"
-msgstr "Șterse"
-
 #. Title of the section in Settings › Personas that lists deleted personas
 msgid "Deleted personas"
 msgstr "Personas șterse"
@@ -353,25 +353,10 @@ msgstr "Ștearsă pe {date}"
 msgid "Detected System Name / Tag"
 msgstr "Nume / etichetă de sistem detectate"
 
-#. Section of the import review
-msgid "Different in your file"
-msgstr "Diferite în fișierul tău"
-
 #. Comparison of a persona picture with the import file: they differ
 msgid "Different picture"
 msgstr "Imagine diferită"
 
-#. Short name of a section of the import review
-msgid "Differs"
-msgstr "Diferă"
-
-#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
-msgid "Differs: {fields}"
-msgstr "Diferă: {fields}"
-
-#. Heading of the display tag choice in the import review
-#. Section of the import review
-#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "Etichetă de afișare"
@@ -442,13 +427,9 @@ msgstr "Pereche de etichete duplicată la această persona"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Fiecare canal își păstrează propria persona. Canalele noi pornesc cu contul tău."
 
-#. Explanation of a section of the import review
-msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
-msgstr "Fiecare dintre aceștia are același nume sau aceeași etichetă ca una dintre personas tale, dar nu pe amândouă, deci poate fi aceeași persona sau alta. Compară-i și alege. Membrii omiși rămân în fișierul tău pentru data viitoare."
-
-#. Explanation at the top of the import review
-msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
-msgstr "Pentru fiecare este deja aleasă varianta cea mai sigură, deci nimic din ce ai nu se schimbă decât dacă alegi tu. Citește fiecare secțiune înainte de import. Cele mai dificile sunt sus."
+#. Hint under the list of differing personas in the import review. {productName} is the app name
+msgid "Each keeps {productName}'s version unless you open it and choose the file's."
+msgstr "Fiecare păstrează versiunea din {productName}, dacă nu o deschizi și alegi versiunea din fișier."
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -572,6 +553,15 @@ msgstr "Filtrează după vizibilitate"
 msgid "Format preview"
 msgstr "Previzualizare format"
 
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "Liberă"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "Din fișierul tău"
+
 #. Link at the end of the command script help to the complete guide on GitHub.
 msgid "Full script guide"
 msgstr "Ghid complet pentru scripturi"
@@ -610,13 +600,14 @@ msgstr "Obține aplicația Tyne"
 msgid "Here is what changed"
 msgstr "Iată ce s-a schimbat"
 
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "Ascunde"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Ascunde lista de canale"
-
-#. Button that hides the comparison of a persona with the import file
-msgid "Hide comparison"
-msgstr "Ascunde comparația"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -677,23 +668,6 @@ msgstr "Se importă..."
 msgid "In each channel"
 msgstr "În fiecare canal"
 
-#. Column heading in the import review
-msgid "In this app"
-msgstr "În această aplicație"
-
-#. Explanation of a section of the import review
-msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
-msgstr "În această aplicație, fiecare etichetă proxy aparține unei singure persona. Acești membri au o etichetă pe care o are deja altă persona sau pe care o are și alt membru din fișierul tău."
-
-#. Column heading in the table comparing a persona with the import file
-msgid "In this app now"
-msgstr "Acum în această aplicație"
-
-#. Column heading in the import review
-#. Column heading in the table comparing a persona with the import file
-msgid "In your file"
-msgstr "În fișierul tău"
-
 #. Explanation of the "Kept as they were" line of the import result
 msgid "Including any that differ from the file, where you kept the version you had."
 msgstr "Inclusiv cele care diferă de fișier, unde ai păstrat versiunea pe care o aveai."
@@ -717,42 +691,49 @@ msgstr "Inserează:"
 msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
 msgstr "Instalează din App Store aplicația gratuită <0>TestFlight</0> de la Apple."
 
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "În loc de {tag}"
+
+#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
+msgid "Is {name} from your file one of these personas in {productName}?"
+msgstr "{name} din fișierul tău este una dintre aceste personas din {productName}?"
+
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "Scriptul ei are o problemă."
 
-#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
-msgid "Keep this version"
-msgstr "Păstrează această versiune"
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "Continuă verificarea"
 
-#. Button in the import review: keep every listed persona as it is
-msgid "Keep this version for all"
-msgstr "Păstrează această versiune pentru toate"
+#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
+msgid "Keep {productName}'s"
+msgstr "Păstrează-o pe cea din {productName}"
 
-#. Choice in the import review: keep the display tag {tag}
-msgid "Keep yours: {tag}"
-msgstr "Păstrează-o pe a ta: {tag}"
+#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
+msgid "Keep {productName}'s {name}"
+msgstr "Păstrează {name} din {productName}"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "Rămâne din {productName}"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "Își păstrează eticheta"
 
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "Păstrate cum erau"
 
-#. Choice in the import review for a persona that was deleted: keep it deleted
-msgid "Leave deleted"
-msgstr "Las-o ștearsă"
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Leave {name} out this time"
+msgstr "Omite {name} de data asta"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "Linia {line}, coloana {column}: {problem}"
-
-#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
-msgctxt "persona-import-choice"
-msgid "Link"
-msgstr "Conectează"
-
-#. Button in the import review that links every persona listed
-msgid "Link all {count}"
-msgstr "Conectează toate ({count})"
 
 #. Shown on a persona in the import review that is already connected to a different member
 msgid "Linked to another PluralKit member"
@@ -817,10 +798,6 @@ msgstr "Membrul nr. {index}"
 msgid "Members with Avatars"
 msgstr "Membri cu avatare"
 
-#. Explanation of a section of the import review
-msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
-msgstr "Membri pe care nu îi ai încă, fără conflict de nume sau de etichetă. Debifează-i pe cei pe care nu îi vrei."
-
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "Instrumente pentru mesaje"
@@ -845,10 +822,6 @@ msgstr "Mută în coș"
 msgid "Name (A–Z)"
 msgstr "Nume (A–Z)"
 
-#. Badge on a section of the import review where every member needs a choice
-msgid "Needs a decision"
-msgstr "Necesită o decizie"
-
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Persona nouă"
@@ -856,10 +829,6 @@ msgstr "Persona nouă"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "Comandă nouă"
-
-#. Section of the import review
-msgid "New in your file"
-msgstr "Noi în fișierul tău"
 
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
@@ -881,6 +850,10 @@ msgstr "Persona următoare"
 msgid "No \"members\" array found in this export file."
 msgstr "Nu s-a găsit niciun tablou „members” în acest fișier de export."
 
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "Fără descriere"
+
 #. Shown on a persona’s card in the Personas list when it has no bio.
 msgid "No bio yet."
 msgstr "Încă nu există o descriere."
@@ -892,6 +865,10 @@ msgstr "Nicio comandă"
 #. Shown in Settings › Personas when there are no deleted personas
 msgid "No deleted personas."
 msgstr "Nicio persona ștearsă."
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "Fără etichetă de afișare"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Nicio etichetă de afișare configurată. Mesajele vor afișa poza de profil a contului tău."
@@ -916,12 +893,24 @@ msgstr "Nu există personas aici."
 msgid "No personas match your search."
 msgstr "Nicio persona nu corespunde căutării tale."
 
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "Fără pronume"
+
 #. Shown in another account’s Personas list when it lists none.
 msgid "No public personas."
 msgstr "Nicio persona publică."
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Încă nu există semnale. Bara rămâne ascunsă până adaugi unul."
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "Fără etichetă: se adaugă fără niciuna"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "Fără etichete"
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
@@ -931,9 +920,17 @@ msgstr "Nimeni nu are acest semnal activat"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Niciuna dintre personas tale nu este încă publică. Ceilalți văd o persona aici după ce îi setezi vizibilitatea la Publică."
 
-#. Hint on the choice to skip a member in the import review
-msgid "Nothing changes. It stays in your file for next time."
-msgstr "Nu se schimbă nimic. Membrul rămâne în fișierul tău pentru data viitoare."
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Not sure: leave {name} out this time"
+msgstr "Nu știu sigur: omite {name} de data asta"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "Nu știi sigur? Lasă așa cum este: nu se schimbă nimic."
+
+#. Badge on the choice in the import review that leaves everything as it is
+msgid "Nothing changes"
+msgstr "Nu se schimbă nimic"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1124,7 +1121,6 @@ msgstr "Persona anterioară"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
-#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "Privată"
@@ -1132,14 +1128,6 @@ msgstr "Privată"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "Persona privată"
-
-#. Short name of a section of the import review
-msgid "Probably the same"
-msgstr "Probabil aceeași"
-
-#. Section of the import review
-msgid "Probably the same persona"
-msgstr "Probabil aceeași persona"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -1154,7 +1142,6 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "Cardurile de profil sunt accesibile când se face clic pe mesaje și sunt vizibile în lista ta publică de personas pentru prieteni și servere comune."
 
 #. Chip above the persona list: public personas.
-#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "Publică"
@@ -1228,13 +1215,8 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Resetezi numărătorile pentru {name}? Acțiunea nu poate fi anulată."
 
 #. Button that brings back a deleted persona
-#. Choice in the import review: bring a deleted persona back, with its old messages
 msgid "Restore"
 msgstr "Restaurează"
-
-#. Button in the import review that restores every deleted persona listed
-msgid "Restore all {count}"
-msgstr "Restaurează toate ({count})"
 
 #. Explanation of the "Still deleted" line of the import result
 msgid "Restore them from Deleted personas in Settings if you change your mind."
@@ -1247,10 +1229,6 @@ msgstr "Restaurate"
 msgid "Results"
 msgstr "Rezultate"
 
-#. Title of the persona import review
-msgid "Review before importing"
-msgstr "Verifică înainte de import"
-
 msgid "Root Account (Default)"
 msgstr "Contul principal (Implicit)"
 
@@ -1262,21 +1240,25 @@ msgstr "Rulează din nou"
 msgid "Run anyway"
 msgstr "Executați oricum"
 
-#. Badge on the safest choice in the import review
-msgid "Safest"
-msgstr "Cea mai sigură"
+#. Why a persona in the import review may be the member: same name
+msgid "Same name"
+msgstr "Același nume"
 
-#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
-msgid "Same as your {name}: link them"
-msgstr "La fel ca {name} a ta: conectează-le"
+#. Why a persona in the import review may be the member: same name and proxy tag
+msgid "Same name and tag"
+msgstr "Același nume și aceeași etichetă"
 
-#. Explanation of a section of the import review
-msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
-msgstr "Același nume și aceeași etichetă ca una dintre personas tale, dar încă neconectate la fișierul tău, de exemplu pentru că le-ai creat manual. Conectarea doar reține ce membru din fișier este fiecare, ca importurile viitoare să o recunoască. La persona nu se schimbă nimic."
+#. Choice on a persona's card in the import review: the member of the import file is this persona
+msgid "Same persona as this one"
+msgstr "Este aceeași persona"
 
 #. Comparison of a persona picture with the import file: they are the same
 msgid "Same picture"
 msgstr "Aceeași imagine"
+
+#. Why a persona in the import review may be the member: same proxy tag
+msgid "Same tag"
+msgstr "Aceeași etichetă"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1337,6 +1319,11 @@ msgstr "Setează ca activă"
 msgid "Set as active persona"
 msgstr "Setează ca persona activă"
 
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "Arată"
+
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
 msgstr "Afișează butonul de copiere"
@@ -1344,10 +1331,6 @@ msgstr "Afișează butonul de copiere"
 #. Button that loads the list of deleted personas in Settings › Personas
 msgid "Show deleted personas"
 msgstr "Arată personas șterse"
-
-#. Button that collapses a list in the import review again
-msgid "Show fewer"
-msgstr "Arată mai puține"
 
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
@@ -1361,10 +1344,6 @@ msgstr "Afișează bara de semnale"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "Afișează nelistatele și privatele"
-
-#. Button that shows the rest of a list in the import review
-msgid "Show {count} more"
-msgstr "Arată încă {count}"
 
 msgid "Signal Bar"
 msgstr "Bara de semnale"
@@ -1396,9 +1375,9 @@ msgstr "Emoji-ul semnătură este deja utilizat de persona „{name}”"
 msgid "Signature emojis"
 msgstr "Emoji-uri semnătură"
 
-#. Choice in the import review: do nothing with this member of the import file
-msgid "Skip this member"
-msgstr "Omite acest membru"
+#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
+msgid "Similar tag"
+msgstr "Etichetă asemănătoare"
 
 #. Line of the import result: members left out
 msgid "Skipped"
@@ -1420,6 +1399,14 @@ msgstr "Încă șterse"
 msgid "Still in your file. Import it again any time to decide about them."
 msgstr "Încă în fișierul tău. Importă-l din nou oricând ca să decizi ce faci cu ei."
 
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "Oprește importul"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "Oprești acest import?"
+
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "Se salvează imaginea {current} din {total} din fișier..."
@@ -1439,6 +1426,11 @@ msgstr "Acceptă fișiere de export de sistem PluralKit"
 msgid "Switch the active persona"
 msgstr "Schimbă persona activă"
 
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "Etichetă"
+
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -1446,14 +1438,6 @@ msgstr "Pictograma etichetei"
 
 msgid "Tag Text"
 msgstr "Textul etichetei"
-
-#. Section of the import review
-msgid "Tag already in use"
-msgstr "Etichetă deja folosită"
-
-#. Short name of a section of the import review
-msgid "Tag in use"
-msgstr "Etichetă folosită"
 
 #. Row heading in the table comparing a persona with the import file: whether its tags are matched
 msgid "Tag matching"
@@ -1554,13 +1538,9 @@ msgstr "Nu există niciun filtru numit {name}."
 msgid "There's no tag called {name}."
 msgstr "Nu există niciun tag numit {name}."
 
-#. Explanation of a section of the import review
-msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
-msgstr "Acestea au venit înainte din fișierul tău, dar acum fișierul are alte detalii sau le-ai schimbat aici între timp. Nu se poate ști care parte s-a schimbat, așa că se păstrează versiunea din această aplicație, decât dacă alegi versiunea din fișier pentru o persona. Versiunea din fișier înlocuiește detaliile acelei persona; mesajele, istoricul, vizibilitatea și emoji-urile ei semnătură rămân, la fel ca orice imagine care nu poate fi descărcată."
-
-#. Explanation of a section of the import review
-msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
-msgstr "Rămân șterse dacă nu le restaurezi. Restaurarea aduce înapoi aceeași persona așa cum era, cu mesajele și utilizarea ei de dinainte, în loc să facă o copie."
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "Acestea par să fie personas pe care le ai deja în {productName}. Pentru fiecare, alege ce ar trebui să aibă {productName}. Nu știi sigur? Lasă așa cum este: nu se schimbă nimic."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1623,6 +1603,10 @@ msgstr "Pornește bara de semnale"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne se deschide singur. Conectează-te și gata."
 
+#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
+msgid "Type {example} to post as {name}"
+msgstr "Scrie {example} ca să trimiți ca {name}"
+
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Scrie {output} sau {tag} pentru sugestii."
@@ -1641,7 +1625,6 @@ msgstr "Ubuntu, Fedora și altele"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
-#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Nelistată"
@@ -1702,34 +1685,30 @@ msgstr "Folosește litere mici, cifre, - și _, cel mult 32 de caractere."
 msgid "Use the basic editor"
 msgstr "Folosește editorul de bază"
 
-#. Choice in the import review: replace the persona's details with those in the import file
-msgid "Use the file's version"
-msgstr "Folosește versiunea din fișier"
+#. Choice on the import file's card in the import review: use the file's display tag
+msgid "Use the file's"
+msgstr "Folosește-o pe cea din fișier"
 
-#. Choice in the import review: use the import file's system tag {tag} as the display tag
-msgid "Use the file's: {tag}"
-msgstr "Folosește-o pe cea din fișier: {tag}"
+#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
+msgid "Use the file's {name}"
+msgstr "Folosește {name} din fișier"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "Folosește editorul de scripturi"
 
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "Din fișier"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Vezi personas tale"
-
-#. Heading of the choices for one member of the import file
-msgid "What should happen to {name} from your file?"
-msgstr "Ce să se întâmple cu {name} din fișierul tău?"
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "Ce scriu"
-
-#. Accessible label of the menu of choices for one persona in the import review
-msgid "What to do with {name}"
-msgstr "Ce faci cu {name}"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1758,29 +1737,29 @@ msgstr "Windows a protejat PC-ul"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Scrie un număr ca 1st, 2nd, 3rd"
 
-#. Hint on the choice to add a member without its proxy tag, in the import review
-msgid "You can give it another tag later in Settings."
-msgstr "Îi poți da altă etichetă mai târziu, în Setări."
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "Ai șters {name} din {productName} pe {date}. Vrei să readuci persona {name}?"
 
-#. Section of the import review
-msgid "You deleted these"
-msgstr "Le-ai șters"
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "Ai șters {name} din {productName}. Vrei să readuci persona {name}?"
 
-#. Hint on the choice to add a member as a separate persona, in the import review
-msgid "You will have one more {name}."
-msgstr "Vei avea încă o persona {name}."
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "Alegerile tale pentru acești membri se vor pierde și nu se va importa nimic."
 
-#. Explanation of a section of the import review
-msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
-msgstr "Contul tău are o singură etichetă de afișare, afișată după numele fiecărei persona. Eticheta de sistem din fișier este diferită."
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "Eticheta ta de afișare apare după numele fiecărei persona. Pe care ar trebui s-o folosească {productName}?"
 
 #. On the download page after the visitor chose to download the app elsewhere.
 msgid "Your download should start in a moment. If it doesn't, use the button above."
 msgstr "Descărcarea ar trebui să înceapă imediat. Dacă nu începe, folosește butonul de mai sus."
 
-#. Hint on the choice to link a member to an existing persona, in the import review
-msgid "Your persona stays as it is; it is connected to this member."
-msgstr "Persona ta rămâne cum este; e conectată la acest membru."
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "Fișierul tău"
 
 msgid "Your reactions"
 msgstr "Reacțiile tale"
@@ -1793,33 +1772,17 @@ msgstr "Reacțiile tale {emojiName}"
 msgid "add {count}"
 msgstr "adăuga {count}"
 
-#. A persona field, listed in "Differs: name, avatar"
-msgid "avatar"
-msgstr "avatar"
-
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "avatare descărcate"
-
-#. A persona field, listed in "Differs: name, banner"
-msgid "banner"
-msgstr "banner"
 
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "bannere descărcate"
 
-#. A persona field, listed in "Differs: name, bio"
-msgid "bio"
-msgstr "descriere"
-
 #. Part of the import summary "Import will add 7 and change your display tag"
 msgid "change your display tag"
 msgstr "schimba eticheta ta de afișare"
-
-#. A persona field (its accent colour), listed in "Differs: name, colour"
-msgid "colour"
-msgstr "culoare"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1853,26 +1816,9 @@ msgstr "elemente"
 msgid "link {count}"
 msgstr "conecta {count}"
 
-#. A persona's name as a field, listed in "Differs: name, bio"
-msgctxt "persona-field"
-msgid "name"
-msgstr "nume"
-
-#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
-msgid "picture not compared"
-msgstr "imagine necomparată"
-
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
 msgstr "apasă pentru a vedea reacțiile tale"
-
-#. A persona field, listed in "Differs: name, pronouns"
-msgid "pronouns"
-msgstr "pronume"
-
-#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
-msgid "removes {fields}"
-msgstr "ar elimina {fields}"
 
 #. Part of the import summary "Import will link 17, restore 2, skip 3"
 msgid "restore {count}"
@@ -1882,21 +1828,9 @@ msgstr "restaura {count}"
 msgid "saving personas"
 msgstr "personas salvate"
 
-#. A persona field, listed in "Differs: name, signature emojis"
-msgid "signature emojis"
-msgstr "emoji-uri semnătură"
-
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "skip {count}"
 msgstr "omite {count}"
-
-#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
-msgid "tag matching"
-msgstr "recunoașterea etichetelor"
-
-#. A persona field (its proxy tags), listed in "Differs: name, tags"
-msgid "tags"
-msgstr "etichete"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1908,10 +1842,6 @@ msgstr "text"
 #. Part of the import summary "Import will link 17, use the file's version for 2"
 msgid "use the file's version for {count}"
 msgstr "folosi versiunea din fișier pentru {count}"
-
-#. A persona field, listed in "Differs: name, visibility"
-msgid "visibility"
-msgstr "vizibilitate"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1927,6 +1857,22 @@ msgstr "Personas adăugate: {addedCount}"
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} este gata de instalare."
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
+msgstr "{count, plural, one {# membru se potrivește deja cu persona sa din {productName}. Nu e nimic de făcut.} few {# membri se potrivesc deja cu personas lor din {productName}. Nu e nimic de făcut.} other {# de membri se potrivesc deja cu personas lor din {productName}. Nu e nimic de făcut.}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
+msgstr "{count, plural, one {# membru nou va fi adăugat} few {# membri noi vor fi adăugați} other {# de membri noi vor fi adăugați}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
+msgstr "{count, plural, one {# persona din {productName} nu este în fișierul tău. Rămâne așa cum este.} few {# personas din {productName} nu sunt în fișierul tău. Rămân așa cum sunt.} other {# de personas din {productName} nu sunt în fișierul tău. Rămân așa cum sunt.}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, one {# persona arată altfel în fișierul tău} few {# personas arată altfel în fișierul tău} other {# de personas arată altfel în fișierul tău}}"
 
 #. Toast after making personas private; it has an Undo button.
 msgid "{count, plural, one {# persona is} other {# personas are}} now private"
@@ -1944,6 +1890,10 @@ msgstr "{count, plural, one {# persona este acum nelistată} few {# personas sun
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, one {# persona rămâne neschimbată} few {# personas rămân neschimbate} other {# de personas rămân neschimbate}}"
 
+#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
+msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
+msgstr "{count, plural, one {# persona creată manual va fi conectată la membrul ei. Nu se schimbă nimic la ea.} few {# personas create manual vor fi conectate la membrii lor. Nu se schimbă nimic la ele.} other {# de personas create manual vor fi conectate la membrii lor. Nu se schimbă nimic la ele.}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, one {# persona} few {# personas} other {# de personas}}"
@@ -1951,6 +1901,10 @@ msgstr "{count, plural, one {# persona} few {# personas} other {# de personas}}"
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, one {# persona ștearsă} few {# personas șterse} other {# de personas șterse}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, one {Verifică # membru înainte de import} few {Verifică # membri înainte de import} other {Verifică # de membri înainte de import}}"
 
 #. How often a persona has been used, shown in the import review
 #. How often a persona has been used, shown in the import review
@@ -1992,21 +1946,25 @@ msgstr "{names} ar avea toate {label}. Schimbă una dintre alegeri."
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - Fă clic pentru a schimba persona"
 
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "Folosită deja de {name}"
+
 #. Toast after a deleted persona was restored
 msgid "{name} is back."
 msgstr "{name} a revenit."
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "{name} arată altfel în fișierul tău. Ce versiune ar trebui să aibă {productName}?"
 
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "{name} nu se închide niciodată."
 
-#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
-msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
-msgstr "De verificat: membri ({needCount}) și eticheta ta de afișare"
-
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
-msgstr "Membri de verificat: {needCount}"
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "Eticheta lui {name} este deja folosită"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -2022,18 +1980,6 @@ msgstr "{publicCount} publice, {unlistedCount} nelistate, {privateCount} private
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "{shown} din {total} personas"
-
-#. Closing line of the import review. {untouched} is a number of personas
-msgid "{untouched} of your personas aren't in this file. They stay as they are."
-msgstr "Personas tale care nu sunt în acest fișier: {untouched}. Rămân cum sunt."
-
-#. Closing line of the import review. {upToDate} is a number of members
-msgid "{upToDate} members match their persona exactly. Nothing to do."
-msgstr "Membri identici cu persona lor: {upToDate}. Nimic de făcut."
-
-#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
-msgid "{visibility} (this app's is kept)"
-msgstr "{visibility} (se păstrează cea din această aplicație)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Astăzi la 12:00"
