@@ -60,9 +60,10 @@ test.describe('PluralKit Import Review', () => {
 		// same persona, which is listed, not asked), but the file's system tag differs from the
 		// account's display tag. The lines at the top say what happens to everyone else.
 		await expect(dialog.getByRole('heading', {name: 'Check before importing'})).toBeVisible({timeout: 15_000});
-		await expect(dialog.getByText('1 new member will be added')).toBeVisible();
-		await expect(dialog.getByText(/^1 persona you made by hand will be connected to its member\./)).toBeVisible();
-		await expect(dialog.getByText(/^1 persona in Tyne isn.t in your file\./)).toBeVisible();
+		await expect(dialog.getByText('1 new member', {exact: true})).toBeVisible();
+		// The persona made by hand is connected to its member, listed with the exact matches.
+		await expect(dialog.getByText('1 exact match', {exact: true})).toBeVisible();
+		await expect(dialog.getByText(/^1 persona in Tyne isn.t in your file$/)).toBeVisible();
 		await expect(
 			dialog.getByRole('heading', {name: /Your display tag shows after every persona.s name/}),
 		).toBeVisible();
