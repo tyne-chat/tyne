@@ -39,8 +39,8 @@
 }
 
 .segmentedTabs {
-	padding-left: 0;
-	padding-right: 0;
+	padding-inline-start: 0;
+	padding-inline-end: 0;
 }
 
 /* The shared tabs have no focus style of their own. */
