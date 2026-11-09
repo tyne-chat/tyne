@@ -317,7 +317,7 @@
 .pinnedBadge {
 	position: absolute;
 	top: 0.1875rem;
-	right: 0.1875rem;
+	inset-inline-end: 0.1875rem;
 	display: none;
 	align-items: center;
 	justify-content: center;
