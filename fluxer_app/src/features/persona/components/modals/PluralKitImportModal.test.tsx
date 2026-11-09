@@ -666,6 +666,575 @@ describe('PluralKitImportModal Component', () => {
 		});
 	});
 
+	it('lists the personas that already match, and the ones not in the file, behind Show', async () => {
+		const persona = (id: string, name: string) => ({
+			id,
+			name,
+			persona_tags: [],
+			signature_emojis: [],
+			use_count: 1,
+			visibility: 'public' as const,
+			auto_tag_disabled: false,
+			created_at: '2026-09-01T00:00:00.000Z',
+			updated_at: '2026-09-01T00:00:00.000Z',
+		});
+		PersonaStore.setPersonas([persona('100000000000000021', 'Sun'), persona('100000000000000022', 'Comet')]);
+		vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+			entries: [
+				{index: 0, kind: 'up_to_date', persona_id: '100000000000000021'},
+				{index: 1, kind: 'tag_in_use', clashes: [{tag: {prefix: 'mo:'}, held_by_persona_id: '100000000000000022'}]},
+			],
+			personas: [persona('100000000000000021', 'Sun'), persona('100000000000000022', 'Comet')],
+			display_tag: {decision: 'none', current_text: null},
+			untouched: 1,
+			needs_review: true,
+		});
+		const file = new File(
+			[
+				JSON.stringify({
+					members: [
+						{id: 'aaaaa', name: 'Sun', privacy: PUBLIC},
+						{id: 'bbbbb', name: 'Moon', proxy_tags: [{prefix: 'mo:'}], privacy: PUBLIC},
+					],
+				}),
+			],
+			'pk.json',
+			{type: 'application/json'},
+		);
+		await act(async () => {
+			root.render(<PluralKitImportModal onClose={vi.fn()} data-flx="persona.plural-kit-import-modal-test.ready" />);
+		});
+		await chooseFile(file, 'Total Members2');
+		// The backup step first, since the account has personas.
+		await act(async () => {
+			importButton()?.click();
+		});
+		await act(async () => {
+			Array.from(document.body.querySelectorAll('button'))
+				.find((b) => b.textContent?.trim() === 'Skip')
+				?.click();
+		});
+		const lists = () =>
+			Array.from(
+				document.body.querySelectorAll(
+					'[data-flx="persona.persona-import-review.ready.matched.list"], [data-flx="persona.persona-import-review.ready.persona-list"]',
+				),
+			);
+		await settled(() =>
+			expect(document.body.querySelectorAll('[data-flx="persona.persona-import-review.ready.toggle"]')).toHaveLength(2),
+		);
+		expect(lists()).toHaveLength(0);
+		for (const toggle of Array.from(
+			document.body.querySelectorAll<HTMLButtonElement>('[data-flx="persona.persona-import-review.ready.toggle"]'),
+		)) {
+			await act(async () => {
+				toggle.click();
+			});
+		}
+		// Both open at once: Sun matches (one list with the connected ones); Comet is in no entry's match.
+		const names = (list: Element) =>
+			Array.from(list.querySelectorAll('[data-flx="persona.persona-import-review.ready.persona-name"]')).map(
+				(name) => name.textContent,
+			);
+		expect(lists().map(names)).toEqual([['Sun'], ['Comet']]);
+	});
+
+	it("leaves a deleted persona deleted, and brings it back as it was or with the file's details", async () => {
+		vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+			entries: [{index: 0, kind: 'deleted', persona_id: '100000000000000031'}],
+			personas: [
+				{
+					id: '100000000000000031',
+					name: 'Pip',
+					bio: 'Old',
+					persona_tags: [{prefix: 'pi:'}],
+					signature_emojis: [],
+					use_count: 9,
+					visibility: 'unlisted',
+					auto_tag_disabled: false,
+					created_at: '2026-09-01T00:00:00.000Z',
+					updated_at: '2026-09-01T00:00:00.000Z',
+					deleted_at: '2026-10-01T00:00:00.000Z',
+				},
+			],
+			display_tag: {decision: 'none', current_text: null},
+			untouched: 0,
+			needs_review: true,
+		});
+		const file = new File(
+			[
+				JSON.stringify({
+					members: [{id: 'ppppp', name: 'Pip', description: 'New', proxy_tags: [{prefix: 'pi:'}], privacy: PUBLIC}],
+				}),
+			],
+			'pk.json',
+			{type: 'application/json'},
+		);
+		await act(async () => {
+			root.render(<PluralKitImportModal onClose={vi.fn()} data-flx="persona.plural-kit-import-modal-test.deleted" />);
+		});
+		await chooseFile(file, 'Total Members1');
+		await act(async () => {
+			importButton()?.click();
+		});
+		const toggle = () =>
+			document.body.querySelector<HTMLButtonElement>('[data-flx="persona.persona-import-review.deleted.toggle"]');
+		await settled(() => expect(toggle()?.textContent).toContain('Staying deleted'));
+		await act(async () => {
+			toggle()!.click();
+		});
+		const radios = (name: string) =>
+			Array.from(document.body.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`));
+		const [leave, bringBack] = radios('import-back-0');
+		expect(leave?.checked).toBe(true);
+		expect(radios('import-0')).toHaveLength(0);
+		await act(async () => {
+			bringBack!.click();
+		});
+		expect(toggle()?.textContent).toContain('Bringing back');
+		expect(document.body.textContent).toContain('Comes back as it was');
+		// Use the file's: it comes back with the file's details.
+		await act(async () => {
+			radios('import-0')[0]!.click();
+		});
+		await act(async () => {
+			importButton()?.click();
+		});
+		await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+		expect(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions).toEqual([
+			expect.objectContaining({
+				action: 'use_file',
+				persona_id: '100000000000000031',
+				item: expect.objectContaining({bio: 'New', external_uuid: 'ppppp'}),
+			}),
+		]);
+	});
+
+	it('only asks whether to bring back a deleted persona the file has exactly as it was', async () => {
+		vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+			entries: [{index: 0, kind: 'deleted', persona_id: '100000000000000041'}],
+			personas: [
+				{
+					id: '100000000000000041',
+					name: 'Alex',
+					bio: 'Same bio',
+					persona_tags: [{prefix: 'al:'}],
+					signature_emojis: [],
+					use_count: 2,
+					visibility: 'unlisted',
+					auto_tag_disabled: false,
+					created_at: '2026-09-01T00:00:00.000Z',
+					updated_at: '2026-09-01T00:00:00.000Z',
+					deleted_at: '2026-10-01T00:00:00.000Z',
+				},
+			],
+			display_tag: {decision: 'none', current_text: null},
+			untouched: 0,
+			needs_review: true,
+		});
+		const file = new File(
+			[
+				JSON.stringify({
+					members: [
+						{id: 'xxxxx', name: 'Alex', description: 'Same bio', proxy_tags: [{prefix: 'al:'}], privacy: PUBLIC},
+					],
+				}),
+			],
+			'pk.json',
+			{type: 'application/json'},
+		);
+		await act(async () => {
+			root.render(
+				<PluralKitImportModal onClose={vi.fn()} data-flx="persona.plural-kit-import-modal-test.deleted-same" />,
+			);
+		});
+		await chooseFile(file, 'Total Members1');
+		await act(async () => {
+			importButton()?.click();
+		});
+		const toggle = () =>
+			document.body.querySelector<HTMLButtonElement>('[data-flx="persona.persona-import-review.deleted.toggle"]');
+		await settled(() => expect(toggle()).not.toBeNull());
+		await act(async () => {
+			toggle()!.click();
+		});
+		const radios = (name: string) =>
+			Array.from(document.body.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`));
+		await act(async () => {
+			radios('import-back-0')[1]!.click();
+		});
+		// No second question: Use the file's and Use Tyne's would bring back the same thing.
+		expect(radios('import-0')).toHaveLength(0);
+		expect(document.body.textContent).toContain('Comes back as it was');
+		await act(async () => {
+			importButton()?.click();
+		});
+		await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+		expect(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions).toEqual([
+			{action: 'restore', persona_id: '100000000000000041'},
+		]);
+	});
+
+	describe('more of the review', () => {
+		const tyne = (id: string, name: string, tags: Array<{prefix: string}>, extra: Record<string, unknown> = {}) => ({
+			id,
+			name,
+			persona_tags: tags,
+			signature_emojis: [],
+			use_count: 3,
+			visibility: 'public' as const,
+			auto_tag_disabled: false,
+			created_at: '2026-09-01T00:00:00.000Z',
+			updated_at: '2026-09-01T00:00:00.000Z',
+			...extra,
+		});
+		const pkFile = (members: Array<Record<string, unknown>>, tag?: string) =>
+			new File(
+				[JSON.stringify({...(tag ? {tag} : {}), members: members.map((m) => ({privacy: PUBLIC, ...m}))})],
+				'pk.json',
+				{
+					type: 'application/json',
+				},
+			);
+		const radios = (name: string) =>
+			Array.from(document.body.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`));
+		const clickAll = async (selector: string) => {
+			for (const element of Array.from(document.body.querySelectorAll<HTMLElement>(selector))) {
+				await act(async () => {
+					element.click();
+				});
+			}
+		};
+		async function review(file: File, summary: string): Promise<void> {
+			await act(async () => {
+				root.render(<PluralKitImportModal onClose={vi.fn()} data-flx="persona.plural-kit-import-modal-test.more" />);
+			});
+			await chooseFile(file, summary);
+			await act(async () => {
+				importButton()?.click();
+			});
+		}
+		const typeInto = async (field: HTMLInputElement, value: string) => {
+			await act(async () => {
+				Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(field, value);
+				field.dispatchEvent(new Event('input', {bubbles: true}));
+			});
+		};
+
+		it('picks among several personas, and a persona one member was given cannot be given to another', async () => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [0, 1].map((index) => ({
+					index,
+					kind: 'cant_tell' as const,
+					candidates: [
+						{persona_id: '100000000000000051', matched_on: 'name' as const, linked_elsewhere: false},
+						{persona_id: '100000000000000052', matched_on: 'name' as const, linked_elsewhere: false},
+					],
+				})),
+				personas: [
+					tyne('100000000000000051', 'Kenoma', [{prefix: 'Ke:'}]),
+					tyne('100000000000000052', 'Kenoma', [{prefix: 'Kn:'}]),
+				],
+				display_tag: {decision: 'none', current_text: null},
+				untouched: 0,
+				needs_review: true,
+			});
+			await review(
+				pkFile([
+					{id: 'k1', name: 'Kenoma', proxy_tags: [{prefix: 'Kx:'}]},
+					{id: 'k2', name: 'Kenoma', proxy_tags: [{prefix: 'Ky:'}]},
+				]),
+				'Total Members2',
+			);
+			await settled(() =>
+				expect(
+					document.body.querySelectorAll('[data-flx="persona.persona-import-review.cant-tell.toggle"]'),
+				).toHaveLength(2),
+			);
+			await clickAll('[data-flx="persona.persona-import-review.cant-tell.toggle"]');
+			expect(radios('import-pick-0')).toHaveLength(3);
+			// The second persona, then the first: the switch follows the pick.
+			await act(async () => {
+				radios('import-pick-0')[1]!.click();
+			});
+			await act(async () => {
+				radios('import-pick-0')[0]!.click();
+			});
+			expect(radios('import-pick-0')[0]?.checked).toBe(true);
+			// The other member can no longer be given the first persona.
+			expect(radios('import-pick-1')[0]?.disabled).toBe(true);
+			expect(radios('import-pick-1')[1]?.disabled).toBe(false);
+
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+			expect(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions).toEqual([
+				{action: 'link', persona_id: '100000000000000051', external_uuid: 'k1'},
+			]);
+		});
+
+		it('shows the other member that uses the same tag, and keeps one with a tag of its own', async () => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [
+					{index: 0, kind: 'tag_in_use', clashes: [{tag: {prefix: 'mo:'}, shared_with_member: 1}]},
+					{index: 1, kind: 'new'},
+				],
+				personas: [],
+				display_tag: {decision: 'none', current_text: null},
+				untouched: 0,
+				needs_review: true,
+			});
+			await review(
+				pkFile([
+					{id: 'm1', name: 'Moth', proxy_tags: [{prefix: 'mo:'}]},
+					{id: 'm2', name: 'Moon', proxy_tags: [{prefix: 'mo:'}]},
+				]),
+				'Total Members2',
+			);
+			await settled(() =>
+				expect(document.body.querySelector('[data-flx="persona.persona-import-review.taken.toggle"]')).not.toBeNull(),
+			);
+			await clickAll('[data-flx="persona.persona-import-review.taken.toggle"]');
+			expect(document.body.textContent).toContain('is also used by Moon in your file');
+			const holder = document.body.querySelector('[data-flx="persona.persona-import-review.taken.holder"]');
+			expect(holder?.textContent).toContain('Moon');
+			await act(async () => {
+				radios('import-0')[1]!.click();
+			});
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+			const [moth, moon] = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions;
+			expect(moth).toMatchObject({action: 'add', item: {name: 'Moth', external_uuid: 'm1'}});
+			expect(moth?.item?.persona_tags).not.toContainEqual({prefix: 'mo:'});
+			expect(moon).toMatchObject({action: 'add', item: {name: 'Moon', persona_tags: [{prefix: 'mo:'}]}});
+		});
+
+		it('blocks Import while two choices would give one tag to two personas', async () => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [
+					{index: 0, kind: 'tag_in_use', clashes: [{tag: {prefix: 'ly:'}, held_by_persona_id: '100000000000000061'}]},
+				],
+				personas: [
+					tyne('100000000000000061', 'Lyra ✦', [{prefix: 'ly:'}]),
+					tyne('100000000000000062', 'Wren', [{prefix: 'wr:'}]),
+				],
+				display_tag: {decision: 'none', current_text: null},
+				untouched: 0,
+				needs_review: true,
+			});
+			await review(pkFile([{id: 'l1', name: 'Lyra ✧', proxy_tags: [{prefix: 'ly:'}]}]), 'Total Members1');
+			await settled(() =>
+				expect(document.body.querySelector('[data-flx="persona.persona-import-review.taken.toggle"]')).not.toBeNull(),
+			);
+			await clickAll('[data-flx="persona.persona-import-review.taken.toggle"]');
+			await act(async () => {
+				radios('import-0')[1]!.click();
+			});
+			const field = document.body.querySelector('input[id^="import-tag-"]') as HTMLInputElement;
+			await typeInto(field, 'wr:');
+			expect(document.body.textContent).toContain('Wren already has it');
+			const banner = document.body.querySelector('[data-flx="persona.persona-import-review.conflicts"]');
+			expect(banner?.textContent).toContain('wr:text');
+			expect(importButton()?.disabled).toBe(true);
+			await act(async () => {
+				importButton()?.click();
+			});
+			expect(PersonaCommands.applyPersonaImport).not.toHaveBeenCalled();
+			// A free tag lifts the block.
+			await typeInto(field, 'lyx:');
+			expect(document.body.querySelector('[data-flx="persona.persona-import-review.conflicts"]')).toBeNull();
+			expect(importButton()?.disabled).toBe(false);
+		});
+
+		it("uses the file's display tag when its box is chosen, with no backup step for an account without personas", async () => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [{index: 0, kind: 'new'}],
+				personas: [],
+				display_tag: {decision: 'ask', current_text: '[ Lantern ]'},
+				untouched: 0,
+				needs_review: true,
+			});
+			await review(pkFile([{id: 's1', name: 'Sol'}], 'SOLAR'), 'Total Members1');
+			expect(document.body.textContent).not.toContain('Use Export to make a backup before continuing.');
+			await settled(() => expect(radios('import-display-tag')).toHaveLength(2));
+			const [fileBox, tyneBox] = radios('import-display-tag');
+			expect(tyneBox?.checked).toBe(true);
+			await act(async () => {
+				fileBox!.click();
+			});
+			expect(document.body.textContent).toContain('Replaces your display tag');
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(PersonaStore.setDisplayTag).toHaveBeenCalledWith('SOLAR', undefined));
+		});
+
+		it('says on the finished screen who was skipped, which tags were left out and what a restore came back without', async () => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [{index: 0, kind: 'deleted', persona_id: '100000000000000071'}],
+				personas: [tyne('100000000000000071', 'Pip', [{prefix: 'pi:'}], {deleted_at: '2026-10-01T00:00:00.000Z'})],
+				display_tag: {decision: 'none', current_text: null},
+				untouched: 0,
+				needs_review: true,
+			});
+			vi.mocked(PersonaCommands.applyPersonaImport).mockResolvedValueOnce({
+				personas: [tyne('100000000000000071', 'Pip', [])],
+				dropped: [{persona_id: '100000000000000071', tags: [{prefix: 'pi:'}], signature_emojis: []}],
+			});
+			const sixTags = ['a:', 'b:', 'c:', 'd:', 'e:', 'f:'].map((prefix) => ({prefix}));
+			await review(
+				pkFile([
+					{id: 'n0', name: null},
+					{id: 'ppppp', name: 'Pip', proxy_tags: sixTags},
+				]),
+				'Total Members2',
+			);
+			await settled(() =>
+				expect(document.body.querySelector('[data-flx="persona.persona-import-review.deleted.toggle"]')).not.toBeNull(),
+			);
+			await clickAll('[data-flx="persona.persona-import-review.deleted.toggle"]');
+			await act(async () => {
+				radios('import-back-0')[1]!.click();
+			});
+			await act(async () => {
+				radios('import-0')[0]!.click();
+			});
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(document.body.textContent).toContain('Import finished'));
+			const text = document.body.textContent ?? '';
+			expect(text).toContain('Skipped member because they have no name configured.');
+			expect(text).toContain('Some proxy tags were left out');
+			expect(text).toContain('Came back without pi:text');
+		});
+	});
+
+	describe('a member that might be one of your personas', () => {
+		const tyne = (id: string, name: string, tags: Array<{prefix: string}>) => ({
+			id,
+			name,
+			persona_tags: tags,
+			signature_emojis: [],
+			use_count: 4,
+			visibility: 'public' as const,
+			auto_tag_disabled: false,
+			created_at: '2026-09-01T00:00:00.000Z',
+			updated_at: '2026-09-01T00:00:00.000Z',
+		});
+		const file = () =>
+			new File(
+				[
+					JSON.stringify({
+						members: [{id: 'lllll', name: 'Lily & Lisica', proxy_tags: [{prefix: 'Lils:'}], privacy: PUBLIC}],
+					}),
+				],
+				'pk.json',
+				{type: 'application/json'},
+			);
+		const toggle = () =>
+			document.body.querySelector<HTMLButtonElement>('[data-flx="persona.persona-import-review.cant-tell.toggle"]');
+		const radios = (name: string) =>
+			Array.from(document.body.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`));
+
+		beforeEach(() => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+				entries: [
+					{
+						index: 0,
+						kind: 'cant_tell',
+						candidates: [
+							{persona_id: '100000000000000008', matched_on: 'tag', linked_elsewhere: false},
+							{persona_id: '100000000000000009', matched_on: 'name', linked_elsewhere: false},
+						],
+						clashes: [{tag: {prefix: 'Lils:'}, held_by_persona_id: '100000000000000008'}],
+					},
+				],
+				personas: [
+					tyne('100000000000000008', 'Lisica & Lily', [{prefix: 'Lils:'}]),
+					tyne('100000000000000009', 'Lily & Lisica', [{prefix: 'Li:'}]),
+				],
+				display_tag: {decision: 'none', current_text: null},
+				untouched: 0,
+				needs_review: true,
+			});
+		});
+
+		async function openRow(): Promise<void> {
+			await act(async () => {
+				root.render(
+					<PluralKitImportModal onClose={vi.fn()} data-flx="persona.plural-kit-import-modal-test.cant-tell" />,
+				);
+			});
+			await chooseFile(file(), 'Total Members1');
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(toggle()?.textContent).toContain('Lily & Lisica'));
+			expect(toggle()?.textContent).toContain('Skipping');
+			await act(async () => {
+				toggle()!.click();
+			});
+			expect(document.body.textContent).toContain('Which persona is Lily & Lisica?');
+			// Two personas and None of these; nothing picked, so no switch yet.
+			expect(radios('import-pick-0')).toHaveLength(3);
+			expect(radios('import-0')).toHaveLength(0);
+		}
+
+		it("picks a persona, then takes the file's version into it", async () => {
+			await openRow();
+			await act(async () => {
+				radios('import-pick-0')[0]!.click();
+			});
+			const [useFile, , useTyne] = radios('import-0');
+			expect(useTyne?.checked).toBe(true);
+			expect(toggle()?.textContent).toContain("Keeping {productName}'s".replace('{productName}', PRODUCT_NAME));
+			await act(async () => {
+				useFile!.click();
+			});
+			expect(document.body.textContent).toContain(
+				"Replaces {productName}'s {name}".replace('{productName}', PRODUCT_NAME).replace('{name}', 'Lisica & Lily'),
+			);
+
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+			const request = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0];
+			expect(request.actions).toEqual([
+				expect.objectContaining({
+					action: 'use_file',
+					persona_id: '100000000000000008',
+					item: expect.objectContaining({name: 'Lily & Lisica', external_uuid: 'lllll'}),
+				}),
+			]);
+			expect(PersonaImportApplyRequestSchema.safeParse(request).success).toBe(true);
+		});
+
+		it('says it is none of them, then keeps it as a new persona with a tag of its own', async () => {
+			await openRow();
+			await act(async () => {
+				radios('import-pick-0')[2]!.click();
+			});
+			const [skip, keep] = radios('import-0');
+			expect(skip?.checked).toBe(true);
+			await act(async () => {
+				keep!.click();
+			});
+			expect(toggle()?.textContent).toContain('Keeping');
+			await act(async () => {
+				importButton()?.click();
+			});
+			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+			const [action] = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions;
+			expect(action).toMatchObject({action: 'add', item: {external_uuid: 'lllll'}});
+			expect(action?.item?.persona_tags).not.toContainEqual({prefix: 'Lils:'});
+		});
+	});
+
 	describe('a member whose tag is taken', () => {
 		beforeEach(() => {
 			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
