@@ -394,7 +394,7 @@
 
 .favoriteDropIndicatorLeft {
 	position: absolute;
-	left: -0.125rem;
+	inset-inline-start: -0.125rem;
 	top: 0.125rem;
 	bottom: 0.125rem;
 	width: 0.25rem;
@@ -406,7 +406,7 @@
 
 .favoriteDropIndicatorRight {
 	position: absolute;
-	right: -0.125rem;
+	inset-inline-end: -0.125rem;
 	top: 0.125rem;
 	bottom: 0.125rem;
 	width: 0.25rem;
