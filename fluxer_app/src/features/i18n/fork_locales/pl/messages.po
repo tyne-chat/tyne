@@ -73,10 +73,6 @@ msgstr "Dodaj sygnał"
 msgid "Add {name}"
 msgstr "Dodaj {name}"
 
-#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
-msgid "Add {name} with a tag of its own"
-msgstr "Dodaj {name} z własnym tagiem"
-
 #. Line of the import result: new personas
 msgid "Added"
 msgstr "Dodane"
@@ -424,6 +420,10 @@ msgstr "Zduplikowana para tagów w tej personie"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Każdy kanał zachowuje własną personę. Nowe kanały zaczynają jako twoje konto."
 
+#. Hint under the list of members whose tag is already taken, in the import review
+msgid "Each is skipped unless you open it and keep it with a tag of its own."
+msgstr "Każdy zostanie pominięty, chyba że go otworzysz i zachowasz z własnym tagiem."
+
 #. Hint under the list of differing personas in the import review. {productName} is the app name
 msgid "Each keeps {productName}'s version unless you open it and choose the file's."
 msgstr "Każda zachowuje wersję z {productName}, chyba że ją otworzysz i wybierzesz wersję z pliku."
@@ -705,6 +705,11 @@ msgstr "Czy {name} z twojego pliku to jedna z tych person w {productName}?"
 msgid "Its script has a problem."
 msgstr "Jego skrypt ma problem."
 
+#. Option of the switch for a member whose tag is already taken: import it with a name and tag of its own
+msgctxt "persona-import-switch"
+msgid "Keep"
+msgstr "Zachowaj"
+
 #. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
 msgid "Keep both"
 msgstr "Zachowaj obie"
@@ -716,6 +721,10 @@ msgstr "Sprawdzaj dalej"
 #. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
 msgid "Keep {productName}'s"
 msgstr "Zachowaj ten z {productName}"
+
+#. Badge on a collapsed member in the import review: it is imported with a tag of its own
+msgid "Keeping"
+msgstr "Zachowany"
 
 #. Badge on a collapsed persona in the import review: the file's version is added next to the app's
 msgid "Keeping both"
@@ -732,10 +741,6 @@ msgstr "Zachowuje swój tag"
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "Pozostawione bez zmian"
-
-#. Choice in the import review: do nothing with this member of the import file. {name} is its name
-msgid "Leave {name} out this time"
-msgstr "Tym razem pomiń {name}"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
@@ -1385,6 +1390,11 @@ msgstr "Emoji podpisu"
 msgid "Similar tag"
 msgstr "Podobny tag"
 
+#. Option of the switch for a member whose tag is already taken: do not import it
+msgctxt "persona-import-switch"
+msgid "Skip"
+msgstr "Pomiń"
+
 #. Line of the import result: members left out
 msgid "Skipped"
 msgstr "Pominięte"
@@ -1392,6 +1402,10 @@ msgstr "Pominięte"
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "Pominięto członka, ponieważ nie ma skonfigurowanej nazwy."
+
+#. Badge on a collapsed member in the import review: it is not imported
+msgid "Skipping"
+msgstr "Pomijany"
 
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
@@ -1880,6 +1894,10 @@ msgstr "Wersja {version} programu {appName} jest gotowa do instalacji."
 #. Line at the top of the import review. {count} is a number, {productName} the app name
 msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
 msgstr "{count, plural, one {# członek już pasuje do swojej persony w {productName}. Nie trzeba nic robić.} few {# członków już pasuje do swoich person w {productName}. Nie trzeba nic robić.} many {# członków już pasuje do swoich person w {productName}. Nie trzeba nic robić.} other {# członka już pasuje do swojej persony w {productName}. Nie trzeba nic robić.}}"
+
+#. Heading in the import review over the list of members whose proxy tag another persona already has
+msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
+msgstr "{count, plural, one {# członek ma tag, który jest już zajęty} few {# członków ma tag, który jest już zajęty} many {# członków ma tag, który jest już zajęty} other {# członka ma tag, który jest już zajęty}}"
 
 #. Line at the top of the import review. {count} is a number of members of the import file
 msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
