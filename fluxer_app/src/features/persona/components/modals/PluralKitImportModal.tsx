@@ -6,6 +6,7 @@
 // stored only for the members whose choice needs them, then the whole import is one request, written
 // whole or not at all. Nothing in here deletes a persona.
 
+import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
@@ -35,6 +36,7 @@ import {
 	type ReviewDecision,
 	type ReviewMember,
 	type ReviewSummary,
+	reviewNeedCount,
 	sourceKindOf,
 	summarize,
 } from '../../utils/PersonaImportReview';
@@ -220,6 +222,23 @@ function listFormat(locale: string, items: ReadonlyArray<string>): string {
 	}
 }
 
+const STOP_IMPORT_TITLE_DESCRIPTOR = msg({
+	message: 'Stop this import?',
+	comment: 'Title of the confirmation when the persona import review is closed before importing',
+});
+const STOP_IMPORT_BODY_DESCRIPTOR = msg({
+	message: 'Your choices for these members will be lost, and nothing is imported.',
+	comment: 'Text of the confirmation when the persona import review is closed before importing',
+});
+const STOP_IMPORT_PRIMARY_DESCRIPTOR = msg({
+	message: 'Stop importing',
+	comment: 'Button that closes the persona import review without importing',
+});
+const KEEP_REVIEWING_DESCRIPTOR = msg({
+	message: 'Keep reviewing',
+	comment: 'Button that goes back to the persona import review',
+});
+
 function summaryLines(i18n: I18n, summary: ReviewSummary, changesTag: boolean): {main: string; rest: string} {
 	const parts: Array<string> = [];
 	if (summary.link) parts.push(i18n._(SUMMARY_LINK_DESCRIPTOR, {count: summary.link}));
@@ -247,6 +266,8 @@ function tagText(tag: PersonaTag): string {
 export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({onClose}) => {
 	const {i18n} = useLingui();
 	const [step, setStep] = useState<'select' | 'checking' | 'review' | 'importing' | 'completed'>('select');
+	// This dialog's place in the modal stack, to close it under the "Stop this import?" confirmation.
+	const [ownModalKey] = useState(() => ModalCommands.getTopModalKey());
 	const [fileName, setFileName] = useState<string | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [source, setSource] = useState<PersonaImportSource | null>(null);
@@ -510,11 +531,39 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			message: 'Checking your file...',
 			comment: 'Title of the persona import dialog while the file is checked',
 		}),
-		review: msg({message: 'Review before importing', comment: 'Title of the persona import review'}),
+		review: msg({
+			message: 'Check before importing',
+			comment: 'Title of the persona import review when no member needs a choice, only the display tag',
+		}),
 		importing: msg({message: 'Importing Personas...', comment: 'Modal title for PluralKit import step importing'}),
 		completed: msg({message: 'Import finished', comment: 'Title of the persona import dialog when the import is done'}),
 	};
 	const busy = step === 'checking' || step === 'importing';
+	// While the review is open, a click outside, Escape or the close button asks first: the review can
+	// hold many choices (tyne-chat/tyne#564). While importing, the dialog cannot be closed.
+	const requestClose = () => {
+		if (busy) return;
+		if (step !== 'review') {
+			onClose();
+			return;
+		}
+		ModalCommands.push(
+			ModalCommands.modal(() => (
+				<ConfirmModal
+					title={i18n._(STOP_IMPORT_TITLE_DESCRIPTOR)}
+					description={i18n._(STOP_IMPORT_BODY_DESCRIPTOR)}
+					primaryText={i18n._(STOP_IMPORT_PRIMARY_DESCRIPTOR)}
+					primaryVariant="danger"
+					secondaryText={i18n._(KEEP_REVIEWING_DESCRIPTOR)}
+					onPrimary={() => {
+						if (ownModalKey != null) ModalCommands.popWithKey(ownModalKey);
+						else onClose();
+					}}
+					data-flx="persona.plural-kit-import-modal.request-close.confirm-modal"
+				/>
+			)),
+		);
+	};
 	const footerSummary =
 		step === 'review' && preview
 			? summaryLines(i18n, summarize(preview.entries, decisions), displayTagChoice === 'file')
@@ -524,11 +573,23 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 	return (
 		<Modal.Root
 			size={step === 'review' ? 'large' : 'medium'}
-			onClose={busy ? () => {} : onClose}
+			onClose={requestClose}
 			data-flx="persona.plural-kit-import-modal.modal-root"
 		>
 			<Modal.Header
-				title={i18n._(titles[step])}
+				onClose={requestClose}
+				title={
+					step === 'review' && preview && reviewNeedCount(preview.entries) > 0
+						? i18n._(
+								msg({
+									message:
+										'{count, plural, one {Check # member before importing} other {Check # members before importing}}',
+									comment: 'Title of the persona import review. {count} is the number of members that need a choice',
+								}),
+								{count: reviewNeedCount(preview.entries)},
+							)
+						: i18n._(titles[step])
+				}
 				hideCloseButton={busy}
 				data-flx="persona.plural-kit-import-modal.modal-header"
 			/>
@@ -658,6 +719,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 							displayTagChoice={displayTagChoice}
 							onDisplayTagChoice={setDisplayTagChoice}
 							conflicts={conflicts}
+							livePersonas={PersonaStore.personas}
 							data-flx="persona.plural-kit-import-modal.persona-import-review"
 						/>
 					)}

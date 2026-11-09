@@ -26,6 +26,10 @@ msgstr "العلامة <0>{tag}</0> تخص شخصيتك {name} بالفعل."
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "العلامة <0>{tag}</0> يستخدمها {name} أيضًا في ملفك."
 
+#. Choice in the import review: the member of the file is someone else, add it as a new persona
+msgid "A different persona: add it"
+msgstr "شخصية مختلفة: إضافتها"
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "يمكن أن تحتوي الشخصية على 5 علامات كحد أقصى"
@@ -58,10 +62,6 @@ msgstr "إضافة شخصية"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "إضافة زوج علامات ({0}/5)"
 
-#. Choice in the import review: add the member as a new persona next to the existing one
-msgid "Add as a separate persona"
-msgstr "إضافة كشخصية منفصلة"
-
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "إضافة عدّاد"
@@ -69,13 +69,13 @@ msgstr "إضافة عدّاد"
 msgid "Add signal"
 msgstr "إضافة إشارة"
 
-#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
-msgid "Add with the tag"
-msgstr "إضافة مع العلامة"
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "إضافة {name}"
 
-#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
-msgid "Add without {tags}"
-msgstr "إضافة بدون {tags}"
+#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
+msgid "Add {name} with a tag of its own"
+msgstr "إضافة {name} بعلامة خاصة"
 
 #. Line of the import result: new personas
 msgid "Added"
@@ -157,6 +157,10 @@ msgstr "تعذّر تنزيل صورة اللافتة: {error}. تم استير�
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "تعذّر تنزيل صورة اللافتة: {error}. احتفظت الشخصية باللافتة التي كانت لديها."
 
+#. Switch on a deleted persona in the import review that restores it. {name} is its name
+msgid "Bring {name} back"
+msgstr "إعادة {name}"
+
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
@@ -166,14 +170,6 @@ msgstr "عادت بدون {items}: أصبحت الآن لدى شخصية أخر�
 msgid "Can't compare"
 msgstr "تتعذّر المقارنة"
 
-#. Short name of a section of the import review
-msgid "Can't tell"
-msgstr "غير واضح"
-
-#. Section of the import review
-msgid "Can't tell if it's the same persona"
-msgstr "غير واضح إن كانت الشخصية نفسها"
-
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "تغيير الشخصية"
@@ -181,6 +177,10 @@ msgstr "تغيير الشخصية"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "تغيير الرسالة حسب ما كتبوه"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "مراجعة قبل الاستيراد"
 
 #. Title of the persona import dialog while the file is checked
 msgid "Checking your file..."
@@ -217,6 +217,10 @@ msgstr "اللون"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "ارجع إلى هنا واضغط على <0>احصل على Tyne في TestFlight</0>، ثم <1>تثبيت</1>."
 
+#. Small line on a deleted persona in the import review once it is set to come back
+msgid "Comes back as it was, with its old messages"
+msgstr "تعود كما كانت، مع رسائلها القديمة"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "الأمر"
@@ -234,10 +238,6 @@ msgstr "الأوامر"
 msgid "Commands saved"
 msgstr "تم حفظ الأوامر"
 
-#. Button that shows a persona next to its version in the import file
-msgid "Compare"
-msgstr "مقارنة"
-
 #. Status while the import file is compared with the account's personas
 msgid "Comparing your file with your personas..."
 msgstr "جارٍ مقارنة ملفك بشخصياتك..."
@@ -245,6 +245,10 @@ msgstr "جارٍ مقارنة ملفك بشخصياتك..."
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "الشخصيات المُعدّة ({count})"
+
+#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
+msgid "Connect {name}"
+msgstr "ربط {name}"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -333,10 +337,6 @@ msgstr "حذف الطابع الزمني\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "حذف {count, plural, zero {لا شخصيات} one {شخصية واحدة} two {شخصيتين} few {# شخصيات} many {# شخصية} other {# شخصية}}؟"
 
-#. Short name of a section of the import review
-msgid "Deleted"
-msgstr "المحذوفة"
-
 #. Title of the section in Settings › Personas that lists deleted personas
 msgid "Deleted personas"
 msgstr "الشخصيات المحذوفة"
@@ -353,25 +353,10 @@ msgstr "حُذفت في {date}"
 msgid "Detected System Name / Tag"
 msgstr "اسم / علامة النظام المكتشفة"
 
-#. Section of the import review
-msgid "Different in your file"
-msgstr "مختلفة في ملفك"
-
 #. Comparison of a persona picture with the import file: they differ
 msgid "Different picture"
 msgstr "صورة مختلفة"
 
-#. Short name of a section of the import review
-msgid "Differs"
-msgstr "اختلافات"
-
-#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
-msgid "Differs: {fields}"
-msgstr "الاختلافات: {fields}"
-
-#. Heading of the display tag choice in the import review
-#. Section of the import review
-#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "علامة العرض"
@@ -442,13 +427,9 @@ msgstr "زوج علامات مكرر في هذه الشخصية"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "كل قناة تحتفظ بشخصيتها الخاصة. القنوات الجديدة تبدأ بحسابك."
 
-#. Explanation of a section of the import review
-msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
-msgstr "كلٌّ من هؤلاء يشترك في الاسم أو العلامة مع إحدى شخصياتك، لكن ليس في كليهما، لذا قد تكون الشخصية نفسها أو شخصية مختلفة. قارن بينها واختر. يبقى الأعضاء الذين تتخطاهم في ملفك للمرة القادمة."
-
-#. Explanation at the top of the import review
-msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
-msgstr "لكلٍّ منها الخيار الأكثر أمانًا محدد مسبقًا، فلن يتغير شيء مما لديك إلا إذا اخترت ذلك. يُرجى قراءة كل قسم قبل الاستيراد. الأصعب في الأعلى."
+#. Hint under the list of differing personas in the import review. {productName} is the app name
+msgid "Each keeps {productName}'s version unless you open it and choose the file's."
+msgstr "تبقى نسخة {productName} من كل واحدة، إلا إذا فتحتها واخترت نسخة الملف."
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -572,6 +553,15 @@ msgstr "التصفية حسب الظهور"
 msgid "Format preview"
 msgstr "معاينة التنسيق"
 
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "متاحة"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "من ملفك"
+
 #. Link at the end of the command script help to the complete guide on GitHub.
 msgid "Full script guide"
 msgstr "الدليل الكامل للنصوص البرمجية"
@@ -610,13 +600,14 @@ msgstr "احصل على تطبيق Tyne"
 msgid "Here is what changed"
 msgstr "إليك ما تغيّر"
 
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "إخفاء"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "إخفاء قائمة القنوات"
-
-#. Button that hides the comparison of a persona with the import file
-msgid "Hide comparison"
-msgstr "إخفاء المقارنة"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -677,23 +668,6 @@ msgstr "جارٍ الاستيراد..."
 msgid "In each channel"
 msgstr "في كل قناة"
 
-#. Column heading in the import review
-msgid "In this app"
-msgstr "في هذا التطبيق"
-
-#. Explanation of a section of the import review
-msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
-msgstr "في هذا التطبيق، تنتمي كل علامة إلى شخصية واحدة. لدى هؤلاء الأعضاء علامة تملكها شخصية أخرى بالفعل، أو يملكها أيضًا عضو آخر في ملفك."
-
-#. Column heading in the table comparing a persona with the import file
-msgid "In this app now"
-msgstr "في هذا التطبيق الآن"
-
-#. Column heading in the import review
-#. Column heading in the table comparing a persona with the import file
-msgid "In your file"
-msgstr "في ملفك"
-
 #. Explanation of the "Kept as they were" line of the import result
 msgid "Including any that differ from the file, where you kept the version you had."
 msgstr "بما فيها تلك التي تختلف عن الملف، حيث احتفظت بالنسخة التي كانت لديك."
@@ -717,42 +691,49 @@ msgstr "إدراج:"
 msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
 msgstr "ثبّت تطبيق <0>TestFlight</0> المجاني من Apple عبر App Store."
 
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "بدلًا من {tag}"
+
+#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
+msgid "Is {name} from your file one of these personas in {productName}?"
+msgstr "هل {name} من ملفك إحدى هذه الشخصيات في {productName}؟"
+
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "هناك مشكلة في نصه البرمجي."
 
-#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
-msgid "Keep this version"
-msgstr "الاحتفاظ بهذه النسخة"
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "متابعة المراجعة"
 
-#. Button in the import review: keep every listed persona as it is
-msgid "Keep this version for all"
-msgstr "الاحتفاظ بهذه النسخة للجميع"
+#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
+msgid "Keep {productName}'s"
+msgstr "الإبقاء على علامة {productName}"
 
-#. Choice in the import review: keep the display tag {tag}
-msgid "Keep yours: {tag}"
-msgstr "الاحتفاظ بعلامتك: {tag}"
+#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
+msgid "Keep {productName}'s {name}"
+msgstr "الإبقاء على نسخة {productName} من {name}"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "نسخة {productName} باقية"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "تحتفظ بعلامتها"
 
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "بقيت كما كانت"
 
-#. Choice in the import review for a persona that was deleted: keep it deleted
-msgid "Leave deleted"
-msgstr "إبقاؤها محذوفة"
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Leave {name} out this time"
+msgstr "استبعاد {name} هذه المرة"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "السطر {line}، العمود {column}: {problem}"
-
-#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
-msgctxt "persona-import-choice"
-msgid "Link"
-msgstr "ربط"
-
-#. Button in the import review that links every persona listed
-msgid "Link all {count}"
-msgstr "ربط الكل ({count})"
 
 #. Shown on a persona in the import review that is already connected to a different member
 msgid "Linked to another PluralKit member"
@@ -817,10 +798,6 @@ msgstr "العضو رقم {index}"
 msgid "Members with Avatars"
 msgstr "أعضاء لديهم أفاتار"
 
-#. Explanation of a section of the import review
-msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
-msgstr "أعضاء ليسوا لديك بعد، بلا تعارض في الاسم أو العلامة. ألغِ تحديد من لا تريده."
-
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "أدوات الرسائل"
@@ -845,10 +822,6 @@ msgstr "نقل إلى سلة المهملات"
 msgid "Name (A–Z)"
 msgstr "الاسم (أ–ي)"
 
-#. Badge on a section of the import review where every member needs a choice
-msgid "Needs a decision"
-msgstr "يحتاج إلى قرار"
-
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "شخصية جديدة"
@@ -856,10 +829,6 @@ msgstr "شخصية جديدة"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "أمر جديد"
-
-#. Section of the import review
-msgid "New in your file"
-msgstr "جديد في ملفك"
 
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
@@ -881,6 +850,10 @@ msgstr "الشخصية التالية"
 msgid "No \"members\" array found in this export file."
 msgstr "لم يُعثر على مصفوفة \"members\" في ملف التصدير هذا."
 
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "لا توجد نبذة"
+
 #. Shown on a persona’s card in the Personas list when it has no bio.
 msgid "No bio yet."
 msgstr "لا توجد نبذة بعد."
@@ -892,6 +865,10 @@ msgstr "لا توجد أوامر"
 #. Shown in Settings › Personas when there are no deleted personas
 msgid "No deleted personas."
 msgstr "لا توجد شخصيات محذوفة."
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "لا توجد علامة عرض"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "لم يتم إعداد علامة عرض. ستعرض الرسائل صورة ملف حسابك الشخصي."
@@ -916,12 +893,24 @@ msgstr "لا توجد شخصيات هنا."
 msgid "No personas match your search."
 msgstr "لا توجد شخصيات تطابق بحثك."
 
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "لا توجد ضمائر"
+
 #. Shown in another account’s Personas list when it lists none.
 msgid "No public personas."
 msgstr "لا توجد شخصيات عامة."
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "لا توجد إشارات بعد. يبقى الشريط مخفيًا حتى تضيف واحدة."
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "بلا علامة: يُضاف دون علامة"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "لا توجد علامات"
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
@@ -931,9 +920,17 @@ msgstr "لم يُفعّل أحد هذه الإشارة"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "لا توجد أي شخصية عامة من شخصياتك بعد. يرى الآخرون الشخصية هنا بعد أن تضبط ظهورها على «عام»."
 
-#. Hint on the choice to skip a member in the import review
-msgid "Nothing changes. It stays in your file for next time."
-msgstr "لن يتغير شيء. يبقى في ملفك للمرة القادمة."
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Not sure: leave {name} out this time"
+msgstr "عند الشك: استبعاد {name} هذه المرة"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "غير متأكد؟ اتركه كما هو: لا يتغير شيء."
+
+#. Badge on the choice in the import review that leaves everything as it is
+msgid "Nothing changes"
+msgstr "لا يتغير شيء"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1124,7 +1121,6 @@ msgstr "الشخصية السابقة"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
-#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "خاص"
@@ -1132,14 +1128,6 @@ msgstr "خاص"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "شخصية خاصة"
-
-#. Short name of a section of the import review
-msgid "Probably the same"
-msgstr "على الأرجح نفسها"
-
-#. Section of the import review
-msgid "Probably the same persona"
-msgstr "على الأرجح الشخصية نفسها"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -1154,7 +1142,6 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "بطاقات الملف الشخصي متاحة عند النقر على الرسائل ومرئية في قائمة شخصياتك العامة للأصدقاء والخوادم المشتركة."
 
 #. Chip above the persona list: public personas.
-#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "عام"
@@ -1228,13 +1215,8 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "هل تريد إعادة تعيين أعداد {name}؟ لا يمكن التراجع عن هذا."
 
 #. Button that brings back a deleted persona
-#. Choice in the import review: bring a deleted persona back, with its old messages
 msgid "Restore"
 msgstr "استعادة"
-
-#. Button in the import review that restores every deleted persona listed
-msgid "Restore all {count}"
-msgstr "استعادة الكل ({count})"
 
 #. Explanation of the "Still deleted" line of the import result
 msgid "Restore them from Deleted personas in Settings if you change your mind."
@@ -1247,10 +1229,6 @@ msgstr "المُستعادة"
 msgid "Results"
 msgstr "النتائج"
 
-#. Title of the persona import review
-msgid "Review before importing"
-msgstr "المراجعة قبل الاستيراد"
-
 msgid "Root Account (Default)"
 msgstr "الحساب الأساسي (افتراضي)"
 
@@ -1262,21 +1240,25 @@ msgstr "تنفيذ مرة أخرى"
 msgid "Run anyway"
 msgstr "التشغيل على أي حال"
 
-#. Badge on the safest choice in the import review
-msgid "Safest"
-msgstr "الأكثر أمانًا"
+#. Why a persona in the import review may be the member: same name
+msgid "Same name"
+msgstr "الاسم نفسه"
 
-#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
-msgid "Same as your {name}: link them"
-msgstr "مطابق لشخصيتك {name}: ربطهما"
+#. Why a persona in the import review may be the member: same name and proxy tag
+msgid "Same name and tag"
+msgstr "الاسم والعلامة نفسهما"
 
-#. Explanation of a section of the import review
-msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
-msgstr "الاسم نفسه والعلامة نفسها مثل إحدى شخصياتك، لكنها غير مرتبطة بملفك بعد، مثلًا لأنك أنشأتها يدويًا. الربط يسجّل فقط أي عضو في الملف تمثله كل شخصية، حتى تتعرف عليها عمليات الاستيراد القادمة. لا يتغير شيء في الشخصية."
+#. Choice on a persona's card in the import review: the member of the import file is this persona
+msgid "Same persona as this one"
+msgstr "هي هذه الشخصية نفسها"
 
 #. Comparison of a persona picture with the import file: they are the same
 msgid "Same picture"
 msgstr "الصورة نفسها"
+
+#. Why a persona in the import review may be the member: same proxy tag
+msgid "Same tag"
+msgstr "العلامة نفسها"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1337,6 +1319,11 @@ msgstr "تعيين كنشط"
 msgid "Set as active persona"
 msgstr "تعيين كشخصية نشطة"
 
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "إظهار"
+
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
 msgstr "إظهار زر النسخ"
@@ -1344,10 +1331,6 @@ msgstr "إظهار زر النسخ"
 #. Button that loads the list of deleted personas in Settings › Personas
 msgid "Show deleted personas"
 msgstr "عرض الشخصيات المحذوفة"
-
-#. Button that collapses a list in the import review again
-msgid "Show fewer"
-msgstr "عرض أقل"
 
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
@@ -1361,10 +1344,6 @@ msgstr "إظهار شريط الإشارات"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "إظهار غير المدرجة والخاصة"
-
-#. Button that shows the rest of a list in the import review
-msgid "Show {count} more"
-msgstr "عرض المزيد ({count})"
 
 msgid "Signal Bar"
 msgstr "شريط الإشارات"
@@ -1396,9 +1375,9 @@ msgstr "الرمز التعبيري المميز مستخدم بالفعل من 
 msgid "Signature emojis"
 msgstr "الرموز التعبيرية المميزة"
 
-#. Choice in the import review: do nothing with this member of the import file
-msgid "Skip this member"
-msgstr "تخطي هذا العضو"
+#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
+msgid "Similar tag"
+msgstr "علامة مشابهة"
 
 #. Line of the import result: members left out
 msgid "Skipped"
@@ -1420,6 +1399,14 @@ msgstr "لا تزال محذوفة"
 msgid "Still in your file. Import it again any time to decide about them."
 msgstr "لا يزالون في ملفك. استورد الملف مجددًا في أي وقت لتقرر بشأنهم."
 
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "إيقاف الاستيراد"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "إيقاف هذا الاستيراد؟"
+
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "جارٍ حفظ الصورة {current} من {total} من الملف..."
@@ -1439,6 +1426,11 @@ msgstr "يدعم ملفات تصدير النظام من PluralKit"
 msgid "Switch the active persona"
 msgstr "تبديل الشخصية النشطة"
 
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "العلامة"
+
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -1446,14 +1438,6 @@ msgstr "أيقونة العلامة"
 
 msgid "Tag Text"
 msgstr "نص العلامة"
-
-#. Section of the import review
-msgid "Tag already in use"
-msgstr "العلامة مستخدمة بالفعل"
-
-#. Short name of a section of the import review
-msgid "Tag in use"
-msgstr "العلامة مستخدمة"
 
 #. Row heading in the table comparing a persona with the import file: whether its tags are matched
 msgid "Tag matching"
@@ -1554,13 +1538,9 @@ msgstr "لا يوجد فلتر باسم {name}."
 msgid "There's no tag called {name}."
 msgstr "لا توجد علامة باسم {name}."
 
-#. Explanation of a section of the import review
-msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
-msgstr "جاءت هذه من ملفك من قبل، لكن الملف فيه الآن بيانات مختلفة، أو أنك غيّرتها هنا منذ ذلك الحين. لا سبيل لمعرفة أي جانب تغيّر، لذا تُحفظ نسخة هذا التطبيق ما لم تختر نسخة الملف لشخصية ما. تحل نسخة الملف محل بيانات تلك الشخصية؛ وتبقى رسائلها وسجلها وظهورها ورموزها التعبيرية المميزة، وكذلك أي صورة يتعذّر تنزيلها."
-
-#. Explanation of a section of the import review
-msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
-msgstr "تبقى محذوفة ما لم تستعدها. الاستعادة تعيد الشخصية نفسها كما كانت، مع رسائلها القديمة واستخدامها، بدلًا من إنشاء نسخة."
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "يبدو أن هؤلاء الأعضاء شخصيات لديك بالفعل في {productName}. اختر لكل منهم ما يجب أن يحتفظ به {productName}. غير متأكد؟ اتركه كما هو: لا يتغير شيء."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1623,6 +1603,10 @@ msgstr "تشغيل شريط الإشارات"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "يفتح Tyne تلقائيًا. سجّل الدخول وانتهى الأمر."
 
+#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
+msgid "Type {example} to post as {name}"
+msgstr "اكتب {example} للنشر باسم {name}"
+
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "اكتب {output} أو {tag} لعرض الاقتراحات."
@@ -1641,7 +1625,6 @@ msgstr "Ubuntu وFedora وغيرها"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
-#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "غير مدرج"
@@ -1702,34 +1685,30 @@ msgstr "استخدم أحرفًا صغيرة وأرقامًا و- و_، بحد �
 msgid "Use the basic editor"
 msgstr "استخدام المحرر الأساسي"
 
-#. Choice in the import review: replace the persona's details with those in the import file
-msgid "Use the file's version"
-msgstr "استخدام نسخة الملف"
+#. Choice on the import file's card in the import review: use the file's display tag
+msgid "Use the file's"
+msgstr "استخدام علامة الملف"
 
-#. Choice in the import review: use the import file's system tag {tag} as the display tag
-msgid "Use the file's: {tag}"
-msgstr "استخدام علامة الملف: {tag}"
+#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
+msgid "Use the file's {name}"
+msgstr "استخدام نسخة الملف من {name}"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "استخدام محرر النصوص البرمجية"
 
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "نسخة الملف"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "عرض شخصياتك"
-
-#. Heading of the choices for one member of the import file
-msgid "What should happen to {name} from your file?"
-msgstr "ماذا تريد أن يحدث للعضو {name} من ملفك؟"
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "ما يكتبونه"
-
-#. Accessible label of the menu of choices for one persona in the import review
-msgid "What to do with {name}"
-msgstr "خيارات {name}"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1758,29 +1737,29 @@ msgstr "قام Windows بحماية الكمبيوتر الشخصي"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "كتابة الرقم بالشكل 1st, 2nd, 3rd"
 
-#. Hint on the choice to add a member without its proxy tag, in the import review
-msgid "You can give it another tag later in Settings."
-msgstr "يمكنك منحها علامة أخرى لاحقًا من الإعدادات."
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "حذفت {name} في {productName} بتاريخ {date}. هل تريد إعادة {name}؟"
 
-#. Section of the import review
-msgid "You deleted these"
-msgstr "حذفتَ هذه"
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "حذفت {name} في {productName}. هل تريد إعادة {name}؟"
 
-#. Hint on the choice to add a member as a separate persona, in the import review
-msgid "You will have one more {name}."
-msgstr "ستكون لديك شخصية {name} إضافية."
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "ستضيع اختياراتك لهؤلاء الأعضاء، ولن يُستورد أي شيء."
 
-#. Explanation of a section of the import review
-msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
-msgstr "لحسابك علامة عرض واحدة، تظهر بعد اسم كل شخصية. علامة النظام في الملف مختلفة."
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "تظهر علامة العرض الخاصة بك بعد اسم كل شخصية. أي علامة يجب أن يستخدمها {productName}؟"
 
 #. On the download page after the visitor chose to download the app elsewhere.
 msgid "Your download should start in a moment. If it doesn't, use the button above."
 msgstr "سيبدأ التنزيل بعد لحظات. إذا لم يبدأ، فاستخدم الزر أعلاه."
 
-#. Hint on the choice to link a member to an existing persona, in the import review
-msgid "Your persona stays as it is; it is connected to this member."
-msgstr "تبقى شخصيتك كما هي؛ وتُربط بهذا العضو."
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "ملفك"
 
 msgid "Your reactions"
 msgstr "تفاعلاتك"
@@ -1793,33 +1772,17 @@ msgstr "تفاعلاتك بـ {emojiName}"
 msgid "add {count}"
 msgstr "إضافة {count}"
 
-#. A persona field, listed in "Differs: name, avatar"
-msgid "avatar"
-msgstr "الصورة الرمزية"
-
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "صور أفاتار تم تنزيلها"
-
-#. A persona field, listed in "Differs: name, banner"
-msgid "banner"
-msgstr "اللافتة"
 
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "لافتات تم تنزيلها"
 
-#. A persona field, listed in "Differs: name, bio"
-msgid "bio"
-msgstr "النبذة الشخصية"
-
 #. Part of the import summary "Import will add 7 and change your display tag"
 msgid "change your display tag"
 msgstr "تغيير علامة العرض الخاصة بك"
-
-#. A persona field (its accent colour), listed in "Differs: name, colour"
-msgid "colour"
-msgstr "اللون"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1853,26 +1816,9 @@ msgstr "عناصر"
 msgid "link {count}"
 msgstr "ربط {count}"
 
-#. A persona's name as a field, listed in "Differs: name, bio"
-msgctxt "persona-field"
-msgid "name"
-msgstr "الاسم"
-
-#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
-msgid "picture not compared"
-msgstr "لم تتم مقارنة الصورة"
-
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
 msgstr "اضغط لعرض تفاعلاتك"
-
-#. A persona field, listed in "Differs: name, pronouns"
-msgid "pronouns"
-msgstr "الضمائر"
-
-#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
-msgid "removes {fields}"
-msgstr "يزيل {fields}"
 
 #. Part of the import summary "Import will link 17, restore 2, skip 3"
 msgid "restore {count}"
@@ -1882,21 +1828,9 @@ msgstr "استعادة {count}"
 msgid "saving personas"
 msgstr "شخصيات تم حفظها"
 
-#. A persona field, listed in "Differs: name, signature emojis"
-msgid "signature emojis"
-msgstr "الرموز التعبيرية المميزة"
-
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "skip {count}"
 msgstr "تخطي {count}"
-
-#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
-msgid "tag matching"
-msgstr "مطابقة العلامات"
-
-#. A persona field (its proxy tags), listed in "Differs: name, tags"
-msgid "tags"
-msgstr "العلامات"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1908,10 +1842,6 @@ msgstr "نص"
 #. Part of the import summary "Import will link 17, use the file's version for 2"
 msgid "use the file's version for {count}"
 msgstr "استخدام نسخة الملف في {count}"
-
-#. A persona field, listed in "Differs: name, visibility"
-msgid "visibility"
-msgstr "الظهور"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1927,6 +1857,22 @@ msgstr "{addedCount, plural, zero {لم تُضف أي شخصية} one {أُضي�
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} الإصدار {version} جاهز للتثبيت."
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
+msgstr "{count, plural, zero {لا يطابق أي عضو شخصيته في {productName} بعد.} one {عضو واحد يطابق شخصيته في {productName} بالفعل. لا حاجة لفعل شيء.} two {عضوان يطابقان شخصيتيهما في {productName} بالفعل. لا حاجة لفعل شيء.} few {# أعضاء يطابقون شخصياتهم في {productName} بالفعل. لا حاجة لفعل شيء.} many {# عضوًا يطابقون شخصياتهم في {productName} بالفعل. لا حاجة لفعل شيء.} other {# عضو يطابقون شخصياتهم في {productName} بالفعل. لا حاجة لفعل شيء.}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
+msgstr "{count, plural, zero {لن يُضاف أي عضو جديد} one {سيُضاف عضو جديد واحد} two {سيُضاف عضوان جديدان} few {سيُضاف # أعضاء جدد} many {سيُضاف # عضوًا جديدًا} other {سيُضاف # عضو جديد}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
+msgstr "{count, plural, zero {كل شخصيات {productName} موجودة في ملفك.} one {شخصية واحدة في {productName} ليست في ملفك. تبقى كما هي.} two {شخصيتان في {productName} ليستا في ملفك. تبقيان كما هما.} few {# شخصيات في {productName} ليست في ملفك. تبقى كما هي.} many {# شخصية في {productName} ليست في ملفك. تبقى كما هي.} other {# شخصية في {productName} ليست في ملفك. تبقى كما هي.}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, zero {لا شخصيات مختلفة في ملفك} one {شخصية واحدة مختلفة في ملفك} two {شخصيتان مختلفتان في ملفك} few {# شخصيات مختلفة في ملفك} many {# شخصية مختلفة في ملفك} other {# شخصية مختلفة في ملفك}}"
 
 #. Toast after making personas private; it has an Undo button.
 msgid "{count, plural, one {# persona is} other {# personas are}} now private"
@@ -1944,6 +1890,10 @@ msgstr "{count, plural, zero {لا شخصيات غير مدرجة الآن} one 
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, zero {لا شخصيات تبقى كما هي} one {تبقى شخصية واحدة كما هي} two {تبقى شخصيتان كما هما} few {تبقى # شخصيات كما هي} many {تبقى # شخصية كما هي} other {تبقى # شخصية كما هي}}"
 
+#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
+msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
+msgstr "{count, plural, zero {لن تُربط أي شخصية أنشأتها يدويًا.} one {ستُربط شخصية واحدة أنشأتها يدويًا بعضوها. لن يتغير فيها شيء.} two {ستُربط شخصيتان أنشأتهما يدويًا بعضويهما. لن يتغير فيهما شيء.} few {ستُربط # شخصيات أنشأتها يدويًا بأعضائها. لن يتغير فيها شيء.} many {ستُربط # شخصية أنشأتها يدويًا بأعضائها. لن يتغير فيها شيء.} other {ستُربط # شخصية أنشأتها يدويًا بأعضائها. لن يتغير فيها شيء.}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, zero {لا شخصيات} one {شخصية واحدة} two {شخصيتان} few {# شخصيات} many {# شخصية} other {# شخصية}}"
@@ -1951,6 +1901,10 @@ msgstr "{count, plural, zero {لا شخصيات} one {شخصية واحدة} two
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, zero {لم تُحذف أي شخصية} one {حُذفت شخصية واحدة} two {حُذفت شخصيتان} few {حُذفت # شخصيات} many {حُذفت # شخصية} other {حُذفت # شخصية}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, zero {لا أعضاء للمراجعة قبل الاستيراد} one {مراجعة عضو واحد قبل الاستيراد} two {مراجعة عضوين قبل الاستيراد} few {مراجعة # أعضاء قبل الاستيراد} many {مراجعة # عضوًا قبل الاستيراد} other {مراجعة # عضو قبل الاستيراد}}"
 
 #. How often a persona has been used, shown in the import review
 #. How often a persona has been used, shown in the import review
@@ -1992,21 +1946,25 @@ msgstr "ستكون {label} لدى كل هؤلاء: {names}. غيّر أحد ال
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - انقر لتبديل الشخصية"
 
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "يستخدمها {name} بالفعل"
+
 #. Toast after a deleted persona was restored
 msgid "{name} is back."
 msgstr "عادت {name}."
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "تختلف {name} في ملفك. أي نسخة يجب أن يحتفظ بها {productName}؟"
 
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "لم يُغلق {name} أبدًا."
 
-#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
-msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
-msgstr "{needCount, plural, zero {تحتاج علامة العرض الخاصة بك إلى مراجعة} one {يحتاج عضو واحد وعلامة العرض الخاصة بك إلى مراجعة} two {يحتاج عضوان وعلامة العرض الخاصة بك إلى مراجعة} few {يحتاج # أعضاء وعلامة العرض الخاصة بك إلى مراجعة} many {يحتاج # عضوًا وعلامة العرض الخاصة بك إلى مراجعة} other {يحتاج # عضو وعلامة العرض الخاصة بك إلى مراجعة}}"
-
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
-msgstr "{needCount, plural, zero {لا أعضاء يحتاجون إلى مراجعة} one {يحتاج عضو واحد إلى مراجعة} two {يحتاج عضوان إلى مراجعة} few {يحتاج # أعضاء إلى مراجعة} many {يحتاج # عضوًا إلى مراجعة} other {يحتاج # عضو إلى مراجعة}}"
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "علامة {name} مستخدمة بالفعل"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -2022,18 +1980,6 @@ msgstr "{publicCount} عامة، {unlistedCount} غير مدرجة، {privateCou
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "{shown} من {total} شخصية"
-
-#. Closing line of the import review. {untouched} is a number of personas
-msgid "{untouched} of your personas aren't in this file. They stay as they are."
-msgstr "{untouched, plural, zero {كل شخصياتك موجودة في هذا الملف.} one {شخصية واحدة من شخصياتك ليست في هذا الملف. ستبقى كما هي.} two {شخصيتان من شخصياتك ليستا في هذا الملف. ستبقيان كما هما.} few {# من شخصياتك ليست في هذا الملف. ستبقى كما هي.} many {# من شخصياتك ليست في هذا الملف. ستبقى كما هي.} other {# من شخصياتك ليست في هذا الملف. ستبقى كما هي.}}"
-
-#. Closing line of the import review. {upToDate} is a number of members
-msgid "{upToDate} members match their persona exactly. Nothing to do."
-msgstr "{upToDate, plural, zero {لا يوجد عضو يطابق شخصيته تمامًا.} one {عضو واحد يطابق شخصيته تمامًا. لا شيء لفعله.} two {عضوان يطابقان شخصيتيهما تمامًا. لا شيء لفعله.} few {# أعضاء يطابقون شخصياتهم تمامًا. لا شيء لفعله.} many {# عضوًا يطابقون شخصياتهم تمامًا. لا شيء لفعله.} other {# عضو يطابقون شخصياتهم تمامًا. لا شيء لفعله.}}"
-
-#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
-msgid "{visibility} (this app's is kept)"
-msgstr "{visibility} (يُحتفظ بإعداد هذا التطبيق)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— اليوم الساعة 12:00"
