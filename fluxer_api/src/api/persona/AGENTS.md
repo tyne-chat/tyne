@@ -174,8 +174,9 @@ personas), 10,000 signature emojis per persona (unique across personas).
   `use_file` connects the persona too if it was not (tyne-chat/tyne#573), on a deleted persona
   brings it back with the file's details in the same write (#574), and never changes
   visibility, nor signature emojis or tag matching from a PluralKit file. Connecting a persona to a
-  member unlinks any other persona linked to it (duplicates, #571). Two actions naming one persona
-  answer `PERSONA_IMPORT_CONFLICT`.
+  member unlinks any other persona linked to it (duplicates, #571), unless an action of its own
+  connects it (one of two duplicates given to another member, #575). Two actions naming one persona,
+  or connecting one member, answer `PERSONA_IMPORT_CONFLICT`.
 - **Older import**, kept for desktop apps that have not updated: the client reads a PluralKit export
   or a Tyne zip, sends the images first, then the
   whole file in one `POST /import` (at most 250 personas, the account's limit). `importPersonas`
