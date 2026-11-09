@@ -67,6 +67,11 @@ describe('reviewed persona import', () => {
 			.post('/users/@me/personas/import/apply')
 			.body({source: 'pluralkit', actions});
 
+	const applyTyne = (actions: Array<PersonaImportAction>) =>
+		createBuilder<PersonaImportApplyResponse>(harness, owner.token)
+			.post('/users/@me/personas/import/apply')
+			.body({source: 'tyne', actions});
+
 	const snapshot = async () =>
 		(await list())
 			.map((p) => JSON.stringify([p.id, p.name, p.persona_tags, p.external_uuid, p.bio, p.visibility]))
@@ -158,6 +163,37 @@ describe('reviewed persona import', () => {
 		expect(after.get(first.id)?.external_uuid ?? null).toBeNull();
 	});
 
+	it('gives each of two personas linked to one member a member of its own, in either order', async () => {
+		// The review asks about both members: two personas carry the first one's id, and the second
+		// member has their name. Each picks one.
+		for (const order of ['first', 'second'] as const) {
+			await harness.reset();
+			owner = await createTestAccount(harness);
+			const first = await create({name: 'Kenoma', external_uuid: 'ddddd'});
+			const second = await create({name: 'Kenoma', external_uuid: 'ddddd'});
+			const actions: Array<PersonaImportAction> = [
+				{action: 'link', persona_id: first.id, external_uuid: 'ddddd'},
+				{action: 'link', persona_id: second.id, external_uuid: 'eeeee'},
+			];
+			await apply(order === 'first' ? actions : actions.reverse())
+				.expect(HTTP_STATUS.OK)
+				.execute();
+			const after = new Map((await list()).map((p) => [p.id, p.external_uuid]));
+			expect(after.get(first.id)).toBe('ddddd');
+			expect(after.get(second.id)).toBe('eeeee');
+		}
+		// Two actions never connect one member to two personas.
+		const third = await create({name: 'Kenoma'});
+		const before = await snapshot();
+		await apply([
+			{action: 'link', persona_id: third.id, external_uuid: 'ddddd'},
+			{action: 'link', persona_id: (await list()).find((p) => p.external_uuid === 'eeeee')!.id, external_uuid: 'ddddd'},
+		])
+			.expect(HTTP_STATUS.BAD_REQUEST, APIErrorCodes.PERSONA_IMPORT_CONFLICT)
+			.execute();
+		expect(await snapshot()).toEqual(before);
+	});
+
 	it("brings a deleted persona back with the file's details, or as it was beside a copy", async () => {
 		const [pip, moss] = await legacyImport([
 			{name: 'Pip', bio: 'Old', persona_tags: [{prefix: 'pi:'}], external_uuid: 'ppppp'},
@@ -243,6 +279,91 @@ describe('reviewed persona import', () => {
 
 		const after = await snapshot();
 		expect(after.filter((row) => !row.includes('Wrennie'))).toEqual(before);
+	});
+
+	it('applies the display tag unasked only on an empty account, and asks only when the file has another', async () => {
+		const member: PersonaImportPreviewMember = {name: 'Sol', persona_tags: [], external_uuid: 'sssss'};
+		expect((await preview([member], 'SOLAR')).display_tag).toEqual({decision: 'auto_apply', current_text: null});
+		await create({name: 'Wren'});
+		const asked = await preview([member], 'SOLAR');
+		expect(asked.display_tag).toEqual({decision: 'ask', current_text: null});
+		expect(asked.needs_review).toBe(true);
+		await createBuilder(harness, owner.token)
+			.patch('/users/@me/personas/settings')
+			.body({display_tag_text: 'SOLAR'})
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		expect((await preview([member], ' SOLAR ')).display_tag).toEqual({decision: 'none', current_text: 'SOLAR'});
+		expect((await preview([member], 'LUNAR')).display_tag).toEqual({decision: 'ask', current_text: 'SOLAR'});
+		const none = await preview([member]);
+		expect(none.display_tag.decision).toBe('none');
+		expect(none.needs_review).toBe(false);
+	});
+
+	it('refuses an action without what it needs, or a restore of a live persona, and writes nothing', async () => {
+		const [wren] = await legacyImport([{name: 'Wren', external_uuid: 'aaaaa'}]);
+		const before = await snapshot();
+		const refused: Array<[PersonaImportAction, number, string]> = [
+			[
+				{action: 'link', persona_id: wren!.id, external_uuid: '  '},
+				HTTP_STATUS.BAD_REQUEST,
+				APIErrorCodes.PERSONA_IMPORT_CONFLICT,
+			],
+			[{action: 'add'}, HTTP_STATUS.BAD_REQUEST, APIErrorCodes.PERSONA_IMPORT_CONFLICT],
+			[{action: 'use_file', persona_id: wren!.id}, HTTP_STATUS.BAD_REQUEST, APIErrorCodes.PERSONA_IMPORT_CONFLICT],
+			[
+				{action: 'use_file', persona_id: wren!.id, item: {name: 'Wren'}},
+				HTTP_STATUS.BAD_REQUEST,
+				APIErrorCodes.PERSONA_IMPORT_CONFLICT,
+			],
+			[{action: 'restore', persona_id: wren!.id}, HTTP_STATUS.NOT_FOUND, APIErrorCodes.UNKNOWN_PERSONA],
+			[
+				{action: 'link', persona_id: '100000000000000999', external_uuid: 'zzzzz'},
+				HTTP_STATUS.NOT_FOUND,
+				APIErrorCodes.UNKNOWN_PERSONA,
+			],
+		];
+		for (const [action, status, code] of refused) {
+			await apply([{action: 'add', item: {name: 'Sorrel'}}, action])
+				.expect(status, code)
+				.execute();
+		}
+		expect(await snapshot()).toEqual(before);
+		// Every member skipped: nothing to write, and nothing refused.
+		expect(await apply([]).expect(HTTP_STATUS.OK).execute()).toEqual({personas: [], dropped: []});
+	});
+
+	it("takes a Tyne export's signature emojis and auto-tag with the file's version, leaving out those dropped", async () => {
+		const ash = await create({name: 'Ash', external_uuid: 'aaaaa', signature_emojis: [{name: '🌿'}]});
+		await applyTyne([
+			{
+				action: 'use_file',
+				persona_id: ash.id,
+				item: {
+					name: 'Ash',
+					external_uuid: 'aaaaa',
+					signature_emojis: [{name: '🌸'}, {name: '🍄'}],
+					auto_tag_disabled: true,
+				},
+				drop_signature_emojis: [{name: '🍄'}],
+			},
+		])
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		const after = (await list()).find((p) => p.id === ash.id);
+		expect(after?.signature_emojis).toEqual([{name: '🌸'}]);
+		expect(after?.auto_tag_disabled).toBe(true);
+	});
+
+	it('restores a deleted persona without a signature emoji another persona took meanwhile, and says which', async () => {
+		const quince = await create({name: 'Quince', signature_emojis: [{name: '🍐'}, {name: '🌿'}]});
+		await remove(quince.id);
+		await create({name: 'Rowan', signature_emojis: [{name: '🌿'}]});
+		const result = await apply([{action: 'restore', persona_id: quince.id}])
+			.expect(HTTP_STATUS.OK)
+			.execute();
+		expect(result.dropped).toEqual([{persona_id: quince.id, tags: [], signature_emojis: [{name: '🌿'}]}]);
+		expect((await list()).find((p) => p.id === quince.id)?.signature_emojis).toEqual([{name: '🍐'}]);
 	});
 
 	it('lists deleted personas and restores one as itself, leaving off a tag another persona took meanwhile', async () => {
