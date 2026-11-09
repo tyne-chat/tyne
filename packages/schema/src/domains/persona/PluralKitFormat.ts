@@ -425,6 +425,26 @@ export function tyneMediaImageUrl(
 
 const OWN_MEDIA_PATH = /^\/(avatars|banners)\/(\d{1,20})\/((?:a_)?[0-9a-f]{8})\.(?:png|webp|gif|jpe?g|avif)$/;
 
+/** A Tyne media path anywhere in a link: `…/avatars/<account>/<hash>.<format>`. */
+const ANY_MEDIA_PATH = /\/(avatars|banners)\/\d{1,20}\/((?:a_)?[0-9a-f]{8})\.(?:png|webp|gif|jpe?g|avif)$/;
+
+/**
+ * The stored picture a link to Tyne media names, on any instance and under any account: the hash in its
+ * path (tyne-chat/tyne#572). A hash is derived from the stored file, so a persona whose picture has this
+ * hash has that very file, whatever format the link asks the media proxy to convert it to.
+ */
+export function tyneMediaLinkHash(url: string, kind: PersonaImageKind): string | null {
+	let parsed: URL;
+	try {
+		parsed = new URL(url);
+	} catch {
+		return null;
+	}
+	const match = ANY_MEDIA_PATH.exec(parsed.pathname);
+	if (!match || match[1] !== MEDIA_FOLDER[kind]) return null;
+	return match[2] ?? null;
+}
+
 /**
  * The image hash in a link to one of this account's own persona images on this instance, or null
  * for any other link. Lets a re-imported file keep those images without fetching them: the media
