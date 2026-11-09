@@ -30,7 +30,7 @@
 }
 
 .rowCategory {
-	margin-left: 1.5rem;
+	margin-inline-start: 1.5rem;
 	color: var(--text-primary-muted);
 	font-size: 0.75rem;
 	font-weight: 600;
@@ -39,11 +39,11 @@
 }
 
 .rowChannel {
-	margin-left: 1.5rem;
+	margin-inline-start: 1.5rem;
 }
 
 .rowNested {
-	margin-left: 3rem;
+	margin-inline-start: 3rem;
 }
 
 .checkbox {
