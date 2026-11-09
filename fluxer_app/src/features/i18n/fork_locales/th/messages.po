@@ -26,6 +26,10 @@ msgstr "<0>{tag}</0> เป็นของ Persona {name} ของคุณอ�
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "<0>{tag}</0> ถูกใช้โดย {name} ในไฟล์ของคุณด้วย"
 
+#. Choice in the import review: the member of the file is someone else, add it as a new persona
+msgid "A different persona: add it"
+msgstr "เป็น Persona อื่น: เพิ่มใหม่"
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "Persona หนึ่งมีแท็กได้สูงสุด 5 แท็ก"
@@ -58,10 +62,6 @@ msgstr "เพิ่ม Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "เพิ่มคู่แท็ก ({0}/5)"
 
-#. Choice in the import review: add the member as a new persona next to the existing one
-msgid "Add as a separate persona"
-msgstr "เพิ่มเป็น Persona แยก"
-
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "เพิ่มตัวนับ"
@@ -69,13 +69,13 @@ msgstr "เพิ่มตัวนับ"
 msgid "Add signal"
 msgstr "เพิ่มสัญญาณ"
 
-#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
-msgid "Add with the tag"
-msgstr "เพิ่มพร้อมแท็ก"
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "เพิ่ม {name}"
 
-#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
-msgid "Add without {tags}"
-msgstr "เพิ่มโดยไม่มี {tags}"
+#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
+msgid "Add {name} with a tag of its own"
+msgstr "เพิ่ม {name} ด้วยแท็กของตัวเอง"
 
 #. Line of the import result: new personas
 msgid "Added"
@@ -157,6 +157,10 @@ msgstr "ดาวน์โหลดรูปแบนเนอร์ไม่ส
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "ดาวน์โหลดรูปแบนเนอร์ไม่สำเร็จ: {error} Persona ยังคงใช้แบนเนอร์เดิม"
 
+#. Switch on a deleted persona in the import review that restores it. {name} is its name
+msgid "Bring {name} back"
+msgstr "นำ {name} กลับมา"
+
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
@@ -166,14 +170,6 @@ msgstr "กลับมาโดยไม่มี {items}: ตอนนี้ P
 msgid "Can't compare"
 msgstr "เปรียบเทียบไม่ได้"
 
-#. Short name of a section of the import review
-msgid "Can't tell"
-msgstr "บอกไม่ได้"
-
-#. Section of the import review
-msgid "Can't tell if it's the same persona"
-msgstr "บอกไม่ได้ว่าเป็น Persona เดียวกันหรือไม่"
-
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "เปลี่ยน Persona"
@@ -181,6 +177,10 @@ msgstr "เปลี่ยน Persona"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "เปลี่ยนข้อความตามสิ่งที่พวกเขาพิมพ์"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "ตรวจสอบก่อนนำเข้า"
 
 #. Title of the persona import dialog while the file is checked
 msgid "Checking your file..."
@@ -217,6 +217,10 @@ msgstr "สี"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "กลับมาที่หน้านี้แล้วแตะ <0>รับ Tyne ใน TestFlight</0> จากนั้นแตะ <1>ติดตั้ง</1>"
 
+#. Small line on a deleted persona in the import review once it is set to come back
+msgid "Comes back as it was, with its old messages"
+msgstr "กลับมาเหมือนเดิม พร้อมข้อความเก่า"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "คำสั่ง"
@@ -234,10 +238,6 @@ msgstr "คำสั่ง"
 msgid "Commands saved"
 msgstr "บันทึกคำสั่งแล้ว"
 
-#. Button that shows a persona next to its version in the import file
-msgid "Compare"
-msgstr "เปรียบเทียบ"
-
 #. Status while the import file is compared with the account's personas
 msgid "Comparing your file with your personas..."
 msgstr "กำลังเปรียบเทียบไฟล์กับ Persona ของคุณ..."
@@ -245,6 +245,10 @@ msgstr "กำลังเปรียบเทียบไฟล์กับ Pe
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Persona ที่ตั้งค่าแล้ว ({count})"
+
+#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
+msgid "Connect {name}"
+msgstr "เชื่อมโยง {name}"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -333,10 +337,6 @@ msgstr "ลบการประทับเวลา\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "ลบ {count, plural, other {Persona # รายการ}} ใช่ไหม"
 
-#. Short name of a section of the import review
-msgid "Deleted"
-msgstr "ถูกลบ"
-
 #. Title of the section in Settings › Personas that lists deleted personas
 msgid "Deleted personas"
 msgstr "Persona ที่ถูกลบ"
@@ -353,25 +353,10 @@ msgstr "ลบเมื่อ {date}"
 msgid "Detected System Name / Tag"
 msgstr "ชื่อ / แท็กระบบที่ตรวจพบ"
 
-#. Section of the import review
-msgid "Different in your file"
-msgstr "แตกต่างในไฟล์ของคุณ"
-
 #. Comparison of a persona picture with the import file: they differ
 msgid "Different picture"
 msgstr "รูปต่างกัน"
 
-#. Short name of a section of the import review
-msgid "Differs"
-msgstr "แตกต่าง"
-
-#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
-msgid "Differs: {fields}"
-msgstr "แตกต่าง: {fields}"
-
-#. Heading of the display tag choice in the import review
-#. Section of the import review
-#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "แท็กแสดงผล"
@@ -442,13 +427,9 @@ msgstr "คู่แท็กซ้ำใน Persona นี้"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "แต่ละช่องเก็บ Persona ของตัวเอง ช่องใหม่จะเริ่มต้นเป็นบัญชีของคุณ"
 
-#. Explanation of a section of the import review
-msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
-msgstr "แต่ละรายการมีชื่อหรือแท็กตรงกับ Persona หนึ่งของคุณ แต่ไม่ตรงทั้งสองอย่าง จึงอาจเป็น Persona เดียวกันหรือคนละ Persona โปรดเปรียบเทียบแล้วเลือก สมาชิกที่ข้ามไว้จะยังอยู่ในไฟล์ของคุณสำหรับครั้งหน้า"
-
-#. Explanation at the top of the import review
-msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
-msgstr "แต่ละรายการเลือกตัวเลือกที่ปลอดภัยที่สุดไว้แล้ว สิ่งที่คุณมีจึงจะไม่เปลี่ยนเว้นแต่คุณเลือกเอง โปรดอ่านทุกส่วนก่อนนำเข้า ส่วนที่ยากที่สุดอยู่ด้านบน"
+#. Hint under the list of differing personas in the import review. {productName} is the app name
+msgid "Each keeps {productName}'s version unless you open it and choose the file's."
+msgstr "แต่ละรายการจะคงแบบของ {productName} ไว้ เว้นแต่คุณเปิดดูและเลือกแบบจากไฟล์"
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -572,6 +553,15 @@ msgstr "กรองตามการมองเห็น"
 msgid "Format preview"
 msgstr "ดูตัวอย่างรูปแบบ"
 
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "ว่าง"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "จากไฟล์ของคุณ"
+
 #. Link at the end of the command script help to the complete guide on GitHub.
 msgid "Full script guide"
 msgstr "คู่มือสคริปต์ฉบับเต็ม"
@@ -610,13 +600,14 @@ msgstr "รับแอป Tyne"
 msgid "Here is what changed"
 msgstr "สิ่งที่เปลี่ยนแปลง"
 
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "ซ่อน"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "ซ่อนรายการช่อง"
-
-#. Button that hides the comparison of a persona with the import file
-msgid "Hide comparison"
-msgstr "ซ่อนการเปรียบเทียบ"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -677,23 +668,6 @@ msgstr "กำลังนำเข้า..."
 msgid "In each channel"
 msgstr "ในแต่ละช่อง"
 
-#. Column heading in the import review
-msgid "In this app"
-msgstr "ในแอปนี้"
-
-#. Explanation of a section of the import review
-msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
-msgstr "ในแอปนี้ แท็กพร็อกซีแต่ละแท็กเป็นของ Persona เดียว สมาชิกเหล่านี้มีแท็กที่ Persona อื่นมีอยู่แล้ว หรือที่สมาชิกอื่นในไฟล์ของคุณก็มีเช่นกัน"
-
-#. Column heading in the table comparing a persona with the import file
-msgid "In this app now"
-msgstr "ในแอปนี้ตอนนี้"
-
-#. Column heading in the import review
-#. Column heading in the table comparing a persona with the import file
-msgid "In your file"
-msgstr "ในไฟล์ของคุณ"
-
 #. Explanation of the "Kept as they were" line of the import result
 msgid "Including any that differ from the file, where you kept the version you had."
 msgstr "รวมถึงรายการที่ต่างจากไฟล์ซึ่งคุณเก็บเวอร์ชันเดิมไว้"
@@ -717,42 +691,49 @@ msgstr "แทรก:"
 msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
 msgstr "ติดตั้งแอป <0>TestFlight</0> ของ Apple ซึ่งใช้ได้ฟรีจาก App Store"
 
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "แทน {tag}"
+
+#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
+msgid "Is {name} from your file one of these personas in {productName}?"
+msgstr "{name} จากไฟล์ของคุณเป็นหนึ่งใน Persona เหล่านี้ใน {productName} หรือไม่"
+
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "สคริปต์ของคำสั่งนี้มีปัญหา"
 
-#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
-msgid "Keep this version"
-msgstr "เก็บเวอร์ชันนี้"
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "ตรวจสอบต่อ"
 
-#. Button in the import review: keep every listed persona as it is
-msgid "Keep this version for all"
-msgstr "เก็บเวอร์ชันนี้สำหรับทั้งหมด"
+#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
+msgid "Keep {productName}'s"
+msgstr "เก็บของ {productName} ไว้"
 
-#. Choice in the import review: keep the display tag {tag}
-msgid "Keep yours: {tag}"
-msgstr "ใช้ของคุณ: {tag}"
+#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
+msgid "Keep {productName}'s {name}"
+msgstr "เก็บ {name} ของ {productName} ไว้"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "คงแบบของ {productName}"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "คงแท็กเดิมไว้"
 
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "คงไว้ตามเดิม"
 
-#. Choice in the import review for a persona that was deleted: keep it deleted
-msgid "Leave deleted"
-msgstr "ปล่อยให้ถูกลบไว้"
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Leave {name} out this time"
+msgstr "ไม่นำเข้า {name} ในครั้งนี้"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "บรรทัด {line} คอลัมน์ {column}: {problem}"
-
-#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
-msgctxt "persona-import-choice"
-msgid "Link"
-msgstr "เชื่อมโยง"
-
-#. Button in the import review that links every persona listed
-msgid "Link all {count}"
-msgstr "เชื่อมโยงทั้งหมด {count} รายการ"
 
 #. Shown on a persona in the import review that is already connected to a different member
 msgid "Linked to another PluralKit member"
@@ -817,10 +798,6 @@ msgstr "สมาชิก #{index}"
 msgid "Members with Avatars"
 msgstr "สมาชิกที่มีอวาตาร์"
 
-#. Explanation of a section of the import review
-msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
-msgstr "สมาชิกที่คุณยังไม่มี และไม่มีชื่อหรือแท็กซ้ำ ยกเลิกการเลือกรายการที่คุณไม่ต้องการ"
-
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "เครื่องมือข้อความ"
@@ -845,10 +822,6 @@ msgstr "ย้ายไปที่ถังขยะ"
 msgid "Name (A–Z)"
 msgstr "ชื่อ (A–Z)"
 
-#. Badge on a section of the import review where every member needs a choice
-msgid "Needs a decision"
-msgstr "ต้องตัดสินใจ"
-
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Persona ใหม่"
@@ -856,10 +829,6 @@ msgstr "Persona ใหม่"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "คำสั่งใหม่"
-
-#. Section of the import review
-msgid "New in your file"
-msgstr "ใหม่ในไฟล์ของคุณ"
 
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
@@ -881,6 +850,10 @@ msgstr "Persona ถัดไป"
 msgid "No \"members\" array found in this export file."
 msgstr "ไม่พบอาร์เรย์ \"members\" ในไฟล์ส่งออกนี้"
 
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "ไม่มีประวัติ"
+
 #. Shown on a persona’s card in the Personas list when it has no bio.
 msgid "No bio yet."
 msgstr "ยังไม่มีประวัติ"
@@ -892,6 +865,10 @@ msgstr "ไม่มีคำสั่ง"
 #. Shown in Settings › Personas when there are no deleted personas
 msgid "No deleted personas."
 msgstr "ไม่มี Persona ที่ถูกลบ"
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "ไม่มีแท็กแสดงผล"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "ยังไม่ได้ตั้งค่าแท็กแสดงผล ข้อความจะแสดงรูปโปรไฟล์ของบัญชีคุณ"
@@ -916,12 +893,24 @@ msgstr "ไม่มี Persona ที่นี่"
 msgid "No personas match your search."
 msgstr "ไม่มี Persona ที่ตรงกับการค้นหาของคุณ"
 
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "ไม่มีคำสรรพนาม"
+
 #. Shown in another account’s Personas list when it lists none.
 msgid "No public personas."
 msgstr "ไม่มี Persona สาธารณะ"
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "ยังไม่มีสัญญาณ แถบจะถูกซ่อนไว้จนกว่าคุณจะเพิ่มสัญญาณ"
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "ไม่มีแท็ก: จะเพิ่มโดยไม่มีแท็ก"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "ไม่มีแท็ก"
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
@@ -931,9 +920,17 @@ msgstr "ยังไม่มีใครเปิดสัญญาณนี้
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "ยังไม่มี Persona ของคุณที่เป็นสาธารณะ ผู้อื่นจะเห็น Persona ที่นี่เมื่อคุณตั้งค่าการมองเห็นเป็นสาธารณะ"
 
-#. Hint on the choice to skip a member in the import review
-msgid "Nothing changes. It stays in your file for next time."
-msgstr "ไม่มีอะไรเปลี่ยน สมาชิกนี้จะยังอยู่ในไฟล์ของคุณสำหรับครั้งหน้า"
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Not sure: leave {name} out this time"
+msgstr "ไม่แน่ใจ: ไม่นำเข้า {name} ในครั้งนี้"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "ไม่แน่ใจใช่ไหม ปล่อยไว้ตามเดิมได้ จะไม่มีอะไรเปลี่ยนแปลง"
+
+#. Badge on the choice in the import review that leaves everything as it is
+msgid "Nothing changes"
+msgstr "ไม่มีอะไรเปลี่ยนแปลง"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1124,7 +1121,6 @@ msgstr "Persona ก่อนหน้า"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
-#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "ส่วนตัว"
@@ -1132,14 +1128,6 @@ msgstr "ส่วนตัว"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "Persona ส่วนตัว"
-
-#. Short name of a section of the import review
-msgid "Probably the same"
-msgstr "น่าจะเหมือนกัน"
-
-#. Section of the import review
-msgid "Probably the same persona"
-msgstr "น่าจะเป็น Persona เดียวกัน"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -1154,7 +1142,6 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "การ์ดโปรไฟล์เข้าถึงได้เมื่อคลิกข้อความ และเพื่อนกับเซิร์ฟเวอร์ที่มีร่วมกันมองเห็นได้ในรายการ Persona สาธารณะของคุณ"
 
 #. Chip above the persona list: public personas.
-#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "สาธารณะ"
@@ -1228,13 +1215,8 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "รีเซ็ตจำนวนของ {name} หรือไม่ การดำเนินการนี้ย้อนกลับไม่ได้"
 
 #. Button that brings back a deleted persona
-#. Choice in the import review: bring a deleted persona back, with its old messages
 msgid "Restore"
 msgstr "กู้คืน"
-
-#. Button in the import review that restores every deleted persona listed
-msgid "Restore all {count}"
-msgstr "กู้คืนทั้งหมด {count} รายการ"
 
 #. Explanation of the "Still deleted" line of the import result
 msgid "Restore them from Deleted personas in Settings if you change your mind."
@@ -1247,10 +1229,6 @@ msgstr "กู้คืนแล้ว"
 msgid "Results"
 msgstr "ผลลัพธ์"
 
-#. Title of the persona import review
-msgid "Review before importing"
-msgstr "ตรวจสอบก่อนนำเข้า"
-
 msgid "Root Account (Default)"
 msgstr "บัญชีหลัก (ค่าเริ่มต้น)"
 
@@ -1262,21 +1240,25 @@ msgstr "เรียกใช้อีกครั้ง"
 msgid "Run anyway"
 msgstr "เรียกใช้ต่อไป"
 
-#. Badge on the safest choice in the import review
-msgid "Safest"
-msgstr "ปลอดภัยที่สุด"
+#. Why a persona in the import review may be the member: same name
+msgid "Same name"
+msgstr "ชื่อเดียวกัน"
 
-#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
-msgid "Same as your {name}: link them"
-msgstr "เหมือนกับ {name} ของคุณ: เชื่อมโยง"
+#. Why a persona in the import review may be the member: same name and proxy tag
+msgid "Same name and tag"
+msgstr "ชื่อและแท็กเดียวกัน"
 
-#. Explanation of a section of the import review
-msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
-msgstr "ชื่อและแท็กเหมือนกับ Persona หนึ่งของคุณ แต่ยังไม่ได้เชื่อมโยงกับไฟล์ของคุณ เช่น เพราะคุณสร้างเอง การเชื่อมโยงเพียงบันทึกว่าแต่ละ Persona คือสมาชิกคนใดในไฟล์ เพื่อให้การนำเข้าครั้งต่อไปจดจำได้ ไม่มีอะไรใน Persona เปลี่ยนแปลง"
+#. Choice on a persona's card in the import review: the member of the import file is this persona
+msgid "Same persona as this one"
+msgstr "เป็น Persona เดียวกันนี้"
 
 #. Comparison of a persona picture with the import file: they are the same
 msgid "Same picture"
 msgstr "รูปเดียวกัน"
+
+#. Why a persona in the import review may be the member: same proxy tag
+msgid "Same tag"
+msgstr "แท็กเดียวกัน"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1337,6 +1319,11 @@ msgstr "ตั้งเป็นใช้งานอยู่"
 msgid "Set as active persona"
 msgstr "ตั้งเป็น Persona ที่ใช้งานอยู่"
 
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "แสดง"
+
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
 msgstr "แสดงปุ่มคัดลอก"
@@ -1344,10 +1331,6 @@ msgstr "แสดงปุ่มคัดลอก"
 #. Button that loads the list of deleted personas in Settings › Personas
 msgid "Show deleted personas"
 msgstr "แสดง Persona ที่ถูกลบ"
-
-#. Button that collapses a list in the import review again
-msgid "Show fewer"
-msgstr "แสดงน้อยลง"
 
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
@@ -1361,10 +1344,6 @@ msgstr "แสดงแถบสัญญาณ"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "แสดงที่ไม่แสดงในรายการและส่วนตัว"
-
-#. Button that shows the rest of a list in the import review
-msgid "Show {count} more"
-msgstr "แสดงอีก {count} รายการ"
 
 msgid "Signal Bar"
 msgstr "แถบสัญญาณ"
@@ -1396,9 +1375,9 @@ msgstr "อีโมจิประจำตัวถูกใช้งานแ
 msgid "Signature emojis"
 msgstr "อีโมจิประจำตัว"
 
-#. Choice in the import review: do nothing with this member of the import file
-msgid "Skip this member"
-msgstr "ข้ามสมาชิกนี้"
+#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
+msgid "Similar tag"
+msgstr "แท็กคล้ายกัน"
 
 #. Line of the import result: members left out
 msgid "Skipped"
@@ -1420,6 +1399,14 @@ msgstr "ยังถูกลบอยู่"
 msgid "Still in your file. Import it again any time to decide about them."
 msgstr "ยังอยู่ในไฟล์ของคุณ นำเข้าอีกครั้งได้ทุกเมื่อเพื่อตัดสินใจ"
 
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "หยุดนำเข้า"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "หยุดการนำเข้านี้ไหม"
+
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "กำลังบันทึกรูปที่ {current} จาก {total} จากไฟล์..."
@@ -1439,6 +1426,11 @@ msgstr "รองรับไฟล์ส่งออกระบบของ Pl
 msgid "Switch the active persona"
 msgstr "สลับ Persona ที่ใช้งานอยู่"
 
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "แท็ก"
+
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -1446,14 +1438,6 @@ msgstr "ไอคอนแท็ก"
 
 msgid "Tag Text"
 msgstr "ข้อความแท็ก"
-
-#. Section of the import review
-msgid "Tag already in use"
-msgstr "แท็กถูกใช้อยู่แล้ว"
-
-#. Short name of a section of the import review
-msgid "Tag in use"
-msgstr "แท็กถูกใช้"
 
 #. Row heading in the table comparing a persona with the import file: whether its tags are matched
 msgid "Tag matching"
@@ -1554,13 +1538,9 @@ msgstr "ไม่มีตัวกรองชื่อ {name}"
 msgid "There's no tag called {name}."
 msgstr "ไม่มีแท็กชื่อ {name}"
 
-#. Explanation of a section of the import review
-msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
-msgstr "รายการเหล่านี้เคยมาจากไฟล์ของคุณ แต่ตอนนี้ไฟล์มีข้อมูลต่างไป หรือคุณแก้ไขที่นี่หลังจากนั้น ไม่มีทางรู้ว่าฝั่งไหนเปลี่ยน จึงเก็บเวอร์ชันของแอปนี้ไว้ เว้นแต่คุณเลือกเวอร์ชันของไฟล์ให้ Persona ใด เวอร์ชันของไฟล์จะแทนที่ข้อมูลของ Persona นั้น ส่วนข้อความ ประวัติ การมองเห็น และอีโมจิประจำตัวยังคงอยู่ รวมถึงรูปที่ดาวน์โหลดไม่ได้ด้วย"
-
-#. Explanation of a section of the import review
-msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
-msgstr "จะยังถูกลบไว้เว้นแต่คุณกู้คืน การกู้คืนจะนำ Persona เดิมกลับมาเหมือนเดิม พร้อมข้อความและการใช้งานเก่า แทนที่จะสร้างสำเนา"
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "ดูเหมือนว่าคุณมี Persona เหล่านี้ใน {productName} อยู่แล้ว เลือกว่า {productName} ควรมีแบบไหนสำหรับแต่ละรายการ ไม่แน่ใจใช่ไหม ปล่อยไว้ตามเดิมได้ จะไม่มีอะไรเปลี่ยนแปลง"
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1623,6 +1603,10 @@ msgstr "เปิดแถบสัญญาณ"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne จะเปิดขึ้นเอง ลงชื่อเข้าใช้ก็เสร็จเรียบร้อย"
 
+#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
+msgid "Type {example} to post as {name}"
+msgstr "พิมพ์ {example} เพื่อส่งในนาม {name}"
+
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "พิมพ์ {output} หรือ {tag} เพื่อดูคำแนะนำ"
@@ -1641,7 +1625,6 @@ msgstr "Ubuntu, Fedora และอื่นๆ"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
-#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "ไม่แสดงในรายการ"
@@ -1702,34 +1685,30 @@ msgstr "ใช้ตัวพิมพ์เล็ก ตัวเลข - แ�
 msgid "Use the basic editor"
 msgstr "ใช้ตัวแก้ไขพื้นฐาน"
 
-#. Choice in the import review: replace the persona's details with those in the import file
-msgid "Use the file's version"
-msgstr "ใช้เวอร์ชันของไฟล์"
+#. Choice on the import file's card in the import review: use the file's display tag
+msgid "Use the file's"
+msgstr "ใช้ของไฟล์"
 
-#. Choice in the import review: use the import file's system tag {tag} as the display tag
-msgid "Use the file's: {tag}"
-msgstr "ใช้ของไฟล์: {tag}"
+#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
+msgid "Use the file's {name}"
+msgstr "ใช้ {name} จากไฟล์"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "ใช้ตัวแก้ไขสคริปต์"
 
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "ใช้แบบจากไฟล์"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "ดู Persona ของคุณ"
-
-#. Heading of the choices for one member of the import file
-msgid "What should happen to {name} from your file?"
-msgstr "ต้องการให้ {name} จากไฟล์ของคุณเป็นอย่างไร"
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "สิ่งที่พวกเขาพิมพ์"
-
-#. Accessible label of the menu of choices for one persona in the import review
-msgid "What to do with {name}"
-msgstr "สิ่งที่จะทำกับ {name}"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1758,29 +1737,29 @@ msgstr "Windows ปกป้องพีซีของคุณแล้ว"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "เขียนตัวเลขแบบ 1st, 2nd, 3rd"
 
-#. Hint on the choice to add a member without its proxy tag, in the import review
-msgid "You can give it another tag later in Settings."
-msgstr "คุณตั้งแท็กอื่นให้ได้ภายหลังในการตั้งค่า"
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "คุณลบ {name} ใน {productName} เมื่อวันที่ {date} ต้องการนำ {name} กลับมาไหม"
 
-#. Section of the import review
-msgid "You deleted these"
-msgstr "คุณลบรายการเหล่านี้"
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "คุณลบ {name} ใน {productName} แล้ว ต้องการนำ {name} กลับมาไหม"
 
-#. Hint on the choice to add a member as a separate persona, in the import review
-msgid "You will have one more {name}."
-msgstr "คุณจะมี {name} เพิ่มอีกหนึ่ง"
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "ตัวเลือกของคุณสำหรับสมาชิกเหล่านี้จะหายไป และจะไม่มีการนำเข้าอะไรเลย"
 
-#. Explanation of a section of the import review
-msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
-msgstr "บัญชีของคุณมีแท็กแสดงผลเดียว ซึ่งแสดงหลังชื่อของทุก Persona แท็กระบบในไฟล์แตกต่างออกไป"
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "แท็กแสดงผลของคุณจะแสดงต่อท้ายชื่อ Persona ทุกรายการ ต้องการให้ {productName} ใช้อันไหน"
 
 #. On the download page after the visitor chose to download the app elsewhere.
 msgid "Your download should start in a moment. If it doesn't, use the button above."
 msgstr "การดาวน์โหลดจะเริ่มในอีกสักครู่ หากไม่เริ่ม ให้ใช้ปุ่มด้านบน"
 
-#. Hint on the choice to link a member to an existing persona, in the import review
-msgid "Your persona stays as it is; it is connected to this member."
-msgstr "Persona ของคุณคงเดิม และเชื่อมโยงกับสมาชิกนี้"
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "ไฟล์ของคุณ"
 
 msgid "Your reactions"
 msgstr "รีแอ็กชันของคุณ"
@@ -1793,33 +1772,17 @@ msgstr "รีแอ็กชัน {emojiName} ของคุณ"
 msgid "add {count}"
 msgstr "เพิ่ม {count} รายการ"
 
-#. A persona field, listed in "Differs: name, avatar"
-msgid "avatar"
-msgstr "อวาตาร์"
-
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "อวาตาร์ที่ดาวน์โหลดแล้ว"
-
-#. A persona field, listed in "Differs: name, banner"
-msgid "banner"
-msgstr "แบนเนอร์"
 
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "แบนเนอร์ที่ดาวน์โหลดแล้ว"
 
-#. A persona field, listed in "Differs: name, bio"
-msgid "bio"
-msgstr "ประวัติ"
-
 #. Part of the import summary "Import will add 7 and change your display tag"
 msgid "change your display tag"
 msgstr "เปลี่ยนแท็กแสดงผลของคุณ"
-
-#. A persona field (its accent colour), listed in "Differs: name, colour"
-msgid "colour"
-msgstr "สี"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1853,26 +1816,9 @@ msgstr "รายการ"
 msgid "link {count}"
 msgstr "เชื่อมโยง {count} รายการ"
 
-#. A persona's name as a field, listed in "Differs: name, bio"
-msgctxt "persona-field"
-msgid "name"
-msgstr "ชื่อ"
-
-#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
-msgid "picture not compared"
-msgstr "ไม่ได้เปรียบเทียบรูป"
-
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
 msgstr "กดเพื่อดูรีแอ็กชันของคุณ"
-
-#. A persona field, listed in "Differs: name, pronouns"
-msgid "pronouns"
-msgstr "คำสรรพนาม"
-
-#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
-msgid "removes {fields}"
-msgstr "จะลบ {fields}"
 
 #. Part of the import summary "Import will link 17, restore 2, skip 3"
 msgid "restore {count}"
@@ -1882,21 +1828,9 @@ msgstr "กู้คืน {count} รายการ"
 msgid "saving personas"
 msgstr "Persona ที่บันทึกแล้ว"
 
-#. A persona field, listed in "Differs: name, signature emojis"
-msgid "signature emojis"
-msgstr "อีโมจิประจำตัว"
-
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "skip {count}"
 msgstr "ข้าม {count} รายการ"
-
-#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
-msgid "tag matching"
-msgstr "การจับคู่แท็ก"
-
-#. A persona field (its proxy tags), listed in "Differs: name, tags"
-msgid "tags"
-msgstr "แท็ก"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1908,10 +1842,6 @@ msgstr "ข้อความ"
 #. Part of the import summary "Import will link 17, use the file's version for 2"
 msgid "use the file's version for {count}"
 msgstr "ใช้เวอร์ชันของไฟล์สำหรับ {count} รายการ"
-
-#. A persona field, listed in "Differs: name, visibility"
-msgid "visibility"
-msgstr "การมองเห็น"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1927,6 +1857,22 @@ msgstr "เพิ่ม Persona แล้ว {addedCount} รายการ"
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} เวอร์ชัน {version} พร้อมติดตั้งแล้ว"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
+msgstr "{count, plural, other {สมาชิก # คนตรงกับ Persona ใน {productName} อยู่แล้ว ไม่ต้องทำอะไร}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
+msgstr "{count, plural, other {จะเพิ่มสมาชิกใหม่ # คน}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
+msgstr "{count, plural, other {Persona # รายการใน {productName} ไม่มีในไฟล์ของคุณ และจะยังคงเหมือนเดิม}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, other {Persona # รายการในไฟล์ของคุณมีข้อมูลต่างออกไป}}"
 
 #. Toast after making personas private; it has an Undo button.
 msgid "{count, plural, one {# persona is} other {# personas are}} now private"
@@ -1944,6 +1890,10 @@ msgstr "{count, plural, other {Persona # รายการไม่แสดง
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, other {Persona # รายการจะคงเดิม}}"
 
+#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
+msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
+msgstr "{count, plural, other {Persona # รายการที่คุณสร้างเองจะเชื่อมโยงกับสมาชิกที่ตรงกัน โดยไม่มีอะไรเปลี่ยนแปลง}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, other {Persona # รายการ}}"
@@ -1951,6 +1901,10 @@ msgstr "{count, plural, other {Persona # รายการ}}"
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, other {ลบ Persona # รายการแล้ว}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, other {ตรวจสอบสมาชิก # คนก่อนนำเข้า}}"
 
 #. How often a persona has been used, shown in the import review
 #. How often a persona has been used, shown in the import review
@@ -1992,21 +1946,25 @@ msgstr "{names} จะมี {label} เหมือนกันทั้งห�
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) - คลิกเพื่อสลับ Persona"
 
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "{name} ใช้อยู่แล้ว"
+
 #. Toast after a deleted persona was restored
 msgid "{name} is back."
 msgstr "{name} กลับมาแล้ว"
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "{name} ในไฟล์ของคุณมีข้อมูลต่างออกไป ต้องการให้ {productName} มีแบบไหน"
 
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "ไม่มีการปิด {name}"
 
-#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
-msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
-msgstr "สมาชิก {needCount} คนและแท็กแสดงผลของคุณต้องตรวจสอบ"
-
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
-msgstr "สมาชิก {needCount} คนต้องตรวจสอบ"
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "แท็กของ {name} ถูกใช้ไปแล้ว"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -2022,18 +1980,6 @@ msgstr "สาธารณะ {publicCount}, ไม่แสดงในรา�
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "Persona {shown} จาก {total} รายการ"
-
-#. Closing line of the import review. {untouched} is a number of personas
-msgid "{untouched} of your personas aren't in this file. They stay as they are."
-msgstr "Persona ของคุณ {untouched} รายการไม่อยู่ในไฟล์นี้ และจะคงเดิม"
-
-#. Closing line of the import review. {upToDate} is a number of members
-msgid "{upToDate} members match their persona exactly. Nothing to do."
-msgstr "สมาชิก {upToDate} คนตรงกับ Persona ของตนทุกประการ ไม่ต้องทำอะไร"
-
-#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
-msgid "{visibility} (this app's is kept)"
-msgstr "{visibility} (คงค่าของแอปนี้ไว้)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— วันนี้ เวลา 12:00"
