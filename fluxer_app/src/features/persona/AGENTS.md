@@ -227,39 +227,30 @@ sheet (`openPersonaGallery`); mobile web also has a button before the mutual fri
   change ends in a toast with Undo, one request that puts each persona back as it was. The
   `feature` subtab (the Personas tab's "Choose personas to feature") opens on Unlisted with Select on.
 - **Import** (tyne-chat/tyne#243): `PluralKitImportModal` reads PluralKit JSON or a Tyne zip
-  (`PersonaImportFile`) and has one Import button, no strategy to pick. It first stores every
-  picture in the file (`storeMemberPictures`: the zip's files, this account's own copies, or the
-  server's streamed download; a failure is not retried, and the result is kept for the file, so Back
-  and Import again stores nothing twice), then sends the members to `previewPersonaImport` (one
-  request, which changes nothing) with each stored picture's hash, so pictures are compared by hash
-  and the review shows the real ones (tyne-chat/tyne#567). When `needs_review` is false (every member
-  new without a clash, or already identical) it applies at once; otherwise `PersonaImportReview`
-  opens, laid out as "Pick a side" (tyne-chat/tyne#563): one line each at the top for what needs no
-  decision (new members and the probably-the-same ones it connects, both untickable behind Show;
-  those already identical; personas not in the file), then one question per member that needs a
-  choice, hardest first (can't tell, tag in use, different in the file, deleted, then the display
-  tag), each sorted by name and set off by a thin line, with the file's version on the left and Tyne's on the right:
-  the card is the choice and the other greys out. Each card starts with the banner and avatar
-  together, as a profile card shows them; a picture that differs is marked, and avatar and banner
-  are not in the list of compared details. Personas different in the file are one list of
-  collapsed rows (what differs, and the current choice), each opened to a three-way switch over the
-  two versions: Use the file's, Keep both (the file's is added unlinked as a copy, "Name (2)" with a
-  free tag, both editable; `keepBothDecision`), Use Tyne's (tyne-chat/tyne#568). Members whose tag
-  is taken are such rows too, with Skip / Keep over the file's card; Keep adds it linked (#570). Every member
-  starts on `defaultDecision`, the choice that changes nothing, and the footer says what Import will
-  do. While the review is open, closing the dialog asks first (tyne-chat/tyne#564); while checking
-  or importing it cannot be closed. A member whose tag
-  another persona or member has can be added with a tag of its own (`replacements` on the add
-  decision, sent in the action's item): the field starts on a free tag in the same style
-  (`suggestTag`) and says who has one typed in (`tagHolder`). `findConflicts` blocks Import while two choices would give one tag to two
-  personas. `applyPersonaImport` then sends one action per member, written whole or not at all,
-  with the pictures stored before the review; a failed picture is reported only where the choice
-  used it. A link in the file is never shown: the review shows a member's picture only from a stored
-  hash the preview returned or from the zip in memory, else a placeholder and a note. Pictures stored
-  for members that end up skipped stay in storage unused. The display tag is the
-  file's system tag, never the system's name; it is applied without asking only on an account with no
-  personas and no display tag. The older `importPersonas` (with `replace`) stays in the commands for
-  reference by older code paths only; the dialog no longer uses it.
+  (`PersonaImportFile`), offers an Export backup first when the account has personas, then stores
+  every picture in the file (`storeMemberPictures`: zip files, own copies, or the server's streamed
+  download; not retried, kept for the file so Back and Import store nothing twice, #567) and sends the
+  members with the stored hashes to `previewPersonaImport`, which changes nothing and compares
+  pictures exactly (a Tyne media link's hash names its file, #572). With nothing to decide it applies
+  at once; otherwise `PersonaImportReview` opens: one line each, with its list behind Show, for new members,
+  exact matches (already linked, or connected by name and tag: one line, always connected),
+  and personas not in the file; then sections of
+  collapsed rows sorted by name: might be one of your personas (pick a persona or None of these,
+  #573), tag already taken (Skip / Keep, #570), different in the file (#568), deleted (Leave deleted
+  / Bring back, #574), then the display tag (two boxes to choose between). A picked, differing or brought-back
+  persona gets a three-way switch over two cards, each saying what happens to it (overwrites in red):
+  Use the file's, Keep both (the file's added as a copy, "Name (2)" with a free tag, both editable;
+  `keepBothDecision`), Use Tyne's. Every card shows the same details (banner and avatar as on a profile
+  card, name, tags, pronouns, bio with its line breaks; a changed bio marks the words the other lacks,
+  `PersonaBioDiff`), except the display tag's. Every member starts on `defaultDecision`, which changes
+  nothing; the footer says what Import will do; closing the open review asks first (#564).
+  `findConflicts` blocks two choices giving one tag to two personas; `suggestTag` suggests free tags
+  from typeable letters, then the old tag numbered. `applyPersonaImport` sends the actions, written
+  whole or not at all; a failed picture is reported only where the choice used it. A link in the
+  file is never shown; pictures stored for skipped members stay unused. The display tag is the file's
+  system tag; it is applied unasked only on an account with no personas and no display tag. The older
+  `importPersonas` (with `replace`) stays in the commands for older code paths; the dialog no longer
+  uses it.
 - **Deleted personas** (`DeletedPersonasSection`, at the end of the Personas settings): the list is
   fetched once, when the person opens it, and a failure waits for Retry. Restore brings back the
   same persona (`restorePersona`), and the toast names any tag it came back without.

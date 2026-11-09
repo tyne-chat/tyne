@@ -26,10 +26,6 @@ msgstr "<0>{tag}</0> 已属于你的人格 {name}。"
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "<0>{tag}</0> 也被你文件中的 {name} 使用。"
 
-#. Choice in the import review: the member of the file is someone else, add it as a new persona
-msgid "A different persona: add it"
-msgstr "是另一个人格：添加"
-
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "一个人格最多可以有 5 个标签"
@@ -157,9 +153,14 @@ msgstr "横幅图片下载失败：{error}。已导入不带横幅的人格。"
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "横幅图片下载失败：{error}。该人格保留了原来的横幅。"
 
-#. Switch on a deleted persona in the import review that restores it. {name} is its name
-msgid "Bring {name} back"
-msgstr "恢复 {name}"
+#. Option of the switch on a deleted persona in the import review: it is restored
+msgctxt "persona-import-switch"
+msgid "Bring back"
+msgstr "恢复"
+
+#. Badge on a collapsed deleted persona in the import review: it comes back as it was
+msgid "Bringing back"
+msgstr "恢复中"
 
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
@@ -213,9 +214,9 @@ msgstr "颜色"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "回到此页面，轻点<0>在 TestFlight 中获取 Tyne</0>，然后轻点<1>安装</1>。"
 
-#. Small line on a deleted persona in the import review once it is set to come back
-msgid "Comes back as it was, with its old messages"
-msgstr "恢复如初，旧消息也一并恢复"
+#. What happens to the app's deleted persona in the import review when it is brought back
+msgid "Comes back as it was"
+msgstr "恢复原样"
 
 #. Section label in the command editor: name and description.
 msgid "Command"
@@ -241,10 +242,6 @@ msgstr "正在将你的文件与你的人格进行比较..."
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "已配置的人格（{count}）"
-
-#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
-msgid "Connect {name}"
-msgstr "关联 {name}"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -419,14 +416,6 @@ msgstr "此人格上存在重复的标签对"
 #. Helper description for the In Each Channel option of the persona scope setting
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "每个频道保留各自的人格。新频道以你的账户开始。"
-
-#. Hint under the list of members whose tag is already taken, in the import review
-msgid "Each is skipped unless you open it and keep it with a tag of its own."
-msgstr "除非你展开并用自己的标签保留，否则每个都会被跳过。"
-
-#. Hint under the list of differing personas in the import review. {productName} is the app name
-msgid "Each keeps {productName}'s version unless you open it and choose the file's."
-msgstr "除非你展开并选择文件中的版本，否则每个都保留 {productName} 的版本。"
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -697,10 +686,6 @@ msgstr "从 App Store 安装 Apple 的免费应用 <0>TestFlight</0>。"
 msgid "Instead of {tag}"
 msgstr "替换 {tag}"
 
-#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
-msgid "Is {name} from your file one of these personas in {productName}?"
-msgstr "你文件中的 {name} 是 {productName} 中的这些人格之一吗？"
-
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "它的脚本有问题。"
@@ -717,10 +702,6 @@ msgstr "两个都保留"
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "继续检查"
-
-#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
-msgid "Keep {productName}'s"
-msgstr "保留 {productName} 的"
 
 #. Badge on a collapsed member in the import review: it is imported with a tag of its own
 msgid "Keeping"
@@ -742,13 +723,14 @@ msgstr "保留其标签"
 msgid "Kept as they were"
 msgstr "保持原样"
 
+#. Option of the switch on a deleted persona in the import review: it stays deleted
+msgctxt "persona-import-switch"
+msgid "Leave deleted"
+msgstr "保持删除"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "第 {line} 行，第 {column} 列：{problem}"
-
-#. Shown on a persona in the import review that is already connected to a different member
-msgid "Linked to another PluralKit member"
-msgstr "已关联到另一个 PluralKit 成员"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -923,6 +905,10 @@ msgstr "无标签"
 msgid "Nobody has this signal on"
 msgstr "还没有人开启此信号"
 
+#. Choice beside the personas a member of the import file might be: it is none of them
+msgid "None of these"
+msgstr "都不是"
+
 #. Shown in one’s own Personas list when none of them is public.
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "你还没有公开的人格。将人格的可见性设为“公开”后，其他人就能在这里看到它。"
@@ -931,17 +917,9 @@ msgstr "你还没有公开的人格。将人格的可见性设为“公开”后
 msgid "Not imported"
 msgstr "不导入"
 
-#. Choice in the import review: do nothing with this member of the import file. {name} is its name
-msgid "Not sure: leave {name} out this time"
-msgstr "不确定：这次先不导入 {name}"
-
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "不确定？保持原样即可：不会有任何变化。"
-
-#. Badge on the choice in the import review that leaves everything as it is
-msgid "Nothing changes"
-msgstr "不会有任何变化"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1209,6 +1187,10 @@ msgstr "移除专属表情符号"
 msgid "Remove tag pair"
 msgstr "移除标签对"
 
+#. What happens to the import file's display tag in the import review when it is used
+msgid "Replaces your display tag"
+msgstr "替换你的显示标签"
+
 #. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
 msgid "Replaces {productName}'s {name}"
 msgstr "替换 {productName} 的 {name}"
@@ -1254,22 +1236,6 @@ msgstr "再次运行"
 #. Button in Windows' SmartScreen warning: use Windows' own wording in this language.
 msgid "Run anyway"
 msgstr "仍要运行"
-
-#. Why a persona in the import review may be the member: same name
-msgid "Same name"
-msgstr "名称相同"
-
-#. Why a persona in the import review may be the member: same name and proxy tag
-msgid "Same name and tag"
-msgstr "名称和标签相同"
-
-#. Choice on a persona's card in the import review: the member of the import file is this persona
-msgid "Same persona as this one"
-msgstr "就是这个人格"
-
-#. Why a persona in the import review may be the member: same proxy tag
-msgid "Same tag"
-msgstr "标签相同"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1386,10 +1352,6 @@ msgstr "专属表情符号已被角色“{name}”使用"
 msgid "Signature emojis"
 msgstr "专属表情符号"
 
-#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
-msgid "Similar tag"
-msgstr "标签相似"
-
 #. Option of the switch for a member whose tag is already taken: do not import it
 msgctxt "persona-import-switch"
 msgid "Skip"
@@ -1411,9 +1373,17 @@ msgstr "跳过"
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "部分代理标签未导入：{productName} 每个人格最多允许 5 个标签，每个标签最多 32 个字符。"
 
+#. Badge on a collapsed deleted persona in the import review: it stays deleted
+msgid "Staying deleted"
+msgstr "保持删除"
+
 #. What happens to the app's version of a persona in the import review
 msgid "Stays as it is"
 msgstr "保持不变"
+
+#. What happens to the app's deleted persona in the import review
+msgid "Stays deleted"
+msgstr "保持删除"
 
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
@@ -1713,10 +1683,6 @@ msgstr "请使用小写字母、数字、- 和 _，最多 32 个字符。"
 msgid "Use the basic editor"
 msgstr "使用基础编辑器"
 
-#. Choice on the import file's card in the import review: use the file's display tag
-msgid "Use the file's"
-msgstr "使用文件中的"
-
 #. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
 msgctxt "persona-import-switch"
 msgid "Use the file's"
@@ -1757,6 +1723,10 @@ msgstr "信号栏显示位置"
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "人格的记忆范围"
+
+#. Question over the personas a member of the import file might be. {name} is the member
+msgid "Which persona is {name}?"
+msgstr "{name} 是哪个人格？"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"
@@ -1891,21 +1861,25 @@ msgstr "已添加 {addedCount} 个人格"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} 已准备好安装。"
 
-#. Line at the top of the import review. {count} is a number, {productName} the app name
-msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
-msgstr "{count, plural, other {# 个成员已与 {productName} 中对应的人格一致。无需操作。}}"
+#. Line at the top of the import review: members already linked to an identical persona, or connected to one with the same name and tag. {count} is a number
+msgid "{count, plural, one {# exact match} other {# exact matches}}"
+msgstr "{count, plural, other {# 个完全匹配}}"
 
 #. Heading in the import review over the list of members whose proxy tag another persona already has
 msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
 msgstr "{count, plural, other {# 个成员的标签已被占用}}"
 
+#. Heading in the import review over the members that share a name or tag with personas of the account
+msgid "{count, plural, one {# member might be a persona you already have} other {# members might be personas you already have}}"
+msgstr "{count, plural, other {# 个成员可能是你已有的人格}}"
+
 #. Line at the top of the import review. {count} is a number of members of the import file
-msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
-msgstr "{count, plural, other {将添加 # 个新成员}}"
+msgid "{count, plural, one {# new member} other {# new members}}"
+msgstr "{count, plural, other {# 个新成员}}"
 
 #. Line at the top of the import review. {count} is a number, {productName} the app name
-msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
-msgstr "{count, plural, other {{productName} 中有 # 个人格不在你的文件中。它们将保持原样。}}"
+msgid "{count, plural, one {# persona in {productName} isn't in your file} other {# personas in {productName} aren't in your file}}"
+msgstr "{count, plural, other {{productName} 中有 # 个人格不在你的文件中}}"
 
 #. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
 msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
@@ -1927,9 +1901,9 @@ msgstr "{count, plural, other {# 个人格已设为未列出}}"
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, other {# 个人格保持不变}}"
 
-#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
-msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
-msgstr "{count, plural, other {你手动创建的 # 个人格将与对应的成员关联。它们不会有任何变化。}}"
+#. Heading in the import review over the members whose persona was deleted. {productName} is the app name
+msgid "{count, plural, one {# persona was deleted in {productName}} other {# personas were deleted in {productName}}}"
+msgstr "{count, plural, other {{productName} 中有 # 个人格已删除}}"
 
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
@@ -1938,6 +1912,10 @@ msgstr "{count, plural, other {# 个人格}}"
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, other {已删除 # 个人格}}"
+
+#. On a collapsed member in the import review: how many personas of the account it might be
+msgid "{count, plural, one {# possible match} other {# possible matches}}"
+msgstr "{count, plural, other {# 个可能的匹配}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

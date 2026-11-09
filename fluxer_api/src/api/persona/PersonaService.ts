@@ -689,8 +689,10 @@ export class PersonaService {
 	 * Applies a reviewed import: one explicit action per member, checked against the account as it is
 	 * now and written in one atomic batch, so a refused import changes nothing. Nothing is deleted. A
 	 * link records the PluralKit id only; a restore brings back the same row, leaving off tags and
-	 * signature emojis another persona holds now; `use_file` replaces a linked persona's details but
-	 * never its visibility, and from a PluralKit file never its signature emojis or auto-tag setting.
+	 * signature emojis another persona holds now; `use_file` replaces a persona's details (connecting it
+	 * to the member if it was not) but never its visibility, and from a PluralKit file never its
+	 * signature emojis or auto-tag setting. Connecting a persona to a member unlinks any other persona
+	 * linked to that member.
 	 */
 	async applyImport(userId: UserID, request: PersonaImportApplyRequest): Promise<PersonaImportApplyResponse> {
 		const fromTyne = request.source === 'tyne';
@@ -705,6 +707,20 @@ export class PersonaService {
 			if (targeted.has(id)) throw new PersonaImportConflictError(`Persona ${id} is named by more than one action`);
 			targeted.add(id);
 			return persona;
+		};
+		// Connecting a persona to a member leaves no other live persona connected to it: any other one
+		// (duplicates an older import left, tyne-chat/tyne#571) keeps its details and loses the link.
+		const unlinkOthers = (persona: Persona, externalId: string) => {
+			for (const other of all) {
+				if (other.isDeleted || other.id === persona.id) continue;
+				if (other.externalUuid !== externalId && other.id.toString() !== externalId) continue;
+				const id = other.id.toString();
+				if (targeted.has(id)) {
+					throw new PersonaImportConflictError(`Persona '${other.name}' is already linked to member ${externalId}`);
+				}
+				targeted.add(id);
+				planned.push({kind: 'update', persona: other, params: {external_uuid: null}});
+			}
 		};
 		const withoutKeys = <T>(values: ReadonlyArray<T>, drop: ReadonlyArray<T>, key: (value: T) => string) => {
 			const dropped = new Set(drop.map(key));
@@ -727,7 +743,8 @@ export class PersonaService {
 		type Planned =
 			| {kind: 'create'; params: CreatePersonaParams; sources: PersonaImportImageSources | null | undefined}
 			| {kind: 'update'; persona: Persona; params: UpdatePersonaParams; sources?: PersonaImportImageSources | null}
-			| {kind: 'restore'; persona: Persona};
+			// With `params`: a deleted persona brought back with the file's details (`use_file` on it).
+			| {kind: 'restore'; persona: Persona; params?: UpdatePersonaParams; sources?: PersonaImportImageSources | null};
 		const planned: Array<Planned> = [];
 		const profileText: Array<PersonaProfileText> = [];
 		let created = 0;
@@ -769,13 +786,7 @@ export class PersonaService {
 					const persona = target(action, false);
 					const externalId = action.external_uuid?.trim();
 					if (!externalId) throw new PersonaImportConflictError('A link needs the member id');
-					const other = all.find(
-						(p) =>
-							!p.isDeleted && p.id !== persona.id && (p.externalUuid === externalId || p.id.toString() === externalId),
-					);
-					if (other) {
-						throw new PersonaImportConflictError(`Persona '${other.name}' is already linked to member ${externalId}`);
-					}
+					unlinkOthers(persona, externalId);
 					planned.push({kind: 'update', persona, params: {external_uuid: externalId}});
 					break;
 				}
@@ -790,13 +801,17 @@ export class PersonaService {
 					break;
 				}
 				case 'use_file': {
-					const persona = target(action, false);
+					// On a deleted persona it brings it back with the file's details (tyne-chat/tyne#574).
+					const deleted = byId.get(action.persona_id ?? '')?.isDeleted ?? false;
+					const persona = target(action, deleted);
 					const item = action.item;
 					if (!item) throw new PersonaImportConflictError("Using the file's version needs the member");
 					const externalId = item.external_uuid?.trim();
-					if (!externalId || (persona.externalUuid !== externalId && persona.id.toString() !== externalId)) {
-						throw new PersonaImportConflictError(`Persona '${persona.name}' is not linked to this member`);
-					}
+					if (!externalId) throw new PersonaImportConflictError("Using the file's version needs the member id");
+					// A persona not yet connected to the member (one the review asked about) is connected by
+					// the same write, as a link would.
+					const linked = persona.externalUuid === externalId || persona.id.toString() === externalId;
+					unlinkOthers(persona, externalId);
 					const tags = withoutKeys(item.persona_tags ?? [], action.drop_tags ?? [], tagKeyOf);
 					const params: UpdatePersonaParams = {
 						name: item.name,
@@ -804,6 +819,7 @@ export class PersonaService {
 						bio: item.bio ?? null,
 						color: item.color ?? null,
 						persona_tags: tags,
+						...(linked ? {} : {external_uuid: externalId}),
 					};
 					if (!action.keep_avatar) {
 						params.avatar_hash = item.avatar_hash ?? null;
@@ -834,7 +850,9 @@ export class PersonaService {
 						avatar: action.keep_avatar ? recordedAvatar : (item.image_sources?.avatar ?? null),
 						banner: action.keep_banner ? recordedBanner : (item.image_sources?.banner ?? null),
 					};
-					planned.push({kind: 'update', persona, params, sources});
+					planned.push(
+						deleted ? {kind: 'restore', persona, params, sources} : {kind: 'update', persona, params, sources},
+					);
 					break;
 				}
 			}
@@ -842,7 +860,9 @@ export class PersonaService {
 
 		// Restored personas give up what another persona holds in the end state.
 		const dropped: PersonaImportApplyResponse['dropped'] = [];
-		const restoredIds = new Set(planned.flatMap((p) => (p.kind === 'restore' ? [p.persona.id.toString()] : [])));
+		const restoredIds = new Set(
+			planned.flatMap((p) => (p.kind === 'restore' && !p.params ? [p.persona.id.toString()] : [])),
+		);
 		const heldElsewhere = (key: string, own: string, of: 'tags' | 'emojis') => {
 			for (const [id, state] of finalState) {
 				if (id === own || restoredIds.has(id)) continue;
@@ -854,7 +874,7 @@ export class PersonaService {
 		const restoreParams = new Map<string, UpdatePersonaParams>();
 		const claimedByRestores = {tags: new Set<string>(), emojis: new Set<string>()};
 		for (const step of planned) {
-			if (step.kind !== 'restore') continue;
+			if (step.kind !== 'restore' || step.params) continue;
 			const id = step.persona.id.toString();
 			const keepTag = (tag: PersonaTag) =>
 				!heldElsewhere(tagKeyOf(tag), id, 'tags') && !claimedByRestores.tags.has(tagKeyOf(tag));
@@ -909,7 +929,7 @@ export class PersonaService {
 		const steps: Array<PersonaImportStep> = planned.map((step) => {
 			if (step.kind === 'create') return {create: step.params};
 			if (step.kind === 'restore') {
-				return {restore: step.persona, params: restoreParams.get(step.persona.id.toString()) ?? {}};
+				return {restore: step.persona, params: step.params ?? restoreParams.get(step.persona.id.toString()) ?? {}};
 			}
 			return {update: step.persona, params: step.params};
 		});
@@ -919,14 +939,16 @@ export class PersonaService {
 			alongside: (personas) =>
 				personas.flatMap((persona, i) => {
 					const step = planned[i];
-					if (!step || step.kind === 'restore') return [];
-					if (step.kind === 'update' && step.sources === undefined) return [];
+					if (!step) return [];
+					// A plain restore keeps the image sources the persona had; so does an update that names none.
+					if (step.kind !== 'create' && step.sources === undefined) return [];
 					return [personaImageSourcesWrite(userId, persona, step.sources ?? null)];
 				}),
 		});
 
 		await this.dispatchListToOwnSessions(userId);
-		if (restoredIds.size > 0 || written.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
+		const revived = planned.some((p) => p.kind === 'restore');
+		if (revived || written.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
 			await this.dispatchToMutualGuilds(userId);
 		}
 		return {personas: written.map((p) => p.toResponse()), dropped};

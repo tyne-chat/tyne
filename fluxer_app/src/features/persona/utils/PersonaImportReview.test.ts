@@ -13,6 +13,7 @@ import {
 	picturesNeeded,
 	type ReviewDecision,
 	reviewNeedCount,
+	samePictureFile,
 	suggestTag,
 	summarize,
 	tagHolder,
@@ -397,5 +398,158 @@ describe('keeping both versions of a differing persona', () => {
 		const [action] = buildActions(entries, new Map([[0, decision]]), members, new Map());
 		expect(action).toMatchObject({action: 'add', drop_signature_emojis: [emoji]});
 		expect(findConflicts(entries, new Map([[0, decision]]), members, live, true)).toEqual([]);
+	});
+});
+
+describe('a member that might be one of the personas', () => {
+	const setup = () => {
+		const {members} = buildPreviewRequest(
+			pkSource([
+				pkMember(0, {
+					name: 'Lily & Lisica',
+					id: 'lllll',
+					personaTags: [{prefix: 'Lils:'}],
+					avatarUrl: 'https://temple.example/media/avatars/1523/0a1b2c3d.png',
+				}),
+			]),
+			'42',
+			MEDIA,
+		);
+		const entries: Array<PersonaImportPreviewEntry> = [
+			{
+				index: 0,
+				kind: 'cant_tell',
+				candidates: [{persona_id: '100000000000000001', matched_on: 'tag', linked_elsewhere: false}],
+				avatar_hash: 'd2e533ce',
+			},
+		];
+		const live = [
+			{id: '100000000000000001', name: 'Lisica & Lily', persona_tags: [{prefix: 'Lils:'}], signature_emojis: []},
+		];
+		const pictures = [{id: '100000000000000001', avatar_hash: '0a1b2c3d', banner_hash: null}];
+		return {members, entries, live, pictures};
+	};
+
+	it("connects the picked persona as it is with Use Tyne's", () => {
+		const {members, entries, pictures} = setup();
+		const decisions = new Map<number, ReviewDecision>([[0, {choice: 'link', personaId: '100000000000000001'}]]);
+		expect(buildActions(entries, decisions, members, new Map(), pictures)).toEqual([
+			{action: 'link', persona_id: '100000000000000001', external_uuid: 'lllll'},
+		]);
+	});
+
+	it("takes the file's version into the picked persona, keeping a picture that is the same file", () => {
+		const {members, entries, live, pictures} = setup();
+		const decisions = new Map<number, ReviewDecision>([[0, {choice: 'use_file', personaId: '100000000000000001'}]]);
+		const stored = new Map([
+			[
+				0,
+				{
+					images: {avatar: {hash: 'd2e533ce', avatarColor: null}, banner: null},
+					avatarFailed: false,
+					bannerFailed: false,
+				},
+			],
+		]);
+		const [action] = buildActions(entries, decisions, members, stored, pictures);
+		// The link names 0a1b2c3d, the picture the persona has: it stays (exactly the same file).
+		expect(action).toMatchObject({
+			action: 'use_file',
+			persona_id: '100000000000000001',
+			keep_avatar: true,
+			item: {name: 'Lily & Lisica', external_uuid: 'lllll'},
+		});
+		expect(PersonaImportActionSchema.safeParse(action).success).toBe(true);
+		expect(findConflicts(entries, decisions, members, live, false)).toEqual([]);
+		// Another picture is taken from the file.
+		const [other] = buildActions(entries, decisions, members, stored, [{...pictures[0]!, avatar_hash: '99999999'}]);
+		expect(other).toMatchObject({keep_avatar: false, item: {avatar_hash: 'd2e533ce'}});
+	});
+
+	it('keeps both: connects the picked persona as it is and adds the copy unlinked, with a free tag', () => {
+		const {members, entries, live, pictures} = setup();
+		const kept = keepBothDecision(entries[0]!, entries, new Map(), members, live, false);
+		if (kept.choice !== 'add' || !kept.copy) throw new Error('Keep both is an add with a copy');
+		const decisions = new Map<number, ReviewDecision>([
+			[0, {...kept, copy: {...kept.copy, connectTo: '100000000000000001'}}],
+		]);
+		const actions = buildActions(entries, decisions, members, new Map(), pictures);
+		expect(actions[0]).toEqual({action: 'link', persona_id: '100000000000000001', external_uuid: 'lllll'});
+		expect(actions[1]).toMatchObject({action: 'add', item: {name: 'Lily & Lisica', external_uuid: null}});
+		expect(actions[1]?.item?.persona_tags).not.toContainEqual({prefix: 'Lils:'});
+		expect(findConflicts(entries, decisions, members, live, false)).toEqual([]);
+	});
+});
+
+describe('a member whose persona was deleted', () => {
+	const setup = () => {
+		const {members} = buildPreviewRequest(
+			pkSource([pkMember(0, {name: 'Pip', id: 'ppppp', bio: 'From the file', personaTags: [{prefix: 'pi:'}]})]),
+			'42',
+			MEDIA,
+		);
+		const entries: Array<PersonaImportPreviewEntry> = [{index: 0, kind: 'deleted', persona_id: '100000000000000003'}];
+		const deleted = {
+			id: '100000000000000003',
+			name: 'Pip',
+			persona_tags: [{prefix: 'pi:'}],
+			signature_emojis: [],
+			avatar_hash: null,
+			banner_hash: null,
+		};
+		return {members, entries, deleted};
+	};
+
+	it("brings it back with the file's details in one action", () => {
+		const {members, entries, deleted} = setup();
+		const decisions = new Map<number, ReviewDecision>([[0, {choice: 'use_file', personaId: deleted.id}]]);
+		const [action] = buildActions(entries, decisions, members, new Map(), [deleted]);
+		expect(action).toMatchObject({
+			action: 'use_file',
+			persona_id: deleted.id,
+			item: {name: 'Pip', bio: 'From the file', external_uuid: 'ppppp'},
+		});
+		expect(PersonaImportActionSchema.safeParse(action).success).toBe(true);
+	});
+
+	it('keeps both: brings it back as it was and adds the copy with a name and tag the deleted one does not have', () => {
+		const {members, entries, deleted} = setup();
+		const kept = keepBothDecision(entries[0]!, entries, new Map(), members, [], false, false, deleted);
+		if (kept.choice !== 'add' || !kept.copy) throw new Error('Keep both is an add with a copy');
+		expect(kept.copy).toMatchObject({name: 'Pip (2)', replacedTags: [{prefix: 'pi:'}]});
+		const decisions = new Map<number, ReviewDecision>([[0, {...kept, copy: {...kept.copy, restore: deleted.id}}]]);
+		const actions = buildActions(entries, decisions, members, new Map(), [deleted]);
+		expect(actions[0]).toEqual({action: 'restore', persona_id: deleted.id});
+		expect(actions[1]).toMatchObject({action: 'add', item: {name: 'Pip (2)', external_uuid: null}});
+		expect(actions[1]?.item?.persona_tags).not.toContainEqual({prefix: 'pi:'});
+	});
+});
+
+describe('the same picture file', () => {
+	it('matches by the hash a Tyne media link names or the stored copy, an animated one included, and nothing else', () => {
+		const {members} = buildPreviewRequest(
+			pkSource([
+				pkMember(0, {
+					name: 'Aurora',
+					avatarUrl: 'https://temple.example/media/avatars/1523/a_7b6aea26.gif',
+					bannerUrl: 'https://cdn.example/banner.png',
+				}),
+			]),
+			'42',
+			MEDIA,
+		);
+		const entry: PersonaImportPreviewEntry = {
+			index: 0,
+			kind: 'differs',
+			avatar_hash: 'd2e533ce',
+			banner_hash: 'eeeeeee1',
+		};
+		expect(samePictureFile(members[0]!, entry, 'avatar', 'a_7b6aea26')).toBe(true);
+		expect(samePictureFile(members[0]!, entry, 'avatar', '7b6aea26')).toBe(true);
+		expect(samePictureFile(members[0]!, entry, 'avatar', 'd2e533ce')).toBe(true);
+		expect(samePictureFile(members[0]!, entry, 'avatar', '7b6aea27')).toBe(false);
+		expect(samePictureFile(members[0]!, entry, 'banner', 'eeeeeee1')).toBe(true);
+		expect(samePictureFile(members[0]!, entry, 'banner', 'eeeeeee2')).toBe(false);
+		expect(samePictureFile(members[0]!, entry, 'banner', null)).toBe(false);
 	});
 });

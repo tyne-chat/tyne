@@ -26,10 +26,6 @@ msgstr "<0>{tag}</0> 태그는 이미 내 페르소나 {name}의 것이에요."
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "파일에서 {name}도 <0>{tag}</0> 태그를 쓰고 있어요."
 
-#. Choice in the import review: the member of the file is someone else, add it as a new persona
-msgid "A different persona: add it"
-msgstr "다른 페르소나: 추가하기"
-
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "페르소나에는 태그를 최대 5개까지 설정할 수 있어요"
@@ -157,9 +153,14 @@ msgstr "배너 이미지를 다운로드하지 못했어요: {error}. 페르소�
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "배너 이미지를 다운로드하지 못했어요: {error}. 페르소나는 기존 배너를 유지했어요."
 
-#. Switch on a deleted persona in the import review that restores it. {name} is its name
-msgid "Bring {name} back"
-msgstr "{name} 복원"
+#. Option of the switch on a deleted persona in the import review: it is restored
+msgctxt "persona-import-switch"
+msgid "Bring back"
+msgstr "되돌리기"
+
+#. Badge on a collapsed deleted persona in the import review: it comes back as it was
+msgid "Bringing back"
+msgstr "되돌리는 중"
 
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
@@ -213,9 +214,9 @@ msgstr "색상"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "이 페이지로 돌아와 <0>TestFlight에서 Tyne 받기</0>를 탭한 다음 <1>설치</1>를 탭하세요."
 
-#. Small line on a deleted persona in the import review once it is set to come back
-msgid "Comes back as it was, with its old messages"
-msgstr "예전 메시지와 함께 그대로 돌아와요"
+#. What happens to the app's deleted persona in the import review when it is brought back
+msgid "Comes back as it was"
+msgstr "원래대로 돌아와요"
 
 #. Section label in the command editor: name and description.
 msgid "Command"
@@ -241,10 +242,6 @@ msgstr "파일을 내 페르소나와 비교하는 중..."
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "설정된 페르소나 ({count})"
-
-#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
-msgid "Connect {name}"
-msgstr "{name} 연결"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -419,14 +416,6 @@ msgstr "이 페르소나에 중복된 태그 쌍이 있어요"
 #. Helper description for the In Each Channel option of the persona scope setting
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "각 채널이 자신의 페르소나를 유지합니다. 새 채널은 내 계정으로 시작합니다."
-
-#. Hint under the list of members whose tag is already taken, in the import review
-msgid "Each is skipped unless you open it and keep it with a tag of its own."
-msgstr "열어서 자체 태그로 유지하지 않으면 각각 건너뛰어요."
-
-#. Hint under the list of differing personas in the import review. {productName} is the app name
-msgid "Each keeps {productName}'s version unless you open it and choose the file's."
-msgstr "열어서 파일 쪽을 선택하지 않으면 각각 {productName}의 내용이 유지돼요."
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -697,10 +686,6 @@ msgstr "App Store에서 Apple의 무료 앱 <0>TestFlight</0>를 설치하세요
 msgid "Instead of {tag}"
 msgstr "{tag} 대신"
 
-#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
-msgid "Is {name} from your file one of these personas in {productName}?"
-msgstr "파일의 {name}이(가) {productName}에 있는 이 페르소나 중 하나인가요?"
-
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "스크립트에 문제가 있습니다."
@@ -717,10 +702,6 @@ msgstr "둘 다 유지"
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "계속 검토하기"
-
-#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
-msgid "Keep {productName}'s"
-msgstr "{productName}의 것 유지"
 
 #. Badge on a collapsed member in the import review: it is imported with a tag of its own
 msgid "Keeping"
@@ -742,13 +723,14 @@ msgstr "태그 유지"
 msgid "Kept as they were"
 msgstr "그대로 유지됨"
 
+#. Option of the switch on a deleted persona in the import review: it stays deleted
+msgctxt "persona-import-switch"
+msgid "Leave deleted"
+msgstr "삭제된 채로 두기"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "{line}행 {column}열: {problem}"
-
-#. Shown on a persona in the import review that is already connected to a different member
-msgid "Linked to another PluralKit member"
-msgstr "다른 PluralKit 멤버와 연결됨"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -923,6 +905,10 @@ msgstr "태그 없음"
 msgid "Nobody has this signal on"
 msgstr "이 시그널을 켠 사람이 없어요"
 
+#. Choice beside the personas a member of the import file might be: it is none of them
+msgid "None of these"
+msgstr "이 중에 없음"
+
 #. Shown in one’s own Personas list when none of them is public.
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "아직 공개된 페르소나가 없어요. 페르소나의 공개 범위를 공개로 설정하면 다른 사람에게도 여기에 표시됩니다."
@@ -931,17 +917,9 @@ msgstr "아직 공개된 페르소나가 없어요. 페르소나의 공개 범�
 msgid "Not imported"
 msgstr "가져오지 않아요"
 
-#. Choice in the import review: do nothing with this member of the import file. {name} is its name
-msgid "Not sure: leave {name} out this time"
-msgstr "잘 모르겠어요: 이번에는 {name} 제외"
-
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "잘 모르겠다면 그대로 두세요. 바뀌는 것은 없어요."
-
-#. Badge on the choice in the import review that leaves everything as it is
-msgid "Nothing changes"
-msgstr "변경 없음"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1209,6 +1187,10 @@ msgstr "시그니처 이모지 삭제"
 msgid "Remove tag pair"
 msgstr "태그 쌍 제거"
 
+#. What happens to the import file's display tag in the import review when it is used
+msgid "Replaces your display tag"
+msgstr "표시 태그를 대체해요"
+
 #. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
 msgid "Replaces {productName}'s {name}"
 msgstr "{productName}의 {name}을(를) 대체해요"
@@ -1254,22 +1236,6 @@ msgstr "다시 실행"
 #. Button in Windows' SmartScreen warning: use Windows' own wording in this language.
 msgid "Run anyway"
 msgstr "실행"
-
-#. Why a persona in the import review may be the member: same name
-msgid "Same name"
-msgstr "같은 이름"
-
-#. Why a persona in the import review may be the member: same name and proxy tag
-msgid "Same name and tag"
-msgstr "같은 이름과 태그"
-
-#. Choice on a persona's card in the import review: the member of the import file is this persona
-msgid "Same persona as this one"
-msgstr "이 페르소나와 같음"
-
-#. Why a persona in the import review may be the member: same proxy tag
-msgid "Same tag"
-msgstr "같은 태그"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1386,10 +1352,6 @@ msgstr "시그니처 이모지가 이미 \"{name}\" 페르소나에서 사용 �
 msgid "Signature emojis"
 msgstr "시그니처 이모지"
 
-#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
-msgid "Similar tag"
-msgstr "비슷한 태그"
-
 #. Option of the switch for a member whose tag is already taken: do not import it
 msgctxt "persona-import-switch"
 msgid "Skip"
@@ -1411,9 +1373,17 @@ msgstr "건너뛰는 중"
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "일부 프록시 태그가 제외되었어요: {productName}에서는 페르소나당 최대 5개, 각각 최대 32자까지 사용할 수 있어요."
 
+#. Badge on a collapsed deleted persona in the import review: it stays deleted
+msgid "Staying deleted"
+msgstr "삭제된 채로 유지"
+
 #. What happens to the app's version of a persona in the import review
 msgid "Stays as it is"
 msgstr "그대로 유지돼요"
+
+#. What happens to the app's deleted persona in the import review
+msgid "Stays deleted"
+msgstr "삭제된 채로 남아요"
 
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
@@ -1713,10 +1683,6 @@ msgstr "소문자, 숫자, -, _만 사용해 32자 이내로 입력하세요."
 msgid "Use the basic editor"
 msgstr "기본 편집기 사용"
 
-#. Choice on the import file's card in the import review: use the file's display tag
-msgid "Use the file's"
-msgstr "파일의 것 사용"
-
 #. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
 msgctxt "persona-import-switch"
 msgid "Use the file's"
@@ -1757,6 +1723,10 @@ msgstr "시그널 바가 표시되는 곳"
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "페르소나를 기억하는 범위"
+
+#. Question over the personas a member of the import file might be. {name} is the member
+msgid "Which persona is {name}?"
+msgstr "{name}은(는) 어떤 페르소나인가요?"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"
@@ -1891,21 +1861,25 @@ msgstr "페르소나 {addedCount}개 추가됨"
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version}을(를) 설치할 준비가 되었습니다."
 
-#. Line at the top of the import review. {count} is a number, {productName} the app name
-msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
-msgstr "{count, plural, other {멤버 #명은 이미 {productName}의 페르소나와 일치해요. 따로 할 일은 없어요.}}"
+#. Line at the top of the import review: members already linked to an identical persona, or connected to one with the same name and tag. {count} is a number
+msgid "{count, plural, one {# exact match} other {# exact matches}}"
+msgstr "{count, plural, other {정확히 일치 #개}}"
 
 #. Heading in the import review over the list of members whose proxy tag another persona already has
 msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
 msgstr "{count, plural, other {태그가 이미 사용 중인 멤버 #명}}"
 
+#. Heading in the import review over the members that share a name or tag with personas of the account
+msgid "{count, plural, one {# member might be a persona you already have} other {# members might be personas you already have}}"
+msgstr "{count, plural, other {이미 있는 페르소나일 수 있는 멤버 #명}}"
+
 #. Line at the top of the import review. {count} is a number of members of the import file
-msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
-msgstr "{count, plural, other {새 멤버 #명이 추가돼요}}"
+msgid "{count, plural, one {# new member} other {# new members}}"
+msgstr "{count, plural, other {새 멤버 #명}}"
 
 #. Line at the top of the import review. {count} is a number, {productName} the app name
-msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
-msgstr "{count, plural, other {{productName}의 페르소나 #개는 파일에 없어요. 그대로 유지돼요.}}"
+msgid "{count, plural, one {# persona in {productName} isn't in your file} other {# personas in {productName} aren't in your file}}"
+msgstr "{count, plural, other {파일에 없는 {productName} 페르소나 #개}}"
 
 #. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
 msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
@@ -1927,9 +1901,9 @@ msgstr "{count, plural, other {페르소나 #개가 일부 공개로 설정됨}}
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, other {페르소나 #개는 그대로 유지돼요}}"
 
-#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
-msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
-msgstr "{count, plural, other {직접 만든 페르소나 #개가 해당 멤버와 연결돼요. 내용은 바뀌지 않아요.}}"
+#. Heading in the import review over the members whose persona was deleted. {productName} is the app name
+msgid "{count, plural, one {# persona was deleted in {productName}} other {# personas were deleted in {productName}}}"
+msgstr "{count, plural, other {{productName}에서 삭제된 페르소나 #개}}"
 
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
@@ -1938,6 +1912,10 @@ msgstr "{count, plural, other {페르소나 #개}}"
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, other {페르소나 #개 삭제됨}}"
+
+#. On a collapsed member in the import review: how many personas of the account it might be
+msgid "{count, plural, one {# possible match} other {# possible matches}}"
+msgstr "{count, plural, other {일치 후보 #개}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

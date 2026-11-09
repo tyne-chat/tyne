@@ -147,6 +147,31 @@ describe('pass 1: the PluralKit id', () => {
 		expect(result.entries[3]?.differences).toEqual([{field: 'avatar', change: 'removed'}]);
 	});
 
+	it("takes a Tyne media link's hash as the picture it names, on any instance and account", () => {
+		// The copy stored from the link (converted to PNG by the media proxy) has another hash: the link's
+		// hash decides, and only an exact match counts.
+		const same = persona({name: 'Aurora', external: 'aaaaa', avatar: '7b6aea26', banner: 'a_970159bf'});
+		const other = persona({name: 'Wren', external: 'bbbbb', avatar: '7b6aea26'});
+		const result = plan(
+			[same, other],
+			[
+				member({
+					name: 'Aurora',
+					external_uuid: 'aaaaa',
+					avatar: {url: 'https://temple.example/media/avatars/1523146531119562752/7b6aea26.png', hash: 'd2e533ce'},
+					banner: {url: 'https://temple.example/media/banners/1523146531119562752/a_970159bf.gif', hash: 'e1e1e1e1'},
+				}),
+				member({
+					name: 'Wren',
+					external_uuid: 'bbbbb',
+					avatar: {url: 'https://temple.example/media/avatars/1523146531119562752/7b6aea27.png', hash: 'd2e533cf'},
+				}),
+			],
+		);
+		expect(result.entries[0]).toMatchObject({kind: 'up_to_date', differences: []});
+		expect(result.entries[1]).toMatchObject({kind: 'differs', differences: [{field: 'avatar', change: 'changed'}]});
+	});
+
 	it('compares signature emojis and auto-tag only for a Tyne export', () => {
 		const p = persona({name: 'Ash', external: 'aaaaa', emojis: [{name: '🌿'}], autoTagDisabled: true});
 		const members = [member({name: 'Ash', external_uuid: 'aaaaa'})];
