@@ -156,7 +156,7 @@
 
 .dangerIcon {
 	color: var(--accent-danger);
-	margin-right: 6px;
+	margin-inline-end: 6px;
 	vertical-align: text-bottom;
 	flex-shrink: 0;
 }
