@@ -166,12 +166,16 @@ personas), 10,000 signature emojis per persona (unique across personas).
   `POST /import/preview` classifies each member against the live and deleted personas and changes
   nothing (`PersonaImportPlanner`): identity is the member's id, never the name; then name and tag,
   one to one; then name or tag (can't tell); then tags held elsewhere or shared by two members; else
-  new. Pictures compare only where their origin is known (own media, or an image source with its
-  hash); otherwise `not_compared`, which never makes a persona "differs". `POST /import/apply` takes
-  one action per member (`add`, `link`, `restore`, `use_file`), re-checks tags, emojis and the cap
-  on the end state, and writes one batch; nothing is deleted, `link` writes only `external_uuid`, and
-  `use_file` never changes visibility, nor signature emojis or tag matching from a PluralKit file.
-  Conflicting actions answer `PERSONA_IMPORT_CONFLICT`.
+  new. Pictures compare exactly, by hash: the stored copy's, own media's, a recorded image source's,
+  or the hash a Tyne media link names (on any instance, since the link converts the format,
+  tyne-chat/tyne#572); otherwise `not_compared`, which never makes a persona "differs". `POST
+  /import/apply` takes actions (`add`, `link`, `restore`, `use_file`), re-checks tags, emojis and the
+  cap on the end state, and writes one batch; nothing is deleted. `link` writes only `external_uuid`;
+  `use_file` connects the persona too if it was not (tyne-chat/tyne#573), on a deleted persona
+  brings it back with the file's details in the same write (#574), and never changes
+  visibility, nor signature emojis or tag matching from a PluralKit file. Connecting a persona to a
+  member unlinks any other persona linked to it (duplicates, #571). Two actions naming one persona
+  answer `PERSONA_IMPORT_CONFLICT`.
 - **Older import**, kept for desktop apps that have not updated: the client reads a PluralKit export
   or a Tyne zip, sends the images first, then the
   whole file in one `POST /import` (at most 250 personas, the account's limit). `importPersonas`

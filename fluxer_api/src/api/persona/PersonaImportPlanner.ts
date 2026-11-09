@@ -28,6 +28,12 @@ import type {
 	PersonaImportPreviewMember,
 	PersonaImportSourceKind,
 } from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import {tyneMediaLinkHash} from '@fluxer/schema/src/domains/persona/PluralKitFormat';
+
+/** An animated picture's hash carries `a_`; the stored file is the same either way. */
+function withoutAnimationFlag(hash: string): string {
+	return hash.replace(/^a_/, '');
+}
 
 export interface PersonaImportPlanInput {
 	source: PersonaImportSourceKind;
@@ -130,6 +136,10 @@ export function planPersonaImport(input: PersonaImportPlanInput): PersonaImportP
 		const fileHasPicture = Boolean(ref?.url || ref?.hash);
 		if (!fileHasPicture) return current ? {field: kind, change: 'removed'} : null;
 		if (!current) return {field: kind, change: 'changed'};
+		// A link to Tyne media names the stored file by its hash: the same hash is the same file, even
+		// when the copy stored from the link (converted to the link's format) has another.
+		const linked = ref?.url ? tyneMediaLinkHash(ref.url, kind) : null;
+		if (linked && withoutAnimationFlag(linked) === withoutAnimationFlag(current)) return null;
 		const known = storedHash(ref, kind);
 		if (known === null) return {field: kind, change: 'not_compared'};
 		return known === current ? null : {field: kind, change: 'changed'};
