@@ -1,0 +1,2012 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+msgid ""
+msgstr ""
+"Language: pt-PT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. placeholder {0}: w.prefix
+msgid "(Prefix: {0})"
+msgstr "(Prefixo: {0})"
+
+#. Install step on Linux for .deb and .rpm packages.
+msgid "<0>.deb or .rpm:</0> open the file you downloaded and click <1>Install</1>."
+msgstr "<0>.deb ou .rpm:</0> abre o ficheiro que transferiste e clica em <1>Instalar</1>."
+
+#. Install step on Linux for the AppImage.
+msgid "<0>AppImage:</0> right-click it, open <1>Properties</1> and allow it to run as a program."
+msgstr "<0>AppImage:</0> clica nele com o botão direito, abre <1>Propriedades</1> e permite que seja executado como programa."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona
+msgid "<0>{tag}</0> already belongs to your persona {name}."
+msgstr "<0>{tag}</0> já pertence à tua persona {name}."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file
+msgid "<0>{tag}</0> is also used by {name} in your file."
+msgstr "<0>{tag}</0> também é usada por {name} no teu ficheiro."
+
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "Uma persona pode ter no máximo 5 tags"
+
+#. Tooltip showing root account username
+#. Tooltip showing root account username
+msgid "Account: @{username}"
+msgstr "Conta: @{username}"
+
+msgid "Active persona cleared"
+msgstr "Persona ativa removida"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "Persona ativa removida (a enviar como conta principal)"
+
+#. Aria label for active persona mode tabs
+#. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
+msgid "Active persona mode"
+msgstr "Modo de persona ativa"
+
+#. placeholder {0}: formData.signatureEmojis.length
+msgid "Add Emoji ({0})"
+msgstr "Adicionar emoji ({0})"
+
+msgid "Add Persona"
+msgstr "Adicionar persona"
+
+#. placeholder {0}: formData.tags.length
+msgid "Add Tag Pair ({0}/5)"
+msgstr "Adicionar par de tags ({0}/5)"
+
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Adicionar contador"
+
+msgid "Add signal"
+msgstr "Adicionar sinal"
+
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "Adicionar {name}"
+
+#. Line of the import result: new personas
+msgid "Added"
+msgstr "Adicionadas"
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Added as a new persona"
+msgstr "Adicionada como nova persona"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "Alice"
+
+msgid "All Personas"
+msgstr "Todas as personas"
+
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "Todas as personas"
+
+#. Heading of the list of every platform on the download page.
+msgid "All platforms"
+msgstr "Todas as plataformas"
+
+#. Section header for all time zones in the timestamp modal.
+msgid "All time zones"
+msgstr "Todos os fusos horários"
+
+#. Heading of the QR code box on the download page.
+msgid "Also on your phone"
+msgstr "Também no teu telemóvel"
+
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Outro comando ou um comando integrado já tem este nome."
+
+#. Under the AppImage download button: it works on every other Linux distribution.
+msgid "Any other Linux"
+msgstr "Qualquer outro Linux"
+
+#. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
+msgid "Apple silicon (M1 or newer)"
+msgstr "Apple silicon (M1 ou mais recente)"
+
+#. placeholder {0}: formData.name
+msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Tens a certeza de que desejas eliminar <0>{0}</0>? Esta ação não pode ser desfeita."
+
+#. Settings search synonym.
+msgid "Auto-hide"
+msgstr "Ocultar automaticamente"
+
+#. Settings section label in Advanced Settings for edge hover peek preference.
+#. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
+msgid "Auto-peek hidden sidebars"
+msgstr "Mostrar automaticamente as barras laterais ocultas"
+
+#. Import warning when avatar fails to download
+msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Não foi possível transferir a imagem do avatar: {error}. A persona foi importada sem avatar."
+
+#. Import warning when the file's avatar for an existing persona fails to download, so the old one stays
+msgid "Avatar image failed to download: {error}. The persona kept the avatar it had."
+msgstr "Não foi possível transferir a imagem do avatar: {error}. A persona manteve o avatar que tinha."
+
+#. Explanation of the "Restored" line of the import result
+msgid "Back as they were, with their old messages."
+msgstr "De volta tal como estavam, com as mensagens antigas."
+
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Voltar aos comandos"
+
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Voltar a {section}"
+
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "Não foi possível transferir a imagem do banner: {error}. A persona foi importada sem banner."
+
+#. Import warning when the file's banner for an existing persona fails to download, so the old one stays
+msgid "Banner image failed to download: {error}. The persona kept the banner it had."
+msgstr "Não foi possível transferir a imagem do banner: {error}. A persona manteve o banner que tinha."
+
+#. Option of the switch on a deleted persona in the import review: it is restored
+msgctxt "persona-import-switch"
+msgid "Bring back"
+msgstr "Restaurar"
+
+#. Badge on a collapsed deleted persona in the import review: it comes back as it was
+msgid "Bringing back"
+msgstr "A restaurar"
+
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+msgid "Came back without {items}: another persona has them now."
+msgstr "Voltou sem {items}: agora pertencem a outra persona."
+
+#. Generic action label that opens the persona picker.
+msgid "Change persona"
+msgstr "Mudar persona"
+
+#. Help for an example in a command script.
+msgid "Change the message depending on what they typed"
+msgstr "Mudar a mensagem conforme o que escreveram"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "Verifica antes de importar"
+
+#. Title of the persona import dialog while the file is checked
+msgid "Checking your file..."
+msgstr "A verificar o teu ficheiro..."
+
+#. Disabled button while the import file is checked
+msgid "Checking..."
+msgstr "A verificar..."
+
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "Escolhe uma exportação do PluralKit (.json) ou do {productName} (.zip), ou arrasta e larga"
+
+#. Link on the download page to the list of every platform.
+msgid "Choose another platform"
+msgstr "Escolher outra plataforma"
+
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "Escolher personas a destacar"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "Esvazia a caixa de mensagem para usar /{name}"
+
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Fechar pesquisa"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Colour"
+msgstr "Cor"
+
+#. Install step on iPhone. 'Get Tyne in TestFlight' is the button on this page; 'Install' is TestFlight's button.
+msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
+msgstr "Volta aqui e toca em <0>Obter o Tyne no TestFlight</0> e depois em <1>Instalar</1>."
+
+#. What happens to the app's deleted persona in the import review when it is brought back
+msgid "Comes back as it was"
+msgstr "Volta tal como estava"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Comando"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Espaços para comandos"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Comandos"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Comandos guardados"
+
+#. Status while the import file is compared with the account's personas
+msgid "Comparing your file with your personas..."
+msgstr "A comparar o teu ficheiro com as tuas personas..."
+
+#. Header for configured personas list with count
+msgid "Configured Personas ({count})"
+msgstr "Personas configuradas ({count})"
+
+#. Explanation of the "Linked" line of the import result
+msgid "Connected to their members in the file. Nothing in them changed."
+msgstr "Associadas aos respetivos membros do ficheiro. Nada nelas mudou."
+
+#. Context menu action to copy a timestamp markdown tag in the message composer.
+msgid "Copy timestamp"
+msgstr "Copiar carimbo de data/hora"
+
+#. Toast when downloading the persona export fails
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "Não foi possível exportar as tuas personas."
+
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "Não foi possível carregar os comandos."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "Não foi possível executar /{name}: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "Não foi possível guardar /{name}: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "Não foi possível alterar as personas. Tenta novamente."
+
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "Não foi possível carregar as personas."
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Contar personas separadamente"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Contar separadamente para cada:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Contadores"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Criar comandos"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Criar comandos para esta comunidade e editar ou eliminar os próprios."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Criado por {name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "Criada em {date}"
+
+#. Aria label for deactivating active persona
+msgid "Deactivate persona"
+msgstr "Desativar persona"
+
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "Eliminar /{name}?"
+
+msgid "Delete Persona"
+msgstr "Eliminar persona"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Eliminar comando"
+
+#. Aria label for deleting persona
+msgid "Delete persona"
+msgstr "Eliminar persona"
+
+#. Context menu action to delete a timestamp from the message composer.
+msgid "Delete timestamp"
+msgstr "Eliminar carimbo de data/hora"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "Eliminar {count, plural, one {# persona} many {# personas} other {# personas}}?"
+
+#. Title of the section in Settings › Personas that lists deleted personas
+msgid "Deleted personas"
+msgstr "Personas eliminadas"
+
+#. Explanation of the deleted personas section in Settings › Personas
+msgid "Deleted personas still show on their old messages, but nobody can pick them and they don't count towards your limit. Restoring one brings the same persona back, with its history."
+msgstr "As personas eliminadas continuam a aparecer nas mensagens antigas, mas ninguém as pode escolher e não contam para o teu limite. Restaurar uma traz de volta a mesma persona, com o respetivo histórico."
+
+#. When a persona was deleted, in the import review. {date} is a date
+#. When a persona was deleted, in the import review. {date} is a date
+msgid "Deleted {date}"
+msgstr "Eliminada em {date}"
+
+msgid "Detected System Name / Tag"
+msgstr "Nome / tag do sistema detetados"
+
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
+msgstr "Tag de exibição"
+
+msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "A tag de exibição aparecerá ao lado do nome de todas as personas nas mensagens. Se nenhuma tag de exibição for definida, a foto de perfil da tua conta será exibida."
+
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Não reconhecer as tags desta persona"
+
+#. Tooltip hint on timestamp pill in message composer.
+msgid "Double-click to edit"
+msgstr "Faz duplo clique para editar"
+
+#. Button that downloads the Tyne app as a .deb package for Linux.
+msgid "Download .deb"
+msgstr "Transferir .deb"
+
+#. Button that downloads the Tyne app as an .rpm package for Linux.
+msgid "Download .rpm"
+msgstr "Transferir .rpm"
+
+#. Button that downloads the Tyne app as an AppImage for Linux.
+msgid "Download AppImage"
+msgstr "Transferir AppImage"
+
+#. Button that opens the Tyne download page when the visitor's platform is not known.
+msgid "Download Tyne"
+msgstr "Transferir o Tyne"
+
+#. Button that downloads the Tyne app for Android.
+#. Button that downloads the Tyne app for Android.
+msgid "Download for Android"
+msgstr "Transferir para Android"
+
+#. Button that opens the Linux downloads of the Tyne app.
+msgid "Download for Linux"
+msgstr "Transferir para Linux"
+
+#. Button that downloads the Tyne app for macOS.
+#. Button that downloads the Tyne app for macOS.
+msgid "Download for Mac"
+msgstr "Transferir para Mac"
+
+#. Button that downloads the Tyne app for Windows.
+#. Button that downloads the Tyne app for Windows.
+msgid "Download for Windows"
+msgstr "Transferir para Windows"
+
+#. Progress status during avatar download
+msgid "Downloading avatar {current} of {total}..."
+msgstr "A transferir o avatar {current} de {total}..."
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "A transferir o banner {current} de {total}..."
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "O par de tags \"{tag}\" não pode aparecer mais de uma vez na mesma persona"
+
+#. Validation error when tag pair is duplicated within the same persona
+msgid "Duplicate tag pair on this persona"
+msgstr "Par de tags duplicado nesta persona"
+
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Cada canal mantém a sua própria persona. Os canais novos começam como a tua conta."
+
+#. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "Editar /{name}"
+
+#. Title for edit persona modal
+msgid "Edit Persona"
+msgstr "Editar persona"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Editar ou eliminar os comandos de qualquer pessoa nesta comunidade."
+
+#. Action button to edit persona
+#. Aria label for editing persona
+msgid "Edit persona"
+msgstr "Editar persona"
+
+#. Context menu action to edit a timestamp in the message composer.
+#. Title of the timestamp modal when editing an existing timestamp.
+msgid "Edit timestamp"
+msgstr "Editar carimbo de data/hora"
+
+msgid "Everyone else"
+msgstr "Todos os outros"
+
+#. Text under the heading when a reviewed persona import is done
+msgid "Everything else is exactly as it was."
+msgstr "Tudo o resto está exatamente como estava."
+
+#. Text when a persona import with nothing to decide is done
+msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
+msgstr "Tudo no ficheiro era novo ou já correspondia exatamente a uma persona, por isso não havia nada a decidir. Mais nada mudou."
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Em todo o lado"
+
+msgid "Export Summary"
+msgstr "Resumo da exportação"
+
+msgid "Failed to clear active persona"
+msgstr "Falha ao remover a persona ativa"
+
+#. Toast when persona deletion fails
+msgid "Failed to delete persona"
+msgstr "Falha ao eliminar a persona"
+
+#. Toast error message on persona import failure
+msgid "Failed to import personas"
+msgstr "Falha ao importar as personas"
+
+#. Error message when parsing PluralKit JSON fails
+msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Falha ao analisar o ficheiro JSON. Confirma que é uma exportação válida do PluralKit."
+
+#. Error message when reading uploaded file fails
+msgid "Failed to read the selected file."
+msgstr "Falha ao ler o ficheiro selecionado."
+
+#. Toast when persona save fails
+msgid "Failed to save persona"
+msgstr "Falha ao guardar a persona"
+
+#. Error toast in the community Message Tools settings tab when saving the signal bar fails.
+msgid "Failed to save the signal bar. Try again."
+msgstr "Não foi possível guardar a barra de sinais. Tenta novamente."
+
+#. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
+msgid "Failed to save where the signal bar appears. Try again."
+msgstr "Não foi possível guardar onde a barra de sinais aparece. Tenta novamente."
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "Falha ao selecionar o ícone GIF"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "Falha ao selecionar a imagem do ícone"
+
+msgid "Failed to set active persona"
+msgstr "Falha ao definir a persona ativa"
+
+msgid "Failed to set the persona for this channel"
+msgstr "Falha ao definir a persona para este canal"
+
+msgid "Failed to update display tag"
+msgstr "Falha ao atualizar a tag de exibição"
+
+msgid "Failed to update persona mode"
+msgstr "Falha ao atualizar o modo de persona"
+
+msgid "Failed to update the reaction setting"
+msgstr "Falha ao atualizar a definição de reações"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "Falha ao alterar onde a tua persona é lembrada"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "Falha ao carregar a imagem do avatar para o servidor"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "Falha ao carregar a imagem do banner para o servidor"
+
+#. Toast when icon upload fails
+msgid "Failed to upload icon to server"
+msgstr "Falha ao carregar o ícone para o servidor"
+
+#. Under the .rpm download button: the Linux distributions that use .rpm packages.
+msgid "Fedora, openSUSE"
+msgstr "Fedora, openSUSE"
+
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "Filtrar por visibilidade"
+
+#. Label for format preview selection in timestamp modal.
+msgid "Format preview"
+msgstr "Pré-visualização do formato"
+
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "Disponível"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "Do teu ficheiro"
+
+#. Link at the end of the command script help to the complete guide on GitHub.
+msgid "Full script guide"
+msgstr "Guia completo de scripts"
+
+#. Heading of the download page for Android.
+msgid "Get Tyne for Android"
+msgstr "Obtém o Tyne para Android"
+
+#. Heading of the download page for Linux.
+msgid "Get Tyne for Linux"
+msgstr "Obtém o Tyne para Linux"
+
+#. Heading of the download page for macOS.
+msgid "Get Tyne for Mac"
+msgstr "Obtém o Tyne para Mac"
+
+#. Heading of the download page for Windows.
+msgid "Get Tyne for Windows"
+msgstr "Obtém o Tyne para Windows"
+
+#. Button that shows how to install the Tyne app on an iPhone or iPad.
+#. Heading of the download page for iPhone and iPad.
+msgid "Get Tyne for iPhone"
+msgstr "Obtém o Tyne para iPhone"
+
+#. Button that opens the Tyne beta in Apple's TestFlight app.
+msgid "Get Tyne in TestFlight"
+msgstr "Obter o Tyne no TestFlight"
+
+#. Heading of the download page when the visitor's platform is not known.
+#. Heading of the panel (and title of the dialog) that offers the Tyne desktop and phone apps.
+msgid "Get the Tyne app"
+msgstr "Obtém a aplicação Tyne"
+
+#. What happens to the app's version of a persona in the import review when the file's version is used
+msgid "Gets overwritten"
+msgstr "É substituída"
+
+#. Heading when a reviewed persona import is done
+msgid "Here is what changed"
+msgstr "Eis o que mudou"
+
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "Ocultar"
+
+#. Tooltip on the channel header channel list toggle when the channel list is currently shown.
+msgid "Hide channel list"
+msgstr "Ocultar lista de canais"
+
+#. Tooltip for the small arrow button that collapses the signal bar above the message box.
+msgid "Hide signal bar"
+msgstr "Ocultar barra de sinais"
+
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "Sugestão"
+
+#. Settings section description in Advanced Settings for edge hover peek preference.
+msgid "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Passa o cursor junto às margens da janela para mostrar temporariamente os painéis recolhidos."
+
+#. Heading of the install steps on the download page.
+msgid "How to install"
+msgstr "Como instalar"
+
+#. Toast when icon file exceeds size limit
+msgid "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "O ficheiro do ícone é demasiado grande. Escolhe uma imagem com menos de 10 MB."
+
+#. Install step on Windows. 'More info' and 'Run anyway' are the links and buttons of Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "If Windows shows this warning, click <0>More info</0>, then <1>Run anyway</1>."
+msgstr "Se o Windows mostrar este aviso, clica em <0>Mais informações</0> e depois em <1>Executar mesmo assim</1>."
+
+#. Install step on Android. 'Settings', 'Allow from this source' and 'Install' are Android's own words: use Android's wording in this language.
+msgid "If your phone asks, tap <0>Settings</0>, turn on <1>Allow from this source</1>, go back and tap <2>Install</2>."
+msgstr "Se o telemóvel pedir, toca em <0>Definições</0>, ativa <1>Permitir a partir desta fonte</1>, volta atrás e toca em <2>Instalar</2>."
+
+#. Title of the persona import dialog when the import is done
+msgid "Import finished"
+msgstr "Importação concluída"
+
+#. Title of the persona import dialog
+#. Title of the persona import dialog
+msgid "Import personas"
+msgstr "Importar personas"
+
+#. Summary in the import review footer when every choice leaves things as they are
+msgid "Import will change nothing"
+msgstr "A importação não vai alterar nada"
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Import will never overwrite existing personas without your permission."
+msgstr "A importação nunca vai substituir personas existentes sem a tua autorização."
+
+#. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
+msgid "Import will {actions}"
+msgstr "A importação vai {actions}"
+
+#. Modal title for PluralKit import step importing
+msgid "Importing Personas..."
+msgstr "A importar personas..."
+
+msgid "Importing..."
+msgstr "A importar..."
+
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "Em cada canal"
+
+#. Explanation of the "Kept as they were" line of the import result
+msgid "Including any that differ from the file, where you kept the version you had."
+msgstr "Incluindo as que diferem do ficheiro, nas quais mantiveste a versão que tinhas."
+
+#. Button to insert timestamp into message composer.
+msgid "Insert"
+msgstr "Inserir"
+
+#. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Title of the timestamp insertion modal.
+msgid "Insert timestamp"
+msgstr "Inserir carimbo de data/hora"
+
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Inserir:"
+
+#. Install step on iPhone. TestFlight is the name of Apple's app for testing apps.
+msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
+msgstr "Instala a aplicação gratuita <0>TestFlight</0> da Apple a partir da App Store."
+
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "Em vez de {tag}"
+
+#. Why a community command could not run, shown after "Couldn't run /name:".
+msgid "Its script has a problem."
+msgstr "O script do comando tem um problema."
+
+#. Option of the switch for a member whose tag is already taken: import it with a name and tag of its own
+msgctxt "persona-import-switch"
+msgid "Keep"
+msgstr "Manter"
+
+#. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
+msgid "Keep both"
+msgstr "Manter as duas"
+
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "Continuar a rever"
+
+#. Badge on a collapsed member in the import review: it is imported with a tag of its own
+msgid "Keeping"
+msgstr "A manter"
+
+#. Badge on a collapsed persona in the import review: the file's version is added next to the app's
+msgid "Keeping both"
+msgstr "A manter as duas"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "A manter a do {productName}"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "Mantém a tag"
+
+#. Line of the import result: personas left unchanged
+msgid "Kept as they were"
+msgstr "Mantidas como estavam"
+
+#. Option of the switch on a deleted persona in the import review: it stays deleted
+msgctxt "persona-import-switch"
+msgid "Leave deleted"
+msgstr "Deixar eliminada"
+
+#. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
+msgid "Line {line}, column {column}: {problem}"
+msgstr "Linha {line}, coluna {column}: {problem}"
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "Feito com /{name}"
+
+msgid "Main account"
+msgstr "Conta principal"
+
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "Tornar privadas"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "Tornar públicas"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "Tornar não listadas"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "Tornar {count, plural, one {# persona privada} many {# personas privadas} other {# personas privadas}}?"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "Tornar {count, plural, one {# persona pública} many {# personas públicas} other {# personas públicas}}?"
+
+msgid "Manage Personas"
+msgstr "Gerir personas"
+
+#. OAuth scope description shown on the consent screen for the personas.write scope.
+msgid "Manage and create your personas"
+msgstr "Gerir e criar as tuas personas"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Gerir comandos"
+
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "Gerir personas"
+
+#. Active persona mode manual
+#. Active persona mode manual
+#. Active persona mode manual
+msgid "Manual"
+msgstr "Manual"
+
+#. Validation error when signature emoji limit is reached
+msgid "Maximum {max} signature emojis allowed per persona"
+msgstr "Máximo de {max} emojis de assinatura por persona"
+
+#. Placeholder name for unnamed member in import
+msgid "Member #{index}"
+msgstr "Membro n.º {index}"
+
+msgid "Members with Avatars"
+msgstr "Membros com avatar"
+
+#. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
+msgid "Message Tools"
+msgstr "Ferramentas de mensagem"
+
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Mensagens que os membros podem publicar ao escrever /name."
+
+#. Link in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "More info"
+msgstr "Mais informações"
+
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "Mais usadas"
+
+#. Button in macOS' warning that an app was not opened: use macOS' own wording.
+msgid "Move to Trash"
+msgstr "Mover para o Lixo"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "Nome (A–Z)"
+
+#. Title for new persona modal
+msgid "New Persona"
+msgstr "Nova persona"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Novo comando"
+
+#. Explanation of the "Added" line of the import result
+msgid "New personas from your file."
+msgstr "Personas novas do teu ficheiro."
+
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "Nova janela"
+
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "Persona seguinte"
+
+#. Error message when PluralKit export lacks members array
+msgid "No \"members\" array found in this export file."
+msgstr "Não foi encontrada nenhuma matriz \"members\" neste ficheiro de exportação."
+
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "Sem biografia"
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "Ainda sem biografia."
+
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Sem cor"
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "Nenhum comando"
+
+#. Shown in Settings › Personas when there are no deleted personas
+msgid "No deleted personas."
+msgstr "Nenhuma persona eliminada."
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "Sem tag de exibição"
+
+msgid "No display tag configured. Messages will show your account profile picture."
+msgstr "Nenhuma tag de exibição configurada. As mensagens vão mostrar a foto de perfil da tua conta."
+
+msgid "No matching personas found."
+msgstr "Nenhuma persona correspondente encontrada."
+
+msgid "No one matches."
+msgstr "Ninguém corresponde."
+
+msgid "No personas configured yet. Create one in Settings."
+msgstr "Nenhuma persona configurada ainda. Cria uma nas Definições."
+
+msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Ainda não criaste nenhuma persona. Clica em \"Adicionar persona\" para criares a tua primeira persona!"
+
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "Não há personas aqui."
+
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "Nenhuma persona corresponde à tua pesquisa."
+
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "Sem pronomes"
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "Nenhuma persona pública."
+
+msgid "No signals yet. The bar stays hidden until you add one."
+msgstr "Ainda não há sinais. A barra fica oculta até adicionares um."
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "Sem tag: adicionada sem nenhuma"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "Sem tags"
+
+#. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
+msgid "Nobody has this signal on"
+msgstr "Ninguém está com este sinal ligado"
+
+#. Choice beside the personas a member of the import file might be: it is none of them
+msgid "None of these"
+msgstr "Nenhuma destas"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "Nenhuma das tuas personas é pública ainda. Os outros veem uma persona aqui quando definires a visibilidade dela como Pública."
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Not imported"
+msgstr "Não será importada"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "Não tens a certeza? Deixa como está: nada muda."
+
+#. Link on the download page to every earlier release of the app.
+msgid "Older versions"
+msgstr "Versões anteriores"
+
+#. Heading next to a QR code that opens the Tyne download page on a phone.
+msgid "On your phone?"
+msgstr "No telemóvel?"
+
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Uma persona para todos os canais."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Apenas para este canal"
+
+#. Helper description for private persona visibility
+msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Visível apenas para ti. Os outros não podem ver a biografia completa nem os detalhes do perfil desta persona."
+
+#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
+msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
+msgstr "Abre as <0>Definições do Sistema</0> e depois <1>Privacidade e segurança</1>. Desloca para baixo e clica em <2>Abrir mesmo assim</2>. Só tens de fazer isto uma vez."
+
+#. Button in macOS' Privacy & Security settings: use macOS' own wording.
+msgid "Open Anyway"
+msgstr "Abrir mesmo assim"
+
+#. Last install step on a phone.
+#. Last install step on a phone.
+msgid "Open Tyne and sign in."
+msgstr "Abre o Tyne e inicia sessão."
+
+#. Last install step on Linux.
+msgid "Open Tyne from your applications menu, or open the AppImage. Sign in and you're done."
+msgstr "Abre o Tyne a partir do menu de aplicações ou abre o AppImage. Inicia sessão e já está."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "Abrir numa nova janela"
+
+#. Install step on macOS. 'Applications' is the Mac's Applications folder: use macOS' own name for it.
+msgid "Open the file you downloaded and drag Tyne into <0>Applications</0>. Then open Tyne."
+msgstr "Abre o ficheiro que transferiste e arrasta o Tyne para <0>Aplicações</0>. Depois, abre o Tyne."
+
+#. Install step: open the installer that was just downloaded.
+#. Install step: open the installer that was just downloaded.
+msgid "Open the file you downloaded."
+msgstr "Abre o ficheiro que transferiste."
+
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "Opcional"
+
+#. Link from the Tyne app download button to the downloads for every platform.
+msgid "Other platforms"
+msgstr "Outras plataformas"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "Os outros veem {count, plural, one {# persona pública} many {# personas públicas} other {# personas públicas}}."
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "Os outros vão vê-las na tua lista de personas e podem abrir os perfis delas. Podes voltar atrás a qualquer momento."
+
+#. Textarea right-click context menu item that pastes clipboard contents without formatting.
+msgid "Paste as plain text"
+msgstr "Colar como texto simples"
+
+#. Settings search synonym.
+msgid "Peek"
+msgstr "Espreitar"
+
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Pessoa mencionada"
+
+#. A community command counter counts per person who runs it.
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Quem usa"
+
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "Persona"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "Persona \"{name}\" selecionada."
+
+msgid "Persona Tags (Prefix & Suffix)"
+msgstr "Tags da persona (prefixo e sufixo)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "A persona aplica-se a"
+
+#. Toast when persona is created
+msgid "Persona created"
+msgstr "Persona criada"
+
+#. Toast when persona is deleted
+msgid "Persona deleted"
+msgstr "Persona eliminada"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "Persona desmarcada."
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "O nome da persona não pode ficar vazio"
+
+#. Fallback screen reader label for the persona profile modal. Keep it concise.
+msgid "Persona profile"
+msgstr "Perfil da persona"
+
+#. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
+msgid "Persona profile: {name}"
+msgstr "Perfil da persona: {name}"
+
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "Persona desde"
+
+#. Toast when persona is updated
+msgid "Persona updated"
+msgstr "Persona atualizada"
+
+#. Aria label for persona visibility tabs
+msgid "Persona visibility"
+msgstr "Visibilidade da persona"
+
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
+#. User settings tab for personas.
+msgid "Personas"
+msgstr "Personas"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "Personas ({count})"
+
+#. Under "Android" in the list of platforms.
+msgid "Phones and tablets"
+msgstr "Telemóveis e tablets"
+
+#. Help for an example in a command script.
+msgid "Pick one option at random"
+msgstr "Escolher uma opção ao acaso"
+
+#. Help for an example in a command script.
+msgid "Pick one word at random"
+msgstr "Escolher uma palavra ao acaso"
+
+#. Help for an example in a command script.
+msgid "Pick the word for a number"
+msgstr "Escolher a palavra de acordo com um número"
+
+#. Emoji context menu action that pins the emoji.
+msgid "Pin emoji"
+msgstr "Fixar emoji"
+
+#. Emoji context menu action that pins the emoji for the active persona.
+msgid "Pin for this persona"
+msgstr "Fixar para esta persona"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "Corrige os erros das tags antes de guardar"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "Com tecnologia KLIPY"
+
+#. Placeholder for persona tag prefix
+msgid "Prefix (e.g. [)"
+msgstr "Prefixo (ex.: [)"
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "Prime F6 para chegar a esta janela com o teclado."
+
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "Persona anterior"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
+#. Persona visibility private
+msgid "Private"
+msgstr "Privada"
+
+#. Tooltip on private persona badge
+msgid "Private persona"
+msgstr "Persona privada"
+
+#. placeholder {0}: progress.currentName
+msgid "Processing: {0}"
+msgstr "A processar: {0}"
+
+#. Helper description for unlisted persona visibility
+msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Os cartões de perfil só ficam acessíveis ao clicar em mensagens enviadas por esta persona. Não aparece na tua lista pública de personas."
+
+#. Helper description for public persona visibility
+msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Os cartões de perfil ficam acessíveis ao clicar em mensagens e visíveis para amigos e servidores em comum na tua lista pública de personas."
+
+#. Chip above the persona list: public personas.
+#. Persona visibility public
+msgid "Public"
+msgstr "Pública"
+
+#. Tooltip on public persona badge
+msgid "Public persona"
+msgstr "Persona pública"
+
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+msgid "QR code that opens the Tyne download page"
+msgstr "Código QR que abre a página de transferência do Tyne"
+
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "Reagir como várias personas ao mesmo tempo"
+
+#. Title of the modal and context menu item to react as a persona.
+msgid "React as..."
+msgstr "Reagir como..."
+
+msgid "Reacted"
+msgstr "Reagiram"
+
+msgid "Reacting as <0>{reactorName}</0>"
+msgstr "A reagir como <0>{reactorName}</0>"
+
+#. Tooltip hint showing effective reacting persona or user on quick reaction hover.
+msgid "Reacting as {name}"
+msgstr "A reagir como {name}"
+
+msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
+msgstr "Reagir com um emoji de assinatura sempre reagirá como esta persona, independentemente da persona ativa."
+
+msgid "Recent"
+msgstr "Recentes"
+
+msgid "Recent Personas"
+msgstr "Personas recentes"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "Usadas recentemente"
+
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Remover contador"
+
+#. Aria label for removing signature emoji
+msgid "Remove signature emoji"
+msgstr "Remover emoji de assinatura"
+
+#. Aria label for removing a tag pair
+msgid "Remove tag pair"
+msgstr "Remover par de tags"
+
+#. What happens to the import file's display tag in the import review when it is used
+msgid "Replaces your display tag"
+msgstr "Substitui a tua tag de exibição"
+
+#. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
+msgid "Replaces {productName}'s {name}"
+msgstr "Substitui {name} no {productName}"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "O pedido falhou (HTTP {status})"
+
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Repor contagens"
+
+#. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
+msgid "Reset signal for everyone"
+msgstr "Repor o sinal para todos"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Repor as contagens de {name}? Isto não pode ser anulado."
+
+#. Button that brings back a deleted persona
+msgid "Restore"
+msgstr "Restaurar"
+
+#. Explanation of the "Still deleted" line of the import result
+msgid "Restore them from Deleted personas in Settings if you change your mind."
+msgstr "Se mudares de ideias, restaura-as em Personas eliminadas, nas Definições."
+
+#. Line of the import result: deleted personas brought back
+msgid "Restored"
+msgstr "Restauradas"
+
+msgid "Results"
+msgstr "Resultados"
+
+msgid "Root Account (Default)"
+msgstr "Conta principal (Padrão)"
+
+#. Button under the preview of a command script that picks at random: fills the preview in again.
+msgid "Run again"
+msgstr "Executar novamente"
+
+#. Button in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "Run anyway"
+msgstr "Executar mesmo assim"
+
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Texto de exemplo"
+
+#. Progress status when saving personas
+msgid "Saving personas..."
+msgstr "A guardar personas..."
+
+#. Under 'On your phone?', next to the QR code.
+msgid "Scan with your camera."
+msgstr "Digitaliza com a câmara."
+
+#. Under the QR code on the download page.
+msgid "Scan with your phone's camera."
+msgstr "Digitaliza com a câmara do telemóvel."
+
+#. Label of the code editor for a community command.
+msgid "Script"
+msgstr "Script"
+
+#. Title of the expandable help under the command script editor.
+msgid "Script reference"
+msgstr "Referência de scripts"
+
+#. placeholder {0}: filteredPersonas.length
+msgid "Search Results ({0})"
+msgstr "Resultados da pesquisa ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Pesquisar comandos"
+
+#. Search placeholder in persona picker sheet
+msgid "Search personas, tags, pronouns..."
+msgstr "Pesquisar personas, tags, pronomes..."
+
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "Pesquisar nas tuas personas"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "Pesquisar nas personas de {name}"
+
+#. Tooltip when sending as root account with persona mode active
+msgid "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "A enviar como @{username} ({mode}) - Clica para mudar de persona"
+
+#. Tooltip when sending as a persona matched by persona tag
+msgid "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "A enviar como {name} (correspondência por tag) - Clica para mudar de persona"
+
+msgid "Set Active"
+msgstr "Tornar ativa"
+
+#. Aria label for setting active persona
+msgid "Set as active persona"
+msgstr "Definir como persona ativa"
+
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "Mostrar"
+
+#. Short label for an advanced message action bar preference.
+msgid "Show copy button"
+msgstr "Mostrar botão de copiar"
+
+#. Button that loads the list of deleted personas in Settings › Personas
+msgid "Show deleted personas"
+msgstr "Mostrar personas eliminadas"
+
+#. Plus menu submenu toggle that shows the persona selector next to the textarea.
+#. Short label for an advanced message input preference.
+msgid "Show personas button"
+msgstr "Mostrar botão de personas"
+
+#. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
+msgid "Show signal bar"
+msgstr "Mostrar barra de sinais"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "Mostrar não listadas e privadas"
+
+msgid "Signal Bar"
+msgstr "Barra de sinais"
+
+#. Community settings tab for choosing the toggleable signal icons shown above the message box.
+msgctxt "community-settings-tab"
+msgid "Signal Bar"
+msgstr "Barra de sinais"
+
+#. Accessible label for the row of toggleable signal icons above the message box.
+msgid "Signal bar"
+msgstr "Barra de sinais"
+
+#. Accessible label for the text field that names a signal in the Message Tools settings tab.
+msgid "Signal label"
+msgstr "Nome do sinal"
+
+msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
+msgstr "Os sinais são ícones acima da caixa de mensagem que qualquer pessoa pode ligar e desligar, e todos na conversa veem quem os tem ligados. Esta barra é partilhada por todas as comunidades e mensagens diretas desta instância. Arrasta para reordenar."
+
+msgid "Signature Emojis"
+msgstr "Emojis de assinatura"
+
+#. Validation error when signature emoji is already used by another persona
+msgid "Signature emoji already in use by persona \"{name}\""
+msgstr "O emoji de assinatura já está em uso pela persona \"{name}\""
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Signature emojis"
+msgstr "Emojis de assinatura"
+
+#. Option of the switch for a member whose tag is already taken: do not import it
+msgctxt "persona-import-switch"
+msgid "Skip"
+msgstr "Ignorar"
+
+#. Line of the import result: members left out
+msgid "Skipped"
+msgstr "Ignorados"
+
+#. Import warning when member has no name
+msgid "Skipped member because they have no name configured."
+msgstr "Membro ignorado por não ter nenhum nome configurado."
+
+#. Badge on a collapsed member in the import review: it is not imported
+msgid "Skipping"
+msgstr "A ignorar"
+
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "Algumas tags de proxy ficaram de fora: o {productName} permite até 5 por persona, cada uma com 32 carateres no máximo."
+
+#. Badge on a collapsed deleted persona in the import review: it stays deleted
+msgid "Staying deleted"
+msgstr "Continua eliminada"
+
+#. What happens to the app's version of a persona in the import review
+msgid "Stays as it is"
+msgstr "Fica como está"
+
+#. What happens to the app's deleted persona in the import review
+msgid "Stays deleted"
+msgstr "Continua eliminada"
+
+#. Line of the import result: deleted personas not restored
+msgid "Still deleted"
+msgstr "Ainda eliminadas"
+
+#. Explanation of the "Skipped" line of the import result
+msgid "Still in your file. Import it again any time to decide about them."
+msgstr "Continuam no teu ficheiro. Importa-o de novo quando quiseres para decidires sobre eles."
+
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "Parar a importação"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "Parar esta importação?"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "A guardar a imagem {current} de {total} do ficheiro..."
+
+#. Placeholder for persona tag suffix
+msgid "Suffix (e.g. ])"
+msgstr "Sufixo (ex.: ])"
+
+#. Section header for suggested time zones in the timestamp modal.
+msgid "Suggested"
+msgstr "Sugeridos"
+
+msgid "Supports PluralKit system export files"
+msgstr "Compatível com ficheiros de exportação de sistemas do PluralKit"
+
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "Mudar a persona ativa"
+
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "Nova tag"
+
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
+msgid "Tag Icon"
+msgstr "Ícone da tag"
+
+msgid "Tag Text"
+msgstr "Texto da tag"
+
+#. Row heading in the table comparing a persona with the import file: whether its tags are matched
+msgid "Tag matching"
+msgstr "Reconhecimento de tags"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "O par de tags \"{tag}\" já está em uso pela persona \"{name}\""
+
+#. Validation error when tag pair is already used by another persona
+msgid "Tag pair already in use by persona \"{name}\""
+msgstr "Par de tags já em uso pela persona \"{name}\""
+
+#. Settings search synonym.
+msgid "Taskbar"
+msgstr "Barra de tarefas"
+
+#. Placeholder for persona bio
+msgid "Tell us about this persona..."
+msgstr "Fala-nos sobre esta persona..."
+
+#. Help for a command script variable.
+msgid "That person’s name"
+msgstr "O nome dessa pessoa"
+
+#. Help for a command script variable.
+msgid "The channel, as a mention"
+msgstr "O canal, como menção"
+
+#. Error message when uploaded file is not valid JSON
+msgid "The chosen file is not a valid JSON object."
+msgstr "O ficheiro escolhido não é um objeto JSON válido."
+
+#. Error in Settings › Personas when the list of deleted personas fails to load
+msgid "The deleted personas could not be loaded."
+msgstr "Não foi possível carregar as personas eliminadas."
+
+#. Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown
+msgid "The file's picture couldn't be loaded"
+msgstr "Não foi possível carregar a imagem do ficheiro"
+
+#. Help for a command script variable.
+msgid "The first person they mention, if any"
+msgstr "A primeira pessoa mencionada, se houver"
+
+#. Help for a command script variable.
+msgid "The name of this community"
+msgstr "O nome desta comunidade"
+
+#. Help for a command script variable.
+msgid "The person running it, as a mention"
+msgstr "Quem usa, como menção"
+
+#. Error toast when restoring a deleted persona fails
+msgid "The persona could not be restored."
+msgstr "Não foi possível restaurar a persona."
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "A persona a selecionar."
+
+#. Problem in a community command script: it produces more text than is allowed.
+msgid "The script builds too much text."
+msgstr "O script gera demasiado texto."
+
+#. Problem in a community command script.
+msgid "The script is too long."
+msgstr "O script é demasiado longo."
+
+#. Problem in a community command script.
+msgid "The script took too long to run."
+msgstr "O script demorou demasiado tempo a ser executado."
+
+msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
+msgstr "A barra de sinais está desligada até marcares um canal aqui. Marcar uma categoria ou a comunidade inteira também abrange os canais criados lá mais tarde."
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "Não foi possível guardar o ícone da tag: {error}. Podes defini-lo novamente nas definições de personas."
+
+#. Explanation of the "Updated from the file" line of the import result
+msgid "Their details are the file's now; their messages and history stayed."
+msgstr "Os dados delas são agora os do ficheiro; as mensagens e o histórico mantiveram-se."
+
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "As mensagens delas continuam a mostrar os nomes e avatares, mas deixas de poder enviar como elas, e as tags e emojis de assinatura delas ficam livres. Esta ação não pode ser anulada."
+
+#. Help for a command script variable.
+msgid "Their name"
+msgstr "O nome de quem usa"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "Os perfis delas ficam ocultos para os outros. Os nomes e avatares continuam a aparecer nas mensagens e reações delas."
+
+#. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
+msgid "There's no filter called {name}."
+msgstr "Não existe nenhum filtro chamado {name}."
+
+#. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
+msgid "There's no tag called {name}."
+msgstr "Não existe nenhuma tag chamada {name}."
+
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "Parece que já tens estas personas no {productName}. Para cada uma, escolhe o que o {productName} deve ter. Não tens a certeza? Deixa como está: nada muda."
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "Não foi possível ler este ficheiro .zip."
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "Este ficheiro .zip não é uma exportação de personas do {productName}."
+
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "Isto não pode ser anulado. As mensagens feitas com ele continuam a mostrar que comando as fez."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "Esta comunidade ainda não tem comandos."
+
+#. Validation error when signature emoji is duplicated within the same persona
+msgid "This emoji is already added as a signature emoji"
+msgstr "Este emoji já foi adicionado como emoji de assinatura"
+
+msgid "This is a preview of how your display tag will look in chat."
+msgstr "Esta é uma pré-visualização de como a tua tag de exibição vai aparecer no chat."
+
+#. Problem in a community command script: a syntax error at the position given before this text.
+msgid "This part can't be read."
+msgstr "Não é possível ler esta parte."
+
+#. Problem in a community command script: it failed while running, at the position given before this text.
+msgid "This part stopped with an error."
+msgstr "Esta parte parou com um erro."
+
+msgid "This persona’s profile is private."
+msgstr "O perfil desta persona é privado."
+
+#. Shown instead of the preview when a command script produces no text.
+msgid "This would post nothing, so the command would fail."
+msgstr "Isto não publicaria nada, por isso o comando falharia."
+
+#. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
+msgid "Toggle the channel list"
+msgstr "Mostrar ou ocultar a lista de canais"
+
+msgid "Total Members"
+msgstr "Total de membros"
+
+#. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
+msgid "Turn off signal bar"
+msgstr "Desligar barra de sinais"
+
+#. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
+msgid "Turn off {name}"
+msgstr "Desligar {name}"
+
+#. Direct message right-click menu action that shows the signal bar above the message box in this DM.
+msgid "Turn on signal bar"
+msgstr "Ligar barra de sinais"
+
+#. Last install step: the app starts after installing.
+msgid "Tyne opens by itself. Sign in and you're done."
+msgstr "O Tyne abre sozinho. Inicia sessão e já está."
+
+#. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
+msgid "Type {output} or {tag} for suggestions."
+msgstr "Escreve {output} ou {tag} para ver sugestões."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Escrever uma destas tags não muda para esta persona. A tag é enviada tal como foi escrita."
+
+#. Under the .deb download button: the Linux distributions that use .deb packages.
+msgid "Ubuntu, Debian, Linux Mint"
+msgstr "Ubuntu, Debian, Linux Mint"
+
+#. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
+msgid "Ubuntu, Fedora and more"
+msgstr "Ubuntu, Fedora e outras"
+
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
+#. Persona visibility unlisted
+msgid "Unlisted"
+msgstr "Não listada"
+
+#. Emoji context menu action that unpins the emoji.
+msgid "Unpin emoji"
+msgstr "Desafixar emoji"
+
+#. Emoji context menu action that unpins the emoji for the active persona.
+msgid "Unpin for this persona"
+msgstr "Desafixar para esta persona"
+
+#. Helper description for Manual persona mode
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "As mensagens sem tag são enviadas como a persona que escolheste. Uma tag aplica-se apenas a essa mensagem."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "As mensagens sem tag são enviadas como quem falou por último. Usar uma tag muda para essa persona."
+
+#. Line of the import result: personas given the file's details
+msgid "Updated from the file"
+msgstr "Atualizadas a partir do ficheiro"
+
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "Usar /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "Usar /{name} de {community}"
+
+#. Shown after pressing Import in the persona import dialog, before anything happens
+msgid "Use Export to make a backup before continuing."
+msgstr "Usa Exportar para fazer uma cópia de segurança antes de continuar."
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Usar comandos de outras comunidades neste canal."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Usar comandos de outras comunidades."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Usar comandos externos"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Usa-o num script como {variable}. Cada execução soma um primeiro, por isso a primeira dá 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Usa letras minúsculas, números e _, a começar por uma letra, e não um nome que os scripts já usem."
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Usa letras minúsculas, números, - e _, até 32 carateres."
+
+#. Button in the command editor that switches back from the code editor to the plain message field.
+msgid "Use the basic editor"
+msgstr "Usar o editor básico"
+
+#. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
+msgctxt "persona-import-switch"
+msgid "Use the file's"
+msgstr "Usar a do ficheiro"
+
+#. Button in the command editor that switches the message field to the code editor for scripts.
+msgid "Use the script editor"
+msgstr "Usar o editor de scripts"
+
+#. Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name
+msgid "Use {productName}'s"
+msgstr "Usar a do {productName}"
+
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "A usar a do ficheiro"
+
+#. OAuth scope description shown on the consent screen for the personas.read scope.
+msgid "View your personas"
+msgstr "Ver as tuas personas"
+
+#. Button inserting the placeholder for what the member types after the command.
+#. Help for a command script variable.
+msgid "What they type"
+msgstr "O que escrevem"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "O que escreveres depois de /{name} tem de caber numa linha."
+
+#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
+msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
+msgstr "Quando o macOS disser que o Tyne não foi aberto, clica em <0>OK</0>."
+
+msgid "Where the signal bar appears"
+msgstr "Onde a barra de sinais aparece"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Onde a tua persona é lembrada"
+
+#. Question over the personas a member of the import file might be. {name} is the member
+msgid "Which persona is {name}?"
+msgstr "Que persona é {name}?"
+
+#. Which Windows versions the Tyne app needs.
+msgid "Windows 10 or 11"
+msgstr "Windows 10 ou 11"
+
+#. Title of Windows' SmartScreen warning, drawn on the download page: use Windows' own wording in this language.
+msgid "Windows protected your PC"
+msgstr "O Windows protegeu o seu PC"
+
+#. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
+msgid "Write a number as 1st, 2nd, 3rd"
+msgstr "Escrever um número como 1st, 2nd, 3rd"
+
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "Eliminaste {name} no {productName} em {date}. Trazer {name} de volta?"
+
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "Eliminaste {name} no {productName}. Trazer {name} de volta?"
+
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "As tuas escolhas para estes membros vão perder-se e nada será importado."
+
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "A tua tag de exibição aparece depois do nome de cada persona. Qual deve o {productName} usar?"
+
+#. On the download page after the visitor chose to download the app elsewhere.
+msgid "Your download should start in a moment. If it doesn't, use the button above."
+msgstr "A transferência deve começar daqui a pouco. Se não começar, usa o botão acima."
+
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "O teu ficheiro"
+
+msgid "Your reactions"
+msgstr "As tuas reações"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "As tuas reações com {emojiName}"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "add {count}"
+msgstr "adicionar {count}"
+
+#. Progress label for avatar downloads
+msgid "avatars downloaded"
+msgstr "avatares transferidos"
+
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "banners transferidos"
+
+#. Part of the import summary "Import will add 7 and change your display tag"
+msgid "change your display tag"
+msgstr "alterar a tua tag de exibição"
+
+#. Placeholder for persona name
+msgid "e.g. Alice"
+msgstr "ex.: Alice"
+
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "ex.: País das Maravilhas"
+
+#. Placeholder for persona pronouns
+msgid "e.g. she/her"
+msgstr "ex.: ela/dela"
+
+#. Placeholder text for natural language timestamp input.
+msgid "e.g. tomorrow at 3pm, in 2 hours, now"
+msgstr "ex.: tomorrow at 3pm, in 2 hours, now"
+
+#. Which iPhone and iPad system versions the Tyne app needs.
+msgid "iOS 16 or newer"
+msgstr "iOS 16 ou mais recente"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "imagens guardadas"
+
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "itens"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "link {count}"
+msgstr "associar {count}"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "prime para ver as tuas reações"
+
+#. Part of the import summary "Import will link 17, restore 2, skip 3"
+msgid "restore {count}"
+msgstr "restaurar {count}"
+
+#. Progress label when saving personas
+msgid "saving personas"
+msgstr "personas guardadas"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "skip {count}"
+msgstr "ignorar {count}"
+
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "texto"
+
+#. Part of the import summary "Import will link 17, use the file's version for 2"
+msgid "use the file's version for {count}"
+msgstr "usar a versão do ficheiro em {count}"
+
+#. placeholder {0}: progress.current
+#. placeholder {1}: progress.total
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
+#. placeholder {3}: progress.percent
+msgid "{0} of {1} {2} ({3}%)"
+msgstr "{0} de {1} {2} ({3}%)"
+
+#. Heading when a persona import with nothing to decide is done. {addedCount} is a number
+msgid "{addedCount} personas added"
+msgstr "{addedCount, plural, one {# persona adicionada} many {# personas adicionadas} other {# personas adicionadas}}"
+
+#. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
+msgid "{appName} {version} is ready to install."
+msgstr "{appName} {version} está pronto a instalar."
+
+#. Line at the top of the import review: members already linked to an identical persona, or connected to one with the same name and tag. {count} is a number
+msgid "{count, plural, one {# exact match} other {# exact matches}}"
+msgstr "{count, plural, one {# correspondência exata} many {# correspondências exatas} other {# correspondências exatas}}"
+
+#. Heading in the import review over the list of members whose proxy tag another persona already has
+msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
+msgstr "{count, plural, one {# membro tem uma tag que já está em uso} many {# membros têm uma tag que já está em uso} other {# membros têm uma tag que já está em uso}}"
+
+#. Heading in the import review over the members that share a name or tag with personas of the account
+msgid "{count, plural, one {# member might be a persona you already have} other {# members might be personas you already have}}"
+msgstr "{count, plural, one {# membro pode ser uma persona que já tens} many {# membros podem ser personas que já tens} other {# membros podem ser personas que já tens}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member} other {# new members}}"
+msgstr "{count, plural, one {# membro novo} many {# membros novos} other {# membros novos}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file} other {# personas in {productName} aren't in your file}}"
+msgstr "{count, plural, one {# persona do {productName} não está no teu ficheiro} many {# personas do {productName} não estão no teu ficheiro} other {# personas do {productName} não estão no teu ficheiro}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, one {# persona está diferente no teu ficheiro} many {# personas estão diferentes no teu ficheiro} other {# personas estão diferentes no teu ficheiro}}"
+
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, one {# persona é agora privada} many {# personas são agora privadas} other {# personas são agora privadas}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, one {# persona é agora pública} many {# personas são agora públicas} other {# personas são agora públicas}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, one {# persona é agora não listada} many {# personas são agora não listadas} other {# personas são agora não listadas}}"
+
+#. Second line of the import review footer
+msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
+msgstr "{count, plural, one {# persona fica como está} many {# personas ficam como estão} other {# personas ficam como estão}}"
+
+#. Heading in the import review over the members whose persona was deleted. {productName} is the app name
+msgid "{count, plural, one {# persona was deleted in {productName}} other {# personas were deleted in {productName}}}"
+msgstr "{count, plural, one {# persona foi eliminada no {productName}} many {# personas foram eliminadas no {productName}} other {# personas foram eliminadas no {productName}}}"
+
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, one {# persona} many {# personas} other {# personas}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, one {# persona eliminada} many {# personas eliminadas} other {# personas eliminadas}}"
+
+#. On a collapsed member in the import review: how many personas of the account it might be
+msgid "{count, plural, one {# possible match} other {# possible matches}}"
+msgstr "{count, plural, one {# correspondência possível} many {# correspondências possíveis} other {# correspondências possíveis}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, one {Verifica # membro antes de importar} many {Verifica # membros antes de importar} other {Verifica # membros antes de importar}}"
+
+#. How often a persona has been used, shown in the import review
+#. How often a persona has been used, shown in the import review
+msgid "{count, plural, one {Used once} other {Used # times}}"
+msgstr "{count, plural, one {Usada uma vez} many {Usada # vezes} other {Usada # vezes}}"
+
+msgid "{count} notice(s) during import"
+msgstr "{count, plural, one {# aviso durante a importação} many {# avisos durante a importação} other {# avisos durante a importação}}"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count} de {total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "{count, plural, one {# de {total} reagiu} many {# de {total} reagiram} other {# de {total} reagiram}}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "{count, plural, one {# selecionada} many {# selecionadas} other {# selecionadas}}"
+
+#. Second line of the import review footer: deleted personas that are not restored
+msgid "{count} stay deleted"
+msgstr "{count, plural, one {# continua eliminada} many {# continuam eliminadas} other {# continuam eliminadas}}"
+
+#. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
+msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
+msgstr "{domain} usa uma versão do {productName} mais recente do que esta aplicação. Atualiza o {productName} e tenta novamente."
+
+#. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
+msgid "{label}: {names}"
+msgstr "{label}: {names}"
+
+#. A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names
+msgid "{names} would all have {label}. Change one of the choices."
+msgstr "{names} ficariam todas com {label}. Altera uma das escolhas."
+
+#. Tooltip when sending as a latched persona
+msgid "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) - Clica para mudar de persona"
+
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "Já pertence a {name}"
+
+#. Toast after a deleted persona was restored
+msgid "{name} is back."
+msgstr "{name} está de volta."
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "{name} está diferente no teu ficheiro. Que versão deve o {productName} ter?"
+
+#. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
+msgid "{name} is never closed."
+msgstr "{name} nunca é fechado."
+
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "A tag de {name} já está em uso"
+
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "{position} de {total}"
+
+#. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
+msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
+msgstr "O {productName} deixou de verificar se o navegador aprovou este início de sessão. O teu código não se perdeu."
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "Públicas: {publicCount}, não listadas: {unlistedCount}, privadas: {privateCount}"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "{shown} de {total} personas"
+
+msgid "— Today at 12:00 PM"
+msgstr "— Hoje às 12:00"
+
+#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” Not Opened"
+msgstr "“Tyne” não foi aberto"
+
+#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
+msgid "“Tyne” was blocked."
+msgstr "“Tyne” foi bloqueado."
