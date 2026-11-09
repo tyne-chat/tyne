@@ -26,6 +26,10 @@ msgstr "Tunniste <0>{tag}</0> kuuluu jo persoonallesi {name}."
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "Myös {name} käyttää tunnistetta <0>{tag}</0> tiedostossasi."
 
+#. Choice in the import review: the member of the file is someone else, add it as a new persona
+msgid "A different persona: add it"
+msgstr "Eri persoona: lisää se"
+
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "Persoonalla voi olla enintään 5 tunnistetta"
@@ -58,10 +62,6 @@ msgstr "Lisää persoona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Lisää tunnistepari ({0}/5)"
 
-#. Choice in the import review: add the member as a new persona next to the existing one
-msgid "Add as a separate persona"
-msgstr "Lisää erillisenä persoonana"
-
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Lisää laskuri"
@@ -69,13 +69,13 @@ msgstr "Lisää laskuri"
 msgid "Add signal"
 msgstr "Lisää signaali"
 
-#. Choice in the import review: add the member with a proxy tag another member of the file has too (that one then needs another choice)
-msgid "Add with the tag"
-msgstr "Lisää tunnisteen kanssa"
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "Lisää {name}"
 
-#. Choice in the import review: add the member as a new persona without the proxy tags listed in {tags}
-msgid "Add without {tags}"
-msgstr "Lisää ilman {tags}"
+#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
+msgid "Add {name} with a tag of its own"
+msgstr "Lisää {name} omalla tunnisteella"
 
 #. Line of the import result: new personas
 msgid "Added"
@@ -157,6 +157,10 @@ msgstr "Bannerikuvan lataus epäonnistui: {error}. Persoona tuotiin ilman banner
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "Bannerikuvan lataus epäonnistui: {error}. Persoona säilytti aiemman bannerinsa."
 
+#. Switch on a deleted persona in the import review that restores it. {name} is its name
+msgid "Bring {name} back"
+msgstr "Tuo {name} takaisin"
+
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
@@ -166,14 +170,6 @@ msgstr "Palasi ilman {items}: ne ovat nyt toisen persoonan käytössä."
 msgid "Can't compare"
 msgstr "Ei voi verrata"
 
-#. Short name of a section of the import review
-msgid "Can't tell"
-msgstr "Epäselvä"
-
-#. Section of the import review
-msgid "Can't tell if it's the same persona"
-msgstr "Epäselvää, onko se sama persoona"
-
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Vaihda persoonaa"
@@ -181,6 +177,10 @@ msgstr "Vaihda persoonaa"
 #. Help for an example in a command script.
 msgid "Change the message depending on what they typed"
 msgstr "Muuta viestiä sen mukaan, mitä kirjoitettiin"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "Tarkista ennen tuontia"
 
 #. Title of the persona import dialog while the file is checked
 msgid "Checking your file..."
@@ -217,6 +217,10 @@ msgstr "Väri"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "Palaa tänne ja napauta <0>Hanki Tyne TestFlightista</0> ja sitten <1>Asenna</1>."
 
+#. Small line on a deleted persona in the import review once it is set to come back
+msgid "Comes back as it was, with its old messages"
+msgstr "Palaa sellaisena kuin oli, vanhoine viesteineen"
+
 #. Section label in the command editor: name and description.
 msgid "Command"
 msgstr "Komento"
@@ -234,10 +238,6 @@ msgstr "Komennot"
 msgid "Commands saved"
 msgstr "Komennot tallennettu"
 
-#. Button that shows a persona next to its version in the import file
-msgid "Compare"
-msgstr "Vertaa"
-
 #. Status while the import file is compared with the account's personas
 msgid "Comparing your file with your personas..."
 msgstr "Verrataan tiedostoasi persooniisi..."
@@ -245,6 +245,10 @@ msgstr "Verrataan tiedostoasi persooniisi..."
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Määritetyt persoonat ({count})"
+
+#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
+msgid "Connect {name}"
+msgstr "Linkitä {name}"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -333,10 +337,6 @@ msgstr "Poista aikaleima\\"
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
 msgstr "Poistetaanko {count, plural, one {# persoona} other {# persoonaa}}?"
 
-#. Short name of a section of the import review
-msgid "Deleted"
-msgstr "Poistetut"
-
 #. Title of the section in Settings › Personas that lists deleted personas
 msgid "Deleted personas"
 msgstr "Poistetut persoonat"
@@ -353,25 +353,10 @@ msgstr "Poistettu {date}"
 msgid "Detected System Name / Tag"
 msgstr "Havaittu järjestelmän nimi / tunniste"
 
-#. Section of the import review
-msgid "Different in your file"
-msgstr "Erilaisia tiedostossasi"
-
 #. Comparison of a persona picture with the import file: they differ
 msgid "Different picture"
 msgstr "Eri kuva"
 
-#. Short name of a section of the import review
-msgid "Differs"
-msgstr "Eroaa"
-
-#. What differs between a persona and the import file. {fields} is a list such as "name, bio"
-msgid "Differs: {fields}"
-msgstr "Eroaa: {fields}"
-
-#. Heading of the display tag choice in the import review
-#. Section of the import review
-#. Short name of a section of the import review
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
 msgstr "Näyttötunniste"
@@ -442,13 +427,9 @@ msgstr "Tunnistepari on jo tällä persoonalla"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Jokainen kanava säilyttää oman persoonansa. Uudet kanavat alkavat tilinäsi."
 
-#. Explanation of a section of the import review
-msgid "Each of these shares a name or a tag with one of your personas, but not both, so it may be the same character or a different one. Compare them and choose. Skipped members stay in your file for next time."
-msgstr "Jokaisella näistä on sama nimi tai tunniste kuin jollakin persoonallasi, mutta ei molempia, joten se voi olla sama tai eri. Vertaa niitä ja valitse. Ohitetut jäsenet jäävät tiedostoosi seuraavaa kertaa varten."
-
-#. Explanation at the top of the import review
-msgid "Each one already has the safest choice picked, so nothing you have changes unless you choose it. Please read every section before importing. The hardest ones are at the top."
-msgstr "Jokaiselle on jo valittu turvallisin vaihtoehto, joten mikään nykyisistä ei muutu, ellet itse valitse niin. Lue jokainen osio ennen tuontia. Vaikeimmat ovat ylimpänä."
+#. Hint under the list of differing personas in the import review. {productName} is the app name
+msgid "Each keeps {productName}'s version unless you open it and choose the file's."
+msgstr "Jokainen säilyttää {productName}-sovelluksen version, ellet avaa sitä ja valitse tiedoston versiota."
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -572,6 +553,15 @@ msgstr "Suodata näkyvyyden mukaan"
 msgid "Format preview"
 msgstr "Muotoilun esikatselu"
 
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "Vapaa"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "Tiedostostasi"
+
 #. Link at the end of the command script help to the complete guide on GitHub.
 msgid "Full script guide"
 msgstr "Täydellinen skriptiopas"
@@ -610,13 +600,14 @@ msgstr "Hanki Tyne-sovellus"
 msgid "Here is what changed"
 msgstr "Tämä muuttui"
 
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "Piilota"
+
 #. Tooltip on the channel header channel list toggle when the channel list is currently shown.
 msgid "Hide channel list"
 msgstr "Piilota kanavaluettelo"
-
-#. Button that hides the comparison of a persona with the import file
-msgid "Hide comparison"
-msgstr "Piilota vertailu"
 
 #. Tooltip for the small arrow button that collapses the signal bar above the message box.
 msgid "Hide signal bar"
@@ -677,23 +668,6 @@ msgstr "Tuodaan..."
 msgid "In each channel"
 msgstr "Kullakin kanavalla"
 
-#. Column heading in the import review
-msgid "In this app"
-msgstr "Tässä sovelluksessa"
-
-#. Explanation of a section of the import review
-msgid "In this app each proxy tag belongs to one persona. These members have a tag another persona already has, or that another member of your file has too."
-msgstr "Tässä sovelluksessa jokainen proxy-tunniste kuuluu yhdelle persoonalle. Näillä jäsenillä on tunniste, joka on jo toisella persoonalla tai myös toisella tiedostosi jäsenellä."
-
-#. Column heading in the table comparing a persona with the import file
-msgid "In this app now"
-msgstr "Nyt tässä sovelluksessa"
-
-#. Column heading in the import review
-#. Column heading in the table comparing a persona with the import file
-msgid "In your file"
-msgstr "Tiedostossasi"
-
 #. Explanation of the "Kept as they were" line of the import result
 msgid "Including any that differ from the file, where you kept the version you had."
 msgstr "Mukaan lukien ne, jotka eroavat tiedostosta ja joissa säilytit oman versiosi."
@@ -717,42 +691,49 @@ msgstr "Lisää:"
 msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
 msgstr "Asenna Applen ilmainen <0>TestFlight</0>-sovellus App Storesta."
 
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "Tunnisteen {tag} tilalle"
+
+#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
+msgid "Is {name} from your file one of these personas in {productName}?"
+msgstr "Onko tiedostosi {name} jokin näistä {productName}-persoonista?"
+
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "Sen skriptissä on ongelma."
 
-#. Choice in the import review: keep the persona as it is in this app, ignoring the import file's version
-msgid "Keep this version"
-msgstr "Säilytä tämä versio"
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "Jatka tarkistusta"
 
-#. Button in the import review: keep every listed persona as it is
-msgid "Keep this version for all"
-msgstr "Säilytä tämä versio kaikille"
+#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
+msgid "Keep {productName}'s"
+msgstr "Pidä {productName}-sovelluksen tunniste"
 
-#. Choice in the import review: keep the display tag {tag}
-msgid "Keep yours: {tag}"
-msgstr "Säilytä omasi: {tag}"
+#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
+msgid "Keep {productName}'s {name}"
+msgstr "Pidä {productName}-sovelluksen {name}"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "{productName}-versio pysyy"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "Pitää tunnisteensa"
 
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "Ennallaan"
 
-#. Choice in the import review for a persona that was deleted: keep it deleted
-msgid "Leave deleted"
-msgstr "Jätä poistetuksi"
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Leave {name} out this time"
+msgstr "Jätä {name} pois tällä kertaa"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "Rivi {line}, sarake {column}: {problem}"
-
-#. Choice in the import review: connect an existing persona to its member in the import file, changing nothing else
-msgctxt "persona-import-choice"
-msgid "Link"
-msgstr "Yhdistä"
-
-#. Button in the import review that links every persona listed
-msgid "Link all {count}"
-msgstr "Linkitä kaikki {count}"
 
 #. Shown on a persona in the import review that is already connected to a different member
 msgid "Linked to another PluralKit member"
@@ -817,10 +798,6 @@ msgstr "Jäsen #{index}"
 msgid "Members with Avatars"
 msgstr "Jäsenet, joilla on avatar"
 
-#. Explanation of a section of the import review
-msgid "Members you don't have yet, with no name or tag clash. Untick any you don't want."
-msgstr "Jäsenet, joita sinulla ei vielä ole ja joiden nimi tai tunniste ei ole ristiriidassa. Poista valinta niistä, joita et halua."
-
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
 msgstr "Viestityökalut"
@@ -845,10 +822,6 @@ msgstr "Siirrä roskakoriin"
 msgid "Name (A–Z)"
 msgstr "Nimi (A–Ö)"
 
-#. Badge on a section of the import review where every member needs a choice
-msgid "Needs a decision"
-msgstr "Vaatii päätöksen"
-
 #. Title for new persona modal
 msgid "New Persona"
 msgstr "Uusi persoona"
@@ -856,10 +829,6 @@ msgstr "Uusi persoona"
 #. Button that starts a new community command.
 msgid "New command"
 msgstr "Uusi komento"
-
-#. Section of the import review
-msgid "New in your file"
-msgstr "Uusia tiedostossasi"
 
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
@@ -881,6 +850,10 @@ msgstr "Seuraava persoona"
 msgid "No \"members\" array found in this export file."
 msgstr "Tästä vientitiedostosta ei löytynyt \"members\"-taulukkoa."
 
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "Ei kuvausta"
+
 #. Shown on a persona’s card in the Personas list when it has no bio.
 msgid "No bio yet."
 msgstr "Ei vielä kuvausta."
@@ -892,6 +865,10 @@ msgstr "Ei komentoja"
 #. Shown in Settings › Personas when there are no deleted personas
 msgid "No deleted personas."
 msgstr "Ei poistettuja persoonia."
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "Ei näyttötunnistetta"
 
 msgid "No display tag configured. Messages will show your account profile picture."
 msgstr "Näyttötunnistetta ei ole määritetty. Viesteissä näkyy tilisi profiilikuva."
@@ -916,12 +893,24 @@ msgstr "Täällä ei ole persoonia."
 msgid "No personas match your search."
 msgstr "Hakuasi vastaavia persoonia ei ole."
 
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "Ei pronomineja"
+
 #. Shown in another account’s Personas list when it lists none.
 msgid "No public personas."
 msgstr "Ei julkisia persoonia."
 
 msgid "No signals yet. The bar stays hidden until you add one."
 msgstr "Ei vielä signaaleja. Palkki pysyy piilossa, kunnes lisäät sellaisen."
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "Ei tunnistetta: jäsen lisätään ilman sitä"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "Ei tunnisteita"
 
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
@@ -931,9 +920,17 @@ msgstr "Kenelläkään ei ole tätä signaalia päällä"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Mikään persoonistasi ei ole vielä julkinen. Muut näkevät persoonan täällä, kun asetat sen näkyvyydeksi Julkinen."
 
-#. Hint on the choice to skip a member in the import review
-msgid "Nothing changes. It stays in your file for next time."
-msgstr "Mikään ei muutu. Se jää tiedostoosi seuraavaa kertaa varten."
+#. Choice in the import review: do nothing with this member of the import file. {name} is its name
+msgid "Not sure: leave {name} out this time"
+msgstr "En ole varma: jätä {name} pois tällä kertaa"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "Etkö ole varma? Jätä ennalleen: mikään ei muutu."
+
+#. Badge on the choice in the import review that leaves everything as it is
+msgid "Nothing changes"
+msgstr "Mikään ei muutu"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1124,7 +1121,6 @@ msgstr "Edellinen persoona"
 
 #. Badge on one’s own persona in the Personas list: its profile is hidden from others.
 #. Chip above the persona list: private personas.
-#. Persona visibility
 #. Persona visibility private
 msgid "Private"
 msgstr "Yksityinen"
@@ -1132,14 +1128,6 @@ msgstr "Yksityinen"
 #. Tooltip on private persona badge
 msgid "Private persona"
 msgstr "Yksityinen persoona"
-
-#. Short name of a section of the import review
-msgid "Probably the same"
-msgstr "Todennäköisesti sama"
-
-#. Section of the import review
-msgid "Probably the same persona"
-msgstr "Todennäköisesti sama persoona"
 
 #. placeholder {0}: progress.currentName
 msgid "Processing: {0}"
@@ -1154,7 +1142,6 @@ msgid "Profile cards are accessible when clicking on messages and visible in you
 msgstr "Profiilikortit ovat käytettävissä viestejä napsauttamalla ja näkyvät julkisessa persoonaluettelossasi kavereille ja yhteisille palvelimille."
 
 #. Chip above the persona list: public personas.
-#. Persona visibility
 #. Persona visibility public
 msgid "Public"
 msgstr "Julkinen"
@@ -1228,13 +1215,8 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Nollataanko laskurin {name} laskennat? Tätä ei voi perua."
 
 #. Button that brings back a deleted persona
-#. Choice in the import review: bring a deleted persona back, with its old messages
 msgid "Restore"
 msgstr "Palauta"
-
-#. Button in the import review that restores every deleted persona listed
-msgid "Restore all {count}"
-msgstr "Palauta kaikki {count}"
 
 #. Explanation of the "Still deleted" line of the import result
 msgid "Restore them from Deleted personas in Settings if you change your mind."
@@ -1247,10 +1229,6 @@ msgstr "Palautettu"
 msgid "Results"
 msgstr "Tulokset"
 
-#. Title of the persona import review
-msgid "Review before importing"
-msgstr "Tarkista ennen tuontia"
-
 msgid "Root Account (Default)"
 msgstr "Päätili (Oletus)"
 
@@ -1262,21 +1240,25 @@ msgstr "Suorita uudelleen"
 msgid "Run anyway"
 msgstr "Suorita silti"
 
-#. Badge on the safest choice in the import review
-msgid "Safest"
-msgstr "Turvallisin"
+#. Why a persona in the import review may be the member: same name
+msgid "Same name"
+msgstr "Sama nimi"
 
-#. Choice in the import review: the member in the import file is the existing persona {name}; connect them
-msgid "Same as your {name}: link them"
-msgstr "Sama kuin persoonasi {name}: linkitä ne"
+#. Why a persona in the import review may be the member: same name and proxy tag
+msgid "Same name and tag"
+msgstr "Sama nimi ja tunniste"
 
-#. Explanation of a section of the import review
-msgid "Same name and same tag as one of your personas, but not connected to your file yet, for example because you made them by hand. Linking only records which member of the file each one is, so future imports recognise it. Nothing in the persona changes."
-msgstr "Sama nimi ja sama tunniste kuin jollakin persoonallasi, mutta ei vielä linkitetty tiedostoosi, esimerkiksi koska loit sen käsin. Linkitys vain tallentaa, mikä tiedoston jäsen kukin on, jotta tulevat tuonnit tunnistavat sen. Persoonassa ei muutu mitään."
+#. Choice on a persona's card in the import review: the member of the import file is this persona
+msgid "Same persona as this one"
+msgstr "Sama persoona kuin tämä"
 
 #. Comparison of a persona picture with the import file: they are the same
 msgid "Same picture"
 msgstr "Sama kuva"
+
+#. Why a persona in the import review may be the member: same proxy tag
+msgid "Same tag"
+msgstr "Sama tunniste"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1337,6 +1319,11 @@ msgstr "Aseta aktiiviseksi"
 msgid "Set as active persona"
 msgstr "Aseta aktiiviseksi persoonaksi"
 
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "Näytä"
+
 #. Short label for an advanced message action bar preference.
 msgid "Show copy button"
 msgstr "Näytä kopiointipainike"
@@ -1344,10 +1331,6 @@ msgstr "Näytä kopiointipainike"
 #. Button that loads the list of deleted personas in Settings › Personas
 msgid "Show deleted personas"
 msgstr "Näytä poistetut persoonat"
-
-#. Button that collapses a list in the import review again
-msgid "Show fewer"
-msgstr "Näytä vähemmän"
 
 #. Plus menu submenu toggle that shows the persona selector next to the textarea.
 #. Short label for an advanced message input preference.
@@ -1361,10 +1344,6 @@ msgstr "Näytä signaalipalkki"
 #. Switch in one’s own Personas list that adds the personas others do not see there.
 msgid "Show unlisted and private"
 msgstr "Näytä piilotetut ja yksityiset"
-
-#. Button that shows the rest of a list in the import review
-msgid "Show {count} more"
-msgstr "Näytä {count} lisää"
 
 msgid "Signal Bar"
 msgstr "Signaalipalkki"
@@ -1396,9 +1375,9 @@ msgstr "Nimikkoemoji on jo käytössä persoonalla \"{name}\""
 msgid "Signature emojis"
 msgstr "Nimikkoemojit"
 
-#. Choice in the import review: do nothing with this member of the import file
-msgid "Skip this member"
-msgstr "Ohita tämä jäsen"
+#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
+msgid "Similar tag"
+msgstr "Samankaltainen tunniste"
 
 #. Line of the import result: members left out
 msgid "Skipped"
@@ -1420,6 +1399,14 @@ msgstr "Yhä poistettu"
 msgid "Still in your file. Import it again any time to decide about them."
 msgstr "Yhä tiedostossasi. Tuo se uudelleen milloin tahansa, kun haluat päättää niistä."
 
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "Keskeytä tuonti"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "Keskeytetäänkö tämä tuonti?"
+
 #. Progress status while the images inside an imported persona export are stored
 msgid "Storing image {current} of {total} from the file..."
 msgstr "Tallennetaan kuvaa {current}/{total} tiedostosta..."
@@ -1439,6 +1426,11 @@ msgstr "Tukee PluralKitin järjestelmävientitiedostoja"
 msgid "Switch the active persona"
 msgstr "Vaihda aktiivinen persoona"
 
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "Tunniste"
+
 #. Names the display tag icon in the list of import warnings, where personas are named otherwise
 #. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
 msgid "Tag Icon"
@@ -1446,14 +1438,6 @@ msgstr "Tunnisteen kuvake"
 
 msgid "Tag Text"
 msgstr "Tunnisteen teksti"
-
-#. Section of the import review
-msgid "Tag already in use"
-msgstr "Tunniste on jo käytössä"
-
-#. Short name of a section of the import review
-msgid "Tag in use"
-msgstr "Tunniste käytössä"
 
 #. Row heading in the table comparing a persona with the import file: whether its tags are matched
 msgid "Tag matching"
@@ -1554,13 +1538,9 @@ msgstr "Suodatinta {name} ei ole."
 msgid "There's no tag called {name}."
 msgstr "Tunnistetta {name} ei ole."
 
-#. Explanation of a section of the import review
-msgid "These came from your file before, but the file has different details now, or you changed them here since. There is no telling which side changed, so this app's version is kept unless you choose the file's for a persona. The file's version replaces that persona's details; its messages, history, visibility and signature emojis stay, and so does any picture that can't be downloaded."
-msgstr "Nämä tulivat aiemmin tiedostostasi, mutta tiedostossa on nyt eri tiedot, tai olet muuttanut niitä täällä sen jälkeen. Ei voi tietää, kumpi puoli muuttui, joten tämän sovelluksen versio säilytetään, ellet valitse tiedoston versiota jollekin persoonalle. Tiedoston versio korvaa persoonan tiedot; sen viestit, historia, näkyvyys ja nimikkoemojit säilyvät, samoin kuin kuva, jota ei voi ladata."
-
-#. Explanation of a section of the import review
-msgid "They stay deleted unless you restore them. Restoring brings the same persona back as it was, with its old messages and usage, instead of making a copy."
-msgstr "Ne pysyvät poistettuina, ellet palauta niitä. Palauttaminen tuo saman persoonan takaisin sellaisena kuin se oli, vanhoine viesteineen ja käyttökertoineen, eikä tee kopiota."
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "Nämä näyttävät persoonilta, jotka sinulla on jo {productName}-sovelluksessa. Valitse jokaiselle, mikä versio {productName}-sovellukseen jää. Etkö ole varma? Jätä ennalleen: mikään ei muutu."
 
 #. Error in the persona import dialog when the chosen .zip file is damaged
 msgid "This .zip file could not be read."
@@ -1623,6 +1603,10 @@ msgstr "Ota signaalipalkki käyttöön"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne avautuu itsestään. Kirjaudu sisään, niin olet valmis."
 
+#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
+msgid "Type {example} to post as {name}"
+msgstr "Kirjoita {example} lähettääksesi nimellä {name}"
+
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Kirjoita {output} tai {tag}, niin saat ehdotuksia."
@@ -1641,7 +1625,6 @@ msgstr "Ubuntu, Fedora ja muut"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.
-#. Persona visibility
 #. Persona visibility unlisted
 msgid "Unlisted"
 msgstr "Piilotettu"
@@ -1702,34 +1685,30 @@ msgstr "Käytä pieniä kirjaimia, numeroita, - ja _, enintään 32 merkkiä."
 msgid "Use the basic editor"
 msgstr "Käytä perusmuokkainta"
 
-#. Choice in the import review: replace the persona's details with those in the import file
-msgid "Use the file's version"
-msgstr "Käytä tiedoston versiota"
+#. Choice on the import file's card in the import review: use the file's display tag
+msgid "Use the file's"
+msgstr "Käytä tiedoston tunnistetta"
 
-#. Choice in the import review: use the import file's system tag {tag} as the display tag
-msgid "Use the file's: {tag}"
-msgstr "Käytä tiedoston tunnistetta: {tag}"
+#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
+msgid "Use the file's {name}"
+msgstr "Valitse tiedoston {name}"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "Käytä skriptimuokkainta"
 
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "Tiedoston versio"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Näytä persoonasi"
-
-#. Heading of the choices for one member of the import file
-msgid "What should happen to {name} from your file?"
-msgstr "Mitä tiedostosi jäsenelle {name} tehdään?"
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
 msgid "What they type"
 msgstr "Mitä kirjoitetaan"
-
-#. Accessible label of the menu of choices for one persona in the import review
-msgid "What to do with {name}"
-msgstr "Mitä tehdään: {name}"
 
 #. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
 msgid "What you type after /{name} has to fit on one line."
@@ -1758,29 +1737,29 @@ msgstr "Windows suojasi tietokonettasi"
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Kirjoita luku muodossa 1st, 2nd, 3rd"
 
-#. Hint on the choice to add a member without its proxy tag, in the import review
-msgid "You can give it another tag later in Settings."
-msgstr "Voit antaa sille toisen tunnisteen myöhemmin asetuksissa."
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "Poistit persoonan {name} {productName}-sovelluksesta {date}. Tuodaanko {name} takaisin?"
 
-#. Section of the import review
-msgid "You deleted these"
-msgstr "Poistit nämä"
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "Poistit persoonan {name} {productName}-sovelluksesta. Tuodaanko {name} takaisin?"
 
-#. Hint on the choice to add a member as a separate persona, in the import review
-msgid "You will have one more {name}."
-msgstr "Sinulla on yksi {name} lisää."
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "Näiden jäsenten valintasi menetetään, eikä mitään tuoda."
 
-#. Explanation of a section of the import review
-msgid "Your account has one display tag, shown after every persona's name. The file's system tag is different."
-msgstr "Tililläsi on yksi näyttötunniste, joka näytetään jokaisen persoonan nimen perässä. Tiedoston järjestelmätunniste on eri."
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "Näyttötunnisteesi näkyy jokaisen persoonan nimen perässä. Kumpaa {productName} käyttää?"
 
 #. On the download page after the visitor chose to download the app elsewhere.
 msgid "Your download should start in a moment. If it doesn't, use the button above."
 msgstr "Latauksen pitäisi alkaa hetken kuluttua. Jos se ei ala, käytä yllä olevaa painiketta."
 
-#. Hint on the choice to link a member to an existing persona, in the import review
-msgid "Your persona stays as it is; it is connected to this member."
-msgstr "Persoonasi pysyy ennallaan; se linkitetään tähän jäseneen."
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "Tiedostosi"
 
 msgid "Your reactions"
 msgstr "Omat reaktiosi"
@@ -1793,33 +1772,17 @@ msgstr "Omat {emojiName}-reaktiosi"
 msgid "add {count}"
 msgstr "lisää {count}"
 
-#. A persona field, listed in "Differs: name, avatar"
-msgid "avatar"
-msgstr "profiilikuva"
-
 #. Progress label for avatar downloads
 msgid "avatars downloaded"
 msgstr "avataria ladattu"
-
-#. A persona field, listed in "Differs: name, banner"
-msgid "banner"
-msgstr "banneri"
 
 #. Progress label for banner downloads during persona import
 msgid "banners downloaded"
 msgstr "banneria ladattu"
 
-#. A persona field, listed in "Differs: name, bio"
-msgid "bio"
-msgstr "kuvaus"
-
 #. Part of the import summary "Import will add 7 and change your display tag"
 msgid "change your display tag"
 msgstr "vaihtaa näyttötunnisteesi"
-
-#. A persona field (its accent colour), listed in "Differs: name, colour"
-msgid "colour"
-msgstr "väri"
 
 #. Placeholder for persona name
 msgid "e.g. Alice"
@@ -1853,26 +1816,9 @@ msgstr "kohdetta"
 msgid "link {count}"
 msgstr "linkittää {count}"
 
-#. A persona's name as a field, listed in "Differs: name, bio"
-msgctxt "persona-field"
-msgid "name"
-msgstr "nimi"
-
-#. Shown on a row when the import cannot tell whether a persona picture changed, because it does not know where the stored one came from
-msgid "picture not compared"
-msgstr "kuvaa ei verrattu"
-
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
 msgstr "näytä reaktiosi painamalla"
-
-#. A persona field, listed in "Differs: name, pronouns"
-msgid "pronouns"
-msgstr "pronominit"
-
-#. Fields the import file has empty, so using its version would remove them, as in "Differs: name · removes bio". {fields} is a list
-msgid "removes {fields}"
-msgstr "poistaa: {fields}"
 
 #. Part of the import summary "Import will link 17, restore 2, skip 3"
 msgid "restore {count}"
@@ -1882,21 +1828,9 @@ msgstr "palauttaa {count}"
 msgid "saving personas"
 msgstr "persoonaa tallennettu"
 
-#. A persona field, listed in "Differs: name, signature emojis"
-msgid "signature emojis"
-msgstr "nimikkoemojit"
-
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "skip {count}"
 msgstr "ohittaa {count}"
-
-#. A persona setting (whether its tags are matched), listed in "Differs: name, tag matching"
-msgid "tag matching"
-msgstr "tunnisteiden tunnistus"
-
-#. A persona field (its proxy tags), listed in "Differs: name, tags"
-msgid "tags"
-msgstr "tunnisteet"
 
 #. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
 #. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
@@ -1908,10 +1842,6 @@ msgstr "teksti"
 #. Part of the import summary "Import will link 17, use the file's version for 2"
 msgid "use the file's version for {count}"
 msgstr "korvaa {count} tiedoston versiolla"
-
-#. A persona field, listed in "Differs: name, visibility"
-msgid "visibility"
-msgstr "näkyvyys"
 
 #. placeholder {0}: progress.current
 #. placeholder {1}: progress.total
@@ -1927,6 +1857,22 @@ msgstr "{addedCount, plural, one {# persoona lisätty} other {# persoonaa lisät
 #. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} on valmis asennettavaksi."
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
+msgstr "{count, plural, one {# jäsen vastaa jo persoonaansa {productName}-sovelluksessa. Ei mitään tehtävää.} other {# jäsentä vastaa jo persoonaansa {productName}-sovelluksessa. Ei mitään tehtävää.}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
+msgstr "{count, plural, one {# uusi jäsen lisätään} other {# uutta jäsentä lisätään}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
+msgstr "{count, plural, one {# {productName}-persoona ei ole tiedostossasi. Se pysyy ennallaan.} other {# {productName}-persoonaa ei ole tiedostossasi. Ne pysyvät ennallaan.}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, one {# persoona on tiedostossasi erilainen} other {# persoonaa on tiedostossasi erilaisia}}"
 
 #. Toast after making personas private; it has an Undo button.
 msgid "{count, plural, one {# persona is} other {# personas are}} now private"
@@ -1944,6 +1890,10 @@ msgstr "{count, plural, one {# persoona on nyt piilotettu} other {# persoonaa on
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, one {# persoona pysyy ennallaan} other {# persoonaa pysyy ennallaan}}"
 
+#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
+msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
+msgstr "{count, plural, one {# käsin luomasi persoona linkitetään jäseneensä. Siinä ei muutu mikään.} other {# käsin luomaasi persoonaa linkitetään jäseniinsä. Niissä ei muutu mikään.}}"
+
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
 msgstr "{count, plural, one {# persoona} other {# persoonaa}}"
@@ -1951,6 +1901,10 @@ msgstr "{count, plural, one {# persoona} other {# persoonaa}}"
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, one {# persoona poistettu} other {# persoonaa poistettu}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, one {Tarkista # jäsen ennen tuontia} other {Tarkista # jäsentä ennen tuontia}}"
 
 #. How often a persona has been used, shown in the import review
 #. How often a persona has been used, shown in the import review
@@ -1992,21 +1946,25 @@ msgstr "Kaikilla näistä olisi {label}: {names}. Muuta jotakin valinnoista."
 msgid "{name} ({mode}) - Click to switch persona"
 msgstr "{name} ({mode}) – Vaihda persoonaa napsauttamalla"
 
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "{name} käyttää sitä jo"
+
 #. Toast after a deleted persona was restored
 msgid "{name} is back."
 msgstr "{name} on palannut."
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "{name} on tiedostossasi erilainen. Kumpi versio jää {productName}-sovellukseen?"
 
 #. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
 msgid "{name} is never closed."
 msgstr "{name} jää sulkematta."
 
-#. Heading of the import review when the display tag needs a choice too. {needCount} is a number of members
-msgid "{needCount, plural, one {# member and your display tag need a look} other {# members and your display tag need a look}}"
-msgstr "{needCount, plural, one {# jäsen ja näyttötunnisteesi kaipaavat tarkistusta} other {# jäsentä ja näyttötunnisteesi kaipaavat tarkistusta}}"
-
-#. Heading of the import review. {needCount} is a number of members
-msgid "{needCount, plural, one {# member needs a look} other {# members need a look}}"
-msgstr "{needCount, plural, one {# jäsen kaipaa tarkistusta} other {# jäsentä kaipaa tarkistusta}}"
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "Jäsenen {name} tunniste on jo varattu"
 
 #. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
 msgid "{position} of {total}"
@@ -2022,18 +1980,6 @@ msgstr "{publicCount} julkista, {unlistedCount} piilotettua, {privateCount} yksi
 #. How many personas match the search, out of all shown. Preserve {shown} and {total}.
 msgid "{shown} of {total} personas"
 msgstr "{shown}/{total} persoonaa"
-
-#. Closing line of the import review. {untouched} is a number of personas
-msgid "{untouched} of your personas aren't in this file. They stay as they are."
-msgstr "{untouched, plural, one {# persoonistasi ei ole tässä tiedostossa. Se pysyy ennallaan.} other {# persoonistasi ei ole tässä tiedostossa. Ne pysyvät ennallaan.}}"
-
-#. Closing line of the import review. {upToDate} is a number of members
-msgid "{upToDate} members match their persona exactly. Nothing to do."
-msgstr "{upToDate, plural, one {# jäsen vastaa persoonaansa täsmälleen. Ei tehtävää.} other {# jäsentä vastaa persoonaansa täsmälleen. Ei tehtävää.}}"
-
-#. The import file's visibility for a persona, shown for information: the persona's own visibility is never changed by an import
-msgid "{visibility} (this app's is kept)"
-msgstr "{visibility} (tämän sovelluksen asetus säilyy)"
 
 msgid "— Today at 12:00 PM"
 msgstr "— Tänään klo 12.00"
