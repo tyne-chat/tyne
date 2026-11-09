@@ -847,6 +847,10 @@ msgstr "Nincs bemutatkozás"
 msgid "No bio yet."
 msgstr "Még nincs bemutatkozás."
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Nincs szín"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "Nincsenek parancsok"
