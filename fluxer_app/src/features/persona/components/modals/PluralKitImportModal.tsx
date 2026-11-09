@@ -308,13 +308,13 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 	const members = source?.system.members ?? [];
 	const namedCount = members.filter((member) => member.name !== null).length;
 
-	const conflicts = useMemo(
-		() =>
-			preview && source
-				? findConflicts(preview.entries, decisions, reviewMembers, PersonaStore.personas, source.kind === 'bundle')
-				: [],
-		[preview, source, decisions, reviewMembers, PersonaStore.personas],
-	);
+	// The account's personas with the live ones the preview names, as the review checks tags against.
+	const conflicts = useMemo(() => {
+		if (!preview || !source) return [];
+		const live = new Map(PersonaStore.personas.map((persona) => [persona.id, persona]));
+		for (const persona of preview.personas) if (!persona.deleted_at) live.set(persona.id, persona);
+		return findConflicts(preview.entries, decisions, reviewMembers, [...live.values()], source.kind === 'bundle');
+	}, [preview, source, decisions, reviewMembers, PersonaStore.personas]);
 
 	const handleFileChosen = async (file: File) => {
 		setFileError(null);
@@ -399,7 +399,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		}
 
 		// 2. One request, written whole or not at all.
-		const actions = buildActions(answer.entries, chosen, memberList, stored);
+		const actions = buildActions(answer.entries, chosen, memberList, stored, answer.personas);
 		setProgress({
 			current: actions.length,
 			total: actions.length,
