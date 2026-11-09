@@ -464,6 +464,10 @@ describe('a member that might be one of the personas', () => {
 		// Another picture is taken from the file.
 		const [other] = buildActions(entries, decisions, members, stored, [{...pictures[0]!, avatar_hash: '99999999'}]);
 		expect(other).toMatchObject({keep_avatar: false, item: {avatar_hash: 'd2e533ce'}});
+		// One that could not be stored leaves the persona's as it is.
+		const failed = new Map([[0, {images: {avatar: null, banner: null}, avatarFailed: true, bannerFailed: false}]]);
+		const [kept] = buildActions(entries, decisions, members, failed, [{...pictures[0]!, avatar_hash: '99999999'}]);
+		expect(kept).toMatchObject({keep_avatar: true, keep_banner: false});
 	});
 
 	it('keeps both: connects the picked persona as it is and adds the copy unlinked, with a free tag', () => {
