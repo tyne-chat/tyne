@@ -10,6 +10,7 @@ import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
+import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
@@ -19,15 +20,21 @@ import type {PersonaImportPreviewResponse} from '@fluxer/schema/src/domains/pers
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
-import {CheckCircle, ShieldCheck, UploadSimple, Warning} from '@phosphor-icons/react';
+import {CheckCircle, DownloadSimple, ShieldCheck, UploadSimple, Warning} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
 import {PersonaStore} from '../../state/PersonaStore';
 import {type PersonaImportSource, readPersonaImportFile} from '../../utils/PersonaImportFile';
-import {type PictureProgress, storeMemberPictures, storeTagIcon} from '../../utils/PersonaImportImages';
 import {
+	type PictureProgress,
+	type StoredFilePictures,
+	storeMemberPictures,
+	storeTagIcon,
+} from '../../utils/PersonaImportImages';
+import {
+	allPictures,
 	buildActions,
 	buildPreviewRequest,
 	defaultDecision,
@@ -222,6 +229,10 @@ function listFormat(locale: string, items: ReadonlyArray<string>): string {
 	}
 }
 
+const EXPORT_FAILED_DESCRIPTOR = msg({
+	message: 'Could not export your personas.',
+	comment: 'Toast when downloading the persona export fails',
+});
 const STOP_IMPORT_TITLE_DESCRIPTOR = msg({
 	message: 'Stop this import?',
 	comment: 'Title of the confirmation when the persona import review is closed before importing',
@@ -265,7 +276,10 @@ function tagText(tag: PersonaTag): string {
 
 export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({onClose}) => {
 	const {i18n} = useLingui();
-	const [step, setStep] = useState<'select' | 'checking' | 'review' | 'importing' | 'completed'>('select');
+	const [step, setStep] = useState<'select' | 'backup' | 'checking' | 'review' | 'importing' | 'completed'>('select');
+	// Before an import into an account that has personas, a backup is offered once.
+	const [backupOffered, setBackupOffered] = useState(false);
+	const [exporting, setExporting] = useState(false);
 	// This dialog's place in the modal stack, to close it under the "Stop this import?" confirmation.
 	const [ownModalKey] = useState(() => ModalCommands.getTopModalKey());
 	const [fileName, setFileName] = useState<string | null>(null);
@@ -284,6 +298,10 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		label?: string;
 	}>({current: 0, total: 0, currentName: '', percent: 0});
 	const [result, setResult] = useState<ImportResult | null>(null);
+	// The file's pictures, stored before the review (tyne-chat/tyne#567); kept for the file they came
+	// from, so going back and importing again stores nothing twice.
+	const storedFor = useRef<{source: PersonaImportSource; pictures: StoredFilePictures} | null>(null);
+	const [storingPictures, setStoringPictures] = useState(false);
 
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const productName = PRODUCT_NAME;
@@ -342,6 +360,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		chosen: ReadonlyMap<number, ReviewDecision>,
 		tagChoice: 'keep' | 'file',
 		fileTag: string | null,
+		pictures: StoredFilePictures,
 	) => {
 		setStep('importing');
 		const warnings: Array<ImportWarning> = [];
@@ -356,37 +375,17 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			}
 		});
 
-		// 1. Pictures, only for the members whose choice needs them.
-		const needed = new Map<number, {avatar: boolean; banner: boolean}>();
-		for (const entry of answer.entries) {
-			const want = picturesNeeded(entry, chosen.get(entry.index) ?? defaultDecision(entry));
-			if (want.avatar || want.banner) needed.set(entry.index, want);
-		}
-		let pictures: Awaited<ReturnType<typeof storeMemberPictures>>;
-		try {
-			pictures = await storeMemberPictures(
-				chosenSource,
-				memberList,
-				needed,
-				ownUserId,
-				mediaEndpoint,
-				showPictureProgress,
-			);
-		} catch (err: unknown) {
-			const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
-			if (message) ToastCommands.error(message);
-			setStep(answer.needs_review ? 'review' : 'select');
-			return;
-		}
+		// 1. The pictures were stored before the review; a failure is reported where the choice used it.
 		const {stored, failures} = pictures;
 		for (const entry of answer.entries) {
 			const member = memberList[entry.index];
 			if (!member) continue;
 			const decision = chosen.get(entry.index) ?? defaultDecision(entry);
 			const prefix = member.member.personaTags[0]?.prefix;
+			const used = picturesNeeded(entry, decision);
 			for (const kind of ['avatar', 'banner'] as const) {
 				const error = failures.get(`${entry.index}:${kind}`);
-				if (!error) continue;
+				if (!error || !used[kind]) continue;
 				const descriptor = (decision.choice === 'use_file' ? PICTURE_KEPT : PICTURE_FAILED)[kind];
 				warnings.push({displayName: member.member.name, prefix, reason: i18n._(descriptor, {error})});
 			}
@@ -456,14 +455,62 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		}
 	};
 
-	const handleImport = async () => {
+	const handleImport = () => {
+		if (!source || namedCount === 0) return;
+		if (!backupOffered && PersonaStore.personas.length > 0) {
+			setBackupOffered(true);
+			setStep('backup');
+			return;
+		}
+		void startImport();
+	};
+
+	// The backup is the same zip as Export in the Personas settings; the import carries on once it is saved.
+	const handleExportThenImport = async () => {
+		setExporting(true);
+		try {
+			const {blob, fileName} = await PersonaCommands.exportPersonas();
+			downloadBlob(blob, fileName);
+		} catch {
+			ToastCommands.error(i18n._(EXPORT_FAILED_DESCRIPTOR));
+			return;
+		} finally {
+			setExporting(false);
+		}
+		void startImport();
+	};
+
+	const startImport = async () => {
 		if (!source || namedCount === 0) return;
 		setStep('checking');
-		const {request, members: memberList} = buildPreviewRequest(
-			source,
-			Users.currentUser?.id ?? null,
-			RuntimeConfig.mediaEndpoint,
-		);
+		const ownUserId = Users.currentUser?.id ?? null;
+		const mediaEndpoint = RuntimeConfig.mediaEndpoint;
+		const {members: memberList} = buildPreviewRequest(source, ownUserId, mediaEndpoint);
+		// 1. Every picture in the file, so the review compares and shows the real ones.
+		let pictures = storedFor.current?.source === source ? storedFor.current.pictures : null;
+		if (!pictures) {
+			setStoringPictures(true);
+			try {
+				pictures = await storeMemberPictures(
+					source,
+					memberList,
+					allPictures(memberList),
+					ownUserId,
+					mediaEndpoint,
+					showPictureProgress,
+				);
+			} catch (err: unknown) {
+				const message = PersonaCommands.personaErrorMessage(err, i18n._(FAILED_TO_IMPORT_DESCRIPTOR));
+				if (message) ToastCommands.error(message);
+				setStep('select');
+				return;
+			} finally {
+				setStoringPictures(false);
+			}
+			storedFor.current = {source, pictures};
+		}
+		// 2. The comparison, with the stored pictures' hashes.
+		const {request} = buildPreviewRequest(source, ownUserId, mediaEndpoint, pictures.stored);
 		const tagText = request.display_tag?.text ?? null;
 		setFileTagText(tagText);
 		let answer: PersonaImportPreviewResponse;
@@ -490,12 +537,14 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 			new Map(),
 			answer.display_tag.decision === 'auto_apply' ? 'file' : 'keep',
 			tagText,
+			pictures,
 		);
 	};
 
 	const handleApplyReviewed = () => {
-		if (!source || !preview || conflicts.length > 0) return;
-		void applyImport(source, preview, reviewMembers, decisions, displayTagChoice, fileTagText);
+		const pictures = storedFor.current?.source === source ? storedFor.current?.pictures : null;
+		if (!source || !preview || !pictures || conflicts.length > 0) return;
+		void applyImport(source, preview, reviewMembers, decisions, displayTagChoice, fileTagText, pictures);
 	};
 
 	const decide = (changes: ReadonlyArray<[number, ReviewDecision]>) =>
@@ -527,6 +576,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 
 	const titles = {
 		select: msg({message: 'Import personas', comment: 'Title of the persona import dialog'}),
+		backup: msg({message: 'Import personas', comment: 'Title of the persona import dialog'}),
 		checking: msg({
 			message: 'Checking your file...',
 			comment: 'Title of the persona import dialog while the file is checked',
@@ -699,13 +749,27 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 								/>
 								<span data-flx="persona.plural-kit-import-modal.span">
 									<Trans comment="Information line in the persona import dialog, above the Import button">
-										Importing never changes or removes a persona you already have unless you choose it. New members are
-										added straight away. If any member might match or clash with one of your personas, you'll review it
-										before anything is imported.
+										Import will never overwrite existing personas without your permission.
 									</Trans>
 								</span>
 							</div>
 						</>
+					)}
+
+					{step === 'backup' && (
+						<div className={reviewStyles.infoLine} data-flx="persona.plural-kit-import-modal.backup">
+							<DownloadSimple
+								size={20}
+								aria-hidden="true"
+								style={{flex: 'none', color: 'var(--brand-primary)'}}
+								data-flx="persona.plural-kit-import-modal.backup-icon"
+							/>
+							<span data-flx="persona.plural-kit-import-modal.backup-text">
+								<Trans comment="Shown after pressing Import in the persona import dialog, before anything happens">
+									Use Export to make a backup before continuing.
+								</Trans>
+							</span>
+						</div>
 					)}
 
 					{step === 'review' && preview && source && (
@@ -730,7 +794,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 								className={styles.progressCurrentName}
 								data-flx="persona.plural-kit-import-modal.progress-current-name"
 							>
-								{step === 'checking' ? (
+								{step === 'checking' && !storingPictures ? (
 									<Trans comment="Status while the import file is compared with the account's personas">
 										Comparing your file with your personas...
 									</Trans>
@@ -738,7 +802,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 									<Trans>Processing: {progress.currentName}</Trans>
 								)}
 							</div>
-							{step === 'importing' && (
+							{(step === 'importing' || storingPictures) && (
 								<>
 									<div
 										className={styles.progressBarContainer}
@@ -836,10 +900,42 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 						<Button
 							variant="primary"
 							disabled={!source || namedCount === 0}
-							onClick={() => void handleImport()}
+							onClick={handleImport}
 							data-flx="persona.plural-kit-import-modal.button"
 						>
 							<Trans comment="Button that starts the persona import">Import</Trans>
+						</Button>
+					</>
+				)}
+				{step === 'backup' && (
+					<>
+						<Button
+							variant="secondary"
+							disabled={exporting}
+							onClick={() => setStep('select')}
+							data-flx="persona.plural-kit-import-modal.backup-back"
+						>
+							<Trans comment="Button in the persona import's backup step that goes back to choosing the file">
+								Back
+							</Trans>
+						</Button>
+						<Button
+							variant="secondary"
+							disabled={exporting}
+							onClick={() => void startImport()}
+							data-flx="persona.plural-kit-import-modal.backup-skip"
+						>
+							<Trans comment="Button in the persona import's backup step: import without making a backup">Skip</Trans>
+						</Button>
+						<Button
+							variant="primary"
+							submitting={exporting}
+							onClick={() => void handleExportThenImport()}
+							data-flx="persona.plural-kit-import-modal.backup-export"
+						>
+							<Trans comment="Button in the persona import's backup step: download a backup of the personas, then import">
+								Export
+							</Trans>
 						</Button>
 					</>
 				)}
