@@ -113,9 +113,14 @@ export type ReviewDecision =
 	| {choice: 'add'; withTags: boolean; replacements?: ReadonlyArray<PersonaTag>; copy?: PersonaCopy}
 	| {choice: 'skip'};
 
-/** The file's version of a differing persona, added next to Tyne's. */
+/**
+ * The file's version of a persona, added under a name and tags of its own: next to Tyne's version of a
+ * differing persona (unlinked), or a member whose tag another persona has (`linked`, tyne-chat/tyne#570).
+ */
 export interface PersonaCopy {
 	name: string;
+	/** Added linked to its member, as a new member is; otherwise unlinked, leaving the link where it is. */
+	linked?: boolean;
 	/** The file's tags another persona keeps; `replacements` stand in their place. */
 	replacedTags: ReadonlyArray<PersonaTag>;
 	/** The file's signature emojis another persona keeps, left off the copy. */
@@ -457,9 +462,10 @@ export function copyName(name: string, isTaken: (name: string) => boolean): stri
 }
 
 /**
- * Keep both versions of a differing persona: the file's is added as a copy, renamed and given a free
- * tag in place of each tag another persona keeps (Tyne's version keeps its own), without the signature
- * emojis another persona keeps.
+ * Add the file's version under a name and tags of its own: a name no other persona has ("Wren (2)"), a
+ * free tag in place of each tag another persona keeps, and without the signature emojis another persona
+ * keeps. For a differing persona (Keep both) the copy is unlinked and Tyne's version stays as it is;
+ * for a member whose tag is taken (`linked`) it is a new persona linked to its member.
  */
 export function keepBothDecision(
 	entry: PersonaImportPreviewEntry,
@@ -468,6 +474,7 @@ export function keepBothDecision(
 	members: ReadonlyArray<ReviewMember>,
 	livePersonas: ReadonlyArray<LivePersona>,
 	fromTyne: boolean,
+	linked = false,
 ): ReviewDecision {
 	const member = members[entry.index];
 	if (!member) return {choice: 'keep'};
@@ -492,7 +499,12 @@ export function keepBothDecision(
 		: [];
 	const names = new Set(others.map((state) => state.name.trim().toLowerCase()));
 	const name = copyName(member.preview.name, (candidate) => names.has(candidate.toLowerCase()));
-	return {choice: 'add', withTags: true, replacements, copy: {name, replacedTags, droppedEmojis}};
+	return {
+		choice: 'add',
+		withTags: true,
+		replacements,
+		copy: {name, replacedTags, droppedEmojis, ...(linked ? {linked} : {})},
+	};
 }
 
 /** Which of a member's pictures have to be stored before applying its choice. */
@@ -537,9 +549,13 @@ export function buildActions(
 				// clashing ones out.
 				const dropTags = replaced ? [] : droppedTags(entry, decision);
 				const base = item();
-				// A copy kept next to the linked persona is added unlinked, under its own name.
+				// A copy is added under its own name; one kept next to the linked persona is added unlinked.
 				const named = decision.copy
-					? {...base, name: decision.copy.name.trim() || base.name, external_uuid: null}
+					? {
+							...base,
+							name: decision.copy.name.trim() || base.name,
+							...(decision.copy.linked ? {} : {external_uuid: null}),
+						}
 					: base;
 				actions.push({
 					action: 'add',
