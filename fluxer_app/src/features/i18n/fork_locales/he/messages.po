@@ -847,6 +847,10 @@ msgstr "אין ביו"
 msgid "No bio yet."
 msgstr "עדיין אין ביו."
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "אין צבע"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "אין פקודות"

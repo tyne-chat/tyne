@@ -26,6 +26,7 @@ function persona(fields: {
 	visibility?: 'public' | 'unlisted' | 'private';
 	emojis?: Array<SignatureEmoji>;
 	autoTagDisabled?: boolean;
+	color?: number | null;
 }): Persona {
 	const id = createPersonaID(nextId++);
 	return new Persona({
@@ -35,7 +36,7 @@ function persona(fields: {
 		avatar_hash: fields.avatar ?? null,
 		banner_hash: fields.banner ?? null,
 		pronouns: fields.pronouns ?? null,
-		color: null,
+		color: fields.color ?? null,
 		avatar_color: null,
 		bio: fields.bio ?? null,
 		auto_tag_disabled: fields.autoTagDisabled ?? false,
@@ -184,6 +185,34 @@ describe('pass 1: the PluralKit id', () => {
 		]);
 	});
 
+	it('tells a colour, tags or signature emojis the file changed from ones it removed', () => {
+		const p = persona({
+			name: 'Ash',
+			external: 'aaaaa',
+			color: 0x112233,
+			tags: [{prefix: 'as:'}],
+			emojis: [{name: '🌿'}],
+		});
+		const q = persona({name: 'Bay', external: 'bbbbb', color: 0x112233, tags: [{prefix: 'ba:'}]});
+		const result = plan(
+			[p, q],
+			[
+				member({name: 'Ash', external_uuid: 'aaaaa', signature_emojis: [{name: '🌸'}]}),
+				member({name: 'Bay', external_uuid: 'bbbbb', color: 0x445566, persona_tags: [{prefix: 'bay:'}]}),
+			],
+			{source: 'tyne'},
+		);
+		expect(result.entries[0]?.differences).toEqual([
+			{field: 'color', change: 'removed'},
+			{field: 'persona_tags', change: 'removed'},
+			{field: 'signature_emojis', change: 'changed'},
+		]);
+		expect(result.entries[1]?.differences).toEqual([
+			{field: 'color', change: 'changed'},
+			{field: 'persona_tags', change: 'changed'},
+		]);
+	});
+
 	it('finds a member linked only to deleted personas deleted in Tyne, choosing the most used', () => {
 		const empty = persona({name: 'Pip', external: 'ppppp', deletedAt: new Date('2026-10-02'), useCount: 0});
 		const used = persona({name: 'Pip', external: 'ppppp', deletedAt: new Date('2026-09-25'), useCount: 41});
@@ -294,6 +323,42 @@ describe('pass 4: tags taken, then new', () => {
 		expect(result.entries.map((e) => e.kind)).toEqual(['tag_in_use', 'tag_in_use', 'new']);
 		expect(result.entries[0]?.clashes).toEqual([{tag: {prefix: 'm:'}, shared_with_member: 1}]);
 		expect(result.entries[1]?.clashes).toEqual([{tag: {prefix: 'm:'}, shared_with_member: 0}]);
+	});
+
+	it("sends a Tyne export's signature emoji another persona holds, or another member has, to review", () => {
+		const holder = persona({name: 'Ash', emojis: [{name: '🌿'}, {id: '900', name: 'leaf'}]});
+		const members = [
+			member({name: 'Fern', signature_emojis: [{name: '🌿'}]}),
+			member({name: 'Moss', signature_emojis: [{name: '🍄'}]}),
+			member({name: 'Mold', signature_emojis: [{name: '🍄'}, {id: '900', name: 'leaf_alt'}]}),
+			member({name: 'Sage', signature_emojis: [{name: '🌱'}]}),
+		];
+		const result = plan([holder], members, {source: 'tyne'});
+		expect(result.entries.map((e) => e.kind)).toEqual(['tag_in_use', 'tag_in_use', 'tag_in_use', 'new']);
+		expect(result.entries[0]?.clashes).toEqual([{emoji: {name: '🌿'}, held_by_persona_id: holder.id.toString()}]);
+		expect(result.entries[1]?.clashes).toEqual([{emoji: {name: '🍄'}, shared_with_member: 2}]);
+		// A custom emoji is the same by its id, whatever its name.
+		expect(result.entries[2]?.clashes).toEqual([
+			{emoji: {name: '🍄'}, shared_with_member: 1},
+			{emoji: {id: '900', name: 'leaf_alt'}, held_by_persona_id: holder.id.toString()},
+		]);
+		expect(result.referencedIds.has(holder.id.toString())).toBe(true);
+		// From PluralKit, which has no signature emojis, nothing clashes.
+		expect(plan([holder], members).entries.map((e) => e.kind)).toEqual(['new', 'new', 'new', 'new']);
+	});
+
+	it('names the emoji a member that may be a persona would clash on if added on its own, for a Tyne export', () => {
+		const holder = persona({name: 'Ash', emojis: [{name: '🌿'}]});
+		const maybe = persona({name: 'Fern', tags: [{prefix: 'fe:'}]});
+		const result = plan(
+			[holder, maybe],
+			[member({name: 'Fern', persona_tags: [{prefix: 'fn:'}], signature_emojis: [{name: '🌿'}]})],
+			{source: 'tyne'},
+		);
+		expect(result.entries[0]).toMatchObject({
+			kind: 'cant_tell',
+			clashes: [{emoji: {name: '🌿'}, held_by_persona_id: holder.id.toString()}],
+		});
 	});
 
 	it('counts the personas no member matched as untouched', () => {

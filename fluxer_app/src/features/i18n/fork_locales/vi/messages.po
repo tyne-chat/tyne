@@ -847,6 +847,10 @@ msgstr "Không có tiểu sử"
 msgid "No bio yet."
 msgstr "Chưa có tiểu sử."
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Không có màu"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "Không có lệnh nào"
