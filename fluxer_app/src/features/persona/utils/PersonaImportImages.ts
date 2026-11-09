@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// Storing the pictures of an import (tyne-chat/tyne#243): only for the members whose choice needs
-// them, after the review. A picture comes from the export's zip, from this account's own copy on
-// this instance, or from a download by the server; a link in the file is never stored or shown.
+// Storing the pictures of an import (tyne-chat/tyne#243): every member's, before the review, so the
+// review compares stored pictures by hash and shows them (tyne-chat/tyne#567). A picture comes from
+// the export's zip, from this account's own copy on this instance, or from a download by the server;
+// a link in the file is never stored or shown.
 
 import i18n from '@app/app/I18n';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
@@ -174,9 +175,16 @@ export interface PictureProgress {
 	phase: 'zip' | 'avatar' | 'banner';
 }
 
+/** What storing a file's pictures gave each member, and why a picture failed (keyed `index:kind`). */
+export interface StoredFilePictures {
+	stored: Map<number, StoredPictures>;
+	failures: Map<string, string>;
+}
+
 /**
- * Stores the pictures the chosen members need, at most four zip uploads at a time and one streamed
- * download request per 500 links. Returns what each member got, with the reasons for failures.
+ * Stores the pictures asked for, at most four zip uploads at a time and one streamed download
+ * request per 500 links; a failure is not retried. Returns what each member got, with the reasons for
+ * failures.
  */
 export async function storeMemberPictures(
 	source: PersonaImportSource,
@@ -185,7 +193,7 @@ export async function storeMemberPictures(
 	ownUserId: string | null,
 	mediaEndpoint: string | null,
 	onProgress: (progress: PictureProgress) => void,
-): Promise<{stored: Map<number, StoredPictures>; failures: Map<string, string>}> {
+): Promise<StoredFilePictures> {
 	const images = new Map<string, StoredImage>();
 	const failures = new Map<string, string>();
 	const uploads: Array<{key: string; kind: PersonaImageKind; bytes: Uint8Array}> = [];
