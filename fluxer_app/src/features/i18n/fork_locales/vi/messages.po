@@ -81,6 +81,10 @@ msgstr "Thêm {name} với thẻ riêng"
 msgid "Added"
 msgstr "Đã thêm"
 
+#. What happens to the import file's version of a persona in the import review
+msgid "Added as a new persona"
+msgstr "Được thêm làm persona mới"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "Alice"
@@ -165,10 +169,6 @@ msgstr "Đưa {name} trở lại"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "Đã trở lại nhưng không có {items}: một persona khác hiện đang dùng chúng."
-
-#. Comparison of a persona picture with the import file: it can't be compared
-msgid "Can't compare"
-msgstr "Không thể so sánh"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -258,6 +258,7 @@ msgstr "Đã kết nối với thành viên tương ứng trong tệp. Không c�
 msgid "Copy timestamp"
 msgstr "Sao chép dấu thời gian\\"
 
+#. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "Không thể xuất các persona của bạn."
@@ -352,10 +353,6 @@ msgstr "Đã xóa ngày {date}"
 
 msgid "Detected System Name / Tag"
 msgstr "Tên / thẻ hệ thống đã phát hiện"
-
-#. Comparison of a persona picture with the import file: they differ
-msgid "Different picture"
-msgstr "Ảnh khác"
 
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
@@ -596,6 +593,10 @@ msgstr "Tải Tyne trong TestFlight"
 msgid "Get the Tyne app"
 msgstr "Tải ứng dụng Tyne"
 
+#. What happens to the app's version of a persona in the import review when the file's version is used
+msgid "Gets overwritten"
+msgstr "Bị ghi đè"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "Đây là những gì đã thay đổi"
@@ -642,12 +643,17 @@ msgid "Import finished"
 msgstr "Đã nhập xong"
 
 #. Title of the persona import dialog
+#. Title of the persona import dialog
 msgid "Import personas"
 msgstr "Nhập persona"
 
 #. Summary in the import review footer when every choice leaves things as they are
 msgid "Import will change nothing"
 msgstr "Lần nhập này sẽ không thay đổi gì"
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Import will never overwrite existing personas without your permission."
+msgstr "Nhập sẽ không bao giờ ghi đè các persona hiện có khi chưa được bạn cho phép."
 
 #. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
 msgid "Import will {actions}"
@@ -656,10 +662,6 @@ msgstr "Lần nhập này sẽ {actions}"
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Đang nhập persona..."
-
-#. Information line in the persona import dialog, above the Import button
-msgid "Importing never changes or removes a persona you already have unless you choose it. New members are added straight away. If any member might match or clash with one of your personas, you'll review it before anything is imported."
-msgstr "Việc nhập không bao giờ thay đổi hay xóa persona bạn đã có trừ khi bạn chọn. Thành viên mới được thêm ngay. Nếu có thành viên nào có thể trùng hoặc xung đột với một persona của bạn, bạn sẽ xem lại trước khi bất cứ thứ gì được nhập."
 
 msgid "Importing..."
 msgstr "Đang nhập..."
@@ -703,6 +705,10 @@ msgstr "{name} trong tệp của bạn có phải là một trong các persona n
 msgid "Its script has a problem."
 msgstr "Tập lệnh có vấn đề."
 
+#. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
+msgid "Keep both"
+msgstr "Giữ cả hai"
+
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "Tiếp tục xem lại"
@@ -711,9 +717,9 @@ msgstr "Tiếp tục xem lại"
 msgid "Keep {productName}'s"
 msgstr "Giữ bản của {productName}"
 
-#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
-msgid "Keep {productName}'s {name}"
-msgstr "Giữ {name} của {productName}"
+#. Badge on a collapsed persona in the import review: the file's version is added next to the app's
+msgid "Keeping both"
+msgstr "Đang giữ cả hai"
 
 #. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
 msgid "Keeping {productName}'s"
@@ -834,10 +840,6 @@ msgstr "Lệnh mới"
 msgid "New personas from your file."
 msgstr "Persona mới từ tệp của bạn."
 
-#. Shown instead of a picture from the import file, which isn't loaded until it is stored on this server
-msgid "New picture in the file, shown once imported"
-msgstr "Ảnh mới trong tệp, sẽ hiện sau khi nhập"
-
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
 msgstr "Cửa sổ mới"
@@ -919,6 +921,10 @@ msgstr "Chưa ai bật tín hiệu này"
 #. Shown in one’s own Personas list when none of them is public.
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Chưa có persona nào của bạn ở chế độ công khai. Người khác sẽ thấy một persona ở đây khi bạn đặt chế độ hiển thị của nó thành Công khai."
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Not imported"
+msgstr "Không được nhập"
 
 #. Choice in the import review: do nothing with this member of the import file. {name} is its name
 msgid "Not sure: leave {name} out this time"
@@ -1198,6 +1204,10 @@ msgstr "Xóa biểu tượng cảm xúc đặc trưng"
 msgid "Remove tag pair"
 msgstr "Xóa cặp thẻ"
 
+#. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
+msgid "Replaces {productName}'s {name}"
+msgstr "Thay thế {name} của {productName}"
+
 #. Why an image could not be imported when the server answered with HTTP status {status}
 msgid "Request failed (HTTP {status})"
 msgstr "Yêu cầu thất bại (HTTP {status})"
@@ -1251,10 +1261,6 @@ msgstr "Trùng tên và thẻ"
 #. Choice on a persona's card in the import review: the member of the import file is this persona
 msgid "Same persona as this one"
 msgstr "Chính là persona này"
-
-#. Comparison of a persona picture with the import file: they are the same
-msgid "Same picture"
-msgstr "Ảnh giống nhau"
 
 #. Why a persona in the import review may be the member: same proxy tag
 msgid "Same tag"
@@ -1391,6 +1397,10 @@ msgstr "Đã bỏ qua thành viên vì chưa cấu hình tên."
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Một số thẻ proxy đã bị bỏ qua: {productName} cho phép tối đa 5 thẻ cho mỗi persona, mỗi thẻ tối đa 32 ký tự."
 
+#. What happens to the app's version of a persona in the import review
+msgid "Stays as it is"
+msgstr "Giữ nguyên"
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "Vẫn ở trạng thái đã xóa"
@@ -1474,6 +1484,10 @@ msgstr "Tệp đã chọn không phải là đối tượng JSON hợp lệ."
 #. Error in Settings › Personas when the list of deleted personas fails to load
 msgid "The deleted personas could not be loaded."
 msgstr "Không tải được các persona đã xóa."
+
+#. Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown
+msgid "The file's picture couldn't be loaded"
+msgstr "Không thể tải hình ảnh của tệp"
 
 #. Help for a command script variable.
 msgid "The first person they mention, if any"
@@ -1603,10 +1617,6 @@ msgstr "Bật thanh tín hiệu"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne sẽ tự mở. Đăng nhập là xong."
 
-#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
-msgid "Type {example} to post as {name}"
-msgstr "Gõ {example} để gửi dưới tên {name}"
-
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Gõ {output} hoặc {tag} để xem gợi ý."
@@ -1657,6 +1667,10 @@ msgstr "Dùng /{name}"
 msgid "Use /{name} from {community}"
 msgstr "Dùng /{name} từ {community}"
 
+#. Shown after pressing Import in the persona import dialog, before anything happens
+msgid "Use Export to make a backup before continuing."
+msgstr "Hãy dùng Xuất để sao lưu trước khi tiếp tục."
+
 #. Permission description in the channel permissions editor for the Use external commands permission.
 msgid "Use commands from other communities in this channel."
 msgstr "Dùng lệnh từ các cộng đồng khác trong kênh này."
@@ -1689,13 +1703,18 @@ msgstr "Dùng trình chỉnh sửa cơ bản"
 msgid "Use the file's"
 msgstr "Dùng bản của tệp"
 
-#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
-msgid "Use the file's {name}"
-msgstr "Dùng {name} của tệp"
+#. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
+msgctxt "persona-import-switch"
+msgid "Use the file's"
+msgstr "Dùng bản của tệp"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "Dùng trình chỉnh sửa tập lệnh"
+
+#. Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name
+msgid "Use {productName}'s"
+msgstr "Dùng bản của {productName}"
 
 #. Badge on a collapsed persona in the import review: the import file's version replaces it
 msgid "Using the file's"
