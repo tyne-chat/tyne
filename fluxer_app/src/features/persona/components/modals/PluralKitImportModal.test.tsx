@@ -79,10 +79,15 @@ vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
 	applyPersonaImport: vi.fn(async () => ({personas: [], dropped: []})),
 	deletePersona: vi.fn().mockResolvedValue(undefined),
 	personaErrorMessage: vi.fn((_err: unknown, fallback: string) => fallback),
+	exportPersonas: vi.fn(),
 	importPersonaImage: vi.fn(async (kind: string) => ({
 		hash: kind === 'avatar' ? 'aaaaaaaa' : 'bbbbbbbb',
 		avatarColor: 7,
 	})),
+}));
+
+vi.mock('@app/features/platform/utils/DownloadFile', () => ({
+	downloadBlob: vi.fn(),
 }));
 
 vi.mock('@app/features/ui/commands/ToastCommands', () => ({
@@ -102,8 +107,14 @@ import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PluralKitImportModal} from '@app/features/persona/components/modals/PluralKitImportModal';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
-import {PersonaImportApplyRequestSchema} from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
+import {
+	PersonaImportApplyRequestSchema,
+	type PersonaImportPreviewRequest,
+	type PersonaImportPreviewResponse,
+} from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
 import {zipSync} from 'fflate';
 
 describe('PluralKitImportModal Component', () => {
@@ -304,35 +315,53 @@ describe('PluralKitImportModal Component', () => {
 				{type: 'application/json'},
 			);
 
-		beforeEach(() => {
-			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
-				entries: [
-					{
-						index: 0,
-						kind: 'differs',
-						persona_id: '100000000000000001',
-						differences: [{field: 'bio', change: 'changed'}],
-					},
-					{index: 1, kind: 'new'},
-				],
-				personas: [
-					{
-						id: '100000000000000001',
-						name: 'Sun',
-						bio: 'Old star',
-						persona_tags: [],
-						signature_emojis: [],
-						use_count: 3,
-						visibility: 'unlisted',
-						auto_tag_disabled: false,
-						created_at: '2026-09-01T00:00:00.000Z',
-						updated_at: '2026-09-01T00:00:00.000Z',
-					},
-				],
-				display_tag: {decision: 'none', current_text: null},
-				untouched: 0,
-				needs_review: true,
+		// The server's answer, which names the stored copy of each member's picture it was sent.
+		const answerFor = (request: PersonaImportPreviewRequest): PersonaImportPreviewResponse => ({
+			entries: [
+				{
+					index: 0,
+					kind: 'differs',
+					persona_id: '100000000000000001',
+					differences: [{field: 'bio', change: 'changed'}],
+					avatar_hash: request.members[0]?.avatar?.hash ?? null,
+				},
+				{index: 1, kind: 'new', avatar_hash: request.members[1]?.avatar?.hash ?? null},
+			],
+			personas: [
+				{
+					id: '100000000000000001',
+					name: 'Sun',
+					bio: 'Old star',
+					persona_tags: [],
+					signature_emojis: [],
+					use_count: 3,
+					visibility: 'unlisted',
+					auto_tag_disabled: false,
+					created_at: '2026-09-01T00:00:00.000Z',
+					updated_at: '2026-09-01T00:00:00.000Z',
+				},
+			],
+			display_tag: {decision: 'none', current_text: null},
+			untouched: 0,
+			needs_review: true,
+		});
+
+		// The server stores each linked picture, with its own hash.
+		const PICTURE_HASHES: Record<string, string> = {
+			'https://cdn.example/sun.png': 'eeeeeee1',
+			'https://cdn.example/earth.png': 'eeeeeee2',
+		};
+		const storingFetch = () =>
+			vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
+				const results = Object.fromEntries(body.urls.map((url) => [url, {avatar_hash: PICTURE_HASHES[url]}]));
+				return new Response(`${JSON.stringify({type: 'complete', total: body.urls.length, results})}\n`, {status: 200});
 			});
+		const requestedPictures = (fetchSpy: ReturnType<typeof storingFetch>) =>
+			fetchSpy.mock.calls.map(([, init]) => JSON.parse(String(init?.body)));
+
+		beforeEach(() => {
+			vi.mocked(PersonaCommands.previewPersonaImport).mockImplementationOnce(async (request) => answerFor(request));
 		});
 
 		async function openReview(fetchSpy: ReturnType<typeof vi.spyOn>): Promise<void> {
@@ -349,16 +378,13 @@ describe('PluralKitImportModal Component', () => {
 				importButton()?.click();
 			});
 			await settled(() => expect(differsToggle('Sun')).toBeDefined());
-			expect(fetchSpy).not.toHaveBeenCalled();
+			// Every picture was stored before the review, in one request.
+			expect(fetchSpy).toHaveBeenCalledTimes(1);
 			expect(PersonaCommands.applyPersonaImport).not.toHaveBeenCalled();
 		}
 
-		it('opens with the safest choices and applies only what they say, storing only the pictures needed', async () => {
-			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
-				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
-				const results = Object.fromEntries(body.urls.map((url) => [url, {avatar_hash: 'eeeeeeee'}]));
-				return new Response(`${JSON.stringify({type: 'complete', total: body.urls.length, results})}\n`, {status: 200});
-			});
+		it('stores every picture first, compares them by hash, and applies only what the choices say', async () => {
+			const fetchSpy = storingFetch();
 			try {
 				await openReview(fetchSpy);
 				// Sun is listed collapsed, naming what differs and the safe choice.
@@ -374,12 +400,19 @@ describe('PluralKitImportModal Component', () => {
 				});
 				await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
 
-				// Sun keeps its own details (no action); only Earth is added, with only its picture fetched.
-				expect(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]?.[0].actions).toEqual([
-					{action: 'add', item: expect.objectContaining({name: 'Earth', avatar_hash: 'eeeeeeee'})},
+				// One request stored both pictures before the review; the comparison got their hashes.
+				expect(requestedPictures(fetchSpy)).toEqual([
+					{urls: ['https://cdn.example/sun.png', 'https://cdn.example/earth.png'], kind: 'avatar'},
 				]);
-				expect(fetchSpy.mock.calls.map(([, init]) => JSON.parse(String(init?.body)))).toEqual([
-					{urls: ['https://cdn.example/earth.png'], kind: 'avatar'},
+				expect(vi.mocked(PersonaCommands.previewPersonaImport).mock.calls[0]?.[0].members.map((m) => m.avatar)).toEqual(
+					[
+						{url: 'https://cdn.example/sun.png', hash: 'eeeeeee1'},
+						{url: 'https://cdn.example/earth.png', hash: 'eeeeeee2'},
+					],
+				);
+				// Sun keeps its own details (no action); only Earth is added, with its stored picture.
+				expect(vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]?.[0].actions).toEqual([
+					{action: 'add', item: expect.objectContaining({name: 'Earth', avatar_hash: 'eeeeeee2'})},
 				]);
 			} finally {
 				fetchSpy.mockRestore();
@@ -387,18 +420,14 @@ describe('PluralKitImportModal Component', () => {
 		});
 
 		it("opens a differing persona to compare, and takes the file's version when chosen", async () => {
-			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
-				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
-				const results = Object.fromEntries(body.urls.map((url) => [url, {avatar_hash: 'eeeeeeee'}]));
-				return new Response(`${JSON.stringify({type: 'complete', total: body.urls.length, results})}\n`, {status: 200});
-			});
+			const fetchSpy = storingFetch();
 			try {
 				await openReview(fetchSpy);
 				await act(async () => {
 					differsToggle('Sun')!.click();
 				});
 				expect(differsToggle('Sun')!.getAttribute('aria-expanded')).toBe('true');
-				expect(differsBody()?.getAttribute('aria-label')).toContain('Sun is different in your file');
+				expect(differsBody()?.textContent).toContain('Sun is different in your file');
 				const useFile = Array.from(document.body.querySelectorAll<HTMLInputElement>('input[name="import-0"]'))[0]!;
 				await act(async () => {
 					useFile.click();
@@ -424,8 +453,51 @@ describe('PluralKitImportModal Component', () => {
 			}
 		});
 
+		it("keeps both: adds the file's Sun as a renamed, unlinked copy and leaves Tyne's Sun as it is", async () => {
+			const fetchSpy = storingFetch();
+			try {
+				await openReview(fetchSpy);
+				await act(async () => {
+					differsToggle('Sun')!.click();
+				});
+				// The switch reads Use the file's · Keep both · Use Tyne's, on Tyne's to begin with.
+				const [useFile, keepBoth, useTyne] = Array.from(
+					document.body.querySelectorAll<HTMLInputElement>('input[name="import-0"]'),
+				);
+				expect(useTyne?.checked).toBe(true);
+				expect(useFile?.checked).toBe(false);
+				await act(async () => {
+					keepBoth!.click();
+				});
+				expect(differsToggle('Sun')!.textContent).toContain('Keeping both');
+				const name = document.body.querySelector<HTMLInputElement>('#import-copy-name-0')!;
+				expect(name.value).toBe('Sun (2)');
+				await act(async () => {
+					const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+					setter.call(name, 'Sun, older');
+					name.dispatchEvent(new Event('input', {bubbles: true}));
+				});
+
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+				const request = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0];
+				expect(request.actions).toEqual([
+					expect.objectContaining({
+						action: 'add',
+						item: expect.objectContaining({name: 'Sun, older', external_uuid: null, avatar_hash: 'eeeeeee1'}),
+					}),
+					expect.objectContaining({action: 'add', item: expect.objectContaining({name: 'Earth'})}),
+				]);
+				expect(PersonaImportApplyRequestSchema.safeParse(request).success).toBe(true);
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
 		it('asks before closing the review, and closes only this dialog when told to stop', async () => {
-			const fetchSpy = vi.spyOn(globalThis, 'fetch');
+			const fetchSpy = storingFetch();
 			const onClose = vi.fn();
 			try {
 				await act(async () => {
@@ -464,12 +536,52 @@ describe('PluralKitImportModal Component', () => {
 			}
 		});
 
+		it("tries a failed download once, still opens the review, and keeps Tyne's picture", async () => {
+			const fetchSpy = vi
+				.spyOn(globalThis, 'fetch')
+				.mockImplementation(async () => new Response('{"message": "Rate limited"}', {status: 429}));
+			try {
+				await openReview(fetchSpy);
+				// The comparison got the links only, without a stored copy.
+				expect(vi.mocked(PersonaCommands.previewPersonaImport).mock.calls[0]?.[0].members.map((m) => m.avatar)).toEqual(
+					[{url: 'https://cdn.example/sun.png'}, {url: 'https://cdn.example/earth.png'}],
+				);
+				await act(async () => {
+					differsToggle('Sun')!.click();
+				});
+				expect(differsBody()?.textContent).toContain("The file's picture couldn't be loaded");
+
+				// Back and Import again: nothing is stored again.
+				await act(async () => {
+					Array.from(document.body.querySelectorAll('button'))
+						.find((button) => button.textContent?.trim() === 'Back')
+						?.click();
+				});
+				vi.mocked(PersonaCommands.previewPersonaImport).mockImplementationOnce(async (request) => answerFor(request));
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(PersonaCommands.previewPersonaImport).toHaveBeenCalledTimes(2));
+				await settled(() => expect(differsToggle('Sun')).toBeDefined());
+				expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+				// Earth is added without a picture, and the import says why.
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+				const [added] = vi.mocked(PersonaCommands.applyPersonaImport).mock.calls[0]![0].actions;
+				expect(added).toMatchObject({action: 'add', item: {name: 'Earth'}});
+				expect((added as {item: {avatar_hash?: string | null}}).item.avatar_hash ?? null).toBeNull();
+				await settled(() => expect(document.body.textContent).toContain('Avatar image failed to download'));
+				expect(fetchSpy).toHaveBeenCalledTimes(1);
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
 		it('stays on the review when the import is refused', async () => {
-			const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
-				const body = JSON.parse(String(init?.body)) as {urls: Array<string>};
-				const results = Object.fromEntries(body.urls.map((url) => [url, {avatar_hash: 'eeeeeeee'}]));
-				return new Response(`${JSON.stringify({type: 'complete', total: body.urls.length, results})}\n`, {status: 200});
-			});
+			const fetchSpy = storingFetch();
 			vi.mocked(PersonaCommands.applyPersonaImport).mockRejectedValueOnce(new Error('This tag is already taken.'));
 			try {
 				await openReview(fetchSpy);
@@ -482,6 +594,75 @@ describe('PluralKitImportModal Component', () => {
 			} finally {
 				fetchSpy.mockRestore();
 			}
+		});
+	});
+
+	describe('a backup before importing into an account with personas', () => {
+		const file = () =>
+			new File([JSON.stringify({members: [{id: 'fffff', name: 'Fern', privacy: PUBLIC}]})], 'pk.json', {
+				type: 'application/json',
+			});
+		const button = (text: string) =>
+			Array.from(document.body.querySelectorAll('button')).find((b) => b.textContent?.trim() === text);
+
+		beforeEach(() => {
+			PersonaStore.setPersonas([
+				{
+					id: '100000000000000005',
+					name: 'Moss',
+					persona_tags: [],
+					signature_emojis: [],
+					use_count: 0,
+					visibility: 'public',
+					auto_tag_disabled: false,
+					created_at: '2026-09-01T00:00:00.000Z',
+					updated_at: '2026-09-01T00:00:00.000Z',
+				},
+			]);
+		});
+
+		async function pressImport(): Promise<void> {
+			await act(async () => {
+				root.render(<PluralKitImportModal onClose={vi.fn()} data-flx="persona.plural-kit-import-modal-test.backup" />);
+			});
+			await chooseFile(file(), 'Total Members1');
+			await act(async () => {
+				importButton()?.click();
+			});
+			expect(document.body.textContent).toContain('Use Export to make a backup before continuing.');
+			expect(PersonaCommands.previewPersonaImport).not.toHaveBeenCalled();
+		}
+
+		it('offers a backup first, and Skip imports without one', async () => {
+			await pressImport();
+			await act(async () => {
+				button('Skip')?.click();
+			});
+			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+			expect(PersonaCommands.exportPersonas).not.toHaveBeenCalled();
+		});
+
+		it('saves the export, then imports', async () => {
+			const blob = new Blob(['zip']);
+			vi.mocked(PersonaCommands.exportPersonas).mockResolvedValueOnce({blob, fileName: 'Tyne personas.zip'});
+			await pressImport();
+			await act(async () => {
+				button('Export')?.click();
+			});
+			await settled(() => expect(PersonaCommands.applyPersonaImport).toHaveBeenCalledTimes(1));
+			expect(downloadBlob).toHaveBeenCalledWith(blob, 'Tyne personas.zip');
+		});
+
+		it('stays on the backup step when the export fails', async () => {
+			vi.mocked(PersonaCommands.exportPersonas).mockRejectedValueOnce(new Error('offline'));
+			await pressImport();
+			await act(async () => {
+				button('Export')?.click();
+			});
+			await settled(() => expect(ToastCommands.error).toHaveBeenCalledWith('Could not export your personas.'));
+			expect(document.body.textContent).toContain('Use Export to make a backup before continuing.');
+			expect(PersonaCommands.previewPersonaImport).not.toHaveBeenCalled();
+			expect(downloadBlob).not.toHaveBeenCalled();
 		});
 	});
 

@@ -5,8 +5,10 @@ import {
 	addedTags,
 	buildActions,
 	buildPreviewRequest,
+	copyName,
 	defaultDecision,
 	findConflicts,
+	keepBothDecision,
 	parseTagInput,
 	picturesNeeded,
 	type ReviewDecision,
@@ -196,7 +198,21 @@ describe('a tag of its own for a clashing member', () => {
 	it('suggests more of the name in the same style until one is free', () => {
 		expect(suggestTag({prefix: 'ly:'}, 'Lyra ✧', takenFrom())).toEqual({prefix: 'lyr:'});
 		expect(suggestTag({prefix: 'ly:'}, 'Lyra ✧', takenFrom('lyr:text'))).toEqual({prefix: 'lyra:'});
-		expect(suggestTag({prefix: 'ly:'}, 'Lyra ✧', takenFrom('lyr:text', 'lyra:text'))).toEqual({prefix: 'lyra2:'});
+		// Then the tag being replaced, with a number.
+		expect(suggestTag({prefix: 'ly:'}, 'Lyra ✧', takenFrom('lyr:text', 'lyra:text'))).toEqual({prefix: 'ly2:'});
+		expect(suggestTag({prefix: 'ly:'}, 'Lyra ✧', takenFrom('lyr:text', 'lyra:text', 'ly2:text'))).toEqual({
+			prefix: 'ly3:',
+		});
+	});
+
+	it('takes from the name only letters anyone can type', () => {
+		expect(suggestTag({prefix: 'zo:'}, 'Zoë', takenFrom())).toEqual({prefix: 'zoe:'});
+		expect(suggestTag({prefix: 'sa:'}, 'S𐒰TVRN 𓆩♅𓆪', takenFrom())).toEqual({prefix: 'stv:'});
+		// A name with no such letters goes straight to the numbered tag; so does a capital one.
+		expect(suggestTag({prefix: 'mi:'}, 'ミク', takenFrom())).toEqual({prefix: 'mi2:'});
+		expect(suggestTag({prefix: 'Mi:'}, 'ミク', takenFrom('Mi2:text'))).toEqual({prefix: 'Mi3:'});
+		// The tag's own punctuation stays: it is the one already typed.
+		expect(suggestTag({prefix: '✦ly:'}, 'Lyra', takenFrom())).toEqual({prefix: '✦lyr:'});
 	});
 
 	it('keeps a capital, a suffix tag and the punctuation around the letters', () => {
@@ -285,5 +301,78 @@ describe('a tag of its own for a clashing member', () => {
 			{index: 6, kind: 'up_to_date'},
 		];
 		expect(reviewNeedCount(entries)).toBe(4);
+	});
+});
+
+describe('keeping both versions of a differing persona', () => {
+	it('names the copy as a file manager names a copy, within the longest name the API takes', () => {
+		const taken =
+			(...names: Array<string>) =>
+			(name: string) =>
+				names.includes(name);
+		expect(copyName('Wren', taken())).toBe('Wren');
+		expect(copyName('Wren', taken('Wren'))).toBe('Wren (2)');
+		expect(copyName('Wren', taken('Wren', 'Wren (2)'))).toBe('Wren (3)');
+		const long = 'W'.repeat(100);
+		expect(copyName(long, taken(long))).toBe(`${'W'.repeat(96)} (2)`);
+	});
+
+	it("adds the file's version unlinked, renamed and with a free tag, and leaves Tyne's as it is", () => {
+		const {members} = buildPreviewRequest(
+			pkSource([pkMember(0, {name: 'Wren', id: 'aaaaa', bio: 'Keeps the log.', personaTags: [{prefix: 'wr:'}]})]),
+			'42',
+			MEDIA,
+		);
+		const entries: Array<PersonaImportPreviewEntry> = [
+			{index: 0, kind: 'differs', persona_id: 'p1', differences: [{field: 'bio', change: 'changed'}]},
+		];
+		const live = [
+			{id: 'p1', name: 'Wren', persona_tags: [{prefix: 'wr:'}], signature_emojis: []},
+			{id: 'p2', name: 'Wren (2)', persona_tags: [{prefix: 'wre:'}], signature_emojis: []},
+		];
+		const decision = keepBothDecision(entries[0]!, entries, new Map(), members, live, false);
+		expect(decision).toEqual({
+			choice: 'add',
+			withTags: true,
+			replacements: [{prefix: 'wren:'}],
+			copy: {name: 'Wren (3)', replacedTags: [{prefix: 'wr:'}], droppedEmojis: []},
+		});
+
+		const decisions = new Map<number, ReviewDecision>([[0, decision]]);
+		const actions = buildActions(entries, decisions, members, new Map());
+		// One action: the copy is added; Tyne's Wren gets none, so it stays as it is and keeps the link.
+		expect(actions).toHaveLength(1);
+		expect(actions[0]).toMatchObject({
+			action: 'add',
+			item: {name: 'Wren (3)', bio: 'Keeps the log.', persona_tags: [{prefix: 'wren:'}], external_uuid: null},
+		});
+		expect(actions[0]).not.toHaveProperty('drop_tags');
+		expect(PersonaImportActionSchema.safeParse(actions[0]).success).toBe(true);
+		expect(findConflicts(entries, decisions, members, live, false)).toEqual([]);
+		expect(summarize(entries, decisions)).toMatchObject({add: 1, kept: 0, useFile: 0});
+
+		// A tag typed over the suggestion that Tyne's Wren has is a clash again.
+		if (decision.choice !== 'add') throw new Error('Keep both is an add');
+		const clashing = new Map<number, ReviewDecision>([[0, {...decision, replacements: [{prefix: 'wr:'}]}]]);
+		expect(findConflicts(entries, clashing, members, live, false)).toEqual([
+			{label: 'wr:text', names: ['Wren', 'Wren (3)']},
+		]);
+	});
+
+	it("leaves off the signature emojis Tyne's version keeps, for a Tyne export", () => {
+		const emoji = {name: '🕯️'};
+		const {members} = buildPreviewRequest(
+			pkSource([pkMember(0, {name: 'Wren', id: 'aaaaa', personaTags: []})]),
+			'42',
+			MEDIA,
+		);
+		members[0]!.preview.signature_emojis = [emoji];
+		const entries: Array<PersonaImportPreviewEntry> = [{index: 0, kind: 'differs', persona_id: 'p1'}];
+		const live = [{id: 'p1', name: 'Wren', persona_tags: [], signature_emojis: [emoji]}];
+		const decision = keepBothDecision(entries[0]!, entries, new Map(), members, live, true);
+		expect(decision).toMatchObject({copy: {name: 'Wren (2)', replacedTags: [], droppedEmojis: [emoji]}});
+		const [action] = buildActions(entries, new Map([[0, decision]]), members, new Map());
+		expect(action).toMatchObject({action: 'add', drop_signature_emojis: [emoji]});
+		expect(findConflicts(entries, new Map([[0, decision]]), members, live, true)).toEqual([]);
 	});
 });
