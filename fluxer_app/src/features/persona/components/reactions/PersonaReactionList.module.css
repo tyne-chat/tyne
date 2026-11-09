@@ -101,7 +101,7 @@
 
 .recentBadge {
 	position: absolute;
-	right: -0.3125rem;
+	inset-inline-end: -0.3125rem;
 	bottom: -0.3125rem;
 	width: 1.25rem;
 	height: 1.25rem;
