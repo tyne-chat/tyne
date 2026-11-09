@@ -847,6 +847,10 @@ msgstr "Ingen bio"
 msgid "No bio yet."
 msgstr "Ingen bio endnu."
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Ingen farve"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "Ingen kommandoer"
