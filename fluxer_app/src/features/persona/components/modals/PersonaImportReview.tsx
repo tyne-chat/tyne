@@ -121,10 +121,6 @@ const DELETED_ON_DESCRIPTOR = msg({
 	message: 'Deleted {date}',
 	comment: 'When a persona was deleted, in the import review. {date} is a date',
 });
-const NO_PICTURE_DESCRIPTOR = msg({
-	message: 'None',
-	comment: 'Comparison of a persona picture with the import file: there is none',
-});
 const PICTURES_MISSING_DESCRIPTOR = msg({
 	message: "The file's picture couldn't be loaded",
 	comment:
@@ -141,6 +137,10 @@ const NO_TAGS_DESCRIPTOR = msg({
 const NO_BIO_DESCRIPTOR = msg({
 	message: 'No bio',
 	comment: 'Shown in the import review where a persona or a member of the file has no bio',
+});
+const NO_COLOUR_DESCRIPTOR = msg({
+	message: 'No colour',
+	comment: 'Shown in the import review where a persona or a member of the file has no colour',
 });
 const DIFFERS_QUESTION_DESCRIPTOR = msg({
 	message: '{name} is different in your file. Which one should {productName} have?',
@@ -2296,7 +2296,7 @@ function VersionDetails({
 					{`#${color.toString(16).padStart(6, '0')}`}
 				</span>
 			) : (
-				empty(NO_PICTURE_DESCRIPTOR)
+				empty(NO_COLOUR_DESCRIPTOR)
 			),
 		]);
 	}
