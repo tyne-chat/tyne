@@ -81,6 +81,10 @@ msgstr "Добавить {name} с собственным тегом"
 msgid "Added"
 msgstr "Добавлено"
 
+#. What happens to the import file's version of a persona in the import review
+msgid "Added as a new persona"
+msgstr "Добавится как новая персона"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "Алиса"
@@ -165,10 +169,6 @@ msgstr "Вернуть {name}"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "Вернулась без {items}: теперь они у другой персоны."
-
-#. Comparison of a persona picture with the import file: it can't be compared
-msgid "Can't compare"
-msgstr "Нельзя сравнить"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -258,6 +258,7 @@ msgstr "Связаны со своими участниками в файле. �
 msgid "Copy timestamp"
 msgstr "Скопировать метку времени\\"
 
+#. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "Не удалось экспортировать ваши персоны."
@@ -352,10 +353,6 @@ msgstr "Удалена {date}"
 
 msgid "Detected System Name / Tag"
 msgstr "Обнаруженное имя / тег системы"
-
-#. Comparison of a persona picture with the import file: they differ
-msgid "Different picture"
-msgstr "Другое изображение"
 
 #. Title of the display tag setting on the personas settings page
 msgid "Display tag"
@@ -596,6 +593,10 @@ msgstr "Получить Tyne в TestFlight"
 msgid "Get the Tyne app"
 msgstr "Приложение Tyne"
 
+#. What happens to the app's version of a persona in the import review when the file's version is used
+msgid "Gets overwritten"
+msgstr "Будет перезаписана"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "Вот что изменилось"
@@ -642,12 +643,17 @@ msgid "Import finished"
 msgstr "Импорт завершён"
 
 #. Title of the persona import dialog
+#. Title of the persona import dialog
 msgid "Import personas"
 msgstr "Импорт персон"
 
 #. Summary in the import review footer when every choice leaves things as they are
 msgid "Import will change nothing"
 msgstr "Импорт ничего не изменит"
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Import will never overwrite existing personas without your permission."
+msgstr "Импорт никогда не перезапишет существующие персоны без вашего разрешения."
 
 #. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
 msgid "Import will {actions}"
@@ -656,10 +662,6 @@ msgstr "Импорт {actions}"
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Импорт персон..."
-
-#. Information line in the persona import dialog, above the Import button
-msgid "Importing never changes or removes a persona you already have unless you choose it. New members are added straight away. If any member might match or clash with one of your personas, you'll review it before anything is imported."
-msgstr "Импорт никогда не изменяет и не удаляет уже существующую у вас персону, если вы сами этого не выберете. Новые участники добавляются сразу. Если какой-то участник может совпадать или конфликтовать с одной из ваших персон, вы проверите его до того, как что-либо будет импортировано."
 
 msgid "Importing..."
 msgstr "Импорт..."
@@ -703,6 +705,10 @@ msgstr "{name} из вашего файла — это одна из этих п
 msgid "Its script has a problem."
 msgstr "В её скрипте есть проблема."
 
+#. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
+msgid "Keep both"
+msgstr "Оставить обе"
+
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "Продолжить проверку"
@@ -711,9 +717,9 @@ msgstr "Продолжить проверку"
 msgid "Keep {productName}'s"
 msgstr "Оставить как в {productName}"
 
-#. Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in "Keep Tyne's Wren"
-msgid "Keep {productName}'s {name}"
-msgstr "Оставить {name} как в {productName}"
+#. Badge on a collapsed persona in the import review: the file's version is added next to the app's
+msgid "Keeping both"
+msgstr "Остаются обе"
 
 #. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
 msgid "Keeping {productName}'s"
@@ -834,10 +840,6 @@ msgstr "Новая команда"
 msgid "New personas from your file."
 msgstr "Новые персоны из вашего файла."
 
-#. Shown instead of a picture from the import file, which isn't loaded until it is stored on this server
-msgid "New picture in the file, shown once imported"
-msgstr "Новое изображение в файле, появится после импорта"
-
 #. Desktop app File menu item. Opens another app window showing the same place as the current one.
 msgid "New window"
 msgstr "Новое окно"
@@ -919,6 +921,10 @@ msgstr "Никто не включил этот сигнал"
 #. Shown in one’s own Personas list when none of them is public.
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Ни одна из ваших персон пока не публичная. Другие увидят персону здесь, когда вы выберете для неё видимость «Публичная»."
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Not imported"
+msgstr "Не импортируется"
 
 #. Choice in the import review: do nothing with this member of the import file. {name} is its name
 msgid "Not sure: leave {name} out this time"
@@ -1198,6 +1204,10 @@ msgstr "Удалить фирменный эмодзи"
 msgid "Remove tag pair"
 msgstr "Удалить пару тегов"
 
+#. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
+msgid "Replaces {productName}'s {name}"
+msgstr "Заменяет {name} в {productName}"
+
 #. Why an image could not be imported when the server answered with HTTP status {status}
 msgid "Request failed (HTTP {status})"
 msgstr "Ошибка запроса (HTTP {status})"
@@ -1251,10 +1261,6 @@ msgstr "То же имя и тег"
 #. Choice on a persona's card in the import review: the member of the import file is this persona
 msgid "Same persona as this one"
 msgstr "Это та же персона"
-
-#. Comparison of a persona picture with the import file: they are the same
-msgid "Same picture"
-msgstr "То же изображение"
 
 #. Why a persona in the import review may be the member: same proxy tag
 msgid "Same tag"
@@ -1391,6 +1397,10 @@ msgstr "Участник пропущен, так как у него не зад
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Некоторые прокси-теги пропущены: {productName} допускает до 5 тегов на персону, каждый не длиннее 32 символов."
 
+#. What happens to the app's version of a persona in the import review
+msgid "Stays as it is"
+msgstr "Остаётся как есть"
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "По-прежнему удалены"
@@ -1474,6 +1484,10 @@ msgstr "Выбранный файл не является корректным �
 #. Error in Settings › Personas when the list of deleted personas fails to load
 msgid "The deleted personas could not be loaded."
 msgstr "Не удалось загрузить удалённые персоны."
+
+#. Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown
+msgid "The file's picture couldn't be loaded"
+msgstr "Не удалось загрузить изображение из файла"
 
 #. Help for a command script variable.
 msgid "The first person they mention, if any"
@@ -1603,10 +1617,6 @@ msgstr "Включить панель сигналов"
 msgid "Tyne opens by itself. Sign in and you're done."
 msgstr "Tyne откроется сам. Войдите — и готово."
 
-#. Hint under the field for a new proxy tag in the import review. {example} is the tag around a word
-msgid "Type {example} to post as {name}"
-msgstr "Введите {example}, чтобы писать от имени {name}"
-
 #. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
 msgid "Type {output} or {tag} for suggestions."
 msgstr "Введите {output} или {tag}, чтобы увидеть подсказки."
@@ -1657,6 +1667,10 @@ msgstr "Использовать /{name}"
 msgid "Use /{name} from {community}"
 msgstr "Использовать /{name} из сообщества {community}"
 
+#. Shown after pressing Import in the persona import dialog, before anything happens
+msgid "Use Export to make a backup before continuing."
+msgstr "Прежде чем продолжить, сделайте резервную копию кнопкой «Экспорт»."
+
 #. Permission description in the channel permissions editor for the Use external commands permission.
 msgid "Use commands from other communities in this channel."
 msgstr "Использовать команды из других сообществ в этом канале."
@@ -1689,13 +1703,18 @@ msgstr "Использовать простой редактор"
 msgid "Use the file's"
 msgstr "Взять из файла"
 
-#. Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name
-msgid "Use the file's {name}"
-msgstr "Взять {name} из файла"
+#. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
+msgctxt "persona-import-switch"
+msgid "Use the file's"
+msgstr "Взять из файла"
 
 #. Button in the command editor that switches the message field to the code editor for scripts.
 msgid "Use the script editor"
 msgstr "Использовать редактор скриптов"
+
+#. Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name
+msgid "Use {productName}'s"
+msgstr "Взять из {productName}"
 
 #. Badge on a collapsed persona in the import review: the import file's version replaces it
 msgid "Using the file's"
