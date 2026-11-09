@@ -229,7 +229,7 @@
 }
 
 .contentGridWithPeekStrip {
-	padding-right: 8px;
+	padding-inline-end: 8px;
 }
 
 .chatAreaSlot {
@@ -263,7 +263,7 @@
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	right: 0;
+	inset-inline-end: 0;
 	width: var(--member-list-width, 16.5rem);
 	height: 100%;
 	min-height: 0;
