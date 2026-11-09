@@ -507,6 +507,41 @@ describe('EdgeProximitySensor', () => {
 		expect(LayoutState.isRightHoverPeeking).toBe(true);
 	});
 
+	it('measures the start drawer from its right edge in a right-to-left page, where it sits on the right', async () => {
+		document.documentElement.dir = 'rtl';
+		try {
+			runInAction(() => {
+				LayoutState.setLeftHoverPeeking(true);
+			});
+
+			createMockDrawer('left', {left: 800, right: 1024});
+
+			await act(async () => {
+				root.render(<EdgeProximitySensor data-flx="ui.edge-proximity-sensor-test.edge-proximity-sensor--rtl" />);
+			});
+
+			// Just outside the drawer's physical left edge, inside cursor slack: it stays open.
+			act(() => {
+				window.dispatchEvent(new PointerEvent('pointermove', {clientX: 790}));
+			});
+			act(() => {
+				vi.advanceTimersByTime(100);
+			});
+			expect(LayoutState.isLeftHoverPeeking).toBe(true);
+
+			// Well into the page, away from the drawer: it retracts.
+			act(() => {
+				window.dispatchEvent(new PointerEvent('pointermove', {clientX: 400}));
+			});
+			act(() => {
+				vi.advanceTimersByTime(85);
+			});
+			expect(LayoutState.isLeftHoverPeeking).toBe(false);
+		} finally {
+			document.documentElement.dir = '';
+		}
+	});
+
 	it('ignores zero-width drawers and retracts when no measurable drawer exists', async () => {
 		runInAction(() => {
 			LayoutState.setLeftHoverPeeking(true);

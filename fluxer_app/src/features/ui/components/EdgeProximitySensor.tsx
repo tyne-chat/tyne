@@ -38,18 +38,21 @@ function isPointerWithinDrawer(side: 'left' | 'right', x: number, y: number, tar
 	}
 
 	// Geometry check: measured drawer edge + cursor slack, ignoring collapsed (zero-width) elements.
+	// The drawers sit at the inline start ('left') and end ('right'), so in a right-to-left page the
+	// 'left' drawer is on the physical right.
+	const onPhysicalLeft = (side === 'left') !== (document.documentElement.dir === 'rtl');
 	let edge: number | null = null;
 	for (const el of document.querySelectorAll<HTMLElement>(selector)) {
 		const rect = el.getBoundingClientRect();
 		if (rect.width <= 0) continue;
-		if (side === 'left') {
+		if (onPhysicalLeft) {
 			edge = edge === null ? rect.right : Math.max(edge, rect.right);
 		} else {
 			edge = edge === null ? rect.left : Math.min(edge, rect.left);
 		}
 	}
 	if (edge === null) return false;
-	return side === 'left' ? x <= edge + CURSOR_WIDTH_PX : x >= edge - CURSOR_WIDTH_PX;
+	return onPhysicalLeft ? x <= edge + CURSOR_WIDTH_PX : x >= edge - CURSOR_WIDTH_PX;
 }
 
 export const EdgeProximitySensor: React.FC = observer(() => {
