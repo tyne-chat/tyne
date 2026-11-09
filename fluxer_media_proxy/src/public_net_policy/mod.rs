@@ -240,3 +240,6 @@ pub fn external_url_for_log(value: &str) -> String {
     parsed.set_fragment(None);
     parsed.to_string()
 }
+
+// Fork: hosts a development proxy may fetch from at a private address (tyne-chat/tyne#565).
+mod fork_dev_private_hosts;
