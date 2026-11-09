@@ -39,7 +39,7 @@
 	min-height: 2.25rem;
 	box-sizing: border-box;
 	cursor: pointer;
-	text-align: left;
+	text-align: start;
 	transition: border-color 150ms ease;
 }
 
