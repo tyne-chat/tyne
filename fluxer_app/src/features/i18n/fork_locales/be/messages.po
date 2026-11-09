@@ -1,0 +1,2012 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+msgid ""
+msgstr ""
+"Language: be\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. placeholder {0}: w.prefix
+msgid "(Prefix: {0})"
+msgstr "(Прэфікс: {0})"
+
+#. Install step on Linux for .deb and .rpm packages.
+msgid "<0>.deb or .rpm:</0> open the file you downloaded and click <1>Install</1>."
+msgstr "<0>.deb або .rpm:</0> адкрыйце спампаваны файл і націсніце <1>Усталяваць</1>."
+
+#. Install step on Linux for the AppImage.
+msgid "<0>AppImage:</0> right-click it, open <1>Properties</1> and allow it to run as a program."
+msgstr "<0>AppImage:</0> націсніце на яго правай кнопкай мышы, адкрыйце <1>Уласцівасці</1> і дазвольце запускаць яго як праграму."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} an existing persona
+msgid "<0>{tag}</0> already belongs to your persona {name}."
+msgstr "<0>{tag}</0> ужо належыць вашай персоне {name}."
+
+#. Why a member is in the import review. {tag} is a proxy tag, {name} another member of the file
+msgid "<0>{tag}</0> is also used by {name} in your file."
+msgstr "<0>{tag}</0> таксама выкарыстоўвае ўдзельнік {name} з вашага файла."
+
+#. Toast when saving a persona with more than five tag pairs
+msgid "A persona can have at most 5 tags"
+msgstr "У персоны можа быць не больш за 5 тэгаў"
+
+#. Tooltip showing root account username
+#. Tooltip showing root account username
+msgid "Account: @{username}"
+msgstr "Уліковы запіс: @{username}"
+
+msgid "Active persona cleared"
+msgstr "Актыўная персона скінута"
+
+msgid "Active persona cleared (sending as root account)"
+msgstr "Актыўная персона скінута (адпраўка ад імя асноўнага ўліковага запісу)"
+
+#. Aria label for active persona mode tabs
+#. Aria label for active persona mode tabs
+#. Title of the setting for how the active persona is chosen
+msgid "Active persona mode"
+msgstr "Рэжым актыўнай персоны"
+
+#. placeholder {0}: formData.signatureEmojis.length
+msgid "Add Emoji ({0})"
+msgstr "Дадаць эмодзі ({0})"
+
+msgid "Add Persona"
+msgstr "Дадаць персону"
+
+#. placeholder {0}: formData.tags.length
+msgid "Add Tag Pair ({0}/5)"
+msgstr "Дадаць пару тэгаў ({0}/5)"
+
+#. Button that adds a counter to a community command.
+msgid "Add counter"
+msgstr "Дадаць лічыльнік"
+
+msgid "Add signal"
+msgstr "Дадаць сігнал"
+
+#. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
+msgid "Add {name}"
+msgstr "Дадаць {name}"
+
+#. Line of the import result: new personas
+msgid "Added"
+msgstr "Дададзены"
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Added as a new persona"
+msgstr "Дадасца як новая персона"
+
+#. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
+msgid "Alice"
+msgstr "Аліса"
+
+msgid "All Personas"
+msgstr "Усе персоны"
+
+#. Back button on a persona’s full profile, back to the Personas list.
+msgid "All personas"
+msgstr "Усе персоны"
+
+#. Heading of the list of every platform on the download page.
+msgid "All platforms"
+msgstr "Усе платформы"
+
+#. Section header for all time zones in the timestamp modal.
+msgid "All time zones"
+msgstr "Усе часавыя паясы"
+
+#. Heading of the QR code box on the download page.
+msgid "Also on your phone"
+msgstr "Таксама на тэлефоне"
+
+#. Error under the command name field.
+msgid "Another command or a built-in command already has this name."
+msgstr "Гэтая назва ўжо занятая іншай або ўбудаванай камандай."
+
+#. Under the AppImage download button: it works on every other Linux distribution.
+msgid "Any other Linux"
+msgstr "Любы іншы Linux"
+
+#. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
+msgid "Apple silicon (M1 or newer)"
+msgstr "Apple silicon (M1 або навейшы)"
+
+#. placeholder {0}: formData.name
+msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
+msgstr "Сапраўды выдаліць <0>{0}</0>? Гэтае дзеянне нельга адрабіць."
+
+#. Settings search synonym.
+msgid "Auto-hide"
+msgstr "Аўтахаванне"
+
+#. Settings section label in Advanced Settings for edge hover peek preference.
+#. Short label for an advanced appearance preference that reveals collapsed sidebars on mouse hover.
+msgid "Auto-peek hidden sidebars"
+msgstr "Аўтаматычна паказваць схаваныя бакавыя панэлі"
+
+#. Import warning when avatar fails to download
+msgid "Avatar image failed to download: {error}. Persona was imported without an avatar."
+msgstr "Не ўдалося спампаваць аватар: {error}. Персона імпартавана без аватара."
+
+#. Import warning when the file's avatar for an existing persona fails to download, so the old one stays
+msgid "Avatar image failed to download: {error}. The persona kept the avatar it had."
+msgstr "Не ўдалося спампаваць аватар: {error}. У персоны застаўся ранейшы аватар."
+
+#. Explanation of the "Restored" line of the import result
+msgid "Back as they were, with their old messages."
+msgstr "Вярнуліся такімі, як былі, разам са сваімі старымі паведамленнямі."
+
+#. Button on narrow screens that returns to the command list.
+msgid "Back to commands"
+msgstr "Назад да каманд"
+
+#. Accessible label of the arrow-only back button in a narrow settings dialog, shown while one permission override is open. {section} is the settings section it returns to, such as "Permissions".
+msgid "Back to {section}"
+msgstr "Назад: {section}"
+
+#. Import warning when a persona banner fails to download
+msgid "Banner image failed to download: {error}. Persona was imported without a banner."
+msgstr "Не ўдалося спампаваць банер: {error}. Персона імпартавана без банера."
+
+#. Import warning when the file's banner for an existing persona fails to download, so the old one stays
+msgid "Banner image failed to download: {error}. The persona kept the banner it had."
+msgstr "Не ўдалося спампаваць банер: {error}. У персоны застаўся ранейшы банер."
+
+#. Option of the switch on a deleted persona in the import review: it is restored
+msgctxt "persona-import-switch"
+msgid "Bring back"
+msgstr "Вярнуць"
+
+#. Badge on a collapsed deleted persona in the import review: it comes back as it was
+msgid "Bringing back"
+msgstr "Вяртаецца"
+
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+#. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
+msgid "Came back without {items}: another persona has them now."
+msgstr "Вярнулася без {items}: цяпер яны ў іншай персоны."
+
+#. Generic action label that opens the persona picker.
+msgid "Change persona"
+msgstr "Змяніць персону"
+
+#. Help for an example in a command script.
+msgid "Change the message depending on what they typed"
+msgstr "Змяняць паведамленне ў залежнасці ад таго, што ўвялі"
+
+#. Title of the persona import review when no member needs a choice, only the display tag
+msgid "Check before importing"
+msgstr "Праверце перад імпартам"
+
+#. Title of the persona import dialog while the file is checked
+msgid "Checking your file..."
+msgstr "Правяраем ваш файл…"
+
+#. Disabled button while the import file is checked
+msgid "Checking..."
+msgstr "Праверка…"
+
+msgid "Choose a PluralKit export (.json) or a {productName} export (.zip), or drag & drop"
+msgstr "Выберыце экспарт PluralKit (.json) або экспарт {productName} (.zip) ці перацягніце яго сюды"
+
+#. Link on the download page to the list of every platform.
+msgid "Choose another platform"
+msgstr "Выбраць іншую платформу"
+
+#. Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.
+msgid "Choose personas to feature"
+msgstr "Выбраць персоны для паказу"
+
+#. Tooltip on the community command chip when the message box already has text. Preserve {name}.
+msgid "Clear the message box to use /{name}"
+msgstr "Ачысціце поле паведамлення, каб выкарыстаць /{name}"
+
+#. Button at the end of the search results panel header. Clears the search and closes the panel.
+msgid "Close search"
+msgstr "Закрыць пошук"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Colour"
+msgstr "Колер"
+
+#. Install step on iPhone. 'Get Tyne in TestFlight' is the button on this page; 'Install' is TestFlight's button.
+msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
+msgstr "Вярніцеся сюды і націсніце <0>Атрымаць Tyne у TestFlight</0>, потым <1>Усталяваць</1>."
+
+#. What happens to the app's deleted persona in the import review when it is brought back
+msgid "Comes back as it was"
+msgstr "Вернецца такой, як была"
+
+#. Section label in the command editor: name and description.
+msgid "Command"
+msgstr "Каманда"
+
+#. Heading above the count of commands, like "Emoji slots".
+msgid "Command slots"
+msgstr "Слоты для каманд"
+
+#. Community settings tab for the slash commands members of the community can use.
+msgctxt "community-settings-tab"
+msgid "Commands"
+msgstr "Каманды"
+
+#. Toast after saving the Commands tab.
+msgid "Commands saved"
+msgstr "Каманды захаваны"
+
+#. Status while the import file is compared with the account's personas
+msgid "Comparing your file with your personas..."
+msgstr "Параўноўваем ваш файл з вашымі персонамі…"
+
+#. Header for configured personas list with count
+msgid "Configured Personas ({count})"
+msgstr "Наладжаныя персоны ({count})"
+
+#. Explanation of the "Linked" line of the import result
+msgid "Connected to their members in the file. Nothing in them changed."
+msgstr "Звязаны са сваімі ўдзельнікамі ў файле. У іх нічога не змянілася."
+
+#. Context menu action to copy a timestamp markdown tag in the message composer.
+msgid "Copy timestamp"
+msgstr "Скапіяваць пазнаку часу"
+
+#. Toast when downloading the persona export fails
+#. Toast when downloading the persona export fails
+msgid "Could not export your personas."
+msgstr "Не ўдалося экспартаваць вашы персоны."
+
+#. Shown when the Commands tab fails to load.
+msgid "Couldn't load the commands."
+msgstr "Не ўдалося загрузіць каманды."
+
+#. Shown in the channel when a community command fails (for example slowmode or a missing permission). Preserve {name} and {detail}.
+msgid "Couldn't run /{name}: {detail}"
+msgstr "Не ўдалося выканаць /{name}: {detail}"
+
+#. Toast when saving a command fails. Preserve {name} and {detail}.
+msgid "Couldn't save /{name}: {detail}"
+msgstr "Не ўдалося захаваць /{name}: {detail}"
+
+#. Toast when changing or deleting several personas failed.
+msgid "Couldn’t change the personas. Try again."
+msgstr "Не ўдалося змяніць персоны. Паспрабуйце яшчэ раз."
+
+#. Shown in the Personas list when the request for them failed.
+msgid "Couldn’t load personas."
+msgstr "Не ўдалося загрузіць персоны."
+
+#. Option of a community command counter: a persona counts as its own person, not as its account.
+msgid "Count personas separately"
+msgstr "Лічыць персоны асобна"
+
+#. Above the choices of what a community command counter keeps its own count for.
+msgid "Count separately for each:"
+msgstr "Лічыць асобна для кожнага:"
+
+#. Section of a community command that counts how often it was used.
+msgid "Counters"
+msgstr "Лічыльнікі"
+
+#. Permission name: allows creating the community's slash commands and editing one's own.
+msgid "Create commands"
+msgstr "Ствараць каманды"
+
+#. Permission description in the role editor for the Create commands permission.
+msgid "Create commands for this community, and edit or delete your own."
+msgstr "Ствараць каманды для гэтай супольнасці, а таксама змяняць і выдаляць свае."
+
+#. Under the command editor heading: who made the command. Preserve {name}.
+msgid "Created by {name}"
+msgstr "Аўтар: {name}"
+
+#. When a persona was made, on its card in the Personas list. {date} is a date.
+msgid "Created {date}"
+msgstr "Створана {date}"
+
+#. Aria label for deactivating active persona
+msgid "Deactivate persona"
+msgstr "Адключыць персону"
+
+#. Title of the dialog confirming that a command is deleted. Preserve {name}.
+msgid "Delete /{name}?"
+msgstr "Выдаліць /{name}?"
+
+msgid "Delete Persona"
+msgstr "Выдаліць персону"
+
+#. Button that deletes a community command.
+msgid "Delete command"
+msgstr "Выдаліць каманду"
+
+#. Aria label for deleting persona
+msgid "Delete persona"
+msgstr "Выдаліць персону"
+
+#. Context menu action to delete a timestamp from the message composer.
+msgid "Delete timestamp"
+msgstr "Выдаліць пазнаку часу"
+
+#. Title of the confirmation before deleting the selected personas.
+msgid "Delete {count, plural, one {# persona} other {# personas}}?"
+msgstr "Выдаліць {count, plural, one {# персону} few {# персоны} many {# персон} other {# персоны}}?"
+
+#. Title of the section in Settings › Personas that lists deleted personas
+msgid "Deleted personas"
+msgstr "Выдаленыя персоны"
+
+#. Explanation of the deleted personas section in Settings › Personas
+msgid "Deleted personas still show on their old messages, but nobody can pick them and they don't count towards your limit. Restoring one brings the same persona back, with its history."
+msgstr "Выдаленыя персоны па-ранейшаму паказваюцца ў сваіх старых паведамленнях, але выбраць іх ніхто не можа, і яны не ўлічваюцца ў ваш ліміт. Калі аднавіць персону, вернецца тая самая персона разам з яе гісторыяй."
+
+#. When a persona was deleted, in the import review. {date} is a date
+#. When a persona was deleted, in the import review. {date} is a date
+msgid "Deleted {date}"
+msgstr "Выдалена {date}"
+
+msgid "Detected System Name / Tag"
+msgstr "Знойдзеная назва / тэг сістэмы"
+
+#. Title of the display tag setting on the personas settings page
+msgid "Display tag"
+msgstr "Бачны тэг"
+
+msgid "Display tag will appear next to all persona names in messages. If no display tag is set, your account profile picture will be shown."
+msgstr "Бачны тэг будзе паказвацца побач з імёнамі ўсіх персон у паведамленнях. Калі бачны тэг не зададзены, будзе паказвацца аватар вашага ўліковага запісу."
+
+#. Switch in the persona editor. When on, typing one of the persona tags does not switch to this persona.
+msgid "Don't match this persona's tags"
+msgstr "Не распазнаваць тэгі гэтай персоны"
+
+#. Tooltip hint on timestamp pill in message composer.
+msgid "Double-click to edit"
+msgstr "Двойчы націсніце, каб змяніць"
+
+#. Button that downloads the Tyne app as a .deb package for Linux.
+msgid "Download .deb"
+msgstr "Спампаваць .deb"
+
+#. Button that downloads the Tyne app as an .rpm package for Linux.
+msgid "Download .rpm"
+msgstr "Спампаваць .rpm"
+
+#. Button that downloads the Tyne app as an AppImage for Linux.
+msgid "Download AppImage"
+msgstr "Спампаваць AppImage"
+
+#. Button that opens the Tyne download page when the visitor's platform is not known.
+msgid "Download Tyne"
+msgstr "Спампаваць Tyne"
+
+#. Button that downloads the Tyne app for Android.
+#. Button that downloads the Tyne app for Android.
+msgid "Download for Android"
+msgstr "Спампаваць для Android"
+
+#. Button that opens the Linux downloads of the Tyne app.
+msgid "Download for Linux"
+msgstr "Спампаваць для Linux"
+
+#. Button that downloads the Tyne app for macOS.
+#. Button that downloads the Tyne app for macOS.
+msgid "Download for Mac"
+msgstr "Спампаваць для Mac"
+
+#. Button that downloads the Tyne app for Windows.
+#. Button that downloads the Tyne app for Windows.
+msgid "Download for Windows"
+msgstr "Спампаваць для Windows"
+
+#. Progress status during avatar download
+msgid "Downloading avatar {current} of {total}..."
+msgstr "Спампоўка аватара {current} з {total}…"
+
+#. Progress status during banner download in the persona import
+msgid "Downloading banner {current} of {total}..."
+msgstr "Спампоўка банера {current} з {total}…"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
+msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
+msgstr "Пара тэгаў «{tag}» не можа паўтарацца ў адной персоны"
+
+#. Validation error when tag pair is duplicated within the same persona
+msgid "Duplicate tag pair on this persona"
+msgstr "Такая пара тэгаў ужо ёсць у гэтай персоны"
+
+#. Helper description for the In Each Channel option of the persona scope setting
+msgid "Each channel keeps its own persona. New channels start as your account."
+msgstr "Кожны канал захоўвае сваю персону. У новых каналах вы спачатку пішаце ад імя ўліковага запісу."
+
+#. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
+#. Heading of the command editor. Preserve {name}, the command name.
+msgid "Edit /{name}"
+msgstr "Змяніць /{name}"
+
+#. Title for edit persona modal
+msgid "Edit Persona"
+msgstr "Рэдагаваць персону"
+
+#. Permission description in the role editor for the Manage commands permission.
+msgid "Edit or delete anyone's commands in this community."
+msgstr "Змяняць і выдаляць каманды любых удзельнікаў гэтай супольнасці."
+
+#. Action button to edit persona
+#. Aria label for editing persona
+msgid "Edit persona"
+msgstr "Рэдагаваць персону"
+
+#. Context menu action to edit a timestamp in the message composer.
+#. Title of the timestamp modal when editing an existing timestamp.
+msgid "Edit timestamp"
+msgstr "Змяніць пазнаку часу"
+
+msgid "Everyone else"
+msgstr "Усе астатнія"
+
+#. Text under the heading when a reviewed persona import is done
+msgid "Everything else is exactly as it was."
+msgstr "Усё астатняе засталося такім, як было."
+
+#. Text when a persona import with nothing to decide is done
+msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
+msgstr "Усё ў файле было альбо новым, альбо ўжо дакладна адпавядала персоне, таму вырашаць не было чаго. Больш нічога не змянілася."
+
+#. Option for where the selected persona applies: one persona for every channel
+msgid "Everywhere"
+msgstr "Усюды"
+
+msgid "Export Summary"
+msgstr "Звесткі пра экспарт"
+
+msgid "Failed to clear active persona"
+msgstr "Не ўдалося скінуць актыўную персону"
+
+#. Toast when persona deletion fails
+msgid "Failed to delete persona"
+msgstr "Не ўдалося выдаліць персону"
+
+#. Toast error message on persona import failure
+msgid "Failed to import personas"
+msgstr "Не ўдалося імпартаваць персоны"
+
+#. Error message when parsing PluralKit JSON fails
+msgid "Failed to parse JSON file. Please ensure it is a valid PluralKit export."
+msgstr "Не ўдалося разабраць файл JSON. Пераканайцеся, што гэта сапраўдны экспарт PluralKit."
+
+#. Error message when reading uploaded file fails
+msgid "Failed to read the selected file."
+msgstr "Не ўдалося прачытаць выбраны файл."
+
+#. Toast when persona save fails
+msgid "Failed to save persona"
+msgstr "Не ўдалося захаваць персону"
+
+#. Error toast in the community Message Tools settings tab when saving the signal bar fails.
+msgid "Failed to save the signal bar. Try again."
+msgstr "Не ўдалося захаваць панэль сігналаў. Паспрабуйце яшчэ раз."
+
+#. Error toast in the community Message Tools settings tab when saving the channel checkboxes fails.
+msgid "Failed to save where the signal bar appears. Try again."
+msgstr "Не ўдалося захаваць, дзе паказваецца панэль сігналаў. Паспрабуйце яшчэ раз."
+
+#. Toast when the chosen animated display tag icon cannot be used
+msgid "Failed to select GIF icon"
+msgstr "Не ўдалося выбраць GIF-значок"
+
+#. Toast when the chosen display tag icon image cannot be used
+msgid "Failed to select icon image"
+msgstr "Не ўдалося выбраць выяву для значка"
+
+msgid "Failed to set active persona"
+msgstr "Не ўдалося задаць актыўную персону"
+
+msgid "Failed to set the persona for this channel"
+msgstr "Не ўдалося задаць персону для гэтага канала"
+
+msgid "Failed to update display tag"
+msgstr "Не ўдалося абнавіць бачны тэг"
+
+msgid "Failed to update persona mode"
+msgstr "Не ўдалося змяніць рэжым персоны"
+
+msgid "Failed to update the reaction setting"
+msgstr "Не ўдалося змяніць наладу рэакцый"
+
+msgid "Failed to update where your persona is remembered"
+msgstr "Не ўдалося змяніць, дзе запамінаецца ваша персона"
+
+#. Toast when uploading a persona avatar fails
+msgid "Failed to upload avatar image to server"
+msgstr "Не ўдалося запампаваць аватар на сервер"
+
+#. Toast when uploading a persona banner fails
+msgid "Failed to upload banner image to server"
+msgstr "Не ўдалося запампаваць банер на сервер"
+
+#. Toast when icon upload fails
+msgid "Failed to upload icon to server"
+msgstr "Не ўдалося запампаваць значок на сервер"
+
+#. Under the .rpm download button: the Linux distributions that use .rpm packages.
+msgid "Fedora, openSUSE"
+msgstr "Fedora, openSUSE"
+
+#. Label of the row of chips above the persona list in settings (All, Public, Unlisted, Private).
+msgid "Filter by visibility"
+msgstr "Фільтр па бачнасці"
+
+#. Label for format preview selection in timestamp modal.
+msgid "Format preview"
+msgstr "Папярэдні прагляд фармату"
+
+#. Status beside the field for a new proxy tag in the import review: no persona has this tag
+msgctxt "persona-import-tag-status"
+msgid "Free"
+msgstr "Вольны"
+
+#. Small line on a card in the import review showing a member of the import file
+msgid "From your file"
+msgstr "З вашага файла"
+
+#. Link at the end of the command script help to the complete guide on GitHub.
+msgid "Full script guide"
+msgstr "Поўны даведнік па скрыптах"
+
+#. Heading of the download page for Android.
+msgid "Get Tyne for Android"
+msgstr "Tyne для Android"
+
+#. Heading of the download page for Linux.
+msgid "Get Tyne for Linux"
+msgstr "Tyne для Linux"
+
+#. Heading of the download page for macOS.
+msgid "Get Tyne for Mac"
+msgstr "Tyne для Mac"
+
+#. Heading of the download page for Windows.
+msgid "Get Tyne for Windows"
+msgstr "Tyne для Windows"
+
+#. Button that shows how to install the Tyne app on an iPhone or iPad.
+#. Heading of the download page for iPhone and iPad.
+msgid "Get Tyne for iPhone"
+msgstr "Tyne для iPhone"
+
+#. Button that opens the Tyne beta in Apple's TestFlight app.
+msgid "Get Tyne in TestFlight"
+msgstr "Атрымаць Tyne у TestFlight"
+
+#. Heading of the download page when the visitor's platform is not known.
+#. Heading of the panel (and title of the dialog) that offers the Tyne desktop and phone apps.
+msgid "Get the Tyne app"
+msgstr "Праграма Tyne"
+
+#. What happens to the app's version of a persona in the import review when the file's version is used
+msgid "Gets overwritten"
+msgstr "Будзе перазапісана"
+
+#. Heading when a reviewed persona import is done
+msgid "Here is what changed"
+msgstr "Вось што змянілася"
+
+#. Button that hides the list behind a line at the top of the import review again
+msgctxt "persona-import-list"
+msgid "Hide"
+msgstr "Схаваць"
+
+#. Tooltip on the channel header channel list toggle when the channel list is currently shown.
+msgid "Hide channel list"
+msgstr "Схаваць спіс каналаў"
+
+#. Tooltip for the small arrow button that collapses the signal bar above the message box.
+msgid "Hide signal bar"
+msgstr "Схаваць панэль сігналаў"
+
+#. Label of the field holding the placeholder shown while a member fills the command in.
+msgid "Hint"
+msgstr "Падказка"
+
+#. Settings section description in Advanced Settings for edge hover peek preference.
+msgid "Hover near window edges to temporarily reveal collapsed panels."
+msgstr "Навядзіце курсор на край акна, каб часова паказаць згорнутыя панэлі."
+
+#. Heading of the install steps on the download page.
+msgid "How to install"
+msgstr "Як усталяваць"
+
+#. Toast when icon file exceeds size limit
+msgid "Icon file is too large. Choose an image smaller than 10MB."
+msgstr "Файл значка завялікі. Выберыце выяву, меншую за 10 МБ."
+
+#. Install step on Windows. 'More info' and 'Run anyway' are the links and buttons of Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "If Windows shows this warning, click <0>More info</0>, then <1>Run anyway</1>."
+msgstr "Калі Windows пакажа гэтае папярэджанне, націсніце <0>Падрабязней</0>, а потым <1>Усё роўна запусціць</1>."
+
+#. Install step on Android. 'Settings', 'Allow from this source' and 'Install' are Android's own words: use Android's wording in this language.
+msgid "If your phone asks, tap <0>Settings</0>, turn on <1>Allow from this source</1>, go back and tap <2>Install</2>."
+msgstr "Калі тэлефон папросіць, націсніце <0>Налады</0>, уключыце <1>Дазволіць з гэтай крыніцы</1>, вярніцеся назад і націсніце <2>Усталяваць</2>."
+
+#. Title of the persona import dialog when the import is done
+msgid "Import finished"
+msgstr "Імпарт завершаны"
+
+#. Title of the persona import dialog
+#. Title of the persona import dialog
+msgid "Import personas"
+msgstr "Імпарт персон"
+
+#. Summary in the import review footer when every choice leaves things as they are
+msgid "Import will change nothing"
+msgstr "Імпарт нічога не зменіць"
+
+#. Information line in the persona import dialog, above the Import button
+msgid "Import will never overwrite existing personas without your permission."
+msgstr "Імпарт ніколі не перазапіша наяўныя персоны без вашага дазволу."
+
+#. Summary in the import review footer. {actions} is a list such as "link 17, add 7, skip 3"
+msgid "Import will {actions}"
+msgstr "Імпарт {actions}"
+
+#. Modal title for PluralKit import step importing
+msgid "Importing Personas..."
+msgstr "Імпарт персон…"
+
+msgid "Importing..."
+msgstr "Імпарт…"
+
+#. Option for where the selected persona applies: each channel remembers its own persona
+msgid "In each channel"
+msgstr "У кожным канале"
+
+#. Explanation of the "Kept as they were" line of the import result
+msgid "Including any that differ from the file, where you kept the version you had."
+msgstr "Уключна з тымі, што адрозніваюцца ад файла, калі вы пакінулі сваю версію."
+
+#. Button to insert timestamp into message composer.
+msgid "Insert"
+msgstr "Уставіць"
+
+#. Button or menu action label in the channel and chat mobile textarea plus bottom sheet. Keep it concise.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Plus menu item that opens the dynamic timestamp insertion modal.
+#. Title of the timestamp insertion modal.
+msgid "Insert timestamp"
+msgstr "Уставіць пазнаку часу"
+
+#. Label before the buttons that insert placeholders into a command.
+msgid "Insert:"
+msgstr "Уставіць:"
+
+#. Install step on iPhone. TestFlight is the name of Apple's app for testing apps.
+msgid "Install Apple's free <0>TestFlight</0> app from the App Store."
+msgstr "Усталюйце бясплатную праграму Apple <0>TestFlight</0> з App Store."
+
+#. Label of a field for a new proxy tag in the import review, when a member has several clashing tags. {tag} is the tag it replaces
+msgid "Instead of {tag}"
+msgstr "Замест {tag}"
+
+#. Why a community command could not run, shown after "Couldn't run /name:".
+msgid "Its script has a problem."
+msgstr "У яе скрыпце ёсць памылка."
+
+#. Option of the switch for a member whose tag is already taken: import it with a name and tag of its own
+msgctxt "persona-import-switch"
+msgid "Keep"
+msgstr "Пакінуць"
+
+#. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
+msgid "Keep both"
+msgstr "Пакінуць абедзве"
+
+#. Button that goes back to the persona import review
+msgid "Keep reviewing"
+msgstr "Працягнуць праверку"
+
+#. Badge on a collapsed member in the import review: it is imported with a tag of its own
+msgid "Keeping"
+msgstr "Пакідаецца"
+
+#. Badge on a collapsed persona in the import review: the file's version is added next to the app's
+msgid "Keeping both"
+msgstr "Застаюцца абедзве"
+
+#. Badge on a collapsed persona in the import review: the app's version is kept. {productName} is the app name
+msgid "Keeping {productName}'s"
+msgstr "Застаецца версія {productName}"
+
+#. Small line on the card of the persona in the import review that already has the proxy tag
+msgid "Keeps its tag"
+msgstr "Захоўвае свой тэг"
+
+#. Line of the import result: personas left unchanged
+msgid "Kept as they were"
+msgstr "Засталіся як былі"
+
+#. Option of the switch on a deleted persona in the import review: it stays deleted
+msgctxt "persona-import-switch"
+msgid "Leave deleted"
+msgstr "Пакінуць выдаленай"
+
+#. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
+msgid "Line {line}, column {column}: {problem}"
+msgstr "Радок {line}, слупок {column}: {problem}"
+
+#. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
+msgid "Made with /{name}"
+msgstr "Зроблена з дапамогай /{name}"
+
+msgid "Main account"
+msgstr "Асноўны ўліковы запіс"
+
+#. Button that makes the selected personas private.
+msgid "Make private"
+msgstr "Зрабіць прыватнымі"
+
+#. Button that makes the selected personas public.
+msgid "Make public"
+msgstr "Зрабіць публічнымі"
+
+#. Button that makes the selected personas unlisted.
+msgid "Make unlisted"
+msgstr "Прыбраць са спісу"
+
+#. Title of the confirmation before making the selected personas private.
+msgid "Make {count, plural, one {# persona} other {# personas}} private?"
+msgstr "Зрабіць {count, plural, one {# персону прыватнай} few {# персоны прыватнымі} many {# персон прыватнымі} other {# персоны прыватнымі}}?"
+
+#. Title of the confirmation before making the selected personas public.
+msgid "Make {count, plural, one {# persona} other {# personas}} public?"
+msgstr "Зрабіць {count, plural, one {# персону публічнай} few {# персоны публічнымі} many {# персон публічнымі} other {# персоны публічнымі}}?"
+
+msgid "Manage Personas"
+msgstr "Кіраванне персонамі"
+
+#. OAuth scope description shown on the consent screen for the personas.write scope.
+msgid "Manage and create your personas"
+msgstr "Ствараць вашы персоны і кіраваць імі"
+
+#. Permission name: allows editing and deleting anyone's community slash commands.
+msgid "Manage commands"
+msgstr "Кіраваць камандамі"
+
+#. Button in one’s own Personas list that opens the persona settings.
+msgid "Manage personas"
+msgstr "Кіраваць персонамі"
+
+#. Active persona mode manual
+#. Active persona mode manual
+#. Active persona mode manual
+msgid "Manual"
+msgstr "Уручную"
+
+#. Validation error when signature emoji limit is reached
+msgid "Maximum {max} signature emojis allowed per persona"
+msgstr "У персоны можа быць не больш за {max} адметных эмодзі"
+
+#. Placeholder name for unnamed member in import
+msgid "Member #{index}"
+msgstr "Удзельнік №{index}"
+
+msgid "Members with Avatars"
+msgstr "Удзельнікі з аватарамі"
+
+#. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
+msgid "Message Tools"
+msgstr "Інструменты паведамленняў"
+
+#. Subtitle of the Commands tab in community settings. Keep "/name" as it is.
+msgid "Messages members can post by typing /name."
+msgstr "Паведамленні, якія ўдзельнікі могуць адправіць, увёўшы /name."
+
+#. Link in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "More info"
+msgstr "Падрабязней"
+
+#. Sort order of the Personas list: the personas used most often first.
+msgid "Most used"
+msgstr "Найчасцей выкарыстоўваныя"
+
+#. Button in macOS' warning that an app was not opened: use macOS' own wording.
+msgid "Move to Trash"
+msgstr "Перамясціць у Кошык"
+
+#. Sort order of the Personas list: alphabetical by name.
+msgid "Name (A–Z)"
+msgstr "Імя (А–Я)"
+
+#. Title for new persona modal
+msgid "New Persona"
+msgstr "Новая персона"
+
+#. Button that starts a new community command.
+msgid "New command"
+msgstr "Новая каманда"
+
+#. Explanation of the "Added" line of the import result
+msgid "New personas from your file."
+msgstr "Новыя персоны з вашага файла."
+
+#. Desktop app File menu item. Opens another app window showing the same place as the current one.
+msgid "New window"
+msgstr "Новае акно"
+
+#. Button on a persona’s full profile that shows the next persona of the list.
+msgid "Next persona"
+msgstr "Наступная персона"
+
+#. Error message when PluralKit export lacks members array
+msgid "No \"members\" array found in this export file."
+msgstr "У гэтым файле экспарту не знойдзены масіў «members»."
+
+#. Shown in the import review where a persona or a member of the file has no bio
+msgid "No bio"
+msgstr "Няма апісання"
+
+#. Shown on a persona’s card in the Personas list when it has no bio.
+msgid "No bio yet."
+msgstr "Апісання пакуль няма."
+
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Няма колеру"
+
+#. Empty state title in the Commands tab.
+msgid "No commands"
+msgstr "Няма каманд"
+
+#. Shown in Settings › Personas when there are no deleted personas
+msgid "No deleted personas."
+msgstr "Выдаленых персон няма."
+
+#. Shown on a card in the import review when the account has no display tag
+msgid "No display tag"
+msgstr "Няма бачнага тэга"
+
+msgid "No display tag configured. Messages will show your account profile picture."
+msgstr "Бачны тэг не наладжаны. У паведамленнях будзе паказвацца аватар вашага ўліковага запісу."
+
+msgid "No matching personas found."
+msgstr "Адпаведных персон не знойдзена."
+
+msgid "No one matches."
+msgstr "Супадзенняў няма."
+
+msgid "No personas configured yet. Create one in Settings."
+msgstr "Персон пакуль няма. Стварыце першую ў наладах."
+
+msgid "No personas created yet. Click \"Add Persona\" to create your first persona!"
+msgstr "Вы яшчэ не стварылі ніводнай персоны. Націсніце «Дадаць персону», каб стварыць першую!"
+
+#. Shown in the persona list when the chosen chip holds none.
+msgid "No personas here."
+msgstr "Тут няма персон."
+
+#. Shown in the Personas list when the search matches nothing.
+msgid "No personas match your search."
+msgstr "Па вашым запыце персон не знойдзена."
+
+#. Shown in the import review where a persona or a member of the file has no pronouns
+msgid "No pronouns"
+msgstr "Няма займеннікаў"
+
+#. Shown in another account’s Personas list when it lists none.
+msgid "No public personas."
+msgstr "Няма публічных персон."
+
+msgid "No signals yet. The bar stays hidden until you add one."
+msgstr "Сігналаў пакуль няма. Панэль застаецца схаванай, пакуль вы не дадасце хоць адзін."
+
+#. Status beside an empty field for a new proxy tag in the import review
+msgid "No tag: added without one"
+msgstr "Без тэга: дадасца без яго"
+
+#. Shown in the import review where a persona or a member of the file has no proxy tags
+msgid "No tags"
+msgstr "Няма тэгаў"
+
+#. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
+msgid "Nobody has this signal on"
+msgstr "Гэты сігнал ні ў кога не ўключаны"
+
+#. Choice beside the personas a member of the import file might be: it is none of them
+msgid "None of these"
+msgstr "Ніводная з іх"
+
+#. Shown in one’s own Personas list when none of them is public.
+msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
+msgstr "Ніводная з вашых персон пакуль не публічная. Іншыя ўбачаць персону тут, калі вы выберыце для яе бачнасць «Публічная»."
+
+#. What happens to the import file's version of a persona in the import review
+msgid "Not imported"
+msgstr "Не будзе імпартавана"
+
+#. Explanation at the top of the import review when no member needs a choice, only the display tag
+msgid "Not sure? Leave it as it is: nothing changes."
+msgstr "Сумняваецеся? Пакіньце як ёсць: нічога не зменіцца."
+
+#. Link on the download page to every earlier release of the app.
+msgid "Older versions"
+msgstr "Папярэднія версіі"
+
+#. Heading next to a QR code that opens the Tyne download page on a phone.
+msgid "On your phone?"
+msgstr "Вы з тэлефона?"
+
+#. Helper description for the Everywhere option of the persona scope setting
+msgid "One persona for all channels."
+msgstr "Адна персона для ўсіх каналаў."
+
+#. Note in the persona picker when personas are remembered per channel. The persona picked here is used in the current channel only.
+msgid "Only for this channel"
+msgstr "Толькі для гэтага канала"
+
+#. Helper description for private persona visibility
+msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
+msgstr "Бачная толькі вам. Іншыя не могуць праглядаць поўнае апісанне і звесткі профілю гэтай персоны."
+
+#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
+msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
+msgstr "Адкрыйце <0>Сістэмныя налады</0>, потым <1>Прыватнасць і бяспека</1>. Пракруціце ўніз і націсніце <2>Усё роўна адкрыць</2>. Гэта трэба зрабіць толькі адзін раз."
+
+#. Button in macOS' Privacy & Security settings: use macOS' own wording.
+msgid "Open Anyway"
+msgstr "Усё роўна адкрыць"
+
+#. Last install step on a phone.
+#. Last install step on a phone.
+msgid "Open Tyne and sign in."
+msgstr "Адкрыйце Tyne і ўвайдзіце."
+
+#. Last install step on Linux.
+msgid "Open Tyne from your applications menu, or open the AppImage. Sign in and you're done."
+msgstr "Адкрыйце Tyne з меню праграм або запусціце AppImage. Увайдзіце — і гатова."
+
+#. Action menu item. Opens the selected community, channel or conversation in another app window (a new browser tab on the web).
+msgid "Open in new window"
+msgstr "Адкрыць у новым акне"
+
+#. Install step on macOS. 'Applications' is the Mac's Applications folder: use macOS' own name for it.
+msgid "Open the file you downloaded and drag Tyne into <0>Applications</0>. Then open Tyne."
+msgstr "Адкрыйце спампаваны файл і перацягніце Tyne у папку <0>Праграмы</0>. Потым адкрыйце Tyne."
+
+#. Install step: open the installer that was just downloaded.
+#. Install step: open the installer that was just downloaded.
+msgid "Open the file you downloaded."
+msgstr "Адкрыйце спампаваны файл."
+
+#. Choice: the command may take input.
+msgid "Optional"
+msgstr "Неабавязкова"
+
+#. Link from the Tyne app download button to the downloads for every platform.
+msgid "Other platforms"
+msgstr "Іншыя платформы"
+
+#. Shown above one’s own Personas list: how many of one’s personas others can see there.
+msgid "Others see {count, plural, one {# public persona} other {# public personas}}."
+msgstr "Іншыя бачаць {count, plural, one {# публічную персону} few {# публічныя персоны} many {# публічных персон} other {# публічнай персоны}}."
+
+#. Explains what making personas public does, in its confirmation.
+msgid "Others will see them in your Personas list and can open their profiles. You can change this back at any time."
+msgstr "Іншыя ўбачаць іх у вашым спісе персон і змогуць адкрываць іх профілі. Вы можаце вярнуць усё назад у любы момант."
+
+#. Textarea right-click context menu item that pastes clipboard contents without formatting.
+msgid "Paste as plain text"
+msgstr "Уставіць як звычайны тэкст"
+
+#. Settings search synonym.
+msgid "Peek"
+msgstr "Падгляд"
+
+#. A community command counter counts per person mentioned. The command then needs a mention to run.
+msgid "Person mentioned"
+msgstr "Згаданы чалавек"
+
+#. A community command counter counts per person who runs it.
+#. Button inserting the placeholder for the member who runs the command.
+msgid "Person running it"
+msgstr "Чалавек, які запускае"
+
+#. Name shown in the persona preview card before a name is entered
+msgid "Persona"
+msgstr "Персона"
+
+#. System message after /persona selects the persona {name}
+msgid "Persona \"{name}\" selected."
+msgstr "Выбрана персона «{name}»."
+
+msgid "Persona Tags (Prefix & Suffix)"
+msgstr "Тэгі персоны (прэфікс і суфікс)"
+
+#. Title of the setting that chooses whether the selected persona applies in every channel or is remembered per channel. Shown under the Active persona mode setting.
+msgid "Persona applies to"
+msgstr "Дзе дзейнічае персона"
+
+#. Toast when persona is created
+msgid "Persona created"
+msgstr "Персона створана"
+
+#. Toast when persona is deleted
+msgid "Persona deleted"
+msgstr "Персона выдалена"
+
+#. System message after /persona without a name: messages are sent as the account again
+msgid "Persona deselected."
+msgstr "Выбар персоны скасаваны."
+
+#. Toast when saving a persona without a name
+msgid "Persona name cannot be empty"
+msgstr "Імя персоны не можа быць пустым"
+
+#. Fallback screen reader label for the persona profile modal. Keep it concise.
+msgid "Persona profile"
+msgstr "Профіль персоны"
+
+#. Screen reader label for the persona profile modal. Keep it concise. Preserve {name}; it is inserted by code.
+msgid "Persona profile: {name}"
+msgstr "Профіль персоны: {name}"
+
+#. Heading on a persona’s full profile, above the date it was made.
+msgid "Persona since"
+msgstr "Дата стварэння"
+
+#. Toast when persona is updated
+msgid "Persona updated"
+msgstr "Персона абноўлена"
+
+#. Aria label for persona visibility tabs
+msgid "Persona visibility"
+msgstr "Бачнасць персоны"
+
+#. Section header in the message search popout listing matching personas for from: / mentions: filters.
+#. User settings tab for personas.
+msgid "Personas"
+msgstr "Персоны"
+
+#. Label of the tab, pill, button and sheet title that list an account’s personas, like "Mutual friends ({count})". Preserve {count}.
+msgid "Personas ({count})"
+msgstr "Персоны ({count})"
+
+#. Under "Android" in the list of platforms.
+msgid "Phones and tablets"
+msgstr "Тэлефоны і планшэты"
+
+#. Help for an example in a command script.
+msgid "Pick one option at random"
+msgstr "Выбраць выпадковы варыянт"
+
+#. Help for an example in a command script.
+msgid "Pick one word at random"
+msgstr "Выбраць выпадковае слова"
+
+#. Help for an example in a command script.
+msgid "Pick the word for a number"
+msgstr "Падабраць форму слова да ліку"
+
+#. Emoji context menu action that pins the emoji.
+msgid "Pin emoji"
+msgstr "Замацаваць эмодзі"
+
+#. Emoji context menu action that pins the emoji for the active persona.
+msgid "Pin for this persona"
+msgstr "Замацаваць для гэтай персоны"
+
+#. Toast when saving a persona whose tag pairs have errors
+msgid "Please fix tag errors before saving"
+msgstr "Перад захаваннем выпраўце памылкі ў тэгах"
+
+#. Accessible name of the KLIPY attribution mark in the GIF picker; KLIPY is a brand name
+msgid "Powered by KLIPY"
+msgstr "Пры падтрымцы KLIPY"
+
+#. Placeholder for persona tag prefix
+msgid "Prefix (e.g. [)"
+msgstr "Прэфікс (напр. [)"
+
+#. Small print on the desktop app update prompt, which opens without taking focus. F6 is a keyboard key, so keep it as F6.
+msgid "Press F6 to reach this window with the keyboard."
+msgstr "Націсніце F6, каб перайсці да гэтага акна з клавіятуры."
+
+#. Button on a persona’s full profile that shows the previous persona of the list.
+msgid "Previous persona"
+msgstr "Папярэдняя персона"
+
+#. Badge on one’s own persona in the Personas list: its profile is hidden from others.
+#. Chip above the persona list: private personas.
+#. Persona visibility private
+msgid "Private"
+msgstr "Прыватная"
+
+#. Tooltip on private persona badge
+msgid "Private persona"
+msgstr "Прыватная персона"
+
+#. placeholder {0}: progress.currentName
+msgid "Processing: {0}"
+msgstr "Апрацоўка: {0}"
+
+#. Helper description for unlisted persona visibility
+msgid "Profile cards are accessible only when clicking on messages sent by this persona. Not listed in your public persona list."
+msgstr "Картку профілю можна адкрыць, толькі націснуўшы на паведамленне гэтай персоны. Яе няма ў вашым публічным спісе персон."
+
+#. Helper description for public persona visibility
+msgid "Profile cards are accessible when clicking on messages and visible in your public personas list to friends and mutual servers."
+msgstr "Картку профілю можна адкрыць, націснуўшы на паведамленне, а ў вашым публічным спісе персон яе бачаць сябры і ўдзельнікі агульных супольнасцей."
+
+#. Chip above the persona list: public personas.
+#. Persona visibility public
+msgid "Public"
+msgstr "Публічная"
+
+#. Tooltip on public persona badge
+msgid "Public persona"
+msgstr "Публічная персона"
+
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+#. Screen reader description of the QR code in the "Get the Tyne app" panel.
+msgid "QR code that opens the Tyne download page"
+msgstr "QR-код, які адкрывае старонку спампоўкі Tyne"
+
+#. Setting on the personas settings page: whether several of your personas (and your account) can each react with the same emoji on one message
+msgid "React as several personas at once"
+msgstr "Рэагаваць ад імя некалькіх персон адначасова"
+
+#. Title of the modal and context menu item to react as a persona.
+msgid "React as..."
+msgstr "Адрэагаваць ад імя…"
+
+msgid "Reacted"
+msgstr "Адрэагавалі"
+
+msgid "Reacting as <0>{reactorName}</0>"
+msgstr "Рэакцыя ад імя <0>{reactorName}</0>"
+
+#. Tooltip hint showing effective reacting persona or user on quick reaction hover.
+msgid "Reacting as {name}"
+msgstr "Рэакцыя ад імя {name}"
+
+msgid "Reacting with a signature emoji will always react as this persona, regardless of active persona."
+msgstr "Рэакцыя адметным эмодзі заўсёды ставіцца ад імя гэтай персоны, незалежна ад актыўнай персоны."
+
+msgid "Recent"
+msgstr "Нядаўнія"
+
+msgid "Recent Personas"
+msgstr "Нядаўнія персоны"
+
+#. Sort order of one’s own Personas list: the personas used most recently first.
+msgid "Recently used"
+msgstr "Нядаўна выкарыстаныя"
+
+#. Button that removes a counter from a community command.
+msgid "Remove counter"
+msgstr "Выдаліць лічыльнік"
+
+#. Aria label for removing signature emoji
+msgid "Remove signature emoji"
+msgstr "Выдаліць адметнае эмодзі"
+
+#. Aria label for removing a tag pair
+msgid "Remove tag pair"
+msgstr "Выдаліць пару тэгаў"
+
+#. What happens to the import file's display tag in the import review when it is used
+msgid "Replaces your display tag"
+msgstr "Заменіць ваш бачны тэг"
+
+#. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
+msgid "Replaces {productName}'s {name}"
+msgstr "Заменіць {name} у {productName}"
+
+#. Why an image could not be imported when the server answered with HTTP status {status}
+msgid "Request failed (HTTP {status})"
+msgstr "Памылка запыту (HTTP {status})"
+
+#. Button that sets all counts of a community command counter to zero.
+msgid "Reset counts"
+msgstr "Абнуліць лічыльнік"
+
+#. Destructive signal bar right-click menu action for moderators that turns the signal off for everyone.
+msgid "Reset signal for everyone"
+msgstr "Скінуць сігнал для ўсіх"
+
+#. Confirmation before resetting a community command counter. Preserve {name}.
+msgid "Reset the counts of {name}? This can't be undone."
+msgstr "Абнуліць лічыльнік {name}? Гэта нельга адрабіць."
+
+#. Button that brings back a deleted persona
+msgid "Restore"
+msgstr "Аднавіць"
+
+#. Explanation of the "Still deleted" line of the import result
+msgid "Restore them from Deleted personas in Settings if you change your mind."
+msgstr "Калі перадумаеце, аднавіце іх у наладах, у раздзеле «Выдаленыя персоны»."
+
+#. Line of the import result: deleted personas brought back
+msgid "Restored"
+msgstr "Адноўлены"
+
+msgid "Results"
+msgstr "Вынікі"
+
+msgid "Root Account (Default)"
+msgstr "Асноўны ўліковы запіс (па змаўчанні)"
+
+#. Button under the preview of a command script that picks at random: fills the preview in again.
+msgid "Run again"
+msgstr "Запусціць яшчэ раз"
+
+#. Button in Windows' SmartScreen warning: use Windows' own wording in this language.
+msgid "Run anyway"
+msgstr "Усё роўна запусціць"
+
+#. Label of the field whose text stands in for what a member types, in the preview.
+msgid "Sample input"
+msgstr "Прыклад уводу"
+
+#. Progress status when saving personas
+msgid "Saving personas..."
+msgstr "Захаванне персон…"
+
+#. Under 'On your phone?', next to the QR code.
+msgid "Scan with your camera."
+msgstr "Адскануйце камерай."
+
+#. Under the QR code on the download page.
+msgid "Scan with your phone's camera."
+msgstr "Адскануйце камерай тэлефона."
+
+#. Label of the code editor for a community command.
+msgid "Script"
+msgstr "Скрыпт"
+
+#. Title of the expandable help under the command script editor.
+msgid "Script reference"
+msgstr "Даведка па скрыптах"
+
+#. placeholder {0}: filteredPersonas.length
+msgid "Search Results ({0})"
+msgstr "Вынікі пошуку ({0})"
+
+#. Placeholder of the search box in the Commands tab.
+msgid "Search commands"
+msgstr "Пошук каманд"
+
+#. Search placeholder in persona picker sheet
+msgid "Search personas, tags, pronouns..."
+msgstr "Пошук персон, тэгаў, займеннікаў…"
+
+#. Placeholder of the search field in one’s own Personas list.
+msgid "Search your personas"
+msgstr "Пошук сярод вашых персон"
+
+#. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
+msgid "Search {name}’s personas"
+msgstr "Пошук сярод персон {name}"
+
+#. Tooltip when sending as root account with persona mode active
+msgid "Sending as @{username} ({mode}) - Click to switch persona"
+msgstr "Адпраўка ад імя @{username} ({mode}) — націсніце, каб змяніць персону"
+
+#. Tooltip when sending as a persona matched by persona tag
+msgid "Sending as {name} (Matched by tag) - Click to switch persona"
+msgstr "Адпраўка ад імя {name} (па тэгу) — націсніце, каб змяніць персону"
+
+msgid "Set Active"
+msgstr "Зрабіць актыўнай"
+
+#. Aria label for setting active persona
+msgid "Set as active persona"
+msgstr "Зрабіць актыўнай персонай"
+
+#. Button that shows the list behind a line at the top of the import review
+msgctxt "persona-import-list"
+msgid "Show"
+msgstr "Паказаць"
+
+#. Short label for an advanced message action bar preference.
+msgid "Show copy button"
+msgstr "Паказваць кнопку капіявання"
+
+#. Button that loads the list of deleted personas in Settings › Personas
+msgid "Show deleted personas"
+msgstr "Паказаць выдаленыя персоны"
+
+#. Plus menu submenu toggle that shows the persona selector next to the textarea.
+#. Short label for an advanced message input preference.
+msgid "Show personas button"
+msgstr "Паказваць кнопку персон"
+
+#. Tooltip for the small arrow button that expands the collapsed signal bar above the message box.
+msgid "Show signal bar"
+msgstr "Паказаць панэль сігналаў"
+
+#. Switch in one’s own Personas list that adds the personas others do not see there.
+msgid "Show unlisted and private"
+msgstr "Паказваць персоны не ў спісе і прыватныя"
+
+msgid "Signal Bar"
+msgstr "Панэль сігналаў"
+
+#. Community settings tab for choosing the toggleable signal icons shown above the message box.
+msgctxt "community-settings-tab"
+msgid "Signal Bar"
+msgstr "Панэль сігналаў"
+
+#. Accessible label for the row of toggleable signal icons above the message box.
+msgid "Signal bar"
+msgstr "Панэль сігналаў"
+
+#. Accessible label for the text field that names a signal in the Message Tools settings tab.
+msgid "Signal label"
+msgstr "Назва сігналу"
+
+msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
+msgstr "Сігналы — гэта значкі над полем паведамлення, якія кожны можа ўключаць і выключаць, і ўсе ў размове бачаць, у каго яны ўключаныя. Гэтая панэль агульная для ўсіх супольнасцей і асабістых паведамленняў на гэтым серверы. Перацягвайце значкі, каб змяніць парадак."
+
+msgid "Signature Emojis"
+msgstr "Адметныя эмодзі"
+
+#. Validation error when signature emoji is already used by another persona
+msgid "Signature emoji already in use by persona \"{name}\""
+msgstr "Гэтае адметнае эмодзі ўжо выкарыстоўвае персона «{name}»"
+
+#. Row heading in the table comparing a persona with the import file
+msgid "Signature emojis"
+msgstr "Адметныя эмодзі"
+
+#. Option of the switch for a member whose tag is already taken: do not import it
+msgctxt "persona-import-switch"
+msgid "Skip"
+msgstr "Прапусціць"
+
+#. Line of the import result: members left out
+msgid "Skipped"
+msgstr "Прапушчаны"
+
+#. Import warning when member has no name
+msgid "Skipped member because they have no name configured."
+msgstr "Удзельніка прапушчана, бо ў яго не зададзена імя."
+
+#. Badge on a collapsed member in the import review: it is not imported
+msgid "Skipping"
+msgstr "Прапускаецца"
+
+#. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
+msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
+msgstr "Некаторыя проксі-тэгі прапушчаны: {productName} дазваляе да 5 тэгаў на персону, кожны не даўжэйшы за 32 сімвалы."
+
+#. Badge on a collapsed deleted persona in the import review: it stays deleted
+msgid "Staying deleted"
+msgstr "Застаецца выдаленай"
+
+#. What happens to the app's version of a persona in the import review
+msgid "Stays as it is"
+msgstr "Застанецца як ёсць"
+
+#. What happens to the app's deleted persona in the import review
+msgid "Stays deleted"
+msgstr "Застанецца выдаленай"
+
+#. Line of the import result: deleted personas not restored
+msgid "Still deleted"
+msgstr "Па-ранейшаму выдаленыя"
+
+#. Explanation of the "Skipped" line of the import result
+msgid "Still in your file. Import it again any time to decide about them."
+msgstr "Яны засталіся ў вашым файле. Імпартуйце яго зноў у любы момант, каб вырашыць, што з імі рабіць."
+
+#. Button that closes the persona import review without importing
+msgid "Stop importing"
+msgstr "Спыніць імпарт"
+
+#. Title of the confirmation when the persona import review is closed before importing
+msgid "Stop this import?"
+msgstr "Спыніць гэты імпарт?"
+
+#. Progress status while the images inside an imported persona export are stored
+msgid "Storing image {current} of {total} from the file..."
+msgstr "Захаванне выявы {current} з {total} з файла…"
+
+#. Placeholder for persona tag suffix
+msgid "Suffix (e.g. ])"
+msgstr "Суфікс (напр. ])"
+
+#. Section header for suggested time zones in the timestamp modal.
+msgid "Suggested"
+msgstr "Прапанаваныя"
+
+msgid "Supports PluralKit system export files"
+msgstr "Падтрымліваюцца файлы экспарту сістэм PluralKit"
+
+#. Slash-command description for /persona
+msgid "Switch the active persona"
+msgstr "Змяніць актыўную персону"
+
+#. Label of the field for a new proxy tag in the import review
+msgctxt "persona-import-field"
+msgid "Tag"
+msgstr "Тэг"
+
+#. Names the display tag icon in the list of import warnings, where personas are named otherwise
+#. Title of the dialog for choosing the icon shown in the display tag, and the icon's alt text
+msgid "Tag Icon"
+msgstr "Значок тэга"
+
+msgid "Tag Text"
+msgstr "Тэкст тэга"
+
+#. Row heading in the table comparing a persona with the import file: whether its tags are matched
+msgid "Tag matching"
+msgstr "Распазнаванне тэгаў"
+
+#. Toast when saving a persona whose tag pair {tag} (such as "a:text") another persona {name} already uses
+msgid "Tag pair \"{tag}\" is already in use by persona \"{name}\""
+msgstr "Пару тэгаў «{tag}» ужо выкарыстоўвае персона «{name}»"
+
+#. Validation error when tag pair is already used by another persona
+msgid "Tag pair already in use by persona \"{name}\""
+msgstr "Гэтую пару тэгаў ужо выкарыстоўвае персона «{name}»"
+
+#. Settings search synonym.
+msgid "Taskbar"
+msgstr "Панэль задач"
+
+#. Placeholder for persona bio
+msgid "Tell us about this persona..."
+msgstr "Раскажыце пра гэтую персону…"
+
+#. Help for a command script variable.
+msgid "That person’s name"
+msgstr "Імя гэтага чалавека"
+
+#. Help for a command script variable.
+msgid "The channel, as a mention"
+msgstr "Канал у выглядзе згадкі"
+
+#. Error message when uploaded file is not valid JSON
+msgid "The chosen file is not a valid JSON object."
+msgstr "Выбраны файл не з’яўляецца сапраўдным аб’ектам JSON."
+
+#. Error in Settings › Personas when the list of deleted personas fails to load
+msgid "The deleted personas could not be loaded."
+msgstr "Не ўдалося загрузіць выдаленыя персоны."
+
+#. Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown
+msgid "The file's picture couldn't be loaded"
+msgstr "Не ўдалося загрузіць выяву з файла"
+
+#. Help for a command script variable.
+msgid "The first person they mention, if any"
+msgstr "Першы згаданы чалавек, калі ёсць"
+
+#. Help for a command script variable.
+msgid "The name of this community"
+msgstr "Назва гэтай супольнасці"
+
+#. Help for a command script variable.
+msgid "The person running it, as a mention"
+msgstr "Чалавек, які запускае каманду, у выглядзе згадкі"
+
+#. Error toast when restoring a deleted persona fails
+msgid "The persona could not be restored."
+msgstr "Не ўдалося аднавіць персону."
+
+#. Description of the persona option of the /persona slash command
+msgid "The persona to select."
+msgstr "Персона, якую трэба выбраць."
+
+#. Problem in a community command script: it produces more text than is allowed.
+msgid "The script builds too much text."
+msgstr "Скрыпт стварае занадта шмат тэксту."
+
+#. Problem in a community command script.
+msgid "The script is too long."
+msgstr "Скрыпт занадта доўгі."
+
+#. Problem in a community command script.
+msgid "The script took too long to run."
+msgstr "Скрыпт выконваўся занадта доўга."
+
+msgid "The signal bar is off until you tick a channel here. Ticking a category or the whole community also covers channels created there later."
+msgstr "Панэль сігналаў выключаная, пакуль вы не адзначыце тут канал. Калі адзначыць катэгорыю або ўсю супольнасць, гэта распаўсюдзіцца і на каналы, створаныя там пазней."
+
+#. Import warning when the icon of the display tag in a Tyne export could not be stored. {error} is the reason, inserted by code.
+msgid "The tag icon could not be stored: {error}. It can be set again in the persona settings."
+msgstr "Не ўдалося захаваць значок тэга: {error}. Яго можна зноў задаць у наладах персон."
+
+#. Explanation of the "Updated from the file" line of the import result
+msgid "Their details are the file's now; their messages and history stayed."
+msgstr "Цяпер у іх даныя з файла; іх паведамленні і гісторыя захаваліся."
+
+#. Explains what deleting personas does, in its confirmation.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
+msgstr "Іх паведамленні па-ранейшаму будуць паказваць іх імёны і аватары, але вы больш не зможаце пісаць ад іх імя, а іх тэгі і адметныя эмодзі вызваляцца. Гэта нельга адрабіць."
+
+#. Help for a command script variable.
+msgid "Their name"
+msgstr "Імя чалавека, які запускае"
+
+#. Explains what making personas private does, in its confirmation.
+msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
+msgstr "Іх профілі будуць схаваныя ад іншых. Іх імёны і аватары па-ранейшаму будуць бачныя ў іх паведамленнях і рэакцыях."
+
+#. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
+msgid "There's no filter called {name}."
+msgstr "Няма фільтра з назвай {name}."
+
+#. Problem in a community command script. {name} is what was written, such as "for". Preserve {name}.
+msgid "There's no tag called {name}."
+msgstr "Няма тэга з назвай {name}."
+
+#. Explanation at the top of the import review. {productName} is the app name
+msgid "These look like personas you already have in {productName}. For each one, pick what {productName} should have. Not sure? Leave it as it is: nothing changes."
+msgstr "Падобна, гэтыя персоны ўжо ёсць у вас у {productName}. Для кожнай выберыце, што павінна быць у {productName}. Сумняваецеся? Пакіньце як ёсць: нічога не зменіцца."
+
+#. Error in the persona import dialog when the chosen .zip file is damaged
+msgid "This .zip file could not be read."
+msgstr "Не ўдалося прачытаць гэты файл .zip."
+
+#. Error in the persona import dialog when the chosen .zip file is not a persona export. Preserve {productName}; it is the app name, inserted by code.
+msgid "This .zip file is not a persona export from {productName}."
+msgstr "Гэты файл .zip не з’яўляецца экспартам персон з {productName}."
+
+#. Body of the dialog confirming that a command is deleted.
+msgid "This can't be undone. Messages made with it still show which command made them."
+msgstr "Гэта нельга адрабіць. Паведамленні, створаныя гэтай камандай, па-ранейшаму будуць паказваць, якая каманда іх стварыла."
+
+#. Empty state text in the Commands tab.
+msgid "This community doesn't have any commands yet."
+msgstr "У гэтай супольнасці пакуль няма каманд."
+
+#. Validation error when signature emoji is duplicated within the same persona
+msgid "This emoji is already added as a signature emoji"
+msgstr "Гэтае эмодзі ўжо дададзена як адметнае"
+
+msgid "This is a preview of how your display tag will look in chat."
+msgstr "Так ваш бачны тэг будзе выглядаць у чаце."
+
+#. Problem in a community command script: a syntax error at the position given before this text.
+msgid "This part can't be read."
+msgstr "Гэтую частку немагчыма прачытаць."
+
+#. Problem in a community command script: it failed while running, at the position given before this text.
+msgid "This part stopped with an error."
+msgstr "Выкананне гэтай часткі спынілася з памылкай."
+
+msgid "This persona’s profile is private."
+msgstr "Профіль гэтай персоны прыватны."
+
+#. Shown instead of the preview when a command script produces no text.
+msgid "This would post nothing, so the command would fail."
+msgstr "Гэта нічога не адправіць, таму каманда не спрацуе."
+
+#. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
+msgid "Toggle the channel list"
+msgstr "Паказаць або схаваць спіс каналаў"
+
+msgid "Total Members"
+msgstr "Усяго ўдзельнікаў"
+
+#. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
+msgid "Turn off signal bar"
+msgstr "Выключыць панэль сігналаў"
+
+#. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
+msgid "Turn off {name}"
+msgstr "Выключыць для {name}"
+
+#. Direct message right-click menu action that shows the signal bar above the message box in this DM.
+msgid "Turn on signal bar"
+msgstr "Уключыць панэль сігналаў"
+
+#. Last install step: the app starts after installing.
+msgid "Tyne opens by itself. Sign in and you're done."
+msgstr "Tyne адкрыецца сам. Увайдзіце — і гатова."
+
+#. Placeholder in the empty command script editor. {output} and {tag} are the characters to type; preserve them.
+msgid "Type {output} or {tag} for suggestions."
+msgstr "Увядзіце {output} або {tag}, каб убачыць падказкі."
+
+#. Explanation under the persona editor's switch for not matching a persona's tags.
+msgid "Typing one of these tags won't switch to this persona. The tag is sent as written."
+msgstr "Увод аднаго з гэтых тэгаў не пераключае на гэтую персону. Тэг адпраўляецца так, як напісаны."
+
+#. Under the .deb download button: the Linux distributions that use .deb packages.
+msgid "Ubuntu, Debian, Linux Mint"
+msgstr "Ubuntu, Debian, Linux Mint"
+
+#. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
+msgid "Ubuntu, Fedora and more"
+msgstr "Ubuntu, Fedora і іншыя"
+
+#. Badge on one’s own persona in the Personas list: others do not see it in the list.
+#. Chip above the persona list: unlisted personas.
+#. Persona visibility unlisted
+msgid "Unlisted"
+msgstr "Не ў спісе"
+
+#. Emoji context menu action that unpins the emoji.
+msgid "Unpin emoji"
+msgstr "Адмацаваць эмодзі"
+
+#. Emoji context menu action that unpins the emoji for the active persona.
+msgid "Unpin for this persona"
+msgstr "Адмацаваць для гэтай персоны"
+
+#. Helper description for Manual persona mode
+msgid "Untagged messages send as the persona you picked. A tag applies to that message only."
+msgstr "Паведамленні без тэга адпраўляюцца ад імя выбранай вамі персоны. Тэг дзейнічае толькі на тое паведамленне, у якім ён ёсць."
+
+#. Helper description for Last Used persona mode
+msgid "Untagged messages send as whoever spoke last. Using a tag switches to that persona."
+msgstr "Паведамленні без тэга адпраўляюцца ад імя таго, хто пісаў апошнім. Тэг пераключае на персону, якой ён належыць."
+
+#. Line of the import result: personas given the file's details
+msgid "Updated from the file"
+msgstr "Абноўлены з файла"
+
+#. Tooltip on the chip that shows which community command made a message. Preserve {name}.
+msgid "Use /{name}"
+msgstr "Выкарыстаць /{name}"
+
+#. Tooltip on the chip that shows which community command made a message, naming the community it belongs to. Preserve {name} and {community}.
+msgid "Use /{name} from {community}"
+msgstr "Выкарыстаць /{name} з супольнасці {community}"
+
+#. Shown after pressing Import in the persona import dialog, before anything happens
+msgid "Use Export to make a backup before continuing."
+msgstr "Перш чым працягнуць, зрабіце рэзервовую копію праз «Экспарт»."
+
+#. Permission description in the channel permissions editor for the Use external commands permission.
+msgid "Use commands from other communities in this channel."
+msgstr "Выкарыстоўваць каманды з іншых супольнасцей у гэтым канале."
+
+#. Permission description in the role editor for the Use external commands permission. "Other communities" means slash commands made in a different community.
+msgid "Use commands from other communities."
+msgstr "Выкарыстоўваць каманды з іншых супольнасцей."
+
+#. Permission name: allows using slash commands made in other communities.
+msgid "Use external commands"
+msgstr "Выкарыстоўваць знешнія каманды"
+
+#. Help under a community command counter. {variable} is code such as {{ hugs }}. Preserve {variable}.
+msgid "Use it in a script as {variable}. Each run adds one first, so the first run reads 1."
+msgstr "Выкарыстоўвайце яго ў скрыпце як {variable}. Кожны запуск спачатку дадае адзінку, таму пры першым запуску значэнне роўнае 1."
+
+#. Error under the name of a community command counter.
+msgid "Use lowercase letters, numbers and _, starting with a letter, and not a name scripts already use."
+msgstr "Выкарыстоўвайце малыя літары, лічбы і _; назва павінна пачынацца з літары і не супадаць з назвай, якую ўжо выкарыстоўваюць скрыпты."
+
+#. Error under the command name field when the name is not allowed.
+msgid "Use lowercase letters, numbers, - and _, up to 32 characters."
+msgstr "Выкарыстоўвайце малыя літары, лічбы, - і _, не больш за 32 сімвалы."
+
+#. Button in the command editor that switches back from the code editor to the plain message field.
+msgid "Use the basic editor"
+msgstr "Выкарыстаць просты рэдактар"
+
+#. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
+msgctxt "persona-import-switch"
+msgid "Use the file's"
+msgstr "Узяць з файла"
+
+#. Button in the command editor that switches the message field to the code editor for scripts.
+msgid "Use the script editor"
+msgstr "Выкарыстаць рэдактар скрыптоў"
+
+#. Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name
+msgid "Use {productName}'s"
+msgstr "Узяць з {productName}"
+
+#. Badge on a collapsed persona in the import review: the import file's version replaces it
+msgid "Using the file's"
+msgstr "Бярэцца версія з файла"
+
+#. OAuth scope description shown on the consent screen for the personas.read scope.
+msgid "View your personas"
+msgstr "Праглядаць вашы персоны"
+
+#. Button inserting the placeholder for what the member types after the command.
+#. Help for a command script variable.
+msgid "What they type"
+msgstr "Уведзены тэкст"
+
+#. Shown in the channel when a community command is sent with a line break in its input. Preserve {name}.
+msgid "What you type after /{name} has to fit on one line."
+msgstr "Тэкст пасля /{name} павінен змяшчацца ў адзін радок."
+
+#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
+msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
+msgstr "Калі macOS паведаміць, што Tyne не адкрыты, націсніце <0>Гатова</0>."
+
+msgid "Where the signal bar appears"
+msgstr "Дзе паказваецца панэль сігналаў"
+
+#. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
+msgid "Where your persona is remembered"
+msgstr "Дзе запамінаецца ваша персона"
+
+#. Question over the personas a member of the import file might be. {name} is the member
+msgid "Which persona is {name}?"
+msgstr "Якая персона — гэта {name}?"
+
+#. Which Windows versions the Tyne app needs.
+msgid "Windows 10 or 11"
+msgstr "Windows 10 або 11"
+
+#. Title of Windows' SmartScreen warning, drawn on the download page: use Windows' own wording in this language.
+msgid "Windows protected your PC"
+msgstr "Сістэма Windows абараніла ваш камп’ютар"
+
+#. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
+msgid "Write a number as 1st, 2nd, 3rd"
+msgstr "Запісаць лік як 1st, 2nd, 3rd"
+
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
+msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
+msgstr "Вы выдалілі {name} у {productName} {date}. Вярнуць {name}?"
+
+#. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name
+msgid "You deleted {name} in {productName}. Bring {name} back?"
+msgstr "Вы выдалілі {name} у {productName}. Вярнуць {name}?"
+
+#. Text of the confirmation when the persona import review is closed before importing
+msgid "Your choices for these members will be lost, and nothing is imported."
+msgstr "Ваш выбар для гэтых удзельнікаў знікне, і нічога не будзе імпартавана."
+
+#. Question in the import review when the import file has another display tag. {productName} is the app name
+msgid "Your display tag shows after every persona's name. Which one should {productName} use?"
+msgstr "Ваш бачны тэг паказваецца пасля імя кожнай персоны. Які з іх выкарыстоўваць у {productName}?"
+
+#. On the download page after the visitor chose to download the app elsewhere.
+msgid "Your download should start in a moment. If it doesn't, use the button above."
+msgstr "Спампоўка хутка пачнецца. Калі не, скарыстайцеся кнопкай вышэй."
+
+#. Column heading in the import review, above the import file side; the other column is the app name
+msgid "Your file"
+msgstr "Ваш файл"
+
+msgid "Your reactions"
+msgstr "Вашы рэакцыі"
+
+#. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
+msgid "Your {emojiName} reactions"
+msgstr "Вашы рэакцыі {emojiName}"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "add {count}"
+msgstr "дадасць {count}"
+
+#. Progress label for avatar downloads
+msgid "avatars downloaded"
+msgstr "аватараў спампавана"
+
+#. Progress label for banner downloads during persona import
+msgid "banners downloaded"
+msgstr "банераў спампавана"
+
+#. Part of the import summary "Import will add 7 and change your display tag"
+msgid "change your display tag"
+msgstr "зменіць ваш бачны тэг"
+
+#. Placeholder for persona name
+msgid "e.g. Alice"
+msgstr "напр. Аліса"
+
+#. Placeholder of the display tag text input; an example of a system or group name, as in Alice in Wonderland
+msgid "e.g. Wonderland"
+msgstr "напр. Краіна Цудаў"
+
+#. Placeholder for persona pronouns
+msgid "e.g. she/her"
+msgstr "напр. яна/яе"
+
+#. Placeholder text for natural language timestamp input.
+msgid "e.g. tomorrow at 3pm, in 2 hours, now"
+msgstr "напр. tomorrow at 3pm, in 2 hours, now"
+
+#. Which iPhone and iPad system versions the Tyne app needs.
+msgid "iOS 16 or newer"
+msgstr "iOS 16 або навейшая"
+
+#. Progress label while the images inside an imported persona export are stored
+msgid "images stored"
+msgstr "выяў захавана"
+
+#. What the import progress counts when no more specific name is known, as in "3 of 10 items (30%)"
+msgid "items"
+msgstr "элементаў"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "link {count}"
+msgstr "звяжа {count}"
+
+#. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
+msgid "press to see your reactions"
+msgstr "націсніце, каб убачыць свае рэакцыі"
+
+#. Part of the import summary "Import will link 17, restore 2, skip 3"
+msgid "restore {count}"
+msgstr "адновіць {count}"
+
+#. Progress label when saving personas
+msgid "saving personas"
+msgstr "персон захавана"
+
+#. Part of the import summary "Import will link 17, add 7, skip 3"
+msgid "skip {count}"
+msgstr "прапусціць {count}"
+
+#. Stands for the message text between a tag pair's prefix and suffix inputs, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+#. Stands for the message text between a tag pair's prefix and suffix, as in "a:text"
+msgid "text"
+msgstr "тэкст"
+
+#. Part of the import summary "Import will link 17, use the file's version for 2"
+msgid "use the file's version for {count}"
+msgstr "возьме версію з файла для {count}"
+
+#. placeholder {0}: progress.current
+#. placeholder {1}: progress.total
+#. placeholder {2}: progress.label ?? i18n._(PROGRESS_ITEMS_DESCRIPTOR)
+#. placeholder {3}: progress.percent
+msgid "{0} of {1} {2} ({3}%)"
+msgstr "{0} з {1} {2} ({3}%)"
+
+#. Heading when a persona import with nothing to decide is done. {addedCount} is a number
+msgid "{addedCount} personas added"
+msgstr "Дададзена персон: {addedCount}"
+
+#. Native desktop dialog headline shown when an update has finished downloading. {appName} is the desktop app name and {version} the new version number.
+msgid "{appName} {version} is ready to install."
+msgstr "Абнаўленне {appName} {version} гатовае да ўсталявання."
+
+#. Line at the top of the import review: members already linked to an identical persona, or connected to one with the same name and tag. {count} is a number
+msgid "{count, plural, one {# exact match} other {# exact matches}}"
+msgstr "{count, plural, one {# дакладнае супадзенне} few {# дакладныя супадзенні} many {# дакладных супадзенняў} other {# дакладнага супадзення}}"
+
+#. Heading in the import review over the list of members whose proxy tag another persona already has
+msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
+msgstr "{count, plural, one {# удзельнік мае ўжо заняты тэг} few {# удзельнікі маюць ужо заняты тэг} many {# удзельнікаў маюць ужо заняты тэг} other {# удзельніка маюць ужо заняты тэг}}"
+
+#. Heading in the import review over the members that share a name or tag with personas of the account
+msgid "{count, plural, one {# member might be a persona you already have} other {# members might be personas you already have}}"
+msgstr "{count, plural, one {# удзельнік можа быць персонай, якая ў вас ужо ёсць} few {# удзельнікі могуць быць персонамі, якія ў вас ужо ёсць} many {# удзельнікаў могуць быць персонамі, якія ў вас ужо ёсць} other {# удзельніка могуць быць персонамі, якія ў вас ужо ёсць}}"
+
+#. Line at the top of the import review. {count} is a number of members of the import file
+msgid "{count, plural, one {# new member} other {# new members}}"
+msgstr "{count, plural, one {# новы ўдзельнік} few {# новыя ўдзельнікі} many {# новых удзельнікаў} other {# новага ўдзельніка}}"
+
+#. Line at the top of the import review. {count} is a number, {productName} the app name
+msgid "{count, plural, one {# persona in {productName} isn't in your file} other {# personas in {productName} aren't in your file}}"
+msgstr "{count, plural, one {# персона з {productName} адсутнічае ў вашым файле} few {# персоны з {productName} адсутнічаюць у вашым файле} many {# персон з {productName} адсутнічаюць у вашым файле} other {# персоны з {productName} адсутнічаюць у вашым файле}}"
+
+#. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
+msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
+msgstr "{count, plural, one {# персона адрозніваецца ў вашым файле} few {# персоны адрозніваюцца ў вашым файле} many {# персон адрозніваюцца ў вашым файле} other {# персоны адрозніваюцца ў вашым файле}}"
+
+#. Toast after making personas private; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now private"
+msgstr "{count, plural, one {# персона цяпер прыватная} few {# персоны цяпер прыватныя} many {# персон цяпер прыватныя} other {# персоны цяпер прыватныя}}"
+
+#. Toast after making personas public; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now public"
+msgstr "{count, plural, one {# персона цяпер публічная} few {# персоны цяпер публічныя} many {# персон цяпер публічныя} other {# персоны цяпер публічныя}}"
+
+#. Toast after making personas unlisted; it has an Undo button.
+msgid "{count, plural, one {# persona is} other {# personas are}} now unlisted"
+msgstr "{count, plural, one {# персона цяпер не ў спісе} few {# персоны цяпер не ў спісе} many {# персон цяпер не ў спісе} other {# персоны цяпер не ў спісе}}"
+
+#. Second line of the import review footer
+msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
+msgstr "{count, plural, one {# персона застанецца без змен} few {# персоны застануцца без змен} many {# персон застануцца без змен} other {# персоны застануцца без змен}}"
+
+#. Heading in the import review over the members whose persona was deleted. {productName} is the app name
+msgid "{count, plural, one {# persona was deleted in {productName}} other {# personas were deleted in {productName}}}"
+msgstr "{count, plural, one {# персона выдалена ў {productName}} few {# персоны выдалены ў {productName}} many {# персон выдалена ў {productName}} other {# персоны выдалена ў {productName}}}"
+
+#. How many personas the Personas list shows.
+msgid "{count, plural, one {# persona} other {# personas}}"
+msgstr "{count, plural, one {# персона} few {# персоны} many {# персон} other {# персоны}}"
+
+#. Toast after deleting personas.
+msgid "{count, plural, one {# persona} other {# personas}} deleted"
+msgstr "{count, plural, one {Выдалена # персона} few {Выдалены # персоны} many {Выдалена # персон} other {Выдалена # персоны}}"
+
+#. On a collapsed member in the import review: how many personas of the account it might be
+msgid "{count, plural, one {# possible match} other {# possible matches}}"
+msgstr "{count, plural, one {# магчымае супадзенне} few {# магчымыя супадзенні} many {# магчымых супадзенняў} other {# магчымага супадзення}}"
+
+#. Title of the persona import review. {count} is the number of members that need a choice
+msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
+msgstr "{count, plural, one {Праверце # удзельніка перад імпартам} few {Праверце # удзельнікаў перад імпартам} many {Праверце # удзельнікаў перад імпартам} other {Праверце # удзельніка перад імпартам}}"
+
+#. How often a persona has been used, shown in the import review
+#. How often a persona has been used, shown in the import review
+msgid "{count, plural, one {Used once} other {Used # times}}"
+msgstr "{count, plural, one {Выкарыстана # раз} few {Выкарыстана # разы} many {Выкарыстана # разоў} other {Выкарыстана # раза}}"
+
+msgid "{count} notice(s) during import"
+msgstr "Заўвагі падчас імпарту: {count}"
+
+#. In the "Your reactions" popout: how many of your identities (the account and its personas) reacted, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total}"
+msgstr "{count} з {total}"
+
+#. Under the "React as..." title: how many of your identities (the account and its personas) reacted with this emoji, out of all of them. Preserve {count} and {total}.
+msgid "{count} of {total} reacted"
+msgstr "Адрэагавалі {count} з {total}"
+
+#. How many personas are selected in settings. Preserve {count}.
+msgid "{count} selected"
+msgstr "Выбрана: {count}"
+
+#. Second line of the import review footer: deleted personas that are not restored
+msgid "{count} stay deleted"
+msgstr "Застануцца выдаленымі: {count}"
+
+#. Instance selector error shown when the instance speaks a protocol generation this client does not know. Domain is interpolated. productName is the name of this app.
+msgid "{domain} runs a newer version of {productName} than this app. Update {productName}, then try again."
+msgstr "На {domain} працуе навейшая версія {productName}, чым у гэтай праграмы. Абнавіце {productName} і паспрабуйце зноў."
+
+#. Accessible label on a lit signal icon. {label} is the signal name such as Reading, {names} is a comma-separated list of the people who turned it on.
+msgid "{label}: {names}"
+msgstr "{label}: {names}"
+
+#. A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names
+msgid "{names} would all have {label}. Change one of the choices."
+msgstr "{label} апынецца адразу ў некалькіх: {names}. Змяніце адзін з варыянтаў."
+
+#. Tooltip when sending as a latched persona
+msgid "{name} ({mode}) - Click to switch persona"
+msgstr "{name} ({mode}) — націсніце, каб змяніць персону"
+
+#. Status beside the field for a new proxy tag in the import review. {name} is the persona that has it
+msgid "{name} already has it"
+msgstr "Ужо ёсць у {name}"
+
+#. Toast after a deleted persona was restored
+msgid "{name} is back."
+msgstr "Персона {name} адноўлена."
+
+#. Question in the import review for a persona whose details differ from the import file. {name} is its name, {productName} the app name
+msgid "{name} is different in your file. Which one should {productName} have?"
+msgstr "{name} адрозніваецца ў вашым файле. Якую версію пакінуць у {productName}?"
+
+#. Problem in a community command script. {name} is a piece of the script, such as {% if target %}. Preserve {name}.
+msgid "{name} is never closed."
+msgstr "{name} нідзе не закрываецца."
+
+#. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
+msgid "{name}'s tag is already taken"
+msgstr "Тэг удзельніка {name} ужо заняты"
+
+#. Which persona of the list is shown, as in "3 of 12". Preserve {position} and {total}.
+msgid "{position} of {total}"
+msgstr "{position} з {total}"
+
+#. Status shown when browser sign-in status polling gives up after repeated failures. productName is the name of this app.
+msgid "{productName} stopped checking whether the browser approved this sign-in. It didn't lose your code."
+msgstr "{productName} перастаў правяраць, ці пацвердзіў браўзер гэты ўваход. Ваш код не страчаны."
+
+msgid "{publicCount} public, {unlistedCount} unlisted, {privateCount} private"
+msgstr "Публічных: {publicCount}, не ў спісе: {unlistedCount}, прыватных: {privateCount}"
+
+#. How many personas match the search, out of all shown. Preserve {shown} and {total}.
+msgid "{shown} of {total} personas"
+msgstr "Персоны: {shown} з {total}"
+
+msgid "— Today at 12:00 PM"
+msgstr "— Сёння а 12:00"
+
+#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” Not Opened"
+msgstr "Праграма «Tyne» не адкрыта"
+
+#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
+msgid "“Tyne” was blocked."
+msgstr "Праграма «Tyne» заблакіравана."
