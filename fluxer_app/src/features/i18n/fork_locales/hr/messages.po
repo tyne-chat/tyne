@@ -847,6 +847,10 @@ msgstr "Nema opisa"
 msgid "No bio yet."
 msgstr "Još nema opisa."
 
+#. Shown in the import review where a persona or a member of the file has no colour
+msgid "No colour"
+msgstr "Nema boje"
+
 #. Empty state title in the Commands tab.
 msgid "No commands"
 msgstr "Nema naredbi"
