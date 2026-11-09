@@ -238,13 +238,14 @@ sheet (`openPersonaGallery`); mobile web also has a button before the mutual fri
   decision (new members and the probably-the-same ones it connects, both untickable behind Show;
   those already identical; personas not in the file), then one question per member that needs a
   choice, hardest first (can't tell, tag in use, different in the file, deleted, then the display
-  tag), each set off by a thin line, with the file's version on the left and Tyne's on the right:
+  tag), each sorted by name and set off by a thin line, with the file's version on the left and Tyne's on the right:
   the card is the choice and the other greys out. Each card starts with the banner and avatar
   together, as a profile card shows them; a picture that differs is marked, and avatar and banner
   are not in the list of compared details. Personas different in the file are one list of
   collapsed rows (what differs, and the current choice), each opened to a three-way switch over the
   two versions: Use the file's, Keep both (the file's is added unlinked as a copy, "Name (2)" with a
-  free tag, both editable; `keepBothDecision`), Use Tyne's (tyne-chat/tyne#568). Every member
+  free tag, both editable; `keepBothDecision`), Use Tyne's (tyne-chat/tyne#568). Members whose tag
+  is taken are such rows too, with Skip / Keep over the file's card; Keep adds it linked (#570). Every member
   starts on `defaultDecision`, the choice that changes nothing, and the footer says what Import will
   do. While the review is open, closing the dialog asks first (tyne-chat/tyne#564); while checking
   or importing it cannot be closed. A member whose tag
