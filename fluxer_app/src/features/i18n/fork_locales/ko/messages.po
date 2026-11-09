@@ -73,10 +73,6 @@ msgstr "시그널 추가"
 msgid "Add {name}"
 msgstr "{name} 추가"
 
-#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
-msgid "Add {name} with a tag of its own"
-msgstr "자체 태그로 {name} 추가"
-
 #. Line of the import result: new personas
 msgid "Added"
 msgstr "추가됨"
@@ -424,6 +420,10 @@ msgstr "이 페르소나에 중복된 태그 쌍이 있어요"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "각 채널이 자신의 페르소나를 유지합니다. 새 채널은 내 계정으로 시작합니다."
 
+#. Hint under the list of members whose tag is already taken, in the import review
+msgid "Each is skipped unless you open it and keep it with a tag of its own."
+msgstr "열어서 자체 태그로 유지하지 않으면 각각 건너뛰어요."
+
 #. Hint under the list of differing personas in the import review. {productName} is the app name
 msgid "Each keeps {productName}'s version unless you open it and choose the file's."
 msgstr "열어서 파일 쪽을 선택하지 않으면 각각 {productName}의 내용이 유지돼요."
@@ -705,6 +705,11 @@ msgstr "파일의 {name}이(가) {productName}에 있는 이 페르소나 중 �
 msgid "Its script has a problem."
 msgstr "스크립트에 문제가 있습니다."
 
+#. Option of the switch for a member whose tag is already taken: import it with a name and tag of its own
+msgctxt "persona-import-switch"
+msgid "Keep"
+msgstr "유지"
+
 #. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
 msgid "Keep both"
 msgstr "둘 다 유지"
@@ -716,6 +721,10 @@ msgstr "계속 검토하기"
 #. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
 msgid "Keep {productName}'s"
 msgstr "{productName}의 것 유지"
+
+#. Badge on a collapsed member in the import review: it is imported with a tag of its own
+msgid "Keeping"
+msgstr "유지하는 중"
 
 #. Badge on a collapsed persona in the import review: the file's version is added next to the app's
 msgid "Keeping both"
@@ -732,10 +741,6 @@ msgstr "태그 유지"
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "그대로 유지됨"
-
-#. Choice in the import review: do nothing with this member of the import file. {name} is its name
-msgid "Leave {name} out this time"
-msgstr "이번에는 {name} 제외"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
@@ -1385,6 +1390,11 @@ msgstr "시그니처 이모지"
 msgid "Similar tag"
 msgstr "비슷한 태그"
 
+#. Option of the switch for a member whose tag is already taken: do not import it
+msgctxt "persona-import-switch"
+msgid "Skip"
+msgstr "건너뛰기"
+
 #. Line of the import result: members left out
 msgid "Skipped"
 msgstr "건너뜀"
@@ -1392,6 +1402,10 @@ msgstr "건너뜀"
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "이름이 설정되지 않아 멤버를 건너뛰었어요."
+
+#. Badge on a collapsed member in the import review: it is not imported
+msgid "Skipping"
+msgstr "건너뛰는 중"
 
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
@@ -1880,6 +1894,10 @@ msgstr "{appName} {version}을(를) 설치할 준비가 되었습니다."
 #. Line at the top of the import review. {count} is a number, {productName} the app name
 msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
 msgstr "{count, plural, other {멤버 #명은 이미 {productName}의 페르소나와 일치해요. 따로 할 일은 없어요.}}"
+
+#. Heading in the import review over the list of members whose proxy tag another persona already has
+msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
+msgstr "{count, plural, other {태그가 이미 사용 중인 멤버 #명}}"
 
 #. Line at the top of the import review. {count} is a number of members of the import file
 msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
