@@ -4,7 +4,8 @@
 // Compiled into every build so that none can fall back to upstream's package server.
 const forkReleaseRepository = process.env.FLUXER_FORK_RELEASES || 'tyne-chat/tyne';
 
-// Fork: the fork's entries in build.mjs's publicBuildDefines(), which spreads them in at the end.
+// Fork: the fork's entries in build.mjs's buildInfoDefines(), which spreads them in first, where the
+// fork's entries in upstream's objects go.
 export function forkPublicBuildDefines() {
 	return {
 		'process.env.FLUXER_FORK_RELEASES': JSON.stringify(forkReleaseRepository),
