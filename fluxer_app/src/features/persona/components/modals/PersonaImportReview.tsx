@@ -9,12 +9,12 @@
 
 import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
-import * as GalleryMessages from '@app/features/persona/utils/PersonaGalleryMessages';
 import type {PersonaImportSource} from '@app/features/persona/utils/PersonaImportFile';
 import {bundlePictureBytes} from '@app/features/persona/utils/PersonaImportImages';
 import {
 	defaultDecision,
 	heldTags,
+	keepBothDecision,
 	parseTagInput,
 	type ReviewConflict,
 	type ReviewDecision,
@@ -26,7 +26,7 @@ import {
 	tagInputText,
 } from '@app/features/persona/utils/PersonaImportReview';
 import Users from '@app/features/user/state/Users';
-import {getPersonaBannerURL} from '@app/features/user/utils/AvatarUtils';
+import {getPersonaAvatarURL, getPersonaBannerURL} from '@app/features/user/utils/AvatarUtils';
 import type {PersonaResponse, PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {
 	PersonaImportCandidate,
@@ -144,25 +144,14 @@ const LINKED_ELSEWHERE_DESCRIPTOR = msg({
 	message: 'Linked to another PluralKit member',
 	comment: 'Shown on a persona in the import review that is already connected to a different member',
 });
-const NEW_PICTURE_DESCRIPTOR = msg({
-	message: 'New picture in the file, shown once imported',
-	comment: "Shown instead of a picture from the import file, which isn't loaded until it is stored on this server",
-});
-const SAME_PICTURE_DESCRIPTOR = msg({
-	message: 'Same picture',
-	comment: 'Comparison of a persona picture with the import file: they are the same',
-});
-const DIFFERENT_PICTURE_DESCRIPTOR = msg({
-	message: 'Different picture',
-	comment: 'Comparison of a persona picture with the import file: they differ',
-});
 const NO_PICTURE_DESCRIPTOR = msg({
 	message: 'None',
 	comment: 'Comparison of a persona picture with the import file: there is none',
 });
-const UNKNOWN_PICTURE_DESCRIPTOR = msg({
-	message: "Can't compare",
-	comment: "Comparison of a persona picture with the import file: it can't be compared",
+const PICTURES_MISSING_DESCRIPTOR = msg({
+	message: "The file's picture couldn't be loaded",
+	comment:
+		'Shown on a member of the import file in the import review when its avatar or banner could not be stored or shown',
 });
 const NO_PRONOUNS_DESCRIPTOR = msg({
 	message: 'No pronouns',
@@ -203,15 +192,46 @@ const USING_FILE_DESCRIPTOR = msg({
 	message: "Using the file's",
 	comment: "Badge on a collapsed persona in the import review: the import file's version replaces it",
 });
-const USE_FILE_NAMED_DESCRIPTOR = msg({
-	message: "Use the file's {name}",
-	comment:
-		"Choice on the import file's card in the import review: replace the persona's details with the file's. {name} is the member's name",
+const KEEPING_BOTH_DESCRIPTOR = msg({
+	message: 'Keeping both',
+	comment: "Badge on a collapsed persona in the import review: the file's version is added next to the app's",
 });
-const KEEP_TYNE_NAMED_DESCRIPTOR = msg({
-	message: "Keep {productName}'s {name}",
+const SWITCH_FILE_DESCRIPTOR = msg({
+	context: 'persona-import-switch',
+	message: "Use the file's",
 	comment:
-		"Choice on the app's card in the import review: keep the persona as it is. {productName} is the app name, {name} the persona's name, as in \"Keep Tyne's Wren\"",
+		"Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's",
+});
+const SWITCH_BOTH_DESCRIPTOR = msg({
+	message: 'Keep both',
+	comment:
+		"Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona",
+});
+const SWITCH_TYNE_DESCRIPTOR = msg({
+	message: "Use {productName}'s",
+	comment:
+		"Option of the three-way switch for a persona that differs from the import file: the app's version stays and the file's is not imported. {productName} is the app name",
+});
+const STATUS_NOT_IMPORTED_DESCRIPTOR = msg({
+	message: 'Not imported',
+	comment: "What happens to the import file's version of a persona in the import review",
+});
+const STATUS_REPLACES_DESCRIPTOR = msg({
+	message: "Replaces {productName}'s {name}",
+	comment:
+		"What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona",
+});
+const STATUS_ADDED_DESCRIPTOR = msg({
+	message: 'Added as a new persona',
+	comment: "What happens to the import file's version of a persona in the import review",
+});
+const STATUS_STAYS_DESCRIPTOR = msg({
+	message: 'Stays as it is',
+	comment: "What happens to the app's version of a persona in the import review",
+});
+const STATUS_OVERWRITTEN_DESCRIPTOR = msg({
+	message: 'Gets overwritten',
+	comment: "What happens to the app's version of a persona in the import review when the file's version is used",
 });
 const CANT_TELL_QUESTION_DESCRIPTOR = msg({
 	message: 'Is {name} from your file one of these personas in {productName}?',
@@ -281,10 +301,6 @@ const TAG_HELD_DESCRIPTOR = msg({
 const TAG_NONE_DESCRIPTOR = msg({
 	message: 'No tag: added without one',
 	comment: 'Status beside an empty field for a new proxy tag in the import review',
-});
-const TAG_EXAMPLE_DESCRIPTOR = msg({
-	message: 'Type {example} to post as {name}',
-	comment: 'Hint under the field for a new proxy tag in the import review. {example} is the tag around a word',
 });
 const DELETED_QUESTION_DESCRIPTOR = msg({
 	message: 'You deleted {name} in {productName} on {date}. Bring {name} back?',
@@ -356,19 +372,36 @@ function Tags({
 	);
 }
 
+/** Local addresses of a zip's pictures for one member, shown when storing them failed. */
+type LocalPictures = {avatar?: string; banner?: string};
+
 /** Local addresses for the zip's pictures of the members shown, released when the review closes. */
-function useLocalPictures(source: PersonaImportSource, members: ReadonlyArray<ReviewMember>): Map<number, string> {
+function useLocalPictures(
+	source: PersonaImportSource,
+	members: ReadonlyArray<ReviewMember>,
+): Map<number, LocalPictures> {
 	const urls = useMemo(() => {
-		const map = new Map<number, string>();
+		const map = new Map<number, LocalPictures>();
 		members.forEach((member, index) => {
-			const bytes = bundlePictureBytes(source, member, 'avatar');
-			if (!bytes) return;
-			const type = `image/${imageFileExtension(bytes) === 'jpg' ? 'jpeg' : imageFileExtension(bytes)}`;
-			map.set(index, URL.createObjectURL(new Blob([bytes as BlobPart], {type})));
+			const local: LocalPictures = {};
+			for (const kind of ['avatar', 'banner'] as const) {
+				const bytes = bundlePictureBytes(source, member, kind);
+				if (!bytes) continue;
+				const type = `image/${imageFileExtension(bytes) === 'jpg' ? 'jpeg' : imageFileExtension(bytes)}`;
+				local[kind] = URL.createObjectURL(new Blob([bytes as BlobPart], {type}));
+			}
+			if (local.avatar || local.banner) map.set(index, local);
 		});
 		return map;
 	}, [source, members]);
-	useEffect(() => () => urls.forEach((url) => URL.revokeObjectURL(url)), [urls]);
+	useEffect(
+		() => () =>
+			urls.forEach((local) => {
+				if (local.avatar) URL.revokeObjectURL(local.avatar);
+				if (local.banner) URL.revokeObjectURL(local.banner);
+			}),
+		[urls],
+	);
 	return urls;
 }
 
@@ -378,31 +411,94 @@ const Initial = ({name}: {name: string}) => (
 	</span>
 );
 
-const MemberPicture = observer(
-	({entry, member, localUrl}: {entry: PersonaImportPreviewEntry; member: ReviewMember; localUrl?: string}) => {
+function colorHex(color: number | null | undefined): string | undefined {
+	return color != null ? `#${color.toString(16).padStart(6, '0')}` : undefined;
+}
+
+/** A picture to show: a stored copy's hash, or a zip's picture in memory. */
+interface HeaderPicture {
+	hash?: string | null;
+	localUrl?: string;
+}
+
+/**
+ * Banner and avatar together, as a profile card shows them: the banner (or the persona's colour) with
+ * the avatar over its lower corner. A picture that differs from the other side is marked.
+ */
+const ProfileHeader = observer(
+	({
+		name,
+		color,
+		avatar,
+		banner,
+		compact,
+		avatarDiffers,
+		bannerDiffers,
+		missing,
+	}: {
+		name: string;
+		color: number | null | undefined;
+		avatar: HeaderPicture;
+		banner: HeaderPicture;
+		compact?: boolean;
+		avatarDiffers?: boolean;
+		bannerDiffers?: boolean;
+		/** The file has a picture that could not be stored or shown. */
+		missing?: boolean;
+	}) => {
+		const {i18n} = useLingui();
 		const user = Users.currentUser;
-		if (entry.avatar_hash && user) {
-			return (
-				<PersonaAvatar
-					user={user}
-					persona={{avatar: entry.avatar_hash}}
-					size={40}
-					data-flx="persona.persona-import-review.member-picture.persona-avatar"
+		const avatarUrl =
+			avatar.hash && user ? getPersonaAvatarURL({userId: user.id, avatar: avatar.hash}, false, 160) : avatar.localUrl;
+		const bannerUrl =
+			banner.hash && user ? getPersonaBannerURL({userId: user.id, banner: banner.hash}, false, 640) : banner.localUrl;
+		return (
+			<div
+				className={clsx(styles.profileHeader, compact && styles.profileHeaderCompact)}
+				data-flx="persona.persona-import-review.profile-header"
+			>
+				<div
+					className={clsx(styles.profileBanner, bannerDiffers && styles.profileDiffers)}
+					style={{
+						backgroundColor: colorHex(color),
+						backgroundImage: bannerUrl ? `url("${bannerUrl}")` : undefined,
+					}}
+					aria-hidden="true"
+					data-flx="persona.persona-import-review.profile-header.banner"
 				/>
-			);
-		}
-		if (localUrl)
-			return (
-				<img
-					className={styles.localAvatar}
-					src={localUrl}
-					alt=""
-					data-flx="persona.persona-import-review.member-picture.local-avatar"
-				/>
-			);
-		return <Initial name={member.member.name} data-flx="persona.persona-import-review.member-picture.initial" />;
+				<span
+					className={clsx(styles.profileAvatar, avatarDiffers && styles.profileAvatarDiffers)}
+					data-flx="persona.persona-import-review.profile-header.avatar"
+				>
+					{avatarUrl ? (
+						<img src={avatarUrl} alt="" data-flx="persona.persona-import-review.profile-header.avatar-image" />
+					) : (
+						<Initial name={name} data-flx="persona.persona-import-review.profile-header.initial" />
+					)}
+				</span>
+				{missing && (
+					<span className={styles.profileMissing} data-flx="persona.persona-import-review.profile-header.missing">
+						{i18n._(PICTURES_MISSING_DESCRIPTOR)}
+					</span>
+				)}
+			</div>
+		);
 	},
 );
+
+/** The file's pictures for a member: stored copies the preview names, else the zip's in memory. */
+function filePictures(
+	entry: PersonaImportPreviewEntry,
+	member: ReviewMember,
+	local: LocalPictures | undefined,
+): {avatar: HeaderPicture; banner: HeaderPicture; missing: boolean} {
+	const avatar = {hash: entry.avatar_hash, localUrl: local?.avatar};
+	const banner = {hash: entry.banner_hash, localUrl: local?.banner};
+	const shown = (picture: HeaderPicture) => Boolean(picture.hash || picture.localUrl);
+	const missing =
+		(Boolean(member.preview.avatar) && !shown(avatar)) || (Boolean(member.preview.banner) && !shown(banner));
+	return {avatar, banner, missing};
+}
 
 const PersonaPicture = observer(({persona}: {persona: PersonaResponse}) => {
 	const user = Users.currentUser;
@@ -422,25 +518,28 @@ const PersonaPicture = observer(({persona}: {persona: PersonaResponse}) => {
 function MemberBlock({
 	entry,
 	member,
-	localUrl,
+	local,
 	clashing,
 }: {
 	entry: PersonaImportPreviewEntry;
 	member: ReviewMember;
-	localUrl?: string;
+	local?: LocalPictures;
 	clashing?: ReadonlySet<string>;
 }) {
 	const {i18n} = useLingui();
-	const showsPicture = Boolean(entry.avatar_hash || localUrl);
+	const pictures = filePictures(entry, member, local);
 	return (
 		<div className={styles.block} data-flx="persona.persona-import-review.member-block">
+			<ProfileHeader
+				name={member.preview.name}
+				color={member.preview.color}
+				avatar={pictures.avatar}
+				banner={pictures.banner}
+				missing={pictures.missing}
+				compact
+				data-flx="persona.persona-import-review.member-block.header"
+			/>
 			<div className={styles.blockHead} data-flx="persona.persona-import-review.member-block.head">
-				<MemberPicture
-					entry={entry}
-					member={member}
-					localUrl={localUrl}
-					data-flx="persona.persona-import-review.member-block.picture"
-				/>
 				<div className={styles.blockTitle} data-flx="persona.persona-import-review.member-block.title">
 					<span className={styles.blockName} data-flx="persona.persona-import-review.member-block.name">
 						{member.preview.name}
@@ -463,7 +562,7 @@ function MemberBlock({
 				</span>
 			)}
 			<span className={styles.blockMeta} data-flx="persona.persona-import-review.member-block.meta">
-				{member.preview.avatar && !showsPicture ? i18n._(NEW_PICTURE_DESCRIPTOR) : i18n._(FROM_FILE_DESCRIPTOR)}
+				{i18n._(FROM_FILE_DESCRIPTOR)}
 			</span>
 		</div>
 	);
@@ -484,8 +583,15 @@ function PersonaBlock({
 	const {i18n} = useLingui();
 	return (
 		<div className={styles.block} data-flx="persona.persona-import-review.persona-block">
+			<ProfileHeader
+				name={persona.name}
+				color={persona.color}
+				avatar={{hash: persona.avatar_hash}}
+				banner={{hash: persona.banner_hash}}
+				compact
+				data-flx="persona.persona-import-review.persona-block.header"
+			/>
 			<div className={styles.blockHead} data-flx="persona.persona-import-review.persona-block.head">
-				<PersonaPicture persona={persona} data-flx="persona.persona-import-review.persona-block.picture" />
 				<div className={styles.blockTitle} data-flx="persona.persona-import-review.persona-block.title">
 					<span className={styles.blockName} data-flx="persona.persona-import-review.persona-block.name">
 						{persona.name}
@@ -652,16 +758,18 @@ function TagFields({
 	context,
 	replacements,
 	onChange,
+	...fork
 }: {
 	entry: PersonaImportPreviewEntry;
 	member: ReviewMember;
 	context: ReviewContext;
 	replacements: ReadonlyArray<PersonaTag>;
 	onChange: (replacements: Array<PersonaTag>) => void;
+	/** The tags the fields stand in for, when not the member's clashing ones (a Keep both copy). */
+	clashing?: ReadonlyArray<PersonaTag>;
 }) {
 	const {i18n} = useLingui();
-	const clashing = clashingTags(entry);
-	const example = i18n._(GalleryMessages.TAG_EXAMPLE_TEXT_DESCRIPTOR);
+	const clashing = fork.clashing ?? clashingTags(entry);
 	return (
 		<div className={styles.tagFields} data-flx="persona.persona-import-review.tag-fields">
 			{clashing.map((tag, position) => {
@@ -724,14 +832,6 @@ function TagFields({
 								<span data-flx="persona.persona-import-review.tag-field.status-text">{status}</span>
 							</span>
 						</div>
-						{!empty && !holder && (
-							<span className={styles.tagExample} data-flx="persona.persona-import-review.tag-field.example">
-								{i18n._(TAG_EXAMPLE_DESCRIPTOR, {
-									example: `${(value.prefix ?? '').trim()}${example}${(value.suffix ?? '').trim()}`,
-									name: member.preview.name,
-								})}
-							</span>
-						)}
 					</div>
 				);
 			})}
@@ -915,7 +1015,7 @@ export const PersonaImportReview = observer(
 											<MemberBlock
 												entry={entry}
 												member={member}
-												localUrl={localPictures.get(entry.index)}
+												local={localPictures.get(entry.index)}
 												data-flx="persona.persona-import-review.cant-tell.member-block"
 											/>
 										</div>
@@ -1043,7 +1143,7 @@ export const PersonaImportReview = observer(
 											<MemberBlock
 												entry={entry}
 												member={member}
-												localUrl={localPictures.get(entry.index)}
+												local={localPictures.get(entry.index)}
 												clashing={clashing}
 												data-flx="persona.persona-import-review.tag-in-use.member-block"
 											/>
@@ -1064,7 +1164,7 @@ export const PersonaImportReview = observer(
 												<MemberBlock
 													entry={otherEntry}
 													member={other}
-													localUrl={localPictures.get(otherEntry.index)}
+													local={localPictures.get(otherEntry.index)}
 													clashing={clashing}
 													data-flx="persona.persona-import-review.tag-in-use.other-member"
 												/>
@@ -1124,7 +1224,8 @@ export const PersonaImportReview = observer(
 											entry={entry}
 											member={member}
 											persona={persona}
-											localUrl={localPictures.get(entry.index)}
+											local={localPictures.get(entry.index)}
+											context={context}
 											decision={decisionOf(entry)}
 											onDecide={(decision) => decide(entry, decision)}
 											expanded={openDiffers.has(entry.index)}
@@ -1170,7 +1271,7 @@ export const PersonaImportReview = observer(
 											<MemberBlock
 												entry={entry}
 												member={member}
-												localUrl={localPictures.get(entry.index)}
+												local={localPictures.get(entry.index)}
 												data-flx="persona.persona-import-review.deleted.member-block"
 											/>
 										</div>
@@ -1449,13 +1550,14 @@ function ReadyLines({
 
 /**
  * One persona whose details differ from the file, as a row that names what differs and the current
- * choice; opened, the two versions side by side, the chosen one lit.
+ * choice; opened, a three-way switch over the two versions side by side (tyne-chat/tyne#568).
  */
 function DiffersItem({
 	entry,
 	member,
 	persona,
-	localUrl,
+	local,
+	context,
 	decision,
 	onDecide,
 	expanded,
@@ -1464,7 +1566,8 @@ function DiffersItem({
 	entry: PersonaImportPreviewEntry;
 	member: ReviewMember;
 	persona: PersonaResponse;
-	localUrl?: string;
+	local?: LocalPictures;
+	context: ReviewContext;
 	decision: ReviewDecision;
 	onDecide: (decision: ReviewDecision) => void;
 	expanded: boolean;
@@ -1472,7 +1575,9 @@ function DiffersItem({
 }) {
 	const {i18n} = useLingui();
 	const productName = PRODUCT_NAME;
-	const useFile = decision.choice === 'use_file';
+	const copy = decision.choice === 'add' ? decision.copy : undefined;
+	let mode: DiffersMode = copy ? 'both' : 'tyne';
+	if (decision.choice === 'use_file') mode = 'file';
 	const bodyId = `import-differs-${entry.index}`;
 	const group = `import-${entry.index}`;
 	const differs = new Map((entry.differences ?? []).map((d) => [d.field, d.change]));
@@ -1483,6 +1588,72 @@ function DiffersItem({
 	const differentFields = (entry.differences ?? [])
 		.filter((d) => isDifferent(d.field))
 		.map((d) => i18n._(FIELD_HEADING[d.field]));
+	const pick = (next: DiffersMode) => {
+		if (next === mode) return;
+		if (next === 'file') onDecide({choice: 'use_file'});
+		else if (next === 'tyne') onDecide({choice: 'keep'});
+		else
+			onDecide(
+				keepBothDecision(
+					entry,
+					context.entries,
+					context.decisions,
+					context.members,
+					context.livePersonas,
+					context.fromTyne,
+				),
+			);
+	};
+	const options: Array<{id: DiffersMode; label: string}> = [
+		{id: 'file', label: i18n._(SWITCH_FILE_DESCRIPTOR)},
+		{id: 'both', label: i18n._(SWITCH_BOTH_DESCRIPTOR)},
+		{id: 'tyne', label: i18n._(SWITCH_TYNE_DESCRIPTOR, {productName})},
+	];
+	const pill = {
+		file: i18n._(USING_FILE_DESCRIPTOR),
+		both: i18n._(KEEPING_BOTH_DESCRIPTOR),
+		tyne: i18n._(KEEPING_TYNE_DESCRIPTOR, {productName}),
+	}[mode];
+	const fileStatus = {
+		file: i18n._(STATUS_REPLACES_DESCRIPTOR, {productName, name: persona.name}),
+		both: i18n._(STATUS_ADDED_DESCRIPTOR),
+		tyne: i18n._(STATUS_NOT_IMPORTED_DESCRIPTOR),
+	}[mode];
+	const tyneStatus = mode === 'file' ? i18n._(STATUS_OVERWRITTEN_DESCRIPTOR) : i18n._(STATUS_STAYS_DESCRIPTOR);
+	const nameId = `import-copy-name-${entry.index}`;
+	const copyFields =
+		copy && decision.choice === 'add' ? (
+			<div className={styles.copyFields} data-flx="persona.persona-import-review.differs.copy-fields">
+				<label
+					htmlFor={nameId}
+					className={styles.tagFieldLabel}
+					data-flx="persona.persona-import-review.differs.copy-name-label"
+				>
+					{i18n._(FIELD_HEADING.name)}
+				</label>
+				<input
+					id={nameId}
+					type="text"
+					className={styles.copyNameInput}
+					value={copy.name}
+					maxLength={100}
+					autoComplete="off"
+					onChange={(event) => onDecide({...decision, copy: {...copy, name: event.target.value}})}
+					data-flx="persona.persona-import-review.differs.copy-name"
+				/>
+				{copy.replacedTags.length > 0 && (
+					<TagFields
+						entry={entry}
+						member={member}
+						context={context}
+						clashing={copy.replacedTags}
+						replacements={decision.replacements ?? []}
+						onChange={(replacements) => onDecide({...decision, replacements})}
+						data-flx="persona.persona-import-review.differs.copy-tags"
+					/>
+				)}
+			</div>
+		) : undefined;
 	return (
 		<li className={styles.differsRow} data-flx="persona.persona-import-review.differs">
 			<h4 className={styles.differsHeading} data-flx="persona.persona-import-review.differs.heading">
@@ -1504,10 +1675,14 @@ function DiffersItem({
 						</span>
 					</span>
 					<span
-						className={clsx(styles.choicePill, useFile && styles.choicePillChange)}
+						className={clsx(
+							styles.choicePill,
+							mode === 'file' && styles.choicePillChange,
+							mode === 'both' && styles.choicePillBoth,
+						)}
 						data-flx="persona.persona-import-review.differs.choice"
 					>
-						{useFile ? i18n._(USING_FILE_DESCRIPTOR) : i18n._(KEEPING_TYNE_DESCRIPTOR, {productName})}
+						{pill}
 					</span>
 					<CaretDownIcon
 						size={16}
@@ -1519,59 +1694,89 @@ function DiffersItem({
 				</button>
 			</h4>
 			{expanded && (
-				<div
-					id={bodyId}
-					className={styles.differsBody}
-					role="group"
-					aria-label={i18n._(DIFFERS_QUESTION_DESCRIPTOR, {name: persona.name, productName})}
-					data-flx="persona.persona-import-review.differs.body"
-				>
-					<Pair
-						left={
-							<SideCard
-								name={group}
-								label={i18n._(USE_FILE_NAMED_DESCRIPTOR, {name: member.preview.name})}
-								checked={useFile}
-								dimmed={!useFile}
-								onSelect={() => onDecide({choice: 'use_file'})}
-								data-flx="persona.persona-import-review.differs.file"
+				<div id={bodyId} className={styles.differsBody} data-flx="persona.persona-import-review.differs.body">
+					<fieldset className={styles.switch} data-flx="persona.persona-import-review.differs.switch">
+						<legend className={styles.srOnly} data-flx="persona.persona-import-review.differs.question">
+							{i18n._(DIFFERS_QUESTION_DESCRIPTOR, {name: persona.name, productName})}
+						</legend>
+						{options.map((option) => (
+							<label
+								key={option.id}
+								className={clsx(styles.switchOption, mode === option.id && styles.switchOptionOn)}
+								data-flx="persona.persona-import-review.differs.switch-option"
 							>
-								<VersionDetails
-									side="file"
-									entry={entry}
-									member={member}
-									persona={persona}
-									localUrl={localUrl}
-									isDifferent={isDifferent}
-									data-flx="persona.persona-import-review.differs.file-details"
+								<input
+									type="radio"
+									className={styles.switchRadio}
+									name={group}
+									checked={mode === option.id}
+									onChange={() => pick(option.id)}
+									data-flx="persona.persona-import-review.differs.switch-radio"
 								/>
-							</SideCard>
-						}
-						right={
-							<SideCard
-								name={group}
-								label={i18n._(KEEP_TYNE_NAMED_DESCRIPTOR, {productName, name: persona.name})}
-								checked={!useFile}
-								dimmed={useFile}
-								onSelect={() => onDecide({choice: 'keep'})}
-								data-flx="persona.persona-import-review.differs.tyne"
-							>
-								<VersionDetails
-									side="tyne"
-									entry={entry}
-									member={member}
-									persona={persona}
-									localUrl={localUrl}
-									isDifferent={isDifferent}
-									data-flx="persona.persona-import-review.differs.tyne-details"
-								/>
-							</SideCard>
-						}
-						data-flx="persona.persona-import-review.differs.pair"
-					/>
+								<span data-flx="persona.persona-import-review.differs.switch-label">{option.label}</span>
+							</label>
+						))}
+					</fieldset>
+					<div className={styles.sides} data-flx="persona.persona-import-review.differs.sides">
+						<div
+							className={clsx(styles.card, mode === 'tyne' ? styles.cardDimmed : styles.cardChosen)}
+							data-flx="persona.persona-import-review.differs.file"
+						>
+							<SideHead
+								title={i18n._(YOUR_FILE_DESCRIPTOR)}
+								status={fileStatus}
+								data-flx="persona.persona-import-review.differs.file-head"
+							/>
+							<VersionDetails
+								side="file"
+								entry={entry}
+								member={member}
+								persona={persona}
+								local={local}
+								isDifferent={isDifferent}
+								editor={copyFields}
+								data-flx="persona.persona-import-review.differs.file-details"
+							/>
+						</div>
+						<div
+							className={clsx(styles.card, mode === 'file' ? styles.cardDimmed : styles.cardChosen)}
+							data-flx="persona.persona-import-review.differs.tyne"
+						>
+							<SideHead
+								title={productName}
+								status={tyneStatus}
+								data-flx="persona.persona-import-review.differs.tyne-head"
+							/>
+							<VersionDetails
+								side="tyne"
+								entry={entry}
+								member={member}
+								persona={persona}
+								local={local}
+								isDifferent={isDifferent}
+								data-flx="persona.persona-import-review.differs.tyne-details"
+							/>
+						</div>
+					</div>
 				</div>
 			)}
 		</li>
+	);
+}
+
+type DiffersMode = 'file' | 'both' | 'tyne';
+
+/** A side's title, and what happens to it. */
+function SideHead({title, status}: {title: string; status: string}) {
+	return (
+		<div className={styles.sideHead} data-flx="persona.persona-import-review.side-head">
+			<span className={styles.sideTitle} data-flx="persona.persona-import-review.side-head.title">
+				{title}
+			</span>
+			<span className={styles.sideStatus} aria-live="polite" data-flx="persona.persona-import-review.side-head.status">
+				{status}
+			</span>
+		</div>
 	);
 }
 
@@ -1581,75 +1786,47 @@ function VersionDetails({
 	entry,
 	member,
 	persona,
-	localUrl,
+	local,
 	isDifferent,
+	editor,
 }: {
 	side: 'file' | 'tyne';
 	entry: PersonaImportPreviewEntry;
 	member: ReviewMember;
 	persona: PersonaResponse;
-	localUrl?: string;
+	local?: LocalPictures;
 	isDifferent: (field: PersonaImportField) => boolean;
+	/** Fields in place of the name and tags, for the copy Keep both adds. */
+	editor?: React.ReactNode;
 }) {
 	const {i18n} = useLingui();
-	const user = Users.currentUser;
 	const fromFile = side === 'file';
 	const name = fromFile ? member.preview.name : persona.name;
 	const pronouns = fromFile ? member.preview.pronouns : persona.pronouns;
 	const tags = fromFile ? member.preview.persona_tags : persona.persona_tags;
 	const bio = fromFile ? member.preview.bio : persona.bio;
+	const file = filePictures(entry, member, local);
 	const empty = (descriptor: MessageDescriptor) => (
 		<span className={styles.empty} data-flx="persona.persona-import-review.version.empty">
 			{i18n._(descriptor)}
 		</span>
 	);
-	const picture = (field: 'avatar' | 'banner'): React.ReactNode => {
-		const hashes = fromFile
-			? {avatar: entry.avatar_hash, banner: entry.banner_hash}
-			: {avatar: persona.avatar_hash, banner: persona.banner_hash};
-		const hash = hashes[field];
-		if (hash && user) {
-			if (field === 'avatar')
-				return (
-					<PersonaAvatar
-						user={user}
-						persona={{avatar: hash}}
-						size={32}
-						data-flx="persona.persona-import-review.version.avatar"
-					/>
-				);
-			const url = getPersonaBannerURL({userId: user.id, banner: hash}, false, 320);
-			if (url)
-				return (
-					<img
-						className={styles.bannerThumb}
-						src={url}
-						alt=""
-						data-flx="persona.persona-import-review.version.banner"
-					/>
-				);
-		}
-		const change = entry.differences?.find((d) => d.field === field)?.change;
-		const fileHas = Boolean(field === 'avatar' ? member.preview.avatar : member.preview.banner);
-		if (fromFile && change === 'not_compared') return i18n._(UNKNOWN_PICTURE_DESCRIPTOR);
-		if (fromFile && change === 'changed' && fileHas) return i18n._(DIFFERENT_PICTURE_DESCRIPTOR);
-		if (!change && (fromFile ? fileHas : hash)) return i18n._(SAME_PICTURE_DESCRIPTOR);
-		return empty(NO_PICTURE_DESCRIPTOR);
-	};
 	const rows: Array<[PersonaImportField, React.ReactNode]> = [
 		['pronouns', pronouns || empty(NO_PRONOUNS_DESCRIPTOR)],
-		[
-			'persona_tags',
-			tags && tags.length > 0 ? (
-				<Tags tags={tags} data-flx="persona.persona-import-review.version.tags" />
-			) : (
-				empty(NO_TAGS_DESCRIPTOR)
-			),
-		],
+		...(editor
+			? []
+			: ([
+					[
+						'persona_tags',
+						tags && tags.length > 0 ? (
+							<Tags tags={tags} data-flx="persona.persona-import-review.version.tags" />
+						) : (
+							empty(NO_TAGS_DESCRIPTOR)
+						),
+					],
+				] as Array<[PersonaImportField, React.ReactNode]>)),
 		['bio', bio || empty(NO_BIO_DESCRIPTOR)],
 	];
-	if (isDifferent('avatar')) rows.push(['avatar', picture('avatar')]);
-	if (isDifferent('banner')) rows.push(['banner', picture('banner')]);
 	if (isDifferent('color')) {
 		const color = fromFile ? member.preview.color : persona.color;
 		rows.push([
@@ -1670,24 +1847,24 @@ function VersionDetails({
 	}
 	return (
 		<div className={styles.version} data-flx="persona.persona-import-review.version">
-			<div className={styles.blockHead} data-flx="persona.persona-import-review.version.head">
-				{fromFile ? (
-					<MemberPicture
-						entry={entry}
-						member={member}
-						localUrl={localUrl}
-						data-flx="persona.persona-import-review.version.member-picture"
-					/>
-				) : (
-					<PersonaPicture persona={persona} data-flx="persona.persona-import-review.version.persona-picture" />
-				)}
+			<ProfileHeader
+				name={name}
+				color={fromFile ? member.preview.color : persona.color}
+				avatar={fromFile ? file.avatar : {hash: persona.avatar_hash}}
+				banner={fromFile ? file.banner : {hash: persona.banner_hash}}
+				missing={fromFile && file.missing}
+				avatarDiffers={isDifferent('avatar')}
+				bannerDiffers={isDifferent('banner')}
+				data-flx="persona.persona-import-review.version.header"
+			/>
+			{editor ?? (
 				<span
 					className={clsx(styles.blockName, isDifferent('name') && styles.differs)}
 					data-flx="persona.persona-import-review.version.name"
 				>
 					{name}
 				</span>
-			</div>
+			)}
 			{rows.map(([field, value]) => (
 				<div
 					key={field}
