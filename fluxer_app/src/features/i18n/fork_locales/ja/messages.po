@@ -73,10 +73,6 @@ msgstr "シグナルを追加"
 msgid "Add {name}"
 msgstr "{name} を追加"
 
-#. Choice in the import review: add the member as a new persona with another proxy tag. {name} is its name
-msgid "Add {name} with a tag of its own"
-msgstr "{name} を独自のタグで追加する"
-
 #. Line of the import result: new personas
 msgid "Added"
 msgstr "追加済み"
@@ -424,6 +420,10 @@ msgstr "このペルソナでタグのペアが重複しています"
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "各チャンネルがそれぞれのペルソナを保持します。新しいチャンネルはアカウントから始まります。"
 
+#. Hint under the list of members whose tag is already taken, in the import review
+msgid "Each is skipped unless you open it and keep it with a tag of its own."
+msgstr "開いてタグを変えて残さない限り、それぞれスキップされます。"
+
 #. Hint under the list of differing personas in the import review. {productName} is the app name
 msgid "Each keeps {productName}'s version unless you open it and choose the file's."
 msgstr "開いてファイルの方を選ばない限り、それぞれ {productName} の内容が残ります。"
@@ -705,6 +705,11 @@ msgstr "ファイル内の {name} は、{productName} にあるこれらのペ�
 msgid "Its script has a problem."
 msgstr "スクリプトに問題があります。"
 
+#. Option of the switch for a member whose tag is already taken: import it with a name and tag of its own
+msgctxt "persona-import-switch"
+msgid "Keep"
+msgstr "残す"
+
 #. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
 msgid "Keep both"
 msgstr "両方を残す"
@@ -716,6 +721,10 @@ msgstr "確認を続ける"
 #. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
 msgid "Keep {productName}'s"
 msgstr "{productName} のものを残す"
+
+#. Badge on a collapsed member in the import review: it is imported with a tag of its own
+msgid "Keeping"
+msgstr "残す"
 
 #. Badge on a collapsed persona in the import review: the file's version is added next to the app's
 msgid "Keeping both"
@@ -732,10 +741,6 @@ msgstr "タグはそのまま"
 #. Line of the import result: personas left unchanged
 msgid "Kept as they were"
 msgstr "変更なし"
-
-#. Choice in the import review: do nothing with this member of the import file. {name} is its name
-msgid "Leave {name} out this time"
-msgstr "今回は {name} を見送る"
 
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
@@ -1385,6 +1390,11 @@ msgstr "シグネチャー絵文字"
 msgid "Similar tag"
 msgstr "似たタグ"
 
+#. Option of the switch for a member whose tag is already taken: do not import it
+msgctxt "persona-import-switch"
+msgid "Skip"
+msgstr "スキップ"
+
 #. Line of the import result: members left out
 msgid "Skipped"
 msgstr "スキップ済み"
@@ -1392,6 +1402,10 @@ msgstr "スキップ済み"
 #. Import warning when member has no name
 msgid "Skipped member because they have no name configured."
 msgstr "名前が設定されていないため、メンバーをスキップしました。"
+
+#. Badge on a collapsed member in the import review: it is not imported
+msgid "Skipping"
+msgstr "スキップ"
 
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
@@ -1880,6 +1894,10 @@ msgstr "{appName} {version} をインストールする準備ができました�
 #. Line at the top of the import review. {count} is a number, {productName} the app name
 msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
 msgstr "{count, plural, other {# 人のメンバーは {productName} のペルソナとすでに一致しています。対応は不要です。}}"
+
+#. Heading in the import review over the list of members whose proxy tag another persona already has
+msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
+msgstr "{count, plural, other {タグが既に使われているメンバー: # 人}}"
 
 #. Line at the top of the import review. {count} is a number of members of the import file
 msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
