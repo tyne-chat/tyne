@@ -26,10 +26,6 @@ msgstr "Тагът <0>{tag}</0> вече принадлежи на вашата 
 msgid "<0>{tag}</0> is also used by {name} in your file."
 msgstr "Тагът <0>{tag}</0> се използва и от {name} във вашия файл."
 
-#. Choice in the import review: the member of the file is someone else, add it as a new persona
-msgid "A different persona: add it"
-msgstr "Друга персона: добави я"
-
 #. Toast when saving a persona with more than five tag pairs
 msgid "A persona can have at most 5 tags"
 msgstr "Една персона може да има най-много 5 тага"
@@ -157,9 +153,14 @@ msgstr "Изображението на банера не можа да бъде
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "Изображението на банера не можа да бъде изтеглено: {error}. Персоната запази досегашния си банер."
 
-#. Switch on a deleted persona in the import review that restores it. {name} is its name
-msgid "Bring {name} back"
-msgstr "Върни {name}"
+#. Option of the switch on a deleted persona in the import review: it is restored
+msgctxt "persona-import-switch"
+msgid "Bring back"
+msgstr "Върни"
+
+#. Badge on a collapsed deleted persona in the import review: it comes back as it was
+msgid "Bringing back"
+msgstr "Връща се"
 
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
@@ -213,9 +214,9 @@ msgstr "Цвят"
 msgid "Come back here and tap <0>Get Tyne in TestFlight</0>, then <1>Install</1>."
 msgstr "Върни се тук и докосни <0>Вземи Tyne в TestFlight</0>, след това <1>Инсталиране</1>."
 
-#. Small line on a deleted persona in the import review once it is set to come back
-msgid "Comes back as it was, with its old messages"
-msgstr "Връща се такава, каквато беше, със старите си съобщения"
+#. What happens to the app's deleted persona in the import review when it is brought back
+msgid "Comes back as it was"
+msgstr "Връща се както беше"
 
 #. Section label in the command editor: name and description.
 msgid "Command"
@@ -241,10 +242,6 @@ msgstr "Сравняване на файла ви с вашите персони
 #. Header for configured personas list with count
 msgid "Configured Personas ({count})"
 msgstr "Конфигурирани персони ({count})"
-
-#. Accessible label of the checkbox that connects a persona made by hand to its member in the import file. {name} is its name
-msgid "Connect {name}"
-msgstr "Свържи {name}"
 
 #. Explanation of the "Linked" line of the import result
 msgid "Connected to their members in the file. Nothing in them changed."
@@ -419,14 +416,6 @@ msgstr "Дублирана двойка тагове при тази персо�
 #. Helper description for the In Each Channel option of the persona scope setting
 msgid "Each channel keeps its own persona. New channels start as your account."
 msgstr "Всеки канал пази своя персона. Новите канали започват с вашия акаунт."
-
-#. Hint under the list of members whose tag is already taken, in the import review
-msgid "Each is skipped unless you open it and keep it with a tag of its own."
-msgstr "Всеки се пропуска, освен ако не го отворите и не го запазите със собствен таг."
-
-#. Hint under the list of differing personas in the import review. {productName} is the app name
-msgid "Each keeps {productName}'s version unless you open it and choose the file's."
-msgstr "Всяка запазва версията от {productName}, освен ако не я отворите и не изберете тази от файла."
 
 #. Context menu action on the community command chip that opens that command in settings. Preserve {name}.
 #. Heading of the command editor. Preserve {name}, the command name.
@@ -697,10 +686,6 @@ msgstr "Инсталирай безплатното приложение <0>Test
 msgid "Instead of {tag}"
 msgstr "Вместо {tag}"
 
-#. Question in the import review for a member that shares a name or a tag with personas, but not both. {name} is its name
-msgid "Is {name} from your file one of these personas in {productName}?"
-msgstr "Дали {name} от файла ви е някоя от тези персони в {productName}?"
-
 #. Why a community command could not run, shown after "Couldn't run /name:".
 msgid "Its script has a problem."
 msgstr "Скриптът ѝ има проблем."
@@ -717,10 +702,6 @@ msgstr "Запази и двете"
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "Продължи прегледа"
-
-#. Choice on the app's card in the import review: keep the display tag. {productName} is the app name
-msgid "Keep {productName}'s"
-msgstr "Запази този от {productName}"
 
 #. Badge on a collapsed member in the import review: it is imported with a tag of its own
 msgid "Keeping"
@@ -742,13 +723,14 @@ msgstr "Запазва тага си"
 msgid "Kept as they were"
 msgstr "Без промяна"
 
+#. Option of the switch on a deleted persona in the import review: it stays deleted
+msgctxt "persona-import-switch"
+msgid "Leave deleted"
+msgstr "Остави изтрита"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "Ред {line}, колона {column}: {problem}"
-
-#. Shown on a persona in the import review that is already connected to a different member
-msgid "Linked to another PluralKit member"
-msgstr "Свързана с друг член от PluralKit"
 
 #. Tooltip on the community command chip when the viewer cannot use that command (not a member of its community, or the command is gone). Preserve {name}.
 msgid "Made with /{name}"
@@ -923,6 +905,10 @@ msgstr "Няма тагове"
 msgid "Nobody has this signal on"
 msgstr "Никой не е включил този сигнал"
 
+#. Choice beside the personas a member of the import file might be: it is none of them
+msgid "None of these"
+msgstr "Нито една от тези"
+
 #. Shown in one’s own Personas list when none of them is public.
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Все още нито една от вашите персони не е публична. Другите виждат персона тук, след като зададете видимостта ѝ на „Публична“."
@@ -931,17 +917,9 @@ msgstr "Все още нито една от вашите персони не е
 msgid "Not imported"
 msgstr "Не се импортира"
 
-#. Choice in the import review: do nothing with this member of the import file. {name} is its name
-msgid "Not sure: leave {name} out this time"
-msgstr "При съмнение: пропусни {name} този път"
-
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Не сте сигурни? Оставете го както е: нищо не се променя."
-
-#. Badge on the choice in the import review that leaves everything as it is
-msgid "Nothing changes"
-msgstr "Нищо не се променя"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1209,6 +1187,10 @@ msgstr "Премахване на подписано емоджи"
 msgid "Remove tag pair"
 msgstr "Премахване на двойката тагове"
 
+#. What happens to the import file's display tag in the import review when it is used
+msgid "Replaces your display tag"
+msgstr "Заменя вашия таг за показване"
+
 #. What happens to the import file's version of a persona in the import review. {productName} is the app name, {name} the persona
 msgid "Replaces {productName}'s {name}"
 msgstr "Заменя {name} в {productName}"
@@ -1254,22 +1236,6 @@ msgstr "Изпълни отново"
 #. Button in Windows' SmartScreen warning: use Windows' own wording in this language.
 msgid "Run anyway"
 msgstr "Изпълни въпреки това"
-
-#. Why a persona in the import review may be the member: same name
-msgid "Same name"
-msgstr "Същото име"
-
-#. Why a persona in the import review may be the member: same name and proxy tag
-msgid "Same name and tag"
-msgstr "Същото име и таг"
-
-#. Choice on a persona's card in the import review: the member of the import file is this persona
-msgid "Same persona as this one"
-msgstr "Същата персона като тази"
-
-#. Why a persona in the import review may be the member: same proxy tag
-msgid "Same tag"
-msgstr "Същият таг"
 
 #. Label of the field whose text stands in for what a member types, in the preview.
 msgid "Sample input"
@@ -1386,10 +1352,6 @@ msgstr "Подписаното емоджи вече се използва от 
 msgid "Signature emojis"
 msgstr "Подписни емоджита"
 
-#. Why a persona in the import review may be the member: the proxy tags differ only in letter case
-msgid "Similar tag"
-msgstr "Подобен таг"
-
 #. Option of the switch for a member whose tag is already taken: do not import it
 msgctxt "persona-import-switch"
 msgid "Skip"
@@ -1411,9 +1373,17 @@ msgstr "Пропуска се"
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Някои етикети за прокси бяха пропуснати: {productName} позволява до 5 на персона, всеки с най-много 32 знака."
 
+#. Badge on a collapsed deleted persona in the import review: it stays deleted
+msgid "Staying deleted"
+msgstr "Остава изтрита"
+
 #. What happens to the app's version of a persona in the import review
 msgid "Stays as it is"
 msgstr "Остава непроменена"
+
+#. What happens to the app's deleted persona in the import review
+msgid "Stays deleted"
+msgstr "Остава изтрита"
 
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
@@ -1713,10 +1683,6 @@ msgstr "Използвайте малки букви, цифри, - и _, до 3
 msgid "Use the basic editor"
 msgstr "Използване на основния редактор"
 
-#. Choice on the import file's card in the import review: use the file's display tag
-msgid "Use the file's"
-msgstr "Използвай този от файла"
-
 #. Option of the three-way switch for a persona that differs from the import file: the file's version replaces the app's
 msgctxt "persona-import-switch"
 msgid "Use the file's"
@@ -1757,6 +1723,10 @@ msgstr "Къде се показва лентата със сигнали"
 #. Aria label for the tabs that choose whether the selected persona applies everywhere or per channel
 msgid "Where your persona is remembered"
 msgstr "Къде се помни персоната ви"
+
+#. Question over the personas a member of the import file might be. {name} is the member
+msgid "Which persona is {name}?"
+msgstr "Коя персона е {name}?"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"
@@ -1891,21 +1861,25 @@ msgstr "{addedCount, plural, one {Добавена е # персона} other {�
 msgid "{appName} {version} is ready to install."
 msgstr "{appName} {version} е готов за инсталиране."
 
-#. Line at the top of the import review. {count} is a number, {productName} the app name
-msgid "{count, plural, one {# member already matches its persona in {productName}. Nothing to do.} other {# members already match their persona in {productName}. Nothing to do.}}"
-msgstr "{count, plural, one {# член вече съвпада с персоната си в {productName}. Няма какво да се прави.} other {# членове вече съвпадат с персоните си в {productName}. Няма какво да се прави.}}"
+#. Line at the top of the import review: members already linked to an identical persona, or connected to one with the same name and tag. {count} is a number
+msgid "{count, plural, one {# exact match} other {# exact matches}}"
+msgstr "{count, plural, one {# точно съвпадение} other {# точни съвпадения}}"
 
 #. Heading in the import review over the list of members whose proxy tag another persona already has
 msgid "{count, plural, one {# member has a tag that is already taken} other {# members have a tag that is already taken}}"
 msgstr "{count, plural, one {# член има таг, който вече е зает} other {# членове имат таг, който вече е зает}}"
 
+#. Heading in the import review over the members that share a name or tag with personas of the account
+msgid "{count, plural, one {# member might be a persona you already have} other {# members might be personas you already have}}"
+msgstr "{count, plural, one {# член може да е персона, която вече имате} other {# членове може да са персони, които вече имате}}"
+
 #. Line at the top of the import review. {count} is a number of members of the import file
-msgid "{count, plural, one {# new member will be added} other {# new members will be added}}"
-msgstr "{count, plural, one {Ще бъде добавен # нов член} other {Ще бъдат добавени # нови членове}}"
+msgid "{count, plural, one {# new member} other {# new members}}"
+msgstr "{count, plural, one {# нов член} other {# нови членове}}"
 
 #. Line at the top of the import review. {count} is a number, {productName} the app name
-msgid "{count, plural, one {# persona in {productName} isn't in your file. It stays as it is.} other {# personas in {productName} aren't in your file. They stay as they are.}}"
-msgstr "{count, plural, one {# персона в {productName} не е във файла ви. Тя остава както е.} other {# персони в {productName} не са във файла ви. Те остават както са.}}"
+msgid "{count, plural, one {# persona in {productName} isn't in your file} other {# personas in {productName} aren't in your file}}"
+msgstr "{count, plural, one {# персона в {productName} не е във файла ви} other {# персони в {productName} не са във файла ви}}"
 
 #. Heading in the import review over the list of personas whose details differ from the import file. {count} is how many
 msgid "{count, plural, one {# persona is different in your file} other {# personas are different in your file}}"
@@ -1927,9 +1901,9 @@ msgstr "{count, plural, one {# персона вече е скрита} other {#
 msgid "{count, plural, one {# persona stays as it is} other {# personas stay as they are}}"
 msgstr "{count, plural, one {# персона остава непроменена} other {# персони остават непроменени}}"
 
-#. Line at the top of the import review: personas with the same name and tag as a member of the import file are connected to it, which records only which member they are. {count} is a number
-msgid "{count, plural, one {# persona you made by hand will be connected to its member. Nothing about it changes.} other {# personas you made by hand will be connected to their members. Nothing about them changes.}}"
-msgstr "{count, plural, one {# персона, създадена от вас ръчно, ще бъде свързана с члена си. Нищо в нея не се променя.} other {# персони, създадени от вас ръчно, ще бъдат свързани с членовете си. Нищо в тях не се променя.}}"
+#. Heading in the import review over the members whose persona was deleted. {productName} is the app name
+msgid "{count, plural, one {# persona was deleted in {productName}} other {# personas were deleted in {productName}}}"
+msgstr "{count, plural, one {# персона е изтрита в {productName}} other {# персони са изтрити в {productName}}}"
 
 #. How many personas the Personas list shows.
 msgid "{count, plural, one {# persona} other {# personas}}"
@@ -1938,6 +1912,10 @@ msgstr "{count, plural, one {# персона} other {# персони}}"
 #. Toast after deleting personas.
 msgid "{count, plural, one {# persona} other {# personas}} deleted"
 msgstr "{count, plural, one {# персона е изтрита} other {# персони са изтрити}}"
+
+#. On a collapsed member in the import review: how many personas of the account it might be
+msgid "{count, plural, one {# possible match} other {# possible matches}}"
+msgstr "{count, plural, one {# възможно съвпадение} other {# възможни съвпадения}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
