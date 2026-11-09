@@ -359,6 +359,29 @@ describe('keeping both versions of a differing persona', () => {
 		]);
 	});
 
+	it('keeps a member whose tag is taken as a new persona linked to its member, with a free tag', () => {
+		const {members} = buildPreviewRequest(
+			pkSource([pkMember(0, {name: 'Lyra ✧', id: 'ccccc', personaTags: [{prefix: 'ly:'}]})]),
+			'42',
+			MEDIA,
+		);
+		const entries: Array<PersonaImportPreviewEntry> = [
+			{index: 0, kind: 'tag_in_use', clashes: [{tag: {prefix: 'ly:'}, held_by_persona_id: 'p1'}]},
+		];
+		const live = [{id: 'p1', name: 'Lyra ✦', persona_tags: [{prefix: 'ly:'}], signature_emojis: []}];
+		const decision = keepBothDecision(entries[0]!, entries, new Map(), members, live, false, true);
+		expect(decision).toMatchObject({
+			replacements: [{prefix: 'lyr:'}],
+			copy: {name: 'Lyra ✧', replacedTags: [{prefix: 'ly:'}], linked: true},
+		});
+		const [action] = buildActions(entries, new Map([[0, decision]]), members, new Map());
+		expect(action).toMatchObject({
+			action: 'add',
+			item: {name: 'Lyra ✧', persona_tags: [{prefix: 'lyr:'}], external_uuid: 'ccccc'},
+		});
+		expect(PersonaImportActionSchema.safeParse(action).success).toBe(true);
+	});
+
 	it("leaves off the signature emojis Tyne's version keeps, for a Tyne export", () => {
 		const emoji = {name: '🕯️'};
 		const {members} = buildPreviewRequest(
