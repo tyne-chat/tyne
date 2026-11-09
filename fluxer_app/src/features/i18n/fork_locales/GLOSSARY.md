@@ -38,13 +38,18 @@ glossary would have caught that.)
 
 ## Words per language
 
-The web's locale code first, then the phone's. Taken from both catalogues on 2026-10-25. The phone
-also has `en_US` and `pt` (Portugal), which use the words of `en_GB` and `pt_BR`.
+The web's locale code first, then the phone's. Taken from both catalogues on 2026-10-25; the ten
+languages upstream added on 2026-11-09 were chosen when they were first translated
+(tyne-chat/tyne#583). The phone also has `en_US`, which uses the words of `en_GB`; its `pt`
+(Portugal) shares the web's `pt-PT` row.
 
 | Language (web / phone) | Persona | Personas | Display tag | Signature emojis | Signal bar | Pin emoji | React as… |
 |---|---|---|---|---|---|---|---|
 | Arabic (`ar`) | شخصية | الشخصيات | علامة العرض | الرموز التعبيرية المميزة | شريط الإشارات | تثبيت الرمز التعبيري | تفاعل باسم... |
+| Belarusian (`be`) | Персона | Персоны | Бачны тэг | Адметныя эмодзі | Панэль сігналаў | Замацаваць эмодзі | Адрэагаваць ад імя… |
 | Bulgarian (`bg`) | Персона | Персони | Таг за показване | Подписни емоджита | Лента със сигнали | Закачане на емоджи | Реагиране като... |
+| Bengali (`bn`) | পারসোনা | পারসোনা | ডিসপ্লে ট্যাগ | সিগনেচার ইমোজি | সিগন্যাল বার | ইমোজি পিন করুন | পারসোনা হিসেবে প্রতিক্রিয়া জানান… |
+| Catalan (`ca`) | Persona | Persones | Etiqueta visible | Emojis distintius | Barra de senyals | Fixa l’emoji | Reacciona com a… |
 | Czech (`cs`) | Persona | Persony | Zobrazovaná značka | Podpisové emoji | Lišta signálů | Připnout emoji | Reagovat jako... |
 | Danish (`da`) | Persona | Personaer | Visningstag | Signatur-emojis | Signalbjælke | Fastgør emoji | Reager som... |
 | German (`de`) | Persona | Personas | Anzeige-Tag | Signatur-Emojis | Signalleiste | Emoji anheften | Reagieren als... |
@@ -53,6 +58,7 @@ also has `en_US` and `pt` (Portugal), which use the words of `en_GB` and `pt_BR`
 | Spanish (`es-ES` / `es`) | Persona | Personas | Etiqueta de visualización | Emojis de firma | Barra de señales | Fijar emoji | Reaccionar como... |
 | Spanish (Latin America) (`es-419` / `es_419`) | Persona | Personas | Etiqueta de visualización | Emojis distintivos | Barra de señales | Fijar emoji | Reaccionar como... |
 | Finnish (`fi`) | Persoona | Persoonat | Näyttötunniste | Nimikkoemojit | Signaalipalkki | Kiinnitä emoji | Reagoi käyttäjänä... |
+| Filipino (`fil`) | Persona | Mga persona | Ipinapakitang tag | Mga natatanging emoji | Hanay ng signal | I-pin ang emoji | Mag-react bilang… |
 | French (`fr`) | Persona | Personas | Badge d'affichage | Emojis signature | Barre de signaux | Épingler l'émoji | Réagir en tant que... |
 | Hebrew (`he`) | פרסונה | פרסונות | תגית תצוגה | אימוג'י חתימה | סרגל אותות | הצמד אימוג'י | הגב בתור... |
 | Hindi (`hi`) | परसोना | परसोना | डिस्प्ले टैग | हस्ताक्षर इमोजी | सिग्नल बार | इमोजी पिन करें | के रूप में प्रतिक्रिया दें... |
@@ -63,14 +69,20 @@ also has `en_US` and `pt` (Portugal), which use the words of `en_GB` and `pt_BR`
 | Japanese (`ja`) | ペルソナ | ペルソナ | 表示タグ | シグネチャー絵文字 | シグナルバー | 絵文字をピン留め | 別名でリアクション... |
 | Korean (`ko`) | 페르소나 | 페르소나 | 표시 태그 | 시그니처 이모지 | 시그널 바 | 이모지 고정 | 다른 프로필로 반응하기... |
 | Lithuanian (`lt`) | Persona | Personos | Rodoma žyma | Parašo jaustukai | Signalų juosta | Prisegti jaustuką | Reaguoti kaip... |
+| Latvian (`lv`) | Persona | Personas | Rādāmā birka | Raksturīgās emocijzīmes | Signālu josla | Piespraust emocijzīmi | Reaģēt kā… |
 | Norwegian (`no` / `nb`) | Persona | Personaer | Visningstag | Signaturemojier | Signallinje | Fest emoji | Reager som... |
 | Dutch (`nl`) | Persona | Persona's | Weergavetag | Handtekening-emoji's | Signaalbalk | Emoji vastpinnen | Reageren als... |
 | Polish (`pl`) | Persona | Persony | Widoczny tag | Emoji podpisu | Pasek sygnałów | Przypnij emoji | Zareaguj jako... |
 | Portuguese (Brazil) (`pt-BR` / `pt_BR`) | Persona | Personas | Tag de exibição | Emojis de assinatura | Barra de sinais | Fixar emoji | Reagir como... |
+| Portuguese (Portugal) (`pt-PT`; the phone's `pt`) | Persona | Personas | Tag de exibição | Emojis de assinatura | Barra de sinais | Fixar emoji | Reagir como… |
 | Romanian (`ro`) | Persona | Personas | Etichetă de afișare | Emoji-uri semnătură | Bara de semnale | Fixează emoji | Reacționează ca... |
 | Russian (`ru`) | Персона | Персоны | Отображаемый тег | Фирменные эмодзи | Панель сигналов | Закрепить эмодзи | Реагировать как... |
+| Slovak (`sk`) | Persona | Persony | Zobrazovaná značka | Podpisové emoji | Lišta signálov | Pripnúť emoji | Reagovať ako… |
+| Slovenian (`sl`) | Persona | Persone | Prikazna oznaka | Prepoznavni emojiji | Vrstica signalov | Pripni emoji | Odzovi se kot … |
+| Albanian (`sq`) | Persona | Personat | Etiketa e shfaqur | Emoji dallues | Shiriti i sinjaleve | Fikso emoji-n | Reago si… |
 | Swedish (`sv-SE` / `sv`) | Persona | Personas | Visningstagg | Signaturemojier | Signalfält | Fäst emoji | Reagera som... |
 | Thai (`th`) | Persona | Persona | แท็กแสดงผล | อีโมจิประจำตัว | แถบสัญญาณ | ปักหมุดอีโมจิ | แสดงความรู้สึกในฐานะ... |
+| Toki Pona (`tok`; the phone's `art`) | jan insa | jan insa | nimi poka | sitelen pilin nimi | linja suno | o sinpin e sitelen pilin | o pilin kepeken nimi… |
 | Turkish (`tr`) | Persona | Personalar | Görünen Etiket | İmza Emojileri | Sinyal Çubuğu | Emojiyi sabitle | Farklı bir profil olarak tepki ver... |
 | Ukrainian (`uk`) | Персона | Персони | Значок відображення | Фірмові емодзі | Панель сигналів | Закріпити емодзі | Відреагувати як... |
 | Vietnamese (`vi`) | Persona | Persona | Thẻ hiển thị | Biểu tượng cảm xúc đặc trưng | Thanh tín hiệu | Ghim biểu tượng cảm xúc | Thả cảm xúc dưới tên... |
