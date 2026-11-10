@@ -196,10 +196,11 @@ A handler that touches accounts, storage or windows checks its sender with
   child process: a `fatal` failure stops the app, a `degraded` one (`app-store`, `gateway-socket`)
   is logged. Callers load add-ons lazily and treat a failure as a missing feature.
 - A new add-on needs `DESKTOP_NATIVE_ADDONS` (`tools/ci/src/desktop_native.rs`), both lists in
-  `build.mjs`, `package.json`, an OS list in `tools/ci/check-desktop-native-workspaces.sh`,
-  `nativeRuntimeFilePatterns`, perhaps the preflight list, and skips in `native/deny.toml`
-  (`-D duplicate` fails on any new duplicate version).
-- The script's `clippy` and `test` run on Linux only, and `clippy` also checks the Windows add-ons
+  `build.mjs`, `package.json`, an OS list in `tools/ci/check-desktop-native-crates.sh`, a member
+  line in the root `Cargo.toml`, `nativeRuntimeFilePatterns`, perhaps the preflight list, and skips
+  in the root `deny.toml` (with `-D warnings`, a new duplicate version fails `cargo deny`).
+- The crates are members of the root Cargo workspace since upstream's #3989 (2026-11-09), with no
+  lockfile of their own. The script's `clippy` runs on Linux only and also checks the Windows add-ons
   for `x86_64-pc-windows-msvc`: install that target (`rustup target add`; upstream's CI does,
   `.devcontainer/Dockerfile` does not). macOS and Windows code is otherwise compiled only by a
   release or `desktop-test/` build.
@@ -237,20 +238,21 @@ deleted; `forkReleaseAssetName` uses them. A main-process string needs `FALLBACK
 
 ## Tests and checks
 
-- `pnpm --filter fluxer_desktop typecheck` and `test` (`CHECKS.md`) first write the
-  git-ignored `src/common/BuildChannel.ts` from `BUILD_CHANNEL` (default `stable`). The tests are
-  `node --test` over `src/{main,preload,common}/*.test.mjs`, with Electron stubbed
-  (`installElectronStub` in `src/main/ForkLocalAppTestSupport.test.mjs`, a copy of the helper
-  upstream removed).
+- `pnpm --filter fluxer_desktop typecheck` and `test` (`CHECKS.md`). `src/common/BuildChannel.ts`
+  reads `__FLUXER_BUILD_CHANNEL__`, which `scripts/build.mjs` defines from `BUILD_CHANNEL` (default
+  `stable`); `test` preloads `scripts/fork-test-build-channel.mjs`, which defines it the same way,
+  as most modules the tests import read it. The tests are `node --test` over
+  `src/{main,preload,common}/*.test.mjs`, with Electron stubbed (`installElectronStub` in
+  `src/main/ForkLocalAppTestSupport.test.mjs`, a copy of the helper upstream removed).
 - Fork tests: `src/main/Fork*.test.mjs`; web side `ForkAppWindows.test.ts`,
   `ForkAppWindowBridge.test.ts`. Put logic that needs no Electron in a `Fork*.ts` module so it can
   be tested. The `Window.ts` block is tested through upstream's `createWindow` with fake windows
   (`ForkExtraAppWindows.test.mjs`, a fresh copy of the module per test); a new step in the block
   gets a case there. A `packages/desktop_ipc` change also needs the root guide's "every other
   workspace package" loop and the web typecheck.
-- Native code: the `fmt`, `clippy` and cargo-deny lines in `CHECKS.md`, plus
-  `tools/ci/check-desktop-native-workspaces.sh test`. The host `cargo test --workspace` there
-  runs `tools/ci`'s tests of the add-on registry and of the preload's imports
+- Native code: the Rust lines in `CHECKS.md`. As members of the root workspace, the crates' tests
+  run in its `cargo test --workspace`, with `tools/ci`'s tests of the add-on registry and of the
+  preload's imports
   (`the_real_preload_closure_resolves`, which fails on an import it cannot follow).
 - Packaging or workflow: a `desktop-test/<name>` build. Only a real release exercises publishing:
   check the run's conclusion, the release, and the verify step's output.
