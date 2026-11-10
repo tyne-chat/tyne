@@ -152,18 +152,6 @@ jobs:
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
         run: ${{ env.CI_TOOL }} --step update_version
 
-      - name: Set build channel
-        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
-        # Since upstream's da7c73d27e (#3989), src/common/BuildChannel.ts is tracked and the build
-        # defines the channel from BUILD_CHANNEL, and the step is gone; before it, the step writes
-        # that file.
-        run: |
-          if git ls-files --error-unmatch src/common/BuildChannel.ts >/dev/null 2>&1; then
-            echo "The build reads BUILD_CHANNEL ($BUILD_CHANNEL) itself."
-          else
-            ${{ env.CI_TOOL }} --step set_build_channel
-          fi
-
       - name: Build renderer
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
         run: ${{ env.CI_TOOL }} --step build_shared_assets
@@ -304,18 +292,6 @@ jobs:
       - name: Update version
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
         run: ${{ env.CI_TOOL }} --step update_version
-
-      - name: Set build channel
-        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
-        # Since upstream's da7c73d27e (#3989), src/common/BuildChannel.ts is tracked and the build
-        # defines the channel from BUILD_CHANNEL, and the step is gone; before it, the step writes
-        # that file.
-        run: |
-          if git ls-files --error-unmatch src/common/BuildChannel.ts >/dev/null 2>&1; then
-            echo "The build reads BUILD_CHANNEL ($BUILD_CHANNEL) itself."
-          else
-            ${{ env.CI_TOOL }} --step set_build_channel
-          fi
 
       - name: Download renderer artifact
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
