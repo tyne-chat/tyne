@@ -5,13 +5,18 @@ import {ConfirmModal} from '@app/features/app/components/dialogs/ConfirmModal';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {EmojiPickerPopout} from '@app/features/emoji/components/popouts/EmojiPickerPopout';
 import type {FlatEmoji} from '@app/features/emoji/types/EmojiTypes';
-import {CLOSE_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
+import {
+	CANCEL_DESCRIPTOR,
+	CLOSE_DESCRIPTOR,
+	CREATE_DESCRIPTOR,
+} from '@app/features/i18n/utils/CommonMessageDescriptors';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
 import {toReactionEmoji, useEmojiURL} from '@app/features/messaging/utils/ReactionUtils';
 import {ComponentBus} from '@app/features/platform/utils/ComponentBus';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
+import {CopyIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
@@ -50,12 +55,18 @@ import {useCallback, useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
 import {type Persona, PersonaStore} from '../../state/PersonaStore';
 import {pasteLinkOverSelection} from '../../utils/PersonaBioLinkPaste';
+import {duplicatePersonaName} from '../../utils/PersonaDuplicate';
 import {PersonaTag} from '../PersonaTag';
 import styles from './PersonaEditModal.module.css';
 
 const NEW_PERSONA_DESCRIPTOR = msg({
 	message: 'New Persona',
 	comment: 'Title for new persona modal',
+});
+const COPY_OF_PERSONA_DESCRIPTOR = msg({
+	message: 'Copy of {name}',
+	comment:
+		'Shown at the top of the editor for a new persona that starts as a copy of another; name is the persona it was copied from. Nothing is created until the person presses Create.',
 });
 const EDIT_PERSONA_DESCRIPTOR = msg({
 	message: 'Edit Persona',
@@ -310,6 +321,27 @@ const emptyFormState = (): PersonaFormState => ({
 	pendingBanner: null,
 });
 
+/**
+ * A new persona that starts as a copy of `source` (tyne-chat/tyne#599): its pictures (the same stored
+ * files), colours, pronouns, bio, visibility and tag matching, under a numbered name. Tags and
+ * signature emojis start empty, since each belongs to one persona.
+ */
+const copyFormState = (source: Persona, personas: ReadonlyArray<Persona>): PersonaFormState => ({
+	...emptyFormState(),
+	name: duplicatePersonaName(
+		source.name,
+		personas.map((p) => p.name),
+	),
+	pronouns: source.pronouns ?? '',
+	avatarHash: source.avatar_hash ?? '',
+	avatarColor: source.avatar_color ?? null,
+	bannerHash: source.banner_hash ?? '',
+	accentColor: source.color ?? null,
+	bio: source.bio ?? '',
+	visibility: source.visibility ?? 'unlisted',
+	autoTagDisabled: source.auto_tag_disabled ?? false,
+});
+
 function normalizeTag(tag: {prefix?: string | null; suffix?: string | null}) {
 	return {
 		prefix: (tag.prefix ?? '').trim(),
@@ -331,10 +363,12 @@ function formatTagDisplay(tag: {prefix: string; suffix: string}, text: string): 
 
 export interface PersonaEditModalProps {
 	persona?: Persona | null;
+	/** Start a new persona as a copy of this one (`openPersonaDuplicateModal`). */
+	copyOf?: Persona | null;
 	onClose: () => void;
 }
 
-export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({persona, onClose}) => {
+export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({persona, copyOf, onClose}) => {
 	const {i18n} = useLingui();
 	const currentUser = Users.currentUser;
 	const prefersReducedMotion = Accessibility.useReducedMotion;
@@ -344,6 +378,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	const tagIcon = PersonaStore.displayTagIcon;
 
 	const initialFormState = useMemo<PersonaFormState>(() => {
+		if (copyOf) return copyFormState(copyOf, PersonaStore.personas);
 		if (!persona) return emptyFormState();
 		return {
 			id: persona.id,
@@ -371,12 +406,24 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			pendingAvatar: null,
 			pendingBanner: null,
 		};
-	}, [persona]);
+	}, [persona, copyOf]);
 
 	const [formData, setFormData] = useState<PersonaFormState>(initialFormState);
 	const initialFormStateRef = useRef<PersonaFormState>(initialFormState);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [flashBanner, setFlashBanner] = useState(false);
+	const isCopy = copyOf != null;
+	// A copy opens on its name (the modal's initial focus), selected once, so typing replaces "Lyra (2)".
+	const nameInputRef = useRef<HTMLInputElement>(null);
+	const nameSelectedRef = useRef(false);
+	const handleNameFocus = useCallback(
+		(event: React.FocusEvent<HTMLInputElement>) => {
+			if (!isCopy || nameSelectedRef.current) return;
+			nameSelectedRef.current = true;
+			event.currentTarget.select();
+		},
+		[isCopy],
+	);
 
 	const triggerFlash = useCallback(() => {
 		setFlashBanner(true);
@@ -442,17 +489,29 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		return false;
 	}, [formData]);
 
+	// A copy closes only through Cancel or Create, even with its fields emptied.
 	const handleAttemptClose = useCallback(() => {
-		if (hasUnsavedChanges) {
+		if (isCopy || hasUnsavedChanges) {
 			triggerFlash();
 			return;
 		}
 		onClose();
-	}, [hasUnsavedChanges, triggerFlash, onClose]);
+	}, [isCopy, hasUnsavedChanges, triggerFlash, onClose]);
 
 	const handleResetForm = useCallback(() => {
 		setFormData(initialFormStateRef.current);
 	}, []);
+
+	// Duplicate starts from the persona as saved: with edits pending, the bar flashes, as closing does.
+	const handleDuplicate = useCallback(() => {
+		if (!formData.id) return;
+		if (hasUnsavedChanges) {
+			triggerFlash();
+			return;
+		}
+		const saved = PersonaStore.personas.find((p) => p.id === formData.id) ?? persona;
+		if (saved) openPersonaDuplicateModal(saved);
+	}, [formData.id, hasUnsavedChanges, triggerFlash, persona]);
 
 	const getTagRowError = useCallback(
 		(idx: number): string | null => {
@@ -808,7 +867,10 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		);
 	};
 
-	const modalTitle = formData.id ? formData.name || i18n._(EDIT_PERSONA_DESCRIPTOR) : i18n._(NEW_PERSONA_DESCRIPTOR);
+	const editTitle = formData.id ? formData.name || i18n._(EDIT_PERSONA_DESCRIPTOR) : i18n._(NEW_PERSONA_DESCRIPTOR);
+	const modalTitle = copyOf ? i18n._(COPY_OF_PERSONA_DESCRIPTOR, {name: copyOf.name}) : editTitle;
+	// A copy keeps its bar up until Create or Cancel: it is unsaved from the start.
+	const showBanner = isCopy || hasUnsavedChanges;
 
 	const visibilityTabs = useMemo(() => getVisibilityTabs(i18n), [i18n]);
 	const visibilityDescriptions = useMemo(() => getVisibilityDescriptions(i18n), [i18n]);
@@ -817,6 +879,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		<Modal.Root
 			size="large"
 			onClose={handleAttemptClose}
+			initialFocusRef={isCopy ? nameInputRef : undefined}
 			className={styles.modalRoot}
 			data-flx="persona.persona-edit-modal.modal-root"
 		>
@@ -826,77 +889,122 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			<div
 				className={clsx(
 					styles.header,
-					hasUnsavedChanges && styles.headerBannerActive,
-					hasUnsavedChanges && flashBanner && styles.headerBannerFlash,
+					showBanner && styles.headerBannerActive,
+					showBanner && flashBanner && styles.headerBannerFlash,
 				)}
 				data-flx="persona.persona-edit-modal.header"
 			>
 				<AnimatePresence mode="wait" data-flx="persona.persona-edit-modal.animate-presence">
-					{hasUnsavedChanges ? (
+					{isCopy && (
 						<motion.div
-							key="unsaved-banner"
-							initial={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
+							key="copy-banner"
+							initial={{opacity: 1}}
 							animate={{opacity: 1}}
 							exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
 							transition={prefersReducedMotion ? {duration: 0} : {duration: 0.2, ease: 'easeOut'}}
 							className={styles.bannerContent}
-							data-flx="persona.persona-edit-modal.banner-content"
+							data-flx="persona.persona-edit-modal.copy-banner-content"
 						>
-							<div className={styles.bannerTextContainer} data-flx="persona.persona-edit-modal.banner-text-container">
+							<div
+								className={clsx(styles.bannerTextContainer, styles.copyBannerTextContainer)}
+								data-flx="persona.persona-edit-modal.copy-banner-text-container"
+							>
 								<div
-									className={clsx(styles.bannerText, flashBanner && styles.bannerTextFlash)}
-									data-flx="persona.persona-edit-modal.banner-text"
+									className={clsx(styles.bannerText, styles.copyBannerText, flashBanner && styles.bannerTextFlash)}
+									title={modalTitle}
+									data-flx="persona.persona-edit-modal.copy-banner-text"
 								>
-									<Trans>You have unsaved changes.</Trans>
+									{modalTitle}
 								</div>
 							</div>
-							<div className={styles.bannerActions} data-flx="persona.persona-edit-modal.banner-actions">
+							<div className={styles.bannerActions} data-flx="persona.persona-edit-modal.copy-banner-actions">
 								<Button
 									variant="secondary"
 									small
-									onClick={handleResetForm}
+									onClick={onClose}
 									disabled={isSubmitting}
-									data-flx="persona.persona-edit-modal.button.reset"
+									data-flx="persona.persona-edit-modal.button.cancel-copy"
 								>
-									<Trans>Reset</Trans>
+									{i18n._(CANCEL_DESCRIPTOR)}
 								</Button>
 								<Button
 									variant="primary"
 									small
 									onClick={handleSaveForm}
 									submitting={isSubmitting}
-									data-flx="persona.persona-edit-modal.button.save"
+									data-flx="persona.persona-edit-modal.button.create-copy"
 								>
-									<Trans>Save changes</Trans>
+									{i18n._(CREATE_DESCRIPTOR)}
 								</Button>
 							</div>
 						</motion.div>
-					) : (
-						<motion.div
-							key="normal-header"
-							initial={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
-							animate={{opacity: 1}}
-							exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
-							transition={prefersReducedMotion ? {duration: 0} : {duration: 0.2, ease: 'easeOut'}}
-							className={styles.titleContent}
-							data-flx="persona.persona-edit-modal.title-content"
-						>
-							<div className={styles.titleWrapper} data-flx="persona.persona-edit-modal.title-wrapper">
-								<h3 className={styles.title} data-flx="persona.persona-edit-modal.title">
-									{modalTitle}
-								</h3>
-							</div>
-							<button
-								type="button"
-								aria-label={i18n._(CLOSE_DESCRIPTOR)}
-								onClick={handleAttemptClose}
-								className={styles.closeButton}
-								data-flx="persona.persona-edit-modal.button.close"
-							>
-								<X weight="bold" width={20} height={20} data-flx="persona.persona-edit-modal.x" />
-							</button>
-						</motion.div>
 					)}
+					{!isCopy &&
+						(hasUnsavedChanges ? (
+							<motion.div
+								key="unsaved-banner"
+								initial={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
+								animate={{opacity: 1}}
+								exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
+								transition={prefersReducedMotion ? {duration: 0} : {duration: 0.2, ease: 'easeOut'}}
+								className={styles.bannerContent}
+								data-flx="persona.persona-edit-modal.banner-content"
+							>
+								<div className={styles.bannerTextContainer} data-flx="persona.persona-edit-modal.banner-text-container">
+									<div
+										className={clsx(styles.bannerText, flashBanner && styles.bannerTextFlash)}
+										data-flx="persona.persona-edit-modal.banner-text"
+									>
+										<Trans>You have unsaved changes.</Trans>
+									</div>
+								</div>
+								<div className={styles.bannerActions} data-flx="persona.persona-edit-modal.banner-actions">
+									<Button
+										variant="secondary"
+										small
+										onClick={handleResetForm}
+										disabled={isSubmitting}
+										data-flx="persona.persona-edit-modal.button.reset"
+									>
+										<Trans>Reset</Trans>
+									</Button>
+									<Button
+										variant="primary"
+										small
+										onClick={handleSaveForm}
+										submitting={isSubmitting}
+										data-flx="persona.persona-edit-modal.button.save"
+									>
+										<Trans>Save changes</Trans>
+									</Button>
+								</div>
+							</motion.div>
+						) : (
+							<motion.div
+								key="normal-header"
+								initial={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
+								animate={{opacity: 1}}
+								exit={prefersReducedMotion ? {opacity: 1} : {opacity: 0}}
+								transition={prefersReducedMotion ? {duration: 0} : {duration: 0.2, ease: 'easeOut'}}
+								className={styles.titleContent}
+								data-flx="persona.persona-edit-modal.title-content"
+							>
+								<div className={styles.titleWrapper} data-flx="persona.persona-edit-modal.title-wrapper">
+									<h3 className={styles.title} data-flx="persona.persona-edit-modal.title">
+										{modalTitle}
+									</h3>
+								</div>
+								<button
+									type="button"
+									aria-label={i18n._(CLOSE_DESCRIPTOR)}
+									onClick={handleAttemptClose}
+									className={styles.closeButton}
+									data-flx="persona.persona-edit-modal.button.close"
+								>
+									<X weight="bold" width={20} height={20} data-flx="persona.persona-edit-modal.x" />
+								</button>
+							</motion.div>
+						))}
 				</AnimatePresence>
 			</div>
 
@@ -908,6 +1016,8 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 						<div className={styles.formColumn} data-flx="persona.persona-edit-modal.form-column">
 							{/* 1. Display name */}
 							<Input
+								ref={nameInputRef}
+								onFocus={handleNameFocus}
 								label={<Trans>Display name</Trans>}
 								placeholder={i18n._(NAME_PLACEHOLDER_DESCRIPTOR)}
 								maxLength={100}
@@ -1155,11 +1265,23 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								</div>
 							</div>
 
-							{/* 9. Bottom actions: Delete button only when editing existing persona */}
+							{/* 9. Bottom actions: Duplicate and Delete only when editing existing persona */}
 							{formData.id && (
 								<div className={styles.detailBottomActions} data-flx="persona.persona-edit-modal.detail-bottom-actions">
 									<Button
+										variant="secondary"
+										leftIcon={<CopyIcon size={14} data-flx="persona.persona-edit-modal.copy-icon" />}
+										onClick={handleDuplicate}
+										disabled={isSubmitting}
+										data-flx="persona.persona-edit-modal.button.duplicate-persona"
+									>
+										<Trans comment="Button in a persona's editor that starts a new persona as a copy of this one">
+											Duplicate Persona
+										</Trans>
+									</Button>
+									<Button
 										variant="danger"
+										className={styles.deleteButton}
 										leftIcon={<Trash size={14} data-flx="persona.persona-edit-modal.trash--2" />}
 										onClick={handleDeletePersona}
 										aria-label={i18n._(DELETE_PERSONA_ARIA_DESCRIPTOR)}
@@ -1304,6 +1426,26 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 PersonaEditModal.displayName = 'PersonaEditModal';
 
 export const PERSONA_EDIT_MODAL_KEY = 'persona-edit-modal';
+
+export const PERSONA_COPY_MODAL_KEY = 'persona-copy-modal';
+
+/**
+ * Close the persona's editor and open a new persona's, filled in from `source` (tyne-chat/tyne#599).
+ * A key of its own, so the copy mounts afresh instead of taking over the open editor's state.
+ */
+export function openPersonaDuplicateModal(source: Persona): void {
+	ModalCommands.popWithKey(PERSONA_EDIT_MODAL_KEY);
+	ModalCommands.pushWithKey(
+		ModalCommands.modal(() => (
+			<PersonaEditModal
+				copyOf={source}
+				onClose={() => ModalCommands.popWithKey(PERSONA_COPY_MODAL_KEY)}
+				data-flx="persona.persona-edit-modal.open-persona-duplicate-modal.persona-edit-modal"
+			/>
+		)),
+		PERSONA_COPY_MODAL_KEY,
+	);
+}
 
 export function openPersonaEditModal(persona?: Persona | null): void {
 	ModalCommands.pushWithKey(
