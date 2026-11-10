@@ -174,6 +174,8 @@ The gateway's requests go to the API's `/internal/rpc`:
 | `utils/constants.erl` | `resume_timeout() -> 300000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`); the docs say 300,000 ms | one value |
 | `guild/guild_dispatch_filter.erl` | `channel_signal_update`, `channel_signal_bar_update` are channel-scoped | two clauses |
 | `session/session_passive.erl` | `signal_bar_update` bypasses the passive filter | one clause |
+| `session/fork_reaction_buffer.erl` | personas in the reaction buffer: `MESSAGE_REACTION_ADD_MANY` entries keep `persona_id` and `subprofile`, and a remove cancels only the buffered add of the same persona (tyne-chat/tyne#120) | fork-owned |
+| `session/session_dispatch_voice.erl` | `build_reactions/1` passes each entry through `fork_reaction_buffer:with_persona/2`; `try_cancel_from_buffer/3` and `matches_reaction/5` compare `fork_reaction_buffer:reactor/1` (user and persona), not `user_id` | three lines replaced |
 
 None of the lines in upstream's files has a `%% Fork:` marker. Keep the hand-overs when upstream
 changes these files: the `icon` line is the easiest to lose (no test checks a persona's icon through
@@ -194,7 +196,8 @@ API sends the fork's events: `fluxer_api/src/api/persona/AGENTS.md` and
   with `meck`.
 - Fork tests: `test/fork_persona_event_atoms_tests.erl` (persona names),
   `test/fork_session_passive_tests.erl` (signal-bar names, scoping, the passive rule at 300
-  members), `test/fork_push_personas_tests.erl` (preview, title, icon). New ones go in
+  members), `test/fork_push_personas_tests.erl` (preview, title, icon),
+  `test/fork_reaction_buffer_tests.erl` (personas in the reaction buffer). New ones go in
   `test/fork_<subject>_tests.erl`, never in an upstream test module or inline block.
 - Not covered: the resume timeout's value, routing of the persona events, the `icon` line.
 - Checks: the four `gateway_*` steps in `CHECKS.md`, as upstream's CI
