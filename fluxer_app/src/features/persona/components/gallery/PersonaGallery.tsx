@@ -97,12 +97,10 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 	// remembered: every profile opens with its header (Chiara, 2026-11-07).
 	const [expanded, setExpanded] = useState(false);
 	const rootRef = useRef<HTMLDivElement>(null);
-	const collapseRef = useRef<HTMLButtonElement>(null);
 	useEffect(() => {
 		if (!expanded) return;
 		const modalRoot = rootRef.current?.closest(PROFILE_MODAL_ROOT_SELECTOR) ?? null;
 		modalRoot?.setAttribute(PERSONA_GALLERY_EXPANDED_ATTRIBUTE, 'true');
-		collapseRef.current?.focus({preventScroll: true});
 		// Escape folds the list back first; it runs before upstream's LayerManager, which listens on
 		// the document, and leaves Escape to an open popout or menu.
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -128,25 +126,29 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 				<span className={styles.expandedCount} data-flx="persona.gallery.expanded-bar.count">
 					{i18n._(M.PERSONAS_COUNT_DESCRIPTOR, {count: directory.publicCount})}
 				</span>
-				<span className={styles.expandedSpacer} data-flx="persona.gallery.expanded-bar.spacer" />
-				<Tooltip
-					text={i18n._(M.COLLAPSE_PERSONAS_DESCRIPTOR)}
-					position="top"
-					data-flx="persona.gallery.collapse.tooltip"
-				>
-					<button
-						ref={collapseRef}
-						type="button"
-						className={styles.expandButton}
-						aria-label={i18n._(M.COLLAPSE_PERSONAS_DESCRIPTOR)}
-						onClick={() => setExpanded(false)}
-						data-flx="persona.gallery.collapse"
-					>
-						<ArrowsInSimpleIcon size={18} weight="bold" data-flx="persona.gallery.collapse-icon" />
-					</button>
-				</Tooltip>
 			</div>
 		) : null;
+	// Expand and Restore are one button, last in the list's toolbar or a persona's nav row, so it stays
+	// in the same place among the controls in both states, and keeps the keyboard's focus
+	// (tyne-chat/tyne#589).
+	const expandLabel = i18n._(expanded ? M.COLLAPSE_PERSONAS_DESCRIPTOR : M.EXPAND_PERSONAS_DESCRIPTOR);
+	const expandButton = isMobile ? null : (
+		<Tooltip text={expandLabel} position="top" data-flx="persona.gallery.expand.tooltip">
+			<button
+				type="button"
+				className={styles.expandButton}
+				aria-label={expandLabel}
+				onClick={() => setExpanded(!expanded)}
+				data-flx={expanded ? 'persona.gallery.collapse' : 'persona.gallery.expand'}
+			>
+				{expanded ? (
+					<ArrowsInSimpleIcon size={18} weight="bold" data-flx="persona.gallery.collapse-icon" />
+				) : (
+					<ArrowsOutSimpleIcon size={18} weight="bold" data-flx="persona.gallery.expand-icon" />
+				)}
+			</button>
+		</Tooltip>
+	);
 
 	const view = PersonaGalleryPrefs.currentView;
 	const effectiveSort: PersonaGallerySort = sort === 'recent' && !directory.isOwn ? 'name' : sort;
@@ -190,7 +192,7 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 					onBack={() => setOpenId(null)}
 					onNavigate={setOpenId}
 					onClose={onClose}
-					onExpand={!isMobile && !expanded ? () => setExpanded(true) : undefined}
+					expandButton={expandButton}
 					data-flx="persona.gallery.detail"
 				/>
 			</div>
@@ -425,19 +427,7 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 						data-flx="persona.gallery.view-switch"
 					/>
 				)}
-				{!isMobile && !expanded && (
-					<Tooltip text={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)} position="top" data-flx="persona.gallery.expand.tooltip">
-						<button
-							type="button"
-							className={styles.expandButton}
-							aria-label={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)}
-							onClick={() => setExpanded(true)}
-							data-flx="persona.gallery.expand"
-						>
-							<ArrowsOutSimpleIcon size={18} weight="bold" data-flx="persona.gallery.expand-icon" />
-						</button>
-					</Tooltip>
-				)}
+				{expandButton}
 			</div>
 			{isMobile && (
 				<div className={styles.mobileViewTabs} data-flx="persona.gallery.persona-gallery.mobile-view-tabs">

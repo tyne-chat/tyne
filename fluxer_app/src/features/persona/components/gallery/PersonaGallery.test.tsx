@@ -220,12 +220,22 @@ describe('PersonaGallery', () => {
 		const query = (flx: string) => modalContainer.querySelector(`[data-flx="${flx}"]`) as HTMLElement | null;
 
 		expect(query('persona.gallery.expanded-bar')).toBeNull();
-		await act(async () => query('persona.gallery.expand')!.click());
+		const expand = query('persona.gallery.expand')!;
+		expect(query('persona.gallery.toolbar')?.lastElementChild?.contains(expand)).toBe(true);
+		expand.focus();
+		await act(async () => expand.click());
 		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
 		expect(query('persona.gallery.expanded-bar')?.textContent).toContain('bob');
 		expect(query('persona.gallery.expand')).toBeNull();
+		// Restore takes Expand's place, last in the toolbar, and the slim bar has no button
+		// (tyne-chat/tyne#589). It is the same button, so the keyboard's focus stays on it.
+		const collapse = query('persona.gallery.collapse')!;
+		expect(collapse).toBe(expand);
+		expect(query('persona.gallery.toolbar')?.lastElementChild?.contains(collapse)).toBe(true);
+		expect(query('persona.gallery.expanded-bar')?.querySelector('button')).toBeNull();
+		expect(document.activeElement).toBe(collapse);
 
-		await act(async () => query('persona.gallery.collapse')!.click());
+		await act(async () => collapse.click());
 		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
 
 		await act(async () => query('persona.gallery.expand')!.click());
@@ -250,17 +260,22 @@ describe('PersonaGallery', () => {
 		});
 		const query = (flx: string) => modalContainer.querySelector(`[data-flx="${flx}"]`) as HTMLElement | null;
 		await act(async () => query('persona.gallery.card.button')!.click());
+		// The button is last in the persona's nav row, after the arrows, in both states (tyne-chat/tyne#589).
+		const lastInNav = () => query('persona.gallery.detail.nav')?.lastElementChild ?? null;
 
-		await act(async () => query('persona.gallery.detail.expand')!.click());
+		expect(lastInNav()?.querySelector('[data-flx="persona.gallery.expand"]')).not.toBeNull();
+		await act(async () => query('persona.gallery.expand')!.click());
 		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
 		expect(query('persona.gallery.expanded-bar')).not.toBeNull();
+		expect(query('persona.gallery.expanded-bar')?.querySelector('button')).toBeNull();
 		expect(query('persona.gallery.detail.name')?.textContent).toBe('Ash');
-		expect(query('persona.gallery.detail.expand')).toBeNull();
+		expect(query('persona.gallery.expand')).toBeNull();
+		expect(lastInNav()?.querySelector('[data-flx="persona.gallery.collapse"]')).not.toBeNull();
 
 		await act(async () => query('persona.gallery.collapse')!.click());
 		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
 		expect(query('persona.gallery.detail.name')?.textContent).toBe('Ash');
-		expect(query('persona.gallery.detail.expand')).not.toBeNull();
+		expect(lastInNav()?.querySelector('[data-flx="persona.gallery.expand"]')).not.toBeNull();
 
 		act(() => modalReactRoot.unmount());
 		modalRoot.remove();
