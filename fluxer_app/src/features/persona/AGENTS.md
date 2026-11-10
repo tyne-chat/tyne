@@ -220,6 +220,14 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
 - `PersonaSettingsTab`: mode, scope, the display tag (its icon is uploaded with
   `POST …/personas/avatar`), search, and the persona list, sorted by name. Setting a persona active
   from here exists only in the global scope.
+- **Duplicate** (tyne-chat/tyne#599): only in a persona's editor, next to Delete; refused (the bar
+  flashes) while the editor has unsaved changes. `openPersonaDuplicateModal` closes the editor and
+  opens a new persona's, under a key of its own, filled in from the saved persona: the same picture
+  hashes (nothing uploaded; images are deleted only with the account), colours, pronouns, bio,
+  visibility and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
+  repeated by the mobile app), focused and selected. Tags and signature emojis start empty, since each
+  belongs to one persona; pins, usage and the PluralKit link are not copied. Its bar ("Copy of …",
+  Cancel, Create) stays up, and Create sends the one `createPersona` Add Persona sends.
 - **Selecting many** (tyne-chat/tyne#542, `components/settings/PersonaBulkSelection.tsx`): chips
   with counts (All, Public, Unlisted, Private) filter the list; Select puts a checkbox on every row
   and hides the row's buttons; "Select all" takes what the search and chip show. The action bar

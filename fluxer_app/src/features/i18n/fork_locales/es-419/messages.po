@@ -247,6 +247,10 @@ msgstr "Personas configuradas ({count})"
 msgid "Connected to their members in the file. Nothing in them changed."
 msgstr "Vinculadas a sus miembros del archivo. No cambió nada en ellas."
 
+#. Shown at the top of the editor for a new persona that starts as a copy of another; name is the persona it was copied from. Nothing is created until the person presses Create.
+msgid "Copy of {name}"
+msgstr "Copia de {name}"
+
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "Copiar marca de tiempo\\"
@@ -404,6 +408,10 @@ msgstr "Descargando avatar {current} de {total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "Descargando banner {current} de {total}..."
+
+#. Button in a persona's editor that starts a new persona as a copy of this one
+msgid "Duplicate Persona"
+msgstr "Duplicar persona"
 
 #. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
 msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
