@@ -56,6 +56,18 @@
 	color: var(--text-primary);
 }
 
+/* A copy's bar names the persona: a long name ends in an ellipsis instead of pushing the buttons out. */
+.copyBannerTextContainer {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+.copyBannerText {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .bannerTextFlash {
 	color: #ffffff !important;
 }
@@ -243,11 +255,18 @@
 
 .detailBottomActions {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: flex-start;
+	gap: 0.5rem;
 	padding-top: 1rem;
 	border-top: 1px solid var(--border-color);
 	margin-top: 8px;
+}
+
+/* Delete sits at the far end, away from Duplicate. */
+.deleteButton {
+	margin-inline-start: auto;
 }
 
 /* Stacked, the preview follows the fields it shows, and deleting the persona comes last. */
