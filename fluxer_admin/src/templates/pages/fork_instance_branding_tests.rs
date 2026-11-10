@@ -17,7 +17,7 @@ fn admin_config() -> AdminConfig {
         api_public_endpoint: String::new(),
         media_endpoint: String::new(),
         static_cdn_endpoint: String::new(),
-        reports_bucket_origin: String::new(),
+        reports_bucket_origin: None,
         admin_endpoint: String::new(),
         web_app_endpoint: String::new(),
         oauth_client_id: String::new(),
