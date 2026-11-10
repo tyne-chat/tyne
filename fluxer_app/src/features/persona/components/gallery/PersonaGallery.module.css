@@ -593,6 +593,11 @@
 	margin-inline-start: auto;
 }
 
+/* Holds the gallery's Expand or Restore button, last in the row (tyne-chat/tyne#589). */
+.detailNavExpand {
+	display: inline-flex;
+}
+
 .detailStep {
 	display: inline-grid;
 	place-items: center;
@@ -751,10 +756,6 @@
 	font-size: 0.8125rem;
 	font-weight: 600;
 	color: var(--text-tertiary);
-}
-
-.expandedSpacer {
-	flex: 1;
 }
 
 /* A persona opened while expanded keeps its nav bar under the slim bar. */
