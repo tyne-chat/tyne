@@ -876,7 +876,8 @@ export class ScrollManager {
 				const scrollerNode = this.ref.current?.getViewportElement();
 				if (!scrollerNode) return;
 				const targetScrollTop = this.layoutGetNodeAlignedScrollTop(element, 'center', padding, scrollerNode);
-				this.scrollMergeTo(targetScrollTop, () => this.jumpComplete(element, jumpToken));
+				// Fork: retarget the jump's running animation; a merge would shift it (tyne-chat/tyne#595).
+				this.ref.current?.retargetTo({to: targetScrollTop, callback: () => this.jumpComplete(element, jumpToken)});
 				return;
 			}
 			this.scrollToUnreadBoundary('top', () => this.jumpComplete(null, jumpToken), false, false, jumpToken);
