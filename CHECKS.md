@@ -31,12 +31,13 @@ pnpm --filter fluxer_app test
 # Upstream's lint job (Biome, ESLint with no warnings, data-flx attributes), plus Biome warnings on
 # files the fork added, committed or not.
 pnpm exec biome ci . && pnpm exec eslint . --max-warnings 0 && pnpm --filter fluxer_app theming:data-flx:check && pnpm exec biome ci --error-on-warnings --files-ignore-unknown=true --no-errors-on-unmatched $(git diff --name-only --no-renames --diff-filter=A $(git merge-base upstream/main HEAD)) $(git ls-files --others --exclude-standard)
-# Rust formatting and Clippy. The native script also checks the Windows add-ons for
-# x86_64-pc-windows-msvc, as upstream's CI does: needs `rustup target add x86_64-pc-windows-msvc` once.
-cargo fmt --all -- --check && cargo fmt --manifest-path fluxer_app/rust/libfluxwebp/Cargo.toml -- --check && tools/ci/check-desktop-native-workspaces.sh fmt && cargo clippy --workspace --all-targets --all-features --locked -- -D warnings && tools/ci/check-desktop-native-workspaces.sh clippy
-# cargo deny: licenses, bans and sources must pass.
+# Rust formatting and Clippy, as upstream's CI runs them. The desktop crates are members of the root
+# workspace; their check also lints the Windows add-ons for x86_64-pc-windows-msvc, as upstream's CI
+# does: needs `rustup target add x86_64-pc-windows-msvc` once.
+cargo fmt --all -- --check && cargo clippy --all-targets --all-features --locked -- -D warnings && tools/ci/check-desktop-native-crates.sh inventory && tools/ci/check-desktop-native-crates.sh clippy
+# cargo deny over the root workspace, every crate included: licenses, bans and sources must pass.
 # Needs `cargo install cargo-deny --version 0.20.2 --locked` once.
-cargo deny --locked check -D warnings licenses bans sources && cargo deny --manifest-path fluxer_app/rust/libfluxwebp/Cargo.toml --config deny.toml --locked check licenses bans sources && (for m in fluxer_desktop/native/*/Cargo.toml; do cargo deny --manifest-path "$m" --all-features --locked check -D warnings -A unmatched-skip -A unnecessary-skip -D duplicate licenses bans sources || exit 1; done)
+cargo deny --locked check -D warnings licenses bans sources
 # Dependency advisories, report only: npm, and every Cargo.lock as upstream's daily job checks them.
 # They fail while any published advisory is open, which never holds a commit; read what they list,
 # and report one that affects the fork as `.github/SECURITY.md` says.
