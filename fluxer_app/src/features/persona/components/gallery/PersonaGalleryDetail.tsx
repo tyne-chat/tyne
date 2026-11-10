@@ -21,12 +21,11 @@ import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import {Spinner} from '@app/features/ui/components/Spinner';
-import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import type {User} from '@app/features/user/models/User';
 import {getFormattedShortDate} from '@app/features/user/utils/DateFormatting';
 import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {Trans, useLingui} from '@lingui/react/macro';
-import {ArrowsOutSimpleIcon, CaretLeftIcon, CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
+import {CaretLeftIcon, CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
@@ -47,8 +46,8 @@ export interface PersonaGalleryDetailProps {
 	onBack: () => void;
 	onNavigate: (personaId: string) => void;
 	onClose?: () => void;
-	/** Gives the profile window to the gallery, as the list's own Expand does; unset when expanded or on phones. */
-	onExpand?: () => void;
+	/** The gallery's Expand or Restore button, last in the nav row as in the list's toolbar; unset on phones. */
+	expandButton?: React.ReactNode;
 }
 
 /**
@@ -70,7 +69,7 @@ export const PersonaGalleryDetail = observer(
 		onBack,
 		onNavigate,
 		onClose,
-		onExpand,
+		expandButton,
 	}: PersonaGalleryDetailProps) => {
 		const {i18n} = useLingui();
 		const rootRef = useRef<HTMLDivElement>(null);
@@ -195,22 +194,13 @@ export const PersonaGalleryDetail = observer(
 							</button>
 						</>
 					)}
-					{onExpand && (
-						<Tooltip
-							text={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)}
-							position="top"
-							data-flx="persona.gallery.detail.expand.tooltip"
+					{expandButton && (
+						<span
+							className={clsx(styles.detailNavExpand, !canStep && styles.detailNavEnd)}
+							data-flx="persona.gallery.detail.expand"
 						>
-							<button
-								type="button"
-								className={clsx(styles.expandButton, !canStep && styles.detailNavEnd)}
-								aria-label={i18n._(M.EXPAND_PERSONAS_DESCRIPTOR)}
-								onClick={onExpand}
-								data-flx="persona.gallery.detail.expand"
-							>
-								<ArrowsOutSimpleIcon size={18} weight="bold" data-flx="persona.gallery.detail.expand-icon" />
-							</button>
-						</Tooltip>
+							{expandButton}
+						</span>
 					)}
 				</div>
 				{!persona && fetched.isLoading && (
