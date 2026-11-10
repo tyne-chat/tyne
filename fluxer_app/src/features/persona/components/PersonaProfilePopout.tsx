@@ -217,6 +217,8 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 												}}
 												rootUser={user}
 												isHovering={isCardHovering}
+												guildId={guildId}
+												onBeforeOpenProfile={onClose}
 												className={pillStyles.tag}
 												data-flx="persona.persona-profile-popout.persona-tag"
 											/>

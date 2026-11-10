@@ -166,4 +166,71 @@ describe('PersonaTag Component', () => {
 
 		expect(openProfileSpy).toHaveBeenCalledWith('100000000000000001', undefined);
 	});
+
+	it('opens the profile in the given server, after what runs first (closing a popout)', async () => {
+		const calls: Array<string> = [];
+		vi.spyOn(UserProfileCommands, 'openUserProfile').mockImplementation((userId, guildId) => {
+			calls.push(`open ${userId} ${guildId}`);
+			return true;
+		});
+		const mockUser = new User({
+			id: '100000000000000001',
+			username: 'alice',
+			discriminator: '0001',
+			avatar: null,
+			flags: 0,
+		} as any);
+
+		await act(async () => {
+			root.render(
+				<PersonaTag
+					rootUser={mockUser}
+					subprofile={{id: 'p5', name: 'AlicePersona', display_tag_text: 'ALICE_TAG'}}
+					guildId="200000000000000001"
+					onBeforeOpenProfile={() => calls.push('close popout')}
+					data-flx="persona.persona-tag-test.persona-tag--5"
+				/>,
+			);
+		});
+		act(() => {
+			(container.querySelector('[data-flx="persona.tag"]') as HTMLElement).click();
+		});
+
+		expect(calls).toEqual(['close popout', 'open 100000000000000001 200000000000000001']);
+	});
+
+	// tyne-chat/tyne#576: a click on the tag in the account's own profile window opened that profile
+	// again on top, once per click.
+	it('is not a button inside the account’s own profile window', async () => {
+		const openProfileSpy = vi.spyOn(UserProfileCommands, 'openUserProfile').mockReturnValue(true);
+		const mockUser = new User({
+			id: '100000000000000001',
+			username: 'alice',
+			discriminator: '0001',
+			avatar: null,
+			flags: 0,
+		} as any);
+
+		await act(async () => {
+			root.render(
+				<PersonaTag
+					rootUser={mockUser}
+					subprofile={{id: 'p6', name: 'AlicePersona', display_tag_text: 'ALICE_TAG'}}
+					inProfile
+					data-flx="persona.persona-tag-test.persona-tag--6"
+				/>,
+			);
+		});
+		const tagEl = container.querySelector('[data-flx="persona.tag"]') as HTMLElement;
+		expect(tagEl.textContent).toBe('ALICE_TAG');
+		expect(tagEl.getAttribute('role')).toBeNull();
+		expect(tagEl.hasAttribute('tabindex')).toBe(false);
+
+		act(() => {
+			tagEl.click();
+			tagEl.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+		});
+
+		expect(openProfileSpy).not.toHaveBeenCalled();
+	});
 });
