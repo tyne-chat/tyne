@@ -127,7 +127,8 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 tyne-chat/tyne#189. Wherever a display tag shows on a profile, the "Personas (N)" pill follows it
 (`PersonasPill`, `AccountPersonaNameExtras`; since 2026-11-07 the account's own profile shows its
 display tag too). The pill opens the full profile's "Personas (N)" tab, or on phones the Personas
-sheet (`openPersonaGallery`); mobile web also has a button before the mutual friends.
+sheet (`openPersonaGallery`); mobile web also has a button before the mutual friends. Inside the
+account's own profile window the display tag is not a button (`inProfile`, tyne-chat/tyne#576).
 
 - **Data:** `usePersonaDirectory(userId)`. Someone else's list comes from `PersonaDirectory`
   (`GET /users/:id/personas`: the display tag and the public personas, most used first): one
