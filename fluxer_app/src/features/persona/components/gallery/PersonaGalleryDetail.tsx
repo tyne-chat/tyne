@@ -276,6 +276,7 @@ export const PersonaGalleryDetail = observer(
 											display_tag_icon: displayTagIcon,
 										}}
 										rootUser={user}
+										inProfile={!isMobile}
 										data-flx="persona.gallery.detail.persona-tag"
 									/>
 								)}
