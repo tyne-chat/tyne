@@ -174,6 +174,8 @@ The gateway's requests go to the API's `/internal/rpc`:
 | `utils/constants.erl` | `resume_timeout() -> 300000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`); the docs say 300,000 ms | one value |
 | `guild/guild_dispatch_filter.erl` | `channel_signal_update`, `channel_signal_bar_update` are channel-scoped | two clauses |
 | `session/session_passive.erl` | `signal_bar_update` bypasses the passive filter | one clause |
+| `session/fork_reaction_buffer.erl` | personas in the reaction buffer: `MESSAGE_REACTION_ADD_MANY` entries keep `persona_id` and `subprofile`, and a remove cancels only the buffered add of the same persona (tyne-chat/tyne#120) | fork-owned |
+| `session/session_dispatch_voice.erl` | `build_reactions/1` passes each entry through `fork_reaction_buffer:with_persona/2`; `try_cancel_from_buffer/3` and `matches_reaction/5` compare `fork_reaction_buffer:reactor/1` (user and persona), not `user_id` | three lines replaced |
 | `gateway/fork_gateway_drain.erl`, `fork_cluster_join.erl`, `fork_cluster_discovery.erl`; `guild/fork_guild_handoff.erl`, `fork_guild_session_rebind.erl`; `session/fork_session_handoff.erl`, `fork_session_transfer_start.erl` | the handoff fixes ("Handing the gateway over", below) | fork-owned |
 | `gateway/gateway_node_router.erl` | `select_owner_node/2` hashes over `fork_gateway_drain:owners/1` | one line replaced |
 | `gateway/gateway_cluster_handoff.erl` | `drain_async/0` announces the drain, `clear_draining/0` withdraws it; the role `all` drain calls `fork_gateway_drain:reconnect_drain/0`; `maybe_start_handoff/1` also sees a handoff in flight stored as a map | two lines added, one replaced, one clause |
@@ -235,7 +237,8 @@ ownership or startup order can reopen a gap that no unit test sees. Rehearse it 
   with `meck`.
 - Fork tests: `test/fork_persona_event_atoms_tests.erl` (persona names),
   `test/fork_session_passive_tests.erl` (signal-bar names, scoping, the passive rule at 300
-  members), `test/fork_push_personas_tests.erl` (preview, title, icon), and one per handoff module
+  members), `test/fork_push_personas_tests.erl` (preview, title, icon),
+  `test/fork_reaction_buffer_tests.erl` (personas in the reaction buffer), and one per handoff module
   (`test/fork_gateway_drain_tests.erl` and the others named after their module). New ones go in
   `test/fork_<subject>_tests.erl`, never in an upstream test module or inline block.
 - Not covered: the resume timeout's value, routing of the persona events, the `icon` line.
