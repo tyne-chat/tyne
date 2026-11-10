@@ -68,7 +68,7 @@ interface AccountPersonaNameExtrasProps extends PersonasPillProps {
  * until 2026-11-07, then the Personas pill (tyne-chat/tyne#189). Nothing for bots and webhooks.
  */
 export const AccountPersonaNameExtras = observer((props: AccountPersonaNameExtrasProps) => {
-	const {user, isHovering} = props;
+	const {user, isHovering, guildId, onBeforeOpen, inProfile} = props;
 	const directory = usePersonaDirectory(user.bot || user.system ? null : user.id);
 	if (user.bot || user.system) return null;
 	const hasTag = Boolean(directory.displayTagText || directory.displayTagIcon);
@@ -85,6 +85,9 @@ export const AccountPersonaNameExtras = observer((props: AccountPersonaNameExtra
 					}}
 					rootUser={user}
 					isHovering={isHovering}
+					guildId={guildId}
+					onBeforeOpenProfile={onBeforeOpen}
+					inProfile={inProfile}
 					className={styles.tag}
 					data-flx="persona.account-name-extras.tag"
 				/>
