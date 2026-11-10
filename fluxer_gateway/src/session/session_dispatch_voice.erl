@@ -57,7 +57,8 @@ maybe_cancel_buffered_reaction(_, _, _) ->
 try_cancel_from_buffer(BufferQ, Data, State) ->
     BufferList = queue:to_list(BufferQ),
     MessageId = maps:get(<<"message_id">>, Data, undefined),
-    UserId = maps:get(<<"user_id">>, Data, undefined),
+    %% Fork: the user and the persona that reacted (fork_reaction_buffer).
+    UserId = fork_reaction_buffer:reactor(Data),
     Emoji = maps:get(<<"emoji">>, Data, #{}),
     case remove_matching_reaction(BufferList, MessageId, UserId, Emoji) of
         {found, NewBufferList} ->
@@ -96,7 +97,7 @@ remove_matching_reaction_loop([Entry | Rest], MessageId, UserId, EmojiId, EmojiN
 matches_reaction(Entry, MessageId, UserId, EmojiId, EmojiName) ->
     EntryEmoji = maps:get(<<"emoji">>, Entry, #{}),
     maps:get(<<"message_id">>, Entry, undefined) =:= MessageId andalso
-        maps:get(<<"user_id">>, Entry, undefined) =:= UserId andalso
+        fork_reaction_buffer:reactor(Entry) =:= UserId andalso
         maps:get(<<"id">>, EntryEmoji, undefined) =:= EmojiId andalso
         maps:get(<<"name">>, EntryEmoji, undefined) =:= EmojiName.
 
@@ -175,7 +176,9 @@ dispatch_reaction_add_many(Buffer, DispatchFun, State) ->
 
 -spec build_reactions([map()]) -> [map()].
 build_reactions(Buffer) ->
-    lists:map(fun build_single_reaction/1, Buffer).
+    lists:map(
+        fun(E) -> fork_reaction_buffer:with_persona(E, build_single_reaction(E)) end, Buffer
+    ).
 
 -spec build_single_reaction(map()) -> map().
 build_single_reaction(Entry) ->
