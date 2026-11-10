@@ -12,6 +12,11 @@ import type {ReactionEmoji} from '@app/features/messaging/utils/ReactionUtils';
 import MentionFeed from '@app/features/notification/state/MentionFeed';
 import type {GuildMemberData} from '@fluxer/schema/src/domains/guild/GuildMemberSchemas';
 
+// Fork imports.
+
+import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+
 interface ReactionEmojiPayload {
 	id?: string | null;
 	name?: string | null;
@@ -21,6 +26,8 @@ interface ReactionEntry {
 	user_id: string;
 	emoji: ReactionEmojiPayload;
 	member?: GuildMemberData;
+	persona_id?: string | null;
+	subprofile?: MessageSubprofileResponse | null;
 }
 
 interface MessageReactionAddManyPayload {
@@ -40,8 +47,18 @@ export function handleMessageReactionAddMany(
 			if (data.guild_id && reaction.member) {
 				GuildMembers.hydrateIfMissing(data.guild_id, reaction.member);
 			}
+			if (reaction.subprofile) {
+				PersonaStore.recordKnownPersona(reaction.subprofile, reaction.user_id);
+			}
 			SavedMessages.handleMessageReactionChange(data.message_id);
-			MessageReactions.handleReactionAdd(data.message_id, reaction.user_id, emoji);
+			MessageReactions.handleReactionAdd(
+				data.message_id,
+				reaction.user_id,
+				emoji,
+				undefined,
+				reaction.persona_id,
+				reaction.subprofile,
+			);
 			ChannelPins.handleMessageReactionAdd(data.channel_id, data.message_id);
 			ForumPosts.handleReaction(
 				data.channel_id,
