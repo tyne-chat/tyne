@@ -592,4 +592,163 @@ describe('PersonaEditModal Component', () => {
 			expect(onClose).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe('duplicating a persona (tyne-chat/tyne#599)', () => {
+		const lyra = {
+			id: '100000000000000077',
+			name: 'Lyra',
+			pronouns: 'she/they',
+			bio: 'Night owl, stargazer.',
+			visibility: 'public' as const,
+			avatar_hash: '0a1b2c3d',
+			avatar_color: 0x26225e,
+			banner_hash: 'a_4e5f6a7b',
+			color: 0x7b6cf6,
+			auto_tag_disabled: true,
+			persona_tags: [{prefix: 'Ly:'}, {prefix: '[', suffix: ']'}],
+			signature_emojis: [{id: null, name: '🌙', animated: null}],
+		} as any;
+		const query = (flx: string) => document.body.querySelector(`[data-flx="${flx}"]`) as HTMLElement | null;
+		const click = async (flx: string) => {
+			await act(async () => {
+				query(flx)?.click();
+			});
+		};
+		const renderCopy = async (onClose = vi.fn()) => {
+			await act(async () => {
+				root.render(
+					<PersonaEditModal
+						copyOf={lyra}
+						onClose={onClose}
+						data-flx="persona.persona-edit-modal-test.persona-edit-modal--copy"
+					/>,
+				);
+			});
+			return onClose;
+		};
+
+		beforeEach(() => {
+			runInAction(() => {
+				PersonaStore.setPersonas([lyra, {id: '100000000000000078', name: 'Lyra (2)'} as any]);
+			});
+		});
+
+		it('starts as a copy under the next free number, with no tags or signature emojis', async () => {
+			await renderCopy();
+
+			expect(query('persona.persona-edit-modal.copy-banner-text')?.textContent).toBe('Copy of Lyra');
+			expect((query('persona.persona-edit-modal.input.name') as HTMLInputElement).value).toBe('Lyra (3)');
+			expect((query('persona.persona-edit-modal.input.pronouns') as HTMLInputElement).value).toBe('she/they');
+			expect(
+				document.body.querySelectorAll('[data-flx="persona.persona-edit-modal.tag-input.tag-change.text"]'),
+			).toHaveLength(1);
+			expect((query('persona.persona-edit-modal.tag-input.tag-change.text') as HTMLInputElement).value).toBe('');
+			expect(query('persona.persona-edit-modal.signature-emoji-chip.signature-emoji-chip')).toBeNull();
+			// Neither the edit's bar nor its actions on the saved persona.
+			expect(query('persona.persona-edit-modal.button.save')).toBeNull();
+			expect(query('persona.persona-edit-modal.button.duplicate-persona')).toBeNull();
+			expect(document.body.querySelector('[aria-label="Delete persona"]')).toBeNull();
+		});
+
+		it('opens on the name, selected, so typing replaces it', async () => {
+			await renderCopy();
+			const nameInput = query('persona.persona-edit-modal.input.name') as HTMLInputElement;
+
+			await vi.waitFor(() => expect(document.activeElement).toBe(nameInput));
+			expect([nameInput.selectionStart, nameInput.selectionEnd]).toEqual([0, 'Lyra (3)'.length]);
+		});
+
+		it('creates the copy in one request, with the same pictures and nothing uploaded', async () => {
+			const onClose = await renderCopy();
+
+			await click('persona.persona-edit-modal.button.create-copy');
+
+			expect(PersonaCommands.uploadPersonaImage).not.toHaveBeenCalled();
+			expect(PersonaCommands.createPersona).toHaveBeenCalledTimes(1);
+			expect(PersonaCommands.createPersona).toHaveBeenCalledWith({
+				name: 'Lyra (3)',
+				pronouns: 'she/they',
+				avatar_hash: '0a1b2c3d',
+				avatar_color: 0x26225e,
+				banner_hash: 'a_4e5f6a7b',
+				color: 0x7b6cf6,
+				bio: 'Night owl, stargazer.',
+				visibility: 'public',
+				persona_tags: [],
+				auto_tag_disabled: true,
+				signature_emojis: [],
+			});
+			expect(PersonaCommands.updatePersona).not.toHaveBeenCalled();
+			expect(onClose).toHaveBeenCalledTimes(1);
+		});
+
+		it('stays open, with the form as it was, when the request fails', async () => {
+			vi.mocked(PersonaCommands.createPersona).mockRejectedValueOnce(new Error('limit'));
+			const onClose = await renderCopy();
+
+			await click('persona.persona-edit-modal.button.create-copy');
+
+			expect(PersonaCommands.createPersona).toHaveBeenCalledTimes(1);
+			expect(ToastCommands.createToast).toHaveBeenCalledWith(expect.objectContaining({type: 'error'}));
+			expect(onClose).not.toHaveBeenCalled();
+			expect((query('persona.persona-edit-modal.input.name') as HTMLInputElement).value).toBe('Lyra (3)');
+		});
+
+		it('Cancel closes without a request', async () => {
+			const onClose = await renderCopy();
+
+			await click('persona.persona-edit-modal.button.cancel-copy');
+
+			expect(onClose).toHaveBeenCalledTimes(1);
+			expect(PersonaCommands.createPersona).not.toHaveBeenCalled();
+		});
+
+		it("Duplicate in a persona's editor closes it and opens the copy of the saved persona", async () => {
+			await act(async () => {
+				root.render(
+					<PersonaEditModal
+						persona={lyra}
+						onClose={vi.fn()}
+						data-flx="persona.persona-edit-modal-test.persona-edit-modal--duplicate"
+					/>,
+				);
+			});
+
+			await click('persona.persona-edit-modal.button.duplicate-persona');
+
+			expect(ModalCommands.popWithKey).toHaveBeenCalledWith('persona-edit-modal');
+			expect(ModalCommands.pushWithKey).toHaveBeenCalledTimes(1);
+			const [render, key] = vi.mocked(ModalCommands.pushWithKey).mock.calls[0]!;
+			expect(key).toBe('persona-copy-modal');
+			const copy = (render as unknown as () => React.ReactElement<{copyOf: unknown}>)();
+			expect(copy.props.copyOf).toMatchObject({id: lyra.id, name: 'Lyra', avatar_hash: '0a1b2c3d'});
+			expect(PersonaCommands.createPersona).not.toHaveBeenCalled();
+		});
+
+		it('Duplicate does nothing while the persona has unsaved changes', async () => {
+			await act(async () => {
+				root.render(
+					<PersonaEditModal
+						persona={lyra}
+						onClose={vi.fn()}
+						data-flx="persona.persona-edit-modal-test.persona-edit-modal--duplicate-dirty"
+					/>,
+				);
+			});
+			const pronounsInput = query('persona.persona-edit-modal.input.pronouns') as HTMLInputElement;
+			await act(async () => {
+				Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(
+					pronounsInput,
+					'she/her',
+				);
+				pronounsInput.dispatchEvent(new Event('input', {bubbles: true}));
+			});
+
+			await click('persona.persona-edit-modal.button.duplicate-persona');
+
+			expect(ModalCommands.popWithKey).not.toHaveBeenCalled();
+			expect(ModalCommands.pushWithKey).not.toHaveBeenCalled();
+			expect(query('persona.persona-edit-modal.button.save')).not.toBeNull();
+		});
+	});
 });
