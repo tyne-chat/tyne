@@ -247,6 +247,10 @@ msgstr "已配置的人格（{count}）"
 msgid "Connected to their members in the file. Nothing in them changed."
 msgstr "已与文件中对应的成员关联。它们没有任何变化。"
 
+#. Shown at the top of the editor for a new persona that starts as a copy of another; name is the persona it was copied from. Nothing is created until the person presses Create.
+msgid "Copy of {name}"
+msgstr "{name} 的副本"
+
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "复制时间戳\\"
@@ -404,6 +408,10 @@ msgstr "正在下载头像 {current} / {total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "正在下载横幅 {current} / {total}..."
+
+#. Button in a persona's editor that starts a new persona as a copy of this one
+msgid "Duplicate Persona"
+msgstr "复制人格"
 
 #. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
 msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
