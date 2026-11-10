@@ -7,37 +7,37 @@ describe('DateTimestampStyle - formatTimestampWithStyle', () => {
 	const timestamp = 1700000000;
 
 	it('formats with short time and default locale', () => {
-		const result = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, 'UTC');
+		const result = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, null, 'UTC');
 		expect(result).toBe('22:13');
 	});
 
 	it('formats with 12-hour short time in UTC', () => {
-		const result = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', true, 'UTC');
+		const result = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', true, null, 'UTC');
 		expect(result).toMatch(/10:13\s*(PM|pm)/i);
 	});
 
 	it('formats with long time including seconds', () => {
-		const result = formatTimestampWithStyle(timestamp, 'LongTime', 'en-US', false, 'UTC');
+		const result = formatTimestampWithStyle(timestamp, 'LongTime', 'en-US', false, null, 'UTC');
 		expect(result).toBe('22:13:20');
 	});
 
 	it('formats with short date', () => {
-		const result = formatTimestampWithStyle(timestamp, 'ShortDate', 'en-US', false, 'UTC');
+		const result = formatTimestampWithStyle(timestamp, 'ShortDate', 'en-US', false, null, 'UTC');
 		expect(result).toMatch(/11\/14\/2023/);
 	});
 
 	it('formats with long date', () => {
-		const result = formatTimestampWithStyle(timestamp, 'LongDate', 'en-US', false, 'UTC');
+		const result = formatTimestampWithStyle(timestamp, 'LongDate', 'en-US', false, null, 'UTC');
 		expect(result).toContain('November 14, 2023');
 	});
 
 	it('adjusts formatted time across different timezones', () => {
 		// In UTC: 22:13
-		const utcResult = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, 'UTC');
+		const utcResult = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, null, 'UTC');
 		// In Tokyo (UTC+9): next day 07:13
-		const tokyoResult = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, 'Asia/Tokyo');
+		const tokyoResult = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, null, 'Asia/Tokyo');
 		// In New York (UTC-5): 17:13
-		const nyResult = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, 'America/New_York');
+		const nyResult = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, null, 'America/New_York');
 
 		expect(utcResult).toBe('22:13');
 		expect(tokyoResult).toBe('07:13');
@@ -45,8 +45,8 @@ describe('DateTimestampStyle - formatTimestampWithStyle', () => {
 	});
 
 	it('handles date change across timezones for LongDateTime', () => {
-		const tokyoResult = formatTimestampWithStyle(timestamp, 'LongDateTime', 'en-US', false, 'Asia/Tokyo');
-		const nyResult = formatTimestampWithStyle(timestamp, 'LongDateTime', 'en-US', false, 'America/New_York');
+		const tokyoResult = formatTimestampWithStyle(timestamp, 'LongDateTime', 'en-US', false, null, 'Asia/Tokyo');
+		const nyResult = formatTimestampWithStyle(timestamp, 'LongDateTime', 'en-US', false, null, 'America/New_York');
 
 		expect(tokyoResult).toContain('Wednesday, November 15, 2023');
 		expect(nyResult).toContain('Tuesday, November 14, 2023');
@@ -54,7 +54,14 @@ describe('DateTimestampStyle - formatTimestampWithStyle', () => {
 
 	it('gracefully falls back to runtime default if invalid timeZone is provided', () => {
 		expect(() => {
-			const result = formatTimestampWithStyle(timestamp, 'ShortTime', 'en-US', false, 'Invalid/TimeZone_DoesNotExist');
+			const result = formatTimestampWithStyle(
+				timestamp,
+				'ShortTime',
+				'en-US',
+				false,
+				null,
+				'Invalid/TimeZone_DoesNotExist',
+			);
 			expect(typeof result).toBe('string');
 			expect(result.length).toBeGreaterThan(0);
 		}).not.toThrow();
