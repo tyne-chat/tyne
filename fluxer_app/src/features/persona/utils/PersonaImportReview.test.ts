@@ -318,6 +318,17 @@ describe('keeping both versions of a differing persona', () => {
 		expect(copyName(long, taken(long))).toBe(`${'W'.repeat(96)} (2)`);
 	});
 
+	// The API counts UTF-16 code units, where 🌙 is two (tyne-chat/tyne#601).
+	it('keeps the copy within the limit as the API counts it, without cutting a character', () => {
+		const moons = '🌙'.repeat(50);
+		const flagged = `${'W'.repeat(92)}🏳️‍🌈`;
+		const taken = (name: string) => name === moons || name === flagged;
+		const copy = copyName(moons, taken);
+		expect(copy).toBe(`${'🌙'.repeat(48)} (2)`);
+		expect(copy.length).toBe(100);
+		expect(copyName(flagged, taken)).toBe(`${'W'.repeat(92)} (2)`);
+	});
+
 	it("adds the file's version unlinked, renamed and with a free tag, and leaves Tyne's as it is", () => {
 		const {members} = buildPreviewRequest(
 			pkSource([pkMember(0, {name: 'Wren', id: 'aaaaa', bio: 'Keeps the log.', personaTags: [{prefix: 'wr:'}]})]),

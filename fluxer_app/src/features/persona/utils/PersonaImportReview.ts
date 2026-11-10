@@ -6,6 +6,7 @@
 // for classifying members are the server's (`PersonaImportPlanner`).
 
 import type {PersonaImportSource} from '@app/features/persona/utils/PersonaImportFile';
+import {fittingStart, PERSONA_NAME_MAX} from '@app/features/persona/utils/PersonaNameLength';
 import type {
 	PersonaImportItem,
 	PersonaResponse,
@@ -448,22 +449,17 @@ export function suggestTag(tag: PersonaTag, name: string, isTaken: (tag: Persona
 	return null;
 }
 
-/** The longest persona name the API takes. */
-const PERSONA_NAME_MAX = 100;
-
 /**
  * A name no other persona has: the name itself, else with " (2)", " (3)"…, as a file manager names a
- * copy, shortening the name where the number would not fit.
+ * copy, shortening the name where the number would not fit: counted as the API counts, in UTF-16 code
+ * units, and cut only between whole characters (tyne-chat/tyne#601).
  */
 export function copyName(name: string, isTaken: (name: string) => boolean): string {
 	const base = name.trim();
 	if (!isTaken(base)) return base;
 	for (let n = 2; n < 1000; n++) {
 		const suffix = ` (${n})`;
-		const candidate = `${Array.from(base)
-			.slice(0, PERSONA_NAME_MAX - suffix.length)
-			.join('')
-			.trimEnd()}${suffix}`;
+		const candidate = `${fittingStart(base, PERSONA_NAME_MAX - suffix.length).trimEnd()}${suffix}`;
 		if (!isTaken(candidate)) return candidate;
 	}
 	return base;
