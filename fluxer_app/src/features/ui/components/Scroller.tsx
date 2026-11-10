@@ -40,6 +40,8 @@ export interface ScrollerState {
 }
 
 export interface ScrollerHandle {
+	// Fork: move a running animation's target without moving the view (tyne-chat/tyne#595).
+	retargetTo(options: {to: number; callback?: () => void}): void;
 	getViewportElement(): HTMLElement | null;
 	readViewportMetrics(): ScrollerState;
 	cancelScroll(): void;
@@ -488,6 +490,25 @@ export const Scroller = forwardRef<ScrollerHandle, ScrollerProps>(function Scrol
 	useImperativeHandle(
 		forwardedRef,
 		() => ({
+			// Fork: `mergeTo` shifts a running animation's target by however far it moves the view, which
+			// is right for content added above the view but sends an animation that is told where its
+			// target is now somewhere else (tyne-chat/tyne#595). This moves only the target, so the
+			// animation keeps its speed and lands there; `callback` runs when it lands. With no animation
+			// running it scrolls straight to `to`.
+			retargetTo({to, callback}) {
+				const node = scrollRef.current;
+				const anim = animRef.current;
+				if (!node || anim == null) {
+					this.scrollTo({to, callback});
+					return;
+				}
+				anim.target = clampToRange(node, to);
+				const landed = anim.callback;
+				anim.callback = () => {
+					landed?.();
+					callback?.();
+				};
+			},
 			getViewportElement: () => scrollRef.current,
 			readViewportMetrics: () => getScrollState(scrollRef.current),
 			cancelScroll() {
