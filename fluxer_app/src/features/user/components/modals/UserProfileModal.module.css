@@ -424,3 +424,31 @@
 	color: var(--text-tertiary);
 	opacity: 0.5;
 }
+
+/* Fork: a fix for upstream's bug, to drop once upstream fixes it (tyne-chat/tyne#577). At display
+   scales such as 110 % or 125 %, the window can land between device pixels. The border's inner edge
+   and the banner's edge then each cover part of one pixel, and the window's dark background shows
+   through what both leave: a dark line between the border and the banner. A strip in the border's
+   colour under that edge, half under the border and half under the banner, leaves nothing dark to
+   show through; the border and the banner are drawn as before. It hangs on the banner's header, so it
+   goes when the header does (loading, the Personas tab expanded). */
+.modalContainer > header {
+	/* Hands the window's border colour (set inline) down to the strip; the header draws no border. */
+	border-color: inherit;
+}
+
+.modalContainer > header::before {
+	content: '';
+	position: absolute;
+	inset-block-start: -1px;
+	inset-inline: -1px;
+	box-sizing: border-box;
+	/* The banner's own ratio, so the strip ends just above the banner's bottom edge. */
+	aspect-ratio: 20 / 7;
+	border: 2px solid;
+	border-block-end: none;
+	border-color: inherit;
+	border-start-start-radius: calc(var(--profile-modal-inner-radius) + 1px);
+	border-start-end-radius: calc(var(--profile-modal-inner-radius) + 1px);
+	pointer-events: none;
+}
