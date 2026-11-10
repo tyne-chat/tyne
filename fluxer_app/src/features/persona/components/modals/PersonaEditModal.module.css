@@ -56,6 +56,18 @@
 	color: var(--text-primary);
 }
 
+/* A copy's bar names the persona: a long name ends in an ellipsis instead of pushing the buttons out. */
+.copyBannerTextContainer {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+.copyBannerText {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .bannerTextFlash {
 	color: #ffffff !important;
 }
@@ -235,6 +247,26 @@
 	}
 }
 
+/* A copy's badge on the preview card's banner (the card is positioned). */
+.copyPreviewBadge {
+	position: absolute;
+	top: 0.625rem;
+	inset-inline-start: 0.625rem;
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.1875rem 0.5rem;
+	border-radius: 999px;
+	background-color: var(--brand-primary);
+	color: var(--brand-primary-fill, #fff);
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1rem;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 45%);
+	pointer-events: none;
+}
+
 .liveCardWrapper {
 	width: 100%;
 	display: flex;
@@ -243,11 +275,18 @@
 
 .detailBottomActions {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: flex-start;
+	gap: 0.5rem;
 	padding-top: 1rem;
 	border-top: 1px solid var(--border-color);
 	margin-top: 8px;
+}
+
+/* Delete sits at the far end, away from Duplicate. */
+.deleteButton {
+	margin-inline-start: auto;
 }
 
 /* Stacked, the preview follows the fields it shows, and deleting the persona comes last. */
