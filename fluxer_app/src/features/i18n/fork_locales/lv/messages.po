@@ -247,6 +247,10 @@ msgstr "Iestatītās personas ({count})"
 msgid "Connected to their members in the file. Nothing in them changed."
 msgstr "Sasaistītas ar atbilstošajiem dalībniekiem failā. Nekas tajās netika mainīts."
 
+#. Shown at the top of the editor for a new persona that starts as a copy of another; name is the persona it was copied from. Nothing is created until the person presses Create.
+msgid "Copy of {name}"
+msgstr "Personas {name} kopija"
+
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
 msgstr "Kopēt laikspiedolu"
@@ -404,6 +408,10 @@ msgstr "Lejupielādē avatāru {current} no {total}..."
 #. Progress status during banner download in the persona import
 msgid "Downloading banner {current} of {total}..."
 msgstr "Lejupielādē baneri {current} no {total}..."
+
+#. Button in a persona's editor that starts a new persona as a copy of this one
+msgid "Duplicate Persona"
+msgstr "Dublēt personu"
 
 #. Toast when saving a persona whose tag pair {tag} (such as "a:text") is listed twice
 msgid "Duplicate tag pair \"{tag}\" cannot be listed more than once on the same persona"
