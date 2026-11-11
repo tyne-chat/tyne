@@ -14,7 +14,7 @@ import {
 	GUILD_COMMAND_TEMPLATE_TAGS,
 	type GuildCommandTemplateIssue,
 } from '@fluxer/schema/src/domains/guild_command/GuildCommandSchemas';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 function scope(overrides: Partial<GuildCommandScope> = {}): GuildCommandScope {
 	return {
@@ -231,34 +231,49 @@ describe('GuildCommandTemplateEngine', () => {
 		}
 	});
 
-	it('stops a template that doubles its output on every line', () => {
-		const doubling = `{% assign x = "ab" %}${'{% assign x = x | append: x %}'.repeat(40)}{{ x | size }}`;
-		expect(problem(() => engine.render(doubling, scope()))).toMatchObject({code: 'too_large'});
-	});
-
-	it('counts what capture stores, so levels of repeats stop early', () => {
-		let template = '{% capture a0 %}0123456789{% endcapture %}';
-		for (let level = 1; level <= 7; level++) {
-			template += `{% capture a${level} %}${`{{ a${level - 1} }}`.repeat(10)}{% endcapture %}`;
-		}
-		expect(problem(() => engine.render(`${template}{{ a7 | slice: 0, 1 }}`, scope()))).toMatchObject({
-			code: 'too_large',
+	// The engine also stops a render after RENDER_LIMIT_MS of real time. On a busy machine these
+	// large renders could pass that first and report too_slow (tyne-chat/tyne#494), so the clock
+	// stands still here and only the size limits can stop them.
+	describe('size limits, with the clock stopped', () => {
+		beforeEach(() => {
+			vi.spyOn(performance, 'now').mockReturnValue(0);
 		});
-	});
 
-	it('counts what a random branch builds', () => {
-		const inner = '{{x}}'.repeat(300);
-		const template = `{% assign x = "0123456789" %}{% capture x %}${inner}{% endcapture %}{% random %}${inner}{% endrandom %}`;
-		expect(problem(() => engine.render(template, scope()))).toMatchObject({code: 'too_large'});
-	});
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
 
-	it('refuses an output too big to be a message, without building it', () => {
-		const big = `{% assign x = "0123456789" %}${'{% assign x = x | append: x %}'.repeat(9)}${'{{x}}'.repeat(600)}`;
-		expect(problem(() => engine.render(big, scope()))).toMatchObject({code: 'too_large', line: null});
-	});
+		it('stops a template that doubles its output on every line', () => {
+			const doubling = `{% assign x = "ab" %}${'{% assign x = x | append: x %}'.repeat(40)}{{ x | size }}`;
+			expect(problem(() => engine.render(doubling, scope()))).toMatchObject({code: 'too_large'});
+		});
 
-	it('refuses a range too long to build', () => {
-		expect(problem(() => engine.render('{% assign r = (1..100000000) %}', scope()))).toMatchObject({code: 'too_large'});
+		it('counts what capture stores, so levels of repeats stop early', () => {
+			let template = '{% capture a0 %}0123456789{% endcapture %}';
+			for (let level = 1; level <= 7; level++) {
+				template += `{% capture a${level} %}${`{{ a${level - 1} }}`.repeat(10)}{% endcapture %}`;
+			}
+			expect(problem(() => engine.render(`${template}{{ a7 | slice: 0, 1 }}`, scope()))).toMatchObject({
+				code: 'too_large',
+			});
+		});
+
+		it('counts what a random branch builds', () => {
+			const inner = '{{x}}'.repeat(300);
+			const template = `{% assign x = "0123456789" %}{% capture x %}${inner}{% endcapture %}{% random %}${inner}{% endrandom %}`;
+			expect(problem(() => engine.render(template, scope()))).toMatchObject({code: 'too_large'});
+		});
+
+		it('refuses an output too big to be a message, without building it', () => {
+			const big = `{% assign x = "0123456789" %}${'{% assign x = x | append: x %}'.repeat(9)}${'{{x}}'.repeat(600)}`;
+			expect(problem(() => engine.render(big, scope()))).toMatchObject({code: 'too_large', line: null});
+		});
+
+		it('refuses a range too long to build', () => {
+			expect(problem(() => engine.render('{% assign r = (1..100000000) %}', scope()))).toMatchObject({
+				code: 'too_large',
+			});
+		});
 	});
 
 	it('runs the worst lists of its filters quickly', () => {
