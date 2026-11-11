@@ -244,4 +244,36 @@ describe('signal bar: signals everywhere', () => {
 
 		expect(await mine(member.token, first.id, member.userId)).toEqual([[reading.id, null]]);
 	});
+
+	it("restores a chat's signals in their order, so the newest still decides its persona", async () => {
+		const {owner, member, first, reading, sleeping} = await setup();
+		const done = (
+			await setBar(owner.token, [
+				{id: reading.id, emoji_name: '📖'},
+				{id: sleeping.id, emoji_name: '💤', everywhere: true},
+				{emoji_name: '✅', everywhere: true},
+			])
+		).signals[2]!;
+		const [kitsune, wren] = await Promise.all(
+			['Kitsune', 'Wren'].map((name) =>
+				createBuilder<PersonaResponse>(harness, member.token)
+					.post('/users/@me/personas')
+					.body({name})
+					.expect(HTTP_STATUS.CREATED)
+					.execute(),
+			),
+		);
+		await light(member.token, first.id, reading.id, kitsune!.id);
+		await light(member.token, first.id, sleeping.id, wren!.id);
+
+		await setEverywhere(member.token, {signal_id: null});
+		await restore(member.token);
+		expect(await mine(member.token, first.id, member.userId)).toEqual([
+			[reading.id, kitsune!.id],
+			[sleeping.id, wren!.id],
+		]);
+
+		await setEverywhere(member.token, {signal_id: done.id});
+		expect(await mine(member.token, first.id, member.userId)).toEqual([[done.id, wren!.id]]);
+	});
 });

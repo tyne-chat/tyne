@@ -403,6 +403,8 @@ export class SignalBarService {
 		signalId: string,
 		user: User,
 		persona: ResolvedPersona,
+		/** When a new entry counts as lit; a restore spaces its entries so their order survives. */
+		activatedAt: number = this.deps.now?.() ?? Date.now(),
 	): Promise<ChannelSignalEntry | null> {
 		const channelId = channel.id.toString();
 		const userKey = user.id.toString();
@@ -418,7 +420,7 @@ export class SignalBarService {
 			user: mapUserToPartialResponse(user),
 			persona_id: persona.personaId,
 			subprofile: persona.subprofile,
-			activated_at: existing.success ? existing.data.activated_at : Date.now(),
+			activated_at: existing.success ? existing.data.activated_at : activatedAt,
 		};
 		await this.deps.cacheService.set(key, entry, ENTRY_TTL_SECONDS);
 		await Promise.all([
@@ -577,7 +579,11 @@ export class SignalBarService {
 		const openPersona = signalId !== null && openChannelId ? await this.resolvePersona(userId, personaId) : null;
 		const userKey = userId.toString();
 		const current = await this.readUserChats(userKey, config);
-		const channelIds = Array.from(current.keys()).filter((channelId) => channelId !== openChannelId);
+		// Newest first, so the snapshot (and the restore preview) lists chats in the panel's order.
+		const newest = (channelId: string) => Math.max(...(current.get(channelId) ?? []).map((e) => e.activated_at));
+		const channelIds = Array.from(current.keys())
+			.filter((channelId) => channelId !== openChannelId)
+			.sort((a, b) => newest(b) - newest(a));
 		if (openPersona && openChannelId) channelIds.unshift(openChannelId);
 		const replaced: UserSignalsSnapshot['chats'] = [];
 		for (const channelId of channelIds.slice(0, MAX_USER_SIGNAL_CHATS)) {
@@ -650,9 +656,11 @@ export class SignalBarService {
 			const before = current.get(chat.channel_id) ?? [];
 			const wanted = chat.signals.filter((ref) => signalIds.has(ref.signal_id));
 			const added: Array<ChannelSignalEntry> = [];
-			for (const ref of wanted) {
+			// One millisecond apart, oldest first as saved, so the newest keeps deciding the chat's persona.
+			const base = this.deps.now?.() ?? Date.now();
+			for (const [index, ref] of wanted.entries()) {
 				const persona = await this.resolvePersonaOrAccount(userId, ref.persona_id);
-				const entry = await this.writeEntry(authChannel.channel, ref.signal_id, user, persona);
+				const entry = await this.writeEntry(authChannel.channel, ref.signal_id, user, persona, base + index);
 				if (entry) added.push(entry);
 			}
 			const keep = new Set(wanted.map((ref) => ref.signal_id));

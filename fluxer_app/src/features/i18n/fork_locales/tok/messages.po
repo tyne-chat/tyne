@@ -1180,6 +1180,10 @@ msgstr "jan insa tawa jan ale"
 msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
 msgstr "suno sina li kama sama tenpo pini: tenpo {time} la sina pini e ale. suno open sina lon ona lon tenpo ni li kama pini."
 
+#. Body of the restore confirmation when the signal last set everywhere has since been taken off the bar. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last change everywhere at {time}. What you have on there now goes off."
+msgstr "suno sina li kama sama tenpo pini: tenpo {time} la sina ante e suno lon ale. suno open sina lon ona lon tenpo ni li kama pini."
+
 #. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
 msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
 msgstr "suno sina li kama sama tenpo pini: tenpo {time} la sina kama sin e suno. suno open sina lon ona lon tenpo ni li kama pini."
@@ -1671,6 +1675,10 @@ msgstr "o pini e ale"
 msgid "Turn off signal bar"
 msgstr "o pini e linja suno"
 
+#. Right-click menu item on a chat in the signals-everywhere panel: turns off every signal you have on in that one chat or direct message.
+msgid "Turn off signals"
+msgstr "o pini e suno"
+
 #. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
 msgid "Turn off {name}"
 msgstr "o pini e suno pi {name}"
@@ -2002,10 +2010,6 @@ msgstr "{count, plural, one {jan insa # li weka} other {jan insa # li weka}}"
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, one {jan insa # li ken sama} other {jan insa # li ken sama}}"
-
-#. Last line of the list in the restore confirmation when more chats change than are listed.
-msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
-msgstr "{count, plural, one {+ tomo toki ante #} other {+ tomo toki ante #}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

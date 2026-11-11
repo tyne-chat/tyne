@@ -1180,6 +1180,10 @@ msgstr "شخصية عامة"
 msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
 msgstr "يعيد ما كان مفعّلًا لديك قبل أن توقف الكل في {time}. سيتوقف ما هو مفعّل لديك هناك الآن."
 
+#. Body of the restore confirmation when the signal last set everywhere has since been taken off the bar. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last change everywhere at {time}. What you have on there now goes off."
+msgstr "يعيد ما كان مفعّلًا لديك قبل آخر تغيير أجريته في كل مكان في {time}. سيتوقف ما هو مفعّل لديك هناك الآن."
+
 #. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
 msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
 msgstr "يعيد ما كان مفعّلًا لديك قبل آخر استعادة في {time}. سيتوقف ما هو مفعّل لديك هناك الآن."
@@ -1671,6 +1675,10 @@ msgstr "إيقاف الكل"
 msgid "Turn off signal bar"
 msgstr "إيقاف شريط الإشارات"
 
+#. Right-click menu item on a chat in the signals-everywhere panel: turns off every signal you have on in that one chat or direct message.
+msgid "Turn off signals"
+msgstr "إيقاف الإشارات"
+
 #. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
 msgid "Turn off {name}"
 msgstr "إيقاف {name}"
@@ -2002,10 +2010,6 @@ msgstr "{count, plural, zero {لم تُحذف أي شخصية} one {حُذفت �
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, zero {لا تطابقات محتملة} one {تطابق محتمل واحد} two {تطابقان محتملان} few {# تطابقات محتملة} many {# تطابقًا محتملًا} other {# تطابق محتمل}}"
-
-#. Last line of the list in the restore confirmation when more chats change than are listed.
-msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
-msgstr "{count, plural, zero {+ # محادثة أخرى} one {+ محادثة أخرى} two {+ محادثتان أخريان} few {+ # محادثات أخرى} many {+ # محادثة أخرى} other {+ # محادثة أخرى}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

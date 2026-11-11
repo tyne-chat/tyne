@@ -40,6 +40,26 @@ vi.mock('@app/features/ui/popover/PopoverPopout', () => ({
 		</span>
 	),
 }));
+vi.mock('@app/features/ui/action_menu/MenuGroup', () => ({
+	MenuGroup: ({children}: {children?: React.ReactNode}) => (
+		<div data-flx="signal-bar.signals-everywhere-test.menu-group">{children}</div>
+	),
+}));
+vi.mock('@app/features/ui/action_menu/MenuItem', () => ({
+	MenuItem: ({children, onClick, ...rest}: {children?: React.ReactNode; onClick?: () => void; 'data-flx'?: string}) => (
+		<button type="button" onClick={onClick} data-flx={rest['data-flx']}>
+			{children}
+		</button>
+	),
+}));
+const contextMenu = vi.hoisted(() => ({
+	render: null as null | ((props: {onClose: () => void}) => React.ReactNode),
+}));
+vi.mock('@app/features/ui/commands/ContextMenuCommands', () => ({
+	openFromEvent: (_event: unknown, render: (props: {onClose: () => void}) => React.ReactNode) => {
+		contextMenu.render = render;
+	},
+}));
 vi.mock('@app/features/channel/components/ChannelOriginIcon', () => ({
 	ChannelOriginIcon: () => <span data-flx="signal-bar.signals-everywhere-test.origin-icon" />,
 }));
@@ -53,6 +73,8 @@ import {http} from '@app/features/platform/transport/RestTransport';
 import {SignalBar, signalsWrapBesidePair} from '@app/features/signal_bar/components/SignalBar';
 import styles from '@app/features/signal_bar/components/SignalBar.module.css';
 import {SignalsEverywherePanel} from '@app/features/signal_bar/components/SignalsEverywherePanel';
+import {restoreChangesSomething, SignalsRestorePreview} from '@app/features/signal_bar/components/SignalsRestoreModal';
+import restoreStyles from '@app/features/signal_bar/components/SignalsRestoreModal.module.css';
 import {UserAreaSignalsRow} from '@app/features/signal_bar/components/UserAreaSignalsRow';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {SignalBarSignal, UserSignalsResponse} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
@@ -103,6 +125,7 @@ describe('signals everywhere on the web', () => {
 	let root: Root;
 	const getMock = vi.spyOn(http, 'get');
 	const putMock = vi.spyOn(http, 'put');
+	const deleteMock = vi.spyOn(http, 'delete');
 	const navigate = vi.spyOn(NavigationCommands, 'selectChannel').mockImplementation(() => {});
 
 	const render = async (node: React.ReactNode) => {
@@ -126,6 +149,8 @@ describe('signals everywhere on the web', () => {
 		SessionManager.setUserId(ME);
 		getMock.mockReset();
 		putMock.mockReset().mockResolvedValue({ok: true, body: summary([], true)} as never);
+		deleteMock.mockReset().mockResolvedValue({ok: true} as never);
+		contextMenu.render = null;
 		navigate.mockClear();
 		for (const wire of WIRE_CHANNELS) Channels.handleChannelCreate({channel: wire as never});
 		SignalBarStore.forgetMyChats();
@@ -202,10 +227,11 @@ describe('signals everywhere on the web', () => {
 			]),
 		);
 		SignalBarStore.setComposerPersona('open', {id: '7'} as never);
+		const onClose = vi.fn();
 		await render(
 			<SignalsEverywherePanel
 				channel={channel('open')}
-				onClose={() => {}}
+				onClose={onClose}
 				data-flx="signal-bar.signals-everywhere-test.panel"
 			/>,
 		);
@@ -220,6 +246,7 @@ describe('signals everywhere on the web', () => {
 		expect(putMock).toHaveBeenCalledWith(ForkEndpoints.USER_SIGNALS, {
 			body: {signal_id: 'sleeping', channel_id: 'open', persona_id: '7'},
 		});
+		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 
 	it('lists chats newest first with the same signal columns, and opens one on click', async () => {
@@ -258,8 +285,9 @@ describe('signals everywhere on the web', () => {
 		await setSummary(
 			summary([{channel_id: 'art', signals: [{signal_id: 'reading', persona_id: null}], updated_at: 1}]),
 		);
+		const onClose = vi.fn();
 		await render(
-			<SignalsEverywherePanel channel={null} onClose={() => {}} data-flx="signal-bar.signals-everywhere-test.panel" />,
+			<SignalsEverywherePanel channel={null} onClose={onClose} data-flx="signal-bar.signals-everywhere-test.panel" />,
 		);
 
 		const restore = buttons().find((node) => node.textContent === 'Restore…');
@@ -272,6 +300,7 @@ describe('signals everywhere on the web', () => {
 		);
 		expect(putMock).toHaveBeenCalledTimes(1);
 		expect(putMock).toHaveBeenCalledWith(ForkEndpoints.USER_SIGNALS, {body: {signal_id: null}});
+		expect(onClose).toHaveBeenCalledTimes(1);
 		expect(buttons().find((node) => node.textContent === 'Restore…')?.disabled).toBe(false);
 	});
 
@@ -298,6 +327,129 @@ describe('signals everywhere on the web', () => {
 			);
 		});
 		expect(container.textContent).toBe('Signals');
+	});
+
+	it("turns off one chat's signals from its right-click menu, and leaves the panel open", async () => {
+		await setSummary(
+			summary([
+				{
+					channel_id: 'art',
+					signals: [
+						{signal_id: 'reading', persona_id: null},
+						{signal_id: 'sleeping', persona_id: null},
+					],
+					updated_at: 2,
+				},
+				{channel_id: 'lore', signals: [{signal_id: 'reading', persona_id: null}], updated_at: 1},
+			]),
+		);
+		const onClose = vi.fn();
+		await render(
+			<SignalsEverywherePanel channel={null} onClose={onClose} data-flx="signal-bar.signals-everywhere-test.panel" />,
+		);
+		const rows = () =>
+			Array.from(container.querySelectorAll('[data-flx="signal-bar.signals-everywhere-panel.row"]')).map((row) =>
+				row.getAttribute('aria-label'),
+			);
+
+		await act(async () => {
+			container
+				.querySelector('[data-flx="signal-bar.signals-everywhere-panel.row"]')
+				?.dispatchEvent(new MouseEvent('contextmenu', {bubbles: true, cancelable: true}));
+		});
+		const menu = document.createElement('div');
+		document.body.appendChild(menu);
+		const menuRoot = createRoot(menu);
+		const closeMenu = vi.fn();
+		await act(async () => menuRoot.render(contextMenu.render?.({onClose: closeMenu})));
+		await act(async () =>
+			(menu.querySelector('[data-flx="signal-bar.signals-everywhere-panel.row-menu.turn-off"]') as HTMLElement).click(),
+		);
+
+		expect(closeMenu).toHaveBeenCalledTimes(1);
+		expect(deleteMock.mock.calls.map(([path]) => path)).toEqual([
+			ForkEndpoints.CHANNEL_SIGNAL_ME('art', 'reading'),
+			ForkEndpoints.CHANNEL_SIGNAL_ME('art', 'sleeping'),
+		]);
+		expect(rows()).toEqual(['lore, Reading']);
+		expect(onClose).not.toHaveBeenCalled();
+		act(() => menuRoot.unmount());
+		menu.remove();
+	});
+
+	it('lists every chat the restore changes, and scrolls past ten', async () => {
+		const many = Array.from({length: 12}, (_, i) => `chat${i}`);
+		for (const id of many) {
+			Channels.handleChannelCreate({channel: {id, type: 0, guild_id: 'g', name: id, position: 0} as never});
+		}
+		const preview = (ids: Array<string>) => ({
+			available: true,
+			created_at: 0,
+			action: {kind: 'off' as const, signal_id: null},
+			chats: ids.map((id) => ({
+				channel_id: id,
+				available: true,
+				now: [],
+				after: [{signal_id: 'reading', persona_id: null}],
+			})),
+		});
+		const i18n = {_: (descriptor: {message?: string}) => descriptor.message ?? '', date: () => '11:58 PM'} as never;
+
+		await render(
+			<SignalsRestorePreview
+				preview={preview(many)}
+				i18n={i18n}
+				data-flx="signal-bar.signals-everywhere-test.preview"
+			/>,
+		);
+		expect(container.querySelectorAll('[data-flx="signal-bar.signals-restore-modal.row"]')).toHaveLength(12);
+		expect(container.querySelector(`.${restoreStyles.tableScrolls}`)).not.toBeNull();
+
+		await render(
+			<SignalsRestorePreview
+				preview={preview(many.slice(0, 10))}
+				i18n={i18n}
+				data-flx="signal-bar.signals-everywhere-test.preview"
+			/>,
+		);
+		expect(container.querySelectorAll('[data-flx="signal-bar.signals-restore-modal.row"]')).toHaveLength(10);
+		expect(container.querySelector(`.${restoreStyles.tableScrolls}`)).toBeNull();
+	});
+
+	it('lets Turn all off clear signals in chats this client cannot show', async () => {
+		await setSummary(
+			summary([{channel_id: 'unknown', signals: [{signal_id: 'reading', persona_id: null}], updated_at: 1}]),
+		);
+		await render(
+			<SignalsEverywherePanel channel={null} onClose={() => {}} data-flx="signal-bar.signals-everywhere-test.panel" />,
+		);
+
+		expect(container.querySelectorAll('[data-flx="signal-bar.signals-everywhere-panel.row"]')).toHaveLength(0);
+		expect(buttons().find((node) => node.textContent === 'Turn all off')?.disabled).toBe(false);
+	});
+
+	it('offers no Restore when it would change nothing, and names a change whose signal left the bar', async () => {
+		const base = {available: true, created_at: 0, action: {kind: 'set' as const, signal_id: 'gone'}};
+		const same = [{signal_id: 'reading', persona_id: null}];
+		expect(
+			restoreChangesSomething({...base, chats: [{channel_id: 'art', available: true, now: same, after: same}]}),
+		).toBe(false);
+		expect(
+			restoreChangesSomething({...base, chats: [{channel_id: 'art', available: false, now: [], after: same}]}),
+		).toBe(false);
+		expect(
+			restoreChangesSomething({...base, chats: [{channel_id: 'art', available: true, now: [], after: same}]}),
+		).toBe(true);
+
+		const i18n = {_: (descriptor: {message?: string}) => descriptor.message ?? '', date: () => '11:58 PM'} as never;
+		await render(
+			<SignalsRestorePreview
+				preview={{...base, chats: [{channel_id: 'art', available: true, now: [], after: same}]}}
+				i18n={i18n}
+				data-flx="signal-bar.signals-everywhere-test.preview"
+			/>,
+		);
+		expect(container.textContent).toContain('before your last change everywhere');
 	});
 });
 

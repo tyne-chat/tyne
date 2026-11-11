@@ -18,6 +18,7 @@ import type {UserSignalRef, UserSignalsRestoreResponse} from '@fluxer/schema/src
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 import {ArrowRightIcon} from '@phosphor-icons/react';
+import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 
 const RESTORE_TITLE_DESCRIPTOR = msg({
@@ -34,6 +35,12 @@ const RESTORE_BEFORE_OFF_DESCRIPTOR = msg({
 	comment:
 		'Body of the restore confirmation, when the last change turned off all your signals in every chat. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.',
 });
+const RESTORE_BEFORE_CHANGE_DESCRIPTOR = msg({
+	message:
+		'Puts back what you had on before your last change everywhere at {time}. What you have on there now goes off.',
+	comment:
+		'Body of the restore confirmation when the signal last set everywhere has since been taken off the bar. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.',
+});
 const RESTORE_BEFORE_RESTORE_DESCRIPTOR = msg({
 	message: 'Puts back what you had on before your last restore at {time}. What you have on there now goes off.',
 	comment:
@@ -47,10 +54,6 @@ const RESTORE_AFTER_DESCRIPTOR = msg({
 	message: 'After',
 	comment:
 		'Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.',
-});
-const RESTORE_MORE_CHATS_DESCRIPTOR = msg({
-	message: '{count, plural, one {+ # more chat} other {+ # more chats}}',
-	comment: 'Last line of the list in the restore confirmation when more chats change than are listed.',
 });
 const RESTORE_LEFT_OUT_DESCRIPTOR = msg({
 	message: 'Left out, since you can no longer post there: {chats}',
@@ -70,8 +73,8 @@ const RESTORE_UNAVAILABLE_DESCRIPTOR = msg({
 	comment: 'Shown in place of the restore confirmation when its preview could not be loaded.',
 });
 
-/** Chats listed before "+ N more". */
-const MAX_LISTED_CHATS = 6;
+/** Past this many chats the list scrolls, its headings staying in view. */
+const MAX_UNSCROLLED_CHATS = 10;
 const BADGE_SIZE = 16;
 
 function formatWhen(i18n: I18n, at: number): string {
@@ -132,7 +135,7 @@ interface PreviewRow {
 	after: ReadonlyArray<UserSignalRef>;
 }
 
-const SignalsRestorePreview = observer(({preview, i18n}: {preview: UserSignalsRestoreResponse; i18n: I18n}) => {
+export const SignalsRestorePreview = observer(({preview, i18n}: {preview: UserSignalsRestoreResponse; i18n: I18n}) => {
 	const rows: Array<PreviewRow> = [];
 	const leftOut: Array<string> = [];
 	for (const chat of preview.chats) {
@@ -151,6 +154,8 @@ const SignalsRestorePreview = observer(({preview, i18n}: {preview: UserSignalsRe
 	let summary: string;
 	if (action?.kind === 'set' && setSignal) {
 		summary = i18n._(RESTORE_BEFORE_SET_DESCRIPTOR, {label: getSignalLabel(setSignal), time});
+	} else if (action?.kind === 'set') {
+		summary = i18n._(RESTORE_BEFORE_CHANGE_DESCRIPTOR, {time});
 	} else if (action?.kind === 'restore') {
 		summary = i18n._(RESTORE_BEFORE_RESTORE_DESCRIPTOR, {time});
 	} else {
@@ -162,7 +167,10 @@ const SignalsRestorePreview = observer(({preview, i18n}: {preview: UserSignalsRe
 				{summary}
 			</p>
 			{rows.length > 0 && (
-				<div className={styles.table} data-flx="signal-bar.signals-restore-modal.table">
+				<div
+					className={clsx(styles.table, rows.length > MAX_UNSCROLLED_CHATS && styles.tableScrolls)}
+					data-flx="signal-bar.signals-restore-modal.table"
+				>
 					<span className={styles.columnHeading} data-flx="signal-bar.signals-restore-modal.chat-heading" />
 					<span className={styles.columnHeading} data-flx="signal-bar.signals-restore-modal.now-heading">
 						{i18n._(RESTORE_NOW_DESCRIPTOR)}
@@ -171,7 +179,7 @@ const SignalsRestorePreview = observer(({preview, i18n}: {preview: UserSignalsRe
 					<span className={styles.columnHeading} data-flx="signal-bar.signals-restore-modal.after-heading">
 						{i18n._(RESTORE_AFTER_DESCRIPTOR)}
 					</span>
-					{rows.slice(0, MAX_LISTED_CHATS).map((row) => (
+					{rows.map((row) => (
 						<div key={row.channel.id} className={styles.row} data-flx="signal-bar.signals-restore-modal.row">
 							<span className={styles.chat} data-flx="signal-bar.signals-restore-modal.chat">
 								<SignalChatIcon channel={row.channel} size={20} data-flx="signal-bar.signals-restore-modal.chat-icon" />
@@ -192,11 +200,6 @@ const SignalsRestorePreview = observer(({preview, i18n}: {preview: UserSignalsRe
 					))}
 				</div>
 			)}
-			{rows.length > MAX_LISTED_CHATS && (
-				<p className={styles.note} data-flx="signal-bar.signals-restore-modal.more">
-					{i18n._(RESTORE_MORE_CHATS_DESCRIPTOR, {count: rows.length - MAX_LISTED_CHATS})}
-				</p>
-			)}
 			{leftOut.length > 0 && (
 				<p className={styles.note} data-flx="signal-bar.signals-restore-modal.left-out">
 					{i18n._(RESTORE_LEFT_OUT_DESCRIPTOR, {chats: leftOut.join(', ')})}
@@ -206,13 +209,18 @@ const SignalsRestorePreview = observer(({preview, i18n}: {preview: UserSignalsRe
 	);
 });
 
+/** Whether a restore would change any chat, among those the account may still post in. */
+export function restoreChangesSomething(preview: UserSignalsRestoreResponse): boolean {
+	return preview.chats.some((chat) => chat.available && !sameRefs(chat.now, chat.after));
+}
+
 /**
  * Loads what Restore would change, then asks before doing it. One GET to open it; one POST to
  * confirm. If the preview cannot be loaded, it says so and offers nothing to confirm.
  */
 export async function openSignalsRestoreModal(i18n: I18n): Promise<void> {
 	const preview = await SignalBarStore.fetchRestorePreview();
-	if (!preview?.available) {
+	if (!preview?.available || !restoreChangesSomething(preview)) {
 		ModalCommands.push(
 			modal(() => (
 				<ConfirmModal
