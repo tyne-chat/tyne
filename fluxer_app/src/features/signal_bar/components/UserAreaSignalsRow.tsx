@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import styles from '@app/features/app/components/floating/UserAreaPopout.module.css';
-import {getKnownSignalChats} from '@app/features/signal_bar/components/SignalChatParts';
 import {SignalsEverywherePanel} from '@app/features/signal_bar/components/SignalsEverywherePanel';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {remFromPx} from '@app/features/theme/layout/RemFromPx';
@@ -37,7 +36,7 @@ interface UserAreaSignalsRowProps {
 export const UserAreaSignalsRow = observer(({ActionButton}: UserAreaSignalsRowProps) => {
 	const {i18n} = useLingui();
 	if (SignalBarStore.signals.length === 0) return null;
-	if (getKnownSignalChats().length === 0 && !SignalBarStore.restoreAvailable) return null;
+	if (SignalBarStore.myChatList.length === 0 && !SignalBarStore.restoreAvailable) return null;
 	return (
 		<>
 			<div className={styles.actionDivider} data-flx="signal-bar.user-area-signals-row.divider" />
