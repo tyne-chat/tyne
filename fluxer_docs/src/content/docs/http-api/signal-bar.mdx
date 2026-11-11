@@ -20,6 +20,12 @@ Switching the bar off in a channel switches off every signal given there.
 
 A signal given with [Give a signal](#give-a-signal) stays on while its giver is online. Fluxer removes the signals of an account that has been offline for 12 hours. It also removes every entry for a signal that is taken off the bar, or whose custom emoji is deleted.
 
+## Signals everywhere
+
+A user can change their signals in every chat at once. [Set a signal everywhere](#set-a-signal-everywhere) sets one signal in every chat where they have a signal on, and in the chat they have open, and switches their other signals there off. Only signals with `everywhere` set may be set this way; members holding `MANAGE_GUILD` in the home community choose them. The same route with a null signal switches every signal of theirs off.
+
+Fluxer keeps what the last such change replaced, until the next one. [Restore my signals](#restore-my-signals) puts it back, and saves what it replaces in turn, so a second restore undoes the first.
+
 Every change to the signals given in a channel is sent to that channel as [Channel Signal Update](/gateway/events/#channel-signal-update), and switching the bar on or off as [Channel Signal Bar Update](/gateway/events/#channel-signal-bar-update). An edit to the bar itself is announced as [Signal Bar Update](/gateway/events/#signal-bar-update).
 
 ## Signal bar object
@@ -48,6 +54,7 @@ One signal on the bar.
 | emoji_name | string | Emoji name or Unicode character |
 | animated | boolean | Whether the emoji is animated |
 | label | ?string | Optional label shown instead of the emoji name |
+| everywhere | boolean | Whether users may set this signal in every chat at once |
 
 ## Signal update object
 
@@ -61,6 +68,7 @@ One signal in the list sent to [Update signal bar](#update-signal-bar).
 | emoji_id? | ?snowflake | Custom emoji ID, or null for a Unicode emoji |
 | emoji_name | string | The Unicode emoji, or the custom emoji's name (1-64 characters) |
 | label? | ?string | Label shown instead of the emoji name, at most 32 characters |
+| everywhere? | ?boolean | Whether users may set this signal in every chat at once; absent or null keeps the current setting |
 
 ## Channel signals object
 
@@ -87,6 +95,53 @@ One account giving one signal in a channel.
 | persona_id | ?snowflake | The persona the account is currently signalling as, if any |
 | subprofile | ?[message persona](/http-api/messages/#message-persona-object) object | The persona the account is signalling as, or null |
 | activated_at | integer | Unix timestamp in milliseconds |
+
+## User signals object
+
+Where the caller has signals on.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| chats | array[[user signal chat](#user-signal-chat-object) object] | Every chat where the caller has a signal on, most recently changed first |
+| restore_available | boolean | Whether [Restore my signals](#restore-my-signals) has anything to put back |
+
+## User signal chat object
+
+The caller's signals in one chat.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| channel_id | snowflake | The ID of the channel |
+| signals | array[[user signal](#user-signal-object) object] | The caller's signals there, oldest first |
+| updated_at | integer | When the newest of them was switched on, as a Unix timestamp in milliseconds |
+
+## User signal object
+
+One of the caller's signals in a chat.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| signal_id | string | The unique identifier of the signal within the bar |
+| persona_id | ?snowflake | The persona the signal is given as, or null for the account |
+
+## Signals restore object
+
+What [Restore my signals](#restore-my-signals) would do.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| available | boolean | Whether there is anything to restore |
+| created_at | ?integer | When the change it undoes was made, as a Unix timestamp in milliseconds |
+| action | ?object | That change: `kind` is `set`, `off` or `restore`, and `signal_id` the signal set, for `set` |
+| chats | array[object] | Per chat: `channel_id`; `available`, false when the caller may no longer give signals there and the restore leaves it out; `now` and `after`, arrays of [user signal](#user-signal-object) objects |
 
 ## Guild signal bar settings object
 
@@ -338,3 +393,75 @@ Replaces the signals on the bar. Requires `MANAGE_GUILD` in the home community. 
 ### Rate limit
 
 30 requests per minute for each authenticated user, on the `signal_bar:mutate` bucket.
+
+## List my signals everywhere
+
+<RouteHeader method="GET" path="/v1/users/@me/signals" />
+
+Returns every chat where the caller has a signal on, and whether there is anything to restore.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [user signals](#user-signals-object) object | The caller's signals |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `signal_bar:read` bucket.
+
+## Set a signal everywhere
+
+<RouteHeader method="PUT" path="/v1/users/@me/signals" />
+
+Sets one signal in every chat where the caller has a signal on, and in `channel_id`, and switches the caller's other signals there off. Each chat keeps the persona its newest signal was given as; `channel_id` takes `persona_id`. A chat where the caller may no longer give signals is left as it is. A signal without `everywhere` is refused with 403, and one not on the bar with 404 `UNKNOWN_EMOJI`. With `signal_id` null, every signal of the caller's is switched off, in every chat. Saves what it replaced for [Restore my signals](#restore-my-signals), unless it changed nothing.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| signal_id | ?string | The signal to set everywhere, or null to switch every signal off |
+| channel_id? | ?snowflake | The chat the caller has open, included even without a signal on |
+| persona_id? | ?snowflake | The persona the signal in `channel_id` is given as |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [user signals](#user-signals-object) object | The caller's signals after the change |
+
+### Rate limit
+
+10 requests per minute for each authenticated user, on the `signal_bar:everywhere` bucket.
+
+## Preview restoring my signals
+
+<RouteHeader method="GET" path="/v1/users/@me/signals/restore" />
+
+Returns, chat by chat, what [Restore my signals](#restore-my-signals) would put back in place of what is on now.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [signals restore](#signals-restore-object) object | The preview |
+
+### Rate limit
+
+60 requests per 10 seconds for each authenticated user, on the `signal_bar:read` bucket.
+
+## Restore my signals
+
+<RouteHeader method="POST" path="/v1/users/@me/signals/restore" />
+
+Puts back what the last change everywhere replaced, in each chat where the caller may still give signals, and switches off the signals they have on there now. Signals without `everywhere` come back too. Saves what it replaced, so restoring again swaps back.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [user signals](#user-signals-object) object | The caller's signals after the restore |
+
+### Rate limit
+
+10 requests per minute for each authenticated user, on the `signal_bar:everywhere` bucket.
