@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {useHover} from '@app/features/app/hooks/useHover';
 import type {Channel} from '@app/features/channel/models/Channel';
 import {getDMDisplayName} from '@app/features/channel/utils/ChannelUtils';
 import * as NavigationCommands from '@app/features/navigation/commands/NavigationCommands';
@@ -7,6 +8,7 @@ import {
 	canSetSignalIn,
 	getKnownSignalChats,
 	getSignalChatPlace,
+	LitSignalEmoji,
 	SignalChatIcon,
 	SignalEmoji,
 } from '@app/features/signal_bar/components/SignalChatParts';
@@ -14,7 +16,10 @@ import styles from '@app/features/signal_bar/components/SignalsEverywherePanel.m
 import {openSignalsRestoreModal} from '@app/features/signal_bar/components/SignalsRestoreModal';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {getSignalLabel} from '@app/features/signal_bar/utils/SignalUtils';
+import {MenuGroup} from '@app/features/ui/action_menu/MenuGroup';
+import {MenuItem} from '@app/features/ui/action_menu/MenuItem';
 import {Button} from '@app/features/ui/button/Button';
+import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import {ME} from '@fluxer/constants/src/AppConstants';
@@ -44,6 +49,11 @@ const RESTORE_ELLIPSIS_DESCRIPTOR = msg({
 	comment:
 		'Button in the signals-everywhere panel that opens a confirmation showing how your last change everywhere would be undone. Keep the ellipsis.',
 });
+const TURN_OFF_CHAT_DESCRIPTOR = msg({
+	message: 'Turn off signals',
+	comment:
+		'Right-click menu item on a chat in the signals-everywhere panel: turns off every signal you have on in that one chat or direct message.',
+});
 const NO_SIGNALS_ANYWHERE_DESCRIPTOR = msg({
 	message: 'None of your signals are on anywhere.',
 	comment:
@@ -59,9 +69,50 @@ interface SignalChatRowProps {
 	onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
 }
 
+/** The right-click menu of a chat in the panel. */
+const SignalChatRowMenu = ({channelId, onClose}: {channelId: string; onClose: () => void}) => {
+	const {i18n} = useLingui();
+	return (
+		<MenuGroup data-flx="signal-bar.signals-everywhere-panel.row-menu.group">
+			<MenuItem
+				onClick={() => {
+					onClose();
+					void SignalBarStore.turnOffChat(channelId);
+				}}
+				data-flx="signal-bar.signals-everywhere-panel.row-menu.turn-off"
+			>
+				{i18n._(TURN_OFF_CHAT_DESCRIPTOR)}
+			</MenuItem>
+		</MenuGroup>
+	);
+};
+
 const SignalChatRow = observer(
 	React.forwardRef<HTMLButtonElement, SignalChatRowProps>(({channel, refs, columns, onOpen, onKeyDown}, ref) => {
 		const {i18n} = useLingui();
+		const [hoverRef, isHovering] = useHover();
+		const setRef = useCallback(
+			(node: HTMLButtonElement | null) => {
+				hoverRef(node);
+				if (typeof ref === 'function') ref(node);
+				else if (ref) ref.current = node;
+			},
+			[hoverRef, ref],
+		);
+		const openMenu = useCallback(
+			(event: React.MouseEvent<HTMLElement>) => {
+				event.preventDefault();
+				event.stopPropagation();
+				ContextMenuCommands.openFromEvent(event, ({onClose}) => (
+					<SignalChatRowMenu
+						channelId={channel.id}
+						onClose={onClose}
+						data-flx="signal-bar.signals-everywhere-panel.row-menu"
+					/>
+				));
+			},
+			[channel.id],
+		);
 		const signals = refs
 			.map((item) => SignalBarStore.signals.find((signal) => signal.id === item.signal_id))
 			.filter((signal): signal is SignalBarSignal => signal !== undefined);
@@ -70,11 +121,12 @@ const SignalChatRow = observer(
 		return (
 			<FocusRing offset={-2} data-flx="signal-bar.signals-everywhere-panel.row.focus-ring">
 				<button
-					ref={ref}
+					ref={setRef}
 					type="button"
 					className={styles.row}
 					onClick={() => onOpen(channel)}
 					onKeyDown={onKeyDown}
+					onContextMenu={openMenu}
 					aria-label={[name, place, signals.map(getSignalLabel).join(', ')].filter(Boolean).join(', ')}
 					data-flx="signal-bar.signals-everywhere-panel.row"
 				>
@@ -96,10 +148,11 @@ const SignalChatRow = observer(
 						data-flx="signal-bar.signals-everywhere-panel.row.signals"
 					>
 						{signals.map((signal) => (
-							<SignalEmoji
+							<LitSignalEmoji
 								key={signal.id}
 								signal={signal}
 								className={styles.rowEmoji}
+								isHovering={isHovering}
 								data-flx="signal-bar.signals-everywhere-panel.row.emoji"
 							/>
 						))}
@@ -132,6 +185,7 @@ export const SignalsEverywherePanel = observer(({channel, onClose}: SignalsEvery
 	const tiles = SignalBarStore.signals.filter((signal) => signal.everywhere);
 	const columns = Math.max(1, ...chats.map((item) => item.chat.signals.length));
 	const busy = SignalBarStore.everywhereBusy;
+	// A tile or Turn all off acts and closes the panel (Chiara, 2026-11-11); the bar shows the result.
 	const setEverywhere = useCallback(
 		(signalId: string) => {
 			void SignalBarStore.setEverywhere(
@@ -139,8 +193,9 @@ export const SignalsEverywherePanel = observer(({channel, onClose}: SignalsEvery
 				openChannel?.id ?? null,
 				openChannel ? SignalBarStore.getEffectivePersonaId(openChannel.id) : null,
 			);
+			onClose();
 		},
-		[openChannel],
+		[openChannel, onClose],
 	);
 	const openChat = useCallback(
 		(target: Channel) => {
@@ -195,8 +250,12 @@ export const SignalsEverywherePanel = observer(({channel, onClose}: SignalsEvery
 				<Button
 					variant="secondary"
 					small
-					disabled={busy || chats.length === 0}
-					onClick={() => void SignalBarStore.setEverywhere(null, null, null)}
+					// Every chat the server lists, those this client cannot show included, so they can be cleared.
+					disabled={busy || SignalBarStore.myChatList.length === 0}
+					onClick={() => {
+						void SignalBarStore.setEverywhere(null, null, null);
+						onClose();
+					}}
 					data-flx="signal-bar.signals-everywhere-panel.turn-all-off"
 				>
 					{i18n._(TURN_ALL_OFF_DESCRIPTOR)}
