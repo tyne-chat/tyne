@@ -34,12 +34,19 @@ import {
 	type ChannelSignalsResponse,
 	type ChannelSignalUpdateEvent,
 	type GuildSignalBarSettings,
+	MAX_USER_SIGNAL_CHATS,
 	resolveSignalBarEnabled,
 	type SignalBarConfig,
 	SignalBarConfigSchema,
 	type SignalBarResponse,
 	type SignalBarSignal,
 	type SignalBarUpdateRequest,
+	type UserSignalRef,
+	type UserSignalsResponse,
+	type UserSignalsRestoreAction,
+	type UserSignalsRestoreResponse,
+	type UserSignalsSnapshot,
+	UserSignalsSnapshotSchema,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
 import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 
@@ -59,9 +66,19 @@ const entryKey = (channelId: string, signalId: string, userId: string) =>
 const channelIndexKey = (channelId: string) => `signalbar:channel:${channelId}`;
 const userIndexKey = (userId: string) => `signalbar:user:${userId}`;
 const offlineSinceKey = (userId: string) => `signalbar:offline_since:${userId}`;
+/** What the last change everywhere replaced, kept until the next one (no TTL). */
+const restoreKey = (userId: string) => `signalbar:restore:${userId}`;
 
 interface StoredEntry extends ChannelSignalEntry {
 	channel_id: string;
+}
+
+/** Opens a chat for the acting user, or null when they cannot see it any more. */
+export type SignalChatAuthenticator = (channelId: string) => Promise<AuthenticatedChannel | null>;
+
+interface ResolvedPersona {
+	personaId: string | null;
+	subprofile: ChannelSignalEntry['subprofile'];
 }
 
 interface SignalBarServiceDeps {
@@ -153,7 +170,8 @@ export class SignalBarService {
 			}
 			const id = item.id && currentIds.has(item.id) && !usedIds.has(item.id) ? item.id : randomBytes(6).toString('hex');
 			usedIds.add(id);
-			signals.push({id, emoji_id: emojiId, emoji_name: emojiName, animated, label: item.label || null});
+			const everywhere = item.everywhere ?? current.signals.find((signal) => signal.id === id)?.everywhere ?? false;
+			signals.push({id, emoji_id: emojiId, emoji_name: emojiName, animated, label: item.label || null, everywhere});
 		}
 		await this.writeConfig({version: current.version + 1, signals});
 		return this.getBar(userId);
@@ -350,28 +368,56 @@ export class SignalBarService {
 		if (!(await this.isChannelEnabled(channel))) throw new MissingPermissionsError();
 		const user = await this.deps.findUser(userId);
 		if (!user) throw new MissingPermissionsError();
-		let subprofile: ChannelSignalEntry['subprofile'] = null;
-		let entryPersonaId: string | null = null;
-		if (personaId && personaId !== NO_PERSONA) {
-			const persona = await this.deps.personaRepository.findById(userId, createPersonaID(BigInt(personaId)));
-			if (!persona || persona.isDeleted) throw new PersonaNotFoundError();
-			subprofile = persona.toSubprofileResponse(await this.deps.personaRepository.findSettings(userId));
-			entryPersonaId = persona.id.toString();
+		const persona = await this.resolvePersona(userId, personaId);
+		const added = await this.writeEntry(channel, signalId, user, persona);
+		if (added) await this.dispatchChannelUpdate(channel, config.version, [added], []);
+	}
+
+	/** The persona a signal is shown as; throws `PersonaNotFoundError` for one the user does not own. */
+	private async resolvePersona(userId: UserID, personaId: string | null | undefined): Promise<ResolvedPersona> {
+		if (!personaId || personaId === NO_PERSONA) return {personaId: null, subprofile: null};
+		const persona = await this.deps.personaRepository.findById(userId, createPersonaID(BigInt(personaId)));
+		if (!persona || persona.isDeleted) throw new PersonaNotFoundError();
+		return {
+			personaId: persona.id.toString(),
+			subprofile: persona.toSubprofileResponse(await this.deps.personaRepository.findSettings(userId)),
+		};
+	}
+
+	/** As `resolvePersona`, but a persona deleted since falls back to the account. */
+	private async resolvePersonaOrAccount(userId: UserID, personaId: string | null): Promise<ResolvedPersona> {
+		try {
+			return await this.resolvePersona(userId, personaId);
+		} catch (error) {
+			if (error instanceof PersonaNotFoundError) return {personaId: null, subprofile: null};
+			throw error;
 		}
+	}
+
+	/**
+	 * Lights a signal or re-points it to another persona, keeping its place. Returns the entry to send
+	 * under `added`, or null when it was already lit as that persona (its TTL is renewed).
+	 */
+	private async writeEntry(
+		channel: Channel,
+		signalId: string,
+		user: User,
+		persona: ResolvedPersona,
+	): Promise<ChannelSignalEntry | null> {
 		const channelId = channel.id.toString();
-		const userKey = userId.toString();
+		const userKey = user.id.toString();
 		const key = entryKey(channelId, signalId, userKey);
 		const existing = ChannelSignalEntrySchema.safeParse(await this.deps.cacheService.get<unknown>(key));
-		if (existing.success && existing.data.persona_id === entryPersonaId) {
+		if (existing.success && existing.data.persona_id === persona.personaId) {
 			await this.deps.cacheService.expire(key, ENTRY_TTL_SECONDS);
-			return;
+			return null;
 		}
 		const entry: StoredEntry = {
 			channel_id: channelId,
 			signal_id: signalId,
 			user: mapUserToPartialResponse(user),
-			persona_id: entryPersonaId,
-			subprofile,
+			persona_id: persona.personaId,
+			subprofile: persona.subprofile,
 			activated_at: existing.success ? existing.data.activated_at : Date.now(),
 		};
 		await this.deps.cacheService.set(key, entry, ENTRY_TTL_SECONDS);
@@ -380,7 +426,20 @@ export class SignalBarService {
 			this.deps.cacheService.sadd(userIndexKey(userKey), `${channelId}:${signalId}`, INDEX_TTL_SECONDS),
 			this.deps.cacheService.sadd(ACTIVE_USERS_KEY, userKey, INDEX_TTL_SECONDS),
 		]);
-		await this.dispatchChannelUpdate(channel, config.version, [toEntry(entry)], []);
+		return toEntry(entry);
+	}
+
+	/** Whether the user may light signals in a chat now: the checks `activate` makes, without throwing. */
+	private async canLight(authChannel: AuthenticatedChannel): Promise<boolean> {
+		const {channel} = authChannel;
+		if (!TEXT_BASED_CHANNEL_TYPES.has(channel.type)) return false;
+		try {
+			assertGuildMemberCanCommunicate(authChannel.member);
+			if (channel.guildId) await authChannel.checkPermission(Permissions.SEND_MESSAGES);
+		} catch {
+			return false;
+		}
+		return this.isChannelEnabled(channel);
 	}
 
 	async deactivate({
@@ -418,6 +477,196 @@ export class SignalBarService {
 			const config = await this.getConfig();
 			await this.dispatchChannelUpdate(channel, config.version, [], removed);
 		}
+	}
+
+	/** The user's lit signals, grouped by chat, oldest first within each; signals no longer on the bar are left out. */
+	private async readUserChats(userId: string, config: SignalBarConfig): Promise<Map<string, Array<StoredEntry>>> {
+		const members = Array.from(await this.deps.cacheService.smembers(userIndexKey(userId)));
+		const chats = new Map<string, Array<StoredEntry>>();
+		if (members.length === 0) return chats;
+		const signalIds = new Set(config.signals.map((signal) => signal.id));
+		const values = await this.deps.cacheService.mget<unknown>(
+			members.map((member) => {
+				const [channelId, signalId] = member.split(':') as [string, string];
+				return entryKey(channelId, signalId, userId);
+			}),
+		);
+		await Promise.all(
+			members.map(async (member, index) => {
+				const parsed = ChannelSignalEntrySchema.safeParse(values[index]);
+				if (!parsed.success) {
+					await this.deps.cacheService.srem(userIndexKey(userId), member);
+					return;
+				}
+				if (!signalIds.has(parsed.data.signal_id)) return;
+				const channelId = member.split(':')[0]!;
+				const list = chats.get(channelId) ?? [];
+				list.push({...parsed.data, channel_id: channelId});
+				chats.set(channelId, list);
+			}),
+		);
+		for (const list of chats.values()) list.sort((a, b) => a.activated_at - b.activated_at);
+		return chats;
+	}
+
+	private toRefs(entries: Array<StoredEntry>): Array<UserSignalRef> {
+		return entries.map((entry) => ({signal_id: entry.signal_id, persona_id: entry.persona_id}));
+	}
+
+	private async readSnapshot(userId: string): Promise<UserSignalsSnapshot | null> {
+		const parsed = UserSignalsSnapshotSchema.safeParse(await this.deps.cacheService.get<unknown>(restoreKey(userId)));
+		return parsed.success ? parsed.data : null;
+	}
+
+	/** Saves what a change everywhere replaced; a change that changed nothing keeps the previous one. */
+	private async writeSnapshot(
+		userId: string,
+		action: UserSignalsRestoreAction,
+		chats: UserSignalsSnapshot['chats'],
+	): Promise<void> {
+		if (chats.length === 0) return;
+		const snapshot: UserSignalsSnapshot = {created_at: this.deps.now?.() ?? Date.now(), action, chats};
+		await this.deps.cacheService.set(restoreKey(userId), snapshot);
+	}
+
+	/** Every chat where the user has a signal on, newest first, and whether Restore has anything to undo. */
+	async getUserSignals(userId: UserID): Promise<UserSignalsResponse> {
+		const userKey = userId.toString();
+		const config = await this.getConfig();
+		const [chats, restoreAvailable] = await Promise.all([
+			this.readUserChats(userKey, config),
+			this.deps.cacheService.exists(restoreKey(userKey)),
+		]);
+		return {
+			chats: Array.from(chats, ([channelId, entries]) => ({
+				channel_id: channelId,
+				signals: this.toRefs(entries),
+				updated_at: Math.max(...entries.map((entry) => entry.activated_at)),
+			})).sort((a, b) => b.updated_at - a.updated_at),
+			restore_available: restoreAvailable,
+		};
+	}
+
+	/**
+	 * Sets one signal in every chat where the user has one on, and in the open chat, turning their
+	 * others there off; or, with no signal, turns every signal of theirs off. Each chat keeps the
+	 * persona its newest signal showed; the open chat uses `personaId`. Chats where the user may no
+	 * longer light signals are left alone when setting. Saves what it replaced for Restore.
+	 */
+	async setEverywhere({
+		userId,
+		signalId,
+		openChannelId,
+		personaId,
+		authenticate,
+	}: {
+		userId: UserID;
+		signalId: string | null;
+		openChannelId?: string | null;
+		personaId?: string | null;
+		authenticate: SignalChatAuthenticator;
+	}): Promise<UserSignalsResponse> {
+		const config = await this.getConfig();
+		if (signalId !== null && !config.signals.some((signal) => signal.id === signalId && signal.everywhere)) {
+			throw signalId && config.signals.some((signal) => signal.id === signalId)
+				? new MissingPermissionsError()
+				: new UnknownSignalError();
+		}
+		const user = await this.deps.findUser(userId);
+		if (!user) throw new MissingPermissionsError();
+		const openPersona = signalId !== null && openChannelId ? await this.resolvePersona(userId, personaId) : null;
+		const userKey = userId.toString();
+		const current = await this.readUserChats(userKey, config);
+		const channelIds = Array.from(current.keys()).filter((channelId) => channelId !== openChannelId);
+		if (openPersona && openChannelId) channelIds.unshift(openChannelId);
+		const replaced: UserSignalsSnapshot['chats'] = [];
+		for (const channelId of channelIds.slice(0, MAX_USER_SIGNAL_CHATS)) {
+			const before = current.get(channelId) ?? [];
+			const authChannel = await authenticate(channelId);
+			let channel = authChannel?.channel ?? null;
+			const added: Array<ChannelSignalEntry> = [];
+			if (signalId !== null) {
+				if (!authChannel || !(await this.canLight(authChannel))) continue;
+				const persona =
+					channelId === openChannelId && openPersona
+						? openPersona
+						: await this.resolvePersonaOrAccount(userId, before.at(-1)?.persona_id ?? null);
+				const entry = await this.writeEntry(authChannel.channel, signalId, user, persona);
+				if (entry) added.push(entry);
+			} else if (!channel) {
+				channel = await this.deps.findChannel(createChannelID(BigInt(channelId)));
+			}
+			const removed = await this.removeEntries(
+				before
+					.filter((entry) => entry.signal_id !== signalId)
+					.map((entry) => ({channelId, signalId: entry.signal_id, userId: userKey})),
+			);
+			if (added.length === 0 && removed.length === 0) continue;
+			replaced.push({channel_id: channelId, signals: this.toRefs(before)});
+			if (channel) await this.dispatchChannelUpdate(channel, config.version, added, removed);
+		}
+		await this.writeSnapshot(userKey, {kind: signalId === null ? 'off' : 'set', signal_id: signalId}, replaced);
+		return this.getUserSignals(userId);
+	}
+
+	/** What Restore would put back, chat by chat, against what is on now. */
+	async getRestorePreview(userId: UserID, authenticate: SignalChatAuthenticator): Promise<UserSignalsRestoreResponse> {
+		const userKey = userId.toString();
+		const snapshot = await this.readSnapshot(userKey);
+		if (!snapshot) return {available: false, created_at: null, action: null, chats: []};
+		const config = await this.getConfig();
+		const signalIds = new Set(config.signals.map((signal) => signal.id));
+		const current = await this.readUserChats(userKey, config);
+		const chats = await Promise.all(
+			snapshot.chats.map(async (chat) => {
+				const authChannel = await authenticate(chat.channel_id);
+				return {
+					channel_id: chat.channel_id,
+					available: authChannel !== null && (await this.canLight(authChannel)),
+					now: this.toRefs(current.get(chat.channel_id) ?? []),
+					after: chat.signals.filter((ref) => signalIds.has(ref.signal_id)),
+				};
+			}),
+		);
+		return {available: true, created_at: snapshot.created_at, action: snapshot.action, chats};
+	}
+
+	/**
+	 * Puts back what the last change everywhere replaced, in the chats where the user may still light
+	 * signals, and saves what this replaces in turn, so a second Restore swaps back.
+	 */
+	async restore(userId: UserID, authenticate: SignalChatAuthenticator): Promise<UserSignalsResponse> {
+		const userKey = userId.toString();
+		const snapshot = await this.readSnapshot(userKey);
+		const user = await this.deps.findUser(userId);
+		if (!snapshot || !user) return this.getUserSignals(userId);
+		const config = await this.getConfig();
+		const signalIds = new Set(config.signals.map((signal) => signal.id));
+		const current = await this.readUserChats(userKey, config);
+		const replaced: UserSignalsSnapshot['chats'] = [];
+		for (const chat of snapshot.chats) {
+			const authChannel = await authenticate(chat.channel_id);
+			if (!authChannel || !(await this.canLight(authChannel))) continue;
+			const before = current.get(chat.channel_id) ?? [];
+			const wanted = chat.signals.filter((ref) => signalIds.has(ref.signal_id));
+			const added: Array<ChannelSignalEntry> = [];
+			for (const ref of wanted) {
+				const persona = await this.resolvePersonaOrAccount(userId, ref.persona_id);
+				const entry = await this.writeEntry(authChannel.channel, ref.signal_id, user, persona);
+				if (entry) added.push(entry);
+			}
+			const keep = new Set(wanted.map((ref) => ref.signal_id));
+			const removed = await this.removeEntries(
+				before
+					.filter((entry) => !keep.has(entry.signal_id))
+					.map((entry) => ({channelId: chat.channel_id, signalId: entry.signal_id, userId: userKey})),
+			);
+			if (added.length === 0 && removed.length === 0) continue;
+			replaced.push({channel_id: chat.channel_id, signals: this.toRefs(before)});
+			await this.dispatchChannelUpdate(authChannel.channel, config.version, added, removed);
+		}
+		await this.writeSnapshot(userKey, {kind: 'restore', signal_id: null}, replaced);
+		return this.getUserSignals(userId);
 	}
 
 	private async removeEntries(
