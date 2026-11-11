@@ -105,7 +105,8 @@ the `OpenAPI` block says; bots may call every route without `DefaultUserOnly`. B
   replaced, over the previous snapshot. A change that changed nothing keeps the previous one, so
   pressing Set twice does not lose the way back. Kept until the next change everywhere
   (Chiara, 2026-11-10: indefinitely for now).
-- **Restore** puts each saved chat back exactly (lights its saved signals, turns the rest off) where
+- **Restore** puts each saved chat back exactly (lights its saved signals one millisecond apart, so
+  their order and the newest's persona survive, and turns the rest off) where
   the user may still light, skips the others, and saves what it replaced: a second restore swaps
   back. It may bring back signals that are not ticked `everywhere`. The preview lists every saved
   chat with `available: false` for the skipped ones.
@@ -217,7 +218,8 @@ Where the clients differ today:
   `middleware/ServiceMiddleware.ts` (a field and the `signalBarService` getter among upstream's),
   `worker/WorkerTaskRegistry.ts`, `worker/WorkerDependencies.ts` (`personaRepository`, for the sweep).
 - One line each, no marker: the cron in `WorkerMain.ts`, the task in `WorkerLaneConfig.ts`, three
-  event names mid-union in `constants/Gateway.ts`. The buckets end `UserRateLimitConfig.ts`.
+  event names mid-union in `constants/Gateway.ts`. The buckets sit in the fork's block at the end of
+  `UserRateLimitConfig.ts`, with the server commands' ones.
 - Gateway: three atoms in `event_atoms.erl`, two `is_channel_scoped_event` clauses, one
   `bypasses_passive_filter` clause. An Erlang function's clauses must stay together.
 - Home community: `signal_bar_guild_id` among the fork's other policy fields in

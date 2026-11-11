@@ -62,12 +62,14 @@ describe('SignalBarStore signals everywhere', () => {
 	const getMock = vi.spyOn(http, 'get');
 	const putMock = vi.spyOn(http, 'put');
 	const postMock = vi.spyOn(http, 'post');
+	const deleteMock = vi.spyOn(http, 'delete');
 
 	beforeEach(() => {
 		SessionManager.setUserId(ME);
 		getMock.mockReset();
 		putMock.mockReset();
 		postMock.mockReset();
+		deleteMock.mockReset();
 		SignalBarStore.forgetMyChats();
 		runInAction(() => {
 			SignalBarStore.signals = [SLEEPING];
@@ -238,5 +240,70 @@ describe('SignalBarStore signals everywhere', () => {
 			ForkEndpoints.INSTANCE_SIGNAL_BAR,
 			ForkEndpoints.USER_SIGNALS,
 		]);
+	});
+
+	it('turns off one chat with one DELETE per signal of the account there, dropping it at once', async () => {
+		getMock.mockResolvedValue({
+			ok: true,
+			body: summary([
+				{
+					channel_id: 'a',
+					signals: [
+						{signal_id: 'sleeping', persona_id: null},
+						{signal_id: 'reading', persona_id: '7'},
+					],
+					updated_at: 2,
+				},
+				{channel_id: 'b', signals: [{signal_id: 'sleeping', persona_id: null}], updated_at: 1},
+			]),
+		} as never);
+		await SignalBarStore.fetchMyChats();
+		deleteMock.mockResolvedValue({ok: true} as never);
+
+		const done = SignalBarStore.turnOffChat('a');
+		expect(SignalBarStore.myChatList.map((chat) => chat.channel_id)).toEqual(['b']);
+		await done;
+
+		expect(deleteMock.mock.calls.map(([path]) => path)).toEqual([
+			ForkEndpoints.CHANNEL_SIGNAL_ME('a', 'sleeping'),
+			ForkEndpoints.CHANNEL_SIGNAL_ME('a', 'reading'),
+		]);
+		expect(getMock).toHaveBeenCalledTimes(1);
+	});
+
+	it('reloads the summary once when turning off a chat fails, however many signals failed', async () => {
+		getMock.mockResolvedValue({
+			ok: true,
+			body: summary([
+				{
+					channel_id: 'a',
+					signals: [
+						{signal_id: 'sleeping', persona_id: null},
+						{signal_id: 'reading', persona_id: null},
+					],
+					updated_at: 2,
+				},
+			]),
+		} as never);
+		await SignalBarStore.fetchMyChats();
+		deleteMock.mockRejectedValue(new Error('offline'));
+
+		await SignalBarStore.turnOffChat('a');
+
+		expect(deleteMock).toHaveBeenCalledTimes(2);
+		expect(getMock.mock.calls.map(([path]) => path)).toEqual([ForkEndpoints.USER_SIGNALS, ForkEndpoints.USER_SIGNALS]);
+	});
+
+	it('drops a chat whose bar is switched off, which clears its signals without a signal event', async () => {
+		getMock.mockResolvedValue({
+			ok: true,
+			body: summary([{channel_id: 'a', signals: [{signal_id: 'sleeping', persona_id: null}], updated_at: 1}]),
+		} as never);
+		await SignalBarStore.fetchMyChats();
+
+		SignalBarStore.handleEnabledUpdate({channel_id: 'a', enabled: false});
+
+		expect(SignalBarStore.myChatList).toEqual([]);
+		expect(getMock).toHaveBeenCalledTimes(1);
 	});
 });

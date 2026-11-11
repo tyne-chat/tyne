@@ -162,8 +162,9 @@ class SignalBarStore {
 		this.enabledByChannel.clear();
 		this.forgetMyChats();
 		this.epoch += 1;
+		// A bar mounting meanwhile may already have asked; ensure shares or skips that request.
 		void this.fetchConfig().then(() => {
-			if (this.signals.length > 0) void this.fetchMyChats();
+			if (this.signals.length > 0) this.ensureMyChats();
 		});
 	}
 
@@ -251,6 +252,35 @@ class SignalBarStore {
 			body.persona_id = personaId;
 		}
 		await this.sendEverywhere(() => http.put<UserSignalsResponse>(ForkEndpoints.USER_SIGNALS, {body}));
+	}
+
+	/**
+	 * Turns off the account's signals in one chat, from the signals-everywhere panel: the chat leaves
+	 * the summary and the channel at once, and one DELETE goes out per signal. A failure reloads the
+	 * summary once, and the channel once if it is loaded.
+	 */
+	async turnOffChat(channelId: string): Promise<void> {
+		const userId = Authentication.currentUserId;
+		const chat = this.myChats?.get(channelId);
+		if (!userId || !chat || !this.myChats) return;
+		const next = new Map(this.myChats);
+		next.delete(channelId);
+		this.myChats = next;
+		for (const ref of chat.signals) this.removeLocal(channelId, ref.signal_id, userId);
+		const failed = await Promise.all(
+			chat.signals.map(async (ref) => {
+				try {
+					const res = await http.delete(ForkEndpoints.CHANNEL_SIGNAL_ME(channelId, ref.signal_id));
+					return !res.ok;
+				} catch (err) {
+					logger.error('Error turning off signals in a chat', err);
+					return true;
+				}
+			}),
+		);
+		if (!failed.some(Boolean)) return;
+		void this.fetchMyChats();
+		if (this.entriesByChannel.has(channelId)) void this.fetchChannel(channelId);
 	}
 
 	/** What Restore would change, chat by chat; null when it could not be loaded. */
@@ -360,6 +390,12 @@ class SignalBarStore {
 
 	handleEnabledUpdate(event: ChannelSignalBarUpdateEvent): void {
 		this.enabledByChannel.set(event.channel_id, event.enabled);
+		// Switching off clears the channel's signals without a CHANNEL_SIGNAL_UPDATE.
+		if (!event.enabled && this.myChats?.has(event.channel_id)) {
+			const next = new Map(this.myChats);
+			next.delete(event.channel_id);
+			this.myChats = next;
+		}
 		if (!event.enabled || !this.entriesByChannel.has(event.channel_id)) {
 			this.entriesByChannel.set(event.channel_id, EMPTY_ENTRIES);
 		}
