@@ -6,7 +6,8 @@ import {DefaultUserOnly, LoginRequired} from '@app/api/middleware/AuthMiddleware
 import {RateLimitMiddleware} from '@app/api/middleware/RateLimitMiddleware';
 import {OpenAPI} from '@app/api/middleware/ResponseTypeMiddleware';
 import {RateLimitConfigs} from '@app/api/RateLimitConfig';
-import type {HonoApp} from '@app/api/types/HonoEnv';
+import type {SignalChatAuthenticator} from '@app/api/signal_bar/SignalBarService';
+import type {HonoApp, HonoEnv} from '@app/api/types/HonoEnv';
 import {Validator} from '@app/api/Validator';
 import {ChannelIdParam, GuildIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {
@@ -18,7 +19,25 @@ import {
 	GuildSignalBarSettingsSchema,
 	SignalBarResponseSchema,
 	SignalBarUpdateRequestSchema,
+	UserSignalsResponseSchema,
+	UserSignalsRestoreResponseSchema,
+	UserSignalsUpdateRequestSchema,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
+import type {Context} from 'hono';
+
+/** Opens chats for the signed-in user; a chat they can no longer see counts as gone. */
+function chatAuthenticator(ctx: Context<HonoEnv>): SignalChatAuthenticator {
+	const userId = ctx.get('user').id;
+	const viewer = viewerFromCtx(ctx);
+	const authService = ctx.get('channelService').interactions.authService;
+	return async (channelId) => {
+		try {
+			return await authService.getChannelAuthenticated({userId, channelId: createChannelID(BigInt(channelId)), viewer});
+		} catch {
+			return null;
+		}
+	};
+}
 
 export function SignalBarController(app: HonoApp) {
 	app.get(
@@ -278,6 +297,94 @@ export function SignalBarController(app: HonoApp) {
 			const guildId = createGuildID(ctx.req.valid('param').guild_id);
 			const body = ctx.req.valid('json');
 			return ctx.json(await ctx.get('signalBarService').updateGuildSettings(guildId, ctx.get('user').id, body));
+		},
+	);
+
+	app.get(
+		'/users/@me/signals',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_READ),
+		LoginRequired,
+		OpenAPI({
+			operationId: 'list_my_signals',
+			summary: 'List my signals everywhere',
+			responseSchema: UserSignalsResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				'Retrieves every chat where the authenticated user has a signal on, newest first, and whether their last change everywhere can be restored.',
+		}),
+		async (ctx) => {
+			return ctx.json(await ctx.get('signalBarService').getUserSignals(ctx.get('user').id));
+		},
+	);
+
+	app.put(
+		'/users/@me/signals',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_EVERYWHERE),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', UserSignalsUpdateRequestSchema),
+		OpenAPI({
+			operationId: 'set_my_signals_everywhere',
+			summary: 'Set a signal everywhere',
+			responseSchema: UserSignalsResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				'Sets one signal in every chat where the authenticated user has a signal on, and in the open chat, turning their other signals there off; each chat keeps the persona its signal showed. With a null signal, turns every signal of theirs off. Only signals the bar allows everywhere can be set. Saves what it replaced, for restore.',
+		}),
+		async (ctx) => {
+			const body = ctx.req.valid('json');
+			return ctx.json(
+				await ctx.get('signalBarService').setEverywhere({
+					userId: ctx.get('user').id,
+					signalId: body.signal_id,
+					openChannelId: body.channel_id ?? null,
+					personaId: body.persona_id ?? null,
+					authenticate: chatAuthenticator(ctx),
+				}),
+			);
+		},
+	);
+
+	app.get(
+		'/users/@me/signals/restore',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_READ),
+		LoginRequired,
+		OpenAPI({
+			operationId: 'get_my_signals_restore',
+			summary: 'Preview restoring my signals',
+			responseSchema: UserSignalsRestoreResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				'Shows, chat by chat, what restoring would put back in place of what is on now, and which chats it would leave out.',
+		}),
+		async (ctx) => {
+			return ctx.json(await ctx.get('signalBarService').getRestorePreview(ctx.get('user').id, chatAuthenticator(ctx)));
+		},
+	);
+
+	app.post(
+		'/users/@me/signals/restore',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_EVERYWHERE),
+		LoginRequired,
+		DefaultUserOnly,
+		OpenAPI({
+			operationId: 'restore_my_signals',
+			summary: 'Restore my signals',
+			responseSchema: UserSignalsResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				'Puts back what the last change everywhere replaced, in the chats where the user may still light signals. A restore is itself a change everywhere, so restoring again swaps back.',
+		}),
+		async (ctx) => {
+			return ctx.json(await ctx.get('signalBarService').restore(ctx.get('user').id, chatAuthenticator(ctx)));
 		},
 	);
 }

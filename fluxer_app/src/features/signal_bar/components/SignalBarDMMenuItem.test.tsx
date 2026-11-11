@@ -33,7 +33,14 @@ import {createRoot, type Root} from 'react-dom/client';
 
 (globalThis as {IS_REACT_ACT_ENVIRONMENT?: boolean}).IS_REACT_ACT_ENVIRONMENT = true;
 
-const READING: SignalBarSignal = {id: 'reading', emoji_id: null, emoji_name: '📖', animated: false, label: 'Reading'};
+const READING: SignalBarSignal = {
+	id: 'reading',
+	emoji_id: null,
+	emoji_name: '📖',
+	animated: false,
+	label: 'Reading',
+	everywhere: false,
+};
 
 function dm(id: string): Channel {
 	return {id, guildId: null, ownerId: null, isGroupDM: () => false} as unknown as Channel;
