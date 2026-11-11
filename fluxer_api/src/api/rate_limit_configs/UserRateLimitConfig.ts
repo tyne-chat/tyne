@@ -338,6 +338,10 @@ export const UserRateLimitConfigs = {
 		bucket: 'signal_bar:mutate',
 		config: {limit: 30, windowMs: ms('1 minute')},
 	} as RouteRateLimitConfig,
+	SIGNAL_BAR_EVERYWHERE: {
+		bucket: 'signal_bar:everywhere',
+		config: {limit: 10, windowMs: ms('1 minute')},
+	} as RouteRateLimitConfig,
 	GUILD_COMMANDS_READ: {
 		bucket: 'guild_commands:read',
 		config: {limit: 60, windowMs: ms('10 seconds')},
