@@ -9,6 +9,7 @@ import Permission from '@app/features/permissions/state/Permission';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import styles from '@app/features/signal_bar/components/SignalBar.module.css';
 import {SignalContextMenu} from '@app/features/signal_bar/components/SignalContextMenu';
+import {SignalsEverywhereButton} from '@app/features/signal_bar/components/SignalsEverywhereButton';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {
 	getSignalEntryKey,
@@ -226,6 +227,58 @@ const SignalButton = observer(
 	},
 );
 
+function px(value: string): number {
+	return Number.parseFloat(value) || 0;
+}
+
+/** Widths in pixels that decide where the globe and the caret go. */
+export interface SignalBarRowMeasure {
+	/** The bar's width inside its padding. */
+	inner: number;
+	count: number;
+	size: number;
+	signalGap: number;
+	/** The bar's gap between the signals and the end group. */
+	barGap: number;
+	/** The divider and the gap after it; 0 without one. */
+	divider: number;
+	/** The globe and the caret side by side, with the gap between them. */
+	pair: number;
+}
+
+/** Whether the signals would wrap even with the globe and the caret side by side after them. */
+export function signalsWrapBesidePair(measure: SignalBarRowMeasure): boolean {
+	if (measure.count === 0) return false;
+	const row = measure.count * measure.size + (measure.count - 1) * measure.signalGap;
+	return row + measure.barGap + measure.divider + measure.pair > measure.inner + 0.5;
+}
+
+function measureSignalBar(
+	bar: HTMLElement,
+	signals: HTMLElement | null,
+	end: HTMLElement | null,
+): SignalBarRowMeasure | null {
+	const first = signals?.firstElementChild as HTMLElement | null | undefined;
+	const buttons = end?.lastElementChild as HTMLElement | null | undefined;
+	if (!signals || !end || !first || !buttons) return null;
+	const barStyle = getComputedStyle(bar);
+	const children = Array.from(buttons.children) as Array<HTMLElement>;
+	const pairGap = px(getComputedStyle(buttons).getPropertyValue('--signal-bar-end-gap'));
+	return {
+		// Both sides together, so the writing direction does not matter.
+		inner: bar.clientWidth - px(barStyle.paddingLeft) - px(barStyle.paddingRight),
+		count: signals.children.length,
+		size: first.offsetWidth,
+		signalGap: px(getComputedStyle(signals).columnGap),
+		barGap: px(barStyle.columnGap),
+		divider:
+			end.childElementCount > 1
+				? (end.firstElementChild as HTMLElement).offsetWidth + px(getComputedStyle(end).columnGap)
+				: 0,
+		pair: children.reduce((sum, child) => sum + child.offsetWidth, 0) + Math.max(0, children.length - 1) * pairGap,
+	};
+}
+
 interface SignalBarProps {
 	channel: Channel;
 	attached?: boolean;
@@ -244,6 +297,9 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 	useEffect(() => {
 		if (hasSignals) void SignalBarStore.fetchChannel(channel.id);
 	}, [channel.id, hasSignals, epoch]);
+	useEffect(() => {
+		if (hasSignals) SignalBarStore.ensureMyChats();
+	}, [hasSignals, epoch]);
 	const handleMove = useCallback((from: number, to: number) => {
 		setDraft((current) => moveSignal(current ?? SignalBarStore.signals, from, to));
 	}, []);
@@ -259,18 +315,41 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 		.filter(({signal}) => !collapsed || SignalBarStore.getEntries(channel.id, signal.id).length > 0);
 	// The caret moves when the bar changes shape, and its focus ring only follows a change of size.
 	const focusRing = useContext(FocusRingContext);
+	const visible = hasSignals && SignalBarStore.isEnabled(channel.id);
+	const [stacked, setStacked] = useState(false);
+	const barRef = useRef<HTMLDivElement | null>(null);
+	const signalsRef = useRef<HTMLDivElement | null>(null);
+	const endRef = useRef<HTMLDivElement | null>(null);
 	useLayoutEffect(() => {
 		focusRing.invalidate();
-	}, [focusRing, shown.length]);
-	if (!hasSignals || !SignalBarStore.isEnabled(channel.id)) return null;
+	}, [focusRing, shown.length, stacked]);
+	// One row of signals: the globe and the caret side by side. Wrapping: stacked. The test asks whether
+	// the signals fit on one row beside the side-by-side pair, so the choice does not flip back and forth.
+	useLayoutEffect(() => {
+		const bar = barRef.current;
+		if (!bar) return;
+		const measure = () => {
+			const widths = measureSignalBar(bar, signalsRef.current, endRef.current);
+			setStacked(widths !== null && signalsWrapBesidePair(widths));
+		};
+		measure();
+		if (typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver(measure);
+		observer.observe(bar);
+		return () => observer.disconnect();
+	}, [shown.length, visible]);
+	if (!visible) return null;
 	const isGuildChannel = channel.guildId != null;
 	const canToggle = !isGuildChannel || Permission.can(Permissions.SEND_MESSAGES, channel);
 	const canReset = isGuildChannel
 		? Permission.can(Permissions.MANAGE_GUILD, channel)
 		: !channel.isGroupDM() || channel.ownerId === Authentication.currentUserId;
 	const toggleLabel = i18n._(collapsed ? SHOW_SIGNAL_BAR_DESCRIPTOR : HIDE_SIGNAL_BAR_DESCRIPTOR);
+	// Collapsed with nothing lit here, only the caret is left: no globe.
+	const showGlobe = shown.length > 0;
 	return (
 		<div
+			ref={barRef}
 			className={clsx(
 				styles.bar,
 				attached ? styles.barAttached : styles.barStandalone,
@@ -281,7 +360,7 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 			data-flx="signal-bar.signal-bar.bar"
 		>
 			{shown.length > 0 && (
-				<div className={styles.signals} data-flx="signal-bar.signal-bar.signals">
+				<div ref={signalsRef} className={styles.signals} data-flx="signal-bar.signal-bar.signals">
 					{shown.map(({signal, index}) => (
 						<SignalButton
 							key={signal.id}
@@ -298,24 +377,35 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 					))}
 				</div>
 			)}
-			<Tooltip text={toggleLabel} data-flx="signal-bar.signal-bar.tooltip">
-				<FocusRing offset={-2} data-flx="signal-bar.signal-bar.focus-ring">
-					<button
-						type="button"
-						className={styles.caret}
-						aria-label={toggleLabel}
-						aria-expanded={!collapsed}
-						onClick={() => SignalBarStore.setCollapsed(!collapsed)}
-						data-flx="signal-bar.signal-bar.caret"
-					>
-						{collapsed ? (
-							<CaretUpIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-up-icon" />
-						) : (
-							<CaretDownIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-down-icon" />
-						)}
-					</button>
-				</FocusRing>
-			</Tooltip>
+			<div ref={endRef} className={styles.end} data-flx="signal-bar.signal-bar.end">
+				{showGlobe && <div className={styles.endDivider} data-flx="signal-bar.signal-bar.end-divider" />}
+				<div
+					className={clsx(styles.endButtons, stacked && styles.endButtonsStacked)}
+					data-flx="signal-bar.signal-bar.end-buttons"
+				>
+					{showGlobe && (
+						<SignalsEverywhereButton channel={channel} data-flx="signal-bar.signal-bar.signals-everywhere-button" />
+					)}
+					<Tooltip text={toggleLabel} data-flx="signal-bar.signal-bar.tooltip">
+						<FocusRing offset={-2} data-flx="signal-bar.signal-bar.focus-ring">
+							<button
+								type="button"
+								className={styles.caret}
+								aria-label={toggleLabel}
+								aria-expanded={!collapsed}
+								onClick={() => SignalBarStore.setCollapsed(!collapsed)}
+								data-flx="signal-bar.signal-bar.caret"
+							>
+								{collapsed ? (
+									<CaretUpIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-up-icon" />
+								) : (
+									<CaretDownIcon size={14} weight="bold" data-flx="signal-bar.signal-bar.caret-down-icon" />
+								)}
+							</button>
+						</FocusRing>
+					</Tooltip>
+				</div>
+			</div>
 		</div>
 	);
 });
