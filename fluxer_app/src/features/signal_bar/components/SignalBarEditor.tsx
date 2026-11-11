@@ -8,6 +8,7 @@ import styles from '@app/features/signal_bar/components/GuildSignalBarTab.module
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {getSignalImageUrl, moveSignal} from '@app/features/signal_bar/utils/SignalUtils';
 import {Button} from '@app/features/ui/button/Button';
+import {Checkbox} from '@app/features/ui/checkbox/Checkbox';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
 import {Input} from '@app/features/ui/components/form/FormInput';
 import {Popout} from '@app/features/ui/popover/PopoverPopout';
@@ -33,6 +34,21 @@ const LABEL_DESCRIPTOR = msg({
 	message: 'Signal label',
 	comment: 'Accessible label for the text field that names a signal in the Message Tools settings tab.',
 });
+const EVERYWHERE_HEADING_DESCRIPTOR = msg({
+	message: 'Everywhere',
+	comment:
+		'Column heading in the signal bar editor over the ticks that let people set a signal in every chat at once. Keep it short.',
+});
+const EVERYWHERE_TICK_DESCRIPTOR = msg({
+	message: 'Can be set everywhere at once',
+	comment:
+		'Accessible label of the tick in the signal bar editor that lets people set this signal in every chat where they have a signal on, in one click.',
+});
+const EVERYWHERE_HELP_DESCRIPTOR = msg({
+	message: 'Ticked signals can also be set in every chat at once, from the globe panel.',
+	comment:
+		'Sentence under the signal bar editor description. The globe panel opens from the globe button at the end of the signal bar.',
+});
 const REMOVE_DESCRIPTOR = msg({
 	message: 'Remove',
 	comment: 'Button that removes a signal from the signal bar in the Message Tools settings tab. Keep it short.',
@@ -48,10 +64,11 @@ interface SignalRowProps {
 	onMove: (from: number, to: number) => void;
 	onCommit: () => void;
 	onLabel: (index: number, label: string) => void;
+	onEverywhere: (index: number, everywhere: boolean) => void;
 	onRemove: (index: number) => void;
 }
 
-const SignalRow = ({signal, index, onMove, onCommit, onLabel, onRemove}: SignalRowProps) => {
+const SignalRow = ({signal, index, onMove, onCommit, onLabel, onEverywhere, onRemove}: SignalRowProps) => {
 	const {i18n} = useLingui();
 	const [label, setLabel] = useState(signal.label ?? '');
 	useEffect(() => setLabel(signal.label ?? ''), [signal.label]);
@@ -119,6 +136,15 @@ const SignalRow = ({signal, index, onMove, onCommit, onLabel, onRemove}: SignalR
 					data-flx="signal-bar.guild-signal-bar-tab.label-input"
 				/>
 			</div>
+			<div className={styles.everywhere} data-flx="signal-bar.guild-signal-bar-tab.everywhere">
+				<Checkbox
+					checked={signal.everywhere}
+					onChange={(checked) => onEverywhere(index, checked)}
+					size="small"
+					aria-label={i18n._(EVERYWHERE_TICK_DESCRIPTOR)}
+					data-flx="signal-bar.guild-signal-bar-tab.everywhere-tick"
+				/>
+			</div>
 			<Button
 				variant="secondary"
 				small
@@ -161,6 +187,12 @@ export const SignalBarEditor = observer(() => {
 		},
 		[save],
 	);
+	const handleEverywhere = useCallback(
+		(index: number, everywhere: boolean) => {
+			void save(SignalBarStore.signals.map((signal, i) => (i === index ? {...signal, everywhere} : signal)));
+		},
+		[save],
+	);
 	const handleRemove = useCallback(
 		(index: number) => {
 			void save(SignalBarStore.signals.filter((_, i) => i !== index));
@@ -177,6 +209,7 @@ export const SignalBarEditor = observer(() => {
 					emoji_name: emoji.id ? emoji.name : getSkinTonedSurrogate(emoji),
 					animated: emoji.animated ?? false,
 					label: null,
+					everywhere: false,
 				},
 			]);
 		},
@@ -195,6 +228,9 @@ export const SignalBarEditor = observer(() => {
 					reorder.
 				</Trans>
 			</p>
+			<p className={styles.description} data-flx="signal-bar.guild-signal-bar-tab.everywhere-help">
+				{i18n._(EVERYWHERE_HELP_DESCRIPTOR)}
+			</p>
 			{visible.length === 0 ? (
 				<p className={styles.empty} data-flx="signal-bar.guild-signal-bar-tab.empty">
 					<Trans>No signals yet. The bar stays hidden until you add one.</Trans>
@@ -202,6 +238,18 @@ export const SignalBarEditor = observer(() => {
 			) : (
 				<DndProvider backend={HTML5Backend} data-flx="signal-bar.guild-signal-bar-tab.dnd-provider">
 					<div className={styles.list} data-flx="signal-bar.guild-signal-bar-tab.list">
+						<div
+							className={styles.listHeading}
+							aria-hidden="true"
+							data-flx="signal-bar.guild-signal-bar-tab.list-heading"
+						>
+							<span className={styles.everywhere} data-flx="signal-bar.guild-signal-bar-tab.everywhere-heading">
+								{i18n._(EVERYWHERE_HEADING_DESCRIPTOR)}
+							</span>
+							<span className={styles.removeSpacer} data-flx="signal-bar.guild-signal-bar-tab.remove-spacer">
+								{i18n._(REMOVE_DESCRIPTOR)}
+							</span>
+						</div>
 						{visible.map((signal, index) => (
 							<SignalRow
 								key={signal.id || `new-${index}`}
@@ -210,6 +258,7 @@ export const SignalBarEditor = observer(() => {
 								onMove={handleMove}
 								onCommit={handleCommit}
 								onLabel={handleLabel}
+								onEverywhere={handleEverywhere}
 								onRemove={handleRemove}
 								data-flx="signal-bar.guild-signal-bar-tab.signal-row"
 							/>
