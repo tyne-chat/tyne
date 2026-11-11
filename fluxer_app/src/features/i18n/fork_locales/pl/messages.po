@@ -77,6 +77,10 @@ msgstr "Dodane"
 msgid "Added as a new persona"
 msgstr "Zostanie dodana jako nowa persona"
 
+#. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
+msgid "After"
+msgstr "Po"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "Alicja"
@@ -166,6 +170,10 @@ msgstr "Przywracana"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "Wróciła bez {items}: ma je teraz inna persona."
+
+#. Accessible label of the tick in the signal bar editor that lets people set this signal in every chat where they have a signal on, in one click.
+msgid "Can be set everywhere at once"
+msgstr "Można ustawić wszędzie naraz"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -259,6 +267,10 @@ msgstr "Kopiuj znacznik czasu\\"
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "Nie udało się wyeksportować twoich person."
+
+#. Shown in place of the restore confirmation when its preview could not be loaded.
+msgid "Could not load what Restore would change. Try again."
+msgstr "Nie udało się wczytać, co zmieniłoby „Przywróć”. Spróbuj ponownie."
 
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
@@ -459,6 +471,7 @@ msgstr "Cała reszta jest dokładnie taka, jaka była."
 msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
 msgstr "Wszystko w pliku było albo nowe, albo dokładnie pasowało już do którejś persony, więc nie było nic do zdecydowania. Nic więcej się nie zmieniło."
 
+#. Column heading in the signal bar editor over the ticks that let people set a signal in every chat at once. Keep it short.
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
 msgstr "Wszędzie"
@@ -736,6 +749,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Zostaw usuniętą"
 
+#. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
+msgid "Left out, since you can no longer post there: {chats}"
+msgstr "Pominięte, bo nie możesz już tam pisać: {chats}"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "Wiersz {line}, kolumna {column}: {problem}"
@@ -925,6 +942,10 @@ msgstr "Żadna z nich"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Żadna z twoich person nie jest jeszcze publiczna. Inni zobaczą tu personę, gdy ustawisz jej widoczność na Publiczna."
 
+#. Shown in the signals-everywhere panel in place of the list of chats when you have no signal on in any chat.
+msgid "None of your signals are on anywhere."
+msgstr "Żaden z twoich sygnałów nie jest nigdzie włączony."
+
 #. What happens to the import file's version of a persona in the import review
 msgid "Not imported"
 msgstr "Nie zostanie zaimportowana"
@@ -932,6 +953,10 @@ msgstr "Nie zostanie zaimportowana"
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Nie masz pewności? Zostaw tak, jak jest: nic się nie zmieni."
+
+#. Column heading in the restore confirmation over the signals you have on in each chat now. Keep it short.
+msgid "Now"
+msgstr "Teraz"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1151,6 +1176,18 @@ msgstr "Publiczna"
 msgid "Public persona"
 msgstr "Persona publiczna"
 
+#. Body of the restore confirmation, when the last change turned off all your signals in every chat. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
+msgstr "Przywraca to, co było włączone przed wyłączeniem wszystkich sygnałów ({time}). To, co jest tam teraz włączone, zostanie wyłączone."
+
+#. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
+msgstr "Przywraca to, co było włączone przed twoim ostatnim przywróceniem ({time}). To, co jest tam teraz włączone, zostanie wyłączone."
+
+#. Body of the restore confirmation, when the last change set one signal in every chat. {label} is the signal name, such as Sleeping; {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before {label} everywhere at {time}. What you have on there now goes off."
+msgstr "Przywraca to, co było włączone przed ustawieniem sygnału {label} wszędzie ({time}). To, co jest tam teraz włączone, zostanie wyłączone."
+
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 msgid "QR code that opens the Tyne download page"
@@ -1224,6 +1261,7 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Wyzerować liczby dla {name}? Tej operacji nie można cofnąć."
 
 #. Button that brings back a deleted persona
+#. Confirm button of the restore confirmation for signals everywhere. Keep it short.
 msgid "Restore"
 msgstr "Przywróć"
 
@@ -1231,9 +1269,17 @@ msgstr "Przywróć"
 msgid "Restore them from Deleted personas in Settings if you change your mind."
 msgstr "Jeśli zmienisz zdanie, przywróć je w Ustawieniach, w sekcji Usunięte persony."
 
+#. Title of the confirmation that undoes your last change to your signals in every chat at once.
+msgid "Restore your signals?"
+msgstr "Przywrócić twoje sygnały?"
+
 #. Line of the import result: deleted personas brought back
 msgid "Restored"
 msgstr "Przywrócone"
+
+#. Button in the signals-everywhere panel that opens a confirmation showing how your last change everywhere would be undone. Keep the ellipsis.
+msgid "Restore…"
+msgstr "Przywróć…"
 
 msgid "Results"
 msgstr "Wyniki"
@@ -1308,6 +1354,14 @@ msgstr "Ustaw jako aktywną"
 msgid "Set as active persona"
 msgstr "Ustaw jako aktywną personę"
 
+#. Small section heading in the signals-everywhere panel, above the signals that can be set in every chat at once. {count} is how many chats a click would change.
+msgid "Set everywhere ({count, plural, one {# chat} other {# chats}})"
+msgstr "Ustaw wszędzie ({count, plural, one {# czat} few {# czaty} many {# czatów} other {# czatu}})"
+
+#. Tooltip and accessible label on a signal in the signals-everywhere panel. Clicking it turns this signal on in every chat where you have a signal on, and your other signals there off. {label} is the signal name, such as Sleeping.
+msgid "Set {label} everywhere"
+msgstr "Ustaw {label} wszędzie"
+
 #. Button that shows the list behind a line at the top of the import review
 msgctxt "persona-import-list"
 msgid "Show"
@@ -1349,6 +1403,10 @@ msgstr "Pasek sygnałów"
 #. Accessible label for the text field that names a signal in the Message Tools settings tab.
 msgid "Signal label"
 msgstr "Etykieta sygnału"
+
+#. Row in your profile popout, next to your online status, that opens the panel of every chat where you have a signal on. Signals are the icons above the message box.
+msgid "Signals"
+msgstr "Sygnały"
 
 msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
 msgstr "Sygnały to ikony nad polem wiadomości, które każdy może włączać i wyłączać, a wszyscy w rozmowie widzą, kto ma je włączone. Ten pasek jest wspólny dla wszystkich społeczności i wiadomości prywatnych na tej instancji. Przeciągnij, aby zmienić kolejność."
@@ -1540,6 +1598,10 @@ msgstr "Nazwa osoby, która go używa"
 msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
 msgstr "Ich profile zostaną ukryte przed innymi. Ich nazwy i awatary nadal będą widoczne przy ich wiadomościach i reakcjach."
 
+#. Shown in place of the restore confirmation for signals everywhere when there is no earlier change to undo.
+msgid "There is nothing to restore."
+msgstr "Nie ma czego przywracać."
+
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
 msgstr "Nie ma filtra o nazwie {name}."
@@ -1590,12 +1652,20 @@ msgstr "Profil tej persony jest prywatny."
 msgid "This would post nothing, so the command would fail."
 msgstr "Nic nie zostałoby opublikowane, więc polecenie by się nie powiodło."
 
+#. Sentence under the signal bar editor description. The globe panel opens from the globe button at the end of the signal bar.
+msgid "Ticked signals can also be set in every chat at once, from the globe panel."
+msgstr "Zaznaczone sygnały możesz też ustawić we wszystkich czatach naraz w panelu z globusem."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Otwórz/zamknij listę kanałów"
 
 msgid "Total Members"
 msgstr "Łączna liczba członków"
+
+#. Button in the signals-everywhere panel that turns off every signal you have on, in every chat. Keep it short.
+msgid "Turn all off"
+msgstr "Wyłącz wszystkie"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -1779,6 +1849,10 @@ msgstr "Twój plik"
 msgid "Your reactions"
 msgstr "Twoje reakcje"
 
+#. Tooltip and accessible label of the globe button at the end of the signal bar. It opens a panel listing every chat where you have a signal on. {count} is how many chats that is.
+msgid "Your signals everywhere · {count, plural, one {# chat} other {# chats}}"
+msgstr "Twoje sygnały wszędzie · {count, plural, one {# czat} few {# czaty} many {# czatów} other {# czatu}}"
+
 #. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
 msgid "Your {emojiName} reactions"
 msgstr "Twoje reakcje {emojiName}"
@@ -1928,6 +2002,10 @@ msgstr "{count, plural, one {Usunięto # personę} few {Usunięto # persony} man
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, one {# możliwe dopasowanie} few {# możliwe dopasowania} many {# możliwych dopasowań} other {# możliwego dopasowania}}"
+
+#. Last line of the list in the restore confirmation when more chats change than are listed.
+msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
+msgstr "{count, plural, one {+ jeszcze # czat} few {+ jeszcze # czaty} many {+ jeszcze # czatów} other {+ jeszcze # czatu}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

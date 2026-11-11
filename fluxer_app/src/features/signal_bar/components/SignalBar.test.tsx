@@ -58,8 +58,22 @@ import {createRoot, type Root} from 'react-dom/client';
 
 (globalThis as {IS_REACT_ACT_ENVIRONMENT?: boolean}).IS_REACT_ACT_ENVIRONMENT = true;
 
-const READING: SignalBarSignal = {id: 'reading', emoji_id: null, emoji_name: '📖', animated: false, label: 'Reading'};
-const DONE: SignalBarSignal = {id: 'done', emoji_id: null, emoji_name: '✅', animated: false, label: null};
+const READING: SignalBarSignal = {
+	id: 'reading',
+	emoji_id: null,
+	emoji_name: '📖',
+	animated: false,
+	label: 'Reading',
+	everywhere: false,
+};
+const DONE: SignalBarSignal = {
+	id: 'done',
+	emoji_id: null,
+	emoji_name: '✅',
+	animated: false,
+	label: null,
+	everywhere: false,
+};
 
 function entry(signalId: string, userId: string, username: string): ChannelSignalEntry {
 	return {
@@ -246,8 +260,9 @@ describe('the requests a mounted bar sends', () => {
 	let failChannels = false;
 
 	const paths = () => getMock.mock.calls.map(([path]) => path);
-	const channelPaths = () => paths().filter((path) => path !== ForkEndpoints.INSTANCE_SIGNAL_BAR);
+	const channelPaths = () => paths().filter((path) => path.startsWith('/channels/'));
 	const configPaths = () => paths().filter((path) => path === ForkEndpoints.INSTANCE_SIGNAL_BAR);
+	const summaryPaths = () => paths().filter((path) => path === ForkEndpoints.USER_SIGNALS);
 	const show = async (id: string) => {
 		await act(async () => {
 			root.render(
@@ -268,8 +283,12 @@ describe('the requests a mounted bar sends', () => {
 		getMock.mockReset().mockImplementation(((path: string) => {
 			if (path === ForkEndpoints.INSTANCE_SIGNAL_BAR) return Promise.reject(new Error('offline'));
 			if (failChannels) return Promise.reject(new Error('offline'));
+			if (path === ForkEndpoints.USER_SIGNALS) {
+				return Promise.resolve({ok: true, body: {chats: [], restore_available: false}});
+			}
 			return Promise.resolve({ok: true, body: {enabled: true, bar_version: 1, entries: []}});
 		}) as never);
+		SignalBarStore.forgetMyChats();
 		runInAction(() => {
 			SignalBarStore.signals = [READING];
 			SignalBarStore.version = 1;
@@ -290,6 +309,7 @@ describe('the requests a mounted bar sends', () => {
 
 		expect(channelPaths()).toEqual(['/channels/a/signals', '/channels/b/signals', '/channels/a/signals']);
 		expect(configPaths()).toEqual([]);
+		expect(summaryPaths()).toHaveLength(1);
 	});
 
 	it('does not send a failed channel request again on the next render', async () => {
@@ -299,6 +319,7 @@ describe('the requests a mounted bar sends', () => {
 		await show('never-loaded');
 
 		expect(channelPaths()).toEqual(['/channels/never-loaded/signals']);
+		expect(summaryPaths()).toHaveLength(1);
 		expect(container.innerHTML).toBe('');
 	});
 
@@ -308,6 +329,7 @@ describe('the requests a mounted bar sends', () => {
 
 		expect(channelPaths()).toEqual(['/channels/a/signals', '/channels/a/signals']);
 		expect(configPaths()).toHaveLength(1);
+		expect(summaryPaths()).toHaveLength(2);
 	});
 
 	it('asks for a bar it does not have once per mount, sends nothing for channels meanwhile, and gives up when it fails', async () => {
@@ -325,5 +347,6 @@ describe('the requests a mounted bar sends', () => {
 
 		expect(configPaths()).toHaveLength(2);
 		expect(channelPaths()).toEqual([]);
+		expect(summaryPaths()).toEqual([]);
 	});
 });

@@ -189,7 +189,7 @@ describe('SignalBarStore', () => {
 });
 
 function signal(id: string): SignalBarSignal {
-	return {id, emoji_id: null, emoji_name: '👍', animated: false, label: null};
+	return {id, emoji_id: null, emoji_name: '👍', animated: false, label: null, everywhere: false};
 }
 
 describe('SignalBarStore when the server refuses a change', () => {

@@ -77,6 +77,10 @@ msgstr "Hozzáadva"
 msgid "Added as a new persona"
 msgstr "Új personaként adódik hozzá"
 
+#. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
+msgid "After"
+msgstr "Utána"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "Aliz"
@@ -166,6 +170,10 @@ msgstr "Visszajön"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "{items} nélkül tért vissza: ezek most egy másik personáé."
+
+#. Accessible label of the tick in the signal bar editor that lets people set this signal in every chat where they have a signal on, in one click.
+msgid "Can be set everywhere at once"
+msgstr "Egyszerre mindenhol beállítható"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -259,6 +267,10 @@ msgstr "Időbélyegző másolása\\"
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "Nem sikerült exportálni a personáidat."
+
+#. Shown in place of the restore confirmation when its preview could not be loaded.
+msgid "Could not load what Restore would change. Try again."
+msgstr "Nem sikerült betölteni, mit változtatna a Visszaállítás. Próbáld újra."
 
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
@@ -459,6 +471,7 @@ msgstr "Minden más pontosan úgy maradt, ahogy volt."
 msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
 msgstr "A fájlban minden vagy új volt, vagy már pontosan egyezett egy personával, így nem volt miről dönteni. Semmi más nem változott."
 
+#. Column heading in the signal bar editor over the ticks that let people set a signal in every chat at once. Keep it short.
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
 msgstr "Mindenhol"
@@ -736,6 +749,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Maradjon törölve"
 
+#. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
+msgid "Left out, since you can no longer post there: {chats}"
+msgstr "Kimaradnak, mert ott már nem írhatsz: {chats}"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "{line}. sor, {column}. oszlop: {problem}"
@@ -925,6 +942,10 @@ msgstr "Egyik sem"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Még egyik personád sem nyilvános. Mások akkor látnak itt egy personát, ha a láthatóságát Nyilvánosra állítod."
 
+#. Shown in the signals-everywhere panel in place of the list of chats when you have no signal on in any chat.
+msgid "None of your signals are on anywhere."
+msgstr "Egyik jelzésed sincs bekapcsolva sehol."
+
 #. What happens to the import file's version of a persona in the import review
 msgid "Not imported"
 msgstr "Nem lesz importálva"
@@ -932,6 +953,10 @@ msgstr "Nem lesz importálva"
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Nem vagy biztos benne? Hagyd így: semmi sem változik."
+
+#. Column heading in the restore confirmation over the signals you have on in each chat now. Keep it short.
+msgid "Now"
+msgstr "Most"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1151,6 +1176,18 @@ msgstr "Nyilvános"
 msgid "Public persona"
 msgstr "Nyilvános persona"
 
+#. Body of the restore confirmation, when the last change turned off all your signals in every chat. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
+msgstr "Visszaállítja, ami be volt kapcsolva, mielőtt mindet kikapcsoltad ({time}). Ami ott most be van kapcsolva, kikapcsol."
+
+#. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
+msgstr "Visszaállítja, ami a legutóbbi visszaállításod ({time}) előtt be volt kapcsolva. Ami ott most be van kapcsolva, kikapcsol."
+
+#. Body of the restore confirmation, when the last change set one signal in every chat. {label} is the signal name, such as Sleeping; {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before {label} everywhere at {time}. What you have on there now goes off."
+msgstr "Visszaállítja, ami be volt kapcsolva, mielőtt mindenhol beállítottad a(z) {label} jelzést ({time}). Ami ott most be van kapcsolva, kikapcsol."
+
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 msgid "QR code that opens the Tyne download page"
@@ -1224,6 +1261,7 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Nullázod a(z) {name} számait? Ez nem vonható vissza."
 
 #. Button that brings back a deleted persona
+#. Confirm button of the restore confirmation for signals everywhere. Keep it short.
 msgid "Restore"
 msgstr "Visszaállítás"
 
@@ -1231,9 +1269,17 @@ msgstr "Visszaállítás"
 msgid "Restore them from Deleted personas in Settings if you change your mind."
 msgstr "Ha meggondolod magad, a Beállítások Törölt personák részében visszaállíthatod őket."
 
+#. Title of the confirmation that undoes your last change to your signals in every chat at once.
+msgid "Restore your signals?"
+msgstr "Visszaállítod a jelzéseidet?"
+
 #. Line of the import result: deleted personas brought back
 msgid "Restored"
 msgstr "Visszaállítva"
+
+#. Button in the signals-everywhere panel that opens a confirmation showing how your last change everywhere would be undone. Keep the ellipsis.
+msgid "Restore…"
+msgstr "Visszaállítás…"
 
 msgid "Results"
 msgstr "Találatok"
@@ -1308,6 +1354,14 @@ msgstr "Beállítás aktívként"
 msgid "Set as active persona"
 msgstr "Beállítás aktív personaként"
 
+#. Small section heading in the signals-everywhere panel, above the signals that can be set in every chat at once. {count} is how many chats a click would change.
+msgid "Set everywhere ({count, plural, one {# chat} other {# chats}})"
+msgstr "Beállítás mindenhol ({count, plural, one {# beszélgetés} other {# beszélgetés}})"
+
+#. Tooltip and accessible label on a signal in the signals-everywhere panel. Clicking it turns this signal on in every chat where you have a signal on, and your other signals there off. {label} is the signal name, such as Sleeping.
+msgid "Set {label} everywhere"
+msgstr "{label} beállítása mindenhol"
+
 #. Button that shows the list behind a line at the top of the import review
 msgctxt "persona-import-list"
 msgid "Show"
@@ -1349,6 +1403,10 @@ msgstr "Jelzősáv"
 #. Accessible label for the text field that names a signal in the Message Tools settings tab.
 msgid "Signal label"
 msgstr "Jelzés címkéje"
+
+#. Row in your profile popout, next to your online status, that opens the panel of every chat where you have a signal on. Signals are the icons above the message box.
+msgid "Signals"
+msgstr "Jelzések"
 
 msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
 msgstr "A jelzések az üzenetmező feletti ikonok, amelyeket bárki be- és kikapcsolhat, és a beszélgetésben mindenki látja, kinél vannak bekapcsolva. Ez a sáv a példány összes közösségében és privát üzenetében közös. Húzással rendezheted át."
@@ -1540,6 +1598,10 @@ msgstr "Annak a neve, aki használja"
 msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
 msgstr "A profiljuk rejtve lesz mások elől. A nevük és avatarjuk továbbra is látszik az üzeneteiknél és reakcióiknál."
 
+#. Shown in place of the restore confirmation for signals everywhere when there is no earlier change to undo.
+msgid "There is nothing to restore."
+msgstr "Nincs mit visszaállítani."
+
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
 msgstr "Nincs {name} nevű szűrő."
@@ -1590,12 +1652,20 @@ msgstr "Ennek a personának a profilja privát."
 msgid "This would post nothing, so the command would fail."
 msgstr "Ez semmit sem küldene el, ezért a parancs sikertelen lenne."
 
+#. Sentence under the signal bar editor description. The globe panel opens from the globe button at the end of the signal bar.
+msgid "Ticked signals can also be set in every chat at once, from the globe panel."
+msgstr "A bejelölt jelzéseket a földgömb panelről egyszerre minden beszélgetésben is beállíthatod."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Csatornalista be/ki kapcsolása"
 
 msgid "Total Members"
 msgstr "Tagok összesen"
+
+#. Button in the signals-everywhere panel that turns off every signal you have on, in every chat. Keep it short.
+msgid "Turn all off"
+msgstr "Összes kikapcsolása"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -1779,6 +1849,10 @@ msgstr "A fájlod"
 msgid "Your reactions"
 msgstr "Reakcióid"
 
+#. Tooltip and accessible label of the globe button at the end of the signal bar. It opens a panel listing every chat where you have a signal on. {count} is how many chats that is.
+msgid "Your signals everywhere · {count, plural, one {# chat} other {# chats}}"
+msgstr "Jelzéseid mindenhol · {count, plural, one {# beszélgetés} other {# beszélgetés}}"
+
 #. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
 msgid "Your {emojiName} reactions"
 msgstr "{emojiName} reakcióid"
@@ -1928,6 +2002,10 @@ msgstr "{count, plural, one {# persona törölve} other {# persona törölve}}"
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, one {# lehetséges egyezés} other {# lehetséges egyezés}}"
+
+#. Last line of the list in the restore confirmation when more chats change than are listed.
+msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
+msgstr "{count, plural, one {+ még # beszélgetés} other {+ még # beszélgetés}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

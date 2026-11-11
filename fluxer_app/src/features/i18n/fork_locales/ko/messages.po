@@ -77,6 +77,10 @@ msgstr "추가됨"
 msgid "Added as a new persona"
 msgstr "새 페르소나로 추가돼요"
 
+#. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
+msgid "After"
+msgstr "이후"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "앨리스"
@@ -166,6 +170,10 @@ msgstr "되돌리는 중"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "{items} 없이 돌아왔어요: 이제 다른 페르소나가 사용하고 있어요."
+
+#. Accessible label of the tick in the signal bar editor that lets people set this signal in every chat where they have a signal on, in one click.
+msgid "Can be set everywhere at once"
+msgstr "모든 곳에 한 번에 설정할 수 있음"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -259,6 +267,10 @@ msgstr "타임스탬프 복사\\"
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "페르소나를 내보내지 못했어요."
+
+#. Shown in place of the restore confirmation when its preview could not be loaded.
+msgid "Could not load what Restore would change. Try again."
+msgstr "복원으로 바뀔 내용을 불러오지 못했어요. 다시 시도해 주세요."
 
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
@@ -459,6 +471,7 @@ msgstr "나머지는 모두 그대로예요."
 msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
 msgstr "파일의 모든 항목이 새것이거나 이미 페르소나와 정확히 일치해서 결정할 것이 없었어요. 다른 것은 바뀌지 않았어요."
 
+#. Column heading in the signal bar editor over the ticks that let people set a signal in every chat at once. Keep it short.
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
 msgstr "모든 곳"
@@ -736,6 +749,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "삭제된 채로 두기"
 
+#. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
+msgid "Left out, since you can no longer post there: {chats}"
+msgstr "더 이상 글을 올릴 수 없어 제외됨: {chats}"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "{line}행 {column}열: {problem}"
@@ -925,6 +942,10 @@ msgstr "이 중에 없음"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "아직 공개된 페르소나가 없어요. 페르소나의 공개 범위를 공개로 설정하면 다른 사람에게도 여기에 표시됩니다."
 
+#. Shown in the signals-everywhere panel in place of the list of chats when you have no signal on in any chat.
+msgid "None of your signals are on anywhere."
+msgstr "어디에도 켜진 시그널이 없어요."
+
 #. What happens to the import file's version of a persona in the import review
 msgid "Not imported"
 msgstr "가져오지 않아요"
@@ -932,6 +953,10 @@ msgstr "가져오지 않아요"
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "잘 모르겠다면 그대로 두세요. 바뀌는 것은 없어요."
+
+#. Column heading in the restore confirmation over the signals you have on in each chat now. Keep it short.
+msgid "Now"
+msgstr "현재"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1151,6 +1176,18 @@ msgstr "공개"
 msgid "Public persona"
 msgstr "공개 페르소나"
 
+#. Body of the restore confirmation, when the last change turned off all your signals in every chat. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
+msgstr "{time}에 모두 끄기 전에 켜져 있던 시그널을 되돌려요. 지금 그곳에 켜져 있는 시그널은 꺼져요."
+
+#. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
+msgstr "{time}에 마지막으로 복원하기 전에 켜져 있던 시그널을 되돌려요. 지금 그곳에 켜져 있는 시그널은 꺼져요."
+
+#. Body of the restore confirmation, when the last change set one signal in every chat. {label} is the signal name, such as Sleeping; {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before {label} everywhere at {time}. What you have on there now goes off."
+msgstr "{time}에 {label} 시그널을 모든 곳에 설정하기 전에 켜져 있던 시그널을 되돌려요. 지금 그곳에 켜져 있는 시그널은 꺼져요."
+
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 msgid "QR code that opens the Tyne download page"
@@ -1224,6 +1261,7 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "{name}의 횟수를 초기화할까요? 되돌릴 수 없습니다."
 
 #. Button that brings back a deleted persona
+#. Confirm button of the restore confirmation for signals everywhere. Keep it short.
 msgid "Restore"
 msgstr "복원"
 
@@ -1231,9 +1269,17 @@ msgstr "복원"
 msgid "Restore them from Deleted personas in Settings if you change your mind."
 msgstr "마음이 바뀌면 설정의 삭제된 페르소나에서 복원하세요."
 
+#. Title of the confirmation that undoes your last change to your signals in every chat at once.
+msgid "Restore your signals?"
+msgstr "시그널을 복원할까요?"
+
 #. Line of the import result: deleted personas brought back
 msgid "Restored"
 msgstr "복원됨"
+
+#. Button in the signals-everywhere panel that opens a confirmation showing how your last change everywhere would be undone. Keep the ellipsis.
+msgid "Restore…"
+msgstr "복원…"
 
 msgid "Results"
 msgstr "결과"
@@ -1308,6 +1354,14 @@ msgstr "활성 상태로 설정"
 msgid "Set as active persona"
 msgstr "활성 페르소나로 설정"
 
+#. Small section heading in the signals-everywhere panel, above the signals that can be set in every chat at once. {count} is how many chats a click would change.
+msgid "Set everywhere ({count, plural, one {# chat} other {# chats}})"
+msgstr "모든 곳에 설정 ({count, plural, other {채팅 #개}})"
+
+#. Tooltip and accessible label on a signal in the signals-everywhere panel. Clicking it turns this signal on in every chat where you have a signal on, and your other signals there off. {label} is the signal name, such as Sleeping.
+msgid "Set {label} everywhere"
+msgstr "모든 곳에 {label} 설정"
+
 #. Button that shows the list behind a line at the top of the import review
 msgctxt "persona-import-list"
 msgid "Show"
@@ -1349,6 +1403,10 @@ msgstr "시그널 바"
 #. Accessible label for the text field that names a signal in the Message Tools settings tab.
 msgid "Signal label"
 msgstr "시그널 라벨"
+
+#. Row in your profile popout, next to your online status, that opens the panel of every chat where you have a signal on. Signals are the icons above the message box.
+msgid "Signals"
+msgstr "시그널"
 
 msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
 msgstr "시그널은 메시지 입력창 위에 표시되는 아이콘으로, 누구나 켜고 끌 수 있으며 대화에 있는 모두가 누가 켰는지 볼 수 있어요. 이 바는 이 인스턴스의 모든 커뮤니티와 다이렉트 메시지에서 공유돼요. 드래그해서 순서를 바꾸세요."
@@ -1540,6 +1598,10 @@ msgstr "실행한 사람의 이름"
 msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
 msgstr "프로필이 다른 사람에게 숨겨집니다. 이름과 아바타는 메시지와 반응에 계속 표시됩니다."
 
+#. Shown in place of the restore confirmation for signals everywhere when there is no earlier change to undo.
+msgid "There is nothing to restore."
+msgstr "복원할 내용이 없어요."
+
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
 msgstr "{name}(이)라는 필터가 없습니다."
@@ -1590,12 +1652,20 @@ msgstr "이 페르소나의 프로필은 비공개입니다."
 msgid "This would post nothing, so the command would fail."
 msgstr "아무것도 게시되지 않으므로 명령이 실패합니다."
 
+#. Sentence under the signal bar editor description. The globe panel opens from the globe button at the end of the signal bar.
+msgid "Ticked signals can also be set in every chat at once, from the globe panel."
+msgstr "체크한 시그널은 지구본 패널에서 모든 채팅에 한 번에 설정할 수도 있어요."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "채널 목록 전환"
 
 msgid "Total Members"
 msgstr "전체 멤버"
+
+#. Button in the signals-everywhere panel that turns off every signal you have on, in every chat. Keep it short.
+msgid "Turn all off"
+msgstr "모두 끄기"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -1779,6 +1849,10 @@ msgstr "내 파일"
 msgid "Your reactions"
 msgstr "내 반응"
 
+#. Tooltip and accessible label of the globe button at the end of the signal bar. It opens a panel listing every chat where you have a signal on. {count} is how many chats that is.
+msgid "Your signals everywhere · {count, plural, one {# chat} other {# chats}}"
+msgstr "모든 곳의 내 시그널 · {count, plural, other {채팅 #개}}"
+
 #. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
 msgid "Your {emojiName} reactions"
 msgstr "내 {emojiName} 반응"
@@ -1928,6 +2002,10 @@ msgstr "{count, plural, other {페르소나 #개 삭제됨}}"
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, other {일치 후보 #개}}"
+
+#. Last line of the list in the restore confirmation when more chats change than are listed.
+msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
+msgstr "{count, plural, other {+ 채팅 #개 더}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

@@ -77,6 +77,10 @@ msgstr "Προστέθηκαν"
 msgid "Added as a new persona"
 msgstr "Προστίθεται ως νέα persona"
 
+#. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
+msgid "After"
+msgstr "Μετά"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "Αλίκη"
@@ -166,6 +170,10 @@ msgstr "Επανέρχεται"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "Επέστρεψε χωρίς {items}: τα έχει πλέον άλλη persona."
+
+#. Accessible label of the tick in the signal bar editor that lets people set this signal in every chat where they have a signal on, in one click.
+msgid "Can be set everywhere at once"
+msgstr "Μπορεί να οριστεί παντού με μία κίνηση"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -259,6 +267,10 @@ msgstr "Αντιγραφή χρονικής σήμανσης\\"
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "Δεν ήταν δυνατή η εξαγωγή των persona σας."
+
+#. Shown in place of the restore confirmation when its preview could not be loaded.
+msgid "Could not load what Restore would change. Try again."
+msgstr "Δεν ήταν δυνατή η φόρτωση όσων θα άλλαζε η «Επαναφορά». Δοκίμασε ξανά."
 
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
@@ -459,6 +471,7 @@ msgstr "Όλα τα άλλα είναι ακριβώς όπως ήταν."
 msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
 msgstr "Όλα στο αρχείο ήταν είτε νέα είτε ταίριαζαν ήδη ακριβώς με μια persona, οπότε δεν υπήρχε κάτι να αποφασίσετε. Τίποτα άλλο δεν άλλαξε."
 
+#. Column heading in the signal bar editor over the ticks that let people set a signal in every chat at once. Keep it short.
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
 msgstr "Παντού"
@@ -736,6 +749,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Να μείνει διαγραμμένη"
 
+#. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
+msgid "Left out, since you can no longer post there: {chats}"
+msgstr "Παραλείπονται, επειδή δεν μπορείς πια να γράψεις εκεί: {chats}"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "Γραμμή {line}, στήλη {column}: {problem}"
@@ -925,6 +942,10 @@ msgstr "Καμία από αυτές"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Καμία από τις persona σας δεν είναι ακόμη δημόσια. Οι άλλοι βλέπουν μια persona εδώ μόλις ορίσετε την ορατότητά της σε «Δημόσιο»."
 
+#. Shown in the signals-everywhere panel in place of the list of chats when you have no signal on in any chat.
+msgid "None of your signals are on anywhere."
+msgstr "Κανένα από τα σήματά σου δεν είναι ενεργό πουθενά."
+
 #. What happens to the import file's version of a persona in the import review
 msgid "Not imported"
 msgstr "Δεν εισάγεται"
@@ -932,6 +953,10 @@ msgstr "Δεν εισάγεται"
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Έχετε αμφιβολίες; Αφήστε το όπως είναι: δεν αλλάζει τίποτα."
+
+#. Column heading in the restore confirmation over the signals you have on in each chat now. Keep it short.
+msgid "Now"
+msgstr "Τώρα"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1151,6 +1176,18 @@ msgstr "Δημόσιο"
 msgid "Public persona"
 msgstr "Δημόσια persona"
 
+#. Body of the restore confirmation, when the last change turned off all your signals in every chat. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
+msgstr "Επαναφέρει ό,τι είχες ενεργό πριν τα απενεργοποιήσεις όλα ({time}). Ό,τι έχεις ενεργό εκεί τώρα θα απενεργοποιηθεί."
+
+#. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
+msgstr "Επαναφέρει ό,τι είχες ενεργό πριν από την τελευταία σου επαναφορά ({time}). Ό,τι έχεις ενεργό εκεί τώρα θα απενεργοποιηθεί."
+
+#. Body of the restore confirmation, when the last change set one signal in every chat. {label} is the signal name, such as Sleeping; {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before {label} everywhere at {time}. What you have on there now goes off."
+msgstr "Επαναφέρει ό,τι είχες ενεργό πριν ορίσεις το {label} παντού ({time}). Ό,τι έχεις ενεργό εκεί τώρα θα απενεργοποιηθεί."
+
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 msgid "QR code that opens the Tyne download page"
@@ -1224,6 +1261,7 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Επαναφορά των μετρήσεων του {name}; Αυτό δεν αναιρείται."
 
 #. Button that brings back a deleted persona
+#. Confirm button of the restore confirmation for signals everywhere. Keep it short.
 msgid "Restore"
 msgstr "Επαναφορά"
 
@@ -1231,9 +1269,17 @@ msgstr "Επαναφορά"
 msgid "Restore them from Deleted personas in Settings if you change your mind."
 msgstr "Αν αλλάξετε γνώμη, επαναφέρετέ τες από τις «Διαγραμμένες persona» στις Ρυθμίσεις."
 
+#. Title of the confirmation that undoes your last change to your signals in every chat at once.
+msgid "Restore your signals?"
+msgstr "Επαναφορά των σημάτων σου;"
+
 #. Line of the import result: deleted personas brought back
 msgid "Restored"
 msgstr "Επανήλθαν"
+
+#. Button in the signals-everywhere panel that opens a confirmation showing how your last change everywhere would be undone. Keep the ellipsis.
+msgid "Restore…"
+msgstr "Επαναφορά…"
 
 msgid "Results"
 msgstr "Αποτελέσματα"
@@ -1308,6 +1354,14 @@ msgstr "Ορισμός ως ενεργό"
 msgid "Set as active persona"
 msgstr "Ορισμός ως ενεργής persona"
 
+#. Small section heading in the signals-everywhere panel, above the signals that can be set in every chat at once. {count} is how many chats a click would change.
+msgid "Set everywhere ({count, plural, one {# chat} other {# chats}})"
+msgstr "Ορισμός παντού ({count, plural, one {# συνομιλία} other {# συνομιλίες}})"
+
+#. Tooltip and accessible label on a signal in the signals-everywhere panel. Clicking it turns this signal on in every chat where you have a signal on, and your other signals there off. {label} is the signal name, such as Sleeping.
+msgid "Set {label} everywhere"
+msgstr "Ορισμός του {label} παντού"
+
 #. Button that shows the list behind a line at the top of the import review
 msgctxt "persona-import-list"
 msgid "Show"
@@ -1349,6 +1403,10 @@ msgstr "Γραμμή σημάτων"
 #. Accessible label for the text field that names a signal in the Message Tools settings tab.
 msgid "Signal label"
 msgstr "Ετικέτα σήματος"
+
+#. Row in your profile popout, next to your online status, that opens the panel of every chat where you have a signal on. Signals are the icons above the message box.
+msgid "Signals"
+msgstr "Σήματα"
 
 msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
 msgstr "Τα σήματα είναι εικονίδια πάνω από το πλαίσιο μηνυμάτων που ο καθένας μπορεί να ενεργοποιεί και να απενεργοποιεί, και όλοι στη συνομιλία βλέπουν ποιος τα έχει ενεργά. Αυτή η γραμμή είναι κοινή για όλες τις κοινότητες και τα άμεσα μηνύματα σε αυτόν τον διακομιστή. Σύρε για αλλαγή σειράς."
@@ -1540,6 +1598,10 @@ msgstr "Το όνομα όποιου τη χρησιμοποιεί"
 msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
 msgstr "Τα προφίλ τους θα κρυφτούν από τους άλλους. Τα ονόματα και τα avatar τους θα εμφανίζονται ακόμη στα μηνύματα και στις αντιδράσεις τους."
 
+#. Shown in place of the restore confirmation for signals everywhere when there is no earlier change to undo.
+msgid "There is nothing to restore."
+msgstr "Δεν υπάρχει τίποτα για επαναφορά."
+
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
 msgstr "Δεν υπάρχει φίλτρο με το όνομα {name}."
@@ -1590,12 +1652,20 @@ msgstr "Το προφίλ αυτής της persona είναι ιδιωτικό.
 msgid "This would post nothing, so the command would fail."
 msgstr "Αυτό δεν θα δημοσίευε τίποτα, οπότε η εντολή θα αποτύγχανε."
 
+#. Sentence under the signal bar editor description. The globe panel opens from the globe button at the end of the signal bar.
+msgid "Ticked signals can also be set in every chat at once, from the globe panel."
+msgstr "Τα επιλεγμένα σήματα μπορούν επίσης να οριστούν σε όλες τις συνομιλίες μαζί, από τον πίνακα με την υδρόγειο."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Εναλλαγή λίστας καναλιών"
 
 msgid "Total Members"
 msgstr "Σύνολο μελών"
+
+#. Button in the signals-everywhere panel that turns off every signal you have on, in every chat. Keep it short.
+msgid "Turn all off"
+msgstr "Απενεργοποίηση όλων"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -1779,6 +1849,10 @@ msgstr "Το αρχείο σας"
 msgid "Your reactions"
 msgstr "Οι αντιδράσεις σας"
 
+#. Tooltip and accessible label of the globe button at the end of the signal bar. It opens a panel listing every chat where you have a signal on. {count} is how many chats that is.
+msgid "Your signals everywhere · {count, plural, one {# chat} other {# chats}}"
+msgstr "Τα σήματά σου παντού · {count, plural, one {# συνομιλία} other {# συνομιλίες}}"
+
 #. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
 msgid "Your {emojiName} reactions"
 msgstr "Οι αντιδράσεις σας {emojiName}"
@@ -1928,6 +2002,10 @@ msgstr "{count, plural, one {Διαγράφηκε # persona} other {Διαγρά
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, one {# πιθανή αντιστοίχιση} other {# πιθανές αντιστοιχίσεις}}"
+
+#. Last line of the list in the restore confirmation when more chats change than are listed.
+msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
+msgstr "{count, plural, one {+ # ακόμη συνομιλία} other {+ # ακόμη συνομιλίες}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"

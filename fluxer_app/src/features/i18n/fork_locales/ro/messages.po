@@ -77,6 +77,10 @@ msgstr "Adăugate"
 msgid "Added as a new persona"
 msgstr "Se adaugă ca persona nouă"
 
+#. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
+msgid "After"
+msgstr "După"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "Alice"
@@ -166,6 +170,10 @@ msgstr "Se readuce"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "A revenit fără {items}: acum le are altă persona."
+
+#. Accessible label of the tick in the signal bar editor that lets people set this signal in every chat where they have a signal on, in one click.
+msgid "Can be set everywhere at once"
+msgstr "Poate fi setat peste tot deodată"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -259,6 +267,10 @@ msgstr "Copiază marcajul de timp\\"
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "Personas tale nu au putut fi exportate."
+
+#. Shown in place of the restore confirmation when its preview could not be loaded.
+msgid "Could not load what Restore would change. Try again."
+msgstr "Nu s-a putut încărca ce ar schimba „Restaurează”. Încearcă din nou."
 
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
@@ -459,6 +471,7 @@ msgstr "Tot restul este exact cum era."
 msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
 msgstr "Tot ce era în fișier era fie nou, fie corespundea deja exact unei persona, deci nu a fost nimic de decis. Nimic altceva nu s-a schimbat."
 
+#. Column heading in the signal bar editor over the ticks that let people set a signal in every chat at once. Keep it short.
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
 msgstr "Peste tot"
@@ -736,6 +749,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Las-o ștearsă"
 
+#. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
+msgid "Left out, since you can no longer post there: {chats}"
+msgstr "Omise, deoarece nu mai poți scrie acolo: {chats}"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "Linia {line}, coloana {column}: {problem}"
@@ -925,6 +942,10 @@ msgstr "Niciuna dintre acestea"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "Niciuna dintre personas tale nu este încă publică. Ceilalți văd o persona aici după ce îi setezi vizibilitatea la Publică."
 
+#. Shown in the signals-everywhere panel in place of the list of chats when you have no signal on in any chat.
+msgid "None of your signals are on anywhere."
+msgstr "Niciunul dintre semnalele tale nu este activat nicăieri."
+
 #. What happens to the import file's version of a persona in the import review
 msgid "Not imported"
 msgstr "Nu se importă"
@@ -932,6 +953,10 @@ msgstr "Nu se importă"
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Nu știi sigur? Lasă așa cum este: nu se schimbă nimic."
+
+#. Column heading in the restore confirmation over the signals you have on in each chat now. Keep it short.
+msgid "Now"
+msgstr "Acum"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1151,6 +1176,18 @@ msgstr "Publică"
 msgid "Public persona"
 msgstr "Persona publică"
 
+#. Body of the restore confirmation, when the last change turned off all your signals in every chat. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
+msgstr "Readuce ce aveai activat înainte să dezactivezi tot ({time}). Ce ai activat acolo acum se va dezactiva."
+
+#. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
+msgstr "Readuce ce aveai activat înainte de ultima ta restaurare ({time}). Ce ai activat acolo acum se va dezactiva."
+
+#. Body of the restore confirmation, when the last change set one signal in every chat. {label} is the signal name, such as Sleeping; {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before {label} everywhere at {time}. What you have on there now goes off."
+msgstr "Readuce ce aveai activat înainte să setezi {label} peste tot ({time}). Ce ai activat acolo acum se va dezactiva."
+
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 msgid "QR code that opens the Tyne download page"
@@ -1224,6 +1261,7 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "Resetezi numărătorile pentru {name}? Acțiunea nu poate fi anulată."
 
 #. Button that brings back a deleted persona
+#. Confirm button of the restore confirmation for signals everywhere. Keep it short.
 msgid "Restore"
 msgstr "Restaurează"
 
@@ -1231,9 +1269,17 @@ msgstr "Restaurează"
 msgid "Restore them from Deleted personas in Settings if you change your mind."
 msgstr "Dacă te răzgândești, le poți restaura din Personas șterse, în Setări."
 
+#. Title of the confirmation that undoes your last change to your signals in every chat at once.
+msgid "Restore your signals?"
+msgstr "Îți restaurezi semnalele?"
+
 #. Line of the import result: deleted personas brought back
 msgid "Restored"
 msgstr "Restaurate"
+
+#. Button in the signals-everywhere panel that opens a confirmation showing how your last change everywhere would be undone. Keep the ellipsis.
+msgid "Restore…"
+msgstr "Restaurează…"
 
 msgid "Results"
 msgstr "Rezultate"
@@ -1308,6 +1354,14 @@ msgstr "Setează ca activă"
 msgid "Set as active persona"
 msgstr "Setează ca persona activă"
 
+#. Small section heading in the signals-everywhere panel, above the signals that can be set in every chat at once. {count} is how many chats a click would change.
+msgid "Set everywhere ({count, plural, one {# chat} other {# chats}})"
+msgstr "Setează peste tot ({count, plural, one {# conversație} few {# conversații} other {# de conversații}})"
+
+#. Tooltip and accessible label on a signal in the signals-everywhere panel. Clicking it turns this signal on in every chat where you have a signal on, and your other signals there off. {label} is the signal name, such as Sleeping.
+msgid "Set {label} everywhere"
+msgstr "Setează {label} peste tot"
+
 #. Button that shows the list behind a line at the top of the import review
 msgctxt "persona-import-list"
 msgid "Show"
@@ -1349,6 +1403,10 @@ msgstr "Bara de semnale"
 #. Accessible label for the text field that names a signal in the Message Tools settings tab.
 msgid "Signal label"
 msgstr "Eticheta semnalului"
+
+#. Row in your profile popout, next to your online status, that opens the panel of every chat where you have a signal on. Signals are the icons above the message box.
+msgid "Signals"
+msgstr "Semnale"
 
 msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
 msgstr "Semnalele sunt pictograme deasupra casetei de mesaje pe care oricine le poate activa și dezactiva, iar toți cei din conversație văd cine le are activate. Această bară este comună tuturor comunităților și mesajelor directe de pe această instanță. Trage pentru a reordona."
@@ -1540,6 +1598,10 @@ msgstr "Numele persoanei care o folosește"
 msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
 msgstr "Profilurile lor vor fi ascunse de ceilalți. Numele și avatarurile lor apar în continuare la mesajele și reacțiile lor."
 
+#. Shown in place of the restore confirmation for signals everywhere when there is no earlier change to undo.
+msgid "There is nothing to restore."
+msgstr "Nu există nimic de restaurat."
+
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
 msgstr "Nu există niciun filtru numit {name}."
@@ -1590,12 +1652,20 @@ msgstr "Profilul acestei persona este privat."
 msgid "This would post nothing, so the command would fail."
 msgstr "Asta nu ar posta nimic, așa că comanda ar eșua."
 
+#. Sentence under the signal bar editor description. The globe panel opens from the globe button at the end of the signal bar.
+msgid "Ticked signals can also be set in every chat at once, from the globe panel."
+msgstr "Semnalele bifate pot fi setate și în toate conversațiile deodată, din panoul cu glob."
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "Comută lista de canale"
 
 msgid "Total Members"
 msgstr "Total membri"
+
+#. Button in the signals-everywhere panel that turns off every signal you have on, in every chat. Keep it short.
+msgid "Turn all off"
+msgstr "Dezactivează tot"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -1779,6 +1849,10 @@ msgstr "Fișierul tău"
 msgid "Your reactions"
 msgstr "Reacțiile tale"
 
+#. Tooltip and accessible label of the globe button at the end of the signal bar. It opens a panel listing every chat where you have a signal on. {count} is how many chats that is.
+msgid "Your signals everywhere · {count, plural, one {# chat} other {# chats}}"
+msgstr "Semnalele tale peste tot · {count, plural, one {# conversație} few {# conversații} other {# de conversații}}"
+
 #. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
 msgid "Your {emojiName} reactions"
 msgstr "Reacțiile tale {emojiName}"
@@ -1928,6 +2002,10 @@ msgstr "{count, plural, one {# persona ștearsă} few {# personas șterse} other
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, one {# potrivire posibilă} few {# potriviri posibile} other {# de potriviri posibile}}"
+
+#. Last line of the list in the restore confirmation when more chats change than are listed.
+msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
+msgstr "{count, plural, one {+ încă # conversație} few {+ încă # conversații} other {+ încă # de conversații}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
