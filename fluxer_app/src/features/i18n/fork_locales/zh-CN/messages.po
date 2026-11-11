@@ -77,6 +77,10 @@ msgstr "已添加"
 msgid "Added as a new persona"
 msgstr "作为新人格添加"
 
+#. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
+msgid "After"
+msgstr "恢复后"
+
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
 msgstr "爱丽丝"
@@ -166,6 +170,10 @@ msgstr "恢复中"
 #. Import warning for a restored persona whose proxy tags or signature emojis another persona took meanwhile
 msgid "Came back without {items}: another persona has them now."
 msgstr "恢复时缺少 {items}：它们现在属于另一个人格。"
+
+#. Accessible label of the tick in the signal bar editor that lets people set this signal in every chat where they have a signal on, in one click.
+msgid "Can be set everywhere at once"
+msgstr "可一次性在所有地方设置"
 
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
@@ -259,6 +267,10 @@ msgstr "复制时间戳\\"
 #. Toast when downloading the persona export fails
 msgid "Could not export your personas."
 msgstr "无法导出你的人格。"
+
+#. Shown in place of the restore confirmation when its preview could not be loaded.
+msgid "Could not load what Restore would change. Try again."
+msgstr "无法加载“恢复”将更改的内容。请重试。"
 
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
@@ -459,6 +471,7 @@ msgstr "其他一切都与之前完全相同。"
 msgid "Everything in the file was either new or already matched a persona exactly, so there was nothing to decide. Nothing else changed."
 msgstr "文件中的所有内容要么是新的，要么已与某个人格完全一致，因此无需做任何决定。其他内容均未更改。"
 
+#. Column heading in the signal bar editor over the ticks that let people set a signal in every chat at once. Keep it short.
 #. Option for where the selected persona applies: one persona for every channel
 msgid "Everywhere"
 msgstr "所有地方"
@@ -736,6 +749,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "保持删除"
 
+#. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
+msgid "Left out, since you can no longer post there: {chats}"
+msgstr "已跳过，因为你无法再在这些聊天中发言：{chats}"
+
 #. Where a problem is in a community command script. Preserve {line}, {column} and {problem}.
 msgid "Line {line}, column {column}: {problem}"
 msgstr "第 {line} 行，第 {column} 列：{problem}"
@@ -925,6 +942,10 @@ msgstr "都不是"
 msgid "None of your personas are public yet. Others see a persona here once you set its visibility to Public."
 msgstr "你还没有公开的人格。将人格的可见性设为“公开”后，其他人就能在这里看到它。"
 
+#. Shown in the signals-everywhere panel in place of the list of chats when you have no signal on in any chat.
+msgid "None of your signals are on anywhere."
+msgstr "你没有在任何地方开启信号。"
+
 #. What happens to the import file's version of a persona in the import review
 msgid "Not imported"
 msgstr "不导入"
@@ -932,6 +953,10 @@ msgstr "不导入"
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "不确定？保持原样即可：不会有任何变化。"
+
+#. Column heading in the restore confirmation over the signals you have on in each chat now. Keep it short.
+msgid "Now"
+msgstr "当前"
 
 #. Link on the download page to every earlier release of the app.
 msgid "Older versions"
@@ -1151,6 +1176,18 @@ msgstr "公开"
 msgid "Public persona"
 msgstr "公开人格"
 
+#. Body of the restore confirmation, when the last change turned off all your signals in every chat. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
+msgstr "恢复你在 {time} 全部关闭之前开启的信号。你现在在那里开启的信号将被关闭。"
+
+#. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
+msgstr "恢复你在 {time} 上次恢复之前开启的信号。你现在在那里开启的信号将被关闭。"
+
+#. Body of the restore confirmation, when the last change set one signal in every chat. {label} is the signal name, such as Sleeping; {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before {label} everywhere at {time}. What you have on there now goes off."
+msgstr "恢复你在 {time} 将 {label} 设置到所有地方之前开启的信号。你现在在那里开启的信号将被关闭。"
+
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 #. Screen reader description of the QR code in the "Get the Tyne app" panel.
 msgid "QR code that opens the Tyne download page"
@@ -1224,6 +1261,7 @@ msgid "Reset the counts of {name}? This can't be undone."
 msgstr "要重置 {name} 的计数吗?此操作无法撤销。"
 
 #. Button that brings back a deleted persona
+#. Confirm button of the restore confirmation for signals everywhere. Keep it short.
 msgid "Restore"
 msgstr "恢复"
 
@@ -1231,9 +1269,17 @@ msgstr "恢复"
 msgid "Restore them from Deleted personas in Settings if you change your mind."
 msgstr "如果你改变主意，可以在设置的“已删除的人格”中恢复它们。"
 
+#. Title of the confirmation that undoes your last change to your signals in every chat at once.
+msgid "Restore your signals?"
+msgstr "要恢复你的信号吗？"
+
 #. Line of the import result: deleted personas brought back
 msgid "Restored"
 msgstr "已恢复"
+
+#. Button in the signals-everywhere panel that opens a confirmation showing how your last change everywhere would be undone. Keep the ellipsis.
+msgid "Restore…"
+msgstr "恢复…"
 
 msgid "Results"
 msgstr "结果"
@@ -1308,6 +1354,14 @@ msgstr "设为活跃"
 msgid "Set as active persona"
 msgstr "设为活跃人格"
 
+#. Small section heading in the signals-everywhere panel, above the signals that can be set in every chat at once. {count} is how many chats a click would change.
+msgid "Set everywhere ({count, plural, one {# chat} other {# chats}})"
+msgstr "在所有地方设置（{count, plural, other {# 个聊天}}）"
+
+#. Tooltip and accessible label on a signal in the signals-everywhere panel. Clicking it turns this signal on in every chat where you have a signal on, and your other signals there off. {label} is the signal name, such as Sleeping.
+msgid "Set {label} everywhere"
+msgstr "在所有地方设置 {label}"
+
 #. Button that shows the list behind a line at the top of the import review
 msgctxt "persona-import-list"
 msgid "Show"
@@ -1349,6 +1403,10 @@ msgstr "信号栏"
 #. Accessible label for the text field that names a signal in the Message Tools settings tab.
 msgid "Signal label"
 msgstr "信号标签"
+
+#. Row in your profile popout, next to your online status, that opens the panel of every chat where you have a signal on. Signals are the icons above the message box.
+msgid "Signals"
+msgstr "信号"
 
 msgid "Signals are icons above the message box that anyone can switch on and off, and everyone in the conversation sees who has them on. This bar is shared by every community and direct message on this instance. Drag to reorder."
 msgstr "信号是消息框上方的图标，任何人都可以开启或关闭，对话中的所有人都能看到谁开启了它们。此信号栏由本实例上的所有社区和私信共用。拖动即可调整顺序。"
@@ -1540,6 +1598,10 @@ msgstr "使用者的名称"
 msgid "Their profiles will be hidden from others. Their names and avatars still show on their messages and reactions."
 msgstr "它们的资料将对他人隐藏。名称和头像仍会显示在它们的消息和回应上。"
 
+#. Shown in place of the restore confirmation for signals everywhere when there is no earlier change to undo.
+msgid "There is nothing to restore."
+msgstr "没有可恢复的内容。"
+
 #. Problem in a community command script. {name} is what was written, such as "upcse". Preserve {name}.
 msgid "There's no filter called {name}."
 msgstr "没有名为 {name} 的过滤器。"
@@ -1590,12 +1652,20 @@ msgstr "此人格的个人资料为私密。"
 msgid "This would post nothing, so the command would fail."
 msgstr "这不会发布任何内容，因此命令会失败。"
 
+#. Sentence under the signal bar editor description. The globe panel opens from the globe button at the end of the signal bar.
+msgid "Ticked signals can also be set in every chat at once, from the globe panel."
+msgstr "勾选的信号也可以通过地球面板一次性在所有聊天中设置。"
+
 #. Keyboard shortcut action label shown in the shortcuts list and keybind editor. Keep short, sentence case.
 msgid "Toggle the channel list"
 msgstr "切换频道列表"
 
 msgid "Total Members"
 msgstr "成员总数"
+
+#. Button in the signals-everywhere panel that turns off every signal you have on, in every chat. Keep it short.
+msgid "Turn all off"
+msgstr "全部关闭"
 
 #. Direct message right-click menu action that hides the signal bar in this DM and clears its signals.
 msgid "Turn off signal bar"
@@ -1779,6 +1849,10 @@ msgstr "你的文件"
 msgid "Your reactions"
 msgstr "你的反应"
 
+#. Tooltip and accessible label of the globe button at the end of the signal bar. It opens a panel listing every chat where you have a signal on. {count} is how many chats that is.
+msgid "Your signals everywhere · {count, plural, one {# chat} other {# chats}}"
+msgstr "你在所有地方的信号 · {count, plural, other {# 个聊天}}"
+
 #. Accessible name of the popout listing which of your personas reacted with an emoji. Preserve {emojiName}.
 msgid "Your {emojiName} reactions"
 msgstr "你的 {emojiName} 反应"
@@ -1928,6 +2002,10 @@ msgstr "{count, plural, other {已删除 # 个人格}}"
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, other {# 个可能的匹配}}"
+
+#. Last line of the list in the restore confirmation when more chats change than are listed.
+msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
+msgstr "{count, plural, other {+ 另外 # 个聊天}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
