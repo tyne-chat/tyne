@@ -84,8 +84,22 @@ import {createRoot, type Root} from 'react-dom/client';
 
 (globalThis as {IS_REACT_ACT_ENVIRONMENT?: boolean}).IS_REACT_ACT_ENVIRONMENT = true;
 
-const READING: SignalBarSignal = {id: 'reading', emoji_id: null, emoji_name: '📖', animated: false, label: 'Reading'};
-const DONE: SignalBarSignal = {id: 'done', emoji_id: null, emoji_name: '✅', animated: false, label: null};
+const READING: SignalBarSignal = {
+	id: 'reading',
+	emoji_id: null,
+	emoji_name: '📖',
+	animated: false,
+	label: 'Reading',
+	everywhere: false,
+};
+const DONE: SignalBarSignal = {
+	id: 'done',
+	emoji_id: null,
+	emoji_name: '✅',
+	animated: false,
+	label: null,
+	everywhere: false,
+};
 const ME = '100000000000000001';
 
 function entry(userId: string, username: string, personaName?: string): ChannelSignalEntry {
@@ -203,7 +217,7 @@ describe('signal bar menus', () => {
 		expect(removeButtons).toHaveLength(2);
 		await act(async () => removeButtons[0]?.click());
 		expect(putMock).toHaveBeenCalledWith('/instance/signal-bar', {
-			body: {signals: [{id: 'done', emoji_id: null, emoji_name: '✅', label: null}]},
+			body: {signals: [{id: 'done', emoji_id: null, emoji_name: '✅', label: null, everywhere: false}]},
 		});
 	});
 });

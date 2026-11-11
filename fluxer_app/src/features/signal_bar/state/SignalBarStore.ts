@@ -20,12 +20,18 @@ import type {
 	SignalBarResponse,
 	SignalBarSignal,
 	SignalBarUpdateRequest,
+	UserSignalChat,
+	UserSignalsResponse,
+	UserSignalsRestoreResponse,
+	UserSignalsUpdateRequest,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
 import {makeAutoObservable, observable, runInAction} from 'mobx';
 
 const logger = new Logger('SignalBar');
 const EMPTY_SIGNALS: ReadonlyArray<SignalBarSignal> = Object.freeze([]);
 const EMPTY_ENTRIES: ReadonlyArray<ChannelSignalEntry> = Object.freeze([]);
+/** After a failed load of the account's signals everywhere, bars wait this long before asking again. */
+const MY_CHATS_RETRY_MS = 60_000;
 
 function isSameEntry(entry: ChannelSignalEntry, signalId: string, userId: string): boolean {
 	return entry.signal_id === signalId && entry.user.id === userId;
@@ -55,9 +61,24 @@ class SignalBarStore {
 		deep: false,
 	});
 	private configRequest: Promise<void> | null = null;
+	/**
+	 * The account's own signals in every chat, from `GET /users/@me/signals`, kept up to date by the
+	 * channel events that carry the account's id. Null until loaded.
+	 */
+	myChats: ReadonlyMap<string, UserSignalChat> | null = null;
+	/** Whether Restore has something to put back. Only this device's own changes update it before READY. */
+	restoreAvailable = false;
+	/** A change everywhere is on its way; the panel's buttons wait for it. */
+	everywhereBusy = false;
+	private myChatsRequest: Promise<void> | null = null;
+	private myChatsFailedAt = 0;
 
 	constructor() {
-		makeAutoObservable<this, 'configRequest'>(this, {configRequest: false}, {autoBind: true});
+		makeAutoObservable<this, 'configRequest' | 'myChatsRequest' | 'myChatsFailedAt'>(
+			this,
+			{configRequest: false, myChatsRequest: false, myChatsFailedAt: false},
+			{autoBind: true},
+		);
 		initializeStore(this, () => makePersistent(this, 'SignalBar', ['collapsed']));
 	}
 
@@ -139,8 +160,161 @@ class SignalBarStore {
 	invalidate(): void {
 		this.entriesByChannel.clear();
 		this.enabledByChannel.clear();
+		this.forgetMyChats();
 		this.epoch += 1;
-		void this.fetchConfig();
+		// A bar mounting meanwhile may already have asked; ensure shares or skips that request.
+		void this.fetchConfig().then(() => {
+			if (this.signals.length > 0) this.ensureMyChats();
+		});
+	}
+
+	/** Drops the account's summary, so the next bar or panel loads it again. */
+	forgetMyChats(): void {
+		this.myChats = null;
+		this.restoreAvailable = false;
+		this.myChatsFailedAt = 0;
+	}
+
+	/** The account's signals everywhere, newest first. */
+	get myChatList(): ReadonlyArray<UserSignalChat> {
+		if (!this.myChats) return [];
+		return Array.from(this.myChats.values()).sort((a, b) => b.updated_at - a.updated_at);
+	}
+
+	/** Loads the account's signals everywhere, sharing a request in flight. A failure is logged and not retried. */
+	fetchMyChats(): Promise<void> {
+		this.myChatsRequest ??= (async () => {
+			let ok = false;
+			try {
+				const res = await http.get<UserSignalsResponse>(ForkEndpoints.USER_SIGNALS);
+				if (res.ok && res.body) {
+					this.applyMyChats(res.body);
+					ok = true;
+				}
+			} catch (err) {
+				logger.error('Error fetching signals everywhere', err);
+			} finally {
+				this.myChatsRequest = null;
+				this.myChatsFailedAt = ok ? 0 : Date.now();
+			}
+		})();
+		return this.myChatsRequest;
+	}
+
+	/** For a mounting bar: loads the summary once, and after a failure not again for a minute. */
+	ensureMyChats(): void {
+		if (this.myChats !== null || this.myChatsRequest) return;
+		if (this.myChatsFailedAt && Date.now() - this.myChatsFailedAt < MY_CHATS_RETRY_MS) return;
+		void this.fetchMyChats();
+	}
+
+	private applyMyChats(response: UserSignalsResponse): void {
+		runInAction(() => {
+			this.myChats = new Map(response.chats.map((chat) => [chat.channel_id, chat]));
+			this.restoreAvailable = response.restore_available;
+		});
+	}
+
+	/** Keeps `myChats` in step with a channel event that names the account. */
+	private trackMyChats(event: ChannelSignalUpdateEvent): void {
+		const userId = Authentication.currentUserId;
+		if (!this.myChats || !userId) return;
+		const removed = event.removed.filter((entry) => entry.user_id === userId);
+		const added = event.added.filter((entry) => entry.user.id === userId);
+		if (removed.length === 0 && added.length === 0) return;
+		const current = this.myChats.get(event.channel_id);
+		let signals = (current?.signals ?? []).filter((ref) => !removed.some((entry) => entry.signal_id === ref.signal_id));
+		let updatedAt = current?.updated_at ?? 0;
+		for (const entry of added) {
+			const ref = {signal_id: entry.signal_id, persona_id: entry.persona_id ?? null};
+			const index = signals.findIndex((existing) => existing.signal_id === entry.signal_id);
+			signals = index === -1 ? [...signals, ref] : signals.map((existing, i) => (i === index ? ref : existing));
+			updatedAt = Math.max(updatedAt, entry.activated_at);
+		}
+		const next = new Map(this.myChats);
+		if (signals.length === 0) {
+			next.delete(event.channel_id);
+		} else {
+			next.set(event.channel_id, {channel_id: event.channel_id, signals, updated_at: updatedAt});
+		}
+		this.myChats = next;
+	}
+
+	/**
+	 * Sets one signal in every chat where the account has one on, and in `channelId`, turning its others
+	 * there off; with `signalId` null, turns every signal of the account's off. One request; the chats
+	 * follow through their events.
+	 */
+	async setEverywhere(signalId: string | null, channelId: string | null, personaId: string | null): Promise<void> {
+		const body: UserSignalsUpdateRequest = {signal_id: signalId};
+		if (signalId !== null && channelId) {
+			body.channel_id = channelId;
+			body.persona_id = personaId;
+		}
+		await this.sendEverywhere(() => http.put<UserSignalsResponse>(ForkEndpoints.USER_SIGNALS, {body}));
+	}
+
+	/**
+	 * Turns off the account's signals in one chat, from the signals-everywhere panel: the chat leaves
+	 * the summary and the channel at once, and one DELETE goes out per signal. A failure reloads the
+	 * summary once, and the channel once if it is loaded.
+	 */
+	async turnOffChat(channelId: string): Promise<void> {
+		const userId = Authentication.currentUserId;
+		const chat = this.myChats?.get(channelId);
+		if (!userId || !chat || !this.myChats) return;
+		const next = new Map(this.myChats);
+		next.delete(channelId);
+		this.myChats = next;
+		for (const ref of chat.signals) this.removeLocal(channelId, ref.signal_id, userId);
+		const failed = await Promise.all(
+			chat.signals.map(async (ref) => {
+				try {
+					const res = await http.delete(ForkEndpoints.CHANNEL_SIGNAL_ME(channelId, ref.signal_id));
+					return !res.ok;
+				} catch (err) {
+					logger.error('Error turning off signals in a chat', err);
+					return true;
+				}
+			}),
+		);
+		if (!failed.some(Boolean)) return;
+		void this.fetchMyChats();
+		if (this.entriesByChannel.has(channelId)) void this.fetchChannel(channelId);
+	}
+
+	/** What Restore would change, chat by chat; null when it could not be loaded. */
+	async fetchRestorePreview(): Promise<UserSignalsRestoreResponse | null> {
+		try {
+			const res = await http.get<UserSignalsRestoreResponse>(ForkEndpoints.USER_SIGNALS_RESTORE);
+			return res.ok && res.body ? res.body : null;
+		} catch (err) {
+			logger.error('Error fetching the signals restore preview', err);
+			return null;
+		}
+	}
+
+	async restoreEverywhere(): Promise<void> {
+		await this.sendEverywhere(() => http.post<UserSignalsResponse>(ForkEndpoints.USER_SIGNALS_RESTORE));
+	}
+
+	private async sendEverywhere(send: () => Promise<{ok: boolean; body?: UserSignalsResponse | null}>): Promise<void> {
+		if (this.everywhereBusy) return;
+		this.everywhereBusy = true;
+		try {
+			const res = await send();
+			if (res.ok && res.body) {
+				this.applyMyChats(res.body);
+				return;
+			}
+		} catch (err) {
+			logger.error('Error changing signals everywhere', err);
+		} finally {
+			runInAction(() => {
+				this.everywhereBusy = false;
+			});
+		}
+		void this.fetchMyChats();
 	}
 
 	fetchConfig(): Promise<void> {
@@ -196,6 +370,7 @@ class SignalBarStore {
 
 	handleChannelUpdate(event: ChannelSignalUpdateEvent): void {
 		this.ensureVersion(event.bar_version);
+		this.trackMyChats(event);
 		const current = this.entriesByChannel.get(event.channel_id);
 		if (!current) return;
 		this.rememberEntries(event.added);
@@ -215,6 +390,12 @@ class SignalBarStore {
 
 	handleEnabledUpdate(event: ChannelSignalBarUpdateEvent): void {
 		this.enabledByChannel.set(event.channel_id, event.enabled);
+		// Switching off clears the channel's signals without a CHANNEL_SIGNAL_UPDATE.
+		if (!event.enabled && this.myChats?.has(event.channel_id)) {
+			const next = new Map(this.myChats);
+			next.delete(event.channel_id);
+			this.myChats = next;
+		}
 		if (!event.enabled || !this.entriesByChannel.has(event.channel_id)) {
 			this.entriesByChannel.set(event.channel_id, EMPTY_ENTRIES);
 		}
@@ -314,6 +495,7 @@ class SignalBarStore {
 				emoji_id: signal.emoji_id,
 				emoji_name: signal.emoji_name,
 				label: signal.label,
+				everywhere: signal.everywhere,
 			})),
 		};
 		try {
