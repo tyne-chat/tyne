@@ -77,6 +77,7 @@ import React, {useCallback, useMemo, useRef} from 'react';
 // Fork imports.
 
 import {AccountPersonaNameExtras} from '@app/features/persona/components/PersonasPill';
+import {UserAreaSignalsRow} from '@app/features/signal_bar/components/UserAreaSignalsRow';
 
 const STATUS_ORDER = [StatusTypes.ONLINE, StatusTypes.IDLE, StatusTypes.DND, StatusTypes.INVISIBLE];
 const STATUS_EXPIRY_LABEL_MESSAGES: Record<TimeWindowKey, MessageDescriptor> = {
@@ -562,6 +563,7 @@ export const UserAreaPopout = observer(() => {
 										data-flx="app.floating.user-area-popout.action-button"
 									/>
 								</Popout>
+								<UserAreaSignalsRow ActionButton={ActionButton} data-flx="app.floating.user-area-popout.signals-row" />
 								<div className={styles.actionDivider} data-flx="app.floating.user-area-popout.action-divider" />
 								<Popout
 									hoverDelay={0}
