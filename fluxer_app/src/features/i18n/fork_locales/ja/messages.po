@@ -1180,6 +1180,10 @@ msgstr "公開ペルソナ"
 msgid "Puts back what you had on before you turned all off at {time}. What you have on there now goes off."
 msgstr "{time} にすべてオフにする前の状態に戻します。現在そこでオンになっているシグナルはオフになります。"
 
+#. Body of the restore confirmation when the signal last set everywhere has since been taken off the bar. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
+msgid "Puts back what you had on before your last change everywhere at {time}. What you have on there now goes off."
+msgstr "{time} のすべての場所での前回の変更より前の状態に戻します。現在そこでオンになっているシグナルはオフになります。"
+
 #. Body of the restore confirmation, when the last change was itself a restore, so this one swaps back. {time} is when, such as 11:58 PM or 9 Nov, 11:58 PM.
 msgid "Puts back what you had on before your last restore at {time}. What you have on there now goes off."
 msgstr "{time} の前回の復元より前の状態に戻します。現在そこでオンになっているシグナルはオフになります。"
@@ -1671,6 +1675,10 @@ msgstr "すべてオフ"
 msgid "Turn off signal bar"
 msgstr "シグナルバーをオフにする"
 
+#. Right-click menu item on a chat in the signals-everywhere panel: turns off every signal you have on in that one chat or direct message.
+msgid "Turn off signals"
+msgstr "シグナルをオフにする"
+
 #. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
 msgid "Turn off {name}"
 msgstr "{name} をオフにする"
@@ -2002,10 +2010,6 @@ msgstr "{count, plural, other {# 件のペルソナを削除しました}}"
 #. On a collapsed member in the import review: how many personas of the account it might be
 msgid "{count, plural, one {# possible match} other {# possible matches}}"
 msgstr "{count, plural, other {一致候補 # 件}}"
-
-#. Last line of the list in the restore confirmation when more chats change than are listed.
-msgid "{count, plural, one {+ # more chat} other {+ # more chats}}"
-msgstr "{count, plural, other {+ ほか # 件のチャット}}"
 
 #. Title of the persona import review. {count} is the number of members that need a choice
 msgid "{count, plural, one {Check # member before importing} other {Check # members before importing}}"
