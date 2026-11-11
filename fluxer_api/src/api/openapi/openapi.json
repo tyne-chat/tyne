@@ -27734,6 +27734,220 @@
 				}
 			}
 		},
+		"/users/@me/signals": {
+			"get": {
+				"operationId": "list_my_signals",
+				"summary": "List my signals everywhere",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserSignalsResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Retrieves every chat where the authenticated user has a signal on, newest first, and whether their last change everywhere can be restored.",
+				"security": [{"sessionToken": []}]
+			},
+			"put": {
+				"operationId": "set_my_signals_everywhere",
+				"summary": "Set a signal everywhere",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserSignalsResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Sets one signal in every chat where the authenticated user has a signal on, and in the open chat, turning their other signals there off; each chat keeps the persona its signal showed. With a null signal, turns every signal of theirs off. Only signals the bar allows everywhere can be set. Saves what it replaced, for restore.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserSignalsUpdateRequestSchema"}}}
+				}
+			}
+		},
+		"/users/@me/signals/restore": {
+			"get": {
+				"operationId": "get_my_signals_restore",
+				"summary": "Preview restoring my signals",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/UserSignalsRestoreResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Shows, chat by chat, what restoring would put back in place of what is on now, and which chats it would leave out.",
+				"security": [{"sessionToken": []}]
+			},
+			"post": {
+				"operationId": "restore_my_signals",
+				"summary": "Restore my signals",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserSignalsResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Puts back what the last change everywhere replaced, in the chats where the user may still light signals. A restore is itself a change everywhere, so restoring again swaps back.",
+				"security": [{"sessionToken": []}]
+			}
+		},
 		"/users/@me/sso/link/start": {
 			"post": {
 				"operationId": "start_sso_link",
@@ -32147,6 +32361,82 @@
 				},
 				"required": ["authorization_url", "state", "redirect_uri", "client_binding"],
 				"additionalProperties": false
+			},
+			"UserSignalsResponseSchema": {
+				"type": "object",
+				"properties": {
+					"chats": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/UserSignalChatSchema"},
+						"description": "Every chat where the user has a signal on, newest first"
+					},
+					"restore_available": {"type": "boolean", "description": "Whether the last change everywhere can be restored"}
+				},
+				"required": ["chats", "restore_available"],
+				"additionalProperties": false
+			},
+			"UserSignalsRestoreResponseSchema": {
+				"type": "object",
+				"properties": {
+					"available": {"type": "boolean", "description": "Whether there is anything to restore"},
+					"created_at": {
+						"anyOf": [{"type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991}, {"type": "null"}],
+						"description": "When the change Restore undoes was made, in Unix milliseconds"
+					},
+					"action": {"anyOf": [{"$ref": "#/components/schemas/UserSignalsRestoreActionSchema"}, {"type": "null"}]},
+					"chats": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"channel_id": {"$ref": "#/components/schemas/SnowflakeStringType"},
+								"available": {
+									"type": "boolean",
+									"description": "False when the user can no longer light signals in this chat; Restore leaves it out"
+								},
+								"now": {
+									"type": "array",
+									"items": {"$ref": "#/components/schemas/UserSignalRefSchema"},
+									"description": "The user's signals there now"
+								},
+								"after": {
+									"type": "array",
+									"items": {"$ref": "#/components/schemas/UserSignalRefSchema"},
+									"description": "The signals Restore puts back"
+								}
+							},
+							"required": ["channel_id", "available", "now", "after"],
+							"additionalProperties": false
+						}
+					}
+				},
+				"required": ["available", "created_at", "action", "chats"],
+				"additionalProperties": false
+			},
+			"UserSignalsUpdateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"signal_id": {
+						"anyOf": [
+							{
+								"type": "string",
+								"pattern": "^[a-z0-9]{1,32}$",
+								"description": "The unique identifier of the signal within the bar"
+							},
+							{"type": "null"}
+						],
+						"description": "The signal to set in every chat where the user has one on, turning their others there off; null turns every signal of theirs off"
+					},
+					"channel_id": {
+						"description": "The open chat, included even if no signal of the user is on there",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					},
+					"persona_id": {
+						"description": "The persona the open chat's signal is shown as",
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}]
+					}
+				},
+				"required": ["signal_id"]
 			},
 			"VoiceActivitySharingUpdateRequest": {
 				"type": "object",
@@ -38796,7 +39086,11 @@
 									"maxLength": 64,
 									"description": "Emoji name or Unicode character"
 								},
-								"label": {"anyOf": [{"type": "string", "maxLength": 32}, {"type": "null"}]}
+								"label": {"anyOf": [{"type": "string", "maxLength": 32}, {"type": "null"}]},
+								"everywhere": {
+									"description": "Whether the signal may be set everywhere at once; omit to keep the current setting",
+									"type": ["boolean", "null"]
+								}
 							},
 							"required": ["emoji_name"]
 						}
@@ -48473,9 +48767,14 @@
 					"label": {
 						"anyOf": [{"type": "string", "maxLength": 32}, {"type": "null"}],
 						"description": "Optional label shown instead of the emoji name"
+					},
+					"everywhere": {
+						"default": false,
+						"description": "Whether a user may set this signal in every chat where they have one on at once",
+						"type": "boolean"
 					}
 				},
-				"required": ["id", "emoji_id", "emoji_name", "animated", "label"],
+				"required": ["id", "emoji_id", "emoji_name", "animated", "label", "everywhere"],
 				"additionalProperties": false
 			},
 			"GroupDmInviteResponse": {
@@ -51909,6 +52208,64 @@
 				],
 				"enum": ["online", "dnd", "idle", "invisible"],
 				"type": "string"
+			},
+			"UserSignalRefSchema": {
+				"type": "object",
+				"properties": {
+					"signal_id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]{1,32}$",
+						"description": "The unique identifier of the signal within the bar"
+					},
+					"persona_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "The persona the signal is shown as, or null for the account"
+					}
+				},
+				"required": ["signal_id", "persona_id"],
+				"additionalProperties": false
+			},
+			"UserSignalsRestoreActionSchema": {
+				"type": "object",
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": ["set", "off", "restore"],
+						"description": "What the last change everywhere was: a signal set everywhere, every signal off, or a restore"
+					},
+					"signal_id": {
+						"anyOf": [
+							{
+								"type": "string",
+								"pattern": "^[a-z0-9]{1,32}$",
+								"description": "The unique identifier of the signal within the bar"
+							},
+							{"type": "null"}
+						],
+						"description": "The signal set everywhere, for kind set"
+					}
+				},
+				"required": ["kind", "signal_id"],
+				"additionalProperties": false
+			},
+			"UserSignalChatSchema": {
+				"type": "object",
+				"properties": {
+					"channel_id": {"$ref": "#/components/schemas/SnowflakeStringType"},
+					"signals": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/UserSignalRefSchema"},
+						"description": "The user's lit signals in this chat, oldest first"
+					},
+					"updated_at": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991,
+						"description": "When the newest of these signals was lit, in Unix milliseconds"
+					}
+				},
+				"required": ["channel_id", "signals", "updated_at"],
+				"additionalProperties": false
 			},
 			"VoiceTurnServer": {
 				"type": "object",
