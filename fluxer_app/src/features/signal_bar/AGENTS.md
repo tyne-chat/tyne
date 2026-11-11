@@ -59,11 +59,14 @@ rules every client follows and where the web and mobile clients differ are in th
   released. Nothing else resets the store: it has no
   `AccountScopedWork` cancellation and no logout hook.
 - **Signals everywhere** (tyne-chat/tyne#223; design and routes in the server guide). `invalidate()`
-  forgets the summary and loads it again after the bar; a mounting bar calls `ensureMyChats()`
+  forgets the summary and, after the bar, calls `ensureMyChats()`, which shares or skips a request a
+  bar mounting meanwhile already sent; a mounting bar calls `ensureMyChats()`
   (once, then not for a minute after a failure); opening the panel calls `fetchMyChats()`.
   `setEverywhere(signalId | null, channelId, personaId)` and `restoreEverywhere()` are one request
   each, take the summary from the answer, and on a failure reload it once. The chats themselves
-  change through their `CHANNEL_SIGNAL_UPDATE` events. No toasts: Restore is the undo.
+  change through their `CHANNEL_SIGNAL_UPDATE` events. A channel switched off
+  (`CHANNEL_SIGNAL_BAR_UPDATE`) leaves the summary, since the server clears it without a signal
+  event. No toasts: Restore is the undo.
 - **Writes.** `activate` is not optimistic: the signal shows lit when the event arrives.
   `deactivate` and `removeUser` remove the entry first; `reset` and `setDmEnabled` wait for the event.
   A failed write refetches the channel once. `saveSignals` shows the new list at once and, on failure,
@@ -98,11 +101,18 @@ barrier), the persona resolved from the draft. Badges draw `entry.subprofile` wi
   bar is on there and the account may post), then Turn all off and Restore…, then every known chat,
   newest first, as in the Quick Switcher: icon with the channel type in the corner (a DM: the
   person), bold name, community (or Direct message / Group DM), and the chat's signals in columns
-  against the right edge, each row filling them from the first. A click or Enter opens the chat;
-  arrow keys move between rows. Chats the client does not know are left out of the list and the
-  count. The open chat's signal is lit as `getEffectivePersonaId`; the others keep their persona.
-- **Restore…** loads the preview (one GET), then upstream's `ConfirmModal`: what the last change
-  was and when, chat by chat what is on now and after, "+ N more", and the chats left out.
+  against the right edge, each row filling them from the first, as large as the chat's icon and
+  animated as lit signals on the bar are (`LitSignalEmoji`, `useShouldAnimate` with the row's hover);
+  the tiles, the size of the bar's signals, stay still. A tile or Turn all off acts and closes the
+  panel (Chiara, 2026-11-11). A click or Enter on a row opens the chat; arrow keys move between rows.
+  A right-click offers "Turn off signals" for that chat (`turnOffChat`), and the panel stays open.
+  Chats the client does not know are left out of the list and the count, but Turn all off and the
+  profile row go by every chat the server lists, so signals left in such chats (tyne-chat/tyne#305)
+  can still be cleared. The open chat's signal is lit as `getEffectivePersonaId`; the others keep their persona.
+- **Restore…** loads the preview (one GET); when it would change nothing (`restoreChangesSomething`)
+  it says there is nothing to restore. Otherwise upstream's `ConfirmModal`: what the last change
+  was and when, every chat with what is on now and after (past ten it scrolls under sticky
+  headings), and the chats left out.
 - **Profile popout:** `UserAreaSignalsRow` after the status row, handed upstream's `ActionButton`;
   shown while the account has a signal on anywhere or Restore has something to put back.
 - **Editor:** an "Everywhere" tick per signal, next to its label; the save sends `everywhere`.
@@ -141,6 +151,7 @@ The REST transport does not retry. After a 429 it answers the same method and pa
 | Opening a DM's context menu | 1 channel GET; the item sends 1 PUT |
 | READY, for signals everywhere | 1 `GET /users/@me/signals` after the config, when the bar has signals; a bar mounting before it shares it |
 | Opening the globe panel | 1 summary GET; a tile, Turn all off or Restore: 1 PUT or POST, and 1 summary GET if it fails; Restore… 1 preview GET first |
+| A row's "Turn off signals" | 1 DELETE per own signal in that chat, all at once; if any fails, 1 summary GET and 1 channel GET (when loaded) |
 | Settings tab | 1 config GET (shared) and 1 `GET …/signal-bar/channels`; then 1 PUT per click, label, removal, addition or drop |
 | `SIGNAL_BAR_UPDATE` (one copy per community) | the first with a newer version starts 1 config GET; the rest share it |
 
@@ -150,7 +161,7 @@ mount and each newer-version event tries the config again. No test counts these 
 ## Rules and traps
 
 - Change a signal's persona only through `affirmPersona`, and only for something done in that channel.
-- `SignalBarStore` is the only caller of the signal routes (`Endpoints.ts`); keep it so.
+- `SignalBarStore` is the only caller of the signal routes (the fork's `ForkEndpoints.ts`); keep it so.
 - `normalize` rewrites the settings on every click: check a tree change with `SignalBarTree.test.ts`.
 - Strings go in `fork_locales` (root `AGENTS.md`), and every element carries a `data-flx` attribute
   (`CHECKS.md` checks it).
@@ -184,8 +195,8 @@ mount and each newer-version event tries the config again. No test counts these 
   - `useTextareaDraftAndTyping.ts`: the `clearComposerPersona` effect, `setComposerPersona` and an
     early return inside upstream's typing effect, and a widened dependency list (shared with personas).
   - `GuildChannelView.tsx`: `withSignalBar` around two `renderChatArea(…)` calls.
-  - `Endpoints.ts` (seven entries mid-object); `RuntimeConfig.ts` and `RuntimeConfigSnapshot.ts`
-    (`signalBarGuildId`, among other policy fields).
+  - `RuntimeConfig.ts` and `RuntimeConfigSnapshot.ts` (`signalBarGuildId`, among other policy
+    fields). The routes are in the fork's `ForkEndpoints.ts`.
 - In fork-owned files: `PersonaComposerPill.tsx`, `ForkAccountReadyWork.ts`.
 - Upstream's `useTextareaDraftAndTyping.test.tsx` mocks `SignalBarStore`, which upstream's hook now
   imports.
