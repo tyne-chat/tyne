@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {useShouldAnimate} from '@app/features/app/hooks/useShouldAnimate';
 import {ChannelOriginIcon} from '@app/features/channel/components/ChannelOriginIcon';
 import type {Channel} from '@app/features/channel/models/Channel';
 import Channels from '@app/features/channel/state/Channels';
@@ -17,9 +18,17 @@ import type {I18n} from '@lingui/core';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 
-/** A signal's emoji, as on the bar: its image, or the Unicode text. */
-export const SignalEmoji = ({signal, className}: {signal: SignalBarSignal; className: string}) => {
-	const imageUrl = getSignalImageUrl(signal, false);
+/** A signal's emoji, as on the bar: its image, or the Unicode text. Still unless `animated`. */
+export const SignalEmoji = ({
+	signal,
+	className,
+	animated = false,
+}: {
+	signal: SignalBarSignal;
+	className: string;
+	animated?: boolean;
+}) => {
+	const imageUrl = getSignalImageUrl(signal, animated);
 	return imageUrl ? (
 		<img className={className} src={imageUrl} alt="" draggable={false} data-flx="signal-bar.signal-emoji.image" />
 	) : (
@@ -63,3 +72,24 @@ export function getKnownSignalChats(): Array<KnownSignalChat> {
 	}
 	return known;
 }
+
+/** A lit signal's emoji: animated as lit signals on the bar are, following the account's settings. */
+export const LitSignalEmoji = ({
+	signal,
+	className,
+	isHovering,
+}: {
+	signal: SignalBarSignal;
+	className: string;
+	isHovering: boolean;
+}) => {
+	const animated = useShouldAnimate({kind: 'emoji', isAnimated: signal.animated, isHovering});
+	return (
+		<SignalEmoji
+			signal={signal}
+			className={className}
+			animated={animated}
+			data-flx="signal-bar.lit-signal-emoji.emoji"
+		/>
+	);
+};
