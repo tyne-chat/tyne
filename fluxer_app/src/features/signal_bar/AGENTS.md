@@ -14,6 +14,8 @@ rules every client follows and where the web and mobile clients differ are in th
 | Gateway events | `events/SignalBarEvents.ts`, registered in upstream's `gateway/events/EventRouter.ts` |
 | The bar, its buttons, rights, drag to reorder | `components/SignalBar.tsx` |
 | Managers' right-click menu | `components/SignalContextMenu.tsx` |
+| Signals everywhere: the globe, its panel, the restore dialog | `components/SignalsEverywhereButton.tsx`, `SignalsEverywherePanel.tsx`, `SignalsRestoreModal.tsx`; shared rows and icons in `SignalChatParts.tsx` |
+| The profile popout's "Signals" row | `components/UserAreaSignalsRow.tsx`, in upstream's `UserAreaPopout.tsx` |
 | DM switch | `components/SignalBarDMMenuItem.tsx`, in `DMContextMenu` and `GroupDMContextMenu` |
 | Community settings tab | `components/GuildSignalBarTab.tsx`: `SignalBarEditor.tsx`, `SignalBarChannelTree.tsx` |
 | Channel tree model | `utils/SignalBarTree.ts` |
@@ -42,6 +44,8 @@ rules every client follows and where the web and mobile clients differ are in th
 | `enabledByChannel` | whether the bar is on; an unknown channel counts as off |
 | `composerPersonas` | per channel, whom the mounted composer writes as (`null`: the account) |
 | `epoch` | bumped by `invalidate()`, so mounted bars refetch |
+| `myChats`, `restoreAvailable` | the account's own signals in every chat (`GET /users/@me/signals`), null until loaded; kept by the events that name the account, in loaded channels or not |
+| `everywhereBusy` | a change everywhere is on its way; the panel's buttons wait |
 | `collapsed` | the caret: one value per account on this device, for every channel, kept in app storage (`makePersistent`, key `SignalBar`), not synced. Collapsed, the bar keeps the lit signals and drops the rest; with none lit only the caret is left (as on mobile) |
 
 - **Loading.** `fetchConfig` shares the request in flight. `fetchChannel` is neither shared nor
@@ -54,6 +58,15 @@ rules every client follows and where the web and mobile clients differ are in th
   promoted resume (a desktop switch with no READY), and again when a sign-in or account switch is
   released. Nothing else resets the store: it has no
   `AccountScopedWork` cancellation and no logout hook.
+- **Signals everywhere** (tyne-chat/tyne#223; design and routes in the server guide). `invalidate()`
+  forgets the summary and, after the bar, calls `ensureMyChats()`, which shares or skips a request a
+  bar mounting meanwhile already sent; a mounting bar calls `ensureMyChats()`
+  (once, then not for a minute after a failure); opening the panel calls `fetchMyChats()`.
+  `setEverywhere(signalId | null, channelId, personaId)` and `restoreEverywhere()` are one request
+  each, take the summary from the answer, and on a failure reload it once. The chats themselves
+  change through their `CHANNEL_SIGNAL_UPDATE` events. A channel switched off
+  (`CHANNEL_SIGNAL_BAR_UPDATE`) leaves the summary, since the server clears it without a signal
+  event. No toasts: Restore is the undo.
 - **Writes.** `activate` is not optimistic: the signal shows lit when the event arrives.
   `deactivate` and `removeUser` remove the entry first; `reset` and `setDmEnabled` wait for the event.
   A failed write refetches the channel once. `saveSignals` shows the new list at once and, on failure,
@@ -75,6 +88,34 @@ Opening a channel, or a selection made elsewhere, moves nothing. A click lights 
 `getEffectivePersonaId`: the composer's recorded persona or, with no composer mounted (above a
 barrier), the persona resolved from the draft. Badges draw `entry.subprofile` with `PersonaAvatar`;
 `getSignalEntryName` takes the persona's name, then the member's nickname, then the username.
+
+## The globe and its panel
+
+- **The end of the bar:** a full-height divider, then the globe and the caret. Side by side while
+  the signals fit on one row beside that pair, stacked otherwise (`signalsWrapBesidePair`, measured
+  by `measureSignalBar` with a `ResizeObserver`); trying the pair first keeps it from flipping.
+  Collapsed with nothing lit in the chat, only the caret is left. The globe shows how many known
+  chats have the account's signals on: brand colour, grey at 0, nothing until loaded.
+- **Panel** (`Popout` from the globe; the same panel from the profile popout, with no open chat):
+  "Set everywhere (N chats)" over the signals ticked `everywhere` (N counts the open chat when the
+  bar is on there and the account may post), then Turn all off and Restore…, then every known chat,
+  newest first, as in the Quick Switcher: icon with the channel type in the corner (a DM: the
+  person), bold name, community (or Direct message / Group DM), and the chat's signals in columns
+  against the right edge, each row filling them from the first, as large as the chat's icon and
+  animated as lit signals on the bar are (`LitSignalEmoji`, `useShouldAnimate` with the row's hover);
+  the tiles, the size of the bar's signals, stay still. A tile or Turn all off acts and closes the
+  panel (Chiara, 2026-11-11). A click or Enter on a row opens the chat; arrow keys move between rows.
+  A right-click offers "Turn off signals" for that chat (`turnOffChat`), and the panel stays open.
+  Chats the client does not know are left out of the list and the count, but Turn all off and the
+  profile row go by every chat the server lists, so signals left in such chats (tyne-chat/tyne#305)
+  can still be cleared. The open chat's signal is lit as `getEffectivePersonaId`; the others keep their persona.
+- **Restore…** loads the preview (one GET); when it would change nothing (`restoreChangesSomething`)
+  it says there is nothing to restore. Otherwise upstream's `ConfirmModal`: what the last change
+  was and when, every chat with what is on now and after (past ten it scrolls under sticky
+  headings), and the chats left out.
+- **Profile popout:** `UserAreaSignalsRow` after the status row, handed upstream's `ActionButton`;
+  shown while the account has a signal on anywhere or Restore has something to put back.
+- **Editor:** an "Everywhere" tick per signal, next to its label; the save sends `everywhere`.
 
 ## Rights and settings
 
@@ -108,6 +149,9 @@ The REST transport does not retry. After a 429 it answers the same method and pa
 | Typing, a pill pick, a send | none, unless own lit signals in the channel name another persona: 1 PUT each, all at once |
 | Clicking a signal; the managers' menu | 1 PUT or DELETE, and 1 channel GET if it fails |
 | Opening a DM's context menu | 1 channel GET; the item sends 1 PUT |
+| READY, for signals everywhere | 1 `GET /users/@me/signals` after the config, when the bar has signals; a bar mounting before it shares it |
+| Opening the globe panel | 1 summary GET; a tile, Turn all off or Restore: 1 PUT or POST, and 1 summary GET if it fails; Restore… 1 preview GET first |
+| A row's "Turn off signals" | 1 DELETE per own signal in that chat, all at once; if any fails, 1 summary GET and 1 channel GET (when loaded) |
 | Settings tab | 1 config GET (shared) and 1 `GET …/signal-bar/channels`; then 1 PUT per click, label, removal, addition or drop |
 | `SIGNAL_BAR_UPDATE` (one copy per community) | the first with a newer version starts 1 config GET; the rest share it |
 
@@ -117,7 +161,7 @@ mount and each newer-version event tries the config again. No test counts these 
 ## Rules and traps
 
 - Change a signal's persona only through `affirmPersona`, and only for something done in that channel.
-- `SignalBarStore` is the only caller of the signal routes (`Endpoints.ts`); keep it so.
+- `SignalBarStore` is the only caller of the signal routes (the fork's `ForkEndpoints.ts`); keep it so.
 - `normalize` rewrites the settings on every click: check a tree change with `SignalBarTree.test.ts`.
 - Strings go in `fork_locales` (root `AGENTS.md`), and every element carries a `data-flx` attribute
   (`CHECKS.md` checks it).
@@ -141,7 +185,8 @@ mount and each newer-version event tries the config again. No test counts these 
 - One line or element each: `LexicalChannelTextareaContent.tsx`, `DMContextMenu.tsx`,
   `GroupDMContextMenu.tsx`, `GuildSettingsTabComponents.ts`, `EventRouter.ts` (three `registry.set`),
   `GatewayReady.ts` (`invalidate()`), `MessageCommands.tsx` (`affirmPersona` in `send`, under
-  `// Fork:`), `DndTypes.ts` (`SIGNAL`).
+  `// Fork:`), `DndTypes.ts` (`SIGNAL`), `UserAreaPopout.tsx` (`<UserAreaSignalsRow>` after the
+  status row, and its fork import).
 - Inside upstream's lines, the likeliest conflicts:
   - `DMChannelView.tsx`: `showsSignalBarAboveBarrier`, and upstream's barrier ternary wrapped in a
     fragment and re-indented. A sibling element before the ternary would leave upstream's lines alone.
@@ -150,14 +195,20 @@ mount and each newer-version event tries the config again. No test counts these 
   - `useTextareaDraftAndTyping.ts`: the `clearComposerPersona` effect, `setComposerPersona` and an
     early return inside upstream's typing effect, and a widened dependency list (shared with personas).
   - `GuildChannelView.tsx`: `withSignalBar` around two `renderChatArea(…)` calls.
-  - `Endpoints.ts` (seven entries mid-object); `RuntimeConfig.ts` and `RuntimeConfigSnapshot.ts`
-    (`signalBarGuildId`, among other policy fields).
+  - `RuntimeConfig.ts` and `RuntimeConfigSnapshot.ts` (`signalBarGuildId`, among other policy
+    fields). The routes are in the fork's `ForkEndpoints.ts`.
 - In fork-owned files: `PersonaComposerPill.tsx`, `ForkAccountReadyWork.ts`.
 - Upstream's `useTextareaDraftAndTyping.test.tsx` mocks `SignalBarStore`, which upstream's hook now
   imports.
 
 ## Tests
 
+- `state/SignalBarEverywhere.test.ts`: the summary loaded once, the minute's wait after a failure,
+  events in loaded and unloaded channels, one request per action, the busy guard, the reload after
+  a failure, READY. `components/SignalsEverywhere.test.tsx`: the globe's count (grey 0, unknown
+  chats left out), no globe when collapsed with nothing lit, ticked tiles and the open chat's
+  persona, rows, columns and navigation, Turn all off and Restore, the profile row,
+  `signalsWrapBesidePair`.
 - `state/SignalBarStore.test.ts`: entries, the persona rules (typing, other channels), version
   refetch, rollbacks, the enabled flag. `state/SignalBarCollapsedStorage.test.ts`: the caret is kept
   per account in app storage. `components/SignalBar.test.tsx`: rendering, badges, toggling,
