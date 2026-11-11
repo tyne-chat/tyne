@@ -17,6 +17,9 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
 - Managers turn one person's signal off or reset a signal for everyone.
 - A signal stays lit while its owner is online and for 12 hours after they go offline
   (tyne-chat/tyne#89).
+- Signals everywhere (tyne-chat/tyne#223): from the globe button at the end of the bar, a user sets
+  one signal in every chat where they have one on (plus the open chat), turns all of theirs off, or
+  restores what the last such change replaced. Managers tick which signals may be set everywhere.
 
 ## Where things are
 
@@ -36,13 +39,14 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
 
 | What | Where | Shape |
 |---|---|---|
-| The bar | upstream's `instance_configuration` table, key `signal_bar` (cached in memory by `InstanceConfigRepository`) | `{version, signals: [{id, emoji_id, emoji_name, animated, label}]}` |
+| The bar | upstream's `instance_configuration` table, key `signal_bar` (cached in memory by `InstanceConfigRepository`) | `{version, signals: [{id, emoji_id, emoji_name, animated, label, everywhere}]}`; `everywhere` missing reads false |
 | Home community | `signal_bar_guild_id` in the policy row | null: `getConfig` returns no signals, but keeps the stored list and version |
 | Community switches | fork table `guild_signal_bar_settings`, key `guild_id` | JSON `{default, categories, channels}`, ids to booleans; no row: off |
 | DM switch | fork table `dm_signal_bar_settings`, key `channel_id` | `enabled`; no row: off |
 | Lit signal | Valkey `signalbar:entry:<channel>:<signal>:<user>`, TTL 10 minutes | `{signal_id, user, persona_id, subprofile, activated_at}` |
 | Indexes | Valkey sets `signalbar:channel:<channel>`, `signalbar:user:<user>`, `signalbar:users` | TTL 7 days, renewed only when a signal is lit or re-pointed |
 | Offline clock | Valkey `signalbar:offline_since:<user>`, TTL 24 hours | when the sweep first saw the account offline |
+| Restore | Valkey `signalbar:restore:<user>`, no TTL | `{created_at, action: {kind, signal_id}, chats: [{channel_id, signals: [{signal_id, persona_id}]}]}`: what the last change everywhere replaced, in the chats it changed |
 
 - A community channel takes its own setting, then its category's, then the community default
   (`resolveSignalBarEnabled`). A DM reads its row.
@@ -57,8 +61,8 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
 
 Every route needs a login. Bearer tokens are refused (no `requireOAuth2ScopeForBearer`), whatever
 the `OpenAPI` block says; bots may call every route without `DefaultUserOnly`. Buckets
-(`UserRateLimitConfig.ts`): read 60 per 10 s, toggle 30 per 10 s, mutate 30 per minute; all count
-toward the global limit.
+(`UserRateLimitConfig.ts`): read 60 per 10 s, toggle 30 per 10 s, mutate 30 per minute, everywhere
+10 per minute; all count toward the global limit.
 
 | Route | Who | Effect |
 |---|---|---|
@@ -70,6 +74,10 @@ toward the global limit.
 | `DELETE /channels/:id/signals/:sid`, `…/:sid/users/:uid` | a manager | everyone off; one account off |
 | `PUT /channels/:id/signal-bar` | anyone in the DM or group DM; no bots | the DM switch; off clears the DM's signals |
 | `GET`, `PUT /guilds/:id/signal-bar/channels` | Manage Community; no bots | the community switches |
+| `GET /users/@me/signals` | anyone | `{chats: [{channel_id, signals, updated_at}], restore_available}`, newest first |
+| `PUT /users/@me/signals` | no bots; a signal ticked `everywhere` (else 403), or null | sets it everywhere, or turns all off; returns the summary |
+| `GET /users/@me/signals/restore` | anyone | per chat `{available, now, after}`, for the confirm dialog |
+| `POST /users/@me/signals/restore` | no bots | puts back the snapshot where the user may still light; returns the summary |
 
 - **Manager** (`assertCanManageChannel`): Manage Community in a community channel; either person in
   a one-to-one DM; the owner of a group DM. The DM switch is not theirs alone: anyone in a group DM
@@ -80,6 +88,29 @@ toward the global limit.
   text must contain a pictograph.
 - `updateGuildSettings` keeps only category, text and announcement channel ids, writes, then for each
   text channel whose state changed clears its signals (when off) and sends `CHANNEL_SIGNAL_BAR_UPDATE`.
+- `updateBar` keeps a signal's `everywhere` tick when the item leaves it out (an older client's edit).
+
+## Signals everywhere
+
+- **Scope.** `setEverywhere` works on the chats in `signalbar:user:<id>` (signals still on the bar),
+  plus `channel_id` when setting; at most `MAX_USER_SIGNAL_CHATS` (200), the open chat first. Each
+  chat is opened through `getChannelAuthenticated` (the controller's `chatAuthenticator`; a chat the
+  user cannot see is null).
+- **Set** lights the signal and turns the user's others there off. A chat where they may no longer
+  light (`canLight`: the same checks as lighting, without throwing) is left as it is. Each chat keeps
+  the persona of its newest signal; the open chat takes `persona_id`, checked like lighting. A
+  persona deleted since falls back to the account.
+- **Off** (`signal_id: null`) clears every chat, including ones the user can no longer see.
+- **Snapshot.** Each change everywhere saves, for the chats it changed, the signals and personas it
+  replaced, over the previous snapshot. A change that changed nothing keeps the previous one, so
+  pressing Set twice does not lose the way back. Kept until the next change everywhere
+  (Chiara, 2026-11-10: indefinitely for now).
+- **Restore** puts each saved chat back exactly (lights its saved signals, turns the rest off) where
+  the user may still light, skips the others, and saves what it replaced: a second restore swaps
+  back. It may bring back signals that are not ticked `everywhere`. The preview lists every saved
+  chat with `available: false` for the skipped ones.
+- One `CHANNEL_SIGNAL_UPDATE` per chat changed; no new event. Clients keep their summary from
+  `GET /users/@me/signals` and the events that carry their own user id.
 
 ## Events
 
@@ -150,6 +181,9 @@ Where the clients differ today:
   on the instance (pages of 100), all inside the request; a failed dispatch is logged and skipped.
 - `PUT /guilds/:id/signal-bar/channels`: clearing and one dispatch per channel whose state changed, in
   sequence.
+- `PUT /users/@me/signals` and `POST …/restore`: per chat one channel authentication, permission and
+  switch reads, a few Valkey calls and one dispatch, in sequence; the preview authenticates every
+  saved chat at once.
 - The sweep, each minute: one emoji read per custom-emoji signal; one presence RPC per account with
   signals and two Valkey calls per entry; one channel read and dispatch per channel with removals.
 
@@ -192,6 +226,9 @@ Where the clients differ today:
 
 ## Tests
 
+- `tests/SignalBarEverywhere.test.ts`: set everywhere with personas and the open chat, the tick and
+  its 403, turning off where the user cannot post, restore and swapping back, a change that changes
+  nothing, a deleted persona.
 - `tests/SignalBar.test.ts` (`createApiTestHarness`, in memory): home community, edit rights and
   stable ids, persona re-pointing, manager rights, group DMs, the 12-hour sweep with a fake clock
   (`createSweepService`), switches and inheritance, clearing, the 50 cap, emoji checks and pruning,
