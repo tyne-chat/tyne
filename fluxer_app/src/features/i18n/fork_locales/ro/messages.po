@@ -1591,10 +1591,6 @@ msgstr "Pictograma etichetei nu a putut fi salvată: {error}. O poți seta din n
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Detaliile lor sunt acum cele din fișier; mesajele și istoricul lor au rămas."
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "Mesajele lor vor arăta în continuare numele și avatarurile lor, dar nu vei mai putea trimite ca ele, iar etichetele și emoji-urile lor semnătură devin libere. Le poți restaura ulterior din Setări › Personas, la Personas șterse."
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "Numele persoanei care o folosește"
@@ -1830,6 +1826,10 @@ msgstr "Windows a protejat PC-ul"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Scrie un număr ca 1st, 2nd, 3rd"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Poți restaura ulterior personas șterse din Setări › Personas, la Personas șterse."
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
