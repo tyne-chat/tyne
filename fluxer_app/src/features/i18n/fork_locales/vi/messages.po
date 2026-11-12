@@ -116,9 +116,10 @@ msgstr "Mọi bản Linux khác"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple silicon (M1 trở lên)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Bạn có chắc muốn xóa <0>{0}</0> không? Không thể hoàn tác hành động này."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Bạn có chắc muốn xóa <0>{0}</0> không? Bạn có thể khôi phục persona đã xóa sau trong Cài đặt › Persona, ở mục Persona đã xóa."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Không lưu được biểu tượng thẻ: {error}. Có thể đặt l�
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Thông tin của chúng giờ là của tệp; tin nhắn và lịch sử vẫn được giữ."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Tin nhắn của chúng vẫn hiện tên và ảnh đại diện, nhưng bạn sẽ không thể gửi dưới tên chúng nữa, và thẻ cùng biểu tượng cảm xúc đặc trưng của chúng sẽ được giải phóng. Không thể hoàn tác."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Tin nhắn của chúng vẫn hiện tên và ảnh đại diện, nhưng bạn sẽ không thể gửi dưới tên chúng nữa, và thẻ cùng biểu tượng cảm xúc đặc trưng của chúng sẽ được giải phóng. Bạn có thể khôi phục chúng sau trong Cài đặt › Persona, ở mục Persona đã xóa."
 
 #. Help for a command script variable.
 msgid "Their name"
