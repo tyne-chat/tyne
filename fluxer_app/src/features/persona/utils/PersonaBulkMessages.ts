@@ -70,8 +70,9 @@ export const CONFIRM_PRIVATE_BODY_DESCRIPTOR = msg({
 });
 export const CONFIRM_DELETE_BODY_DESCRIPTOR = msg({
 	message:
-		'Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone.',
-	comment: 'Explains what deleting personas does, in its confirmation.',
+		'Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas.',
+	comment:
+		'Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.',
 });
 export const NOW_PUBLIC_DESCRIPTOR = msg({
 	message: '{count, plural, one {# persona is} other {# personas are}} now public',

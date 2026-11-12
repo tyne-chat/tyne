@@ -235,7 +235,7 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   and hides the row's buttons; "Select all" takes what the search and chip show. The action bar
   makes the selection public, unlisted or private (`setPersonaVisibilities`, one request) or
   deletes it (`deletePersonas`, one request, dropping the personas and their pins in one action).
-  Public, private and delete ask first (delete in red, saying it cannot be undone); a visibility
+  Public, private and delete ask first (delete in red, pointing to Deleted personas); a visibility
   change ends in a toast with Undo, one request that puts each persona back as it was. The
   `feature` subtab (the Personas tab's "Choose personas to feature") opens on Unlisted with Select on.
 - **Import** (tyne-chat/tyne#243): `PluralKitImportModal` reads PluralKit JSON or a Tyne zip
