@@ -227,7 +227,9 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   visibility and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
   repeated by the mobile app), focused and selected. Tags and signature emojis start empty, since each
   belongs to one persona; pins, usage and the PluralKit link are not copied. Its bar ("Copy of …",
-  Cancel, Create) stays up, and Create sends the one `createPersona` Add Persona sends.
+  Cancel, Create) stays up, and Create sends the one `createPersona` Add Persona sends. A "+ New
+  Persona" badge on the preview card's banner tells the copy from the persona it came from, which
+  it otherwise looks like (someone edited the original thinking it was the copy).
 - **Selecting many** (tyne-chat/tyne#542, `components/settings/PersonaBulkSelection.tsx`): chips
   with counts (All, Public, Unlisted, Private) filter the list; Select puts a checkbox on every row
   and hides the row's buttons; "Select all" takes what the search and chip show. The action bar

@@ -637,6 +637,8 @@ describe('PersonaEditModal Component', () => {
 			await renderCopy();
 
 			expect(query('persona.persona-edit-modal.copy-banner-text')?.textContent).toBe('Copy of Lyra');
+			// The badge on the preview's banner tells the copy from the persona it came from.
+			expect(query('persona.persona-edit-modal.copy-preview-badge')?.textContent).toBe('New Persona');
 			expect((query('persona.persona-edit-modal.input.name') as HTMLInputElement).value).toBe('Lyra (3)');
 			expect((query('persona.persona-edit-modal.input.pronouns') as HTMLInputElement).value).toBe('she/they');
 			expect(
@@ -713,6 +715,8 @@ describe('PersonaEditModal Component', () => {
 					/>,
 				);
 			});
+
+			expect(query('persona.persona-edit-modal.copy-preview-badge')).toBeNull();
 
 			await click('persona.persona-edit-modal.button.duplicate-persona');
 
