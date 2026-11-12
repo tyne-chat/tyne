@@ -55,6 +55,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {allowsMessageDoubleClick} from '@app/features/accessibility/state/ForkMessageDoubleClick';
 import {pressedAttachmentId} from '@app/features/channel/components/DeleteAttachmentMenuGroup';
 import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
 import {PersonaPickerSheet} from '@app/features/persona/components/PersonaPickerSheet';
@@ -347,6 +348,8 @@ export const Message: React.FC<MessageProps> = observer((props) => {
 			}
 			const permissions = getMessagePermissions(message, channel);
 			if (!permissions?.canSendMessages) return;
+			// Fork: editing and replying have a switch each (tyne-chat/tyne#611).
+			if (!allowsMessageDoubleClick(permissions.canEditMessage && !message.messageSnapshots)) return;
 			if (permissions.canEditMessage && !message.messageSnapshots) {
 				startMessageEdit(message);
 				return;
