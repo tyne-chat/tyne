@@ -116,9 +116,10 @@ msgstr "Cualquier otro Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Chip de Apple (M1 o posterior)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "¿Seguro que quieres eliminar <0>{0}</0>? Esta acción no se puede deshacer."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "¿Seguro que quieres eliminar <0>{0}</0>? Más tarde puedes restaurar las personas eliminadas en Configuración › Personas, en «Personas eliminadas»."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "No se pudo guardar el ícono de la etiqueta: {error}. Puedes configurarl
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Ahora tienen los datos del archivo; sus mensajes y su historial se conservaron."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Sus mensajes seguirán mostrando sus nombres y avatares, pero ya no podrás enviar como ellas, y sus etiquetas y emojis distintivos quedarán libres. Esto no se puede deshacer."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Sus mensajes seguirán mostrando sus nombres y avatares, pero ya no podrás enviar como ellas, y sus etiquetas y emojis distintivos quedarán libres. Más tarde puedes restaurarlas en Configuración › Personas, en «Personas eliminadas»."
 
 #. Help for a command script variable.
 msgid "Their name"

@@ -116,9 +116,10 @@ msgstr "Każdy inny Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Procesor Apple (M1 lub nowszy)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Czy na pewno chcesz usunąć <0>{0}</0>? Tej czynności nie można cofnąć."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Czy na pewno chcesz usunąć <0>{0}</0>? Usunięte persony możesz później przywrócić w sekcji Usunięte persony (Ustawienia › Persony)."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Nie udało się zapisać ikony tagu: {error}. Można ją ustawić ponown
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Ich dane pochodzą teraz z pliku; wiadomości i historia zostały."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Ich wiadomości nadal będą pokazywać ich nazwy i awatary, ale nie będziesz już mieć możliwości pisania jako one, a ich tagi i emoji podpisu się zwolnią. Tego nie można cofnąć."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Ich wiadomości nadal będą pokazywać ich nazwy i awatary, ale nie będziesz już mieć możliwości pisania jako one, a ich tagi i emoji podpisu się zwolnią. Możesz je później przywrócić w sekcji Usunięte persony (Ustawienia › Persony)."
 
 #. Help for a command script variable.
 msgid "Their name"
