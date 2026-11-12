@@ -26,6 +26,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {ForkEmojiImg} from '@app/features/expressions/components/ForkEmojiImg';
+
 const EMOJI_FAILED_TO_LOAD_DESCRIPTOR = msg({
 	message: '{emojiName} (failed to load)',
 	comment: 'Error message in the messaging emoji renderer.',
@@ -193,7 +197,7 @@ export const EmojiRenderer = observer(function EmojiRenderer({
 	};
 	const renderEmojiElement = (contextMenu: boolean, dataFlx: string) =>
 		emojiUrl ? (
-			<img
+			<ForkEmojiImg
 				draggable={false}
 				className={className}
 				alt={accessibleName}

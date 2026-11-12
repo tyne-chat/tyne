@@ -284,6 +284,15 @@ design, including the mobile part still to come, is `docs/design/server-commands
   use it (`fluxer_app/src/features/user/utils/ForkOriginalImageUrl.ts`, called from upstream's
   `UserImageMenuItems.tsx`), and persona profiles have the same menus
   (`features/persona/utils/usePersonaImageMenus.tsx`; tyne-chat/tyne#471, #473).
+- Animated emoji in step: on the web and desktop, animated custom emoji in messages and reactions
+  with the same loop length (a left and a right wing) always show the same frame, as on mobile. Each
+  loop length has one clock, started by the first such emoji shown and dropped when none is on screen;
+  later ones join it at its current frame. A browser cannot pick the frame an `<img>` shows, so each
+  emoji is fetched once, decoded with WebCodecs' `ImageDecoder` into a strip of frames, and shown in
+  upstream's `<img>` moved to the clock's frame (`features/expressions/utils/ForkSyncedEmojiClock.ts`,
+  `ForkSyncedEmojiPlayback.ts`, `components/ForkEmojiImg.tsx`, which takes the place of the `<img>` in
+  upstream's `EmojiRenderer.tsx` and `ReactionImage.tsx`). Without `ImageDecoder` the `<img>` stays
+  upstream's (tyne-chat/tyne#612; mobile: #91).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
