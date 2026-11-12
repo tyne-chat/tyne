@@ -375,9 +375,14 @@ msgstr "Бачны тэг будзе паказвацца побач з імён
 msgid "Don't match this persona's tags"
 msgstr "Не распазнаваць тэгі гэтай персоны"
 
+#. Short label for an advanced chat preference: double-clicking one of your own messages opens it for editing.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Двойчы націсніце, каб змяніць"
+
+#. Short label for an advanced chat preference: double-clicking someone else's message starts a reply to it. Off by default, so that double-clicking a word selects it.
+msgid "Double-click to reply"
+msgstr "Двойчы націсніце, каб адказаць"
 
 #. Button that downloads the Tyne app as a .deb package for Linux.
 msgid "Download .deb"
