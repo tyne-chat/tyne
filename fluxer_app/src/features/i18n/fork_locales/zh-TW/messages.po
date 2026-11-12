@@ -116,9 +116,10 @@ msgstr "其他任何 Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple 晶片（M1 或更新）"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "確定要刪除 <0>{0}</0> 嗎？此操作無法復原。"
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "確定要刪除 <0>{0}</0> 嗎？已刪除的人格之後可以在「設定 › 人格」的「已刪除的人格」中還原。"
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "無法儲存標籤圖示：{error}。可在人格設定中重新設定�
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "其資料現已採用檔案中的版本；訊息和歷史紀錄均保留。"
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "它們的訊息仍會顯示名稱和頭像，但你將無法再以它們的身分傳送，它們的標籤和專屬表情符號也會釋出。此操作無法復原。"
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "它們的訊息仍會顯示名稱和頭像，但你將無法再以它們的身分傳送，它們的標籤和專屬表情符號也會釋出。之後可以在「設定 › 人格」的「已刪除的人格」中還原它們。"
 
 #. Help for a command script variable.
 msgid "Their name"

@@ -116,9 +116,10 @@ msgstr "Qualquer outro Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple silicon (M1 ou mais recente)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Tens a certeza de que desejas eliminar <0>{0}</0>? Esta ação não pode ser desfeita."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Tens a certeza de que desejas eliminar <0>{0}</0>? Podes restaurar personas eliminadas mais tarde em Definições › Personas, em Personas eliminadas."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Não foi possível guardar o ícone da tag: {error}. Podes defini-lo nov
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Os dados delas são agora os do ficheiro; as mensagens e o histórico mantiveram-se."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "As mensagens delas continuam a mostrar os nomes e avatares, mas deixas de poder enviar como elas, e as tags e emojis de assinatura delas ficam livres. Esta ação não pode ser anulada."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "As mensagens delas continuam a mostrar os nomes e avatares, mas deixas de poder enviar como elas, e as tags e emojis de assinatura delas ficam livres. Podes restaurá-las mais tarde em Definições › Personas, em Personas eliminadas."
 
 #. Help for a command script variable.
 msgid "Their name"

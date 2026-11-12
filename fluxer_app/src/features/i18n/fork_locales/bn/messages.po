@@ -116,9 +116,10 @@ msgstr "অন্য যেকোনো Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple সিলিকন (M1 বা নতুন)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "আপনি কি নিশ্চিত যে <0>{0}</0> মুছে ফেলতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।"
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "আপনি কি নিশ্চিত যে <0>{0}</0> মুছে ফেলতে চান? মুছে ফেলা পারসোনা পরে সেটিংস › পারসোনা-র “মুছে ফেলা পারসোনা” অংশ থেকে পুনরুদ্ধার করতে পারবেন।"
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "ট্যাগ আইকন সংরক্ষণ করা যায�
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "তাদের তথ্য এখন ফাইলের মতো; তাদের মেসেজ আর ইতিহাস আগের মতোই আছে।"
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "তাদের মেসেজে নাম ও অ্যাভাটার দেখা যেতেই থাকবে, কিন্তু আপনি আর তাদের হয়ে পাঠাতে পারবেন না, এবং তাদের ট্যাগ ও সিগনেচার ইমোজি মুক্ত হয়ে যাবে। এটি পূর্বাবস্থায় ফেরানো যাবে না।"
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "তাদের মেসেজে নাম ও অ্যাভাটার দেখা যেতেই থাকবে, কিন্তু আপনি আর তাদের হয়ে পাঠাতে পারবেন না, এবং তাদের ট্যাগ ও সিগনেচার ইমোজি মুক্ত হয়ে যাবে। পরে সেটিংস › পারসোনা-র “মুছে ফেলা পারসোনা” অংশ থেকে তাদের পুনরুদ্ধার করতে পারবেন।"
 
 #. Help for a command script variable.
 msgid "Their name"
