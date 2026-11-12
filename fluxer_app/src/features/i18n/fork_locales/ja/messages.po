@@ -1591,10 +1591,6 @@ msgstr "タグアイコンを保存できませんでした: {error}。ペルソ
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "詳細はファイルの内容になりました。メッセージと履歴はそのままです。"
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "メッセージには名前とアバターが引き続き表示されますが、そのペルソナとして送信できなくなり、タグとシグネチャー絵文字は解放されます。あとで「設定 › ペルソナ」の「削除したペルソナ」から復元できます。"
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "使った人の名前"
@@ -1830,6 +1826,10 @@ msgstr "Windows によって PC が保護されました"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "数を 1st, 2nd, 3rd の形で書く"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "削除したペルソナは、あとで「設定 › ペルソナ」の「削除したペルソナ」から復元できます。"
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
