@@ -51,6 +51,7 @@ import type {I18n} from '@lingui/core';
 // Fork imports.
 
 import {forkAppearanceIndex} from '@app/features/user/components/settings_utils/search_index/ForkAppearanceIndex';
+import {forkChatSettingsIndex} from '@app/features/user/components/settings_utils/search_index/ForkChatSettingsIndex';
 
 export interface SettingsSearchResult {
 	tab: SettingsTab;
@@ -117,6 +118,7 @@ const ADDITIONAL_SEARCHABLE_ITEMS: Array<SearchableSettingDescriptor> = [
 	...themesIndex,
 	...notificationsIndex,
 	...chatSettingsIndex,
+	...forkChatSettingsIndex,
 	...voiceVideoIndex,
 	...accessibilityIndex,
 	...languageIndex,
