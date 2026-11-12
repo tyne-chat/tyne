@@ -202,6 +202,15 @@ export class FluxerApiClient {
 		});
 	}
 
+	// --- User Settings Endpoints ---
+
+	public async updateUserSettings(settings: Record<string, unknown>): Promise<Record<string, unknown>> {
+		return this.request<Record<string, unknown>>('/api/v1/users/@me/settings', {
+			method: 'PATCH',
+			body: JSON.stringify(settings),
+		});
+	}
+
 	public async startGatewaySession(timeoutMs = 10000): Promise<void> {
 		if (!this.token) {
 			throw new Error('Cannot start gateway session without an auth token');
