@@ -375,9 +375,14 @@ msgstr "메시지의 모든 페르소나 이름 옆에 표시 태그가 나타�
 msgid "Don't match this persona's tags"
 msgstr "이 페르소나의 태그를 인식하지 않기"
 
+#. Short label for an advanced chat preference: double-clicking one of your own messages opens it for editing.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "더블 클릭하여 수정"
+
+#. Short label for an advanced chat preference: double-clicking someone else's message starts a reply to it. Off by default, so that double-clicking a word selects it.
+msgid "Double-click to reply"
+msgstr "더블 클릭하여 답장"
 
 #. Button that downloads the Tyne app as a .deb package for Linux.
 msgid "Download .deb"
