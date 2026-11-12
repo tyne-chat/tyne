@@ -172,6 +172,7 @@ and the fork tests. Inside upstream's files, under `// Fork imports.`:
 | `TypingStart.ts`, `useTextareaDraftAndTyping.ts` | the typist's persona; the composer's persona to typing and the signal bar, silent while a tag is half typed |
 | `MarkdownToSegmentUtils.ts` | `convertMarkdownToSegments` returns through `withPersonaMentionSegments`, so an edited message's persona mentions become pills |
 | `PasteSegmentUtils.ts` | `detectPastedSegments` adds `pastedPersonaMentionSegments`, so pasted persona mentions become pills |
+| `EmojiRenderer.tsx`, `ReactionImage.tsx` | the emoji's `<img>` is `ForkEmojiImg` (`expressions/components/`), which keeps animated custom emoji in step (tyne-chat/tyne#612) |
 
 Smaller fork changes: emoji autocomplete limit, typed shortcode case, `<t:>` in the profile's
 time zone, plain paste, an emptied composer deleting its draft. The mention parser is in
