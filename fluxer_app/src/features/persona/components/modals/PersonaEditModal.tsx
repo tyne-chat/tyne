@@ -1304,6 +1304,22 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 										style={PROFILE_POPOUT_GEOMETRY_STYLE}
 										data-flx="persona.persona-edit-modal.profile-card-layout"
 									>
+										{/* A copy looks like the persona it came from: the badge on its banner, where people look, says
+										    which one this is (tyne-chat/tyne#599). */}
+										{isCopy && (
+											<span
+												className={styles.copyPreviewBadge}
+												data-flx="persona.persona-edit-modal.copy-preview-badge"
+											>
+												<Plus
+													size={12}
+													weight="bold"
+													aria-hidden={true}
+													data-flx="persona.persona-edit-modal.copy-preview-badge-icon"
+												/>
+												{i18n._(NEW_PERSONA_DESCRIPTOR)}
+											</span>
+										)}
 										<ProfileCardBanner
 											bannerUrl={
 												formData.pendingBanner ??
