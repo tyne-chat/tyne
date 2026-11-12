@@ -116,9 +116,10 @@ msgstr "Bet kuri kita Linux sistema"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple lustas (M1 ar naujesnis)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Ar tikrai norite ištrinti <0>{0}</0>? Šio veiksmo anuliuoti negalima."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Ar tikrai norite ištrinti <0>{0}</0>? Ištrintas personas vėliau galėsite atkurti skyriuje „Ištrintos personos“ (Nustatymai › Personos)."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Nepavyko išsaugoti žymos piktogramos: {error}. Ją galite vėl nustaty
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Dabar jų duomenys paimti iš failo; jų žinutės ir istorija liko."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Jų žinutėse ir toliau bus rodomi jų vardai ir avatarai, bet nebegalėsite rašyti jų vardu, o jų žymos ir parašo jaustukai atsilaisvins. To atšaukti negalima."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Jų žinutėse ir toliau bus rodomi jų vardai ir avatarai, bet nebegalėsite rašyti jų vardu, o jų žymos ir parašo jaustukai atsilaisvins. Vėliau jas galėsite atkurti skyriuje „Ištrintos personos“ (Nustatymai › Personos)."
 
 #. Help for a command script variable.
 msgid "Their name"
