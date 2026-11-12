@@ -18,6 +18,10 @@ import {captureCustomCssOffFromLocation} from '@app/features/theme_settings/stat
 import {PASSKEY_BRIDGE_PATH} from '@fluxer/constants/src/PasskeyConstants';
 import {configure} from 'mobx';
 
+// Fork imports.
+
+import {installForkSyncedEmoji} from '@app/features/expressions/utils/ForkSyncedEmojiImages';
+
 const logger = new Logger('index');
 
 function loadAppBootstrap() {
@@ -36,6 +40,7 @@ async function bootstrap(): Promise<void> {
 
 	installRuntimeConfigEffects();
 	installImageRetention(document);
+	installForkSyncedEmoji(document);
 	const passkeyBridgeSide =
 		window.location.pathname === PASSKEY_BRIDGE_PATH ? resolveDomainMigrationSide(window.location.origin) : null;
 	if (passkeyBridgeSide !== null) {
