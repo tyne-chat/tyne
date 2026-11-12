@@ -116,9 +116,10 @@ msgstr "Любой другой Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple silicon (M1 или новее)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Вы уверены, что хотите удалить <0>{0}</0>? Это действие нельзя отменить."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Вы уверены, что хотите удалить <0>{0}</0>? Удалённые персоны можно потом восстановить в разделе «Удалённые персоны» (Настройки › Персоны)."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Не удалось сохранить значок тега: {error}. �
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Теперь у них данные из файла; их сообщения и история сохранились."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Их сообщения по-прежнему будут показывать их имена и аватары, но вы больше не сможете писать от их имени, а их теги и фирменные эмодзи освободятся. Это действие нельзя отменить."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Их сообщения по-прежнему будут показывать их имена и аватары, но вы больше не сможете писать от их имени, а их теги и фирменные эмодзи освободятся. Их можно потом восстановить в разделе «Удалённые персоны» (Настройки › Персоны)."
 
 #. Help for a command script variable.
 msgid "Their name"
