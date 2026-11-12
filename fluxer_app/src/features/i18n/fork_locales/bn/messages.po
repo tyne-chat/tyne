@@ -375,9 +375,14 @@ msgstr "মেসেজে সব পারসোনার নামের প�
 msgid "Don't match this persona's tags"
 msgstr "এই পারসোনার ট্যাগ মেলাবেন না"
 
+#. Short label for an advanced chat preference: double-clicking one of your own messages opens it for editing.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "এডিট করতে ডাবল-ক্লিক করুন"
+
+#. Short label for an advanced chat preference: double-clicking someone else's message starts a reply to it. Off by default, so that double-clicking a word selects it.
+msgid "Double-click to reply"
+msgstr "উত্তর দিতে ডাবল-ক্লিক করুন"
 
 #. Button that downloads the Tyne app as a .deb package for Linux.
 msgid "Download .deb"

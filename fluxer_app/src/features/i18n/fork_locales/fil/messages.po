@@ -375,9 +375,14 @@ msgstr "Lalabas ang ipinapakitang tag sa tabi ng pangalan ng bawat persona sa mg
 msgid "Don't match this persona's tags"
 msgstr "Huwag itugma ang mga tag ng personang ito"
 
+#. Short label for an advanced chat preference: double-clicking one of your own messages opens it for editing.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "I-double click para i-edit"
+
+#. Short label for an advanced chat preference: double-clicking someone else's message starts a reply to it. Off by default, so that double-clicking a word selects it.
+msgid "Double-click to reply"
+msgstr "I-double click para sumagot"
 
 #. Button that downloads the Tyne app as a .deb package for Linux.
 msgid "Download .deb"

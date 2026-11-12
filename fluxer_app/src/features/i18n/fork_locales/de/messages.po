@@ -375,9 +375,14 @@ msgstr "Das Anzeige-Tag wird neben allen Persona-Namen in Nachrichten angezeigt.
 msgid "Don't match this persona's tags"
 msgstr "Tags dieser Persona nicht erkennen"
 
+#. Short label for an advanced chat preference: double-clicking one of your own messages opens it for editing.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "Doppelklick zum Bearbeiten"
+
+#. Short label for an advanced chat preference: double-clicking someone else's message starts a reply to it. Off by default, so that double-clicking a word selects it.
+msgid "Double-click to reply"
+msgstr "Doppelklick zum Antworten"
 
 #. Button that downloads the Tyne app as a .deb package for Linux.
 msgid "Download .deb"

@@ -67,6 +67,10 @@ import {observer} from 'mobx-react-lite';
 // Fork imports.
 
 import {EdgeHoverPeekControl} from '@app/features/user/components/modals/tabs/advanced_settings_tab/AdvancedAppearanceControls';
+import {
+	ForkDoubleClickToEditControl,
+	ForkDoubleClickToReplyControl,
+} from '@app/features/user/components/modals/tabs/advanced_settings_tab/ForkMessageDoubleClickControl';
 
 export const DIRECT_CONTROL_ITEM_IDS = new Set([
 	'advanced-windows-fluxer-sans',
@@ -166,6 +170,14 @@ export const COMPACT_SWITCH_CONTROL_ITEM_IDS = new Set([
 
 export const AdvancedSettingControl = observer(({item}: {item: SearchableSettingItem}) => {
 	switch (item.id) {
+		case 'chat-settings-double-click-edit':
+			return (
+				<ForkDoubleClickToEditControl data-flx="user.advanced-setting-direct-controls.advanced-setting-control.double-click-to-edit-control" />
+			);
+		case 'chat-settings-double-click-reply':
+			return (
+				<ForkDoubleClickToReplyControl data-flx="user.advanced-setting-direct-controls.advanced-setting-control.double-click-to-reply-control" />
+			);
 		case 'advanced-windows-fluxer-sans':
 			return (
 				<WindowsFluxerSansControl data-flx="user.advanced-setting-direct-controls.advanced-setting-control.windows-fluxer-sans-control" />
@@ -386,3 +398,9 @@ export const AdvancedSettingControl = observer(({item}: {item: SearchableSetting
 			return null;
 	}
 });
+
+// Fork: the rows of ForkChatSettingsIndex.ts, each a switch that a click on the row toggles.
+for (const id of ['chat-settings-double-click-edit', 'chat-settings-double-click-reply']) {
+	DIRECT_CONTROL_ITEM_IDS.add(id);
+	COMPACT_SWITCH_CONTROL_ITEM_IDS.add(id);
+}
