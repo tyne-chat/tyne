@@ -1591,10 +1591,6 @@ msgstr "Ikon tag tidak dapat disimpan: {error}. Ikon dapat diatur lagi di pengat
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Detailnya kini mengikuti file; pesan dan riwayatnya tetap ada."
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "Pesannya tetap menampilkan nama dan avatarnya, tetapi kamu tidak bisa lagi mengirim sebagai persona tersebut, dan tag serta emoji tanda tangannya menjadi bebas. Kamu bisa memulihkannya nanti di Pengaturan › Persona, pada bagian Persona yang dihapus."
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "Nama orang yang menjalankannya"
@@ -1830,6 +1826,10 @@ msgstr "Windows melindungi PC Anda"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Tulis angka sebagai 1st, 2nd, 3rd"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Persona yang dihapus bisa kamu pulihkan nanti di Pengaturan › Persona, pada bagian Persona yang dihapus."
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
