@@ -116,9 +116,10 @@ msgstr "Qualsevol altra distribució Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Xip d’Apple (M1 o posterior)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Segur que vols suprimir <0>{0}</0>? Aquesta acció no es pot desfer."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Segur que vols suprimir <0>{0}</0>? Més endavant pots restaurar les persones suprimides a Configuració › Persones, a l’apartat Persones suprimides."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "No s’ha pogut desar la icona de l’etiqueta: {error}. La pots tornar 
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Ara tenen les dades del fitxer; els missatges i l’historial s’han mantingut."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Els seus missatges continuaran mostrant els noms i els avatars, però ja no podràs enviar com a aquestes persones, i les seves etiquetes i emojis distintius quedaran lliures. No es pot desfer."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Els seus missatges continuaran mostrant els noms i els avatars, però ja no podràs enviar com a aquestes persones, i les seves etiquetes i emojis distintius quedaran lliures. Més endavant les pots restaurar a Configuració › Persones, a l’apartat Persones suprimides."
 
 #. Help for a command script variable.
 msgid "Their name"
