@@ -116,9 +116,10 @@ msgstr "Linux อื่นๆ ทั้งหมด"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple silicon (M1 หรือใหม่กว่า)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบ <0>{0}</0> การดำเนินการนี้ไม่สามารถย้อนกลับได้"
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "คุณแน่ใจหรือไม่ว่าต้องการลบ <0>{0}</0> คุณกู้คืน Persona ที่ถูกลบได้ภายหลังที่ การตั้งค่า › Persona ในส่วน Persona ที่ถูกลบ"
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "บันทึกไอคอนแท็กไม่สำเร็จ
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "ตอนนี้ข้อมูลเป็นของไฟล์แล้ว ข้อความและประวัติยังอยู่ครบ"
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "ข้อความของ Persona เหล่านี้จะยังแสดงชื่อและอวตาร แต่คุณจะส่งข้อความในฐานะ Persona เหล่านี้ไม่ได้อีก และแท็กกับอีโมจิประจำตัวจะว่างให้ใช้ใหม่ เลิกทำไม่ได้"
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "ข้อความของ Persona เหล่านี้จะยังแสดงชื่อและอวตาร แต่คุณจะส่งข้อความในฐานะ Persona เหล่านี้ไม่ได้อีก และแท็กกับอีโมจิประจำตัวจะว่างให้ใช้ใหม่ กู้คืนได้ภายหลังที่ การตั้งค่า › Persona ในส่วน Persona ที่ถูกลบ"
 
 #. Help for a command script variable.
 msgid "Their name"
