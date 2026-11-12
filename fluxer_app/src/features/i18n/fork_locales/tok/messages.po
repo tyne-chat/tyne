@@ -1591,10 +1591,6 @@ msgstr "sitelen lili pi nimi poka li ken ala awen: {error}. sina ken pana sin e 
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "sona ona li kama sama lipu. toki ona en tenpo pini ona li awen."
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "toki ona li awen jo e nimi ona e sitelen jan ona. taso sina ken ala toki kepeken nimi ona. nimi lili ona en sitelen pilin nimi ona li kama ken tawa jan insa ante. sina ken kama sin e ona lon tenpo kama. o lukin e \"jan insa weka\" lon nasin › jan insa."
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "nimi ona"
@@ -1830,6 +1826,10 @@ msgstr "Windows protected your PC"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "o sitelen e nanpa sama 1st, 2nd, 3rd"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "sina ken kama sin e jan insa weka lon tenpo kama. o lukin e \"jan insa weka\" lon nasin › jan insa."
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"

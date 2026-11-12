@@ -1591,10 +1591,6 @@ msgstr "टैग आइकन सहेजा नहीं जा सका: {e
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "उनकी जानकारी अब फ़ाइल वाली है; उनके संदेश और इतिहास बने रहे।"
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "उनके संदेशों में उनके नाम और अवतार दिखते रहेंगे, लेकिन आप अब उनके रूप में संदेश नहीं भेज पाएँगे, और उनके टैग और हस्ताक्षर इमोजी खाली हो जाएँगे। आप बाद में सेटिंग्स › परसोना के “डिलीट किए गए परसोना” सेक्शन से उन्हें रीस्टोर कर सकते हैं।"
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "इस्तेमाल करने वाले का नाम"
@@ -1830,6 +1826,10 @@ msgstr "Windows ने आपके PC की सुरक्षा की"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "संख्या को 1st, 2nd, 3rd की तरह लिखें"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "डिलीट किए गए परसोना को आप बाद में सेटिंग्स › परसोना के “डिलीट किए गए परसोना” सेक्शन से रीस्टोर कर सकते हैं।"
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"

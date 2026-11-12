@@ -1591,10 +1591,6 @@ msgstr "Het tagpictogram kon niet worden opgeslagen: {error}. Je kunt het opnieu
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Hun gegevens zijn nu die uit het bestand; hun berichten en geschiedenis zijn gebleven."
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "Hun berichten blijven hun namen en avatars tonen, maar je kunt niet meer als hen sturen, en hun tags en handtekening-emoji's komen vrij. Je kunt ze later herstellen via Instellingen › Persona's, onder Verwijderde persona's."
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "De naam van wie hem gebruikt"
@@ -1830,6 +1826,10 @@ msgstr "Uw pc is beveiligd door Windows"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Een getal schrijven als 1st, 2nd, 3rd"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Verwijderde persona's kun je later herstellen via Instellingen › Persona's, onder Verwijderde persona's."
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
