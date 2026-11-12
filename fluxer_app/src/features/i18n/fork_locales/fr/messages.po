@@ -1591,10 +1591,6 @@ msgstr "L'icône de badge n'a pas pu être enregistrée : {error}. Vous pouvez l
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Leurs informations sont désormais celles du fichier ; leurs messages et leur historique sont conservés."
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "Leurs messages continueront d’afficher leurs noms et avatars, mais vous ne pourrez plus écrire en leur nom, et leurs badges et emojis signature seront libérés. Vous pourrez les restaurer plus tard dans Réglages › Personas, sous « Personas supprimées »."
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "Le nom de la personne qui l'utilise"
@@ -1830,6 +1826,10 @@ msgstr "Windows a protégé votre ordinateur"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Écrire un nombre sous la forme 1st, 2nd, 3rd"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Vous pourrez restaurer les personas supprimées plus tard dans Réglages › Personas, sous « Personas supprimées »."
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
