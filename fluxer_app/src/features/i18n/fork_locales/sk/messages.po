@@ -1591,10 +1591,6 @@ msgstr "Ikonu značky sa nepodarilo uložiť: {error}. Môžete ju znova nastavi
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Ich údaje sú teraz zo súboru; ich správy a história zostali."
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "Ich správy budú naďalej zobrazovať ich mená a avatary, ale už nebudete môcť posielať správy ako ony a ich značky a podpisové emoji sa uvoľnia. Neskôr ich môžete obnoviť v časti Odstránené persony (Nastavenia › Persony)."
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "Meno toho, kto ho spúšťa"
@@ -1830,6 +1826,10 @@ msgstr "Systém Windows ochránil váš počítač"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "Napísať číslo ako 1st, 2nd, 3rd"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Odstránené persony môžete neskôr obnoviť v časti Odstránené persony (Nastavenia › Persony)."
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
