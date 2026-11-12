@@ -116,9 +116,10 @@ msgstr "그 밖의 모든 Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple 실리콘(M1 이상)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "<0>{0}</0>을(를) 삭제할까요? 이 작업은 되돌릴 수 없어요."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "<0>{0}</0>을(를) 삭제할까요? 삭제된 페르소나는 나중에 설정 › 페르소나의 삭제된 페르소나에서 복원할 수 있어요."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "태그 아이콘을 저장하지 못했어요: {error}. 페르소나 설
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "세부 정보는 이제 파일의 내용이에요. 메시지와 기록은 그대로 남아 있어요."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "메시지에는 이름과 아바타가 계속 표시되지만, 이제 해당 페르소나로 보낼 수 없으며 태그와 시그니처 이모지는 다시 쓸 수 있게 됩니다. 되돌릴 수 없습니다."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "메시지에는 이름과 아바타가 계속 표시되지만, 이제 해당 페르소나로 보낼 수 없으며 태그와 시그니처 이모지는 다시 쓸 수 있게 됩니다. 나중에 설정 › 페르소나의 삭제된 페르소나에서 복원할 수 있습니다."
 
 #. Help for a command script variable.
 msgid "Their name"
