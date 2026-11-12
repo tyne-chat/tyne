@@ -329,7 +329,7 @@ export async function applyVisibility(
 	});
 }
 
-/** Delete asks first, in red, and says it cannot be undone; there is no Undo afterwards. */
+/** Delete asks first, in red, and says where to restore from; there is no Undo afterwards. */
 export function requestDelete(i18n: I18n, chosen: ReadonlyArray<ClientPersona>, onDone: () => void): void {
 	const ids = chosen.map((p) => p.id);
 	ModalCommands.push(
