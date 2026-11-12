@@ -15,6 +15,10 @@ message AccessibilitySettings {
   optional double mobile_font_size = 2224;
   optional double mobile_message_group_spacing = 2225;
   optional double mobile_compact_message_group_spacing = 2226;
+  // Each half of message_double_click_actions on its own: editing your own message, replying to
+  // anyone else's. Missing, edits read as on and replies as off (tyne-chat/tyne#611).
+  optional bool message_double_click_edits = 2227;
+  optional bool message_double_click_replies = 2228;
 
   optional double saturation_factor = 1;
   bool always_underline_links = 2;

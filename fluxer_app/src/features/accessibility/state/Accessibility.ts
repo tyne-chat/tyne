@@ -582,6 +582,9 @@ export enum HdrDisplayMode {
 }
 
 export interface AccessibilitySettings {
+	// Fork: the two halves of messageDoubleClickActions (ForkMessageDoubleClick.ts, tyne-chat/tyne#611).
+	messageDoubleClickEdits: boolean;
+	messageDoubleClickReplies: boolean;
 	saturationFactor: number;
 	alwaysUnderlineLinks: boolean;
 	dimStrikethroughText: boolean;
@@ -691,6 +694,9 @@ const HDR_FROM_PROTO: Record<ProtoHdrDisplayMode, HdrDisplayMode> = {
 };
 
 class Accessibility {
+	// Fork: until set, upstream's switch alone edits and does not reply (tyne-chat/tyne#611).
+	messageDoubleClickEdits = true;
+	messageDoubleClickReplies = false;
 	saturationFactor = 1;
 	alwaysUnderlineLinks = false;
 	dimStrikethroughText = true;
@@ -809,6 +815,8 @@ class Accessibility {
 			schema: AccessibilitySettingsSchema,
 			syncAcrossTabs: true,
 			persist: [
+				'messageDoubleClickEdits',
+				'messageDoubleClickReplies',
 				'saturationFactor',
 				'alwaysUnderlineLinks',
 				'dimStrikethroughText',
@@ -872,6 +880,8 @@ class Accessibility {
 				'sequentialFileSend',
 			],
 			toMessage: (s) => ({
+				messageDoubleClickEdits: s.messageDoubleClickEdits,
+				messageDoubleClickReplies: s.messageDoubleClickReplies,
 				saturationFactor: s.saturationFactor,
 				alwaysUnderlineLinks: s.alwaysUnderlineLinks,
 				dimStrikethroughText: s.dimStrikethroughText,
@@ -939,6 +949,10 @@ class Accessibility {
 				sequentialFileSend: s.sequentialFileSend,
 			}),
 			applyMessage: (s, m) => {
+				// Fork: a record without them (saved before they existed, or by an older client) means
+				// upstream's switch alone, which edits and does not reply, in every window alike.
+				s.messageDoubleClickEdits = m.messageDoubleClickEdits ?? true;
+				s.messageDoubleClickReplies = m.messageDoubleClickReplies ?? false;
 				if (m.saturationFactor !== undefined) s.saturationFactor = m.saturationFactor;
 				s.alwaysUnderlineLinks = m.alwaysUnderlineLinks;
 				if (m.dimStrikethroughText !== undefined) s.dimStrikethroughText = m.dimStrikethroughText;
@@ -1260,6 +1274,11 @@ class Accessibility {
 			Object.hasOwn(data, 'keepAnimatedEmojiUnderReducedMotion') ||
 			Object.hasOwn(data, 'keepGifAutoPlayUnderReducedMotion') ||
 			Object.hasOwn(data, 'keepStickerAnimationUnderReducedMotion');
+		// Fork: tyne-chat/tyne#611.
+		if (validated.messageDoubleClickEdits !== undefined)
+			this.messageDoubleClickEdits = validated.messageDoubleClickEdits;
+		if (validated.messageDoubleClickReplies !== undefined)
+			this.messageDoubleClickReplies = validated.messageDoubleClickReplies;
 		if (validated.saturationFactor !== undefined) this.saturationFactor = validated.saturationFactor;
 		if (validated.alwaysUnderlineLinks !== undefined) this.alwaysUnderlineLinks = validated.alwaysUnderlineLinks;
 		if (validated.dimStrikethroughText !== undefined) this.dimStrikethroughText = validated.dimStrikethroughText;
@@ -1392,6 +1411,8 @@ class Accessibility {
 
 	private validateSettings(data: Readonly<Partial<AccessibilitySettings>>): Partial<AccessibilitySettings> {
 		return {
+			messageDoubleClickEdits: data.messageDoubleClickEdits ?? this.messageDoubleClickEdits,
+			messageDoubleClickReplies: data.messageDoubleClickReplies ?? this.messageDoubleClickReplies,
 			saturationFactor: Math.max(0, Math.min(1, data.saturationFactor ?? this.saturationFactor)),
 			alwaysUnderlineLinks: data.alwaysUnderlineLinks ?? this.alwaysUnderlineLinks,
 			dimStrikethroughText: data.dimStrikethroughText ?? this.dimStrikethroughText,
