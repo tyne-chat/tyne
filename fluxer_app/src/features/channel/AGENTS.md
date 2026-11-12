@@ -50,6 +50,13 @@ the fork's `MessageChangePersona`) unless `behaviorOverrides` sets it, and calls
 layout or `CompactMessageLayout` (`CompactAuthorPrefix`), with `ReplyPreview`,
 `EditingMessageInput`, attachments and reactions.
 
+**Double-click** (tyne-chat/tyne#611): upstream's `handleDoubleClick` edits your own message or
+replies to anyone else's while `messageDoubleClickActions` is on. One fork line asks
+`accessibility/state/ForkMessageDoubleClick.ts` first, so each action has its own switch (the
+"Double-click to edit" and "Double-click to reply" rows of advanced settings,
+`user/components/settings_utils/search_index/ForkChatSettingsIndex.ts`, which hide upstream's row
+for both); without stored switches it edits and does not reply.
+
 **The persona is `message.subprofile`**, built by the server (by the client for a pending message).
 The rules are in `persona/AGENTS.md`; this is where each part is drawn:
 
