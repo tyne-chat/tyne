@@ -1591,10 +1591,6 @@ msgstr "บันทึกไอคอนแท็กไม่สำเร็จ
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "ตอนนี้ข้อมูลเป็นของไฟล์แล้ว ข้อความและประวัติยังอยู่ครบ"
 
-#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
-msgstr "ข้อความของ Persona เหล่านี้จะยังแสดงชื่อและอวตาร แต่คุณจะส่งข้อความในฐานะ Persona เหล่านี้ไม่ได้อีก และแท็กกับอีโมจิประจำตัวจะว่างให้ใช้ใหม่ กู้คืนได้ภายหลังที่ การตั้งค่า › Persona ในส่วน Persona ที่ถูกลบ"
-
 #. Help for a command script variable.
 msgid "Their name"
 msgstr "ชื่อของผู้ที่เรียกใช้"
@@ -1830,6 +1826,10 @@ msgstr "Windows ปกป้องพีซีของคุณแล้ว"
 #. Help for an example in a command script. Translators: keep the English examples 1st, 2nd, 3rd.
 msgid "Write a number as 1st, 2nd, 3rd"
 msgstr "เขียนตัวเลขแบบ 1st, 2nd, 3rd"
+
+#. Body of the confirmation before deleting the selected personas; its title asks the question. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "คุณกู้คืน Persona ที่ถูกลบได้ภายหลังที่ การตั้งค่า › Persona ในส่วน Persona ที่ถูกลบ"
 
 #. Question in the import review for a persona that was deleted. {name} is its name, {productName} the app name, {date} a date
 msgid "You deleted {name} in {productName} on {date}. Bring {name} back?"
