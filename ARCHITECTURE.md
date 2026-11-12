@@ -284,6 +284,20 @@ design, including the mobile part still to come, is `docs/design/server-commands
   use it (`fluxer_app/src/features/user/utils/ForkOriginalImageUrl.ts`, called from upstream's
   `UserImageMenuItems.tsx`), and persona profiles have the same menus
   (`features/persona/utils/usePersonaImageMenus.tsx`; tyne-chat/tyne#471, #473).
+- Animated emoji in step: on the web and desktop, animated custom emoji with the same loop length (a
+  left and a right wing) always show the same frame, as on mobile, wherever upstream shows them:
+  messages, reactions, the emoji picker, autocomplete, the composer, tooltips. Each loop length has
+  one clock, started by the first such emoji shown and dropped when none is on screen; later ones
+  join it at its current frame. A browser cannot pick the frame an `<img>` shows, so each emoji is
+  fetched once and decoded with WebCodecs' `ImageDecoder` into its frames, at the size it is shown,
+  and the clock's frame is drawn on a `<canvas>`. No upstream component changes for it: a listener on
+  the document (`installForkSyncedEmoji`, called in `indexMain.tsx` next to upstream's
+  `installImageRetention`) hears every `<img>` load, and for an animated custom emoji near the
+  viewport puts the canvas right after the `<img>`, out of the flow, measured onto it. The `<img>`
+  stays in the page, invisible, with its `src`, alt text, classes and events, so copying, menus,
+  styles and layout are upstream's (`features/expressions/utils/ForkSyncedEmojiClock.ts`,
+  `ForkSyncedEmojiFrames.ts`, `ForkSyncedEmojiPlayer.ts`, `ForkSyncedEmojiImages.ts`). Without
+  `ImageDecoder` nothing happens (tyne-chat/tyne#612; mobile: #91).
 - Branding, the end-to-end suite in `e2e/`, and data migrations in `fluxer_api/scripts/migrate_*.ts`.
 
 ## Building, testing and running
