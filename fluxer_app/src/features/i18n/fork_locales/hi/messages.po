@@ -116,9 +116,10 @@ msgstr "कोई भी दूसरा Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple सिलिकॉन (M1 या नया)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "क्या आप वाकई <0>{0}</0> को डिलीट करना चाहते हैं? यह कार्रवाई वापस नहीं ली जा सकती।"
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "क्या आप वाकई <0>{0}</0> को डिलीट करना चाहते हैं? डिलीट किए गए परसोना को आप बाद में सेटिंग्स › परसोना के “डिलीट किए गए परसोना” सेक्शन से रीस्टोर कर सकते हैं।"
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "टैग आइकन सहेजा नहीं जा सका: {e
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "उनकी जानकारी अब फ़ाइल वाली है; उनके संदेश और इतिहास बने रहे।"
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "उनके संदेशों में उनके नाम और अवतार दिखते रहेंगे, लेकिन आप अब उनके रूप में संदेश नहीं भेज पाएँगे, और उनके टैग और हस्ताक्षर इमोजी खाली हो जाएँगे। इसे पूर्ववत नहीं किया जा सकता।"
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "उनके संदेशों में उनके नाम और अवतार दिखते रहेंगे, लेकिन आप अब उनके रूप में संदेश नहीं भेज पाएँगे, और उनके टैग और हस्ताक्षर इमोजी खाली हो जाएँगे। आप बाद में सेटिंग्स › परसोना के “डिलीट किए गए परसोना” सेक्शन से उन्हें रीस्टोर कर सकते हैं।"
 
 #. Help for a command script variable.
 msgid "Their name"

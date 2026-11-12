@@ -836,10 +836,10 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				<ConfirmModal
 					title={<Trans>Delete Persona</Trans>}
 					description={
-						<Trans>
+						<Trans comment="Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button">
 							Are you sure you want to delete{' '}
-							<strong data-flx="persona.persona-edit-modal.handle-delete-persona.strong">{formData.name}</strong>? This
-							action cannot be undone.
+							<strong data-flx="persona.persona-edit-modal.handle-delete-persona.strong">{formData.name}</strong>? You
+							can restore deleted personas later in Settings › Personas, under Deleted personas.
 						</Trans>
 					}
 					primaryText={<Trans>Delete</Trans>}
