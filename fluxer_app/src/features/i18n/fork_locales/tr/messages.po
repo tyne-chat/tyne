@@ -116,9 +116,10 @@ msgstr "Diğer tüm Linux'lar"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple silicon (M1 veya daha yeni)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "<0>{0}</0> öğesini silmek istediğinden emin misin? Bu işlem geri alınamaz."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "<0>{0}</0> öğesini silmek istediğinden emin misin? Silinen personaları daha sonra Ayarlar › Personalar'daki Silinen personalar bölümünden geri yükleyebilirsin."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Etiket simgesi kaydedilemedi: {error}. Persona ayarlarından yeniden aya
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Bilgileri artık dosyadaki gibi; mesajları ve geçmişleri korundu."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Mesajları adlarını ve avatarlarını göstermeye devam eder, ancak artık onlar olarak gönderemezsin ve etiketleri ile imza emojileri boşa çıkar. Bu geri alınamaz."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Mesajları adlarını ve avatarlarını göstermeye devam eder, ancak artık onlar olarak gönderemezsin ve etiketleri ile imza emojileri boşa çıkar. Bunları daha sonra Ayarlar › Personalar'daki Silinen personalar bölümünden geri yükleyebilirsin."
 
 #. Help for a command script variable.
 msgid "Their name"

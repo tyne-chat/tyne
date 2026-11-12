@@ -116,9 +116,10 @@ msgstr "Anumang ibang Linux"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple silicon (M1 o mas bago)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Sigurado ka bang gusto mong i-delete ang <0>{0}</0>? Hindi na ito mababawi."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Sigurado ka bang gusto mong i-delete ang <0>{0}</0>? Maibabalik mo ang mga na-delete na persona sa ibang pagkakataon sa Mga Setting › Mga persona, sa ilalim ng Mga na-delete na persona."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Hindi na-save ang icon ng tag: {error}. Puwede itong itakdang muli sa mg
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Galing na sa file ang mga detalye nila; nanatili ang kanilang mga mensahe at kasaysayan."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Patuloy na ipapakita ng kanilang mga mensahe ang kanilang pangalan at avatar, pero hindi ka na makakapagpadala bilang sila, at magagamit na ng iba ang kanilang mga tag at natatanging emoji. Hindi na ito mababawi."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Patuloy na ipapakita ng kanilang mga mensahe ang kanilang pangalan at avatar, pero hindi ka na makakapagpadala bilang sila, at magagamit na ng iba ang kanilang mga tag at natatanging emoji. Maibabalik mo sila sa ibang pagkakataon sa Mga Setting › Mga persona, sa ilalim ng Mga na-delete na persona."
 
 #. Help for a command script variable.
 msgid "Their name"

@@ -116,9 +116,10 @@ msgstr "Alle andre Linux-versioner"
 msgid "Apple silicon (M1 or newer)"
 msgstr "Apple-chip (M1 eller nyere)"
 
+#. Confirmation before deleting a persona; {0} is its name. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button
 #. placeholder {0}: formData.name
-msgid "Are you sure you want to delete <0>{0}</0>? This action cannot be undone."
-msgstr "Er du sikker på, at du vil slette <0>{0}</0>? Denne handling kan ikke fortrydes."
+msgid "Are you sure you want to delete <0>{0}</0>? You can restore deleted personas later in Settings › Personas, under Deleted personas."
+msgstr "Er du sikker på, at du vil slette <0>{0}</0>? Du kan senere gendanne slettede personaer under Slettede personaer i Indstillinger › Personaer."
 
 #. Settings search synonym.
 msgid "Auto-hide"
@@ -1590,9 +1591,9 @@ msgstr "Tagikonet kunne ikke gemmes: {error}. Det kan indstilles igen i personai
 msgid "Their details are the file's now; their messages and history stayed."
 msgstr "Deres oplysninger er nu filens; deres beskeder og historik er bevaret."
 
-#. Explains what deleting personas does, in its confirmation.
-msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. This can’t be undone."
-msgstr "Deres beskeder viser stadig deres navne og avatarer, men du kan ikke længere skrive som dem, og deres tags og signatur-emojis bliver ledige. Det kan ikke fortrydes."
+#. Explains what deleting personas does, in its confirmation. Deleted personas are listed under Deleted personas, the last section of Settings › Personas, with a Restore button.
+msgid "Their messages keep showing their names and avatars, but you can no longer send as them, and their tags and signature emojis become free. You can restore them later in Settings › Personas, under Deleted personas."
+msgstr "Deres beskeder viser stadig deres navne og avatarer, men du kan ikke længere skrive som dem, og deres tags og signatur-emojis bliver ledige. Du kan senere gendanne dem under Slettede personaer i Indstillinger › Personaer."
 
 #. Help for a command script variable.
 msgid "Their name"
