@@ -375,9 +375,14 @@ msgstr "nimi poka li lon poka pi nimi ale pi jan insa lon toki. nimi poka li lon
 msgid "Don't match this persona's tags"
 msgstr "nimi lili pi jan insa ni li lawa ala"
 
+#. Short label for an advanced chat preference: double-clicking one of your own messages opens it for editing.
 #. Tooltip hint on timestamp pill in message composer.
 msgid "Double-click to edit"
 msgstr "o luka e ni lon tenpo tu tawa ante"
+
+#. Short label for an advanced chat preference: double-clicking someone else's message starts a reply to it. Off by default, so that double-clicking a word selects it.
+msgid "Double-click to reply"
+msgstr "o luka e ni lon tenpo tu tawa toki sin"
 
 #. Button that downloads the Tyne app as a .deb package for Linux.
 msgid "Download .deb"

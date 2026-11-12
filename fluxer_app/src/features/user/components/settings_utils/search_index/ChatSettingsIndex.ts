@@ -760,3 +760,9 @@ export const chatSettingsIndex: Array<SearchableSettingDescriptor> = [
 		tags: ['chat'],
 	},
 ];
+
+// Fork: this one switch for editing and replying is two rows of their own in
+// ForkChatSettingsIndex.ts, "Double-click to edit" and "Double-click to reply" (tyne-chat/tyne#611).
+for (const item of chatSettingsIndex) {
+	if (item.id === 'chat-settings-double-click-message-actions') item.isVisible = () => false;
+}
