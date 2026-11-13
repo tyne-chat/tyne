@@ -70,7 +70,11 @@ export function startChannelAsPersona(channelId: string, personaId: string | nul
 	PersonaStore.startChannelAs(channelId, personaId);
 }
 
-/** A lone `\\` clears the active persona and is not a message. Returns true when it was consumed. */
-export function consumePersonaCommand(channelId: string | null, content: string): boolean {
-	return PersonaStore.handleInChatCommand(channelId, content).handled;
+/**
+ * A lone `\\` clears the active persona, and a persona's tag with nothing in it selects that persona;
+ * neither is a message. `hasMedia`: the message has an attachment, sticker or meme, which a tag names
+ * the sender of instead. Returns true when it was consumed.
+ */
+export function consumePersonaCommand(channelId: string | null, content: string, hasMedia: boolean): boolean {
+	return PersonaStore.handleInChatCommand(channelId, content, hasMedia).handled;
 }
