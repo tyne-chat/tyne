@@ -7,7 +7,6 @@ import {Popout} from '@app/features/ui/popover/PopoverPopout';
 import Users from '@app/features/user/state/Users';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
-import {LockSimple} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
@@ -127,11 +126,7 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 					<FocusRing offset={-2} data-flx="persona.persona-composer-pill.focus-ring">
 						<button
 							type="button"
-							className={clsx(
-								styles.pillButton,
-								isLatched && !isFromTag && styles.latched,
-								isFromTag && styles.tagMatched,
-							)}
+							className={styles.pillButton}
 							aria-label={tooltipText}
 							data-flx="persona.persona-composer-pill.pill-button"
 						>
@@ -141,11 +136,6 @@ export const PersonaComposerPill: React.FC<PersonaComposerPillProps> = observer(
 								size={24}
 								data-flx="persona.persona-composer-pill.persona-avatar"
 							/>
-							{isLatched && !isFromTag && (
-								<div className={styles.latchBadge} data-flx="persona.persona-composer-pill.latch-badge">
-									<LockSimple size={8} weight="bold" data-flx="persona.persona-composer-pill.lock-simple" />
-								</div>
-							)}
 						</button>
 					</FocusRing>
 				</Popout>
