@@ -42,11 +42,8 @@ const THREAD_NAME_PARSER_FLAGS = getParserFlagsForContext(MarkdownContext.STANDA
 
 // Fork: personas.
 
-import {
-	consumePersonaCommand,
-	resolveOutgoingPersona,
-	startChannelAsPersona,
-} from '@app/features/persona/utils/OutgoingPersona';
+import {resolveOutgoingPersona, startChannelAsPersona} from '@app/features/persona/utils/OutgoingPersona';
+import {consumeStarterPersonaCommand} from '@app/features/persona/utils/StarterPersonaCommand';
 
 interface ThreadCreatePaneProps {
 	parent: Channel;
@@ -103,7 +100,17 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 	const disabled = cooldownSeconds > 0 || (!canPublic && !canPrivate);
 	const handleSubmit: SendMessageFunction = useCallback(
 		(typedContent, hasAttachments, stickersOrTts, favoriteMemeIdOrStickers, maybeFavoriteMemeId) => {
-			if (consumePersonaCommand(parent.id, typedContent)) {
+			if (
+				consumeStarterPersonaCommand(
+					parent.id,
+					draftKey,
+					typedContent,
+					hasAttachments,
+					stickersOrTts,
+					favoriteMemeIdOrStickers,
+					maybeFavoriteMemeId,
+				)
+			) {
 				DraftCommands.deleteDraft(accountKey, draftKey);
 				return true;
 			}
