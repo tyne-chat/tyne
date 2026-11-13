@@ -21,7 +21,6 @@ import {
 	UnderlineRenderer,
 } from '@app/features/messaging/components/markdown/renderers/common/FormattingElements';
 import {EmojiRenderer} from '@app/features/messaging/components/markdown/renderers/EmojiRenderer';
-import {LinkRenderer} from '@app/features/messaging/components/markdown/renderers/LinkRenderer';
 import {MentionRenderer} from '@app/features/messaging/components/markdown/renderers/MentionRenderer';
 import {
 	isRestrictedInlineContext,
@@ -40,6 +39,11 @@ import {Logger} from '@app/features/platform/utils/AppLogger';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {i18n} from '@lingui/core';
 import React from 'react';
+
+// Fork imports.
+
+// Fork: TEMPORARY, until upstream fixes the import cycle behind tyne-chat/tyne#632; see the file.
+import {ForkDeferredLinkRenderer} from '@app/features/messaging/components/markdown/renderers/ForkDeferredLinkRenderer';
 
 const logger = new Logger('MarkdownRenderers');
 export const parse = parseMarkdownContent;
@@ -62,7 +66,7 @@ function getRenderers(): RendererMap {
 		[NodeType.Blockquote]: BlockquoteRenderer,
 		[NodeType.CodeBlock]: CodeBlockRenderer,
 		[NodeType.InlineCode]: InlineCodeRenderer,
-		[NodeType.Link]: LinkRenderer,
+		[NodeType.Link]: ForkDeferredLinkRenderer,
 		[NodeType.Mention]: MentionRenderer,
 		[NodeType.Emoji]: EmojiRenderer,
 		[NodeType.List]: ListRenderer,
