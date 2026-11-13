@@ -97,15 +97,15 @@ describe('consumePersonaCommand', () => {
 	it('consumes a lone double backslash and clears the active persona', async () => {
 		const fox = addTestPersona(PersonaStore, {name: 'Fox'});
 		await PersonaStore.setActivePersona(fox.id, true);
-		expect(consumePersonaCommand(null, '\\\\')).toBe(true);
+		expect(consumePersonaCommand(null, '\\\\', false)).toBe(true);
 		expect(PersonaStore.activePersona).toBeNull();
 	});
 
 	it('leaves everything else to be sent', async () => {
-		expect(consumePersonaCommand(null, '\\\\')).toBe(false);
+		expect(consumePersonaCommand(null, '\\\\', false)).toBe(false);
 		const fox = addTestPersona(PersonaStore, {name: 'Fox'});
 		await PersonaStore.setActivePersona(fox.id, true);
-		expect(consumePersonaCommand(null, 'hello')).toBe(false);
+		expect(consumePersonaCommand(null, 'hello', false)).toBe(false);
 		expect(PersonaStore.activePersona?.id).toBe(fox.id);
 	});
 });
