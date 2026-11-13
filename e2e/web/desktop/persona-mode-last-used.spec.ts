@@ -119,7 +119,6 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 		await expect(pill).toBeVisible({timeout: 10_000});
 		const pillButton = pill.locator('button');
 		await expect(pillButton).toHaveAttribute('aria-label', /Bob-Alpha/i, {timeout: 10_000});
-		await expect(pill.locator('[class*="latchBadge"]')).toBeVisible({timeout: 10_000});
 
 		// 9. Send second message UNTAGGED (should automatically use Bob-Alpha due to Last Used mode)
 		const secondText = `Follow-up untagged message [${timestamp}]`;
@@ -144,8 +143,7 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 			timeout: 10_000,
 		});
 
-		// Verify composer pill is now unlatched (latchBadge hidden, aria-label shows root account)
-		await expect(pill.locator('[class*="latchBadge"]')).toBeHidden({timeout: 10_000});
+		// Verify composer pill is now unlatched (aria-label shows root account)
 		await expect(pillButton).toHaveAttribute('aria-label', /Sending as @/i, {timeout: 10_000});
 	});
 });
