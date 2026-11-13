@@ -661,7 +661,16 @@ export class PersonaStoreClass {
 		}
 	}
 
-	handleInChatCommand(channelId: string | null, content: string): {isCommand: boolean; handled: boolean} {
+	/**
+	 * Commands typed as a message, which are not sent: a lone `\\` clears the selection, and a
+	 * persona's tag with nothing in it selects that persona (tyne-chat/tyne#628). With an attachment,
+	 * sticker or meme (`hasMedia`) a tag names who sends them instead, so it is not a command.
+	 */
+	handleInChatCommand(
+		channelId: string | null,
+		content: string,
+		hasMedia = false,
+	): {isCommand: boolean; handled: boolean} {
 		if (content.trim() === '\\\\') {
 			if (!this.latchedPersonaFor(channelId)) {
 				return {isCommand: false, handled: false};
@@ -669,6 +678,15 @@ export class PersonaStoreClass {
 			void this.unlatch(false, channelId);
 			Toast.success(i18n._(ACTIVE_PERSONA_CLEARED_DESCRIPTOR));
 			return {isCommand: true, handled: true};
+		}
+		if (!hasMedia) {
+			const bareTag = matchPersona(content, this.matchablePersonas(), null, false, {allowEmptyContent: true});
+			if (bareTag.isFromTag && bareTag.persona && bareTag.strippedContent.trim() === '') {
+				if (this.latchedPersonaFor(channelId)?.id !== bareTag.persona.id) {
+					void this.setActivePersona(bareTag.persona.id, true, undefined, channelId);
+				}
+				return {isCommand: true, handled: true};
+			}
 		}
 		return {isCommand: false, handled: false};
 	}
