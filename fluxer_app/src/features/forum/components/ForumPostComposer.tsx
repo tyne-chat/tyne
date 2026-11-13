@@ -46,11 +46,8 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import Accessibility from '@app/features/accessibility/state/Accessibility';
 import {PersonaComposerPill} from '@app/features/persona/components/PersonaComposerPill';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import {
-	consumePersonaCommand,
-	resolveOutgoingPersona,
-	startChannelAsPersona,
-} from '@app/features/persona/utils/OutgoingPersona';
+import {resolveOutgoingPersona, startChannelAsPersona} from '@app/features/persona/utils/OutgoingPersona';
+import {consumeStarterPersonaCommand} from '@app/features/persona/utils/StarterPersonaCommand';
 
 interface ForumPostComposerProps {
 	forum: Channel;
@@ -84,7 +81,17 @@ export const ForumPostComposer = observer(({forum, initialTitle, onClose}: Forum
 	const cooldownSeconds = useThreadCreateCooldownSeconds(forum);
 	const handleSubmit: SendMessageFunction = useCallback(
 		(typedContent, _hasAttachments, stickersOrTts, favoriteMemeIdOrStickers, maybeFavoriteMemeId) => {
-			if (consumePersonaCommand(forum.id, typedContent)) {
+			if (
+				consumeStarterPersonaCommand(
+					forum.id,
+					draftKey,
+					typedContent,
+					_hasAttachments,
+					stickersOrTts,
+					favoriteMemeIdOrStickers,
+					maybeFavoriteMemeId,
+				)
+			) {
 				DraftCommands.deleteDraft(accountKey, draftKey);
 				return true;
 			}

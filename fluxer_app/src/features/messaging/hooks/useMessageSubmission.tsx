@@ -132,7 +132,7 @@ export const useMessageSubmission = ({
 			if (!canSubmitMessage(content, hasNonTextContent)) return false;
 			if (isBlockedBySlowmode(channel)) return false;
 
-			const cmdResult = PersonaStore.handleInChatCommand(channel.id, content);
+			const cmdResult = PersonaStore.handleInChatCommand(channel.id, content, hasNonTextContent);
 			if (cmdResult.handled) {
 				RollingTypingSender.stopTyping(channel.id);
 				DraftCommands.deleteDraft(accountKey, channel.id);

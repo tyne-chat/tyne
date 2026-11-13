@@ -51,6 +51,8 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   persona's tags" switch sets it.
 - Escapes, only while a persona is selected: `\\` alone clears the selection; `\\ text` sends as the
   account and clears it; `\ text` sends as the account and keeps it.
+- A message that is only a persona's tag (`a:`, `[]`) selects that persona and is not sent
+  (`handleInChatCommand`, tyne-chat/tyne#628); with media the tag names who sends it.
 - **`matchOutgoingMessage` is the send, not a question.** It records a use, may clear the
   selection, and in `last` mode moves it. Call it once per message actually sent. To ask without
   side effects, use `previewOutgoingContent` (the text that would be sent) or
