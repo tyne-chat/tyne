@@ -30,6 +30,7 @@ fn options() -> ResponseBuildOptions {
         excluded_types: Vec::new(),
         attachment_decay: true,
         instance_name: "test".to_owned(),
+        attachment_api_base: None,
     }
 }
 
