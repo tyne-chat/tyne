@@ -21,5 +21,5 @@ import type {LinkNode} from '@app/features/messaging/utils/markdown/parser/Nodes
 import type React from 'react';
 
 export function ForkDeferredLinkRenderer(props: RendererProps<LinkNode>): React.ReactElement {
-	return <LinkRenderer {...props} />;
+	return <LinkRenderer data-flx="messaging.markdown.renderers.fork-deferred-link-renderer.link-renderer" {...props} />;
 }
