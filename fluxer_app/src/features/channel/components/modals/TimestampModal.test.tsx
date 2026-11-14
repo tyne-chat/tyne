@@ -57,6 +57,7 @@ vi.mock('@app/features/ui/commands/ModalCommands', () => ({
 }));
 
 const {TimestampModal} = await import('./TimestampModal');
+const {clearRemScaleCache} = await import('@app/features/theme/layout/RemFromPx');
 
 describe('TimestampModal', () => {
 	let container: HTMLDivElement;
@@ -184,6 +185,47 @@ describe('TimestampModal', () => {
 		} finally {
 			window.matchMedia = originalMatchMedia;
 		}
+	});
+
+	describe('at the desktop app zoom (tyne-chat/tyne#639)', () => {
+		// The desktop app zooms by the root font size: 24px is 150%. A window 1,000 px high then holds only
+		// as much of the dialog as 667 px do at 100%, so it takes the compact layout.
+		const matchOnlyMaxHeight = (px: number) =>
+			vi.fn().mockImplementation((query: string) => ({
+				matches: query === `(max-height: ${px}px)`,
+				media: query,
+				onchange: null,
+				addListener: vi.fn(),
+				removeListener: vi.fn(),
+				addEventListener: vi.fn(),
+				removeEventListener: vi.fn(),
+				dispatchEvent: vi.fn(),
+			}));
+
+		async function renderAtRootFontSize(fontSize: string): Promise<boolean> {
+			const originalMatchMedia = window.matchMedia;
+			window.matchMedia = matchOnlyMaxHeight(1020);
+			document.documentElement.style.fontSize = fontSize;
+			clearRemScaleCache();
+			try {
+				await act(async () => {
+					root.render(<TimestampModal onInsert={vi.fn()} data-flx="channel.timestamp-modal-test.timestamp-modal--zoom" />);
+				});
+				return document.querySelector('[data-flx="channel.timestamp-modal.combobox.format"]') !== null;
+			} finally {
+				window.matchMedia = originalMatchMedia;
+				document.documentElement.style.fontSize = '';
+				clearRemScaleCache();
+			}
+		}
+
+		it('uses the compact layout when the window is short for the zoomed dialog', async () => {
+			expect(await renderAtRootFontSize('24px')).toBe(true);
+		});
+
+		it('keeps the full layout in the same window at 100%', async () => {
+			expect(await renderAtRootFontSize('16px')).toBe(false);
+		});
 	});
 
 	it('responsively renders combobox when window width is narrow', async () => {
