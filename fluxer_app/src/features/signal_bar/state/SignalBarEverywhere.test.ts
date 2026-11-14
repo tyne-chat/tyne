@@ -218,7 +218,7 @@ describe('SignalBarStore signals everywhere', () => {
 		expect(postMock).toHaveBeenCalledWith(ForkEndpoints.USER_SIGNALS_RESTORE);
 	});
 
-	it('forgets the summary on READY and loads it again with the bar', async () => {
+	it('keeps the summary shown on READY and loads it again with the bar', async () => {
 		getMock.mockImplementation(((path: string) =>
 			Promise.resolve({
 				ok: true,
@@ -231,9 +231,10 @@ describe('SignalBarStore signals everywhere', () => {
 		expect(SignalBarStore.restoreAvailable).toBe(true);
 
 		SignalBarStore.invalidate();
-		expect(SignalBarStore.myChats).toBeNull();
-		expect(SignalBarStore.restoreAvailable).toBe(false);
-		await vi.waitFor(() => expect(SignalBarStore.myChats).not.toBeNull());
+		// Shown as it was until the new answer (tyne-chat/tyne#644), so the globe's count stays.
+		expect(SignalBarStore.myChats).not.toBeNull();
+		expect(SignalBarStore.restoreAvailable).toBe(true);
+		await vi.waitFor(() => expect(getMock).toHaveBeenCalledTimes(3));
 
 		expect(getMock.mock.calls.map(([path]) => path)).toEqual([
 			ForkEndpoints.USER_SIGNALS,
