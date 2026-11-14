@@ -66,11 +66,13 @@
 	min-width: 0;
 }
 
-@media (max-width: 480px) {
-	.pickersGrid {
-		grid-template-columns: 1fr;
-	}
+/* Narrow for the dialog at the desktop zoom: TimestampModal.tsx's useIsSingleColumnLayout (tyne-chat/tyne#639). */
+.pickersGridSingle {
+	grid-template-columns: 1fr;
+}
 
+/* Phones: 16px inputs, so iOS does not zoom in on focus. */
+@media (max-width: 480px) {
 	.nlpInput,
 	.nativeInput {
 		font-size: 1rem;

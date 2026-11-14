@@ -209,7 +209,9 @@ describe('TimestampModal', () => {
 			clearRemScaleCache();
 			try {
 				await act(async () => {
-					root.render(<TimestampModal onInsert={vi.fn()} data-flx="channel.timestamp-modal-test.timestamp-modal--zoom" />);
+					root.render(
+						<TimestampModal onInsert={vi.fn()} data-flx="channel.timestamp-modal-test.timestamp-modal--zoom" />,
+					);
 				});
 				return document.querySelector('[data-flx="channel.timestamp-modal.combobox.format"]') !== null;
 			} finally {
@@ -225,6 +227,34 @@ describe('TimestampModal', () => {
 
 		it('keeps the full layout in the same window at 100%', async () => {
 			expect(await renderAtRootFontSize('16px')).toBe(false);
+		});
+
+		// One column below a 480 px window at 100%, so below 720 px at 150%.
+		async function pickerColumnsAt(fontSize: string, windowWidth: number): Promise<number> {
+			Object.defineProperty(window, 'innerWidth', {configurable: true, value: windowWidth});
+			document.documentElement.style.fontSize = fontSize;
+			clearRemScaleCache();
+			try {
+				await act(async () => {
+					root.render(
+						<TimestampModal onInsert={vi.fn()} data-flx="channel.timestamp-modal-test.timestamp-modal--columns" />,
+					);
+				});
+				const grid = document.querySelector('[data-flx="channel.timestamp-modal.pickers-grid"]');
+				return grid?.className.includes('pickersGridSingle') ? 1 : 2;
+			} finally {
+				Reflect.deleteProperty(window, 'innerWidth');
+				document.documentElement.style.fontSize = '';
+				clearRemScaleCache();
+			}
+		}
+
+		it('puts the pickers in one column when the window is narrow for the zoomed dialog', async () => {
+			expect(await pickerColumnsAt('24px', 700)).toBe(1);
+		});
+
+		it('keeps two columns in the same window at 100%', async () => {
+			expect(await pickerColumnsAt('16px', 700)).toBe(2);
 		});
 	});
 
