@@ -174,14 +174,16 @@ search like that ✕, at every width, and moves focus to the message box.
   `channel_header/shared.ts`, `ChannelHeader.module.css`, `MessageReactions.module.css`,
   `direct_message/DMFriendsView.module.css` (the tabs fade where they scroll, tyne-chat/tyne#504),
   `GuildMembersPage.module.css` (the title's ellipsis, tyne-chat/tyne#505) and
-  `ChannelSearchResults.module.css` (room for the close button, tyne-chat/tyne#518) end with appended
-  blocks.
+  `ChannelSearchResults.module.css` (room for the close button, tyne-chat/tyne#518) and
+  `Autocomplete.module.css` (the list's cap by the space above the composer, in rem so it follows the
+  desktop zoom, tyne-chat/tyne#636) end with appended blocks.
 - **Inside upstream's lines** (conflicts first): `LexicalChannelTextareaContent.tsx` and
   `ChannelMessage.tsx` (both among upstream's most changed here; the picker effect could move to a
   fork hook), `MessageReactions.tsx`, `MessageActionBar.tsx`, `MessageActionMenu.tsx`,
   `MessageActionUtils.tsx`, `UserMessage.tsx` (the inline edit runs `matchEditMessage`, and hands
   edits with files to `InlineEditUploads`), `EditingMessageInput.tsx` (its controls and files),
-  `AutocompleteMention.tsx` (`renderPersona`), `EmojiRenderer.tsx` (drag-and-drop in upstream's
+  `AutocompleteMention.tsx` (`renderPersona`), `Autocomplete.tsx` (the `size()` middleware passes the
+  space above as `--fork-autocomplete-space`), `EmojiRenderer.tsx` (drag-and-drop in upstream's
   render), `PreloadableUserPopout.tsx`, `DMChannelView.tsx` (upstream's barrier ternary re-indented
   in a fragment), the search-bar hook, `MessageSearchBar.tsx` (the suggestions dropdown's
   `flip`/`shift` keep it inside the window, tyne-chat/tyne#232), `ChannelPermissionsTab.tsx` (a
@@ -233,10 +235,12 @@ that counts requests (root `AGENTS.md`, "Network calls").
 - **End to end:** `e2e/web/desktop/persona-*.spec.ts` (rows, replies, reactions, "Change persona",
   the inline edit's selector, typing, mentions), `channel-timestamp-pills.spec.ts`,
   `channel-inline-edit-upload.spec.ts`, `window-activation-quick-reaction.spec.ts`,
-  `channel-header-narrow.spec.ts`,
-  `signal-bar.spec.ts`, `e2e/web/mobile/persona-picker.spec.ts`.
-- **Not covered:** no unit tests for `ChannelMessages`, `ScrollManager`, the composer or
-  `UserMessage`; nothing counts the search requests; no end-to-end test of persona search
+  `channel-header-narrow.spec.ts`, `composer-autocomplete-zoom.spec.ts` (the last suggestion at 100,
+  140 and 175% zoom), `signal-bar.spec.ts`, `e2e/web/mobile/persona-picker.spec.ts`.
+- **`ScrollManager`** (`platform/utils`): only `ScrollManagerJumpRetarget.test.tsx` (tyne-chat/tyne#595)
+  and `ScrollManagerRestoredHistory.test.tsx` (tyne-chat/tyne#635), which drive the real class with a
+  real `Scroller`.
+- **Not covered:** no unit tests for `ChannelMessages`, the composer or `UserMessage`; nothing counts the search requests; no end-to-end test of persona search
   suggestions or collapsible panels.
 - Run `pnpm --filter fluxer_app test features/channel`, the specs above, then the list in
   `CHECKS.md` (all of it for a persona change).
