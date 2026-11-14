@@ -25,13 +25,61 @@ import type {
 	UserSignalsRestoreResponse,
 	UserSignalsUpdateRequest,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
-import {makeAutoObservable, observable, runInAction} from 'mobx';
+import {makeAutoObservable, observable, observableRef, reaction, runInAction} from 'mobx';
 
 const logger = new Logger('SignalBar');
 const EMPTY_SIGNALS: ReadonlyArray<SignalBarSignal> = Object.freeze([]);
 const EMPTY_ENTRIES: ReadonlyArray<ChannelSignalEntry> = Object.freeze([]);
 /** After a failed load of the account's signals everywhere, bars wait this long before asking again. */
 const MY_CHATS_RETRY_MS = 60_000;
+/** How many chats the device's copy keeps: the most recently loaded (tyne-chat/tyne#645). */
+export const SNAPSHOT_CHANNELS = 50;
+/** A bar mounting does not ask again for a chat a preload answered this recently. */
+export const FRESH_CHANNEL_ANSWER_MS = 10_000;
+
+/** One chat in the device's copy. */
+export interface SignalBarSnapshotChannel {
+	channel_id: string;
+	enabled: boolean;
+	entries: ReadonlyArray<ChannelSignalEntry>;
+}
+
+/**
+ * What the bar showed last, kept on this device for each account in app storage, so that the next
+ * start shows it before any request answers (tyne-chat/tyne#645). Plain JSON, never a Map.
+ */
+export interface SignalBarSnapshot {
+	/** The account it belongs to. */
+	userId: string;
+	signals: ReadonlyArray<SignalBarSignal>;
+	version: number;
+	/** The most recently loaded chats first, at most `SNAPSHOT_CHANNELS`. */
+	channels: ReadonlyArray<SignalBarSnapshotChannel>;
+	myChats: ReadonlyArray<UserSignalChat> | null;
+	restoreAvailable: boolean;
+}
+
+/** A click on a signal of a chat whose copy is not confirmed yet: the state it asked for. */
+interface WantedSignal {
+	on: boolean;
+	/** Whom to light it as, taken at the click. */
+	personaId: string | null;
+}
+
+/** The snapshot as read back from storage, or null when it is not one. */
+function readSnapshot(value: unknown): SignalBarSnapshot | null {
+	if (!value || typeof value !== 'object') return null;
+	const snapshot = value as Partial<SignalBarSnapshot>;
+	if (
+		typeof snapshot.userId !== 'string' ||
+		!Array.isArray(snapshot.signals) ||
+		!Array.isArray(snapshot.channels) ||
+		(snapshot.myChats != null && !Array.isArray(snapshot.myChats))
+	) {
+		return null;
+	}
+	return snapshot as SignalBarSnapshot;
+}
 
 function isSameEntry(entry: ChannelSignalEntry, signalId: string, userId: string): boolean {
 	return entry.signal_id === signalId && entry.user.id === userId;
@@ -72,14 +120,160 @@ class SignalBarStore {
 	everywhereBusy = false;
 	private myChatsRequest: Promise<void> | null = null;
 	private myChatsFailedAt = 0;
+	/** Whether the summary was answered since the latest READY; until then it is shown unconfirmed. */
+	private myChatsConfirmed = false;
+	/**
+	 * The device's last copy (`SignalBarSnapshot`), kept in app storage per account with `collapsed`
+	 * and swapped on an account switch. Written after every change; read only at start and on a switch.
+	 */
+	snapshot: SignalBarSnapshot | null = null;
+	/** The account the copy in memory belongs to; null while there is none. */
+	private ownerId: string | null = null;
+	/** Chats loaded, the most recent first: the ones the snapshot keeps. */
+	private channelOrder: ReadonlyArray<string> = [];
+	/** Chats answered since the latest READY. The others are shown as they were, unconfirmed. */
+	private readonly confirmedChannels = new Set<string>();
+	/** Chats with a request sent since the latest READY still on its way. */
+	private readonly loadingChannels = new Set<string>();
+	/** Chats a preload is loading, and when a preload last confirmed a chat: for `loadForBar`. */
+	private readonly preloadingChannels = new Set<string>();
+	private readonly preloadedAt = new Map<string, number>();
+	/** Clicks on unconfirmed chats, by chat, then signal, waiting for the chat's answer. */
+	private readonly wantedSignals = new Map<string, Map<string, WantedSignal>>();
+	/** The bar's version in the copy the store was seeded from, while `version` is still -1. */
+	private seededVersion = -1;
 
 	constructor() {
-		makeAutoObservable<this, 'configRequest' | 'myChatsRequest' | 'myChatsFailedAt'>(
+		makeAutoObservable<
 			this,
-			{configRequest: false, myChatsRequest: false, myChatsFailedAt: false},
+			| 'configRequest'
+			| 'myChatsRequest'
+			| 'myChatsFailedAt'
+			| 'myChatsConfirmed'
+			| 'confirmedChannels'
+			| 'loadingChannels'
+			| 'preloadingChannels'
+			| 'preloadedAt'
+			| 'wantedSignals'
+			| 'seededVersion'
+			| 'buildSnapshot'
+		>(
+			this,
+			{
+				configRequest: false,
+				myChatsRequest: false,
+				myChatsFailedAt: false,
+				myChatsConfirmed: false,
+				confirmedChannels: false,
+				loadingChannels: false,
+				preloadingChannels: false,
+				preloadedAt: false,
+				wantedSignals: false,
+				seededVersion: false,
+				buildSnapshot: false,
+				snapshot: observableRef,
+			},
 			{autoBind: true},
 		);
-		initializeStore(this, () => makePersistent(this, 'SignalBar', ['collapsed']));
+		initializeStore(this, async () => {
+			await makePersistent(this, 'SignalBar', ['collapsed', 'snapshot'], {
+				// Another account's copy: nothing of the previous account's stays.
+				onRehydrated: () => this.replaceWithSnapshot(),
+			});
+			reaction(
+				() => this.buildSnapshot(),
+				(snapshot) => {
+					if (snapshot) this.setSnapshot(snapshot);
+				},
+			);
+			this.seedFromSnapshot();
+		});
+	}
+
+	/** The copy to keep on the device, or null while there is nothing of the account's to keep. */
+	private buildSnapshot(): SignalBarSnapshot | null {
+		const userId = this.ownerId;
+		if (!userId || (Authentication.currentUserId && Authentication.currentUserId !== userId)) return null;
+		const channels: Array<SignalBarSnapshotChannel> = [];
+		for (const channelId of this.channelOrder) {
+			const entries = this.entriesByChannel.get(channelId);
+			const enabled = this.enabledByChannel.get(channelId);
+			if (entries === undefined || enabled === undefined) continue;
+			channels.push({channel_id: channelId, enabled, entries});
+			if (channels.length === SNAPSHOT_CHANNELS) break;
+		}
+		return {
+			userId,
+			signals: this.signals,
+			version: this.version >= 0 ? this.version : this.seededVersion,
+			channels,
+			myChats: this.myChats ? Array.from(this.myChats.values()) : null,
+			restoreAvailable: this.restoreAvailable,
+		};
+	}
+
+	private setSnapshot(snapshot: SignalBarSnapshot): void {
+		this.snapshot = snapshot;
+	}
+
+	/**
+	 * Shows the device's last copy wherever nothing is loaded yet, unconfirmed: each chat until its
+	 * answer, the summary until it is loaded again, the bar until `fetchConfig` (tyne-chat/tyne#645).
+	 */
+	private seedFromSnapshot(): void {
+		const snapshot = readSnapshot(this.snapshot);
+		if (!snapshot) return;
+		const userId = Authentication.currentUserId;
+		if ((userId && snapshot.userId !== userId) || (this.ownerId && this.ownerId !== snapshot.userId)) return;
+		runInAction(() => {
+			this.seededVersion = snapshot.version;
+			if (this.signals.length === 0 && this.version < 0) this.signals = snapshot.signals;
+			const order = [...this.channelOrder];
+			for (const channel of snapshot.channels) {
+				if (this.entriesByChannel.has(channel.channel_id)) continue;
+				try {
+					this.rememberEntries(channel.entries);
+				} catch (err) {
+					// Early in the start the user store may not take them yet: the badges come with the answer.
+					logger.warn('Could not remember the accounts of a kept chat', err);
+				}
+				this.entriesByChannel.set(channel.channel_id, channel.entries);
+				this.enabledByChannel.set(channel.channel_id, channel.enabled);
+				if (!order.includes(channel.channel_id)) order.push(channel.channel_id);
+			}
+			this.channelOrder = order.slice(0, SNAPSHOT_CHANNELS);
+			if (this.myChats === null && snapshot.myChats) {
+				this.myChats = new Map(snapshot.myChats.map((chat) => [chat.channel_id, chat]));
+				this.restoreAvailable = snapshot.restoreAvailable;
+			}
+			this.ownerId = snapshot.userId;
+		});
+	}
+
+	/** An account switch: the previous account's chats and summary go, and the new account's copy comes. */
+	private replaceWithSnapshot(): void {
+		runInAction(() => {
+			this.clearAccountData();
+			this.seedFromSnapshot();
+		});
+	}
+
+	private clearAccountData(): void {
+		this.entriesByChannel.clear();
+		this.enabledByChannel.clear();
+		this.channelOrder = [];
+		this.confirmedChannels.clear();
+		this.loadingChannels.clear();
+		this.preloadingChannels.clear();
+		this.preloadedAt.clear();
+		this.wantedSignals.clear();
+		this.forgetMyChats();
+		this.ownerId = null;
+	}
+
+	/** Whether a chat's copy was answered since the latest READY. */
+	isConfirmed(channelId: string): boolean {
+		return this.confirmedChannels.has(channelId);
 	}
 
 	/**
@@ -125,7 +319,8 @@ class SignalBarStore {
 	affirmPersona(channelId: string, subprofile: MessageSubprofileResponse | null): void {
 		const userId = Authentication.currentUserId;
 		const entries = this.entriesByChannel.get(channelId);
-		if (!userId || !entries) return;
+		// An unconfirmed copy may be out of date: the next change after the chat's answer re-points.
+		if (!userId || !entries || !this.confirmedChannels.has(channelId)) return;
 		const personaId = subprofile?.id ?? null;
 		const stale = entries.filter((entry) => entry.user.id === userId && (entry.persona_id ?? null) !== personaId);
 		if (stale.length === 0) return;
@@ -157,10 +352,17 @@ class SignalBarStore {
 		this.collapsed = collapsed;
 	}
 
+	/**
+	 * READY: nothing is dropped (tyne-chat/tyne#644). Every chat and the summary stay shown,
+	 * unconfirmed, until their answers; mounted bars ask again on `epoch`. Another account's copy goes.
+	 */
 	invalidate(): void {
-		this.entriesByChannel.clear();
-		this.enabledByChannel.clear();
-		this.forgetMyChats();
+		if (this.ownerId !== null && this.ownerId !== Authentication.currentUserId) this.clearAccountData();
+		this.confirmedChannels.clear();
+		this.loadingChannels.clear();
+		this.preloadingChannels.clear();
+		this.preloadedAt.clear();
+		this.myChatsConfirmed = false;
 		this.epoch += 1;
 		// A bar mounting meanwhile may already have asked; ensure shares or skips that request.
 		void this.fetchConfig().then(() => {
@@ -173,6 +375,7 @@ class SignalBarStore {
 		this.myChats = null;
 		this.restoreAvailable = false;
 		this.myChatsFailedAt = 0;
+		this.myChatsConfirmed = false;
 	}
 
 	/** The account's signals everywhere, newest first. */
@@ -185,10 +388,11 @@ class SignalBarStore {
 	fetchMyChats(): Promise<void> {
 		this.myChatsRequest ??= (async () => {
 			let ok = false;
+			const epoch = this.epoch;
 			try {
 				const res = await http.get<UserSignalsResponse>(ForkEndpoints.USER_SIGNALS);
 				if (res.ok && res.body) {
-					this.applyMyChats(res.body);
+					this.applyMyChats(res.body, epoch);
 					ok = true;
 				}
 			} catch (err) {
@@ -201,18 +405,24 @@ class SignalBarStore {
 		return this.myChatsRequest;
 	}
 
-	/** For a mounting bar: loads the summary once, and after a failure not again for a minute. */
+	/**
+	 * For a mounting bar: loads the summary once, and again once after READY (until then the copy
+	 * stays shown), and after a failure not again for a minute.
+	 */
 	ensureMyChats(): void {
-		if (this.myChats !== null || this.myChatsRequest) return;
+		if ((this.myChats !== null && this.myChatsConfirmed) || this.myChatsRequest) return;
 		if (this.myChatsFailedAt && Date.now() - this.myChatsFailedAt < MY_CHATS_RETRY_MS) return;
 		void this.fetchMyChats();
 	}
 
-	private applyMyChats(response: UserSignalsResponse): void {
+	/** Takes the server's summary; it confirms the copy only if asked for since the latest READY. */
+	private applyMyChats(response: UserSignalsResponse, epoch: number): void {
 		runInAction(() => {
 			this.myChats = new Map(response.chats.map((chat) => [chat.channel_id, chat]));
 			this.restoreAvailable = response.restore_available;
+			this.ownerId ??= Authentication.currentUserId;
 		});
+		if (epoch === this.epoch) this.myChatsConfirmed = true;
 	}
 
 	/** Keeps `myChats` in step with a channel event that names the account. */
@@ -301,10 +511,11 @@ class SignalBarStore {
 	private async sendEverywhere(send: () => Promise<{ok: boolean; body?: UserSignalsResponse | null}>): Promise<void> {
 		if (this.everywhereBusy) return;
 		this.everywhereBusy = true;
+		const epoch = this.epoch;
 		try {
 			const res = await send();
 			if (res.ok && res.body) {
-				this.applyMyChats(res.body);
+				this.applyMyChats(res.body, epoch);
 				return;
 			}
 		} catch (err) {
@@ -344,19 +555,121 @@ class SignalBarStore {
 		if (version > this.version) void this.fetchConfig();
 	}
 
+	/**
+	 * Loads a chat. An answer to a request sent since the latest READY confirms the chat and sends
+	 * the clicks waiting for it; an older answer updates the copy and waits for the newer request the
+	 * bar sent on `epoch`. When the newest request fails, the waiting clicks are sent as they are.
+	 */
 	async fetchChannel(channelId: string): Promise<void> {
+		const epoch = this.epoch;
+		let answered = false;
+		this.loadingChannels.add(channelId);
 		try {
 			const res = await http.get<ChannelSignalsResponse>(ForkEndpoints.CHANNEL_SIGNALS(channelId));
-			if (!res.ok || !res.body) return;
-			const {entries, bar_version, enabled} = res.body;
-			this.rememberEntries(entries);
-			runInAction(() => {
-				this.entriesByChannel.set(channelId, entries);
-				this.enabledByChannel.set(channelId, enabled);
-			});
-			this.ensureVersion(bar_version);
+			// An answer to a request sent before READY never replaces a newer one already shown.
+			if (epoch !== this.epoch && this.confirmedChannels.has(channelId)) return;
+			if (res.ok && res.body) {
+				const {entries, bar_version, enabled} = res.body;
+				this.rememberEntries(entries);
+				runInAction(() => {
+					this.entriesByChannel.set(channelId, entries);
+					this.enabledByChannel.set(channelId, enabled);
+					this.channelOrder = [channelId, ...this.channelOrder.filter((id) => id !== channelId)].slice(
+						0,
+						SNAPSHOT_CHANNELS,
+					);
+					this.ownerId ??= Authentication.currentUserId;
+				});
+				answered = true;
+				this.ensureVersion(bar_version);
+			}
 		} catch (err) {
 			logger.error('Error fetching channel signals', err);
+		}
+		if (epoch !== this.epoch) return;
+		this.loadingChannels.delete(channelId);
+		if (answered) this.confirmedChannels.add(channelId);
+		this.sendWanted(channelId, answered);
+	}
+
+	/**
+	 * Starts loading a chat someone is about to open, from upstream's hover and click preload
+	 * (`useChannelHoverPreload`), so that a chat not opened before shows its bar with the composer
+	 * instead of popping in after it: one request, only with a bar, only for a chat not answered
+	 * since the latest READY, and none while one is on its way.
+	 */
+	preloadChannel(channelId: string): void {
+		if (this.signals.length === 0) return;
+		if (this.loadingChannels.has(channelId) || this.confirmedChannels.has(channelId)) return;
+		this.preloadingChannels.add(channelId);
+		const epoch = this.epoch;
+		void this.fetchChannel(channelId).finally(() => {
+			if (epoch !== this.epoch) return;
+			this.preloadingChannels.delete(channelId);
+			if (this.confirmedChannels.has(channelId)) this.preloadedAt.set(channelId, Date.now());
+		});
+	}
+
+	/**
+	 * A bar mounting asks for its chat, as on every mount, except that it takes over a preload's
+	 * request still on its way, or an answer a preload got less than `FRESH_CHANNEL_ANSWER_MS` ago
+	 * (once: the next mount asks again).
+	 */
+	loadForBar(channelId: string): void {
+		if (this.preloadingChannels.has(channelId)) return;
+		const preloadedAt = this.preloadedAt.get(channelId);
+		this.preloadedAt.delete(channelId);
+		if (
+			preloadedAt !== undefined &&
+			this.confirmedChannels.has(channelId) &&
+			Date.now() - preloadedAt < FRESH_CHANNEL_ANSWER_MS
+		) {
+			return;
+		}
+		void this.fetchChannel(channelId);
+	}
+
+	/**
+	 * A click on a signal of the bar: turns the account's own off, or lights it as the composer here
+	 * writes. On a chat whose copy is not confirmed (from the device, or from before READY), the click
+	 * is remembered as the state it asks for, the last click winning, and sent once the chat answers,
+	 * only if the answer differs (tyne-chat/tyne#645). Turning off shows at once either way.
+	 */
+	toggle(channelId: string, signalId: string): void {
+		const userId = Authentication.currentUserId;
+		const mine = userId !== null && this.getEntries(channelId, signalId).some((entry) => entry.user.id === userId);
+		if (this.confirmedChannels.has(channelId)) {
+			if (mine) {
+				void this.deactivate(channelId, signalId);
+			} else {
+				void this.activate(channelId, signalId, this.getEffectivePersonaId(channelId));
+			}
+			return;
+		}
+		if (!userId) return;
+		const wanted = this.wantedSignals.get(channelId) ?? new Map<string, WantedSignal>();
+		wanted.set(signalId, {on: !mine, personaId: mine ? null : this.getEffectivePersonaId(channelId)});
+		this.wantedSignals.set(channelId, wanted);
+		if (mine) this.removeLocal(channelId, signalId, userId);
+		// After a failed request nothing else would ask: the click does, once.
+		if (!this.loadingChannels.has(channelId)) void this.fetchChannel(channelId);
+	}
+
+	/** Sends the clicks waiting for a chat: against its answer, or as they are when it has none. */
+	private sendWanted(channelId: string, answered: boolean): void {
+		const wanted = this.wantedSignals.get(channelId);
+		if (!wanted) return;
+		this.wantedSignals.delete(channelId);
+		const userId = Authentication.currentUserId;
+		if (!userId) return;
+		for (const [signalId, want] of wanted) {
+			const on = this.getEntries(channelId, signalId).some((entry) => entry.user.id === userId);
+			if (answered && on === want.on) continue;
+			if (want.on) {
+				void this.activate(channelId, signalId, want.personaId);
+			} else {
+				void this.deactivate(channelId, signalId);
+			}
 		}
 	}
 
