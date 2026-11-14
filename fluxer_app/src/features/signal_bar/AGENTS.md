@@ -33,30 +33,48 @@ rules every client follows and where the web and mobile clients differ are in th
   barrier rather than a `ChannelTextarea` (verification, a limited account);
   `showsSignalBarAboveBarrier` in `DMChannelView.tsx` does the same for a blocked recipient, a limited
   account or an unclaimed account.
-- The bar renders nothing until the instance has signals and the channel is known to be on.
+- The bar renders nothing until the instance has signals and the channel is known to be on. Known
+  includes the device's copy (below), so at start a chat opened before shows its bar at once.
 
 ## State and flows
 
 | Field | Meaning |
 |---|---|
-| `signals`, `version` (-1 until loaded), `guildId` (home community), `canManage` | from `GET /instance/signal-bar` |
-| `entriesByChannel` | lit entries of each channel loaded; emptied only by `invalidate()` |
+| `signals`, `version` (-1 until loaded this session), `guildId` (home community), `canManage` | from `GET /instance/signal-bar`; `signals` may come from the device's copy first, with `version` still -1, so the bar still asks |
+| `entriesByChannel` | lit entries of each channel loaded or kept on the device; emptied only for another account |
 | `enabledByChannel` | whether the bar is on; an unknown channel counts as off |
+| `confirmedChannels` (private) | channels answered since the latest READY (`isConfirmed`); the others show their copy, unconfirmed |
+| `wantedSignals` (private) | clicks on unconfirmed channels, the state each asks for, waiting for the channel's answer |
+| `snapshot` | the device's last copy (`SignalBarSnapshot`: the bar, the 50 most recently loaded channels, the summary), persisted with `collapsed`; written by a `reaction` after every change, read at start and on an account switch (tyne-chat/tyne#645) |
+| `ownerId` (private) | the account the copy in memory belongs to |
 | `composerPersonas` | per channel, whom the mounted composer writes as (`null`: the account) |
-| `epoch` | bumped by `invalidate()`, so mounted bars refetch |
-| `myChats`, `restoreAvailable` | the account's own signals in every chat (`GET /users/@me/signals`), null until loaded; kept by the events that name the account, in loaded channels or not |
+| `epoch` | bumped by `invalidate()`, so mounted bars refetch; a channel answer confirms only if no READY came since its request |
+| `myChats`, `restoreAvailable` | the account's own signals in every chat (`GET /users/@me/signals`), null until loaded or seeded from the device's copy; kept by the events that name the account, in loaded channels or not. Unconfirmed after READY until loaded again |
 | `everywhereBusy` | a change everywhere is on its way; the panel's buttons wait |
 | `collapsed` | the caret: one value per account on this device, for every channel, kept in app storage (`makePersistent`, key `SignalBar`), not synced. Collapsed, the bar keeps the lit signals and drops the rest; with none lit only the caret is left (as on mobile) |
 
 - **Loading.** `fetchConfig` shares the request in flight. `fetchChannel` is neither shared nor
   cached: it replaces the channel's entries and flag, and `rememberEntries` writes each entry's `user`
-  and `subprofile` into `Users.cacheUsers` and `PersonaStore.recordKnownPersona`.
+  and `subprofile` into `Users.cacheUsers` and `PersonaStore.recordKnownPersona`. Its answer confirms
+  the channel and sends the clicks waiting for it, unless a READY came after the request was sent:
+  then it only updates the copy, and the bar's newer request confirms. Such an older answer is
+  dropped once a newer one has confirmed the channel (`loadingChannels` holds the requests sent
+  since the latest READY).
+- **The device's copy** (tyne-chat/tyne#645). `makePersistent(this, 'SignalBar', ['collapsed',
+  'snapshot'])` keeps it per account. After hydration a `reaction` writes `snapshot` after every
+  change (app storage debounces), and `seedFromSnapshot` puts it into whatever is not loaded yet,
+  unconfirmed. A snapshot of another account is ignored. On an account switch, `onRehydrated` drops
+  the previous account's channels and summary and seeds the new account's copy; the bar's signals
+  stay until the next `fetchConfig`. Seeding tries `rememberEntries`; if the user store refuses that
+  early, the badges come with the answer.
 - **Events.** `handleChannelUpdate` applies `added`/`removed` to loaded channels and ignores others.
   `handleEnabledUpdate` sets the flag; off empties the channel. A newer `version` or `bar_version`
   starts `fetchConfig`.
-- **Resets.** `GatewayReady` calls `invalidate()` on every READY, `ForkAccountReadyWork` on a
+- **READY.** `GatewayReady` calls `invalidate()` on every READY, `ForkAccountReadyWork` on a
   promoted resume (a desktop switch with no READY), and again when a sign-in or account switch is
-  released. Nothing else resets the store: it has no
+  released. It drops nothing (tyne-chat/tyne#644): every channel and the summary stay shown,
+  unconfirmed, `epoch` makes mounted bars ask again, and the bar and the summary load again. Only a
+  copy of another account (`ownerId` is not the current user) is dropped. The store has no
   `AccountScopedWork` cancellation and no logout hook.
 - **Signals everywhere** (tyne-chat/tyne#223; design and routes in the server guide). `invalidate()`
   forgets the summary and, after the bar, calls `ensureMyChats()`, which shares or skips a request a
@@ -67,6 +85,11 @@ rules every client follows and where the web and mobile clients differ are in th
   change through their `CHANNEL_SIGNAL_UPDATE` events. A channel switched off
   (`CHANNEL_SIGNAL_BAR_UPDATE`) leaves the summary, since the server clears it without a signal
   event. No toasts: Restore is the undo.
+- **Clicks.** The bar's buttons call `toggle`. On a confirmed channel it is `deactivate` for one's own
+  lit signal, else `activate` as `getEffectivePersonaId`. On an unconfirmed one it records the state
+  asked for (the last click winning; turning off still shows at once) and `sendWanted` sends it with
+  the channel's answer, only if the answer differs, or as it is when that request fails. With no
+  request for the channel on its way (the last one failed), the click sends one.
 - **Writes.** `activate` is not optimistic: the signal shows lit when the event arrives.
   `deactivate` and `removeUser` remove the entry first; `reset` and `setDmEnabled` wait for the event.
   A failed write refetches the channel once. `saveSignals` shows the new list at once and, on failure,
@@ -75,7 +98,8 @@ rules every client follows and where the web and mobile clients differ are in th
 ## Signals and personas
 
 `affirmPersona(channelId, subprofile)` is the one place that re-points: the account's own lit entries
-in that channel whose persona differs change locally at once and get one PUT each. It is called for:
+in that channel whose persona differs change locally at once and get one PUT each. It does nothing in
+an unconfirmed channel: the next change after the channel's answer re-points. It is called for:
 
 - **typing:** `useTextareaDraftAndTyping` calls `setComposerPersona` on every value change. That
   records the persona and affirms when `decideComposerTyping` answers `start`, the typing indicator's
@@ -144,8 +168,11 @@ The REST transport does not retry. After a 429 it answers the same method and pa
 
 | Action | Requests |
 |---|---|
-| READY | 1 config GET (shared) and 1 `GET /channels/:id/signals` per mounted bar; once more after a sign-in or account switch |
+| READY | 1 config GET (shared) and 1 `GET /channels/:id/signals` per mounted bar; once more after a sign-in or account switch. The bars keep showing their copy meanwhile |
+| Start | nothing more for the device's copy: it is read from app storage |
+| A click on an unconfirmed channel | nothing until the channel's answer, and 1 channel GET if none is on its way; then 1 PUT or DELETE only if the answer differs (or as it is after a failed answer) |
 | Opening a channel, thread or forum | 1 channel GET per mounted bar, every time (A → B → A is 3), also where the bar is off, since that is how the store learns it. Threads and forums answer 400 |
+| Hovering a channel or DM for 220 ms, or pressing it (upstream's `useChannelHoverPreload`) | 1 channel GET (`preloadChannel`), only with a bar, only for a chat not answered since READY, none while one is on its way. The bar mounting next takes it over (`loadForBar`): it waits for that request, or skips its own GET once if the preload answered less than 10 s ago. So opening it is still 1 GET, sent earlier; a hover without a click costs 1 |
 | Typing, a pill pick, a send | none, unless own lit signals in the channel name another persona: 1 PUT each, all at once |
 | Clicking a signal; the managers' menu | 1 PUT or DELETE, and 1 channel GET if it fails |
 | Opening a DM's context menu | 1 channel GET; the item sends 1 PUT |
@@ -176,12 +203,16 @@ mount and each newer-version event tries the config again. No test counts these 
 - Lit signals carry copies made when they were lit, and `rememberEntries` writes them over newer data
   in `Users` and `PersonaStore`: opening a channel can bring back an old name or avatar there
   (tyne-chat/tyne#311).
-- Every READY empties all channels, so the bar disappears until the channel GET returns.
+- At start, the globe's count can show 0 until the channels are known, since it counts only chats
+  the client knows (not checked in a browser).
 - Keyboard use of the bar is tyne-chat/tyne#112.
 - The bar shows above a blocked recipient's barrier, and the server does not check blocks.
 
 ## Where this code hooks into upstream files
 
+- `useChannelHoverPreload.ts`: the fork import and one `SignalBarStore.preloadChannel` call at the
+  end of `preloadChannelNow`, so a chat not opened before shows its bar with the composer
+  (tyne-chat/tyne#645). Tested in the fork's `useChannelHoverPreloadSignalBar.test.tsx`.
 - One line or element each: `LexicalChannelTextareaContent.tsx`, `DMContextMenu.tsx`,
   `GroupDMContextMenu.tsx`, `GuildSettingsTabComponents.ts`, `EventRouter.ts` (three `registry.set`),
   `GatewayReady.ts` (`invalidate()`), `MessageCommands.tsx` (`affirmPersona` in `send`, under
@@ -210,9 +241,13 @@ mount and each newer-version event tries the config again. No test counts these 
   persona, rows, columns and navigation, Turn all off and Restore, the profile row,
   `signalsWrapBesidePair`.
 - `state/SignalBarStore.test.ts`: entries, the persona rules (typing, other channels), version
-  refetch, rollbacks, the enabled flag. `state/SignalBarCollapsedStorage.test.ts`: the caret is kept
+  refetch, rollbacks, the enabled flag; after READY: the copy kept and unconfirmed, an older answer
+  not confirming, clicks remembered and sent only when the answer differs or as they are after a
+  failure, no re-pointing while unconfirmed, another account's copy dropped.
+  `state/SignalBarSnapshot.test.tsx`: the device's copy (bar, 50 most recent chats, summary), another
+  account starting empty, and the bar drawn from the copy before any request answers. `state/SignalBarCollapsedStorage.test.ts`: the caret is kept
   per account in app storage. `components/SignalBar.test.tsx`: rendering, badges, toggling,
-  rights, off, collapsed. `components/SignalBarMenus.test.tsx`: the managers' menu, reset, editor
+  rights, off, collapsed, the bar staying as it was while its request after READY is on its way. `components/SignalBarMenus.test.tsx`: the managers' menu, reset, editor
   removal. `utils/SignalBarTree.test.ts`: order, mixed states, folding.
   `user/components/settings_utils/GuildSettingsTabsSignalBar.test.ts`: no tab without a home community.
 - End to end: `e2e/web/desktop/signal-bar.spec.ts`: two accounts toggling in real time, the persona
