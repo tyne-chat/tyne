@@ -229,7 +229,7 @@
 }
 
 .contentGridWithPeekStrip {
-	padding-inline-end: 8px;
+	padding-inline-end: 0.5rem;
 }
 
 .chatAreaSlot {
