@@ -1112,7 +1112,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 										<div key={idx} style={{marginBottom: remFromPx(6)}} data-flx="persona.persona-edit-modal.div">
 											<div
 												className={styles.tagRow}
-												style={{marginBottom: tagError ? 2 : 0}}
+												style={{marginBottom: tagError ? remFromPx(2) : 0}}
 												data-flx="persona.persona-edit-modal.tag-row"
 											>
 												<input
