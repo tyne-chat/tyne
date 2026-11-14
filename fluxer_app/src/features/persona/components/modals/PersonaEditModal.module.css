@@ -257,7 +257,7 @@
 	align-items: center;
 	gap: 0.25rem;
 	padding: 0.1875rem 0.5rem;
-	border-radius: 62.4375rem;
+	border-radius: var(--radius-full);
 	background-color: var(--brand-primary);
 	color: var(--brand-primary-fill, #fff);
 	font-size: 0.75rem;
