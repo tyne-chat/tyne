@@ -220,6 +220,12 @@ cannot conflict.
   send the strings to an outside translation service.
 - The mobile app has its own fork catalogues; keep the wording aligned where a string exists in both.
 
+## Sizes in the web app
+
+Write sizes as upstream does: in `rem`, hairlines, shadows and radii included. The desktop app zooms by
+the root font size, which `px` ignores (a `px` cap hid the bottom of the autocomplete above 100%,
+tyne-chat/tyne#636). `fork-px-lint.mjs` enforces it; the few `px` upstream keeps are in `CHECKS.md`.
+
 ## Network calls: count the requests
 
 The server ends sessions over request floods. Upstream's API allows each user 50 requests per second
