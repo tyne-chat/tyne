@@ -437,6 +437,8 @@
 	border-color: inherit;
 }
 
+/* The strip covers a seam at most one device pixel wide at any zoom: in px it stays 2px thick and 1px
+   outside the banner, inside the border down to 50% zoom (tyne-chat/tyne#638). px-ok: device pixels. */
 .modalContainer > header::before {
 	content: '';
 	position: absolute;
