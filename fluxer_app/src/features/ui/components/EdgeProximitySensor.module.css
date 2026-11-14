@@ -5,7 +5,7 @@
 	top: 0;
 	bottom: 0;
 	inset-inline-start: 0;
-	width: 15px;
+	width: 0.9375rem;
 	z-index: var(--z-index-elevated-3, 40);
 	pointer-events: auto;
 	background: transparent;
@@ -16,7 +16,7 @@
 	top: 0;
 	bottom: 0;
 	inset-inline-end: 0;
-	width: 8px;
+	width: 0.5rem;
 	z-index: var(--z-index-elevated-3, 40);
 	pointer-events: auto;
 	background: transparent;

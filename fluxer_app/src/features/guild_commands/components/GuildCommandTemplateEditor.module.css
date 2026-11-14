@@ -2,7 +2,7 @@
    off by it. The editor's own scroller does the scrolling. */
 .editor {
 	min-height: 5.5rem;
-	border: 1px solid var(--background-modifier-accent);
+	border: 0.0625rem solid var(--background-modifier-accent);
 	border-radius: 0.5rem;
 	background-color: var(--background-secondary);
 }
@@ -28,5 +28,5 @@
 
 .editor :global(.cm-lintRange-error) {
 	background-image: none;
-	border-bottom: 2px solid var(--status-danger);
+	border-bottom: 0.125rem solid var(--status-danger);
 }
