@@ -1108,7 +1108,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								{formData.tags.map((tag, idx) => {
 									const tagError = getTagRowError(idx);
 									return (
-										<div key={idx} style={{marginBottom: 6}} data-flx="persona.persona-edit-modal.div">
+										<div key={idx} style={{marginBottom: '0.375rem'}} data-flx="persona.persona-edit-modal.div">
 											<div
 												className={styles.tagRow}
 												style={{marginBottom: tagError ? 2 : 0}}
@@ -1203,7 +1203,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								</div>
 								<div
 									className={styles.modeHelperText}
-									style={{marginTop: 4, marginBottom: 8}}
+									style={{marginTop: '0.25rem', marginBottom: '0.5rem'}}
 									data-flx="persona.persona-edit-modal.mode-helper-text"
 								>
 									<Info
@@ -1250,7 +1250,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								/>
 								<div
 									className={styles.modeHelperText}
-									style={{marginTop: 6}}
+									style={{marginTop: '0.375rem'}}
 									data-flx="persona.persona-edit-modal.mode-helper-text--2"
 								>
 									<Info
