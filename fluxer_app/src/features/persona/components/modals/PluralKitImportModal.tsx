@@ -11,6 +11,7 @@ import * as Modal from '@app/features/app/components/dialogs/Modal';
 import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
 import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
@@ -789,7 +790,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 					)}
 
 					{busy && (
-						<div style={{padding: '16px 0'}} data-flx="persona.plural-kit-import-modal.div--2">
+						<div style={{padding: '1rem 0'}} data-flx="persona.plural-kit-import-modal.div--2">
 							<div
 								className={styles.progressCurrentName}
 								data-flx="persona.plural-kit-import-modal.progress-current-name"
@@ -830,7 +831,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 							<div className={styles.successBox} data-flx="persona.plural-kit-import-modal.success-box">
 								<CheckCircle
 									size={36}
-									style={{color: 'var(--accent-success)', marginBottom: 8}}
+									style={{color: 'var(--accent-success)', marginBottom: remFromPx(8)}}
 									data-flx="persona.plural-kit-import-modal.check-circle"
 								/>
 								<div className={styles.successTitle} data-flx="persona.plural-kit-import-modal.success-title">
