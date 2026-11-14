@@ -187,6 +187,37 @@ describe('SignalBar', () => {
 		expect(putMock).not.toHaveBeenCalled();
 	});
 
+	it('stays as it was while its request after READY is on its way (tyne-chat/tyne#644)', async () => {
+		SessionManager.setUserId('100000000000000001');
+		setSignals([READING]);
+		await render(channel({id: 'ready'} as Partial<Channel>), [entry('reading', '100000000000000002', 'them')]);
+		expect(button('Reading')?.getAttribute('aria-label')).toBe('Reading: them');
+
+		const held = new Map<string, (value: unknown) => void>();
+		getMock.mockImplementation(
+			((path: string) =>
+				new Promise((resolve) => {
+					held.set(path, resolve);
+				})) as never,
+		);
+		await act(async () => SignalBarStore.invalidate());
+
+		expect(held.has(ForkEndpoints.CHANNEL_SIGNALS('ready'))).toBe(true);
+		expect(button('Reading')?.getAttribute('aria-label')).toBe('Reading: them');
+
+		await act(async () =>
+			held.get(ForkEndpoints.CHANNEL_SIGNALS('ready'))?.({
+				ok: true,
+				body: {enabled: true, bar_version: 1, entries: []},
+			}),
+		);
+		expect(button('Reading')?.getAttribute('aria-label')).toBe('Reading');
+		// Nothing stays in flight into the next test: a held bar request would be shared.
+		await act(async () => {
+			for (const resolve of held.values()) resolve({ok: false, body: null});
+		});
+	});
+
 	it('does not toggle in a community channel where the user has no send permission', async () => {
 		setSignals([READING]);
 		await render(channel({id: 'c', guildId: 'g'} as Partial<Channel>));

@@ -22,7 +22,7 @@ import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import SessionManager from '@app/features/platform/state/AuthSession';
 import {http} from '@app/features/platform/transport/RestTransport';
-import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
+import SignalBarStore, {FRESH_CHANNEL_ANSWER_MS} from '@app/features/signal_bar/state/SignalBarStore';
 import {moveSignal} from '@app/features/signal_bar/utils/SignalUtils';
 import type {ChannelSignalEntry, SignalBarSignal} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
 import {observable, runInAction} from 'mobx';
@@ -398,19 +398,236 @@ describe('the requests SignalBarStore sends', () => {
 			expect(SignalBarStore.signals.map((item) => item.id)).toEqual(['kept']);
 		});
 
-		it('empties every channel and asks for the bar once when invalidated', async () => {
+		it('keeps every channel shown, unconfirmed, and asks for the bar once when invalidated', async () => {
+			SessionManager.setUserId('1');
 			void SignalBarStore.fetchChannel('loaded');
 			await channelGets('loaded')[0]?.answer(channelBody(3, [entry('a', '1')]));
+			expect(SignalBarStore.isConfirmed('loaded')).toBe(true);
 			const epoch = SignalBarStore.epoch;
 
 			SignalBarStore.invalidate();
 			SignalBarStore.invalidate();
 
-			expect(SignalBarStore.getEntries('loaded', 'a')).toEqual([]);
-			expect(SignalBarStore.isEnabled('loaded')).toBe(false);
+			// READY drops nothing (tyne-chat/tyne#644): the bar keeps what it showed until the answer.
+			expect(SignalBarStore.getEntries('loaded', 'a')).toHaveLength(1);
+			expect(SignalBarStore.isEnabled('loaded')).toBe(true);
+			expect(SignalBarStore.isConfirmed('loaded')).toBe(false);
 			expect(SignalBarStore.epoch).toBe(epoch + 2);
 			expect(configGets()).toHaveLength(1);
 			expect(channelGets('loaded')).toHaveLength(1);
+		});
+	});
+
+	// READY keeps what is shown, unconfirmed, until each chat answers again (tyne-chat/tyne#644), and
+	// a click on such a chat waits for that answer (tyne-chat/tyne#645).
+	describe('after READY', () => {
+		const loaded = async (channelId: string, entries: Array<ChannelSignalEntry>) => {
+			void SignalBarStore.fetchChannel(channelId);
+			await channelGets(channelId).at(-1)?.answer(channelBody(3, entries));
+			SignalBarStore.invalidate();
+			// The mounted bar asks again on the new epoch.
+			void SignalBarStore.fetchChannel(channelId);
+		};
+
+		beforeEach(() => {
+			SessionManager.setUserId('1');
+		});
+
+		it('takes an answer to a request sent before READY, but only the newer one confirms the chat', async () => {
+			void SignalBarStore.fetchChannel('early');
+			SignalBarStore.invalidate();
+			void SignalBarStore.fetchChannel('early');
+
+			await channelGets('early')[0]?.answer(channelBody(3, [entry('a', '2')]));
+			expect(SignalBarStore.getEntries('early', 'a')).toHaveLength(1);
+			expect(SignalBarStore.isConfirmed('early')).toBe(false);
+
+			await channelGets('early')[1]?.answer(channelBody(3, [entry('a', '2'), entry('b', '3')]));
+			expect(SignalBarStore.isConfirmed('early')).toBe(true);
+			expect(SignalBarStore.getEntries('early', 'b')).toHaveLength(1);
+			expect(channelGets('early')).toHaveLength(2);
+		});
+
+		it('never lets an answer to a request sent before READY replace a newer one', async () => {
+			void SignalBarStore.fetchChannel('late');
+			SignalBarStore.invalidate();
+			void SignalBarStore.fetchChannel('late');
+
+			await channelGets('late')[1]?.answer(channelBody(3, [entry('b', '3')]));
+			await channelGets('late')[0]?.answer(channelBody(3, [entry('a', '2')]));
+
+			expect(SignalBarStore.isConfirmed('late')).toBe(true);
+			expect(SignalBarStore.getEntries('late', 'b')).toHaveLength(1);
+			expect(SignalBarStore.getEntries('late', 'a')).toEqual([]);
+		});
+
+		it('asks once for a chat whose request failed when it is clicked', async () => {
+			await loaded('retry', []);
+			await channelGets('retry')[1]?.fail();
+			expect(channelGets('retry')).toHaveLength(2);
+
+			SignalBarStore.toggle('retry', 'a');
+			SignalBarStore.toggle('retry', 'b');
+			expect(channelGets('retry')).toHaveLength(3);
+			await channelGets('retry')[2]?.answer(channelBody(3, [entry('b', '1')]));
+
+			expect(sent('PUT', ForkEndpoints.CHANNEL_SIGNAL_ME('retry', 'a'))).toHaveLength(1);
+			expect(sent('PUT', ForkEndpoints.CHANNEL_SIGNAL_ME('retry', 'b'))).toHaveLength(0);
+		});
+
+		it('shows a click turning a signal off at once, and sends it only if the answer still has it on', async () => {
+			await loaded('off', [entry('a', '1'), entry('b', '2')]);
+
+			SignalBarStore.toggle('off', 'a');
+			expect(SignalBarStore.getEntries('off', 'a')).toEqual([]);
+			expect(sent('DELETE')).toHaveLength(0);
+
+			await channelGets('off')[1]?.answer(channelBody(3, [entry('a', '1'), entry('b', '2')]));
+			expect(sent('DELETE', ForkEndpoints.CHANNEL_SIGNAL_ME('off', 'a'))).toHaveLength(1);
+			expect(SignalBarStore.getEntries('off', 'a')).toEqual([]);
+			expect(SignalBarStore.getEntries('off', 'b')).toHaveLength(1);
+		});
+
+		it('sends nothing for a click the answer already agrees with', async () => {
+			await loaded('on', []);
+
+			SignalBarStore.toggle('on', 'a');
+			SignalBarStore.toggle('on', 'b');
+			expect(sent('PUT')).toHaveLength(0);
+			// Lit on another device meanwhile.
+			await channelGets('on')[1]?.answer(channelBody(3, [entry('a', '1')]));
+
+			expect(sent('PUT', ForkEndpoints.CHANNEL_SIGNAL_ME('on', 'a'))).toHaveLength(0);
+			expect(sent('PUT', ForkEndpoints.CHANNEL_SIGNAL_ME('on', 'b'))).toHaveLength(1);
+		});
+
+		it('keeps only the last click on a signal', async () => {
+			await loaded('twice', [entry('a', '1')]);
+
+			SignalBarStore.toggle('twice', 'a');
+			SignalBarStore.toggle('twice', 'a');
+			await channelGets('twice')[1]?.answer(channelBody(3, [entry('a', '1')]));
+
+			expect(sent('PUT')).toHaveLength(0);
+			expect(sent('DELETE')).toHaveLength(0);
+			expect(SignalBarStore.getEntries('twice', 'a')).toHaveLength(1);
+		});
+
+		it('sends a click as it is when the chat cannot be loaded', async () => {
+			await loaded('offline', []);
+
+			SignalBarStore.toggle('offline', 'a');
+			await channelGets('offline')[1]?.fail();
+
+			expect(sent('PUT', ForkEndpoints.CHANNEL_SIGNAL_ME('offline', 'a'))).toHaveLength(1);
+			expect(channelGets('offline')).toHaveLength(2);
+		});
+
+		it('sends a click on a confirmed chat at once, as before', async () => {
+			void SignalBarStore.fetchChannel('confirmed');
+			await channelGets('confirmed')[0]?.answer(channelBody(3, []));
+
+			SignalBarStore.toggle('confirmed', 'a');
+
+			expect(sent('PUT', ForkEndpoints.CHANNEL_SIGNAL_ME('confirmed', 'a'))).toHaveLength(1);
+		});
+
+		it('re-points nothing in a chat that has not answered again', async () => {
+			await loaded('point', [entry('a', '1')]);
+
+			SignalBarStore.affirmPersona('point', {id: '7', name: 'Seven'});
+
+			expect(sent('PUT')).toHaveLength(0);
+			expect(SignalBarStore.getEntries('point', 'a')[0]?.persona_id).toBeNull();
+		});
+
+		it("drops another account's copy", async () => {
+			void SignalBarStore.fetchChannel('theirs');
+			await channelGets('theirs')[0]?.answer(channelBody(3, [entry('a', '1')]));
+
+			SessionManager.setUserId('2');
+			SignalBarStore.invalidate();
+
+			expect(SignalBarStore.isEnabled('theirs')).toBe(false);
+			expect(SignalBarStore.getEntries('theirs', 'a')).toEqual([]);
+			SessionManager.setUserId('1');
+		});
+	});
+
+	// Upstream's hover and click preload (`useChannelHoverPreload`) starts the chat's bar too, so a
+	// chat not opened before shows its bar with the composer instead of after it (tyne-chat/tyne#645).
+	describe('a chat about to open', () => {
+		let signalsBefore: ReadonlyArray<SignalBarSignal>;
+
+		beforeEach(() => {
+			signalsBefore = SignalBarStore.signals;
+			runInAction(() => {
+				SignalBarStore.signals = [signal('a')];
+			});
+		});
+
+		afterEach(() => {
+			runInAction(() => {
+				SignalBarStore.signals = signalsBefore;
+			});
+		});
+
+		it('is asked for once, and the bar mounting meanwhile shares that request', async () => {
+			SignalBarStore.preloadChannel('hover');
+			SignalBarStore.preloadChannel('hover');
+			SignalBarStore.loadForBar('hover');
+			expect(channelGets('hover')).toHaveLength(1);
+
+			await channelGets('hover')[0]?.answer(channelBody(3, [entry('a', '2')]));
+			expect(SignalBarStore.isEnabled('hover')).toBe(true);
+			expect(SignalBarStore.isConfirmed('hover')).toBe(true);
+		});
+
+		it('spares the bar mounting right after the answer one request, once', async () => {
+			SignalBarStore.preloadChannel('soon');
+			await channelGets('soon')[0]?.answer(channelBody(3));
+			SignalBarStore.preloadChannel('soon');
+			SignalBarStore.loadForBar('soon');
+			expect(channelGets('soon')).toHaveLength(1);
+
+			// Another mount later asks, as every mount does.
+			SignalBarStore.loadForBar('soon');
+			expect(channelGets('soon')).toHaveLength(2);
+		});
+
+		it('does not spare a bar mounting long after the answer', async () => {
+			const now = vi.spyOn(Date, 'now').mockReturnValue(1_000_000);
+			try {
+				SignalBarStore.preloadChannel('late');
+				await channelGets('late')[0]?.answer(channelBody(3));
+				now.mockReturnValue(1_000_000 + FRESH_CHANNEL_ANSWER_MS);
+				SignalBarStore.loadForBar('late');
+				expect(channelGets('late')).toHaveLength(2);
+			} finally {
+				now.mockRestore();
+			}
+		});
+
+		it('leaves a bar mounting without a preload asking every time', async () => {
+			SignalBarStore.loadForBar('plain');
+			await channelGets('plain')[0]?.answer(channelBody(3));
+			SignalBarStore.loadForBar('plain');
+			expect(channelGets('plain')).toHaveLength(2);
+		});
+
+		it('is asked for again after a failed preload, by the bar mounting', async () => {
+			SignalBarStore.preloadChannel('flaky');
+			await channelGets('flaky')[0]?.fail();
+			SignalBarStore.loadForBar('flaky');
+			expect(channelGets('flaky')).toHaveLength(2);
+		});
+
+		it('asks nothing without a bar', () => {
+			runInAction(() => {
+				SignalBarStore.signals = [];
+			});
+			SignalBarStore.preloadChannel('nobar');
+			expect(channelGets('nobar')).toHaveLength(0);
 		});
 	});
 
