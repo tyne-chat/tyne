@@ -151,12 +151,8 @@ const SignalButton = observer(
 		}, []);
 		const handleClick = useCallback(() => {
 			if (!canToggle) return;
-			if (mine) {
-				void SignalBarStore.deactivate(channel.id, signal.id);
-			} else {
-				void SignalBarStore.activate(channel.id, signal.id, SignalBarStore.getEffectivePersonaId(channel.id));
-			}
-		}, [canToggle, mine, channel.id, signal.id]);
+			SignalBarStore.toggle(channel.id, signal.id);
+		}, [canToggle, channel.id, signal.id]);
 		return (
 			<Tooltip text={tooltip} data-flx="signal-bar.signal-button.tooltip">
 				<FocusRing offset={-2} data-flx="signal-bar.signal-button.focus-ring">
@@ -295,7 +291,7 @@ export const SignalBar = observer(({channel, attached = false}: SignalBarProps) 
 		if (version < 0) void SignalBarStore.fetchConfig();
 	}, [version]);
 	useEffect(() => {
-		if (hasSignals) void SignalBarStore.fetchChannel(channel.id);
+		if (hasSignals) SignalBarStore.loadForBar(channel.id);
 	}, [channel.id, hasSignals, epoch]);
 	useEffect(() => {
 		if (hasSignals) SignalBarStore.ensureMyChats();
