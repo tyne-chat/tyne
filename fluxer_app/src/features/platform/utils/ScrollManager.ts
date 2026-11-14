@@ -39,6 +39,10 @@ import {MAX_MESSAGES_PER_CHANNEL, NEW_MESSAGES_BAR_BUFFER} from '@fluxer/constan
 import debounce from 'lodash/debounce';
 import {createRef, useLayoutEffect, useState} from 'react';
 
+// Fork imports.
+
+import {prependDeferredOlderAtBottom} from '@app/features/boot_state/ForkDeferredOlderAtBottom';
+
 const ANCHOR_SCROLL_IDLE_MS = 35;
 const DEFERRED_OLDER_SCROLL_SETTLE_MS = 120;
 const DEFERRED_OLDER_SLICE_MESSAGES = 16;
@@ -927,6 +931,9 @@ export class ScrollManager {
 		this.restoreApplyInitialPosition();
 		if (Messages.hasDeferredOlderMessages(this.props.channel.id)) {
 			afterBootReveal(() => this.loadDeferredOlderWhenScrollSettles());
+			// Fork: a stopgap, at the bottom the held rows come back at once (tyne-chat/tyne#635). Delete it
+			// with its import once upstream fixes this; when is in ForkDeferredOlderAtBottom.ts.
+			prependDeferredOlderAtBottom(this.props.channel.id, () => !this.lifecycleIsDisposed && this.pinIsAtBottom);
 		}
 	}
 
