@@ -21,6 +21,7 @@ import {personaTagIconUrls} from '@app/features/persona/utils/PersonaTagIconUrls
 import {http} from '@app/features/platform/transport/RestTransport';
 import {readBlobAsDataUrl} from '@app/features/platform/utils/BlobDataUrl';
 import {downloadBlob} from '@app/features/platform/utils/DownloadFile';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
@@ -720,7 +721,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 						})}
 						linkable={false}
 						actions={
-							<div style={{display: 'flex', gap: '0.5rem'}} data-flx="persona.settings.persona-settings-tab.div">
+							<div style={{display: 'flex', gap: remFromPx(8)}} data-flx="persona.settings.persona-settings-tab.div">
 								<Button
 									variant="secondary"
 									leftIcon={<UploadSimple size={16} data-flx="persona.settings.persona-settings-tab.upload-simple" />}
@@ -879,8 +880,8 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 														<div
 															className={styles.colorPreview}
 															style={{
-																width: '0.75rem',
-																height: '0.75rem',
+																width: remFromPx(12),
+																height: remFromPx(12),
 																backgroundColor: `#${persona.color.toString(16).padStart(6, '0')}`,
 															}}
 															data-flx="persona.settings.persona-settings-tab.color-preview"

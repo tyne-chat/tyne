@@ -10,13 +10,13 @@
 	line-height: 1;
 	vertical-align: middle;
 	margin-inline-start: 0.35rem;
-	padding: 1px 0.25rem;
+	padding: 0.0625rem 0.25rem;
 	border-radius: 0.1875rem;
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
 	user-select: none;
 	cursor: pointer;
-	border: 1px solid var(--border-color);
+	border: 0.0625rem solid var(--border-color);
 	transition:
 		background-color 0.15s ease,
 		color 0.15s ease;
@@ -42,7 +42,7 @@
 }
 
 .iconOnly {
-	padding: 1px 0.125rem;
+	padding: 0.0625rem 0.125rem;
 }
 
 .iconOnly .icon {

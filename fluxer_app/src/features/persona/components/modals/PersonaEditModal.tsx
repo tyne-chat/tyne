@@ -14,6 +14,7 @@ import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
 import {toReactionEmoji, useEmojiURL} from '@app/features/messaging/utils/ReactionUtils';
 import {ComponentBus} from '@app/features/platform/utils/ComponentBus';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
 import {CopyIcon} from '@app/features/ui/action_menu/ContextMenuIcons';
@@ -1108,7 +1109,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								{formData.tags.map((tag, idx) => {
 									const tagError = getTagRowError(idx);
 									return (
-										<div key={idx} style={{marginBottom: '0.375rem'}} data-flx="persona.persona-edit-modal.div">
+										<div key={idx} style={{marginBottom: remFromPx(6)}} data-flx="persona.persona-edit-modal.div">
 											<div
 												className={styles.tagRow}
 												style={{marginBottom: tagError ? 2 : 0}}
@@ -1203,7 +1204,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								</div>
 								<div
 									className={styles.modeHelperText}
-									style={{marginTop: '0.25rem', marginBottom: '0.5rem'}}
+									style={{marginTop: remFromPx(4), marginBottom: remFromPx(8)}}
 									data-flx="persona.persona-edit-modal.mode-helper-text"
 								>
 									<Info
@@ -1236,7 +1237,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 							<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block--3">
 								<div
 									className={styles.fieldLabel}
-									style={{marginBottom: '0.5rem'}}
+									style={{marginBottom: remFromPx(8)}}
 									data-flx="persona.persona-edit-modal.field-label--3"
 								>
 									<Trans>Visibility</Trans>
@@ -1250,7 +1251,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								/>
 								<div
 									className={styles.modeHelperText}
-									style={{marginTop: '0.375rem'}}
+									style={{marginTop: remFromPx(6)}}
 									data-flx="persona.persona-edit-modal.mode-helper-text--2"
 								>
 									<Info
