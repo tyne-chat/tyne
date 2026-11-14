@@ -222,9 +222,9 @@ cannot conflict.
 
 ## Sizes in the web app
 
-The desktop app zooms by the root font size, so only `rem` follows its zoom: size in `rem`, as upstream
-does, not `px` (a `px` cap hid the bottom of the autocomplete above 100%, tyne-chat/tyne#636).
-`fork-px-lint.mjs` enforces it; its rules and exceptions are in `CHECKS.md`.
+Write sizes as upstream does: in `rem`, hairlines, shadows and radii included. The desktop app zooms by
+the root font size, which `px` ignores (a `px` cap hid the bottom of the autocomplete above 100%,
+tyne-chat/tyne#636). `fork-px-lint.mjs` enforces it; the few `px` upstream keeps are in `CHECKS.md`.
 
 ## Network calls: count the requests
 
