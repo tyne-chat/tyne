@@ -789,7 +789,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 					)}
 
 					{busy && (
-						<div style={{padding: '16px 0'}} data-flx="persona.plural-kit-import-modal.div--2">
+						<div style={{padding: '1rem 0'}} data-flx="persona.plural-kit-import-modal.div--2">
 							<div
 								className={styles.progressCurrentName}
 								data-flx="persona.plural-kit-import-modal.progress-current-name"
@@ -830,7 +830,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 							<div className={styles.successBox} data-flx="persona.plural-kit-import-modal.success-box">
 								<CheckCircle
 									size={36}
-									style={{color: 'var(--accent-success)', marginBottom: 8}}
+									style={{color: 'var(--accent-success)', marginBottom: '0.5rem'}}
 									data-flx="persona.plural-kit-import-modal.check-circle"
 								/>
 								<div className={styles.successTitle} data-flx="persona.plural-kit-import-modal.success-title">

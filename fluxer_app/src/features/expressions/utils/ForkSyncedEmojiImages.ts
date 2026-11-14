@@ -32,7 +32,7 @@ import {
 } from '@app/features/expressions/utils/ForkSyncedEmojiPlayer';
 
 // Emoji this close to the viewport count as on screen. `scrollMargin` extends the message list's own
-// scroll box too (Chromium); other engines ignore it.
+// scroll box too (Chromium); other engines ignore it. px-ok: a distance in screen pixels.
 const NEAR_VIEWPORT = {rootMargin: '200px', scrollMargin: '200px'} as IntersectionObserverInit;
 
 type ViewportListener = (near: boolean, cssPixels: number) => void;

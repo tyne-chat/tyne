@@ -7,12 +7,12 @@
 	container-type: inline-size;
 	display: flex;
 	flex-direction: column;
-	gap: 18px;
+	gap: 1.125rem;
 }
 
 .intro {
 	margin: 0;
-	font-size: 15px;
+	font-size: 0.9375rem;
 	line-height: 1.5;
 	color: var(--text-secondary);
 }
@@ -21,8 +21,8 @@
 .ready {
 	display: flex;
 	flex-direction: column;
-	padding: 4px 14px;
-	border-radius: 10px;
+	padding: 0.25rem 0.875rem;
+	border-radius: 0.625rem;
 	background: var(--bg-secondary);
 	border: 1px solid var(--border-color);
 }
@@ -38,8 +38,8 @@
 .readyHead {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	min-height: 44px;
+	gap: 0.625rem;
+	min-height: 2.75rem;
 }
 
 .readyIcon {
@@ -55,7 +55,7 @@
 .readyText {
 	flex: 1;
 	min-width: 0;
-	font-size: 14px;
+	font-size: 0.875rem;
 	line-height: 1.4;
 	color: var(--text-primary);
 }
@@ -66,14 +66,14 @@
 
 .readyToggle {
 	flex: none;
-	min-height: 36px;
-	padding: 0 10px;
+	min-height: 2.25rem;
+	padding: 0 0.625rem;
 	border: 0;
-	border-radius: 6px;
+	border-radius: 0.375rem;
 	background: transparent;
 	color: var(--brand-primary);
 	font: inherit;
-	font-size: 14px;
+	font-size: 0.875rem;
 	cursor: pointer;
 }
 
@@ -82,11 +82,11 @@
 }
 
 .readyList {
-	margin: 0 0 10px;
+	margin: 0 0 0.625rem;
 	padding: 0;
 	list-style: none;
 	border: 1px solid var(--border-color);
-	border-radius: 8px;
+	border-radius: 0.5rem;
 }
 
 .readyItem {
@@ -100,9 +100,9 @@
 .readyItemLabel {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	min-height: 40px;
-	padding: 0 10px;
+	gap: 0.625rem;
+	min-height: 2.5rem;
+	padding: 0 0.625rem;
 	cursor: pointer;
 }
 
@@ -115,8 +115,8 @@
 .checkbox,
 .radio {
 	flex: none;
-	width: 18px;
-	height: 18px;
+	width: 1.125rem;
+	height: 1.125rem;
 	margin: 0;
 	accent-color: var(--brand-primary);
 	cursor: pointer;
@@ -125,20 +125,20 @@
 .conflicts {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
-	padding: 12px 14px;
-	border-radius: 10px;
+	gap: 0.375rem;
+	padding: 0.75rem 0.875rem;
+	border-radius: 0.625rem;
 	border: 1px solid color-mix(in srgb, var(--accent-danger) 50%, transparent);
 	background: color-mix(in srgb, var(--accent-danger) 10%, transparent);
 	color: var(--text-primary);
-	font-size: 14px;
+	font-size: 0.875rem;
 }
 
 /* Your file → the app: the column heads and every pair of cards share this grid. */
 .pair {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr);
-	gap: 8px;
+	grid-template-columns: minmax(0, 1fr) 1.5rem minmax(0, 1fr);
+	gap: 0.5rem;
 	align-items: stretch;
 }
 
@@ -155,8 +155,8 @@
 .columnHead {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	font-size: 12px;
+	gap: 0.5rem;
+	font-size: 0.75rem;
 	font-weight: 600;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -166,24 +166,24 @@
 .items {
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
+	gap: 1.5rem;
 }
 
 /* A thin line between one question and the next. */
 .items > .item + .item {
-	padding-top: 24px;
+	padding-top: 1.5rem;
 	border-top: 1px solid var(--border-color);
 }
 
 .item {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 0.625rem;
 }
 
 .question {
 	margin: 0;
-	font-size: 16px;
+	font-size: 1rem;
 	font-weight: 600;
 	line-height: 1.4;
 	color: var(--text-primary);
@@ -192,7 +192,7 @@
 
 .why {
 	margin: 0;
-	font-size: 14px;
+	font-size: 0.875rem;
 	line-height: 1.5;
 	color: var(--text-secondary);
 }
@@ -201,10 +201,10 @@
 	--import-card-bg: var(--bg-secondary);
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 0.625rem;
 	min-width: 0;
-	padding: 12px 14px;
-	border-radius: 12px;
+	padding: 0.75rem 0.875rem;
+	border-radius: 0.75rem;
 	border: 2px solid var(--border-color);
 	background: var(--import-card-bg);
 	color: var(--text-primary);
@@ -254,11 +254,11 @@
 .cardChoiceHead {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 0.625rem;
 }
 
 .cardChoiceLabel {
-	font-size: 14px;
+	font-size: 0.875rem;
 	font-weight: 600;
 	color: var(--text-primary);
 }
@@ -266,7 +266,7 @@
 .stack {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 0.5rem;
 	min-width: 0;
 }
 
@@ -275,24 +275,24 @@
 .version {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 0.5rem;
 	min-width: 0;
 }
 
 .blockName {
-	font-size: 15px;
+	font-size: 0.9375rem;
 	font-weight: 600;
 	color: var(--text-primary);
 	overflow-wrap: anywhere;
 }
 
 .blockMeta {
-	font-size: 12px;
+	font-size: 0.75rem;
 	color: var(--text-primary-muted);
 }
 
 .blockBio {
-	font-size: 13px;
+	font-size: 0.8125rem;
 	line-height: 1.45;
 	color: var(--text-secondary);
 	overflow-wrap: anywhere;
@@ -305,7 +305,7 @@
 .tags {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 6px;
+	gap: 0.375rem;
 }
 
 .tag.tagClash {
@@ -316,8 +316,8 @@
 	flex: none;
 	display: inline-grid;
 	place-items: center;
-	width: 40px;
-	height: 40px;
+	width: 2.5rem;
+	height: 2.5rem;
 	border-radius: 50%;
 	background: var(--bg-tertiary);
 	color: var(--text-secondary);
@@ -328,13 +328,13 @@
 .versionRow {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
-	padding: 5px 8px;
-	border-radius: 8px;
+	gap: 0.125rem;
+	padding: 0.3125rem 0.5rem;
+	border-radius: 0.5rem;
 }
 
 .versionLabel {
-	font-size: 11px;
+	font-size: 0.6875rem;
 	font-weight: 600;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -342,7 +342,7 @@
 }
 
 .versionValue {
-	font-size: 14px;
+	font-size: 0.875rem;
 	line-height: 1.45;
 	color: var(--text-primary);
 	overflow-wrap: anywhere;
@@ -350,11 +350,11 @@
 
 .differs {
 	background: color-mix(in srgb, var(--accent-warning) 16%, transparent);
-	border-radius: 6px;
+	border-radius: 0.375rem;
 }
 
 .blockName.differs {
-	padding: 1px 6px;
+	padding: 1px 0.375rem;
 }
 
 .empty {
@@ -365,13 +365,13 @@
 .colorValue {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: 0.375rem;
 }
 
 .colorSwatch {
-	width: 14px;
-	height: 14px;
-	border-radius: 4px;
+	width: 0.875rem;
+	height: 0.875rem;
+	border-radius: 0.25rem;
 	border: 1px solid var(--border-color);
 }
 
@@ -379,9 +379,9 @@
 .option {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding: 10px 14px;
-	border-radius: 12px;
+	gap: 0.625rem;
+	padding: 0.625rem 0.875rem;
+	border-radius: 0.75rem;
 	border: 2px solid var(--border-color);
 	background: var(--bg-secondary);
 }
@@ -389,24 +389,24 @@
 .optionHead {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	min-height: 28px;
+	gap: 0.625rem;
+	min-height: 1.75rem;
 	cursor: pointer;
 }
 
 .optionLabel {
 	flex: 1;
 	min-width: 0;
-	font-size: 14px;
+	font-size: 0.875rem;
 	font-weight: 600;
 	color: var(--text-primary);
 }
 
 .safeChip {
 	flex: none;
-	padding: 2px 8px;
-	border-radius: 999px;
-	font-size: 12px;
+	padding: 0.125rem 0.5rem;
+	border-radius: 62.4375rem;
+	font-size: 0.75rem;
 	font-weight: 600;
 	background: color-mix(in srgb, var(--accent-success) 18%, transparent);
 	color: var(--text-primary);
@@ -416,39 +416,39 @@
 .tagFields {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding-inline-start: 28px;
+	gap: 0.625rem;
+	padding-inline-start: 1.75rem;
 }
 
 .tagField {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 0.25rem;
 }
 
 .tagFieldRow {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 10px;
+	gap: 0.625rem;
 }
 
 .tagFieldLabel {
-	font-size: 13px;
+	font-size: 0.8125rem;
 	color: var(--text-secondary);
 }
 
 .tagInput {
 	width: 9rem;
-	min-height: 36px;
+	min-height: 2.25rem;
 	box-sizing: border-box;
-	padding: 0 10px;
-	border-radius: 8px;
+	padding: 0 0.625rem;
+	border-radius: 0.5rem;
 	border: 1px solid var(--border-color);
 	background: var(--bg-tertiary);
 	color: var(--text-primary);
 	font-family: var(--font-mono, ui-monospace, monospace);
-	font-size: 14px;
+	font-size: 0.875rem;
 }
 
 .tagInput:focus-visible {
@@ -463,8 +463,8 @@
 .tagStatus {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
-	font-size: 13px;
+	gap: 0.25rem;
+	font-size: 0.8125rem;
 	color: var(--text-primary-muted);
 }
 
@@ -483,14 +483,14 @@
 	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 0.625rem;
 }
 
 .switchInput {
 	position: absolute;
 	inset: 0;
-	width: 40px;
-	height: 24px;
+	width: 2.5rem;
+	height: 1.5rem;
 	margin: 0;
 	opacity: 0;
 	cursor: pointer;
@@ -500,11 +500,11 @@
 	flex: none;
 	display: flex;
 	align-items: center;
-	width: 40px;
-	height: 24px;
-	padding: 2px;
+	width: 2.5rem;
+	height: 1.5rem;
+	padding: 0.125rem;
 	box-sizing: border-box;
-	border-radius: 999px;
+	border-radius: 62.4375rem;
 	background: var(--bg-active);
 	transition: background-color 120ms ease;
 }
@@ -514,15 +514,15 @@
 }
 
 .switchKnob {
-	width: 20px;
-	height: 20px;
+	width: 1.25rem;
+	height: 1.25rem;
 	border-radius: 50%;
 	background: var(--text-primary);
 	transition: transform 120ms ease;
 }
 
 .switchTrackOn .switchKnob {
-	transform: translateX(16px);
+	transform: translateX(1rem);
 	background: #ffffff;
 }
 
@@ -534,15 +534,15 @@
 .namePreview {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 0.5rem;
 	flex-wrap: wrap;
-	padding: 8px 10px;
-	border-radius: 8px;
+	padding: 0.5rem 0.625rem;
+	border-radius: 0.5rem;
 	background: var(--bg-tertiary);
 }
 
 .displayTagText {
-	font-size: 13px;
+	font-size: 0.8125rem;
 	color: var(--text-secondary);
 }
 
@@ -553,7 +553,7 @@
 	padding: 0;
 	list-style: none;
 	border: 1px solid var(--border-color);
-	border-radius: 12px;
+	border-radius: 0.75rem;
 	overflow: hidden;
 }
 
@@ -569,10 +569,10 @@
 .differsToggle {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 0.75rem;
 	width: 100%;
-	min-height: 56px;
-	padding: 8px 14px;
+	min-height: 3.5rem;
+	padding: 0.5rem 0.875rem;
 	border: none;
 	background: var(--bg-secondary);
 	color: var(--text-primary);
@@ -594,22 +594,22 @@
 
 .differsName {
 	overflow: hidden;
-	font-size: 15px;
+	font-size: 0.9375rem;
 	font-weight: 600;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
 .differsFields {
-	font-size: 13px;
+	font-size: 0.8125rem;
 	color: var(--text-secondary);
 }
 
 .choicePill {
 	flex: none;
-	padding: 2px 10px;
-	border-radius: 999px;
-	font-size: 12px;
+	padding: 0.125rem 0.625rem;
+	border-radius: 62.4375rem;
+	font-size: 0.75rem;
 	font-weight: 600;
 	background: color-mix(in srgb, var(--accent-success) 18%, transparent);
 }
@@ -629,7 +629,7 @@
 }
 
 .differsBody {
-	padding: 12px 14px 14px;
+	padding: 0.75rem 0.875rem 0.875rem;
 	border-top: 1px solid var(--border-color);
 }
 
@@ -657,7 +657,7 @@
 
 .explanation {
 	margin: 0;
-	font-size: 14px;
+	font-size: 0.875rem;
 	line-height: 1.5;
 	color: var(--text-secondary);
 }
@@ -665,14 +665,14 @@
 .groupButtons {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
+	gap: 0.5rem;
 }
 
 .tag {
 	font-family: var(--font-mono, ui-monospace, monospace);
-	font-size: 12px;
-	padding: 1px 5px;
-	border-radius: 4px;
+	font-size: 0.75rem;
+	padding: 1px 0.3125rem;
+	border-radius: 0.25rem;
 	background: var(--bg-active);
 	color: var(--text-primary);
 }
@@ -681,7 +681,7 @@
 	display: flex;
 	flex-direction: column;
 	border: 1px solid var(--border-color);
-	border-radius: 10px;
+	border-radius: 0.625rem;
 	overflow: hidden;
 }
 
@@ -699,17 +699,17 @@
 .rowMain {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	padding: 10px 12px;
+	gap: 0.75rem;
+	padding: 0.625rem 0.75rem;
 	flex-wrap: wrap;
 }
 
 .rowText {
 	flex: 1;
-	min-width: 160px;
+	min-width: 10rem;
 	display: flex;
 	flex-direction: column;
-	gap: 3px;
+	gap: 0.1875rem;
 }
 
 .rowName {
@@ -719,7 +719,7 @@
 }
 
 .rowMeta {
-	font-size: 13px;
+	font-size: 0.8125rem;
 	color: var(--text-primary-muted);
 }
 
@@ -727,7 +727,7 @@
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: 0.125rem;
 	min-width: 0;
 }
 
@@ -737,24 +737,24 @@
 }
 
 .summaryRest {
-	font-size: 13px;
+	font-size: 0.8125rem;
 	color: var(--text-primary-muted);
 }
 
 .resultList {
 	display: flex;
 	flex-direction: column;
-	max-height: 300px;
+	max-height: 18.75rem;
 	overflow-y: auto;
 	border: 1px solid var(--border-color);
-	border-radius: 10px;
+	border-radius: 0.625rem;
 }
 
 .resultRow {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 8px 12px;
+	gap: 0.625rem;
+	padding: 0.5rem 0.75rem;
 	border-bottom: 1px solid var(--border-color);
 	flex: none;
 }
@@ -764,9 +764,9 @@
 }
 
 .resultCount {
-	font-size: 18px;
+	font-size: 1.125rem;
 	font-weight: 600;
-	min-width: 32px;
+	min-width: 2rem;
 	text-align: end;
 	font-variant-numeric: tabular-nums;
 	color: var(--text-primary);
@@ -774,13 +774,13 @@
 
 .infoLine {
 	display: flex;
-	gap: 10px;
+	gap: 0.625rem;
 	align-items: flex-start;
-	padding: 12px 14px;
-	border-radius: 10px;
+	padding: 0.75rem 0.875rem;
+	border-radius: 0.625rem;
 	background: var(--bg-secondary);
 	border: 1px solid var(--border-color);
-	font-size: 14px;
+	font-size: 0.875rem;
 	line-height: 1.45;
 	color: var(--text-secondary);
 }
@@ -788,7 +788,7 @@
 /* Banner and avatar together, as a profile card shows them (tyne-chat/tyne#567). The avatar's ring is
    the card's own background, so it reads as cut out of the banner. */
 .profileHeader {
-	--profile-avatar: 64px;
+	--profile-avatar: 4rem;
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -796,12 +796,12 @@
 }
 
 .profileHeaderCompact {
-	--profile-avatar: 48px;
+	--profile-avatar: 3rem;
 }
 
 .profileBanner {
 	aspect-ratio: 300 / 105;
-	border-radius: 8px;
+	border-radius: 0.5rem;
 	background-color: var(--bg-tertiary);
 	background-position: center;
 	background-size: cover;
@@ -813,7 +813,7 @@
 
 .profileAvatar {
 	position: absolute;
-	inset-inline-start: 10px;
+	inset-inline-start: 0.625rem;
 	bottom: 0;
 	display: grid;
 	place-items: center;
@@ -840,8 +840,8 @@
 	position: absolute;
 	inset-inline-end: 0;
 	bottom: 0;
-	max-width: calc(100% - var(--profile-avatar) - 20px);
-	font-size: 12px;
+	max-width: calc(100% - var(--profile-avatar) - 1.25rem);
+	font-size: 0.75rem;
 	line-height: 1.3;
 	color: var(--text-secondary);
 	text-align: end;
@@ -851,11 +851,11 @@
 .switch {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 4px;
-	margin: 0 0 12px;
-	padding: 4px;
+	gap: 0.25rem;
+	margin: 0 0 0.75rem;
+	padding: 0.25rem;
 	border: 0;
-	border-radius: 10px;
+	border-radius: 0.625rem;
 	background: var(--bg-tertiary);
 }
 
@@ -863,10 +863,10 @@
 	position: relative;
 	display: grid;
 	place-items: center;
-	min-height: 40px;
-	padding: 4px 8px;
-	border-radius: 8px;
-	font-size: 14px;
+	min-height: 2.5rem;
+	padding: 0.25rem 0.5rem;
+	border-radius: 0.5rem;
+	font-size: 0.875rem;
 	font-weight: 600;
 	text-align: center;
 	color: var(--text-secondary);
@@ -911,18 +911,18 @@
 .sides {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12px;
+	gap: 0.75rem;
 }
 
 .sideHead {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
-	gap: 8px;
+	gap: 0.5rem;
 }
 
 .sideTitle {
-	font-size: 12px;
+	font-size: 0.75rem;
 	font-weight: 600;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -930,7 +930,7 @@
 }
 
 .sideStatus {
-	font-size: 12px;
+	font-size: 0.75rem;
 	font-weight: 600;
 	text-align: end;
 	color: var(--text-primary);
@@ -939,7 +939,7 @@
 .copyFields {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 0.375rem;
 }
 
 .copyFields .tagFields {
@@ -947,15 +947,15 @@
 }
 
 .copyNameInput {
-	min-height: 36px;
+	min-height: 2.25rem;
 	box-sizing: border-box;
-	padding: 0 10px;
+	padding: 0 0.625rem;
 	border: 1px solid var(--border-color);
-	border-radius: 8px;
+	border-radius: 0.5rem;
 	background: var(--bg-tertiary);
 	color: var(--text-primary);
 	font: inherit;
-	font-size: 15px;
+	font-size: 0.9375rem;
 	font-weight: 600;
 }
 
@@ -975,18 +975,18 @@
 
 .rowAvatar {
 	flex: none;
-	width: 40px;
-	height: 40px;
+	width: 2.5rem;
+	height: 2.5rem;
 	border-radius: 50%;
 	object-fit: cover;
 }
 
 /* A member whose tag is taken: the switch sits over the file's card only (tyne-chat/tyne#570). */
 .takenGrid {
-	margin-top: 10px;
+	margin-top: 0.625rem;
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12px;
+	gap: 0.75rem;
 	align-items: start;
 }
 
@@ -1012,34 +1012,34 @@
 .pick {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-	margin: 0 0 12px;
+	gap: 0.5rem;
+	margin: 0 0 0.75rem;
 	padding: 0;
 	border: 0;
 }
 
 .pickQuestion {
 	padding: 0;
-	margin-bottom: 8px;
-	font-size: 14px;
+	margin-bottom: 0.5rem;
+	font-size: 0.875rem;
 	font-weight: 600;
 	color: var(--text-primary);
 }
 
 .pickGrid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-	gap: 8px;
+	grid-template-columns: repeat(auto-fill, minmax(9.375rem, 1fr));
+	gap: 0.5rem;
 }
 
 .pickCard {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 0.375rem;
 	min-width: 0;
-	padding: 10px;
+	padding: 0.625rem;
 	border: 2px solid var(--border-color);
-	border-radius: 10px;
+	border-radius: 0.625rem;
 	background: var(--bg-secondary);
 	cursor: pointer;
 }
@@ -1061,15 +1061,15 @@
 .pickCardHead {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 0.5rem;
 }
 
 /* The lists of what needs no decision show small pictures. */
 .readyItem .rowAvatar,
 .readyItem .placeholderAvatar {
-	width: 28px;
-	height: 28px;
-	font-size: 13px;
+	width: 1.75rem;
+	height: 1.75rem;
+	font-size: 0.8125rem;
 }
 
 /* A bio keeps its line breaks, as a profile card shows it; words the other side lacks are marked. */
@@ -1080,14 +1080,14 @@
 
 .bioChanged {
 	padding: 0 1px;
-	border-radius: 3px;
+	border-radius: 0.1875rem;
 	background: color-mix(in srgb, var(--brand-primary) 38%, transparent);
 	color: inherit;
 }
 
 /* Where the persona a member might be goes, until one is picked. */
 .emptyCard {
-	min-height: 160px;
+	min-height: 10rem;
 	border-style: dashed;
 	background: transparent;
 }
