@@ -15,7 +15,7 @@
 	justify-content: center;
 	gap: 0.5rem;
 	padding: 2rem 1.25rem;
-	border: 2px dashed var(--border-color);
+	border: 0.125rem dashed var(--border-color);
 	border-radius: 0.5rem;
 	background: var(--bg-secondary);
 	cursor: pointer;
@@ -54,7 +54,7 @@
 	background: var(--bg-tertiary);
 	border-radius: 0.5rem;
 	padding: 0.75rem 1rem;
-	border: 1px solid var(--border-color);
+	border: 0.0625rem solid var(--border-color);
 }
 
 .summaryTitle {
@@ -98,7 +98,7 @@
 
 .textInput {
 	background: var(--bg-secondary);
-	border: 1px solid var(--border-color);
+	border: 0.0625rem solid var(--border-color);
 	border-radius: 0.25rem;
 	padding: 0.5rem 0.75rem;
 	color: var(--text-primary);
@@ -125,7 +125,7 @@
 	padding: 0.75rem;
 	border-radius: 0.375rem;
 	cursor: pointer;
-	border: 1px solid var(--border-color);
+	border: 0.0625rem solid var(--border-color);
 	background: var(--bg-secondary);
 	transition:
 		border-color 0.15s ease,
@@ -190,7 +190,7 @@
 	height: 0.625rem;
 	overflow: hidden;
 	margin: 0.75rem 0 0.375rem;
-	border: 1px solid var(--border-color);
+	border: 0.0625rem solid var(--border-color);
 }
 
 .progressBarFill {
@@ -218,7 +218,7 @@
 
 .successBox {
 	background: color-mix(in srgb, var(--accent-success) 10%, transparent);
-	border: 1px solid var(--accent-success);
+	border: 0.0625rem solid var(--accent-success);
 	border-radius: 0.5rem;
 	padding: 1rem;
 	text-align: center;
@@ -237,7 +237,7 @@
 }
 
 .warningBox {
-	border: 1px solid var(--accent-warning);
+	border: 0.0625rem solid var(--accent-warning);
 	background: color-mix(in srgb, var(--accent-warning) 8%, transparent);
 	border-radius: 0.5rem;
 	padding: 0.75rem 1rem;
@@ -269,7 +269,7 @@
 	background: var(--bg-tertiary);
 	padding: 0.5rem 0.625rem;
 	border-radius: 0.375rem;
-	border: 1px solid var(--border-color);
+	border: 0.0625rem solid var(--border-color);
 	display: flex;
 	flex-direction: column;
 	gap: 0.125rem;
@@ -286,7 +286,7 @@
 
 .errorBanner {
 	background: color-mix(in srgb, var(--accent-danger) 10%, transparent);
-	border: 1px solid var(--accent-danger);
+	border: 0.0625rem solid var(--accent-danger);
 	border-radius: 0.375rem;
 	padding: 0.5rem 0.75rem;
 	font-size: 0.8125rem;

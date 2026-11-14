@@ -17,6 +17,7 @@ import {personaColor} from '@app/features/persona/utils/PersonaColor';
 import {openPersonaGallery} from '@app/features/persona/utils/PersonaGalleryOpen';
 import {usePersonaImageMenus} from '@app/features/persona/utils/usePersonaImageMenus';
 import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {getUserAccentColor} from '@app/features/theme/utils/AccentColorUtils';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
@@ -239,22 +240,22 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 									data-flx="persona.persona-profile-popout.bio-container-loading"
 								>
 									<div
-										style={{display: 'flex', flexDirection: 'column', gap: '0.375rem', padding: '0.25rem 0'}}
+										style={{display: 'flex', flexDirection: 'column', gap: remFromPx(6), padding: '0.25rem 0'}}
 										data-flx="persona.persona-profile-popout.div"
 									>
 										<div
 											className={skeletonStyles.skeleton}
-											style={{width: '75%', height: '0.75rem', borderRadius: '0.25rem'}}
+											style={{width: '75%', height: remFromPx(12), borderRadius: remFromPx(4)}}
 											data-flx="persona.persona-profile-popout.div--2"
 										/>
 										<div
 											className={skeletonStyles.skeleton}
-											style={{width: '90%', height: '0.75rem', borderRadius: '0.25rem'}}
+											style={{width: '90%', height: remFromPx(12), borderRadius: remFromPx(4)}}
 											data-flx="persona.persona-profile-popout.div--3"
 										/>
 										<div
 											className={skeletonStyles.skeleton}
-											style={{width: '50%', height: '0.75rem', borderRadius: '0.25rem'}}
+											style={{width: '50%', height: remFromPx(12), borderRadius: remFromPx(4)}}
 											data-flx="persona.persona-profile-popout.div--4"
 										/>
 									</div>

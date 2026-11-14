@@ -16,6 +16,7 @@ import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobi
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {personaColor} from '@app/features/persona/utils/PersonaColor';
 import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import markupStyles from '@app/features/theme/styles/Markup.module.css';
 import {getUserAccentColor} from '@app/features/theme/utils/AccentColorUtils';
 import * as ColorUtils from '@app/features/theme/utils/ColorUtils';
@@ -275,7 +276,7 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 								>
 									<div
 										className={styles.avatarBorder}
-										style={{borderRadius: '9999px'}}
+										style={{borderRadius: 'var(--radius-full)'}}
 										data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.avatar-border"
 									>
 										<Avatar
@@ -430,22 +431,22 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 													<Trans>About me</Trans>
 												</h3>
 												<div
-													style={{display: 'flex', flexDirection: 'column', gap: '0.375rem', padding: '0.25rem 0'}}
+													style={{display: 'flex', flexDirection: 'column', gap: remFromPx(6), padding: '0.25rem 0'}}
 													data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.div--2"
 												>
 													<div
 														className={skeletonStyles.skeleton}
-														style={{width: '75%', height: '0.75rem', borderRadius: '0.25rem'}}
+														style={{width: '75%', height: remFromPx(12), borderRadius: remFromPx(4)}}
 														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.div--3"
 													/>
 													<div
 														className={skeletonStyles.skeleton}
-														style={{width: '90%', height: '0.75rem', borderRadius: '0.25rem'}}
+														style={{width: '90%', height: remFromPx(12), borderRadius: remFromPx(4)}}
 														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.div--4"
 													/>
 													<div
 														className={skeletonStyles.skeleton}
-														style={{width: '50%', height: '0.75rem', borderRadius: '0.25rem'}}
+														style={{width: '50%', height: remFromPx(12), borderRadius: remFromPx(4)}}
 														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.div--5"
 													/>
 												</div>

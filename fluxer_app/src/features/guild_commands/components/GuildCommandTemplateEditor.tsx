@@ -55,7 +55,7 @@ const editorTheme = EditorView.theme({
 	'.cm-placeholder': {color: 'var(--text-tertiary)'},
 	'.cm-tooltip': {
 		backgroundColor: 'var(--background-primary)',
-		border: '1px solid var(--background-modifier-accent)',
+		border: '0.0625rem solid var(--background-modifier-accent)',
 		borderRadius: '0.375rem',
 		color: 'var(--text-primary)',
 	},

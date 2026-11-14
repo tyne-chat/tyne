@@ -102,13 +102,13 @@
 .badge {
 	display: flex;
 	border-radius: var(--radius-full);
-	box-shadow: 0 0 0 2px var(--signal-bar-surface);
+	box-shadow: 0 0 0 0.125rem var(--signal-bar-surface);
 	background-color: var(--signal-bar-surface);
 }
 
 .badge + .badge,
 .badge + .more {
-	margin-inline-start: -5px;
+	margin-inline-start: -0.3125rem;
 }
 
 .more {
@@ -119,7 +119,7 @@
 	height: 1.125rem;
 	padding: 0 0.25rem;
 	border-radius: var(--radius-full);
-	box-shadow: 0 0 0 2px var(--signal-bar-surface);
+	box-shadow: 0 0 0 0.125rem var(--signal-bar-surface);
 	background-color: var(--background-tertiary);
 	color: var(--text-primary);
 	font-size: 0.625rem;
@@ -216,7 +216,7 @@
 	padding: 0 0.25rem;
 	box-sizing: border-box;
 	border-radius: var(--radius-full);
-	box-shadow: 0 0 0 2px var(--signal-bar-surface);
+	box-shadow: 0 0 0 0.125rem var(--signal-bar-surface);
 	background-color: var(--brand-primary);
 	color: var(--white, #fff);
 	font-size: 0.625rem;
