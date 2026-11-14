@@ -8,6 +8,10 @@ import ThreadGuilds from '@app/features/threads/state/ThreadGuilds';
 import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {useCallback, useEffect, useRef} from 'react';
 
+// Fork imports.
+
+import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
+
 const CHANNEL_HOVER_PRELOAD_DELAY_MS = 220;
 
 interface UseChannelHoverPreloadOptions {
@@ -56,6 +60,8 @@ export function useChannelHoverPreload({channel, guild = null, enabled = true}: 
 		if (!Messages.preloadLatestPage(channel.id, guild?.id ?? channel.guildId ?? null)) {
 			ensureMembersForCachedChannelMessages(channel.id);
 		}
+		// Fork: the chat's signal bar loads with it, so it does not pop in after the composer.
+		SignalBarStore.preloadChannel(channel.id);
 	}, [cancelChannelPreload, channel, enabled, guild]);
 	const scheduleChannelPreload = useCallback(() => {
 		if (!enabled || !channel || typeof window === 'undefined') {
