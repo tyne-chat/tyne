@@ -28,6 +28,12 @@ pnpm --filter fluxer_desktop typecheck && pnpm --filter fluxer_desktop test
 pnpm --filter fluxer_app test
 # Fork catalogues, and no hard-coded user-facing strings in the fork's code (fork-string-lint.mjs).
 (cd fluxer_app && node scripts/fork-i18n.mjs check --upstream upstream/main && node scripts/fork-string-lint.mjs --upstream upstream/main) && pnpm --filter fluxer_app lingui:compile
+# Sizes in rem, not px, in the fork's code (fork-px-lint.mjs). The desktop app zooms by the root font size
+# (--custom-zoom): rem follows the zoom; px, media queries and innerWidth do not. px only for 1px borders,
+# shadows, outlines and values in screen pixels marked `px-ok: <reason>`. A limit computed in script is in
+# screen px: convert constants with getRemScaleForDocument, and never cap a box in one unit around content
+# capped in the other (tyne-chat/tyne#636). Check a UI change at 150% zoom in the desktop app too.
+(cd fluxer_app && node scripts/fork-px-lint.mjs --upstream upstream/main)
 # Upstream's lint job (Biome, ESLint with no warnings, data-flx attributes), plus Biome warnings on
 # files the fork added, committed or not.
 pnpm exec biome ci . && pnpm exec eslint . --max-warnings 0 && pnpm --filter fluxer_app theming:data-flx:check && pnpm exec biome ci --error-on-warnings --files-ignore-unknown=true --no-errors-on-unmatched $(git diff --name-only --no-renames --diff-filter=A $(git merge-base upstream/main HEAD)) $(git ls-files --others --exclude-standard)
