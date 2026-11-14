@@ -218,8 +218,9 @@ export const Autocomplete = observer(
 						const width = rects.reference.width;
 						Object.assign(elements.floating.style, {
 							width: `${width}px`,
-							maxHeight: `${Math.min(availableHeight, 490)}px`,
 						});
+						// Fork: the list's cap, in Autocomplete.module.css (tyne-chat/tyne#636).
+						elements.floating.style.setProperty('--fork-autocomplete-space', `${availableHeight}px`);
 					},
 					padding: 16,
 				}),

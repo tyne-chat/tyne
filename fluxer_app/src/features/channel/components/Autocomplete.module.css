@@ -1,9 +1,6 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 
 .container {
-	display: flex;
-	flex-direction: column;
-	max-height: 30.625rem;
 	overflow: hidden;
 	background-color: var(--background-primary);
 	z-index: var(--z-index-popout);
@@ -32,4 +29,12 @@
 	font-weight: 600;
 	color: var(--text-primary-muted);
 	font-size: 0.75rem;
+}
+
+/* Fork: the list never reaches past the window. Autocomplete.tsx's size() middleware passes the space above
+   the composer as --fork-autocomplete-space (screen px, the box's border included), and the list keeps its
+   own cap in rem, which follows the app's zoom. A fixed px cap on the box instead hid the bottom of the
+   list from about 100% zoom up (tyne-chat/tyne#636). */
+.scroller {
+	max-height: min(30.625rem, calc(var(--fork-autocomplete-space, 30.625rem) - 0.125rem));
 }
