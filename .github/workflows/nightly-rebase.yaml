@@ -76,9 +76,11 @@ jobs:
   nightly-rebase:
     if: ${{ !inputs.test_issue }}
     runs-on: ubuntu-24.04
-    # Chain worst case from the 01:00 Pacific dispatch: monorepo 195 + SDK 20 + Flutter 145 min, plus 10 for
-    # each publish job, ends 07:30, before the 07:40 mobile sync. (Since 2026-11-13 the SDK gives 10 of its
-    # minutes to Flutter, whose run left 4 of 125 that day; the longest SDK run so far took 12.)
+    # Chain worst case from the 00:20 Pacific dispatch: monorepo 195 + SDK 20 + Flutter 180 min, plus 10 for
+    # each publish job, ends 07:25, before the 07:40 mobile sync. (Since 2026-11-13 the SDK gives 10 of its
+    # minutes to Flutter, whose run left 4 of 125 that day; the longest SDK run so far took 12. Since
+    # 2026-11-14 Flutter has 180 and the chain starts at 00:20, not 01:00: a repaired gate runs the whole
+    # test suite again, about 37 minutes, which 145 left no room for, tyne-chat/tyne#643.)
     timeout-minutes: 195
 
     # The agent this run uses (tyne-tools rebase/pipeline_issues.py); the publish job needs it too, for
