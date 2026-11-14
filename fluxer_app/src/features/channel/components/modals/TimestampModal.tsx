@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import Accessibility from '@app/features/accessibility/state/Accessibility';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import styles from '@app/features/channel/components/modals/TimestampModal.module.css';
 import {CANCEL_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
@@ -10,6 +11,7 @@ import {SearchableTimeZonePicker} from '@app/features/ui/components/form/Searcha
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {RadioGroup, type RadioOption} from '@app/features/ui/radio_group/RadioGroup';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
+import {getAppRemScale} from '@app/features/ui/utils/AppZoomUtils';
 import Users from '@app/features/user/state/Users';
 import {shouldUse12HourFormat} from '@app/features/user/utils/DateFormatting';
 import {getCurrentLocale} from '@app/features/user/utils/LocaleUtils';
@@ -132,19 +134,32 @@ function getTimestampMarkdown(format: string, epoch: number): string {
 	}
 }
 
+const COMPACT_MAX_HEIGHT_PX = 680;
+const COMPACT_MAX_WIDTH_PX = 520;
+
+// The desktop app zooms by the root font size (`--custom-zoom`), which media queries and the window size do
+// not see: at 150% the dialog is half again as tall, so the thresholds grow with the zoom (tyne-chat/tyne#639).
+function compactThresholds(): {height: number; width: number} {
+	const scale = getAppRemScale();
+	return {height: Math.round(COMPACT_MAX_HEIGHT_PX * scale), width: Math.round(COMPACT_MAX_WIDTH_PX * scale)};
+}
+
 function useIsCompactLayout(): boolean {
+	// Read while rendering, so a zoom change renders the dialog again and the effect below checks again.
+	const zoomLevel = Accessibility.zoomLevel;
 	const checkCompact = useCallback(() => {
 		if (typeof window === 'undefined') {
 			return false;
 		}
+		const {height, width} = compactThresholds();
 		const matchesHeight =
 			typeof window.matchMedia === 'function'
-				? window.matchMedia('(max-height: 680px)').matches
-				: window.innerHeight < 680;
+				? window.matchMedia(`(max-height: ${height}px)`).matches
+				: window.innerHeight < height;
 		const matchesWidth =
 			typeof window.matchMedia === 'function'
-				? window.matchMedia('(max-width: 520px)').matches
-				: window.innerWidth < 520;
+				? window.matchMedia(`(max-width: ${width}px)`).matches
+				: window.innerWidth < width;
 		return matchesHeight || matchesWidth || MobileLayout.isMobileLayout();
 	}, []);
 
@@ -157,12 +172,14 @@ function useIsCompactLayout(): boolean {
 		const handleResize = () => {
 			setIsCompact(checkCompact());
 		};
+		handleResize();
 		window.addEventListener('resize', handleResize);
 		let heightQuery: MediaQueryList | null = null;
 		let widthQuery: MediaQueryList | null = null;
 		if (typeof window.matchMedia === 'function') {
-			heightQuery = window.matchMedia('(max-height: 680px)');
-			widthQuery = window.matchMedia('(max-width: 520px)');
+			const {height, width} = compactThresholds();
+			heightQuery = window.matchMedia(`(max-height: ${height}px)`);
+			widthQuery = window.matchMedia(`(max-width: ${width}px)`);
 			heightQuery.addEventListener('change', handleResize);
 			widthQuery.addEventListener('change', handleResize);
 		}
@@ -171,7 +188,7 @@ function useIsCompactLayout(): boolean {
 			heightQuery?.removeEventListener('change', handleResize);
 			widthQuery?.removeEventListener('change', handleResize);
 		};
-	}, [checkCompact]);
+	}, [checkCompact, zoomLevel]);
 
 	return isCompact;
 }
