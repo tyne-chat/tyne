@@ -54,7 +54,8 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
   (`toSubprofileResponse`, with the display tag) are taken when it is lit and served as stored. Unlike
   messages, a renamed account or persona keeps its old name and avatar on a signal until it is turned
   off, or re-lit as someone else.
-- No synced settings are involved; clients hold memory state only (and the web's collapsed caret).
+- No synced settings are involved. Clients hold the state in memory, keep their last copy of it on
+  the device (per account, not synced: tyne-chat/tyne#645), and the collapsed caret.
   Deleting a community, channel, account or persona removes no row or key.
 
 ## Routes and who may do what
@@ -157,7 +158,19 @@ rules shows wrong signals to everyone in the channel, not only to its user.
   channel not loaded counts as off.
 - Apply `added` and `removed` only to loaded channels, replacing an account's entry in place.
 - Refetch the bar, with one shared request, when a `version` or `bar_version` is newer than the copy.
-- On READY, drop every channel.
+- On READY, drop nothing (tyne-chat/tyne#644): the bar, every channel and the account's summary stay
+  shown, unconfirmed, are fetched again as before, and each copy is replaced when its answer arrives.
+  An answer to a request sent before that READY updates the copy but does not confirm it. A copy that
+  belongs to another account is dropped.
+- Keep the last copy on the device, per account (tyne-chat/tyne#645): the bar, the enabled flag and
+  entries of the 50 most recently loaded channels, and the summary. Read it at start, before the
+  first bar draws, and show it as it is, unconfirmed, until each channel's answer.
+- A click on a signal of an unconfirmed channel records the state wanted (on, or off), the last click
+  winning, and is sent once the channel's answer has arrived, only if the answer differs; if that
+  request fails, it is sent as it is. With no request for the channel on its way, the click sends
+  one. Turning off still removes one's own entry at once. An answer to a request sent before READY
+  never replaces one sent after it.
+- Re-point nothing in an unconfirmed channel; the next change after its answer does.
 - Lighting waits for the event; turning off may remove the entry first. After a failed write,
   refetch the channel once.
 - Light as the persona the composer in that channel writes as. Re-point one's own signals only for
@@ -170,7 +183,7 @@ Where the clients differ today:
 | | Web | Mobile |
 |---|---|---|
 | Where | every composer, and above DM and community barriers | the open channel's composer, not while editing; none where a barrier replaces it |
-| Channel `GET` | on every mount | once per channel per session |
+| Channel `GET` | on every mount, or earlier on hover or press (a preload the mount takes over) | once per channel per session |
 | Managers | as the server | Manage Community, every DM, or a channel missing from the channel list |
 | Names | persona, else the community nickname | persona, else the copy's `global_name`, else `username` |
 | Configuration | editor, drag to reorder, channel tree, DM switch | none |
