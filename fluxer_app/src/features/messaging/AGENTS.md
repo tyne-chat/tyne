@@ -59,6 +59,13 @@ relative to this folder; other features are named from `fluxer_app/src/features/
   cursor (one trimmed message, the usual case). Otherwise it drops the page, and the load ends
   `loadingMore` only if it still owns the window (same `loadGeneration`, still loading); a newer load
   or the reload keeps it. The Android app drops such pages too (`applyOlderPage`, `applyNewerPage`).
+- **Fork: the startup restore's held-back rows come back at the bottom.** Upstream's boot snapshot
+  restore mounts a channel from 12 rows above the anchor and holds the older rows aside
+  (`deferSeededOlderMessages`) behind a blank filler of their height; `ScrollManager` adds them back
+  only while the list is not at the bottom or from `loadMore` near the top, so scrolling up from the
+  bottom crossed the blank filler (tyne-chat/tyne#635). `boot_state/ForkDeferredOlderAtBottom.ts`, one
+  call in `ScrollManager.restoreInitial`, adds them all once the restored list has settled at the
+  bottom. A stopgap: its header says when to delete it.
 
 ## Sending: composer to echo
 
