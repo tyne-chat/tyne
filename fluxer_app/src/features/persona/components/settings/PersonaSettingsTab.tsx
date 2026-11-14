@@ -720,7 +720,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 						})}
 						linkable={false}
 						actions={
-							<div style={{display: 'flex', gap: 8}} data-flx="persona.settings.persona-settings-tab.div">
+							<div style={{display: 'flex', gap: '0.5rem'}} data-flx="persona.settings.persona-settings-tab.div">
 								<Button
 									variant="secondary"
 									leftIcon={<UploadSimple size={16} data-flx="persona.settings.persona-settings-tab.upload-simple" />}
@@ -879,8 +879,8 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 														<div
 															className={styles.colorPreview}
 															style={{
-																width: 12,
-																height: 12,
+																width: '0.75rem',
+																height: '0.75rem',
 																backgroundColor: `#${persona.color.toString(16).padStart(6, '0')}`,
 															}}
 															data-flx="persona.settings.persona-settings-tab.color-preview"

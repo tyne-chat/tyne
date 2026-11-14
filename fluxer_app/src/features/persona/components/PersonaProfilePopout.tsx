@@ -239,22 +239,22 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 									data-flx="persona.persona-profile-popout.bio-container-loading"
 								>
 									<div
-										style={{display: 'flex', flexDirection: 'column', gap: '6px', padding: '4px 0'}}
+										style={{display: 'flex', flexDirection: 'column', gap: '0.375rem', padding: '0.25rem 0'}}
 										data-flx="persona.persona-profile-popout.div"
 									>
 										<div
 											className={skeletonStyles.skeleton}
-											style={{width: '75%', height: '12px', borderRadius: '4px'}}
+											style={{width: '75%', height: '0.75rem', borderRadius: '0.25rem'}}
 											data-flx="persona.persona-profile-popout.div--2"
 										/>
 										<div
 											className={skeletonStyles.skeleton}
-											style={{width: '90%', height: '12px', borderRadius: '4px'}}
+											style={{width: '90%', height: '0.75rem', borderRadius: '0.25rem'}}
 											data-flx="persona.persona-profile-popout.div--3"
 										/>
 										<div
 											className={skeletonStyles.skeleton}
-											style={{width: '50%', height: '12px', borderRadius: '4px'}}
+											style={{width: '50%', height: '0.75rem', borderRadius: '0.25rem'}}
 											data-flx="persona.persona-profile-popout.div--4"
 										/>
 									</div>

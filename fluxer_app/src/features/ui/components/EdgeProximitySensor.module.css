@@ -5,6 +5,7 @@
 	top: 0;
 	bottom: 0;
 	inset-inline-start: 0;
+	/* px-ok: a pointer hit zone at the window edge, the same size at every zoom. */
 	width: 15px;
 	z-index: var(--z-index-elevated-3, 40);
 	pointer-events: auto;
@@ -16,6 +17,7 @@
 	top: 0;
 	bottom: 0;
 	inset-inline-end: 0;
+	/* px-ok: a pointer hit zone at the window edge, the same size at every zoom. */
 	width: 8px;
 	z-index: var(--z-index-elevated-3, 40);
 	pointer-events: auto;

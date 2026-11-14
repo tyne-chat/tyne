@@ -140,7 +140,7 @@ export const MessagePersonaAccount = observer(
 									tagStyles.standaloneIcon,
 									className,
 								)}
-								style={{width: 16, height: 16, borderRadius: '50%', objectFit: 'cover'}}
+								style={{width: '1rem', height: '1rem', borderRadius: '50%', objectFit: 'cover'}}
 								data-flx="channel.user-message.message-avatar-subprofile-custom-icon"
 							/>
 						) : null}
