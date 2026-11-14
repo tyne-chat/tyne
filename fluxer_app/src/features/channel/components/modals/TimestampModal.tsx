@@ -193,6 +193,32 @@ function useIsCompactLayout(): boolean {
 	return isCompact;
 }
 
+const SINGLE_COLUMN_MAX_WIDTH_PX = 480;
+
+// The date and time pickers share a row unless the window is narrow for the dialog, which grows with the
+// desktop zoom; a media query would not see the zoom (tyne-chat/tyne#639).
+function useIsSingleColumnLayout(): boolean {
+	const zoomLevel = Accessibility.zoomLevel;
+	const checkSingleColumn = useCallback(
+		() =>
+			typeof window !== 'undefined' && window.innerWidth <= Math.round(SINGLE_COLUMN_MAX_WIDTH_PX * getAppRemScale()),
+		[],
+	);
+	const [isSingleColumn, setIsSingleColumn] = useState(checkSingleColumn);
+	useEffect(() => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+		const handleResize = () => {
+			setIsSingleColumn(checkSingleColumn());
+		};
+		handleResize();
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, [checkSingleColumn, zoomLevel]);
+	return isSingleColumn;
+}
+
 export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, onClosed}: TimestampModalProps) => {
 	const {i18n} = useLingui();
 	// Unmounting is the one thing every way of closing shares: Insert, Cancel, Escape, the backdrop.
@@ -230,6 +256,7 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 	const [selectedTimeZone, setSelectedTimeZone] = useState(initialTimeZone);
 	const [selectedFormat, setSelectedFormat] = useState(() => initialFormat ?? 'combo');
 	const isCompact = useIsCompactLayout();
+	const isSingleColumn = useIsSingleColumnLayout();
 
 	const handleNlpChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -402,7 +429,10 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 							/>
 						</div>
 
-						<div className={styles.pickersGrid} data-flx="channel.timestamp-modal.pickers-grid">
+						<div
+							className={isSingleColumn ? `${styles.pickersGrid} ${styles.pickersGridSingle}` : styles.pickersGrid}
+							data-flx="channel.timestamp-modal.pickers-grid"
+						>
 							<div className={styles.pickerField} data-flx="channel.timestamp-modal.picker-field.date">
 								<label
 									htmlFor={dateInputId}
