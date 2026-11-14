@@ -11,6 +11,7 @@ import type {GuildMember} from '@app/features/member/models/GuildMember';
 import type {Message} from '@app/features/messaging/models/MessagingMessage';
 import tagStyles from '@app/features/persona/components/PersonaTag.module.css';
 import {personaTagIconUrls} from '@app/features/persona/utils/PersonaTagIconUrls';
+import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import styles from '@app/features/theme/styles/Message.module.css';
 import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
@@ -140,7 +141,7 @@ export const MessagePersonaAccount = observer(
 									tagStyles.standaloneIcon,
 									className,
 								)}
-								style={{width: '1rem', height: '1rem', borderRadius: '50%', objectFit: 'cover'}}
+								style={{width: remFromPx(16), height: remFromPx(16), borderRadius: '50%', objectFit: 'cover'}}
 								data-flx="channel.user-message.message-avatar-subprofile-custom-icon"
 							/>
 						) : null}
