@@ -339,7 +339,7 @@
 }
 
 .messageSubprofileMainAvatar {
-	margin-bottom: 2px;
+	margin-bottom: 0.125rem;
 	margin-inline-start: var(--message-compact-gap);
 }
 
