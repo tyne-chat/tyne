@@ -28,6 +28,16 @@ pnpm --filter fluxer_desktop typecheck && pnpm --filter fluxer_desktop test
 pnpm --filter fluxer_app test
 # Fork catalogues, and no hard-coded user-facing strings in the fork's code (fork-string-lint.mjs).
 (cd fluxer_app && node scripts/fork-i18n.mjs check --upstream upstream/main && node scripts/fork-string-lint.mjs --upstream upstream/main) && pnpm --filter fluxer_app lingui:compile
+# Sizes as upstream writes them (fork-px-lint.mjs). The desktop app zooms by the root font size
+# (--custom-zoom): rem follows it, px does not. So rem throughout: 1px is 0.0625rem, shadows, outlines
+# and radii too, a pill var(--radius-full), remFromPx(n) in style objects. px only where upstream keeps
+# it (0px, @media queries, Floating UI options, IntersectionObserver margins) or a size is about device
+# pixels (a seam strip). Mark observer margins and device-pixel sizes `px-ok: <reason>` (above a CSS
+# rule, it covers the rule).
+# @media, matchMedia and innerWidth never see the zoom: a layout that must follow it uses an @container
+# query in rem or scales its threshold with getAppRemScale(). A size computed in script is in screen px:
+# never cap a box in one unit around content capped in the other. Check UI changes at 150% zoom.
+(cd fluxer_app && node scripts/fork-px-lint.mjs --upstream upstream/main)
 # Upstream's lint job (Biome, ESLint with no warnings, data-flx attributes), plus Biome warnings on
 # files the fork added, committed or not.
 pnpm exec biome ci . && pnpm exec eslint . --max-warnings 0 && pnpm --filter fluxer_app theming:data-flx:check && pnpm exec biome ci --error-on-warnings --files-ignore-unknown=true --no-errors-on-unmatched $(git diff --name-only --no-renames --diff-filter=A $(git merge-base upstream/main HEAD)) $(git ls-files --others --exclude-standard)
