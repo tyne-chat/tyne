@@ -70,7 +70,7 @@
 	border: 0.25rem solid var(--background-primary);
 	background-color: var(--background-primary);
 	width: fit-content;
-	border-radius: 9999px;
+	border-radius: var(--radius-full);
 }
 
 .contentPadding {
