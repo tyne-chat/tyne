@@ -1465,6 +1465,10 @@ msgstr "Ostane, kot je"
 msgid "Stays deleted"
 msgstr "Ostane izbrisana"
 
+#. Description in the community sticker upload section. {maxSize} is the formatted size limit.
+msgid "Stickers keep their own size, up to 2048 pixels on each side, and must be under {maxSize}. Larger static images are shrunk and compressed automatically. Animated stickers and SVGs must already fit the limit."
+msgstr "Nalepke ohranijo svojo velikost, do 2048 slikovnih pik na vsaki stranici, in morajo biti manjše od {maxSize}. Večje statične slike se samodejno pomanjšajo in stisnejo. Animirane nalepke in datoteke SVG morajo že ustrezati omejitvi."
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "Še vedno izbrisane"
@@ -1795,6 +1799,10 @@ msgstr "Uporabi se različica iz datoteke"
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Ogled vaših person"
+
+#. Body of the sticker upload size error modal when a static image remains too large after resizing. {fileSize} and {maxSize} are formatted file sizes.
+msgid "We compressed this sticker, but it is still {fileSize}. The limit is {maxSize}. Try a simpler image, fewer colors, or a smaller source file."
+msgstr "To nalepko smo stisnili, vendar ima še vedno {fileSize}. Omejitev je {maxSize}. Poskusite s preprostejšo sliko, manj barvami ali manjšo izvorno datoteko."
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
