@@ -29,6 +29,13 @@ import {startEarly} from '@app/api/utils/ConcurrencyUtils';
 import {generateSnowflake} from '@fluxer/snowflake/src/Snowflake';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 
+// Fork imports.
+
+import {
+	createdBucketForNewState,
+	withoutCreatedBucket,
+} from '@app/api/channel/repositories/message/ForkChannelCreatedBucket';
+
 function getLogger() {
 	return Logger.child({module: 'MessageDataRepository'});
 }
@@ -549,20 +556,22 @@ export class MessageDataRepository {
 			updated_at: new Date(),
 		};
 		const set = {last_message_id: messageId, last_message_bucket: messageBucket};
+		// Fork: created_bucket only on the row's first write (ForkChannelCreatedBucket.ts).
 		await advanceRow(
 			{
 				table: ChannelState,
 				pk: {channel_id: channelId},
 				guard: {col: 'last_message_id', value: messageId},
 				set,
-				always,
+				always: withoutCreatedBucket(always),
 				insert: {channel_id: channelId, ...always, ...set},
 			},
 			async () => {
 				const state = await this.getChannelState(channelId);
 				const prev = state?.last_message_id ?? null;
+				// Fork: created_bucket only on the row's first write (ForkChannelCreatedBucket.ts).
 				const patch = {
-					created_bucket: Db.set(always.created_bucket),
+					...createdBucketForNewState(state, always.created_bucket),
 					has_messages: Db.set(always.has_messages),
 					updated_at: Db.set(always.updated_at),
 				};
