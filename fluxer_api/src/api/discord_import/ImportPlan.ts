@@ -3,8 +3,10 @@
 // review tool (tyne-tools discord_import, plan.py): creates the placeholder accounts, personas,
 // emoji and stickers it lists, then writes each message through the message repository, so every
 // index row (history buckets, pins, attachment lookups, last message) is written as Tyne writes it,
-// but nothing is sent: no gateway events, notifications or unread changes. Run by an operator, one
-// plan at a time, in a container of the API's image:
+// but nothing is sent: no message events, notifications or unread changes. The one exception is at
+// the end: the emoji and sticker lists of the communities the plan adds to go to the gateway
+// (ImportExpressionLists.ts), or the apps would never show them. Run by an operator, one plan at a
+// time, in a container of the API's image:
 //
 //   tsx src/api/discord_import/ImportPlan.ts <plan.json> <exports dir> <ledger.json>
 //   tsx src/api/discord_import/ImportPlan.ts <plan.json> <exports dir> <ledger.json> --copy-media <origin>
@@ -52,6 +54,7 @@ import type {
 	MessageRow,
 } from '@app/api/database/types/MessageTypes';
 import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
+import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
 import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
 import {JobLedgerRepository} from '@app/api/jobs/JobLedgerRepository';
@@ -920,6 +923,14 @@ async function main(): Promise<void> {
 			'indexChannelMessages',
 			{channelId: channelId.toString()},
 			{jobKey: `discord-import-reindex-${channelId}-${Date.now()}`, maxAttempts: 3},
+		);
+	}
+	// Last, so a gateway that cannot be reached fails the run only after everything is written;
+	// applying the plan again sends the lists again (tyne-chat/tyne#660).
+	if (!dryRun) {
+		const sent = await sendExpressionLists(plan, deps);
+		console.log(
+			`sent the emoji list of ${sent.emoji.length} and the sticker list of ${sent.stickers.length} communities to the gateway`,
 		);
 	}
 	ledger.finished_at = new Date().toISOString();
