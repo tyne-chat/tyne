@@ -1465,6 +1465,10 @@ msgstr "คงไว้ตามเดิม"
 msgid "Stays deleted"
 msgstr "ยังถูกลบอยู่"
 
+#. Description in the community sticker upload section. {maxSize} is the formatted size limit.
+msgid "Stickers keep their own size, up to 2048 pixels on each side, and must be under {maxSize}. Larger static images are shrunk and compressed automatically. Animated stickers and SVGs must already fit the limit."
+msgstr "สติกเกอร์จะคงขนาดเดิมไว้ สูงสุด 2048 พิกเซลต่อด้าน และต้องมีขนาดไม่เกิน {maxSize} ภาพนิ่งที่ใหญ่กว่านั้นจะถูกย่อขนาดและบีบอัดโดยอัตโนมัติ สติกเกอร์เคลื่อนไหวและ SVG ต้องมีขนาดไม่เกินที่กำหนดอยู่แล้ว"
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "ยังถูกลบอยู่"
@@ -1795,6 +1799,10 @@ msgstr "ใช้แบบจากไฟล์"
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "ดู Persona ของคุณ"
+
+#. Body of the sticker upload size error modal when a static image remains too large after resizing. {fileSize} and {maxSize} are formatted file sizes.
+msgid "We compressed this sticker, but it is still {fileSize}. The limit is {maxSize}. Try a simpler image, fewer colors, or a smaller source file."
+msgstr "เราได้บีบอัดสติกเกอร์นี้แล้ว แต่ขนาดไฟล์ยังคงเป็น {fileSize} โดยมีขีดจำกัดอยู่ที่ {maxSize} ลองใช้รูปภาพที่เรียบง่ายกว่า มีสีน้อยลง หรือไฟล์ต้นฉบับที่มีขนาดเล็กกว่า"
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
