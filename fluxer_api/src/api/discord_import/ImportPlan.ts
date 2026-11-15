@@ -63,6 +63,7 @@ import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
 import {JobLedgerRepository} from '@app/api/jobs/JobLedgerRepository';
 import {initializeLogger, Logger} from '@app/api/Logger';
+import {getGuildCommandRepository} from '@app/api/middleware/ForkServiceSingletons';
 import {
 	createSnowflakeService,
 	getMediaService,
@@ -162,6 +163,8 @@ interface PlanMessage {
 	snapshot?: PlanSnapshot | null;
 	/** The forwarded original, when its channel is on Tyne: the "go to original" link. */
 	forward?: {message_id: string; channel_id: string; guild_id: string | null} | null;
+	/** The command the message answered, shown as Tyne's server commands are: a /name chip. */
+	command?: {name: string; command_id: string; guild_id: string} | null;
 }
 interface PlanPlaceholder {
 	user_id: string;
@@ -875,6 +878,33 @@ async function main(): Promise<void> {
 		};
 	};
 
+	// Command chips, recorded as the send path records a server command's use. A command named like one of
+	// the community's own takes that one's id, so its chip works like theirs; otherwise the plan's id, which
+	// no command has, so the chip shows the name as a deleted command's does.
+	const commands = getGuildCommandRepository();
+	const commandNames = new Map<string, Promise<Map<string, bigint>>>();
+	const commandId = async (c: NonNullable<PlanMessage['command']>): Promise<bigint> => {
+		let names = commandNames.get(c.guild_id);
+		if (!names) {
+			names = commands
+				.listByGuild(id<GuildID>(c.guild_id))
+				.then((rows) => new Map(rows.map((row) => [row.name, row.command_id])));
+			commandNames.set(c.guild_id, names);
+		}
+		return (await names).get(c.name) ?? BigInt(c.command_id);
+	};
+	const recordCommand = async (m: PlanMessage, messageId: MessageID) => {
+		if (!m.command || dryRun) return;
+		await commands.recordUse({
+			channel_id: channelId,
+			message_id: messageId,
+			guild_id: id<GuildID>(m.command.guild_id),
+			command_id: await commandId(m.command),
+			command_name: m.command.name,
+			created_at: new Date(m.timestamp),
+		});
+	};
+
 	let minBucket = BucketUtils.makeBucket(channelId);
 	let n = 0;
 	for (const m of plan.messages) {
@@ -915,6 +945,7 @@ async function main(): Promise<void> {
 					version: 1,
 				});
 			await writeReactions(bucket, messageId, planReactions(m).values(), new Date(m.timestamp));
+			await recordCommand(m, messageId);
 			ledger.messages.push(m.message_id);
 			continue;
 		}
@@ -998,6 +1029,16 @@ async function main(): Promise<void> {
 				changed = true;
 			}
 			if (add.length || remove.length) updated('message', m.message_id);
+		}
+		// The chip, unless it changed on Tyne since (an edit to the text drops it).
+		if ((prev.command?.name ?? null) !== (m.command?.name ?? null)) {
+			const current = (await commands.findUses(channelId, [messageId]))[0]?.command_name ?? null;
+			if (current !== (prev.command?.name ?? null)) keep('message command');
+			else {
+				if (current !== null && !dryRun) await commands.deleteUse(channelId, messageId);
+				await recordCommand(m, messageId);
+				updated('message', m.message_id);
+			}
 		}
 		if (changed) {
 			if (!dryRun) {
