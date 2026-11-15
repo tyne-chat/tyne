@@ -63,6 +63,13 @@ on:
         default: false
         type: boolean
 
+# One run of this workflow at a time in this repository. A second chain (a manual dispatch while
+# the nightly one runs) waits for the first instead of rebasing the same commits beside it and
+# having its push refused (tyne-chat/tyne#656). Never cancel a run that has started.
+concurrency:
+  group: nightly-rebase
+  cancel-in-progress: false
+
 # Read-only by default. The rebase job runs code nobody here controls (upstream's new commits,
 # installs and build scripts, the test suites, the agent), so it holds no token that can write:
 # its GITHUB_TOKEN reads, and the private tools come in with a read-only deploy key. The publish
