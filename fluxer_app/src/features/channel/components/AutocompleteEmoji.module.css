@@ -53,3 +53,9 @@
 	width: 1rem;
 	color: var(--brand-primary-fill);
 }
+
+/* Fork: a sticker's icon shows the whole sticker instead of cropping it to the square; meme icons
+   keep upstream's crop (tyne-chat/tyne#659). */
+.stickerIcon {
+	object-fit: contain;
+}
