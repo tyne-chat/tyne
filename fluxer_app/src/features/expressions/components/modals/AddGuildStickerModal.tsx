@@ -30,6 +30,10 @@ import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 
+// Fork imports.
+
+import {prepareStickerImage} from '@app/features/expressions/utils/ForkStickerUpload';
+
 const COULD_NOT_CREATE_STICKER_DESCRIPTOR = msg({
 	message: "Couldn't create this sticker",
 	comment: 'Title of the generic fallback error modal shown when creating a sticker fails.',
@@ -52,9 +56,10 @@ const STICKER_SOURCE_FILE_TOO_LARGE_DESCRIPTOR = msg({
 	comment:
 		'Body of the sticker upload size error modal for animated files or SVGs. {fileSize} and {maxSize} are formatted file sizes.',
 });
+// Fork: stickers keep their own size, so the message no longer says 320x320 (tyne-chat/tyne#658).
 const STICKER_PROCESSED_FILE_TOO_LARGE_DESCRIPTOR = msg({
 	message:
-		'We resized and compressed this sticker to 320x320 pixels, but it is still {fileSize}. The limit is {maxSize}. Try a simpler image, fewer colors, or a smaller source file.',
+		'We compressed this sticker, but it is still {fileSize}. The limit is {maxSize}. Try a simpler image, fewer colors, or a smaller source file.',
 	comment:
 		'Body of the sticker upload size error modal when a static image remains too large after resizing. {fileSize} and {maxSize} are formatted file sizes.',
 });
@@ -148,7 +153,7 @@ export const AddGuildStickerModal = observer(function AddGuildStickerModal({
 			const maxStickerSize = Guilds.getGuild(guildId)?.maxStickerSize ?? STICKER_MAX_SIZE;
 			setIsProcessing(true);
 			try {
-				const base64Image = await ImageCropUtils.optimizeStickerImage(file, maxStickerSize, 320);
+				const base64Image = await prepareStickerImage(file, maxStickerSize);
 				await GuildStickerCommands.create(guildId, {
 					name: data.name.trim(),
 					description: data.description.trim(),
