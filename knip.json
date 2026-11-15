@@ -25,6 +25,7 @@
 			"ignoreDependencies": ["vite"]
 		},
 		"fluxer_api": {
+			"entry": ["src/api/discord_import/ImportPlan.ts"],
 			"ignoreDependencies": [
 				"@messageformat/parser",
 				"@pdf-lib/fontkit",
