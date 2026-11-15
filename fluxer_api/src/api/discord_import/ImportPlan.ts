@@ -907,6 +907,7 @@ async function main(): Promise<void> {
 
 	let minBucket = BucketUtils.makeBucket(channelId);
 	let n = 0;
+	let rewritten = 0;
 	for (const m of plan.messages) {
 		const messageId = id<MessageID>(m.message_id);
 		const bucket = BucketUtils.makeBucket(messageId);
@@ -917,40 +918,47 @@ async function main(): Promise<void> {
 		}
 		const row = await fetchMessage(bucket, messageId);
 		const prev = previous.messages?.[m.message_id];
-		if (!row) {
-			if (prev) {
-				keep('message deleted on Tyne');
-				continue;
-			}
+		if (!row && prev) {
+			keep('message deleted on Tyne');
+			continue;
+		}
+		if (!row || !prev) {
+			// New, or written by a run that stopped before recording it: a plan's message ids are the
+			// importer's own (snowflake worker 1023, which nothing else uses), so one on Tyne with no record
+			// is written again in full and recorded.
+			if (row) rewritten++;
 			const attachments: Array<MessageAttachment> = [];
 			for (const a of m.attachments) attachments.push(await uploadAttachment(a));
 			await uploadEmbedMedia(m.embeds);
 			const snapshots = m.snapshot ? [await buildSnapshot(m.snapshot)] : null;
 			if (!dryRun)
-				await deps.channelRepository.messages.upsertMessage({
-					channel_id: channelId,
-					bucket,
-					message_id: messageId,
-					...messageFields(m, channelId),
-					webhook_id: null,
-					webhook_name: null,
-					webhook_avatar_hash: null,
-					flags: 0,
-					mention_roles: null,
-					mention_channels: null,
-					attachments: attachments.length ? attachments : null,
-					message_snapshots: snapshots,
-					call: null,
-					has_reaction: m.reactions.length > 0,
-					version: 1,
-				});
+				await deps.channelRepository.messages.upsertMessage(
+					{
+						channel_id: channelId,
+						bucket,
+						message_id: messageId,
+						...messageFields(m, channelId),
+						webhook_id: null,
+						webhook_name: null,
+						webhook_avatar_hash: null,
+						flags: 0,
+						mention_roles: null,
+						mention_channels: null,
+						attachments: attachments.length ? attachments : null,
+						message_snapshots: snapshots,
+						call: null,
+						has_reaction: m.reactions.length > 0,
+						version: row?.version ?? 1,
+					},
+					row,
+				);
+			// The repository indexes the new author; a rewritten message's old one's index row goes here.
+			if (!dryRun && row?.author_id && row.author_id !== messageFields(m, channelId).author_id)
+				await deleteOneOrMany(MessagesByAuthorV2.deleteByPk({author_id: row.author_id, message_id: messageId}));
 			await writeReactions(bucket, messageId, planReactions(m).values(), new Date(m.timestamp));
 			await recordCommand(m, messageId);
-			ledger.messages.push(m.message_id);
-			continue;
-		}
-		if (!prev) {
-			ledger.skipped_existing++;
+			if (row) updated('message', m.message_id);
+			else ledger.messages.push(m.message_id);
 			continue;
 		}
 
@@ -1113,6 +1121,7 @@ async function main(): Promise<void> {
 	ledger.finished_at = new Date().toISOString();
 	save();
 	const count = (kind: Kind) => ledger.updated[kind].length;
+	if (rewritten) console.log(`wrote again ${rewritten} messages an interrupted run had left unrecorded`);
 	console.log(
 		`done${dryRun ? ' (dry run: nothing written)' : ''}: created ${ledger.messages.length} messages, ` +
 			`${ledger.reactions} reactions, ${ledger.placeholders.length} placeholders, ${ledger.personas.length} personas, ` +
