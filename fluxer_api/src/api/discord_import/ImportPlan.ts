@@ -35,7 +35,10 @@ import type {
 	UserID,
 } from '@app/api/BrandedTypes';
 import {Config, initializeConfig} from '@app/api/Config';
-import {purgeMessageAttachments} from '@app/api/channel/services/message/MessageHelpers';
+import {
+	EMBED_MEDIA_OWNED_ATTACHMENT_FLAG,
+	purgeMessageAttachments,
+} from '@app/api/channel/services/message/MessageHelpers';
 import {
 	deleteOneOrMany,
 	fetchMany,
@@ -52,6 +55,7 @@ import type {
 	MessageEmbedMedia,
 	MessageReactionRow,
 	MessageRow,
+	MessageSnapshot,
 } from '@app/api/database/types/MessageTypes';
 import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
@@ -106,6 +110,10 @@ interface PlanMedia {
 	url: string | null;
 	width?: number | null;
 	height?: number | null;
+	/** The export's copy, stored on Tyne because the original no longer loads (tyne-chat/tyne#662). */
+	local?: PlanFile;
+	attachment_id?: string;
+	content_type?: string;
 }
 interface PlanEmbed {
 	type: string;
@@ -120,6 +128,16 @@ interface PlanEmbed {
 	thumbnail: PlanMedia | null;
 	image: PlanMedia | null;
 	video: PlanMedia | null;
+	provider?: {name: string; url: string | null} | null;
+}
+/** What a forward forwarded, as Tyne keeps a forward's copy (tyne-chat/tyne#661). */
+interface PlanSnapshot {
+	content: string | null;
+	timestamp: string;
+	edited_timestamp: string | null;
+	mention_user_ids: Array<string>;
+	attachments: Array<PlanAttachment>;
+	embeds: Array<PlanEmbed>;
 }
 interface PlanMessage {
 	discord_id: string;
@@ -141,6 +159,9 @@ interface PlanMessage {
 		emoji: {id: string | null; name: string; animated: boolean};
 		users: Array<{user_id: string; persona_id: string | null}>;
 	}>;
+	snapshot?: PlanSnapshot | null;
+	/** The forwarded original, when its channel is on Tyne: the "go to original" link. */
+	forward?: {message_id: string; channel_id: string; guild_id: string | null} | null;
 }
 interface PlanPlaceholder {
 	user_id: string;
@@ -234,22 +255,33 @@ const dryRun = rest.includes('--dry-run');
 const id = <T>(value: string) => BigInt(value) as unknown as T;
 const readBase64 = (file: PlanFile) => readFileSync(join(exportsDir, file.path)).toString('base64');
 
-function embedMedia(m: PlanMedia | null): MessageEmbedMedia | null {
-	if (!m?.url) return null;
+/** Where the export's copy of a preview's media goes: next to the channel's attachments, flagged as the
+ * preview's own, as Tyne keeps media it hosts for a preview itself (MessageHelpers.ts). */
+function ownedMediaKey(channelId: ChannelID, m: PlanMedia): string | null {
+	return m.local && m.attachment_id
+		? `attachments/${channelId}/${m.attachment_id}/${normalizeFilename(m.local.name) || 'file'}`
+		: null;
+}
+
+function embedMedia(m: PlanMedia | null, channelId: ChannelID): MessageEmbedMedia | null {
+	if (!m) return null;
+	const owned = ownedMediaKey(channelId, m);
+	const url = owned ? `${Config.endpoints.media}/${owned}` : m.url;
+	if (!url) return null;
 	return {
-		url: m.url,
+		url,
 		width: m.width ?? null,
 		height: m.height ?? null,
 		description: null,
-		content_type: null,
+		content_type: owned ? (m.content_type ?? null) : null,
 		content_hash: null,
 		placeholder: null,
-		flags: 0,
+		flags: owned ? EMBED_MEDIA_OWNED_ATTACHMENT_FLAG : 0,
 		duration: null,
 	};
 }
 
-function toEmbed(e: PlanEmbed): MessageEmbed {
+function toEmbed(e: PlanEmbed, channelId: ChannelID): MessageEmbed {
 	return {
 		type: e.type,
 		title: e.title,
@@ -258,10 +290,10 @@ function toEmbed(e: PlanEmbed): MessageEmbed {
 		timestamp: e.timestamp ? new Date(e.timestamp) : null,
 		color: e.color,
 		author: e.author ? {name: e.author.name, url: e.author.url, icon_url: e.author.icon_url} : null,
-		provider: null,
-		thumbnail: embedMedia(e.thumbnail),
-		image: embedMedia(e.image),
-		video: embedMedia(e.video),
+		provider: e.provider ? {name: e.provider.name, url: e.provider.url} : null,
+		thumbnail: embedMedia(e.thumbnail, channelId),
+		image: embedMedia(e.image, channelId),
+		video: embedMedia(e.video, channelId),
 		footer: e.footer ? {text: e.footer.text, icon_url: e.footer.icon_url} : null,
 		fields: e.fields.length ? e.fields.map((f) => ({name: f.name, value: f.value, inline: f.inline})) : null,
 		nsfw: null,
@@ -284,7 +316,19 @@ const MESSAGE_FIELDS = [
 ] as const;
 type MessageFields = Pick<MessageRow, (typeof MESSAGE_FIELDS)[number]>;
 
-function messageFields(m: PlanMessage): MessageFields {
+/** A reply's reference, or a forward's (type 1) when its original's channel is on Tyne. */
+function messageReference(m: PlanMessage): MessageRow['message_reference'] {
+	const target = m.reference ?? m.forward;
+	if (!target) return null;
+	return {
+		channel_id: id<ChannelID>(target.channel_id),
+		message_id: id<MessageID>(target.message_id),
+		guild_id: target.guild_id ? id<GuildID>(target.guild_id) : null,
+		type: m.reference ? 0 : 1,
+	};
+}
+
+function messageFields(m: PlanMessage, channelId: ChannelID): MessageFields {
 	return {
 		author_id: id<UserID>(m.author_id),
 		persona_id: m.persona_id ? id<PersonaID>(m.persona_id) : null,
@@ -294,19 +338,44 @@ function messageFields(m: PlanMessage): MessageFields {
 		pinned_timestamp: m.pinned_timestamp ? new Date(m.pinned_timestamp) : null,
 		mention_everyone: m.mention_everyone,
 		mention_users: m.mention_user_ids.length ? new Set(m.mention_user_ids.map((u) => id<UserID>(u))) : null,
-		embeds: m.embeds.length ? m.embeds.map(toEmbed) : null,
+		embeds: m.embeds.length ? m.embeds.map((e) => toEmbed(e, channelId)) : null,
 		sticker_items: m.sticker_items.length
 			? m.sticker_items.map((s) => ({sticker_id: id<StickerID>(s.sticker_id), name: s.name, animated: s.animated}))
 			: null,
-		message_reference: m.reference
-			? {
-					channel_id: id<ChannelID>(m.reference.channel_id),
-					message_id: id<MessageID>(m.reference.message_id),
-					guild_id: m.reference.guild_id ? id<GuildID>(m.reference.guild_id) : null,
-					type: 0,
-				}
-			: null,
+		message_reference: messageReference(m),
 	};
+}
+
+// A forward's copy, comparable between a plan entry and a stored row. Nobody can edit a forward on
+// Tyne, so the copy is compared as a whole; its files by id and stored name, as attachments are.
+function plannedSnapshot(s: PlanSnapshot | null | undefined, channelId: ChannelID): string {
+	if (!s) return canonical(null);
+	return canonical({
+		content: s.content,
+		timestamp: new Date(s.timestamp),
+		edited_timestamp: s.edited_timestamp ? new Date(s.edited_timestamp) : null,
+		mention_users: new Set(s.mention_user_ids),
+		embeds: s.embeds.map((e) => toEmbed(e, channelId)),
+		attachments: s.attachments.map((a) => ({id: a.attachment_id, filename: storedFilename(a)})),
+	});
+}
+
+function storedSnapshot(row: MessageRow): string {
+	const s = row.message_snapshots?.[0];
+	if (!s) return canonical(null);
+	return canonical({
+		content: s.content,
+		timestamp: s.timestamp,
+		edited_timestamp: s.edited_timestamp,
+		mention_users: s.mention_users,
+		embeds: s.embeds,
+		attachments: (s.attachments ?? []).map((a) => ({id: a.attachment_id, filename: a.filename})),
+	});
+}
+
+/** A plan's forward copy including where its files come from, to tell whether the plan changed it. */
+function snapshotSource(s: PlanSnapshot | null | undefined, channelId: ChannelID): string {
+	return canonical([plannedSnapshot(s, channelId), s?.attachments.map((a) => a.path) ?? null]);
 }
 
 function rowFields(row: MessageRow): MessageFields {
@@ -755,6 +824,57 @@ async function main(): Promise<void> {
 	const plannedFiles = (m: PlanMessage) =>
 		canonical(m.attachments.map((a) => ({id: a.attachment_id, filename: storedFilename(a)})));
 
+	// The export's copies of preview media that no longer load from their sites (tyne-chat/tyne#662),
+	// stored wherever a preview is written.
+	const uploadEmbedMedia = async (embeds: Array<PlanEmbed>) => {
+		for (const e of embeds) {
+			for (const m of [e.thumbnail, e.image, e.video]) {
+				const key = m ? ownedMediaKey(channelId, m) : null;
+				if (!m?.local || !key) continue;
+				let body: Uint8Array = readFileSync(join(exportsDir, m.local.path));
+				if ((m.content_type ?? '').startsWith('image/')) body = (await media.stripImageMetadata(body)) ?? body;
+				if (!dryRun)
+					await deps.storageService.uploadObject({
+						bucket: cdn,
+						key,
+						body,
+						contentType: m.content_type ?? 'application/octet-stream',
+					});
+				ledger.storage_keys.push(key);
+			}
+		}
+	};
+	// A forward's copy, its files uploaded, or reused from the stored copy where they did not change.
+	const buildSnapshot = async (
+		s: PlanSnapshot,
+		stored?: MessageSnapshot | null,
+		before?: PlanSnapshot | null,
+	): Promise<MessageSnapshot> => {
+		const have = new Map((stored?.attachments ?? []).map((a) => [a.attachment_id.toString(), a]));
+		const old = new Map((before?.attachments ?? []).map((a) => [a.attachment_id, a]));
+		const attachments: Array<MessageAttachment> = [];
+		for (const a of s.attachments) {
+			const o = old.get(a.attachment_id);
+			const unchanged =
+				o && o.path === a.path && storedFilename(o) === storedFilename(a) ? have.get(a.attachment_id) : undefined;
+			attachments.push(unchanged ?? (await uploadAttachment(a)));
+		}
+		await uploadEmbedMedia(s.embeds);
+		return {
+			content: s.content,
+			timestamp: new Date(s.timestamp),
+			edited_timestamp: s.edited_timestamp ? new Date(s.edited_timestamp) : null,
+			mention_users: s.mention_user_ids.length ? new Set(s.mention_user_ids.map((u) => id<UserID>(u))) : null,
+			mention_roles: null,
+			mention_channels: null,
+			attachments: attachments.length ? attachments : null,
+			embeds: s.embeds.length ? s.embeds.map((e) => toEmbed(e, channelId)) : null,
+			sticker_items: null,
+			type: 0,
+			flags: 0,
+		};
+	};
+
 	let minBucket = BucketUtils.makeBucket(channelId);
 	let n = 0;
 	for (const m of plan.messages) {
@@ -774,12 +894,14 @@ async function main(): Promise<void> {
 			}
 			const attachments: Array<MessageAttachment> = [];
 			for (const a of m.attachments) attachments.push(await uploadAttachment(a));
+			await uploadEmbedMedia(m.embeds);
+			const snapshots = m.snapshot ? [await buildSnapshot(m.snapshot)] : null;
 			if (!dryRun)
 				await deps.channelRepository.messages.upsertMessage({
 					channel_id: channelId,
 					bucket,
 					message_id: messageId,
-					...messageFields(m),
+					...messageFields(m, channelId),
 					webhook_id: null,
 					webhook_name: null,
 					webhook_avatar_hash: null,
@@ -787,7 +909,7 @@ async function main(): Promise<void> {
 					mention_roles: null,
 					mention_channels: null,
 					attachments: attachments.length ? attachments : null,
-					message_snapshots: null,
+					message_snapshots: snapshots,
 					call: null,
 					has_reaction: m.reactions.length > 0,
 					version: 1,
@@ -802,10 +924,24 @@ async function main(): Promise<void> {
 		}
 
 		// Imported before: bring it up to date, keeping what people changed on Tyne since.
-		const merge = mergeFields(messageFields(prev), rowFields(row), messageFields(m), MESSAGE_FIELDS);
+		const merge = mergeFields(
+			messageFields(prev, channelId),
+			rowFields(row),
+			messageFields(m, channelId),
+			MESSAGE_FIELDS,
+		);
 		for (const field of merge.kept) keep(`message ${field}`);
 		const next: MessageRow = {...row, ...merge.patch};
 		let changed = Object.keys(merge.patch).length > 0;
+		if (merge.patch.embeds !== undefined) await uploadEmbedMedia(m.embeds);
+		if (snapshotSource(prev.snapshot, channelId) !== snapshotSource(m.snapshot, channelId)) {
+			if (storedSnapshot(row) === plannedSnapshot(prev.snapshot, channelId)) {
+				next.message_snapshots = m.snapshot
+					? [await buildSnapshot(m.snapshot, row.message_snapshots?.[0], prev.snapshot)]
+					: null;
+				changed = true;
+			} else keep('message forwarded content');
+		}
 		if (attachmentIdentity(prev.attachments) !== attachmentIdentity(m.attachments)) {
 			if (storedFiles(row) === plannedFiles(prev)) {
 				const stored = new Map((row.attachments ?? []).map((a) => [a.attachment_id.toString(), a]));
@@ -887,7 +1023,7 @@ async function main(): Promise<void> {
 		if (
 			theirs ||
 			storedFiles(row) !== plannedFiles(prev) ||
-			changedSince(messageFields(prev), rowFields(row), MESSAGE_FIELDS)
+			changedSince(messageFields(prev, channelId), rowFields(row), MESSAGE_FIELDS)
 		) {
 			keep('message no longer planned, kept: changed on Tyne');
 			continue;
