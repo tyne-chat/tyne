@@ -2,9 +2,10 @@
 
 `fluxer_media_proxy` is the Rust service (Axum, with native code on libvips and FFmpeg) that serves
 stored and signed external media under `/media/*`, transforms images, and answers the API's internal
-requests. It is upstream's. The fork adds three things: a size cap an internal caller can ask for on
+requests. It is upstream's. The fork adds four things: a size cap an internal caller can ask for on
 external fetches (persona avatar imports), a repair of MP3 uploads that Chromium cannot decode
-(tyne-chat/tyne#245), and `?original=true`, which serves a stored image itself (tyne-chat/tyne#471).
+(tyne-chat/tyne#245), `?original=true`, which serves a stored image itself (tyne-chat/tyne#471), and
+stickers scaled to fit instead of cropped to a square (tyne-chat/tyne#659).
 
 ## Where things are
 
@@ -18,6 +19,7 @@ external fetches (persona avatar imports), a repair of MP3 uploads that Chromium
 | MP3 repair (fork) | `src/media_process/fork_mp3_repair.rs`; backfill tool `examples/fork_mp3_repair.rs` |
 | Native C code and what it links | `src/native_shim/`, listed in `build.rs`; FFmpeg and the libraries built from source by `tools/install-native-deps.sh` |
 | `?original=true` on avatars, banners and other image assets (fork) | `src/server/stored/fork_original_asset.rs`, one call in `serve_asset_image` (`src/server/stored/mod.rs`) |
+| Stickers scaled to fit, not cropped (fork) | `src/server/stored/fork_sticker_fit.rs`, one statement after upstream picks `resize_mode` in `serve_asset_image` |
 | The API's side | `fluxer_api/src/api/infrastructure/MediaService.ts` (`stripObjectMetadata`), `fluxer_api/src/api/channel/services/message/AttachmentProcessingService.ts` |
 
 ## Uploads go through `/_strip`
@@ -45,6 +47,16 @@ The URL's extension and `size` are ignored.
   An SVG is drawn at its declared size, shrunk to at most 1024×1024 for avatars or 2048×1152 for
   banners (the transform never enlarges).
 - The app's side: `fluxer_app/src/features/user/utils/ForkOriginalImageUrl.ts`.
+
+## Stickers are scaled to fit
+
+Upstream resizes emoji and stickers with `ResizeMode::Cover`, which crops them to the requested
+square. The apps square every still sticker before upload, so that crop removed nothing from those,
+but it cut the still frame of animated stickers (uploaded as they are) and stickers kept at their
+original size (tyne-chat/tyne#658). The fork scales stickers with `ResizeMode::Fit` instead: the whole
+image, shrunk to fit the box, never enlarged. Emoji keep the crop. The apps show stickers with
+`object-fit: contain` on the web and sized from their aspect ratio on the phone. The transform cache
+key includes the resize mode, so cropped copies cached before the change are not reused.
 
 ## The MP3 repair
 

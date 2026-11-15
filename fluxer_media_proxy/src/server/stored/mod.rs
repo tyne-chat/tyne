@@ -89,6 +89,8 @@ pub(in crate::server) async fn serve_asset_image(
     } else {
         ResizeMode::Fit
     };
+    // Fork: stickers are scaled to fit, not cropped to a square (tyne-chat/tyne#659).
+    let resize_mode = fork_sticker_fit::resize_mode(asset.kind, resize_mode);
     let CdnSourceObject {
         object,
         content_identity,
@@ -462,3 +464,7 @@ pub(in crate::server) async fn serve_stored_with_override(
 // Fork: `?original=true`, the stored image itself for the apps' "Open in browser" and "Copy URL"
 // (tyne-chat/tyne#471).
 mod fork_original_asset;
+
+// Fork: stickers are scaled to fit the requested size instead of cropped to a square
+// (tyne-chat/tyne#659).
+mod fork_sticker_fit;
