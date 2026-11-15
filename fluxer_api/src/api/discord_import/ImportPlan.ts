@@ -27,10 +27,11 @@ import type {
 	UserID,
 } from '@app/api/BrandedTypes';
 import {Config, initializeConfig} from '@app/api/Config';
-import {setDatabaseQueryExecutor, upsertOne} from '@app/api/database/CassandraQueryExecution';
+import {fetchOne, setDatabaseQueryExecutor, upsertOne} from '@app/api/database/CassandraQueryExecution';
 import {Db} from '@app/api/database/CassandraTypes';
 import {ensurePostgresKvSchema, PostgresKvQueryExecutor} from '@app/api/database/PostgresKvQueryExecutor';
 import type {
+	ChannelStateRow,
 	MessageAttachment,
 	MessageEmbed,
 	MessageEmbedMedia,
@@ -58,6 +59,8 @@ import {normalizeFilename} from '@fluxer/schema/src/primitives/FileValidators';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 import {JetStreamConnectionManager} from '@pkgs/nats/src/JetStreamConnectionManager';
 import {getDefaultPostgresClient, initPostgres} from '@pkgs/postgres/src/Client';
+
+const FETCH_CHANNEL_STATE = ChannelState.select({where: ChannelState.where.eq('channel_id'), limit: 1});
 
 interface PlanFile {
 	path: string;
@@ -484,21 +487,24 @@ async function main(): Promise<void> {
 		}
 	}
 
-	// Writing a message resets the channel's oldest bucket to the channel's own; history older than
-	// the channel needs it lowered, or search reindexing and purges would not see it.
-	await upsertOne(
-		ChannelState.patchByPk(
-			{channel_id: channelId},
-			{created_bucket: Db.set(minBucket), updated_at: Db.set(new Date())},
-		),
-	);
-	// Search: the worker reindexes the channel, imported history included (it reads from the bucket
-	// lowered above). A key of its own, so it is not merged with a reindex queued earlier.
-	await workerService.addJob(
-		'indexChannelMessages',
-		{channelId: channelId.toString()},
-		{jobKey: `discord-import-reindex-${channelId}-${Date.now()}`, maxAttempts: 3},
-	);
+	// A plan with no messages (emoji or stickers only) leaves the channel alone.
+	if (plan.messages.length > 0) {
+		// The channel's oldest bucket is where the API's reads of its history start: history older than
+		// the channel needs it lowered, or search reindexing and purges would not see it. Never raise
+		// it: an earlier import into this channel may have lowered it further.
+		const state = await fetchOne<ChannelStateRow>(FETCH_CHANNEL_STATE.bind({channel_id: channelId}));
+		const oldest = Math.min(minBucket, state?.created_bucket ?? minBucket);
+		await upsertOne(
+			ChannelState.patchByPk({channel_id: channelId}, {created_bucket: Db.set(oldest), updated_at: Db.set(new Date())}),
+		);
+		// Search: the worker reindexes the channel, imported history included (it reads from the
+		// bucket lowered above). A key of its own, so it is not merged with a reindex queued earlier.
+		await workerService.addJob(
+			'indexChannelMessages',
+			{channelId: channelId.toString()},
+			{jobKey: `discord-import-reindex-${channelId}-${Date.now()}`, maxAttempts: 3},
+		);
+	}
 	ledger.finished_at = new Date().toISOString();
 	save();
 	console.log(
