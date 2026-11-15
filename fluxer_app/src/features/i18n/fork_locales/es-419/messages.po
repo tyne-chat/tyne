@@ -1465,6 +1465,10 @@ msgstr "Se queda como está"
 msgid "Stays deleted"
 msgstr "Sigue eliminada"
 
+#. Description in the community sticker upload section. {maxSize} is the formatted size limit.
+msgid "Stickers keep their own size, up to 2048 pixels on each side, and must be under {maxSize}. Larger static images are shrunk and compressed automatically. Animated stickers and SVGs must already fit the limit."
+msgstr "Los stickers conservan su propio tamaño, hasta 2048 píxeles por lado, y deben ocupar menos de {maxSize}. Las imágenes estáticas más grandes se reducen y comprimen automáticamente. Los stickers animados y los archivos SVG ya deben cumplir el límite."
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "Siguen eliminadas"
@@ -1795,6 +1799,10 @@ msgstr "Se usa la del archivo"
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Ver tus personas"
+
+#. Body of the sticker upload size error modal when a static image remains too large after resizing. {fileSize} and {maxSize} are formatted file sizes.
+msgid "We compressed this sticker, but it is still {fileSize}. The limit is {maxSize}. Try a simpler image, fewer colors, or a smaller source file."
+msgstr "Comprimimos este sticker, pero sigue siendo de {fileSize}. El límite es {maxSize}. Prueba con una imagen más simple, menos colores o un archivo de origen más pequeño."
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
