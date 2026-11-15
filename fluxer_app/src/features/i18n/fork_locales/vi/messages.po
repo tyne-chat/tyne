@@ -1465,6 +1465,10 @@ msgstr "Giữ nguyên"
 msgid "Stays deleted"
 msgstr "Vẫn đã xóa"
 
+#. Description in the community sticker upload section. {maxSize} is the formatted size limit.
+msgid "Stickers keep their own size, up to 2048 pixels on each side, and must be under {maxSize}. Larger static images are shrunk and compressed automatically. Animated stickers and SVGs must already fit the limit."
+msgstr "Nhãn dán giữ nguyên kích thước gốc, tối đa 2048 pixel mỗi cạnh, và không được vượt quá {maxSize}. Ảnh tĩnh lớn hơn sẽ được tự động thu nhỏ và nén. Nhãn dán động và SVG phải đã phù hợp với giới hạn này."
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "Vẫn ở trạng thái đã xóa"
@@ -1795,6 +1799,10 @@ msgstr "Dùng của tệp"
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Xem persona của bạn"
+
+#. Body of the sticker upload size error modal when a static image remains too large after resizing. {fileSize} and {maxSize} are formatted file sizes.
+msgid "We compressed this sticker, but it is still {fileSize}. The limit is {maxSize}. Try a simpler image, fewer colors, or a smaller source file."
+msgstr "Chúng tôi đã nén nhãn dán này, nhưng kích thước vẫn là {fileSize}. Giới hạn là {maxSize}. Hãy thử một hình ảnh đơn giản hơn, ít màu hơn hoặc tệp nguồn nhỏ hơn."
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.

@@ -1465,6 +1465,10 @@ msgstr "Mbetet siç është"
 msgid "Stays deleted"
 msgstr "Mbetet e fshirë"
 
+#. Description in the community sticker upload section. {maxSize} is the formatted size limit.
+msgid "Stickers keep their own size, up to 2048 pixels on each side, and must be under {maxSize}. Larger static images are shrunk and compressed automatically. Animated stickers and SVGs must already fit the limit."
+msgstr "Ngjitëset ruajnë madhësinë e tyre, deri në 2048 piksel për çdo anë, dhe duhet të jenë më pak se {maxSize}. Imazhet statike më të mëdha zvogëlohen dhe ngjeshen automatikisht. Ngjitëset e animuara dhe SVG-të duhet ta respektojnë tashmë kufirin."
+
 #. Line of the import result: deleted personas not restored
 msgid "Still deleted"
 msgstr "Ende të fshira"
@@ -1795,6 +1799,10 @@ msgstr "Përdoret ajo e skedarit"
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Shikimi i personave të tua"
+
+#. Body of the sticker upload size error modal when a static image remains too large after resizing. {fileSize} and {maxSize} are formatted file sizes.
+msgid "We compressed this sticker, but it is still {fileSize}. The limit is {maxSize}. Try a simpler image, fewer colors, or a smaller source file."
+msgstr "E ngjeshëm këtë ngjitëse, por ajo është ende {fileSize}. Kufiri është {maxSize}. Provo një imazh më të thjeshtë, më pak ngjyra ose një skedar burim më të vogël."
 
 #. Button inserting the placeholder for what the member types after the command.
 #. Help for a command script variable.
