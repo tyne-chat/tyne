@@ -80,9 +80,10 @@ const THERE_WAS_AN_ERROR_LOADING_THE_STICKERS_PLEASE_DESCRIPTOR = msg({
 	message: 'There was an error loading the stickers. Try again.',
 	comment: 'Error message in the guild stickers tab.',
 });
+// Fork: stickers keep their own size up to ForkStickerUpload's STICKER_MAX_SIDE (tyne-chat/tyne#658).
 const STICKER_UPLOAD_REQUIREMENTS_DESCRIPTOR = msg({
 	message:
-		'Stickers are saved at 320x320 pixels and must be under {maxSize}. Static images are resized and compressed automatically. Animated stickers and SVGs must already fit the limit.',
+		'Stickers keep their own size, up to 2048 pixels on each side, and must be under {maxSize}. Larger static images are shrunk and compressed automatically. Animated stickers and SVGs must already fit the limit.',
 	comment: 'Description in the community sticker upload section. {maxSize} is the formatted size limit.',
 });
 const UNSUPPORTED_STICKER_FILE_DESCRIPTOR = msg({
