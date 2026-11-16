@@ -60,6 +60,7 @@ import type {
 import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
 import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
+import {ensureActiveGuildTainted} from '@app/api/experiment/ChannelThreadsGate';
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
 import {JobLedgerRepository} from '@app/api/jobs/JobLedgerRepository';
 import {initializeLogger, Logger} from '@app/api/Logger';
@@ -78,6 +79,8 @@ import {initializeWorkerDependencies} from '@app/api/worker/WorkerDependencies';
 import {WorkerService} from '@app/api/worker/WorkerService';
 import {Config as AppConfig} from '@app/Config';
 import {Logger as AppLogger} from '@app/Logger';
+import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
+import {ServerMessageFlags, THREAD_CHANNEL_TYPES, ThreadMemberFlags} from '@fluxer/constants/src/ThreadConstants';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {normalizeFilename} from '@fluxer/schema/src/primitives/FileValidators';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
@@ -152,7 +155,8 @@ interface PlanMessage {
 	content: string | null;
 	mention_user_ids: Array<string>;
 	mention_everyone: boolean;
-	reference: {message_id: string; channel_id: string; guild_id: string | null} | null;
+	/** A reply's target; for a "started a thread" notice, the thread (no message). */
+	reference: {message_id: string | null; channel_id: string; guild_id: string | null} | null;
 	attachments: Array<PlanAttachment>;
 	embeds: Array<PlanEmbed>;
 	sticker_items: Array<{sticker_id: string; name: string; animated: boolean}>;
@@ -163,8 +167,23 @@ interface PlanMessage {
 	snapshot?: PlanSnapshot | null;
 	/** The forwarded original, when its channel is on Tyne: the "go to original" link. */
 	forward?: {message_id: string; channel_id: string; guild_id: string | null} | null;
+	/** A message a thread was started from: the thread hangs from it (and has its id). */
+	has_thread?: boolean;
 	/** The command the message answered, shown as Tyne's server commands are: a /name chip. */
 	command?: {name: string; command_id: string; guild_id: string} | null;
+}
+/** A Discord thread going to a new thread under its parent's destination. */
+interface PlanThread {
+	guild_id: string;
+	parent_id: string;
+	name: string;
+	owner_id: string;
+	created_at: string;
+	archived: boolean;
+	archive_timestamp: string | null;
+	auto_archive_duration: number;
+	/** Started from a message in the parent, whose id it has: the app shows that message at its top. */
+	has_starter: boolean;
 }
 interface PlanPlaceholder {
 	user_id: string;
@@ -201,7 +220,7 @@ interface Plan {
 	version: number;
 	/** The instance the plan was made for: its links point there. */
 	origin?: string;
-	destination: {channel_id: string; path: string; dm: boolean};
+	destination: {channel_id: string; path: string; dm: boolean; thread?: PlanThread | null};
 	operator_user_id: string;
 	placeholders: Array<PlanPlaceholder>;
 	personas: Array<PlanPersona>;
@@ -325,7 +344,7 @@ function messageReference(m: PlanMessage): MessageRow['message_reference'] {
 	if (!target) return null;
 	return {
 		channel_id: id<ChannelID>(target.channel_id),
-		message_id: id<MessageID>(target.message_id),
+		message_id: target.message_id ? id<MessageID>(target.message_id) : null,
 		guild_id: target.guild_id ? id<GuildID>(target.guild_id) : null,
 		type: m.reference ? 0 : 1,
 	};
@@ -470,8 +489,63 @@ async function main(): Promise<void> {
 	const cdn = Config.s3.buckets.cdn;
 
 	const channelId = id<ChannelID>(plan.destination.channel_id);
-	if (!(await deps.channelRepository.channelData.findUnique(channelId)))
-		throw new Error(`destination channel ${channelId} does not exist`);
+	let destination = await deps.channelRepository.channelData.findUnique(channelId);
+	const thread = plan.destination.thread;
+	const threadCreated = !destination && thread != null;
+	if (threadCreated) {
+		// A Discord thread going to a new thread: created as Tyne creates one (ThreadCreationService), owned
+		// by whoever started it, in a community then marked as having threads, which the apps need to show it.
+		const parent = await deps.channelRepository.channelData.findUnique(id<ChannelID>(thread.parent_id));
+		if (!parent) throw new Error(`the thread's parent channel ${thread.parent_id} does not exist`);
+		if (!dryRun) {
+			const guildId = id<GuildID>(thread.guild_id);
+			const ownerId = id<UserID>(thread.owner_id);
+			const createdAt = new Date(thread.created_at);
+			await deps.channelRepository.threads.create({
+				channel: {
+					channel_id: channelId,
+					guild_id: guildId,
+					type: ChannelTypes.PUBLIC_THREAD,
+					name: thread.name,
+					topic: null,
+					icon_hash: null,
+					url: null,
+					parent_id: parent.id,
+					position: null,
+					owner_id: ownerId,
+					recipient_ids: null,
+					nsfw: null,
+					rate_limit_per_user: 0,
+					bitrate: null,
+					user_limit: null,
+					voice_connection_limit: null,
+					rtc_region: null,
+					rtc_p2p: null,
+					last_message_id: null,
+					last_pin_timestamp: null,
+					permission_overwrites: null,
+					nicks: null,
+					soft_deleted: false,
+					indexed_at: createdAt,
+					version: 1,
+				},
+				parentType: parent.type,
+				autoArchiveDuration: thread.auto_archive_duration,
+				invitable: null,
+				flags: 0,
+				appliedTags: [],
+				hasStarter: thread.has_starter,
+				createdAt,
+				members: [{userId: ownerId, flags: ThreadMemberFlags.HAS_INTERACTED}],
+			});
+			await ensureActiveGuildTainted(guildId);
+			destination = await deps.channelRepository.channelData.findUnique(channelId);
+		}
+		console.log(
+			`${dryRun ? 'would create' : 'created'} the thread ${thread.name}${thread.archived ? ' (closed)' : ''}`,
+		);
+	}
+	if (!destination && !(dryRun && threadCreated)) throw new Error(`destination channel ${channelId} does not exist`);
 	const ledger: Ledger = {
 		plan: planPath,
 		started_at: new Date().toISOString(),
@@ -941,7 +1015,7 @@ async function main(): Promise<void> {
 						webhook_id: null,
 						webhook_name: null,
 						webhook_avatar_hash: null,
-						flags: 0,
+						flags: m.has_thread ? ServerMessageFlags.HAS_THREAD : 0,
 						mention_roles: null,
 						mention_channels: null,
 						attachments: attachments.length ? attachments : null,
@@ -1091,6 +1165,21 @@ async function main(): Promise<void> {
 	}
 	ledger.removed.message.push(...removable.map((messageId) => messageId.toString()));
 	save();
+
+	// A thread counts its messages apart (ThreadStats), which the repository's writes leave alone: this
+	// run's are added and its removals taken off. A thread this run created is then closed if Discord had
+	// closed it; one that existed keeps the state people gave it on Tyne.
+	if (destination && THREAD_CHANNEL_TYPES.has(destination.type) && !dryRun) {
+		const created = ledger.messages.length;
+		await deps.channelRepository.channelData.adjustThreadStats(channelId, created - removable.length, created);
+		if (threadCreated && thread.archived && thread.archive_timestamp) {
+			const closedAt = new Date(thread.archive_timestamp);
+			await deps.channelRepository.threads.updateState(channelId, () => ({
+				archived: true,
+				archive_timestamp: closedAt,
+			}));
+		}
+	}
 
 	// A plan with no messages (emoji or stickers only) leaves the channel alone.
 	if (plan.messages.length > 0 && !dryRun) {
