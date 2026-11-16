@@ -2,6 +2,7 @@
 import i18n from '@app/app/I18n';
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import EmojiPins from '@app/features/emoji/state/EmojiPins';
+import {getPersonaSortName} from '@app/features/persona/utils/PersonaSortName';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import {http} from '@app/features/platform/transport/RestTransport';
 import * as Toast from '@app/features/ui/commands/ToastCommands';
@@ -108,13 +109,6 @@ export function normalizePersona(
 }
 
 const personaNameCollator = new Intl.Collator(undefined, {numeric: true});
-const LEADING_DECORATION = /^[^\p{Alphabetic}\p{N}]+/u;
-
-/** The name as it is filed in sorted lists: without leading symbols or emoji, so "✨Alice" sits with the A's. */
-export function getPersonaSortName(name: string): string {
-	const trimmed = name.trim();
-	return trimmed.replace(LEADING_DECORATION, '') || trimmed;
-}
 
 export function comparePersonasByName(a: ClientPersona, b: ClientPersona): number {
 	return (
