@@ -7,6 +7,10 @@ import type {UserCacheService} from '@app/api/infrastructure/UserCacheService';
 import {Channel} from '@app/api/models/Channel';
 import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {ContentWarningLevel, GuildFeatures} from '@fluxer/constants/src/GuildConstants';
+import {
+	VOICE_CHANNEL_BITRATE_DEFAULT,
+	VOICE_CHANNEL_CONNECTION_LIMIT_DEFAULT,
+} from '@fluxer/constants/src/LimitConstants';
 import {describe, expect, it} from 'vitest';
 
 const ARCHIVE = 1571309688694243328n as GuildID;
@@ -46,6 +50,7 @@ function row(
 /** A community holding the given channels, whose repository keeps what is created and whose gateway records events. */
 function fakes(existing: Array<Channel>, features: Array<string> = []) {
 	const created: Array<Channel> = [];
+	const rows: Array<ChannelRow> = [];
 	const sent: Array<{event: string; data: {id: string; name?: string; parent_id?: string | null; position?: number}}> =
 		[];
 	const deps = {
@@ -53,6 +58,7 @@ function fakes(existing: Array<Channel>, features: Array<string> = []) {
 			channelData: {
 				listGuildChannels: async () => [...existing],
 				create: async (data: ChannelRow) => {
+					rows.push(data);
 					const channel = new Channel(data);
 					created.push(channel);
 					return channel;
@@ -68,7 +74,7 @@ function fakes(existing: Array<Channel>, features: Array<string> = []) {
 		},
 		userCacheService: {} as UserCacheService,
 	} as unknown as NewChannelDeps;
-	return {deps, created, sent};
+	return {deps, created, rows, sent};
 }
 
 const plan = (fields: Partial<PlanNewChannel> = {}): PlanNewChannel => ({
@@ -133,6 +139,35 @@ describe('createNewChannel', () => {
 		const {deps, created} = fakes([], [GuildFeatures.TEXT_CHANNEL_FLEXIBLE_NAMES]);
 		await createNewChannel(plan({category: null}), deps, false);
 		expect(created.map((c) => [c.name, c.parentId])).toEqual([['✍🏻 Renders', null]]);
+	});
+
+	it('makes a voice channel for a Discord voice or stage channel, its name as given (tyne-chat/tyne#688)', async () => {
+		const {deps, rows, sent} = fakes([]);
+		const result = await createNewChannel(plan({name: 'Cosmic Podium', type: 'voice'}), deps, false);
+		const channel = rows[1];
+		expect([channel.type, channel.name, channel.parent_id?.toString()]).toEqual([
+			ChannelTypes.GUILD_VOICE,
+			'Cosmic Podium',
+			'1293755317015810002',
+		]);
+		expect([channel.bitrate, channel.user_limit, channel.voice_connection_limit]).toEqual([
+			VOICE_CHANNEL_BITRATE_DEFAULT,
+			0,
+			VOICE_CHANNEL_CONNECTION_LIMIT_DEFAULT,
+		]);
+		expect(sent.map((s) => s.data.id)).toContain('1293755317015810001');
+		expect(result.name).toBe('Cosmic Podium');
+	});
+
+	it('makes a text channel, with no voice settings, when the plan names no type', async () => {
+		const {deps, rows} = fakes([]);
+		await createNewChannel(plan({category: null}), deps, false);
+		expect([rows[0].type, rows[0].bitrate, rows[0].user_limit, rows[0].voice_connection_limit]).toEqual([
+			ChannelTypes.GUILD_TEXT,
+			null,
+			null,
+			null,
+		]);
 	});
 
 	it('writes and sends nothing in a dry run, but says what it would create', async () => {
