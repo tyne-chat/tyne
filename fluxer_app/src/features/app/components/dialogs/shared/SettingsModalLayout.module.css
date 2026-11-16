@@ -677,9 +677,11 @@
 }
 
 /* Fork: a narrow settings dialog shows the sidebar or the open section, not both. When it is narrow
-   is decided in shared/SettingsNarrowNav.tsx (tyne-chat/tyne#232). */
+   is decided in shared/SettingsNarrowNav.tsx (tyne-chat/tyne#232). Stacked in a column, the list
+   only scrolls if it may shrink below its content (tyne-chat/tyne#649). */
 [data-settings-narrow] > .desktopSidebar {
 	flex: 1 1 auto;
+	min-height: 0;
 	border-inline-end: none;
 }
 
