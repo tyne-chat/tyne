@@ -13,7 +13,8 @@ const PUBLIC_USER_FLAGS: i64 = USER_FLAG_STAFF
     | USER_FLAG_BUG_HUNTER
     | USER_FLAG_FRIENDLY_BOT
     | USER_FLAG_FRIENDLY_BOT_MANUAL_APPROVAL
-    | USER_FLAG_SPAMMER;
+    | USER_FLAG_SPAMMER
+    | USER_FLAG_IMPORTED;
 const HIDEABLE_FLAG_BADGES: [(&str, i64); 3] = [
     ("staff", USER_FLAG_STAFF),
     ("partner", USER_FLAG_PARTNER),
@@ -62,6 +63,10 @@ impl AccountStanding {
                 || deleting)
     }
 }
+
+// Fork: a placeholder account the Discord history import made for someone not on Tyne (UserFlags.IMPORTED
+// in packages/constants, tyne-chat/tyne#682). Public, so bit 30, the top of the public flags (an i32).
+pub const USER_FLAG_IMPORTED: i64 = 1 << 30;
 
 #[cfg(test)]
 mod tests {

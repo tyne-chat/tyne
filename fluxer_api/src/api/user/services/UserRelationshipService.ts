@@ -45,6 +45,10 @@ import type {
 } from '@fluxer/schema/src/domains/user/UserRequestSchemas';
 import {extractTimestamp} from '@fluxer/snowflake/src/SnowflakeUtils';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/api/user/ForkImportedAccounts';
+
 function emitUserBlocked(userId: UserID, targetId: UserID): void {
 	void emitActivity('user_blocked', targetId.toString(), {
 		blocker_id: userId.toString(),
@@ -782,6 +786,9 @@ export class UserRelationshipService {
 		if (!user) {
 			return false;
 		}
+		// Fork: nobody is behind a placeholder from the Discord import, so it cannot be befriended either
+		// (tyne-chat/tyne#682); every friend request path refuses users this answers true for.
+		if (isImportedPlaceholder(user)) return true;
 		if (isSyntheticUserId(user.id)) {
 			return true;
 		}

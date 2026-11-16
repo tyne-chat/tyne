@@ -105,6 +105,7 @@ import {useEffect, useMemo, useState} from 'react';
 // Fork imports.
 
 import {AccountPersonaNameExtras, PersonasProfileSheetButton} from '@app/features/persona/components/PersonasPill';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const logger = new Logger('UserProfileMobileSheet');
 export const UserProfileMobileSheet: React.FC = observer(function UserProfileMobileSheet() {
@@ -374,6 +375,8 @@ const UserProfileMobileSheetContent: React.FC<UserProfileMobileSheetContentProps
 		const renderRelationshipButton = () => {
 			const isFriendlyBot = user.bot && (user.flags & PublicUserFlags.FRIENDLY_BOT) === PublicUserFlags.FRIENDLY_BOT;
 			if (isCurrentUser || (user.bot && !isFriendlyBot)) return null;
+			// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+			if (isImportedPlaceholder(user)) return null;
 			if (RuntimeConfig.friendsDisabled && relationshipType !== RelationshipTypes.BLOCKED) {
 				return null;
 			}
@@ -673,7 +676,7 @@ const UserProfileMobileSheetContent: React.FC<UserProfileMobileSheetContentProps
 													className={styles.actionButtonsContainer}
 													data-flx="user.user-profile-mobile-sheet.user-profile-mobile-sheet-content.action-buttons-container--2"
 												>
-													{!RuntimeConfig.directMessagesDisabled && (
+													{!RuntimeConfig.directMessagesDisabled && !isImportedPlaceholder(user) && (
 														<button
 															type="button"
 															onClick={isBlocked ? handleOpenBlockedDm : handleMessage}
