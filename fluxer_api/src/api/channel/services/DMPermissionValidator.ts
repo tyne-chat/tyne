@@ -15,6 +15,10 @@ import {RelationshipTypes, UserFlags} from '@fluxer/constants/src/UserConstants'
 import {CannotSendMessagesToUserError} from '@fluxer/errors/src/domains/channel/CannotSendMessagesToUserError';
 import {CommunityMemberDmsDisabledError} from '@fluxer/errors/src/domains/channel/CommunityMemberDmsDisabledError';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/api/user/ForkImportedAccounts';
+
 interface DMPermissionValidatorDeps {
 	userRepository: UserRepository;
 	guildRepository: GuildRepository;
@@ -36,6 +40,8 @@ export class DMPermissionValidator {
 		if (!targetUser) {
 			throw new CannotSendMessagesToUserError();
 		}
+		// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+		if (isImportedPlaceholder(targetUser)) throw new CannotSendMessagesToUserError();
 		const isShadowbannedSpammer = !senderUser.isBot && (senderUser.flags & UserFlags.SPAMMER) === UserFlags.SPAMMER;
 		const [senderBlockedTarget, targetBlockedSender, areFriends, targetSettings, senderSettings] = await Promise.all([
 			this.deps.userRepository.getRelationship(senderId, recipientId, RelationshipTypes.BLOCKED),

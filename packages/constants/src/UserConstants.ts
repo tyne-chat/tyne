@@ -75,6 +75,11 @@ export const UserFlags = {
 	APP_STORE_REVIEWER: 1n << 53n,
 	MATURE_CONTENT_UNLOCKED: 1n << 60n,
 	LIMIT_EXEMPT: 1n << 62n,
+
+	// Fork values.
+	// Fork: a placeholder account the Discord history import made for someone not on Tyne (tyne-chat/tyne#682).
+	// Public, so bit 30, the top of the public flags (an Int32): the fork takes flag bits from the top.
+	IMPORTED: 1n << 30n,
 } as const;
 export const UserFlagsDescriptions: Record<keyof typeof UserFlags, string> = {
 	STAFF: 'User is a staff member',
@@ -98,6 +103,9 @@ export const UserFlagsDescriptions: Record<keyof typeof UserFlags, string> = {
 	MATURE_CONTENT_UNLOCKED:
 		'User can see mature content in regions where a date of birth is not enough. Staff can set it, and accounts that already had mature content unlocked before keep it',
 	LIMIT_EXEMPT: 'User is permanently exempt from account limitation',
+
+	// Fork values.
+	IMPORTED: 'Placeholder account for someone not on Tyne, holding messages imported from Discord',
 };
 export const PremiumFlags = {
 	DISCRIMINATOR: 1 << 0,
@@ -188,7 +196,8 @@ export const PUBLIC_USER_FLAGS =
 	UserFlags.BUG_HUNTER |
 	UserFlags.FRIENDLY_BOT |
 	UserFlags.FRIENDLY_BOT_MANUAL_APPROVAL |
-	UserFlags.SPAMMER;
+	UserFlags.SPAMMER |
+	UserFlags.IMPORTED;
 const HIDEABLE_FLAG_BADGES: ReadonlyArray<readonly [ProfileBadgeKind, bigint]> = [
 	['staff', UserFlags.STAFF],
 	['partner', UserFlags.PARTNER],
@@ -213,6 +222,9 @@ export const PublicUserFlags = {
 	FRIENDLY_BOT: Number(UserFlags.FRIENDLY_BOT),
 	FRIENDLY_BOT_MANUAL_APPROVAL: Number(UserFlags.FRIENDLY_BOT_MANUAL_APPROVAL),
 	SPAMMER: Number(UserFlags.SPAMMER),
+
+	// Fork values.
+	IMPORTED: Number(UserFlags.IMPORTED),
 } as const;
 export const PublicUserFlagsDescriptions: Record<keyof typeof PublicUserFlags, string> = {
 	STAFF: 'User is a staff member',
@@ -221,6 +233,9 @@ export const PublicUserFlagsDescriptions: Record<keyof typeof PublicUserFlags, s
 	FRIENDLY_BOT: 'Bot accepts friend requests from users',
 	FRIENDLY_BOT_MANUAL_APPROVAL: 'Bot requires manual approval for friend requests',
 	SPAMMER: 'User is flagged as a spammer',
+
+	// Fork values.
+	IMPORTED: 'Placeholder account for someone not on Tyne, holding messages imported from Discord',
 };
 export const ThemeTypes = {
 	DARK: 'dark',

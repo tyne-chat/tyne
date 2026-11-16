@@ -16,6 +16,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+
 const MESSAGE_DESCRIPTOR = msg({
 	message: 'Message',
 	context: 'message-action',
@@ -53,6 +57,8 @@ export const MessageUserMenuItem: React.FC<MessageUserMenuItemProps> = observer(
 	if (RuntimeConfig.directMessagesDisabled) {
 		return null;
 	}
+	// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+	if (isImportedPlaceholder(user)) return null;
 	return (
 		<MenuItem
 			icon={<MessageUserIcon size={16} data-flx="ui.action-menu.items.message-user-menu-item.message-user-icon" />}
