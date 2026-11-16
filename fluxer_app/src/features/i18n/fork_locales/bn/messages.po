@@ -675,6 +675,10 @@ msgstr "আপনার অনুমতি ছাড়া ইমপোর্ট
 msgid "Import will {actions}"
 msgstr "ইমপোর্টে যা হবে: {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "আমদানি করা"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "পারসোনা ইমপোর্ট করা হচ্ছে…"
@@ -1130,6 +1134,10 @@ msgstr "ইমোজি পিন করুন"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "এই পারসোনার জন্য পিন করুন"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "Tyne-এ নেই এমন কারও জন্য স্থানধারী: এই বার্তাগুলো Discord থেকে আমদানি করা হয়েছে।"
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
