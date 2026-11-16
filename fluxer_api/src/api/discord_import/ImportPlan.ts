@@ -81,6 +81,7 @@ import {Config as AppConfig} from '@app/Config';
 import {Logger as AppLogger} from '@app/Logger';
 import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {ServerMessageFlags, THREAD_CHANNEL_TYPES, ThreadMemberFlags} from '@fluxer/constants/src/ThreadConstants';
+import {UserFlags} from '@fluxer/constants/src/UserConstants';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {normalizeFilename} from '@fluxer/schema/src/primitives/FileValidators';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
@@ -275,6 +276,9 @@ const copyMediaFrom = rest.includes('--copy-media') ? rest[rest.indexOf('--copy-
 const dryRun = rest.includes('--dry-run');
 
 const id = <T>(value: string) => BigInt(value) as unknown as T;
+
+/** The bio a placeholder starts with; one written on Tyne is kept (tyne-chat/tyne#682). */
+const PLACEHOLDER_BIO = 'Placeholder account: messages imported from Discord.';
 const readBase64 = (file: PlanFile) => readFileSync(join(exportsDir, file.path)).toString('base64');
 
 /** Where the export's copy of a preview's media goes: next to the channel's attachments, flagged as the
@@ -616,17 +620,31 @@ async function main(): Promise<void> {
 					system: false,
 					email_verified: true,
 					authenticator_types: new Set(),
-					flags: 0n,
+					flags: UserFlags.IMPORTED,
+					bio: PLACEHOLDER_BIO,
 					avatar_hash: avatarHash,
 					version: 1,
 				});
+			if (!dryRun) await deps.userCacheService.invalidateUserCache(userId);
 			ledger.placeholders.push(p.user_id);
 			ledger.hashes.placeholder[p.user_id] = avatarHash;
 			save();
 			continue;
 		}
+		// A placeholder made before they were marked gets the mark, and the bio if it has none (its id is
+		// the importer's own, so it is one).
+		const mark: Partial<UserRow> = {};
+		if ((existing.flags & UserFlags.IMPORTED) === 0n) mark.flags = existing.flags | UserFlags.IMPORTED;
+		if (existing.bio === null) mark.bio = PLACEHOLDER_BIO;
 		if (!prev) {
-			ledger.skipped_existing++;
+			if (Object.keys(mark).length) {
+				if (!dryRun) {
+					await deps.userRepository.patchUpsert(userId, mark, existing.toRow());
+					await deps.userCacheService.invalidateUserCache(userId);
+				}
+				updated('placeholder', p.user_id);
+				save();
+			} else ledger.skipped_existing++;
 			continue;
 		}
 		const merge = mergeFields(
@@ -637,7 +655,7 @@ async function main(): Promise<void> {
 		);
 		for (const field of merge.kept) keep(`placeholder ${field}`);
 		if (p.username !== prev.username) keep('placeholder username (imports never change one: use the admin panel)');
-		const patch: Partial<UserRow> = {...merge.patch};
+		const patch: Partial<UserRow> = {...mark, ...merge.patch};
 		if ((prev.avatar?.path ?? null) !== (p.avatar?.path ?? null)) {
 			if (prev._avatar_hash !== undefined && existing.avatarHash === prev._avatar_hash) {
 				patch.avatar_hash = p.avatar ? await uploadAvatar(userId, p.avatar) : null;
@@ -645,7 +663,10 @@ async function main(): Promise<void> {
 			} else keep('placeholder avatar');
 		}
 		if (Object.keys(patch).length) {
-			if (!dryRun) await deps.userRepository.patchUpsert(userId, patch, existing.toRow());
+			if (!dryRun) {
+				await deps.userRepository.patchUpsert(userId, patch, existing.toRow());
+				await deps.userCacheService.invalidateUserCache(userId);
+			}
 			updated('placeholder', p.user_id);
 			save();
 		}
