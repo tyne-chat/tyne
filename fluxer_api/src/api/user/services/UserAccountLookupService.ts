@@ -30,6 +30,7 @@ import type {GuildMemberResponse} from '@fluxer/schema/src/domains/guild/GuildMe
 
 // Fork imports.
 
+import {isImportedPlaceholder} from '@app/api/user/ForkImportedAccounts';
 import {UnknownUserError} from '@fluxer/errors/src/domains/user/UnknownUserError';
 
 interface ProfileFieldPrivacyContext {
@@ -140,6 +141,8 @@ export class UserAccountLookupService {
 	private async shouldRestrictProfile(viewerId: UserID, targetId: UserID, targetUser: User): Promise<boolean> {
 		if (viewerId === targetId) return false;
 		if (targetUser.isBot) return false;
+		// Fork: an import placeholder's profile, its bio included, is for everyone (tyne-chat/tyne#682).
+		if (isImportedPlaceholder(targetUser)) return false;
 		const targetSettings = await this.deps.userAccountRepository.findSettings(targetId);
 		const level = targetSettings?.profilePrivacy ?? ProfilePrivacyLevels.ALL_GUILDS;
 		if (level === ProfilePrivacyLevels.ALL_GUILDS) {
@@ -174,6 +177,8 @@ export class UserAccountLookupService {
 		if (resolvedTargetUser.isBot) {
 			return;
 		}
+		// Fork: a placeholder from the Discord import shares no community with anyone (tyne-chat/tyne#682).
+		if (isImportedPlaceholder(resolvedTargetUser)) return;
 		const friendship = await this.deps.userAccountRepository.getRelationship(
 			userId,
 			targetId,
