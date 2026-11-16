@@ -60,6 +60,7 @@ import type {
 import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
 import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
+import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
 import {ensureActiveGuildTainted} from '@app/api/experiment/ChannelThreadsGate';
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
 import {JobLedgerRepository} from '@app/api/jobs/JobLedgerRepository';
@@ -221,7 +222,14 @@ interface Plan {
 	version: number;
 	/** The instance the plan was made for: its links point there. */
 	origin?: string;
-	destination: {channel_id: string; path: string; dm: boolean; thread?: PlanThread | null};
+	destination: {
+		channel_id: string;
+		path: string;
+		dm: boolean;
+		thread?: PlanThread | null;
+		/** A Discord channel going to a new channel in the archive community: created first (ImportNewChannel). */
+		new_channel?: PlanNewChannel | null;
+	};
 	operator_user_id: string;
 	placeholders: Array<PlanPlaceholder>;
 	personas: Array<PlanPersona>;
@@ -549,7 +557,21 @@ async function main(): Promise<void> {
 			`${dryRun ? 'would create' : 'created'} the thread ${thread.name}${thread.archived ? ' (closed)' : ''}`,
 		);
 	}
-	if (!destination && !(dryRun && threadCreated)) throw new Error(`destination channel ${channelId} does not exist`);
+	const newChannel = plan.destination.new_channel;
+	const channelCreated = !destination && newChannel != null;
+	if (channelCreated) {
+		// Created once: when an earlier import of this channel wrote to it and it is gone, it was deleted on
+		// Tyne, and the import stops rather than make it again.
+		if (Object.keys(plan.previous?.messages ?? {}).length)
+			throw new Error(`the channel ${channelId} an earlier import created is gone; not creating it again`);
+		const made = await createNewChannel(newChannel, deps, dryRun);
+		if (made.createdCategory)
+			console.log(`${dryRun ? 'would create' : 'created'} the category ${newChannel.category?.name}`);
+		console.log(`${dryRun ? 'would create' : 'created'} the channel #${made.name}`);
+		destination = made.channel;
+	}
+	if (!destination && !(dryRun && (threadCreated || channelCreated)))
+		throw new Error(`destination channel ${channelId} does not exist`);
 	const ledger: Ledger = {
 		plan: planPath,
 		started_at: new Date().toISOString(),
