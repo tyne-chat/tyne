@@ -142,10 +142,12 @@ import {
 	SHOW_CHANNELS_DESCRIPTOR,
 } from '@app/features/channel/components/channel_header/shared';
 import {useCollapsedPanelBadges} from '@app/features/channel/components/channel_header/useCollapsedPanelBadges';
+import {withoutImportedDmCalls} from '@app/features/channel/components/channel_header_components/ForkCallButtons';
 import LayoutState from '@app/features/ui/state/LayoutState';
 import {SidebarSimpleIcon} from '@phosphor-icons/react';
 
-const {VoiceCallButton, VideoCallButton} = CallButtons;
+// Fork: without call buttons in a DM with a Discord import placeholder (tyne-chat/tyne#685).
+const {VoiceCallButton, VideoCallButton} = withoutImportedDmCalls(CallButtons);
 
 interface ChannelHeaderProps {
 	channel?: Channel;
