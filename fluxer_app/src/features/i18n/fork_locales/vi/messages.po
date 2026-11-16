@@ -675,6 +675,10 @@ msgstr "Nhập sẽ không bao giờ ghi đè các persona hiện có khi chưa 
 msgid "Import will {actions}"
 msgstr "Lần nhập này sẽ {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "Đã nhập"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Đang nhập persona..."
@@ -1130,6 +1134,10 @@ msgstr "Ghim biểu tượng cảm xúc"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "Ghim cho persona này"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "Tài khoản giữ chỗ cho người không có trên Tyne: các tin nhắn này được nhập từ Discord."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"

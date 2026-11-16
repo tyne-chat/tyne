@@ -27,11 +27,13 @@ import {Avatar} from '@app/features/ui/components/Avatar';
 import {Scroller} from '@app/features/ui/components/Scroller';
 import * as Sheet from '@app/features/ui/sheet/Sheet';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
+import {ImportedTag} from '@app/features/user/components/ForkImportedTag';
 import {getContrastingNotchColor} from '@app/features/user/components/modals/UserProfileUtils';
 import sharedStyles from '@app/features/user/components/popouts/UserProfileShared.module.css';
 import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {DEFAULT_ACCENT_COLOR} from '@fluxer/constants/src/AppConstants';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -309,19 +311,21 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 												/>
 											</button>
 										) : (
-											<button
-												type="button"
-												onClick={handleMessage}
-												className={styles.actionButton}
-												aria-label={i18n._(msg({message: 'Message', comment: 'Action button to open DM'}))}
-												data-flx="persona.persona-profile-mobile-sheet.action-button.message"
-											>
-												<ChatTeardropIcon
-													className={styles.icon}
-													weight="bold"
-													data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.icon--2"
-												/>
-											</button>
+											!isImportedPlaceholder(user) && (
+												<button
+													type="button"
+													onClick={handleMessage}
+													className={styles.actionButton}
+													aria-label={i18n._(msg({message: 'Message', comment: 'Action button to open DM'}))}
+													data-flx="persona.persona-profile-mobile-sheet.action-button.message"
+												>
+													<ChatTeardropIcon
+														className={styles.icon}
+														weight="bold"
+														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.icon--2"
+													/>
+												</button>
+											)
 										)}
 									</div>
 									<div
@@ -339,6 +343,9 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 												data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.badges-wrapper"
 											>
 												<PersonaNameExtras data-flx="persona.persona-profile-mobile-sheet.name-extras">
+													{isImportedPlaceholder(user) && (
+														<ImportedTag data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.imported-tag" />
+													)}
 													{(effectiveDisplayTagText || effectiveDisplayTagIcon) && (
 														<PersonaTag
 															subprofile={{
@@ -393,28 +400,30 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 												</span>
 											</button>
 										) : (
-											<button
-												type="button"
-												onClick={handleMessage}
-												className={styles.actionCard}
-												data-flx="persona.persona-profile-mobile-sheet.action-card.message"
-											>
-												<div
-													className={styles.actionIconContainer}
-													data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.action-icon-container"
+											!isImportedPlaceholder(user) && (
+												<button
+													type="button"
+													onClick={handleMessage}
+													className={styles.actionCard}
+													data-flx="persona.persona-profile-mobile-sheet.action-card.message"
 												>
-													<ChatTeardropIcon
-														className={styles.actionIcon}
-														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.action-icon"
-													/>
-												</div>
-												<span
-													className={styles.actionLabel}
-													data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.action-label"
-												>
-													<Trans context="message-action">Message</Trans>
-												</span>
-											</button>
+													<div
+														className={styles.actionIconContainer}
+														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.action-icon-container"
+													>
+														<ChatTeardropIcon
+															className={styles.actionIcon}
+															data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.action-icon"
+														/>
+													</div>
+													<span
+														className={styles.actionLabel}
+														data-flx="persona.persona-profile-mobile-sheet.persona-profile-mobile-sheet-content.action-label"
+													>
+														<Trans context="message-action">Message</Trans>
+													</span>
+												</button>
+											)
 										)}
 									</div>
 
