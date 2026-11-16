@@ -74,8 +74,10 @@ import {type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 
 
 // Fork imports.
 
+import {ImportedDmBarrier} from '@app/features/channel/components/barriers/ForkImportedDmBarrier';
 import {SignalBar} from '@app/features/signal_bar/components/SignalBar';
 import LayoutState from '@app/features/ui/state/LayoutState';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 interface DMChannelViewProps {
 	channelId: string;
@@ -485,6 +487,14 @@ export const DMChannelView = observer(({channelId}: DMChannelViewProps) => {
 	let channelTextarea: ReactNode;
 	if (isSystemDm) {
 		channelTextarea = <SystemDmBarrier data-flx="channel.channel-view.dm-channel-view.system-dm-barrier" />;
+	} else if (isDM && recipient && isImportedPlaceholder(recipient)) {
+		// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#685).
+		channelTextarea = (
+			<ImportedDmBarrier
+				name={NicknameUtils.getNickname(recipient, null)}
+				data-flx="channel.channel-view.dm-channel-view.imported-dm-barrier"
+			/>
+		);
 	} else if (isDM && isRecipientBlocked && recipient) {
 		channelTextarea = (
 			<BlockedUserBarrier
