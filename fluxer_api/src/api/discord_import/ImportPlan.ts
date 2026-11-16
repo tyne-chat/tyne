@@ -61,6 +61,7 @@ import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
 import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
 import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
+import {createNewDm, markNewDmRead, type PlanNewDm} from '@app/api/discord_import/ImportNewDm';
 import {ensureActiveGuildTainted} from '@app/api/experiment/ChannelThreadsGate';
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
 import {JobLedgerRepository} from '@app/api/jobs/JobLedgerRepository';
@@ -229,6 +230,8 @@ interface Plan {
 		thread?: PlanThread | null;
 		/** A Discord channel going to a new channel in the archive community: created first (ImportNewChannel). */
 		new_channel?: PlanNewChannel | null;
+		/** A Discord channel going to a one-to-one DM not on Tyne yet: created after the placeholders (ImportNewDm). */
+		new_dm?: PlanNewDm | null;
 	};
 	operator_user_id: string;
 	placeholders: Array<PlanPlaceholder>;
@@ -570,7 +573,11 @@ async function main(): Promise<void> {
 		console.log(`${dryRun ? 'would create' : 'created'} the channel #${made.name}`);
 		destination = made.channel;
 	}
-	if (!destination && !(dryRun && (threadCreated || channelCreated)))
+	const newDm = plan.destination.new_dm;
+	const dmCreated = !destination && newDm != null;
+	if (dmCreated && Object.keys(plan.previous?.messages ?? {}).length)
+		throw new Error(`the DM ${channelId} an earlier import created is gone; not creating it again`);
+	if (!destination && !dmCreated && !(dryRun && (threadCreated || channelCreated)))
 		throw new Error(`destination channel ${channelId} does not exist`);
 	const ledger: Ledger = {
 		plan: planPath,
@@ -692,6 +699,14 @@ async function main(): Promise<void> {
 			updated('placeholder', p.user_id);
 			save();
 		}
+	}
+
+	// A DM the plan creates may be with a placeholder this run made, so it comes after them.
+	if (dmCreated) {
+		const made = await createNewDm(newDm, deps, dryRun);
+		const done = made.created ? 'created' : 'found';
+		console.log(`${dryRun ? 'would create' : done} the DM ${newDm.channel_id}`);
+		destination = made.channel;
 	}
 
 	const personaTags = (tags: PlanPersona['tags']): Array<PersonaTag> =>
@@ -1222,6 +1237,12 @@ async function main(): Promise<void> {
 				archive_timestamp: closedAt,
 			}));
 		}
+	}
+
+	// A DM this run created arrives read for its Tyne users, up to its last message.
+	if (dmCreated && !dryRun && plan.messages.length > 0) {
+		const last = plan.messages.reduce((max, m) => (BigInt(m.message_id) > BigInt(max) ? m.message_id : max), '0');
+		await markNewDmRead(newDm, last, deps);
 	}
 
 	// A plan with no messages (emoji or stickers only) leaves the channel alone.
