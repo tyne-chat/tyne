@@ -24,6 +24,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+
 const STOP_RINGING_DESCRIPTOR = msg({
 	message: 'Stop ringing',
 	comment: 'Action that stops ringing the selected participant in a voice call.',
@@ -63,6 +67,8 @@ export const StartVoiceCallMenuItem: React.FC<StartVoiceCallMenuItemProps> = obs
 	if (RuntimeConfig.directMessagesDisabled) {
 		return null;
 	}
+	// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+	if (isImportedPlaceholder(user)) return null;
 	if (user.bot || hasActiveDirectCallWithUser(user.id)) {
 		return null;
 	}
@@ -96,6 +102,8 @@ export const StartVideoCallMenuItem: React.FC<StartVideoCallMenuItemProps> = obs
 	if (RuntimeConfig.directMessagesDisabled) {
 		return null;
 	}
+	// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+	if (isImportedPlaceholder(user)) return null;
 	if (user.bot || hasActiveDirectCallWithUser(user.id)) {
 		return null;
 	}

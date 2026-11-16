@@ -675,6 +675,10 @@ msgstr "sina wile ala la kama li ante ala e jan insa sina."
 msgid "Import will {actions}"
 msgstr "kama ni la {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "kama"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "jan insa li kama..."
@@ -1130,6 +1134,10 @@ msgstr "o sinpin e sitelen pilin"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "o sinpin tawa jan insa ni"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "jan ni li lon ala Tyne. toki ni li kama tan Discord."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
