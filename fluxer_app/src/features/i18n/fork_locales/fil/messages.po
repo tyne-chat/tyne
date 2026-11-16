@@ -675,6 +675,10 @@ msgstr "Hindi kailanman papalitan ng pag-import ang mga dati mong persona nang w
 msgid "Import will {actions}"
 msgstr "Sa pag-import, {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "Inangkat"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Ini-import ang mga Persona…"
@@ -1130,6 +1134,10 @@ msgstr "I-pin ang emoji"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "I-pin para sa personang ito"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "Pansamantalang account para sa taong wala sa Tyne: in-import ang mga mensaheng ito mula sa Discord."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"

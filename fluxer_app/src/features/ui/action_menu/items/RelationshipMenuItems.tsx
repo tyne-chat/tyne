@@ -39,6 +39,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useState} from 'react';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+
 interface SendFriendRequestMenuItemProps {
 	user: User;
 	onClose: () => void;
@@ -350,6 +354,8 @@ export const RelationshipActionMenuItem: React.FC<RelationshipActionMenuItemProp
 	if (RuntimeConfig.friendsDisabled) {
 		return null;
 	}
+	// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+	if (isImportedPlaceholder(user)) return null;
 	const isFriendlyBot = user.bot && (user.flags & PublicUserFlags.FRIENDLY_BOT) === PublicUserFlags.FRIENDLY_BOT;
 	if (user.bot && !isFriendlyBot) {
 		if (relationshipType === RelationshipTypes.FRIEND) {
