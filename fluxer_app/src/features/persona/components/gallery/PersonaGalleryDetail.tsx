@@ -23,6 +23,7 @@ import {modal} from '@app/features/ui/commands/ModalCommands';
 import {Spinner} from '@app/features/ui/components/Spinner';
 import type {User} from '@app/features/user/models/User';
 import {getFormattedShortDate} from '@app/features/user/utils/DateFormatting';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {Trans, useLingui} from '@lingui/react/macro';
 import {CaretLeftIcon, CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
@@ -288,15 +289,17 @@ export const PersonaGalleryDetail = observer(
 										<Trans>Edit persona</Trans>
 									</Button>
 								) : (
-									<Button
-										small
-										fitContent
-										leftIcon={<ChatTeardropIcon size={16} data-flx="persona.gallery.detail.message-icon" />}
-										onClick={handleMessage}
-										data-flx="persona.gallery.detail.message"
-									>
-										<Trans>Message</Trans>
-									</Button>
+									!isImportedPlaceholder(user) && (
+										<Button
+											small
+											fitContent
+											leftIcon={<ChatTeardropIcon size={16} data-flx="persona.gallery.detail.message-icon" />}
+											onClick={handleMessage}
+											data-flx="persona.gallery.detail.message"
+										>
+											<Trans>Message</Trans>
+										</Button>
+									)
 								)}
 							</div>
 							<div className={styles.detailSeparator} data-flx="persona.gallery.detail.separator" />
