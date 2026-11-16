@@ -100,6 +100,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+
 const USER_PROFILE_2_DESCRIPTOR = msg({
 	message: 'User profile: {tag}',
 	comment: 'Short label in the user profile modal. Keep it concise. Preserve {tag}; it is inserted by code.',
@@ -576,6 +580,8 @@ export const UserProfileModal: UserProfileModalComponent = observer(
 				if (isUserBot && !isFriendlyBot) {
 					return null;
 				}
+				// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+				if (isImportedPlaceholder(user)) return null;
 				if (RuntimeConfig.friendsDisabled && relationshipType !== RelationshipTypes.BLOCKED) {
 					return null;
 				}
@@ -720,7 +726,7 @@ export const UserProfileModal: UserProfileModalComponent = observer(
 					className={userProfileModalStyles.actionButtons}
 					data-flx="user.user-profile-modal.render-action-buttons.div--5"
 				>
-					{!RuntimeConfig.directMessagesDisabled && (
+					{!RuntimeConfig.directMessagesDisabled && !isImportedPlaceholder(user) && (
 						<Button
 							small={true}
 							leftIcon={

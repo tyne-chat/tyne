@@ -675,6 +675,10 @@ msgstr "Az importálás soha nem írja felül a meglévő personákat az engedé
 msgid "Import will {actions}"
 msgstr "Importálás: {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "Importált"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Personák importálása..."
@@ -1130,6 +1134,10 @@ msgstr "Hangulatjel rögzítése"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "Rögzítés ehhez a personához"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "Helyőrző valakinek, aki nincs a Tyne-on: ezeket az üzeneteket a Discordról importálták."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
