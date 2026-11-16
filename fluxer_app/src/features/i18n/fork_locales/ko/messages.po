@@ -675,6 +675,10 @@ msgstr "가져오기는 허락 없이 기존 페르소나를 절대 덮어쓰지
 msgid "Import will {actions}"
 msgstr "가져오기 내용: {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "가져옴"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "페르소나 가져오는 중..."
@@ -1130,6 +1134,10 @@ msgstr "이모지 고정"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "이 페르소나에 고정"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "Tyne에 없는 사람을 위한 자리 표시 계정: 이 메시지들은 Discord에서 가져왔습니다."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"

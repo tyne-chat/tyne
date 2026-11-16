@@ -675,6 +675,10 @@ msgstr "Importul nu va suprascrie niciodată personas existente fără permisiun
 msgid "Import will {actions}"
 msgstr "Importul va {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "Importat"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Se importă personas..."
@@ -1130,6 +1134,10 @@ msgstr "Fixează emoji"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "Fixează pentru această persona"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "Cont substituent pentru cineva care nu este pe Tyne: aceste mesaje au fost importate din Discord."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
