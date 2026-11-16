@@ -4,8 +4,10 @@ import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import * as M from '@app/features/persona/utils/PersonaGalleryMessages';
 import {openPersonaGallery} from '@app/features/persona/utils/PersonaGalleryOpen';
 import {usePersonaDirectory} from '@app/features/persona/utils/usePersonaDirectory';
+import {ImportedTag} from '@app/features/user/components/ForkImportedTag';
 import sheetStyles from '@app/features/user/components/modals/UserProfileMobileSheet.module.css';
 import type {User} from '@app/features/user/models/User';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 import {useLingui} from '@lingui/react/macro';
 import {UsersThreeIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
@@ -74,6 +76,9 @@ export const AccountPersonaNameExtras = observer((props: AccountPersonaNameExtra
 	const hasTag = Boolean(directory.displayTagText || directory.displayTagIcon);
 	return (
 		<PersonaNameExtras data-flx="persona.account-name-extras">
+			{isImportedPlaceholder(user) && (
+				<ImportedTag data-flx="persona.personas-pill.account-persona-name-extras.imported-tag" />
+			)}
 			{hasTag && (
 				<PersonaTag
 					subprofile={{

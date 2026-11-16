@@ -21898,6 +21898,11 @@
 						"name": "LIMIT_EXEMPT",
 						"value": "4611686018427387904",
 						"description": "User is permanently exempt from account limitation"
+					},
+					{
+						"name": "IMPORTED",
+						"value": "1073741824",
+						"description": "Placeholder account for someone not on Tyne, holding messages imported from Discord"
 					}
 				]
 			},
@@ -23293,7 +23298,12 @@
 						"value": "32",
 						"description": "Bot requires manual approval for friend requests"
 					},
-					{"name": "SPAMMER", "value": "64", "description": "User is flagged as a spammer"}
+					{"name": "SPAMMER", "value": "64", "description": "User is flagged as a spammer"},
+					{
+						"name": "IMPORTED",
+						"value": "1073741824",
+						"description": "Placeholder account for someone not on Tyne, holding messages imported from Discord"
+					}
 				]
 			},
 			"MessageAttachmentFlags": {

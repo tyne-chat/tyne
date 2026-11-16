@@ -675,6 +675,10 @@ msgstr "Uvoz brez vašega dovoljenja nikoli ne bo prepisal obstoječih person."
 msgid "Import will {actions}"
 msgstr "Uvoz bo {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "Uvoženo"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "Uvažanje person …"
@@ -1130,6 +1134,10 @@ msgstr "Pripni emoji"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "Pripni za to persono"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "Nadomestni račun za nekoga, ki ni na Tyne: ta sporočila so bila uvožena iz Discorda."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
