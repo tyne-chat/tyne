@@ -2093,6 +2093,10 @@ msgstr "Persona {name} je ve vašem souboru jiná. Kterou verzi má mít {produc
 msgid "{name} is never closed."
 msgstr "{name} se nikdy neuzavírá."
 
+#. Shown instead of the message composer in a direct message with a placeholder account that the Discord history import made for someone who is not on Tyne. name is their display name.
+msgid "{name} isn't on Tyne: this conversation was imported from Discord, and new messages can't reach them."
+msgstr "{name} není na Tyne: tato konverzace byla importována z Discordu a nové zprávy se k němu nedostanou."
+
 #. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
 msgid "{name}'s tag is already taken"
 msgstr "Značka pro {name} už je obsazená"
