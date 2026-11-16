@@ -294,6 +294,8 @@ export const BlockUserMenuItem: React.FC<BlockUserMenuItemProps> = observer(({us
 	if (user.system) {
 		return null;
 	}
+	// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#687).
+	if (isImportedPlaceholder(user)) return null;
 	return (
 		<MenuItem
 			icon={

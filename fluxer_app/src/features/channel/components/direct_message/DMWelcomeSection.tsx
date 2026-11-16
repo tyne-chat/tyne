@@ -39,6 +39,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo} from 'react';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+
 const logger = new Logger('DMWelcomeSection');
 
 interface DMWelcomeSectionProps {
@@ -116,7 +120,9 @@ export const DMWelcomeSection: React.FC<DMWelcomeSectionProps> = observer(functi
 	};
 	const hasMutualGuilds = profileMutualGuilds.length > 0;
 	const friendRequestGate = canPerform(Users.currentUser, TierGatedActions.FRIEND_REQUEST);
+	// Fork: no friend request to a placeholder from the Discord import: nobody is behind it (tyne-chat/tyne#687).
 	const shouldShowActionButton =
+		!isImportedPlaceholder(user) &&
 		!user.bot &&
 		!RuntimeConfig.friendsDisabled &&
 		(relationshipType === undefined ||

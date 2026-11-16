@@ -11,6 +11,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+
 interface ReportUserProfileMenuItemProps {
 	user: User;
 	guildId?: string;
@@ -26,6 +30,8 @@ export const ReportUserProfileMenuItem: React.FC<ReportUserProfileMenuItemProps>
 		if (user.system) {
 			return null;
 		}
+		// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#687).
+		if (isImportedPlaceholder(user)) return null;
 		return (
 			<MenuItem
 				icon={
