@@ -58,6 +58,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {Routes} from '@app/app/Routes';
 import {openRouteInNewWindowOnMiddleClick} from '@app/features/platform/utils/ForkAppWindows';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const YOU_DESCRIPTOR = msg({
 	message: 'You',
@@ -174,7 +175,8 @@ const ResolvedDMListItem = observer(function ResolvedDMListItem({
 	const closeNestedSheet = useCallback(() => {
 		setNestedSheet(null);
 	}, []);
-	const restrictRecipientActions = recipient?.system ?? false;
+	// Fork: a placeholder from the Discord import is as out of reach as the system user (tyne-chat/tyne#687).
+	const restrictRecipientActions = (recipient?.system ?? false) || isImportedPlaceholder(recipient);
 	const relationshipType = recipient ? Relationships.getRelationship(recipient.id)?.type : undefined;
 	const inviteCandidates = useMemo<Array<InviteCandidate>>(() => {
 		if (!recipient || restrictRecipientActions || recipient.bot) return [];
