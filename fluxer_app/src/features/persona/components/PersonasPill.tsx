@@ -67,12 +67,21 @@ interface AccountPersonaNameExtrasProps extends PersonasPillProps {
 
 /**
  * What follows an account's name on its profile: its display tag, which only its personas showed
- * until 2026-11-07, then the Personas pill (tyne-chat/tyne#189). Nothing for bots and webhooks.
+ * until 2026-11-07, then the Personas pill (tyne-chat/tyne#189); first the Imported tag of a Discord import
+ * placeholder (tyne-chat/tyne#682). For bots only that tag, and nothing for webhooks.
  */
 export const AccountPersonaNameExtras = observer((props: AccountPersonaNameExtrasProps) => {
 	const {user, isHovering, guildId, onBeforeOpen, inProfile} = props;
 	const directory = usePersonaDirectory(user.bot || user.system ? null : user.id);
-	if (user.bot || user.system) return null;
+	if (user.bot || user.system) {
+		// Bots have no personas, but one the Discord import made still shows it was imported (tyne-chat/tyne#682).
+		if (!isImportedPlaceholder(user)) return null;
+		return (
+			<PersonaNameExtras data-flx="persona.account-name-extras.bot">
+				<ImportedTag data-flx="persona.personas-pill.account-persona-name-extras.imported-tag--bot" />
+			</PersonaNameExtras>
+		);
+	}
 	const hasTag = Boolean(directory.displayTagText || directory.displayTagIcon);
 	return (
 		<PersonaNameExtras data-flx="persona.account-name-extras">
