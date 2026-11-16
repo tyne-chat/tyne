@@ -61,6 +61,10 @@ import {
 } from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+
 const KICK_DESCRIPTOR = msg({
 	message: 'Kick',
 	comment:
@@ -313,6 +317,7 @@ export const UserProfileActionsSheet: React.FC<UserProfileActionsSheetProps> = o
 					],
 				});
 			}
+			// Fork: no Report or Block for a placeholder from the Discord import: nobody is behind it (tyne-chat/tyne#687).
 			const reportBlockItems = [
 				...(message && canReportMessage(message)
 					? [
@@ -324,7 +329,7 @@ export const UserProfileActionsSheet: React.FC<UserProfileActionsSheetProps> = o
 							},
 						]
 					: []),
-				...(showReportUserProfile && !user.system
+				...(showReportUserProfile && !user.system && !isImportedPlaceholder(user)
 					? [
 							{
 								icon: <FlagIcon className={styles.icon} data-flx="user.user-profile-actions-sheet.icon--12" />,
@@ -335,7 +340,7 @@ export const UserProfileActionsSheet: React.FC<UserProfileActionsSheetProps> = o
 						]
 					: []),
 			];
-			if (!user.system) {
+			if (!user.system && !isImportedPlaceholder(user)) {
 				if (relationshipType !== RelationshipTypes.BLOCKED) {
 					reportBlockItems.push({
 						icon: <ProhibitIcon className={styles.icon} data-flx="user.user-profile-actions-sheet.icon--13" />,
