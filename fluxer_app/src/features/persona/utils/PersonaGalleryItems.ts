@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {ClientPersona} from '@app/features/persona/state/PersonaStore';
+import {getPersonaSortName} from '@app/features/persona/utils/PersonaSortName';
 import type {
 	PersonaTag,
 	PersonaVisibility,
@@ -97,7 +98,7 @@ export function sortGalleryItems(
 	locale?: string,
 ): Array<GalleryPersona> {
 	const byName = (a: GalleryPersona, b: GalleryPersona) =>
-		a.name.localeCompare(b.name, locale, {sensitivity: 'base', numeric: true});
+		getPersonaSortName(a.name).localeCompare(getPersonaSortName(b.name), locale, {sensitivity: 'base', numeric: true});
 	const sorted = [...items];
 	switch (sort) {
 		case 'used':
