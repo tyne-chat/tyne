@@ -56,6 +56,24 @@ describe('gallery items', () => {
 		expect(sortGalleryItems(items, 'name', 'en').map((p) => p.name)).toEqual(['Alpha', 'beta', 'Item 2', 'Item 10']);
 	});
 
+	it('sorts names as the persona settings do: past leading emoji, not past ASCII punctuation', () => {
+		const items = galleryItemsFromPublic(
+			['THE EGG', '???Template', '✨Cleo', '???', 'Bee'].map((name, i) => ({
+				id: String(i + 1),
+				name,
+				visibility: 'public',
+			})),
+		);
+
+		expect(sortGalleryItems(items, 'name', 'en').map((p) => p.name)).toEqual([
+			'???',
+			'???Template',
+			'Bee',
+			'✨Cleo',
+			'THE EGG',
+		]);
+	});
+
 	it('searches name, pronouns and bio, without case', () => {
 		const items = galleryItemsFromPublic([
 			{id: '1', name: 'Wren', pronouns: 'she/her', visibility: 'public'},
