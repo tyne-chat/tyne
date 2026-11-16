@@ -5,7 +5,9 @@
 // positions, the category's permission overwrites, the name rule of a community without flexible names,
 // and a CHANNEL_CREATE to the community, without which the gateway (which keeps the channel list in
 // memory) would not list it. The ids are the plan's, so a later import fills the same channel. No audit
-// log entry: an import is not a member's action.
+// log entry: an import is not a member's action. A Discord voice or stage channel becomes a voice channel
+// (Tyne has no stage channels; a voice channel has a text chat of its own), made as the API makes one: its
+// name as given, the default bitrate, no user limit and the default connection limit (tyne-chat/tyne#688).
 import type {ChannelID, GuildID} from '@app/api/BrandedTypes';
 import {mapChannelToResponse} from '@app/api/channel/ChannelMappers';
 import type {ChannelRepository} from '@app/api/channel/ChannelRepository';
@@ -17,7 +19,8 @@ import type {UserCacheService} from '@app/api/infrastructure/UserCacheService';
 import {createRequestCache} from '@app/api/middleware/RequestCacheMiddleware';
 import type {Channel} from '@app/api/models/Channel';
 import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
-import {ContentWarningLevel, GuildFeatures} from '@fluxer/constants/src/GuildConstants';
+import {ContentWarningLevel, GuildFeatures, resolveVoiceChannelBitrate} from '@fluxer/constants/src/GuildConstants';
+import {VOICE_CHANNEL_CONNECTION_LIMIT_DEFAULT} from '@fluxer/constants/src/LimitConstants';
 import {ChannelNameType} from '@fluxer/schema/src/primitives/ChannelValidators';
 
 /** A new channel in the plan: what to create, in which community and category. */
@@ -26,6 +29,8 @@ export interface PlanNewChannel {
 	channel_id: string;
 	name: string;
 	topic: string | null;
+	/** A voice channel for a Discord voice or stage channel; text when absent (plans before tyne-chat/tyne#688). */
+	type?: 'text' | 'voice';
 	/** Found by name when the community has one already, else created with this id. */
 	category: {channel_id: string; name: string} | null;
 }
@@ -53,8 +58,11 @@ export async function createNewChannel(
 	const guildId = BigInt(plan.guild_id) as GuildID;
 	const guild = await deps.guildRepository.findUnique(guildId);
 	if (!guild) throw new Error(`the community ${plan.guild_id} for the new channel does not exist`);
+	const voice = plan.type === 'voice';
+	const type = voice ? ChannelTypes.GUILD_VOICE : ChannelTypes.GUILD_TEXT;
 	const flexibleNames = guild.features.has(GuildFeatures.TEXT_CHANNEL_FLEXIBLE_NAMES);
-	const name = flexibleNames ? plan.name : ChannelNameType.parse(plan.name);
+	// The API's name rule is for text channels: a voice channel keeps its name as given.
+	const name = flexibleNames || voice ? plan.name : ChannelNameType.parse(plan.name);
 	const channels = await deps.channelRepository.channelData.listGuildChannels(guildId, 'enrolled');
 	let category: Channel | null = null;
 	let createdCategory: string | null = null;
@@ -85,11 +93,18 @@ export async function createNewChannel(
 	const channel = await createRow(deps, {
 		channelId: BigInt(plan.channel_id) as ChannelID,
 		guildId,
-		type: ChannelTypes.GUILD_TEXT,
+		type,
 		name,
 		topic: plan.topic,
 		parent: category,
-		position: ChannelHelpers.getNextGlobalChannelPosition(ChannelTypes.GUILD_TEXT, category?.id ?? null, channels),
+		position: ChannelHelpers.getNextGlobalChannelPosition(type, category?.id ?? null, channels),
+		voice: voice
+			? {
+					bitrate: resolveVoiceChannelBitrate(null, guild.features),
+					userLimit: 0,
+					connectionLimit: VOICE_CHANNEL_CONNECTION_LIMIT_DEFAULT,
+				}
+			: null,
 	});
 	return {channel, createdCategory, categoryId, name};
 }
@@ -104,6 +119,7 @@ async function createRow(
 		topic: string | null;
 		parent: Channel | null;
 		position: number;
+		voice?: {bitrate: number; userLimit: number; connectionLimit: number} | null;
 	},
 ): Promise<Channel> {
 	const channel = await deps.channelRepository.channelData.create({
@@ -122,9 +138,9 @@ async function createRow(
 		content_warning_level: ContentWarningLevel.INHERIT,
 		content_warning_text: null,
 		rate_limit_per_user: 0,
-		bitrate: null,
-		user_limit: null,
-		voice_connection_limit: null,
+		bitrate: row.voice?.bitrate ?? null,
+		user_limit: row.voice?.userLimit ?? null,
+		voice_connection_limit: row.voice?.connectionLimit ?? null,
 		rtc_region: null,
 		rtc_p2p: null,
 		last_message_id: null,
