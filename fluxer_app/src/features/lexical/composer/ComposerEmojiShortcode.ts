@@ -86,7 +86,7 @@ function isEscapedAt(text: string, index: number): boolean {
 	return backslashes % 2 === 1;
 }
 
-export function $convertEmojiShortcode(node: TextNode, resolve: ComposerEmojiResolver, parserFlags?: number): void {
+function $convertEmojiShortcode(node: TextNode, resolve: ComposerEmojiResolver, parserFlags?: number): void {
 	if ($isComposerCaretAnchorNode(node)) {
 		return;
 	}
@@ -228,3 +228,7 @@ function $adjustEmbedCaret(
 	};
 	return {anchor: adjust(selection.anchor), focus: adjust(selection.focus)};
 }
+
+// Fork: exported for the fork's ComposerEmojiCaret.test.ts, here rather than on
+// upstream's declaration so that upstream can change its signature without a conflict.
+export {$convertEmojiShortcode};
