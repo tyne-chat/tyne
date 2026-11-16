@@ -68,6 +68,7 @@ import {useCallback, useEffect, useMemo, useRef} from 'react';
 // Fork imports.
 
 import {AccountPersonaNameExtras} from '@app/features/persona/components/PersonasPill';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const logger = new Logger('UserProfilePopout');
 
@@ -117,7 +118,7 @@ export const UserProfilePopout: React.FC<UserProfilePopoutProps> = observer(
 		const isCurrentUser = user.id === Authentication.currentUserId;
 		const relationshipType = Relationships.getRelationship(user.id)?.type;
 		const isBlocked = relationshipType === RelationshipTypes.BLOCKED;
-		const directMessagesDisabled = RuntimeConfig.directMessagesDisabled;
+		const directMessagesDisabled = RuntimeConfig.directMessagesDisabled || isImportedPlaceholder(user);
 		const showProfileFooter = !isWebhook && (isCurrentUser || !directMessagesDisabled);
 		const requestClose = useCallback(() => {
 			if (onClose) {

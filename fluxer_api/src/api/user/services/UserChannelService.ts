@@ -47,6 +47,10 @@ import type {MessageResponse} from '@fluxer/schema/src/domains/message/MessageRe
 import type {CreatePrivateChannelRequest} from '@fluxer/schema/src/domains/user/UserRequestSchemas';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 
+// Fork imports.
+
+import {assertNotImportedPlaceholder} from '@app/api/user/ForkImportedAccounts';
+
 export class UserChannelService {
 	private readonly userRepository: UserRepository;
 	private readonly channelService: ChannelService;
@@ -163,6 +167,8 @@ export class UserChannelService {
 		if (userId === recipientId) {
 			throw InputValidationError.fromCode('recipient_id', ValidationErrorCodes.CANNOT_DM_YOURSELF);
 		}
+		// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
+		await assertNotImportedPlaceholder(this.userRepository, recipientId);
 		await assertMayStartConversation({
 			user: callingUser,
 			targetId: recipientId,

@@ -675,6 +675,10 @@ msgstr "הייבוא לעולם לא ידרוס פרסונות קיימות בל
 msgid "Import will {actions}"
 msgstr "הייבוא {actions}"
 
+#. Tag after the name of a placeholder account that the Discord history import made for someone who is not on Tyne. Keep it one short word.
+msgid "Imported"
+msgstr "מיובא"
+
 #. Modal title for PluralKit import step importing
 msgid "Importing Personas..."
 msgstr "מייבא פרסונות..."
@@ -1130,6 +1134,10 @@ msgstr "הצמד אימוג'י"
 #. Emoji context menu action that pins the emoji for the active persona.
 msgid "Pin for this persona"
 msgstr "הצמד לפרסונה זו"
+
+#. Tooltip of the Imported tag after the name of a placeholder account.
+msgid "Placeholder for someone not on Tyne: these messages were imported from Discord."
+msgstr "ממלא מקום למישהו שאינו ב-Tyne: ההודעות האלה יובאו מ-Discord."
 
 #. Toast when saving a persona whose tag pairs have errors
 msgid "Please fix tag errors before saving"
