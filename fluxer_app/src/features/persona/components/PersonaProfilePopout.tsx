@@ -28,6 +28,7 @@ import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import FocusRingScope from '@app/features/ui/focus_ring/FocusRingScope';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
+import {ImportedTag} from '@app/features/user/components/ForkImportedTag';
 import popoutStyles from '@app/features/user/components/popouts/UserProfilePopout.module.css';
 import sharedStyles from '@app/features/user/components/popouts/UserProfileShared.module.css';
 import {ProfileCardBanner} from '@app/features/user/components/profile/profile_card/ProfileCardBanner';
@@ -39,6 +40,7 @@ import {PROFILE_POPOUT_GEOMETRY_STYLE} from '@app/features/user/constants/UserPr
 import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import * as AvatarUtils from '@app/features/user/utils/AvatarUtils';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {DEFAULT_ACCENT_COLOR} from '@fluxer/constants/src/AppConstants';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -209,6 +211,9 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 								onDisplayNameClick={handleOpenFullProfile}
 								personaNameExtras={
 									<PersonaNameExtras data-flx="persona.persona-profile-popout.name-extras">
+										{isImportedPlaceholder(user) && (
+											<ImportedTag data-flx="persona.persona-profile-popout.imported-tag" />
+										)}
 										{effectiveDisplayTagText || effectiveDisplayTagIcon ? (
 											<PersonaTag
 												subprofile={{
@@ -354,20 +359,22 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 									<Trans>Edit persona</Trans>
 								</Button>
 							) : (
-								<Button
-									small={true}
-									fitContainer={true}
-									leftIcon={
-										<ChatTeardropIcon
-											className={popoutStyles.iconSmall}
-											data-flx="persona.persona-profile-popout.chat-teardrop-icon"
-										/>
-									}
-									onClick={handleMessage}
-									data-flx="persona.persona-profile-popout.button.message"
-								>
-									<Trans>Message</Trans>
-								</Button>
+								!isImportedPlaceholder(user) && (
+									<Button
+										small={true}
+										fitContainer={true}
+										leftIcon={
+											<ChatTeardropIcon
+												className={popoutStyles.iconSmall}
+												data-flx="persona.persona-profile-popout.chat-teardrop-icon"
+											/>
+										}
+										onClick={handleMessage}
+										data-flx="persona.persona-profile-popout.button.message"
+									>
+										<Trans>Message</Trans>
+									</Button>
+								)
 							)}
 						</ProfileCardFooter>
 					</ProfileCardLayout>

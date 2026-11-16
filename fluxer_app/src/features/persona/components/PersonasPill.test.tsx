@@ -35,6 +35,7 @@ import {AccountPersonaNameExtras} from '@app/features/persona/components/Persona
 import {openPersonaGallery} from '@app/features/persona/utils/PersonaGalleryOpen';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
 import {User} from '@app/features/user/models/User';
+import {PublicUserFlags} from '@fluxer/constants/src/UserConstants';
 import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 
@@ -113,5 +114,55 @@ describe('AccountPersonaNameExtras', () => {
 
 		act(() => tag().click());
 		expect(calls).toEqual(['close popout', 'open 100000000000000001 200000000000000001']);
+	});
+
+	// tyne-chat/tyne#682: accounts the Discord import made for people and bots not on Tyne.
+	const imported = () => container.querySelector('[data-flx="user.imported-tag"]') as HTMLElement | null;
+	const user = (fields: {bot?: boolean; flags: number}) =>
+		new User({
+			id: '100000000000000002',
+			username: 'placeholder',
+			discriminator: '0002',
+			avatar: null,
+			...fields,
+		} as any);
+
+	it('shows a bot the import made with the Imported tag alone', async () => {
+		await act(async () => {
+			root.render(
+				<AccountPersonaNameExtras
+					user={user({bot: true, flags: PublicUserFlags.IMPORTED})}
+					data-flx="persona.personas-pill-test.account-persona-name-extras"
+				/>,
+			);
+		});
+		expect(imported()?.textContent).toBe('Imported');
+		expect(tag()).toBeNull();
+		expect(pill()).toBeNull();
+	});
+
+	it('shows nothing for any other bot', async () => {
+		await act(async () => {
+			root.render(
+				<AccountPersonaNameExtras
+					user={user({bot: true, flags: 0})}
+					data-flx="persona.personas-pill-test.account-persona-name-extras--2"
+				/>,
+			);
+		});
+		expect(container.innerHTML).toBe('');
+	});
+
+	it('puts the Imported tag before the display tag of a placeholder that is not a bot', async () => {
+		await act(async () => {
+			root.render(
+				<AccountPersonaNameExtras
+					user={user({flags: PublicUserFlags.IMPORTED})}
+					data-flx="persona.personas-pill-test.account-persona-name-extras--3"
+				/>,
+			);
+		});
+		expect(imported()?.textContent).toBe('Imported');
+		expect(imported()!.compareDocumentPosition(tag()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 });
