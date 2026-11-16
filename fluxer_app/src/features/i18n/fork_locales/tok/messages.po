@@ -2093,6 +2093,10 @@ msgstr "{name} li ante lon lipu sina. ilo {productName} o jo e seme?"
 msgid "{name} is never closed."
 msgstr "{name} li pini ala."
 
+#. Shown instead of the message composer in a direct message with a placeholder account that the Discord history import made for someone who is not on Tyne. name is their display name.
+msgid "{name} isn't on Tyne: this conversation was imported from Discord, and new messages can't reach them."
+msgstr "jan {name} li lon ala Tyne. toki ni li kama tan Discord. toki sin li ken ala tawa ona."
+
 #. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
 msgid "{name}'s tag is already taken"
 msgstr "jan ante li jo e nimi lili pi {name}"
