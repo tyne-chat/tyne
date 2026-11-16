@@ -23,6 +23,7 @@ const {runtimeSnapshotFromDiscovery} = await import('@app/features/app/state/Ins
 const {default: RuntimeConfig} = await import('@app/features/app/state/RuntimeConfig');
 const {DEPLOYED_OFFICIAL_DOCUMENT} = await import('@fluxer/instance_bootstrap/src/__tests__/DiscoveryFixtures');
 const {parseInstanceDiscoveryDocument} = await import('@fluxer/instance_bootstrap/src/Discovery');
+const {default: UserSettings} = await import('@app/features/user/state/UserSettings');
 
 // After upstream's start date for the nagbar (AndroidAppNagbarSchedule.ts).
 const AFTER_START = new Date('2026-11-10T00:00:00.000Z');
@@ -44,7 +45,7 @@ function canShowAndroidApp(): boolean {
 }
 
 describe("upstream's nagbar for Fluxer's Android app (tyne-chat/tyne#546)", () => {
-	beforeEach(() => {
+	beforeEach(async () => {
 		// A self-hosted instance, as Tyne's production reports itself.
 		RuntimeConfig.applySnapshot(
 			runtimeSnapshotFromDiscovery(
@@ -57,6 +58,11 @@ describe("upstream's nagbar for Fluxer's Android app (tyne-chat/tyne#546)", () =
 		vi.useFakeTimers({toFake: ['Date']});
 		vi.setSystemTime(AFTER_START);
 		gate.override = undefined;
+		// Upstream hides the nagbar until the synced dismissals have loaded (#4102); here they have.
+		await UserSettings.restoreAccountTransitionCheckpoint({
+			...UserSettings.captureAccountTransitionCheckpoint(),
+			hydrated: true,
+		});
 		container = document.createElement('div');
 		document.body.appendChild(container);
 		root = createRoot(container);
