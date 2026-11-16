@@ -126,8 +126,8 @@ describe('PersonaStore', () => {
 		expect(store.personas.map((p) => p.name)).toEqual(['mallory', 'Zed', 'alice', 'Bob']);
 	});
 
-	it('files decorated persona names under their first letter or digit', async () => {
-		for (const name of ['Zoe', '✨Élodie', '🌙 Luna', '𝓐𝓶𝔂', '[Mika]', 'Ⓑⓔⓝ', '✨✨', 'Dana', '★ 2B']) {
+	it('files names decorated with emoji or symbols under their first letter or digit', async () => {
+		for (const name of ['Zoe', '✨Élodie', '🌙 Luna', '𝓐𝓶𝔂', 'Ⓑⓔⓝ', '✨✨', 'Dana', '★ 2B']) {
 			addTestPersona(store, {name});
 		}
 
@@ -139,8 +139,23 @@ describe('PersonaStore', () => {
 			'Dana',
 			'✨Élodie',
 			'🌙 Luna',
-			'[Mika]',
 			'Zoe',
+		]);
+	});
+
+	// tyne-chat/tyne#686: "???Template" was filed as "Template", far from "???".
+	it('keeps leading ASCII punctuation in the name it sorts by', async () => {
+		for (const name of ['THE EGG', '???Template', 'Aelena', '???', '[Mika]', '✨ ~Wisp']) {
+			addTestPersona(store, {name});
+		}
+
+		expect(store.sortedPersonas.map((p) => p.name)).toEqual([
+			'???',
+			'???Template',
+			'[Mika]',
+			'✨ ~Wisp',
+			'Aelena',
+			'THE EGG',
 		]);
 	});
 
