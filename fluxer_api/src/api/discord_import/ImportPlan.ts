@@ -570,7 +570,8 @@ async function main(): Promise<void> {
 		const made = await createNewChannel(newChannel, deps, dryRun);
 		if (made.createdCategory)
 			console.log(`${dryRun ? 'would create' : 'created'} the category ${newChannel.category?.name}`);
-		console.log(`${dryRun ? 'would create' : 'created'} the channel #${made.name}`);
+		const what = newChannel.type === 'voice' ? 'voice channel ' : 'channel #';
+		console.log(`${dryRun ? 'would create' : 'created'} the ${what}${made.name}`);
 		destination = made.channel;
 	}
 	const newDm = plan.destination.new_dm;
