@@ -147,6 +147,7 @@ import {
 	buildOpenInNewWindowMenuItem,
 	channelWindowRoute,
 } from '@app/features/ui/action_menu/items/ForkOpenInNewWindowMenuItem';
+import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const logger = new Logger('DMMenuData');
 
@@ -209,7 +210,8 @@ export function useDMMenuData(
 	const canSendFriendRequest = canPerform(Users.currentUser, TierGatedActions.FRIEND_REQUEST).allowed;
 	const friendsDisabled = RuntimeConfig.friendsDisabled;
 	const isRecipientSystem = recipient?.system ?? false;
-	const restrictRecipientActions = isRecipientSystem;
+	// Fork: a placeholder from the Discord import is as out of reach as the system user (tyne-chat/tyne#687).
+	const restrictRecipientActions = isRecipientSystem || isImportedPlaceholder(recipient);
 	const hasActiveDirectCall = recipient ? hasActiveDirectCallWithUser(recipient.id) : false;
 	const invitableCommunities = useMemo(() => {
 		if (!recipient || isRecipientBot) return [];
