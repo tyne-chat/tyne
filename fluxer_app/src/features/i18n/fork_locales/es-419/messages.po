@@ -2093,6 +2093,10 @@ msgstr "{name} es diferente en tu archivo. ¿Cuál debe tener {productName}?"
 msgid "{name} is never closed."
 msgstr "{name} nunca se cierra."
 
+#. Shown instead of the message composer in a direct message with a placeholder account that the Discord history import made for someone who is not on Tyne. name is their display name.
+msgid "{name} isn't on Tyne: this conversation was imported from Discord, and new messages can't reach them."
+msgstr "{name} no está en Tyne: esta conversación se importó de Discord y los mensajes nuevos no le llegarán."
+
 #. Heading in the import review for a member whose proxy tag another persona or member already has. {name} is its name
 msgid "{name}'s tag is already taken"
 msgstr "La etiqueta de {name} ya está en uso"
