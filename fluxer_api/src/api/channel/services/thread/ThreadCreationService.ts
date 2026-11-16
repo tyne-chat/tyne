@@ -236,6 +236,7 @@ export class ThreadCreationService {
 		const ownerPersonaId = await resolveThreadOwnerPersonaId(params.user.id, params.personaId);
 		const threadId = createChannelID(await this.ctx.snowflakeService.generate());
 		const {view, members} = await this.create({
+			ownerPersonaId,
 			parent: parentAuth.channel,
 			creator: {kind: 'user', user: params.user, parentAuth},
 			threadId,
@@ -243,7 +244,6 @@ export class ThreadCreationService {
 			input: params.input,
 			invitable: isPrivate ? (params.invitable ?? true) : null,
 			hasStarter: false,
-			ownerPersonaId,
 		});
 		await this.recordCreateAudit(view, params.user.id, params.auditLogReason);
 		const events: Array<ThreadDispatchEvent> = [threadCreateEvent(view, {members, newlyCreated: true})];
@@ -287,6 +287,7 @@ export class ThreadCreationService {
 		const ownerPersonaId = await resolveThreadOwnerPersonaId(user.id, requestedPersonaId(body.message, user.id));
 		const threadId = createChannelID(await this.ctx.snowflakeService.generate());
 		const {view, members} = await this.create({
+			ownerPersonaId,
 			parent,
 			creator: {kind: 'user', user, parentAuth},
 			threadId,
@@ -299,7 +300,6 @@ export class ThreadCreationService {
 			invitable: null,
 			hasStarter: true,
 			appliedTags,
-			ownerPersonaId,
 		});
 		await dispatchThreadEvents(this.ctx.gatewayService, view.state.guildId, [
 			threadCreateEvent(view, {members, newlyCreated: true}),
