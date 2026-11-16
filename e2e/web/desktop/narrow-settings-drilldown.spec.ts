@@ -1,6 +1,6 @@
-import {expect, type Page, test} from '@playwright/test';
+import {expect, type Locator, type Page, test} from '@playwright/test';
 import {FluxerApiClient} from '../../api-helpers/client.js';
-import {loginAs} from '../support/auth.js';
+import {loginAs, openUserSettings} from '../support/auth.js';
 
 // tyne-chat/tyne#232: in a narrow settings dialog, channel Permissions and community Roles are a
 // drill-down: the list of sections, then the override or role list as a page of its own, then the
@@ -62,6 +62,42 @@ test.describe('Narrow settings drill-downs', () => {
 	const title = (page: Page) => page.locator('[data-flx="app.settings-modal-header.title"]');
 	const back = (page: Page) =>
 		page.locator('[data-flx="app.settings-narrow-nav.settings-narrow-nav-button.back-button.show-list"]');
+
+	// tyne-chat/tyne#649: the list of sections, alone in a dialog shorter than it, scrolls to its end.
+	// The sidebar may shrink below its content only because the fork's CSS says so
+	// (SettingsModalLayout.module.css): upstream's #3901 dropped the overflow that used to allow it.
+	test('the list of sections scrolls to its last entry in a short dialog', async ({page}) => {
+		const stamp = Date.now().toString().slice(-8);
+		const client = new FluxerApiClient(baseURL);
+		const email = `narrowlist_${stamp}@test.local`;
+		await client.register({username: `narrowlist_${stamp}`, email, password, global_name: 'Narrow List'});
+		await loginAs(page, email, password);
+		await page.setViewportSize({width: 520, height: 600});
+
+		await openUserSettings(page);
+		await expect(nav(page)).toHaveAttribute('data-settings-narrow', 'true');
+		// An account with its privacy review pending opens on Privacy instead of the list.
+		if ((await nav(page).getAttribute('data-settings-narrow-view')) !== 'list') await back(page).click();
+		await expect(nav(page)).toHaveAttribute('data-settings-narrow-view', 'list');
+
+		const items = page.getByRole('treeitem');
+		const last = items.last();
+		const bottomOf = async (locator: Locator) => {
+			const box = await locator.boundingBox();
+			if (box == null) throw new Error('not laid out');
+			return box.y + box.height;
+		};
+		// The last entry ends below the dialog, so the list has to scroll to show it.
+		expect(await bottomOf(last)).toBeGreaterThan(await bottomOf(nav(page)));
+
+		await items.first().hover();
+		await expect
+			.poll(async () => {
+				await page.mouse.wheel(0, 400);
+				return (await bottomOf(last)) <= (await bottomOf(nav(page)));
+			})
+			.toBe(true);
+	});
 
 	test('channel Permissions: overrides list, override editor one level below, back, and removing one', async ({
 		page,
