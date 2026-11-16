@@ -451,7 +451,7 @@ export const UserProfileModal: UserProfileModalComponent = observer(
 							</MenuItem>
 						</MenuGroup>
 					)}
-					{!isCurrentUser && !displayUser.system && (
+					{!isCurrentUser && !displayUser.system && !isImportedPlaceholder(displayUser) && (
 						<MenuGroup data-flx="user.user-profile-modal.open-more-options-menu.menu-group--5">
 							<MenuItem
 								icon={<FlagIcon data-flx="user.user-profile-modal.open-more-options-menu.flag-icon" />}
