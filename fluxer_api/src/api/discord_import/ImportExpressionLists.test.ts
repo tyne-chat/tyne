@@ -82,9 +82,11 @@ describe('sendExpressionLists', () => {
 		});
 	});
 
-	it('sends nothing for emoji kept outside any community, or for a plan without emoji or stickers', async () => {
+	it('sends nothing for emoji or stickers kept outside any community, or for a plan without either', async () => {
 		const {deps, sent, reads} = fakes({});
-		expect(await sendExpressionLists({emoji: [{guild_id: null}, {guild_id: null}], stickers: []}, deps)).toEqual({
+		expect(
+			await sendExpressionLists({emoji: [{guild_id: null}, {guild_id: null}], stickers: [{guild_id: null}]}, deps),
+		).toEqual({
 			emoji: [],
 			stickers: [],
 		});
