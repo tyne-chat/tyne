@@ -213,7 +213,7 @@ interface PlanEmoji {
 interface PlanSticker {
 	sticker_id: string;
 	name: string;
-	guild_id: string;
+	guild_id: string | null;
 	animated: boolean;
 	file: PlanFile | null;
 }
@@ -261,7 +261,7 @@ interface Ledger {
 	placeholders: Array<string>;
 	personas: Array<{user_id: string; persona_id: string}>;
 	emoji: Array<{emoji_id: string; guild_id: string | null}>;
-	stickers: Array<{sticker_id: string; guild_id: string}>;
+	stickers: Array<{sticker_id: string; guild_id: string | null}>;
 	messages: Array<string>;
 	reactions: number;
 	storage_keys: Array<string>;
@@ -852,7 +852,7 @@ async function main(): Promise<void> {
 		}
 		const prev = previous.stickers?.[s.sticker_id];
 		const uploadImage = async (): Promise<boolean> => {
-			const guild = await deps.guildRepository.findUnique(id<GuildID>(s.guild_id));
+			const guild = s.guild_id ? await deps.guildRepository.findUnique(id<GuildID>(s.guild_id)) : null;
 			const processed = await deps.avatarService.processSticker({
 				errorPath: 'image',
 				base64Image: readBase64(file),
@@ -867,6 +867,19 @@ async function main(): Promise<void> {
 			ledger.storage_keys.push(`stickers/${s.sticker_id}`);
 			return processed.animated;
 		};
+		if (!s.guild_id) {
+			// Stored only for the messages that show it, in no community, as an archive-only emoji is.
+			if (prev && prev.file?.path === file.path) {
+				ledger.skipped_existing++;
+				continue;
+			}
+			await uploadImage();
+			if (prev) updated('sticker', s.sticker_id);
+			else ledger.stickers.push({sticker_id: s.sticker_id, guild_id: null});
+			save();
+			continue;
+		}
+		const guildId = s.guild_id;
 		const existing = await deps.guildRepository.getStickerById(id<StickerID>(s.sticker_id));
 		if (!existing) {
 			if (prev) {
@@ -876,7 +889,7 @@ async function main(): Promise<void> {
 			const animated = await uploadImage();
 			if (!dryRun)
 				await deps.guildRepository.upsertSticker({
-					guild_id: id<GuildID>(s.guild_id),
+					guild_id: id<GuildID>(guildId),
 					sticker_id: id<StickerID>(s.sticker_id),
 					name: s.name,
 					description: null,
@@ -885,7 +898,7 @@ async function main(): Promise<void> {
 					creator_id: id<UserID>(plan.operator_user_id),
 					version: 1,
 				});
-			ledger.stickers.push({sticker_id: s.sticker_id, guild_id: s.guild_id});
+			ledger.stickers.push({sticker_id: s.sticker_id, guild_id: guildId});
 			save();
 			continue;
 		}
