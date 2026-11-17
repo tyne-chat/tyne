@@ -27,6 +27,7 @@ import {Avatar} from '@app/features/ui/components/Avatar';
 import {Scroller} from '@app/features/ui/components/Scroller';
 import * as Sheet from '@app/features/ui/sheet/Sheet';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
+import {ImportedConversationActionCard} from '@app/features/user/components/ForkImportedConversationButton';
 import {ImportedTag} from '@app/features/user/components/ForkImportedTag';
 import {getContrastingNotchColor} from '@app/features/user/components/modals/UserProfileUtils';
 import sharedStyles from '@app/features/user/components/popouts/UserProfileShared.module.css';
@@ -424,6 +425,14 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 													</span>
 												</button>
 											)
+										)}
+										{/* A placeholder's persona: Open DM for its imported conversation (tyne-chat/tyne#696). */}
+										{!isCurrentUser && isImportedPlaceholder(user) && (
+											<ImportedConversationActionCard
+												user={user}
+												onOpen={() => void handleMessage()}
+												data-flx="persona.persona-profile-mobile-sheet.imported-conversation-action-card"
+											/>
 										)}
 									</div>
 
