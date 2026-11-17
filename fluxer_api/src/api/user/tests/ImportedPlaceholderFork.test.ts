@@ -2,6 +2,7 @@
 
 // Fork: placeholder accounts the Discord history import makes for people not on Tyne (UserFlags.IMPORTED,
 // tyne-chat/tyne#682): their profile is open to anyone signed in, and nobody can message or befriend them.
+// A closed DM with one that holds messages (the imported conversation) opens again (tyne-chat/tyne#696).
 
 import {createTestAccount, type TestAccount} from '@app/api/auth/tests/AuthTestUtils';
 import {type ApiTestHarness, createApiTestHarness} from '@app/api/test/ApiTestHarness';
@@ -91,6 +92,65 @@ describe('imported placeholder accounts', () => {
 			.body({content: 'hello?'})
 			.expect(HTTP_STATUS.BAD_REQUEST, APIErrorCodes.CANNOT_SEND_MESSAGES_TO_USER)
 			.execute();
+	});
+
+	// A DM with history, the account then marked: what the import leaves behind.
+	async function importedDm(withHistory: boolean): Promise<{viewer: TestAccount; target: TestAccount; dmId: string}> {
+		const viewer = await createTestAccount(harness);
+		const target = await createTestAccount(harness);
+		await sendFriendRequest(harness, viewer.token, target.userId);
+		await acceptFriendRequest(harness, target.token, viewer.userId);
+		const dm = await createBuilder<{id: string}>(harness, viewer.token)
+			.post('/users/@me/channels')
+			.body({recipient_id: target.userId})
+			.execute();
+		if (withHistory) {
+			await createBuilder(harness, viewer.token)
+				.post(`/channels/${dm.id}/messages`)
+				.body({content: 'from Discord'})
+				.execute();
+		}
+		await markImported(target);
+		await createBuilder(harness, viewer.token).delete(`/channels/${dm.id}`).expect(HTTP_STATUS.NO_CONTENT).execute();
+		return {viewer, target, dmId: dm.id};
+	}
+
+	async function importedConversationOf(viewer: TestAccount, target: TestAccount): Promise<string | null> {
+		const res = await createBuilder<{channel_id: string | null}>(harness, viewer.token)
+			.get(`/users/@me/imported-conversations/${target.userId}`)
+			.execute();
+		return res.channel_id;
+	}
+
+	it('opens a closed DM with it again when the DM holds messages', async () => {
+		const {viewer, target, dmId} = await importedDm(true);
+		expect(await importedConversationOf(viewer, target)).toBe(dmId);
+		const reopened = await createBuilder<{id: string}>(harness, viewer.token)
+			.post('/users/@me/channels')
+			.body({recipient_id: target.userId})
+			.execute();
+		expect(reopened.id).toBe(dmId);
+		await createBuilder(harness, viewer.token)
+			.post(`/channels/${dmId}/messages`)
+			.body({content: 'still nobody there'})
+			.expect(HTTP_STATUS.BAD_REQUEST, APIErrorCodes.CANNOT_SEND_MESSAGES_TO_USER)
+			.execute();
+	});
+
+	it('does not open an empty DM with it, nor offer one', async () => {
+		const {viewer, target} = await importedDm(false);
+		expect(await importedConversationOf(viewer, target)).toBeNull();
+		await createBuilder(harness, viewer.token)
+			.post('/users/@me/channels')
+			.body({recipient_id: target.userId})
+			.expect(HTTP_STATUS.BAD_REQUEST, APIErrorCodes.CANNOT_SEND_MESSAGES_TO_USER)
+			.execute();
+	});
+
+	it('offers no imported conversation with anyone else', async () => {
+		const viewer = await createTestAccount(harness);
+		const other = await createTestAccount(harness);
+		expect(await importedConversationOf(viewer, other)).toBeNull();
 	});
 
 	it('refuses friend requests by id and by username', async () => {
