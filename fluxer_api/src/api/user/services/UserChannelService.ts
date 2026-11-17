@@ -49,7 +49,7 @@ import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 
 // Fork imports.
 
-import {assertNotImportedPlaceholder} from '@app/api/user/ForkImportedAccounts';
+import {reopenableImportedConversation} from '@app/api/user/ForkImportedAccounts';
 
 export class UserChannelService {
 	private readonly userRepository: UserRepository;
@@ -167,8 +167,10 @@ export class UserChannelService {
 		if (userId === recipientId) {
 			throw InputValidationError.fromCode('recipient_id', ValidationErrorCodes.CANNOT_DM_YOURSELF);
 		}
-		// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682).
-		await assertNotImportedPlaceholder(this.userRepository, recipientId);
+		// Fork: nobody is behind a placeholder from the Discord import (tyne-chat/tyne#682); only its imported conversation reopens (#696).
+		const imported = await reopenableImportedConversation(this.userRepository, userId, recipientId);
+		if (imported)
+			return await this.reopenExistingDMChannel({userId, existingChannel: imported, userCacheService, requestCache});
 		await assertMayStartConversation({
 			user: callingUser,
 			targetId: recipientId,

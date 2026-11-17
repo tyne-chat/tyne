@@ -102,6 +102,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {ImportedConversationButton} from '@app/features/user/components/ForkImportedConversationButton';
 import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const USER_PROFILE_2_DESCRIPTOR = msg({
@@ -741,6 +742,11 @@ export const UserProfileModal: UserProfileModalComponent = observer(
 							{isBlocked ? i18n._(OPEN_DM_DESCRIPTOR) : <Trans context="message-action">Message</Trans>}
 						</Button>
 					)}
+					<ImportedConversationButton
+						user={user}
+						onOpen={handleMessage}
+						data-flx="user.user-profile-modal.render-action-buttons.imported-conversation-button"
+					/>
 					{renderPrimaryActionButton()}
 					<Button
 						ref={moreOptionsButtonRef}
