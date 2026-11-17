@@ -24,6 +24,7 @@ export const ForkEndpoints = {
 	USER_PERSONA_RESTORE: (personaId: string) => `/users/@me/personas/deleted/${personaId}/restore`,
 	USER_PERSONA_VISIBILITY: '/users/@me/personas/visibility',
 	USER_PERSONA_BULK_DELETE: '/users/@me/personas/bulk-delete',
+	USER_IMPORTED_CONVERSATION: (userId: string) => `/users/@me/imported-conversations/${userId}`,
 	USER_PUBLIC_PERSONAS: (userId: string) => `/users/${userId}/personas`,
 	USER_PUBLIC_PERSONA: (userId: string, personaId: string) => `/users/${userId}/personas/${personaId}`,
 	PERSONA_LOOKUP: '/personas/lookup',
