@@ -22850,6 +22850,68 @@
 				]
 			}
 		},
+		"/users/@me/imported-conversations/{user_id}": {
+			"get": {
+				"operationId": "get_imported_conversation",
+				"summary": "Get your imported conversation with a placeholder",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ImportedConversationResponse"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Your DM with a Discord import placeholder account when it holds imported messages: it can be opened again once closed (POST /users/@me/channels). The channel id is null for anyone else, or an empty DM.",
+				"security": [{"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the user", "$ref": "#/components/schemas/SnowflakeType"},
+						"description": "The ID of the user"
+					}
+				]
+			}
+		},
 		"/users/@me/memes": {
 			"get": {
 				"operationId": "list_favorite_memes",
@@ -34797,6 +34859,17 @@
 				"required": ["url"]
 			},
 			"FavoriteMemeListResponse": {"type": "array", "items": {"$ref": "#/components/schemas/FavoriteMemeResponse"}},
+			"ImportedConversationResponse": {
+				"type": "object",
+				"properties": {
+					"channel_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "Your DM with this Discord import placeholder when it holds imported messages, which can be opened again once closed; null for anyone else, or an empty DM"
+					}
+				},
+				"required": ["channel_id"],
+				"additionalProperties": false
+			},
 			"HarvestDownloadUrlResponse": {
 				"type": "object",
 				"properties": {

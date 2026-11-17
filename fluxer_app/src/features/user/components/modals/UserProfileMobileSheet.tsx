@@ -105,6 +105,7 @@ import {useEffect, useMemo, useState} from 'react';
 // Fork imports.
 
 import {AccountPersonaNameExtras, PersonasProfileSheetButton} from '@app/features/persona/components/PersonasPill';
+import {ImportedConversationActionCard} from '@app/features/user/components/ForkImportedConversationButton';
 import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const logger = new Logger('UserProfileMobileSheet');
@@ -704,6 +705,11 @@ const UserProfileMobileSheetContent: React.FC<UserProfileMobileSheetContentProps
 															</span>
 														</button>
 													)}
+													<ImportedConversationActionCard
+														user={user}
+														onOpen={handleMessage}
+														data-flx="user.user-profile-mobile-sheet.user-profile-mobile-sheet-content.imported-conversation-action-card"
+													/>
 													{relationshipType === RelationshipTypes.FRIEND &&
 														!user.bot &&
 														!hasActiveDirectCall &&
