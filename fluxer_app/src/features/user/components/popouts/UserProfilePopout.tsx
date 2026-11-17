@@ -68,6 +68,7 @@ import {useCallback, useEffect, useMemo, useRef} from 'react';
 // Fork imports.
 
 import {AccountPersonaNameExtras} from '@app/features/persona/components/PersonasPill';
+import {ImportedConversationFooter} from '@app/features/user/components/ForkImportedConversationButton';
 import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const logger = new Logger('UserProfilePopout');
@@ -433,6 +434,11 @@ export const UserProfilePopout: React.FC<UserProfilePopoutProps> = observer(
 								{footerAction}
 							</ProfileCardFooter>
 						)}
+						<ImportedConversationFooter
+							user={user}
+							onOpen={handleMessage}
+							data-flx="user.user-profile-popout.imported-conversation-footer"
+						/>
 					</ProfileCardLayout>
 				</div>
 			</FocusRingScope>
