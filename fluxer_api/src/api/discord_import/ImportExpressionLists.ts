@@ -14,7 +14,7 @@ import type {IGatewayService} from '@app/api/infrastructure/IGatewayService';
 
 export interface ExpressionListsPlan {
 	emoji: Array<{guild_id: string | null}>;
-	stickers: Array<{guild_id: string}>;
+	stickers: Array<{guild_id: string | null}>;
 }
 
 export interface ExpressionListsDeps {
@@ -27,9 +27,9 @@ export async function sendExpressionLists(
 	plan: ExpressionListsPlan,
 	deps: ExpressionListsDeps,
 ): Promise<{emoji: Array<string>; stickers: Array<string>}> {
-	// Emoji without a community are stored only for the messages that show them: no list to send.
+	// Emoji and stickers without a community are stored only for the messages that show them: no list to send.
 	const emojiGuilds = [...new Set(plan.emoji.flatMap((e) => (e.guild_id ? [e.guild_id] : [])))];
-	const stickerGuilds = [...new Set(plan.stickers.map((s) => s.guild_id))];
+	const stickerGuilds = [...new Set(plan.stickers.flatMap((s) => (s.guild_id ? [s.guild_id] : [])))];
 	for (const guild of emojiGuilds) {
 		const guildId = BigInt(guild) as GuildID;
 		const emojis = await deps.guildRepository.listEmojis(guildId);
