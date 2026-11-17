@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {createUserID} from '@app/api/BrandedTypes';
 import {DefaultUserOnly, LoginRequired} from '@app/api/middleware/AuthMiddleware';
 import {RateLimitMiddleware} from '@app/api/middleware/RateLimitMiddleware';
 import {OpenAPI} from '@app/api/middleware/ResponseTypeMiddleware';
 import {beginPersonaAvatarBatchImport, importPersonaAvatar} from '@app/api/persona/PersonaAvatarImporter';
 import {RateLimitConfigs} from '@app/api/RateLimitConfig';
 import type {HonoApp} from '@app/api/types/HonoEnv';
+import {importedConversation} from '@app/api/user/ForkImportedAccounts';
 import {deriveDominantAvatarColor} from '@app/api/utils/AvatarColorUtils';
 import {Validator} from '@app/api/Validator';
+import {UserIdParam} from '@fluxer/schema/src/domains/common/CommonParamSchemas';
 import {
 	PersonaAvatarImportRequest,
 	PersonaAvatarImportResponse,
@@ -18,6 +21,7 @@ import {
 	PersonaBatchAvatarImportRequest,
 	PersonaBatchAvatarImportStream,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {ImportedConversationResponse} from '@fluxer/schema/src/domains/user/ForkImportedConversationSchemas';
 import {streamText} from 'hono/streaming';
 
 // Fork: the fork's account routes. UserAccountController() registers them with one call at the
@@ -119,6 +123,32 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 		return res;
 	};
 
+	// A Discord import placeholder's profile offers its conversation with you only when there is one to see
+	// (tyne-chat/tyne#696): asked when such a profile opens, never for anyone else.
+	app.get(
+		'/users/@me/imported-conversations/:user_id',
+		RateLimitMiddleware(RateLimitConfigs.USER_GET_PROFILE),
+		LoginRequired,
+		Validator('param', UserIdParam),
+		OpenAPI({
+			operationId: 'get_imported_conversation',
+			summary: 'Get your imported conversation with a placeholder',
+			responseSchema: ImportedConversationResponse,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Users'],
+			description:
+				'Your DM with a Discord import placeholder account when it holds imported messages: it can be opened again once closed (POST /users/@me/channels). The channel id is null for anyone else, or an empty DM.',
+		}),
+		async (ctx) => {
+			const dm = await importedConversation(
+				ctx.get('userRepository'),
+				ctx.get('user').id,
+				createUserID(ctx.req.valid('param').user_id),
+			);
+			return ctx.json({channel_id: dm ? dm.id.toString() : null});
+		},
+	);
 	app.post(
 		'/users/@me/personas/avatar',
 		RateLimitMiddleware(RateLimitConfigs.USER_UPDATE_SELF),
