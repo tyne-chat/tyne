@@ -88,6 +88,10 @@ msgstr "jan Alisi"
 msgid "All Personas"
 msgstr "jan insa ale"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "ale li lon kulupu wan"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "jan insa ale"
@@ -465,6 +469,10 @@ msgstr "o ante e jan insa"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "o ante e sitelen tenpo"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "sitelen pilin ({emojiCount})"
 
 msgid "Everyone else"
 msgstr "ante ale"
@@ -846,6 +854,7 @@ msgstr "kepeken mute"
 msgid "Move to Trash"
 msgstr "Move to Trash"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "nimi (A–Z)"
@@ -943,6 +952,10 @@ msgstr "nimi lili ala"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "jan ala li open e suno ni"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "sitelen pilin tawa ala en sitelen pilin tawa li lon poka ante"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "tenpo poka"
 msgid "Recent Personas"
 msgstr "jan insa pi tenpo poka"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "sin lon tenpo poka"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "kepeken lon tenpo poka"
@@ -1460,6 +1477,10 @@ msgstr "ona li kama ala"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "nimi lili ante li kama ala: lon ilo {productName} la jan insa li ken jo e nimi lili 5 taso. nimi lili wan li ken jo e sitelen 32 taso."
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "o nasin o kulupu"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"

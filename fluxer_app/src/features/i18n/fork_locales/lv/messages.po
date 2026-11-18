@@ -88,6 +88,10 @@ msgstr "Alise"
 msgid "All Personas"
 msgstr "Visas personas"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "Visas vienā sarakstā"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "Visas personas"
@@ -465,6 +469,10 @@ msgstr "Rediģēt personu"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Rediģēt laikspiedolu"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "Emocijzīmes ({emojiCount})"
 
 msgid "Everyone else"
 msgstr "Visi pārējie"
@@ -846,6 +854,7 @@ msgstr "Visbiežāk lietotās"
 msgid "Move to Trash"
 msgstr "Pārvietot uz atkritni"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "Vārds (A–Ž)"
@@ -943,6 +952,10 @@ msgstr "Nav birku"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Neviens nav ieslēdzis šo signālu"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "Neanimētās un animētās atsevišķi"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "Nesen lietotās"
 msgid "Recent Personas"
 msgstr "Nesen lietotās personas"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "Nesen pievienotās"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "Nesen lietotās"
@@ -1460,6 +1477,10 @@ msgstr "Tiks izlaists"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Dažas birkas netika iekļautas: {productName} atļauj ne vairāk kā 5 birkas katrai personai, katru ne garāku par 32 rakstzīmēm."
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "Kārtot un grupēt"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"
