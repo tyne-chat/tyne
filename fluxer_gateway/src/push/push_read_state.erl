@@ -45,7 +45,11 @@ stale_read_key(#{buffered_at := BufferedAt} = Params) when is_integer(BufferedAt
             push_message_params:context(Params)
     of
         {ok, #{user_ids := [UserId], channel_id := ChannelId, message_id := MessageId}} ->
-            {ok, {UserId, ChannelId, MessageId}};
+            %% Fork: a DM thread's message is read in the thread (tyne-chat/tyne#699).
+            ReadChannelId = fork_dm_thread_push:read_channel_id(
+                maps:get(message_data, Params, #{}), ChannelId
+            ),
+            {ok, {UserId, ReadChannelId, MessageId}};
         _ ->
             none
     end;

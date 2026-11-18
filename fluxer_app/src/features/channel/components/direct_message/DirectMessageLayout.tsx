@@ -21,6 +21,7 @@ import type {ReactNode} from 'react';
 
 // Fork imports.
 
+import {forkDmThreadView} from '@app/features/threads/fork/ForkDmThreadViews';
 import LayoutState from '@app/features/ui/state/LayoutState';
 
 const NO_COMMUNITIES_TITLE_DESCRIPTOR = msg({
@@ -53,6 +54,9 @@ export const DMLayout = observer(({children}: DMLayoutProps) => {
 		if (location.pathname === Routes.MENTIONS) {
 			return <RecentMentionsPage data-flx="channel.direct-message.dm-layout.render-content.recent-mentions-page" />;
 		}
+		// Fork: a DM with its threads beside it, and a DM thread in full view (tyne-chat/tyne#699).
+		const forkDmView = forkDmThreadView(channelId);
+		if (forkDmView) return forkDmView;
 		if (channelId) {
 			return (
 				<DMChannelView

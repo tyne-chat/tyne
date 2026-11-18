@@ -28,6 +28,10 @@ import type {
 } from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 
+// Fork imports.
+
+import {seesDmThreads} from '@app/api/channel/services/thread/ForkDmThreadViewer';
+
 interface ThreadListQuery {
 	limit: number;
 	before?: MessageID;
@@ -96,6 +100,8 @@ export function maskThreadArtifactsFor(
 ): Array<MessageResponse> {
 	if (!responses.some(carriesThreadArtifact)) return responses;
 	if (guildId !== null && viewerActive(viewer, guildId)) return responses;
+	// Fork: an app that knows DM threads sees them in DMs (tyne-chat/tyne#699).
+	if (seesDmThreads(viewer, guildId)) return responses;
 	return maskThreadArtifacts(responses);
 }
 
@@ -146,7 +152,8 @@ export class ThreadMessageResponses {
 		const {authChannel, viewer} = params;
 		const guildId = authChannel.channel.guildId;
 		let responses = params.responses;
-		if (guildId === null || !viewerActive(viewer, guildId)) {
+		// Fork: an app that knows DM threads gets a DM's and a DM thread's as a guild channel's (tyne-chat/tyne#699).
+		if ((guildId === null || !viewerActive(viewer, guildId)) && !seesDmThreads(viewer, guildId)) {
 			return maskThreadArtifacts(responses);
 		}
 		if (authChannel.thread && params.query && (await this.starterBelongsToPage(authChannel, responses, params.query))) {

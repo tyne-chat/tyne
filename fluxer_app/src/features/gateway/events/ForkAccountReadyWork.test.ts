@@ -20,6 +20,7 @@ const calls = vi.hoisted(() => ({
 	fetchChannelStates: 0,
 	invalidateSignalBar: 0,
 	invalidateGuildCommands: 0,
+	restoredDmThreads: [] as Array<string>,
 }));
 
 vi.mock('@app/features/platform/state/AccountScopedWork', () => ({
@@ -31,6 +32,11 @@ vi.mock('@app/features/platform/state/AccountScopedWork', () => ({
 			work.transition = handler;
 			return () => {};
 		},
+	},
+}));
+vi.mock('@app/features/threads/fork/ForkDmThreadReady', () => ({
+	restoreDmThreadsAfterPromotedResume: (accountKey: string) => {
+		calls.restoredDmThreads.push(accountKey);
 	},
 }));
 vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
@@ -76,21 +82,24 @@ describe("the fork's READY work after upstream's promoted resume", () => {
 		calls.fetchChannelStates = 0;
 		calls.invalidateSignalBar = 0;
 		calls.invalidateGuildCommands = 0;
+		calls.restoredDmThreads = [];
 	});
 
 	it('loads the personas, their settings and the channel states once, as after READY', () => {
-		handleForkPromotedResume();
+		handleForkPromotedResume('account-1');
 		expect(calls.fetchPersonas).toEqual([true]);
 		expect(calls.fetchPersonaSettings).toBe(1);
 		expect(calls.fetchChannelStates).toBe(1);
 		expect(requests()).toBe(3);
 		expect(calls.invalidateSignalBar).toBe(1);
 		expect(calls.invalidateGuildCommands).toBe(1);
+		// The account's DM threads come back with no request (tyne-chat/tyne#699).
+		expect(calls.restoredDmThreads).toEqual(['account-1']);
 	});
 
 	it('waits for an account switch to finish, then loads them once', () => {
 		work.isSuspended = true;
-		handleForkPromotedResume();
+		handleForkPromotedResume('account-1');
 		expect(requests()).toBe(0);
 		work.isSuspended = false;
 		work.transition?.released?.(SWITCH);
@@ -101,7 +110,7 @@ describe("the fork's READY work after upstream's promoted resume", () => {
 
 	it('drops the work when another switch starts before the first one finishes', () => {
 		work.isSuspended = true;
-		handleForkPromotedResume();
+		handleForkPromotedResume('account-1');
 		work.transition?.suspend(SWITCH);
 		work.isSuspended = false;
 		work.transition?.released?.(SWITCH);

@@ -28,6 +28,10 @@ import {chunkArray} from '@app/api/utils/ArrayUtils';
 import {AuditLogActionType} from '@fluxer/constants/src/AuditLogActionType';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 
+// Fork imports.
+
+import {dmRulesChannelOf} from '@app/api/channel/services/thread/ForkDmThreads';
+
 interface UserMessageDeletionServiceDeps {
 	channelRepository: ChannelRepository;
 	gatewayService: IGatewayService;
@@ -112,7 +116,8 @@ export class UserMessageDeletionService {
 				let eligible = channelEligibility.get(channelIdStr);
 				if (eligible === undefined) {
 					const channel = await this.deps.channelRepository.channelData.findUnique(channelId);
-					eligible = channel ? isChannelEligible(channel, userId, filter, context) : false;
+					// Fork: a DM thread's messages go with its DM (tyne-chat/tyne#699).
+					eligible = channel ? isChannelEligible(await dmRulesChannelOf(channel), userId, filter, context) : false;
 					channelEligibility.set(channelIdStr, eligible);
 				}
 				return eligible;

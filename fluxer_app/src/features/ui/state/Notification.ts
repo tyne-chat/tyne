@@ -57,6 +57,7 @@ import {makeAutoObservable, reaction, runInAction} from 'mobx';
 import {getPersonaNotificationIconURL} from '@app/features/persona/utils/PersonaNotificationIconURL';
 import {startForkAppWindowBridge} from '@app/features/platform/utils/ForkAppWindowBridge';
 import {claimNotificationAcrossWindows} from '@app/features/platform/utils/ForkAppWindows';
+import {dmThreadNotificationContext, isDmThread} from '@app/features/threads/fork/ForkDmThreads';
 
 const FRIEND_REQUEST_DESCRIPTOR = msg({
 	message: 'Friend request',
@@ -194,6 +195,10 @@ class NotificationState {
 		if (channel.isPrivate()) {
 			return !UserGuildSettings.isGuildOrChannelMuted(null, channel.id);
 		}
+		// Fork: as in its DM, every message in a DM thread one follows (tyne-chat/tyne#699).
+		if (isDmThread(channel) && channel.parentId && ThreadMemberships.isMember(channel.id)) {
+			return !UserGuildSettings.isGuildOrChannelMuted(null, channel.parentId);
+		}
 		return false;
 	}
 
@@ -289,7 +294,8 @@ class NotificationState {
 		if (!(await claimNotificationAcrossWindows(message.id, message.channel_id))) {
 			return;
 		}
-		if (channel.isPrivate()) {
+		// Fork: a DM thread sounds like its DM (tyne-chat/tyne#699).
+		if (channel.isPrivate() || isDmThread(channel)) {
 			NotificationUtils.playDirectMessageNotificationSoundIfEnabled();
 		} else {
 			NotificationUtils.playNotificationSoundIfEnabled();
@@ -332,6 +338,12 @@ class NotificationState {
 			case ChannelTypes.ANNOUNCEMENT_THREAD:
 			case ChannelTypes.PUBLIC_THREAD:
 			case ChannelTypes.PRIVATE_THREAD: {
+				// Fork: "Author (Thread)" for a message in a DM thread (tyne-chat/tyne#699).
+				if (isDmThread(channel)) {
+					if (useMacOSNotificationPresentation) subtitle = dmThreadNotificationContext(channel);
+					else title = `${title} (${dmThreadNotificationContext(channel)})`;
+					break;
+				}
 				const parent = channel.parentId ? Channels.getChannel(channel.parentId) : undefined;
 				const guild = channel.guildId ? Guilds.getGuild(channel.guildId) : null;
 				const context =
@@ -383,7 +395,8 @@ class NotificationState {
 	}
 
 	private playForegroundObscuredNotificationSound(channel: Channel): void {
-		if (channel.isPrivate()) {
+		// Fork: a DM thread sounds like its DM (tyne-chat/tyne#699).
+		if (channel.isPrivate() || isDmThread(channel)) {
 			NotificationUtils.playDirectMessageNotificationSoundIfEnabled();
 		} else {
 			NotificationUtils.playNotificationSoundIfEnabled();

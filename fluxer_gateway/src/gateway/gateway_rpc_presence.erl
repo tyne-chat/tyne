@@ -43,6 +43,10 @@ maybe_invalidate_push_blocked_ids(_EventAtom, _UserId) ->
     ok.
 
 -spec handle_unreachable_dispatch(atom(), integer(), map()) -> no_return().
+%% Fork: a new message in a DM thread is pushed as a message in its DM (tyne-chat/tyne#699).
+handle_unreachable_dispatch(fork_dm_thread_event, UserId, Data) ->
+    _ = handle_offline_dispatch(fork_dm_thread_event, UserId, Data),
+    gateway_rpc_error:raise(<<"presence_dispatch_error">>);
 handle_unreachable_dispatch(message_create, UserId, Data) ->
     _ = handle_offline_dispatch(message_create, UserId, Data),
     gateway_rpc_error:raise(<<"presence_dispatch_error">>);
@@ -319,6 +323,12 @@ maybe_valid_owner_node(OwnerNode) ->
     end.
 
 -spec handle_offline_dispatch(atom(), integer(), map() | list()) -> true.
+%% Fork: a new message in a DM thread is pushed as a message in its DM (tyne-chat/tyne#699).
+handle_offline_dispatch(fork_dm_thread_event, UserId, Data) when is_map(Data) ->
+    case fork_dm_thread_push:push_message(Data) of
+        undefined -> true;
+        Message -> handle_offline_dispatch(message_create, UserId, Message)
+    end;
 handle_offline_dispatch(message_create, UserId, Data) when is_map(Data) ->
     case offline_message_author_id(Data) of
         {ok, AuthorId} ->
