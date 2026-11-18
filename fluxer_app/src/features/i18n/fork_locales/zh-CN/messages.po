@@ -58,6 +58,10 @@ msgstr "添加人格"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "添加标签对（{0}/5）"
 
+#. placeholder {0}: formData.aliases.length
+msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
+msgstr "添加别名 ({0}/{PERSONA_ALIASES_MAX})"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "添加计数器"
@@ -80,6 +84,13 @@ msgstr "作为新人格添加"
 #. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
 msgid "After"
 msgstr "恢复后"
+
+#. Accessible name of one alias field in the persona editor: another name, never shown, that finds the persona when searching or mentioning it.
+msgid "Alias"
+msgstr "别名"
+
+msgid "Aliases"
+msgstr "别名"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -1043,6 +1054,9 @@ msgstr "打开下载的文件。"
 msgid "Optional"
 msgstr "可选"
 
+msgid "Other names for finding this persona"
+msgstr "用来找到此人格的其他名称"
+
 #. Link from the Tyne app download button to the downloads for every platform.
 msgid "Other platforms"
 msgstr "其他平台"
@@ -1266,6 +1280,10 @@ msgstr "最近添加"
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "最近使用"
+
+#. Accessible name of the button that removes one alias of a persona in the persona editor.
+msgid "Remove alias"
+msgstr "删除别名"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"

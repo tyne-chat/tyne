@@ -90,6 +90,13 @@ and follow the placement rules in the root `AGENTS.md`.
   schemas declare the pattern, so dev and tests fail on a response that breaks it. The clients
   turn a hash into an address only through helpers that refuse anything else. A link stored and
   shown would tell its server who reads the account's messages.
+- **Aliases are for finding, never for showing** (tyne-chat/tyne#707). `aliases` (a JSON list in
+  the row, up to 10, stored trimmed and without repeats) come with the owner's, the public and the
+  persona-mention shapes, and the mention route's `q` matches them (`PersonaNameSearch.ts`), but
+  never with `toSubprofileResponse`: messages do not carry them. Each is checked against the profile
+  blocklist as a name. PluralKit has no aliases, so the export keeps them in `tyne.json`. A request
+  that leaves `aliases` out keeps the stored ones (an empty list clears them): clients from before
+  aliases send none, and keep what is stored, on edits and imports alike.
 - **Counters and other concurrent fields need partial writes.** `update` and `recordUsage` write
   every other column from a read made earlier, so two concurrent edits can revert each other. An
   `upsertAll` row with columns missing becomes a partial update; use that for new counters.
@@ -102,7 +109,7 @@ single Postgres key/value table.
 
 | Table | Key | Holds |
 |---|---|---|
-| `personas` | (user_id, persona_id) | profile fields; tags and signature emojis as JSON strings; usage counters; `visibility`; `external_uuid` (the PluralKit member id); `deleted_at` |
+| `personas` | (user_id, persona_id) | profile fields, `aliases` among them; tags and signature emojis as JSON strings; usage counters; `visibility`; `external_uuid` (the PluralKit member id); `deleted_at` |
 | `user_persona_settings` | user_id | mode (`manual` or `last`), scope (`global` or `channel`), the selected persona and whether it is latched, the account-wide display tag, `multi_persona_reactions` (several identities may react with one emoji; a row without it means on) |
 | `persona_channel_states` | (user_id, channel_id) | the per-channel selection; no row means the account |
 | `thread_owner_personas`, `thread_owner_personas_by_user` | thread_id; (user_id, thread_id) | which persona started a thread; the by-user row is written first, so account deletion finds it |

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {PERSONA_ALIAS_MAX_LENGTH, PERSONA_ALIASES_MAX} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import {withBase64Binary} from '@fluxer/schema/src/primitives/Base64BinaryFields';
 import {QueryBooleanType} from '@fluxer/schema/src/primitives/QueryValidators';
 import {createStringType, SnowflakeStringType, SnowflakeType} from '@fluxer/schema/src/primitives/SchemaPrimitives';
@@ -61,6 +62,10 @@ export function personaAssetHashOrNull(value: unknown): string | null {
 export const PersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
+	aliases: z
+		.array(z.string())
+		.optional()
+		.describe('Other names to find the persona by when searching or mentioning. Never shown'),
 	avatar_hash: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
 	banner_hash: PersonaAssetHashType.nullish().describe('Banner asset hash'),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
@@ -85,6 +90,10 @@ export const PersonaListResponseSchema = z.array(PersonaResponseSchema);
 export const PublicPersonaResponseSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
+	aliases: z
+		.array(z.string())
+		.optional()
+		.describe('Other names to find the persona by when searching or mentioning. Never shown'),
 	avatar_hash: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
 	banner_hash: PersonaAssetHashType.nullish().describe('Banner asset hash'),
 	pronouns: z.string().nullish().describe('Optional pronouns'),
@@ -128,8 +137,18 @@ export const PersonaBulkDeleteRequestSchema = z.object({
 	persona_ids: z.array(SnowflakeStringType).min(1).max(250).describe('The IDs of the personas to delete'),
 });
 
+/** One alias as sent. Blank ones are allowed and dropped (the validator would otherwise turn '' into null). */
+const PersonaAliasType = z.string().max(PERSONA_ALIAS_MAX_LENGTH).register(schemaMetadata, {preserveEmptyValues: true});
+
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),
+	aliases: z
+		.array(PersonaAliasType)
+		.max(PERSONA_ALIASES_MAX)
+		.optional()
+		.describe(
+			'Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones',
+		),
 	avatar_hash: PersonaAssetHashType.nullish().optional().describe('Avatar asset hash'),
 	banner_hash: PersonaAssetHashType.nullish().optional().describe('Banner asset hash'),
 	pronouns: z.string().max(100).nullish().optional().describe('Optional pronouns'),
@@ -150,6 +169,13 @@ export type PersonaCreateRequest = z.infer<typeof PersonaCreateRequestSchema>;
 
 export const PersonaUpdateRequestSchema = z.object({
 	name: createStringType(1, 100).optional().describe('Persona display name'),
+	aliases: z
+		.array(PersonaAliasType)
+		.max(PERSONA_ALIASES_MAX)
+		.optional()
+		.describe(
+			'Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones',
+		),
 	avatar_hash: PersonaAssetHashType.nullish().optional().describe('Avatar asset hash'),
 	banner_hash: PersonaAssetHashType.nullish().optional().describe('Banner asset hash'),
 	pronouns: z.string().max(100).nullish().optional().describe('Optional pronouns'),
@@ -300,6 +326,10 @@ export const PersonaChannelStateParam = z.object({
 export const ChannelPersonaMentionItemSchema = z.object({
 	id: SnowflakeStringType.describe('The unique Snowflake identifier for this persona'),
 	name: z.string().describe('The persona display name'),
+	aliases: z
+		.array(z.string())
+		.optional()
+		.describe('Other names to find the persona by when searching or mentioning. Never shown'),
 	avatar_hash: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
 	banner_hash: PersonaAssetHashType.nullish().describe('Banner asset hash'),
 	display_tag_text: z.string().nullish().describe('Optional display tag text'),
