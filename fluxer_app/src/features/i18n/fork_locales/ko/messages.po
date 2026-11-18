@@ -88,6 +88,10 @@ msgstr "앨리스"
 msgid "All Personas"
 msgstr "모든 페르소나"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "모두 한 목록에"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "모든 페르소나"
@@ -465,6 +469,10 @@ msgstr "페르소나 편집"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "타임스탬프 수정\\"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "이모티콘({emojiCount})"
 
 msgid "Everyone else"
 msgstr "그 외 모두"
@@ -846,6 +854,7 @@ msgstr "많이 사용한 순"
 msgid "Move to Trash"
 msgstr "휴지통으로 이동"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "이름순 (A–Z)"
@@ -943,6 +952,10 @@ msgstr "태그 없음"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "이 시그널을 켠 사람이 없어요"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "움직이지 않는 이모티콘과 움직이는 이모티콘 따로"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "최근"
 msgid "Recent Personas"
 msgstr "최근 페르소나"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "최근 추가됨"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "최근 사용한 순"
@@ -1460,6 +1477,10 @@ msgstr "건너뛰는 중"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "일부 프록시 태그가 제외되었어요: {productName}에서는 페르소나당 최대 5개, 각각 최대 32자까지 사용할 수 있어요."
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "정렬 및 그룹화"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"
