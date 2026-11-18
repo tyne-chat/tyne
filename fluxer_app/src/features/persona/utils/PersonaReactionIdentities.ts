@@ -3,6 +3,7 @@
 import {hasPersonaReacted} from '@app/features/messaging/utils/ReactionUtils';
 import type {ClientPersona} from '@app/features/persona/state/PersonaStore';
 import type {MessageReaction} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
+import {personaNameMatches} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 
 /** One of the identities that can react: a persona's id, or `null` for the account itself. */
 export type ReactionIdentityId = string | null;
@@ -65,11 +66,11 @@ export function recentPersonaIds(ranked: ReadonlyArray<ClientPersona>, limit: nu
 		.map((p) => p.id);
 }
 
-/** Search over name, pronouns and proxy tags, as the persona pickers do. */
+/** Search over name, aliases, pronouns and proxy tags, as the persona pickers do. */
 export function personaMatchesQuery(persona: ClientPersona, query: string): boolean {
 	const q = query.trim().toLowerCase();
 	if (!q) return true;
-	if (persona.name.toLowerCase().includes(q)) return true;
+	if (personaNameMatches(persona.name, persona.aliases, q)) return true;
 	if (persona.pronouns?.toLowerCase().includes(q)) return true;
 	return (persona.persona_tags ?? []).some(
 		(tag) => tag.prefix?.toLowerCase().includes(q) || tag.suffix?.toLowerCase().includes(q),

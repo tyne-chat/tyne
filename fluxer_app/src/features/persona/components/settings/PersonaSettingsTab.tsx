@@ -36,6 +36,7 @@ import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import Users from '@app/features/user/state/Users';
 import {getAcceptString} from '@fluxer/constants/src/AssetFormatPolicy';
 import type {ActivePersonaScope} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {personaNameMatches} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
@@ -334,7 +335,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const filteredPersonaIds = (
 		query
 			? chipPersonas.filter((p) => {
-					const nameMatch = p.name.toLowerCase().includes(query);
+					const nameMatch = personaNameMatches(p.name, p.aliases, query);
 					const pronounsMatch = (p.pronouns ?? '').toLowerCase().includes(query);
 					const tags = p.persona_tags ?? [];
 					const tagMatch = tags.some(

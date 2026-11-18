@@ -44,6 +44,11 @@ import {
 	type PersonaVisibility,
 	type SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {
+	normalizePersonaAliases,
+	PERSONA_ALIAS_MAX_LENGTH,
+	PERSONA_ALIASES_MAX,
+} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
@@ -122,6 +127,15 @@ const VISIBILITY_PRIVATE_DESC = msg({
 const NAME_PLACEHOLDER_DESCRIPTOR = msg({
 	message: 'e.g. Alice',
 	comment: 'Placeholder for persona name',
+});
+const ALIAS_ARIA_DESCRIPTOR = msg({
+	message: 'Alias',
+	comment:
+		'Accessible name of one alias field in the persona editor: another name, never shown, that finds the persona when searching or mentioning it.',
+});
+const REMOVE_ALIAS_ARIA_DESCRIPTOR = msg({
+	message: 'Remove alias',
+	comment: 'Accessible name of the button that removes one alias of a persona in the persona editor.',
 });
 const PRONOUNS_PLACEHOLDER_DESCRIPTOR = msg({
 	message: 'e.g. she/her',
@@ -288,6 +302,8 @@ function signatureEmojisEqual(a: ReadonlyArray<SignatureEmoji>, b: ReadonlyArray
 interface PersonaFormState {
 	id?: string;
 	name: string;
+	/** Other names to find the persona by, one per row (tyne-chat/tyne#707). */
+	aliases: Array<string>;
 	pronouns: string;
 	avatarHash: string;
 	avatarColor?: number | null;
@@ -306,8 +322,19 @@ interface PersonaFormState {
 // The field grows with its text up to here, and can be dragged to any height up to here.
 const BIO_MAX_ROWS = 30;
 
+/** A persona's aliases as editor rows: one empty row when it has none. */
+const aliasRows = (aliases: ReadonlyArray<string> | undefined): Array<string> =>
+	aliases && aliases.length > 0 ? [...aliases] : [''];
+
+const sameAliases = (a: ReadonlyArray<string>, b: ReadonlyArray<string>): boolean => {
+	const left = normalizePersonaAliases(a);
+	const right = normalizePersonaAliases(b);
+	return left.length === right.length && left.every((alias, i) => alias === right[i]);
+};
+
 const emptyFormState = (): PersonaFormState => ({
 	name: '',
+	aliases: [''],
 	pronouns: '',
 	avatarHash: '',
 	avatarColor: null,
@@ -333,6 +360,7 @@ const copyFormState = (source: Persona, personas: ReadonlyArray<Persona>): Perso
 		source.name,
 		personas.map((p) => p.name),
 	),
+	aliases: aliasRows(source.aliases),
 	pronouns: source.pronouns ?? '',
 	avatarHash: source.avatar_hash ?? '',
 	avatarColor: source.avatar_color ?? null,
@@ -384,6 +412,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		return {
 			id: persona.id,
 			name: persona.name,
+			aliases: aliasRows(persona.aliases),
 			pronouns: persona.pronouns ?? '',
 			avatarHash: persona.avatar_hash ?? '',
 			avatarColor: persona.avatar_color ?? null,
@@ -455,6 +484,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			const hasNonEmptyTag = formData.tags.some((t) => t.prefix.trim() !== '' || t.suffix.trim() !== '');
 			return (
 				formData.name.trim() !== '' ||
+				normalizePersonaAliases(formData.aliases).length > 0 ||
 				formData.pronouns.trim() !== '' ||
 				formData.avatarHash !== '' ||
 				formData.bannerHash !== '' ||
@@ -469,6 +499,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			);
 		}
 		if (formData.name.trim() !== initial.name.trim()) return true;
+		if (!sameAliases(formData.aliases, initial.aliases)) return true;
 		if (formData.pronouns.trim() !== initial.pronouns.trim()) return true;
 		if (formData.avatarHash !== initial.avatarHash) return true;
 		if (formData.bannerHash !== initial.bannerHash) return true;
@@ -677,6 +708,20 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		return next;
 	};
 
+	const handleAddAliasRow = () => {
+		setFormData((prev) =>
+			prev.aliases.length >= PERSONA_ALIASES_MAX ? prev : {...prev, aliases: [...prev.aliases, '']},
+		);
+	};
+
+	const handleRemoveAliasRow = (index: number) => {
+		setFormData((prev) => ({...prev, aliases: prev.aliases.filter((_, i) => i !== index)}));
+	};
+
+	const handleAliasChange = (index: number, value: string) => {
+		setFormData((prev) => ({...prev, aliases: prev.aliases.map((alias, i) => (i === index ? value : alias))}));
+	};
+
 	const handleAddTagRow = () => {
 		if (formData.tags.length >= 5) return;
 		setFormData((prev) => ({
@@ -779,6 +824,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			if (formData.id) {
 				await PersonaCommands.updatePersona(formData.id, {
 					name: trimmedName,
+					aliases: normalizePersonaAliases(formData.aliases),
 					pronouns: formData.pronouns.trim() || null,
 					avatar_hash: stored.avatarHash.trim() || null,
 					avatar_color: stored.avatarColor ?? null,
@@ -797,6 +843,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			} else {
 				await PersonaCommands.createPersona({
 					name: trimmedName,
+					aliases: normalizePersonaAliases(formData.aliases),
 					pronouns: formData.pronouns.trim() || null,
 					avatar_hash: stored.avatarHash.trim() || null,
 					avatar_color: stored.avatarColor ?? null,
@@ -1026,6 +1073,54 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								onChange={(e) => setFormData((prev) => ({...prev, name: e.target.value}))}
 								data-flx="persona.persona-edit-modal.input.name"
 							/>
+
+							{/* Aliases: only for finding the persona, never shown (tyne-chat/tyne#707). */}
+							<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.aliases">
+								<div className={styles.tagsHeader} data-flx="persona.persona-edit-modal.aliases-header">
+									<span className={styles.fieldLabel} data-flx="persona.persona-edit-modal.aliases-label">
+										<Trans>Aliases</Trans>
+									</span>
+									<Button
+										variant="secondary"
+										small
+										leftIcon={<Plus size={14} data-flx="persona.persona-edit-modal.aliases-plus" />}
+										onClick={handleAddAliasRow}
+										disabled={formData.aliases.length >= PERSONA_ALIASES_MAX}
+										data-flx="persona.persona-edit-modal.button.add-alias"
+									>
+										<Trans>
+											Add alias ({formData.aliases.length}/{PERSONA_ALIASES_MAX})
+										</Trans>
+									</Button>
+								</div>
+								<div className={styles.fieldHelperText} data-flx="persona.persona-edit-modal.aliases-help">
+									<Trans>Other names for finding this persona</Trans>
+								</div>
+								{formData.aliases.map((alias, idx) => (
+									<div key={idx} className={styles.tagRow} data-flx="persona.persona-edit-modal.alias-row">
+										<input
+											type="text"
+											className={styles.aliasInput}
+											aria-label={i18n._(ALIAS_ARIA_DESCRIPTOR)}
+											maxLength={PERSONA_ALIAS_MAX_LENGTH}
+											value={alias}
+											onChange={(e) => handleAliasChange(idx, e.target.value)}
+											data-flx="persona.persona-edit-modal.input.alias"
+										/>
+										{formData.aliases.length > 1 && (
+											<Button
+												variant="danger"
+												small
+												square
+												icon={<Trash size={14} data-flx="persona.persona-edit-modal.alias-trash" />}
+												onClick={() => handleRemoveAliasRow(idx)}
+												aria-label={i18n._(REMOVE_ALIAS_ARIA_DESCRIPTOR)}
+												data-flx="persona.persona-edit-modal.button.remove-alias"
+											/>
+										)}
+									</div>
+								))}
+							</div>
 
 							{/* 2. Pronouns */}
 							<Input
