@@ -12,6 +12,10 @@ import type {ThreadMember} from '@app/api/models/ThreadMember';
 import type {ThreadState} from '@app/api/models/ThreadState';
 import {THREAD_MEMBER_COUNT_DISPLAY_CAP} from '@fluxer/constants/src/ThreadConstants';
 
+// Fork imports.
+
+import {dispatchDmThreadEvents, isDmThreadGuildKey} from '@app/api/channel/services/thread/ForkDmThreads';
+
 export interface ThreadDispatchEvent {
 	event: GatewayDispatchEvent;
 	data: unknown;
@@ -98,6 +102,8 @@ export async function dispatchThreadEvents(
 	events: Array<ThreadDispatchEvent>,
 ): Promise<void> {
 	if (events.length === 0) return;
+	// Fork: a DM thread's events go to the parent DM's recipients (tyne-chat/tyne#699).
+	if (isDmThreadGuildKey(guildId)) return dispatchDmThreadEvents(gatewayService, events);
 	if (events.length === 1) {
 		await gatewayService.dispatchGuild({guildId, event: events[0]!.event, data: events[0]!.data});
 		return;

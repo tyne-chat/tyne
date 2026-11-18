@@ -15,6 +15,10 @@ import type {HonoEnv} from '@app/api/types/HonoEnv';
 import {ReadStateFlags} from '@fluxer/constants/src/ThreadConstants';
 import type {Context} from 'hono';
 
+// Fork imports.
+
+import {dmThreadReadStateMarker} from '@app/api/read_state/ForkDmThreadReadStates';
+
 export interface ReadStateChannelHint {
 	type: number;
 	guildId: GuildID | null;
@@ -59,6 +63,8 @@ export function readStateCapable(ctx: Context<HonoEnv>): boolean {
 }
 
 function readStateMarkerFor(channel: ReadStateChannelHint): ReadStateMarker | null {
+	// Fork: a DM thread's read state is marked under DM_THREAD_GUILD_KEY (tyne-chat/tyne#699).
+	if (channel.guildId === null) return dmThreadReadStateMarker(channel);
 	if (channel.guildId === null || !THREAD_FEATURE_CHANNEL_TYPES.has(channel.type)) return null;
 	const flags =
 		ReadStateFlags.IS_GUILD_CHANNEL | (THREAD_CHANNEL_TYPES.has(channel.type) ? ReadStateFlags.IS_THREAD : 0);

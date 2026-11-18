@@ -35,6 +35,11 @@ pub struct MessageJob {
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
 pub struct NotificationFields {
+    // Fork: the thread of a message in a DM thread (tyne-chat/tyne#699, fork_dm_thread_push.rs).
+    #[serde(default)]
+    pub fork_thread_id: Option<String>,
+    #[serde(default)]
+    pub fork_thread_name: Option<String>,
     pub title: String,
     pub body: String,
     pub icon: String,

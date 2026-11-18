@@ -14,6 +14,10 @@ import type {Channel as WireChannel} from '@fluxer/schema/src/domains/channel/Ch
 import type {Guild as WireGuild} from '@fluxer/schema/src/domains/guild/GuildResponseSchemas';
 import {makeAutoObservable, observable, reaction} from 'mobx';
 
+// Fork imports.
+
+import {dmThreadPermissionsFor} from '@app/features/threads/fork/ForkDmThreads';
+
 const isChannelLike = (value: unknown): value is ChannelModel | WireChannel => {
 	return Boolean(value && typeof value === 'object' && 'type' in value && 'id' in value);
 };
@@ -55,6 +59,9 @@ class Permission {
 					guildId?: string;
 			  },
 	): boolean {
+		// Fork: a DM thread's members may do there what they do in the DM (tyne-chat/tyne#699).
+		const forkDmThread = dmThreadPermissionsFor(context);
+		if (forkDmThread !== null) return (forkDmThread & permission) === permission;
 		let permissions = PermissionUtils.NONE;
 		if (isChannelLike(context)) {
 			permissions = this.channelPermissions.get(context.id as ChannelId) ?? PermissionUtils.NONE;

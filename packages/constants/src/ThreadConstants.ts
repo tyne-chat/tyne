@@ -3,6 +3,14 @@
 import {ChannelTypes, GUILD_TEXT_BASED_CHANNEL_TYPES} from '@fluxer/constants/src/ChannelConstants';
 import type {ValueOf} from '@fluxer/constants/src/ValueOf';
 
+// Fork imports.
+
+import {
+	DM_THREAD_PARENT_CHANNEL_TYPES,
+	isDmThreadParentType,
+	resolveDmThreadType,
+} from '@fluxer/constants/src/ForkDmThreadConstants';
+
 export const THREAD_CHANNEL_TYPES = new Set<number>([
 	ChannelTypes.ANNOUNCEMENT_THREAD,
 	ChannelTypes.PUBLIC_THREAD,
@@ -13,7 +21,9 @@ export const PUBLIC_THREAD_CHANNEL_TYPES = new Set<number>([
 	ChannelTypes.PUBLIC_THREAD,
 ]);
 export const THREAD_ONLY_CHANNEL_TYPES = new Set<number>([ChannelTypes.GUILD_FORUM, ChannelTypes.GUILD_MEDIA]);
+// Fork: DMs and group DMs hold text threads too (tyne-chat/tyne#699).
 export const TEXT_THREAD_PARENT_CHANNEL_TYPES = new Set<number>([
+	...DM_THREAD_PARENT_CHANNEL_TYPES,
 	ChannelTypes.GUILD_TEXT,
 	ChannelTypes.GUILD_ANNOUNCEMENT,
 ]);
@@ -29,6 +39,7 @@ export function publicThreadTypeFor(parentType: number): number {
 }
 
 export function resolveTextThreadType(parentType: number, requestedType: number): number | null {
+	if (isDmThreadParentType(parentType)) return resolveDmThreadType(requestedType);
 	if (parentType === ChannelTypes.GUILD_ANNOUNCEMENT) {
 		return PUBLIC_THREAD_CHANNEL_TYPES.has(requestedType) ? ChannelTypes.ANNOUNCEMENT_THREAD : null;
 	}
