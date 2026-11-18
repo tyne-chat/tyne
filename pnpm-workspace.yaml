@@ -31,7 +31,8 @@ catalog:
   '@astrojs/check': 0.9.12
   '@astrojs/markdown-remark': 7.3.5
   '@astrojs/mdx': 8.1.2
-  '@astrojs/node': 11.1.9
+  # Fork: upstream's 11.1.9 has GHSA-r3h5-4585-7x3w. Take upstream's line once it is 11.1.12 or later.
+  '@astrojs/node': 11.1.12
   '@astrojs/starlight': 0.42.7
   '@atproto/jwk-jose': 0.2.4
   '@atproto/oauth-client-node': 0.5.13
@@ -93,7 +94,8 @@ catalog:
   altcha-lib: 2.8.0
   archiver: 8.0.0
   argon2: 0.45.1
-  astro: 7.4.4
+  # Fork: upstream's 7.4.4 has GHSA-mh32-jxcr-mh9f and GHSA-r3h5-4585-7x3w. Take upstream's line once it is 7.4.7 or later.
+  astro: 7.4.7
   autoprefixer: 10.6.2
   bidi-js: 1.0.3
   bowser: 2.15.0
