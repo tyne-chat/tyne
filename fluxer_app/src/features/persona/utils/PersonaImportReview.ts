@@ -80,6 +80,7 @@ export function buildPreviewRequest(
 		if (bundle) {
 			preview.signature_emojis = extras?.signature_emojis ?? [];
 			preview.auto_tag_disabled = extras?.auto_tag_disabled === true;
+			preview.aliases = extras?.aliases ?? [];
 		}
 		members.push({member: named, extras, preview});
 	}

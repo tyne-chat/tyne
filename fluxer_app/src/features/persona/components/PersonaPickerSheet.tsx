@@ -19,6 +19,7 @@ import type React from 'react';
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {fetchPersonas} from '../commands/PersonaCommands';
 import {type ActivePersonaMode, PersonaStore} from '../state/PersonaStore';
+import {personaMatchesQuery} from '../utils/PersonaReactionIdentities';
 import styles from './PersonaPickerSheet.module.css';
 
 const TAG_EXAMPLE_TEXT_DESCRIPTOR = msg({
@@ -78,13 +79,7 @@ export const PersonaPickerSheet: React.FC<PersonaPickerSheetProps> = observer(
 		const filteredPersonas = useMemo(() => {
 			const trimmed = query.trim().toLowerCase();
 			if (!trimmed) return personas;
-			return personas.filter((p) => {
-				if (p.name.toLowerCase().includes(trimmed)) return true;
-				if (p.pronouns?.toLowerCase().includes(trimmed)) return true;
-				return (p.persona_tags ?? []).some(
-					(tag) => tag.prefix?.toLowerCase().includes(trimmed) || tag.suffix?.toLowerCase().includes(trimmed),
-				);
-			});
+			return personas.filter((p) => personaMatchesQuery(p, trimmed));
 		}, [personas, query]);
 
 		const recentShelfPersonas = useMemo(() => {

@@ -18,6 +18,7 @@ import type {SearchHistoryEntry} from '@app/features/search/state/SearchHistory'
 import type {SearchHints, tokenize} from '@app/features/search/utils/SearchQueryParser';
 import type {SearchSegment} from '@app/features/search/utils/SearchSegmentManager';
 import type {MessageSearchParams} from '@app/features/search/utils/SearchUtils';
+import {personaAliasesInclude} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 
 // Upstream keeps its token type private; this is the type tokenize() returns.
 type ParsedToken = ReturnType<typeof tokenize>['tokens'][number];
@@ -61,16 +62,23 @@ function addPersona(params: MessageSearchParams, filterKey: PersonaFilterKey, is
 	else params.personaMentions = addUnique(params.personaMentions, personaId);
 }
 
-/** The one known persona with this name (any case), or null when there is none or more than one. */
+/**
+ * The one known persona with this name (any case), or null when there is none or more than one. A
+ * persona with the name among its aliases counts too, but only when no persona has it as its name
+ * (tyne-chat/tyne#707).
+ */
 export function resolveKnownPersonaByName(name: string): string | null {
 	const wanted = name.trim().toLowerCase();
 	if (wanted === '') return null;
+	const known = [...PersonaStore.personas, ...getCachedPersonaMentionItems()];
 	const ids = new Set<string>();
-	for (const persona of PersonaStore.personas) {
+	for (const persona of known) {
 		if (persona.name.trim().toLowerCase() === wanted) ids.add(persona.id);
 	}
-	for (const persona of getCachedPersonaMentionItems()) {
-		if (persona.name.trim().toLowerCase() === wanted) ids.add(persona.id);
+	if (ids.size === 0) {
+		for (const persona of known) {
+			if (personaAliasesInclude(persona.aliases, wanted)) ids.add(persona.id);
+		}
 	}
 	return ids.size === 1 ? [...ids][0]! : null;
 }
