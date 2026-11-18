@@ -54,6 +54,11 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type MouseEvent, useCallback, useEffect, useId, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {chosenForwardAs, ForwardAsPersonaRow} from '@app/features/persona/components/ForwardAsPersonaRow';
+import type {ForwardAs} from '@app/features/persona/utils/OutgoingPersona';
+
 const MessageForwardFailedModal_FAILED_TO_FORWARD_MESSAGE_DESCRIPTOR = msg({
 	message: 'Failed to forward message',
 	comment: 'Error message in the message forward failed modal.',
@@ -230,6 +235,8 @@ export const ForwardModal = observer(
 		} = useForwardDestinations({message, mediaSelection});
 		const [actualOptionalMessage, setActualOptionalMessage] = useState('');
 		const [isForwarding, setIsForwarding] = useState(false);
+		// Fork: who the forward goes out as, once picked in the dialog (tyne-chat/tyne#817).
+		const [forwardAs, setForwardAs] = useState<ForwardAs | undefined>(undefined);
 		const [expressionPickerOpen, setExpressionPickerOpen] = useState(false);
 		const searchInputRef = useRef<HTMLInputElement>(null);
 		const containerRef = useRef<HTMLDivElement>(null);
@@ -313,6 +320,7 @@ export const ForwardModal = observer(
 						embed_indices: embedIndices,
 					},
 					actualMessage,
+					chosenForwardAs(forwardAs, message.channelId),
 				);
 				if (!forwarded) {
 					if (Users.currentUser?.accountLimited === true) {
@@ -470,6 +478,14 @@ export const ForwardModal = observer(
 						mediaSelection={mediaSelection}
 						embedChannel={composerChannel}
 						data-flx="messaging.forward-modal.forward-message-preview"
+					/>
+					<ForwardAsPersonaRow
+						sourceChannelId={message.channelId}
+						comment={actualOptionalMessage}
+						picked={forwardAs}
+						onPick={setForwardAs}
+						disabled={isForwarding}
+						data-flx="messaging.forward-modal.forward-as-persona-row"
 					/>
 					<FocusRing
 						within
