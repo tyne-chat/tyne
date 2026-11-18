@@ -574,6 +574,14 @@ msgstr "Filtro sipas dukshmërisë"
 msgid "Format preview"
 msgstr "Pamja paraprake e formatit"
 
+#. Label in the Forward dialog before the persona (or account) the forward is sent as.
+msgid "Forward as"
+msgstr "Përcill si"
+
+#. Spoken name of the button in the Forward dialog that picks who the forward is sent as. name is a persona or account name.
+msgid "Forward as {name}. Change"
+msgstr "Përcill si {name}. Ndrysho"
+
 #. Status beside the field for a new proxy tag in the import review: no persona has this tag
 msgctxt "persona-import-tag-status"
 msgid "Free"
