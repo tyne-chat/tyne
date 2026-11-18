@@ -140,6 +140,7 @@ The session that made a change receives the Dispatch like any other session. The
 | [Channel Signal Update](#channel-signal-update) | Signals are given or switched off in a channel |
 | [Channel Signal Bar Update](#channel-signal-bar-update) | The signal bar is switched on or off in a channel |
 | [Guild Commands Update](#guild-commands-update) | A community's commands are created, edited or deleted |
+| [DM Thread Event](#fork-dm-thread-event) | An event about a thread in a DM or group DM, wrapped |
 
 ## Session and current user
 
@@ -163,6 +164,7 @@ The session's initial state, sent once after a successful [Identify](/gateway/co
 | user_guild_settings | array[[user guild settings](/http-api/users/settings/#user-guild-settings-object) object] | Per-guild notification settings |
 | notes | map[snowflake, string] | Private notes keyed by user ID |
 | pinned_dms | array[snowflake] | Pinned private channel IDs |
+| fork_dm_threads? | [DM threads](#dm-threads-object) object | Threads in the account's DMs and group DMs |
 | favorite_memes | array[[meme](/http-api/memes/#meme-object) object] | Saved memes |
 | webauthn_credentials | array[[WebAuthn credential object](#webauthn-credential-object)] | Registered WebAuthn credentials |
 | rtc_regions | array[[RTC region object](#rtc-region-object)] | Voice regions you can pick, nearest first, without [hidden regions](/admin-api/voice/#hidden-regions) |
@@ -1137,3 +1139,25 @@ A community's [commands](/http-api/guild-commands/) were created, edited or dele
 | guild_id | snowflake | The community whose commands changed |
 
 Passive sessions receive it too.
+
+### <span id="fork-dm-thread-event"></span>FORK_DM_THREAD_EVENT
+
+An event about a thread in a DM or group DM. Every event about such a thread, and about messages, reactions, typing and read states in it, reaches each recipient of the DM wrapped in this one, so that clients that do not know threads in DMs drop it. A client that does handles `d` as the event named in `t`.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| t | string | The wrapped event's name, such as `THREAD_CREATE`, `MESSAGE_CREATE` or `MESSAGE_ACK` |
+| d | object | The wrapped event's payload |
+| push? | object | For the server's push notifications only |
+
+A thread in a DM is a channel of type `PUBLIC_THREAD` whose `parent_id` is the DM or group DM; it has no `guild_id`. Its `THREAD_CREATE` and `THREAD_UPDATE` carry the receiving account's own thread `member` when it follows the thread. Everyone in a DM follows a new thread; a message in it counts toward the read state of each follower who did not mute it.
+
+#### <span id="dm-threads-object"></span>DM threads object
+
+READY's `fork_dm_threads`.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| enabled | boolean | Whether this account may start threads in DMs |
+| threads | array[channel object] | The open threads the account follows, each with its own `member` |
+| read_states | array[read state object] | Their read states, which `read_states` leaves out |
