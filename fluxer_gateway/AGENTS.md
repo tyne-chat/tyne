@@ -176,6 +176,9 @@ The gateway's requests go to the API's `/internal/rpc`:
 | `session/session_passive.erl` | `signal_bar_update` bypasses the passive filter | one clause |
 | `session/fork_reaction_buffer.erl` | personas in the reaction buffer: `MESSAGE_REACTION_ADD_MANY` entries keep `persona_id` and `subprofile`, and a remove cancels only the buffered add of the same persona (tyne-chat/tyne#120) | fork-owned |
 | `session/session_dispatch_voice.erl` | `build_reactions/1` passes each entry through `fork_reaction_buffer:with_persona/2`; `try_cancel_from_buffer/3` and `matches_reaction/5` compare `fork_reaction_buffer:reactor/1` (user and persona), not `user_id` | three lines replaced |
+| `utils/fork_event_atoms.erl`, `utils/event_atoms.erl` | `FORK_DM_THREAD_EVENT`, the envelope of every event about a thread in a DM (tyne-chat/tyne#699); its map first in `known_event_map/0` | fork-owned; one line |
+| `push/fork_dm_thread_push.erl` | a DM-thread envelope's `push.message` is pushed as a message in the parent DM, titled "Author (Thread)", with `fork_thread_id` and `fork_thread_name` | fork-owned |
+| `presence/presence.erl`, `gateway/gateway_rpc_presence.erl`, `push/push_notification.erl`, `push/push_job_fields.erl` | hand the envelope's push message to upstream's DM push path (online, offline, unreachable), the title, the two fields | one clause each; one branch; one line |
 
 None of the lines in upstream's files has a `%% Fork:` marker. Keep the hand-overs when upstream
 changes these files: the `icon` line is the easiest to lose (no test checks a persona's icon through

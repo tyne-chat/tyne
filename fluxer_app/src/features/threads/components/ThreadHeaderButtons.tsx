@@ -24,6 +24,11 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useState} from 'react';
 
+// Fork imports.
+
+import {isDmWithoutThreads} from '@app/features/threads/fork/ForkDmThreads';
+import {parentThreadNews} from '@app/features/threads/fork/ForkThreadNews';
+
 function isThreadBrowserParent(channel: Channel): boolean {
 	return TEXT_THREAD_PARENT_CHANNEL_TYPES.has(channel.type);
 }
@@ -39,10 +44,16 @@ export const ThreadsButton = observer(({channel}: {channel: Channel}) => {
 	const [sheetOpen, setSheetOpen] = useState(false);
 	const parent = resolveThreadBrowserParent(channel);
 	if (!ThreadGuilds.isActive(channel.guildId) || parent == null) return null;
+	// Fork: no threads in a DM with a system account or a bot (tyne-chat/tyne#699).
+	if (isDmWithoutThreads(parent)) return null;
+	// Fork: the threads' news on the button (tyne-chat/tyne#699).
+	const news = parentThreadNews(parent.id);
 	if (MobileLayout.enabled) {
 		return (
 			<>
 				<ChannelHeaderIcon
+					badgeCount={news.mentionCount}
+					hasUnread={news.hasUnread}
 					icon={ChatsIcon}
 					label={i18n._(D.THREADS_DESCRIPTOR)}
 					isSelected={sheetOpen}
@@ -89,6 +100,8 @@ export const ThreadsButton = observer(({channel}: {channel: Channel}) => {
 			data-flx="threads.threads-button.popout"
 		>
 			<ChannelHeaderIcon
+				badgeCount={news.mentionCount}
+				hasUnread={news.hasUnread}
 				icon={ChatsIcon}
 				label={i18n._(D.THREADS_DESCRIPTOR)}
 				isSelected={isOpen}

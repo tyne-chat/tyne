@@ -69,6 +69,10 @@ import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 import {ms} from 'itty-time';
 import {z} from 'zod';
 
+// Fork imports.
+
+import {dmRulesChannelOf} from '@app/api/channel/services/thread/ForkDmThreads';
+
 const PayloadSchema = z.object({
 	userId: z.string(),
 	harvestId: z.string(),
@@ -285,7 +289,10 @@ async function harvestMessages(
 			let eligible = channelEligibility.get(channelIdStr);
 			if (eligible === undefined) {
 				const channel = await filterArgs.findChannel(ref.channelId);
-				eligible = channel ? isChannelEligible(channel, userId, filterArgs.filter, filterArgs.context) : false;
+				// Fork: a DM thread's messages go with its DM (tyne-chat/tyne#699).
+				eligible = channel
+					? isChannelEligible(await dmRulesChannelOf(channel), userId, filterArgs.filter, filterArgs.context)
+					: false;
 				channelEligibility.set(channelIdStr, eligible);
 			}
 			if (eligible) {

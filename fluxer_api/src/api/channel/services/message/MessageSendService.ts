@@ -93,6 +93,7 @@ import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 // Fork imports.
 
 import type {PersonaID} from '@app/api/BrandedTypes';
+import {dmRulesChannel, isDmThreadChannel} from '@app/api/channel/services/thread/ForkDmThreads';
 import {type ForkSendMessageOptions, recordForkGuildCommandUse} from '@app/api/guild_command/GuildCommandUses';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
@@ -256,6 +257,10 @@ export class MessageSendService {
 			checkGuildVerificationWithResponse({user, guild, member});
 		} else if (channel.type === ChannelTypes.DM || channel.type === ChannelTypes.GROUP_DM) {
 			await this.deps.channelAuthService.validateDMSendPermissions({channel, userId: user.id});
+		}
+		// Fork: a DM thread follows its parent DM's rules for sending (tyne-chat/tyne#699).
+		if (!guild && isDmThreadChannel(channel) && channel.parentId !== null) {
+			await this.deps.channelAuthService.validateDMSendPermissions({channelId: channel.parentId, userId: user.id});
 		}
 		return {canEmbedLinks, canMentionEveryone, canAttachFiles};
 	}
@@ -700,6 +705,10 @@ export class MessageSendService {
 			user.id !== SYSTEM_USER_ID &&
 			(await systemDmsHidden())
 		) {
+			throw new DirectMessagesDisabledError();
+		}
+		// Fork: a DM thread is part of its DM here (tyne-chat/tyne#699).
+		if (dmRulesChannel(authChannel) !== channel && user.id !== SYSTEM_USER_ID && (await systemDmsHidden())) {
 			throw new DirectMessagesDisabledError();
 		}
 		const {checkPermission, hasPermission} = forumStarter?.parentAuth ?? authChannel;

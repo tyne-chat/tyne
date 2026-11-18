@@ -10,6 +10,7 @@ import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
+import {restoreDmThreadsAfterPromotedResume} from '@app/features/threads/fork/ForkDmThreadReady';
 
 let pending = false;
 
@@ -23,7 +24,8 @@ function runForkAccountReadyWork(): void {
 // the account engine kept the account's session warm, so switching to it (or starting the app on it)
 // resumes that session and no READY arrives. Do here what the READY handler does for the fork. The
 // switch has already dropped the previous account's personas (PersonaStore's cancellation).
-export function handleForkPromotedResume(): void {
+export function handleForkPromotedResume(accountKey: string): void {
+	restoreDmThreadsAfterPromotedResume(accountKey);
 	SignalBarStore.invalidate();
 	GuildCommandsStore.invalidate();
 	scheduleForkAccountReadyWork();

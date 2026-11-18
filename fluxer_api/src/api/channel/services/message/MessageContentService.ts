@@ -19,6 +19,10 @@ import {RelationshipTypes, SensitiveMediaFilterLevel} from '@fluxer/constants/sr
 import type {GuildMemberResponse} from '@fluxer/schema/src/domains/guild/GuildMemberSchemas';
 import type {GuildResponse} from '@fluxer/schema/src/domains/guild/GuildResponseSchemas';
 
+// Fork imports.
+
+import {dmRulesChannelOf} from '@app/api/channel/services/thread/ForkDmThreads';
+
 export interface DmNsfwContext {
 	senderFilterLevel: number;
 	recipientFilterLevel: number;
@@ -59,7 +63,9 @@ export class MessageContentService {
 		});
 	}
 
-	async resolveDmNsfwContext(channel: Channel, senderId: UserID): Promise<DmNsfwContext | undefined> {
+	async resolveDmNsfwContext(dmChannel: Channel, senderId: UserID): Promise<DmNsfwContext | undefined> {
+		// Fork: a DM thread follows its parent DM's settings (tyne-chat/tyne#699).
+		const channel = await dmRulesChannelOf(dmChannel);
 		if (channel.type !== ChannelTypes.DM) {
 			return undefined;
 		}
