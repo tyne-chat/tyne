@@ -36,14 +36,56 @@ export function resolveOutgoingPersona(
 }
 
 /**
- * What a forward and its comment go out as. They are one thing said by one speaker, so a tag in the
- * comment decides for both. Without one they use the persona selected where the forward started,
- * which is the one on screen, and then the destination's, so that the account does not turn up in a
- * channel where a persona was chosen. Call it once per destination.
+ * Who a forward goes out as when the Forward dialog's "Forward as" was used: a persona, or `null` for
+ * the account (tyne-chat/tyne#817).
+ */
+export type ForwardAs = MessageSubprofileResponse | null;
+
+/**
+ * What a forward and its comment go out as without the Forward dialog's choice (callers other than
+ * the dialog): the persona selected where the forward started, which is the one on screen, and then
+ * the destination's, so that the account does not turn up in a channel where a persona was chosen. A
+ * tag in the comment decides for both, as in the message box. Call it once per destination.
  */
 export function resolveForwardPersona(sourceChannelId: string, channelId: string, comment: string): OutgoingPersona {
 	const selectionChannelId = PersonaStore.latchedPersonaFor(sourceChannelId) ? sourceChannelId : channelId;
 	return resolveOutgoingPersona(selectionChannelId, comment, false, {allowEmptyContent: true});
+}
+
+/**
+ * What a forward and its comment go out as with the Forward dialog's choice, `forwardAs`, which is
+ * what the dialog showed. They are one thing said by one speaker, so a tag in the comment decides for
+ * both, and a backslash sends them as the account. Either way this is a choice made in the dialog,
+ * like a pick: it changes no channel's selection, even in "last used" mode, and records one use for
+ * the whole forward. Call it once per forward, not per destination (tyne-chat/tyne#817).
+ */
+export function resolveDialogForwardPersona(comment: string, forwardAs: ForwardAs): OutgoingPersona {
+	const said = PersonaStore.matchTagOnly(comment, forwardAs?.id ?? null);
+	if (said.isFromTag && said.persona) {
+		void PersonaStore.recordPersonaUse(said.persona.id);
+		return {
+			content: said.strippedContent,
+			subprofile: normalizeSubprofile(said.persona, {
+				display_tag_text: PersonaStore.displayTagText || null,
+				display_tag_icon: PersonaStore.displayTagIcon || null,
+			}),
+		};
+	}
+	if (said.wasEscaped) {
+		return {content: said.strippedContent, subprofile: undefined};
+	}
+	if (forwardAs != null) {
+		void PersonaStore.recordPersonaUse(forwardAs.id);
+	}
+	return {content: comment, subprofile: forwardAs ?? undefined};
+}
+
+/**
+ * Who the Forward dialog shows the forward going out as before anyone picks: the persona active in
+ * the channel it is forwarded from (the one on screen), else the account (tyne-chat/tyne#817).
+ */
+export function defaultForwardAs(sourceChannelId: string): ForwardAs {
+	return PersonaStore.getActiveSubprofile(sourceChannelId);
 }
 
 /**
