@@ -350,14 +350,16 @@ export const useMessageActionMenuData = (
 					onClick: handlers.handleEditMessage,
 					shortcut: <KeybindHint action="message_edit" data-flx="channel.message-action-menu.groups.keybind-hint--5" />,
 				});
-				if (PersonaStore.personas.length)
-					interactionActions.push({
-						id: messageActionMenuItemIds.changePersona,
-						icon: <ChangePersonasIcon size={20} data-flx="channel.message-action-menu.groups.change-personas-icon" />,
-						label: i18n._(CHANGE_PERSONA_DESCRIPTOR),
-						onClick: handlers.handleChangePersona,
-						//shortcut: <KeybindHint action="message_change_persona" data-flx="channel.message-action-menu.groups.keybind-hint--change-persona" />
-					});
+			}
+			// Fork: also for a forward, whose sender is the one thing about it that can change (tyne-chat/tyne#817).
+			if (message.isCurrentUserAuthor() && message.isUserMessage() && PersonaStore.personas.length) {
+				interactionActions.push({
+					id: messageActionMenuItemIds.changePersona,
+					icon: <ChangePersonasIcon size={20} data-flx="channel.message-action-menu.groups.change-personas-icon" />,
+					label: i18n._(CHANGE_PERSONA_DESCRIPTOR),
+					onClick: handlers.handleChangePersona,
+					//shortcut: <KeybindHint action="message_change_persona" data-flx="channel.message-action-menu.groups.keybind-hint--change-persona" />
+				});
 			}
 			if (message.isUserMessage() && permissions?.canPinMessage) {
 				managementActions.push({

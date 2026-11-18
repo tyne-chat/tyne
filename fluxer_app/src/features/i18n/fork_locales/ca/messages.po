@@ -574,6 +574,14 @@ msgstr "Filtra per visibilitat"
 msgid "Format preview"
 msgstr "Previsualització del format"
 
+#. Label in the Forward dialog before the persona (or account) the forward is sent as.
+msgid "Forward as"
+msgstr "Reenvia com a"
+
+#. Spoken name of the button in the Forward dialog that picks who the forward is sent as. name is a persona or account name.
+msgid "Forward as {name}. Change"
+msgstr "Reenvia com a {name}. Canvia"
+
 #. Status beside the field for a new proxy tag in the import review: no persona has this tag
 msgctxt "persona-import-tag-status"
 msgid "Free"
