@@ -8,6 +8,8 @@ export interface PersonaRow {
 	user_id: UserID;
 	persona_id: PersonaID;
 	name: string;
+	/** Other names to find the persona by, a JSON list (tyne-chat/tyne#707). Rows written before have none. */
+	aliases?: Nullish<string>;
 	avatar_hash: Nullish<string>;
 	banner_hash: Nullish<string>;
 	pronouns: Nullish<string>;
@@ -31,6 +33,7 @@ export const PERSONA_COLUMNS = [
 	'user_id',
 	'persona_id',
 	'name',
+	'aliases',
 	'avatar_hash',
 	'banner_hash',
 	'pronouns',

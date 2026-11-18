@@ -7,6 +7,7 @@ import {
 	personaAssetHashOrNull,
 	type SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {readPersonaAliases} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 import type {PersonaID, UserID} from '../BrandedTypes';
@@ -16,6 +17,7 @@ export class Persona {
 	readonly id: PersonaID;
 	readonly userId: UserID;
 	readonly name: string;
+	readonly aliases: Array<string>;
 	readonly avatarHash: string | null;
 	readonly bannerHash: string | null;
 	readonly pronouns: string | null;
@@ -42,6 +44,7 @@ export class Persona {
 		this.id = row.persona_id;
 		this.userId = row.user_id;
 		this.name = row.name;
+		this.aliases = readPersonaAliases(row.aliases);
 		// Image fields are hashes of images stored under the account (the routes accept nothing else);
 		// anything else read from storage, a link above all, is dropped rather than handed on.
 		this.avatarHash = personaAssetHashOrNull(row.avatar_hash);
@@ -67,6 +70,7 @@ export class Persona {
 		return {
 			id: this.id.toString(),
 			name: this.name,
+			aliases: this.aliases,
 			avatar_hash: this.avatarHash,
 			banner_hash: this.bannerHash,
 			pronouns: this.pronouns,
@@ -90,6 +94,7 @@ export class Persona {
 		return {
 			id: this.id.toString(),
 			name: this.name,
+			aliases: this.aliases,
 			avatar_hash: this.avatarHash,
 			banner_hash: this.bannerHash,
 			pronouns: this.pronouns,
@@ -140,6 +145,7 @@ export class Persona {
 			user_id: this.userId,
 			persona_id: this.id,
 			name: this.name,
+			aliases: JSON.stringify(this.aliases),
 			avatar_hash: this.avatarHash,
 			banner_hash: this.bannerHash,
 			pronouns: this.pronouns,

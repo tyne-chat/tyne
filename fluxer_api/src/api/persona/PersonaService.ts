@@ -26,6 +26,11 @@ import type {
 	PersonaImportPreviewResponse,
 	PersonaRestoreResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import {
+	normalizePersonaAliases,
+	personaNameMatches,
+	personaNameMatchScore,
+} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import type {PersonaLookupItem} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {ownTyneMediaImageHash} from '@fluxer/schema/src/domains/persona/PluralKitFormat';
 import {type ChannelID, createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
@@ -117,19 +122,14 @@ export function calculatePersonaMatchScore(
 	ownerUsername?: string | null,
 	ownerNickname?: string | null,
 	ownerGlobalName?: string | null,
+	aliases?: ReadonlyArray<string> | null,
 ): number {
 	const q = query.trim().toLowerCase();
 	if (!q) return 0;
 
-	const name = personaName.toLowerCase();
-	if (name.startsWith(q)) {
-		return 1000;
-	}
-	if (name.includes(` ${q}`) || name.includes(`-${q}`) || name.includes(`_${q}`)) {
-		return 800;
-	}
-	if (name.includes(q)) {
-		return 500;
+	const byName = personaNameMatchScore(personaName, aliases, q);
+	if (byName >= 0) {
+		return byName;
 	}
 	const tag = (displayTagText ?? '').toLowerCase();
 	if (tag.startsWith(q)) {
@@ -159,13 +159,26 @@ type PersonaProfileText = ['global_name' | 'bio' | 'pronouns', string | null | u
  */
 function changedProfileText(
 	existing: Persona,
-	data: {name?: string | null; bio?: string | null; pronouns?: string | null},
+	data: {name?: string | null; aliases?: ReadonlyArray<string>; bio?: string | null; pronouns?: string | null},
 ): Array<PersonaProfileText> {
 	const fields: Array<PersonaProfileText> = [];
 	if (data.name != null && data.name !== existing.name) fields.push(['global_name', data.name]);
+	// Aliases are other names, so they are checked as names.
+	for (const alias of normalizePersonaAliases(data.aliases)) {
+		if (!existing.aliases.includes(alias)) fields.push(['global_name', alias]);
+	}
 	if (data.bio != null && data.bio !== existing.bio) fields.push(['bio', data.bio]);
 	if (data.pronouns != null && data.pronouns !== existing.pronouns) fields.push(['pronouns', data.pronouns]);
 	return fields;
+}
+
+/** Aliases as stored, or undefined when the request leaves them alone (tyne-chat/tyne#707). */
+function storedAliases(aliases: ReadonlyArray<string> | undefined): Array<string> | undefined {
+	return aliases === undefined ? undefined : normalizePersonaAliases(aliases);
+}
+
+function aliasProfileText(aliases: ReadonlyArray<string> | undefined): Array<PersonaProfileText> {
+	return normalizePersonaAliases(aliases).map((alias): PersonaProfileText => ['global_name', alias]);
 }
 
 function personaSettingsResponse(row: UserPersonaSettingsRow): PersonaSettingsResponse {
@@ -313,6 +326,7 @@ export class PersonaService {
 		}
 		await this.assertProfileTextAllowed(userId, [
 			['global_name', data.name],
+			...aliasProfileText(data.aliases),
 			['bio', data.bio],
 			['pronouns', data.pronouns],
 		]);
@@ -320,6 +334,7 @@ export class PersonaService {
 		const persona = await this.deps.personaRepository.create({
 			user_id: userId,
 			name: data.name,
+			aliases: storedAliases(data.aliases),
 			avatar_hash: data.avatar_hash,
 			banner_hash: data.banner_hash,
 			pronouns: data.pronouns,
@@ -358,6 +373,7 @@ export class PersonaService {
 
 		const updated = await this.deps.personaRepository.update(userId, personaId, {
 			name: data.name,
+			aliases: storedAliases(data.aliases),
 			avatar_hash: data.avatar_hash,
 			banner_hash: data.banner_hash,
 			pronouns: data.pronouns,
@@ -527,6 +543,7 @@ export class PersonaService {
 					? changedProfileText(existing, item)
 					: ([
 							['global_name', item.name],
+							...aliasProfileText(item.aliases),
 							['bio', item.bio],
 							['pronouns', item.pronouns],
 						] satisfies Array<PersonaProfileText>);
@@ -540,6 +557,7 @@ export class PersonaService {
 					update: existing,
 					params: {
 						name: item.name,
+						aliases: storedAliases(item.aliases),
 						avatar_hash: item.avatar_hash,
 						banner_hash: item.banner_hash,
 						pronouns: item.pronouns,
@@ -559,6 +577,7 @@ export class PersonaService {
 				create: {
 					user_id: userId,
 					name: item.name,
+					aliases: storedAliases(item.aliases),
 					avatar_hash: item.avatar_hash,
 					banner_hash: item.banner_hash,
 					pronouns: item.pronouns,
@@ -770,12 +789,18 @@ export class PersonaService {
 						: [];
 					const key = `new:${created++}`;
 					finalState.set(key, {name: item.name, tags, emojis});
-					profileText.push(['global_name', item.name], ['bio', item.bio], ['pronouns', item.pronouns]);
+					profileText.push(
+						['global_name', item.name],
+						...aliasProfileText(item.aliases),
+						['bio', item.bio],
+						['pronouns', item.pronouns],
+					);
 					planned.push({
 						kind: 'create',
 						params: {
 							user_id: userId,
 							name: item.name,
+							aliases: storedAliases(item.aliases),
 							avatar_hash: item.avatar_hash,
 							banner_hash: item.banner_hash,
 							pronouns: item.pronouns,
@@ -829,6 +854,9 @@ export class PersonaService {
 						bio: item.bio ?? null,
 						color: item.color ?? null,
 						persona_tags: tags,
+						// Only aliases the request names replace the stored ones (an empty list clears them):
+						// PluralKit has none, and clients from before aliases (tyne-chat/tyne#707) send none either.
+						...(item.aliases !== undefined ? {aliases: storedAliases(item.aliases)} : {}),
 						...(linked ? {} : {external_uuid: externalId}),
 					};
 					if (!action.keep_avatar) {
@@ -1250,7 +1278,7 @@ export class PersonaService {
 		// Query matching
 		const matched = visiblePersonas.filter((persona) => {
 			if (!normalizedQuery) return true;
-			const nameMatch = persona.name.toLowerCase().includes(normalizedQuery);
+			const nameMatch = personaNameMatches(persona.name, persona.aliases, normalizedQuery);
 			const userSettings = settingsMap.get(persona.userId.toString());
 			const tagMatch = userSettings?.display_tag_text?.toLowerCase().includes(normalizedQuery);
 			const owner = userMap.get(persona.userId);
@@ -1273,6 +1301,7 @@ export class PersonaService {
 				aOwner?.username,
 				aOwner?.nickname,
 				aOwner?.globalName,
+				a.aliases,
 			);
 			const bMatch = calculatePersonaMatchScore(
 				b.name,
@@ -1281,6 +1310,7 @@ export class PersonaService {
 				bOwner?.username,
 				bOwner?.nickname,
 				bOwner?.globalName,
+				b.aliases,
 			);
 			if (aMatch !== bMatch) {
 				return bMatch - aMatch;
@@ -1300,6 +1330,7 @@ export class PersonaService {
 			return {
 				id: persona.id.toString(),
 				name: persona.name,
+				aliases: persona.aliases,
 				avatar_hash: persona.avatarHash,
 				banner_hash: persona.bannerHash,
 				display_tag_text: userSettings?.display_tag_text ?? null,

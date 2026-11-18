@@ -41,6 +41,7 @@ export type PersonaImportImageRef = z.infer<typeof PersonaImportImageRefSchema>;
 
 export const PersonaImportPreviewMemberSchema = PersonaCreateRequestSchema.pick({
 	name: true,
+	aliases: true,
 	pronouns: true,
 	color: true,
 	bio: true,
@@ -88,6 +89,7 @@ export const PersonaImportFieldSchema = z.enum([
 	'signature_emojis',
 	'auto_tag_disabled',
 	'visibility',
+	'aliases',
 ]);
 export type PersonaImportField = z.infer<typeof PersonaImportFieldSchema>;
 

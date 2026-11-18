@@ -11,6 +11,7 @@ export interface CreatePersonaParams {
 	user_id: UserID;
 	persona_id?: PersonaID;
 	name: string;
+	aliases?: ReadonlyArray<string>;
 	avatar_hash?: string | null;
 	banner_hash?: string | null;
 	pronouns?: string | null;
@@ -28,6 +29,7 @@ export interface CreatePersonaParams {
 
 export interface UpdatePersonaParams {
 	name?: string;
+	aliases?: ReadonlyArray<string>;
 	avatar_hash?: string | null;
 	banner_hash?: string | null;
 	pronouns?: string | null;
