@@ -88,6 +88,10 @@ msgstr "এলিস"
 msgid "All Personas"
 msgstr "সব পারসোনা"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "সব এক তালিকায়"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "সব পারসোনা"
@@ -465,6 +469,10 @@ msgstr "পারসোনা এডিট করুন"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "টাইমস্ট্যাম্প এডিট করুন"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "ইমোজি ({emojiCount})"
 
 msgid "Everyone else"
 msgstr "অন্য সবাই"
@@ -846,6 +854,7 @@ msgstr "সবচেয়ে বেশি ব্যবহৃত"
 msgid "Move to Trash"
 msgstr "ট্র্যাশে সরান"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "নাম (A–Z)"
@@ -943,6 +952,10 @@ msgstr "কোনো ট্যাগ নেই"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "কেউ এই সিগন্যাল চালু করেনি"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "অ্যানিমেটেড নয় ও অ্যানিমেটেড আলাদা"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "সাম্প্রতিক"
 msgid "Recent Personas"
 msgstr "সাম্প্রতিক পারসোনা"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "সম্প্রতি যোগ করা"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "সম্প্রতি ব্যবহৃত"
@@ -1460,6 +1477,10 @@ msgstr "বাদ দেওয়া হচ্ছে"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "কিছু প্রক্সি ট্যাগ বাদ পড়েছে: {productName}-এ প্রতি পারসোনায় সর্বোচ্চ 5টি ট্যাগ রাখা যায়, প্রতিটি সর্বোচ্চ 32 অক্ষরের।"
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "সাজানো ও গ্রুপ করা"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"
