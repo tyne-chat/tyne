@@ -38,6 +38,7 @@ import {ComponentBus} from '@app/features/platform/utils/ComponentBus';
 import {MenuGroup} from '@app/features/ui/action_menu/MenuGroup';
 import {MenuItem} from '@app/features/ui/action_menu/MenuItem';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
+import {MentionBadge} from '@app/features/ui/components/MentionBadge';
 import {useContextMenuTrigger} from '@app/features/ui/hooks/useContextMenuTrigger';
 import ContextMenuState, {isContextMenuNodeTarget} from '@app/features/ui/state/ContextMenu';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
@@ -71,6 +72,18 @@ const CRUMB_NAME = /thread-parent-crumb\.crumb-name/;
 const FOLLOW = /channel-follow-button/;
 // A dot or badge on an item: unread pins, or the fork's mention badge or unread dot on a header button.
 const UNREAD_MARK = /unread-pin-indicator|header-button-badge|header-button-unread-dot/;
+// A header button's red count: the menu button shows the sum of those folded into it (tyne-chat/tyne#699).
+const COUNT_MARK = /header-button-badge$/;
+
+function foldedCount(element: Element): number {
+	let total = 0;
+	for (const node of element.querySelectorAll('[data-flx]')) {
+		if (!COUNT_MARK.test(node.getAttribute('data-flx') ?? '')) continue;
+		const count = Number.parseInt(node.textContent ?? '', 10);
+		if (Number.isFinite(count)) total += count;
+	}
+	return total;
+}
 
 interface MeasuredItem {
 	readonly item: HeaderLayoutItem;
@@ -81,11 +94,12 @@ interface MeasuredItem {
 interface OverflowState {
 	readonly count: number;
 	readonly dot: boolean;
+	readonly badge: number;
 	readonly searchMode: HeaderLayout['searchMode'] | null;
 	readonly searchFolded: boolean;
 }
 
-const INITIAL_STATE: OverflowState = {count: 0, dot: false, searchMode: null, searchFolded: false};
+const INITIAL_STATE: OverflowState = {count: 0, dot: false, badge: 0, searchMode: null, searchFolded: false};
 
 const flxOf = (element: Element): string | null =>
 	element.getAttribute('data-flx') ?? element.querySelector('[data-flx]')?.getAttribute('data-flx') ?? null;
@@ -141,6 +155,9 @@ function naturalWidth(element: Element, caps: NameCaps, cachedWidth: (element: E
 interface MenuEntry {
 	readonly key: string;
 	readonly label: string;
+	// The button's own mark, drawn in the menu instead of read out of its label (tyne-chat/tyne#704).
+	readonly badge: number;
+	readonly dot: boolean;
 	readonly disabled: boolean;
 	// The search box has no icon of its own to copy; the Follow button has no icon at all.
 	readonly icon: Element | 'search' | null;
@@ -320,6 +337,7 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 			if (searchElement != null) header.setAttribute(SEARCH_ATTR, layout.searchMode);
 			else header.removeAttribute(SEARCH_ATTR);
 			let dot = false;
+			let badge = 0;
 			let searchFolded = false;
 			for (const {item, element, rule} of measured) {
 				if (item.kind === 'info') {
@@ -333,6 +351,7 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 				if (!folded) continue;
 				if (item.kind === 'search') searchFolded = true;
 				if (element.contains(document.activeElement)) focusMoreRef.current = true;
+				badge += foldedCount(element);
 				if (
 					rule?.id === 'updater' ||
 					[...element.querySelectorAll('[data-flx]')].some((node) =>
@@ -350,11 +369,13 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 				const next: OverflowState = {
 					count: layout.folded.size,
 					dot,
+					badge,
 					searchMode: searchElement != null ? layout.searchMode : null,
 					searchFolded,
 				};
 				return previous.count === next.count &&
 					previous.dot === next.dot &&
+					previous.badge === next.badge &&
 					previous.searchMode === next.searchMode &&
 					previous.searchFolded === next.searchFolded
 					? previous
@@ -518,6 +539,8 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 				entries.push({
 					key: item.key,
 					label: i18n._(SEARCH_DESCRIPTOR),
+					badge: 0,
+					dot: false,
 					disabled: false,
 					icon: 'search',
 					activate: openSearch,
@@ -528,7 +551,16 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 			if (button == null) continue;
 			entries.push({
 				key: item.key,
-				label: button.getAttribute('aria-label') ?? button.textContent?.trim() ?? '',
+				// A header button's plain name: its aria-label also reads out its marks for screen readers.
+				label:
+					button.getAttribute('data-header-label') ??
+					button.getAttribute('aria-label') ??
+					button.textContent?.trim() ??
+					'',
+				badge: foldedCount(element),
+				dot: [...element.querySelectorAll('[data-flx]')].some((node) =>
+					UNREAD_MARK.test(node.getAttribute('data-flx') ?? ''),
+				),
 				disabled: button.disabled,
 				icon: button.querySelector('svg'),
 				activate: () => {
@@ -561,6 +593,17 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 								data-flx="channel.header-overflow.menu-item"
 							>
 								{entry.label}
+								{entry.badge > 0 ? (
+									<span className={ownStyles.menuMark} data-flx="channel.header-overflow.menu-badge">
+										<MentionBadge
+											mentionCount={entry.badge}
+											size="small"
+											data-flx="channel.header-overflow.mention-badge"
+										/>
+									</span>
+								) : (
+									entry.dot && <span className={ownStyles.menuDot} data-flx="channel.header-overflow.menu-dot" />
+								)}
 							</MenuItem>
 						))}
 					</MenuGroup>
@@ -581,6 +624,7 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 					icon={DotsThreeIcon}
 					iconWeight="bold"
 					label={i18n._(MORE_OPTIONS_DESCRIPTOR)}
+					badgeCount={state.badge}
 					hasUnread={state.dot}
 					isSelected={isMenuOpen}
 					className={buttonClassName}
