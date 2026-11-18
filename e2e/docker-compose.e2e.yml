@@ -399,7 +399,7 @@ services:
       static-proxy: { condition: service_healthy }
 
   test-runner:
-    image: mcr.microsoft.com/playwright:v1.50.1-noble
+    image: mcr.microsoft.com/playwright:v1.55.1-noble
     network_mode: host
     restart: "no"
     environment:
