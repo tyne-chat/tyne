@@ -183,6 +183,7 @@ export async function createPersonaExportArchive(
 				avatar,
 				banner,
 				autoTagDisabled: persona.autoTagDisabled,
+				aliases: persona.aliases,
 				signatureEmojis: persona.signatureEmojis,
 			});
 		}

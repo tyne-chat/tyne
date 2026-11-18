@@ -90,6 +90,7 @@ export function normalizePersona(
 	return {
 		id: source.id ?? '',
 		name: source.name ?? '',
+		aliases: Array.isArray(source.aliases) ? source.aliases : [],
 		avatar_hash: source.avatar_hash ?? null,
 		banner_hash: source.banner_hash ?? null,
 		pronouns: source.pronouns ?? null,
