@@ -29,6 +29,11 @@ function fakes(rows: Array<GuildEmojiRow>) {
 	const byId = new Map(rows.map((r) => [r.emoji_id, r]));
 	const calls: Array<string> = [];
 	const deps: EmojiFatesDeps = {
+		avatarService: {
+			cloneEmojiImage: async ({sourceEmojiId, emojiId}) => {
+				calls.push(`clone ${sourceEmojiId} ${emojiId}`);
+			},
+		},
 		guildRepository: {
 			getEmojiById: async (id) => {
 				const r = byId.get(id);
@@ -51,15 +56,15 @@ function fakes(rows: Array<GuildEmojiRow>) {
 describe('applyEmojiFates', () => {
 	it('moves an emoji to another community under its new name, keeping its id and creator', async () => {
 		const {deps, calls, byId} = fakes([row(10n, 501n, 'NodNod')]);
-		const result = await applyEmojiFates([fate({})], deps, false);
+		const result = await applyEmojiFates([fate({})], deps, false, '1');
 		expect(calls).toEqual(['delete 10 501', 'upsert 20 501 SeraphNod']);
 		expect(byId.get(501n as EmojiID)?.creator_id).toBe(1n);
-		expect(result).toEqual({guilds: ['10', '20'], done: ['501'], changed: [], missing: []});
+		expect(result).toEqual({guilds: ['10', '20'], done: ['501'], changed: [], missing: [], copied: []});
 	});
 
 	it('renames one in its own community without taking it off the list', async () => {
 		const {deps, calls} = fakes([row(10n, 501n, 'NodNod')]);
-		const result = await applyEmojiFates([fate({guild_id: '10'})], deps, false);
+		const result = await applyEmojiFates([fate({guild_id: '10'})], deps, false, '1');
 		expect(calls).toEqual(['upsert 10 501 SeraphNod']);
 		expect(result.guilds).toEqual(['10']);
 	});
@@ -73,22 +78,35 @@ describe('applyEmojiFates', () => {
 			],
 			deps,
 			false,
+			'1',
 		);
 		expect(calls).toEqual(['delete 10 501']);
-		expect(result).toEqual({guilds: ['10'], done: ['501', '502'], changed: [], missing: []});
+		expect(result).toEqual({guilds: ['10'], done: ['501', '502'], changed: [], missing: [], copied: []});
 	});
 
 	it('leaves one changed on Tyne since the review as it is', async () => {
 		const {deps, calls} = fakes([row(10n, 501n, 'RenamedOnTyne'), row(30n, 503n, 'NodNod')]);
-		const result = await applyEmojiFates([fate({}), fate({emoji_id: '503'})], deps, false);
+		const result = await applyEmojiFates([fate({}), fate({emoji_id: '503'})], deps, false, '1');
 		expect(calls).toEqual([]);
 		expect(result.changed).toEqual(['501', '503']);
 	});
 
+	it('copies it to more communities as emoji of their own, once', async () => {
+		const {deps, calls, byId} = fakes([row(10n, 501n, 'NodNod'), row(40n, 602n, 'NodNod')]);
+		const copies = [
+			{emoji_id: '601', guild_id: '30', name: 'NodNod'},
+			{emoji_id: '602', guild_id: '40', name: 'NodNod'},
+		];
+		const result = await applyEmojiFates([fate({guild_id: '10', name: 'NodNod', copies})], deps, false, '7');
+		expect(calls).toEqual(['clone 501 601', 'upsert 30 601 NodNod']);
+		expect(byId.get(601n as EmojiID)?.creator_id).toBe(7n);
+		expect(result).toEqual({guilds: ['30'], done: ['501'], changed: [], missing: [], copied: ['601']});
+	});
+
 	it('counts one already where it should be as done, and writes nothing in a dry run', async () => {
 		const {deps, calls} = fakes([row(20n, 501n, 'SeraphNod'), row(10n, 502n, 'NodNod')]);
-		const result = await applyEmojiFates([fate({}), fate({emoji_id: '502'}), fate({emoji_id: '999'})], deps, true);
+		const result = await applyEmojiFates([fate({}), fate({emoji_id: '502'}), fate({emoji_id: '999'})], deps, true, '1');
 		expect(calls).toEqual([]);
-		expect(result).toEqual({guilds: ['10', '20'], done: ['501', '502'], changed: [], missing: ['999']});
+		expect(result).toEqual({guilds: ['10', '20'], done: ['501', '502'], changed: [], missing: ['999'], copied: []});
 	});
 });
