@@ -63,6 +63,11 @@ import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 
 import {forgetThreadOwnerPersona} from '@app/api/persona/ThreadOwnerPersonaStore';
 
+// Fork imports.
+
+import {DM_THREAD_GUILD_KEY, isDmThreadGuildKey} from '@app/api/channel/services/thread/ForkDmThreadKeys';
+import {isDmThreadParentType} from '@fluxer/constants/src/ForkDmThreadConstants';
+
 export interface CreateThreadMember {
 	userId: UserID;
 	flags: number;
@@ -286,7 +291,8 @@ export class ThreadRepository {
 	async create(params: CreateThreadParams): Promise<ThreadState> {
 		const channel = params.channel;
 		const threadId = channel.channel_id;
-		const guildId = channel.guild_id;
+		// Fork: a DM thread's row has no guild; its thread rows go under DM_THREAD_GUILD_KEY (tyne-chat/tyne#699).
+		const guildId = channel.guild_id ?? (isDmThreadParentType(params.parentType) ? DM_THREAD_GUILD_KEY : null);
 		const parentId = channel.parent_id;
 		if (guildId == null || parentId == null) {
 			throw new Error('Thread channel rows require a guild and a parent');
@@ -512,6 +518,8 @@ export class ThreadRepository {
 	}
 
 	async countActiveThreads(guildId: GuildID): Promise<number> {
+		// Fork: DM threads share one key across every DM; the guild's cap does not apply to them (tyne-chat/tyne#699).
+		if (isDmThreadGuildKey(guildId)) return 0;
 		const row = await fetchOne<{count: bigint | number}>(COUNT_ACTIVE.bind({guild_id: guildId}));
 		return Number(row?.count ?? 0);
 	}

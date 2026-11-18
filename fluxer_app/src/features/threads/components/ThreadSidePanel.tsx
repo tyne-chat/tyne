@@ -37,6 +37,12 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useRef} from 'react';
 
+// Fork imports.
+
+import {DmThreadPeopleButton} from '@app/features/threads/fork/ForkDmThreadPeople';
+import {dmThreadParent, isDmThread} from '@app/features/threads/fork/ForkDmThreads';
+import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
+
 function usePanelResize(): (event: React.PointerEvent<HTMLDivElement>) => void {
 	const startRef = useRef<{x: number; width: number} | null>(null);
 	return useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -60,6 +66,18 @@ function usePanelResize(): (event: React.PointerEvent<HTMLDivElement>) => void {
 const ThreadMembersButton = observer(({thread}: {thread: Channel}) => {
 	const {i18n} = useLingui();
 	const {isOpen, openProps} = usePopout(`thread-members-${thread.id}`);
+	// Fork: a DM thread's people are the DM's: none to list in a 1:1 DM, the group's own list in a group DM
+	// (tyne-chat/tyne#699).
+	const dmParent = dmThreadParent(thread);
+	if (isDmThread(thread)) {
+		return dmParent?.type === ChannelTypes.GROUP_DM ? (
+			<DmThreadPeopleButton
+				thread={thread}
+				parent={dmParent}
+				data-flx="threads.thread-side-panel.dm-thread-people-button"
+			/>
+		) : null;
+	}
 	return (
 		<Popout
 			{...openProps}

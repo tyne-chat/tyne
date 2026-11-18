@@ -23,6 +23,10 @@ import type {
 } from '@fluxer/schema/src/domains/channel/ThreadRequestSchemas';
 import {compareSnowflakes} from '@fluxer/snowflake/src/SnowflakeComparison';
 
+// Fork imports.
+
+import {isDmThreadParent} from '@app/api/channel/services/thread/ForkDmThreads';
+
 export class ThreadListService {
 	constructor(private readonly ctx: ThreadServiceContext) {}
 
@@ -146,7 +150,8 @@ export class ThreadListService {
 		});
 		const {channel} = auth;
 		const allowed = textOnly ? channel.type === ChannelTypes.GUILD_TEXT : THREAD_PARENT_CHANNEL_TYPES.has(channel.type);
-		if (!auth.guild || !allowed) {
+		// Fork: a DM or group DM lists its closed threads too (tyne-chat/tyne#699).
+		if ((!auth.guild && !isDmThreadParent(channel)) || !allowed) {
 			throw new InvalidChannelTypeError();
 		}
 		assertThreadAllowed(canListArchivedThreads(await this.ctx.parentActor(auth, userId), {privateThreads}));

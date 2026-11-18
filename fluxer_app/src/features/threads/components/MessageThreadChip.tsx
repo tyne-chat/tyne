@@ -17,6 +17,10 @@ import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import {ThreadChipNews} from '@app/features/threads/fork/ForkThreadNewsMarks';
+
 export const MessageThreadChip = observer(({message}: {message: Message}) => {
 	const {i18n} = useLingui();
 	if (!ThreadGuilds.anyActive) return null;
@@ -57,6 +61,7 @@ export const MessageThreadChip = observer(({message}: {message: Message}) => {
 						</span>
 						<CaretRightIcon size={12} weight="bold" data-flx="threads.message-thread-chip.caret" />
 					</span>
+					<ThreadChipNews thread={thread} data-flx="threads.message-thread-chip.thread-chip-news" />
 				</span>
 				{preview && (
 					<span className={styles.preview} data-flx="threads.message-thread-chip.preview">

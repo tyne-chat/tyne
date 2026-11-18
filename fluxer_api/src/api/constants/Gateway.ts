@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 export type GatewayDispatchEvent =
+	| 'FORK_DM_THREAD_EVENT'
 	| 'USER_UPDATE'
 	| 'USER_PINNED_DMS_UPDATE'
 	| 'USER_SETTINGS_UPDATE'

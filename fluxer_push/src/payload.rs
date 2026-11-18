@@ -74,6 +74,8 @@ pub fn web_push_message(job: &MessageJob, target_user_id: &str, badge_count: u32
     });
     merge_thread_fields(&mut data, job);
     merge_identity_fields(&mut data, fields);
+    // Fork: the thread of a message in a DM thread (tyne-chat/tyne#699).
+    crate::fork_dm_thread_push::merge_fields(&mut data, fields);
     let badge = fields.badge.as_deref();
     let mut notification = json!({
         "title": fields.title,
@@ -677,6 +679,9 @@ mod tests {
             channel_id: CHANNEL_ID.to_owned(),
             message_id: MESSAGE_ID.to_owned(),
             notification: NotificationFields {
+                // Fork: the fields DM threads add (tyne-chat/tyne#699).
+                fork_thread_id: None,
+                fork_thread_name: None,
                 title: "Elias".to_owned(),
                 body: "see you tomorrow".to_owned(),
                 icon: "https://media.fluxer.app/avatars/1/a.webp".to_owned(),

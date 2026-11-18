@@ -16,6 +16,10 @@ import type {
 } from '@app/api/read_state/ReadStateRepository';
 import {visibleReadStates} from '@app/api/read_state/ReadStateVisibility';
 
+// Fork imports.
+
+import {dispatchDmThreadUserEvent, isDmThreadReadState} from '@app/api/read_state/ForkDmThreadReadStates';
+
 function threadScope(readState: ReadState | null | undefined): Record<string, unknown> {
 	if (!readState?.isMarked) return {};
 	return {flags: readState.flags ?? 0, __thread_scoped: readState.guildId!.toString()};
@@ -249,6 +253,17 @@ export class ReadStateService {
 		readState?: ReadState | null;
 	}): Promise<void> {
 		const {userId, channelId, messageId, mentionCount, manual, version} = params;
+		// Fork: a DM thread's ack goes in the DM-thread envelope (tyne-chat/tyne#699).
+		if (isDmThreadReadState(params.readState)) {
+			return dispatchDmThreadUserEvent(this.gatewayService, userId, 'MESSAGE_ACK', {
+				channel_id: channelId.toString(),
+				message_id: messageId.toString(),
+				mention_count: mentionCount,
+				manual,
+				version: version?.toString(),
+				flags: params.readState?.flags ?? 0,
+			});
+		}
 		await this.gatewayService.dispatchPresence({
 			userId,
 			event: 'MESSAGE_ACK',
@@ -285,6 +300,13 @@ export class ReadStateService {
 		marker: ReadStateMarker | null;
 	}): Promise<void> {
 		const {userId, channelId, timestamp, marker} = params;
+		// Fork: a DM thread's ack goes in the DM-thread envelope (tyne-chat/tyne#699).
+		if (marker && isDmThreadReadState(marker)) {
+			return dispatchDmThreadUserEvent(this.gatewayService, userId, 'CHANNEL_PINS_ACK', {
+				channel_id: channelId.toString(),
+				timestamp: timestamp.toISOString(),
+			});
+		}
 		await this.gatewayService.dispatchPresence({
 			userId,
 			event: 'CHANNEL_PINS_ACK',

@@ -51,6 +51,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {parentThreadNews} from '@app/features/threads/fork/ForkThreadNews';
+
 const SELECTED_DESCRIPTOR = msg({
 	message: 'selected',
 	comment: 'Lowercase screen-reader fragment in the sidebar navigation guild list DM item.',
@@ -69,12 +73,14 @@ const ACTIVE_CALL_DESCRIPTOR = msg({
 });
 
 // Fork: muting a DM changes only its row in the DM list, as on Discord. Its rail item looks the same,
-// so a mention count shown elsewhere always has a visible source (tyne-chat/tyne#284).
+// so a mention count shown elsewhere always has a visible source (tyne-chat/tyne#284). A DM's threads count with it
+// (tyne-chat/tyne#699).
 export function resolveDMListItemUnreadState(channelId: string): ChannelUnreadState {
+	const threadMentions = parentThreadNews(channelId).mentionCount;
 	return getChannelUnreadState({
-		hasUnread: ReadStates.hasUnread(channelId),
+		hasUnread: ReadStates.hasUnread(channelId) || threadMentions > 0,
 		unreadCount: ReadStates.getUnreadCount(channelId),
-		mentionCount: ReadStates.getMentionCount(channelId),
+		mentionCount: ReadStates.getMentionCount(channelId) + threadMentions,
 		isMuted: false,
 		showFadedUnreadOnMutedChannels: Accessibility.showFadedUnreadOnMutedChannels,
 		unreadBadgesLevel: null,

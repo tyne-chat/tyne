@@ -13,6 +13,10 @@ import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {observer} from 'mobx-react-lite';
 import {useEffect} from 'react';
 
+// Fork imports.
+
+import {forkDmThreadView} from '@app/features/threads/fork/ForkDmThreadViews';
+
 export const ChannelIndexPage = observer(() => {
 	const location = useLocation();
 	const {
@@ -71,6 +75,9 @@ export const ChannelIndexPage = observer(() => {
 	if (channel && (channel.type === ChannelTypes.GUILD_CATEGORY || channel.type === ChannelTypes.GUILD_LINK)) {
 		return null;
 	}
+	// Fork: a DM with its threads beside it, and a DM thread in full view (tyne-chat/tyne#699).
+	const forkDmView = forkDmThreadView(channelId);
+	if (forkDmView) return forkDmView;
 	if (channel?.isPrivate()) {
 		return <DMChannelView channelId={channelId} data-flx="channel.channel-index-page.dm-channel-view" />;
 	}

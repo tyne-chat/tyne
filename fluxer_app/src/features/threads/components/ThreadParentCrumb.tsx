@@ -9,8 +9,19 @@ import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {CaretRightIcon} from '@app/features/ui/icons/DirectionalIcons';
 import {observer} from 'mobx-react-lite';
 
+// Fork imports.
+
+import {DmThreadParentCrumb} from '@app/features/threads/fork/ForkDmThreadParentCrumb';
+import {isDmThreadParent} from '@app/features/threads/fork/ForkDmThreads';
+
 export const ThreadParentCrumb = observer(({thread, iconClassName}: {thread: Channel; iconClassName?: string}) => {
 	const parent = thread.parentId ? Channels.getChannel(thread.parentId) : undefined;
+	// Fork: a DM thread names the DM's person or group (tyne-chat/tyne#699).
+	if (parent && isDmThreadParent(parent)) {
+		return (
+			<DmThreadParentCrumb parent={parent} iconClassName={iconClassName} data-flx="threads.thread-parent-crumb.dm" />
+		);
+	}
 	if (!parent || !thread.guildId) return null;
 	const guildId = thread.guildId;
 	return (
