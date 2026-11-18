@@ -685,6 +685,15 @@ export class PersonaStoreClass {
 		return {isCommand: false, handled: false};
 	}
 
+	/**
+	 * What `content` says about its sender when `chosenPersonaId` was chosen elsewhere (the Forward
+	 * dialog's "Forward as", tyne-chat/tyne#817), without recording a use: a tag names a persona
+	 * (`isFromTag`), and a backslash escape the account (`wasEscaped`).
+	 */
+	matchTagOnly(content: string, chosenPersonaId: string | null): MatchResult {
+		return matchPersona(content, this.matchablePersonas(), chosenPersonaId, false, {allowEmptyContent: true});
+	}
+
 	private matchablePersonas(): Array<PersonaLike> {
 		return this._personas.map((p) => ({
 			id: p.id,

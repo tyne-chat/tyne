@@ -574,6 +574,14 @@ msgstr "依可見度篩選"
 msgid "Format preview"
 msgstr "格式預覽"
 
+#. Label in the Forward dialog before the persona (or account) the forward is sent as.
+msgid "Forward as"
+msgstr "轉傳身分"
+
+#. Spoken name of the button in the Forward dialog that picks who the forward is sent as. name is a persona or account name.
+msgid "Forward as {name}. Change"
+msgstr "以 {name} 身分轉傳。變更"
+
 #. Status beside the field for a new proxy tag in the import review: no persona has this tag
 msgctxt "persona-import-tag-status"
 msgid "Free"
