@@ -88,6 +88,10 @@ msgstr "アリス"
 msgid "All Personas"
 msgstr "すべてのペルソナ"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "すべてを1つのリストに"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "すべてのペルソナ"
@@ -465,6 +469,10 @@ msgstr "ペルソナを編集"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "タイムスタンプを編集\\"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "絵文字 ({emojiCount})"
 
 msgid "Everyone else"
 msgstr "その他"
@@ -846,6 +854,7 @@ msgstr "よく使う順"
 msgid "Move to Trash"
 msgstr "ゴミ箱に入れる"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "名前順（A–Z）"
@@ -943,6 +952,10 @@ msgstr "タグなし"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "このシグナルをオンにしている人はいません"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "非アニメーションとアニメーションを分ける"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "最近"
 msgid "Recent Personas"
 msgstr "最近のペルソナ"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "最近追加"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "最近使った順"
@@ -1460,6 +1477,10 @@ msgstr "スキップ"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "一部のプロキシタグは省略されました: {productName} ではペルソナごとに最大 5 個、各 32 文字までです。"
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "並び替えとグループ化"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"
