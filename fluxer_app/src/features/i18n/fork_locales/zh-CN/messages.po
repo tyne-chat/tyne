@@ -88,6 +88,10 @@ msgstr "爱丽丝"
 msgid "All Personas"
 msgstr "所有人格"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "全部在一个列表中"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "全部人格"
@@ -465,6 +469,10 @@ msgstr "编辑人格"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "编辑时间戳\\"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "表情（{emojiCount}）"
 
 msgid "Everyone else"
 msgstr "其他人"
@@ -846,6 +854,7 @@ msgstr "最常使用"
 msgid "Move to Trash"
 msgstr "移到废纸篓"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "名称（A–Z）"
@@ -943,6 +952,10 @@ msgstr "无标签"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "还没有人开启此信号"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "非动态与动态分开"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "最近"
 msgid "Recent Personas"
 msgstr "最近使用的人格"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "最近添加"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "最近使用"
@@ -1460,6 +1477,10 @@ msgstr "跳过"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "部分代理标签未导入：{productName} 每个人格最多允许 5 个标签，每个标签最多 32 个字符。"
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "排序和分组"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"
