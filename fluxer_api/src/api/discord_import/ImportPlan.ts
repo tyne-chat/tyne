@@ -780,8 +780,9 @@ async function main(): Promise<void> {
 	}
 
 	// Existing Tyne emoji renamed, moved or taken off their list, before any message shows them by their new name.
-	const fates = await applyEmojiFates(plan.emoji_fates ?? [], deps, dryRun);
+	const fates = await applyEmojiFates(plan.emoji_fates ?? [], deps, dryRun, plan.operator_user_id);
 	ledger.emoji_fates = fates.done;
+	ledger.storage_keys.push(...fates.copied.map((emojiId) => `emojis/${emojiId}`));
 	if (fates.missing.length) Logger.warn({emoji: fates.missing}, 'emoji to rename or move are no longer on Tyne');
 	if (fates.changed.length)
 		Logger.warn({emoji: fates.changed}, 'emoji renamed or moved on Tyne since the review; left as they are');
