@@ -147,6 +147,10 @@ import {ms} from 'itty-time';
 import sharp from 'sharp';
 import {uint8ArrayToBase64} from 'uint8array-extras';
 
+// Fork imports.
+
+import {buildDmThreadsReadyField, withoutDmThreadReadStates} from '@app/api/channel/services/thread/ForkDmThreadReady';
+
 interface HandleRpcRequestParams {
 	request: RpcRequest;
 	requestCache: RequestCache;
@@ -1141,9 +1145,18 @@ export class RpcService {
 						resolveSessionGuildVisits({user, ip: ip ?? null, memberGuildIds: userData.guildIds}),
 					)
 				: [];
+		// Fork: READY's DM threads (tyne-chat/tyne#699).
+		const forkDmThreads = await timings.time('fork_dm_threads', () =>
+			buildDmThreadsReadyField({
+				channelRepository: this.channelRepository,
+				userId: user.id,
+				readStates: userData.readStates,
+			}),
+		);
 		const responseBuildSteps: RpcTimingSteps = {};
 		const responseBuildStartedAtNs = startRpcTiming();
 		const responsePayload = {
+			fork_dm_threads: forkDmThreads,
 			auth_session_id_hash: timeRpcStepSync(responseBuildSteps, 'map_auth_session_id_hash', () =>
 				authSession ? uint8ArrayToBase64(authSession.sessionIdHash, {urlSafe: true}) : undefined,
 			),
@@ -1163,7 +1176,7 @@ export class RpcService {
 				Object.fromEntries(Array.from(userData.notes.entries()).map(([userId, note]) => [userId.toString(), note])),
 			),
 			read_states: timeRpcStepSync(responseBuildSteps, 'map_read_states', () =>
-				visibleReadStates(userData.readStates, sessionViewer).map(mapReadStateResponse),
+				visibleReadStates(withoutDmThreadReadStates(userData.readStates), sessionViewer).map(mapReadStateResponse),
 			),
 			guilds,
 			private_channels: privateChannels,

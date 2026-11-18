@@ -58,6 +58,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {Routes} from '@app/app/Routes';
 import {openRouteInNewWindowOnMiddleClick} from '@app/features/platform/utils/ForkAppWindows';
+import {DmThreadsMark} from '@app/features/threads/fork/ForkThreadNewsMarks';
 import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const YOU_DESCRIPTOR = msg({
@@ -451,6 +452,7 @@ const ResolvedDMListItem = observer(function ResolvedDMListItem({
 									</span>
 								)}
 							</div>
+							<DmThreadsMark channel={channel} data-flx="channel.direct-message.dm-list-item.dm-threads-mark--mobile" />
 							{relativeTime && (
 								<span
 									className={styles.dmItemTimestamp}
@@ -600,6 +602,7 @@ const ResolvedDMListItem = observer(function ResolvedDMListItem({
 							</span>
 						)}
 					</div>
+					<DmThreadsMark channel={channel} data-flx="channel.direct-message.dm-list-item.dm-threads-mark" />
 					<FocusRing offset={-2} data-flx="channel.direct-message.dm-list-item.focus-ring--3">
 						<button
 							type="button"

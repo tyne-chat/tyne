@@ -122,7 +122,13 @@ import {
 	useAutocompletePersonaSearch,
 } from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {dmThreadParent} from '@app/features/threads/fork/ForkDmThreads';
 import type {ChannelPersonaMentionItem} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+
+// A DM thread's people are its parent DM's: the thread's own channel has none (tyne-chat/tyne#699).
+function dmMentionRecipientIds(channel: Channel): ReadonlyArray<string> {
+	return (dmThreadParent(channel) ?? channel).recipientIds;
+}
 
 interface UseLexicalAutocompleteParams {
 	channel: Channel | null;
@@ -496,7 +502,7 @@ export function useLexicalAutocomplete({
 						},
 					}));
 				if (channel.guildId == null) {
-					const users = channel.recipientIds
+					const users = dmMentionRecipientIds(channel)
 						.map((id) => Users.getUser(id))
 						.filter((user): user is User => user != null);
 					const userOptions = filterDMUsers(users, parsedQuery);
@@ -968,7 +974,9 @@ function buildSlotUserOptions({
 	}
 	const parsedQuery = parseMentionQuery(query);
 	if (channel.guildId == null) {
-		const users = channel.recipientIds.map((id) => Users.getUser(id)).filter((user): user is User => user != null);
+		const users = dmMentionRecipientIds(channel)
+			.map((id) => Users.getUser(id))
+			.filter((user): user is User => user != null);
 		return filterDMUsers(users, parsedQuery);
 	}
 	return filterGuildMembers(memberSearchResults, parsedQuery, true, canViewChannel, stableOrder);

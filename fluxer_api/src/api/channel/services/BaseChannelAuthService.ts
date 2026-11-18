@@ -67,6 +67,11 @@ import {UnknownUserError} from '@fluxer/errors/src/domains/user/UnknownUserError
 import type {GuildMemberResponse} from '@fluxer/schema/src/domains/guild/GuildMemberSchemas';
 import type {GuildResponse} from '@fluxer/schema/src/domains/guild/GuildResponseSchemas';
 
+// Fork imports.
+
+import {authenticateDmThread, isDmThreadChannel} from '@app/api/channel/services/thread/ForkDmThreads';
+import {userViewerActive} from '@app/api/experiment/ChannelThreadsGate';
+
 export interface ChannelAuthOptions {
 	errorOnMissingGuild: 'unknown_channel' | 'missing_permissions';
 	validateNsfw: boolean;
@@ -130,6 +135,10 @@ export abstract class BaseChannelAuthService {
 		}
 		const channel = await this.channelRepository.channelData.findUnique(channelId);
 		if (!channel) throw new UnknownChannelError();
+		// Fork: a thread in a DM or group DM follows its parent's recipients (tyne-chat/tyne#699).
+		if (isDmThreadChannel(channel) && userViewerActive(viewer)) {
+			return authenticateDmThread({channelRepository: this.channelRepository, channel, userId});
+		}
 		if (
 			THREAD_FEATURE_CHANNEL_TYPES.has(channel.type) &&
 			(channel.guildId === null || !viewerActive(viewer, channel.guildId))

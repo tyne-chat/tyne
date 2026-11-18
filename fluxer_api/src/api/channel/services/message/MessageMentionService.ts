@@ -32,6 +32,10 @@ import {
 } from '@fluxer/schema/src/domains/message/SharedMessageSchemas';
 import type {IWorkerService} from '@pkgs/worker/src/contracts/IWorkerService';
 
+// Fork imports.
+
+import {dmRulesChannelOf} from '@app/api/channel/services/thread/ForkDmThreads';
+
 interface MentionData {
 	userMentions: Set<UserID>;
 	roleMentions: Set<RoleID>;
@@ -328,7 +332,8 @@ export class MessageMentionService {
 				validChannelMentions,
 			};
 		}
-		const recipients = Array.from(channel.recipientIds || []);
+		// Fork: a DM thread's people are its parent DM's (tyne-chat/tyne#699).
+		const recipients = Array.from((await dmRulesChannelOf(channel)).recipientIds || []);
 		const validUserIds = recipients.filter((r) => userMentions.has(r));
 		const [validUsers, validChannelMentions] = await Promise.all([
 			validUserIds.length > 0 ? this.userRepository.listUsers(validUserIds) : Promise.resolve([]),

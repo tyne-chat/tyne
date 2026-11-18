@@ -20,6 +20,10 @@ import type {ThreadChannelResponse} from '@fluxer/schema/src/domains/channel/Thr
 import type {ThreadMemberResponse} from '@fluxer/schema/src/domains/channel/ThreadSchemas';
 import type {MessageSearchResultsResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork imports.
+
+import {searchableDmThreads} from '@app/api/channel/services/thread/ForkDmThreads';
+
 const CHANNEL_LOOKUP_CONCURRENCY = 16;
 
 export class MessageSearchResponseMapper {
@@ -53,6 +57,9 @@ export class MessageSearchResponseMapper {
 				)
 				.map((channel) => [channel.id.toString(), channel] as const),
 		);
+		// Fork: hits in DM threads (tyne-chat/tyne#699).
+		for (const thread of await searchableDmThreads(channels, userId, viewer))
+			channelById.set(thread.id.toString(), thread);
 		const renderableMessages = messages.filter((message) => channelById.has(message.channelId.toString()));
 		const messageResponses = await createMessageResponseDataService().buildMessagesForChannels({
 			userId,
