@@ -110,6 +110,23 @@ describe('personas in the parsed query', () => {
 	});
 });
 
+describe('persona aliases in the parsed query (tyne-chat/tyne#707)', () => {
+	it('resolves a typed alias when no persona has it as its name', () => {
+		const own = addTestPersona(PersonaStore, {name: 'SΛTVRN', aliases: ['Sat', 'Saturn']});
+		stubs.mentionItems = [{...otherPersona('601', 'ΞΣNΛ'), aliases: ['Aelena']}];
+
+		expect(parseQuery('from:saturn').personaId).toEqual([own.id]);
+		expect(parseQuery('mentions:Aelena').personaMentions).toEqual(['601']);
+	});
+
+	it('prefers a persona named so over one with that alias', () => {
+		addTestPersona(PersonaStore, {name: 'SΛTVRN', aliases: ['Sat', 'Saturn']});
+		stubs.mentionItems = [otherPersona('601', 'Saturn')];
+
+		expect(parseQuery('from:Saturn').personaId).toEqual(['601']);
+	});
+});
+
 describe('persona segments', () => {
 	it('apply the persona they carry', () => {
 		const query = 'from:"Ash Grey" hello';

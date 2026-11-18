@@ -410,6 +410,50 @@ describe('PersonaService', () => {
 		});
 	});
 
+	describe('aliases (tyne-chat/tyne#707)', () => {
+		const otherUserId = 3000000000000000001n as UserID;
+		const userMap = new Map([[otherUserId, {username: 'bob_owner', globalName: 'Bob Global', nickname: 'Bobby'}]]);
+
+		it('finds a persona by an alias and sends the aliases with it', async () => {
+			const saturn = makeMockPersona(otherUserId, 20n as PersonaID, 'SΛTVRN', {
+				visibility: 'public',
+				aliases: JSON.stringify(['Sat', 'Saturn']),
+			});
+			const other = makeMockPersona(otherUserId, 21n as PersonaID, 'Moss', {visibility: 'public'});
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([saturn, other]);
+
+			const results = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [otherUserId],
+				query: 'satur',
+				userMap,
+			});
+
+			expect(results.map((r) => [r.name, r.aliases])).toEqual([['SΛTVRN', ['Sat', 'Saturn']]]);
+		});
+
+		it('stores the aliases tidied on create, and replaces them on update', async () => {
+			vi.mocked(mockRepo.count).mockResolvedValueOnce(0);
+			vi.mocked(mockRepo.create).mockResolvedValueOnce(makeMockPersona(userId, defaultPersonaId, 'SΛTVRN'));
+			await service.createPersona(userId, {name: 'SΛTVRN', aliases: [' Saturn ', '', 'saturn', 'Sat']});
+			expect(vi.mocked(mockRepo.create).mock.calls.at(-1)?.[0]).toMatchObject({aliases: ['Saturn', 'Sat']});
+
+			const existing = makeMockPersona(userId, defaultPersonaId, 'SΛTVRN', {aliases: '["Saturn"]'});
+			vi.mocked(mockRepo.findById).mockResolvedValueOnce(existing);
+			vi.mocked(mockRepo.update).mockResolvedValueOnce(existing);
+			await service.updatePersona(userId, defaultPersonaId, {aliases: []});
+			expect(vi.mocked(mockRepo.update).mock.calls.at(-1)?.[2]).toMatchObject({aliases: []});
+		});
+
+		it('returns the aliases in the owner and public shapes, not on messages', () => {
+			const saturn = makeMockPersona(userId, defaultPersonaId, 'SΛTVRN', {aliases: '["Saturn"]'});
+			expect(saturn.toResponse().aliases).toEqual(['Saturn']);
+			expect(saturn.toPublicResponse().aliases).toEqual(['Saturn']);
+			expect(saturn.toSubprofileResponse()).not.toHaveProperty('aliases');
+			expect(makeMockPersona(userId, defaultPersonaId, 'Old row').aliases).toEqual([]);
+		});
+	});
+
 	describe('Persona Model', () => {
 		// Database resiliency: Ensures that toRow serializes fields properly and that
 		// corrupted or non-array JSON stored in legacy persona_tags columns safely falls
