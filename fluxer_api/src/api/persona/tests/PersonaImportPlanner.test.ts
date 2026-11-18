@@ -27,12 +27,14 @@ function persona(fields: {
 	emojis?: Array<SignatureEmoji>;
 	autoTagDisabled?: boolean;
 	color?: number | null;
+	aliases?: Array<string>;
 }): Persona {
 	const id = createPersonaID(nextId++);
 	return new Persona({
 		user_id: OWNER,
 		persona_id: id,
 		name: fields.name,
+		aliases: JSON.stringify(fields.aliases ?? []),
 		avatar_hash: fields.avatar ?? null,
 		banner_hash: fields.banner ?? null,
 		pronouns: fields.pronouns ?? null,
@@ -183,6 +185,22 @@ describe('pass 1: the PluralKit id', () => {
 			{field: 'signature_emojis', change: 'removed'},
 			{field: 'auto_tag_disabled', change: 'changed'},
 		]);
+	});
+
+	it('compares aliases only for a Tyne export, so an alias-only change is not taken for up to date', () => {
+		const p = persona({name: 'SΛTVRN', external: 'aaaaa', aliases: ['Saturn']});
+		const changed = [member({name: 'SΛTVRN', external_uuid: 'aaaaa', aliases: ['Saturn', 'Sat']})];
+		expect(plan([p], changed).entries[0]?.kind).toBe('up_to_date');
+		const fromTyne = plan([p], changed, {source: 'tyne'});
+		expect(fromTyne.entries[0]?.kind).toBe('differs');
+		expect(fromTyne.entries[0]?.differences).toEqual([{field: 'aliases', change: 'changed'}]);
+
+		const removed = plan([p], [member({name: 'SΛTVRN', external_uuid: 'aaaaa', aliases: []})], {source: 'tyne'});
+		expect(removed.entries[0]?.differences).toEqual([{field: 'aliases', change: 'removed'}]);
+		const same = plan([p], [member({name: 'SΛTVRN', external_uuid: 'aaaaa', aliases: [' Saturn ']})], {
+			source: 'tyne',
+		});
+		expect(same.entries[0]?.kind).toBe('up_to_date');
 	});
 
 	it('tells a colour, tags or signature emojis the file changed from ones it removed', () => {

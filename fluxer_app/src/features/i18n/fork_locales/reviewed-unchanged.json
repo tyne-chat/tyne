@@ -14,8 +14,9 @@
 			"text",
 			"{label}: {names}"
 		],
-		"cs": ["(Prefix: {0})", "avatar", "banner", "Emoji ({emojiCount})", "Persona", "text"],
+		"cs": ["(Prefix: {0})", "Alias", "avatar", "banner", "Emoji ({emojiCount})", "Persona", "text"],
 		"da": [
+			"Alias",
 			"Alice",
 			"avatar",
 			"banner",
@@ -29,6 +30,7 @@
 		],
 		"de": [
 			"Account: @{username}",
+			"Alias",
 			"Alice",
 			"Name (A–Z)",
 			"Optional",
@@ -39,6 +41,7 @@
 		],
 		"el": ["Emoji ({emojiCount})", "Persona"],
 		"es-419": [
+			"Alias",
 			"avatar",
 			"banner",
 			"Manual",
@@ -49,6 +52,7 @@
 			"{count, plural, one {# persona} other {# personas}}"
 		],
 		"es-ES": [
+			"Alias",
 			"avatar",
 			"Manual",
 			"Persona",
@@ -57,6 +61,7 @@
 			"Script",
 			"{count, plural, one {# persona} other {# personas}}"
 		],
+		"fi": ["Alias"],
 		"fil": [
 			"Alice",
 			"Command",
@@ -72,6 +77,7 @@
 			"“Tyne” was blocked."
 		],
 		"fr": [
+			"Alias",
 			"Alice",
 			"avatar",
 			"Persona",
@@ -81,9 +87,10 @@
 			"Script",
 			"{count, plural, one {# persona} other {# personas}}"
 		],
-		"hr": ["avatar", "Persona"],
+		"hr": ["Alias", "avatar", "Persona"],
 		"hu": ["Persona"],
 		"id": [
+			"Alias",
 			"Alice",
 			"avatar",
 			"banner",
@@ -95,7 +102,17 @@
 			"Persona",
 			"Tag"
 		],
-		"it": ["Account: @{username}", "Alice", "avatar", "banner", "Emoji ({emojiCount})", "Persona", "Script", "Tag"],
+		"it": [
+			"Account: @{username}",
+			"Alias",
+			"Alice",
+			"avatar",
+			"banner",
+			"Emoji ({emojiCount})",
+			"Persona",
+			"Script",
+			"Tag"
+		],
 		"lt": ["Persona"],
 		"lv": [
 			"Fedora, openSUSE",
@@ -107,6 +124,7 @@
 		],
 		"nl": [
 			"Account: @{username}",
+			"Alias",
 			"Alice",
 			"avatar",
 			"banner",
@@ -117,8 +135,8 @@
 			"Tag",
 			"tags"
 		],
-		"no": ["Alice", "avatar", "banner", "bio", "Persona"],
-		"pl": ["Emoji ({emojiCount})", "Persona", "Tag"],
+		"no": ["Alias", "Alice", "avatar", "banner", "bio", "Persona"],
+		"pl": ["Alias", "Emoji ({emojiCount})", "Persona", "Tag"],
 		"pt-BR": [
 			"Alice",
 			"avatar",
@@ -143,6 +161,7 @@
 		],
 		"ro": [
 			"(Prefix: {0})",
+			"Alias",
 			"Alice",
 			"avatar",
 			"banner",
@@ -155,6 +174,7 @@
 			"text"
 		],
 		"sk": [
+			"Alias",
 			"Emoji ({emojiCount})",
 			"Fedora, openSUSE",
 			"Persona",
@@ -176,6 +196,7 @@
 		],
 		"sv-SE": [
 			"(Prefix: {0})",
+			"Alias",
 			"Alice",
 			"avatar",
 			"banner",
