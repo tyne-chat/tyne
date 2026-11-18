@@ -14,7 +14,7 @@
 			"text",
 			"{label}: {names}"
 		],
-		"cs": ["(Prefix: {0})", "avatar", "banner", "Persona", "text"],
+		"cs": ["(Prefix: {0})", "avatar", "banner", "Emoji ({emojiCount})", "Persona", "text"],
 		"da": [
 			"Alice",
 			"avatar",
@@ -37,7 +37,7 @@
 			"Personas ({count})",
 			"Tag"
 		],
-		"el": ["Persona"],
+		"el": ["Emoji ({emojiCount})", "Persona"],
 		"es-419": [
 			"avatar",
 			"banner",
@@ -83,8 +83,19 @@
 		],
 		"hr": ["avatar", "Persona"],
 		"hu": ["Persona"],
-		"id": ["Alice", "avatar", "banner", "bio", "Edit Persona", "Edit persona", "Manual", "Persona", "Tag"],
-		"it": ["Account: @{username}", "Alice", "avatar", "banner", "Persona", "Script", "Tag"],
+		"id": [
+			"Alice",
+			"avatar",
+			"banner",
+			"bio",
+			"Edit Persona",
+			"Edit persona",
+			"Emoji ({emojiCount})",
+			"Manual",
+			"Persona",
+			"Tag"
+		],
+		"it": ["Account: @{username}", "Alice", "avatar", "banner", "Emoji ({emojiCount})", "Persona", "Script", "Tag"],
 		"lt": ["Persona"],
 		"lv": [
 			"Fedora, openSUSE",
@@ -94,9 +105,20 @@
 			"Ubuntu, Debian, Linux Mint",
 			"{label}: {names}"
 		],
-		"nl": ["Account: @{username}", "Alice", "avatar", "banner", "bio", "Persona", "Script", "Tag", "tags"],
+		"nl": [
+			"Account: @{username}",
+			"Alice",
+			"avatar",
+			"banner",
+			"bio",
+			"Emoji ({emojiCount})",
+			"Persona",
+			"Script",
+			"Tag",
+			"tags"
+		],
 		"no": ["Alice", "avatar", "banner", "bio", "Persona"],
-		"pl": ["Persona", "Tag"],
+		"pl": ["Emoji ({emojiCount})", "Persona", "Tag"],
 		"pt-BR": [
 			"Alice",
 			"avatar",
@@ -124,6 +146,7 @@
 			"Alice",
 			"avatar",
 			"banner",
+			"Emoji ({emojiCount})",
 			"Manual",
 			"Persona",
 			"Personas",
@@ -131,7 +154,14 @@
 			"Script",
 			"text"
 		],
-		"sk": ["Fedora, openSUSE", "Persona", "Ubuntu, Debian, Linux Mint", "text", "{label}: {names}"],
+		"sk": [
+			"Emoji ({emojiCount})",
+			"Fedora, openSUSE",
+			"Persona",
+			"text",
+			"Ubuntu, Debian, Linux Mint",
+			"{label}: {names}"
+		],
 		"sl": ["Fedora, openSUSE", "Persona", "Ubuntu, Debian, Linux Mint", "{label}: {names}"],
 		"sq": [
 			"Fedora, openSUSE",
