@@ -58,6 +58,7 @@ import type {
 	MessageSnapshot,
 } from '@app/api/database/types/MessageTypes';
 import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
+import {applyEmojiFates, type PlanEmojiFate} from '@app/api/discord_import/ImportEmojiFates';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
 import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
 import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
@@ -238,6 +239,8 @@ interface Plan {
 	personas: Array<PlanPersona>;
 	emoji: Array<PlanEmoji>;
 	stickers: Array<PlanSticker>;
+	/** Tyne emoji the plan's messages show, renamed, moved or taken off their list first (ImportEmojiFates.ts). */
+	emoji_fates?: Array<PlanEmojiFate>;
 	messages: Array<PlanMessage>;
 	/** What earlier imports wrote for the objects in this plan, by Tyne id: the base of the three-way
 	 * comparison (ImportMerge.ts). An object with no entry here is created, or left alone if it exists. */
@@ -262,6 +265,8 @@ interface Ledger {
 	personas: Array<{user_id: string; persona_id: string}>;
 	emoji: Array<{emoji_id: string; guild_id: string | null}>;
 	stickers: Array<{sticker_id: string; guild_id: string | null}>;
+	/** Tyne emoji this run renamed, moved or took off their list as planned, or found so already. */
+	emoji_fates?: Array<string>;
 	messages: Array<string>;
 	reactions: number;
 	storage_keys: Array<string>;
@@ -774,6 +779,14 @@ async function main(): Promise<void> {
 		save();
 	}
 
+	// Existing Tyne emoji renamed, moved or taken off their list, before any message shows them by their new name.
+	const fates = await applyEmojiFates(plan.emoji_fates ?? [], deps, dryRun);
+	ledger.emoji_fates = fates.done;
+	if (fates.missing.length) Logger.warn({emoji: fates.missing}, 'emoji to rename or move are no longer on Tyne');
+	if (fates.changed.length)
+		Logger.warn({emoji: fates.changed}, 'emoji renamed or moved on Tyne since the review; left as they are');
+	save();
+
 	for (const e of plan.emoji) {
 		const file = e.file;
 		if (!file) {
@@ -1280,7 +1293,7 @@ async function main(): Promise<void> {
 	// Last, so a gateway that cannot be reached fails the run only after everything is written;
 	// applying the plan again sends the lists again (tyne-chat/tyne#660).
 	if (!dryRun) {
-		const sent = await sendExpressionLists(plan, deps);
+		const sent = await sendExpressionLists(plan, deps, fates.guilds);
 		console.log(
 			`sent the emoji list of ${sent.emoji.length} and the sticker list of ${sent.stickers.length} communities to the gateway`,
 		);
