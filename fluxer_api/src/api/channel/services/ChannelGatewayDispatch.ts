@@ -8,6 +8,10 @@ import type {Channel} from '@app/api/models/Channel';
 import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {THREAD_CHANNEL_TYPES} from '@fluxer/constants/src/ThreadConstants';
 
+// Fork imports.
+
+import {dispatchDmThreadChannelEvent, isDmThreadChannel} from '@app/api/channel/services/thread/ForkDmThreads';
+
 interface DispatchChannelEventParams {
 	gatewayService: IGatewayService;
 	channel: Channel;
@@ -40,6 +44,8 @@ export async function dispatchChannelEvent({
 			data,
 		});
 	}
+	// Fork: a DM thread's events go to the parent DM's recipients (tyne-chat/tyne#699).
+	if (isDmThreadChannel(channel)) return dispatchDmThreadChannelEvent({gatewayService, channel, event, data});
 	if (channel.guildId) {
 		return gatewayService.dispatchGuild({guildId: channel.guildId, event, data: withThreadContext(channel, data)});
 	}

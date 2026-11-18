@@ -18,6 +18,11 @@ import {THREAD_ONLY_CHANNEL_TYPES} from '@fluxer/constants/src/ThreadConstants';
 import {isObjectLike} from '@fluxer/record_utils/src/RecordGuards';
 import {makeAutoObservable, observable} from 'mobx';
 
+// Fork imports.
+
+import {DmThreads} from '@app/features/threads/fork/ForkDmThreads';
+import {ME} from '@fluxer/constants/src/AppConstants';
+
 class ThreadGuilds {
 	private readonly activeGuildIds = observable.set<string>();
 	readonly purgedThreadIds = new Set<string>();
@@ -32,10 +37,14 @@ class ThreadGuilds {
 	}
 
 	get anyActive(): boolean {
+		// Fork: DMs always hold threads (tyne-chat/tyne#699).
+		if (DmThreads.supported) return true;
 		return this.activeGuildIds.size > 0;
 	}
 
 	isActive(guildId: string | null | undefined): boolean {
+		// Fork: DMs and group DMs (no guild, or ME in a route) always hold threads (tyne-chat/tyne#699).
+		if (guildId == null || guildId === ME) return true;
 		return guildId != null && this.activeGuildIds.has(guildId);
 	}
 

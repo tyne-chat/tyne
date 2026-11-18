@@ -88,6 +88,16 @@ import {resolveThreadOwnerPersonaId} from '@app/api/channel/services/thread/Fork
 import {requestedPersonaId} from '@app/api/persona/PersonaOwnership';
 import {storeThreadOwnerPersona} from '@app/api/persona/ThreadOwnerPersonaStore';
 
+// Fork imports.
+
+import {
+	addDmThreadParticipants,
+	authorizeDmThreadParent,
+	dmThreadGuildKeyFor,
+	isDmThreadParent,
+	isDmThreadState,
+} from '@app/api/channel/services/thread/ForkDmThreads';
+
 const THREAD_CREATED_MESSAGE_RECENT_WINDOW = 5;
 
 function slowmodeThreadKey(parentId: ChannelID, userId: UserID): string {
@@ -433,6 +443,10 @@ export class ThreadCreationService {
 	): Promise<AuthenticatedChannel> {
 		assertAccountNotLimited(user);
 		const {channel, guild} = parentAuth;
+		// Fork: threads in DMs and group DMs (tyne-chat/tyne#699).
+		if (isDmThreadParent(channel)) {
+			return authorizeDmThreadParent({channelAuth: this.ctx.channelAuth, parentAuth, user, kind});
+		}
 		if (!guild || !TEXT_THREAD_PARENT_CHANNEL_TYPES.has(channel.type)) {
 			throw new InvalidChannelTypeError();
 		}
@@ -460,7 +474,7 @@ export class ThreadCreationService {
 
 	private async create(params: NewThread): Promise<{view: ThreadView; members: Array<ThreadMember>}> {
 		const {parent, creator} = params;
-		const guildId = parent.guildId;
+		const guildId = parent.guildId ?? dmThreadGuildKeyFor(parent);
 		assert(guildId !== null);
 		const ownerId = creator.kind === 'user' ? creator.user.id : creator.ownerId;
 		const {threads} = this.ctx.channelRepository;
@@ -498,7 +512,7 @@ export class ThreadCreationService {
 
 	private async storeThread(params: NewThread): Promise<ThreadState> {
 		const {parent, creator} = params;
-		const guildId = parent.guildId;
+		const guildId = parent.guildId ?? dmThreadGuildKeyFor(parent);
 		assert(guildId !== null);
 		const ownerId = creator.kind === 'user' ? creator.user.id : creator.ownerId;
 		const {threads} = this.ctx.channelRepository;
@@ -514,7 +528,7 @@ export class ThreadCreationService {
 		const now = new Date();
 		const row: ChannelRow = {
 			channel_id: params.threadId,
-			guild_id: guildId,
+			guild_id: parent.guildId,
 			type: params.type,
 			name: params.input.name,
 			topic: null,
@@ -559,6 +573,7 @@ export class ThreadCreationService {
 			if (params.starterAuthorId) {
 				options.members.push({userId: params.starterAuthorId, flags: 0});
 			}
+			if (isDmThreadParent(parent)) addDmThreadParticipants(options.members, parent);
 			return threads.create(options);
 		};
 		if (!TEXT_THREAD_PARENT_CHANNEL_TYPES.has(parent.type)) {
@@ -645,7 +660,7 @@ export class ThreadCreationService {
 			message_reference: {
 				channel_id: view.channel.id,
 				message_id: null,
-				guild_id: createGuildID(BigInt(view.state.guildId)),
+				guild_id: isDmThreadState(view.state) ? null : createGuildID(BigInt(view.state.guildId)),
 				type: MessageReferenceTypes.DEFAULT,
 			},
 			message_snapshots: null,

@@ -22,6 +22,10 @@ import {THREAD_CHANNEL_TYPES, THREAD_ONLY_CHANNEL_TYPES} from '@fluxer/constants
 import type {ChannelId, GuildId} from '@fluxer/schema/src/branded/WireIds';
 import {makeAutoObservable, observable, reaction, runInAction} from 'mobx';
 
+// Fork imports.
+
+import {DM_THREAD_INDEX_KEY} from '@app/features/threads/fork/ForkDmThreads';
+
 const PRIVATE_CHANNEL_SENTINEL = ME;
 
 class GuildReadStateEntry {
@@ -294,6 +298,18 @@ class GuildReadState {
 				if (!newState.unread.get() && contribution.unreadAllowed) {
 					newState.unread.set(true);
 					newState.firstUnreadChannelId.set(channel.id as ChannelId);
+				}
+			}
+			// Fork: a DM's threads count with the DMs (tyne-chat/tyne#699).
+			for (const threadId of ChannelThreads.getGuildThreadIds(DM_THREAD_INDEX_KEY)) {
+				const contribution = getThreadContribution(threadId);
+				if (contribution.mentionAllowed) {
+					newState.mentionCount.set(newState.mentionCount.get() + contribution.mentionCount);
+					newState.mentionChannels.add(threadId as ChannelId);
+				}
+				if (!newState.unread.get() && contribution.unreadAllowed) {
+					newState.unread.set(true);
+					newState.firstUnreadChannelId.set(threadId as ChannelId);
 				}
 			}
 		} else {
