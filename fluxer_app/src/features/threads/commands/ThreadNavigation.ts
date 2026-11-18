@@ -8,12 +8,17 @@ import * as RouterUtils from '@app/features/navigation/utils/RouterUtils';
 import ThreadPanel from '@app/features/threads/state/ThreadPanel';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
 
+// Fork imports.
+
+import {dmThreadRouteGuildId} from '@app/features/threads/fork/ForkDmThreads';
+
 export interface ThreadOpenEvent {
 	readonly shiftKey: boolean;
 }
 
 export function openThread(thread: Channel, messageId?: string): void {
-	const guildId = thread.guildId;
+	// Fork: a DM thread opens under ME, as its DM does (tyne-chat/tyne#699).
+	const guildId = thread.guildId ?? dmThreadRouteGuildId(thread);
 	if (!guildId || !thread.parentId) return;
 	ThreadPanel.closeCreate();
 	if (MobileLayout.enabled) {
@@ -29,9 +34,11 @@ export function openThread(thread: Channel, messageId?: string): void {
 }
 
 export function openThreadFullView(thread: Channel, messageId?: string): void {
-	if (!thread.guildId) return;
+	// Fork: a DM thread opens under ME, as its DM does (tyne-chat/tyne#699).
+	const guildId = thread.guildId ?? dmThreadRouteGuildId(thread);
+	if (!guildId) return;
 	ThreadPanel.closeCreate();
-	NavigationCommands.selectChannel(thread.guildId, thread.id, messageId);
+	NavigationCommands.selectChannel(guildId, thread.id, messageId);
 }
 
 export function openThreadFromEvent(thread: Channel, event: ThreadOpenEvent): void {
@@ -55,7 +62,8 @@ export function closeThreadPanel(): void {
 }
 
 export function openCreateThread(parent: Channel, messageId: string | null): void {
-	const guildId = parent.guildId;
+	// Fork: a DM opens under ME (tyne-chat/tyne#699).
+	const guildId = parent.guildId ?? dmThreadRouteGuildId(parent);
 	if (!guildId) return;
 	ThreadPanel.openCreate(parent.id, messageId);
 	if (Navigation.channelId !== parent.id || Navigation.threadId != null) {

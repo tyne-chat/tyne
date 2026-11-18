@@ -452,7 +452,7 @@ export class PooledGatewayConnection {
 		ForumPosts.handleGatewayReady();
 		ForumReadState.handleGatewayReady();
 		NavigationSideEffects.handleGatewayReady();
-		handleForkPromotedResume();
+		handleForkPromotedResume(accountKey);
 		const userId = SessionManager.userId;
 		if (userId !== null) {
 			scheduleAccountReadyWork(userId);

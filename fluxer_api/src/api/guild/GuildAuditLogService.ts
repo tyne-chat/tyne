@@ -21,6 +21,10 @@ import {ChannelOverwriteTypes} from '@fluxer/constants/src/ChannelConstants';
 import type {IWorkerService} from '@pkgs/worker/src/contracts/IWorkerService';
 import {ms} from 'itty-time';
 
+// Fork imports.
+
+import {isDmThreadGuildKey} from '@app/api/channel/services/thread/ForkDmThreadKeys';
+
 const MESSAGE_DELETE_BATCH_DELAY_MS = ms('30 seconds');
 const MESSAGE_DELETE_BATCH_MAX_ATTEMPTS = 3;
 const RECENT_MESSAGE_DELETE_LOG_LIMIT = 250;
@@ -73,6 +77,8 @@ export class GuildAuditLogService {
 		changes?: GuildAuditLogChange | null;
 		createdAt?: Date;
 	}): Promise<void> {
+		// Fork: a DM thread has no guild, so no guild audit log (tyne-chat/tyne#699).
+		if (isDmThreadGuildKey(params.guildId)) return;
 		let targetId: string | null = null;
 		if (params.targetId !== undefined && params.targetId !== null) {
 			targetId = typeof params.targetId === 'string' ? params.targetId : params.targetId.toString();
