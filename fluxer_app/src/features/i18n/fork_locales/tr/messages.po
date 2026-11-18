@@ -58,6 +58,10 @@ msgstr "Persona ekle"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Etiket çifti ekle ({0}/5)"
 
+#. placeholder {0}: formData.aliases.length
+msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
+msgstr "Takma ad ekle ({0}/{PERSONA_ALIASES_MAX})"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Sayaç ekle"
@@ -80,6 +84,13 @@ msgstr "Yeni persona olarak eklenir"
 #. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
 msgid "After"
 msgstr "Sonra"
+
+#. Accessible name of one alias field in the persona editor: another name, never shown, that finds the persona when searching or mentioning it.
+msgid "Alias"
+msgstr "Takma ad"
+
+msgid "Aliases"
+msgstr "Takma adlar"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -1043,6 +1054,9 @@ msgstr "İndirdiğiniz dosyayı açın."
 msgid "Optional"
 msgstr "İsteğe bağlı"
 
+msgid "Other names for finding this persona"
+msgstr "Bu personayı bulmak için başka adlar"
+
 #. Link from the Tyne app download button to the downloads for every platform.
 msgid "Other platforms"
 msgstr "Diğer platformlar"
@@ -1266,6 +1280,10 @@ msgstr "Son eklenenler"
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "Son kullanılanlar"
+
+#. Accessible name of the button that removes one alias of a persona in the persona editor.
+msgid "Remove alias"
+msgstr "Takma adı kaldır"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"

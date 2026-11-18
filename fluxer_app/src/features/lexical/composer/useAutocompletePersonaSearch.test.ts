@@ -596,3 +596,16 @@ describe('persona mention ranking', () => {
 		expect(filterPersonaMentions(items, 'chi').map((item) => item.name)).toEqual(['Chip', 'Moss', 'Fern']);
 	});
 });
+
+describe('persona aliases (tyne-chat/tyne#707)', () => {
+	it('finds a persona by one of its aliases, after one whose name matches', () => {
+		const items = [
+			persona('p-1', 'SΛTVRN', {aliases: ['Sat', 'Saturn']}),
+			persona('p-2', 'Saturnine'),
+			persona('p-3', 'ΞΣNΛ', {aliases: ['Aelena']}),
+		];
+
+		expect(filterPersonaMentions(items, 'sat').map((item) => item.id)).toEqual(['p-2', 'p-1']);
+		expect(filterPersonaMentions(items, 'aelena').map((item) => item.id)).toEqual(['p-3']);
+	});
+});

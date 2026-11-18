@@ -81,6 +81,14 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 
 ## Showing personas
 
+- **Aliases** (tyne-chat/tyne#707): a persona's `aliases` (up to 10) are other names it is found by,
+  for a name in letters a keyboard does not easily type (`SΛTVRN`, found by "saturn"). They are
+  never shown: not in a list row, an autocomplete row or a profile. Everything that finds a persona
+  by typed text matches them, a little below the name, through `PersonaNameSearch.ts` in
+  `packages/schema` (the mention autocomplete, the pickers, the settings list, the gallery, and
+  search's `from:`/`mentions:`, where a typed alias counts only when no persona has it as its name).
+  The editor shows one row per alias, as it does tag pairs. The mobile app repeats the rule in
+  `persona_name_search.dart`.
 - A message's `subprofile` is the persona as the server built it for this response. `MessageUsername`
   shows its name; `UserMessage` and `CompactMessageLayout` add `<PersonaTag>`, whose click opens the
   account, while the name and avatar open the persona's profile.

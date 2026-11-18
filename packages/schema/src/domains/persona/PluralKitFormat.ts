@@ -19,6 +19,7 @@
  */
 
 import type {PersonaImportItem, PersonaTag, PersonaVisibility, SignatureEmoji} from './PersonaApiSchemas';
+import {readPersonaAliases} from './PersonaNameSearch';
 
 export const PLURALKIT_EXPORT_VERSION = 2;
 
@@ -321,6 +322,9 @@ export function personaImportItem(
 		},
 	};
 	if (extras?.auto_tag_disabled) item.auto_tag_disabled = true;
+	// From a Tyne export, no aliases means none (an empty list clears them); from PluralKit, which
+	// has no aliases, they are left out, and the persona's own are kept.
+	if (extras) item.aliases = extras.aliases ?? [];
 	if (extras?.signature_emojis && extras.signature_emojis.length > 0) item.signature_emojis = extras.signature_emojis;
 	return item;
 }
@@ -495,6 +499,8 @@ export interface TyneBundleMemberEntry {
 	bio?: string;
 	auto_tag_disabled?: true;
 	signature_emojis?: Array<SignatureEmoji>;
+	/** Other names to find the persona by (tyne-chat/tyne#707); PluralKit has no place for them. */
+	aliases?: Array<string>;
 }
 
 export interface TyneBundleManifest {
@@ -548,6 +554,8 @@ export function readTyneBundleManifest(raw: unknown): TyneBundleManifest | null 
 			const bio = optionalString(source.bio, 4096);
 			if (bio) entry.bio = bio;
 			if (source.auto_tag_disabled === true) entry.auto_tag_disabled = true;
+			const aliases = readPersonaAliases(source.aliases);
+			if (aliases.length > 0) entry.aliases = aliases;
 			if (Array.isArray(source.signature_emojis)) {
 				entry.signature_emojis = source.signature_emojis.filter(
 					(emoji): emoji is SignatureEmoji =>
@@ -647,6 +655,7 @@ export interface PersonaBundlePersona extends Omit<PluralKitExportPersona, 'avat
 	avatar: PersonaBundleImage | null;
 	banner: PersonaBundleImage | null;
 	autoTagDisabled: boolean;
+	aliases?: ReadonlyArray<string>;
 	signatureEmojis: ReadonlyArray<SignatureEmoji>;
 }
 
@@ -695,6 +704,7 @@ export function buildPersonaBundleText(input: PersonaBundleInput): PersonaBundle
 		const fullBio = shortenedBios.get(persona.exportId);
 		if (fullBio) entry.bio = fullBio;
 		if (persona.autoTagDisabled) entry.auto_tag_disabled = true;
+		if (persona.aliases && persona.aliases.length > 0) entry.aliases = [...persona.aliases];
 		if (persona.signatureEmojis.length > 0) entry.signature_emojis = [...persona.signatureEmojis];
 		manifest.members[persona.exportId] = entry;
 	}

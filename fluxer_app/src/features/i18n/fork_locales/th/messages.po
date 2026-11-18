@@ -58,6 +58,10 @@ msgstr "เพิ่ม Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "เพิ่มคู่แท็ก ({0}/5)"
 
+#. placeholder {0}: formData.aliases.length
+msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
+msgstr "เพิ่มชื่อแฝง ({0}/{PERSONA_ALIASES_MAX})"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "เพิ่มตัวนับ"
@@ -80,6 +84,13 @@ msgstr "เพิ่มเป็น Persona ใหม่"
 #. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
 msgid "After"
 msgstr "หลังกู้คืน"
+
+#. Accessible name of one alias field in the persona editor: another name, never shown, that finds the persona when searching or mentioning it.
+msgid "Alias"
+msgstr "ชื่อแฝง"
+
+msgid "Aliases"
+msgstr "ชื่อแฝง"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -1043,6 +1054,9 @@ msgstr "เปิดไฟล์ที่ดาวน์โหลดมา"
 msgid "Optional"
 msgstr "ไม่บังคับ"
 
+msgid "Other names for finding this persona"
+msgstr "ชื่ออื่นที่ใช้ค้นหา Persona นี้"
+
 #. Link from the Tyne app download button to the downloads for every platform.
 msgid "Other platforms"
 msgstr "แพลตฟอร์มอื่นๆ"
@@ -1266,6 +1280,10 @@ msgstr "เพิ่มล่าสุด"
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "ใช้ล่าสุด"
+
+#. Accessible name of the button that removes one alias of a persona in the persona editor.
+msgid "Remove alias"
+msgstr "ลบชื่อแฝง"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"
