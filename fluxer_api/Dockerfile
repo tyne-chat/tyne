@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 ARG BUILD_VERSION
 
-FROM node:26-trixie-slim@sha256:5adad64f9a1fca2d51972caa65983634c8a774eb300d72b20f7f2a0f60368072 AS base
+# Fork: Node 26.13.1, the security release of 2026-11-11. Take upstream's digest once it moves past it.
+FROM node:26-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc AS base
 
 WORKDIR /usr/src/app
 
@@ -26,7 +27,8 @@ RUN pnpm deploy --legacy --filter=fluxer_api --prod --config.allow-unused-patche
 	rm -rf /out/pkgs /out/dist /out/node_modules/.pnpm/@pkgs+email@*/node_modules/@pkgs/email/src/operator_pass_certificate/fonts && \
 	find /out/node_modules -type f \( -name '*.d.ts' -o -name '*.d.mts' -o -name '*.d.cts' -o -name '*.js.map' -o -name '*.mjs.map' -o -name '*.cjs.map' -o -name '*.ts.map' \) -delete
 
-FROM node:26-trixie-slim@sha256:5adad64f9a1fca2d51972caa65983634c8a774eb300d72b20f7f2a0f60368072
+# Fork: Node 26.13.1, as above.
+FROM node:26-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc
 
 ARG BUILD_VERSION
 ARG SOURCE_SHA
