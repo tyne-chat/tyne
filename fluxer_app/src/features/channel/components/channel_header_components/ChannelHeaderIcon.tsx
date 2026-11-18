@@ -65,6 +65,7 @@ export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHead
 			data-flx="channel.channel-header-components.channel-header-icon.focus-ring"
 		>
 			<button
+				data-header-label={label}
 				data-flx="channel.channel-header-components.channel-header-icon.icon-button.undefined"
 				{...rest}
 				ref={mergedRef}

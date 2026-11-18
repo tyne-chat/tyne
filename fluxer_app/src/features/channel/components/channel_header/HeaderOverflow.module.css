@@ -22,3 +22,20 @@
 	width: 100%;
 	height: 100%;
 }
+
+/* A folded button's mark in the menu (tyne-chat/tyne#704): its red count, or its dot. */
+.menuMark {
+	display: inline-flex;
+	margin-inline-start: 0.5rem;
+	vertical-align: middle;
+}
+
+.menuDot {
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	margin-inline-start: 0.5rem;
+	border-radius: var(--radius-full);
+	background-color: var(--text-primary);
+	vertical-align: middle;
+}
