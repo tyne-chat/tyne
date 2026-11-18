@@ -46,7 +46,13 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 
 // Fork imports.
 
+import {GuildEmojiListPrefs} from '@app/features/emoji/state/GuildEmojiListPrefs';
 import {compareEmojisByName} from '@app/features/emoji/utils/EmojiSortingUtils';
+import {orderGuildEmojiSections} from '@app/features/emoji/utils/GuildEmojiListOrder';
+import {
+	ALL_EMOJI_SECTION_TITLE_DESCRIPTOR,
+	GuildEmojiSortControl,
+} from '@app/features/guild/components/modals/guild_tabs/GuildEmojiSortControl';
 
 const NO_EMOJI_SLOTS_AVAILABLE_DESCRIPTOR = msg({
 	message: 'No emoji slots available',
@@ -168,18 +174,16 @@ const GuildEmojiTab: React.FC<{guildId: string}> = observer(function GuildEmojiT
 		if (!searchQuery) return emojis;
 		return matchSorter(emojis, searchQuery, {keys: ['name']});
 	}, [emojis, searchQuery]);
-	const {staticEmojis, animatedEmojis} = useMemo(() => {
-		const statics: Array<GuildEmojiWithUser> = [];
-		const animateds: Array<GuildEmojiWithUser> = [];
-		for (const emoji of filteredEmojis) {
-			if (emoji.animated) {
-				animateds.push(emoji);
-			} else {
-				statics.push(emoji);
-			}
-		}
-		return {staticEmojis: statics, animatedEmojis: animateds};
-	}, [filteredEmojis]);
+	// Fork: the order and grouping chosen in the sort menu (tyne-chat/tyne#775).
+	const emojiSort = GuildEmojiListPrefs.currentSort;
+	const emojiGrouping = GuildEmojiListPrefs.currentGrouping;
+	const {staticEmojis, animatedEmojis} = useMemo(
+		() => orderGuildEmojiSections(filteredEmojis, emojiSort, emojiGrouping),
+		[filteredEmojis, emojiSort, emojiGrouping],
+	);
+	// Fork: one "Emoji (N)" heading when every emoji is in one list.
+	const staticSectionTitleDescriptor =
+		emojiGrouping === 'together' ? ALL_EMOJI_SECTION_TITLE_DESCRIPTOR : NON_ANIMATED_EMOJI_SECTION_TITLE_DESCRIPTOR;
 	const maxEmojis = guild?.maxEmojis ?? MAX_GUILD_EMOJIS;
 	const currentEmojiCount = emojis.length;
 	const maxEmojiSize = guild?.maxEmojiSize ?? EMOJI_MAX_SIZE;
@@ -426,6 +430,7 @@ const GuildEmojiTab: React.FC<{guildId: string}> = observer(function GuildEmojiT
 					className={styles.searchInput}
 					data-flx="guild.guild-tabs.guild-emoji-tab.search-input.set-search-query.text"
 				/>
+				<GuildEmojiSortControl data-flx="guild.guild-tabs.guild-emoji-tab.sort-control" />
 			</div>
 			{fetchStatus === 'error' && (
 				<div className={styles.notice} data-flx="guild.guild-tabs.guild-emoji-tab.notice">
@@ -487,7 +492,7 @@ const GuildEmojiTab: React.FC<{guildId: string}> = observer(function GuildEmojiT
 					{staticEmojis.length > 0 && (
 						<div className={styles.emojiSection} data-flx="guild.guild-tabs.guild-emoji-tab.emoji-section">
 							<h3 className={styles.emojiSectionTitle} data-flx="guild.guild-tabs.guild-emoji-tab.emoji-section-title">
-								{i18n._(NON_ANIMATED_EMOJI_SECTION_TITLE_DESCRIPTOR, {emojiCount: staticEmojis.length})}
+								{i18n._(staticSectionTitleDescriptor, {emojiCount: staticEmojis.length})}
 							</h3>
 							{layout === 'list' && <EmojiListHeader data-flx="guild.guild-tabs.guild-emoji-tab.emoji-list-header" />}
 							<div

@@ -88,6 +88,10 @@ msgstr "أليس"
 msgid "All Personas"
 msgstr "كل الشخصيات"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "الكل في قائمة واحدة"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "كل الشخصيات"
@@ -465,6 +469,10 @@ msgstr "تعديل الشخصية"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "تعديل الطابع الزمني\\"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "الرموز التعبيرية ({emojiCount})"
 
 msgid "Everyone else"
 msgstr "الآخرون"
@@ -846,6 +854,7 @@ msgstr "الأكثر استخدامًا"
 msgid "Move to Trash"
 msgstr "نقل إلى سلة المهملات"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "الاسم (أ–ي)"
@@ -943,6 +952,10 @@ msgstr "لا توجد علامات"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "لم يُفعّل أحد هذه الإشارة"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "غير المتحركة والمتحركة منفصلة"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "الأخيرة"
 msgid "Recent Personas"
 msgstr "الشخصيات الأخيرة"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "المضافة حديثًا"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "المستخدمة مؤخرًا"
@@ -1460,6 +1477,10 @@ msgstr "يُتخطى"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "تم حذف بعض الوسوم: يسمح {productName} بما يصل إلى 5 وسوم لكل شخصية، لا يتجاوز كل منها 32 حرفًا."
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "الفرز والتجميع"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"

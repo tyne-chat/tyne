@@ -88,6 +88,10 @@ msgstr "Alice"
 msgid "All Personas"
 msgstr "Tất cả persona"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "Tất cả trong một danh sách"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "Tất cả persona"
@@ -465,6 +469,10 @@ msgstr "Chỉnh sửa persona"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Chỉnh sửa dấu thời gian\\"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "Biểu tượng cảm xúc ({emojiCount})"
 
 msgid "Everyone else"
 msgstr "Những người khác"
@@ -846,6 +854,7 @@ msgstr "Dùng nhiều nhất"
 msgid "Move to Trash"
 msgstr "Chuyển vào Thùng rác"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "Tên (A–Z)"
@@ -943,6 +952,10 @@ msgstr "Không có thẻ"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Chưa ai bật tín hiệu này"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "Tĩnh và động riêng"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "Gần đây"
 msgid "Recent Personas"
 msgstr "Persona gần đây"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "Mới thêm gần đây"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "Dùng gần đây"
@@ -1460,6 +1477,10 @@ msgstr "Đang bỏ qua"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Một số thẻ proxy đã bị bỏ qua: {productName} cho phép tối đa 5 thẻ cho mỗi persona, mỗi thẻ tối đa 32 ký tự."
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "Sắp xếp và nhóm"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"
