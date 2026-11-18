@@ -240,9 +240,10 @@ deleted; `forkReleaseAssetName` uses them. A main-process string needs `FALLBACK
 
 - `pnpm --filter fluxer_desktop typecheck` and `test` (`CHECKS.md`). `src/common/BuildChannel.ts`
   reads `__FLUXER_BUILD_CHANNEL__`, which `scripts/build.mjs` defines from `BUILD_CHANNEL` (default
-  `stable`); `test` preloads `scripts/fork-test-build-channel.mjs`, which defines it the same way,
-  as most modules the tests import read it. The tests are `node --test` over
-  `src/{main,preload,common}/*.test.mjs`, with Electron stubbed (`installElectronStub` in
+  `stable`). `test` is upstream's `vitest run` (its `*.test.ts`, since #4225); the fork's tests run
+  after it as `posttest`, which pnpm runs after `test` and which preloads
+  `scripts/fork-test-build-channel.mjs`, defining it the same way, as most modules the tests import
+  read it. The fork's tests are `node --test` over `src/**/*.test.mjs`, with Electron stubbed (`installElectronStub` in
   `src/main/ForkLocalAppTestSupport.test.mjs`, a copy of the helper upstream removed).
 - Fork tests: `src/main/Fork*.test.mjs`; web side `ForkAppWindows.test.ts`,
   `ForkAppWindowBridge.test.ts`. Put logic that needs no Electron in a `Fork*.ts` module so it can
