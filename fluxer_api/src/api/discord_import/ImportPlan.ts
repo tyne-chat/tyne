@@ -35,10 +35,12 @@ import type {
 	UserID,
 } from '@app/api/BrandedTypes';
 import {Config, initializeConfig} from '@app/api/Config';
+import type {MessageRepository} from '@app/api/channel/repositories/MessageRepository';
 import {
 	EMBED_MEDIA_OWNED_ATTACHMENT_FLAG,
 	purgeMessageAttachments,
 } from '@app/api/channel/services/message/MessageHelpers';
+import {addDmThreadParticipants, isDmThreadParent} from '@app/api/channel/services/thread/ForkDmThreads';
 import {
 	deleteOneOrMany,
 	fetchMany,
@@ -82,7 +84,7 @@ import {initializeWorkerDependencies} from '@app/api/worker/WorkerDependencies';
 import {WorkerService} from '@app/api/worker/WorkerService';
 import {Config as AppConfig} from '@app/Config';
 import {Logger as AppLogger} from '@app/Logger';
-import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
+import {ChannelTypes, MessageTypes} from '@fluxer/constants/src/ChannelConstants';
 import {ServerMessageFlags, THREAD_CHANNEL_TYPES, ThreadMemberFlags} from '@fluxer/constants/src/ThreadConstants';
 import {UserFlags} from '@fluxer/constants/src/UserConstants';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -176,9 +178,10 @@ interface PlanMessage {
 	/** The command the message answered, shown as Tyne's server commands are: a /name chip. */
 	command?: {name: string; command_id: string; guild_id: string} | null;
 }
-/** A Discord thread going to a new thread under its parent's destination. */
+/** A Discord thread going to a new thread under its parent's destination: a community channel, or a DM. */
 interface PlanThread {
-	guild_id: string;
+	/** None for a thread in a DM (tyne-chat/tyne#699). */
+	guild_id: string | null;
 	parent_id: string;
 	name: string;
 	owner_id: string;
@@ -188,6 +191,10 @@ interface PlanThread {
 	auto_archive_duration: number;
 	/** Started from a message in the parent, whose id it has: the app shows that message at its top. */
 	has_starter: boolean;
+	/** A thread moved to a DM: its "started a thread" notice, written in the DM at the thread's time. */
+	notice?: {message_id: string; author_id: string; timestamp: string; content: string} | null;
+	/** A thread moved to a DM: the DM's Tyne users, who get its history read. */
+	read_for?: Array<string>;
 }
 interface PlanPlaceholder {
 	user_id: string;
@@ -370,6 +377,61 @@ function messageReference(m: PlanMessage): MessageRow['message_reference'] {
 	};
 }
 
+/**
+ * A thread moved to a DM: Tyne's "started a thread" notice in the DM at the thread's time, pointing at it, as
+ * the thread's starter writes one on Tyne. Written once; nothing else in the DM changes.
+ */
+async function writeDmThreadNotice(
+	notice: NonNullable<PlanThread['notice']>,
+	dmId: ChannelID,
+	threadId: ChannelID,
+	deps: {channelRepository: {messages: Pick<MessageRepository, 'getMessage' | 'upsertMessage'>}},
+	dryRun: boolean,
+): Promise<void> {
+	const messageId = id<MessageID>(notice.message_id);
+	if (await deps.channelRepository.messages.getMessage(dmId, messageId)) return;
+	console.log(`${dryRun ? 'would write' : 'wrote'} the thread's notice in the DM`);
+	if (dryRun) return;
+	const m: PlanMessage = {
+		discord_id: '',
+		message_id: notice.message_id,
+		type: MessageTypes.THREAD_CREATED,
+		author_id: notice.author_id,
+		persona_id: null,
+		timestamp: notice.timestamp,
+		edited_timestamp: null,
+		pinned_timestamp: null,
+		content: notice.content,
+		mention_user_ids: [],
+		mention_everyone: false,
+		reference: {message_id: null, channel_id: threadId.toString(), guild_id: null},
+		attachments: [],
+		embeds: [],
+		sticker_items: [],
+		reactions: [],
+	};
+	await deps.channelRepository.messages.upsertMessage(
+		{
+			channel_id: dmId,
+			bucket: BucketUtils.makeBucket(messageId),
+			message_id: messageId,
+			...messageFields(m, dmId),
+			webhook_id: null,
+			webhook_name: null,
+			webhook_avatar_hash: null,
+			flags: 0,
+			mention_roles: null,
+			mention_channels: null,
+			attachments: null,
+			message_snapshots: null,
+			call: null,
+			has_reaction: false,
+			version: 1,
+		},
+		null,
+	);
+}
+
 function messageFields(m: PlanMessage, channelId: ChannelID): MessageFields {
 	return {
 		author_id: id<UserID>(m.author_id),
@@ -512,15 +574,35 @@ async function main(): Promise<void> {
 	let destination = await deps.channelRepository.channelData.findUnique(channelId);
 	const thread = plan.destination.thread;
 	const threadCreated = !destination && thread != null;
-	if (threadCreated) {
+	// A thread in a DM comes after the DM, which the plan may create (with a placeholder this run makes).
+	const dmThread = threadCreated && thread.guild_id === null;
+	const makeThread = async (): Promise<void> => {
+		if (!thread) return;
 		// A Discord thread going to a new thread: created as Tyne creates one (ThreadCreationService), owned
 		// by whoever started it, in a community then marked as having threads, which the apps need to show it.
 		const parent = await deps.channelRepository.channelData.findUnique(id<ChannelID>(thread.parent_id));
+		if (!parent && dryRun && plan.destination.new_dm?.channel_id === thread.parent_id) {
+			console.log(
+				`would create the thread ${thread.name}${thread.archived ? ' (closed)' : ''} in the DM it would create`,
+			);
+			return;
+		}
 		if (!parent) throw new Error(`the thread's parent channel ${thread.parent_id} does not exist`);
+		// In a DM (tyne-chat/tyne#699) the thread has no community, its owner is one of the DM's people, and everyone
+		// in the DM follows it, as when it is started on Tyne (ThreadCreationService).
+		const inDm = thread.guild_id === null;
+		if (inDm && !isDmThreadParent(parent)) throw new Error(`the thread's parent ${thread.parent_id} is not a DM`);
+		let ownerId = id<UserID>(thread.owner_id);
+		if (inDm && !parent.recipientIds.has(ownerId)) {
+			const [first] = [...parent.recipientIds].sort((a, b) => (a < b ? -1 : 1));
+			console.log(`the thread ${thread.name}'s owner ${ownerId} is not in the DM; owned by ${first} instead`);
+			ownerId = first;
+		}
 		if (!dryRun) {
-			const guildId = id<GuildID>(thread.guild_id);
-			const ownerId = id<UserID>(thread.owner_id);
+			const guildId = inDm ? null : id<GuildID>(thread.guild_id!);
 			const createdAt = new Date(thread.created_at);
+			const members = [{userId: ownerId, flags: ThreadMemberFlags.HAS_INTERACTED}];
+			if (inDm) addDmThreadParticipants(members, parent);
 			await deps.channelRepository.threads.create({
 				channel: {
 					channel_id: channelId,
@@ -556,15 +638,17 @@ async function main(): Promise<void> {
 				appliedTags: [],
 				hasStarter: thread.has_starter,
 				createdAt,
-				members: [{userId: ownerId, flags: ThreadMemberFlags.HAS_INTERACTED}],
+				members,
 			});
-			await ensureActiveGuildTainted(guildId);
+			if (guildId) await ensureActiveGuildTainted(guildId);
 			destination = await deps.channelRepository.channelData.findUnique(channelId);
 		}
 		console.log(
 			`${dryRun ? 'would create' : 'created'} the thread ${thread.name}${thread.archived ? ' (closed)' : ''}`,
 		);
-	}
+		if (inDm && thread.notice) await writeDmThreadNotice(thread.notice, parent.id, channelId, deps, dryRun);
+	};
+	if (threadCreated && !dmThread) await makeThread();
 	const newChannel = plan.destination.new_channel;
 	const channelCreated = !destination && newChannel != null;
 	if (channelCreated) {
@@ -580,10 +664,12 @@ async function main(): Promise<void> {
 		destination = made.channel;
 	}
 	const newDm = plan.destination.new_dm;
-	const dmCreated = !destination && newDm != null;
+	// The plan's channel goes to a new DM; or a thread moved to a DM goes into one the plan creates.
+	const dmCreated = !destination && !dmThread && newDm != null;
+	const threadDmCreated = dmThread && newDm != null;
 	if (dmCreated && Object.keys(plan.previous?.messages ?? {}).length)
 		throw new Error(`the DM ${channelId} an earlier import created is gone; not creating it again`);
-	if (!destination && !dmCreated && !(dryRun && (threadCreated || channelCreated)))
+	if (!destination && !dmCreated && !dmThread && !(dryRun && (threadCreated || channelCreated)))
 		throw new Error(`destination channel ${channelId} does not exist`);
 	const ledger: Ledger = {
 		plan: planPath,
@@ -708,12 +794,16 @@ async function main(): Promise<void> {
 	}
 
 	// A DM the plan creates may be with a placeholder this run made, so it comes after them.
-	if (dmCreated) {
-		const made = await createNewDm(newDm, deps, dryRun);
+	if (dmCreated || threadDmCreated) {
+		const made = await createNewDm(newDm!, deps, dryRun);
 		const done = made.created ? 'created' : 'found';
-		console.log(`${dryRun ? 'would create' : done} the DM ${newDm.channel_id}`);
-		destination = made.channel;
+		console.log(`${dryRun ? 'would create' : done} the DM ${newDm!.channel_id}`);
+		if (dmCreated) destination = made.channel;
+		// Its only message so far is the thread's notice: it arrives read.
+		if (threadDmCreated && made.created && thread?.notice && !dryRun)
+			await markNewDmRead(newDm!, thread.notice.message_id, deps);
 	}
+	if (dmThread) await makeThread();
 
 	const personaTags = (tags: PlanPersona['tags']): Array<PersonaTag> =>
 		tags.map((t) => ({...(t.prefix ? {prefix: t.prefix} : {}), ...(t.suffix ? {suffix: t.suffix} : {})}));
@@ -1267,10 +1357,14 @@ async function main(): Promise<void> {
 		}
 	}
 
-	// A DM this run created arrives read for its Tyne users, up to its last message.
+	// A DM this run created arrives read for its Tyne users, up to its last message; so does a thread moved to a DM.
 	if (dmCreated && !dryRun && plan.messages.length > 0) {
 		const last = plan.messages.reduce((max, m) => (BigInt(m.message_id) > BigInt(max) ? m.message_id : max), '0');
-		await markNewDmRead(newDm, last, deps);
+		await markNewDmRead(newDm!, last, deps);
+	}
+	if (dmThread && thread?.read_for?.length && !dryRun && plan.messages.length > 0) {
+		const last = plan.messages.reduce((max, m) => (BigInt(m.message_id) > BigInt(max) ? m.message_id : max), '0');
+		await markNewDmRead({channel_id: plan.destination.channel_id, members: [], open_for: thread.read_for}, last, deps);
 	}
 
 	// A plan with no messages (emoji or stickers only) leaves the channel alone.
