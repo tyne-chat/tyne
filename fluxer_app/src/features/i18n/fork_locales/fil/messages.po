@@ -58,6 +58,10 @@ msgstr "Magdagdag ng Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Magdagdag ng Pares ng Tag ({0}/5)"
 
+#. placeholder {0}: formData.aliases.length
+msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
+msgstr "Magdagdag ng alyas ({0}/{PERSONA_ALIASES_MAX})"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Magdagdag ng counter"
@@ -80,6 +84,13 @@ msgstr "Idaragdag bilang bagong persona"
 #. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
 msgid "After"
 msgstr "Pagkatapos"
+
+#. Accessible name of one alias field in the persona editor: another name, never shown, that finds the persona when searching or mentioning it.
+msgid "Alias"
+msgstr "Alyas"
+
+msgid "Aliases"
+msgstr "Mga alyas"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -1043,6 +1054,9 @@ msgstr "Buksan ang file na na-download mo."
 msgid "Optional"
 msgstr "Opsyonal"
 
+msgid "Other names for finding this persona"
+msgstr "Iba pang pangalan para mahanap ang personang ito"
+
 #. Link from the Tyne app download button to the downloads for every platform.
 msgid "Other platforms"
 msgstr "Iba pang platform"
@@ -1266,6 +1280,10 @@ msgstr "Kamakailang idinagdag"
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "Kamakailang ginamit"
+
+#. Accessible name of the button that removes one alias of a persona in the persona editor.
+msgid "Remove alias"
+msgstr "Alisin ang alyas"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"

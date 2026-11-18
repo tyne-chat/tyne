@@ -597,6 +597,7 @@ describe('PersonaEditModal Component', () => {
 		const lyra = {
 			id: '100000000000000077',
 			name: 'Lyra',
+			aliases: ['Lyre'],
 			pronouns: 'she/they',
 			bio: 'Night owl, stargazer.',
 			visibility: 'public' as const,
@@ -669,6 +670,7 @@ describe('PersonaEditModal Component', () => {
 			expect(PersonaCommands.createPersona).toHaveBeenCalledTimes(1);
 			expect(PersonaCommands.createPersona).toHaveBeenCalledWith({
 				name: 'Lyra (3)',
+				aliases: ['Lyre'],
 				pronouns: 'she/they',
 				avatar_hash: '0a1b2c3d',
 				avatar_color: 0x26225e,
@@ -682,6 +684,25 @@ describe('PersonaEditModal Component', () => {
 			});
 			expect(PersonaCommands.updatePersona).not.toHaveBeenCalled();
 			expect(onClose).toHaveBeenCalledTimes(1);
+		});
+
+		it('keeps the aliases, and sends a new one tidied (tyne-chat/tyne#707)', async () => {
+			await renderCopy();
+			expect((query('persona.persona-edit-modal.input.alias') as HTMLInputElement).value).toBe('Lyre');
+
+			await click('persona.persona-edit-modal.button.add-alias');
+			const rows = document.body.querySelectorAll('[data-flx="persona.persona-edit-modal.input.alias"]');
+			expect(rows).toHaveLength(2);
+			await act(async () => {
+				const input = rows[1] as HTMLInputElement;
+				Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(input, '  Lyra Star ');
+				input.dispatchEvent(new Event('input', {bubbles: true}));
+			});
+			await click('persona.persona-edit-modal.button.create-copy');
+
+			expect(PersonaCommands.createPersona).toHaveBeenCalledWith(
+				expect.objectContaining({aliases: ['Lyre', 'Lyra Star']}),
+			);
 		});
 
 		it('stays open, with the form as it was, when the request fails', async () => {
