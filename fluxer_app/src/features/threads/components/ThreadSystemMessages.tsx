@@ -20,6 +20,10 @@ import {ChatsIcon, TrashIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useCallback} from 'react';
 
+// Fork imports.
+
+import {ThreadCreatedNews} from '@app/features/threads/fork/ForkThreadNewsMarks';
+
 export const ThreadCreatedMessage = observer(({message}: {message: Message}) => {
 	const {i18n} = useLingui();
 	const {author, channel, guild} = useSystemMessageData(message);
@@ -64,6 +68,7 @@ export const ThreadCreatedMessage = observer(({message}: {message: Message}) => 
 			>
 				{i18n._(D.SEE_ALL_THREADS_DESCRIPTOR)}
 			</button>
+			<ThreadCreatedNews thread={thread} data-flx="threads.thread-created-message.thread-created-news" />
 		</>
 	);
 	return (

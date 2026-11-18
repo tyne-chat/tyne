@@ -106,6 +106,14 @@ vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
 }));
 vi.mock('@app/features/persona/state/PersonaStore', () => ({PersonaStore: recorder.store('PersonaStore')}));
 vi.mock('@app/features/signal_bar/state/SignalBarStore', () => ({default: recorder.store('SignalBarStore')}));
+vi.mock('@app/features/threads/fork/ForkDmThreadReady', () => ({
+	includeDmThreadReadStates: recorder.fn('includeDmThreadReadStates'),
+	dmThreadReadyChannels: (): Array<unknown> => {
+		recorder.calls.push('dmThreadReadyChannels');
+		return [];
+	},
+	hydrateDmThreadsFromReady: recorder.fn('hydrateDmThreadsFromReady'),
+}));
 
 const {handleReady} = await import('@app/features/gateway/events/GatewayReady');
 
@@ -165,6 +173,19 @@ describe("the fork's work on READY", () => {
 		expect(position('PersonaCommands.resetFetchPersonasCooldown')).toBeLessThan(
 			position('scheduleForkAccountReadyWork'),
 		);
+	});
+
+	it("reads READY's DM threads around upstream's thread and read-state loading (tyne-chat/tyne#699)", () => {
+		handleReady(ready('session-1'), context(null));
+
+		expect(count('includeDmThreadReadStates')).toBe(1);
+		expect(count('dmThreadReadyChannels')).toBe(1);
+		expect(count('hydrateDmThreadsFromReady')).toBe(1);
+		// The read states join upstream's before it loads them; the threads are indexed after upstream's own
+		// ChannelThreads pass, which keeps only the threads READY's guilds list.
+		expect(position('includeDmThreadReadStates')).toBeLessThan(position('ReadStates.handleGatewayReady'));
+		expect(position('dmThreadReadyChannels')).toBeLessThan(position('Channels.handleGatewayReady'));
+		expect(position('hydrateDmThreadsFromReady')).toBeGreaterThan(position('ChannelThreads.handleGatewayReady'));
 	});
 
 	it('does none of it for a READY that names another account than expected', () => {

@@ -14,7 +14,11 @@ build_notification_title(AuthorUsername, MessageData, GuildId, GuildName, Channe
     ChannelType = maps:get(<<"channel_type">>, MessageData, 1),
     case GuildId of
         0 ->
-            format_dm_title(AuthorUsername, ChannelType);
+            %% Fork: "Author (Thread)" for a message in a DM thread (tyne-chat/tyne#699).
+            case fork_dm_thread_push:title(AuthorUsername, MessageData) of
+                undefined -> format_dm_title(AuthorUsername, ChannelType);
+                ThreadTitle -> ThreadTitle
+            end;
         _ ->
             format_guild_title(
                 AuthorUsername, GuildName, channel_label(MessageData, ChannelName)

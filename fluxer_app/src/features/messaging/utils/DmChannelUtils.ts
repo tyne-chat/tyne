@@ -8,8 +8,13 @@ import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {RelationshipTypes} from '@fluxer/constants/src/UserConstants';
 import {compare, fromTimestamp} from '@fluxer/snowflake/src/SnowflakeUtils';
 
+// Fork imports.
+
+import {latestDmThreadActivity} from '@app/features/threads/fork/ForkThreadNews';
+
 const getChannelSortSnowflake = (channel: Channel): string => {
-	const baseSnowflake = channel.lastMessageId ?? channel.id;
+	// Fork: a message in a thread it follows moves a DM up too (tyne-chat/tyne#699).
+	const baseSnowflake = latestDmThreadActivity(channel, channel.lastMessageId ?? channel.id);
 	if (channel.type !== ChannelTypes.DM) {
 		return baseSnowflake;
 	}

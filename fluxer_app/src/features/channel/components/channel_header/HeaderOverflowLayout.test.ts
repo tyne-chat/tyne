@@ -22,13 +22,13 @@ const icon = (key: string, foldOrder: number): HeaderLayoutItem => ({key, kind: 
 
 const ROW: Array<HeaderLayoutItem> = [
 	icon('bell', 4),
-	icon('threads', 6),
-	icon('pins', 7),
+	icon('threads', 12),
+	icon('pins', 10),
 	icon('favorite', 3),
-	icon('members', 9),
-	{key: 'search', kind: 'search', width: 32, foldOrder: 11},
+	icon('members', 7),
+	{key: 'search', kind: 'search', width: 32, foldOrder: 9},
 	icon('developer-tools', 2),
-	icon('inbox', 8),
+	icon('inbox', 11),
 ];
 
 // The verification account's #general on chat-dev: a 55 px name, title side 115 px with the
@@ -84,11 +84,11 @@ describe('HeaderOverflowLayout', () => {
 			'bell',
 			'unknown-b',
 			'unknown-a',
-			'threads',
-			'pins',
-			'inbox',
 			'members',
 			'search',
+			'pins',
+			'inbox',
+			'threads',
 		]);
 	});
 
@@ -120,10 +120,10 @@ describe('HeaderOverflowLayout', () => {
 		expect([...layout.folded]).toEqual(['developer-tools', 'favorite']);
 	});
 
-	it('folds in order until it fits, the search box and the call buttons last', () => {
-		// Members, the magnifier and the menu button: 3 * 32 + 2 * 8 = 112.
+	it('folds in order until it fits, Inbox and Threads last', () => {
+		// Inbox, Threads and the menu button: 3 * 32 + 2 * 8 = 112.
 		const layout = layoutAtLevel(input(0), fittingLevel(input(120 + 236)));
-		expect([...layout.folded]).toEqual(['developer-tools', 'favorite', 'bell', 'threads', 'pins', 'inbox']);
+		expect([...layout.folded]).toEqual(['developer-tools', 'favorite', 'bell', 'members', 'search', 'pins']);
 	});
 
 	it('folds everything when nothing fits', () => {

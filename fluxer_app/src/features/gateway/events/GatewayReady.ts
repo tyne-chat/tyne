@@ -66,6 +66,11 @@ import GuildCommandsStore from '@app/features/guild_commands/state/GuildCommands
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
+import {
+	dmThreadReadyChannels,
+	hydrateDmThreadsFromReady,
+	includeDmThreadReadStates,
+} from '@app/features/threads/fork/ForkDmThreadReady';
 
 const logger = new Logger('READY Handler');
 
@@ -119,6 +124,8 @@ export function handleReady(data: ReadyPayload, context: GatewayHandlerContext):
 }
 
 function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext, accountKey: string): void {
+	// Fork: DM threads' read states come apart from upstream's (tyne-chat/tyne#699).
+	includeDmThreadReadStates(data);
 	const currentSessionId = data.session_id;
 	const isNewSession = context.previousSessionId !== null && context.previousSessionId !== currentSessionId;
 	if (isNewSession) {
@@ -151,6 +158,8 @@ function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext,
 			}
 		}
 	}
+	// Fork: DM threads (tyne-chat/tyne#699).
+	channels.push(...dmThreadReadyChannels(data));
 	GuildAvailability.loadUnavailableGuilds(guilds);
 	UserNote.loadNotes(data.notes ?? {});
 	context.setConnectionGeoip({
@@ -177,6 +186,7 @@ function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext,
 	ThreadGuilds.handleGatewayReady(guilds);
 	Channels.handleGatewayReady({channels});
 	ChannelThreads.handleGatewayReady(guilds);
+	hydrateDmThreadsFromReady(data);
 	ThreadSubscriptions.handleConnectionReady();
 	ForumPosts.handleGatewayReady();
 	ForumReadState.handleGatewayReady();

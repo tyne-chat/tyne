@@ -176,7 +176,9 @@ test.describe('Channel header in a narrow window', () => {
 		const widths: Array<[number, () => Promise<void>]> = [
 			[1400, inBox],
 			[1000, byMagnifier],
-			[760, byMagnifier],
+			// The long name leaves Threads alone beside the menu here: Search folds before Pins, Inbox and Threads
+			// (tyne-chat/tyne#699).
+			[760, fromMenu],
 			[600, fromMenu],
 			[520, fromMenu],
 			[480, fromMenu],
@@ -202,7 +204,7 @@ test.describe('Channel header in a narrow window', () => {
 	// closed the suggestions they open again the next time (focusing the box alone left them closed).
 	test('the magnifier opens the suggestions again after Escape closed them', async ({page}) => {
 		await openLongChannel(page);
-		await page.setViewportSize({width: 760, height: 900});
+		await page.setViewportSize({width: 1000, height: 900});
 		await expect(header(page)).toHaveAttribute('data-header-search', 'icon');
 
 		await magnifier(page).click();
