@@ -39,6 +39,10 @@ import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import {observer} from 'mobx-react-lite';
 import {type ReactNode, useEffect, useState} from 'react';
 
+// Fork imports.
+
+import {isDmThreadParent} from '@app/features/threads/fork/ForkDmThreads';
+
 type AppRouteComponentProps = Record<string, unknown>;
 
 function requireAuthenticatedRuntime() {
@@ -416,7 +420,14 @@ const threadPanelRoute = createRoute({
 	path: '/channels/:guildId/:channelId/threads/:threadId/:threadMessageId?',
 	onEnter: (ctx) => {
 		const {guildId, channelId} = ctx.params;
-		if (guildId === ME || (GatewaySessions.foregroundConnection.isReady && !ThreadGuilds.isActive(guildId))) {
+		// Fork: a DM's threads open beside it (tyne-chat/tyne#699).
+		const dmThreadPanel =
+			guildId === ME &&
+			(Channels.getChannel(channelId) === undefined || isDmThreadParent(Channels.getChannel(channelId)));
+		if (
+			(guildId === ME && !dmThreadPanel) ||
+			(GatewaySessions.foregroundConnection.isReady && !ThreadGuilds.isActive(guildId))
+		) {
 			return notFound();
 		}
 		const channel = Channels.getChannel(channelId);

@@ -16,6 +16,7 @@ import {
 	handleChannelSignalUpdate,
 	handleSignalBarUpdate,
 } from '@app/features/signal_bar/events/SignalBarEvents';
+import {registerDmThreadEnvelope} from '@app/features/threads/fork/ForkDmThreadEvents';
 
 type GatewayEventHandler = Parameters<GatewayHandlerRegistry['set']>[1];
 
@@ -33,4 +34,5 @@ export function registerForkGatewayHandlers(registry: GatewayHandlerRegistry): v
 	registry.set('SIGNAL_BAR_UPDATE', handleSignalBarUpdate as GatewayEventHandler);
 	registry.set('CHANNEL_SIGNAL_BAR_UPDATE', handleChannelSignalBarUpdate as GatewayEventHandler);
 	registry.set('GUILD_COMMANDS_UPDATE', handleGuildCommandsUpdate as GatewayEventHandler);
+	registerDmThreadEnvelope(registry);
 }

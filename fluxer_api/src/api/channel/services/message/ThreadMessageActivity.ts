@@ -29,6 +29,10 @@ import {ThreadArchivedError} from '@fluxer/errors/src/domains/channel/ThreadArch
 import {ThreadLockedError} from '@fluxer/errors/src/domains/channel/ThreadLockedError';
 import {UnknownChannelError} from '@fluxer/errors/src/domains/channel/UnknownChannelError';
 
+// Fork imports.
+
+import {dispatchDmThreadEvents, isDmThreadChannel} from '@app/api/channel/services/thread/ForkDmThreads';
+
 const INTERACTED_CAS_ATTEMPTS = 3;
 
 export class ThreadMessageActivity {
@@ -179,6 +183,8 @@ export class ThreadMessageActivity {
 	}
 
 	private async dispatch(channel: Channel, events: Array<ThreadDispatchEvent>): Promise<void> {
+		// Fork: a DM thread's events go to the parent DM's recipients (tyne-chat/tyne#699).
+		if (events.length > 0 && isDmThreadChannel(channel)) return dispatchDmThreadEvents(this.gatewayService, events);
 		if (events.length === 0 || channel.guildId === null) return;
 		await dispatchThreadEvents(this.gatewayService, channel.guildId, events);
 	}

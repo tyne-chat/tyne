@@ -22,6 +22,15 @@ import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/Me
 import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {makeAutoObservable, observable} from 'mobx';
 
+// Fork imports.
+
+import {
+	DM_THREAD_INDEX_KEY,
+	isDmThread,
+	isDmThreadParent,
+	isGuildlessThreadWire,
+} from '@app/features/threads/fork/ForkDmThreads';
+
 const EMPTY_IDS: ReadonlyArray<string> = Object.freeze([]);
 
 export interface ThreadListSyncPayload {
@@ -86,7 +95,8 @@ class ChannelThreads {
 		const ids = this.threadIdsByParent.get(parentId);
 		if (ids == null || ids.length === 0) return [];
 		const parent = Channels.getChannel(parentId);
-		if (!parent || !Permission.can(Permissions.VIEW_CHANNEL, parent)) return [];
+		// Fork: everyone in a DM sees its threads (tyne-chat/tyne#699).
+		if (!parent || !(isDmThreadParent(parent) || Permission.can(Permissions.VIEW_CHANNEL, parent))) return [];
 		const threads: Array<Channel> = [];
 		for (const id of ids) {
 			const thread = Channels.getChannel(id);
@@ -121,6 +131,8 @@ class ChannelThreads {
 	private isParentViewable(thread: Channel): boolean {
 		if (!thread.parentId) return false;
 		const parent = Channels.getChannel(thread.parentId);
+		// Fork: everyone in a DM sees its threads (tyne-chat/tyne#699).
+		if (isDmThreadParent(parent)) return true;
 		return parent != null && Permission.can(Permissions.VIEW_CHANNEL, parent);
 	}
 
@@ -146,6 +158,8 @@ class ChannelThreads {
 	}
 
 	upsert(wire: ChannelWire, guildId?: string, {silent = false}: {silent?: boolean} = {}): Channel | undefined {
+		// Fork: a DM thread has no guild (tyne-chat/tyne#699).
+		if (guildId == null && isGuildlessThreadWire(wire)) return this.forkUpsertDmThread(wire, silent);
 		const resolvedGuildId = wire.guild_id ?? guildId;
 		if (
 			!resolvedGuildId ||
@@ -186,6 +200,10 @@ class ChannelThreads {
 		ThreadMemberships.remove(threadId);
 		if (channel?.guildId && channel.parentId && Navigation.channelId === threadId) {
 			RouterUtils.replaceWith(Routes.guildChannel(channel.guildId, channel.parentId));
+		}
+		// Fork: back to the DM when its open thread goes (tyne-chat/tyne#699).
+		if (isDmThread(channel) && channel?.parentId && Navigation.channelId === threadId) {
+			RouterUtils.replaceWith(Routes.dmChannel(channel.parentId));
 		}
 		if (channel) {
 			cleanupChannelLocalState(channel.toJSON());
@@ -234,6 +252,8 @@ class ChannelThreads {
 		for (const message of messages) {
 			const thread = message.thread as ChannelWire | undefined;
 			if (thread == null) continue;
+			// Fork: the thread of a message in a DM (tyne-chat/tyne#699).
+			if (thread.guild_id == null && message.guild_id == null && isGuildlessThreadWire(thread)) this.upsert(thread);
 			const guildId = thread.guild_id ?? message.guild_id;
 			if (guildId && ThreadGuilds.isActive(guildId)) {
 				this.upsert(thread, guildId);
@@ -296,6 +316,23 @@ class ChannelThreads {
 
 	isCurrentUser(userId: string | undefined): boolean {
 		return userId != null && userId === Authentication.currentUserId;
+	}
+
+	// Fork: upsert() for a thread in a DM (tyne-chat/tyne#699). It is indexed under DM_THREAD_INDEX_KEY and stored
+	// without a guild id, which is how the rest of the app tells it from a guild's.
+	private forkUpsertDmThread(wire: ChannelWire, silent: boolean): Channel | undefined {
+		if (!wire.parent_id) return undefined;
+		const {member, newly_created: _newlyCreated, ...rest} = wire;
+		const existing = Channels.getChannel(wire.id);
+		const channel: ChannelWire = {...rest, last_message_id: newestId(rest.last_message_id, existing?.lastMessageId)};
+		Channels.upsertThread(channel);
+		this.index(DM_THREAD_INDEX_KEY, wire.parent_id, wire.id);
+		if (member) ThreadMemberships.set(wire.id, member);
+		if (silent) return Channels.getChannel(wire.id);
+		Permission.handleChannelUpdate(wire.id);
+		ReadStates.handleChannelCreate({channel});
+		GuildReadState.handleGenericUpdate(wire.id);
+		return Channels.getChannel(wire.id);
 	}
 }
 

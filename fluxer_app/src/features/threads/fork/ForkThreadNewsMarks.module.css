@@ -1,0 +1,47 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* Fork: the Threads mark on a DM's row (tyne-chat/tyne#699): the Threads icon at half the header button's size, with
+   the red count in its corner as on the header button. */
+.dmThreadsMark {
+	position: relative;
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.25rem;
+	height: 1.25rem;
+	color: var(--text-primary);
+}
+
+.dmThreadsIcon {
+	width: 1rem;
+	height: 1rem;
+}
+
+.dmThreadsCount {
+	position: absolute;
+	top: -0.375rem;
+	inset-inline-end: -0.5rem;
+	pointer-events: none;
+}
+
+/* On a "started a thread" notice: the count after the sentence. */
+.createdNews {
+	display: inline-flex;
+	vertical-align: middle;
+	margin-inline-start: 0.375rem;
+}
+
+/* In the Threads list: the count or the unread dot at the end of a thread's line. */
+.browserNews {
+	margin-inline-start: auto;
+	display: inline-flex;
+	align-items: center;
+}
+
+.browserUnreadDot {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: var(--radius-full);
+	background-color: var(--text-primary);
+}

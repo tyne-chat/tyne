@@ -20,6 +20,10 @@ import Users from '@app/features/user/state/Users';
 import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
+// Fork imports.
+
+import {countsLikeDmMessages} from '@app/features/threads/fork/ForkDmThreads';
+
 export class ReadStateEntry {
 	readonly channelId: string;
 	storedGuildId: string | null = null;
@@ -134,6 +138,8 @@ export class ReadStateEntry {
 
 	get isPrivate(): boolean {
 		const channel = Channels.getChannel(this.channelId);
+		// Fork: a followed DM thread counts its messages as its DM does (tyne-chat/tyne#699).
+		if (countsLikeDmMessages(channel)) return true;
 		return channel?.isPrivate() ?? false;
 	}
 

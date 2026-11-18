@@ -278,6 +278,12 @@ handle_presence_rejoin(State) ->
     {noreply, State}.
 
 -spec process_dispatch_event(atom(), map() | list(), state()) -> state().
+%% Fork: a new message in a DM thread is pushed as a message in its DM (tyne-chat/tyne#699).
+process_dispatch_event(fork_dm_thread_event, Data, State) when is_map(Data) ->
+    case fork_dm_thread_push:push_message(Data) of
+        undefined -> State;
+        Message -> presence_update:handle_message_create_event(Message, State)
+    end;
 process_dispatch_event(user_update, Data, State) when is_map(Data) ->
     presence_update:handle_user_update_event(Data, State);
 process_dispatch_event(user_settings_update, Data, State) when is_map(Data) ->

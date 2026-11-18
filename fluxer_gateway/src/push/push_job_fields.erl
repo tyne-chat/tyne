@@ -48,7 +48,9 @@ notification(
         <<"url">> => push_notification_format:build_url(GuildId, ChannelId, MessageId)
     },
     Fields = message_fields(MessageData, MarkdownContext, GuildId, GuildName, ChannelName),
-    with_badge(maps:merge(Common, Fields)).
+    %% Fork: the thread of a message in a DM thread (tyne-chat/tyne#699).
+    ForkFields = fork_dm_thread_push:fields(MessageData),
+    with_badge(maps:merge(maps:merge(Common, Fields), ForkFields)).
 
 -spec message_fields(map(), map(), integer(), binary() | undefined, binary() | undefined) ->
     map().

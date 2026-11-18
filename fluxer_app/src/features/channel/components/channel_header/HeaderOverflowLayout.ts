@@ -41,6 +41,8 @@ export interface HeaderItemRule {
 // Matched against the data-flx attribute of an item in the action row (or of the first element in
 // it that has one). An item that matches none folds in the middle of the order, under its own label,
 // so a button upstream adds later still fits.
+// The order is Seraphim's (tyne-chat/tyne#699, design section 10.5): Threads folds last, then Inbox, Pins and Search,
+// since thread news must stay in view; calls before them, and what nobody uses often first.
 export const HEADER_ITEM_RULES: ReadonlyArray<HeaderItemRule> = [
 	{
 		id: 'supplement',
@@ -55,14 +57,14 @@ export const HEADER_ITEM_RULES: ReadonlyArray<HeaderItemRule> = [
 	{id: 'favorite', pattern: /toggle-favorite/, kind: 'action', foldOrder: 3},
 	{id: 'notifications', pattern: /notification-settings-button/, kind: 'action', foldOrder: 4},
 	{id: 'group', pattern: /open-create-group-dm|open-add-friends-to-group/, kind: 'action', foldOrder: 5},
-	{id: 'threads', pattern: /threads-button/, kind: 'action', foldOrder: 6},
-	{id: 'pins', pattern: /channel-pins-button/, kind: 'action', foldOrder: 7},
-	{id: 'inbox', pattern: /inbox-button/, kind: 'action', foldOrder: 8},
-	{id: 'members', pattern: /toggle-members/, kind: 'action', foldOrder: 9},
-	{id: 'voice-call', pattern: /voice-call-button/, kind: 'action', foldOrder: 10},
-	{id: 'video-call', pattern: /video-call-button/, kind: 'action', foldOrder: 10.5},
-	{id: 'search', pattern: /message-search-focus-wrapper/, kind: 'search', foldOrder: 11},
-	{id: 'updater', pattern: /updater-icon/, kind: 'action', foldOrder: 12},
+	{id: 'threads', pattern: /threads-button/, kind: 'action', foldOrder: 12},
+	{id: 'pins', pattern: /channel-pins-button/, kind: 'action', foldOrder: 10},
+	{id: 'inbox', pattern: /inbox-button/, kind: 'action', foldOrder: 11},
+	{id: 'members', pattern: /toggle-members/, kind: 'action', foldOrder: 7},
+	{id: 'voice-call', pattern: /voice-call-button/, kind: 'action', foldOrder: 6.5},
+	{id: 'video-call', pattern: /video-call-button/, kind: 'action', foldOrder: 6},
+	{id: 'search', pattern: /message-search-focus-wrapper/, kind: 'search', foldOrder: 9},
+	{id: 'updater', pattern: /updater-icon/, kind: 'action', foldOrder: 8},
 ];
 
 export const UNKNOWN_ITEM_FOLD_ORDER = 5.5;

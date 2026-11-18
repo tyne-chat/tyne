@@ -55,6 +55,14 @@ import type {ChannelUpdateThreadRequest} from '@fluxer/schema/src/domains/channe
 import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 
+// Fork imports.
+
+import {
+	assertDmThreadDeleteAllowed,
+	assertDmThreadPatchAllowed,
+	isDmThreadState,
+} from '@app/api/channel/services/thread/ForkDmThreads';
+
 interface ThreadModifyServiceDeps {
 	channelRepository: ChannelRepository;
 	gatewayService: IGatewayService;
@@ -117,7 +125,8 @@ export class ThreadModifyService {
 		};
 		const thread = authChannel.thread;
 		const channel = authChannel.channel;
-		if (!thread || channel.guildId === null) throw new UnknownChannelError();
+		// Fork: a DM thread has no guild (tyne-chat/tyne#699).
+		if (!thread || (channel.guildId === null && !isDmThreadState(thread.state))) throw new UnknownChannelError();
 		const {state, parent} = thread;
 		if (data.flags !== undefined && (data.flags & ~settableChannelFlags(channel.type, parent.type)) !== 0) {
 			throw InputValidationError.fromCode('flags', ValidationErrorCodes.INVALID_FORMAT);
@@ -134,6 +143,7 @@ export class ThreadModifyService {
 			applied_tags: data.applied_tags,
 		};
 		assertThreadAllowed(threadPatchRequirement(patch, state.flags, thread.actor));
+		assertDmThreadPatchAllowed(patch, thread);
 		const appliedTags =
 			data.applied_tags !== undefined
 				? await this.resolvePatchedTags(
@@ -248,8 +258,11 @@ export class ThreadModifyService {
 	}): Promise<void> {
 		const thread = authChannel.thread;
 		const channel = authChannel.channel;
-		if (!thread || channel.guildId === null) throw new UnknownChannelError();
-		assertThreadAllowed(canDeleteThread(thread.actor));
+		// Fork: a DM thread has no guild and no moderator in a 1:1 DM (tyne-chat/tyne#699).
+		if (!thread || (channel.guildId === null && !isDmThreadState(thread.state))) throw new UnknownChannelError();
+		if (isDmThreadState(thread.state)) {
+			await assertDmThreadDeleteAllowed({channelRepository: this.deps.channelRepository, channel, thread, userId});
+		} else assertThreadAllowed(canDeleteThread(thread.actor));
 		thread.enforceMfa(ThreadPermissionFlags.MANAGE_THREADS);
 		const view = await loadThreadView(this.deps.channelRepository, channel, thread.state, thread.parent);
 		const members = await this.deps.channelRepository.threads.listMembers(channel.id, {limit: MAX_THREAD_MEMBERS});

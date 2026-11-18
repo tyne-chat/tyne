@@ -140,6 +140,26 @@ Fork-owned: `controllers/ChannelPersonaMentionController.ts` (one line in `contr
 
 When upstream changes one of these, keep the hand-over shape and move fork lines out of upstream's.
 
+### Threads in DMs (tyne-chat/tyne#699)
+
+`services/thread/ForkDmThreads.ts` (rules, access, event fan-out), `ForkDmThreadKeys.ts` (telling a DM
+thread apart; no service imports, so repositories can use it), `ForkDmThreadReady.ts` (READY's
+`fork_dm_threads`) and `../read_state/ForkDmThreadReadStates.ts`. A DM thread's channel row has no guild
+and no recipients; its thread rows store `guild_id` 0 (`DM_THREAD_GUILD_KEY`), which also routes upstream's
+`dispatchThreadEvents`, archive sweep, audit log and active-thread cap to the fork's code. Hand-overs, one
+or a few lines each: the thread route guard, `getChannelAuthenticated`, `ThreadServiceContext.parentActor`,
+thread creation (authorization, participants, the guild key, the system message's reference),
+`ThreadRepository.create` and `countActiveThreads`, `dispatchThreadEvents`, `dispatchChannelEvent`,
+`ThreadMessageActivity.dispatch`, the member service's `add`, update and delete in `ThreadModifyService`,
+`ThreadListService.authorizeParent`, the DM send rules in `MessageSendService`, `updateDMRecipients` and
+`updateReadStates` in `MessageProcessingService`, the read-state marker and acks, `GuildAuditLogService.record`,
+and READY in `RpcService`. Tests: `tests/ForkDmThreads.test.ts`.
+
+Upstream strips thread chips, "thread created" notices and starter messages from every channel without a
+guild. An app that knows DM threads sends the client feature `fork_dm_threads` (`DM_THREADS_CLIENT_FEATURE`)
+and keeps them: `ForkDmThreadViewer.ts` marks its viewer in `viewerFromCtx`, and `maskThreadArtifactsFor` and
+`ThreadMessageResponses.shape` let it through. Older apps still get them stripped.
+
 ## Tests
 
 - `tests/` holds integration tests on `createApiTestHarness` (in-memory database, gateway and
