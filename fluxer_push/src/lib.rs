@@ -19,6 +19,9 @@ mod subscription;
 mod tokens;
 mod vendor;
 
+// Fork modules.
+mod fork_dm_thread_push;
+
 pub use config::Config;
 pub use server::run;
 

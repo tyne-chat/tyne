@@ -32,6 +32,16 @@ import {
 	withImplicitThreadBits,
 } from '@fluxer/constants/src/ThreadPermissionUtils';
 
+// Fork imports.
+
+import {
+	DmThreads,
+	dmThreadActor,
+	isDmThreadParent,
+	isDmWithoutThreads,
+	isOneToOneDmThread,
+} from '@app/features/threads/fork/ForkDmThreads';
+
 function actorFor(guildId: string | undefined, permissions: bigint): ThreadActor {
 	const userId = Authentication.currentUserId;
 	const guild = guildId ? Guilds.getGuild(guildId) : null;
@@ -49,6 +59,8 @@ function actorFor(guildId: string | undefined, permissions: bigint): ThreadActor
 }
 
 function getParentActor(parent: Channel): ThreadActor {
+	// Fork: a DM or group DM (tyne-chat/tyne#699).
+	if (isDmThreadParent(parent)) return dmThreadActor(parent, Authentication.currentUserId);
 	return actorFor(parent.guildId, Permission.getChannelPermissions(parent.id) ?? 0n);
 }
 
@@ -66,7 +78,9 @@ export function getThreadActorContext(thread: Channel): ThreadActorContext | nul
 			locked: metadata?.locked ?? false,
 			invitable: metadata?.invitable ?? true,
 		},
-		isThreadOwner: thread.ownerId != null && thread.ownerId === Authentication.currentUserId,
+		// Fork: in a 1:1 DM both people may rename and close a thread (tyne-chat/tyne#699).
+		isThreadOwner:
+			(thread.ownerId != null && thread.ownerId === Authentication.currentUserId) || isOneToOneDmThread(thread),
 		isMember: ThreadMemberships.isMember(thread.id),
 	};
 }
@@ -88,6 +102,8 @@ export function canViewThreadChannel(thread: Channel): boolean {
 
 export function canCreateThreadIn(parent: Channel, kind: ThreadCreateKind): boolean {
 	if (kind === 'private' && parent.type !== ChannelTypes.GUILD_TEXT) return false;
+	// Fork: the server's per-account switch for starting threads in DMs (tyne-chat/tyne#699).
+	if (isDmThreadParent(parent) && (!DmThreads.canStart || isDmWithoutThreads(parent))) return false;
 	return canCreateThread(getParentActor(parent), kind) === null;
 }
 
@@ -105,6 +121,8 @@ export function canWriteInThread(thread: Channel, action: ThreadWriteAction): bo
 }
 
 export function canPatchThread(thread: Channel, patch: ThreadPatch): boolean {
+	// Fork: nobody locks a thread in a 1:1 DM; nobody could unlock it again (tyne-chat/tyne#699).
+	if (patch.locked !== undefined && isOneToOneDmThread(thread)) return false;
 	const ctx = getThreadActorContext(thread);
 	return ctx != null && threadPatchRequirement(patch, thread.flags, ctx) === null;
 }
@@ -130,6 +148,8 @@ export function canRemoveThreadMembers(thread: Channel): boolean {
 }
 
 export function canDeleteThreadChannel(thread: Channel): boolean {
+	// Fork: in a 1:1 DM its starter may, while nobody else has written in it; the server checks that part.
+	if (isOneToOneDmThread(thread)) return thread.ownerId === Authentication.currentUserId;
 	const ctx = getThreadActorContext(thread);
 	return ctx != null && canDeleteThread(ctx) === null;
 }

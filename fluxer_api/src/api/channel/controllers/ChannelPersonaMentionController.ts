@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {createChannelID} from '@app/api/BrandedTypes';
+import {dmRulesChannel} from '@app/api/channel/services/thread/ForkDmThreads';
 import {viewerFromCtx} from '@app/api/experiment/ChannelThreadsGate';
 import {DefaultUserOnly, LoginRequired} from '@app/api/middleware/AuthMiddleware';
 import {RateLimitMiddleware} from '@app/api/middleware/RateLimitMiddleware';
@@ -73,8 +74,9 @@ export function ChannelPersonaMentionController(app: HonoApp) {
 						nickname: memberNickMap.get(u.id) ?? null,
 					});
 				}
-			} else if (authChannel.channel.recipientIds && authChannel.channel.recipientIds.size > 0) {
-				const recipientIds = Array.from(authChannel.channel.recipientIds);
+			} else if (dmRulesChannel(authChannel).recipientIds.size > 0) {
+				// A DM thread's people are its parent DM's (tyne-chat/tyne#699).
+				const recipientIds = Array.from(dmRulesChannel(authChannel).recipientIds);
 				const users = await userRepository.listUsers(recipientIds);
 				for (const u of users) {
 					candidateUserIds.push(u.id);

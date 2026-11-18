@@ -38,6 +38,10 @@ import {isObjectLike as isRecord} from '@fluxer/record_utils/src/RecordGuards';
 import {i18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import {DM_THREADS_CLIENT_FEATURE} from '@fluxer/constants/src/ForkDmThreadConstants';
+
 const TOO_MANY_REQUESTS_DESCRIPTOR = msg({message: 'Too many requests. Try again later.'});
 const log = new Logger('RestClient');
 const RETRY_BACKOFF_BASE_MS = 1000;
@@ -604,6 +608,8 @@ function assembleHeaders(input: AssembleHeadersInput): Record<string, string> {
 	const accumulator: Record<string, string> = {};
 	if (input.sameOrigin) {
 		accumulator[Headers.X_FLUXER_FEATURES] = 'view_channel_members_permission,channel_threads';
+		// Fork: this app knows DM threads (tyne-chat/tyne#699).
+		accumulator[Headers.X_FLUXER_FEATURES] = `${DM_THREADS_CLIENT_FEATURE},${accumulator[Headers.X_FLUXER_FEATURES]}`;
 		accumulator[Headers.X_FLUXER_CAPABILITIES] = 'guild_visits';
 		accumulator[Headers.X_FLUXER_CLIENT_INSTALLATION_ID] = ClientInstallationId.get();
 	}

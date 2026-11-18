@@ -25,6 +25,10 @@ import type {MessageResponse} from '@fluxer/schema/src/domains/message/MessageRe
 import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 
+// Fork imports.
+
+import {dmThreadParentActor, isDmThreadParent} from '@app/api/channel/services/thread/ForkDmThreads';
+
 export interface ThreadServiceDeps {
 	channelRepository: ChannelRepository;
 	guildRepository: GuildRepository;
@@ -95,6 +99,8 @@ export class ThreadServiceContext {
 
 	async parentActor(auth: AuthenticatedChannel, userId: UserID): Promise<ThreadActor> {
 		if (auth.visitor) return {permissions: auth.visitor.permissions, isOwner: false, timedOut: false};
+		// Fork: a DM or group DM (tyne-chat/tyne#699).
+		if (isDmThreadParent(auth.channel)) return dmThreadParentActor(auth.channel, userId);
 		const permissions = await this.gatewayService.getUserPermissions({
 			guildId: auth.channel.guildId!,
 			userId,
