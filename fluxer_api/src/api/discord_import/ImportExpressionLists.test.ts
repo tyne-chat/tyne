@@ -82,6 +82,15 @@ describe('sendExpressionLists', () => {
 		});
 	});
 
+	it('also sends the lists of the communities whose emoji were renamed, moved or archived', async () => {
+		const {deps, sent} = fakes({});
+		expect(await sendExpressionLists({emoji: [], stickers: []}, deps, ['10', '20'])).toEqual({
+			emoji: ['10', '20'],
+			stickers: [],
+		});
+		expect(sent.map((s) => s.guildId)).toEqual([10n, 20n]);
+	});
+
 	it('sends nothing for emoji or stickers kept outside any community, or for a plan without either', async () => {
 		const {deps, sent, reads} = fakes({});
 		expect(
