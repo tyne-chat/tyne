@@ -41,6 +41,7 @@ import type {PersonaID} from '@app/api/BrandedTypes';
 import {forgetForkGuildCommandUseOnEdit} from '@app/api/guild_command/GuildCommandUses';
 import {getPersonaRepository} from '@app/api/middleware/ForkServiceSingletons';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+import {isPersonaOnlyEdit} from '@app/api/persona/PersonaOnlyEdit';
 import {requestedPersonaId, resolveOwnedPersonaId} from '@app/api/persona/PersonaOwnership';
 
 interface EditMessageResult {
@@ -120,11 +121,14 @@ export class MessageEditService {
 		}
 		const user = await this.deps.userRepository.findUnique(userId);
 		this.deps.validationService.validateMessageEditable(message);
-		this.deps.validationService.validateMessageContent(data, user, {
-			isUpdate: true,
-			guildFeatures: guild?.features ?? null,
-			existingMessage: message,
-		});
+		// Fork: an edit of nothing but the persona changes no content (tyne-chat/tyne#817).
+		if (!isPersonaOnlyEdit(data)) {
+			this.deps.validationService.validateMessageContent(data, user, {
+				isUpdate: true,
+				guildFeatures: guild?.features ?? null,
+				existingMessage: message,
+			});
+		}
 		this.deps.embedAttachmentResolver.validateAttachmentReferences({
 			embeds: data.embeds,
 			attachments: data.attachments,

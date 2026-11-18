@@ -69,6 +69,7 @@ import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 // Fork imports.
 
 import type {PersonaID} from '@app/api/BrandedTypes';
+import {isPersonaOnlyEdit} from '@app/api/persona/PersonaOnlyEdit';
 
 const FORWARD_MEDIA_EMBED_TYPES: ReadonlySet<string> = new Set([
 	MessageEmbedTypes.IMAGE,
@@ -591,7 +592,7 @@ export class MessagePersistenceService {
 		hasPermission?: (permission: bigint) => Promise<boolean>;
 	}): Promise<UpdateMessageResult> {
 		const {message, messageId, data, channel, guild, member} = params;
-		if (message.messageSnapshots && message.messageSnapshots.length > 0) {
+		if (message.messageSnapshots && message.messageSnapshots.length > 0 && !isPersonaOnlyEdit(data)) {
 			throw InputValidationError.fromCode('message', ValidationErrorCodes.MESSAGES_WITH_SNAPSHOTS_CANNOT_BE_EDITED);
 		}
 		const attachmentNsfwMode = this.contentService.attachmentNsfwMode({
