@@ -62,6 +62,7 @@ installVoiceMenuTestBootstrap();
 const {PersonaStore} = await import('@app/features/persona/state/PersonaStore');
 const {addTestPersona} = await import('@app/features/persona/state/__fixtures__/PersonaTestFixtures');
 const {forward} = await import('@app/features/messaging/commands/MessageCommands');
+const {defaultForwardAs} = await import('@app/features/persona/utils/OutgoingPersona');
 
 const ROOM = '1500000000000000001';
 const OTHER_ROOM = '1500000000000000002';
@@ -138,5 +139,66 @@ describe('forwarding as a persona', () => {
 		failNext.value = true;
 		await expect(forward([ROOM, OTHER_ROOM], SOURCE, 'look')).resolves.toBe(false);
 		expect(sent).toHaveLength(1);
+	});
+});
+
+describe("the Forward dialog's Forward as (tyne-chat/tyne#817)", () => {
+	let foxId: string;
+	let baoId: string;
+	const asSubprofile = (id: string) => ({id, name: id === foxId ? 'Fox' : 'Bao'});
+
+	beforeEach(() => {
+		sent.length = 0;
+		failNext.value = false;
+		PersonaStore.reset();
+		foxId = addTestPersona(PersonaStore, {name: 'Fox'}).id;
+		baoId = addTestPersona(PersonaStore, {name: 'Bao', persona_tags: [{prefix: 'B:', suffix: ''}]}).id;
+	});
+
+	afterEach(() => {
+		PersonaStore.reset();
+	});
+
+	it('sends the forward and its comment as the picked persona in every destination', async () => {
+		await PersonaStore.setActivePersonaScope('channel');
+		PersonaStore.handleChannelStateUpdate({channel_id: OTHER_ROOM, persona_id: foxId});
+		await expect(forward([ROOM, OTHER_ROOM], SOURCE, 'look', asSubprofile(baoId))).resolves.toBe(true);
+		expect(sent.map((payload) => [payload.channelId, payload.content, payload.subprofile?.id])).toEqual([
+			[ROOM, '', baoId],
+			[ROOM, 'look', baoId],
+			[OTHER_ROOM, '', baoId],
+			[OTHER_ROOM, 'look', baoId],
+		]);
+	});
+
+	it('sends as the account when the account was picked, although a persona is selected', async () => {
+		await PersonaStore.setActivePersona(foxId, true);
+		await expect(forward([ROOM], SOURCE, undefined, null)).resolves.toBe(true);
+		expect(sent).toHaveLength(1);
+		expect(sent[0].subprofile).toBeUndefined();
+	});
+
+	it('lets a tag in the comment win over the pick, as in the message box', async () => {
+		await expect(forward([ROOM], SOURCE, 'B: look', asSubprofile(foxId))).resolves.toBe(true);
+		expect(sent.map((payload) => [payload.content, payload.subprofile?.id])).toEqual([
+			['', baoId],
+			['look', baoId],
+		]);
+	});
+
+	it('sends as the account, without the backslash, when the comment escapes the picked persona', async () => {
+		await expect(forward([ROOM], SOURCE, '\\look', asSubprofile(foxId))).resolves.toBe(true);
+		expect(sent).toHaveLength(2);
+		expect(sent[0].subprofile).toBeUndefined();
+		expect(sent[1].subprofile).toBeUndefined();
+		expect(sent[1].content).not.toContain('\\');
+	});
+
+	it('shows the persona active in the channel forwarded from, else the account', async () => {
+		await PersonaStore.setActivePersonaScope('channel');
+		PersonaStore.handleChannelStateUpdate({channel_id: ROOM, persona_id: baoId});
+		expect(defaultForwardAs(SOURCE.channel_id)).toBeNull();
+		PersonaStore.handleChannelStateUpdate({channel_id: SOURCE.channel_id, persona_id: foxId});
+		expect(defaultForwardAs(SOURCE.channel_id)?.id).toBe(foxId);
 	});
 });

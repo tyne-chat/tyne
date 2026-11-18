@@ -574,6 +574,14 @@ msgstr "Nach Sichtbarkeit filtern"
 msgid "Format preview"
 msgstr "Formatvorschau"
 
+#. Label in the Forward dialog before the persona (or account) the forward is sent as.
+msgid "Forward as"
+msgstr "Weiterleiten als"
+
+#. Spoken name of the button in the Forward dialog that picks who the forward is sent as. name is a persona or account name.
+msgid "Forward as {name}. Change"
+msgstr "Weiterleiten als {name}. Ändern"
+
 #. Status beside the field for a new proxy tag in the import review: no persona has this tag
 msgctxt "persona-import-tag-status"
 msgid "Free"

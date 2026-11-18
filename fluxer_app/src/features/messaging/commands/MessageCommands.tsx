@@ -94,7 +94,7 @@ import {
 	messageLoadGeneration,
 } from '@app/features/messaging/commands/ForkMessagePageFit';
 import type {MessageEditPayload, MessageEditRequest} from '@app/features/messaging/utils/MessageRequestUtils';
-import {resolveForwardPersona} from '@app/features/persona/utils/OutgoingPersona';
+import {type ForwardAs, resolveForwardPersona} from '@app/features/persona/utils/OutgoingPersona';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
@@ -1176,12 +1176,18 @@ export async function forward(
 	channelIds: Array<string>,
 	messageReference: ForwardMessageReference,
 	optionalMessage?: string,
+	forwardAs?: ForwardAs,
 ): Promise<boolean> {
 	logger.debug(`Forwarding message ${messageReference.message_id} to ${channelIds.length} channels`);
 	const normalizedComment = optionalMessage == null ? null : normalizeMessageContent(optionalMessage);
 	try {
 		for (const channelId of channelIds) {
-			const outgoing = resolveForwardPersona(messageReference.channel_id, channelId, normalizedComment?.content ?? '');
+			const outgoing = resolveForwardPersona(
+				messageReference.channel_id,
+				channelId,
+				normalizedComment?.content ?? '',
+				forwardAs,
+			);
 			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
 			const forwardedMessage = await send(channelId, {
 				content: '',
