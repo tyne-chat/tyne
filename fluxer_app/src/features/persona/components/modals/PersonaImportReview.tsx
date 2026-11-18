@@ -66,6 +66,7 @@ const FIELD_HEADING: Record<PersonaImportField, MessageDescriptor> = {
 		message: 'Visibility',
 		comment: 'Row heading in the table comparing a persona with the import file',
 	}),
+	aliases: msg({message: 'Aliases'}),
 };
 
 const INTRO_MEMBERS_DESCRIPTOR = msg({

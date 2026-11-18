@@ -741,3 +741,55 @@ describe("the bundle's text files", () => {
 		});
 	});
 });
+
+describe('persona aliases in the bundle (tyne-chat/tyne#707)', () => {
+	it('keeps the aliases in tyne.json and brings them back on import', () => {
+		const text = buildPersonaBundleText({
+			exportedAt: new Date('2026-11-18T12:00:00Z'),
+			mediaHost: 'media.example.com',
+			tagText: null,
+			tagIcon: null,
+			personas: [
+				{
+					exportId: 'abcde',
+					name: 'SΛTVRN',
+					aliases: ['Saturn', 'Sat'],
+					color: null,
+					pronouns: null,
+					bio: null,
+					personaTags: [],
+					visibility: 'public',
+					avatarOrigin: null,
+					avatar: null,
+					banner: null,
+					autoTagDisabled: false,
+					signatureEmojis: [],
+				},
+			],
+		});
+		expect(text.pluralKitJson).not.toContain('Saturn');
+		const manifest = readTyneBundleManifest(JSON.parse(text.manifestJson));
+		const extras = manifest?.members.abcde;
+		expect(extras).toEqual({aliases: ['Saturn', 'Sat']});
+
+		const member = {
+			index: 0,
+			id: 'abcde',
+			name: 'SΛTVRN',
+			color: null,
+			pronouns: null,
+			bio: null,
+			personaTags: [],
+			droppedTagCount: 0,
+			visibility: 'public' as const,
+			avatarUrl: null,
+			avatarOrigin: null,
+			bannerUrl: null,
+		};
+		const item = personaImportItem(member, {avatar: null, banner: null}, extras);
+		expect(item.aliases).toEqual(['Saturn', 'Sat']);
+		// A Tyne export without aliases clears them; a PluralKit file, which has none, keeps them.
+		expect(personaImportItem(member, {avatar: null, banner: null}, {}).aliases).toEqual([]);
+		expect(personaImportItem(member, {avatar: null, banner: null})).not.toHaveProperty('aliases');
+	});
+});

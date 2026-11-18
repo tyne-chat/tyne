@@ -13,6 +13,8 @@ import {extractTimestamp} from '@fluxer/snowflake/src/SnowflakeUtils';
 export interface GalleryPersona {
 	id: string;
 	name: string;
+	/** Other names it is found by, never shown (tyne-chat/tyne#707). */
+	aliases?: ReadonlyArray<string>;
 	avatar: string | null;
 	banner: string | null;
 	pronouns: string | null;
@@ -40,6 +42,7 @@ export function galleryItemsFromPublic(personas: ReadonlyArray<PublicPersonaResp
 	return personas.map((p, index) => ({
 		id: p.id,
 		name: p.name,
+		aliases: p.aliases ?? [],
 		avatar: p.avatar_hash ?? null,
 		banner: p.banner_hash ?? null,
 		pronouns: p.pronouns ?? null,
@@ -63,6 +66,7 @@ export function galleryItemsFromOwn(personas: ReadonlyArray<ClientPersona>): Arr
 		return {
 			id: p.id,
 			name: p.name,
+			aliases: p.aliases ?? [],
 			avatar: p.avatar_hash ?? null,
 			banner: p.banner_hash ?? null,
 			pronouns: p.pronouns ?? null,
@@ -83,12 +87,14 @@ function compareIds(a: string, b: string): number {
 	return a < b ? -1 : 1;
 }
 
-/** Name, pronouns and bio, matched without case. */
+/** Name, aliases, pronouns and bio, matched without case. */
 export function filterGalleryItems(items: ReadonlyArray<GalleryPersona>, query: string): Array<GalleryPersona> {
 	const q = query.trim().toLocaleLowerCase();
 	if (!q) return [...items];
 	return items.filter((p) =>
-		[p.name, p.pronouns ?? '', p.bio ?? ''].some((field) => field.toLocaleLowerCase().includes(q)),
+		[p.name, ...(p.aliases ?? []), p.pronouns ?? '', p.bio ?? ''].some((field) =>
+			field.toLocaleLowerCase().includes(q),
+		),
 	);
 }
 
