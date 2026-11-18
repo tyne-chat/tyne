@@ -88,6 +88,10 @@ msgstr "Alice"
 msgid "All Personas"
 msgstr "Semua Persona"
 
+#. Grouping choice in community emoji settings: non-animated and animated emojis in one section.
+msgid "All in one list"
+msgstr "Semua dalam satu daftar"
+
 #. Back button on a persona’s full profile, back to the Personas list.
 msgid "All personas"
 msgstr "Semua persona"
@@ -465,6 +469,10 @@ msgstr "Edit persona"
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
 msgstr "Edit stempel waktu\\"
+
+#. Section heading in community emoji settings when non-animated and animated emojis are listed together.
+msgid "Emoji ({emojiCount})"
+msgstr "Emoji ({emojiCount})"
 
 msgid "Everyone else"
 msgstr "Semua yang lain"
@@ -846,6 +854,7 @@ msgstr "Paling sering dipakai"
 msgid "Move to Trash"
 msgstr "Pindahkan ke Tempat Sampah"
 
+#. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
 msgstr "Nama (A–Z)"
@@ -943,6 +952,10 @@ msgstr "Tidak ada tag"
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Belum ada yang menyalakan sinyal ini"
+
+#. Grouping choice in community emoji settings: two sections, non-animated emojis and animated emojis.
+msgid "Non-animated and animated apart"
+msgstr "Non-animasi dan animasi terpisah"
 
 #. Choice beside the personas a member of the import file might be: it is none of them
 msgid "None of these"
@@ -1238,6 +1251,10 @@ msgstr "Terbaru"
 msgid "Recent Personas"
 msgstr "Persona Terbaru"
 
+#. Sort choice in community emoji settings: the newest uploaded emojis first.
+msgid "Recently added"
+msgstr "Baru ditambahkan"
+
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "Baru-baru ini dipakai"
@@ -1460,6 +1477,10 @@ msgstr "Dilewati"
 #. Import warning when a PluralKit member has more or longer proxy tags than a persona can have. Preserve {productName}; it is the app name, inserted by code.
 msgid "Some proxy tags were left out: {productName} allows up to 5 per persona, each at most 32 characters."
 msgstr "Beberapa tag proxy tidak disertakan: {productName} mengizinkan hingga 5 per persona, masing-masing maksimal 32 karakter."
+
+#. Title of the menu that orders the emoji list in community emoji settings.
+msgid "Sort and group"
+msgstr "Urutkan dan kelompokkan"
 
 #. Badge on a collapsed deleted persona in the import review: it stays deleted
 msgid "Staying deleted"
