@@ -26,7 +26,6 @@ A thread is a [channel object](/http-api/channels/#channel-object) with the fiel
 | parent_id | snowflake | The ID of the parent channel |
 | owner_id | snowflake | The ID of the user or webhook that created the thread |
 | owner_persona_id? | ?snowflake | The [persona](/http-api/users/personas/) the owner started the thread as, absent when it was started as the account |
-| owner_persona_id? | ?snowflake | The [persona](/http-api/users/personas/) the owner started the thread as, absent when it was started as the account |
 | name | string | The name of the thread (1-100 characters) |
 | last_message_id | ?snowflake | The ID of the most recent message |
 | last_pin_timestamp | ?ISO8601 timestamp | The time a message was most recently pinned |
@@ -388,3 +387,7 @@ A message that started a thread has a `thread` field with the [thread object](#t
 A user request needs a session token and `channel_threads` in the `X-Fluxer-Features` header, or every route with a route header on this page returns 404 `NOT_FOUND`. An OAuth2 token can't declare the capability.
 
 On other routes, a user without the capability sees no threads, and a route that looks up a thread by ID returns 404 `UNKNOWN_CHANNEL`. A Gateway session uses the `CHANNEL_THREADS` [session flag](/gateway/threads/#session-flag).
+
+### Threads in DMs
+
+A DM or group DM holds public threads too, with no `guild_id`, and everyone in it can see them. A user request that also sends `fork_dm_threads` in `X-Fluxer-Features` gets thread chips, thread-created messages and starter messages in DMs; without it they are left out, as for a client that does not know threads in DMs. Their Gateway events arrive wrapped in [`FORK_DM_THREAD_EVENT`](/gateway/events/#fork-dm-thread-event).
