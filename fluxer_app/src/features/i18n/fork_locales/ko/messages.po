@@ -58,6 +58,10 @@ msgstr "페르소나 추가"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "태그 쌍 추가 ({0}/5)"
 
+#. placeholder {0}: formData.aliases.length
+msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
+msgstr "별칭 추가 ({0}/{PERSONA_ALIASES_MAX})"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "카운터 추가"
@@ -80,6 +84,13 @@ msgstr "새 페르소나로 추가돼요"
 #. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
 msgid "After"
 msgstr "이후"
+
+#. Accessible name of one alias field in the persona editor: another name, never shown, that finds the persona when searching or mentioning it.
+msgid "Alias"
+msgstr "별칭"
+
+msgid "Aliases"
+msgstr "별칭"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -1043,6 +1054,9 @@ msgstr "다운로드한 파일을 여세요."
 msgid "Optional"
 msgstr "선택"
 
+msgid "Other names for finding this persona"
+msgstr "이 페르소나를 찾기 위한 다른 이름"
+
 #. Link from the Tyne app download button to the downloads for every platform.
 msgid "Other platforms"
 msgstr "다른 플랫폼"
@@ -1266,6 +1280,10 @@ msgstr "최근 추가됨"
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "최근 사용한 순"
+
+#. Accessible name of the button that removes one alias of a persona in the persona editor.
+msgid "Remove alias"
+msgstr "별칭 삭제"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"

@@ -58,6 +58,10 @@ msgstr "Thêm persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Thêm cặp thẻ ({0}/5)"
 
+#. placeholder {0}: formData.aliases.length
+msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
+msgstr "Thêm biệt danh ({0}/{PERSONA_ALIASES_MAX})"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Thêm bộ đếm"
@@ -80,6 +84,13 @@ msgstr "Được thêm làm persona mới"
 #. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
 msgid "After"
 msgstr "Sau"
+
+#. Accessible name of one alias field in the persona editor: another name, never shown, that finds the persona when searching or mentioning it.
+msgid "Alias"
+msgstr "Biệt danh"
+
+msgid "Aliases"
+msgstr "Biệt danh"
 
 #. Example persona name in the display tag preview, as in Alice in Wonderland; use the usual form of the name in your language
 msgid "Alice"
@@ -1043,6 +1054,9 @@ msgstr "Mở tệp bạn đã tải xuống."
 msgid "Optional"
 msgstr "Không bắt buộc"
 
+msgid "Other names for finding this persona"
+msgstr "Các tên khác để tìm persona này"
+
 #. Link from the Tyne app download button to the downloads for every platform.
 msgid "Other platforms"
 msgstr "Nền tảng khác"
@@ -1266,6 +1280,10 @@ msgstr "Mới thêm gần đây"
 #. Sort order of one’s own Personas list: the personas used most recently first.
 msgid "Recently used"
 msgstr "Dùng gần đây"
+
+#. Accessible name of the button that removes one alias of a persona in the persona editor.
+msgid "Remove alias"
+msgstr "Xóa biệt danh"
 
 #. Button that removes a counter from a community command.
 msgid "Remove counter"

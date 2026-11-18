@@ -6,6 +6,7 @@ import type {
 	ChannelPersonaMentionItem,
 	ChannelPersonaMentionsResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {personaNameMatchScore} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import {useEffect, useRef, useState} from 'react';
 
 interface CacheEntry {
@@ -92,19 +93,14 @@ export function calculatePersonaMatchScore(
 	ownerUsername?: string | null,
 	ownerNickname?: string | null,
 	ownerGlobalName?: string | null,
+	aliases?: ReadonlyArray<string> | null,
 ): number {
 	const q = query.trim().toLowerCase();
 	if (!q) return 0;
 
-	const name = personaName.toLowerCase();
-	if (name.startsWith(q)) {
-		return 1000;
-	}
-	if (name.includes(` ${q}`) || name.includes(`-${q}`) || name.includes(`_${q}`)) {
-		return 800;
-	}
-	if (name.includes(q)) {
-		return 500;
+	const byName = personaNameMatchScore(personaName, aliases, q);
+	if (byName >= 0) {
+		return byName;
 	}
 	const sys = (displayTagText ?? '').toLowerCase();
 	if (sys.startsWith(q)) {
@@ -141,6 +137,7 @@ export function filterPersonaMentions(
 					item.owner_username,
 					item.owner_nickname,
 					item.owner_global_name,
+					item.aliases,
 				);
 				return match >= 0;
 			})
@@ -155,6 +152,7 @@ export function filterPersonaMentions(
 				a.owner_username,
 				a.owner_nickname,
 				a.owner_global_name,
+				a.aliases,
 			);
 			const bMatch = calculatePersonaMatchScore(
 				b.name,
@@ -163,6 +161,7 @@ export function filterPersonaMentions(
 				b.owner_username,
 				b.owner_nickname,
 				b.owner_global_name,
+				b.aliases,
 			);
 			if (aMatch !== bMatch) {
 				return bMatch - aMatch;

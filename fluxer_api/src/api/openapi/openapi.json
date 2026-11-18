@@ -32029,6 +32029,11 @@
 						"$ref": "#/components/schemas/SnowflakeStringType"
 					},
 					"name": {"type": "string", "description": "The persona display name"},
+					"aliases": {
+						"description": "Other names to find the persona by when searching or mentioning. Never shown",
+						"type": "array",
+						"items": {"type": "string"}
+					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
@@ -33403,6 +33408,12 @@
 				"type": "object",
 				"properties": {
 					"name": {"description": "Persona display name", "type": "string"},
+					"aliases": {
+						"description": "Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones",
+						"maxItems": 10,
+						"type": "array",
+						"items": {"type": "string", "maxLength": 100}
+					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
@@ -33459,6 +33470,11 @@
 						"$ref": "#/components/schemas/SnowflakeStringType"
 					},
 					"name": {"type": "string", "description": "The persona display name"},
+					"aliases": {
+						"description": "Other names to find the persona by when searching or mentioning. Never shown",
+						"type": "array",
+						"items": {"type": "string"}
+					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
@@ -33915,6 +33931,12 @@
 				"type": "object",
 				"properties": {
 					"name": {"description": "Persona display name", "type": "string"},
+					"aliases": {
+						"description": "Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones",
+						"maxItems": 10,
+						"type": "array",
+						"items": {"type": "string", "maxLength": 100}
+					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
@@ -47305,6 +47327,11 @@
 						"$ref": "#/components/schemas/SnowflakeStringType"
 					},
 					"name": {"type": "string", "description": "The persona display name"},
+					"aliases": {
+						"description": "Other names to find the persona by when searching or mentioning. Never shown",
+						"type": "array",
+						"items": {"type": "string"}
+					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
@@ -51624,6 +51651,12 @@
 				"type": "object",
 				"properties": {
 					"name": {"description": "Persona display name", "type": "string"},
+					"aliases": {
+						"description": "Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones",
+						"maxItems": 10,
+						"type": "array",
+						"items": {"type": "string", "maxLength": 100}
+					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
 						"anyOf": [{"$ref": "#/components/schemas/PersonaAssetHashType"}, {"type": "null"}]
