@@ -12,6 +12,10 @@ import {
 } from '@fluxer/schema/src/domains/admin/ChannelThreadsSchemas';
 import type {Context} from 'hono';
 
+// Fork imports.
+
+import {markDmThreadViewer} from '@app/api/channel/services/thread/ForkDmThreadViewer';
+
 export {
 	THREAD_CHANNEL_TYPES,
 	THREAD_FEATURE_CHANNEL_TYPES,
@@ -65,7 +69,8 @@ export function viewerFromCtx(ctx: Context<HonoEnv>): ThreadViewer {
 	const bot = user.isBot;
 	const capable =
 		bot || (isSessionBacked(ctx.get('authTokenType')) && ctx.get('clientFeatures').has(CHANNEL_THREADS_CLIENT_FEATURE));
-	return {kind: 'user', userId: user.id, bot, capable};
+	// Fork: marks an app that knows DM threads (tyne-chat/tyne#699).
+	return markDmThreadViewer(ctx.get('clientFeatures'), {kind: 'user', userId: user.id, bot, capable});
 }
 
 function rememberTaint(key: string, tainted: boolean): void {

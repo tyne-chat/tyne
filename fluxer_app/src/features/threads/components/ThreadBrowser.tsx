@@ -41,10 +41,17 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type ReactNode, useCallback, useEffect, useState} from 'react';
 
+// Fork imports.
+
+import {compareThreadNews, ThreadBrowserNews} from '@app/features/threads/fork/ForkThreadNewsMarks';
+
 type BrowserTab = 'active' | 'archived' | 'archivedPrivate';
 type ThreadOpenHandler = (thread: Channel, event: ThreadOpenEvent) => void;
 
 function byLastActivity(a: Channel, b: Channel): number {
+	// Fork: threads with news first (tyne-chat/tyne#699).
+	const news = compareThreadNews(a, b);
+	if (news !== 0) return news;
 	return SnowflakeUtils.compare(lastActivityId(b), lastActivityId(a));
 }
 
@@ -82,6 +89,10 @@ const ThreadBrowserItem = observer(({thread, onOpen}: {thread: Channel; onOpen: 
 					<span data-flx="threads.thread-browser.thread-browser-item.last-activity">
 						{DateUtils.getRelativeDateString(lastActivity, i18n)}
 					</span>
+					<ThreadBrowserNews
+						thread={thread}
+						data-flx="threads.thread-browser.thread-browser-item.thread-browser-news"
+					/>
 				</span>
 			</button>
 		</FocusRing>

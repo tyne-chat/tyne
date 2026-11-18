@@ -23,6 +23,15 @@ import {CannotEditOtherUserMessageError} from '@fluxer/errors/src/domains/channe
 import type {GuildResponse} from '@fluxer/schema/src/domains/guild/GuildResponseSchemas';
 import type {AllowedMentionsRequest} from '@fluxer/schema/src/domains/message/SharedMessageSchemas';
 
+// Fork imports.
+
+import {
+	dmThreadMentionRecipientIds,
+	isDmThreadChannel,
+	loadDmThreadParentOf,
+} from '@app/api/channel/services/thread/ForkDmThreads';
+import {incrementDmThreadMentionCounts} from '@app/api/read_state/ForkDmThreadReadStates';
+
 interface RecipientOpenState {
 	recipientId: UserID;
 	isOpen: boolean;
@@ -79,6 +88,15 @@ export class MessageProcessingService {
 		messageId: MessageID;
 		requestCache: RequestCache;
 	}): Promise<void> {
+		// Fork: a message in a DM thread opens its DM again for a recipient who closed it (tyne-chat/tyne#699).
+		if (isDmThreadChannel(channel)) {
+			const parent = await loadDmThreadParentOf(channel);
+			// The DM's own last message stays its last: the thread's is not in it (Gemini Carbon's review).
+			const lastInDm = parent?.lastMessageId ?? messageId;
+			if (parent)
+				await this.updateDMRecipients({channel: parent, channelId: parent.id, messageId: lastInDm, requestCache});
+			return;
+		}
 		if (channel.guildId || channel.type !== ChannelTypes.DM) return;
 		if (channel.recipientIds?.size !== 2) return;
 		const recipientIds = Array.from(channel.recipientIds);
@@ -142,6 +160,19 @@ export class MessageProcessingService {
 		channelId: ChannelID;
 		messageId: MessageID;
 	}): Promise<void> {
+		// Fork: in a DM thread, every message counts for its followers who did not mute it (tyne-chat/tyne#699).
+		if (!guild && isDmThreadChannel(channel)) {
+			const recipients = await this.userRepository.listUsers(await dmThreadMentionRecipientIds(channel));
+			await incrementDmThreadMentionCounts({
+				readStateService: this.readStateService,
+				userRepository: this.userRepository,
+				user,
+				recipients,
+				channelId,
+				messageId,
+			});
+			return;
+		}
 		if (!guild) {
 			const recipients = await this.userRepository.listUsers(Array.from(channel.recipientIds));
 			await incrementDmMentionCounts({
