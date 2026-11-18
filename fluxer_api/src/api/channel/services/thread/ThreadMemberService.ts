@@ -29,6 +29,11 @@ import {UnknownGuildMemberError} from '@fluxer/errors/src/domains/guild/UnknownG
 import type {ThreadMemberResponse} from '@fluxer/schema/src/domains/channel/ThreadSchemas';
 import type {GuildMemberResponse} from '@fluxer/schema/src/domains/guild/GuildMemberSchemas';
 
+// Fork imports.
+
+import {isDmThreadState} from '@app/api/channel/services/thread/ForkDmThreads';
+import {MissingPermissionsError} from '@fluxer/errors/src/domains/core/MissingPermissionsError';
+
 type ThreadAuth = AuthenticatedChannel & {thread: AuthenticatedThread};
 
 export class ThreadMemberService {
@@ -56,6 +61,8 @@ export class ThreadMemberService {
 	async add(params: {viewer: ThreadViewer; user: User; channelId: ChannelID; targetId: UserID}): Promise<void> {
 		const auth = await this.authorizeThread(params.viewer, params.user.id, params.channelId);
 		const {thread} = auth;
+		// Fork: everyone in a DM follows its threads from the start, or chose to leave (tyne-chat/tyne#699).
+		if (isDmThreadState(thread.state)) throw new MissingPermissionsError();
 		const guildId = thread.state.guildId;
 		const targetMember = await this.ctx.guildRepository.getMember(guildId, params.targetId);
 		if (!targetMember) throw new UnknownGuildMemberError();

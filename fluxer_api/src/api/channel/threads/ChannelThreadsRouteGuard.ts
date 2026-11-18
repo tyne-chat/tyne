@@ -7,6 +7,10 @@ import {AppNotFoundHandler} from '@fluxer/errors/src/domains/core/ErrorHandlers'
 import type {Context} from 'hono';
 import {createMiddleware} from 'hono/factory';
 
+// Fork imports.
+
+import {isDmThreadChannel, isDmThreadParent} from '@app/api/channel/services/thread/ForkDmThreads';
+
 const SNOWFLAKE_PARAM = /^\d{1,20}$/;
 
 function callerActive(ctx: Context<HonoEnv>, botOnly: boolean): boolean {
@@ -24,6 +28,8 @@ function pathGuildActive(ctx: Context<HonoEnv>): boolean {
 	if (channelId === undefined) return true;
 	if (!SNOWFLAKE_PARAM.test(channelId)) return false;
 	const channel = ctx.get('requestCache').channels.get(createChannelID(BigInt(channelId)));
+	// Fork: a DM or group DM holds threads too (tyne-chat/tyne#699).
+	if (channel && (isDmThreadParent(channel) || isDmThreadChannel(channel))) return true;
 	return channel?.guildId != null;
 }
 

@@ -34,6 +34,8 @@ known_event_map() ->
         fun maps:merge/2,
         #{},
         [
+            %% Fork: the fork's own events (fork_event_atoms.erl).
+            fork_event_atoms:event_map(),
             core_event_map(),
             channel_event_map(),
             guild_event_map(),

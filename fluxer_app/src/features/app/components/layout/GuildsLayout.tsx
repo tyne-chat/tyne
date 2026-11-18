@@ -132,6 +132,7 @@ import {useDrop} from 'react-dnd';
 // Fork imports.
 
 import {hasCommunityCreationGrant} from '@app/features/guild/utils/ForkCommunityCreation';
+import {parentThreadNews} from '@app/features/threads/fork/ForkThreadNews';
 import {EdgeProximitySensor} from '@app/features/ui/components/EdgeProximitySensor';
 import LayoutState from '@app/features/ui/state/LayoutState';
 
@@ -456,7 +457,10 @@ function resolveSelectedGuildNavigationKey({
 const getUnreadDMChannels = (dmChannels: ReadonlyArray<Channel>): Array<Channel> => {
 	const out: Array<Channel> = [];
 	for (let i = 0; i < dmChannels.length; i++) {
-		if (ReadStates.hasUnreadPrivateChannel(dmChannels[i].id)) out.push(dmChannels[i]);
+		// Fork: or its threads' messages (tyne-chat/tyne#699).
+		if (ReadStates.hasUnreadPrivateChannel(dmChannels[i].id) || parentThreadNews(dmChannels[i].id).mentionCount > 0) {
+			out.push(dmChannels[i]);
+		}
 	}
 	return out;
 };
