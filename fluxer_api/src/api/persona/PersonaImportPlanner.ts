@@ -28,6 +28,7 @@ import type {
 	PersonaImportPreviewMember,
 	PersonaImportSourceKind,
 } from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import {normalizePersonaAliases} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import {tyneMediaLinkHash} from '@fluxer/schema/src/domains/persona/PluralKitFormat';
 
 /** An animated picture's hash carries `a_`; the stored file is the same either way. */
@@ -175,6 +176,12 @@ export function planPersonaImport(input: PersonaImportPlanInput): PersonaImportP
 			}
 			if (persona.autoTagDisabled !== Boolean(member.auto_tag_disabled)) {
 				differences.push({field: 'auto_tag_disabled', change: 'changed'});
+			}
+			// Only a Tyne export carries aliases (tyne-chat/tyne#707).
+			const fileAliases = normalizePersonaAliases(member.aliases);
+			const storedAliases = normalizePersonaAliases(persona.aliases);
+			if (fileAliases.join('\u0000') !== storedAliases.join('\u0000')) {
+				differences.push({field: 'aliases', change: fileAliases.length === 0 ? 'removed' : 'changed'});
 			}
 		}
 		if (member.visibility && member.visibility !== persona.visibility) {

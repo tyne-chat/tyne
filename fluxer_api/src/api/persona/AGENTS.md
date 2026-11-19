@@ -121,7 +121,8 @@ The persona columns on upstream's tables (`persona_id` and `mention_personas` on
 see the root `AGENTS.md`.
 
 Limits: 250 live personas per account, 5 tags per persona (unique across the account's live
-personas), 10,000 signature emojis per persona (unique across personas).
+personas), 10,000 signature emojis per persona (unique across personas), 10 aliases per persona of
+100 characters each.
 
 ## Routes and OAuth
 

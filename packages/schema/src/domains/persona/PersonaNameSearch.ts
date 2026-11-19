@@ -17,17 +17,22 @@ const ALIAS_PREFIX = 900;
 const ALIAS_WORD = 700;
 const ALIAS_ANYWHERE = 450;
 
+/** What a word starts after: a space, a dash, an underscore, or an opening bracket ("Chelsea (Sol)"). */
+const WORD_STARTS: ReadonlyArray<string> = [' ', '-', '_', '(', '['];
+
 function textScore(text: string, q: string, prefix: number, word: number, anywhere: number): number {
 	const lowered = text.toLowerCase();
 	if (lowered.startsWith(q)) return prefix;
-	if (lowered.includes(` ${q}`) || lowered.includes(`-${q}`) || lowered.includes(`_${q}`)) return word;
+	if (WORD_STARTS.some((start) => lowered.includes(`${start}${q}`))) return word;
 	if (lowered.includes(q)) return anywhere;
 	return -1;
 }
 
 /**
- * The score of [query] against a persona's name, else its best alias: higher is a better match, -1
- * when none contains it. The query is trimmed and compared without case; an empty one scores 0.
+ * The score of [query] against a persona's name and aliases, the best of them: higher is a better
+ * match, -1 when none contains it. A name always beats the same kind of match on an alias, but a
+ * stronger match on an alias beats a weaker one on the name ("Saturn" as an alias outranks "Lady
+ * Saturn" as a name). The query is trimmed and compared without case; an empty one scores 0.
  */
 export function personaNameMatchScore(
 	name: string,
@@ -36,9 +41,8 @@ export function personaNameMatchScore(
 ): number {
 	const q = query.trim().toLowerCase();
 	if (!q) return 0;
-	const byName = textScore(name, q, NAME_PREFIX, NAME_WORD, NAME_ANYWHERE);
-	if (byName >= 0) return byName;
-	let best = -1;
+	let best = textScore(name, q, NAME_PREFIX, NAME_WORD, NAME_ANYWHERE);
+	if (best === NAME_PREFIX) return best;
 	for (const alias of aliases ?? []) {
 		best = Math.max(best, textScore(alias, q, ALIAS_PREFIX, ALIAS_WORD, ALIAS_ANYWHERE));
 	}
@@ -79,6 +83,12 @@ export function normalizePersonaAliases(aliases: ReadonlyArray<string> | null | 
 	return out;
 }
 
+/** [alias] cut to the longest an alias may be, without splitting a character in two. */
+function cutToAliasLength(alias: string): string {
+	const cut = alias.slice(0, PERSONA_ALIAS_MAX_LENGTH);
+	return /[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut;
+}
+
 /** Aliases read from storage or a file: an array of strings, anything else dropped. */
 export function readPersonaAliases(value: unknown): Array<string> {
 	if (typeof value === 'string') {
@@ -90,6 +100,6 @@ export function readPersonaAliases(value: unknown): Array<string> {
 	}
 	if (!Array.isArray(value)) return [];
 	return normalizePersonaAliases(
-		value.filter((item): item is string => typeof item === 'string').map((s) => s.slice(0, PERSONA_ALIAS_MAX_LENGTH)),
+		value.filter((item): item is string => typeof item === 'string').map(cutToAliasLength),
 	);
 }

@@ -238,8 +238,8 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
 - **Duplicate** (tyne-chat/tyne#599): only in a persona's editor, next to Delete; refused (the bar
   flashes) while the editor has unsaved changes. `openPersonaDuplicateModal` closes the editor and
   opens a new persona's, under a key of its own, filled in from the saved persona: the same picture
-  hashes (nothing uploaded; images are deleted only with the account), colours, pronouns, bio,
-  visibility and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
+  hashes (nothing uploaded; images are deleted only with the account), colours, aliases, pronouns,
+  bio, visibility and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
   repeated by the mobile app), focused and selected. Tags and signature emojis start empty, since each
   belongs to one persona; pins, usage and the PluralKit link are not copied. Its bar ("Copy of …",
   Cancel, Create) stays up, and Create sends the one `createPersona` Add Persona sends. A "+ New

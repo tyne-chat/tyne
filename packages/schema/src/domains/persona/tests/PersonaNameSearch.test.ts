@@ -31,6 +31,21 @@ describe('personaNameMatchScore (tyne-chat/tyne#707)', () => {
 		);
 	});
 
+	it('lets a stronger match on an alias beat a weaker one on the name', () => {
+		expect(personaNameMatchScore('SΛTVRN', ['Saturn'], 'saturn')).toBeGreaterThan(
+			personaNameMatchScore('Lady Saturn', [], 'saturn'),
+		);
+		// "sol" is only inside the name, but starts the alias: the alias's match counts.
+		expect(personaNameMatchScore('Marisol', ['Sol'], 'sol')).toBe(personaNameMatchScore('X', ['Sol'], 'sol'));
+		expect(personaNameMatchScore('Saturn', ['Saturn'], 'saturn')).toBe(personaNameMatchScore('Saturn', [], 'saturn'));
+	});
+
+	it('takes an opening bracket as the start of a word', () => {
+		expect(personaNameMatchScore('神聖狐天使', ['Chelsea (Sol)'], 'sol')).toBe(
+			personaNameMatchScore('神聖狐天使', ['Chelsea Sol'], 'sol'),
+		);
+	});
+
 	it('scores an empty query 0 and a miss -1', () => {
 		expect(personaNameMatchScore('SΛTVRN', ['Saturn'], '  ')).toBe(0);
 		expect(personaNameMatchScore('SΛTVRN', ['Saturn'], 'moon')).toBe(-1);
@@ -55,5 +70,8 @@ describe('stored aliases', () => {
 		expect(readPersonaAliases(['Saturn'])).toEqual(['Saturn']);
 		expect(readPersonaAliases('not json')).toEqual([]);
 		expect(readPersonaAliases(null)).toEqual([]);
+		// Cut at the limit without leaving half of a character.
+		const long = `${'a'.repeat(99)}😀`;
+		expect(readPersonaAliases([long])).toEqual(['a'.repeat(99)]);
 	});
 });

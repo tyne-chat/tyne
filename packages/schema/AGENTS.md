@@ -15,7 +15,7 @@ settings, a block of accessibility protobuf fields, and the pinned emojis' synce
 | Field types (snowflakes, strings, enums, bitflags) | `src/primitives/SchemaPrimitives.ts` and the `*Validators.ts` beside it |
 | Component names, enum entries, the API's null-handling flags | `src/SchemaMetadata.ts` (`schemaMetadata`) |
 | The web app's hand-written `Message` and `MessageReaction` types | `src/domains/message/MessageResponseSchemas.ts` |
-| Personas (fork) | `src/domains/persona/`: routes in `PersonaApiSchemas.ts`, the `subprofile` object in `PersonaSchemas.ts`, `PersonaSearchSchemas.ts`, `PersonaMatcher.ts`, `PluralKitFormat.ts` |
+| Personas (fork) | `src/domains/persona/`: routes in `PersonaApiSchemas.ts`, the `subprofile` object in `PersonaSchemas.ts`, `PersonaSearchSchemas.ts`, `PersonaMatcher.ts`, `PersonaNameSearch.ts`, `PluralKitFormat.ts` |
 | Signal bar (fork) | `src/domains/signal_bar/SignalBarSchemas.ts` |
 | Synced preferences | `proto/fluxer/user/preferences/v1/*.proto` → `src/gen/` (generated); `src/domains/user/SyncedPreferencesCodec.ts` |
 | Spec generator and output | `packages/openapi/` → `fluxer_api/src/api/openapi/openapi.json`, `fluxer_admin/openapi-admin.json` |
@@ -156,6 +156,9 @@ names.
 
 ## Persona helpers
 
+- **`PersonaNameSearch.ts`:** how typed text finds a persona by its name and aliases (tyne-chat/tyne#707),
+  for the server's persona-mention query and every web search. tyne-mobile repeats it in
+  `lib/features/profile/domain/persona_name_search.dart`: change both together.
 - **`PersonaMatcher.ts`:** tag matching for the web composer, called only by `PersonaStore`; the
   server never matches tags. Behaviour: `fluxer_app/src/features/persona/AGENTS.md`. tyne-mobile
   has a Dart port (`lib/features/profile/domain/persona_matcher.dart`); `isUnfinishedPersonaTag`
