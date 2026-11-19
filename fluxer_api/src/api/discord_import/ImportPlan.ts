@@ -23,7 +23,7 @@
 // instance's public media route, because a scratch copy of the database starts with empty storage.
 
 import {readFileSync, writeFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {dirname, join} from 'node:path';
 import type {
 	AttachmentID,
 	ChannelID,
@@ -62,9 +62,11 @@ import type {
 import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
 import {applyEmojiFates, type PlanEmojiFate} from '@app/api/discord_import/ImportEmojiFates';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
+import {moveEmojiRow, moveStickerRow} from '@app/api/discord_import/ImportExpressionMoves';
 import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
 import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
 import {createNewDm, markNewDmRead, type PlanNewDm} from '@app/api/discord_import/ImportNewDm';
+import {applyPictures, type PicturesResult, type PlanPicture} from '@app/api/discord_import/ImportPictures';
 import {ensureActiveGuildTainted} from '@app/api/experiment/ChannelThreadsGate';
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
 import {JobLedgerRepository} from '@app/api/jobs/JobLedgerRepository';
@@ -109,6 +111,8 @@ const FETCH_REACTIONS = MessageReactions.select({
 interface PlanFile {
 	path: string;
 	name: string;
+	/** "custom": a custom picture from the review tool's state folder (CUSTOM_DIR), not from the exports. */
+	root?: string;
 }
 interface PlanAttachment extends PlanFile {
 	attachment_id: string;
@@ -248,6 +252,8 @@ interface Plan {
 	stickers: Array<PlanSticker>;
 	/** Tyne emoji the plan's messages show, renamed, moved or taken off their list first (ImportEmojiFates.ts). */
 	emoji_fates?: Array<PlanEmojiFate>;
+	/** Tyne emoji and stickers whose own picture a custom one replaces (ImportPictures.ts). */
+	pictures?: Array<PlanPicture>;
 	messages: Array<PlanMessage>;
 	/** What earlier imports wrote for the objects in this plan, by Tyne id: the base of the three-way
 	 * comparison (ImportMerge.ts). An object with no entry here is created, or left alone if it exists. */
@@ -274,6 +280,9 @@ interface Ledger {
 	stickers: Array<{sticker_id: string; guild_id: string | null}>;
 	/** Tyne emoji this run renamed, moved or took off their list as planned, or found so already. */
 	emoji_fates?: Array<string>;
+	/** Tyne emoji and stickers whose picture this run replaced ("<kind>:<id>"), and where each old one was kept. */
+	pictures?: Array<string>;
+	replaced_pictures?: PicturesResult['kept'];
 	messages: Array<string>;
 	reactions: number;
 	storage_keys: Array<string>;
@@ -302,7 +311,10 @@ const id = <T>(value: string) => BigInt(value) as unknown as T;
 
 /** The bio a placeholder starts with; one written on Tyne is kept (tyne-chat/tyne#682). */
 const PLACEHOLDER_BIO = 'Placeholder account: messages imported from Discord.';
-const readBase64 = (file: PlanFile) => readFileSync(join(exportsDir, file.path)).toString('base64');
+// Custom pictures made on the review page (tyne-chat/tyne#608, 2026-11-18): run.sh mounts them here.
+const CUSTOM_DIR = process.env.DIMPORT_CUSTOM_DIR || '/custom';
+const readBase64 = (file: PlanFile) =>
+	readFileSync(join(file.root === 'custom' ? CUSTOM_DIR : exportsDir, file.path)).toString('base64');
 
 /** Where the export's copy of a preview's media goes: next to the channel's attachments, flagged as the
  * preview's own, as Tyne keeps media it hosts for a preview itself (MessageHelpers.ts). */
@@ -692,8 +704,8 @@ async function main(): Promise<void> {
 		dry_run: dryRun,
 	};
 	const save = () => writeFileSync(ledgerPath, JSON.stringify(ledger, null, 1));
-	const keep = (what: string) => {
-		ledger.kept[what] = (ledger.kept[what] ?? 0) + 1;
+	const keep = (what: string, times = 1) => {
+		if (times > 0) ledger.kept[what] = (ledger.kept[what] ?? 0) + times;
 	};
 	const updated = (kind: Kind, tyneId: string) => {
 		if (!ledger.updated[kind].includes(tyneId)) ledger.updated[kind].push(tyneId);
@@ -870,14 +882,40 @@ async function main(): Promise<void> {
 	}
 
 	// Existing Tyne emoji renamed, moved or taken off their list, before any message shows them by their new name.
+	// Recorded as done only once their lists are sent, at the end: a run that stops before plans them again, and
+	// finding them done sends the lists then (Carbon's review of tyne-chat/tyne#608).
 	const fates = await applyEmojiFates(plan.emoji_fates ?? [], deps, dryRun, plan.operator_user_id);
-	ledger.emoji_fates = fates.done;
 	ledger.storage_keys.push(...fates.copied.map((emojiId) => `emojis/${emojiId}`));
 	if (fates.missing.length) Logger.warn({emoji: fates.missing}, 'emoji to rename or move are no longer on Tyne');
 	if (fates.changed.length)
 		Logger.warn({emoji: fates.changed}, 'emoji renamed or moved on Tyne since the review; left as they are');
+	if (fates.noCommunity.length)
+		Logger.warn({emoji: fates.noCommunity}, 'emoji to move or copy to a community no longer on Tyne; left as they are');
+	keep('emoji renamed or moved on Tyne', fates.changed.length);
+	keep('emoji to rename or move deleted on Tyne', fates.missing.length);
+	keep('emoji to move or copy to a deleted community', fates.noCommunity.length);
 	save();
 
+	// Tyne emoji and stickers whose own picture a custom one replaces, after any move or copy (a copy keeps the old).
+	const pictures = await applyPictures(plan.pictures ?? [], deps, {
+		dryRun,
+		bucket: cdn,
+		read: readBase64,
+		keepDir: join(dirname(ledgerPath), 'replaced'),
+		stamp: new Date()
+			.toISOString()
+			.replace(/[-:]/g, '')
+			.replace(/\.\d+Z$/, 'Z'),
+	});
+	ledger.pictures = pictures.done;
+	ledger.replaced_pictures = pictures.kept;
+	if (pictures.missing.length)
+		Logger.warn({pictures: pictures.missing}, 'emoji or stickers to give a new picture are no longer on Tyne');
+	save();
+
+	// Communities whose list lost an emoji or sticker the plan moved elsewhere or made archive-only.
+	const vacatedEmojiGuilds = new Set<string>();
+	const vacatedStickerGuilds = new Set<string>();
 	for (const e of plan.emoji) {
 		const file = e.file;
 		if (!file) {
@@ -896,9 +934,24 @@ async function main(): Promise<void> {
 			ledger.storage_keys.push(`emojis/${e.emoji_id}`);
 		};
 		if (!e.guild_id) {
-			// Stored only for the messages that show it, in no community: Tyne has no row to check.
+			// Stored only for the messages that show it, in no community: Tyne has no row to check. One an earlier
+			// import put on a community's list comes off it, its picture kept (Carbon's review of tyne-chat/tyne#608).
+			let offList = false;
+			if (prev?.guild_id) {
+				const row = await deps.guildRepository.getEmojiById(id<EmojiID>(e.emoji_id));
+				if (row && row.guildId.toString() !== prev.guild_id) keep('emoji moved on Tyne');
+				else if (row) {
+					console.log(`${dryRun ? 'would take' : 'took'} :${row.name}: off community ${prev.guild_id}'s list`);
+					if (!dryRun) await deps.guildRepository.deleteEmoji(row.guildId, row.id);
+					vacatedEmojiGuilds.add(prev.guild_id);
+					offList = true;
+				}
+			}
 			if (prev && prev.file?.path === file.path) {
-				ledger.skipped_existing++;
+				if (offList) {
+					updated('emoji', e.emoji_id);
+					save();
+				} else ledger.skipped_existing++;
 				continue;
 			}
 			await uploadImage();
@@ -909,11 +962,13 @@ async function main(): Promise<void> {
 		}
 		const existing = await deps.guildRepository.getEmojiById(id<EmojiID>(e.emoji_id));
 		if (!existing) {
-			if (prev) {
+			// Deleted on Tyne after an earlier import put it on a list: left deleted. One that was archive-only goes
+			// on the list now, its stored picture kept unless the file changed.
+			if (prev?.guild_id) {
 				keep('emoji deleted on Tyne');
 				continue;
 			}
-			await uploadImage();
+			if (!prev || prev.file?.path !== file.path) await uploadImage();
 			if (!dryRun)
 				await deps.guildRepository.upsertEmoji({
 					guild_id: id<GuildID>(e.guild_id),
@@ -923,7 +978,8 @@ async function main(): Promise<void> {
 					animated: e.animated,
 					version: 1,
 				});
-			ledger.emoji.push({emoji_id: e.emoji_id, guild_id: e.guild_id});
+			if (prev) updated('emoji', e.emoji_id);
+			else ledger.emoji.push({emoji_id: e.emoji_id, guild_id: e.guild_id});
 			save();
 			continue;
 		}
@@ -931,18 +987,24 @@ async function main(): Promise<void> {
 			ledger.skipped_existing++;
 			continue;
 		}
+		// Put in another community by an earlier import: moved, unless it was moved on Tyne since.
+		const moveFrom = existing.guildId.toString() === e.guild_id ? null : existing.guildId;
+		if (moveFrom !== null && moveFrom.toString() !== prev.guild_id) {
+			keep('emoji moved on Tyne');
+			continue;
+		}
 		const merge = mergeFields({name: prev.name}, {name: existing.name}, {name: e.name}, ['name']);
 		for (const field of merge.kept) keep(`emoji ${field}`);
 		// Nobody can change an emoji's image on Tyne, only its name: a new file always applies.
 		const newImage = prev.file?.path !== file.path;
 		if (newImage) await uploadImage();
-		if (merge.patch.name !== undefined || newImage) {
-			if (!dryRun)
-				await deps.guildRepository.upsertEmoji({
-					...existing.toRow(),
-					name: merge.patch.name ?? existing.name,
-					animated: e.animated,
-				});
+		if (merge.patch.name !== undefined || newImage || moveFrom !== null) {
+			const row = {...existing.toRow(), name: merge.patch.name ?? existing.name, animated: e.animated};
+			if (!dryRun) {
+				if (moveFrom === null) await deps.guildRepository.upsertEmoji(row);
+				else await moveEmojiRow(moveFrom, {...row, guild_id: id<GuildID>(e.guild_id), version: 1});
+			}
+			if (moveFrom !== null) vacatedEmojiGuilds.add(moveFrom.toString());
 			updated('emoji', e.emoji_id);
 			save();
 		}
@@ -972,9 +1034,26 @@ async function main(): Promise<void> {
 			return processed.animated;
 		};
 		if (!s.guild_id) {
-			// Stored only for the messages that show it, in no community, as an archive-only emoji is.
+			// Stored only for the messages that show it, in no community, as an archive-only emoji is; one an earlier
+			// import put on a community's list comes off it.
+			let offList = false;
+			if (prev?.guild_id) {
+				const row = await deps.guildRepository.getStickerById(id<StickerID>(s.sticker_id));
+				if (row && row.guildId.toString() !== prev.guild_id) keep('sticker moved on Tyne');
+				else if (row) {
+					console.log(
+						`${dryRun ? 'would take' : 'took'} the sticker ${row.name} off community ${prev.guild_id}'s list`,
+					);
+					if (!dryRun) await deps.guildRepository.deleteSticker(row.guildId, row.id);
+					vacatedStickerGuilds.add(prev.guild_id);
+					offList = true;
+				}
+			}
 			if (prev && prev.file?.path === file.path) {
-				ledger.skipped_existing++;
+				if (offList) {
+					updated('sticker', s.sticker_id);
+					save();
+				} else ledger.skipped_existing++;
 				continue;
 			}
 			await uploadImage();
@@ -986,11 +1065,12 @@ async function main(): Promise<void> {
 		const guildId = s.guild_id;
 		const existing = await deps.guildRepository.getStickerById(id<StickerID>(s.sticker_id));
 		if (!existing) {
-			if (prev) {
+			// As for emoji: deleted on Tyne stays deleted; archive-only until now goes on the list.
+			if (prev?.guild_id) {
 				keep('sticker deleted on Tyne');
 				continue;
 			}
-			const animated = await uploadImage();
+			const animated = !prev || prev.file?.path !== file.path ? await uploadImage() : prev.animated;
 			if (!dryRun)
 				await deps.guildRepository.upsertSticker({
 					guild_id: id<GuildID>(guildId),
@@ -1002,7 +1082,8 @@ async function main(): Promise<void> {
 					creator_id: id<UserID>(plan.operator_user_id),
 					version: 1,
 				});
-			ledger.stickers.push({sticker_id: s.sticker_id, guild_id: guildId});
+			if (prev) updated('sticker', s.sticker_id);
+			else ledger.stickers.push({sticker_id: s.sticker_id, guild_id: guildId});
 			save();
 			continue;
 		}
@@ -1010,17 +1091,22 @@ async function main(): Promise<void> {
 			ledger.skipped_existing++;
 			continue;
 		}
+		const moveFrom = existing.guildId.toString() === guildId ? null : existing.guildId;
+		if (moveFrom !== null && moveFrom.toString() !== prev.guild_id) {
+			keep('sticker moved on Tyne');
+			continue;
+		}
 		const merge = mergeFields({name: prev.name}, {name: existing.name}, {name: s.name}, ['name']);
 		for (const field of merge.kept) keep(`sticker ${field}`);
 		const newImage = prev.file?.path !== file.path;
 		const animated = newImage ? await uploadImage() : existing.animated;
-		if (merge.patch.name !== undefined || newImage) {
-			if (!dryRun)
-				await deps.guildRepository.upsertSticker({
-					...existing.toRow(),
-					name: merge.patch.name ?? existing.name,
-					animated,
-				});
+		if (merge.patch.name !== undefined || newImage || moveFrom !== null) {
+			const row = {...existing.toRow(), name: merge.patch.name ?? existing.name, animated};
+			if (!dryRun) {
+				if (moveFrom === null) await deps.guildRepository.upsertSticker(row);
+				else await moveStickerRow(moveFrom, {...row, guild_id: id<GuildID>(guildId), version: 1});
+			}
+			if (moveFrom !== null) vacatedStickerGuilds.add(moveFrom.toString());
 			updated('sticker', s.sticker_id);
 			save();
 		}
@@ -1388,11 +1474,17 @@ async function main(): Promise<void> {
 	// Last, so a gateway that cannot be reached fails the run only after everything is written;
 	// applying the plan again sends the lists again (tyne-chat/tyne#660).
 	if (!dryRun) {
-		const sent = await sendExpressionLists(plan, deps, fates.guilds);
+		const sent = await sendExpressionLists(
+			plan,
+			deps,
+			[...fates.guilds, ...pictures.emojiGuilds, ...vacatedEmojiGuilds],
+			[...pictures.stickerGuilds, ...vacatedStickerGuilds],
+		);
 		console.log(
 			`sent the emoji list of ${sent.emoji.length} and the sticker list of ${sent.stickers.length} communities to the gateway`,
 		);
 	}
+	ledger.emoji_fates = fates.done;
 	ledger.finished_at = new Date().toISOString();
 	save();
 	const count = (kind: Kind) => ledger.updated[kind].length;
@@ -1403,6 +1495,7 @@ async function main(): Promise<void> {
 			`${ledger.emoji.length} emoji, ${ledger.stickers.length} stickers; updated ${count('message')} messages, ` +
 			`${count('placeholder')} placeholders, ${count('persona')} personas, ${count('emoji')} emoji, ` +
 			`${count('sticker')} stickers; removed ${ledger.removed.message.length} messages; ` +
+			`emoji renamed, moved or archived ${fates.done.length}, copied ${fates.copied.length}; ` +
 			`skipped ${ledger.skipped_existing} already there; kept from Tyne: ${JSON.stringify(ledger.kept)}`,
 	);
 	await jetStream.drain();
@@ -1435,7 +1528,9 @@ async function copyMedia(
 					`${origin}/media/emojis/${r.emoji.id}.webp?size=128${r.emoji.animated ? '&animated=true' : ''}`,
 				);
 		}
-		for (const e of (m.content ?? '').matchAll(/<(a?):\w+:(\d+)>/g))
+		// Emoji in the text, the embeds and a forwarded message's snapshot alike (Carbon's review of tyne-chat/tyne#608).
+		const text = [m.content ?? '', JSON.stringify(m.embeds ?? []), JSON.stringify(m.snapshot ?? null)].join('\n');
+		for (const e of text.matchAll(/<(a?):\w+:(\d+)>/g))
 			keys.set(`emojis/${e[2]}`, `${origin}/media/emojis/${e[2]}.webp?size=128${e[1] ? '&animated=true' : ''}`);
 		for (const s of m.sticker_items)
 			keys.set(
@@ -1443,6 +1538,12 @@ async function copyMedia(
 				`${origin}/media/stickers/${s.sticker_id}.webp?size=320${s.animated ? '&animated=true' : ''}`,
 			);
 	}
+	// A Tyne emoji the plan moves or copies: its picture is what a copy is made from, whichever message shows it.
+	for (const f of plan.emoji_fates ?? [])
+		keys.set(
+			`emojis/${f.emoji_id}`,
+			`${origin}/media/emojis/${f.emoji_id}.webp?size=128${f.animated ? '&animated=true' : ''}`,
+		);
 	for (const userId of userIds) {
 		const user = await deps.userRepository.findUnique(id<UserID>(userId));
 		const hash = user?.avatarHash;
@@ -1465,7 +1566,9 @@ async function copyMedia(
 	for (const [key, url] of keys) {
 		if (
 			plan.emoji.some((e) => key === `emojis/${e.emoji_id}`) ||
-			plan.stickers.some((s) => key === `stickers/${s.sticker_id}`)
+			plan.stickers.some((s) => key === `stickers/${s.sticker_id}`) ||
+			// Copies are made here, not on the source instance.
+			(plan.emoji_fates ?? []).some((f) => f.action === 'move' && f.copies?.some((c) => key === `emojis/${c.emoji_id}`))
 		)
 			continue;
 		const res = await fetch(url);
