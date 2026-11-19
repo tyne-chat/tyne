@@ -116,7 +116,8 @@ export const GuildEmojiSortControl = observer(() => {
 				<CaretDownIcon size={remFromPx(12)} weight="bold" data-flx="guild.guild-tabs.guild-emoji-sort.caret" />
 			}
 			className={forumStyles.filterPill}
-			aria-haspopup="menu"
+			aria-haspopup="dialog"
+			aria-expanded={mobile ? sheetOpen : undefined}
 			aria-label={`${i18n._(SORT_AND_GROUP_DESCRIPTOR)}: ${sortLabel}`}
 			onClick={mobile ? () => setSheetOpen(true) : undefined}
 			data-flx="guild.guild-tabs.guild-emoji-sort.button"
@@ -127,7 +128,7 @@ export const GuildEmojiSortControl = observer(() => {
 	if (!mobile) {
 		return (
 			<Popout
-				position="bottom-start"
+				position="bottom-end"
 				render={() => <SortGroupPanel data-flx="guild.guild-tabs.guild-emoji-sort.popout-panel" />}
 				data-flx="guild.guild-tabs.guild-emoji-sort.popout"
 			>

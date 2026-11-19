@@ -38,6 +38,29 @@ describe('orderGuildEmojiSections', () => {
 		]);
 	});
 
+	it('compares ids as numbers, so a 19-digit id is newer than an 18-digit one', () => {
+		const mixed = [
+			{id: '1000000000000000000', name: 'newer', animated: false},
+			{id: '999999999999999999', name: 'older', animated: false},
+		];
+		expect(names(orderGuildEmojiSections(mixed, 'recent', 'together').staticEmojis)).toEqual(['newer', 'older']);
+		expect(names(orderGuildEmojiSections(mixed.slice().reverse(), 'recent', 'together').staticEmojis)).toEqual([
+			'newer',
+			'older',
+		]);
+	});
+
+	it('lists same-named emojis newest first with Name (A–Z)', () => {
+		const same = [
+			{id: '999999999999999999', name: 'star', animated: false},
+			{id: '1000000000000000000', name: 'Star', animated: false},
+		];
+		expect(orderGuildEmojiSections(same, 'name', 'together').staticEmojis.map((emoji) => emoji.id)).toEqual([
+			'1000000000000000000',
+			'999999999999999999',
+		]);
+	});
+
 	it('leaves the list it was given as it was', () => {
 		const given = emojis.slice();
 		orderGuildEmojiSections(given, 'recent', 'together');
