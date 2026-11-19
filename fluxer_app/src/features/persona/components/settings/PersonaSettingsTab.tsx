@@ -43,6 +43,7 @@ import {Trans, useLingui} from '@lingui/react/macro';
 import {
 	CaretRight,
 	DownloadSimple,
+	FolderPlus,
 	GlobeSimple,
 	LockSimple,
 	LockSimpleOpen,
@@ -56,9 +57,15 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
+import * as PersonaGroupCommands from '../../commands/PersonaGroupCommands';
+import {PersonaGroupFolds} from '../../state/PersonaGroupFolds';
+import {PersonaGroups} from '../../state/PersonaGroups';
 import {type ActivePersonaMode, type Persona, PersonaStore} from '../../state/PersonaStore';
 import * as BulkMessages from '../../utils/PersonaBulkMessages';
+import * as GroupMessages from '../../utils/PersonaGroupMessages';
+import {personaGroupSections} from '../../utils/PersonaGroupSections';
 import {openPersonaEditModal} from '../modals/PersonaEditModal';
+import {openNewPersonaGroupModal} from '../modals/PersonaGroupNameModal';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
 import {SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR} from '../PersonaPickerSheet';
 import {PersonaTag} from '../PersonaTag';
@@ -73,6 +80,8 @@ import {
 	visibilityOf,
 } from './PersonaBulkSelection';
 import bulkStyles from './PersonaBulkSelection.module.css';
+import {PersonaGroupSectionView} from './PersonaGroupSection';
+import groupStyles from './PersonaGroupSection.module.css';
 import styles from './PersonaSettingsTab.module.css';
 
 const TAG_ICON_DESCRIPTOR = msg({
@@ -205,6 +214,10 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	const currentUser = Users.currentUser;
 
 	const [searchQuery, setSearchQuery] = useState('');
+	// The groups come after READY; if that request failed, opening the list asks once more (tyne-chat/tyne#829).
+	useEffect(() => {
+		if (!PersonaGroups.loaded) void PersonaGroupCommands.fetchPersonaGroups();
+	}, []);
 	// Selecting many personas to change or delete at once (tyne-chat/tyne#542).
 	const [visibilityFilter, setVisibilityFilter] = useState<PersonaVisibilityFilter>('all');
 	const selection = usePersonaSelection(personas);
@@ -491,6 +504,173 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		openPersonaEditModal(persona);
 	};
 
+	// One persona's card, in the flat list or in each of its groups' sections (tyne-chat/tyne#829).
+	const renderPersonaCard = (personaId: string) => {
+		const persona = PersonaStore.getPersona(personaId);
+		if (!persona) return null;
+		// With a persona per channel there is no single active one to show or set from here.
+		const isThisActive = activePersonaScope === 'global' && activePersonaId === persona.id && isLatched;
+		const isSelected = selection.selected.has(persona.id);
+		return (
+			// biome-ignore lint/a11y/noStaticElementInteractions: mouse convenience; the card's edit button is the keyboard affordance.
+			// biome-ignore lint/a11y/useKeyWithClickEvents: mouse convenience; the card's edit button is the keyboard affordance.
+			<div
+				key={persona.id}
+				className={clsx(
+					styles.compactPersonaCard,
+					isThisActive && styles.activeCard,
+					isSelected && bulkStyles.selectedCard,
+				)}
+				onClick={() => (selection.selecting ? selection.toggle(persona.id) : handleStartEdit(persona))}
+				data-flx="persona.settings.persona-settings-tab.compact-persona-card.start-edit"
+			>
+				{selection.selecting && (
+					<PersonaCardCheckbox
+						checked={isSelected}
+						label={persona.name}
+						onToggle={() => selection.toggle(persona.id)}
+						data-flx="persona.settings.persona-settings-tab.persona-card-checkbox"
+					/>
+				)}
+				{currentUser && (
+					<PersonaAvatar
+						user={currentUser}
+						persona={PersonaStore.getKnownPersona(persona.id)}
+						size={36}
+						data-flx="persona.settings.persona-settings-tab.persona-avatar"
+					/>
+				)}
+				<div className={styles.cardDetails} data-flx="persona.settings.persona-settings-tab.card-details">
+					<div className={styles.cardPrimaryRow} data-flx="persona.settings.persona-settings-tab.card-primary-row">
+						<span className={styles.cardName} data-flx="persona.settings.persona-settings-tab.card-name">
+							{persona.name}
+						</span>
+						{persona.pronouns && (
+							<span className={styles.cardPronouns} data-flx="persona.settings.persona-settings-tab.card-pronouns">
+								({persona.pronouns})
+							</span>
+						)}
+						{persona.color != null && persona.color !== 0 && (
+							<div
+								className={styles.colorPreview}
+								style={{
+									width: remFromPx(12),
+									height: remFromPx(12),
+									backgroundColor: `#${persona.color.toString(16).padStart(6, '0')}`,
+								}}
+								data-flx="persona.settings.persona-settings-tab.color-preview"
+							/>
+						)}
+						{persona.visibility === 'public' && (
+							<Tooltip
+								text={i18n._(PUBLIC_PERSONA_TOOLTIP_DESCRIPTOR)}
+								position="top"
+								data-flx="persona.settings.persona-settings-tab.tooltip"
+							>
+								<span
+									className={styles.visibilityIcon}
+									role="img"
+									aria-label={i18n._(PUBLIC_PERSONA_TOOLTIP_DESCRIPTOR)}
+									data-flx="persona.settings.persona-settings-tab.visibility-icon"
+								>
+									<GlobeSimple
+										size={14}
+										weight="bold"
+										className={styles.iconPublic}
+										data-flx="persona.settings.persona-settings-tab.icon-public"
+									/>
+								</span>
+							</Tooltip>
+						)}
+						{persona.visibility === 'private' && (
+							<Tooltip
+								text={i18n._(PRIVATE_PERSONA_TOOLTIP_DESCRIPTOR)}
+								position="top"
+								data-flx="persona.settings.persona-settings-tab.tooltip--2"
+							>
+								<span
+									className={styles.visibilityIcon}
+									role="img"
+									aria-label={i18n._(PRIVATE_PERSONA_TOOLTIP_DESCRIPTOR)}
+									data-flx="persona.settings.persona-settings-tab.visibility-icon--2"
+								>
+									<LockSimple
+										size={14}
+										weight="bold"
+										className={styles.iconPrivate}
+										data-flx="persona.settings.persona-settings-tab.icon-private"
+									/>
+								</span>
+							</Tooltip>
+						)}
+					</div>
+					<div className={styles.cardSecondaryRow} data-flx="persona.settings.persona-settings-tab.card-secondary-row">
+						{(persona.persona_tags ?? []).map((t, idx) => (
+							<span key={idx} className={styles.tagPill} data-flx="persona.settings.persona-settings-tab.tag-pill">
+								{`${t.prefix ?? ''}${i18n._(TAG_EXAMPLE_TEXT_DESCRIPTOR)}${t.suffix ?? ''}`}
+							</span>
+						))}
+						{persona.bio && (
+							<span className={styles.cardBio} data-flx="persona.settings.persona-settings-tab.card-bio">
+								{persona.bio}
+							</span>
+						)}
+					</div>
+				</div>
+				{/* biome-ignore lint/a11y/noStaticElementInteractions: only keeps clicks on the buttons inside from also opening the editor. */}
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: only keeps clicks on the buttons inside from also opening the editor. */}
+				<div
+					hidden={selection.selecting}
+					className={styles.cardActions}
+					onClick={(e) => e.stopPropagation()}
+					data-flx="persona.settings.persona-settings-tab.card-actions.stop-propagation"
+				>
+					{activePersonaScope === 'global' && (
+						<Button
+							variant="secondary"
+							small={true}
+							onClick={() => handleToggleActive(persona.id)}
+							leftIcon={
+								isThisActive ? (
+									<LockSimple
+										size={14}
+										color="var(--brand-primary)"
+										data-flx="persona.settings.persona-settings-tab.lock-simple"
+									/>
+								) : (
+									<LockSimpleOpen size={14} data-flx="persona.settings.persona-settings-tab.lock-simple-open" />
+								)
+							}
+							aria-label={
+								isThisActive ? i18n._(DEACTIVATE_PERSONA_ARIA_DESCRIPTOR) : i18n._(SET_ACTIVE_PERSONA_ARIA_DESCRIPTOR)
+							}
+							data-flx="persona.settings.persona-settings-tab.button.toggle-active"
+						>
+							{isThisActive ? <Trans>Active</Trans> : <Trans>Set Active</Trans>}
+						</Button>
+					)}
+					<button
+						type="button"
+						className={styles.chevronButton}
+						onClick={() => handleStartEdit(persona)}
+						aria-label={i18n._(EDIT_PERSONA_ARIA_DESCRIPTOR)}
+						data-flx="persona.settings.persona-settings-tab.chevron-button.start-edit"
+					>
+						<CaretRight size={18} weight="bold" data-flx="persona.settings.persona-settings-tab.caret-right" />
+					</button>
+				</div>
+			</div>
+		);
+	};
+
+	// The list by group, while there are groups and no search (tyne-chat/tyne#829).
+	const groupSections = personaGroupSections(
+		filteredPersonaIds,
+		PersonaGroups.groups,
+		(sectionId) => PersonaGroupFolds.isFolded(currentUser?.id, sectionId),
+		{searching: query.length > 0, filtering: visibilityFilter !== 'all'},
+	);
+
 	return (
 		<SettingsTabContainer data-flx="user.personas-settings-tab.container">
 			<SettingsTabContent data-flx="user.personas-settings-tab.content">
@@ -722,7 +902,10 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 						})}
 						linkable={false}
 						actions={
-							<div style={{display: 'flex', gap: remFromPx(8)}} data-flx="persona.settings.persona-settings-tab.div">
+							<div
+								style={{display: 'flex', flexWrap: 'wrap', gap: remFromPx(8)}}
+								data-flx="persona.settings.persona-settings-tab.div"
+							>
 								<Button
 									variant="secondary"
 									leftIcon={<UploadSimple size={16} data-flx="persona.settings.persona-settings-tab.upload-simple" />}
@@ -741,6 +924,14 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									data-flx="persona.settings.persona-settings-tab.button"
 								>
 									<Trans>Export</Trans>
+								</Button>
+								<Button
+									variant="secondary"
+									leftIcon={<FolderPlus size={16} data-flx="persona.settings.persona-settings-tab.folder-plus" />}
+									onClick={() => openNewPersonaGroupModal()}
+									data-flx="persona.settings.persona-settings-tab.button.new-group"
+								>
+									{i18n._(GroupMessages.NEW_GROUP_DESCRIPTOR)}
 								</Button>
 								<Button
 									variant="primary"
@@ -824,187 +1015,28 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								{query ? <Trans>No matching personas found.</Trans> : i18n._(BulkMessages.NO_PERSONAS_HERE_DESCRIPTOR)}
 							</div>
 						) : null}
-						{personas.length > 0 && filteredPersonaIds.length > 0 ? (
+						{personas.length > 0 && filteredPersonaIds.length > 0 && !groupSections ? (
 							<div className={styles.cardList} data-flx="persona.settings.persona-settings-tab.card-list">
-								{filteredPersonaIds.map((personaId) => {
-									const persona = PersonaStore.getPersona(personaId);
-									if (!persona) return null;
-									// With a persona per channel there is no single active one to show or set from here.
-									const isThisActive = activePersonaScope === 'global' && activePersonaId === persona.id && isLatched;
-									const isSelected = selection.selected.has(persona.id);
-									return (
-										// biome-ignore lint/a11y/noStaticElementInteractions: mouse convenience; the card's edit button is the keyboard affordance.
-										// biome-ignore lint/a11y/useKeyWithClickEvents: mouse convenience; the card's edit button is the keyboard affordance.
-										<div
-											key={persona.id}
-											className={clsx(
-												styles.compactPersonaCard,
-												isThisActive && styles.activeCard,
-												isSelected && bulkStyles.selectedCard,
-											)}
-											onClick={() => (selection.selecting ? selection.toggle(persona.id) : handleStartEdit(persona))}
-											data-flx="persona.settings.persona-settings-tab.compact-persona-card.start-edit"
-										>
-											{selection.selecting && (
-												<PersonaCardCheckbox
-													checked={isSelected}
-													label={persona.name}
-													onToggle={() => selection.toggle(persona.id)}
-													data-flx="persona.settings.persona-settings-tab.persona-card-checkbox"
-												/>
-											)}
-											{currentUser && (
-												<PersonaAvatar
-													user={currentUser}
-													persona={PersonaStore.getKnownPersona(persona.id)}
-													size={36}
-													data-flx="persona.settings.persona-settings-tab.persona-avatar"
-												/>
-											)}
-											<div className={styles.cardDetails} data-flx="persona.settings.persona-settings-tab.card-details">
-												<div
-													className={styles.cardPrimaryRow}
-													data-flx="persona.settings.persona-settings-tab.card-primary-row"
-												>
-													<span className={styles.cardName} data-flx="persona.settings.persona-settings-tab.card-name">
-														{persona.name}
-													</span>
-													{persona.pronouns && (
-														<span
-															className={styles.cardPronouns}
-															data-flx="persona.settings.persona-settings-tab.card-pronouns"
-														>
-															({persona.pronouns})
-														</span>
-													)}
-													{persona.color != null && persona.color !== 0 && (
-														<div
-															className={styles.colorPreview}
-															style={{
-																width: remFromPx(12),
-																height: remFromPx(12),
-																backgroundColor: `#${persona.color.toString(16).padStart(6, '0')}`,
-															}}
-															data-flx="persona.settings.persona-settings-tab.color-preview"
-														/>
-													)}
-													{persona.visibility === 'public' && (
-														<Tooltip
-															text={i18n._(PUBLIC_PERSONA_TOOLTIP_DESCRIPTOR)}
-															position="top"
-															data-flx="persona.settings.persona-settings-tab.tooltip"
-														>
-															<span
-																className={styles.visibilityIcon}
-																role="img"
-																aria-label={i18n._(PUBLIC_PERSONA_TOOLTIP_DESCRIPTOR)}
-																data-flx="persona.settings.persona-settings-tab.visibility-icon"
-															>
-																<GlobeSimple
-																	size={14}
-																	weight="bold"
-																	className={styles.iconPublic}
-																	data-flx="persona.settings.persona-settings-tab.icon-public"
-																/>
-															</span>
-														</Tooltip>
-													)}
-													{persona.visibility === 'private' && (
-														<Tooltip
-															text={i18n._(PRIVATE_PERSONA_TOOLTIP_DESCRIPTOR)}
-															position="top"
-															data-flx="persona.settings.persona-settings-tab.tooltip--2"
-														>
-															<span
-																className={styles.visibilityIcon}
-																role="img"
-																aria-label={i18n._(PRIVATE_PERSONA_TOOLTIP_DESCRIPTOR)}
-																data-flx="persona.settings.persona-settings-tab.visibility-icon--2"
-															>
-																<LockSimple
-																	size={14}
-																	weight="bold"
-																	className={styles.iconPrivate}
-																	data-flx="persona.settings.persona-settings-tab.icon-private"
-																/>
-															</span>
-														</Tooltip>
-													)}
-												</div>
-												<div
-													className={styles.cardSecondaryRow}
-													data-flx="persona.settings.persona-settings-tab.card-secondary-row"
-												>
-													{(persona.persona_tags ?? []).map((t, idx) => (
-														<span
-															key={idx}
-															className={styles.tagPill}
-															data-flx="persona.settings.persona-settings-tab.tag-pill"
-														>
-															{`${t.prefix ?? ''}${i18n._(TAG_EXAMPLE_TEXT_DESCRIPTOR)}${t.suffix ?? ''}`}
-														</span>
-													))}
-													{persona.bio && (
-														<span className={styles.cardBio} data-flx="persona.settings.persona-settings-tab.card-bio">
-															{persona.bio}
-														</span>
-													)}
-												</div>
+								{filteredPersonaIds.map(renderPersonaCard)}
+							</div>
+						) : null}
+						{groupSections && groupSections.length > 0 ? (
+							<div className={groupStyles.sectionList} data-flx="persona.settings.persona-settings-tab.group-sections">
+								{groupSections.map((section) => (
+									<PersonaGroupSectionView
+										key={section.id}
+										section={section}
+										accountId={currentUser?.id ?? null}
+										selection={selection}
+										data-flx="persona.settings.persona-settings-tab.group-section"
+									>
+										{section.personaIds.length > 0 && (
+											<div className={styles.cardList} data-flx="persona.settings.persona-settings-tab.group-card-list">
+												{section.personaIds.map(renderPersonaCard)}
 											</div>
-											{/* biome-ignore lint/a11y/noStaticElementInteractions: only keeps clicks on the buttons inside from also opening the editor. */}
-											{/* biome-ignore lint/a11y/useKeyWithClickEvents: only keeps clicks on the buttons inside from also opening the editor. */}
-											<div
-												hidden={selection.selecting}
-												className={styles.cardActions}
-												onClick={(e) => e.stopPropagation()}
-												data-flx="persona.settings.persona-settings-tab.card-actions.stop-propagation"
-											>
-												{activePersonaScope === 'global' && (
-													<Button
-														variant="secondary"
-														small={true}
-														onClick={() => handleToggleActive(persona.id)}
-														leftIcon={
-															isThisActive ? (
-																<LockSimple
-																	size={14}
-																	color="var(--brand-primary)"
-																	data-flx="persona.settings.persona-settings-tab.lock-simple"
-																/>
-															) : (
-																<LockSimpleOpen
-																	size={14}
-																	data-flx="persona.settings.persona-settings-tab.lock-simple-open"
-																/>
-															)
-														}
-														aria-label={
-															isThisActive
-																? i18n._(DEACTIVATE_PERSONA_ARIA_DESCRIPTOR)
-																: i18n._(SET_ACTIVE_PERSONA_ARIA_DESCRIPTOR)
-														}
-														data-flx="persona.settings.persona-settings-tab.button.toggle-active"
-													>
-														{isThisActive ? <Trans>Active</Trans> : <Trans>Set Active</Trans>}
-													</Button>
-												)}
-												<button
-													type="button"
-													className={styles.chevronButton}
-													onClick={() => handleStartEdit(persona)}
-													aria-label={i18n._(EDIT_PERSONA_ARIA_DESCRIPTOR)}
-													data-flx="persona.settings.persona-settings-tab.chevron-button.start-edit"
-												>
-													<CaretRight
-														size={18}
-														weight="bold"
-														data-flx="persona.settings.persona-settings-tab.caret-right"
-													/>
-												</button>
-											</div>
-										</div>
-									);
-								})}
+										)}
+									</PersonaGroupSectionView>
+								))}
 							</div>
 						) : null}
 						<PersonaBulkActionBar
