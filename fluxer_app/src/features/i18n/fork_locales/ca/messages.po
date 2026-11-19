@@ -69,6 +69,11 @@ msgstr "Afegeix un comptador"
 msgid "Add signal"
 msgstr "Afegeix un senyal"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "Afegeix al grup"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "Afegeix {name}"
@@ -300,6 +305,10 @@ msgstr "No s’ha pogut executar /{name}: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "No s’ha pogut desar /{name}: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "No s’han pogut canviar els grups. Torna-ho a provar."
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "No s’han pogut canviar les persones. Torna-ho a provar."
@@ -328,6 +337,10 @@ msgstr "Crear ordres"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "Permet crear ordres per a aquesta comunitat, i editar o suprimir les pròpies."
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "Crea el grup"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "Creada per {name}"
@@ -351,9 +364,17 @@ msgstr "Suprimeix la persona"
 msgid "Delete command"
 msgstr "Suprimeix l’ordre"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "Suprimeix el grup"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "Suprimeix la persona"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "Vols suprimir el grup «{name}»? Les persones que conté es conserven."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "Obtén l’aplicació Tyne"
 msgid "Gets overwritten"
 msgstr "Es sobreescriu"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "Nom del grup"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "Grups"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "Això és el que ha canviat"
@@ -886,6 +916,15 @@ msgstr "Persona nova"
 msgid "New command"
 msgstr "Ordre nova"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "Grup nou"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "Grup nou…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "Persones noves del teu fitxer."
@@ -992,6 +1031,10 @@ msgstr "No tens cap senyal activat enlloc."
 msgid "Not imported"
 msgstr "No s’importa"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "Sense grup"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "No n’estàs segur? Deixa-ho tal com està: no canviarà res."
@@ -1053,6 +1096,10 @@ msgstr "Obre el fitxer que has baixat."
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "Opcional"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "Opcions de {name}"
 
 msgid "Other names for finding this persona"
 msgstr "Altres noms per trobar aquesta persona"
@@ -1281,6 +1328,11 @@ msgstr "Elimina l’àlies"
 msgid "Remove counter"
 msgstr "Elimina el comptador"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "Treu del grup"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Elimina l’emoji distintiu"
@@ -1288,6 +1340,10 @@ msgstr "Elimina l’emoji distintiu"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "Elimina el parell d’etiquetes"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "Canvia el nom del grup"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "Cerca les teves persones"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "Cerca les persones de {name}"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "Selecciona tothom de {name}"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "Selecciona les persones que conté"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"

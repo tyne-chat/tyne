@@ -28,6 +28,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
 | Import review and its decisions | `components/modals/PersonaImportReview.tsx`, `utils/PersonaImportReview.ts` (pure), `utils/PersonaImportImages.ts` |
 | Deleted personas, Restore | `components/settings/DeletedPersonasSection.tsx` |
+| Persona groups (tyne-chat/tyne#829) | `state/PersonaGroups.ts`, `state/PersonaGroupFolds.ts`, `commands/PersonaGroupCommands.ts`, `utils/PersonaGroupSections.ts` (pure), `components/settings/PersonaGroupSection.tsx`, `PersonaBulkGroupActions.tsx`, `components/modals/PersonaGroupNameModal.tsx`, `PersonaGroupsField.tsx` |
 | Tag matching | `packages/schema/src/domains/persona/PersonaMatcher.ts` (`matchPersona`) |
 
 ## Which persona: the selection
@@ -214,8 +215,8 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
 
 ## Loading, resets and events
 
-- After READY, `ForkAccountReadyWork` fetches the personas, the settings and the channel
-  selections (3 GETs). A desktop account switch that resumes a session the account engine kept warm
+- After READY, `ForkAccountReadyWork` fetches the personas, the settings, the channel
+  selections and the persona groups (4 GETs). A desktop account switch that resumes a session the account engine kept warm
   gets no READY: upstream's `completePromotedResume` calls `handleForkPromotedResume` instead. While `AccountScopedWork` is suspended (signing in, switching accounts) it
   waits, because upstream aborts requests made then.
 - The store is emptied on the `AccountScopedWork` cancellation, on logout, and on a READY with a new
@@ -239,7 +240,7 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   flashes) while the editor has unsaved changes. `openPersonaDuplicateModal` closes the editor and
   opens a new persona's, under a key of its own, filled in from the saved persona: the same picture
   hashes (nothing uploaded; images are deleted only with the account), colours, aliases, pronouns,
-  bio, visibility and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
+  bio, visibility, groups and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
   repeated by the mobile app), focused and selected. Tags and signature emojis start empty, since each
   belongs to one persona; pins, usage and the PluralKit link are not copied. Its bar ("Copy of …",
   Cancel, Create) stays up, and Create sends the one `createPersona` Add Persona sends. A "+ New
@@ -278,6 +279,18 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   system tag; it is applied unasked only on an account with no personas and no display tag. The older
   `importPersonas` (with `replace`) stays in the commands for older code paths; the dialog no longer
   uses it.
+- **Groups** (tyne-chat/tyne#829; the full design and mockups are on the issue): with at least one
+  group, the list is cut into a section per group, in the order they were made, then "Not in a
+  group" (`personaGroupSections`); a persona in several groups shows in each, and a search shows the
+  flat list, folded groups included. A section's header folds it; the folds are kept per device and
+  per account (`PersonaGroupFolds`, `makePersistent`, Chiara's choice), never synced. Its ⋯ menu
+  renames, selects the group's personas or deletes the group (the personas stay). In Select mode the
+  header's box takes the whole group, and the action bar has Add to group (or New group… with the
+  selection) and Remove from group, one request each (`changePersonaGroupMembers`). The editor's
+  Groups boxes (shown once a group exists) are sent with Save, in a request of their own after the
+  persona's; Duplicate copies them. The list comes after READY, and once more when the settings open
+  without it; the four strings upstream also has for group DMs take the context `persona-group`,
+  since upstream says "group chat" for them in Chinese and has none in ten languages.
 - **Deleted personas** (`DeletedPersonasSection`, at the end of the Personas settings): the list is
   fetched once, when the person opens it, and a failure waits for Retry. Restore brings back the
   same persona (`restorePersona`), and the toast names any tag it came back without.
@@ -311,8 +324,8 @@ The signal bar follows the composer's persona through `SignalBarStore.affirmPers
   elsewhere.
 - End to end: `e2e/web/*/persona-*.spec.ts` (26 specs).
 - Request counts: `state/PersonaLookupBatcher.test.ts`, `events/PersonaRefresh.test.ts`.
-- `gateway/events/ForkAccountReadyWork.test.ts`: the work after a promoted resume, its 3 requests and
-  its wait for a switch.
+- `gateway/events/ForkAccountReadyWork.test.ts`: the work after a promoted resume, its 4 requests and
+  its wait for a switch. `commands/PersonaGroupCommands.test.ts` counts the groups' requests.
 - Not covered: the call from `completePromotedResume`, and request counts for the mention fetch
   (root `AGENTS.md`, "Network calls").
 - Before committing, run the full list in `CHECKS.md`: a persona change needs all of it.
