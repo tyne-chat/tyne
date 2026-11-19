@@ -5458,7 +5458,7 @@
 						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
 					}
 				},
-				"description": "Retrieves mentionable personas belonging to members of the specified channel. Only public personas of other members are returned, along with own personas.",
+				"description": "Retrieves mentionable personas belonging to members of the specified channel: other members' personas whose mention setting is everyone, and your own unless it is nobody. A persona that has no setting follows its visibility (private: only its owner).",
 				"security": [{"sessionToken": []}],
 				"parameters": [
 					{
@@ -26534,6 +26534,65 @@
 				}
 			}
 		},
+		"/users/@me/personas/mentions": {
+			"patch": {
+				"operationId": "set_persona_mentionable_by",
+				"summary": "Change who gets several personas in mention suggestions",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Gives each named persona its own mention setting (everyone, self, nobody, or null to follow its visibility), in one write: if one of them is not yours or is deleted, nothing changes. Returns the personas that changed.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {"schema": {"$ref": "#/components/schemas/PersonaMentionableByBulkRequestSchema"}}
+					}
+				}
+			}
+		},
 		"/users/@me/personas/settings": {
 			"get": {
 				"operationId": "get_my_persona_settings",
@@ -33744,6 +33803,10 @@
 						"type": "string",
 						"enum": ["unlisted", "public", "private"]
 					},
+					"mentionable_by": {
+						"description": "Who gets the persona in mention and search suggestions: everyone, self or nobody; null to follow its visibility again. Leave it out to keep the stored one",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaMentionableBySchema"}, {"type": "null"}]
+					},
 					"external_uuid": {
 						"description": "Optional external UUID",
 						"anyOf": [{"type": "string", "maxLength": 64}, {"type": "null"}]
@@ -33812,6 +33875,10 @@
 					"visibility": {
 						"description": "Visibility setting: unlisted (default), public, or private",
 						"$ref": "#/components/schemas/PersonaVisibilitySchema"
+					},
+					"mentionable_by": {
+						"description": "Who gets the persona in mention and search suggestions: everyone, only you (self) or nobody. Null until chosen: it then follows visibility (private: self, otherwise everyone)",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaMentionableBySchema"}, {"type": "null"}]
 					},
 					"external_uuid": {
 						"description": "External UUID for idempotent PluralKit imports",
@@ -33915,6 +33982,32 @@
 				},
 				"required": ["user_id", "active_persona_mode", "active_persona_scope", "is_latched", "multi_persona_reactions"],
 				"additionalProperties": false
+			},
+			"PersonaMentionableByBulkRequestSchema": {
+				"type": "object",
+				"properties": {
+					"personas": {
+						"minItems": 1,
+						"maxItems": 250,
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"description": "The ID of one of your personas",
+									"$ref": "#/components/schemas/SnowflakeStringType"
+								},
+								"mentionable_by": {
+									"anyOf": [{"$ref": "#/components/schemas/PersonaMentionableBySchema"}, {"type": "null"}],
+									"description": "Who gets it in mention and search suggestions; null to follow its visibility again"
+								}
+							},
+							"required": ["id", "mentionable_by"]
+						},
+						"description": "The personas to change, each with its new setting"
+					}
+				},
+				"required": ["personas"]
 			},
 			"PersonaImportPreviewRequestSchema": {
 				"type": "object",
@@ -34336,6 +34429,10 @@
 					"visibility": {
 						"description": "Visibility: unlisted (default), public, or private",
 						"$ref": "#/components/schemas/PersonaVisibilitySchema"
+					},
+					"mentionable_by": {
+						"description": "Who gets the persona in mention and search suggestions: everyone, self or nobody. Leave it out or null to follow its visibility",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaMentionableBySchema"}, {"type": "null"}]
 					},
 					"external_uuid": {
 						"description": "Optional external UUID (e.g. PluralKit)",
@@ -51966,6 +52063,7 @@
 				"required": ["status"],
 				"additionalProperties": false
 			},
+			"PersonaMentionableBySchema": {"type": "string", "enum": ["everyone", "self", "nobody"]},
 			"SignatureEmojiSchemaInput": {
 				"type": "object",
 				"properties": {
@@ -52056,6 +52154,10 @@
 					"visibility": {
 						"description": "Visibility: unlisted (default), public, or private",
 						"$ref": "#/components/schemas/PersonaVisibilitySchema"
+					},
+					"mentionable_by": {
+						"description": "Who gets the persona in mention and search suggestions: everyone, self or nobody. Leave it out or null to follow its visibility",
+						"anyOf": [{"$ref": "#/components/schemas/PersonaMentionableBySchema"}, {"type": "null"}]
 					},
 					"external_uuid": {
 						"description": "Optional external UUID (e.g. PluralKit)",

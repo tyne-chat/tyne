@@ -32,7 +32,7 @@ export function ChannelPersonaMentionController(app: HonoApp) {
 			security: ['bearerToken', 'sessionToken'],
 			tags: ['Channels', 'Personas'],
 			description:
-				'Retrieves mentionable personas belonging to members of the specified channel. Only public personas of other members are returned, along with own personas.',
+				"Retrieves mentionable personas belonging to members of the specified channel: other members' personas whose mention setting is everyone, and your own unless it is nobody. A persona that has no setting follows its visibility (private: only its owner).",
 		}),
 		async (ctx) => {
 			const user = ctx.get('user');
