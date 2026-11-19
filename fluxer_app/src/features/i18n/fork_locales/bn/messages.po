@@ -1090,10 +1090,6 @@ msgstr "যিনি চালাচ্ছেন"
 msgid "Persona"
 msgstr "পারসোনা"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "“{name}” পারসোনা বেছে নেওয়া হয়েছে।"
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "পারসোনা ট্যাগ (প্রিফিক্স ও সাফিক্স)"
 
@@ -1108,10 +1104,6 @@ msgstr "পারসোনা তৈরি করা হয়েছে"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "পারসোনা মুছে ফেলা হয়েছে"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "পারসোনা নির্বাচন বাতিল করা হয়েছে।"
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "প্রস্তাবিত"
 msgid "Supports PluralKit system export files"
 msgstr "PluralKit সিস্টেম এক্সপোর্ট ফাইল সমর্থন করে"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "সক্রিয় পারসোনা বদলান"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "যিনি চালাচ্ছেন, মেনশন হিসে�
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "পারসোনাটি পুনরুদ্ধার করা যায়নি।"
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "যে পারসোনা বেছে নেবেন।"
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."
