@@ -27,6 +27,7 @@ import type {
 	PersonaImportPreviewResponse,
 	PersonaRestoreResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import {isPersonaSuggested, type PersonaMentionableBy} from '@fluxer/schema/src/domains/persona/PersonaMentionableBy';
 import {
 	normalizePersonaAliases,
 	personaNameMatches,
@@ -190,6 +191,15 @@ function storedAliases(aliases: ReadonlyArray<string> | undefined): Array<string
 
 function aliasProfileText(aliases: ReadonlyArray<string> | undefined): Array<PersonaProfileText> {
 	return normalizePersonaAliases(aliases).map((alias): PersonaProfileText => ['global_name', alias]);
+}
+
+/**
+ * Whether a new or imported persona changes what other people see: the gallery lists a public one,
+ * and other people's suggestions hold one for everyone (tyne-chat/tyne#652). Any other needs no
+ * refresh of every shared community.
+ */
+function seenByOthers(persona: Persona): boolean {
+	return persona.visibility === 'public' || persona.mentionableBy === 'everyone';
 }
 
 function personaSettingsResponse(row: UserPersonaSettingsRow): PersonaSettingsResponse {
@@ -356,13 +366,14 @@ export class PersonaService {
 			persona_tags: data.persona_tags,
 			signature_emojis: data.signature_emojis,
 			visibility: data.visibility ?? 'unlisted',
+			mentionable_by: data.mentionable_by,
 			external_uuid: data.external_uuid,
 		});
 
 		await this.dispatchToUser(userId, 'USER_PERSONA_CREATE', {
 			persona: {...persona.toResponse(), user_id: userId.toString()},
 		});
-		if (persona.visibility === 'public' || persona.visibility === 'unlisted') {
+		if (seenByOthers(persona)) {
 			await this.dispatchToMutualGuilds(userId, persona, 'update');
 		}
 		return persona;
@@ -395,6 +406,7 @@ export class PersonaService {
 			persona_tags: data.persona_tags,
 			signature_emojis: data.signature_emojis,
 			visibility: data.visibility,
+			mentionable_by: data.mentionable_by,
 			external_uuid: data.external_uuid,
 		});
 		if (!updated) {
@@ -579,6 +591,7 @@ export class PersonaService {
 						persona_tags: item.persona_tags,
 						signature_emojis: item.signature_emojis,
 						visibility: item.visibility ?? existing.visibility,
+						mentionable_by: item.mentionable_by,
 						external_uuid:
 							existing.externalUuid ?? (item.external_uuid === existing.id.toString() ? null : item.external_uuid),
 					},
@@ -599,6 +612,7 @@ export class PersonaService {
 					persona_tags: item.persona_tags,
 					signature_emojis: item.signature_emojis,
 					visibility: item.visibility ?? 'unlisted',
+					mentionable_by: item.mentionable_by,
 					external_uuid: item.external_uuid,
 				},
 			};
@@ -626,7 +640,7 @@ export class PersonaService {
 		await this.dispatchListToOwnSessions(userId, settings, clearedChannelIds);
 		// One refresh for everyone who sees this account, also for the replaced personas, whatever
 		// their visibility, as a deletion of each would have sent.
-		if (retired.length > 0 || results.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
+		if (retired.length > 0 || results.some(seenByOthers)) {
 			await this.dispatchToMutualGuilds(userId);
 		}
 
@@ -652,6 +666,31 @@ export class PersonaService {
 		const steps = Array.from(wanted, ([id, visibility]) => ({persona: live.get(id)!, visibility}))
 			.filter(({persona, visibility}) => persona.visibility !== visibility)
 			.map(({persona, visibility}) => ({update: persona, params: {visibility}}));
+		if (steps.length === 0) return [];
+		const results = await this.deps.personaRepository.writeImport(userId, {retire: [], steps});
+		await this.dispatchListToOwnSessions(userId);
+		await this.dispatchToMutualGuilds(userId);
+		return results;
+	}
+
+	/**
+	 * Gives many of the account's personas a new mention setting at once (tyne-chat/tyne#652), as
+	 * `setPersonaVisibilities` does for visibility: all of them the caller's and live, or nothing
+	 * changes; one write, the list to the account's own sessions, one refresh for everyone who sees the
+	 * account. Null makes a persona follow its visibility again. Returns the personas changed.
+	 */
+	async setPersonaMentionableBy(
+		userId: UserID,
+		changes: ReadonlyArray<{personaId: PersonaID; mentionableBy: PersonaMentionableBy | null}>,
+	): Promise<Array<Persona>> {
+		const live = await this.liveByIds(
+			userId,
+			changes.map((c) => c.personaId),
+		);
+		const wanted = new Map(changes.map((c) => [c.personaId.toString(), c.mentionableBy]));
+		const steps = Array.from(wanted, ([id, mentionableBy]) => ({persona: live.get(id)!, mentionableBy}))
+			.filter(({persona, mentionableBy}) => persona.storedMentionableBy !== mentionableBy)
+			.map(({persona, mentionableBy}) => ({update: persona, params: {mentionable_by: mentionableBy}}));
 		if (steps.length === 0) return [];
 		const results = await this.deps.personaRepository.writeImport(userId, {retire: [], steps});
 		await this.dispatchListToOwnSessions(userId);
@@ -822,6 +861,7 @@ export class PersonaService {
 							persona_tags: tags,
 							signature_emojis: emojis,
 							visibility: item.visibility ?? 'unlisted',
+							mentionable_by: fromTyne ? item.mentionable_by : undefined,
 							external_uuid: item.external_uuid,
 						},
 						sources: item.image_sources,
@@ -997,7 +1037,7 @@ export class PersonaService {
 
 		await this.dispatchListToOwnSessions(userId);
 		const revived = planned.some((p) => p.kind === 'restore');
-		if (revived || written.some((p) => p.visibility === 'public' || p.visibility === 'unlisted')) {
+		if (revived || written.some(seenByOthers)) {
 			await this.dispatchToMutualGuilds(userId);
 		}
 		return {personas: written.map((p) => p.toResponse()), dropped};
@@ -1276,15 +1316,12 @@ export class PersonaService {
 			this.deps.personaRepository.findSettingsByUserIds(candidateUserIds),
 		]);
 
-		// Filter according to privacy model:
-		// - caller can see all of their own personas
-		// - other room members' personas can be public or unlisted (private personas are hidden)
-		const visiblePersonas = allPersonas.filter((persona) => {
-			if (persona.userId === callerUserId) {
-				return true;
-			}
-			return persona.visibility === 'public' || persona.visibility === 'unlisted';
-		});
+		// The mention setting decides (tyne-chat/tyne#652): another account's persona only when it is
+		// for everyone, one's own unless it is for nobody. Untouched, it follows visibility, so other
+		// people's private personas stay out as before.
+		const visiblePersonas = allPersonas.filter((persona) =>
+			isPersonaSuggested(persona.mentionableBy, persona.userId === callerUserId),
+		);
 
 		// Query matching
 		const matched = visiblePersonas.filter((persona) => {
@@ -1338,18 +1375,20 @@ export class PersonaService {
 		return results.map((persona) => {
 			const owner = userMap.get(persona.userId);
 			const userSettings = settingsMap.get(persona.userId.toString());
+			// A private persona offered to everyone keeps its profile to its owner, as Private promises.
+			const profileHidden = persona.visibility === 'private' && persona.userId !== callerUserId;
 			return {
 				id: persona.id.toString(),
 				name: persona.name,
 				aliases: persona.aliases,
 				avatar_hash: persona.avatarHash,
-				banner_hash: persona.bannerHash,
+				banner_hash: profileHidden ? null : persona.bannerHash,
 				display_tag_text: userSettings?.display_tag_text ?? null,
 				display_tag_icon: userSettings?.display_tag_icon ?? null,
-				pronouns: persona.pronouns,
+				pronouns: profileHidden ? null : persona.pronouns,
 				color: persona.color,
 				avatar_color: persona.avatarColor,
-				bio: persona.bio,
+				bio: profileHidden ? null : persona.bio,
 				visibility: persona.visibility,
 				use_count: persona.useCount,
 				last_used_at_ms: persona.lastUsedAtMs ? persona.lastUsedAtMs.toString() : null,
