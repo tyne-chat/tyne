@@ -26,11 +26,24 @@ An account holds at most 250 [persona groups](#persona-groups). Making one more 
 
 | Value | Description |
 | --- | --- |
-| unlisted | The default. Fetched by ID and offered as a mention candidate, but not listed on the owner's profile |
-| public | Listed by [List user public personas](#list-user-public-personas) and offered as a mention candidate |
+| unlisted | The default. Fetched by ID, but not listed on the owner's profile |
+| public | Listed by [List user public personas](#list-user-public-personas) |
 | private | Not listed. Its profile is refused to others; its messages, reactions and [lookup by ID](#look-up-personas-by-id) still show its name and avatar |
 
 [Get persona profile card by ID](#get-persona-profile-card-by-id) refuses a `private` persona to anyone but its owner with 403 `PRIVATE_PERSONA`. A persona ID that does not belong to the account a route acts on returns 404 `UNKNOWN_PERSONA`.
+
+## Mention setting
+
+`mentionable_by` decides who is offered a persona as a [mention candidate](#get-persona-mention-candidates-for-a-channel), which clients also use for search suggestions. It is a convenience for copies of other people's personas and changes nothing else: messages, profiles, listing and mentions typed by hand are unaffected.
+
+| Value | Description |
+| --- | --- |
+| everyone | Offered to everyone in the channel |
+| self | Offered only to the persona's owner |
+| nobody | Offered to nobody, its owner included |
+| null | The default: follows [visibility](#visibility), `self` for a `private` persona and `everyone` otherwise |
+
+A `private` persona offered to others is sent to them without its bio, banner and pronouns.
 
 ## Selecting a persona
 
@@ -67,6 +80,7 @@ One of the caller's own personas, with every setting the owner can change.
 | use_count | integer | Usage counter for frecency ranking |
 | last_used_at_ms? | ?string | Timestamp in ms when the persona was last used |
 | visibility | string | Visibility setting: unlisted (default), public, or private |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, only you (self) or nobody. Null until chosen: it then follows visibility (private: self, otherwise everyone) |
 | external_uuid? | ?string | External UUID for idempotent PluralKit imports |
 | created_at | string | ISO timestamp of persona creation |
 | updated_at | string | ISO timestamp of last update |
@@ -211,6 +225,7 @@ One persona in a [bulk import](#bulk-import-personas), with the fields of the [C
 | persona_tags? | array[[persona tag](#persona-tag-object) object] | Persona prefix/suffix tags |
 | signature_emojis? | array[[signature emoji](#signature-emoji-object) object] | Signature emojis for this persona |
 | visibility? | string | Visibility: unlisted (default), public, or private |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, self or nobody. Leave it out or null to follow its visibility |
 | external_uuid? | ?string | Optional external UUID (e.g. PluralKit) |
 | image_sources? | ?[persona import image sources](#persona-import-image-sources-object) object | Where the persona's images were imported from; null when the file gave it none |
 
@@ -274,7 +289,7 @@ The stored image. Pass `hash` as the `avatar_hash` or `banner_hash` of a [person
 
 <RouteHeader method="GET" path="/v1/channels/{channel_id}/persona-mentions" />
 
-Returns the personas that can be mentioned in a channel the caller can see: the caller's own personas, and the public and unlisted personas of the community's other members or the direct message's other recipients. The best matches for `q` come first, then the most used.
+Returns the personas that can be mentioned in a channel the caller can see, by their [mention setting](#mention-setting): the caller's own personas unless set to `nobody`, and those of the community's other members or the direct message's other recipients set to `everyone`. The best matches for `q` come first, then the most used.
 
 ### Path parameters
 
@@ -337,6 +352,7 @@ Creates a persona for the caller and sends [User Persona Create](/gateway/events
 | persona_tags? | array[[persona tag](#persona-tag-object) object] | Persona prefix/suffix tags |
 | signature_emojis? | array[[signature emoji](#signature-emoji-object) object] | Signature emojis for this persona |
 | visibility? | string | Visibility: unlisted (default), public, or private |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, self or nobody. Leave it out or null to follow its visibility |
 | external_uuid? | ?string | Optional external UUID (e.g. PluralKit) |
 
 ### Response
@@ -591,6 +607,28 @@ Gives up to 250 of the caller's personas a new [visibility](#visibility) in one 
 | Status | Body | Condition |
 | --- | --- | --- |
 | 200 | array[[persona](#persona-object) object] | The personas whose visibility changed |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Change who gets several personas in mention suggestions
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/mentions" oauth2="personas.write" />
+
+Gives up to 250 of the caller's personas a new [mention setting](#mention-setting) in one write. Each entry names its own value, null included, so putting several personas back as they were is one request too. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing changes. A persona that already has the value asked for is left as it is. Sends one [User Personas Update](/gateway/events/#user-personas-update) with the caller's full list, and one [Guild Personas Dirty](/gateway/events/#guild-personas-dirty) per community.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| personas | array[object] | Between 1 and 250 objects, each with `id` (snowflake, one of your personas) and `mentionable_by` (`everyone`, `self`, `nobody`, or null to follow its visibility) |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona](#persona-object) object] | The personas whose setting changed |
 
 ### Rate limit
 
@@ -906,6 +944,7 @@ Changes one of the caller's personas. Only the fields present in the body change
 | persona_tags? | array[[persona tag](#persona-tag-object) object] | Persona prefix/suffix tags |
 | signature_emojis? | array[[signature emoji](#signature-emoji-object) object] | Signature emojis for this persona |
 | visibility? | string | Visibility setting |
+| mentionable_by? | ?string | Who gets the persona in mention and search suggestions: everyone, self or nobody; null to follow its visibility again. Leave it out to keep the stored one |
 | external_uuid? | ?string | Optional external UUID |
 
 ### Response
