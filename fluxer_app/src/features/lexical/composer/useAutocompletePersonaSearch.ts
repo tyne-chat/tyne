@@ -13,7 +13,16 @@ interface CacheEntry {
 	items: Array<ChannelPersonaMentionItem>;
 	fetchedAt: number;
 	guildId?: string | null;
+	/**
+	 * The channel's whole list is here (a fetch without a query came back under the limit), so a
+	 * query with no local match has nothing more to find and sends no request (tyne-chat/tyne#652: a
+	 * channel whose personas are all for nobody used to ask again at every keystroke).
+	 */
+	complete?: boolean;
 }
+
+/** The most personas one fetch asks for. */
+const PERSONA_FETCH_LIMIT = 500;
 
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes backup TTL (primary invalidation is push-driven via gateway)
 const channelPersonaCache = new Map<string, CacheEntry>();
@@ -178,8 +187,15 @@ export function filterPersonaMentions(
 	return filtered;
 }
 
-function mergeIntoCache(channelId: string, newItems: Array<ChannelPersonaMentionItem>, guildId?: string | null): void {
-	const existing = channelPersonaCache.get(channelId);
+function mergeIntoCache(
+	channelId: string,
+	newItems: Array<ChannelPersonaMentionItem>,
+	guildId?: string | null,
+	complete = false,
+): void {
+	const cached = channelPersonaCache.get(channelId);
+	// An expired entry gives nothing to the new one, its whole-list mark least of all.
+	const existing = cached && Date.now() - cached.fetchedAt <= CACHE_TTL_MS ? cached : undefined;
 	const itemMap = new Map<string, ChannelPersonaMentionItem>();
 	if (existing) {
 		for (const item of existing.items) {
@@ -192,14 +208,15 @@ function mergeIntoCache(channelId: string, newItems: Array<ChannelPersonaMention
 	channelPersonaCache.set(channelId, {
 		items: Array.from(itemMap.values()),
 		fetchedAt: Date.now(),
-		guildId: guildId !== undefined ? guildId : existing?.guildId,
+		guildId: guildId !== undefined ? guildId : (existing?.guildId ?? cached?.guildId),
+		complete: complete || existing?.complete,
 	});
 }
 
 async function fetchChannelPersonas(
 	channelId: string,
 	q = '',
-	limit = 500,
+	limit = PERSONA_FETCH_LIMIT,
 ): Promise<Array<ChannelPersonaMentionItem> | null> {
 	try {
 		const res = await http.get<ChannelPersonaMentionsResponse>(ForkEndpoints.CHANNEL_PERSONA_MENTIONS(channelId), {
@@ -254,13 +271,14 @@ export function useAutocompletePersonaSearch({
 		// Immediately update results from cache if we have local matches
 		if (cached) {
 			const localMatches = filterPersonaMentions(cached.items, query);
-			if (localMatches.length > 0) {
+			// A fresh whole list answers for itself, even with no match.
+			if (localMatches.length > 0 || (hasValidCache && cached.complete)) {
 				setResults(localMatches);
 			} else if (!query) {
 				setResults(cached.items);
 			}
-			// If cache is fresh and local matches exist, no network fetch needed
-			if (hasValidCache && localMatches.length > 0) {
+			// If cache is fresh and local matches exist, or it holds the whole list, no network fetch needed
+			if (hasValidCache && (localMatches.length > 0 || cached.complete)) {
 				if (debounceTimerRef.current != null) {
 					clearTimeout(debounceTimerRef.current);
 					debounceTimerRef.current = null;
@@ -277,10 +295,10 @@ export function useAutocompletePersonaSearch({
 		const debounceMs = query ? 60 : 0;
 
 		debounceTimerRef.current = setTimeout(async () => {
-			const items = await fetchChannelPersonas(channelId, query, 500);
+			const items = await fetchChannelPersonas(channelId, query, PERSONA_FETCH_LIMIT);
 			// Guard against stale async responses: only update if query hasn't changed
 			if (activeQueryRef.current === query && items) {
-				mergeIntoCache(channelId, items, guildId);
+				mergeIntoCache(channelId, items, guildId, query === '' && items.length < PERSONA_FETCH_LIMIT);
 				setResults(filterPersonaMentions(items, query));
 			}
 		}, debounceMs);

@@ -64,12 +64,14 @@ import {type ActivePersonaMode, type Persona, PersonaStore} from '../../state/Pe
 import * as BulkMessages from '../../utils/PersonaBulkMessages';
 import * as GroupMessages from '../../utils/PersonaGroupMessages';
 import {personaGroupSections} from '../../utils/PersonaGroupSections';
+import {personaMentionableBy} from '../../utils/PersonaMentionSetting';
 import {openPersonaEditModal} from '../modals/PersonaEditModal';
 import {openNewPersonaGroupModal} from '../modals/PersonaGroupNameModal';
 import {openPluralKitImportModal} from '../modals/PluralKitImportModal';
 import {SEARCH_PERSONAS_PLACEHOLDER_DESCRIPTOR} from '../PersonaPickerSheet';
 import {PersonaTag} from '../PersonaTag';
 import {DeletedPersonasSection} from './DeletedPersonasSection';
+import {PersonaNotMentionableIcon} from './PersonaBulkMentionActions';
 import {
 	PersonaBulkActionBar,
 	PersonaCardCheckbox,
@@ -602,6 +604,9 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									/>
 								</span>
 							</Tooltip>
+						)}
+						{personaMentionableBy(persona) === 'nobody' && (
+							<PersonaNotMentionableIcon data-flx="persona.settings.persona-settings-tab.not-mentionable-icon" />
 						)}
 					</div>
 					<div className={styles.cardSecondaryRow} data-flx="persona.settings.persona-settings-tab.card-secondary-row">

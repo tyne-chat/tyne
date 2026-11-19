@@ -45,6 +45,10 @@ import {
 	type SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {
+	effectiveMentionableBy,
+	type PersonaMentionableBy,
+} from '@fluxer/schema/src/domains/persona/PersonaMentionableBy';
+import {
 	normalizePersonaAliases,
 	PERSONA_ALIAS_MAX_LENGTH,
 	PERSONA_ALIASES_MAX,
@@ -174,6 +178,47 @@ const DELETE_PERSONA_ARIA_DESCRIPTOR = msg({
 	message: 'Delete persona',
 	comment: 'Aria label for deleting persona',
 });
+const MENTIONABLE_BY_EVERYONE_DESCRIPTOR = msg({
+	message: 'Everyone',
+	comment: 'Persona setting "Allow mentions by": everyone gets this persona in mention and search suggestions',
+});
+const MENTIONABLE_BY_SELF_DESCRIPTOR = msg({
+	message: 'Only you',
+	comment:
+		'Persona setting "Allow mentions by": only the persona owner\'s account gets it in mention and search suggestions',
+});
+const MENTIONABLE_BY_NOBODY_DESCRIPTOR = msg({
+	message: 'Nobody',
+	comment:
+		'Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner',
+});
+const MENTIONABLE_BY_EVERYONE_DESC = msg({
+	message: 'Anyone can find this persona when typing @ or searching.',
+	comment: 'Helper text under "Allow mentions by" when Everyone is chosen',
+});
+const MENTIONABLE_BY_SELF_DESC = msg({
+	message: 'Only your account finds it when typing @ or searching.',
+	comment: 'Helper text under "Allow mentions by" when Only you is chosen',
+});
+const MENTIONABLE_BY_NOBODY_DESC = msg({
+	message:
+		'Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility.',
+	comment:
+		'Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people\'s personas. Visibility is the setting above it',
+});
+const MENTIONABLE_BY_FOLLOWS_DESC = msg({
+	message: 'Follows Visibility until you choose.',
+	comment:
+		'Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone',
+});
+const MENTIONABLE_BY_FOLLOW_VISIBILITY_DESCRIPTOR = msg({
+	message: 'Follow Visibility',
+	comment: 'Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again',
+});
+const MENTIONABLE_BY_ARIA_DESCRIPTOR = msg({
+	message: 'Who gets this persona in mention suggestions',
+	comment: 'Aria label for the persona "Allow mentions by" tabs',
+});
 const PERSONA_VISIBILITY_ARIA_DESCRIPTOR = msg({
 	message: 'Persona visibility',
 	comment: 'Aria label for persona visibility tabs',
@@ -244,6 +289,18 @@ const getVisibilityTabs = (i18n: I18n): Array<SegmentedTab<PersonaVisibility>> =
 	{id: 'public', label: i18n._(VISIBILITY_PUBLIC_DESCRIPTOR)},
 	{id: 'private', label: i18n._(VISIBILITY_PRIVATE_DESCRIPTOR)},
 ];
+
+const getMentionableByTabs = (i18n: I18n): Array<SegmentedTab<PersonaMentionableBy>> => [
+	{id: 'everyone', label: i18n._(MENTIONABLE_BY_EVERYONE_DESCRIPTOR)},
+	{id: 'self', label: i18n._(MENTIONABLE_BY_SELF_DESCRIPTOR)},
+	{id: 'nobody', label: i18n._(MENTIONABLE_BY_NOBODY_DESCRIPTOR)},
+];
+
+const getMentionableByDescriptions = (i18n: I18n): Record<PersonaMentionableBy, string> => ({
+	everyone: i18n._(MENTIONABLE_BY_EVERYONE_DESC),
+	self: i18n._(MENTIONABLE_BY_SELF_DESC),
+	nobody: i18n._(MENTIONABLE_BY_NOBODY_DESC),
+});
 
 const getVisibilityDescriptions = (i18n: I18n): Record<PersonaVisibility, string> => ({
 	unlisted: i18n._(VISIBILITY_UNLISTED_DESC),
@@ -316,6 +373,8 @@ interface PersonaFormState {
 	accentColor: number | null;
 	bio: string;
 	visibility: PersonaVisibility;
+	/** Who gets it in mention suggestions (tyne-chat/tyne#652); null follows visibility until chosen. */
+	mentionableBy: PersonaMentionableBy | null;
 	tags: Array<{prefix: string; suffix: string}>;
 	autoTagDisabled: boolean;
 	signatureEmojis: Array<SignatureEmoji>;
@@ -349,6 +408,7 @@ const emptyFormState = (): PersonaFormState => ({
 	accentColor: null,
 	bio: '',
 	visibility: 'unlisted',
+	mentionableBy: null,
 	tags: [{prefix: '', suffix: ''}],
 	autoTagDisabled: false,
 	signatureEmojis: [],
@@ -359,8 +419,8 @@ const emptyFormState = (): PersonaFormState => ({
 
 /**
  * A new persona that starts as a copy of `source` (tyne-chat/tyne#599): its pictures (the same stored
- * files), colours, pronouns, bio, visibility, groups and tag matching, under a numbered name. Tags and
- * signature emojis start empty, since each belongs to one persona.
+ * files), colours, pronouns, bio, visibility, mention setting, groups and tag matching, under a
+ * numbered name. Tags and signature emojis start empty, since each belongs to one persona.
  */
 const copyFormState = (source: Persona, personas: ReadonlyArray<Persona>): PersonaFormState => ({
 	...emptyFormState(),
@@ -376,6 +436,7 @@ const copyFormState = (source: Persona, personas: ReadonlyArray<Persona>): Perso
 	accentColor: source.color ?? null,
 	bio: source.bio ?? '',
 	visibility: source.visibility ?? 'unlisted',
+	mentionableBy: source.mentionable_by ?? null,
 	autoTagDisabled: source.auto_tag_disabled ?? false,
 	groupEdits: Object.fromEntries(PersonaGroups.groupIdsOf(source.id).map((groupId) => [groupId, true])),
 });
@@ -429,6 +490,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			accentColor: persona.color ?? null,
 			bio: persona.bio ?? '',
 			visibility: persona.visibility ?? 'unlisted',
+			mentionableBy: persona.mentionable_by ?? null,
 			tags:
 				(persona.persona_tags ?? []).length > 0
 					? (persona.persona_tags ?? []).map((t) => ({
@@ -504,6 +566,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 				formData.accentColor !== null ||
 				formData.bio.trim() !== '' ||
 				formData.visibility !== 'unlisted' ||
+				formData.mentionableBy !== null ||
 				hasNonEmptyTag ||
 				formData.autoTagDisabled ||
 				formData.signatureEmojis.length > 0
@@ -518,6 +581,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		if (formData.accentColor !== initial.accentColor) return true;
 		if (formData.bio.trim() !== initial.bio.trim()) return true;
 		if (formData.visibility !== initial.visibility) return true;
+		if (formData.mentionableBy !== initial.mentionableBy) return true;
 		if (formData.autoTagDisabled !== initial.autoTagDisabled) return true;
 		if (!signatureEmojisEqual(formData.signatureEmojis, initial.signatureEmojis)) return true;
 
@@ -866,6 +930,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 						color: parsedColor,
 						bio: formData.bio.trim() || null,
 						visibility: formData.visibility,
+						mentionable_by: formData.mentionableBy,
 						persona_tags: validTags,
 						auto_tag_disabled: formData.autoTagDisabled,
 						signature_emojis: formData.signatureEmojis,
@@ -891,6 +956,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					color: parsedColor,
 					bio: formData.bio.trim() || null,
 					visibility: formData.visibility,
+					mentionable_by: formData.mentionableBy,
 					persona_tags: validTags,
 					auto_tag_disabled: formData.autoTagDisabled,
 					signature_emojis: formData.signatureEmojis,
@@ -967,6 +1033,9 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 	const visibilityTabs = useMemo(() => getVisibilityTabs(i18n), [i18n]);
 	const visibilityDescriptions = useMemo(() => getVisibilityDescriptions(i18n), [i18n]);
+	const mentionableByTabs = useMemo(() => getMentionableByTabs(i18n), [i18n]);
+	const mentionableByDescriptions = useMemo(() => getMentionableByDescriptions(i18n), [i18n]);
+	const effectiveMentionable = effectiveMentionableBy(formData.mentionableBy, formData.visibility);
 
 	return (
 		<Modal.Root
@@ -1404,6 +1473,51 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 										{visibilityDescriptions[formData.visibility]}
 									</span>
 								</div>
+							</div>
+
+							<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block--mentions">
+								<div
+									className={styles.fieldLabel}
+									style={{marginBottom: remFromPx(8)}}
+									data-flx="persona.persona-edit-modal.field-label--mentions"
+								>
+									<Trans>Allow mentions by</Trans>
+								</div>
+								<SegmentedTabs<PersonaMentionableBy>
+									tabs={mentionableByTabs}
+									selectedTab={effectiveMentionable}
+									onTabChange={(value) => setFormData((prev) => ({...prev, mentionableBy: value}))}
+									ariaLabel={i18n._(MENTIONABLE_BY_ARIA_DESCRIPTOR)}
+									data-flx="persona.persona-edit-modal.segmented-tabs-mentions"
+								/>
+								<div
+									className={styles.modeHelperText}
+									style={{marginTop: remFromPx(6)}}
+									data-flx="persona.persona-edit-modal.mode-helper-text--mentions"
+								>
+									<Info
+										size={16}
+										weight="bold"
+										className={styles.modeHelperIcon}
+										data-flx="persona.persona-edit-modal.mode-helper-icon--mentions"
+									/>
+									<span data-flx="persona.persona-edit-modal.span--mentions">
+										{mentionableByDescriptions[effectiveMentionable]}
+										{formData.mentionableBy === null && <> {i18n._(MENTIONABLE_BY_FOLLOWS_DESC)}</>}
+									</span>
+								</div>
+								{formData.mentionableBy !== null && (
+									<div style={{marginTop: remFromPx(6)}} data-flx="persona.persona-edit-modal.mentions-follow-row">
+										<Button
+											variant="secondary"
+											small
+											onClick={() => setFormData((prev) => ({...prev, mentionableBy: null}))}
+											data-flx="persona.persona-edit-modal.button.mentions-follow-visibility"
+										>
+											{i18n._(MENTIONABLE_BY_FOLLOW_VISIBILITY_DESCRIPTOR)}
+										</Button>
+									</div>
+								)}
 							</div>
 
 							{PersonaGroups.groups.length > 0 && (

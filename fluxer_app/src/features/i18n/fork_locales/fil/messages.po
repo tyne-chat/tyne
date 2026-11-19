@@ -120,6 +120,21 @@ msgstr "Lahat ng platform"
 msgid "All time zones"
 msgstr "Lahat ng time zone"
 
+msgid "Allow mentions by"
+msgstr "Sino ang puwedeng mag-mention"
+
+#. Menu item under the persona selection bar’s Mentions button.
+msgid "Allow mentions by everyone"
+msgstr "Payagan ang mention ng lahat"
+
+#. Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).
+msgid "Allow mentions by nobody"
+msgstr "Huwag payagan ang mention ng sinuman"
+
+#. Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.
+msgid "Allow mentions only by you"
+msgstr "Payagan ang mention mo lang"
+
 #. Heading of the QR code box on the download page.
 msgid "Also on your phone"
 msgstr "Sa telepono mo rin"
@@ -131,6 +146,10 @@ msgstr "Ginagamit na ng ibang command o ng isang built-in na command ang pangala
 #. Under the AppImage download button: it works on every other Linux distribution.
 msgid "Any other Linux"
 msgstr "Anumang ibang Linux"
+
+#. Helper text under "Allow mentions by" when Everyone is chosen
+msgid "Anyone can find this persona when typing @ or searching."
+msgstr "Mahahanap ng sinuman ang personang ito kapag nag-type ng @ o naghanap."
 
 #. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
 msgid "Apple silicon (M1 or newer)"
@@ -602,6 +621,15 @@ msgstr "Fedora, openSUSE"
 msgid "Filter by visibility"
 msgstr "I-filter ayon sa visibility"
 
+#. Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.
+#. Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again
+msgid "Follow Visibility"
+msgstr "Sundin ang visibility"
+
+#. Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone
+msgid "Follows Visibility until you choose."
+msgstr "Sinusunod ang visibility hangga't wala kang pinipili."
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "Preview ng format"
@@ -816,6 +844,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Hayaang naka-delete"
 
+#. Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people's personas. Visibility is the setting above it
+msgid "Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility."
+msgstr "Wala sa mga mungkahi ng @ at sa mga filter ng paghahanap, pati sa iyo. Puwede pa rin itong magsalita, at sinusunod ng profile nito ang visibility."
+
 #. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
 msgid "Left out, since you can no longer post there: {chats}"
 msgstr "Hindi isinama dahil hindi ka na makakapag-post doon: {chats}"
@@ -882,6 +914,22 @@ msgstr "Miyembro #{index}"
 
 msgid "Members with Avatars"
 msgstr "Mga Miyembrong may Avatar"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone"
+msgstr "Puwede nang i-mention ng lahat ang {count, plural, one {# persona} other {# persona}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody"
+msgstr "Hindi na puwedeng i-mention ng sinuman ang {count, plural, one {# persona} other {# persona}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you"
+msgstr "Ikaw na lang ang puwedeng mag-mention sa {count, plural, one {# persona} other {# persona}}"
+
+#. Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility"
+msgstr "Sinusunod na ng mga mention ng {count, plural, one {# persona} other {# persona}} ang visibility"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -1007,6 +1055,14 @@ msgstr "Walang tag: idaragdag nang walang tag"
 msgid "No tags"
 msgstr "Walang tag"
 
+#. Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner
+msgid "Nobody"
+msgstr "Walang sinuman"
+
+#. Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.
+msgid "Nobody gets this persona in mention suggestions"
+msgstr "Walang nakakakita sa personang ito sa mga mungkahi ng mention"
+
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Walang naka-on ng signal na ito"
@@ -1062,6 +1118,14 @@ msgstr "Para sa channel na ito lang"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Ikaw lang ang makakakita. Hindi makikita ng iba ang buong bio o mga detalye ng profile ng personang ito."
+
+#. Persona setting "Allow mentions by": only the persona owner's account gets it in mention and search suggestions
+msgid "Only you"
+msgstr "Ikaw lang"
+
+#. Helper text under "Allow mentions by" when Only you is chosen
+msgid "Only your account finds it when typing @ or searching."
+msgstr "Ang account mo lang ang nakakahanap nito kapag nag-type ng @ o naghanap."
 
 #. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
 msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
@@ -1930,6 +1994,10 @@ msgstr "Kung saan tinatandaan ang persona mo"
 #. Question over the personas a member of the import file might be. {name} is the member
 msgid "Which persona is {name}?"
 msgstr "Aling persona si {name}?"
+
+#. Aria label for the persona "Allow mentions by" tabs
+msgid "Who gets this persona in mention suggestions"
+msgstr "Sino ang nakakakita sa personang ito sa mga mungkahi ng mention"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"

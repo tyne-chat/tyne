@@ -120,6 +120,21 @@ msgstr "Tất cả nền tảng"
 msgid "All time zones"
 msgstr "Tất cả múi giờ"
 
+msgid "Allow mentions by"
+msgstr "Ai có thể nhắc đến"
+
+#. Menu item under the persona selection bar’s Mentions button.
+msgid "Allow mentions by everyone"
+msgstr "Cho phép mọi người nhắc đến"
+
+#. Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).
+msgid "Allow mentions by nobody"
+msgstr "Không cho ai nhắc đến"
+
+#. Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.
+msgid "Allow mentions only by you"
+msgstr "Chỉ cho phép bạn nhắc đến"
+
 #. Heading of the QR code box on the download page.
 msgid "Also on your phone"
 msgstr "Có cả trên điện thoại"
@@ -131,6 +146,10 @@ msgstr "Một lệnh khác hoặc một lệnh có sẵn đã dùng tên này."
 #. Under the AppImage download button: it works on every other Linux distribution.
 msgid "Any other Linux"
 msgstr "Mọi bản Linux khác"
+
+#. Helper text under "Allow mentions by" when Everyone is chosen
+msgid "Anyone can find this persona when typing @ or searching."
+msgstr "Bất kỳ ai cũng tìm thấy persona này khi gõ @ hoặc tìm kiếm."
 
 #. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
 msgid "Apple silicon (M1 or newer)"
@@ -602,6 +621,15 @@ msgstr "Fedora, openSUSE"
 msgid "Filter by visibility"
 msgstr "Lọc theo chế độ hiển thị"
 
+#. Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.
+#. Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again
+msgid "Follow Visibility"
+msgstr "Theo Độ rõ"
+
+#. Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone
+msgid "Follows Visibility until you choose."
+msgstr "Theo Độ rõ cho đến khi bạn chọn."
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "Xem trước định dạng"
@@ -816,6 +844,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Để nguyên đã xóa"
 
+#. Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people's personas. Visibility is the setting above it
+msgid "Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility."
+msgstr "Không có trong gợi ý @ và bộ lọc tìm kiếm, kể cả của bạn. Persona vẫn có thể nói, và hồ sơ của nó theo Độ rõ."
+
 #. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
 msgid "Left out, since you can no longer post there: {chats}"
 msgstr "Bỏ qua vì bạn không thể đăng ở đó nữa: {chats}"
@@ -882,6 +914,22 @@ msgstr "Thành viên #{index}"
 
 msgid "Members with Avatars"
 msgstr "Thành viên có ảnh đại diện"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone"
+msgstr "{count, plural, other {Giờ mọi người có thể nhắc đến # persona}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody"
+msgstr "{count, plural, other {Giờ không ai có thể nhắc đến # persona}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you"
+msgstr "{count, plural, other {Giờ chỉ bạn có thể nhắc đến # persona}}"
+
+#. Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility"
+msgstr "{count, plural, other {Việc nhắc đến # persona giờ theo Độ rõ}}"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -1007,6 +1055,14 @@ msgstr "Không có thẻ: sẽ thêm mà không có thẻ"
 msgid "No tags"
 msgstr "Không có thẻ"
 
+#. Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner
+msgid "Nobody"
+msgstr "Không ai"
+
+#. Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.
+msgid "Nobody gets this persona in mention suggestions"
+msgstr "Không ai thấy persona này trong gợi ý nhắc đến"
+
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Chưa ai bật tín hiệu này"
@@ -1062,6 +1118,14 @@ msgstr "Chỉ cho kênh này"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Chỉ bạn nhìn thấy. Người khác không thể xem tiểu sử đầy đủ hay chi tiết hồ sơ của persona này."
+
+#. Persona setting "Allow mentions by": only the persona owner's account gets it in mention and search suggestions
+msgid "Only you"
+msgstr "Chỉ bạn"
+
+#. Helper text under "Allow mentions by" when Only you is chosen
+msgid "Only your account finds it when typing @ or searching."
+msgstr "Chỉ tài khoản của bạn tìm thấy nó khi gõ @ hoặc tìm kiếm."
 
 #. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
 msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
@@ -1930,6 +1994,10 @@ msgstr "Nơi ghi nhớ persona của bạn"
 #. Question over the personas a member of the import file might be. {name} is the member
 msgid "Which persona is {name}?"
 msgstr "{name} là persona nào?"
+
+#. Aria label for the persona "Allow mentions by" tabs
+msgid "Who gets this persona in mention suggestions"
+msgstr "Ai thấy persona này trong gợi ý nhắc đến"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"

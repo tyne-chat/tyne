@@ -120,6 +120,21 @@ msgstr "Todas las plataformas"
 msgid "All time zones"
 msgstr "Todas las zonas horarias"
 
+msgid "Allow mentions by"
+msgstr "Quién puede mencionar"
+
+#. Menu item under the persona selection bar’s Mentions button.
+msgid "Allow mentions by everyone"
+msgstr "Permitir menciones de todos"
+
+#. Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).
+msgid "Allow mentions by nobody"
+msgstr "No permitir menciones de nadie"
+
+#. Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.
+msgid "Allow mentions only by you"
+msgstr "Permitir menciones solo de ti"
+
 #. Heading of the QR code box on the download page.
 msgid "Also on your phone"
 msgstr "También en tu celular"
@@ -131,6 +146,10 @@ msgstr "Otro comando o un comando integrado ya tiene este nombre."
 #. Under the AppImage download button: it works on every other Linux distribution.
 msgid "Any other Linux"
 msgstr "Cualquier otro Linux"
+
+#. Helper text under "Allow mentions by" when Everyone is chosen
+msgid "Anyone can find this persona when typing @ or searching."
+msgstr "Cualquiera puede encontrar esta persona al escribir @ o al buscar."
 
 #. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
 msgid "Apple silicon (M1 or newer)"
@@ -602,6 +621,15 @@ msgstr "Fedora, openSUSE"
 msgid "Filter by visibility"
 msgstr "Filtrar por visibilidad"
 
+#. Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.
+#. Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again
+msgid "Follow Visibility"
+msgstr "Seguir la visibilidad"
+
+#. Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone
+msgid "Follows Visibility until you choose."
+msgstr "Sigue la visibilidad hasta que elijas."
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "Vista previa del formato"
@@ -816,6 +844,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Dejar eliminada"
 
+#. Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people's personas. Visibility is the setting above it
+msgid "Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility."
+msgstr "Excluida de las sugerencias de @ y de los filtros de búsqueda, también de los tuyos. Puede seguir hablando y su perfil sigue la visibilidad."
+
 #. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
 msgid "Left out, since you can no longer post there: {chats}"
 msgstr "Se omitieron porque ya no puedes escribir ahí: {chats}"
@@ -882,6 +914,22 @@ msgstr "Miembro n.º {index}"
 
 msgid "Members with Avatars"
 msgstr "Miembros con avatar"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone"
+msgstr "Ahora todos pueden mencionar {count, plural, one {# persona} other {# personas}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody"
+msgstr "Ahora nadie puede mencionar {count, plural, one {# persona} other {# personas}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you"
+msgstr "Ahora solo tú puedes mencionar {count, plural, one {# persona} other {# personas}}"
+
+#. Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility"
+msgstr "Las menciones de {count, plural, one {# persona} other {# personas}} ahora siguen la visibilidad"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -1007,6 +1055,14 @@ msgstr "Sin etiqueta: se agrega sin ninguna"
 msgid "No tags"
 msgstr "Sin etiquetas"
 
+#. Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner
+msgid "Nobody"
+msgstr "Nadie"
+
+#. Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.
+msgid "Nobody gets this persona in mention suggestions"
+msgstr "Nadie ve esta persona en las sugerencias de menciones"
+
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Nadie tiene esta señal activada"
@@ -1062,6 +1118,14 @@ msgstr "Solo para este canal"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Solo visible para ti. Los demás no pueden ver la biografía completa ni los detalles del perfil de esta persona."
+
+#. Persona setting "Allow mentions by": only the persona owner's account gets it in mention and search suggestions
+msgid "Only you"
+msgstr "Solo tú"
+
+#. Helper text under "Allow mentions by" when Only you is chosen
+msgid "Only your account finds it when typing @ or searching."
+msgstr "Solo tu cuenta la encuentra al escribir @ o al buscar."
 
 #. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
 msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
@@ -1930,6 +1994,10 @@ msgstr "Dónde se recuerda tu persona"
 #. Question over the personas a member of the import file might be. {name} is the member
 msgid "Which persona is {name}?"
 msgstr "¿Qué persona es {name}?"
+
+#. Aria label for the persona "Allow mentions by" tabs
+msgid "Who gets this persona in mention suggestions"
+msgstr "Quién ve esta persona en las sugerencias de menciones"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"

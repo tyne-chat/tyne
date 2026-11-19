@@ -120,6 +120,21 @@ msgstr "모든 플랫폼"
 msgid "All time zones"
 msgstr "모든 시간대"
 
+msgid "Allow mentions by"
+msgstr "멘션 허용 대상"
+
+#. Menu item under the persona selection bar’s Mentions button.
+msgid "Allow mentions by everyone"
+msgstr "모든 사람에게 멘션 허용"
+
+#. Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).
+msgid "Allow mentions by nobody"
+msgstr "아무에게도 멘션 허용 안 함"
+
+#. Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.
+msgid "Allow mentions only by you"
+msgstr "나에게만 멘션 허용"
+
 #. Heading of the QR code box on the download page.
 msgid "Also on your phone"
 msgstr "휴대폰에서도"
@@ -131,6 +146,10 @@ msgstr "다른 명령 또는 기본 제공 명령이 이미 이 이름을 사용
 #. Under the AppImage download button: it works on every other Linux distribution.
 msgid "Any other Linux"
 msgstr "그 밖의 모든 Linux"
+
+#. Helper text under "Allow mentions by" when Everyone is chosen
+msgid "Anyone can find this persona when typing @ or searching."
+msgstr "누구나 @를 입력하거나 검색할 때 이 페르소나를 찾을 수 있어요."
 
 #. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
 msgid "Apple silicon (M1 or newer)"
@@ -602,6 +621,15 @@ msgstr "Fedora, openSUSE"
 msgid "Filter by visibility"
 msgstr "공개 범위로 필터"
 
+#. Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.
+#. Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again
+msgid "Follow Visibility"
+msgstr "공개 범위 따르기"
+
+#. Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone
+msgid "Follows Visibility until you choose."
+msgstr "직접 선택하기 전까지 공개 범위를 따라요."
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "형식 미리보기"
@@ -816,6 +844,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "삭제된 채로 두기"
 
+#. Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people's personas. Visibility is the setting above it
+msgid "Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility."
+msgstr "내 것을 포함해 @ 추천과 검색 필터에서 제외돼요. 여전히 말할 수 있고, 프로필은 공개 범위를 따라요."
+
 #. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
 msgid "Left out, since you can no longer post there: {chats}"
 msgstr "더 이상 글을 올릴 수 없어 제외됨: {chats}"
@@ -882,6 +914,22 @@ msgstr "멤버 #{index}"
 
 msgid "Members with Avatars"
 msgstr "아바타가 있는 멤버"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone"
+msgstr "{count, plural, other {이제 모든 사람이 페르소나 #개를 멘션할 수 있음}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody"
+msgstr "{count, plural, other {이제 아무도 페르소나 #개를 멘션할 수 없음}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you"
+msgstr "{count, plural, other {이제 나만 페르소나 #개를 멘션할 수 있음}}"
+
+#. Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility"
+msgstr "{count, plural, other {페르소나 #개의 멘션이 이제 공개 범위를 따름}}"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -1007,6 +1055,14 @@ msgstr "태그 없음: 태그 없이 추가돼요"
 msgid "No tags"
 msgstr "태그 없음"
 
+#. Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner
+msgid "Nobody"
+msgstr "아무도 없음"
+
+#. Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.
+msgid "Nobody gets this persona in mention suggestions"
+msgstr "아무에게도 멘션 추천에 이 페르소나가 표시되지 않음"
+
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "이 시그널을 켠 사람이 없어요"
@@ -1062,6 +1118,14 @@ msgstr "이 채널에서만"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "나에게만 보여요. 다른 사람은 이 페르소나의 전체 소개나 프로필 세부 정보를 볼 수 없어요."
+
+#. Persona setting "Allow mentions by": only the persona owner's account gets it in mention and search suggestions
+msgid "Only you"
+msgstr "나만"
+
+#. Helper text under "Allow mentions by" when Only you is chosen
+msgid "Only your account finds it when typing @ or searching."
+msgstr "@를 입력하거나 검색할 때 내 계정에서만 찾을 수 있어요."
 
 #. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
 msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
@@ -1930,6 +1994,10 @@ msgstr "페르소나를 기억하는 범위"
 #. Question over the personas a member of the import file might be. {name} is the member
 msgid "Which persona is {name}?"
 msgstr "{name}은(는) 어떤 페르소나인가요?"
+
+#. Aria label for the persona "Allow mentions by" tabs
+msgid "Who gets this persona in mention suggestions"
+msgstr "멘션 추천에 이 페르소나가 표시되는 대상"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"

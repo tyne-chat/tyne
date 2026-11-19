@@ -436,6 +436,66 @@ describe('the requests useAutocompletePersonaSearch sends', () => {
 		expect(requests).toHaveLength(2);
 	});
 
+	// tyne-chat/tyne#652: when everyone's personas are set to nobody, the channel's list is empty.
+	it('sends nothing more while a fresh cache holds the whole list, even when nothing matches', async () => {
+		type('');
+		await wait(0);
+		await settle(() => requests[0]?.answer([]));
+
+		type('l');
+		await wait(60);
+		type('ly');
+		await wait(60);
+		type('');
+		await wait(60);
+		expect(requests).toHaveLength(1);
+		expect(latest).toEqual([]);
+
+		await wait(15 * 60 * 1000);
+		type('ly');
+		await wait(60);
+		expect(requests.map((request) => request.q)).toEqual(['', 'ly']);
+	});
+
+	it('shows no match from a fresh whole list at once, instead of keeping the last results', async () => {
+		type('');
+		await wait(0);
+		await settle(() => requests[0]?.answer([ALICE]));
+
+		type('a');
+		await wait(60);
+		expect(latest.map((item) => item.id)).toEqual([ALICE.id]);
+		type('ax');
+		await wait(60);
+		expect(latest).toEqual([]);
+		expect(requests).toHaveLength(1);
+	});
+
+	it('does not carry an expired whole list into the next answer', async () => {
+		type('');
+		await wait(0);
+		await settle(() => requests[0]?.answer([ALICE]));
+
+		await wait(15 * 60 * 1000 + 1);
+		type('bo');
+		await wait(60);
+		await settle(() => requests[1]?.answer([BOB]));
+
+		type('zed');
+		await wait(60);
+		expect(requests.map((request) => request.q)).toEqual(['', 'bo', 'zed']);
+	});
+
+	it('takes a whole list only from an answer without a query that came back under the limit', async () => {
+		type('ali');
+		await wait(60);
+		await settle(() => requests[0]?.answer([ALICE]));
+
+		type('zed');
+		await wait(60);
+		expect(requests.map((request) => request.q)).toEqual(['ali', 'zed']);
+	});
+
 	it('does not share overlapping requests, and drops the late answer to an older query', async () => {
 		type('a');
 		await wait(60);
