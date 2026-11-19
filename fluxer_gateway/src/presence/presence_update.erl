@@ -127,7 +127,10 @@ handle_message_create_event(Data, State) ->
 
 -spec route_unread_push_notification(map(), map(), state()) -> state().
 route_unread_push_notification(Data, Params, State) ->
-    ChannelId = extract_snowflake(<<"channel_id">>, Data),
+    %% Fork: a DM thread's message is read in the thread (tyne-chat/tyne#699).
+    ChannelId = fork_dm_thread_push:read_channel_id(
+        Data, extract_snowflake(<<"channel_id">>, Data)
+    ),
     MessageId = extract_snowflake(<<"id">>, Data),
     ReadMarks = maps:get(push_read_marks, State, #{}),
     Read = is_integer(MessageId) andalso MessageId =< maps:get(ChannelId, ReadMarks, 0),
@@ -138,7 +141,10 @@ route_unread_push_notification(Data, Params, State) ->
 
 -spec ack_own_message(map(), state()) -> state().
 ack_own_message(Data, State) ->
-    ChannelId = extract_snowflake(<<"channel_id">>, Data),
+    %% Fork: a DM thread's message is read in the thread (tyne-chat/tyne#699).
+    ChannelId = fork_dm_thread_push:read_channel_id(
+        Data, extract_snowflake(<<"channel_id">>, Data)
+    ),
     MessageId = extract_snowflake(<<"id">>, Data),
     maybe_ack_push_buffer(ChannelId, MessageId, State).
 
@@ -398,7 +404,10 @@ should_drop_buffer_entry(Entry, ChannelId, MessageId) ->
 -spec make_push_buffer_entry(map()) -> push_buffer_entry() | undefined.
 make_push_buffer_entry(Params) ->
     MessageData = maps:get(message_data, Params, #{}),
-    ChannelId = extract_snowflake(<<"channel_id">>, MessageData),
+    %% Fork: a DM thread's message is read in the thread (tyne-chat/tyne#699).
+    ChannelId = fork_dm_thread_push:read_channel_id(
+        MessageData, extract_snowflake(<<"channel_id">>, MessageData)
+    ),
     MessageId = extract_snowflake(<<"id">>, MessageData),
     build_buffer_entry(ChannelId, MessageId, Params).
 

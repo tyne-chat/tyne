@@ -186,7 +186,7 @@ function handleReadyInternal(data: ReadyPayload, context: GatewayHandlerContext,
 	ThreadGuilds.handleGatewayReady(guilds);
 	Channels.handleGatewayReady({channels});
 	ChannelThreads.handleGatewayReady(guilds);
-	hydrateDmThreadsFromReady(data);
+	hydrateDmThreadsFromReady(data, accountKey);
 	ThreadSubscriptions.handleConnectionReady();
 	ForumPosts.handleGatewayReady();
 	ForumReadState.handleGatewayReady();

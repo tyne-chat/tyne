@@ -10,16 +10,23 @@
 // - TYNE_DM_THREADS decides who may start one: unset or empty for nobody, "all" for everyone, else a comma list of
 //   user ids. Threads that exist show for everyone whose app supports them.
 
-import {type ChannelID, createChannelID, type UserID} from '@app/api/BrandedTypes';
+import {type ChannelID, createChannelID, type MessageID, type UserID} from '@app/api/BrandedTypes';
 import type {ChannelRepository} from '@app/api/channel/ChannelRepository';
 import type {AuthenticatedChannel, AuthenticatedThread} from '@app/api/channel/services/AuthenticatedChannel';
 import type {BaseChannelAuthService} from '@app/api/channel/services/BaseChannelAuthService';
-import {isDmThreadGuildKey, isDmThreadState} from '@app/api/channel/services/thread/ForkDmThreadKeys';
+import {DMPermissionValidator} from '@app/api/channel/services/DMPermissionValidator';
+import {
+	isDmThreadChannel,
+	isDmThreadGuildKey,
+	isDmThreadState,
+} from '@app/api/channel/services/thread/ForkDmThreadKeys';
+import {seesDmThreads} from '@app/api/channel/services/thread/ForkDmThreadViewer';
 import {assertThreadAllowed} from '@app/api/channel/services/thread/ThreadDenials';
 import {SYSTEM_USER_ID} from '@app/api/constants/Core';
 import type {GatewayDispatchEvent} from '@app/api/constants/Gateway';
+import type {ThreadViewer} from '@app/api/experiment/ChannelThreadsGate';
 import type {IGatewayService} from '@app/api/infrastructure/IGatewayService';
-import {getChannelRepository} from '@app/api/middleware/ServiceSingletons';
+import {getChannelRepository, getGuildRepository, getUserRepository} from '@app/api/middleware/ServiceSingletons';
 import type {Channel} from '@app/api/models/Channel';
 import type {ThreadMember} from '@app/api/models/ThreadMember';
 import type {User} from '@app/api/models/User';
@@ -81,6 +88,34 @@ function isGroupOwner(parent: Channel, userId: UserID): boolean {
 
 export function dmThreadParentActor(parent: Channel, userId: UserID): ThreadActor {
 	return {permissions: DM_THREAD_PERMISSIONS, isOwner: isGroupOwner(parent, userId), timedOut: false};
+}
+
+// The channel whose DM rules apply: a DM thread's parent (who may write, blocks, new-conversation limits, its
+// people), any other channel itself. A DM thread's own row has no recipients, so upstream's DM checks on it fail
+// or find nobody (Gemini Carbon's review of tyne-chat/tyne#699).
+export function dmRulesChannel(authChannel: Pick<AuthenticatedChannel, 'channel' | 'guild' | 'thread'>): Channel {
+	if (authChannel.guild || !authChannel.thread || !isDmThreadChannel(authChannel.channel)) return authChannel.channel;
+	return authChannel.thread.parent;
+}
+
+// The same for a channel alone: a DM thread's parent DM, loaded; any other channel itself.
+export async function dmRulesChannelOf(channel: Channel): Promise<Channel> {
+	if (!isDmThreadChannel(channel)) return channel;
+	return (await loadDmThreadParent(getChannelRepository(), channel)) ?? channel;
+}
+
+// Search hits in DM threads the viewer may see: an app that knows DM threads, and a recipient of the parent DM.
+// Upstream's search mapper keeps only threads with a guild (Gemini Carbon's review of tyne-chat/tyne#699).
+export async function searchableDmThreads(
+	channels: ReadonlyArray<Channel | null>,
+	userId: UserID,
+	viewer: ThreadViewer,
+): Promise<Array<Channel>> {
+	const threads = channels.filter((channel): channel is Channel => channel !== null && isDmThreadChannel(channel));
+	if (threads.length === 0 || !seesDmThreads(viewer, null)) return [];
+	const channelRepository = getChannelRepository();
+	const parents = await Promise.all(threads.map((thread) => loadDmThreadParent(channelRepository, thread)));
+	return threads.filter((_, i) => parents[i]?.recipientIds.has(userId) === true);
 }
 
 // Access to a DM thread: a recipient of its parent, as for the parent itself.
@@ -168,6 +203,25 @@ export function assertDmThreadPatchAllowed(patch: ThreadPatch, thread: Authentic
 	if (patch.rate_limit_per_user !== undefined || patch.flags !== undefined) throw new MissingPermissionsError();
 }
 
+// In a 1:1 DM, renaming or reopening a thread writes to the other person, so the DM's rules apply: not once either
+// has blocked the other. Closing one stays allowed, so someone who blocked can still close it (Gemini Carbon's
+// review of tyne-chat/tyne#699).
+export async function assertDmThreadWriteAllowed(
+	patch: ThreadPatch,
+	thread: AuthenticatedThread,
+	userId: UserID,
+): Promise<void> {
+	if (!isDmThreadState(thread.state) || thread.parent.type !== ChannelTypes.DM) return;
+	if (patch.name === undefined && !(patch.archived === false && thread.state.archived)) return;
+	const other = [...thread.parent.recipientIds].find((id) => id !== userId);
+	if (other === undefined) return;
+	const validator = new DMPermissionValidator({
+		userRepository: getUserRepository(),
+		guildRepository: getGuildRepository(),
+	});
+	await validator.validate({senderId: userId, recipientId: other});
+}
+
 // Deleting a DM thread deletes everyone's messages in it. A group DM's owner may; in a 1:1 DM the starter may
 // while nobody else has written in it, as each person may delete only their own messages in a DM.
 export async function assertDmThreadDeleteAllowed({
@@ -188,6 +242,33 @@ export async function assertDmThreadDeleteAllowed({
 		(member) => member.userId !== userId && (member.flags & ThreadMemberFlags.HAS_INTERACTED) !== 0,
 	);
 	if (othersWrote) throw new MissingPermissionsError();
+	// Someone who left the thread has no member row, so nothing records that they wrote: the messages do (Gemini
+	// Carbon's review).
+	const othersLeft = dmThreadParticipantIds(thread.parent).some(
+		(id) => id !== userId && !members.some((member) => member.userId === id),
+	);
+	if (othersLeft && (await someoneElseWrote(channelRepository, channel.id, userId)))
+		throw new MissingPermissionsError();
+}
+
+const WROTE_PAGE = 100;
+const WROTE_PAGES = 20;
+
+// Whether anyone but `userId` wrote in the thread; past the pages read, assume so.
+async function someoneElseWrote(
+	channelRepository: ChannelRepository,
+	channelId: ChannelID,
+	userId: UserID,
+): Promise<boolean> {
+	let before: MessageID | undefined;
+	for (let page = 0; page < WROTE_PAGES; page++) {
+		const messages = await channelRepository.messages.listMessages(channelId, before, WROTE_PAGE);
+		if (messages.some((m) => m.authorId !== null && m.authorId !== userId && m.authorId !== SYSTEM_USER_ID))
+			return true;
+		if (messages.length < WROTE_PAGE) return false;
+		before = messages[messages.length - 1].id;
+	}
+	return true;
 }
 
 function isMutedNow(member: ThreadMember, now: number): boolean {
@@ -373,6 +454,10 @@ export async function dispatchDmThreadChannelEvent({
 				channel_type: parent.type,
 				fork_thread_id: channel.id.toString(),
 				fork_thread_name: channel.name ?? '',
+				// The push title's part in brackets, as the web app words it: "Thread, Group" in a named group DM.
+				fork_thread_context: [channel.name, parent.type === ChannelTypes.GROUP_DM ? parent.name : null]
+					.filter((part): part is string => part != null && part !== '')
+					.join(', '),
 			},
 		};
 	}
