@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {PersonaMentionableBySchema} from '@fluxer/schema/src/domains/persona/PersonaMentionableBy';
 import {PERSONA_ALIAS_MAX_LENGTH, PERSONA_ALIASES_MAX} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import {withBase64Binary} from '@fluxer/schema/src/primitives/Base64BinaryFields';
 import {QueryBooleanType} from '@fluxer/schema/src/primitives/QueryValidators';
@@ -78,6 +79,9 @@ export const PersonaResponseSchema = z.object({
 	use_count: z.number().int().default(0).describe('Usage counter for frecency ranking'),
 	last_used_at_ms: z.string().nullish().describe('Timestamp in ms when the persona was last used'),
 	visibility: PersonaVisibilitySchema.describe('Visibility setting: unlisted (default), public, or private'),
+	mentionable_by: PersonaMentionableBySchema.nullish().describe(
+		'Who gets the persona in mention and search suggestions: everyone, only you (self) or nobody. Null until chosen: it then follows visibility (private: self, otherwise everyone)',
+	),
 	external_uuid: z.string().nullish().describe('External UUID for idempotent PluralKit imports'),
 	created_at: z.string().describe('ISO timestamp of persona creation'),
 	updated_at: z.string().describe('ISO timestamp of last update'),
@@ -132,6 +136,22 @@ export const PersonaVisibilityBulkRequestSchema = z.object({
 		.describe('The personas to change, each with its new visibility'),
 });
 
+/** Many mention setting changes in one request (tyne-chat/tyne#652); each persona names its own, so an undo is one request too. */
+export const PersonaMentionableByBulkRequestSchema = z.object({
+	personas: z
+		.array(
+			z.object({
+				id: SnowflakeStringType.describe('The ID of one of your personas'),
+				mentionable_by: PersonaMentionableBySchema.nullable().describe(
+					'Who gets it in mention and search suggestions; null to follow its visibility again',
+				),
+			}),
+		)
+		.min(1)
+		.max(250)
+		.describe('The personas to change, each with its new setting'),
+});
+
 /** Many deletions in one request (tyne-chat/tyne#542). */
 export const PersonaBulkDeleteRequestSchema = z.object({
 	persona_ids: z.array(SnowflakeStringType).min(1).max(250).describe('The IDs of the personas to delete'),
@@ -168,6 +188,9 @@ export const PersonaCreateRequestSchema = z.object({
 		.optional()
 		.describe('Signature emojis for this persona'),
 	visibility: PersonaVisibilitySchema.optional().describe('Visibility: unlisted (default), public, or private'),
+	mentionable_by: PersonaMentionableBySchema.nullish().describe(
+		'Who gets the persona in mention and search suggestions: everyone, self or nobody. Leave it out or null to follow its visibility',
+	),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID (e.g. PluralKit)'),
 });
 export type PersonaCreateRequest = z.infer<typeof PersonaCreateRequestSchema>;
@@ -195,6 +218,9 @@ export const PersonaUpdateRequestSchema = z.object({
 		.optional()
 		.describe('Signature emojis for this persona'),
 	visibility: z.enum(['unlisted', 'public', 'private']).optional().describe('Visibility setting'),
+	mentionable_by: PersonaMentionableBySchema.nullish().describe(
+		'Who gets the persona in mention and search suggestions: everyone, self or nobody; null to follow its visibility again. Leave it out to keep the stored one',
+	),
 	external_uuid: z.string().max(64).nullish().optional().describe('Optional external UUID'),
 });
 export type PersonaUpdateRequest = z.infer<typeof PersonaUpdateRequestSchema>;

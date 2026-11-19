@@ -16,6 +16,7 @@ import {
 	PersonaImportImageResponse,
 	PersonaImportQuerySchema,
 	PersonaListResponseSchema,
+	PersonaMentionableByBulkRequestSchema,
 	PersonaResponseSchema,
 	PersonaSettingsResponseSchema,
 	PersonaSettingsUpdateRequestSchema,
@@ -249,6 +250,37 @@ export function PersonaController(app: HonoApp) {
 			const changed = await ctx.get('personaService').setPersonaVisibilities(
 				user.id,
 				personas.map(({id, visibility}) => ({personaId: createPersonaID(BigInt(id)), visibility})),
+			);
+			return ctx.json(changed.map((p) => p.toResponse()));
+		},
+	);
+
+	app.patch(
+		'/users/@me/personas/mentions',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaMentionableByBulkRequestSchema),
+		OpenAPI({
+			operationId: 'set_persona_mentionable_by',
+			summary: 'Change who gets several personas in mention suggestions',
+			responseSchema: PersonaListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Gives each named persona its own mention setting (everyone, self, nobody, or null to follow its visibility), in one write: if one of them is not yours or is deleted, nothing changes. Returns the personas that changed.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {personas} = ctx.req.valid('json');
+			const changed = await ctx.get('personaService').setPersonaMentionableBy(
+				user.id,
+				personas.map(({id, mentionable_by}) => ({
+					personaId: createPersonaID(BigInt(id)),
+					mentionableBy: mentionable_by,
+				})),
 			);
 			return ctx.json(changed.map((p) => p.toResponse()));
 		},
