@@ -13,8 +13,10 @@ import type {
 	PersonaResponse,
 	PersonaSettingsResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {PersonaGroupsUpdateEvent} from '@fluxer/schema/src/domains/persona/PersonaGroupSchemas';
 import {forgetPersonaProfilesOf} from '../commands/PersonaCommands';
 import {PersonaDirectory} from '../state/PersonaDirectory';
+import {PersonaGroups} from '../state/PersonaGroups';
 import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 import {applyPersonaUpdate, requestPersonaRefresh} from './PersonaRefresh';
 
@@ -85,6 +87,14 @@ export function handleUserPersonaSettingsUpdate(
 			});
 		}
 	}
+}
+
+/** The account's persona groups changed (tyne-chat/tyne#829): the event carries the whole list. */
+export function handleUserPersonaGroupsUpdate(
+	data: Partial<PersonaGroupsUpdateEvent> | undefined,
+	_context: GatewayHandlerContext,
+): void {
+	if (Array.isArray(data?.groups)) PersonaGroups.setGroups(data.groups);
 }
 
 /** Another session of this account selected a persona in a channel, or the server cleared one. */

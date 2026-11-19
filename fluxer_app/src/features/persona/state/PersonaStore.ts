@@ -31,6 +31,7 @@ import type {
 } from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {msg} from '@lingui/core/macro';
 import {makeAutoObservable, observable, runInAction} from 'mobx';
+import {PersonaGroups} from './PersonaGroups';
 import {PersonaLookupBatcher, type PersonaLookupPair} from './PersonaLookupBatcher';
 
 const DISPLAY_TAG_UPDATE_FAILED_DESCRIPTOR = msg`Failed to update display tag`;
@@ -166,6 +167,7 @@ export class PersonaStoreClass {
 			this._knownPersonaOwners.clear();
 		});
 		personaLookups.reset();
+		PersonaGroups.reset();
 	}
 
 	get personas(): ReadonlyArray<ClientPersona> {

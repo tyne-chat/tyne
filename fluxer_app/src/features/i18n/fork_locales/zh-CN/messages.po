@@ -69,6 +69,11 @@ msgstr "添加计数器"
 msgid "Add signal"
 msgstr "添加信号"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "添加到分组"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "添加 {name}"
@@ -300,6 +305,10 @@ msgstr "无法运行 /{name}：{detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "无法保存 /{name}：{detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "无法更改分组。请重试。"
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "无法更改这些人格。请重试。"
@@ -328,6 +337,10 @@ msgstr "创建命令"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "为此社区创建命令，并编辑或删除自己的命令。"
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "创建分组"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "创建者：{name}"
@@ -351,9 +364,17 @@ msgstr "删除人格"
 msgid "Delete command"
 msgstr "删除命令"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "删除分组"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "删除人格"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "要删除分组“{name}”吗？其中的人格会保留。"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "获取 Tyne 应用"
 msgid "Gets overwritten"
 msgstr "将被覆盖"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "分组名称"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "分组"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "以下是更改内容"
@@ -886,6 +916,15 @@ msgstr "新建人格"
 msgid "New command"
 msgstr "新建命令"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "新建分组"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "新建分组…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "来自你文件的新人格。"
@@ -992,6 +1031,10 @@ msgstr "你没有在任何地方开启信号。"
 msgid "Not imported"
 msgstr "不导入"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "未分组"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "不确定？保持原样即可：不会有任何变化。"
@@ -1053,6 +1096,10 @@ msgstr "打开下载的文件。"
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "可选"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "{name} 的选项"
 
 msgid "Other names for finding this persona"
 msgstr "用来找到此人格的其他名称"
@@ -1281,6 +1328,11 @@ msgstr "删除别名"
 msgid "Remove counter"
 msgstr "移除计数器"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "移出分组"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "移除专属表情符号"
@@ -1288,6 +1340,10 @@ msgstr "移除专属表情符号"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "移除标签对"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "重命名分组"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "搜索你的人格"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "搜索 {name} 的人格"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "选择 {name} 中的全部"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "选择其中的人格"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"

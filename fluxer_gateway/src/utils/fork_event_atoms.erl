@@ -10,5 +10,7 @@
 event_map() ->
     #{
         %% tyne-chat/tyne#699: every event about a thread in a DM, wrapped as {t, d}.
-        <<"FORK_DM_THREAD_EVENT">> => fork_dm_thread_event
+        <<"FORK_DM_THREAD_EVENT">> => fork_dm_thread_event,
+        %% tyne-chat/tyne#829: the account's persona groups changed, to its own sessions only.
+        <<"USER_PERSONA_GROUPS_UPDATE">> => user_persona_groups_update
     }.

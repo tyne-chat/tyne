@@ -69,6 +69,11 @@ msgstr "Thêm bộ đếm"
 msgid "Add signal"
 msgstr "Thêm tín hiệu"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "Thêm vào nhóm"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "Thêm {name}"
@@ -300,6 +305,10 @@ msgstr "Không thể chạy /{name}: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Không thể lưu /{name}: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "Không thể thay đổi nhóm. Hãy thử lại."
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "Không thể thay đổi persona. Hãy thử lại."
@@ -328,6 +337,10 @@ msgstr "Tạo lệnh"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "Tạo lệnh cho cộng đồng này, và sửa hoặc xóa lệnh của bạn."
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "Tạo nhóm"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "Do {name} tạo"
@@ -351,9 +364,17 @@ msgstr "Xóa persona"
 msgid "Delete command"
 msgstr "Xóa lệnh"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "Xóa nhóm"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "Xóa persona"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "Xóa nhóm \"{name}\"? Các persona trong nhóm vẫn được giữ lại."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "Tải ứng dụng Tyne"
 msgid "Gets overwritten"
 msgstr "Bị ghi đè"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "Tên nhóm"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "Nhóm"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "Đây là những gì đã thay đổi"
@@ -886,6 +916,15 @@ msgstr "Persona mới"
 msgid "New command"
 msgstr "Lệnh mới"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "Nhóm mới"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "Nhóm mới…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "Persona mới từ tệp của bạn."
@@ -992,6 +1031,10 @@ msgstr "Không có tín hiệu nào của bạn đang bật ở bất kỳ đâu
 msgid "Not imported"
 msgstr "Không được nhập"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "Không thuộc nhóm nào"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Không chắc? Cứ để nguyên: không có gì thay đổi."
@@ -1053,6 +1096,10 @@ msgstr "Mở tệp bạn đã tải xuống."
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "Không bắt buộc"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "Tùy chọn cho {name}"
 
 msgid "Other names for finding this persona"
 msgstr "Các tên khác để tìm persona này"
@@ -1281,6 +1328,11 @@ msgstr "Xóa biệt danh"
 msgid "Remove counter"
 msgstr "Xóa bộ đếm"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "Xóa khỏi nhóm"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Xóa biểu tượng cảm xúc đặc trưng"
@@ -1288,6 +1340,10 @@ msgstr "Xóa biểu tượng cảm xúc đặc trưng"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "Xóa cặp thẻ"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "Đổi tên nhóm"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "Tìm persona của bạn"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "Tìm persona của {name}"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "Chọn tất cả trong {name}"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "Chọn các persona trong nhóm"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"

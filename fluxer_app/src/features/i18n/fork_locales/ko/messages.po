@@ -69,6 +69,11 @@ msgstr "카운터 추가"
 msgid "Add signal"
 msgstr "시그널 추가"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "그룹에 추가"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "{name} 추가"
@@ -300,6 +305,10 @@ msgstr "/{name}을(를) 실행할 수 없습니다: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name}을(를) 저장할 수 없습니다: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "그룹을 변경하지 못했습니다. 다시 시도해 주세요."
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "페르소나를 변경하지 못했습니다. 다시 시도해 주세요."
@@ -328,6 +337,10 @@ msgstr "명령 만들기"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "이 커뮤니티의 명령을 만들고 내 명령을 수정하거나 삭제합니다."
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "그룹 만들기"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "만든 사람: {name}"
@@ -351,9 +364,17 @@ msgstr "페르소나 삭제"
 msgid "Delete command"
 msgstr "명령 삭제"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "그룹 삭제"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "페르소나 삭제"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "‘{name}’ 그룹을 삭제할까요? 그룹 안의 페르소나는 그대로 남습니다."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "Tyne 앱 받기"
 msgid "Gets overwritten"
 msgstr "덮어써져요"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "그룹 이름"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "그룹"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "변경된 내용"
@@ -886,6 +916,15 @@ msgstr "새 페르소나"
 msgid "New command"
 msgstr "새 명령"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "새 그룹"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "새 그룹…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "파일에서 가져온 새 페르소나예요."
@@ -992,6 +1031,10 @@ msgstr "어디에도 켜진 시그널이 없어요."
 msgid "Not imported"
 msgstr "가져오지 않아요"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "그룹 없음"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "잘 모르겠다면 그대로 두세요. 바뀌는 것은 없어요."
@@ -1053,6 +1096,10 @@ msgstr "다운로드한 파일을 여세요."
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "선택"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "{name} 옵션"
 
 msgid "Other names for finding this persona"
 msgstr "이 페르소나를 찾기 위한 다른 이름"
@@ -1281,6 +1328,11 @@ msgstr "별칭 삭제"
 msgid "Remove counter"
 msgstr "카운터 제거"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "그룹에서 빼기"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "시그니처 이모지 삭제"
@@ -1288,6 +1340,10 @@ msgstr "시그니처 이모지 삭제"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "태그 쌍 제거"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "그룹 이름 바꾸기"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "내 페르소나 검색"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "{name}님의 페르소나 검색"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "{name}의 모두 선택"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "그룹 안의 페르소나 선택"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"

@@ -186,7 +186,7 @@ The gateway's requests go to the API's `/internal/rpc`:
 | `guild/guild_connect_async.erl` | `upsert_pending_session/5` hands an existing entry to the appended fork block (`fork_upsert_existing/5`) | one line replaced, block appended |
 | `guild/guild_manager_shard_lifecycle.erl` | `start_transferred_guild/3` marks the carried-over sessions (`fork_guild_handoff:mark_carried_over/1`) | one call wrapped |
 | `session/session.erl` | `export_state` answers through `fork_session_handoff:export_and_forward/2` | one clause body |
-| `utils/fork_event_atoms.erl`, `utils/event_atoms.erl` | `FORK_DM_THREAD_EVENT`, the envelope of every event about a thread in a DM (tyne-chat/tyne#699); its map first in `known_event_map/0` | fork-owned; one line |
+| `utils/fork_event_atoms.erl`, `utils/event_atoms.erl` | `FORK_DM_THREAD_EVENT`, the envelope of every event about a thread in a DM (tyne-chat/tyne#699), and `USER_PERSONA_GROUPS_UPDATE` (tyne-chat/tyne#829); its map first in `known_event_map/0`. New fork events go here, not into upstream's maps | fork-owned; one line |
 | `push/fork_dm_thread_push.erl` | a DM-thread envelope's `push.message` is pushed as a message in the parent DM, titled "Author (Thread)", with `fork_thread_id` and `fork_thread_name` | fork-owned |
 | `presence/presence.erl`, `gateway/gateway_rpc_presence.erl`, `push/push_notification.erl`, `push/push_job_fields.erl` | hand the envelope's push message to upstream's DM push path (online, offline, unreachable), the title, the two fields | one clause each; one branch; one line |
 | `session/session_state_transfer.erl`, `session/session_manager_shard.erl` | a received state starts its session (`fork_session_transfer_start`) | one line; one clause |

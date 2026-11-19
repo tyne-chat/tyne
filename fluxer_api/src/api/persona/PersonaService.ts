@@ -18,6 +18,7 @@ import type {
 	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {MAX_SIGNATURE_EMOJIS_PER_PERSONA} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {PERSONA_GROUPS_MAX, type PersonaGroupResponse} from '@fluxer/schema/src/domains/persona/PersonaGroupSchemas';
 import type {
 	PersonaImportAction,
 	PersonaImportApplyRequest,
@@ -36,7 +37,7 @@ import {ownTyneMediaImageHash} from '@fluxer/schema/src/domains/persona/PluralKi
 import {type ChannelID, createPersonaID, type PersonaID, type UserID} from '../BrandedTypes';
 import {Config} from '../Config';
 import {SYSTEM_USER_ID} from '../constants/Core';
-import type {UserPersonaSettingsRow} from '../database/types/PersonaTypes';
+import type {PersonaGroupRow, UserPersonaSettingsRow} from '../database/types/PersonaTypes';
 import type {IGatewayService} from '../infrastructure/IGatewayService';
 import {profileSubstringBlocklistCache} from '../middleware/ProfileSubstringBlocklistCache';
 import type {Persona} from '../models/Persona';
@@ -47,6 +48,8 @@ import {isProfileSubstringExempt} from '../user/UserHelpers';
 import {
 	DuplicatePersonaTagError,
 	DuplicateSignatureEmojiError,
+	PersonaGroupLimitReachedError,
+	PersonaGroupNotFoundError,
 	PersonaImportConflictError,
 	PersonaLimitReachedError,
 	PersonaNotFoundError,
@@ -67,6 +70,14 @@ import {
 	loadPersonaChannelStates,
 	storePersonaChannelState,
 } from './PersonaChannelStateStore';
+import {
+	loadPersonaGroups,
+	personaGroupMemberIds,
+	toPersonaGroupResponse,
+	writePersonaGroupName,
+	writePersonaGroups,
+} from './PersonaGroupStore';
+import {generatePersonaId} from './PersonaIdGenerator';
 import {loadPersonaImageSources, personaImageSourcesWrite} from './PersonaImageSourceStore';
 import {planPersonaImport} from './PersonaImportPlanner';
 import {formatTagDisplay, getTagKey, normalizeTag} from './PersonaTagKeys';
@@ -1387,6 +1398,104 @@ export class PersonaService {
 		return state;
 	}
 
+	// Groups of the account's personas (tyne-chat/tyne#829). Only their owner sees them, so every
+	// change goes to the owner's own sessions alone, as the whole list, and to nobody else.
+
+	async getPersonaGroups(userId: UserID): Promise<Array<PersonaGroupResponse>> {
+		return (await loadPersonaGroups(userId)).map(toPersonaGroupResponse);
+	}
+
+	async createPersonaGroup(
+		userId: UserID,
+		name: string,
+		personaIds: ReadonlyArray<PersonaID> = [],
+	): Promise<PersonaGroupResponse> {
+		const groups = await loadPersonaGroups(userId);
+		// Two requests at the same moment can both pass this and end one over the limit; that is all.
+		if (groups.length >= PERSONA_GROUPS_MAX) throw new PersonaGroupLimitReachedError(PERSONA_GROUPS_MAX);
+		if (personaIds.length > 0) await this.liveByIds(userId, personaIds);
+		const row: PersonaGroupRow = {
+			user_id: userId,
+			// The persona ID generator, for the same reasons: nothing to learn from the low bits, and
+			// IDs that sort in the order the groups were made, which is the order they are listed in.
+			group_id: BigInt(await generatePersonaId()),
+			name,
+			persona_ids: JSON.stringify(Array.from(new Set(personaIds.map((id) => id.toString())))),
+			updated_at: new Date(),
+		};
+		await writePersonaGroups(userId, {upsert: [row]});
+		await this.dispatchGroupsToOwnSessions(userId);
+		return toPersonaGroupResponse(row);
+	}
+
+	async renamePersonaGroup(userId: UserID, groupId: bigint, name: string): Promise<PersonaGroupResponse> {
+		const groups = await loadPersonaGroups(userId);
+		const group = groups.find((row) => row.group_id.toString() === groupId.toString());
+		if (!group) throw new PersonaGroupNotFoundError();
+		// The name alone, so a rename never undoes a change to the members made at the same moment.
+		await writePersonaGroupName(userId, group.group_id, name);
+		const after = await this.dispatchGroupsToOwnSessions(userId);
+		const renamed = after.find((row) => row.group_id.toString() === groupId.toString());
+		return toPersonaGroupResponse(renamed ?? {...group, name});
+	}
+
+	/** Deletes the group alone: its personas stay as they are. */
+	async deletePersonaGroup(userId: UserID, groupId: bigint): Promise<void> {
+		const groups = await loadPersonaGroups(userId);
+		const group = groups.find((row) => row.group_id.toString() === groupId.toString());
+		if (!group) throw new PersonaGroupNotFoundError();
+		await writePersonaGroups(userId, {remove: [group.group_id]});
+		await this.dispatchGroupsToOwnSessions(userId);
+	}
+
+	/**
+	 * Puts personas in groups and takes them out, in one write: if a group is not the caller's, or a
+	 * persona to add is not the caller's and live, nothing changes. Taking out any ID is allowed, so
+	 * a deleted persona can leave its groups. A persona both added and taken out of a group ends up
+	 * in it. Returns every group.
+	 *
+	 * Each changed group's members are read, changed and written whole, so two changes to the same
+	 * group at the same moment can lose one; changes to different groups cannot. One owner's private
+	 * lists make that rare enough to accept.
+	 */
+	async changePersonaGroupMembers(
+		userId: UserID,
+		changes: ReadonlyArray<{groupId: bigint; add: ReadonlyArray<PersonaID>; remove: ReadonlyArray<string>}>,
+	): Promise<Array<PersonaGroupResponse>> {
+		const groups = await loadPersonaGroups(userId);
+		const byId = new Map(groups.map((row) => [row.group_id.toString(), row] as const));
+		for (const change of changes) {
+			if (!byId.has(change.groupId.toString())) throw new PersonaGroupNotFoundError();
+		}
+		const added = changes.flatMap((change) => change.add);
+		if (added.length > 0) await this.liveByIds(userId, added);
+
+		const now = new Date();
+		const changed = new Map<string, PersonaGroupRow>();
+		for (const change of changes) {
+			const key = change.groupId.toString();
+			const row = changed.get(key) ?? byId.get(key)!;
+			const removed = new Set(change.remove);
+			const members = personaGroupMemberIds(row).filter((id) => !removed.has(id));
+			for (const id of change.add.map((personaId) => personaId.toString())) {
+				if (!members.includes(id)) members.push(id);
+			}
+			changed.set(key, {...row, persona_ids: JSON.stringify(members), updated_at: now});
+		}
+		await writePersonaGroups(userId, {upsert: Array.from(changed.values())});
+		return (await this.dispatchGroupsToOwnSessions(userId)).map(toPersonaGroupResponse);
+	}
+
+	/**
+	 * After a write: the groups read again, so that a change another request made meanwhile to
+	 * another group is not undone in the owner's sessions, sent to them, and returned.
+	 */
+	private async dispatchGroupsToOwnSessions(userId: UserID): Promise<Array<PersonaGroupRow>> {
+		const groups = await loadPersonaGroups(userId);
+		await this.dispatchToUser(userId, 'USER_PERSONA_GROUPS_UPDATE', {groups: groups.map(toPersonaGroupResponse)});
+		return groups;
+	}
+
 	private async dispatchToUser(
 		userId: UserID,
 		event:
@@ -1395,7 +1504,8 @@ export class PersonaService {
 			| 'USER_PERSONA_DELETE'
 			| 'USER_PERSONAS_UPDATE'
 			| 'USER_PERSONA_SETTINGS_UPDATE'
-			| 'USER_PERSONA_CHANNEL_STATE_UPDATE',
+			| 'USER_PERSONA_CHANNEL_STATE_UPDATE'
+			| 'USER_PERSONA_GROUPS_UPDATE',
 		data: unknown,
 	): Promise<void> {
 		if (!this.deps.gatewayService) return;

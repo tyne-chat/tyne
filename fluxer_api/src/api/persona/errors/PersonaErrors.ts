@@ -80,3 +80,19 @@ export class PersonaImportConflictError extends BadRequestError {
 		});
 	}
 }
+
+/** A persona group that is not the caller's (tyne-chat/tyne#829). */
+export class PersonaGroupNotFoundError extends NotFoundError {
+	constructor() {
+		super({code: APIErrorCodes.UNKNOWN_PERSONA_GROUP, message: 'Unknown persona group'});
+	}
+}
+
+export class PersonaGroupLimitReachedError extends BadRequestError {
+	constructor(max: number) {
+		super({
+			code: APIErrorCodes.PERSONA_GROUP_LIMIT_REACHED,
+			message: `You can have at most ${max} persona groups`,
+		});
+	}
+}

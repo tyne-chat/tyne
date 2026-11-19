@@ -134,3 +134,21 @@ export const PERSONA_IMAGE_SOURCE_COLUMNS = [
 	'banner_hash',
 	'updated_at',
 ] as const satisfies ReadonlyArray<keyof PersonaImageSourceRow>;
+
+/** A group of the account's personas (tyne-chat/tyne#829). Only its owner sees it. */
+export interface PersonaGroupRow {
+	user_id: UserID;
+	group_id: bigint;
+	name: string;
+	/** The personas in the group, a JSON list of IDs in the order they were added. */
+	persona_ids: string;
+	updated_at: Date;
+}
+
+export const PERSONA_GROUP_COLUMNS = [
+	'user_id',
+	'group_id',
+	'name',
+	'persona_ids',
+	'updated_at',
+] as const satisfies ReadonlyArray<keyof PersonaGroupRow>;
