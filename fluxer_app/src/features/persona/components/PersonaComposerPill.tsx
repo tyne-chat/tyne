@@ -22,7 +22,7 @@ const MODE_LAST_DESCRIPTOR = msg({
 	message: 'Last used',
 	comment: 'Active persona mode last used',
 });
-const SENDING_AS_TAG_DESCRIPTOR = msg({
+export const SENDING_AS_TAG_DESCRIPTOR = msg({
 	message: 'Sending as {name} (Matched by tag) - Click to switch persona',
 	comment: 'Tooltip when sending as a persona matched by persona tag',
 });

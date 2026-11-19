@@ -69,13 +69,18 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   send, any other text stays in the composer (`messaging/utils/ExpressionDraftPersona.ts`), and a
   backslash sends as the account. A retry resends the message's own persona. Threads and forum posts
   resolve against the parent channel.
-- A forward and its comment are one speaker (`resolveForwardPersona`): a tag in the comment decides
-  for both; otherwise the selection where the forward started, then the destination's, then the
-  account.
+- A forward and its comment are one speaker. The Forward dialog's "Forward as" row
+  (`ForwardAsPersonaRow`, tyne-chat/tyne#817) shows who: the pick, else the persona active where the
+  forward started (`defaultForwardAs`), else the account. `resolveDialogForwardPersona` works it out
+  once per forward: a tag in the comment decides for both and a `\` sends as the account, but like a
+  pick it changes no channel's selection, even in "last used" mode, and records one use. Without the
+  dialog's choice, `resolveForwardPersona` uses the selection where the forward started, then the
+  destination's, per destination.
 - Editing (`matchEditMessage`): a leading `\` on a persona's message removes the persona, a tag
   switches to that persona, and anything else leaves the persona as it is (the request omits it).
   When the message's text already started with `\`, the backslash is text and removes nothing.
-  "Change persona" on one's own message edits only the persona. The inline edit's selector
+  "Change persona" on one's own message edits only the persona, also on a forward, whose content
+  cannot be edited (the API's `isPersonaOnlyEdit`). The inline edit's selector
   (`channel/components/InlineEditControls.tsx`) keeps its pick in `MessageChangePersona` until Save;
   a typed tag or `\` wins over it (`resolveEditSubprofile`), and the selector shows that as you type.
 

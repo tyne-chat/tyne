@@ -194,6 +194,27 @@ describe("the Forward dialog's Forward as (tyne-chat/tyne#817)", () => {
 		expect(sent[1].content).not.toContain('\\');
 	});
 
+	it('changes no channel\'s selection for a tag in the comment, and records one use, in "last used" mode', async () => {
+		await PersonaStore.setActivePersonaScope('channel');
+		await PersonaStore.setActivePersonaMode('last');
+		PersonaStore.handleChannelStateUpdate({channel_id: SOURCE.channel_id, persona_id: foxId});
+		const setActive = vi.spyOn(PersonaStore, 'setActivePersona');
+		const recordUse = vi.spyOn(PersonaStore, 'recordPersonaUse');
+
+		await expect(forward([ROOM, OTHER_ROOM], SOURCE, 'B: look', asSubprofile(foxId))).resolves.toBe(true);
+
+		expect(sent.map((payload) => [payload.channelId, payload.content, payload.subprofile?.id])).toEqual([
+			[ROOM, '', baoId],
+			[ROOM, 'look', baoId],
+			[OTHER_ROOM, '', baoId],
+			[OTHER_ROOM, 'look', baoId],
+		]);
+		expect(setActive).not.toHaveBeenCalled();
+		expect(PersonaStore.latchedPersonaFor(SOURCE.channel_id)?.id).toBe(foxId);
+		expect(PersonaStore.latchedPersonaFor(ROOM)).toBeFalsy();
+		expect(recordUse.mock.calls).toEqual([[baoId]]);
+	});
+
 	it('shows the persona active in the channel forwarded from, else the account', async () => {
 		await PersonaStore.setActivePersonaScope('channel');
 		PersonaStore.handleChannelStateUpdate({channel_id: ROOM, persona_id: baoId});
