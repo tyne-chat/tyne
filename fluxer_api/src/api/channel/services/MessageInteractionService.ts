@@ -34,6 +34,7 @@ import type {ChannelPinResponse, MessageResponse} from '@fluxer/schema/src/domai
 
 // Fork imports.
 
+import {dmRulesChannel} from '@app/api/channel/services/thread/ForkDmThreads';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import type {ReactionUserItemResponse} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 
@@ -103,7 +104,8 @@ export class MessageInteractionService {
 		if (authChannel.thread) {
 			assertThreadAllowed(threadWriteBlock('send', authChannel.thread.actor));
 		}
-		if (!authChannel.guild && (await this.startsNewConversation(authChannel.channel, userId))) return authChannel;
+		if (!authChannel.guild && (await this.startsNewConversation(dmRulesChannel(authChannel), userId)))
+			return authChannel;
 		await this.readStateService.startTyping({authChannel, userId, personaId});
 		return authChannel;
 	}
@@ -161,8 +163,8 @@ export class MessageInteractionService {
 	}): Promise<void> {
 		const authChannel = await this.authService.getChannelAuthenticated({userId, channelId, viewer});
 		if (!authChannel.guild && authChannel.channel.type !== ChannelTypes.DM_PERSONAL_NOTES) {
-			await this.authService.validateDMSendPermissions({channel: authChannel.channel, userId});
-			await this.assertConversationAllowed(authChannel.channel, userId);
+			await this.authService.validateDMSendPermissions({channel: dmRulesChannel(authChannel), userId});
+			await this.assertConversationAllowed(dmRulesChannel(authChannel), userId);
 		}
 		await this.pinService.pinMessage({authChannel, messageId, userId, requestCache, auditLogReason});
 	}
@@ -182,7 +184,7 @@ export class MessageInteractionService {
 	}): Promise<void> {
 		const authChannel = await this.authService.getChannelAuthenticated({userId, channelId, viewer});
 		if (!authChannel.guild && authChannel.channel.type !== ChannelTypes.DM_PERSONAL_NOTES) {
-			await this.authService.validateDMSendPermissions({channel: authChannel.channel, userId});
+			await this.authService.validateDMSendPermissions({channel: dmRulesChannel(authChannel), userId});
 		}
 		await this.pinService.unpinMessage({authChannel, messageId, userId, auditLogReason});
 	}
@@ -232,7 +234,7 @@ export class MessageInteractionService {
 	}): Promise<void> {
 		const authChannel = await this.authService.getChannelAuthenticated({userId, channelId, viewer});
 		if (!authChannel.guild) {
-			await this.assertConversationAllowed(authChannel.channel, userId);
+			await this.assertConversationAllowed(dmRulesChannel(authChannel), userId);
 		}
 		await this.reactionService.addReaction({authChannel, messageId, emoji, userId, sessionId, personaId});
 	}

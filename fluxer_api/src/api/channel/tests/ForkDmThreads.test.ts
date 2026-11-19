@@ -6,7 +6,12 @@ import {createTestAccount, type TestAccount} from '@app/api/auth/tests/AuthTestU
 import {createChannelID, createUserID} from '@app/api/BrandedTypes';
 import {ChannelRepository} from '@app/api/channel/ChannelRepository';
 import {buildDmThreadsReadyField} from '@app/api/channel/services/thread/ForkDmThreadReady';
-import {createDmChannel, createFriendship, createGroupDmChannel} from '@app/api/channel/tests/ChannelTestUtils';
+import {
+	blockUser,
+	createDmChannel,
+	createFriendship,
+	createGroupDmChannel,
+} from '@app/api/channel/tests/ChannelTestUtils';
 import {THREADS_FEATURE, THREADS_FEATURE_HEADER, threadsRequest} from '@app/api/channel/tests/ThreadTestUtils';
 import {ensureSessionStarted, sendMessage} from '@app/api/message/tests/MessageTestUtils';
 import {ReadStateRepository} from '@app/api/read_state/ReadStateRepository';
@@ -260,5 +265,47 @@ describe('threads in DMs', () => {
 		expect(field.enabled).toBe(true);
 		const states = field.read_states as Array<{id: string; mention_count: number}>;
 		expect(states.map((state) => state.id)).toEqual([open.id]);
+	});
+	// Gemini Carbon's review of tyne-chat/tyne#699: a DM thread's row has no recipients, so upstream's DM checks
+	// on it failed or found nobody.
+	it('lets either person in a 1:1 DM pin and unpin a message in its thread', async () => {
+		const {a, b, dmId} = await dm();
+		const thread = await startStandalone(a, dmId, 'Pins');
+		const message = await sendInThread(b, thread.id, 'pin me');
+		await threadsRequest(harness, a.token).put(`/channels/${thread.id}/pins/${message.id}`).expect(204).execute();
+		await threadsRequest(harness, b.token).delete(`/channels/${thread.id}/pins/${message.id}`).expect(204).execute();
+	});
+
+	it("keeps mentions of the DM's people in its threads, and only theirs", async () => {
+		const {a, b, dmId} = await dm();
+		const outsider = await createTestAccount(harness);
+		const thread = await startStandalone(a, dmId, 'Mentions');
+		const message = await sendInThread(a, thread.id, `hi <@${b.userId}> and <@${outsider.userId}>`);
+		expect(message.mentions?.map((user) => user.id)).toEqual([b.userId]);
+	});
+
+	it('does not let someone blocked rename or reopen a 1:1 DM thread, while closing it still works', async () => {
+		const {a, b, dmId} = await dm();
+		const thread = await startStandalone(a, dmId, 'Talk');
+		await blockUser(harness, a, b.userId);
+		await threadsRequest(harness, b.token)
+			.patch(`/channels/${thread.id}`)
+			.body({name: 'Renamed'})
+			.expect(400, APIErrorCodes.CANNOT_SEND_MESSAGES_TO_USER)
+			.execute();
+		await threadsRequest(harness, a.token).patch(`/channels/${thread.id}`).body({archived: true}).execute();
+		await threadsRequest(harness, b.token)
+			.patch(`/channels/${thread.id}`)
+			.body({archived: false})
+			.expect(400, APIErrorCodes.CANNOT_SEND_MESSAGES_TO_USER)
+			.execute();
+	});
+
+	it('does not let the starter delete a thread the other person wrote in and then left', async () => {
+		const {a, b, dmId} = await dm();
+		const thread = await startStandalone(a, dmId, 'Left');
+		await sendInThread(b, thread.id, 'my words');
+		await threadsRequest(harness, b.token).delete(`/channels/${thread.id}/thread-members/@me`).expect(204).execute();
+		await threadsRequest(harness, a.token).delete(`/channels/${thread.id}`).expect(403).execute();
 	});
 });
