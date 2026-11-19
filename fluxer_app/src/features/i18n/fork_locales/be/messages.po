@@ -1090,10 +1090,6 @@ msgstr "Чалавек, які запускае"
 msgid "Persona"
 msgstr "Персона"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "Выбрана персона «{name}»."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Тэгі персоны (прэфікс і суфікс)"
 
@@ -1108,10 +1104,6 @@ msgstr "Персона створана"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Персона выдалена"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "Выбар персоны скасаваны."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "Прапанаваныя"
 msgid "Supports PluralKit system export files"
 msgstr "Падтрымліваюцца файлы экспарту сістэм PluralKit"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "Змяніць актыўную персону"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "Чалавек, які запускае каманду, у выгляд�
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "Не ўдалося аднавіць персону."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "Персона, якую трэба выбраць."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."

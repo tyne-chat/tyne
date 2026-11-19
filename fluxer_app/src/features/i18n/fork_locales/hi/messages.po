@@ -1090,10 +1090,6 @@ msgstr "इस्तेमाल करने वाला व्यक्ति
 msgid "Persona"
 msgstr "परसोना"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "परसोना \"{name}\" चुना गया।"
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "परसोना टैग (उपसर्ग और प्रत्यय)"
 
@@ -1108,10 +1104,6 @@ msgstr "परसोना बन गया"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "परसोना डिलीट हो गया"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "परसोना का चयन हटाया गया।"
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "सुझाए गए"
 msgid "Supports PluralKit system export files"
 msgstr "PluralKit सिस्टम एक्सपोर्ट फ़ाइलें समर्थित हैं"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "सक्रिय परसोना बदलें"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "इस्तेमाल करने वाला व्यक्ति
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "परसोना रीस्टोर नहीं हो सका।"
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "चुनने के लिए परसोना।"
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."

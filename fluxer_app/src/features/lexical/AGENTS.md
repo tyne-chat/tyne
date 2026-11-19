@@ -84,8 +84,6 @@ under `composer/` unless stated.
 - **Persona tags** are plain text here: no node, no highlight. The host passes `wireValue` to
   `PersonaComposerPill` and the send strips the tag (`persona/AGENTS.md`). Match tags against the
   wire, never the display, which shows emoji as `:name:` and mentions as `@Name`.
-- `/persona` is parsed by `resolveCommand` (`LexicalMessageCommand.ts`) and run by
-  `devtools/utils/CommandUtils.ts`.
 
 ## Timestamps, caret anchors, shortcuts (fork)
 
@@ -140,7 +138,7 @@ upstream's files, each under `// Fork imports.`:
 | `nodes/ComposerMentionPill.tsx`, `nodes/ComposerMentionNode.tsx` | persona branch (in the persona's colour), plain-mode name; `getPersonaId`, two props |
 | `ComposerSerialization.ts`, `composerOffsets.ts`, `ComposerInsertion.ts`, `ComposerHandle.ts` | persona form; timestamp and anchor cases; `timestamp` payload (built only by a test) |
 | `ComposerMarkdownHighlight.ts`, `ComposerBlockquote.ts`, `ComposerEmojiShortcode.ts`, `ComposerPlainText.ts` | anchor checks inside upstream's conditions |
-| `ComposerMarkdownShortcuts.ts`, `LexicalMessageCommand.ts` | empty-selection shortcuts; `/persona` |
+| `ComposerMarkdownShortcuts.ts` | empty-selection shortcuts |
 
 When touching them, move fork lines out: persona helpers into `useAutocompletePersonaSearch.ts`, the
 pill's branch into a fork component behind one line (its fetch in an effect), anchor checks into
