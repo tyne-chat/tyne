@@ -33412,7 +33412,7 @@
 						"description": "Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones",
 						"maxItems": 10,
 						"type": "array",
-						"items": {"type": "string", "maxLength": 100}
+						"items": {"type": "string"}
 					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
@@ -33935,7 +33935,7 @@
 						"description": "Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones",
 						"maxItems": 10,
 						"type": "array",
-						"items": {"type": "string", "maxLength": 100}
+						"items": {"type": "string"}
 					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
@@ -51655,7 +51655,7 @@
 						"description": "Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones",
 						"maxItems": 10,
 						"type": "array",
-						"items": {"type": "string", "maxLength": 100}
+						"items": {"type": "string"}
 					},
 					"avatar_hash": {
 						"description": "Avatar asset hash",
@@ -51911,13 +51911,20 @@
 					"banner",
 					"signature_emojis",
 					"auto_tag_disabled",
-					"visibility"
+					"visibility",
+					"aliases"
 				]
 			},
 			"PersonaImportPreviewMemberSchema": {
 				"type": "object",
 				"properties": {
 					"name": {"description": "Persona display name", "type": "string"},
+					"aliases": {
+						"description": "Other names to find the persona by when searching or mentioning, never shown. Leave it out to keep the stored ones",
+						"maxItems": 10,
+						"type": "array",
+						"items": {"type": "string"}
+					},
 					"pronouns": {
 						"description": "Optional pronouns",
 						"anyOf": [{"type": "string", "maxLength": 100}, {"type": "null"}]

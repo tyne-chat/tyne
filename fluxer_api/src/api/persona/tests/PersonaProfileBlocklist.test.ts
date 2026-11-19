@@ -119,6 +119,19 @@ describe('PersonaService and the admin profile blocklist', () => {
 		expect(repo.create).toHaveBeenCalledTimes(1);
 	});
 
+	it('checks every alias as a name, on create and on an edit that adds one', async () => {
+		banEverywhere();
+
+		await expect(service.createPersona(userId, {name: 'Alice', aliases: ['Al', BANNED]})).rejects.toThrow(
+			ContentBlockedError,
+		);
+		expect(repo.create).not.toHaveBeenCalled();
+		await expect(service.updatePersona(userId, personaId, {aliases: [`My ${BANNED}`]})).rejects.toThrow(
+			ContentBlockedError,
+		);
+		expect(repo.update).not.toHaveBeenCalled();
+	});
+
 	it('refuses an edit that puts banned text in a persona', async () => {
 		banEverywhere();
 
