@@ -1090,10 +1090,6 @@ msgstr "Kullanan kişi"
 msgid "Persona"
 msgstr "Persona"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "\"{name}\" personası seçildi."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Persona Etiketleri (Ön Ek ve Son Ek)"
 
@@ -1108,10 +1104,6 @@ msgstr "Persona oluşturuldu"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Persona silindi"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "Persona seçimi kaldırıldı."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "Önerilen"
 msgid "Supports PluralKit system export files"
 msgstr "PluralKit sistem dışa aktarma dosyalarını destekler"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "Etkin personayı değiştir"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "Bahsetme olarak kullanan kişi"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "Persona geri yüklenemedi."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "Seçilecek persona."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."

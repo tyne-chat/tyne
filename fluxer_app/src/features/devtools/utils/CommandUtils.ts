@@ -21,14 +21,6 @@ import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
-// Fork imports.
-
-import {
-	PERSONA_DESELECTED_DESCRIPTOR,
-	PERSONA_SELECTED_DESCRIPTOR,
-} from '@app/features/persona/commands/PersonaSlashCommandMessages';
-import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-
 const USER_MENTION_REGEX = /<@!?(\d+)>/;
 const logger = new Logger('CommandUtils');
 const localCurrentUserNicknames = new Map<string, string | null>();
@@ -79,10 +71,6 @@ export type ParsedCommand =
 	| {
 			type: 'saved' | 'sticker' | 'gif';
 			query: string;
-	  }
-	| {
-			type: 'persona';
-			persona: string;
 	  }
 	| {
 			type: 'unknown';
@@ -173,13 +161,6 @@ export function parseCommand(content: string): ParsedCommand {
 			return {type, query};
 		}
 	}
-	if (trimmed === '/persona') {
-		return {type: 'persona', persona: ''};
-	}
-	if (trimmed.startsWith('/persona ')) {
-		const persona = trimmed.slice(9).trim();
-		return {type: 'persona', persona};
-	}
 	return {type: 'unknown'};
 }
 
@@ -217,8 +198,6 @@ export function isCommand(content: string): boolean {
 		trimmed.startsWith('/sticker ') ||
 		trimmed === '/gif' ||
 		trimmed.startsWith('/gif ') ||
-		trimmed === '/persona' ||
-		trimmed.startsWith('/persona ') ||
 		(trimmed.startsWith('_') && trimmed.endsWith('_') && trimmed.length > 2)
 	);
 }
@@ -383,24 +362,6 @@ export async function executeCommand(
 		case 'sticker':
 		case 'gif': {
 			throw new Error(`Select a ${command.type} result before submitting the command`);
-		}
-		case 'persona': {
-			if (!command.persona) {
-				const systemMessage = createSystemMessage(channelId, i18n._(PERSONA_DESELECTED_DESCRIPTOR));
-				PersonaStore.setActivePersona(null);
-				MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
-			} else {
-				const persona = PersonaStore.personas.find((v) => v.id === command.persona);
-				if (persona) {
-					const systemMessage = createSystemMessage(
-						channelId,
-						i18n._(PERSONA_SELECTED_DESCRIPTOR, {name: persona.name}),
-					);
-					PersonaStore.setActivePersona(command.persona);
-					MessageCommands.createOptimistic(channelId, systemMessage.toJSON());
-				}
-			}
-			break;
 		}
 		default:
 			break;
