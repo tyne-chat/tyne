@@ -137,8 +137,13 @@ export const PersonaBulkDeleteRequestSchema = z.object({
 	persona_ids: z.array(SnowflakeStringType).min(1).max(250).describe('The IDs of the personas to delete'),
 });
 
-/** One alias as sent. Blank ones are allowed and dropped (the validator would otherwise turn '' into null). */
-const PersonaAliasType = z.string().max(PERSONA_ALIAS_MAX_LENGTH).register(schemaMetadata, {preserveEmptyValues: true});
+/**
+ * One alias as sent, cleaned as a name is (trimmed, without invisible and direction characters).
+ * Blank ones are allowed and dropped (the validator would otherwise turn '' into null).
+ */
+const PersonaAliasType = createStringType(0, PERSONA_ALIAS_MAX_LENGTH).register(schemaMetadata, {
+	preserveEmptyValues: true,
+});
 
 export const PersonaCreateRequestSchema = z.object({
 	name: createStringType(1, 100).describe('Persona display name'),
