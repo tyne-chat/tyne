@@ -287,8 +287,8 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
 
 About 50 upstream files import from this folder: mostly in `channel` (message rendering, the
 composer, popouts) and `messaging` (submission, retry, reactions, message state), and a few each in
-`gateway`, `threads`, `forum`, `lexical` (mentions, autocomplete), `emoji`, `signal_bar`, `devtools`
-(`/persona`), `user`, `ui`, `app` and `auth`. The ones that edit inside upstream's lines, and so
+`gateway`, `threads`, `forum`, `lexical` (mentions, autocomplete), `emoji`, `signal_bar`, `user`,
+`ui`, `app` and `auth`. The ones that edit inside upstream's lines, and so
 conflict most often in the nightly rebase: `MessageUsername.tsx`, `UserMessage.tsx`,
 `CompactMessageLayout.tsx`, `useMessageSubmission.tsx`, `useTextareaSubmit.ts`,
 `useTextareaDraftAndTyping.ts`, `ReactionCommands.tsx`, `MessageReactions.ts`, `MentionRenderer.tsx`,

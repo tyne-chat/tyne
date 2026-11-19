@@ -1090,10 +1090,6 @@ msgstr "Lietotājs, kas to palaiž"
 msgid "Persona"
 msgstr "Persona"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "Izvēlēta persona „{name}”."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Personas birkas (prefikss un sufikss)"
 
@@ -1108,10 +1104,6 @@ msgstr "Persona izveidota"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Persona dzēsta"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "Personas izvēle atcelta."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "Ieteiktās"
 msgid "Supports PluralKit system export files"
 msgstr "Atbalsta PluralKit sistēmas eksporta failus"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "Mainīt aktīvo personu"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "Lietotājs, kas to palaiž, kā pieminējums"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "Neizdevās atjaunot personu."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "Persona, kuru izvēlēties."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."
