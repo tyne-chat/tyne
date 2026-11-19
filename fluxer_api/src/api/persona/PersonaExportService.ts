@@ -185,6 +185,7 @@ export async function createPersonaExportArchive(
 				autoTagDisabled: persona.autoTagDisabled,
 				aliases: persona.aliases,
 				signatureEmojis: persona.signatureEmojis,
+				mentionableBy: persona.storedMentionableBy,
 			});
 		}
 
