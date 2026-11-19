@@ -23,6 +23,7 @@ export const ForkEndpoints = {
 	USER_PERSONAS_DELETED: '/users/@me/personas/deleted',
 	USER_PERSONA_RESTORE: (personaId: string) => `/users/@me/personas/deleted/${personaId}/restore`,
 	USER_PERSONA_VISIBILITY: '/users/@me/personas/visibility',
+	USER_PERSONA_MENTIONABLE_BY: '/users/@me/personas/mentions',
 	USER_PERSONA_BULK_DELETE: '/users/@me/personas/bulk-delete',
 	USER_PERSONA_GROUPS: '/users/@me/personas/groups',
 	USER_PERSONA_GROUP_MEMBERS: '/users/@me/personas/groups/members',
