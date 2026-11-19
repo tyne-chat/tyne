@@ -1090,10 +1090,6 @@ msgstr "Người chạy lệnh"
 msgid "Persona"
 msgstr "Persona"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "Đã chọn persona \"{name}\"."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Thẻ persona (tiền tố và hậu tố)"
 
@@ -1108,10 +1104,6 @@ msgstr "Đã tạo persona"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Đã xóa persona"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "Đã bỏ chọn persona."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "Được gợi ý"
 msgid "Supports PluralKit system export files"
 msgstr "Hỗ trợ tệp xuất hệ thống PluralKit"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "Chuyển persona đang hoạt động"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "Người chạy lệnh, dưới dạng lượt nhắc đến"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "Không khôi phục được persona."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "Persona cần chọn."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."
