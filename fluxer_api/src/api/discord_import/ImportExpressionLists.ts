@@ -22,18 +22,22 @@ export interface ExpressionListsDeps {
 	gatewayService: Pick<IGatewayService, 'dispatchGuild'>;
 }
 
-/** Sends the emoji and sticker lists of the communities the plan adds to, and of `movedEmojiGuilds` (those whose
- * list an emoji's rename, move or archiving changed, ImportEmojiFates.ts); returns their ids. */
+/** Sends the emoji and sticker lists of the communities the plan adds to, and of `movedEmojiGuilds` and
+ * `changedStickerGuilds` (those whose list an emoji's rename, move or archiving changed, ImportEmojiFates.ts, or a
+ * picture replaced, ImportPictures.ts); returns their ids. */
 export async function sendExpressionLists(
 	plan: ExpressionListsPlan,
 	deps: ExpressionListsDeps,
 	movedEmojiGuilds: Array<string> = [],
+	changedStickerGuilds: Array<string> = [],
 ): Promise<{emoji: Array<string>; stickers: Array<string>}> {
 	// Emoji and stickers without a community are stored only for the messages that show them: no list to send.
 	const emojiGuilds = [
 		...new Set([...plan.emoji.flatMap((e) => (e.guild_id ? [e.guild_id] : [])), ...movedEmojiGuilds]),
 	];
-	const stickerGuilds = [...new Set(plan.stickers.flatMap((s) => (s.guild_id ? [s.guild_id] : [])))];
+	const stickerGuilds = [
+		...new Set([...plan.stickers.flatMap((s) => (s.guild_id ? [s.guild_id] : [])), ...changedStickerGuilds]),
+	];
 	for (const guild of emojiGuilds) {
 		const guildId = BigInt(guild) as GuildID;
 		const emojis = await deps.guildRepository.listEmojis(guildId);
