@@ -91,7 +91,10 @@ export class MessageProcessingService {
 		// Fork: a message in a DM thread opens its DM again for a recipient who closed it (tyne-chat/tyne#699).
 		if (isDmThreadChannel(channel)) {
 			const parent = await loadDmThreadParentOf(channel);
-			if (parent) await this.updateDMRecipients({channel: parent, channelId: parent.id, messageId, requestCache});
+			// The DM's own last message stays its last: the thread's is not in it (Gemini Carbon's review).
+			const lastInDm = parent?.lastMessageId ?? messageId;
+			if (parent)
+				await this.updateDMRecipients({channel: parent, channelId: parent.id, messageId: lastInDm, requestCache});
 			return;
 		}
 		if (channel.guildId || channel.type !== ChannelTypes.DM) return;

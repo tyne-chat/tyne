@@ -156,6 +156,15 @@ thread creation (authorization, participants, the guild key, the system message'
 `updateReadStates` in `MessageProcessingService`, the read-state marker and acks, `GuildAuditLogService.record`,
 and READY in `RpcService`. Tests: `tests/ForkDmThreads.test.ts`.
 
+Upstream's DM rules read the channel's recipients, which a DM thread's row lacks: `dmRulesChannel` (an
+authenticated channel) and `dmRulesChannelOf` (a channel) give the parent DM instead. They stand in for the
+DM at pins, reactions and typing (`MessageInteractionService`), mention checks (`MessageMentionService`),
+persona mentions, the DM's sensitive-media settings (`MessageContentService`), hidden system DMs, bulk
+self-deletion and data harvests, and search hits (`searchableDmThreads` in `MessageSearchResponseMapper`).
+In a 1:1 DM, renaming or reopening a thread follows the DM's block rules (`assertDmThreadWriteAllowed`). A
+push carries `fork_thread_context` for its title; the gateway reads, buffers and tags a DM thread's pushes by
+the thread (`fork_dm_thread_push:read_channel_id`).
+
 Upstream strips thread chips, "thread created" notices and starter messages from every channel without a
 guild. An app that knows DM threads sends the client feature `fork_dm_threads` (`DM_THREADS_CLIENT_FEATURE`)
 and keeps them: `ForkDmThreadViewer.ts` marks its viewer in `viewerFromCtx`, and `maskThreadArtifactsFor` and

@@ -257,8 +257,10 @@ stand in for the guild where upstream's thread code needs one (thread tables sto
 event about a DM thread goes to each recipient wrapped as `FORK_DM_THREAD_EVENT`, and READY carries
 `fork_dm_threads`, so older apps never see them; REST keeps thread chips and starter messages in DMs
 only for apps that send the client feature `fork_dm_threads`. Pushes go through the gateway's DM path
-(`push/fork_dm_thread_push.erl`) with `fork_thread_id`. Web `features/threads/fork/`: the envelope, READY,
-the DM views and breadcrumb, and the marks of thread news (Threads button, chip, list, DM row). Who may
+(`push/fork_dm_thread_push.erl`) with `fork_thread_id`; reading, buffering and their tags go by the thread.
+Web `features/threads/fork/`: the envelope, READY, an account's DM threads kept across a warm account switch
+on the desktop (`ForkDmThreadAccounts.ts`), the DM views and breadcrumb, and the marks of thread news (Threads
+button, chip, list, DM row). Who may
 start one: the API setting `TYNE_DM_THREADS`. Design: the mockups doc linked from the issue.
 
 ### Other

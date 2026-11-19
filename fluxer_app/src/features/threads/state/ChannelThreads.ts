@@ -24,6 +24,7 @@ import {makeAutoObservable, observable} from 'mobx';
 
 // Fork imports.
 
+import {forgetDmThread, rememberDmThread} from '@app/features/threads/fork/ForkDmThreadAccounts';
 import {
 	DM_THREAD_INDEX_KEY,
 	isDmThread,
@@ -205,6 +206,7 @@ class ChannelThreads {
 		if (isDmThread(channel) && channel?.parentId && Navigation.channelId === threadId) {
 			RouterUtils.replaceWith(Routes.dmChannel(channel.parentId));
 		}
+		if (isDmThread(channel)) forgetDmThread(threadId);
 		if (channel) {
 			cleanupChannelLocalState(channel.toJSON());
 		}
@@ -326,6 +328,7 @@ class ChannelThreads {
 		const existing = Channels.getChannel(wire.id);
 		const channel: ChannelWire = {...rest, last_message_id: newestId(rest.last_message_id, existing?.lastMessageId)};
 		Channels.upsertThread(channel);
+		rememberDmThread({...channel, ...(member ? {member} : {})});
 		this.index(DM_THREAD_INDEX_KEY, wire.parent_id, wire.id);
 		if (member) ThreadMemberships.set(wire.id, member);
 		if (silent) return Channels.getChannel(wire.id);

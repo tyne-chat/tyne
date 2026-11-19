@@ -60,6 +60,7 @@ import type {IRateLimitService} from '@pkgs/rate_limit/src/IRateLimitService';
 import {
 	assertDmThreadDeleteAllowed,
 	assertDmThreadPatchAllowed,
+	assertDmThreadWriteAllowed,
 	isDmThreadState,
 } from '@app/api/channel/services/thread/ForkDmThreads';
 
@@ -144,6 +145,7 @@ export class ThreadModifyService {
 		};
 		assertThreadAllowed(threadPatchRequirement(patch, state.flags, thread.actor));
 		assertDmThreadPatchAllowed(patch, thread);
+		await assertDmThreadWriteAllowed(patch, thread, userId);
 		const appliedTags =
 			data.applied_tags !== undefined
 				? await this.resolvePatchedTags(
