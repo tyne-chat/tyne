@@ -1090,10 +1090,6 @@ msgstr "Aki használja"
 msgid "Persona"
 msgstr "Persona"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "„{name}” persona kiválasztva."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Personacímkék (előtag és utótag)"
 
@@ -1108,10 +1104,6 @@ msgstr "Persona létrehozva"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Persona törölve"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "Persona kijelölése megszüntetve."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "Javasolt"
 msgid "Supports PluralKit system export files"
 msgstr "Támogatja a PluralKit rendszerexport-fájljait"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "Aktív persona váltása"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "Aki használja, említésként"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "A personát nem sikerült visszaállítani."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "A kiválasztandó persona."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."
