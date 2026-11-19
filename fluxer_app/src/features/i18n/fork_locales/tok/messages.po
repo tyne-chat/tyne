@@ -1090,10 +1090,6 @@ msgstr "jan kepeken"
 msgid "Persona"
 msgstr "jan insa"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "sina kepeken jan insa \"{name}\"."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "nimi lili pi jan insa (open en pini)"
 
@@ -1108,10 +1104,6 @@ msgstr "jan insa sin li lon"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "jan insa li weka"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "sina kepeken ala jan insa."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "ken pona"
 msgid "Supports PluralKit system export files"
 msgstr "ilo ni li ken kepeken lipu kulupu tan ilo PluralKit"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "o ante e jan insa toki"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "nimi @ pi jan kepeken"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "jan insa li ken ala kama sin."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "jan insa tawa kepeken."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."
