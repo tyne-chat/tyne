@@ -60,6 +60,7 @@ function createdPersonaRow(params: CreatePersonaParams, personaId: PersonaID, no
 		use_count: params.use_count ?? 0,
 		last_used_at_ms: params.last_used_at_ms ?? null,
 		visibility: params.visibility ?? 'unlisted',
+		mentionable_by: params.mentionable_by ?? null,
 		external_uuid: params.external_uuid ?? null,
 		created_at: now,
 		updated_at: now,
@@ -89,6 +90,9 @@ function updatedPersonaRow(existing: Persona, params: UpdatePersonaParams, now: 
 		use_count: params.use_count !== undefined ? params.use_count : existing.useCount,
 		last_used_at_ms: params.last_used_at_ms !== undefined ? params.last_used_at_ms : existing.lastUsedAtMs,
 		visibility: params.visibility !== undefined ? params.visibility : existing.visibility,
+		// The stored value, never the effective one: making a persona private must still hide an
+		// untouched one from others' suggestions.
+		mentionable_by: params.mentionable_by !== undefined ? params.mentionable_by : existing.storedMentionableBy,
 		external_uuid: params.external_uuid !== undefined ? params.external_uuid : existing.externalUuid,
 		created_at: existing.createdAt,
 		updated_at: now,

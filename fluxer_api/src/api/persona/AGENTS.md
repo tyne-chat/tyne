@@ -73,6 +73,18 @@ and follow the placement rules in the root `AGENTS.md`.
   profile card) is withheld: `GET /users/:id/personas/:pid` answers 403 `PRIVATE_PERSONA`, not 404,
   because the asker has already seen the persona on a message. Other people's lookups also pass
   upstream's `validateProfileAccess` first.
+- **Suggestions follow the mention setting, not visibility** (tyne-chat/tyne#652). `mentionable_by`
+  (`everyone`, `self`, `nobody`) decides who gets a persona in the mention route
+  (`getChannelPersonaMentions`), which also feeds both clients' `from:`/`mentions:` suggestions:
+  another account's persona only for `everyone`, one's own unless `nobody`. It is a convenience
+  setting for copies of other people's personas, not a privacy one: it changes nothing a message,
+  the profile or the gallery shows, and a typed `<@user:persona>` still works. Stored null (rows
+  from before, and every persona until its owner picks a value) follows visibility through
+  `effectiveMentionableBy` in `@fluxer/schema` (private: `self`, otherwise `everyone`), so "make
+  private" keeps hiding an untouched persona; `Persona.storedMentionableBy` is what is stored and
+  written back, `mentionableBy` the effective value. A private persona offered to everyone reaches
+  others' suggestions without its bio, banner and pronouns. Clients take other accounts' personas
+  only from the route, never from messages they have loaded, so the setting applies in one place.
 - **Knowing a persona's ID entitles anyone signed in to what a message from it shows**, whatever
   its visibility: `POST /personas/lookup` takes up to 100 `{user_id, persona_id}` pairs and returns
   `toSubprofileResponse` with the owner (`lookupPersonas`), deleted personas included. That shape
@@ -110,7 +122,7 @@ single Postgres key/value table.
 
 | Table | Key | Holds |
 |---|---|---|
-| `personas` | (user_id, persona_id) | profile fields, `aliases` among them; tags and signature emojis as JSON strings; usage counters; `visibility`; `external_uuid` (the PluralKit member id); `deleted_at` |
+| `personas` | (user_id, persona_id) | profile fields, `aliases` among them; tags and signature emojis as JSON strings; usage counters; `visibility`; `mentionable_by` (null follows visibility); `external_uuid` (the PluralKit member id); `deleted_at` |
 | `user_persona_settings` | user_id | mode (`manual` or `last`), scope (`global` or `channel`), the selected persona and whether it is latched, the account-wide display tag, `multi_persona_reactions` (several identities may react with one emoji; a row without it means on) |
 | `persona_channel_states` | (user_id, channel_id) | the per-channel selection; no row means the account |
 | `thread_owner_personas`, `thread_owner_personas_by_user` | thread_id; (user_id, thread_id) | which persona started a thread; the by-user row is written first, so account deletion finds it |
@@ -138,16 +150,16 @@ groups others can see, and the PluralKit import and export of `groups` (the issu
 ## Routes and OAuth
 
 - `@me` routes: list and create, `/:persona_id`, `/import`, `/import/preview`, `/import/apply`,
-  `/deleted`, `/deleted/:persona_id/restore`, `/visibility`, `/bulk-delete`, `/settings`,
+  `/deleted`, `/deleted/:persona_id/restore`, `/visibility`, `/mentions`, `/bulk-delete`, `/settings`,
   `/channel-states[/:channel_id]`, `/groups`, `/groups/members`, `/groups/:group_id`, `/export`,
   `/import-image`. Restore lives under `/deleted` because the
   OpenAPI check refuses `/{persona_id}/restore` as ambiguous with `/channel-states/{channel_id}`.
-- `/visibility` (PATCH) and `/bulk-delete` (POST) change or delete many personas in one write
+- `/visibility` and `/mentions` (PATCH) and `/bulk-delete` (POST) change or delete many personas in one write
   (tyne-chat/tyne#542), through `writeImport` like the import: all or nothing (`liveByIds` refuses a
   persona that is not the caller's and live), the whole list to the account's sessions and one
   `GUILD_PERSONAS_DIRTY` per community, never one per persona. A bulk delete clears what deleting
-  each would (`planRetirement`, shared with the import's `replace`). Each visibility entry names its
-  own value, so an undo is one request. Other people's: `/users/:user_id/personas`
+  each would (`planRetirement`, shared with the import's `replace`). Each visibility or mention
+  entry names its own value (a mention entry may be null), so an undo is one request. Other people's: `/users/:user_id/personas`
   and `/users/:user_id/personas/:persona_id`.
 - `/users/:user_id/personas` feeds the Personas tab, sheet and pill (tyne-chat/tyne#189): the
   account's display tag and its public personas, the most used first, also for the owner. The order
@@ -171,7 +183,7 @@ groups others can see, and the PluralKit import and export of `groups` (the issu
 | `USER_PERSONA_SETTINGS_UPDATE` | own sessions | a settings save |
 | `USER_PERSONA_CHANNEL_STATE_UPDATE` | own sessions only, on purpose | a per-channel selection |
 | `USER_PERSONA_GROUPS_UPDATE` | own sessions only, on purpose | every change to the groups (the whole list) |
-| `GUILD_PERSONAS_DIRTY` | every guild the account is in, plus each DM and group-DM recipient | create (public and unlisted only), every update and delete, a bulk import, a display-tag change; carries the persona only when it is public or unlisted |
+| `GUILD_PERSONAS_DIRTY` | every guild the account is in, plus each DM and group-DM recipient | create (public, or offered to everyone in suggestions, only), every update and delete, a bulk import, a display-tag change; carries the persona only when it is public or unlisted |
 
 - `GUILD_PERSONAS_DIRTY` costs one gateway RPC per guild and per DM partner for every persona edit.
   Keep it off paths that run often.
@@ -196,7 +208,8 @@ groups others can see, and the PluralKit import and export of `groups` (the issu
   cap on the end state, and writes one batch; nothing is deleted. `link` writes only `external_uuid`;
   `use_file` connects the persona too if it was not (tyne-chat/tyne#573), on a deleted persona
   brings it back with the file's details in the same write (#574), and never changes
-  visibility, nor signature emojis or tag matching from a PluralKit file. Connecting a persona to a
+  visibility or the mention setting, nor signature emojis or tag matching from a PluralKit file. An
+  `add` from a Tyne zip keeps the mention setting `tyne.json` carries. Connecting a persona to a
   member unlinks any other persona linked to it (duplicates, #571), unless an action of its own
   connects it (one of two duplicates given to another member, #575). Two actions naming one persona,
   or connecting one member, answer `PERSONA_IMPORT_CONFLICT`.
