@@ -149,7 +149,9 @@ move into a "More options" menu. It works on its sibling elements in the DOM (at
 by its `data-flx` (`HEADER_ITEM_RULES`). A folded action stays mounted, inert and invisible where the
 menu button is, so its popout, menu and keybind work as before and open there; the menu clicks it,
 and focus that would return to it goes to the menu button. Nothing moves while a header popout or
-menu is open. The loading skeletons clip their action rows (fork blocks at the end of
+menu is open. A folded button's menu item takes its plain name from `data-header-label`, shows its mark
+(a dot, or a badge whose count it reads from `data-header-badge`, never from the badge's formatted text),
+and gives screen readers what the button's aria-label says of that mark (tyne-chat/tyne#704). The loading skeletons clip their action rows (fork blocks at the end of
 `BootShell.css` and `ChatSkeleton.module.css`). A collapsed search box closes when it loses focus and
 takes its ✕ with it, so the results panel ends its header with a close of its own,
 `channel_search_results/SearchResultsCloseButton.tsx` (tyne-chat/tyne#518): it clears and closes the
