@@ -290,6 +290,7 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `PASSWORD_REQUIRED_TO_CLAIM` | Set a password to keep this account |
 | `PASSWORD_SIGN_IN_REQUIRED` | Sign in to this account with its password |
 | `PERSONAL_NOTES_DISABLED` | Personal notes are turned off on this instance |
+| `PERSONA_GROUP_LIMIT_REACHED` | You can have at most 250 persona groups |
 | `PERSONA_LIMIT_REACHED` | Maximum number of personas reached (250) |
 | `PERSONA_TAG_LIMIT_REACHED` | A persona can have at most 5 tags |
 | `PREMIUM_PURCHASE_BLOCKED` | No active subscription |
@@ -385,6 +386,7 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `UNKNOWN_MESSAGE` | Message wasn't found |
 | `UNKNOWN_ORIGIN_HANDOFF` | This sign-in transfer has expired or was already used |
 | `UNKNOWN_PERSONA` | User wasn't found |
+| `UNKNOWN_PERSONA_GROUP` | Not found |
 | `UNKNOWN_REPORT` | Unknown report |
 | `UNKNOWN_ROLE` | Role wasn't found |
 | `UNKNOWN_SIGN_IN_TICKET` | This sign-in attempt has expired |

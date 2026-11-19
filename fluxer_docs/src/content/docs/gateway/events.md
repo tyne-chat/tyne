@@ -1076,6 +1076,16 @@ The current user's persona settings changed, or the persona they had selected wa
 
 The persona the current user selected in one channel changed. The payload is a [persona channel state object](/http-api/users/personas/#persona-channel-state-object), and a null `persona_id` means the channel is used as the account itself again. Only the current user's sessions receive it.
 
+### <span id="user-persona-groups-update"></span>USER_PERSONA_GROUPS_UPDATE
+
+The current user's persona groups changed: one was made, renamed or deleted, or personas were put in a group or taken out. Only the current user's sessions receive it.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| groups | array[persona group object] | Every group the account has, in the order they were made |
+
+A persona group object has `id` (snowflake), `name` (string) and `persona_ids` (array of snowflakes, in the order they were added). A deleted persona stays in its groups, so that restoring it puts it back; a client shows only the live ones. `groups` is always the complete set, and a client replaces what it stores with it.
+
 ### <span id="guild-personas-dirty"></span>GUILD_PERSONAS_DIRTY
 
 Another account changed its personas or its display tag. A client that caches that account's personas refreshes them.
