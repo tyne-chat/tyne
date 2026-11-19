@@ -61,8 +61,9 @@ which cannot change its persona. The author's edit writes through
   channel access, before the personal-notes branch and the nonce. `validateForumStarter` calls it
   too, so a forum post naming someone else's persona is refused before the post exists.
 - **Edit:** checked in `editMessage` before the lock. Re-sending the message's current persona skips
-  the check, so a message stays editable after its persona is deleted. A persona-only edit sets no
-  `edited_timestamp`, and `MessageValidationService` counts the stored content, attachments, embeds
+  the check, so a message stays editable after its persona is deleted. A persona-only edit
+  (`persona/PersonaOnlyEdit.ts`) is allowed on a forward too, whose snapshot cannot otherwise be
+  edited (tyne-chat/tyne#817), and skips the content checks. It sets no `edited_timestamp`, and `MessageValidationService` counts the stored content, attachments, embeds
   and stickers when an edit leaves them out, so such an edit is not "empty".
 - **Storage:** `persona_id` and `mention_personas` on upstream's `messages` table.
   `MessageRepository.upsertMessage` runs `withMentionedPersonas` (persona guide) on every write.

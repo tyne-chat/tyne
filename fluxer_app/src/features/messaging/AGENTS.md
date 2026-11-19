@@ -167,7 +167,7 @@ and the fork tests. Inside upstream's files, under `// Fork imports.`:
 | File | Fork change |
 |---|---|
 | `useMessageSubmission.tsx`, `useTextareaSubmit.ts`, `useTextareaExpressionHandlers.ts` | persona blocks in both send callbacks; `matchEditMessage` around the edit calls; the draft kept on expression sends |
-| `MessageCommands.tsx` | `subprofile` on `SendMessageParams`; `SignalBarStore.affirmPersona` in `send`; `edit`'s last parameter and response block; the page-fit check in `fetchMessages`; `editWithFiles` appended |
+| `MessageCommands.tsx` | `subprofile` on `SendMessageParams`; `SignalBarStore.affirmPersona` in `send`; `forward`'s `forwardAs` and its persona per send (tyne-chat/tyne#817); `edit`'s last parameter and response block; the page-fit check in `fetchMessages`; `editWithFiles` appended |
 | `MessageRequestUtils.ts`, `MessageSubmitUtils.ts`, `MessageRetryUtils.ts`, `MessageQueue.tsx` | `persona_id` in requests; `subprofile` carried through |
 | `MessagingMessage.ts`, `ChannelMessages.ts` | `subprofile` in constructor, `withUpdates`, `equals`, `toJSON`; `mention_personas` → `PersonaStore.recordKnownPersona`; `skipReactionHydration` |
 | `components/pages/MessageListPage.module.css` | appended block: the Saved messages and Recent mentions titles end in an ellipsis (tyne-chat/tyne#505) |
