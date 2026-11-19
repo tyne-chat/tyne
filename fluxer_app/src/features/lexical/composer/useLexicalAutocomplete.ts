@@ -122,6 +122,7 @@ import {
 	useAutocompletePersonaSearch,
 } from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {isOwnPersonaSuggested} from '@app/features/persona/utils/PersonaMentionSetting';
 import {dmThreadParent} from '@app/features/threads/fork/ForkDmThreads';
 import type {ChannelPersonaMentionItem} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 
@@ -188,56 +189,60 @@ function buildRecentSpeakerOptions(
 	return options;
 }
 
+/**
+ * Personas seen in the channel's loaded messages, newest first. Each one's time ranks it higher in
+ * the suggestions, but only the account's own become suggestions from here, taken from the own
+ * store (tyne-chat/tyne#652): other accounts' come from the mention route, which applies their
+ * mention setting, so a copy of someone's persona set to nobody never slips back in from a message.
+ */
 function buildRecentPersonaOptions(
 	channel: Channel,
 	currentUserId?: string,
 	limit: number = MENTION_RESULT_LIMIT,
-): Array<ChannelPersonaMentionItem> {
+): {own: Array<ChannelPersonaMentionItem>; lastUsedAt: Map<string, string>} {
+	const own: Array<ChannelPersonaMentionItem> = [];
+	const lastUsedAt = new Map<string, string>();
 	const messages = Messages.getCachedMessages(channel.id);
 	if (messages == null) {
-		return [];
+		return {own, lastUsedAt};
 	}
-	const seen = new Set<string>();
-	const items: Array<ChannelPersonaMentionItem> = [];
 	messages.forEach(
 		(message) => {
 			const sub = message.subprofile;
-			if (sub == null) {
+			if (sub == null || lastUsedAt.has(sub.id)) {
 				return undefined;
 			}
-			if (seen.has(sub.id)) {
-				return undefined;
+			const usedAt = message.timestamp.getTime().toString();
+			lastUsedAt.set(sub.id, usedAt);
+			const persona = message.author.id === currentUserId ? PersonaStore.getPersona(sub.id) : null;
+			if (persona && isOwnPersonaSuggested(persona)) {
+				const member = channel.guildId ? GuildMembers.getMember(channel.guildId, message.author.id) : null;
+				own.push({
+					id: persona.id,
+					name: persona.name,
+					aliases: persona.aliases,
+					avatar_hash: persona.avatar_hash ?? null,
+					color: persona.color ?? null,
+					avatar_color: persona.avatar_color ?? null,
+					display_tag_text: sub.display_tag_text ?? null,
+					display_tag_icon: sub.display_tag_icon ?? null,
+					visibility: persona.visibility,
+					use_count: 1,
+					last_used_at_ms: usedAt,
+					owner_user_id: message.author.id,
+					owner_username: message.author.username,
+					owner_discriminator:
+						message.author.discriminator != null ? String(message.author.discriminator).padStart(4, '0') : null,
+					owner_global_name: message.author.globalName ?? null,
+					owner_nickname: member?.nick ?? null,
+				});
 			}
-			// Privacy check: If the persona is private and the author is not the current user, skip it
-			if (sub.visibility === 'private' && message.author.id !== currentUserId) {
-				return undefined;
-			}
-			seen.add(sub.id);
-			const member = channel.guildId ? GuildMembers.getMember(channel.guildId, message.author.id) : null;
-			items.push({
-				id: sub.id,
-				name: sub.name,
-				avatar_hash: sub.avatar ?? null,
-				color: sub.color ?? null,
-				avatar_color: sub.avatar_color ?? null,
-				display_tag_text: sub.display_tag_text ?? null,
-				display_tag_icon: sub.display_tag_icon ?? null,
-				visibility: sub.visibility ?? 'public',
-				use_count: 1,
-				last_used_at_ms: message.timestamp.getTime().toString(),
-				owner_user_id: message.author.id,
-				owner_username: message.author.username,
-				owner_discriminator:
-					message.author.discriminator != null ? String(message.author.discriminator).padStart(4, '0') : null,
-				owner_global_name: message.author.globalName ?? null,
-				owner_nickname: member?.nick ?? null,
-			});
-			return items.length < limit;
+			return lastUsedAt.size < limit;
 		},
 		undefined,
 		true,
 	);
-	return items;
+	return {own, lastUsedAt};
 }
 
 export type {TriggerType} from '@app/features/messaging/utils/AutocompleteTriggerPolicy';
@@ -466,16 +471,14 @@ export function useLexicalAutocomplete({
 				for (const item of personaSearchResults) {
 					mergedPersonasMap.set(item.id, {...item});
 				}
-				for (const p of recentInChannelPersonas) {
-					const existing = mergedPersonasMap.get(p.id);
-					if (existing) {
-						if (
-							p.last_used_at_ms &&
-							(!existing.last_used_at_ms || Number(p.last_used_at_ms) > Number(existing.last_used_at_ms))
-						) {
-							existing.last_used_at_ms = p.last_used_at_ms;
-						}
-					} else {
+				for (const [id, usedAt] of recentInChannelPersonas.lastUsedAt) {
+					const existing = mergedPersonasMap.get(id);
+					if (existing && (!existing.last_used_at_ms || Number(usedAt) > Number(existing.last_used_at_ms))) {
+						existing.last_used_at_ms = usedAt;
+					}
+				}
+				for (const p of recentInChannelPersonas.own) {
+					if (!mergedPersonasMap.has(p.id)) {
 						mergedPersonasMap.set(p.id, p);
 					}
 				}

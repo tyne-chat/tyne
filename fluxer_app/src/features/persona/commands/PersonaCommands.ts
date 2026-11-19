@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
+import {clearPersonaMentionCache} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import MessageReactions from '@app/features/messaging/state/MessageReactions';
 import Messages from '@app/features/messaging/state/MessagingMessages';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
@@ -24,6 +25,7 @@ import type {
 	PersonaImportPreviewResponse,
 	PersonaRestoreResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
+import type {PersonaMentionableBy} from '@fluxer/schema/src/domains/persona/PersonaMentionableBy';
 import {runInAction} from 'mobx';
 import {normalizeSubprofile, PersonaStore} from '../state/PersonaStore';
 
@@ -267,6 +269,26 @@ export async function setPersonaVisibilities(
 		'Failed to change the visibility of personas',
 	);
 	PersonaStore.upsertPersonas(res.body);
+	return res.body;
+}
+
+/**
+ * Gives many personas their own mention setting in one request (tyne-chat/tyne#652); null makes one
+ * follow its visibility again. Suggestions change at once, before the gateway's echo.
+ */
+export async function setPersonaMentionableBy(
+	changes: ReadonlyArray<{id: string; mentionable_by: PersonaMentionableBy | null}>,
+): Promise<Array<PersonaResponse>> {
+	if (changes.length === 0) return [];
+	const res = await sendPersonaRequest(
+		() =>
+			http.patch<Array<PersonaResponse>>(ForkEndpoints.USER_PERSONA_MENTIONABLE_BY, {
+				body: {personas: changes},
+			}),
+		'Failed to change who gets personas in mention suggestions',
+	);
+	PersonaStore.upsertPersonas(res.body);
+	clearPersonaMentionCache();
 	return res.body;
 }
 

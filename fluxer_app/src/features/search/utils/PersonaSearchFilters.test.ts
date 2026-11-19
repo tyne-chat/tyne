@@ -110,6 +110,23 @@ describe('personas in the parsed query', () => {
 	});
 });
 
+describe('own personas set to nobody in the parsed query (tyne-chat/tyne#652)', () => {
+	it("leave a friend's persona of the same name to a typed name", () => {
+		addTestPersona(PersonaStore, {name: 'Lyra', mentionable_by: 'nobody'});
+		stubs.mentionItems = [otherPersona('601', 'Lyra')];
+
+		expect(parseQuery('from:Lyra').personaId).toEqual(['601']);
+	});
+
+	it('still count when set to only you, or when following visibility', () => {
+		const mine = addTestPersona(PersonaStore, {name: 'Wren', mentionable_by: 'self'});
+		const privateOne = addTestPersona(PersonaStore, {name: 'Pip', visibility: 'private'});
+
+		expect(parseQuery('from:Wren').personaId).toEqual([mine.id]);
+		expect(parseQuery('from:Pip').personaId).toEqual([privateOne.id]);
+	});
+});
+
 describe('persona aliases in the parsed query (tyne-chat/tyne#707)', () => {
 	it('resolves a typed alias when no persona has it as its name', () => {
 		const own = addTestPersona(PersonaStore, {name: 'SΛTVRN', aliases: ['Sat', 'Saturn']});

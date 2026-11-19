@@ -120,6 +120,21 @@ msgstr "nasin ilo ale"
 msgid "All time zones"
 msgstr "ma tenpo ale"
 
+msgid "Allow mentions by"
+msgstr "jan seme li ken pana e nimi @?"
+
+#. Menu item under the persona selection bar’s Mentions button.
+msgid "Allow mentions by everyone"
+msgstr "jan ale li ken pana e nimi @"
+
+#. Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).
+msgid "Allow mentions by nobody"
+msgstr "jan ala li ken pana e nimi @"
+
+#. Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.
+msgid "Allow mentions only by you"
+msgstr "sina taso li ken pana e nimi @"
+
 #. Heading of the QR code box on the download page.
 msgid "Also on your phone"
 msgstr "lon ilo toki sina kin"
@@ -131,6 +146,10 @@ msgstr "nimi lawa ante anu nimi lawa pi ilo li jo e nimi ni."
 #. Under the AppImage download button: it works on every other Linux distribution.
 msgid "Any other Linux"
 msgstr "Linux ante ale"
+
+#. Helper text under "Allow mentions by" when Everyone is chosen
+msgid "Anyone can find this persona when typing @ or searching."
+msgstr "jan ale li ken lukin e jan insa ni lon nimi @ en lon alasa."
 
 #. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
 msgid "Apple silicon (M1 or newer)"
@@ -602,6 +621,15 @@ msgstr "Fedora, openSUSE"
 msgid "Filter by visibility"
 msgstr "jan seme li ken lukin?"
 
+#. Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.
+#. Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again
+msgid "Follow Visibility"
+msgstr "o kepeken ken lukin"
+
+#. Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone
+msgid "Follows Visibility until you choose."
+msgstr "sina pana ala e wile la, ken lukin li lawa."
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "lukin pi nasin sitelen"
@@ -816,6 +844,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "ona o awen weka"
 
+#. Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people's personas. Visibility is the setting above it
+msgid "Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility."
+msgstr "jan insa ni li lon ala sona pi nimi @ li lon ala alasa, kin tawa sina. ona li ken toki. ken lukin li lawa e lipu ona."
+
 #. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
 msgid "Left out, since you can no longer post there: {chats}"
 msgstr "sina ken ala toki lon tomo toki ni la ona li weka: {chats}"
@@ -882,6 +914,22 @@ msgstr "jan nanpa {index}"
 
 msgid "Members with Avatars"
 msgstr "jan pi sitelen jan"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone"
+msgstr "{count, plural, one {jan ale li ken pana e nimi @ pi jan insa #} other {jan ale li ken pana e nimi @ pi jan insa #}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody"
+msgstr "{count, plural, one {jan ala li ken pana e nimi @ pi jan insa #} other {jan ala li ken pana e nimi @ pi jan insa #}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you"
+msgstr "{count, plural, one {sina taso li ken pana e nimi @ pi jan insa #} other {sina taso li ken pana e nimi @ pi jan insa #}}"
+
+#. Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility"
+msgstr "{count, plural, one {ken lukin li lawa e nimi @ pi jan insa #} other {ken lukin li lawa e nimi @ pi jan insa #}}"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -1007,6 +1055,14 @@ msgstr "nimi lili ala: ona li kama, li jo ala e nimi lili"
 msgid "No tags"
 msgstr "nimi lili ala"
 
+#. Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner
+msgid "Nobody"
+msgstr "jan ala"
+
+#. Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.
+msgid "Nobody gets this persona in mention suggestions"
+msgstr "jan ala li lukin e jan insa ni lon sona pi nimi @"
+
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "jan ala li open e suno ni"
@@ -1062,6 +1118,14 @@ msgstr "tawa tomo toki ni taso"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "sina taso li ken lukin. jan ante li ken ala lukin e toki sona ale e lipu sona pi jan insa ni."
+
+#. Persona setting "Allow mentions by": only the persona owner's account gets it in mention and search suggestions
+msgid "Only you"
+msgstr "sina taso"
+
+#. Helper text under "Allow mentions by" when Only you is chosen
+msgid "Only your account finds it when typing @ or searching."
+msgstr "lipu jan sina taso li lukin e ona lon nimi @ en lon alasa."
 
 #. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
 msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
@@ -1930,6 +1994,10 @@ msgstr "jan insa sina li awen lon seme"
 #. Question over the personas a member of the import file might be. {name} is the member
 msgid "Which persona is {name}?"
 msgstr "{name} li jan insa seme?"
+
+#. Aria label for the persona "Allow mentions by" tabs
+msgid "Who gets this persona in mention suggestions"
+msgstr "jan seme li lukin e jan insa ni lon sona pi nimi @"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"

@@ -120,6 +120,21 @@ msgstr "Sve platforme"
 msgid "All time zones"
 msgstr "Sve vremenske zone"
 
+msgid "Allow mentions by"
+msgstr "Tko može spominjati"
+
+#. Menu item under the persona selection bar’s Mentions button.
+msgid "Allow mentions by everyone"
+msgstr "Dopusti spominjanje svima"
+
+#. Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).
+msgid "Allow mentions by nobody"
+msgstr "Ne dopusti spominjanje nikome"
+
+#. Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.
+msgid "Allow mentions only by you"
+msgstr "Dopusti spominjanje samo vama"
+
 #. Heading of the QR code box on the download page.
 msgid "Also on your phone"
 msgstr "I na vašem telefonu"
@@ -131,6 +146,10 @@ msgstr "Druga naredba ili ugrađena naredba već ima ovaj naziv."
 #. Under the AppImage download button: it works on every other Linux distribution.
 msgid "Any other Linux"
 msgstr "Bilo koji drugi Linux"
+
+#. Helper text under "Allow mentions by" when Everyone is chosen
+msgid "Anyone can find this persona when typing @ or searching."
+msgstr "Svatko može pronaći ovu personu pri upisivanju @ ili pretraživanju."
 
 #. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
 msgid "Apple silicon (M1 or newer)"
@@ -602,6 +621,15 @@ msgstr "Fedora, openSUSE"
 msgid "Filter by visibility"
 msgstr "Filtriraj po vidljivosti"
 
+#. Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.
+#. Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again
+msgid "Follow Visibility"
+msgstr "Prati Vidljivost"
+
+#. Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone
+msgid "Follows Visibility until you choose."
+msgstr "Prati Vidljivost dok ne odaberete."
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "Pretpregled formata"
@@ -816,6 +844,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "Ostavi izbrisanu"
 
+#. Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people's personas. Visibility is the setting above it
+msgid "Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility."
+msgstr "Izostavljena iz prijedloga za @ i filtara pretraživanja, i vaših. I dalje može pisati, a njezin profil prati Vidljivost."
+
 #. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
 msgid "Left out, since you can no longer post there: {chats}"
 msgstr "Izostavljeno jer ondje više ne možeš pisati: {chats}"
@@ -882,6 +914,22 @@ msgstr "Član br. {index}"
 
 msgid "Members with Avatars"
 msgstr "Članovi s avatarima"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone"
+msgstr "{count, plural, one {# personu sada mogu spominjati svi} few {# persone sada mogu spominjati svi} other {# persona sada mogu spominjati svi}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody"
+msgstr "{count, plural, one {# personu sada ne može spominjati nitko} few {# persone sada ne može spominjati nitko} other {# persona sada ne može spominjati nitko}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you"
+msgstr "{count, plural, one {# personu sada možete spominjati samo vi} few {# persone sada možete spominjati samo vi} other {# persona sada možete spominjati samo vi}}"
+
+#. Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility"
+msgstr "{count, plural, one {Spominjanja # persone sada prate Vidljivost} few {Spominjanja # persone sada prate Vidljivost} other {Spominjanja # persona sada prate Vidljivost}}"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -1007,6 +1055,14 @@ msgstr "Nema oznake: dodaje se bez nje"
 msgid "No tags"
 msgstr "Nema oznaka"
 
+#. Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner
+msgid "Nobody"
+msgstr "Nitko"
+
+#. Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.
+msgid "Nobody gets this persona in mention suggestions"
+msgstr "Nitko ne dobiva ovu personu u prijedlozima za spominjanje"
+
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "Nitko nema uključen ovaj signal"
@@ -1062,6 +1118,14 @@ msgstr "Samo za ovaj kanal"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "Vidljivo samo vama. Drugi ne mogu vidjeti puni opis ni pojedinosti profila ove persone."
+
+#. Persona setting "Allow mentions by": only the persona owner's account gets it in mention and search suggestions
+msgid "Only you"
+msgstr "Samo vi"
+
+#. Helper text under "Allow mentions by" when Only you is chosen
+msgid "Only your account finds it when typing @ or searching."
+msgstr "Pronalazi je samo vaš račun pri upisivanju @ ili pretraživanju."
 
 #. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
 msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
@@ -1930,6 +1994,10 @@ msgstr "Gdje se pamti vaša persona"
 #. Question over the personas a member of the import file might be. {name} is the member
 msgid "Which persona is {name}?"
 msgstr "Koja je persona {name}?"
+
+#. Aria label for the persona "Allow mentions by" tabs
+msgid "Who gets this persona in mention suggestions"
+msgstr "Tko dobiva ovu personu u prijedlozima za spominjanje"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"

@@ -3,8 +3,9 @@
 /**
  * Persona suggestions in the message search bar (tyne#46). For `from:` and `mentions:`, and for a
  * plain word that could become one of them, the bar suggests personas as well as accounts: the
- * same personas the composer suggests for an @-mention in this channel, that is every persona of
- * the user's own and the public and unlisted personas of the channel's other members.
+ * same personas the composer suggests for an @-mention in this channel, that is the user's own
+ * unless set to nobody, and the other members' set to everyone (tyne-chat/tyne#652; a persona
+ * whose owner has not chosen follows its visibility: private only for its owner).
  */
 
 import type {

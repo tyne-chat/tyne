@@ -97,7 +97,9 @@ describe('useLexicalAutocomplete - Persona Mentions', () => {
 		};
 	}
 
-	it('extracts in-channel recent personas and includes them in mention autocomplete', async () => {
+	// Another account's persona comes only from the server's mention route, which applies its mention
+	// setting; a message only ranks it (tyne-chat/tyne#652, useLexicalAutocompleteRecentPersonas.test.tsx).
+	it("does not suggest another account's persona from a message alone", async () => {
 		const msg1 = {
 			id: '1001',
 			channel_id: testChannel.id,
@@ -146,14 +148,7 @@ describe('useLexicalAutocomplete - Persona Mentions', () => {
 
 		expect(hookResult).not.toBeNull();
 		const options = hookResult!.autocompleteOptions;
-		const personaOption = options.find((opt: any) => opt.type === 'mention' && opt.kind === 'persona');
-		expect(personaOption).toBeDefined();
-		if (personaOption && personaOption.type === 'mention' && personaOption.kind === 'persona') {
-			expect(personaOption.persona.name).toBe('Foxy');
-			expect(personaOption.persona.id).toBe('sub_fox');
-			expect(personaOption.persona.display_tag_text).toBe('FOX');
-			expect(personaOption.persona.owner_user_id).toBe('author_1');
-		}
+		expect(options.find((opt: any) => opt.type === 'mention' && opt.kind === 'persona')).toBeUndefined();
 	});
 
 	it('skips private personas authored by another user', async () => {
