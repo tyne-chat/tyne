@@ -1090,10 +1090,6 @@ msgstr "Osoba koja je koristi"
 msgid "Persona"
 msgstr "Persona"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "Odabrana je persona „{name}”."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "Oznake persone (prefiks i sufiks)"
 
@@ -1108,10 +1104,6 @@ msgstr "Persona je stvorena"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "Persona je izbrisana"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "Odabir persone poništen."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "Predloženo"
 msgid "Supports PluralKit system export files"
 msgstr "Podržava datoteke izvoza sustava iz PluralKita"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "Promijeni aktivnu personu"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "Osoba koja je koristi, kao spominjanje"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "Personu nije bilo moguće vratiti."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "Persona koju treba odabrati."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."

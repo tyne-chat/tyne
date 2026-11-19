@@ -1090,10 +1090,6 @@ msgstr "使用者"
 msgid "Persona"
 msgstr "人格"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "已選擇人格「{name}」。"
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "人格標籤（前綴和後綴）"
 
@@ -1108,10 +1104,6 @@ msgstr "人格已建立"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "人格已刪除"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "已取消選擇人格。"
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "推薦"
 msgid "Supports PluralKit system export files"
 msgstr "支援 PluralKit 系統匯出檔"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "切換使用中人格"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "使用者（提及形式）"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "無法還原該人格。"
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "要選擇的人格。"
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."

@@ -1090,10 +1090,6 @@ msgstr "실행한 사람"
 msgid "Persona"
 msgstr "페르소나"
 
-#. System message after /persona selects the persona {name}
-msgid "Persona \"{name}\" selected."
-msgstr "페르소나 \"{name}\"을(를) 선택했어요."
-
 msgid "Persona Tags (Prefix & Suffix)"
 msgstr "페르소나 태그 (접두사 및 접미사)"
 
@@ -1108,10 +1104,6 @@ msgstr "페르소나 생성됨"
 #. Toast when persona is deleted
 msgid "Persona deleted"
 msgstr "페르소나 삭제됨"
-
-#. System message after /persona without a name: messages are sent as the account again
-msgid "Persona deselected."
-msgstr "페르소나 선택을 해제했어요."
 
 #. Toast when saving a persona without a name
 msgid "Persona name cannot be empty"
@@ -1555,10 +1547,6 @@ msgstr "추천"
 msgid "Supports PluralKit system export files"
 msgstr "PluralKit 시스템 내보내기 파일을 지원해요"
 
-#. Slash-command description for /persona
-msgid "Switch the active persona"
-msgstr "활성 페르소나 전환"
-
 #. Label of the field for a new proxy tag in the import review
 msgctxt "persona-import-field"
 msgid "Tag"
@@ -1627,10 +1615,6 @@ msgstr "실행한 사람 멘션"
 #. Error toast when restoring a deleted persona fails
 msgid "The persona could not be restored."
 msgstr "페르소나를 복원하지 못했어요."
-
-#. Description of the persona option of the /persona slash command
-msgid "The persona to select."
-msgstr "선택할 페르소나예요."
 
 #. Problem in a community command script: it produces more text than is allowed.
 msgid "The script builds too much text."
