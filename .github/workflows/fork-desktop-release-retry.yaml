@@ -3,9 +3,11 @@
 # Fork: retries the macOS build of a desktop release when GitHub had no macOS runner for it
 # (tyne-chat/tyne#259). GitHub drops a job it cannot place on a runner ("The job was not acquired
 # by Runner of type hosted even after multiple attempts") and the release run fails, although the
-# other platforms built. This waits, reruns only the failed jobs (the jobs that succeeded and
-# their artifacts are kept, and the publish job runs again after the new macOS build), and
-# repeats up to MAX_ATTEMPTS attempts of the release run in all.
+# other platforms built. By then Windows and Linux are already published; this waits, reruns only
+# the failed jobs (the jobs that succeeded and their artifacts are kept, and publish-macos adds the
+# new macOS build to the release), and repeats up to MAX_ATTEMPTS attempts of the release run in
+# all. That can take many hours: before this job reaches its own time limit it starts the next
+# retry run for the same release run and stops.
 #
 # It retries only when every failed job is the macOS build and that job was never given a
 # runner. Any other failure is left for a person.
@@ -48,8 +50,11 @@ jobs:
       GH_REPO: ${{ github.repository }}
       RUN_ID: ${{ inputs.run_id || github.event.workflow_run.id }}
       # Attempts of the release run in all, the first one included.
-      MAX_ATTEMPTS: '6'
+      MAX_ATTEMPTS: '40'
       WAIT_MINUTES: '20'
+      # Start the next retry run once this one has run this long (its timeout is 340 minutes,
+      # and a wait plus a macOS attempt can take about an hour).
+      HANDOFF_MINUTES: '270'
     steps:
       - name: Wait and rerun while only the macOS runner is missing
         run: |
@@ -109,6 +114,11 @@ jobs:
             if [ "$attempt" -ge "$MAX_ATTEMPTS" ]; then
               echo "::error::No macOS runner in $attempt attempts of run $RUN_ID. Rerun its failed jobs later: gh run rerun $RUN_ID --failed"
               exit 1
+            fi
+            if [ "$SECONDS" -ge $((HANDOFF_MINUTES * 60)) ]; then
+              gh workflow run fork-desktop-release-retry.yaml --ref "$GITHUB_REF_NAME" -f run_id="$RUN_ID"
+              echo "Handed the retries of run $RUN_ID to a new retry run, before this one times out."
+              exit 0
             fi
             echo "Only the macOS build failed, for want of a runner. Retrying in $WAIT_MINUTES minutes."
             sleep $((WAIT_MINUTES * 60))
