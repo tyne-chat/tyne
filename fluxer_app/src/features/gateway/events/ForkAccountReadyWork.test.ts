@@ -18,6 +18,7 @@ const calls = vi.hoisted(() => ({
 	fetchPersonas: [] as Array<boolean | undefined>,
 	fetchPersonaSettings: 0,
 	fetchChannelStates: 0,
+	fetchPersonaGroups: 0,
 	invalidateSignalBar: 0,
 	invalidateGuildCommands: 0,
 	restoredDmThreads: [] as Array<string>,
@@ -48,6 +49,11 @@ vi.mock('@app/features/persona/commands/PersonaCommands', () => ({
 		calls.fetchPersonaSettings += 1;
 	},
 }));
+vi.mock('@app/features/persona/commands/PersonaGroupCommands', () => ({
+	fetchPersonaGroups: async () => {
+		calls.fetchPersonaGroups += 1;
+	},
+}));
 vi.mock('@app/features/persona/state/PersonaStore', () => ({
 	PersonaStore: {
 		fetchChannelStates: async () => {
@@ -72,7 +78,8 @@ vi.mock('@app/features/guild_commands/state/GuildCommandsStore', () => ({
 
 const {handleForkPromotedResume} = await import('@app/features/gateway/events/ForkAccountReadyWork');
 
-const requests = () => calls.fetchPersonas.length + calls.fetchPersonaSettings + calls.fetchChannelStates;
+const requests = () =>
+	calls.fetchPersonas.length + calls.fetchPersonaSettings + calls.fetchChannelStates + calls.fetchPersonaGroups;
 
 describe("the fork's READY work after upstream's promoted resume", () => {
 	beforeEach(() => {
@@ -80,17 +87,19 @@ describe("the fork's READY work after upstream's promoted resume", () => {
 		calls.fetchPersonas = [];
 		calls.fetchPersonaSettings = 0;
 		calls.fetchChannelStates = 0;
+		calls.fetchPersonaGroups = 0;
 		calls.invalidateSignalBar = 0;
 		calls.invalidateGuildCommands = 0;
 		calls.restoredDmThreads = [];
 	});
 
-	it('loads the personas, their settings and the channel states once, as after READY', () => {
+	it('loads the personas, their settings, the channel states and the groups once, as after READY', () => {
 		handleForkPromotedResume('account-1');
 		expect(calls.fetchPersonas).toEqual([true]);
 		expect(calls.fetchPersonaSettings).toBe(1);
 		expect(calls.fetchChannelStates).toBe(1);
-		expect(requests()).toBe(3);
+		expect(calls.fetchPersonaGroups).toBe(1);
+		expect(requests()).toBe(4);
 		expect(calls.invalidateSignalBar).toBe(1);
 		expect(calls.invalidateGuildCommands).toBe(1);
 		// The account's DM threads come back with no request (tyne-chat/tyne#699).
@@ -103,9 +112,9 @@ describe("the fork's READY work after upstream's promoted resume", () => {
 		expect(requests()).toBe(0);
 		work.isSuspended = false;
 		work.transition?.released?.(SWITCH);
-		expect(requests()).toBe(3);
+		expect(requests()).toBe(4);
 		work.transition?.released?.(SWITCH);
-		expect(requests()).toBe(3);
+		expect(requests()).toBe(4);
 	});
 
 	it('drops the work when another switch starts before the first one finishes', () => {

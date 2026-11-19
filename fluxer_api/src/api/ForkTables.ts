@@ -16,8 +16,10 @@ import {
 import {
 	PERSONA_CHANNEL_STATE_COLUMNS,
 	PERSONA_COLUMNS,
+	PERSONA_GROUP_COLUMNS,
 	PERSONA_IMAGE_SOURCE_COLUMNS,
 	type PersonaChannelStateRow,
+	type PersonaGroupRow,
 	type PersonaImageSourceRow,
 	type PersonaRow,
 	THREAD_OWNER_PERSONA_COLUMNS,
@@ -61,6 +63,12 @@ export const PersonaImageSources = defineTable<PersonaImageSourceRow, 'user_id' 
 	name: 'persona_image_sources',
 	columns: PERSONA_IMAGE_SOURCE_COLUMNS,
 	primaryKey: ['user_id', 'persona_id'],
+	partitionKey: ['user_id'],
+});
+export const PersonaGroups = defineTable<PersonaGroupRow, 'user_id' | 'group_id', 'user_id'>({
+	name: 'persona_groups',
+	columns: PERSONA_GROUP_COLUMNS,
+	primaryKey: ['user_id', 'group_id'],
 	partitionKey: ['user_id'],
 });
 export const GuildCommands = defineTable<GuildCommandRow, 'guild_id' | 'command_id', 'guild_id'>({
