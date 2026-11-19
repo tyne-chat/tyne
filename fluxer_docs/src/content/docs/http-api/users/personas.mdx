@@ -16,6 +16,8 @@ An account holds at most 250 personas. Creating one more is refused with 400 `PE
 
 A persona has at most five tags. A longer list is refused with 400 `PERSONA_TAG_LIMIT_REACHED`. A tag listed twice on one persona, or a tag another of the account's personas already uses, is refused with 400 `DUPLICATE_PERSONA_TAG`.
 
+A persona has at most 10 aliases of up to 100 characters each: other names it is found by when searching or mentioning, never shown. A longer list is refused with 400, and a blank alias or a repeat (compared without case) is dropped. Each alias is checked against the profile blocklist as a name, and one it refuses is answered with 403 `CONTENT_BLOCKED`.
+
 A persona has at most 10,000 signature emojis, and a longer list is refused with 400 `SIGNATURE_EMOJI_LIMIT_REACHED`. A custom emoji is identified by its ID and a Unicode emoji by its name. An emoji listed twice, or one another of the account's personas already lists, is refused with 400 `DUPLICATE_SIGNATURE_EMOJI`.
 
 ## Visibility
@@ -46,6 +48,7 @@ One of the caller's own personas, with every setting the owner can change.
 | --- | --- | --- |
 | id | snowflake | The unique Snowflake identifier for this persona |
 | name | string | The persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each) |
 | avatar_hash? | ?string | Avatar asset hash |
 | banner_hash? | ?string | Banner asset hash |
 | pronouns? | ?string | Optional pronouns |
@@ -96,6 +99,7 @@ Another account's persona as others see it, without the settings only its owner 
 | --- | --- | --- |
 | id | snowflake | The unique Snowflake identifier for this persona |
 | name | string | The persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each) |
 | avatar_hash? | ?string | Avatar asset hash |
 | banner_hash? | ?string | Banner asset hash |
 | pronouns? | ?string | Optional pronouns |
@@ -152,6 +156,7 @@ A persona that can be mentioned in a channel, with its owner.
 | --- | --- | --- |
 | id | snowflake | The unique Snowflake identifier for this persona |
 | name | string | The persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each) |
 | avatar_hash? | ?string | Avatar asset hash |
 | banner_hash? | ?string | Banner asset hash |
 | display_tag_text? | ?string | Optional display tag text |
@@ -177,6 +182,7 @@ One persona in a [bulk import](#bulk-import-personas), with the fields of the [C
 | Field | Type | Description |
 | --- | --- | --- |
 | name | string | Persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each). Each is trimmed, and blank ones and repeats are dropped. Leave it out to keep the stored ones; an empty list clears them |
 | avatar_hash? | ?string | Avatar asset hash |
 | banner_hash? | ?string | Banner asset hash |
 | pronouns? | ?string | Optional pronouns |
@@ -262,7 +268,7 @@ Returns the personas that can be mentioned in a channel the caller can see: the 
 
 | Field | Type | Description |
 | --- | --- | --- |
-| q? | string | Text the persona's name, display tag, or owner's username or nickname must contain |
+| q? | string | Text the persona's name or one of its aliases, its display tag, or the owner's username or nickname must contain |
 | limit? | integer | The most candidates to return, 1-1000, default 100 |
 
 ### Response
@@ -302,6 +308,7 @@ Creates a persona for the caller and sends [User Persona Create](/gateway/events
 | Field | Type | Description |
 | --- | --- | --- |
 | name | string | Persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each). Each is trimmed, and blank ones and repeats are dropped. Leave it out to keep the stored ones; an empty list clears them |
 | avatar_hash? | ?string | Avatar asset hash |
 | banner_hash? | ?string | Banner asset hash |
 | pronouns? | ?string | Optional pronouns |
@@ -416,7 +423,7 @@ Selects one of the caller's personas in a channel the caller can see, or the acc
 
 <RouteHeader method="GET" path="/v1/users/@me/personas/export" oauth2="personas.read" />
 
-Returns the caller's personas as a ZIP file. It holds a PluralKit export file (`pluralkit.json`), each persona's avatar and banner and the display tag icon, `tyne.json` listing which image belongs to which persona, and a README. Importing the ZIP gives the personas back.
+Returns the caller's personas as a ZIP file. It holds a PluralKit export file (`pluralkit.json`), each persona's avatar and banner and the display tag icon, `tyne.json` listing which image belongs to which persona and what PluralKit has no place for (such as aliases), and a README. Importing the ZIP gives the personas back.
 
 ### Response
 
@@ -759,6 +766,7 @@ Changes one of the caller's personas. Only the fields present in the body change
 | Field | Type | Description |
 | --- | --- | --- |
 | name? | string | Persona display name |
+| aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each). Each is trimmed, and blank ones and repeats are dropped. Leave it out to keep the stored ones; an empty list clears them |
 | avatar_hash? | ?string | Avatar asset hash |
 | banner_hash? | ?string | Banner asset hash |
 | pronouns? | ?string | Optional pronouns |
