@@ -104,6 +104,7 @@ export function normalizePersona(
 		use_count: source.use_count ?? 0,
 		last_used_at_ms: lastUsedRaw != null ? String(lastUsedRaw) : null,
 		visibility: (source.visibility ?? 'unlisted') as PersonaVisibility,
+		mentionable_by: source.mentionable_by ?? null,
 		external_uuid: source.external_uuid ?? null,
 		created_at: source.created_at ?? new Date().toISOString(),
 		updated_at: source.updated_at ?? new Date().toISOString(),

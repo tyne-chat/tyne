@@ -678,6 +678,7 @@ describe('PersonaEditModal Component', () => {
 				color: 0x7b6cf6,
 				bio: 'Night owl, stargazer.',
 				visibility: 'public',
+				mentionable_by: null,
 				persona_tags: [],
 				auto_tag_disabled: true,
 				signature_emojis: [],
@@ -774,6 +775,74 @@ describe('PersonaEditModal Component', () => {
 			expect(ModalCommands.popWithKey).not.toHaveBeenCalled();
 			expect(ModalCommands.pushWithKey).not.toHaveBeenCalled();
 			expect(query('persona.persona-edit-modal.button.save')).not.toBeNull();
+		});
+	});
+
+	// "Allow mentions by" (tyne-chat/tyne#652): null follows visibility until a value is picked.
+	describe('the mention setting', () => {
+		const tab = (group: string, label: string) =>
+			Array.from(document.body.querySelectorAll<HTMLButtonElement>(`[aria-label="${group}"] button`)).find(
+				(button) => button.textContent === label,
+			)!;
+		const MENTIONS = 'Who gets this persona in mention suggestions';
+		const pick = async (group: string, label: string) => {
+			await act(async () => {
+				tab(group, label).click();
+			});
+		};
+		const clickFlx = async (flx: string) => {
+			await act(async () => {
+				(document.body.querySelector(`[data-flx="${flx}"]`) as HTMLButtonElement).click();
+			});
+		};
+		const renderNew = async () => {
+			await act(async () => {
+				root.render(
+					<PersonaEditModal
+						onClose={vi.fn()}
+						data-flx="persona.persona-edit-modal-test.persona-edit-modal--mentions"
+					/>,
+				);
+			});
+			await act(async () => {
+				const input = document.body.querySelector(
+					'[data-flx="persona.persona-edit-modal.input.name"]',
+				) as HTMLInputElement;
+				Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(input, 'Lyra');
+				input.dispatchEvent(new Event('input', {bubbles: true}));
+			});
+		};
+
+		it('follows visibility until picked, and sends null meanwhile', async () => {
+			await renderNew();
+			expect(tab(MENTIONS, 'Everyone').getAttribute('aria-selected')).toBe('true');
+
+			await pick('Persona visibility', 'Private');
+			expect(tab(MENTIONS, 'Only you').getAttribute('aria-selected')).toBe('true');
+			expect(
+				document.body.querySelector('[data-flx="persona.persona-edit-modal.button.mentions-follow-visibility"]'),
+			).toBeNull();
+
+			await clickFlx('persona.persona-edit-modal.button.save');
+			expect(PersonaCommands.createPersona).toHaveBeenCalledWith(
+				expect.objectContaining({visibility: 'private', mentionable_by: null}),
+			);
+		});
+
+		it('sends a picked value, and Follow Visibility drops it again', async () => {
+			await renderNew();
+			await pick(MENTIONS, 'Nobody');
+			await pick('Persona visibility', 'Public');
+			expect(tab(MENTIONS, 'Nobody').getAttribute('aria-selected')).toBe('true');
+
+			await clickFlx('persona.persona-edit-modal.button.mentions-follow-visibility');
+			expect(tab(MENTIONS, 'Everyone').getAttribute('aria-selected')).toBe('true');
+			await pick(MENTIONS, 'Nobody');
+
+			await clickFlx('persona.persona-edit-modal.button.save');
+			expect(PersonaCommands.createPersona).toHaveBeenCalledWith(
+				expect.objectContaining({visibility: 'public', mentionable_by: 'nobody'}),
+			);
 		});
 	});
 });

@@ -14,6 +14,7 @@
 import type {SearchHints as SearchBarHints} from '@app/features/channel/components/message_search_bar/MessageSearchBarTypes';
 import {getCachedPersonaMentionItems} from '@app/features/lexical/composer/useAutocompletePersonaSearch';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {isOwnPersonaSuggested} from '@app/features/persona/utils/PersonaMentionSetting';
 import type {SearchHistoryEntry} from '@app/features/search/state/SearchHistory';
 import type {SearchHints, tokenize} from '@app/features/search/utils/SearchQueryParser';
 import type {SearchSegment} from '@app/features/search/utils/SearchSegmentManager';
@@ -65,12 +66,13 @@ function addPersona(params: MessageSearchParams, filterKey: PersonaFilterKey, is
 /**
  * The one known persona with this name (any case), or null when there is none or more than one. A
  * persona with the name among its aliases counts too, but only when no persona has it as its name
- * (tyne-chat/tyne#707).
+ * (tyne-chat/tyne#707). One's own personas set to nobody do not count (tyne-chat/tyne#652), so a copy
+ * of a friend's "Lyra" leaves `from:Lyra` naming the friend's.
  */
 export function resolveKnownPersonaByName(name: string): string | null {
 	const wanted = name.trim().toLowerCase();
 	if (wanted === '') return null;
-	const known = [...PersonaStore.personas, ...getCachedPersonaMentionItems()];
+	const known = [...PersonaStore.personas.filter(isOwnPersonaSuggested), ...getCachedPersonaMentionItems()];
 	const ids = new Set<string>();
 	for (const persona of known) {
 		if (persona.name.trim().toLowerCase() === wanted) ids.add(persona.id);

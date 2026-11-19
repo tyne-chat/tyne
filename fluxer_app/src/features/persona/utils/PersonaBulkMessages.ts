@@ -103,3 +103,50 @@ export const CHOOSE_PERSONAS_TO_FEATURE_DESCRIPTOR = msg({
 	comment:
 		'Button in one’s own Personas list when none is public; opens persona settings to pick which to make public.',
 });
+
+// Who gets the selected personas in mention suggestions (tyne-chat/tyne#652).
+export const MENTIONS_BUTTON_DESCRIPTOR = msg({
+	message: 'Mentions',
+	comment:
+		'Button in the persona selection bar; opens a menu to choose who gets the selected personas in @ mention and search suggestions.',
+});
+export const MENTIONABLE_BY_EVERYONE_ITEM_DESCRIPTOR = msg({
+	message: 'Allow mentions by everyone',
+	comment: 'Menu item under the persona selection bar’s Mentions button.',
+});
+export const MENTIONABLE_BY_SELF_ITEM_DESCRIPTOR = msg({
+	message: 'Allow mentions only by you',
+	comment:
+		'Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.',
+});
+export const MENTIONABLE_BY_NOBODY_ITEM_DESCRIPTOR = msg({
+	message: 'Allow mentions by nobody',
+	comment:
+		'Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).',
+});
+export const MENTIONABLE_BY_FOLLOW_ITEM_DESCRIPTOR = msg({
+	message: 'Follow Visibility',
+	comment:
+		'Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.',
+});
+export const NOW_MENTIONABLE_BY_EVERYONE_DESCRIPTOR = msg({
+	message: 'Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone',
+	comment: 'Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.',
+});
+export const NOW_MENTIONABLE_BY_SELF_DESCRIPTOR = msg({
+	message: 'Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you',
+	comment: 'Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.',
+});
+export const NOW_MENTIONABLE_BY_NOBODY_DESCRIPTOR = msg({
+	message: 'Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody',
+	comment: 'Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.',
+});
+export const NOW_MENTIONABLE_BY_FOLLOWING_DESCRIPTOR = msg({
+	message: 'Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility',
+	comment:
+		'Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.',
+});
+export const NOT_MENTIONABLE_ICON_DESCRIPTOR = msg({
+	message: 'Nobody gets this persona in mention suggestions',
+	comment: 'Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.',
+});
