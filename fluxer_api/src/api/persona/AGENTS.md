@@ -18,6 +18,7 @@ and follow the placement rules in the root `AGENTS.md`.
 | The three response shapes | `models/Persona.ts` (outside this folder) |
 | Which persona a request names, and whether the caller owns it | `PersonaOwnership.ts` |
 | A new message sent as whoever is selected (`use_persona_selection`) | `PersonaSelection.ts` |
+| An edit that changes only the persona, allowed on a forward too (tyne-chat/tyne#817) | `PersonaOnlyEdit.ts` |
 | Who is typing as whom | `TypingPersona.ts` |
 | Image import from links | `PersonaAvatarImporter.ts`; the upload and link routes are in `user/controllers/UserAccountController.ts` |
 | Deleting the images with the account | `PersonaImageDeletion.ts`, called from `UserDeletionService` |

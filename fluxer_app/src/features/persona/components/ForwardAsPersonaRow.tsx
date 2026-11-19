@@ -3,6 +3,7 @@
 import Accessibility from '@app/features/accessibility/state/Accessibility';
 import styles from '@app/features/persona/components/ForwardAsPersonaRow.module.css';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
+import {SENDING_AS_TAG_DESCRIPTOR} from '@app/features/persona/components/PersonaComposerPill';
 import {PersonaPickerSheet} from '@app/features/persona/components/PersonaPickerSheet';
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {defaultForwardAs, type ForwardAs} from '@app/features/persona/utils/OutgoingPersona';
@@ -15,7 +16,7 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {CaretDownIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 const FORWARD_AS_DESCRIPTOR = msg({
 	message: 'Forward as',
@@ -26,6 +27,8 @@ const FORWARD_AS_NAME_DESCRIPTOR = msg({
 	comment:
 		'Spoken name of the button in the Forward dialog that picks who the forward is sent as. name is a persona or account name.',
 });
+
+const FORWARD_AS_POPOUT_KEY = 'forward-as-persona-picker';
 
 /** Who the forward goes out as: the dialog's pick, else the default it shows. */
 export function chosenForwardAs(picked: ForwardAs | undefined, sourceChannelId: string): ForwardAs {
@@ -50,6 +53,8 @@ export const ForwardAsPersonaRow = observer(
 		const {i18n} = useLingui();
 		const buttonRef = useRef<HTMLButtonElement | null>(null);
 		const [pickerOpen, setPickerOpen] = useState(false);
+		// The picker belongs to the dialog: it goes when the dialog does.
+		useEffect(() => () => PopoutCommands.close(FORWARD_AS_POPOUT_KEY), []);
 		const currentUser = Users.getCurrentUser();
 		const chosen = chosenForwardAs(picked, sourceChannelId);
 		const said = PersonaStore.matchTagOnly(comment, chosen?.id ?? null);
@@ -67,7 +72,7 @@ export const ForwardAsPersonaRow = observer(
 		const handleClick = useCallback(() => {
 			const button = buttonRef.current;
 			if (button == null || disabled) return;
-			const popoutKey = 'forward-as-persona-picker';
+			const popoutKey = FORWARD_AS_POPOUT_KEY;
 			if (pickerOpen) {
 				PopoutCommands.close(popoutKey);
 				return;
@@ -79,7 +84,7 @@ export const ForwardAsPersonaRow = observer(
 						<PersonaPickerSheet
 							onClose={onClose}
 							showModes={false}
-							selectedPersonaId={chosen?.id ?? ''}
+							selectedPersonaId={shownId ?? ''}
 							onSelectPersona={(id) => {
 								const persona = PersonaStore.personas.find((candidate) => candidate.id === id);
 								if (persona != null) {
@@ -103,7 +108,7 @@ export const ForwardAsPersonaRow = observer(
 				},
 				popoutKey,
 			);
-		}, [chosen?.id, disabled, onPick, pickerOpen]);
+		}, [shownId, disabled, onPick, pickerOpen]);
 
 		if (!Accessibility.showPersonasButton || PersonaStore.personas.length === 0 || currentUser == null) {
 			return null;
@@ -121,6 +126,7 @@ export const ForwardAsPersonaRow = observer(
 						aria-haspopup="dialog"
 						aria-expanded={pickerOpen}
 						aria-label={i18n._(FORWARD_AS_NAME_DESCRIPTOR, {name: shownName})}
+						title={said.isFromTag ? i18n._(SENDING_AS_TAG_DESCRIPTOR, {name: shownName}) : undefined}
 						disabled={disabled}
 						onClick={handleClick}
 						data-flx="persona.forward-as.button"
@@ -129,7 +135,12 @@ export const ForwardAsPersonaRow = observer(
 						<span className={styles.name} data-flx="persona.forward-as.name">
 							{shownName}
 						</span>
-						<CaretDownIcon size={remFromPx(12)} weight="bold" data-flx="persona.forward-as.caret" />
+						<CaretDownIcon
+							className={styles.caret}
+							size={remFromPx(12)}
+							weight="bold"
+							data-flx="persona.forward-as.caret"
+						/>
 					</button>
 				</FocusRing>
 			</div>

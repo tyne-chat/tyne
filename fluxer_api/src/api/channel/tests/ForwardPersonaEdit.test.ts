@@ -26,7 +26,7 @@ describe('Changing the persona of a forward', () => {
 	});
 
 	async function forwardAsAccount() {
-		const {owner, guild, systemChannel} = await setupTestGuildWithMembers(harness, 0);
+		const {owner, members, guild, systemChannel} = await setupTestGuildWithMembers(harness, 1);
 		await ensureSessionStarted(harness, owner.token);
 		const destination = await createChannel(harness, owner.token, guild.id, 'forward-destination');
 		const source = await sendChannelMessage(harness, owner.token, systemChannel.id, 'forward me');
@@ -47,7 +47,7 @@ describe('Changing the persona of a forward', () => {
 			})
 			.expect(HTTP_STATUS.OK)
 			.execute();
-		return {owner, destination, persona, forward};
+		return {owner, member: members[0]!, destination, persona, forward};
 	}
 
 	it('moves a forward to a persona and back to the account, and leaves the rest alone', async () => {
@@ -89,6 +89,26 @@ describe('Changing the persona of a forward', () => {
 			.patch(`/channels/${destination.id}/messages/${forward.id}`)
 			.body({persona_id: persona.id, flags: 0})
 			.expect(HTTP_STATUS.BAD_REQUEST)
+			.execute();
+	});
+
+	it("refuses a change of persona on someone else's forward", async () => {
+		const {member, destination, forward} = await forwardAsAccount();
+		await ensureSessionStarted(harness, member.token);
+		const theirs = await createBuilder<{id: string}>(harness, member.token)
+			.post('/users/@me/personas')
+			.body({name: 'Not the author'})
+			.expect(HTTP_STATUS.CREATED)
+			.execute();
+		await createBuilder(harness, member.token)
+			.patch(`/channels/${destination.id}/messages/${forward.id}`)
+			.body({persona_id: theirs.id})
+			.expect(HTTP_STATUS.FORBIDDEN)
+			.execute();
+		await createBuilder(harness, member.token)
+			.patch(`/channels/${destination.id}/messages/${forward.id}`)
+			.body({persona_id: null})
+			.expect(HTTP_STATUS.FORBIDDEN)
 			.execute();
 	});
 

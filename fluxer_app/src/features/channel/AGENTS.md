@@ -71,7 +71,8 @@ The rules are in `persona/AGENTS.md`; this is where each part is drawn:
   `PersonaProfileMobile.open`) when the message has a `subprofile`.
 - **OP tag:** only when `originalPosterTagAppliesToMessage` matches the message's persona with the
   thread's `Channel.ownerPersonaId`.
-- **"Change persona":** a `MessageActionMenu` item (when the account has personas) calls
+- **"Change persona":** a `MessageActionMenu` item (one's own user message, interactive, also a
+  forward, when the account has personas; tyne-chat/tyne#817) calls
   `MessageChangePersona.startChangePersona`; an effect in `ChannelMessage` opens
   `PersonaPickerSheet` on the row, and a pick sends one edit carrying only the persona. The inline
   edit's selector differs: its pick waits for Save in `MessageChangePersona`, and Escape discards it.

@@ -352,7 +352,12 @@ export const useMessageActionMenuData = (
 				});
 			}
 			// Fork: also for a forward, whose sender is the one thing about it that can change (tyne-chat/tyne#817).
-			if (message.isCurrentUserAuthor() && message.isUserMessage() && PersonaStore.personas.length) {
+			if (
+				message.isCurrentUserAuthor() &&
+				message.isUserMessage() &&
+				supportsInteractiveActions &&
+				PersonaStore.personas.length
+			) {
 				interactionActions.push({
 					id: messageActionMenuItemIds.changePersona,
 					icon: <ChangePersonasIcon size={20} data-flx="channel.message-action-menu.groups.change-personas-icon" />,

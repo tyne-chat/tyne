@@ -22,7 +22,7 @@
 	padding-block: 0.25rem;
 	padding-inline: 0.25rem 0.5rem;
 	border: 0.0625rem solid var(--background-modifier-accent);
-	border-radius: 999rem;
+	border-radius: var(--radius-full);
 	background-color: var(--background-secondary);
 	color: var(--text-primary);
 	font: inherit;
@@ -37,6 +37,10 @@
 .button:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
+}
+
+.caret {
+	flex-shrink: 0;
 }
 
 .name {
