@@ -7,6 +7,11 @@ import {
 	personaAssetHashOrNull,
 	type SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {
+	effectiveMentionableBy,
+	type PersonaMentionableBy,
+	PersonaMentionableBySchema,
+} from '@fluxer/schema/src/domains/persona/PersonaMentionableBy';
 import {readPersonaAliases} from '@fluxer/schema/src/domains/persona/PersonaNameSearch';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
@@ -30,6 +35,8 @@ export class Persona {
 	readonly useCount: number;
 	readonly lastUsedAtMs: bigint | null;
 	readonly visibility: PersonaVisibility;
+	/** The mention setting as stored: null until the owner chooses (tyne-chat/tyne#652). */
+	readonly storedMentionableBy: PersonaMentionableBy | null;
 	readonly externalUuid: string | null;
 	readonly createdAt: Date;
 	readonly updatedAt: Date;
@@ -38,6 +45,11 @@ export class Persona {
 
 	get isDeleted(): boolean {
 		return this.deletedAt !== null;
+	}
+
+	/** Who gets the persona in mention and search suggestions, the stored setting or what visibility implies. */
+	get mentionableBy(): PersonaMentionableBy {
+		return effectiveMentionableBy(this.storedMentionableBy, this.visibility);
 	}
 
 	constructor(row: PersonaRow) {
@@ -59,6 +71,7 @@ export class Persona {
 		this.useCount = row.use_count ?? 0;
 		this.lastUsedAtMs = row.last_used_at_ms ?? null;
 		this.visibility = (row.visibility as PersonaVisibility) || 'unlisted';
+		this.storedMentionableBy = PersonaMentionableBySchema.safeParse(row.mentionable_by).data ?? null;
 		this.externalUuid = row.external_uuid ?? null;
 		this.createdAt = row.created_at ?? snowflakeToDate(row.persona_id);
 		this.updatedAt = row.updated_at ?? this.createdAt;
@@ -83,6 +96,7 @@ export class Persona {
 			use_count: this.useCount,
 			last_used_at_ms: this.lastUsedAtMs ? this.lastUsedAtMs.toString() : null,
 			visibility: this.visibility,
+			mentionable_by: this.storedMentionableBy,
 			external_uuid: this.externalUuid,
 			created_at: this.createdAt.toISOString(),
 			updated_at: this.updatedAt.toISOString(),
@@ -158,6 +172,7 @@ export class Persona {
 			use_count: this.useCount,
 			last_used_at_ms: this.lastUsedAtMs,
 			visibility: this.visibility,
+			mentionable_by: this.storedMentionableBy,
 			external_uuid: this.externalUuid,
 			created_at: this.createdAt,
 			updated_at: this.updatedAt,

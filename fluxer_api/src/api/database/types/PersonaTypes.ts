@@ -22,6 +22,11 @@ export interface PersonaRow {
 	use_count: number;
 	last_used_at_ms: Nullish<bigint>;
 	visibility: string;
+	/**
+	 * Who gets the persona in mention suggestions: `everyone`, `self` or `nobody` (tyne-chat/tyne#652).
+	 * Null until its owner chooses, and on rows written before: it then follows `visibility`.
+	 */
+	mentionable_by?: Nullish<string>;
 	external_uuid: Nullish<string>;
 	created_at: Date;
 	updated_at: Date;
@@ -46,12 +51,13 @@ export const PERSONA_COLUMNS = [
 	'use_count',
 	'last_used_at_ms',
 	'visibility',
+	'mentionable_by',
 	'external_uuid',
 	'created_at',
 	'updated_at',
 	'deleted_at',
 	'version',
-] as const;
+] as const satisfies ReadonlyArray<keyof PersonaRow>;
 
 export interface UserPersonaSettingsRow {
 	user_id: UserID;
