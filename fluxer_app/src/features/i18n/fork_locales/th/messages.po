@@ -120,6 +120,21 @@ msgstr "แพลตฟอร์มทั้งหมด"
 msgid "All time zones"
 msgstr "เขตเวลาทั้งหมด"
 
+msgid "Allow mentions by"
+msgstr "อนุญาตให้กล่าวถึงโดย"
+
+#. Menu item under the persona selection bar’s Mentions button.
+msgid "Allow mentions by everyone"
+msgstr "อนุญาตให้ทุกคนกล่าวถึง"
+
+#. Menu item under the persona selection bar’s Mentions button: nobody gets them in suggestions, you included (for copies of other people’s personas).
+msgid "Allow mentions by nobody"
+msgstr "ไม่อนุญาตให้ใครกล่าวถึง"
+
+#. Menu item under the persona selection bar’s Mentions button: only your own account gets them in suggestions.
+msgid "Allow mentions only by you"
+msgstr "อนุญาตให้คุณกล่าวถึงเท่านั้น"
+
 #. Heading of the QR code box on the download page.
 msgid "Also on your phone"
 msgstr "ใช้บนโทรศัพท์ได้ด้วย"
@@ -131,6 +146,10 @@ msgstr "มีคำสั่งอื่นหรือคำสั่งใน
 #. Under the AppImage download button: it works on every other Linux distribution.
 msgid "Any other Linux"
 msgstr "Linux อื่นๆ ทั้งหมด"
+
+#. Helper text under "Allow mentions by" when Everyone is chosen
+msgid "Anyone can find this persona when typing @ or searching."
+msgstr "ทุกคนจะพบ Persona นี้เมื่อพิมพ์ @ หรือค้นหา"
 
 #. Which Macs the Tyne app runs on: Macs with an Apple processor, M1 or newer.
 msgid "Apple silicon (M1 or newer)"
@@ -602,6 +621,15 @@ msgstr "Fedora, openSUSE"
 msgid "Filter by visibility"
 msgstr "กรองตามการมองเห็น"
 
+#. Menu item under the persona selection bar’s Mentions button: drop the choice, so a private persona is only for you and any other for everyone.
+#. Small button under "Allow mentions by" that drops the choice, so the setting follows Visibility again
+msgid "Follow Visibility"
+msgstr "ตามการมองเห็น"
+
+#. Added to the helper text under "Allow mentions by" while the persona has no choice of its own: a private persona is then only for you, any other for everyone
+msgid "Follows Visibility until you choose."
+msgstr "เป็นไปตามการมองเห็นจนกว่าคุณจะเลือก"
+
 #. Label for format preview selection in timestamp modal.
 msgid "Format preview"
 msgstr "ดูตัวอย่างรูปแบบ"
@@ -816,6 +844,10 @@ msgctxt "persona-import-switch"
 msgid "Leave deleted"
 msgstr "ปล่อยให้ถูกลบ"
 
+#. Helper text under "Allow mentions by" when Nobody is chosen; for copies of other people's personas. Visibility is the setting above it
+msgid "Left out of @ suggestions and search filters, yours too. It can still speak, and its profile follows Visibility."
+msgstr "ไม่แสดงในคำแนะนำ @ และตัวกรองการค้นหา รวมถึงของคุณด้วย Persona นี้ยังพูดได้ และโปรไฟล์เป็นไปตามการมองเห็น"
+
 #. Line in the restore confirmation naming chats the restore will skip. {chats} is a comma-separated list of chat names.
 msgid "Left out, since you can no longer post there: {chats}"
 msgstr "ข้ามไป เนื่องจากคุณโพสต์ที่นั่นไม่ได้แล้ว: {chats}"
@@ -882,6 +914,22 @@ msgstr "สมาชิก #{index}"
 
 msgid "Members with Avatars"
 msgstr "สมาชิกที่มีอวาตาร์"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by everyone"
+msgstr "{count, plural, other {ทุกคนกล่าวถึง Persona # รายการได้แล้ว}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed by nobody"
+msgstr "{count, plural, other {ไม่มีใครกล่าวถึง Persona # รายการได้แล้ว}}"
+
+#. Toast after changing who gets the selected personas in mention suggestions; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now allowed only by you"
+msgstr "{count, plural, other {มีเพียงคุณที่กล่าวถึง Persona # รายการได้แล้ว}}"
+
+#. Toast after making the selected personas’ mention setting follow their visibility again; it has an Undo button.
+msgid "Mentions of {count, plural, one {# persona} other {# personas}} now follow Visibility"
+msgstr "{count, plural, other {การกล่าวถึง Persona # รายการเป็นไปตามการมองเห็นแล้ว}}"
 
 #. Community settings sidebar category grouping tools that sit around the message box, such as the signal bar.
 msgid "Message Tools"
@@ -1007,6 +1055,14 @@ msgstr "ไม่มีแท็ก: จะเพิ่มโดยไม่ม�
 msgid "No tags"
 msgstr "ไม่มีแท็ก"
 
+#. Persona setting "Allow mentions by": nobody gets this persona in mention and search suggestions, not even its owner
+msgid "Nobody"
+msgstr "ไม่มีใคร"
+
+#. Tooltip and label of the small icon on a persona row in settings whose “Allow mentions by” is Nobody.
+msgid "Nobody gets this persona in mention suggestions"
+msgstr "ไม่มีใครเห็น Persona นี้ในคำแนะนำการกล่าวถึง"
+
 #. Disabled menu entry in the signal bar right-click menu when no one has turned the signal on.
 msgid "Nobody has this signal on"
 msgstr "ยังไม่มีใครเปิดสัญญาณนี้"
@@ -1062,6 +1118,14 @@ msgstr "เฉพาะช่องนี้"
 #. Helper description for private persona visibility
 msgid "Only visible to you. Others cannot view this persona’s full bio or profile details."
 msgstr "มองเห็นได้เฉพาะคุณ ผู้อื่นไม่สามารถดูประวัติฉบับเต็มหรือรายละเอียดโปรไฟล์ของ Persona นี้ได้"
+
+#. Persona setting "Allow mentions by": only the persona owner's account gets it in mention and search suggestions
+msgid "Only you"
+msgstr "เฉพาะคุณ"
+
+#. Helper text under "Allow mentions by" when Only you is chosen
+msgid "Only your account finds it when typing @ or searching."
+msgstr "มีเพียงบัญชีของคุณที่พบเมื่อพิมพ์ @ หรือค้นหา"
 
 #. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
 msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
@@ -1930,6 +1994,10 @@ msgstr "ตำแหน่งที่จดจำ Persona ของคุณ"
 #. Question over the personas a member of the import file might be. {name} is the member
 msgid "Which persona is {name}?"
 msgstr "{name} คือ Persona ใด"
+
+#. Aria label for the persona "Allow mentions by" tabs
+msgid "Who gets this persona in mention suggestions"
+msgstr "ใครเห็น Persona นี้ในคำแนะนำการกล่าวถึง"
 
 #. Which Windows versions the Tyne app needs.
 msgid "Windows 10 or 11"
