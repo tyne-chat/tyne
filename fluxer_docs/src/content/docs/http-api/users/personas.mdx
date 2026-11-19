@@ -20,6 +20,8 @@ A persona has at most 10 aliases of up to 100 characters each: other names it is
 
 A persona has at most 10,000 signature emojis, and a longer list is refused with 400 `SIGNATURE_EMOJI_LIMIT_REACHED`. A custom emoji is identified by its ID and a Unicode emoji by its name. An emoji listed twice, or one another of the account's personas already lists, is refused with 400 `DUPLICATE_SIGNATURE_EMOJI`.
 
+An account holds at most 250 [persona groups](#persona-groups). Making one more is refused with 400 `PERSONA_GROUP_LIMIT_REACHED`.
+
 ## Visibility
 
 | Value | Description |
@@ -37,6 +39,10 @@ A persona has at most 10,000 signature emojis, and a longer list is refused with
 Clients send a message as the selected persona by naming it in `persona_id`. A message wrapped in one of a persona's tags is sent as that persona instead, unless the persona has `auto_tag_disabled`. With an `active_persona_mode` of `last`, such a message also makes that persona the selected one.
 
 Every change to a persona, to the settings or to a channel selection is sent to the owner's sessions as the matching [Gateway Dispatch](/gateway/events/#personas-and-signals). Most changes are also announced to every community the owner is in, and to everyone the owner shares a direct message with, as [Guild Personas Dirty](/gateway/events/#guild-personas-dirty), which lists the changes it covers.
+
+## Persona groups
+
+An account can sort its personas into groups, as PluralKit sorts members, and a persona can be in any number of groups. Groups are private: only the owner can list them, and changes to them are sent only to the owner's sessions, as [User Persona Groups Update](/gateway/events/#user-persona-groups-update). A group ID that is not the caller's returns 404 `UNKNOWN_PERSONA_GROUP`.
 
 ## Persona object
 
@@ -134,6 +140,18 @@ Every channel in which the caller has selected a persona.
 | Field | Type | Description |
 | --- | --- | --- |
 | states | array[[persona channel state](#persona-channel-state-object) object] | Every channel that has a persona selected |
+
+## Persona group object
+
+A group of the caller's personas.
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | snowflake | The ID of the group |
+| name | string | The name of the group, 1 to 100 characters |
+| persona_ids | array[snowflake] | The personas in the group, in the order they were added. A deleted persona stays listed, so that [restoring](#restore-a-deleted-persona) it puts it back |
 
 ## Persona channel state object
 
@@ -595,6 +613,117 @@ Deletes up to 250 of the caller's personas in one write, as [Delete persona](#de
 | Status | Body | Condition |
 | --- | --- | --- |
 | 204 | empty | The personas were deleted |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## List own persona groups
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/groups" oauth2="personas.read" />
+
+Lists the caller's [persona groups](#persona-groups), in the order they were made.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona group](#persona-group-object) object] | The groups |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Create a persona group
+
+<RouteHeader method="POST" path="/v1/users/@me/personas/groups" oauth2="personas.write" />
+
+Makes a [persona group](#persona-groups), optionally with some of the caller's personas in it. If one of them is not a live persona of the caller, the request is refused with 404 `UNKNOWN_PERSONA` and nothing is made.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name | string | The name of the group, 1 to 100 characters |
+| persona_ids? | array[snowflake] | Up to 250 of your personas to put in the group |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 201 | [persona group](#persona-group-object) object | The new group |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Put personas in groups or take them out
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/groups/members" oauth2="personas.write" />
+
+Changes the personas in several of the caller's groups in one write. If a group is not the caller's (404 `UNKNOWN_PERSONA_GROUP`), or a persona to add is not a live persona of the caller (404 `UNKNOWN_PERSONA`), nothing changes. Any persona ID can be taken out, a deleted one too. A persona already in a group keeps its place; one both added and taken out of a group ends up in it.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| changes | array[object] | Between 1 and 250 objects, each with `group_id` (snowflake, one of your groups) and optional `add` and `remove` (each up to 250 persona IDs) |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[[persona group](#persona-group-object) object] | Every group of the caller |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Rename a persona group
+
+<RouteHeader method="PATCH" path="/v1/users/@me/personas/groups/{group_id}" oauth2="personas.write" />
+
+Gives one of the caller's groups a new name.
+
+### Path parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| group_id | snowflake | The ID of the group |
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| name | string | The new name, 1 to 100 characters |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | [persona group](#persona-group-object) object | The renamed group |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Delete a persona group
+
+<RouteHeader method="DELETE" path="/v1/users/@me/personas/groups/{group_id}" oauth2="personas.write" />
+
+Deletes one of the caller's groups. The personas in it are not changed.
+
+### Path parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| group_id | snowflake | The ID of the group |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 204 | empty | The group was deleted |
 
 ### Rate limit
 
