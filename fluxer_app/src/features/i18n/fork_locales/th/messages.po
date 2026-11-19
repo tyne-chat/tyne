@@ -69,6 +69,11 @@ msgstr "เพิ่มตัวนับ"
 msgid "Add signal"
 msgstr "เพิ่มสัญญาณ"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "เพิ่มเข้ากลุ่ม"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "เพิ่ม {name}"
@@ -300,6 +305,10 @@ msgstr "ไม่สามารถเรียกใช้ /{name} ได้: {
 msgid "Couldn't save /{name}: {detail}"
 msgstr "ไม่สามารถบันทึก /{name} ได้: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "เปลี่ยนกลุ่มไม่ได้ ลองอีกครั้ง"
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "เปลี่ยน Persona ไม่ได้ ลองอีกครั้ง"
@@ -328,6 +337,10 @@ msgstr "สร้างคำสั่ง"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "สร้างคำสั่งสำหรับคอมมูนิตี้นี้ และแก้ไขหรือลบคำสั่งของคุณเอง"
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "สร้างกลุ่ม"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "สร้างโดย {name}"
@@ -351,9 +364,17 @@ msgstr "ลบ Persona"
 msgid "Delete command"
 msgstr "ลบคำสั่ง"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "ลบกลุ่ม"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "ลบ Persona"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "ลบกลุ่ม \"{name}\" ใช่ไหม Persona ในกลุ่มจะยังอยู่"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "รับแอป Tyne"
 msgid "Gets overwritten"
 msgstr "ถูกเขียนทับ"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "ชื่อกลุ่ม"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "กลุ่ม"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "สิ่งที่เปลี่ยนแปลง"
@@ -886,6 +916,15 @@ msgstr "Persona ใหม่"
 msgid "New command"
 msgstr "คำสั่งใหม่"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "กลุ่มใหม่"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "กลุ่มใหม่…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "Persona ใหม่จากไฟล์ของคุณ"
@@ -992,6 +1031,10 @@ msgstr "ไม่มีสัญญาณของคุณเปิดอยู
 msgid "Not imported"
 msgstr "ไม่นำเข้า"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "ไม่อยู่ในกลุ่มใด"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "ไม่แน่ใจใช่ไหม ปล่อยไว้ตามเดิมได้ จะไม่มีอะไรเปลี่ยนแปลง"
@@ -1053,6 +1096,10 @@ msgstr "เปิดไฟล์ที่ดาวน์โหลดมา"
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "ไม่บังคับ"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "ตัวเลือกสำหรับ {name}"
 
 msgid "Other names for finding this persona"
 msgstr "ชื่ออื่นที่ใช้ค้นหา Persona นี้"
@@ -1281,6 +1328,11 @@ msgstr "ลบชื่อแฝง"
 msgid "Remove counter"
 msgstr "ลบตัวนับ"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "นำออกจากกลุ่ม"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "ลบอีโมจิประจำตัว"
@@ -1288,6 +1340,10 @@ msgstr "ลบอีโมจิประจำตัว"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "ลบคู่แท็ก"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "เปลี่ยนชื่อกลุ่ม"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "ค้นหา Persona ของคุณ"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "ค้นหา Persona ของ {name}"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "เลือกทั้งหมดใน {name}"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "เลือก Persona ในกลุ่มนี้"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"

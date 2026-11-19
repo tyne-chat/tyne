@@ -3,6 +3,7 @@
 import type {UserID} from '@app/api/BrandedTypes';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import {forgetPersonaChannelStatesOfUser} from '@app/api/persona/PersonaChannelStateStore';
+import {forgetPersonaGroupsOfUser} from '@app/api/persona/PersonaGroupStore';
 import {forgetPersonaImageSourcesOfUser} from '@app/api/persona/PersonaImageSourceStore';
 import {forgetThreadOwnerPersonasOfUser} from '@app/api/persona/ThreadOwnerPersonaStore';
 
@@ -16,6 +17,7 @@ export function forkUserDeletionCleanups(
 		personaRepository.deleteSettings(userId),
 		forgetThreadOwnerPersonasOfUser(userId),
 		forgetPersonaChannelStatesOfUser(userId),
+		forgetPersonaGroupsOfUser(userId),
 		forgetPersonaImageSourcesOfUser(userId),
 	];
 }
