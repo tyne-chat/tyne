@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {PersonaVisibility, SignatureEmoji} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {PersonaMentionableBy} from '@fluxer/schema/src/domains/persona/PersonaMentionableBy';
 import type {PersonaTag} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import type {PersonaID, UserID} from '../BrandedTypes';
 import type {PreparedQuery} from '../database/CassandraTypes';
@@ -22,6 +23,8 @@ export interface CreatePersonaParams {
 	persona_tags?: Array<PersonaTag>;
 	signature_emojis?: Array<SignatureEmoji>;
 	visibility?: PersonaVisibility;
+	/** Null or left out follows visibility; on an update, left out keeps the stored value. */
+	mentionable_by?: PersonaMentionableBy | null;
 	external_uuid?: string | null;
 	use_count?: number;
 	last_used_at_ms?: bigint | null;
@@ -40,6 +43,8 @@ export interface UpdatePersonaParams {
 	persona_tags?: Array<PersonaTag>;
 	signature_emojis?: Array<SignatureEmoji>;
 	visibility?: PersonaVisibility;
+	/** Null or left out follows visibility; on an update, left out keeps the stored value. */
+	mentionable_by?: PersonaMentionableBy | null;
 	external_uuid?: string | null;
 	use_count?: number;
 	last_used_at_ms?: bigint | null;
