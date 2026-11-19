@@ -1520,17 +1520,15 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 								)}
 							</div>
 
-							{PersonaGroups.groups.length > 0 && (
-								<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block--groups">
-									<PersonaGroupsField
-										selected={shownGroupIds(PersonaGroups.groups, formData.id, formData.groupEdits)}
-										onToggle={(groupId, checked) =>
-											setFormData((prev) => ({...prev, groupEdits: {...prev.groupEdits, [groupId]: checked}}))
-										}
-										data-flx="persona.persona-edit-modal.groups-field"
-									/>
-								</div>
-							)}
+							<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block--groups">
+								<PersonaGroupsField
+									selected={shownGroupIds(PersonaGroups.groups, formData.id, formData.groupEdits)}
+									onToggle={(groupId, checked) =>
+										setFormData((prev) => ({...prev, groupEdits: {...prev.groupEdits, [groupId]: checked}}))
+									}
+									data-flx="persona.persona-edit-modal.groups-field"
+								/>
+							</div>
 
 							{/* 9. Bottom actions: Duplicate and Delete only when editing existing persona */}
 							{formData.id && (

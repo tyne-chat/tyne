@@ -297,10 +297,12 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   flat list, folded groups included. A section's header folds it; the folds are kept per device and
   per account (`PersonaGroupFolds`, `makePersistent`, Chiara's choice), never synced. Its ⋯ menu
   renames, selects the group's personas or deletes the group (the personas stay). In Select mode the
-  header's box takes the whole group, and the action bar has Add to group (or New group… with the
-  selection) and Remove from group, one request each (`changePersonaGroupMembers`). The editor's
-  Groups boxes (shown once a group exists) are sent with Save, in a request of their own after the
-  persona's; Duplicate copies them. The list comes after READY, and once more when the settings open
+  header's box takes the whole group, "Select all" takes only what shows (not folded groups, as on
+  phones), and the action bar has Add to group (or New group… with the selection) and Remove from
+  group, one request each (`changePersonaGroupMembers`). The editor's Groups (always shown, with New
+  group… for the first) keep only what was ticked or unticked (`PersonaGroupEdits`) and are sent with
+  Save, in a request of their own after the persona's, which is not sent when only the groups
+  changed; Duplicate copies them. The list comes after READY, and once more when the settings open
   without it; the four strings upstream also has for group DMs take the context `persona-group`,
   since upstream says "group chat" for them in Chinese and has none in ten languages.
 - **Deleted personas** (`DeletedPersonasSection`, at the end of the Personas settings): the list is
