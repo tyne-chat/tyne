@@ -23,7 +23,7 @@
 // instance's public media route, because a scratch copy of the database starts with empty storage.
 
 import {readFileSync, writeFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {dirname, join} from 'node:path';
 import type {
 	AttachmentID,
 	ChannelID,
@@ -65,6 +65,7 @@ import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists
 import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
 import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
 import {createNewDm, markNewDmRead, type PlanNewDm} from '@app/api/discord_import/ImportNewDm';
+import {applyPictures, type PicturesResult, type PlanPicture} from '@app/api/discord_import/ImportPictures';
 import {ensureActiveGuildTainted} from '@app/api/experiment/ChannelThreadsGate';
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
 import {JobLedgerRepository} from '@app/api/jobs/JobLedgerRepository';
@@ -109,6 +110,8 @@ const FETCH_REACTIONS = MessageReactions.select({
 interface PlanFile {
 	path: string;
 	name: string;
+	/** "custom": a custom picture from the review tool's state folder (CUSTOM_DIR), not from the exports. */
+	root?: string;
 }
 interface PlanAttachment extends PlanFile {
 	attachment_id: string;
@@ -248,6 +251,8 @@ interface Plan {
 	stickers: Array<PlanSticker>;
 	/** Tyne emoji the plan's messages show, renamed, moved or taken off their list first (ImportEmojiFates.ts). */
 	emoji_fates?: Array<PlanEmojiFate>;
+	/** Tyne emoji and stickers whose own picture a custom one replaces (ImportPictures.ts). */
+	pictures?: Array<PlanPicture>;
 	messages: Array<PlanMessage>;
 	/** What earlier imports wrote for the objects in this plan, by Tyne id: the base of the three-way
 	 * comparison (ImportMerge.ts). An object with no entry here is created, or left alone if it exists. */
@@ -274,6 +279,9 @@ interface Ledger {
 	stickers: Array<{sticker_id: string; guild_id: string | null}>;
 	/** Tyne emoji this run renamed, moved or took off their list as planned, or found so already. */
 	emoji_fates?: Array<string>;
+	/** Tyne emoji and stickers whose picture this run replaced ("<kind>:<id>"), and where each old one was kept. */
+	pictures?: Array<string>;
+	replaced_pictures?: PicturesResult['kept'];
 	messages: Array<string>;
 	reactions: number;
 	storage_keys: Array<string>;
@@ -302,7 +310,10 @@ const id = <T>(value: string) => BigInt(value) as unknown as T;
 
 /** The bio a placeholder starts with; one written on Tyne is kept (tyne-chat/tyne#682). */
 const PLACEHOLDER_BIO = 'Placeholder account: messages imported from Discord.';
-const readBase64 = (file: PlanFile) => readFileSync(join(exportsDir, file.path)).toString('base64');
+// Custom pictures made on the review page (tyne-chat/tyne#608, 2026-11-18): run.sh mounts them here.
+const CUSTOM_DIR = process.env.DIMPORT_CUSTOM_DIR || '/custom';
+const readBase64 = (file: PlanFile) =>
+	readFileSync(join(file.root === 'custom' ? CUSTOM_DIR : exportsDir, file.path)).toString('base64');
 
 /** Where the export's copy of a preview's media goes: next to the channel's attachments, flagged as the
  * preview's own, as Tyne keeps media it hosts for a preview itself (MessageHelpers.ts). */
@@ -878,6 +889,23 @@ async function main(): Promise<void> {
 		Logger.warn({emoji: fates.changed}, 'emoji renamed or moved on Tyne since the review; left as they are');
 	save();
 
+	// Tyne emoji and stickers whose own picture a custom one replaces, after any move or copy (a copy keeps the old).
+	const pictures = await applyPictures(plan.pictures ?? [], deps, {
+		dryRun,
+		bucket: cdn,
+		read: readBase64,
+		keepDir: join(dirname(ledgerPath), 'replaced'),
+		stamp: new Date()
+			.toISOString()
+			.replace(/[-:]/g, '')
+			.replace(/\.\d+Z$/, 'Z'),
+	});
+	ledger.pictures = pictures.done;
+	ledger.replaced_pictures = pictures.kept;
+	if (pictures.missing.length)
+		Logger.warn({pictures: pictures.missing}, 'emoji or stickers to give a new picture are no longer on Tyne');
+	save();
+
 	for (const e of plan.emoji) {
 		const file = e.file;
 		if (!file) {
@@ -1388,7 +1416,12 @@ async function main(): Promise<void> {
 	// Last, so a gateway that cannot be reached fails the run only after everything is written;
 	// applying the plan again sends the lists again (tyne-chat/tyne#660).
 	if (!dryRun) {
-		const sent = await sendExpressionLists(plan, deps, fates.guilds);
+		const sent = await sendExpressionLists(
+			plan,
+			deps,
+			[...fates.guilds, ...pictures.emojiGuilds],
+			pictures.stickerGuilds,
+		);
 		console.log(
 			`sent the emoji list of ${sent.emoji.length} and the sticker list of ${sent.stickers.length} communities to the gateway`,
 		);
