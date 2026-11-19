@@ -93,7 +93,17 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
   by typed text matches them, a little below the name, through `PersonaNameSearch.ts` in
   `packages/schema` (the mention autocomplete, the pickers, the settings list, the gallery, and
   search's `from:`/`mentions:`, where a typed alias counts only when no persona has it as its name).
-  The editor shows one row per alias, as it does tag pairs. The mobile app repeats the rule in
+  The editor shows one row per alias, as it does tag pairs.
+- **Mention setting** (tyne-chat/tyne#652): "Allow mentions by" (Everyone, Only you, Nobody) decides
+  who gets a persona in the mention autocomplete and search's `from:`/`mentions:`; it is for copies
+  of other people's personas and hides nothing else. `mentionable_by` null follows visibility
+  (`utils/PersonaMentionSetting.ts`): the editor shows the value visibility implies until one is
+  picked, sends null meanwhile, and Follow Visibility drops a choice. Other accounts' personas come
+  only from the mention route, which applies the setting; messages loaded in the channel only rank
+  them (`buildRecentPersonaOptions` in `useLexicalAutocomplete.ts`), and the account's own come
+  from `PersonaStore`. A settings row set to Nobody shows a struck-through @. The mention cache
+  (`useAutocompletePersonaSearch.ts`) knows when it holds a channel's whole list and then sends no
+  request for a query nothing matches. The mobile app repeats the rule in
   `persona_name_search.dart`.
 - A message's `subprofile` is the persona as the server built it for this response. `MessageUsername`
   shows its name; `UserMessage` and `CompactMessageLayout` add `<PersonaTag>`, whose click opens the
@@ -240,7 +250,7 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   flashes) while the editor has unsaved changes. `openPersonaDuplicateModal` closes the editor and
   opens a new persona's, under a key of its own, filled in from the saved persona: the same picture
   hashes (nothing uploaded; images are deleted only with the account), colours, aliases, pronouns,
-  bio, visibility, groups and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
+  bio, visibility, mention setting, groups and tag matching, under `duplicatePersonaName` ("Lyra (2)", `utils/PersonaDuplicate.ts`,
   repeated by the mobile app), focused and selected. Tags and signature emojis start empty, since each
   belongs to one persona; pins, usage and the PluralKit link are not copied. Its bar ("Copy of …",
   Cancel, Create) stays up, and Create sends the one `createPersona` Add Persona sends. A "+ New
@@ -254,6 +264,8 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   Public, private and delete ask first (delete in red, pointing to Deleted personas); a visibility
   change ends in a toast with Undo, one request that puts each persona back as it was. The
   `feature` subtab (the Personas tab's "Choose personas to feature") opens on Unlisted with Select on.
+  Mentions (`PersonaBulkMentionActions.tsx`) opens a menu that gives the selection one "Allow
+  mentions by" (or Follow Visibility), one request, no confirmation, a toast with Undo.
 - **Import** (tyne-chat/tyne#243): `PluralKitImportModal` reads PluralKit JSON or a Tyne zip
   (`PersonaImportFile`), offers an Export backup first when the account has personas, then stores
   every picture in the file (`storeMemberPictures`: zip files, own copies, or the server's streamed
