@@ -57,13 +57,18 @@ import {clsx} from 'clsx';
 import {AnimatePresence, motion} from 'framer-motion';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import * as PersonaCommands from '../../commands/PersonaCommands';
+import * as PersonaGroupCommands from '../../commands/PersonaGroupCommands';
+import {PersonaGroups} from '../../state/PersonaGroups';
 import {type Persona, PersonaStore} from '../../state/PersonaStore';
 import {pasteLinkOverSelection} from '../../utils/PersonaBioLinkPaste';
 import {duplicatePersonaName} from '../../utils/PersonaDuplicate';
+import {groupEditChanges, hasGroupEdits, type PersonaGroupEdits, shownGroupIds} from '../../utils/PersonaGroupEdits';
+import {GROUPS_CHANGE_FAILED_DESCRIPTOR} from '../../utils/PersonaGroupMessages';
 import {PersonaTag} from '../PersonaTag';
 import styles from './PersonaEditModal.module.css';
+import {PersonaGroupsField} from './PersonaGroupsField';
 
 const NEW_PERSONA_DESCRIPTOR = msg({
 	message: 'New Persona',
@@ -317,6 +322,8 @@ interface PersonaFormState {
 	/** A picked image, as a data URL, not stored yet: Save uploads it first, Reset drops it. */
 	pendingAvatar: string | null;
 	pendingBanner: string | null;
+	/** The groups ticked or unticked here (tyne-chat/tyne#829), sent with Save in a request of their own. */
+	groupEdits: PersonaGroupEdits;
 }
 
 // The field grows with its text up to here, and can be dragged to any height up to here.
@@ -347,11 +354,12 @@ const emptyFormState = (): PersonaFormState => ({
 	signatureEmojis: [],
 	pendingAvatar: null,
 	pendingBanner: null,
+	groupEdits: {},
 });
 
 /**
  * A new persona that starts as a copy of `source` (tyne-chat/tyne#599): its pictures (the same stored
- * files), colours, pronouns, bio, visibility and tag matching, under a numbered name. Tags and
+ * files), colours, pronouns, bio, visibility, groups and tag matching, under a numbered name. Tags and
  * signature emojis start empty, since each belongs to one persona.
  */
 const copyFormState = (source: Persona, personas: ReadonlyArray<Persona>): PersonaFormState => ({
@@ -369,6 +377,7 @@ const copyFormState = (source: Persona, personas: ReadonlyArray<Persona>): Perso
 	bio: source.bio ?? '',
 	visibility: source.visibility ?? 'unlisted',
 	autoTagDisabled: source.auto_tag_disabled ?? false,
+	groupEdits: Object.fromEntries(PersonaGroups.groupIdsOf(source.id).map((groupId) => [groupId, true])),
 });
 
 function normalizeTag(tag: {prefix?: string | null; suffix?: string | null}) {
@@ -435,6 +444,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			})),
 			pendingAvatar: null,
 			pendingBanner: null,
+			groupEdits: {},
 		};
 	}, [persona, copyOf]);
 
@@ -478,7 +488,8 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 
 	const previewColor = formData.accentColor ?? effectiveDefaultColor;
 
-	const hasUnsavedChanges = useMemo(() => {
+	// The persona's own fields; its groups are compared with the list as it is now, below.
+	const personaFieldsChanged = useMemo(() => {
 		const initial = initialFormStateRef.current;
 		if (!formData.id) {
 			const hasNonEmptyTag = formData.tags.some((t) => t.prefix.trim() !== '' || t.suffix.trim() !== '');
@@ -520,6 +531,13 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		}
 		return false;
 	}, [formData]);
+	const groupsChanged = hasGroupEdits(PersonaGroups.groups, formData.id, formData.groupEdits);
+	const hasUnsavedChanges = personaFieldsChanged || groupsChanged;
+
+	// The groups come after READY; an editor opened before they did asks for them once.
+	useEffect(() => {
+		if (!PersonaGroups.loaded) void PersonaGroupCommands.fetchPersonaGroups();
+	}, []);
 
 	// A copy closes only through Cancel or Create, even with its fields emptied.
 	const handleAttemptClose = useCallback(() => {
@@ -745,6 +763,19 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		});
 	};
 
+	/** The groups' request, after the persona's own: on a failure it says so about the groups and returns false. */
+	const saveGroups = async (changes: ReadonlyArray<PersonaGroupCommands.PersonaGroupMemberChange>) => {
+		if (changes.length === 0) return true;
+		try {
+			await PersonaGroupCommands.changePersonaGroupMembers(changes);
+			return true;
+		} catch (err) {
+			const message = PersonaCommands.personaErrorMessage(err, i18n._(GROUPS_CHANGE_FAILED_DESCRIPTOR));
+			if (message) ToastCommands.createToast({type: 'error', children: message});
+			return false;
+		}
+	};
+
 	const handleSaveForm = async () => {
 		const trimmedName = formData.name.trim();
 		if (!trimmedName) {
@@ -822,26 +853,35 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 			const stored = await storePendingImages(formData);
 			if (!stored) return;
 			if (formData.id) {
-				await PersonaCommands.updatePersona(formData.id, {
-					name: trimmedName,
-					aliases: normalizePersonaAliases(formData.aliases),
-					pronouns: formData.pronouns.trim() || null,
-					avatar_hash: stored.avatarHash.trim() || null,
-					avatar_color: stored.avatarColor ?? null,
-					banner_hash: stored.bannerHash.trim() || null,
-					color: parsedColor,
-					bio: formData.bio.trim() || null,
-					visibility: formData.visibility,
-					persona_tags: validTags,
-					auto_tag_disabled: formData.autoTagDisabled,
-					signature_emojis: formData.signatureEmojis,
-				});
+				const groupChanges = groupEditChanges(PersonaGroups.groups, formData.id, formData.groupEdits);
+				// Only the groups changed: the persona is not sent, so nobody is told it changed.
+				if (personaFieldsChanged)
+					await PersonaCommands.updatePersona(formData.id, {
+						name: trimmedName,
+						aliases: normalizePersonaAliases(formData.aliases),
+						pronouns: formData.pronouns.trim() || null,
+						avatar_hash: stored.avatarHash.trim() || null,
+						avatar_color: stored.avatarColor ?? null,
+						banner_hash: stored.bannerHash.trim() || null,
+						color: parsedColor,
+						bio: formData.bio.trim() || null,
+						visibility: formData.visibility,
+						persona_tags: validTags,
+						auto_tag_disabled: formData.autoTagDisabled,
+						signature_emojis: formData.signatureEmojis,
+					});
+				if (!(await saveGroups(groupChanges))) {
+					// The persona's own fields are saved and the editor closes; with only the groups
+					// changed it stays open, so Save can try again.
+					if (personaFieldsChanged) onClose();
+					return;
+				}
 				ToastCommands.createToast({
 					type: 'success',
 					children: i18n._(PERSONA_UPDATED_DESCRIPTOR),
 				});
 			} else {
-				await PersonaCommands.createPersona({
+				const created = await PersonaCommands.createPersona({
 					name: trimmedName,
 					aliases: normalizePersonaAliases(formData.aliases),
 					pronouns: formData.pronouns.trim() || null,
@@ -855,6 +895,11 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 					auto_tag_disabled: formData.autoTagDisabled,
 					signature_emojis: formData.signatureEmojis,
 				});
+				// The persona exists now, so the editor closes either way: Save again would make another.
+				if (!(await saveGroups(groupEditChanges(PersonaGroups.groups, created.id, formData.groupEdits)))) {
+					onClose();
+					return;
+				}
 				ToastCommands.createToast({
 					type: 'success',
 					children: i18n._(PERSONA_CREATED_DESCRIPTOR),
@@ -1360,6 +1405,18 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 									</span>
 								</div>
 							</div>
+
+							{PersonaGroups.groups.length > 0 && (
+								<div className={styles.sectionBlock} data-flx="persona.persona-edit-modal.section-block--groups">
+									<PersonaGroupsField
+										selected={shownGroupIds(PersonaGroups.groups, formData.id, formData.groupEdits)}
+										onToggle={(groupId, checked) =>
+											setFormData((prev) => ({...prev, groupEdits: {...prev.groupEdits, [groupId]: checked}}))
+										}
+										data-flx="persona.persona-edit-modal.groups-field"
+									/>
+								</div>
+							)}
 
 							{/* 9. Bottom actions: Duplicate and Delete only when editing existing persona */}
 							{formData.id && (

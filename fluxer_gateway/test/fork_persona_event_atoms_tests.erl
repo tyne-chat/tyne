@@ -26,6 +26,7 @@ persona_list_and_community_events_have_atoms_test() ->
             {<<"USER_PERSONA_UPDATE">>, user_persona_update},
             {<<"USER_PERSONA_DELETE">>, user_persona_delete},
             {<<"USER_PERSONAS_UPDATE">>, user_personas_update},
+            {<<"USER_PERSONA_GROUPS_UPDATE">>, user_persona_groups_update},
             {<<"GUILD_PERSONAS_DIRTY">>, guild_personas_dirty}
         ]
     ),

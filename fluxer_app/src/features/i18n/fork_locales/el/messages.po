@@ -69,6 +69,11 @@ msgstr "Προσθήκη μετρητή"
 msgid "Add signal"
 msgstr "Προσθήκη σήματος"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "Προσθήκη σε ομάδα"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "Προσθήκη μέλους {name}"
@@ -300,6 +305,10 @@ msgstr "Δεν ήταν δυνατή η εκτέλεση της /{name}: {detail
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Δεν ήταν δυνατή η αποθήκευση της /{name}: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "Δεν ήταν δυνατή η αλλαγή των ομάδων. Δοκιμάστε ξανά."
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "Δεν ήταν δυνατή η αλλαγή των persona. Δοκιμάστε ξανά."
@@ -328,6 +337,10 @@ msgstr "Δημιουργία εντολών"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "Δημιουργήστε εντολές για αυτή την κοινότητα και επεξεργαστείτε ή διαγράψτε τις δικές σας."
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "Δημιουργία ομάδας"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "Δημιουργήθηκε από {name}"
@@ -351,9 +364,17 @@ msgstr "Διαγραφή persona"
 msgid "Delete command"
 msgstr "Διαγραφή εντολής"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "Διαγραφή ομάδας"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "Διαγραφή persona"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "Διαγραφή της ομάδας «{name}»; Οι persona που περιέχει διατηρούνται."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "Αποκτήστε την εφαρμογή Tyne"
 msgid "Gets overwritten"
 msgstr "Αντικαθίσταται"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "Όνομα ομάδας"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "Ομάδες"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "Αυτά άλλαξαν"
@@ -886,6 +916,15 @@ msgstr "Νέα persona"
 msgid "New command"
 msgstr "Νέα εντολή"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "Νέα ομάδα"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "Νέα ομάδα…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "Νέες persona από το αρχείο σας."
@@ -992,6 +1031,10 @@ msgstr "Κανένα από τα σήματά σου δεν είναι ενερ�
 msgid "Not imported"
 msgstr "Δεν εισάγεται"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "Εκτός ομάδας"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Έχετε αμφιβολίες; Αφήστε το όπως είναι: δεν αλλάζει τίποτα."
@@ -1053,6 +1096,10 @@ msgstr "Ανοίξτε το αρχείο που κατεβάσατε."
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "Προαιρετικό"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "Επιλογές για {name}"
 
 msgid "Other names for finding this persona"
 msgstr "Άλλα ονόματα για να βρίσκετε αυτή την persona"
@@ -1281,6 +1328,11 @@ msgstr "Αφαίρεση ψευδωνύμου"
 msgid "Remove counter"
 msgstr "Αφαίρεση μετρητή"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "Αφαίρεση από την ομάδα"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Κατάργηση χαρακτηριστικού emoji"
@@ -1288,6 +1340,10 @@ msgstr "Κατάργηση χαρακτηριστικού emoji"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "Αφαίρεση ζεύγους ετικετών"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "Μετονομασία ομάδας"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "Αναζήτηση στις persona σας"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "Αναζήτηση στις persona του χρήστη {name}"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "Επιλογή όλων στην ομάδα {name}"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "Επιλογή των persona της"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"

@@ -25883,6 +25883,294 @@
 				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
 			}
 		},
+		"/users/@me/personas/groups": {
+			"get": {
+				"operationId": "list_my_persona_groups",
+				"summary": "List own persona groups",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaGroupListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Lists the authenticated user's persona groups, in the order they were made, each with the personas in it. Only the owner can see them.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
+			},
+			"post": {
+				"operationId": "create_persona_group",
+				"summary": "Create a persona group",
+				"tags": ["Personas"],
+				"responses": {
+					"201": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaGroupResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Makes a group of personas, optionally with some of your personas in it already. An account can have up to 250 groups.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaGroupCreateRequestSchema"}}}
+				}
+			}
+		},
+		"/users/@me/personas/groups/members": {
+			"patch": {
+				"operationId": "change_persona_group_members",
+				"summary": "Put personas in groups or take them out",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaGroupListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Puts personas in your groups and takes them out, in one write: if a group is not yours, or a persona to add is not yours or is deleted, nothing changes. Returns every group.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaGroupMembersRequestSchema"}}}
+				}
+			}
+		},
+		"/users/@me/personas/groups/{group_id}": {
+			"patch": {
+				"operationId": "update_persona_group",
+				"summary": "Rename a persona group",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaGroupResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Gives one of your persona groups a new name.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "group_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the group", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "The ID of the group"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaGroupUpdateRequestSchema"}}}
+				}
+			},
+			"delete": {
+				"operationId": "delete_persona_group",
+				"summary": "Delete a persona group",
+				"tags": ["Personas"],
+				"responses": {
+					"204": {"description": "No Content"},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Deletes one of your persona groups. The personas in it are not changed.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "group_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the group", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "The ID of the group"
+					}
+				]
+			}
+		},
 		"/users/@me/personas/import": {
 			"post": {
 				"operationId": "import_personas",
@@ -33811,6 +34099,77 @@
 				"maxItems": 250,
 				"type": "array",
 				"items": {"$ref": "#/components/schemas/PersonaImportItemSchema"}
+			},
+			"PersonaGroupUpdateRequestSchema": {
+				"type": "object",
+				"properties": {"name": {"description": "The name of the group", "type": "string"}},
+				"required": ["name"]
+			},
+			"PersonaGroupResponseSchema": {
+				"type": "object",
+				"properties": {
+					"id": {"description": "The ID of the group", "$ref": "#/components/schemas/SnowflakeStringType"},
+					"name": {"type": "string", "description": "The name of the group"},
+					"persona_ids": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "The personas in the group, in the order they were added. A deleted persona stays listed, so that restoring it puts it back"
+					}
+				},
+				"required": ["id", "name", "persona_ids"],
+				"additionalProperties": false
+			},
+			"PersonaGroupMembersRequestSchema": {
+				"type": "object",
+				"properties": {
+					"changes": {
+						"minItems": 1,
+						"maxItems": 250,
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"group_id": {
+									"description": "The ID of one of your groups",
+									"$ref": "#/components/schemas/SnowflakeStringType"
+								},
+								"add": {
+									"description": "Personas of yours to put in the group",
+									"maxItems": 250,
+									"type": "array",
+									"items": {"$ref": "#/components/schemas/SnowflakeStringType"}
+								},
+								"remove": {
+									"description": "Personas to take out of the group",
+									"maxItems": 250,
+									"type": "array",
+									"items": {"$ref": "#/components/schemas/SnowflakeStringType"}
+								}
+							},
+							"required": ["group_id"]
+						},
+						"description": "The groups to change"
+					}
+				},
+				"required": ["changes"]
+			},
+			"PersonaGroupListResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/PersonaGroupResponseSchema"},
+				"description": "The groups, in the order they were made"
+			},
+			"PersonaGroupCreateRequestSchema": {
+				"type": "object",
+				"properties": {
+					"name": {"description": "The name of the group", "type": "string"},
+					"persona_ids": {
+						"description": "Personas of yours to put in the new group",
+						"maxItems": 250,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeStringType"}
+					}
+				},
+				"required": ["name"]
 			},
 			"PersonaExportResponse": {
 				"type": "string",
@@ -53033,6 +53392,8 @@
 					"GUILD_COMMAND_LIMIT_REACHED",
 					"GUILD_COMMAND_TEMPLATE_INVALID",
 					"GUILD_COMMAND_INPUT_INVALID",
+					"UNKNOWN_PERSONA_GROUP",
+					"PERSONA_GROUP_LIMIT_REACHED",
 					"UNKNOWN_REPORT",
 					"UNKNOWN_ROLE",
 					"UNKNOWN_STICKER",
@@ -53443,6 +53804,8 @@
 					"You can't have more than {limit} connections.",
 					"Invalid form body.",
 					"Invalid form body.",
+					"Not found.",
+					"You can't have more than {limit} connections.",
 					"Unknown report.",
 					"Role wasn't found.",
 					"Unknown sticker.",

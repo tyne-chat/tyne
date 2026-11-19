@@ -16,6 +16,7 @@ import {EyeSlashIcon, GlobeSimpleIcon, LockSimpleIcon, TrashIcon} from '@phospho
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useMemo, useState} from 'react';
+import {PersonaBulkGroupButtons} from './PersonaBulkGroupActions';
 import styles from './PersonaBulkSelection.module.css';
 
 // Select many personas in settings and change their visibility or delete them in one request
@@ -234,6 +235,7 @@ export const PersonaBulkActionBar = observer(
 						</Button>
 					);
 				})}
+				<PersonaBulkGroupButtons chosen={chosen} onDone={selection.stop} data-flx="persona.bulk.group-buttons" />
 				<Button
 					variant="danger"
 					small

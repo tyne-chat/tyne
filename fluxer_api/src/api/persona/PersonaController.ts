@@ -26,6 +26,14 @@ import {
 	UserIdPersonaIdParam,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {
+	PersonaGroupCreateRequestSchema,
+	PersonaGroupIdParam,
+	PersonaGroupListResponseSchema,
+	PersonaGroupMembersRequestSchema,
+	PersonaGroupResponseSchema,
+	PersonaGroupUpdateRequestSchema,
+} from '@fluxer/schema/src/domains/persona/PersonaGroupSchemas';
+import {
 	DeletedPersonaListResponseSchema,
 	PersonaImportApplyRequestSchema,
 	PersonaImportApplyResponseSchema,
@@ -440,6 +448,140 @@ export function PersonaController(app: HonoApp) {
 				.get('personaService')
 				.setChannelState(user.id, channelId, persona_id === null ? null : createPersonaID(BigInt(persona_id)));
 			return ctx.json(state);
+		},
+	);
+
+	// Groups of the account's personas (tyne-chat/tyne#829), also before the `:persona_id` routes.
+	// "members" is registered before `:group_id` for the same reason.
+	app.get(
+		'/users/@me/personas/groups',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_READ),
+		requireOAuth2ScopeForBearer('personas.read'),
+		LoginRequired,
+		DefaultUserOnly,
+		OpenAPI({
+			operationId: 'list_my_persona_groups',
+			summary: 'List own persona groups',
+			responseSchema: PersonaGroupListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				"Lists the authenticated user's persona groups, in the order they were made, each with the personas in it. Only the owner can see them.",
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			return ctx.json(await ctx.get('personaService').getPersonaGroups(user.id));
+		},
+	);
+
+	app.post(
+		'/users/@me/personas/groups',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaGroupCreateRequestSchema),
+		OpenAPI({
+			operationId: 'create_persona_group',
+			summary: 'Create a persona group',
+			responseSchema: PersonaGroupResponseSchema,
+			statusCode: 201,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Makes a group of personas, optionally with some of your personas in it already. An account can have up to 250 groups.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {name, persona_ids} = ctx.req.valid('json');
+			const group = await ctx.get('personaService').createPersonaGroup(
+				user.id,
+				name,
+				(persona_ids ?? []).map((id) => createPersonaID(BigInt(id))),
+			);
+			return ctx.json(group, 201);
+		},
+	);
+
+	app.patch(
+		'/users/@me/personas/groups/members',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', PersonaGroupMembersRequestSchema),
+		OpenAPI({
+			operationId: 'change_persona_group_members',
+			summary: 'Put personas in groups or take them out',
+			responseSchema: PersonaGroupListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Puts personas in your groups and takes them out, in one write: if a group is not yours, or a persona to add is not yours or is deleted, nothing changes. Returns every group.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {changes} = ctx.req.valid('json');
+			const groups = await ctx.get('personaService').changePersonaGroupMembers(
+				user.id,
+				changes.map((change) => ({
+					groupId: BigInt(change.group_id),
+					add: (change.add ?? []).map((id) => createPersonaID(BigInt(id))),
+					remove: (change.remove ?? []).map((id) => BigInt(id).toString()),
+				})),
+			);
+			return ctx.json(groups);
+		},
+	);
+
+	app.patch(
+		'/users/@me/personas/groups/:group_id',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', PersonaGroupIdParam),
+		Validator('json', PersonaGroupUpdateRequestSchema),
+		OpenAPI({
+			operationId: 'update_persona_group',
+			summary: 'Rename a persona group',
+			responseSchema: PersonaGroupResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description: 'Gives one of your persona groups a new name.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {group_id} = ctx.req.valid('param');
+			const {name} = ctx.req.valid('json');
+			return ctx.json(await ctx.get('personaService').renamePersonaGroup(user.id, BigInt(group_id), name));
+		},
+	);
+
+	app.delete(
+		'/users/@me/personas/groups/:group_id',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', PersonaGroupIdParam),
+		OpenAPI({
+			operationId: 'delete_persona_group',
+			summary: 'Delete a persona group',
+			responseSchema: null,
+			statusCode: 204,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description: 'Deletes one of your persona groups. The personas in it are not changed.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {group_id} = ctx.req.valid('param');
+			await ctx.get('personaService').deletePersonaGroup(user.id, BigInt(group_id));
+			return ctx.body(null, 204);
 		},
 	);
 

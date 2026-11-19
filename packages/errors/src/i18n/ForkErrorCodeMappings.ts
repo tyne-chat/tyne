@@ -19,4 +19,6 @@ export const ForkErrorCodeToI18nKey = {
 	[APIErrorCodes.GUILD_COMMAND_LIMIT_REACHED]: 'connections.limit_reached',
 	[APIErrorCodes.GUILD_COMMAND_TEMPLATE_INVALID]: 'admin_and_system.invalid_form_body',
 	[APIErrorCodes.GUILD_COMMAND_INPUT_INVALID]: 'admin_and_system.invalid_form_body',
+	[APIErrorCodes.UNKNOWN_PERSONA_GROUP]: 'http.not_found',
+	[APIErrorCodes.PERSONA_GROUP_LIMIT_REACHED]: 'connections.limit_reached',
 } as const;

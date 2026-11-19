@@ -1,0 +1,105 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* A group's section in the persona settings list (tyne-chat/tyne#829). */
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.625rem;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding-bottom: 0.375rem;
+	border-bottom: 0.0625rem solid var(--background-modifier-accent);
+}
+
+.foldButton {
+	display: flex;
+	flex: 1;
+	min-width: 0;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.25rem 0.125rem;
+	border: none;
+	border-radius: var(--radius-sm);
+	background: none;
+	color: var(--text-primary);
+	text-align: start;
+	cursor: pointer;
+}
+
+.foldButton:hover .name {
+	text-decoration: underline;
+}
+
+.caret {
+	flex: none;
+	color: var(--text-secondary);
+	transition: transform 0.15s ease;
+}
+
+.caretFolded {
+	transform: rotate(-90deg);
+}
+
+.caretFolded:dir(rtl) {
+	transform: rotate(90deg);
+}
+
+.name {
+	overflow: hidden;
+	font-size: 0.9375rem;
+	font-weight: 700;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.looseName {
+	color: var(--text-secondary);
+}
+
+.count {
+	flex: none;
+	color: var(--text-secondary);
+	font-size: 0.8125rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.menuButton {
+	display: grid;
+	flex: none;
+	width: 1.875rem;
+	height: 1.875rem;
+	place-items: center;
+	padding: 0;
+	border: none;
+	border-radius: var(--radius-sm);
+	background: none;
+	color: var(--text-secondary);
+	cursor: pointer;
+}
+
+.menuButton:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-primary);
+}
+
+.groupCheckbox {
+	display: inline-flex;
+	flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.caret {
+		transition: none;
+	}
+}
+
+.sectionList {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}

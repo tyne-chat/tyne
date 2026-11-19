@@ -13,7 +13,7 @@ and follow the placement rules in the root `AGENTS.md`.
 |---|---|
 | Routes, OAuth scopes | `PersonaController.ts` (registered in the fork block of `app/ControllerRegistry.ts`) |
 | Rules, settings, events | `PersonaService.ts` |
-| Rows | `PersonaRepository.ts` (behind `IPersonaRepository.ts`), plus `PersonaChannelStateStore.ts`, `ThreadOwnerPersonaStore.ts`, `PersonaImageSourceStore.ts` |
+| Rows | `PersonaRepository.ts` (behind `IPersonaRepository.ts`), plus `PersonaChannelStateStore.ts`, `ThreadOwnerPersonaStore.ts`, `PersonaImageSourceStore.ts`, `PersonaGroupStore.ts` |
 | New persona IDs | `PersonaIdGenerator.ts` |
 | The three response shapes | `models/Persona.ts` (outside this folder) |
 | Which persona a request names, and whether the caller owns it | `PersonaOwnership.ts` |
@@ -115,6 +115,7 @@ single Postgres key/value table.
 | `persona_channel_states` | (user_id, channel_id) | the per-channel selection; no row means the account |
 | `thread_owner_personas`, `thread_owner_personas_by_user` | thread_id; (user_id, thread_id) | which persona started a thread; the by-user row is written first, so account deletion finds it |
 | `persona_image_sources` | (user_id, persona_id) | the PluralKit link an image came from, and the hash it produced; only the export reads it |
+| `persona_groups` | (user_id, group_id) | a group of the account's personas (tyne-chat/tyne#829): its name and its members as a JSON list of persona ids, in the order they were added |
 
 The persona columns on upstream's tables (`persona_id` and `mention_personas` on `messages`,
 `persona_id` in the key of `message_reactions`) are the one exception to "fork data in fork tables";
@@ -122,13 +123,24 @@ see the root `AGENTS.md`.
 
 Limits: 250 live personas per account, 5 tags per persona (unique across the account's live
 personas), 10,000 signature emojis per persona (unique across personas), 10 aliases per persona of
-100 characters each.
+100 characters each, 250 persona groups per account (PluralKit's default).
+
+**Persona groups** (tyne-chat/tyne#829) sort the account's personas, as PluralKit's groups sort
+members; a persona can be in any number of them. They are private: only the owner lists them, and no
+event about them reaches anyone else. The members live on the group's row, so putting thirty personas
+in a group is one write and editing a persona never touches its groups. A deleted persona stays in
+its groups, so restoring it puts it back; the clients show only live personas. Adding checks that each
+persona is the caller's and live (`liveByIds`); taking out accepts any id. Group ids come from the
+persona id generator, so groups list in the order they were made. Folding a group is the clients'
+own, per device, and never reaches the server. Not built yet: order, colour, icon, description,
+groups others can see, and the PluralKit import and export of `groups` (the issue has the design).
 
 ## Routes and OAuth
 
 - `@me` routes: list and create, `/:persona_id`, `/import`, `/import/preview`, `/import/apply`,
   `/deleted`, `/deleted/:persona_id/restore`, `/visibility`, `/bulk-delete`, `/settings`,
-  `/channel-states[/:channel_id]`, `/export`, `/import-image`. Restore lives under `/deleted` because the
+  `/channel-states[/:channel_id]`, `/groups`, `/groups/members`, `/groups/:group_id`, `/export`,
+  `/import-image`. Restore lives under `/deleted` because the
   OpenAPI check refuses `/{persona_id}/restore` as ambiguous with `/channel-states/{channel_id}`.
 - `/visibility` (PATCH) and `/bulk-delete` (POST) change or delete many personas in one write
   (tyne-chat/tyne#542), through `writeImport` like the import: all or nothing (`liveByIds` refuses a
@@ -158,12 +170,14 @@ personas), 10,000 signature emojis per persona (unique across personas), 10 alia
 | `USER_PERSONAS_UPDATE` | own sessions | after a bulk import (the whole list) |
 | `USER_PERSONA_SETTINGS_UPDATE` | own sessions | a settings save |
 | `USER_PERSONA_CHANNEL_STATE_UPDATE` | own sessions only, on purpose | a per-channel selection |
+| `USER_PERSONA_GROUPS_UPDATE` | own sessions only, on purpose | every change to the groups (the whole list) |
 | `GUILD_PERSONAS_DIRTY` | every guild the account is in, plus each DM and group-DM recipient | create (public and unlisted only), every update and delete, a bulk import, a display-tag change; carries the persona only when it is public or unlisted |
 
 - `GUILD_PERSONAS_DIRTY` costs one gateway RPC per guild and per DM partner for every persona edit.
   Keep it off paths that run often.
-- **Adding an event:** add the name to `constants/Gateway.ts` and to
-  `fluxer_gateway/src/utils/event_atoms.erl`, document it in `fluxer_docs` (`gateway/events.md`;
+- **Adding an event:** add the name to `constants/Gateway.ts` and to the fork's own map,
+  `fluxer_gateway/src/utils/fork_event_atoms.erl` (the older persona events sit in upstream's
+  `event_atoms.erl`), document it in `fluxer_docs` (`gateway/events.md`;
   nothing checks that since upstream dropped the docs verifier), and restart the gateway. Without the atom, a DM dispatch
   (`rpc.gateway.presence.dispatch`) fails with `presence_dispatch_error`, and a guild dispatch is
   logged and dropped: nobody receives the event. A community event also needs a decision on channel

@@ -69,6 +69,11 @@ msgstr "Dodaj števec"
 msgid "Add signal"
 msgstr "Dodaj signal"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "Dodaj v skupino"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "Dodaj {name}"
@@ -300,6 +305,10 @@ msgstr "Ukaza /{name} ni bilo mogoče zagnati: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Ukaza /{name} ni bilo mogoče shraniti: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "Skupin ni bilo mogoče spremeniti. Poskusite znova."
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "Person ni bilo mogoče spremeniti. Poskusite znova."
@@ -328,6 +337,10 @@ msgstr "Ustvarjanje ukazov"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "Ustvarjanje ukazov za to skupnost ter urejanje in brisanje lastnih ukazov."
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "Ustvari skupino"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "Avtor: {name}"
@@ -351,9 +364,17 @@ msgstr "Izbriši persono"
 msgid "Delete command"
 msgstr "Izbriši ukaz"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "Izbriši skupino"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "Izbriši persono"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "Želite izbrisati skupino »{name}«? Persone v njej ostanejo."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "Prenesite aplikacijo Tyne"
 msgid "Gets overwritten"
 msgstr "Se prepiše"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "Ime skupine"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "Skupine"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "To se je spremenilo"
@@ -886,6 +916,15 @@ msgstr "Nova persona"
 msgid "New command"
 msgstr "Nov ukaz"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "Nova skupina"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "Nova skupina…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "Nove persone iz vaše datoteke."
@@ -992,6 +1031,10 @@ msgstr "Nobeden od vaših signalov ni nikjer vklopljen."
 msgid "Not imported"
 msgstr "Se ne uvozi"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "Zunaj skupin"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "Niste prepričani? Pustite, kot je: nič se ne bo spremenilo."
@@ -1053,6 +1096,10 @@ msgstr "Odprite preneseno datoteko."
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "Neobvezno"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "Možnosti za {name}"
 
 msgid "Other names for finding this persona"
 msgstr "Druga imena, po katerih najdete to persono"
@@ -1281,6 +1328,11 @@ msgstr "Odstrani vzdevek"
 msgid "Remove counter"
 msgstr "Odstrani števec"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "Odstrani iz skupine"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "Odstrani prepoznavni emoji"
@@ -1288,6 +1340,10 @@ msgstr "Odstrani prepoznavni emoji"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "Odstrani par oznak"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "Preimenuj skupino"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "Iščite med svojimi personami"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "Iščite med personami računa {name}"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "Izberi vse v skupini {name}"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "Izberi persone v njej"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
