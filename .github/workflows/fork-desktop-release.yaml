@@ -7,6 +7,9 @@
 # wherever they work without signing; compare the two when upstream changes its build.
 #
 # - Run by hand with a version and release notes to publish a release tagged desktop-v<version>.
+#   Windows and Linux are published as soon as they are built; the macOS build is added to the
+#   same release when it is done, however long it waits for a runner (build-macos and
+#   publish-macos below, retried by fork-desktop-release-retry.yaml).
 # - A push to a desktop-test/** branch builds every platform and keeps the files as workflow
 #   artifacts only. Nothing is published, so installed apps never see those builds.
 name: fork desktop release
@@ -168,28 +171,30 @@ jobs:
           retention-days: 1
           compression-level: 0
 
+  # Windows and Linux. macOS is the same steps in build-macos, a job of its own, so a release does
+  # not wait for GitHub's often-busy macOS runners.
   build:
     name: Build ${{ matrix.platform }} (${{ matrix.arch }})
+    if: ${{ inputs.platform != 'macos' }}
     needs: renderer
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        # Every platform, or the one named by the platform input.
+        # Both, or the one named by the platform input.
         include: >-
           ${{ fromJSON(format('[{0}]',
           inputs.platform == 'windows' && '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"}'
           || inputs.platform == 'linux' && '{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"}'
-          || inputs.platform == 'macos' && '{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-15"}'
-          || '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"},{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"},{"platform":"macos","node_platform":"darwin","arch":"arm64","os":"macos-15"}')) }}
-    defaults:
+          || '{"platform":"windows","node_platform":"win32","arch":"x64","os":"windows-2025"},{"platform":"linux","node_platform":"linux","arch":"x64","os":"ubuntu-22.04"}')) }}
+    defaults: &build-defaults
       run:
         shell: bash
-    env:
+    env: &build-env
       ARCH: ${{ matrix.arch }}
       ELECTRON_ARCH: ${{ matrix.arch }}
-    steps:
+    steps: &build-steps
       - name: Checkout CI helpers
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -414,6 +419,26 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  # The macOS build: the build job's steps (YAML anchors), on its own so the release does not wait
+  # for it. The runner is the repository variable TYNE_MACOS_RUNNER when set (a JSON label list
+  # for a Mac of the maintainers', e.g. ["self-hosted","macOS","ARM64"]), else GitHub's macos-15.
+  # The retry workflow recognises this job by its name: keep "Build macos (".
+  build-macos:
+    name: Build ${{ matrix.platform }} (${{ matrix.arch }})
+    if: ${{ inputs.platform != 'windows' && inputs.platform != 'linux' }}
+    needs: renderer
+    runs-on: ${{ vars.TYNE_MACOS_RUNNER && fromJSON(vars.TYNE_MACOS_RUNNER) || 'macos-15' }}
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        include:
+          - platform: macos
+            node_platform: darwin
+            arch: arm64
+    defaults: *build-defaults
+    env: *build-env
+    steps: *build-steps
+
   # Signs the macOS build with the Tyne team's Developer ID, notarizes it, and replaces the build's
   # files with the signed ones (tyne-chat/tyne#202). The signing identity is only in the
   # desktop-release environment, which runs from tyne only, and this job runs only Apple's tools
@@ -422,8 +447,8 @@ jobs:
   sign-macos:
     name: Sign and notarize macOS
     if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') && inputs.macos_signing != 'ad-hoc' }}
-    needs: build
-    runs-on: macos-15
+    needs: build-macos
+    runs-on: ${{ vars.TYNE_MACOS_RUNNER && fromJSON(vars.TYNE_MACOS_RUNNER) || 'macos-15' }}
     # Two notarizations of up to two hours each (scripts/fork-sign-macos.sh).
     timeout-minutes: 300
     environment: desktop-release
@@ -486,8 +511,8 @@ jobs:
   # whatever became of the macOS signing: a slow notarization must not keep this from being tested.
   check-release-signing:
     name: Sign checksums (test run, nothing published)
-    if: ${{ !cancelled() && needs.build.result == 'success' && github.event_name == 'workflow_dispatch' && !inputs.publish && github.ref == 'refs/heads/tyne' }}
-    needs: [build, sign-macos, test-macos]
+    if: ${{ !cancelled() && (needs.build.result == 'success' || needs.build-macos.result == 'success') && github.event_name == 'workflow_dispatch' && !inputs.publish && github.ref == 'refs/heads/tyne' }}
+    needs: [build, build-macos, sign-macos, test-macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: desktop-release
@@ -528,11 +553,10 @@ jobs:
 
   publish:
     name: Publish GitHub release
-    # Only from tyne. With Developer ID signing (the default) it needs sign-macos and its test, so
-    # the macOS build is signed and opens; with macos_signing=ad-hoc those two are skipped and the
-    # build's own macOS files are published.
-    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' && github.ref == 'refs/heads/tyne' && needs.build.result == 'success' && (inputs.macos_signing == 'ad-hoc' || (needs.sign-macos.result == 'success' && needs.test-macos.result == 'success')) }}
-    needs: [build, sign-macos, test-macos]
+    # Only from tyne, with Windows and Linux: the macOS files are added by publish-macos once they
+    # are built (and, with Developer ID signing, signed and opened).
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.publish && inputs.platform == 'all' && github.ref == 'refs/heads/tyne' && needs.build.result == 'success' }}
+    needs: [build]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -549,12 +573,19 @@ jobs:
             exit 1
           fi
 
-      - name: Download release assets
+      # Windows and Linux only, by name: a macOS build that happens to be done already is added
+      # by publish-macos like any other, so there is one way it reaches a release.
+      - name: Download the Windows build
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: fork-desktop-*
+          name: fork-desktop-windows-x64
           path: release_assets
-          merge-multiple: true
+
+      - name: Download the Linux build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: fork-desktop-linux-x64
+          path: release_assets
 
       # Installed apps install only what this signed list gives (src/main/ForkReleaseSignature.ts).
       - name: Checkout the release signing script and keys
@@ -589,6 +620,11 @@ jobs:
             )"
             older=""
             for other in $pending; do
+              # Already published: only its macOS build is still on its way, which never makes
+              # it the newest release again.
+              if gh release view "desktop-v${other}" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+                continue
+              fi
               if [ "$other" != "$VERSION" ] && [ "$(printf '%s\n%s\n' "$other" "$VERSION" | sort -V | head -1)" = "$other" ]; then
                 older="$older $other"
               fi
@@ -617,6 +653,81 @@ jobs:
           --notes "$NOTES"
           --latest
           release_assets/*
+
+  # Adds the macOS files to the release publish made, whenever the macOS build gets a runner (the
+  # retry workflow reruns it while GitHub has none), and signs the checksums again over every file:
+  # the Windows and Linux lines stay the same, so what installed apps check stays valid. The two
+  # checksum files are replaced one after the other, so for a moment the pair does not match; an
+  # update check in that moment fails its signature check and the next one succeeds.
+  publish-macos:
+    name: Add the macOS build to the release
+    if: ${{ !cancelled() && needs.publish.result == 'success' && needs.build-macos.result == 'success' && (inputs.macos_signing == 'ad-hoc' || (needs.sign-macos.result == 'success' && needs.test-macos.result == 'success')) }}
+    needs: [publish, build-macos, sign-macos, test-macos]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    # Holds the release signing key; only runs from the tyne branch can use it.
+    environment: desktop-release
+    steps:
+      - name: Download the macOS build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: fork-desktop-macos-arm64
+          path: macos_assets
+
+      - name: Checkout the release signing script and keys
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          path: source
+          sparse-checkout: |
+            fluxer_desktop/scripts/fork-sign-release-checksums.sh
+            fluxer_desktop/scripts/fork-release-signing-keys.pem
+            fluxer_desktop/scripts/fork-verify-release-signature.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Download the published files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download "desktop-v${VERSION}" --repo "${{ github.repository }}" --dir release_assets
+          rm -f release_assets/SHA256SUMS.txt release_assets/SHA256SUMS.txt.sig
+          for file in macos_assets/*; do
+            name="$(basename "$file")"
+            if [ -e "release_assets/$name" ] && ! cmp -s "$file" "release_assets/$name"; then
+              echo "::error::desktop-v${VERSION} already has a different $name."
+              exit 1
+            fi
+            cp "$file" "release_assets/$name"
+          done
+
+      - name: Write and sign checksums
+        env:
+          SIGNING_KEY: ${{ secrets.TYNE_RELEASE_SIGNING_KEY }}
+        run: source/fluxer_desktop/scripts/fork-sign-release-checksums.sh release_assets
+
+      - name: Add the macOS files and the new checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          files=()
+          for file in macos_assets/*; do files+=("release_assets/$(basename "$file")"); done
+          gh release upload "desktop-v${VERSION}" --repo "${{ github.repository }}" --clobber "${files[@]}"
+          gh release upload "desktop-v${VERSION}" --repo "${{ github.repository }}" --clobber \
+            release_assets/SHA256SUMS.txt release_assets/SHA256SUMS.txt.sig
+
+      - name: Verify the published signature
+        run: |
+          base="https://github.com/${{ github.repository }}/releases/download/desktop-v${VERSION}"
+          curl -fsSL --retry 5 -o "$RUNNER_TEMP/SHA256SUMS.txt" "$base/SHA256SUMS.txt"
+          curl -fsSL --retry 5 -o "$RUNNER_TEMP/SHA256SUMS.txt.sig" "$base/SHA256SUMS.txt.sig"
+          cmp "$RUNNER_TEMP/SHA256SUMS.txt" release_assets/SHA256SUMS.txt
+          source/fluxer_desktop/scripts/fork-verify-release-signature.sh \
+            source/fluxer_desktop/scripts/fork-release-signing-keys.pem \
+            "$RUNNER_TEMP/SHA256SUMS.txt" "$RUNNER_TEMP/SHA256SUMS.txt.sig"
 
   # Velopack's GitHub source reads the ten newest releases and downloads the update feed of every
   # one that has it, one after another: 21 connections per check once ten desktop releases carry a
