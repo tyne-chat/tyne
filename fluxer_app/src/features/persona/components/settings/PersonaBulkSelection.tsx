@@ -17,6 +17,7 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useMemo, useState} from 'react';
 import {PersonaBulkGroupButtons} from './PersonaBulkGroupActions';
+import {PersonaBulkMentionButton} from './PersonaBulkMentionActions';
 import styles from './PersonaBulkSelection.module.css';
 
 // Select many personas in settings and change their visibility or delete them in one request
@@ -200,7 +201,7 @@ const MAKE_DESCRIPTORS = {
 	private: M.MAKE_PRIVATE_DESCRIPTOR,
 } as const;
 
-/** The bar under a non-empty selection: Make public, unlisted or private, and Delete. */
+/** The bar under a non-empty selection: Make public, unlisted or private, Mentions, the groups, and Delete. */
 export const PersonaBulkActionBar = observer(
 	({selection, personas}: {selection: PersonaSelection; personas: ReadonlyArray<ClientPersona>}) => {
 		const {i18n} = useLingui();
@@ -235,6 +236,7 @@ export const PersonaBulkActionBar = observer(
 						</Button>
 					);
 				})}
+				<PersonaBulkMentionButton chosen={chosen} onDone={selection.stop} data-flx="persona.bulk.mention-button" />
 				<PersonaBulkGroupButtons chosen={chosen} onDone={selection.stop} data-flx="persona.bulk.group-buttons" />
 				<Button
 					variant="danger"
