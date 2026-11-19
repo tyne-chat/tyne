@@ -675,6 +675,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 		(sectionId) => PersonaGroupFolds.isFolded(currentUser?.id, sectionId),
 		{searching: query.length > 0, filtering: visibilityFilter !== 'all'},
 	);
+	// What "Select all" takes: what shows, so not the personas of folded groups, as on phones. A
+	// group's own box still takes the whole group.
+	const selectableIds = groupSections
+		? Array.from(new Set(groupSections.filter((section) => !section.folded).flatMap((section) => section.personaIds)))
+		: filteredPersonaIds;
 
 	return (
 		<SettingsTabContainer data-flx="user.personas-settings-tab.container">
@@ -1003,7 +1008,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 								{selection.selecting && (
 									<PersonaSelectionHeader
 										selection={selection}
-										shownIds={filteredPersonaIds}
+										shownIds={selectableIds}
 										data-flx="persona.settings.persona-settings-tab.selection-header"
 									/>
 								)}
