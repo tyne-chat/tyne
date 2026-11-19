@@ -69,6 +69,11 @@ msgstr "o pana e ilo nanpa"
 msgid "Add signal"
 msgstr "o pana e suno"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "o pana tawa kulupu"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "o pana e {name}"
@@ -300,6 +305,10 @@ msgstr "/{name} li ken ala pali: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "ilo li ken ala awen e /{name}: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "ilo li ken ala ante e kulupu. o lukin sin."
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "ilo li ken ala ante e jan insa. o lukin sin."
@@ -328,6 +337,10 @@ msgstr "pali e nimi lawa"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "sina ken pali e nimi lawa lon kulupu ni. sina ken ante anu weka e nimi lawa sina."
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "o pali e kulupu"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "{name} li pali e ni"
@@ -351,9 +364,17 @@ msgstr "o weka e jan insa"
 msgid "Delete command"
 msgstr "o weka e nimi lawa"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "o weka e kulupu"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "o weka e jan insa"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "sina wile ala wile weka e kulupu \"{name}\"? jan insa lon ona li awen."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "o kama jo e ilo Tyne"
 msgid "Gets overwritten"
 msgstr "ona li kama sama lipu"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "nimi kulupu"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "kulupu"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "ante ni li kama"
@@ -886,6 +916,15 @@ msgstr "jan insa sin"
 msgid "New command"
 msgstr "nimi lawa sin"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "kulupu sin"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "kulupu sin…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "jan insa sin tan lipu sina."
@@ -992,6 +1031,10 @@ msgstr "suno sina li open lon ma ala."
 msgid "Not imported"
 msgstr "kama ala"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "lon kulupu ala"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "sina sona ala la o ante ala. ni la ijo ala li ante."
@@ -1053,6 +1096,10 @@ msgstr "o open e lipu pi kama jo."
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "ken"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "ken pi kulupu {name}"
 
 msgid "Other names for finding this persona"
 msgstr "nimi ante la sina ken alasa e jan insa ni"
@@ -1281,6 +1328,11 @@ msgstr "o weka e nimi ante"
 msgid "Remove counter"
 msgstr "o weka e ilo nanpa"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "o weka tan kulupu"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "o weka e sitelen pilin nimi"
@@ -1288,6 +1340,10 @@ msgstr "o weka e sitelen pilin nimi"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "o weka e nimi lili tu"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "o ante e nimi kulupu"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "o alasa e jan insa sina"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "o alasa e jan insa pi {name}"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "o wile e jan ale lon kulupu {name}"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "o wile e jan insa lon kulupu ni"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"

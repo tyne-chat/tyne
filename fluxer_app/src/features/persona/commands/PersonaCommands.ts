@@ -136,7 +136,7 @@ export function personaErrorMessage(err: unknown, fallback: string): string | nu
  * Sends a persona request and returns a reply with a body. The HTTP client throws `HttpError` for a
  * refused request, whose message is only the method and path; the server's message is in its body.
  */
-async function sendPersonaRequest<T>(
+export async function sendPersonaRequest<T>(
 	send: () => Promise<RestResponse<T>>,
 	fallback: string,
 ): Promise<RestResponse<NonNullable<T>>> {
