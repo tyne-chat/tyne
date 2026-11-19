@@ -283,6 +283,12 @@ start one: the API setting `TYNE_DM_THREADS`. Design: the mockups doc linked fro
 - Community creation: the web app hides it from accounts the API would refuse, by evaluating
   upstream's rule itself (`packages/limits/src/ForkCommunityCreation.ts`); the API test
   `ForkCommunityCreationClientRule.test.ts` checks that the two agree.
+- Discord import placeholders: accounts a Discord import makes for people not on Tyne carry the
+  imported flag (`fluxer_api/src/api/user/ForkImportedAccounts.ts`). Nobody uses them: their profiles
+  show an "Imported" tag and no Message, and instead offer Open DM for the viewer's imported
+  conversation with them when there is one (`GET /users/@me/imported-conversations/:user_id`; web
+  `features/user/state/ForkImportedConversations.ts`, phone `imported_conversation_provider.dart`;
+  tyne-chat/tyne#696), which `POST /users/@me/channels` reopens and no other DM with them.
 - Link colours: on the web and desktop, links and mentions keep upstream's link colours, not the
   instance's brand colour that upstream gives them (`features/theme/styles/ForkLinkColors.css`,
   imported in `fluxer_app/src/index.tsx` after the generated colour system; tyne-chat/tyne#230).

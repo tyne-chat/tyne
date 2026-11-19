@@ -28,6 +28,7 @@ import {Avatar} from '@app/features/ui/components/Avatar';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import FocusRingScope from '@app/features/ui/focus_ring/FocusRingScope';
 import * as UserProfileCommands from '@app/features/user/commands/UserProfileCommands';
+import {ImportedConversationFooter} from '@app/features/user/components/ForkImportedConversationButton';
 import {ImportedTag} from '@app/features/user/components/ForkImportedTag';
 import popoutStyles from '@app/features/user/components/popouts/UserProfilePopout.module.css';
 import sharedStyles from '@app/features/user/components/popouts/UserProfileShared.module.css';
@@ -342,41 +343,50 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 								</FocusRing>
 							</div>
 						</ProfileCardContent>
-						<ProfileCardFooter data-flx="persona.persona-profile-popout.profile-card-footer">
-							{isCurrentUser ? (
-								<Button
-									small={true}
-									fitContainer={true}
-									leftIcon={
-										<PencilIcon
-											className={popoutStyles.iconSmall}
-											data-flx="persona.persona-profile-popout.pencil-icon"
-										/>
-									}
-									onClick={handleEditPersona}
-									data-flx="persona.persona-profile-popout.button.edit-persona"
-								>
-									<Trans>Edit persona</Trans>
-								</Button>
-							) : (
-								!isImportedPlaceholder(user) && (
+						{/* A placeholder's persona: Open DM for its imported conversation, or no footer (tyne-chat/tyne#696). */}
+						{!isCurrentUser && isImportedPlaceholder(user) ? (
+							<ImportedConversationFooter
+								user={user}
+								onOpen={() => void handleMessage()}
+								data-flx="persona.persona-profile-popout.imported-conversation-footer"
+							/>
+						) : (
+							<ProfileCardFooter data-flx="persona.persona-profile-popout.profile-card-footer">
+								{isCurrentUser ? (
 									<Button
 										small={true}
 										fitContainer={true}
 										leftIcon={
-											<ChatTeardropIcon
+											<PencilIcon
 												className={popoutStyles.iconSmall}
-												data-flx="persona.persona-profile-popout.chat-teardrop-icon"
+												data-flx="persona.persona-profile-popout.pencil-icon"
 											/>
 										}
-										onClick={handleMessage}
-										data-flx="persona.persona-profile-popout.button.message"
+										onClick={handleEditPersona}
+										data-flx="persona.persona-profile-popout.button.edit-persona"
 									>
-										<Trans>Message</Trans>
+										<Trans>Edit persona</Trans>
 									</Button>
-								)
-							)}
-						</ProfileCardFooter>
+								) : (
+									!isImportedPlaceholder(user) && (
+										<Button
+											small={true}
+											fitContainer={true}
+											leftIcon={
+												<ChatTeardropIcon
+													className={popoutStyles.iconSmall}
+													data-flx="persona.persona-profile-popout.chat-teardrop-icon"
+												/>
+											}
+											onClick={handleMessage}
+											data-flx="persona.persona-profile-popout.button.message"
+										>
+											<Trans>Message</Trans>
+										</Button>
+									)
+								)}
+							</ProfileCardFooter>
+						)}
 					</ProfileCardLayout>
 				</div>
 			</FocusRingScope>
