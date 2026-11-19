@@ -69,6 +69,11 @@ msgstr "কাউন্টার যোগ করুন"
 msgid "Add signal"
 msgstr "সিগন্যাল যোগ করুন"
 
+#. Button that puts the selected personas in a group chosen from a menu
+msgctxt "persona-group"
+msgid "Add to group"
+msgstr "গ্রুপে যোগ করুন"
+
 #. Accessible label of the checkbox that adds a new member of the import file. {name} is its name
 msgid "Add {name}"
 msgstr "{name}-কে যোগ করুন"
@@ -300,6 +305,10 @@ msgstr "/{name} চালানো যায়নি: {detail}"
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name} সেভ করা যায়নি: {detail}"
 
+#. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
+msgid "Couldn’t change the groups. Try again."
+msgstr "গ্রুপগুলো বদলানো যায়নি। আবার চেষ্টা করুন।"
+
 #. Toast when changing or deleting several personas failed.
 msgid "Couldn’t change the personas. Try again."
 msgstr "পারসোনাগুলো বদলানো যায়নি। আবার চেষ্টা করুন।"
@@ -328,6 +337,10 @@ msgstr "কমান্ড তৈরি"
 msgid "Create commands for this community, and edit or delete your own."
 msgstr "এই কমিউনিটির জন্য কমান্ড তৈরি করতে এবং নিজের কমান্ড এডিট বা মুছে ফেলতে দেয়।"
 
+#. Button that makes the group of personas named in the dialog
+msgid "Create group"
+msgstr "গ্রুপ তৈরি করুন"
+
 #. Under the command editor heading: who made the command. Preserve {name}.
 msgid "Created by {name}"
 msgstr "{name}-এর তৈরি"
@@ -351,9 +364,17 @@ msgstr "পারসোনা মুছে ফেলুন"
 msgid "Delete command"
 msgstr "কমান্ড মুছে ফেলুন"
 
+#. Menu item, dialog title and button for deleting a group of personas; the personas stay
+msgid "Delete group"
+msgstr "গ্রুপ মুছুন"
+
 #. Aria label for deleting persona
 msgid "Delete persona"
 msgstr "পারসোনা মুছে ফেলুন"
+
+#. Asks before deleting a group of personas. Preserve {name}, the group’s name.
+msgid "Delete the group “{name}”? The personas in it are kept."
+msgstr "\"{name}\" গ্রুপটি মুছবেন? এর পারসোনাগুলো থেকে যাবে।"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
@@ -640,6 +661,15 @@ msgstr "Tyne অ্যাপ নিন"
 msgid "Gets overwritten"
 msgstr "প্রতিস্থাপিত হবে"
 
+#. Label of the name field when making or renaming a group of personas
+msgctxt "persona-group"
+msgid "Group name"
+msgstr "গ্রুপের নাম"
+
+#. Heading of the persona editor’s list of the groups the persona is in
+msgid "Groups"
+msgstr "গ্রুপ"
+
 #. Heading when a reviewed persona import is done
 msgid "Here is what changed"
 msgstr "যা যা বদলেছে"
@@ -886,6 +916,15 @@ msgstr "নতুন পারসোনা"
 msgid "New command"
 msgstr "নতুন কমান্ড"
 
+#. Button in persona settings that makes a group of personas, and the title of its dialog
+msgctxt "persona-group"
+msgid "New group"
+msgstr "নতুন গ্রুপ"
+
+#. Menu item that makes a new group of personas, asking its name first
+msgid "New group…"
+msgstr "নতুন গ্রুপ…"
+
 #. Explanation of the "Added" line of the import result
 msgid "New personas from your file."
 msgstr "আপনার ফাইল থেকে নতুন পারসোনা।"
@@ -992,6 +1031,10 @@ msgstr "আপনার কোনো সিগন্যাল কোথাও �
 msgid "Not imported"
 msgstr "ইমপোর্ট হবে না"
 
+#. Heading of the section of the persona list holding the personas that are in no group
+msgid "Not in a group"
+msgstr "কোনো গ্রুপে নেই"
+
 #. Explanation at the top of the import review when no member needs a choice, only the display tag
 msgid "Not sure? Leave it as it is: nothing changes."
 msgstr "নিশ্চিত নন? যেমন আছে তেমনই রাখুন: কিছুই বদলাবে না।"
@@ -1053,6 +1096,10 @@ msgstr "ডাউনলোড করা ফাইলটি খুলুন।"
 #. Choice: the command may take input.
 msgid "Optional"
 msgstr "ঐচ্ছিক"
+
+#. Accessible name of the button that opens the menu of a group of personas. Preserve {name}.
+msgid "Options for {name}"
+msgstr "{name}-এর বিকল্প"
 
 msgid "Other names for finding this persona"
 msgstr "এই পারসোনাকে খুঁজে পাওয়ার অন্য নাম"
@@ -1281,6 +1328,11 @@ msgstr "উপনাম সরান"
 msgid "Remove counter"
 msgstr "কাউন্টার সরান"
 
+#. Button that takes the selected personas out of a group chosen from a menu
+msgctxt "persona-group"
+msgid "Remove from group"
+msgstr "গ্রুপ থেকে সরান"
+
 #. Aria label for removing signature emoji
 msgid "Remove signature emoji"
 msgstr "সিগনেচার ইমোজি সরান"
@@ -1288,6 +1340,10 @@ msgstr "সিগনেচার ইমোজি সরান"
 #. Aria label for removing a tag pair
 msgid "Remove tag pair"
 msgstr "ট্যাগ জোড়া সরান"
+
+#. Menu item and dialog title for giving a group of personas a new name
+msgid "Rename group"
+msgstr "গ্রুপের নাম বদলান"
 
 #. What happens to the import file's display tag in the import review when it is used
 msgid "Replaces your display tag"
@@ -1391,6 +1447,14 @@ msgstr "আপনার পারসোনা খুঁজুন"
 #. Placeholder of the search field in another account’s Personas list. {name} is the account’s name.
 msgid "Search {name}’s personas"
 msgstr "{name}-এর পারসোনা খুঁজুন"
+
+#. Accessible name of the checkbox that selects every persona in a group. Preserve {name}.
+msgid "Select everyone in {name}"
+msgstr "{name}-এর সবাইকে বেছে নিন"
+
+#. Menu item of a group of personas that selects every persona in the group
+msgid "Select the personas in it"
+msgstr "এর পারসোনাগুলো বেছে নিন"
 
 #. Tooltip when sending as root account with persona mode active
 msgid "Sending as @{username} ({mode}) - Click to switch persona"
