@@ -85,6 +85,7 @@ export const ChannelHeaderIcon = React.forwardRef<HTMLButtonElement, ChannelHead
 				{showBadge ? (
 					<div
 						className={styles.headerButtonBadge}
+						data-header-badge={badgeCount}
 						data-flx="channel.channel-header-components.channel-header-icon.header-button-badge"
 					>
 						<MentionBadge

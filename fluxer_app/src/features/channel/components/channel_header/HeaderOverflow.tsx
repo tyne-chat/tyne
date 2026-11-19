@@ -75,11 +75,14 @@ const UNREAD_MARK = /unread-pin-indicator|header-button-badge|header-button-unre
 // A header button's red count: the menu button shows the sum of those folded into it (tyne-chat/tyne#699).
 const COUNT_MARK = /header-button-badge$/;
 
+// The badge's count as a number: its text is formatted ("99+", "1K", other numerals; Gemini Carbon's review).
+const COUNT_ATTR = 'data-header-badge';
+
 function foldedCount(element: Element): number {
 	let total = 0;
 	for (const node of element.querySelectorAll('[data-flx]')) {
 		if (!COUNT_MARK.test(node.getAttribute('data-flx') ?? '')) continue;
-		const count = Number.parseInt(node.textContent ?? '', 10);
+		const count = Number(node.getAttribute(COUNT_ATTR));
 		if (Number.isFinite(count)) total += count;
 	}
 	return total;
@@ -158,6 +161,8 @@ interface MenuEntry {
 	// The button's own mark, drawn in the menu instead of read out of its label (tyne-chat/tyne#704).
 	readonly badge: number;
 	readonly dot: boolean;
+	// For screen readers, with the dot: what the button's aria-label says of its mark.
+	readonly markLabel: string;
 	readonly disabled: boolean;
 	// The search box has no icon of its own to copy; the Follow button has no icon at all.
 	readonly icon: Element | 'search' | null;
@@ -403,7 +408,13 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 			if (search != null && records.every((record) => search.contains(record.target))) return;
 			schedule();
 		});
-		mutationObserver.observe(header, {childList: true, subtree: true, characterData: true});
+		mutationObserver.observe(header, {
+			childList: true,
+			subtree: true,
+			characterData: true,
+			attributes: true,
+			attributeFilter: [COUNT_ATTR],
+		});
 		// A header popout or menu keeps the layout as it is while open, so that nothing moves under it.
 		const disposeReaction = reaction(isFrozen, (frozen) => {
 			if (!frozen) schedule();
@@ -541,6 +552,7 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 					label: i18n._(SEARCH_DESCRIPTOR),
 					badge: 0,
 					dot: false,
+					markLabel: '',
 					disabled: false,
 					icon: 'search',
 					activate: openSearch,
@@ -549,14 +561,14 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 			}
 			const button = element instanceof HTMLButtonElement ? element : element.querySelector('button');
 			if (button == null) continue;
+			const plainLabel = button.getAttribute('data-header-label');
+			const fullLabel = button.getAttribute('aria-label');
 			entries.push({
 				key: item.key,
 				// A header button's plain name: its aria-label also reads out its marks for screen readers.
-				label:
-					button.getAttribute('data-header-label') ??
-					button.getAttribute('aria-label') ??
-					button.textContent?.trim() ??
-					'',
+				label: plainLabel ?? fullLabel ?? button.textContent?.trim() ?? '',
+				// What the aria-label adds to the name (", unread pinned messages"), read out with the menu's dot.
+				markLabel: plainLabel != null && fullLabel?.startsWith(plainLabel) ? fullLabel.slice(plainLabel.length) : '',
 				badge: foldedCount(element),
 				dot: [...element.querySelectorAll('[data-flx]')].some((node) =>
 					UNREAD_MARK.test(node.getAttribute('data-flx') ?? ''),
@@ -602,7 +614,15 @@ export const HeaderOverflow = observer(({searchActive = false, buttonClassName}:
 										/>
 									</span>
 								) : (
-									entry.dot && <span className={ownStyles.menuDot} data-flx="channel.header-overflow.menu-dot" />
+									entry.dot && (
+										<span className={ownStyles.menuDot} data-flx="channel.header-overflow.menu-dot">
+											{entry.markLabel && (
+												<span className={ownStyles.srOnly} data-flx="channel.header-overflow.menu-mark-label">
+													{entry.markLabel}
+												</span>
+											)}
+										</span>
+									)
 								)}
 							</MenuItem>
 						))}
