@@ -19,6 +19,11 @@ vi.mock('@lingui/react/macro', () => ({
 vi.mock('@app/features/user/state/UserSettings', () => ({
 	default: {getSubPreference: () => undefined, setSubPreference: () => Promise.resolve(), isHydrated: true},
 }));
+const mentionCache = vi.hoisted(() => ({clear: vi.fn()}));
+vi.mock('@app/features/lexical/composer/useAutocompletePersonaSearch', async (importOriginal) => ({
+	...(await importOriginal<typeof import('@app/features/lexical/composer/useAutocompletePersonaSearch')>()),
+	clearPersonaMentionCache: mentionCache.clear,
+}));
 vi.mock('@app/features/platform/transport/RestTransport', () => ({
 	http: {get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(), configure: vi.fn()},
 }));
@@ -107,6 +112,54 @@ describe('bulk persona commands', () => {
 				PersonaCommands.PersonaRequestError,
 			);
 			expect(PersonaStore.personas.find((p) => p.id === A)?.visibility).toBe('unlisted');
+		});
+	});
+
+	// tyne-chat/tyne#652
+	describe('setPersonaMentionableBy', () => {
+		it('sends one request, takes the answer into the store and drops cached suggestions', async () => {
+			vi.mocked(http.patch).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				body: [{...persona(A, 'Alpha'), mentionable_by: 'nobody'}, persona(B, 'Beta')],
+			} as any);
+
+			await PersonaCommands.setPersonaMentionableBy([
+				{id: A, mentionable_by: 'nobody'},
+				{id: B, mentionable_by: null},
+			]);
+
+			expect(http.patch).toHaveBeenCalledTimes(1);
+			expect(http.patch).toHaveBeenCalledWith(ForkEndpoints.USER_PERSONA_MENTIONABLE_BY, {
+				body: {
+					personas: [
+						{id: A, mentionable_by: 'nobody'},
+						{id: B, mentionable_by: null},
+					],
+				},
+			});
+			expect(PersonaStore.personas.map((p) => `${p.name}:${p.mentionable_by}`)).toEqual([
+				'Alpha:nobody',
+				'Beta:null',
+				'Gamma:null',
+			]);
+			expect(mentionCache.clear).toHaveBeenCalledTimes(1);
+		});
+
+		it('sends nothing for no change, and leaves the store alone when refused', async () => {
+			await PersonaCommands.setPersonaMentionableBy([]);
+			expect(http.patch).not.toHaveBeenCalled();
+
+			vi.mocked(http.patch).mockResolvedValueOnce({
+				ok: false,
+				status: 404,
+				body: {code: 'UNKNOWN_PERSONA', message: 'Unknown persona'},
+			} as any);
+			await expect(PersonaCommands.setPersonaMentionableBy([{id: A, mentionable_by: 'nobody'}])).rejects.toBeInstanceOf(
+				PersonaCommands.PersonaRequestError,
+			);
+			expect(PersonaStore.personas.find((p) => p.id === A)?.mentionable_by).toBeNull();
+			expect(mentionCache.clear).not.toHaveBeenCalled();
 		});
 	});
 
