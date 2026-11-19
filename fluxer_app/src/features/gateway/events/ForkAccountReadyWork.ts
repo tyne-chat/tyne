@@ -7,6 +7,7 @@
 
 import GuildCommandsStore from '@app/features/guild_commands/state/GuildCommandsStore';
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
+import * as PersonaGroupCommands from '@app/features/persona/commands/PersonaGroupCommands';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
@@ -18,6 +19,7 @@ function runForkAccountReadyWork(): void {
 	void PersonaCommands.fetchPersonas(true);
 	void PersonaCommands.fetchPersonaSettings();
 	void PersonaStore.fetchChannelStates();
+	void PersonaGroupCommands.fetchPersonaGroups();
 }
 
 // Upstream's promoted resume (completePromotedResume in PooledGatewayConnection.ts): on the desktop,
