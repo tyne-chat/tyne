@@ -2,7 +2,7 @@
 
 import {createUserID} from '@app/api/BrandedTypes';
 import {DefaultUserOnly, LoginRequired} from '@app/api/middleware/AuthMiddleware';
-import {RateLimitMiddleware} from '@app/api/middleware/RateLimitMiddleware';
+import {RateLimitMiddleware, type RouteRateLimitConfig} from '@app/api/middleware/RateLimitMiddleware';
 import {OpenAPI} from '@app/api/middleware/ResponseTypeMiddleware';
 import {beginPersonaAvatarBatchImport, importPersonaAvatar} from '@app/api/persona/PersonaAvatarImporter';
 import {RateLimitConfigs} from '@app/api/RateLimitConfig';
@@ -23,6 +23,14 @@ import {
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {ImportedConversationResponse} from '@fluxer/schema/src/domains/user/ForkImportedConversationSchemas';
 import {streamText} from 'hono/streaming';
+import {ms} from 'itty-time';
+
+// One bucket per placeholder asked about (Gemini Carbon's review of tyne-chat/tyne#696): upstream's profile bucket
+// names a `:target_id` this route does not have.
+const IMPORTED_CONVERSATION_RATE_LIMIT: RouteRateLimitConfig = {
+	bucket: 'user:imported_conversation::user_id',
+	config: {limit: 100, windowMs: ms('10 seconds')},
+};
 
 // Fork: the fork's account routes. UserAccountController() registers them with one call at the
 // place they had among its own, so every route keeps its order.
@@ -127,15 +135,16 @@ export function ForkUserAccountRoutes(app: HonoApp): void {
 	// (tyne-chat/tyne#696): asked when such a profile opens, never for anyone else.
 	app.get(
 		'/users/@me/imported-conversations/:user_id',
-		RateLimitMiddleware(RateLimitConfigs.USER_GET_PROFILE),
+		RateLimitMiddleware(IMPORTED_CONVERSATION_RATE_LIMIT),
 		LoginRequired,
+		DefaultUserOnly,
 		Validator('param', UserIdParam),
 		OpenAPI({
 			operationId: 'get_imported_conversation',
 			summary: 'Get your imported conversation with a placeholder',
 			responseSchema: ImportedConversationResponse,
 			statusCode: 200,
-			security: ['bearerToken', 'sessionToken'],
+			security: ['sessionToken'],
 			tags: ['Users'],
 			description:
 				'Your DM with a Discord import placeholder account when it holds imported messages: it can be opened again once closed (POST /users/@me/channels). The channel id is null for anyone else, or an empty DM.',

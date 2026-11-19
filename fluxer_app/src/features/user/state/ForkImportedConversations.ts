@@ -4,6 +4,7 @@
 // closed it can be opened again, so the placeholder's profile offers Open DM, but only when there is one.
 
 import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
+import RuntimeConfig from '@app/features/app/state/RuntimeConfig';
 import Authentication from '@app/features/auth/state/Authentication';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {Logger} from '@app/features/platform/utils/AppLogger';
@@ -54,13 +55,15 @@ export class ImportedConversationsStore {
 		return `${this.deps.viewerId() ?? ''}:${userId}`;
 	}
 
-	/** The DM's id once known, else null. */
+	/** The DM's id once known, else null; null while signed out. */
 	channelId(userId: string): string | null {
+		if (!this.deps.viewerId()) return null;
 		return this.answers.get(this.key(userId)) ?? null;
 	}
 
-	/** Asks unless the answer is known, a request is in flight, or one failed less than a minute ago. */
+	/** Asks unless signed out, the answer is known, a request is in flight, or one failed less than a minute ago. */
 	ensure(userId: string): void {
+		if (!this.deps.viewerId()) return;
 		const key = this.key(userId);
 		if (this.answers.has(key) || this.inFlight.has(key)) return;
 		const failedAt = this.failedAt.get(key);
@@ -88,7 +91,8 @@ export const ImportedConversations = new ImportedConversationsStore();
 
 /** Your imported conversation with this user when they are a placeholder and it exists; use in observers. */
 export function useImportedConversation(user: {id: string; flags: number} | null | undefined): string | null {
-	const placeholderId = user && isImportedPlaceholder(user) ? user.id : null;
+	// None where the instance has DMs off, and nothing asked (Gemini Carbon's review).
+	const placeholderId = user && isImportedPlaceholder(user) && !RuntimeConfig.directMessagesDisabled ? user.id : null;
 	const viewerId = Authentication.currentUserId;
 	useEffect(() => {
 		if (placeholderId && viewerId) ImportedConversations.ensure(placeholderId);

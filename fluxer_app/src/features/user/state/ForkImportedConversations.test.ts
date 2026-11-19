@@ -67,4 +67,12 @@ describe('ImportedConversationsStore', () => {
 		store.ensure('with-history');
 		expect(fetchChannelId).toHaveBeenCalledTimes(2);
 	});
+	// Gemini Carbon's review.
+	it('asks nothing and answers nothing while signed out', async () => {
+		viewer = null;
+		store.ensure('with-history');
+		await settle();
+		expect(fetchChannelId).not.toHaveBeenCalled();
+		expect(store.channelId('with-history')).toBeNull();
+	});
 });
