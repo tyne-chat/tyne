@@ -64,6 +64,13 @@ pub fn build_image_candidates(
                 .and_then(oembed::parse_dimension),
         );
     }
+    // Fork: a resized copy of the og:image in the oEmbed thumbnail is not a second image (tyne-chat/tyne#843).
+    super::fork_oembed_thumbnail::drop_redundant_oembed_thumbnail(
+        &mut candidates,
+        base_url,
+        og,
+        oembed,
+    );
     candidates
 }
 
