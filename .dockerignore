@@ -69,13 +69,10 @@
 
 /fluxer_native/fluxerd
 
-# Fork: a TEMPORARY fix for an UPSTREAM BUG (tyne-chat/tyne#592), kept only until upstream fixes it.
-# Since upstream's da7c73d27e (#3989) the desktop crates are members of the root Cargo workspace and
-# cargo loads every member, but the `/fluxer_desktop/` line above leaves them out of the build
-# context, so no image that builds a Rust service from the root workspace can build (upstream's own
-# included). These lines bring the crates' sources back, without their build output. When upstream's
-# fix lands, remove this block, after checking the form upstream chose (the issue says what to look
-# for).
-!/fluxer_desktop/native/
+# Fork: keep the desktop crates' build output out of Docker build contexts (tyne-chat/tyne#592).
+# Upstream's `!/fluxer_desktop/native/` above (#4023) lets the crates in, as the root Cargo workspace
+# needs, but it also re-includes their `target/` and `node_modules/`, which the `**/` lines before it
+# had left out. In a clean checkout there are none; production deploys build from a working tree,
+# where they hold about 2.9 GB.
 /fluxer_desktop/native/**/target/
 /fluxer_desktop/native/**/node_modules/
