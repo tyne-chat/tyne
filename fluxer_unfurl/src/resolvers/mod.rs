@@ -12,6 +12,9 @@ pub mod wikipedia;
 pub mod xkcd;
 pub mod youtube;
 
+// Fork modules.
+pub(crate) mod fork_oembed_thumbnail;
+
 use crate::activity_pub::fetcher::ActivityPubClient;
 use crate::activity_pub::signature::RequestSigner;
 use crate::media_proxy::MediaProxyClient;
