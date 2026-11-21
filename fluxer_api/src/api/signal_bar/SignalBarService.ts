@@ -48,6 +48,7 @@ import {
 	type UserSignalsSnapshot,
 	UserSignalsSnapshotSchema,
 } from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
+import {isValidSingleUnicodeEmoji} from '@fluxer/schema/src/primitives/EmojiValidators';
 import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 
 const SIGNAL_BAR_CONFIG_KEY = 'signal_bar';
@@ -58,7 +59,6 @@ const OFFLINE_GRACE_MS = 12 * 60 * 60 * 1000;
 const OFFLINE_SINCE_TTL_SECONDS = 24 * 60 * 60;
 const NO_PERSONA = '0';
 const ACTIVE_USERS_KEY = 'signalbar:users';
-const UNICODE_EMOJI_REGEX = /\p{Extended_Pictographic}|\p{Regional_Indicator}|[#*0-9]️?⃣/u;
 const GUILD_DISPATCH_PAGE_SIZE = 100;
 
 const entryKey = (channelId: string, signalId: string, userId: string) =>
@@ -165,7 +165,7 @@ export class SignalBarService {
 				emojiId = emoji.id.toString();
 				emojiName = emoji.name;
 				animated = emoji.isAnimated;
-			} else if (!UNICODE_EMOJI_REGEX.test(emojiName)) {
+			} else if (!isValidSingleUnicodeEmoji(emojiName)) {
 				throw new UnknownSignalError();
 			}
 			const id = item.id && currentIds.has(item.id) && !usedIds.has(item.id) ? item.id : randomBytes(6).toString('hex');

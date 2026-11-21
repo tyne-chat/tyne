@@ -86,7 +86,8 @@ the `OpenAPI` block says; bots may call every route without `DefaultUserOnly`. B
 - Listing, lighting and the DM switch call `ensureTextChannel`: threads and forums get 400.
 - `updateBar` keeps an item's `id` only if it is on the current bar and not repeated, so a reorder
   keeps ids and the signals lit under them. A custom emoji must exist (in any community); Unicode
-  text must contain a pictograph.
+  text must be exactly one emoji (upstream's `isValidSingleUnicodeEmoji`). Every signal in the
+  request is checked, unchanged ones too.
 - `updateGuildSettings` keeps only category, text and announcement channel ids, writes, then for each
   text channel whose state changed clears its signals (when off) and sends `CHANNEL_SIGNAL_BAR_UPDATE`.
 - `updateBar` keeps a signal's `everywhere` tick when the item leaves it out (an older client's edit).
