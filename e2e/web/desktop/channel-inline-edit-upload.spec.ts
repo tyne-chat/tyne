@@ -149,6 +149,11 @@ test.describe("The inline edit's Upload file", () => {
 			if (route.request().method() === 'PATCH' && holdNext) {
 				holdNext = false;
 				await held;
+				// Released only once the page has aborted this save. A browser never finishes sending a
+				// request it aborted, but newer Playwright forwards a held one anyway (tyne-chat/tyne#820),
+				// so the test drops it.
+				await route.abort().catch(() => {});
+				return;
 			}
 			await route.continue().catch(() => {});
 		});
