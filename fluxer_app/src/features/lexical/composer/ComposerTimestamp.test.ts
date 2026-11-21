@@ -132,7 +132,7 @@ describe('ComposerTimestampUtils', () => {
 		});
 		expect(parseTimestampWire('<t:1700000000>')).toEqual({
 			epoch: 1700000000,
-			format: 'shortDateTime',
+			format: 'unstyled',
 		});
 		expect(parseTimestampWire('invalid')).toBeNull();
 	});
@@ -145,6 +145,16 @@ describe('ComposerTimestampUtils', () => {
 		// Mismatched epochs should not match combo regex
 		const mismatched = '<t:1700000000:f> (<t:1800000000:R>)'.match(TIMESTAMP_COMBO_REGEX);
 		expect(mismatched).toBeNull();
+	});
+
+	it('round-trips the s and S styles and a tag without a style (tyne-chat/tyne#386)', () => {
+		expect(normalizeTimestampFormat('s')).toBe('shortDateShortTime');
+		expect(normalizeTimestampFormat('S')).toBe('shortDateMediumTime');
+		for (const wire of ['<t:1700000000:s>', '<t:1700000000:S>', '<t:1700000000>']) {
+			const parsed = parseTimestampWire(wire);
+			expect(parsed).not.toBeNull();
+			expect(getTimestampWire(parsed!.epoch, parsed!.format)).toBe(wire);
+		}
 	});
 
 	it('matches single timestamp regex', () => {
@@ -311,6 +321,105 @@ describe('ComposerTimestampNode', () => {
 			expect(children[2]?.getTextContent()).toBe(' ready');
 		});
 
+		unregister();
+	});
+
+	function createTransformEditor(namespace: string) {
+		const editor = createEditor({
+			namespace,
+			nodes: [ComposerTimestampNode],
+			onError: (err) => {
+				throw err;
+			},
+		});
+		const unregister = registerComposerTimestampTransform(editor);
+		return {editor, unregister};
+	}
+
+	function typeAndRead(editor: ReturnType<typeof createEditor>, text: string) {
+		editor.update(
+			() => {
+				$hydrateComposerFromDraft(text, []);
+			},
+			{discrete: true},
+		);
+		return editor.getEditorState().read(() => {
+			const formats: Array<string> = [];
+			for (const block of $getRoot().getChildren()) {
+				if (!$isElementNode(block)) {
+					continue;
+				}
+				for (const child of block.getChildren()) {
+					if ($isComposerTimestampNode(child)) {
+						formats.push(child.getFormat());
+					}
+				}
+			}
+			return {formats, wire: $projectComposer().wire};
+		});
+	}
+
+	it('keeps every style the parser accepts, and a tag without one, as written (tyne-chat/tyne#386)', () => {
+		const {editor, unregister} = createTransformEditor('timestamp-styles-test');
+		for (const style of ['t', 'T', 'd', 'D', 'f', 'F', 's', 'S', 'R', null]) {
+			const tag = style == null ? '<t:1700000000>' : `<t:1700000000:${style}>`;
+			const {formats, wire} = typeAndRead(editor, `at ${tag} ok`);
+			expect(formats).toHaveLength(1);
+			expect(wire).toBe(`at ${tag} ok`);
+		}
+		unregister();
+	});
+
+	it('restores s, S and style-less pills from a draft as written (tyne-chat/tyne#386)', () => {
+		const editor = createEditor({
+			namespace: 'timestamp-draft-styles-test',
+			nodes: [ComposerTimestampNode],
+			onError: (err) => {
+				throw err;
+			},
+		});
+		for (const [format, wire] of [
+			['shortDateShortTime', '<t:1700000000:s>'],
+			['shortDateMediumTime', '<t:1700000000:S>'],
+			['unstyled', '<t:1700000000>'],
+		] as const) {
+			const displayText = 'label';
+			const segment: MentionSegment = {
+				type: 'special',
+				id: `timestamp:1700000000:${format}`,
+				displayText,
+				actualText: wire,
+				start: 0,
+				end: displayText.length,
+			};
+			editor.update(
+				() => {
+					$hydrateComposerFromDraft(displayText, [segment]);
+					expect($projectComposer().wire).toBe(wire);
+				},
+				{discrete: true},
+			);
+		}
+	});
+
+	it('leaves a timestamp inside backticks as text (tyne-chat/tyne#388)', () => {
+		const {editor, unregister} = createTransformEditor('timestamp-code-test');
+		expect(typeAndRead(editor, 'see `<t:1700000000:f>` here')).toEqual({
+			formats: [],
+			wire: 'see `<t:1700000000:f>` here',
+		});
+		// An unclosed backtick suppresses it too, as it does emoji shortcodes.
+		expect(typeAndRead(editor, 'see `<t:1700000000:f>')).toEqual({formats: [], wire: 'see `<t:1700000000:f>'});
+		// A code block, whose backticks sit on other lines.
+		expect(typeAndRead(editor, '```\n<t:1700000000:f>\n```').formats).toEqual([]);
+		unregister();
+	});
+
+	it('still turns a timestamp after one in code into a pill (tyne-chat/tyne#388)', () => {
+		const {editor, unregister} = createTransformEditor('timestamp-after-code-test');
+		const {formats, wire} = typeAndRead(editor, '`<t:1700000000:f>` then <t:1700000000:R>');
+		expect(formats).toEqual(['relative']);
+		expect(wire).toBe('`<t:1700000000:f>` then <t:1700000000:R>');
 		unregister();
 	});
 });
