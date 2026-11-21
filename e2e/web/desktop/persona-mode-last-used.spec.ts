@@ -5,10 +5,7 @@ import {loginAs, openPersonasSettings} from '../support/auth.js';
 test.describe('Active Persona Mode: Last Used Flow', () => {
 	const baseURL = process.env.E2E_BASE_URL || 'http://localhost:9188';
 
-	test('setting mode to Last Used latches persona on tagged message and unlatches on escape', async ({
-		page,
-		isMobile,
-	}) => {
+	test('setting mode to Last Used latches persona on tagged message and unlatches on escape', async ({page}) => {
 		const timestamp = Date.now().toString().slice(-6);
 
 		// 1. Create Bob
@@ -90,17 +87,6 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 		await expect(composer).toBeVisible({timeout: 20_000});
 
 		const submitMessage = async () => {
-			if (isMobile) {
-				const sendBtn = page
-					.locator(
-						'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label="Send message"]',
-					)
-					.first();
-				if (await sendBtn.isVisible({timeout: 1_000}).catch(() => false)) {
-					await sendBtn.click();
-					return;
-				}
-			}
 			await composer.press('Enter');
 		};
 

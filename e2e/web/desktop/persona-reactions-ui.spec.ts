@@ -123,7 +123,6 @@ test.describe('In-App Persona Reactions UI & Context Menu Flow', () => {
 		await expect(reactionButton).toBeVisible({timeout: 10_000});
 
 		// 12. Hover over the reaction button to verify tooltip attributes Bob-Alpha
-		await page.waitForTimeout(500);
 		await reactionButton.hover();
 		await expect(
 			page.locator('[data-flx*="emoji-tooltip-content"]').filter({hasText: bobAlpha.name}).first(),

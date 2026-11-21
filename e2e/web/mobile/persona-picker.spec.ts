@@ -71,16 +71,8 @@ test.describe('Mobile Web Persona Picker', () => {
 		await composer.click();
 		await page.keyboard.type(testMsg);
 
-		const sendButton = page
-			.locator(
-				'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-			)
-			.first();
-		if (await sendButton.isVisible({timeout: 3_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		// On a phone, typing swaps the voice message button for Send.
+		await page.locator('[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"]').click();
 
 		// Verify message sent
 		await expect(page.getByText(testMsg)).toBeVisible({timeout: 15_000});
