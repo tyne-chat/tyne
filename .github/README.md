@@ -52,6 +52,14 @@ Desktop builds for Windows, macOS and Linux are on the
 [releases page](https://github.com/tyne-chat/tyne/releases). They are not code-signed, so your
 system will ask before running them.
 
+- **Windows:** the first time you run the installer, Windows shows "Windows protected your PC".
+  Click **More info**, then **Run anyway**. Windows warns about any app from a publisher it does not
+  know yet; it does not mean the file is damaged.
+- **Checking a download:** each release lists the SHA-256 of every file in `SHA256SUMS.txt`, signed
+  in `SHA256SUMS.txt.sig`. Compare it with the file you downloaded, for example
+  `sha256sum Tyne-Setup-2.1.31-win-x64.exe` on Linux, `shasum -a 256 <file>` on macOS, or
+  `Get-FileHash <file>` in PowerShell on Windows.
+
 ## Licence
 
 Tyne is free software under the [GNU Affero General Public License, version 3 or later](../LICENSE),
