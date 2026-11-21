@@ -95,9 +95,18 @@ test.describe('Starting a thread as a persona', () => {
 		const thread = await api<{name: string; owner_persona_id?: string}>(alice.client, `/channels/${source.id}`);
 		expect(thread.name).toBe(threadName);
 		expect(thread.owner_persona_id).toBe(fox.id);
+		// The thread panel shows the message only once the server has answered the send. This failed
+		// once with `undefined` (tyne-chat/tyne#684), which cannot tell a missing message from one
+		// without its persona, so a failure now says which.
 		const threadMessages = await api<Array<any>>(alice.client, `/channels/${source.id}/messages?limit=50`);
 		const sent = threadMessages.find((m) => m.content === firstText);
-		expect(sent?.subprofile?.id).toBe(fox.id);
+		expect(
+			sent,
+			`the thread's first message, among ${JSON.stringify(threadMessages.map((m) => m.content))}`,
+		).toBeDefined();
+		expect(sent.subprofile?.id, `the persona of ${JSON.stringify({id: sent.id, subprofile: sent.subprofile})}`).toBe(
+			fox.id,
+		);
 
 		// Alice opens the thread and sees it attributed to Fox.
 		const aliceContext = await browser.newContext();
