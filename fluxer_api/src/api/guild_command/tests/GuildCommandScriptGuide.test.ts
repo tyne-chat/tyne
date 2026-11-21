@@ -12,7 +12,7 @@ import {
 	GUILD_COMMAND_TEMPLATE_FILTERS,
 	GUILD_COMMAND_TEMPLATE_TAGS,
 } from '@fluxer/schema/src/domains/guild_command/GuildCommandSchemas';
-import {describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 // People and LLMs write scripts from docs/server-command-scripts.md, and much of what it warns about
 // fails silently, so what it says is tested: its `template` → `result` pairs, its code blocks, and
@@ -56,6 +56,17 @@ const INPUTS: Array<Partial<GuildCommandScope>> = [
 describe('docs/server-command-scripts.md', () => {
 	const engine = new GuildCommandTemplateEngine();
 
+	// The engine stops a render after 50 ms of real time, which a busy machine can reach on any render
+	// here (tyne-chat/tyne#540). That limit is GuildCommandTemplateEngine.test.ts's to test; with the
+	// clock stopped, only what the guide's scripts do can fail them.
+	beforeEach(() => {
+		vi.spyOn(performance, 'now').mockReturnValue(0);
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	function problem(run: () => unknown): string {
 		try {
 			run();
@@ -80,7 +91,14 @@ describe('docs/server-command-scripts.md', () => {
 		for (const input of INPUTS) {
 			// Repeated so random branches turn up.
 			for (let run = 0; run < 25; run++) {
-				expect(engine.render(block, scope(input), {hugs: 2})).not.toBe('');
+				let output: string;
+				try {
+					output = engine.render(block, scope(input), {hugs: 2});
+				} catch (error) {
+					if (!(error instanceof GuildCommandTemplateError)) throw error;
+					throw new Error(`${JSON.stringify(error.issue)} with input ${JSON.stringify(input.input ?? '')}`);
+				}
+				expect(output).not.toBe('');
 			}
 		}
 	});
