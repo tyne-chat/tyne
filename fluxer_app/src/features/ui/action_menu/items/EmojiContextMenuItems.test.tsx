@@ -105,6 +105,23 @@ vi.mock('@app/features/ui/commands/ToastCommands', () => ({
 	createToast: vi.fn(),
 }));
 
+const media = vi.hoisted(() => ({
+	createDownloadHandler: vi.fn((_src: string, _type: string, _name?: string) => async () => {}),
+	copyMediaToClipboard: vi.fn(async (_options: {originalSrc: string; type: string; defaultName?: string}) => {}),
+}));
+vi.mock('@app/features/messaging/utils/FileDownloadUtils', async () => ({
+	...(await vi.importActual<typeof import('@app/features/messaging/utils/FileDownloadUtils')>(
+		'@app/features/messaging/utils/FileDownloadUtils',
+	)),
+	createDownloadHandler: media.createDownloadHandler,
+}));
+vi.mock('@app/features/ui/action_menu/items/MediaMenuData', async () => ({
+	...(await vi.importActual<typeof import('@app/features/ui/action_menu/items/MediaMenuData')>(
+		'@app/features/ui/action_menu/items/MediaMenuData',
+	)),
+	copyMediaToClipboard: media.copyMediaToClipboard,
+}));
+
 import EmojiPicker, {getEmojiUsageKey} from '@app/features/emoji/state/EmojiPicker';
 import ExpressionPicker from '@app/features/emoji/state/ExpressionPicker';
 import type {FlatEmoji} from '@app/features/emoji/types/EmojiTypes';
@@ -426,5 +443,71 @@ describe('EmojiContextMenuItems', () => {
 
 		expect(TextCopyCommands.copy).toHaveBeenCalledWith(expect.anything(), '123456789012345678');
 		expect(mockOnClose).toHaveBeenCalled();
+	});
+
+	describe('the file name of a downloaded or copied emoji (tyne-chat/tyne#395)', () => {
+		const clickItem = async (label: string) => {
+			const item = Array.from(document.querySelectorAll('[role="menuitem"]')).find(
+				(el) => el.textContent === label,
+			) as HTMLElement;
+			expect(item).toBeTruthy();
+			await act(async () => item.click());
+		};
+		const renderMenu = async (emoji: FlatEmoji) => {
+			await act(async () => {
+				root.render(
+					<EmojiContextMenuItems
+						emoji={emoji}
+						onClose={mockOnClose}
+						data-flx="ui.action-menu.items.emoji-context-menu-items-test.emoji-context-menu-items--file-name"
+					/>,
+				);
+			});
+		};
+
+		it('saves a Unicode emoji under the extension of its file, an SVG', async () => {
+			const url = 'https://static.test/emoji/1f44d.svg?v=15';
+			await renderMenu({...unicodeEmoji, url});
+
+			await clickItem('Download image');
+
+			expect(media.createDownloadHandler).toHaveBeenCalledWith(url, 'image', 'thumbsup.svg');
+		});
+
+		it('saves and copies a custom emoji that shares its name under that name, without the ~1', async () => {
+			const duplicate: FlatEmoji = {
+				id: '223456789012345678',
+				name: 'super_fox~1',
+				uniqueName: 'super_fox',
+				allNamesString: ':super_fox~1:',
+				animated: true,
+				guildId: 'guild-2',
+			};
+			await renderMenu(duplicate);
+
+			await clickItem('Download GIF');
+			await clickItem('Copy GIF');
+
+			expect(media.createDownloadHandler).toHaveBeenCalledWith(
+				expect.stringContaining('/emojis/223456789012345678.gif'),
+				'gif',
+				'super_fox.gif',
+			);
+			expect(media.copyMediaToClipboard).toHaveBeenCalledWith(
+				expect.objectContaining({type: 'gif', defaultName: 'super_fox.gif'}),
+			);
+		});
+
+		it('saves a still custom emoji as a PNG', async () => {
+			await renderMenu({...customEmoji, uniqueName: 'super_fox'});
+
+			await clickItem('Download image');
+
+			expect(media.createDownloadHandler).toHaveBeenCalledWith(
+				expect.stringContaining('/emojis/123456789012345678.png'),
+				'image',
+				'super_fox.png',
+			);
+		});
 	});
 });
