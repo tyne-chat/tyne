@@ -461,12 +461,12 @@ impl<T: Transport> MessagesShard<T> {
             .await?;
         let stmt_get_reactions = db
             .prepare(
-                "SELECT user_id, emoji_id, emoji_name, emoji_animated, created_at FROM message_reactions WHERE channel_id = ? AND bucket = ? AND message_id = ?"
+                "SELECT user_id, emoji_id, emoji_name, emoji_animated, created_at, persona_id FROM message_reactions WHERE channel_id = ? AND bucket = ? AND message_id = ?"
             )
             .await?;
         let stmt_get_reactions_for_messages = db
             .prepare(
-                "SELECT message_id, user_id, emoji_id, emoji_name, emoji_animated, created_at FROM message_reactions WHERE channel_id = ? AND bucket = ? AND message_id IN ?"
+                "SELECT message_id, user_id, emoji_id, emoji_name, emoji_animated, created_at, persona_id FROM message_reactions WHERE channel_id = ? AND bucket = ? AND message_id IN ?"
             )
             .await?;
         let stmt_get_attachment_decay = db
