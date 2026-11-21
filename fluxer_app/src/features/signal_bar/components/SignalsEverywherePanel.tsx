@@ -21,6 +21,7 @@ import {MenuItem} from '@app/features/ui/action_menu/MenuItem';
 import {Button} from '@app/features/ui/button/Button';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
+import FocusRingScope from '@app/features/ui/focus_ring/FocusRingScope';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
 import {ME} from '@fluxer/constants/src/AppConstants';
 import type {SignalBarSignal, UserSignalRef} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
@@ -179,6 +180,8 @@ export const SignalsEverywherePanel = observer(({channel, onClose}: SignalsEvery
 		void SignalBarStore.fetchMyChats();
 	}, []);
 	const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
+	// A popout draws no focus ring without a scope of its own (tyne-chat/tyne#839).
+	const containerRef = useRef<HTMLDivElement>(null);
 	const chats = getKnownSignalChats();
 	const openChannel = channel && canSetSignalIn(channel) ? channel : null;
 	const scope = chats.length + (openChannel && !chats.some((item) => item.channel.id === openChannel.id) ? 1 : 0);
@@ -213,89 +216,91 @@ export const SignalsEverywherePanel = observer(({channel, onClose}: SignalsEvery
 		rows[next]?.focus();
 	}, []);
 	return (
-		<div className={styles.panel} data-flx="signal-bar.signals-everywhere-panel.panel">
-			{tiles.length > 0 && (
-				<>
-					<div className={styles.heading} data-flx="signal-bar.signals-everywhere-panel.heading">
-						{i18n._(SET_EVERYWHERE_HEADING_DESCRIPTOR, {count: scope})}
-					</div>
-					<div className={styles.tiles} data-flx="signal-bar.signals-everywhere-panel.tiles">
-						{tiles.map((signal) => {
-							const label = i18n._(SET_SIGNAL_EVERYWHERE_DESCRIPTOR, {label: getSignalLabel(signal)});
-							return (
-								<Tooltip key={signal.id} text={label} data-flx="signal-bar.signals-everywhere-panel.tile.tooltip">
-									<FocusRing offset={-2} data-flx="signal-bar.signals-everywhere-panel.tile.focus-ring">
-										<button
-											type="button"
-											className={styles.tile}
-											disabled={busy || scope === 0}
-											onClick={() => setEverywhere(signal.id)}
-											aria-label={label}
-											data-flx="signal-bar.signals-everywhere-panel.tile"
-										>
-											<SignalEmoji
-												signal={signal}
-												className={styles.tileEmoji}
-												data-flx="signal-bar.signals-everywhere-panel.tile.emoji"
-											/>
-										</button>
-									</FocusRing>
-								</Tooltip>
-							);
-						})}
-					</div>
-				</>
-			)}
-			<div className={styles.actions} data-flx="signal-bar.signals-everywhere-panel.actions">
-				<Button
-					variant="secondary"
-					small
-					// Every chat the server lists, those this client cannot show included, so they can be cleared.
-					disabled={busy || SignalBarStore.myChatList.length === 0}
-					onClick={() => {
-						void SignalBarStore.setEverywhere(null, null, null);
-						onClose();
-					}}
-					data-flx="signal-bar.signals-everywhere-panel.turn-all-off"
-				>
-					{i18n._(TURN_ALL_OFF_DESCRIPTOR)}
-				</Button>
-				<Button
-					variant="secondary"
-					small
-					disabled={busy || !SignalBarStore.restoreAvailable}
-					onClick={() => {
-						onClose();
-						void openSignalsRestoreModal(i18n);
-					}}
-					data-flx="signal-bar.signals-everywhere-panel.restore"
-				>
-					{i18n._(RESTORE_ELLIPSIS_DESCRIPTOR)}
-				</Button>
-			</div>
-			<div className={styles.divider} data-flx="signal-bar.signals-everywhere-panel.divider" />
-			{chats.length === 0 ? (
-				<p className={styles.empty} data-flx="signal-bar.signals-everywhere-panel.empty">
-					{i18n._(NO_SIGNALS_ANYWHERE_DESCRIPTOR)}
-				</p>
-			) : (
-				<div className={styles.list} data-flx="signal-bar.signals-everywhere-panel.list">
-					{chats.map((item, index) => (
-						<SignalChatRow
-							key={item.channel.id}
-							ref={(node) => {
-								rowRefs.current[index] = node;
-							}}
-							channel={item.channel}
-							refs={item.chat.signals}
-							columns={columns}
-							onOpen={openChat}
-							onKeyDown={handleRowKeyDown}
-							data-flx="signal-bar.signals-everywhere-panel.chat-row"
-						/>
-					))}
+		<FocusRingScope containerRef={containerRef} data-flx="signal-bar.signals-everywhere-panel.focus-ring-scope">
+			<div ref={containerRef} className={styles.panel} data-flx="signal-bar.signals-everywhere-panel.panel">
+				{tiles.length > 0 && (
+					<>
+						<div className={styles.heading} data-flx="signal-bar.signals-everywhere-panel.heading">
+							{i18n._(SET_EVERYWHERE_HEADING_DESCRIPTOR, {count: scope})}
+						</div>
+						<div className={styles.tiles} data-flx="signal-bar.signals-everywhere-panel.tiles">
+							{tiles.map((signal) => {
+								const label = i18n._(SET_SIGNAL_EVERYWHERE_DESCRIPTOR, {label: getSignalLabel(signal)});
+								return (
+									<Tooltip key={signal.id} text={label} data-flx="signal-bar.signals-everywhere-panel.tile.tooltip">
+										<FocusRing offset={-2} data-flx="signal-bar.signals-everywhere-panel.tile.focus-ring">
+											<button
+												type="button"
+												className={styles.tile}
+												disabled={busy || scope === 0}
+												onClick={() => setEverywhere(signal.id)}
+												aria-label={label}
+												data-flx="signal-bar.signals-everywhere-panel.tile"
+											>
+												<SignalEmoji
+													signal={signal}
+													className={styles.tileEmoji}
+													data-flx="signal-bar.signals-everywhere-panel.tile.emoji"
+												/>
+											</button>
+										</FocusRing>
+									</Tooltip>
+								);
+							})}
+						</div>
+					</>
+				)}
+				<div className={styles.actions} data-flx="signal-bar.signals-everywhere-panel.actions">
+					<Button
+						variant="secondary"
+						small
+						// Every chat the server lists, those this client cannot show included, so they can be cleared.
+						disabled={busy || SignalBarStore.myChatList.length === 0}
+						onClick={() => {
+							void SignalBarStore.setEverywhere(null, null, null);
+							onClose();
+						}}
+						data-flx="signal-bar.signals-everywhere-panel.turn-all-off"
+					>
+						{i18n._(TURN_ALL_OFF_DESCRIPTOR)}
+					</Button>
+					<Button
+						variant="secondary"
+						small
+						disabled={busy || !SignalBarStore.restoreAvailable}
+						onClick={() => {
+							onClose();
+							void openSignalsRestoreModal(i18n);
+						}}
+						data-flx="signal-bar.signals-everywhere-panel.restore"
+					>
+						{i18n._(RESTORE_ELLIPSIS_DESCRIPTOR)}
+					</Button>
 				</div>
-			)}
-		</div>
+				<div className={styles.divider} data-flx="signal-bar.signals-everywhere-panel.divider" />
+				{chats.length === 0 ? (
+					<p className={styles.empty} data-flx="signal-bar.signals-everywhere-panel.empty">
+						{i18n._(NO_SIGNALS_ANYWHERE_DESCRIPTOR)}
+					</p>
+				) : (
+					<div className={styles.list} data-flx="signal-bar.signals-everywhere-panel.list">
+						{chats.map((item, index) => (
+							<SignalChatRow
+								key={item.channel.id}
+								ref={(node) => {
+									rowRefs.current[index] = node;
+								}}
+								channel={item.channel}
+								refs={item.chat.signals}
+								columns={columns}
+								onOpen={openChat}
+								onKeyDown={handleRowKeyDown}
+								data-flx="signal-bar.signals-everywhere-panel.chat-row"
+							/>
+						))}
+					</div>
+				)}
+			</div>
+		</FocusRingScope>
 	);
 });
