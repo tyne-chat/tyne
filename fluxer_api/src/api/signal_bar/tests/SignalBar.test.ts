@@ -35,6 +35,7 @@ import {afterAll, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest'
 
 // Fork imports.
 
+import {readFileSync} from 'node:fs';
 import {createGuildID, createUserID, type GuildID} from '@app/api/BrandedTypes';
 import {createEmoji, getPngDataUrl} from '@app/api/emoji/tests/EmojiTestUtils';
 import type {GuildRepository} from '@app/api/guild/repositories/GuildRepository';
@@ -44,6 +45,18 @@ import {createTestWorkerHelpers} from '@app/api/test/SyncTaskWorkerService';
 import sweepSignalBar from '@app/api/worker/tasks/SweepSignalBar';
 import {clearWorkerDependencies, setWorkerDependencies} from '@app/api/worker/WorkerContext';
 import {initializeWorkerDependencies} from '@app/api/worker/WorkerDependencies';
+import {MAX_SIGNAL_BAR_SIGNALS} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
+
+// Every emoji the web app's picker offers, skin tones included: the bar editor adds signals from it.
+function readWebPickerEmojis(): Array<string> {
+	const file = new URL('../../../../../fluxer_app/src/media/data/emojis.json', import.meta.url);
+	const data = JSON.parse(readFileSync(file, 'utf8')) as {
+		categories: Record<string, Array<{surrogates: string; skins?: Array<{surrogates: string}>}>>;
+	};
+	return Object.values(data.categories).flatMap((emojis) =>
+		emojis.flatMap((emoji) => [emoji.surrogates, ...(emoji.skins ?? []).map((skin) => skin.surrogates)]),
+	);
+}
 
 describe('signal bar', () => {
 	let harness: ApiTestHarness;
@@ -521,6 +534,32 @@ describe('signal bar', () => {
 			.body({signals: [{emoji_name: 'reading'}]})
 			.expect(HTTP_STATUS.NOT_FOUND)
 			.execute();
+	});
+
+	it('takes every emoji the web picker offers, and no text around one or two together (tyne-chat/tyne#446)', async () => {
+		const {owner, guild} = await setupTestGuildWithMembers(harness, 0);
+		await setHomeGuild(guild.id);
+		const putBar = (names: Array<string>) =>
+			createBuilder(harness, owner.token)
+				.put('/instance/signal-bar')
+				.body({signals: names.map((emoji_name) => ({emoji_name}))})
+				.executeRaw();
+
+		const picker = readWebPickerEmojis();
+		expect(picker.length).toBeGreaterThan(3000);
+		const refused: Array<string> = [];
+		for (let start = 0; start < picker.length; start += MAX_SIGNAL_BAR_SIGNALS) {
+			const batch = picker.slice(start, start + MAX_SIGNAL_BAR_SIGNALS);
+			if ((await putBar(batch)).response.status === HTTP_STATUS.OK) continue;
+			for (const name of batch) {
+				if ((await putBar([name])).response.status !== HTTP_STATUS.OK) refused.push(name);
+			}
+		}
+		expect(refused).toEqual([]);
+
+		for (const text of ['📖 reading', 'Done ✅', '📖✅']) {
+			expect((await putBar([text])).response.status).toBe(HTTP_STATUS.NOT_FOUND);
+		}
 	});
 
 	it('drops a signal from the bar once its custom emoji is deleted', async () => {
