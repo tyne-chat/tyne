@@ -9,6 +9,10 @@ import {NATIVE_TITLEBAR_CLASS} from '@fluxer/desktop_ipc/src/NativeTitlebarShell
 import type React from 'react';
 import {useLayoutEffect, useRef} from 'react';
 
+// Fork imports.
+
+import {useForkNativeTitlebarTopLayer} from '@app/features/app/components/layout/ForkNativeTitlebarTopLayer';
+
 const STARTUP_NATIVE_TITLEBAR_ID = 'fluxer-startup-native-titlebar';
 
 interface NativeTitlebarProps {
@@ -18,6 +22,7 @@ interface NativeTitlebarProps {
 export const NativeTitlebar: React.FC<NativeTitlebarProps> = ({platform}) => {
 	const isMacOS = platform === 'macos';
 	const titlebarRef = useRef<HTMLDivElement>(null);
+	useForkNativeTitlebarTopLayer(titlebarRef);
 	useLayoutEffect(() => {
 		const startupTitlebar = document.getElementById(STARTUP_NATIVE_TITLEBAR_ID);
 		if (startupTitlebar != null) {
