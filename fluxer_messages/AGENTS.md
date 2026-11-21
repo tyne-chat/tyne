@@ -106,11 +106,12 @@ separate processes, so for a while either may run an older build than the other.
 - **Absence:** `me_root` and `persona_reactions` are left out when false or empty. The web's
   hydration (`ReactionStateMachine.ts`) keeps its previous value when a field is absent, so it cannot
   tell "none" from "not sent" (tyne-chat/tyne#327).
-- **Scylla is behind the fork.** `MESSAGE_COLUMNS` selects `persona_id`, which
-  `tools/dev/cassandra_target_schema.json` does not have (it still lists the retired `subprofile`),
-  and the two Scylla reaction statements do not select `persona_id`. Tyne runs Postgres (the compose
-  files and `config/env/development.env` set it), but the image is built with `--features scylla`.
-  Clippy with `--all-features` compiles that code and cannot catch this (tyne-chat/tyne#329).
+- **Nothing builds the Scylla queries against the schema.** Tyne runs Postgres (the compose files
+  and `config/env/development.env` set it), but the image is built with `--features scylla`, and
+  Clippy with `--all-features` compiles those queries without the schema. A column they select must
+  be in `tools/dev/cassandra_target_schema.json`; the API's `ForkCassandraSchemaParity.test.ts`
+  checks the fork's columns there. Until tyne-chat/tyne#329 the reaction queries left out
+  `persona_id`, and every persona query failed on Scylla.
 
 ## Where the fork's code sits
 
