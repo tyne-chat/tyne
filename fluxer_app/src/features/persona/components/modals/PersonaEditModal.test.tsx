@@ -845,4 +845,49 @@ describe('PersonaEditModal Component', () => {
 			);
 		});
 	});
+
+	it('clears the flash timer when the editor closes (tyne-chat/tyne#861)', async () => {
+		const setTimeoutSpy = vi.spyOn(window, 'setTimeout');
+		const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout');
+		try {
+			await act(async () => {
+				root.render(
+					<PersonaEditModal
+						persona={{id: '100000000000000099', name: 'Flash', pronouns: 'they/them'} as any}
+						onClose={vi.fn()}
+						data-flx="persona.persona-edit-modal-test.persona-edit-modal--flash-timer"
+					/>,
+				);
+			});
+			const pronounsInput = document.body.querySelector(
+				'[data-flx="persona.persona-edit-modal.input.pronouns"]',
+			) as HTMLInputElement;
+			await act(async () => {
+				Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set?.call(pronounsInput, 'he/him');
+				pronounsInput.dispatchEvent(new Event('input', {bubbles: true}));
+			});
+
+			// Duplicating with an unsaved change flashes the bar instead, for 300 ms.
+			setTimeoutSpy.mockClear();
+			await act(async () => {
+				(
+					document.body.querySelector(
+						'[data-flx="persona.persona-edit-modal.button.duplicate-persona"]',
+					) as HTMLButtonElement
+				).click();
+			});
+			const flashIndex = setTimeoutSpy.mock.calls.findIndex((call) => call[1] === 300);
+			expect(flashIndex).toBeGreaterThanOrEqual(0);
+			const flashTimer = setTimeoutSpy.mock.results[flashIndex]!.value;
+
+			act(() => {
+				root.unmount();
+			});
+			root = createRoot(container);
+			expect(clearTimeoutSpy).toHaveBeenCalledWith(flashTimer);
+		} finally {
+			setTimeoutSpy.mockRestore();
+			clearTimeoutSpy.mockRestore();
+		}
+	});
 });
