@@ -1405,6 +1405,10 @@ msgstr "Alisin ang natatanging emoji"
 msgid "Remove tag pair"
 msgstr "Alisin ang pares ng tag"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Alisin ang bookmark na ito?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Palitan ang pangalan ng grupo"

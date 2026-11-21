@@ -1405,6 +1405,10 @@ msgstr "Poista nimikkoemoji"
 msgid "Remove tag pair"
 msgstr "Poista tunnistepari"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Poistetaanko tämä kirjanmerkki?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Nimeä ryhmä uudelleen"

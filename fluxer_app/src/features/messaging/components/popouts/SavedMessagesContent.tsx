@@ -27,6 +27,10 @@ import {FlagCheckeredIcon, SparkleIcon, XIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 
+// Fork imports.
+
+import {requestRemoveBookmark} from '@app/features/messaging/commands/ForkBookmarkRemoval';
+
 const NO_BOOKMARKS_DESCRIPTOR = msg({
 	message: 'No bookmarks',
 	comment: 'Empty-state text in the saved messages content popout.',
@@ -60,7 +64,7 @@ export const SavedMessagesContent = observer(() => {
 			<SavedMessageMissingCard
 				key={`lost-${entryId}`}
 				entryId={entryId}
-				onRemove={() => SavedMessageCommands.remove(i18n, entryId)}
+				onRemove={(event?: React.MouseEvent) => requestRemoveBookmark(i18n, entryId, {shiftKey: event?.shiftKey})}
 				data-flx="messaging.saved-messages-content.render-missing-saved-message.saved-message-missing-card"
 			/>
 		),
@@ -155,7 +159,9 @@ export const SavedMessagesContent = observer(() => {
 											<button
 												type="button"
 												className={headerStyles.headerIconButton}
-												onClick={() => SavedMessageCommands.remove(i18n, message.id)}
+												onClick={(event) =>
+													requestRemoveBookmark(i18n, message.id, {message, shiftKey: event.shiftKey})
+												}
 												aria-label={i18n._(REMOVE_BOOKMARK_DESCRIPTOR)}
 												data-flx="messaging.saved-messages-content.button.remove"
 											>

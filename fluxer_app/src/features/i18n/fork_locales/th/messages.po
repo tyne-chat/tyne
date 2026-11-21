@@ -1405,6 +1405,10 @@ msgstr "ลบอีโมจิประจำตัว"
 msgid "Remove tag pair"
 msgstr "ลบคู่แท็ก"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "ลบบุ๊กมาร์กนี้ใช่ไหม"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "เปลี่ยนชื่อกลุ่ม"

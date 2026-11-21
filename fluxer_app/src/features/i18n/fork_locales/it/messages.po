@@ -1405,6 +1405,10 @@ msgstr "Rimuovi emoji distintiva"
 msgid "Remove tag pair"
 msgstr "Rimuovi coppia di tag"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Rimuovere questo messaggio dai messaggi salvati?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Rinomina gruppo"
