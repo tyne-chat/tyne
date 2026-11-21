@@ -35,6 +35,18 @@ vi.mock('@lingui/react/macro', () => ({
 	}),
 }));
 
+// Lets a test give the picker its own list of zones; the others get the real one.
+const timeZoneList = vi.hoisted(() => ({
+	options: null as null | Array<{value: string; label: string; searchText: string; offsetMinutes: number}>,
+}));
+vi.mock('@fluxer/date_utils/src/TimeZoneUtils', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@fluxer/date_utils/src/TimeZoneUtils')>();
+	return {
+		...actual,
+		getTimeZoneDisplayOptions: () => timeZoneList.options ?? actual.getTimeZoneDisplayOptions(),
+	};
+});
+
 const {SearchableTimeZonePicker} = await import('./SearchableTimeZonePicker');
 
 describe('SearchableTimeZonePicker', () => {
@@ -259,5 +271,53 @@ describe('SearchableTimeZonePicker', () => {
 
 		expect(onChange).toHaveBeenCalledWith(null);
 		expect(document.querySelector('[data-flx="ui.searchable-timezone-picker.popout-wrapper"]')).toBeNull();
+	});
+
+	async function openSuggestedFor(
+		localZone: string,
+		options: NonNullable<typeof timeZoneList.options>,
+	): Promise<string | null | undefined> {
+		const resolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
+		const spy = vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockImplementation(function (
+			this: Intl.DateTimeFormat,
+		) {
+			return {...resolvedOptions.call(this), timeZone: localZone};
+		});
+		timeZoneList.options = options;
+		try {
+			await act(async () => {
+				root.render(
+					<SearchableTimeZonePicker
+						value={null}
+						onChange={vi.fn()}
+						data-flx="ui.form.searchable-time-zone-picker-test.searchable-time-zone-picker.suggested"
+					/>,
+				);
+			});
+			const trigger = document.querySelector('[data-flx="ui.searchable-timezone-picker.trigger"]') as HTMLButtonElement;
+			await act(async () => {
+				trigger.click();
+			});
+			return document.querySelector('[data-flx="ui.searchable-timezone-picker.suggested-item"]')?.textContent;
+		} finally {
+			timeZoneList.options = null;
+			spy.mockRestore();
+		}
+	}
+
+	it('suggests the local zone itself over an earlier zone whose search text names it (tyne-chat/tyne#390)', async () => {
+		const suggested = await openSuggestedFor('UTC', [
+			{value: 'Etc/Other', label: 'UTC+00:00 Other', searchText: 'Etc/Other UTC', offsetMinutes: 0},
+			{value: 'UTC', label: 'UTC+00:00 UTC', searchText: 'UTC Etc/UTC', offsetMinutes: 0},
+		]);
+		expect(suggested).toBe('UTC+00:00 UTC');
+	});
+
+	it('still suggests the zone that lists the local one when the list has no option of that name', async () => {
+		const suggested = await openSuggestedFor('Asia/Calcutta', [
+			{value: 'Asia/Dubai', label: 'UTC+04:00 Dubai', searchText: 'Asia/Dubai', offsetMinutes: 240},
+			{value: 'Asia/Kolkata', label: 'UTC+05:30 Kolkata', searchText: 'Asia/Kolkata Asia/Calcutta', offsetMinutes: 330},
+		]);
+		expect(suggested).toBe('UTC+05:30 Kolkata');
 	});
 });
