@@ -416,6 +416,11 @@ class NotificationState {
 		if (isFocusedViewingChannel && !Modal.hasModalOpen()) {
 			// Fork: this window has the message in view, so no other window should announce it.
 			void claimNotificationAcrossWindows(message.id, message.channel_id);
+			// Fork: Do Not Disturb mutes this sound too, as it does every other notification (tyne-chat/tyne#778).
+			if (LocalPresence.getStatus() === StatusTypes.DND) {
+				this.markNotified(message.id);
+				return true;
+			}
 			NotificationUtils.playSameChannelNotificationSoundIfEnabled();
 			this.markNotified(message.id);
 			return true;
