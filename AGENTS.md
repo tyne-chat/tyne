@@ -118,6 +118,8 @@ Rules with a mechanical answer; follow them every time:
   stripped from stored settings, tyne-chat/tyne#125.)
 - **Strings:** fork catalogues only (see "Translations").
 - **Generated files:** never edited by hand (see "Generated code").
+- **Suppressions:** a fork `@ts-expect-error`, `eslint-disable` or `biome-ignore` says why, on its
+  line or the one above.
 - **Data:** fork-owned tables next to `Personas` (the one exception, a message's or reaction's
   persona, is under "Personas").
 
