@@ -31,10 +31,7 @@ test.describe('Personal Notes Persona Integration', () => {
 	test.beforeAll(() => setPersonalNotes(true));
 	test.afterAll(() => setPersonalNotes(false));
 
-	test('user can send and manage persona-attributed messages in personal notes self-channel', async ({
-		page,
-		isMobile,
-	}) => {
+	test('user can send and manage persona-attributed messages in personal notes self-channel', async ({page}) => {
 		const timestamp = Date.now().toString().slice(-6);
 
 		// 1. Register User with a dedicated Persona
@@ -72,17 +69,6 @@ test.describe('Personal Notes Persona Integration', () => {
 		await expect(composer).toBeVisible({timeout: 15_000});
 
 		const submitMessage = async () => {
-			if (isMobile) {
-				const sendBtn = page
-					.locator(
-						'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label="Send message"]',
-					)
-					.first();
-				if (await sendBtn.isVisible({timeout: 1_000}).catch(() => false)) {
-					await sendBtn.click();
-					return;
-				}
-			}
 			await composer.press('Enter');
 		};
 

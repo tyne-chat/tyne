@@ -92,17 +92,8 @@ test.describe('In-App Composer Tag Auto-Proxying', () => {
 		// Verify the composer pill indicates tag-matched state
 		await expect(pill).toHaveAttribute('aria-label', /Matched by tag/i, {timeout: 5_000});
 
-		// 6. Submit message (click send button if mobile or press Enter)
-		const sendButton = page
-			.locator(
-				'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-			)
-			.first();
-		if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		// 6. Submit message
+		await page.keyboard.press('Enter');
 
 		// 7. Verify message renders in chat as Bob-Alpha with tag stripped
 		await expect(page.getByText(messageBody)).toBeVisible({timeout: 15_000});

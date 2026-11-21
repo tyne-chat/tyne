@@ -111,16 +111,7 @@ test.describe('Rich Composer Timestamp Pills & Formatting', () => {
 		await expect(timestampPill).toBeVisible({timeout: 5_000});
 
 		// 6. Submit message
-		const sendButton = page
-			.locator(
-				'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-			)
-			.first();
-		if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		await page.keyboard.press('Enter');
 
 		// 7. Verify message renders with formatted timestamp element
 		const renderedTimestamp = page.locator('time, [class*="timestamp"], [data-flx*="timestamp-renderer"]').first();
