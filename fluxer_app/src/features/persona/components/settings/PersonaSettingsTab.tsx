@@ -30,6 +30,7 @@ import * as UnsavedChangesCommands from '@app/features/ui/commands/UnsavedChange
 import {Avatar} from '@app/features/ui/components/Avatar';
 import {Input} from '@app/features/ui/components/form/FormInput';
 import {Switch} from '@app/features/ui/components/form/FormSwitch';
+import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {RadioGroup, type RadioOption} from '@app/features/ui/radio_group/RadioGroup';
 import type {SegmentedTab} from '@app/features/ui/segmented_tabs/SegmentedTabs';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
@@ -79,6 +80,7 @@ import {
 	PersonaVisibilityChips,
 	type PersonaVisibilityFilter,
 	usePersonaSelection,
+	usePersonaSelectionFocus,
 	visibilityOf,
 } from './PersonaBulkSelection';
 import bulkStyles from './PersonaBulkSelection.module.css';
@@ -223,6 +225,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 	// Selecting many personas to change or delete at once (tyne-chat/tyne#542).
 	const [visibilityFilter, setVisibilityFilter] = useState<PersonaVisibilityFilter>('all');
 	const selection = usePersonaSelection(personas);
+	const selectionFocus = usePersonaSelectionFocus(selection);
 
 	// Display tag state
 	const [tagText, setTagText] = useState(PersonaStore.displayTagText);
@@ -654,15 +657,18 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 							{isThisActive ? <Trans>Active</Trans> : <Trans>Set Active</Trans>}
 						</Button>
 					)}
-					<button
-						type="button"
-						className={styles.chevronButton}
-						onClick={() => handleStartEdit(persona)}
-						aria-label={i18n._(EDIT_PERSONA_ARIA_DESCRIPTOR)}
-						data-flx="persona.settings.persona-settings-tab.chevron-button.start-edit"
-					>
-						<CaretRight size={18} weight="bold" data-flx="persona.settings.persona-settings-tab.caret-right" />
-					</button>
+					{/* The card's own control from the keyboard needs a ring of its own (tyne-chat/tyne#840). */}
+					<FocusRing offset={-2} data-flx="persona.settings.persona-settings-tab.chevron-button.focus-ring">
+						<button
+							type="button"
+							className={styles.chevronButton}
+							onClick={() => handleStartEdit(persona)}
+							aria-label={i18n._(EDIT_PERSONA_ARIA_DESCRIPTOR)}
+							data-flx="persona.settings.persona-settings-tab.chevron-button.start-edit"
+						>
+							<CaretRight size={18} weight="bold" data-flx="persona.settings.persona-settings-tab.caret-right" />
+						</button>
+					</FocusRing>
 				</div>
 			</div>
 		);
@@ -995,10 +1001,11 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									/>
 									{!selection.selecting && (
 										<Button
+											ref={selectionFocus.selectButtonRef}
 											variant="secondary"
 											small
 											fitContent
-											onClick={() => selection.start()}
+											onClick={selectionFocus.startFromSelectButton}
 											data-flx="persona.settings.persona-settings-tab.button.select"
 										>
 											{i18n._(BulkMessages.SELECT_DESCRIPTOR)}
@@ -1009,6 +1016,7 @@ export const PersonaSettingsTab: React.FC<PersonaSettingsTabProps> = observer(({
 									<PersonaSelectionHeader
 										selection={selection}
 										shownIds={selectableIds}
+										containerRef={selectionFocus.headerRef}
 										data-flx="persona.settings.persona-settings-tab.selection-header"
 									/>
 								)}
