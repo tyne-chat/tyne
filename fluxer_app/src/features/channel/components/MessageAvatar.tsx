@@ -22,7 +22,6 @@ export const MessageAvatar = observer(
 		size,
 		className,
 		isHovering,
-		ignoreSubprofile,
 	}: {
 		user: User;
 		message: Message;
@@ -31,7 +30,6 @@ export const MessageAvatar = observer(
 		className: string;
 		isHovering: boolean;
 		isPreview: boolean;
-		ignoreSubprofile?: boolean;
 	}) => {
 		const onPopoutToggle = useMaybeMessageViewContext()?.onPopoutToggle;
 		const handlePopoutOpen = useCallback(() => onPopoutToggle?.(true), [onPopoutToggle]);
@@ -70,13 +68,12 @@ export const MessageAvatar = observer(
 				enableLongPressActions={false}
 				onPopoutOpen={handlePopoutOpen}
 				onPopoutClose={handlePopoutClose}
-				ignoreSubprofile={ignoreSubprofile}
 				data-flx="channel.message-avatar.preloadable-user-popout"
 			>
 				<FocusRing data-flx="channel.message-avatar.focus-ring">
 					<Avatar
 						user={user}
-						{...personaAvatarUrls(user.id, ignoreSubprofile ? null : message.subprofile)}
+						{...personaAvatarUrls(user.id, message.subprofile)}
 						size={size}
 						className={className}
 						forceAnimate={isHovering}
