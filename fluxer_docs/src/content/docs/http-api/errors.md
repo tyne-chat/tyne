@@ -92,6 +92,7 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `ACLS_MUST_BE_NON_EMPTY` | ACLs must be non-empty |
 | `ADMIN_API_KEY_NOT_FOUND` | Admin API key wasn't found |
 | `ALREADY_FRIENDS` | You're already friends with this user |
+| `ANIMATION_TOO_LARGE_TO_CONVERT` | An attached animated AVIF is too long or too large to convert to an animated WebP |
 | `ANNOUNCEMENT_CHANNEL_REQUIRED` | This action is only available in announcement channels |
 | `BAD_GATEWAY` | Bad gateway |
 | `BAD_REQUEST` | Bad request |
