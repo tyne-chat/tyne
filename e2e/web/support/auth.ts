@@ -1,4 +1,4 @@
-import {expect, type Page} from '@playwright/test';
+import {expect, type Page, test} from '@playwright/test';
 
 const EMAIL_INPUT_SELECTOR = 'input[type="email"], input[name="email"], input[autocomplete="email"]';
 
@@ -33,12 +33,14 @@ export async function loginAs(page: Page, email: string, password = 'TestPasswor
 }
 
 export async function openUserSettings(page: Page): Promise<void> {
-	// Try desktop settings button first (in UserArea bottom-left)
-	const desktopSettingsBtn = page
-		.locator('button[data-flx*="control-button.settings-click"], button[aria-label*="User Settings" i]')
-		.first();
-	if (await desktopSettingsBtn.isVisible({timeout: 2_000}).catch(() => false)) {
-		await desktopSettingsBtn.click();
+	// The layout is the project's, not whatever is on screen yet: isVisible() answers at once, so a
+	// page still drawing its user area went down the phone path (tyne-chat/tyne#385).
+	if (!test.info().project.use.isMobile) {
+		// The settings button in the UserArea, bottom left.
+		await page
+			.locator('button[data-flx*="control-button.settings-click"], button[aria-label*="User Settings" i]')
+			.first()
+			.click();
 		return;
 	}
 
