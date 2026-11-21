@@ -527,12 +527,24 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 		[isCopy],
 	);
 
+	// The flash ends after 300 ms; a timer still pending when the editor closes is cleared, so it
+	// never updates a closed editor (tyne-chat/tyne#861).
+	const flashTimerRef = useRef<number | null>(null);
+	const clearFlashTimer = useCallback(() => {
+		if (flashTimerRef.current === null) return;
+		window.clearTimeout(flashTimerRef.current);
+		flashTimerRef.current = null;
+	}, []);
+	useEffect(() => clearFlashTimer, [clearFlashTimer]);
+
 	const triggerFlash = useCallback(() => {
 		setFlashBanner(true);
-		window.setTimeout(() => {
+		clearFlashTimer();
+		flashTimerRef.current = window.setTimeout(() => {
+			flashTimerRef.current = null;
 			setFlashBanner(false);
 		}, 300);
-	}, []);
+	}, [clearFlashTimer]);
 
 	const effectiveDefaultColor = useMemo<number | null>(() => {
 		if (formData.avatarHash.trim()) {
