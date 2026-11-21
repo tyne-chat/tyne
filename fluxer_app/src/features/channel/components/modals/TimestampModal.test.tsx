@@ -398,4 +398,51 @@ describe('TimestampModal', () => {
 		});
 		expect(timeInput.value).toBe('09:15');
 	});
+
+	async function submit(): Promise<void> {
+		const form = document.querySelector('form') as HTMLFormElement;
+		await act(async () => {
+			form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+		});
+	}
+
+	it('keeps the s and S styles of a pill being edited (tyne-chat/tyne#386)', async () => {
+		const epoch = 1700000000;
+		for (const [format, markdown] of [
+			['shortDateShortTime', `<t:${epoch}:s>`],
+			['shortDateMediumTime', `<t:${epoch}:S>`],
+		] as const) {
+			const onInsert = vi.fn();
+			await act(async () => {
+				root.render(
+					<TimestampModal
+						key={format}
+						initialEpoch={epoch}
+						initialFormat={format}
+						onInsert={onInsert}
+						data-flx="channel.timestamp-modal-test.timestamp-modal--short-styles"
+					/>,
+				);
+			});
+			await submit();
+			expect(onInsert).toHaveBeenCalledWith(markdown, {epoch, format});
+		}
+	});
+
+	it('edits a tag without a style as f, the style the parser shows it in (tyne-chat/tyne#386)', async () => {
+		const epoch = 1700000000;
+		const onInsert = vi.fn();
+		await act(async () => {
+			root.render(
+				<TimestampModal
+					initialEpoch={epoch}
+					initialFormat="unstyled"
+					onInsert={onInsert}
+					data-flx="channel.timestamp-modal-test.timestamp-modal--unstyled"
+				/>,
+			);
+		});
+		await submit();
+		expect(onInsert).toHaveBeenCalledWith(`<t:${epoch}:f>`, {epoch, format: 'shortDateTime'});
+	});
 });
