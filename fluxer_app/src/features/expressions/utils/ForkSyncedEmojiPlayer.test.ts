@@ -11,6 +11,7 @@ import {
 	ForkSyncedEmojiPlayer,
 	type ForkSyncedEmojiPlayerEnvironment,
 	forkEmojiCanvasStaysWithImage,
+	forkSyncedEmojiRules,
 } from '@app/features/expressions/utils/ForkSyncedEmojiPlayer';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
@@ -119,7 +120,7 @@ interface Draw {
 }
 
 // Where the page puts an image, and where a canvas next to it starts out before any margin: by
-// default at the end of the image, on its line. The other cases are what browsers do (measured in
+// default at the start of the image, on its line. The other cases are what browsers do (measured in
 // Chromium and Firefox):
 // - `rightToLeft`: the text runs right to left, so the canvas starts out from its right edge, at
 //   `canvasStartsAt`; its left margin moves nothing, its right margin does.
@@ -155,7 +156,7 @@ function makeEmoji(layout: Partial<Layout> = {}, parent: HTMLElement = document.
 	layouts.set(img, {
 		at,
 		size,
-		canvasStartsAt: layout.canvasStartsAt ?? [at[0] + size, at[1]],
+		canvasStartsAt: layout.canvasStartsAt ?? [at[0], at[1]],
 		rightToLeft: layout.rightToLeft ?? false,
 		centredOn: layout.centredOn ?? null,
 		stuck: layout.stuck ?? false,
@@ -187,7 +188,7 @@ beforeEach(() => {
 		return box(layout.at[0] * layout.scale, layout.at[1] * layout.scale, size * layout.scale, size * layout.scale);
 	});
 	vi.spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLCanvasElement) {
-		const layout = this.previousElementSibling ? layouts.get(this.previousElementSibling) : undefined;
+		const layout = this.nextElementSibling ? layouts.get(this.nextElementSibling) : undefined;
 		if (!layout) return box(0, 0, 0, 0);
 		const px = (value: string) => Number.parseFloat(value) || 0;
 		const [width, height] = [px(this.style.width), px(this.style.height)];
@@ -211,7 +212,7 @@ beforeEach(() => {
 	});
 	// Whether anyone can see the emoji: upstream fades some out, with the canvas, through their classes.
 	(HTMLCanvasElement.prototype as {checkVisibility?: unknown}).checkVisibility = function (this: HTMLCanvasElement) {
-		return !(this.previousElementSibling && unseen.has(this.previousElementSibling));
+		return !(this.nextElementSibling && unseen.has(this.nextElementSibling));
 	};
 	HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement) {
 		const drawn: Array<Draw> = [];
@@ -342,7 +343,7 @@ describe('ForkSyncedEmojiPlayer', () => {
 		expect(fake.framesRun()).toBeLessThan(60);
 	});
 
-	it("puts the canvas right after upstream's <img>, out of the flow and out of reach", () => {
+	it("puts the canvas right before upstream's <img>, out of the flow and out of reach", () => {
 		const fake = createFakeEnvironment();
 		const player = new ForkSyncedEmojiPlayer(fake.environment);
 		const parent = document.createElement('span');
@@ -351,7 +352,8 @@ describe('ForkSyncedEmojiPlayer', () => {
 		const img = makeEmoji({}, parent);
 		parent.append(' after');
 		const shown = player.show(img, makeFrames(WING_DURATIONS))!;
-		expect(img.nextSibling).toBe(shown.canvas);
+		// Before it, so that the image paints its selection tint over the canvas (tyne-chat/tyne#850).
+		expect(img.previousSibling).toBe(shown.canvas);
 		expect(parent.childNodes).toHaveLength(4);
 		expect(shown.canvas.hasAttribute(FORK_EMOJI_CANVAS_ATTRIBUTE)).toBe(true);
 		expect(shown.canvas.getAttribute('aria-hidden')).toBe('true');
@@ -381,6 +383,17 @@ describe('ForkSyncedEmojiPlayer', () => {
 		shown.restyle();
 		expect(shown.canvas.className).toBe('statusEmoji');
 		expect(shown.canvas.style.opacity).toBe('');
+	});
+
+	it('hides only the picture of a synced <img>, so that the browser still tints it in a selection', () => {
+		const rules = forkSyncedEmojiRules('load1');
+		expect(rules).toContain(`img[${FORK_EMOJI_SYNCED_ATTRIBUTE}="load1"] {`);
+		expect(rules).toContain(`[${FORK_EMOJI_ANCHOR_ATTRIBUTE}="load1"] { position: relative; }`);
+		expect(rules).toMatch(/object-position: [^;]+ !important;/);
+		// It paints after the canvas before it, whether upstream positions it or not.
+		expect(rules).toContain('isolation: isolate !important;');
+		// Each of these would hide the selection tint along with the picture (tyne-chat/tyne#850).
+		expect(rules).not.toMatch(/opacity|visibility|filter|clip|mask|display/);
 	});
 
 	it("hides upstream's <img> once a frame is on the canvas, and shows it again afterwards", () => {
@@ -424,7 +437,7 @@ describe('ForkSyncedEmojiPlayer', () => {
 	it("moves the canvas onto the image's box, with a pixel for every device pixel", () => {
 		const fake = createFakeEnvironment({ratio: 1.25});
 		const player = new ForkSyncedEmojiPlayer(fake.environment);
-		// The canvas starts out at the end of the image and 3.5 px above it.
+		// The canvas starts out 20 px right of the image and 3.5 px above it.
 		const img = makeEmoji({size: 20, at: [110, 54], canvasStartsAt: [130, 50.5]});
 		const shown = player.show(img, makeFrames(WING_DURATIONS))!;
 		fake.settle(img, shown);
@@ -459,7 +472,7 @@ describe('ForkSyncedEmojiPlayer', () => {
 	it('lands on the image at once where the text runs right to left, and stays there', () => {
 		const fake = createFakeEnvironment();
 		const player = new ForkSyncedEmojiPlayer(fake.environment);
-		// A message that starts with Hebrew: the image is left of where the canvas starts out.
+		// A message that starts with Hebrew, and a canvas that starts out one emoji left of the image.
 		const img = makeEmoji({size: 24, at: [300, 50], canvasStartsAt: [300, 50], rightToLeft: true});
 		const shown = player.show(img, makeFrames(WING_DURATIONS))!;
 		fake.settle(img, shown);
@@ -529,12 +542,13 @@ describe('ForkSyncedEmojiPlayer', () => {
 	it('puts the canvas back when the page moves the image without resizing it', () => {
 		const fake = createFakeEnvironment();
 		const player = new ForkSyncedEmojiPlayer(fake.environment);
-		const img = makeEmoji({size: 24, at: [100, 50], canvasStartsAt: [124, 50]});
+		const img = makeEmoji({size: 24, at: [100, 50], canvasStartsAt: [100, 50]});
 		const shown = player.show(img, makeFrames([500, 500]))!;
 		fake.settle(img, shown);
 		expect(offset(img, shown)).toEqual([0, 0]);
 		fake.advance(16);
-		// The text before the emoji wraps: the image goes to the next line, the canvas's start does not.
+		// The line now breaks between the canvas and the image: the image goes to the next line, the
+		// canvas's start does not.
 		layouts.get(img)!.at = [10, 72];
 		expect(offset(img, shown)).not.toEqual([0, 0]);
 		// Long before the next frame is due.
