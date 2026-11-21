@@ -170,8 +170,11 @@ export const SearchableTimeZonePicker: React.FC<SearchableTimeZonePickerProps> =
 		);
 
 		const localOption = useMemo(() => {
-			return timeZoneOptions.find(
-				(opt) => opt.value === initialTimeZone || opt.searchText.toLowerCase().includes(initialTimeZone.toLowerCase()),
+			// The zone itself first: an earlier option's search text may contain its name (tyne-chat/tyne#390).
+			const needle = initialTimeZone.toLowerCase();
+			return (
+				timeZoneOptions.find((opt) => opt.value === initialTimeZone) ??
+				timeZoneOptions.find((opt) => opt.searchText.toLowerCase().includes(needle))
 			);
 		}, [timeZoneOptions, initialTimeZone]);
 
