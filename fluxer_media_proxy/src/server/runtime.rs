@@ -125,6 +125,8 @@ fn build_router(state: Arc<AppState>, drain: HttpRequestDrain) -> Router {
             put(routes::relay::relay_put).options(routes::relay::relay_options),
         )
         .fallback(any(routes::dispatch::catch_all));
+    // Fork: the API's converter for animated AVIF uploads (tyne-chat/tyne#854).
+    let router = routes::fork_animated_avif::with_routes(router);
     let router = if state.cfg.mode == DeploymentMode::Static {
         router.layer(
             CompressionLayer::new()

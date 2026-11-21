@@ -33,6 +33,10 @@ import {getContentTypeFromFilename, isSupportedMediaContentType} from '@pkgs/mim
 import type {IVirusScanService} from '@pkgs/virus_scan/src/IVirusScanService';
 import {temporaryFile} from 'tempy';
 
+// Fork imports.
+
+import {forkConvertAnimatedAvifUpload} from '@app/api/channel/services/message/ForkAnimatedAvifConversion';
+
 const ATTACHMENT_PROCESSING_CONCURRENCY = 2;
 const METADATA_PROBE_DEGRADED_CONTEXT = 'message_attachment';
 
@@ -218,6 +222,16 @@ export class AttachmentProcessingService {
 		if (!sourceKey || !uploadedFile) {
 			throw InputValidationError.fromCode(`attachments.${index}.upload_filename`, ValidationErrorCodes.FILE_NOT_FOUND);
 		}
+		// Fork: an animated AVIF becomes an animated WebP before anything reads it (tyne-chat/tyne#854).
+		await forkConvertAnimatedAvifUpload({
+			attachment,
+			pendingUpload,
+			uploadedFile,
+			bucket: Config.s3.buckets.uploads,
+			key: sourceKey,
+			message,
+			storageService: this.storageService,
+		});
 		const attachmentId = createAttachmentID(await this.snowflakeService.generate());
 		const cdnKey = makeAttachmentCdnKey(message.channelId, attachmentId, attachment.filename);
 		let contentType = pendingUpload.content_type ?? getContentTypeFromFilename(attachment.filename);

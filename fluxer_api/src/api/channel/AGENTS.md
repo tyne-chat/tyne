@@ -21,7 +21,7 @@ it: a message, reaction or thread stores only a persona id, checked on the way i
 | Events | `services/message/MessageGatewayDispatch.ts`, `services/ChannelGatewayDispatch.ts` |
 | Reactions | `services/interaction/MessageReactionService.ts`, `repositories/MessageInteractionRepository.ts` |
 | Pins, typing | `services/interaction/MessagePinService.ts`, `MessageReadStateService.ts` |
-| Uploads | `services/AttachmentUploadService.ts`, `services/message/AttachmentProcessingService.ts` |
+| Uploads | `services/AttachmentUploadService.ts`, `services/message/AttachmentProcessingService.ts`; the fork converts animated AVIF uploads to animated WebP first (`services/message/ForkAnimatedAvifConversion.ts`, tyne-chat/tyne#854) |
 | Threads, forums | `services/thread/`, `repositories/ThreadRepository.ts` |
 | Persona mention candidates (fork) | `controllers/ChannelPersonaMentionController.ts` |
 | Rows, models, schemas | `api/Tables.ts`, `api/database/types/MessageTypes.ts`, `api/models/`, `packages/schema/src/domains/message/` |

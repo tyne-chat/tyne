@@ -301,6 +301,13 @@ start one: the API setting `TYNE_DM_THREADS`. Design: the mockups doc linked fro
   frame; FFmpeg decodes the result unchanged (`fluxer_media_proxy/src/media_process/fork_mp3_repair.rs`,
   called from `server/media_operations/strip.rs`; `examples/fork_mp3_repair.rs` repairs stored
   files; `fluxer_media_proxy/AGENTS.md`; tyne-chat/tyne#245).
+- Animated AVIF uploads: before an attachment is read, an upload whose `ftyp` names the `avis`
+  brand is converted by the media proxy (`POST /_fork/animated_avif_to_webp`) to an animated WebP,
+  which replaces it and is handled like any other; the file name becomes `.webp`. libvips reads no
+  animated AVIF, so such uploads were stored as plain files. One too long or too large to decode is
+  refused (`ANIMATION_TOO_LARGE_TO_CONVERT`) (`fluxer_api/src/api/channel/services/message/ForkAnimatedAvifConversion.ts`,
+  `fluxer_media_proxy/src/media_process/fork_animated_avif.rs`; `fluxer_media_proxy/AGENTS.md`;
+  tyne-chat/tyne#854).
 - Stored images: `?original=true` on an image asset makes the media proxy answer with the stored
   image itself rather than a resized copy (`fluxer_media_proxy/src/server/stored/fork_original_asset.rs`,
   called from `serve_asset_image`). The avatar and banner menus' "Copy URL" and "Open in browser"

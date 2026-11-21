@@ -2,10 +2,11 @@
 
 `fluxer_media_proxy` is the Rust service (Axum, with native code on libvips and FFmpeg) that serves
 stored and signed external media under `/media/*`, transforms images, and answers the API's internal
-requests. It is upstream's. The fork adds four things: a size cap an internal caller can ask for on
+requests. It is upstream's. The fork adds five things: a size cap an internal caller can ask for on
 external fetches (persona avatar imports), a repair of MP3 uploads that Chromium cannot decode
-(tyne-chat/tyne#245), `?original=true`, which serves a stored image itself (tyne-chat/tyne#471), and
-stickers scaled to fit instead of cropped to a square (tyne-chat/tyne#659).
+(tyne-chat/tyne#245), `?original=true`, which serves a stored image itself (tyne-chat/tyne#471),
+stickers scaled to fit instead of cropped to a square (tyne-chat/tyne#659), and the conversion of
+animated AVIF uploads to animated WebP (tyne-chat/tyne#854).
 
 ## Where things are
 
@@ -20,6 +21,7 @@ stickers scaled to fit instead of cropped to a square (tyne-chat/tyne#659).
 | Native C code and what it links | `src/native_shim/`, listed in `build.rs`; FFmpeg and the libraries built from source by `tools/install-native-deps.sh` |
 | `?original=true` on avatars, banners and other image assets (fork) | `src/server/stored/fork_original_asset.rs`, one call in `serve_asset_image` (`src/server/stored/mod.rs`) |
 | Stickers scaled to fit, not cropped (fork) | `src/server/stored/fork_sticker_fit.rs`, one statement after upstream picks `resize_mode` in `serve_asset_image` |
+| Animated AVIF to animated WebP (fork) | `src/media_process/fork_animated_avif.rs` (fixtures in `fork_animated_avif_fixtures/`), route `src/server/routes/fork_animated_avif.rs` (`/_fork/animated_avif_to_webp`, one statement in `build_router`), `fluxer_fork_ffmpeg_decode_avif_track` at the end of `src/native_shim/animation_decode.c` |
 | The API's side | `fluxer_api/src/api/infrastructure/MediaService.ts` (`stripObjectMetadata`), `fluxer_api/src/api/channel/services/message/AttachmentProcessingService.ts` |
 
 ## Uploads go through `/_strip`
@@ -57,6 +59,30 @@ original size (tyne-chat/tyne#658). The fork scales stickers with `ResizeMode::F
 image, shrunk to fit the box, never enlarged. Emoji keep the crop. The apps show stickers with
 `object-fit: contain` on the web and sized from their aspect ratio on the phone. The transform cache
 key includes the resize mode, so cropped copies cached before the change are not reused.
+
+## Animated AVIF becomes animated WebP
+
+libvips recognises AVIF by the `avif` brand only, so the proxy read no animated AVIF (major brand
+`avis`) as an image: `/_metadata` and `/_strip` failed, and the API stored such an upload as a plain
+file, with no size, preview, NSFW check or stripping. Before it reads an attachment, the API sends an
+upload whose `ftyp` names `avis` to `/_fork/animated_avif_to_webp`
+(`fluxer_api/src/api/channel/services/message/ForkAnimatedAvifConversion.ts`), stores the WebP in its
+place and renames the file to `.webp`; everything after that sees an ordinary animated WebP.
+
+- **Decoding** uses the track decoder of upstream's animated AVIF previews (`decode_heif_sequence`,
+  FFmpeg). Its item check allows one `meta` box; libavif writes a second inside the track when the
+  file has Exif or XMP, so every `meta` inside the movie is relabelled `free` in a copy first. A file
+  with no top-level `meta` (the track only, FFmpeg's MP4 muxer with `-brand avis`) goes through the
+  fork's `fluxer_fork_ffmpeg_decode_avif_track`, which demuxes it as an MP4 upload is, after the same
+  sample-table check.
+- **Limits:** the decode budget of upstream's animated AVIF previews, half of the native memory
+  budget (`accumulated_decode_pixels`; about 200 million frame pixels on production's 2 GiB), and
+  the 20,000-frame limit. Over either, the answer is 413 and the API refuses the message: the decoder
+  runs with `require_complete`, so an animation is never cut short. The decoder reads the frame count
+  from the container and refuses before decoding when it is over.
+- **Encoding:** WebP quality 85 (`ImageQuality::High`), the source's frame timing, frames that store
+  only what changed. Nothing of the source but pixels and timing is kept.
+- Any other failure (400, 503, 504) leaves the upload as it was, as when stripping fails.
 
 ## The MP3 repair
 
