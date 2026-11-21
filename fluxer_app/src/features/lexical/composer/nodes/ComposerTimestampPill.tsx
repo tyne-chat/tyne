@@ -22,7 +22,7 @@ import {$getNodeByKey, type NodeKey} from 'lexical';
 import {DateTime} from 'luxon';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useMemo} from 'react';
+import {useCallback} from 'react';
 import {$isComposerTimestampNode} from './ComposerTimestampNode';
 
 const DOUBLE_CLICK_TO_EDIT_DESCRIPTOR = msg({
@@ -36,6 +36,10 @@ export interface ComposerTimestampPillProps {
 	format: ComposerTimestampFormat;
 	wire: string;
 	'data-flx'?: string;
+}
+
+function readTickSecond(): number {
+	return Tick.nowSecond;
 }
 
 export const ComposerTimestampPill = observer(function ComposerTimestampPill({
@@ -52,14 +56,14 @@ export const ComposerTimestampPill = observer(function ComposerTimestampPill({
 	const isValid = date !== null;
 
 	const isRelative = format === 'relative' || format === 'combo';
-	const _tick = isRelative ? Tick.nowSecond : 0;
+	// Made at each render, not memoised: the observer then follows the time and date format settings
+	// the label reads, and the clock for a relative one (tyne-chat/tyne#856).
+	if (isRelative) readTickSecond();
 
 	const fullDateTime = isValid ? getFormattedDateTimeWithSeconds(date, locale) : null;
 	const relativeTime = isValid ? DateTime.fromJSDate(date).setLocale(locale).toRelative() : null;
 
-	const displayTime = useMemo(() => {
-		return getTimestampDisplay(epoch, format, i18n);
-	}, [epoch, format, i18n, _tick]);
+	const displayTime = getTimestampDisplay(epoch, format, i18n);
 
 	const handleOpenEdit = useCallback(() => {
 		openTimestampModal({
