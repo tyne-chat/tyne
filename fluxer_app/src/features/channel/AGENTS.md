@@ -183,7 +183,10 @@ search like that ✕, at every width, and moves focus to the message box.
 - **Inside upstream's lines** (conflicts first): `LexicalChannelTextareaContent.tsx` and
   `ChannelMessage.tsx` (both among upstream's most changed here; the picker effect could move to a
   fork hook), `MessageReactions.tsx`, `MessageActionBar.tsx`, `MessageActionMenu.tsx`,
-  `MessageActionUtils.tsx`, `UserMessage.tsx` (the inline edit runs `matchEditMessage`, and hands
+  `MessageActionUtils.tsx` (removing a bookmark from the menu or the shortcut asks first, like
+  "Unpin": `handleSaveMessage` and `requestToggleBookmark` call messaging's `ForkBookmarkRemoval`,
+  tyne-chat/tyne#742), `modals/BookmarksBottomSheet.tsx` (the same for the phone layout's
+  bookmarks), `UserMessage.tsx` (the inline edit runs `matchEditMessage`, and hands
   edits with files to `InlineEditUploads`), `EditingMessageInput.tsx` (its controls and files),
   `AutocompleteMention.tsx` (`renderPersona`), `Autocomplete.tsx` (the `size()` middleware passes the
   space above as `--fork-autocomplete-space`), `EmojiRenderer.tsx` (drag-and-drop in upstream's

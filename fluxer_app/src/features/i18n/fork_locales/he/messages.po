@@ -1405,6 +1405,10 @@ msgstr "הסר אימוג'י חתימה"
 msgid "Remove tag pair"
 msgstr "הסרת זוג תגיות"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "להסיר את הסימנייה הזו?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "שינוי שם הקבוצה"
