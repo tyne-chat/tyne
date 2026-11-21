@@ -406,6 +406,21 @@ describe('TimestampModal', () => {
 		});
 	}
 
+	it('words the relative preview as the sent timestamp does, rounding down (tyne-chat/tyne#389)', async () => {
+		const inOneHourFifty = Math.floor(Date.now() / 1000) + 110 * 60;
+		await act(async () => {
+			root.render(
+				<TimestampModal
+					initialEpoch={inOneHourFifty}
+					onInsert={vi.fn()}
+					data-flx="channel.timestamp-modal-test.timestamp-modal--relative"
+				/>,
+			);
+		});
+		expect(document.body.textContent).toContain('in 1 hour');
+		expect(document.body.textContent).not.toContain('in 2 hours');
+	});
+
 	it('keeps the s and S styles of a pill being edited (tyne-chat/tyne#386)', async () => {
 		const epoch = 1700000000;
 		for (const [format, markdown] of [
@@ -444,5 +459,82 @@ describe('TimestampModal', () => {
 		});
 		await submit();
 		expect(onInsert).toHaveBeenCalledWith(`<t:${epoch}:f>`, {epoch, format: 'shortDateTime'});
+	});
+
+	describe('times that move with the clock (tyne-chat/tyne#389)', () => {
+		// A whole second ahead of the real clock: upstream's formatter keeps its "now" for 250 ms.
+		let start: number;
+		beforeEach(() => {
+			vi.useFakeTimers({toFake: ['Date', 'setInterval', 'clearInterval']});
+			start = Math.ceil(Date.now() / 1000) * 1000 + 1000;
+			vi.setSystemTime(start);
+		});
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		function formatListText(): string {
+			return document.querySelector('[data-flx="channel.timestamp-modal.format-list"]')?.textContent ?? '';
+		}
+
+		it('keeps "in 10 minutes" ten minutes away while the dialog is open, and counts it from Insert', async () => {
+			const onInsert = vi.fn();
+			await act(async () => {
+				root.render(
+					<TimestampModal onInsert={onInsert} data-flx="channel.timestamp-modal-test.timestamp-modal--moving" />,
+				);
+			});
+			const nlpInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+			await act(async () => {
+				setInputValue(nlpInput, 'in 10 minutes');
+			});
+			expect(formatListText()).toContain('in 10 minutes');
+
+			await act(async () => {
+				vi.advanceTimersByTime(2 * 60_000 + 400);
+			});
+			expect(formatListText()).toContain('in 10 minutes');
+			expect(formatListText()).not.toContain('in 9 minutes');
+
+			await submit();
+			const insertedAt = start + 2 * 60_000 + 400;
+			const epoch = Math.ceil((insertedAt + 10 * 60_000) / 1000);
+			expect(onInsert).toHaveBeenCalledWith(`<t:${epoch}:f> (<t:${epoch}:R>)`, {epoch, format: 'combo'});
+		});
+
+		it('counts a fixed time down while the dialog is open', async () => {
+			await act(async () => {
+				root.render(
+					<TimestampModal
+						initialEpoch={start / 1000 + 110 * 60}
+						onInsert={vi.fn()}
+						data-flx="channel.timestamp-modal-test.timestamp-modal--fixed"
+					/>,
+				);
+			});
+			expect(formatListText()).toContain('in 1 hour');
+
+			await act(async () => {
+				vi.advanceTimersByTime(51 * 60_000);
+			});
+			expect(formatListText()).toContain('in 59 minutes');
+		});
+
+		it('inserts the time rounded up to a whole second', async () => {
+			vi.setSystemTime(start + 400);
+			const onInsert = vi.fn();
+			await act(async () => {
+				root.render(
+					<TimestampModal onInsert={onInsert} data-flx="channel.timestamp-modal-test.timestamp-modal--rounded" />,
+				);
+			});
+			const nlpInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+			await act(async () => {
+				setInputValue(nlpInput, 'in 10 minutes');
+			});
+			await submit();
+			const epoch = start / 1000 + 601;
+			expect(onInsert).toHaveBeenCalledWith(`<t:${epoch}:f> (<t:${epoch}:R>)`, {epoch, format: 'combo'});
+		});
 	});
 });
