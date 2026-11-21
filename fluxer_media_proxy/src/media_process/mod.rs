@@ -204,3 +204,11 @@ fn native_buffer_to_media_bytes(buffer: NativeBuffer) -> Result<MediaBytes, Medi
 // (tyne-chat/tyne#245).
 mod fork_mp3_repair;
 pub use fork_mp3_repair::{Mp3RepairReport, fork_repair_stripped_mp3, repair_mp3, repair_mp3_file};
+
+// Fork: animated AVIF uploads become animated WebP before the API reads them
+// (tyne-chat/tyne#854).
+mod fork_animated_avif;
+pub use fork_animated_avif::{
+    AnimatedAvifConversion, ConvertedAnimation, animated_avif_conversion_cost,
+    convert_animated_avif_to_webp, is_animated_avif,
+};
