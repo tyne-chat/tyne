@@ -654,6 +654,20 @@ describe('PluralKitImportModal Component', () => {
 			expect(downloadBlob).toHaveBeenCalledWith(blob, 'Tyne personas.zip');
 		});
 
+		it('offers the backup again after Back, then Import (tyne-chat/tyne#748)', async () => {
+			await pressImport();
+			await act(async () => {
+				button('Back')?.click();
+			});
+			expect(document.body.textContent).not.toContain('Use Export to make a backup before continuing.');
+			await act(async () => {
+				importButton()?.click();
+			});
+			expect(document.body.textContent).toContain('Use Export to make a backup before continuing.');
+			expect(PersonaCommands.previewPersonaImport).not.toHaveBeenCalled();
+			expect(PersonaCommands.applyPersonaImport).not.toHaveBeenCalled();
+		});
+
 		it('stays on the backup step when the export fails', async () => {
 			vi.mocked(PersonaCommands.exportPersonas).mockRejectedValueOnce(new Error('offline'));
 			await pressImport();
