@@ -301,7 +301,7 @@ msgstr "{name}의 사본"
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
-msgstr "타임스탬프 복사\\"
+msgstr "타임스탬프 복사"
 
 #. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
@@ -397,7 +397,7 @@ msgstr "‘{name}’ 그룹을 삭제할까요? 그룹 안의 페르소나는 �
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
-msgstr "타임스탬프 삭제\\"
+msgstr "타임스탬프 삭제"
 
 #. Title of the confirmation before deleting the selected personas.
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
@@ -519,7 +519,7 @@ msgstr "페르소나 편집"
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
-msgstr "타임스탬프 수정\\"
+msgstr "타임스탬프 수정"
 
 #. Section heading in community emoji settings when non-animated and animated emojis are listed together.
 msgid "Emoji ({emojiCount})"

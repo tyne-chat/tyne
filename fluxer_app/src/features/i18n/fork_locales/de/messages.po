@@ -301,7 +301,7 @@ msgstr "Kopie von {name}"
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
-msgstr "Zeitstempel kopieren\\"
+msgstr "Zeitstempel kopieren"
 
 #. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
@@ -397,7 +397,7 @@ msgstr "Die Gruppe „{name}“ löschen? Die Personas darin bleiben erhalten."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
-msgstr "Zeitstempel löschen\\"
+msgstr "Zeitstempel löschen"
 
 #. Title of the confirmation before deleting the selected personas.
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
@@ -519,7 +519,7 @@ msgstr "Persona bearbeiten"
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
-msgstr "Zeitstempel bearbeiten\\"
+msgstr "Zeitstempel bearbeiten"
 
 #. Section heading in community emoji settings when non-animated and animated emojis are listed together.
 msgid "Emoji ({emojiCount})"
