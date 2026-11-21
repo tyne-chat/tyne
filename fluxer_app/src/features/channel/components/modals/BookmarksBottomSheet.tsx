@@ -27,6 +27,10 @@ import {ArrowSquareOutIcon, TrashIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {requestRemoveBookmark} from '@app/features/messaging/commands/ForkBookmarkRemoval';
+
 const JUMP_TO_MESSAGE_DESCRIPTOR = msg({
 	message: 'Jump to message',
 	comment: 'Short label in the bookmarks bottom sheet. Keep it concise.',
@@ -89,7 +93,7 @@ export const BookmarksBottomSheet = observer(({isOpen, onClose}: BookmarksBottom
 	};
 	const handleRemove = () => {
 		if (selectedMessage) {
-			SavedMessageCommands.remove(i18n, selectedMessage.id);
+			requestRemoveBookmark(i18n, selectedMessage.id, {message: selectedMessage});
 		}
 		setMenuOpen(false);
 		setSelectedMessage(null);
@@ -150,7 +154,9 @@ export const BookmarksBottomSheet = observer(({isOpen, onClose}: BookmarksBottom
 										<SavedMessageMissingCard
 											key={entry.id}
 											entryId={entry.id}
-											onRemove={() => SavedMessageCommands.remove(i18n, entry.id)}
+											onRemove={(event?: React.MouseEvent) =>
+												requestRemoveBookmark(i18n, entry.id, {shiftKey: event?.shiftKey})
+											}
 											data-flx="channel.bookmarks-bottom-sheet.saved-message-missing-card"
 										/>
 									))}

@@ -1405,6 +1405,10 @@ msgstr "シグネチャー絵文字を削除"
 msgid "Remove tag pair"
 msgstr "タグのペアを削除"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "このブックマークを削除しますか？"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "グループ名を変更"

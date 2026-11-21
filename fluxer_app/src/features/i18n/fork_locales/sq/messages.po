@@ -1405,6 +1405,10 @@ msgstr "Hiq emoji-n dallues"
 msgid "Remove tag pair"
 msgstr "Hiq çiftin e etiketave"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Të hiqet ky faqerojtës?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Riemërto grupin"

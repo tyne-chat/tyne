@@ -1405,6 +1405,10 @@ msgstr "Odebrat podpisové emoji"
 msgid "Remove tag pair"
 msgstr "Odebrat pár značek"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Odebrat tuto záložku?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Přejmenovat skupinu"
