@@ -466,6 +466,12 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 		void startImport();
 	};
 
+	// Back leaves the backup unanswered, so Import offers it again (tyne-chat/tyne#748).
+	const handleBackupBack = () => {
+		setBackupOffered(false);
+		setStep('select');
+	};
+
 	// The backup is the same zip as Export in the Personas settings; the import carries on once it is saved.
 	const handleExportThenImport = async () => {
 		setExporting(true);
@@ -913,7 +919,7 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 						<Button
 							variant="secondary"
 							disabled={exporting}
-							onClick={() => setStep('select')}
+							onClick={handleBackupBack}
 							data-flx="persona.plural-kit-import-modal.backup-back"
 						>
 							<Trans comment="Button in the persona import's backup step that goes back to choosing the file">
