@@ -7,6 +7,7 @@
 
 import type {Channel} from '@app/features/channel/models/Channel';
 import {ChannelTypes, MessageTypes} from '@fluxer/constants/src/ChannelConstants';
+import {StatusTypes} from '@fluxer/constants/src/StatusConstants';
 import {RelationshipTypes} from '@fluxer/constants/src/UserConstants';
 import type {Message as WireMessage} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -20,6 +21,7 @@ const env = vi.hoisted(() => ({
 	users: new Map<string, unknown>(),
 	selectedChannelId: null as string | null,
 	modalOpen: false,
+	status: 'online',
 	claim: true,
 	showFails: false,
 	claims: [] as Array<[string, string | null]>,
@@ -115,7 +117,7 @@ vi.mock('@app/features/platform/utils/MobXPersistence', () => ({
 	stopPersistent: () => {},
 }));
 vi.mock('@app/features/platform/utils/StoreInitialization', () => ({initializeStore: () => {}}));
-vi.mock('@app/features/presence/state/LocalPresence', () => ({default: {getStatus: () => 'online'}}));
+vi.mock('@app/features/presence/state/LocalPresence', () => ({default: {getStatus: () => env.status}}));
 vi.mock('@app/features/relationship/state/FriendsTab', () => ({default: {setTab: () => {}}}));
 vi.mock('@app/features/relationship/state/Relationships', () => ({default: {isBlocked: () => false}}));
 vi.mock('@app/features/relationship/utils/RelationshipMessageDescriptors', () => ({
@@ -200,6 +202,7 @@ describe('notifications for a message sent as a persona', () => {
 		env.users.set(AUTHOR, {id: AUTHOR, nickname: 'Chiara'});
 		env.selectedChannelId = null;
 		env.modalOpen = false;
+		env.status = 'online';
 		env.claim = true;
 		env.showFails = false;
 		env.claims.length = 0;
@@ -260,6 +263,7 @@ describe('notifications with several app windows open', () => {
 		env.users.set(AUTHOR, {id: AUTHOR, nickname: 'Chiara'});
 		env.selectedChannelId = null;
 		env.modalOpen = false;
+		env.status = 'online';
 		env.claim = true;
 		env.showFails = false;
 		env.claims.length = 0;
@@ -365,5 +369,59 @@ describe('notifications with several app windows open', () => {
 
 		expect(env.claims).toEqual([[`relationship_${RelationshipTypes.FRIEND}_1000000000000000012`, null]]);
 		expect(env.shown).toEqual([]);
+	});
+});
+
+describe('Do Not Disturb (tyne-chat/tyne#778)', () => {
+	beforeEach(() => {
+		env.channels.clear();
+		env.users.clear();
+		env.users.set(AUTHOR, {id: AUTHOR, nickname: 'Chiara'});
+		env.selectedChannelId = 'general';
+		env.modalOpen = false;
+		env.status = StatusTypes.DND;
+		env.claim = true;
+		env.showFails = false;
+		env.claims.length = 0;
+		env.sounds.length = 0;
+		env.shown.length = 0;
+		Notification.setI18n({_: (descriptor: {message?: string}) => descriptor.message ?? ''} as unknown as I18n);
+		Notification.handleNotificationPermissionGranted();
+		Notification.handleWindowFocused({focused: true});
+	});
+
+	it('mutes the sound of a message in the channel the focused window shows, and still claims it', async () => {
+		channel('general', ChannelTypes.GUILD_TEXT);
+		const sent = message('general', null);
+
+		expect(Notification.handleMessageCreate({message: sent})).toBe(true);
+		await settle();
+
+		expect(env.sounds).toEqual([]);
+		expect(env.shown).toEqual([]);
+		expect(env.claims).toEqual([[sent.id, 'general']]);
+	});
+
+	it('also stays quiet when a modal covers that channel, or another channel gets the message', async () => {
+		channel('general', ChannelTypes.GUILD_TEXT);
+		channel('random', ChannelTypes.GUILD_TEXT, 'random');
+		env.modalOpen = true;
+		Notification.handleMessageCreate({message: message('general', null)});
+		env.modalOpen = false;
+		Notification.handleMessageCreate({message: message('random', null)});
+		await settle();
+
+		expect(env.sounds).toEqual([]);
+		expect(env.shown).toEqual([]);
+	});
+
+	it('plays that sound again once the status is no longer Do Not Disturb', async () => {
+		channel('general', ChannelTypes.GUILD_TEXT);
+		env.status = 'online';
+
+		Notification.handleMessageCreate({message: message('general', null)});
+		await settle();
+
+		expect(env.sounds).toEqual(['same-channel']);
 	});
 });
