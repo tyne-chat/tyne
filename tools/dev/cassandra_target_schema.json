@@ -1,43 +1,6 @@
 {
 	"user_types": [
 		{
-			"name": "message_subprofile",
-			"fields": [
-				{
-					"name": "id",
-					"type": "text"
-				},
-				{
-					"name": "name",
-					"type": "text"
-				},
-				{
-					"name": "avatar",
-					"type": "text"
-				},
-				{
-					"name": "avatar_color",
-					"type": "int"
-				},
-				{
-					"name": "system_name",
-					"type": "text"
-				},
-				{
-					"name": "pronouns",
-					"type": "text"
-				},
-				{
-					"name": "color",
-					"type": "int"
-				},
-				{
-					"name": "bio",
-					"type": "text"
-				}
-			]
-		},
-		{
 			"name": "channel_override",
 			"fields": [
 				{
@@ -5682,6 +5645,10 @@
 			"name": "message_reactions",
 			"columns": [
 				{
+					"name": "persona_id",
+					"type": "bigint"
+				},
+				{
 					"name": "channel_id",
 					"type": "bigint"
 				},
@@ -5714,7 +5681,7 @@
 					"type": "timestamp"
 				}
 			],
-			"primary_key": "((channel_id, bucket), message_id, emoji_id, emoji_name, user_id)",
+			"primary_key": "((channel_id, bucket), message_id, emoji_id, emoji_name, user_id, persona_id)",
 			"options": ""
 		},
 		{
@@ -5747,6 +5714,14 @@
 		{
 			"name": "messages",
 			"columns": [
+				{
+					"name": "persona_id",
+					"type": "bigint"
+				},
+				{
+					"name": "mention_personas",
+					"type": "set<bigint>"
+				},
 				{
 					"name": "channel_id",
 					"type": "bigint"
@@ -5842,10 +5817,6 @@
 				{
 					"name": "version",
 					"type": "int"
-				},
-				{
-					"name": "subprofile",
-					"type": "frozen<message_subprofile>"
 				}
 			],
 			"primary_key": "((channel_id, bucket), message_id)",
@@ -5905,7 +5876,7 @@
 					"type": "timestamp"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -6601,7 +6572,7 @@
 					"type": "timestamp"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -6660,7 +6631,7 @@
 					"type": "int"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -6854,7 +6825,7 @@
 					"type": "int"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -7926,7 +7897,7 @@
 					"type": "timestamp"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -8311,7 +8282,7 @@
 					"type": "int"
 				}
 			],
-			"primary_key": "((thread_id))",
+			"primary_key": "(thread_id)",
 			"options": ""
 		},
 		{
@@ -8330,7 +8301,7 @@
 					"type": "int"
 				}
 			],
-			"primary_key": "((thread_id))",
+			"primary_key": "(thread_id)",
 			"options": ""
 		},
 		{
@@ -8451,11 +8422,15 @@
 					"type": "text"
 				},
 				{
-					"name": "avatar_url",
+					"name": "aliases",
 					"type": "text"
 				},
 				{
-					"name": "system_name",
+					"name": "avatar_hash",
+					"type": "text"
+				},
+				{
+					"name": "banner_hash",
 					"type": "text"
 				},
 				{
@@ -8464,6 +8439,10 @@
 				},
 				{
 					"name": "color",
+					"type": "int"
+				},
+				{
+					"name": "avatar_color",
 					"type": "int"
 				},
 				{
@@ -8479,6 +8458,10 @@
 					"type": "text"
 				},
 				{
+					"name": "signature_emojis",
+					"type": "text"
+				},
+				{
 					"name": "use_count",
 					"type": "int"
 				},
@@ -8488,6 +8471,10 @@
 				},
 				{
 					"name": "visibility",
+					"type": "text"
+				},
+				{
+					"name": "mentionable_by",
 					"type": "text"
 				},
 				{
@@ -8503,12 +8490,383 @@
 					"type": "timestamp"
 				},
 				{
+					"name": "deleted_at",
+					"type": "timestamp"
+				},
+				{
 					"name": "version",
 					"type": "int"
 				}
 			],
 			"primary_key": "((user_id), persona_id)",
 			"options": "CLUSTERING ORDER BY (persona_id DESC)"
+		},
+		{
+			"name": "user_persona_settings",
+			"columns": [
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "active_persona_mode",
+					"type": "text"
+				},
+				{
+					"name": "active_persona_scope",
+					"type": "text"
+				},
+				{
+					"name": "active_persona_id",
+					"type": "text"
+				},
+				{
+					"name": "is_latched",
+					"type": "boolean"
+				},
+				{
+					"name": "display_tag_text",
+					"type": "text"
+				},
+				{
+					"name": "display_tag_icon",
+					"type": "text"
+				},
+				{
+					"name": "multi_persona_reactions",
+					"type": "boolean"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				},
+				{
+					"name": "version",
+					"type": "int"
+				}
+			],
+			"primary_key": "(user_id)",
+			"options": ""
+		},
+		{
+			"name": "thread_owner_personas",
+			"columns": [
+				{
+					"name": "thread_id",
+					"type": "bigint"
+				},
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "persona_id",
+					"type": "bigint"
+				}
+			],
+			"primary_key": "(thread_id)",
+			"options": ""
+		},
+		{
+			"name": "thread_owner_personas_by_user",
+			"columns": [
+				{
+					"name": "thread_id",
+					"type": "bigint"
+				},
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "persona_id",
+					"type": "bigint"
+				}
+			],
+			"primary_key": "((user_id), thread_id)",
+			"options": ""
+		},
+		{
+			"name": "persona_channel_states",
+			"columns": [
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "channel_id",
+					"type": "bigint"
+				},
+				{
+					"name": "persona_id",
+					"type": "bigint"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "((user_id), channel_id)",
+			"options": ""
+		},
+		{
+			"name": "persona_image_sources",
+			"columns": [
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "persona_id",
+					"type": "bigint"
+				},
+				{
+					"name": "avatar_field",
+					"type": "text"
+				},
+				{
+					"name": "avatar_main_empty",
+					"type": "boolean"
+				},
+				{
+					"name": "avatar_url",
+					"type": "text"
+				},
+				{
+					"name": "avatar_hash",
+					"type": "text"
+				},
+				{
+					"name": "banner_url",
+					"type": "text"
+				},
+				{
+					"name": "banner_hash",
+					"type": "text"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "((user_id), persona_id)",
+			"options": ""
+		},
+		{
+			"name": "persona_groups",
+			"columns": [
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "group_id",
+					"type": "bigint"
+				},
+				{
+					"name": "name",
+					"type": "text"
+				},
+				{
+					"name": "persona_ids",
+					"type": "text"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "((user_id), group_id)",
+			"options": ""
+		},
+		{
+			"name": "guild_commands",
+			"columns": [
+				{
+					"name": "guild_id",
+					"type": "bigint"
+				},
+				{
+					"name": "command_id",
+					"type": "bigint"
+				},
+				{
+					"name": "name",
+					"type": "text"
+				},
+				{
+					"name": "description",
+					"type": "text"
+				},
+				{
+					"name": "template",
+					"type": "text"
+				},
+				{
+					"name": "kind",
+					"type": "text"
+				},
+				{
+					"name": "input_mode",
+					"type": "text"
+				},
+				{
+					"name": "input_type",
+					"type": "text"
+				},
+				{
+					"name": "input_hint",
+					"type": "text"
+				},
+				{
+					"name": "counters",
+					"type": "text"
+				},
+				{
+					"name": "creator_id",
+					"type": "bigint"
+				},
+				{
+					"name": "created_at",
+					"type": "timestamp"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "((guild_id), command_id)",
+			"options": ""
+		},
+		{
+			"name": "guild_command_counts",
+			"columns": [
+				{
+					"name": "guild_id",
+					"type": "bigint"
+				},
+				{
+					"name": "command_id",
+					"type": "bigint"
+				},
+				{
+					"name": "counter_id",
+					"type": "bigint"
+				},
+				{
+					"name": "scope_key",
+					"type": "text"
+				},
+				{
+					"name": "value",
+					"type": "int"
+				},
+				{
+					"name": "updated_ms",
+					"type": "bigint"
+				}
+			],
+			"primary_key": "((guild_id, command_id), counter_id, scope_key)",
+			"options": ""
+		},
+		{
+			"name": "guild_command_ids",
+			"columns": [
+				{
+					"name": "command_id",
+					"type": "bigint"
+				},
+				{
+					"name": "guild_id",
+					"type": "bigint"
+				}
+			],
+			"primary_key": "(command_id)",
+			"options": ""
+		},
+		{
+			"name": "guild_command_uses",
+			"columns": [
+				{
+					"name": "channel_id",
+					"type": "bigint"
+				},
+				{
+					"name": "message_id",
+					"type": "bigint"
+				},
+				{
+					"name": "guild_id",
+					"type": "bigint"
+				},
+				{
+					"name": "command_id",
+					"type": "bigint"
+				},
+				{
+					"name": "command_name",
+					"type": "text"
+				},
+				{
+					"name": "created_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "((channel_id), message_id)",
+			"options": ""
+		},
+		{
+			"name": "guild_command_use_channels",
+			"columns": [
+				{
+					"name": "channel_id",
+					"type": "bigint"
+				},
+				{
+					"name": "since",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "(channel_id)",
+			"options": ""
+		},
+		{
+			"name": "guild_signal_bar_settings",
+			"columns": [
+				{
+					"name": "guild_id",
+					"type": "bigint"
+				},
+				{
+					"name": "settings",
+					"type": "text"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "(guild_id)",
+			"options": ""
+		},
+		{
+			"name": "dm_signal_bar_settings",
+			"columns": [
+				{
+					"name": "channel_id",
+					"type": "bigint"
+				},
+				{
+					"name": "enabled",
+					"type": "boolean"
+				},
+				{
+					"name": "updated_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "(channel_id)",
+			"options": ""
 		},
 		{
 			"name": "user_contact_change_logs",
@@ -9028,7 +9386,7 @@
 					"type": "timestamp"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -9311,7 +9669,7 @@
 					"type": "timestamp"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -10258,7 +10616,7 @@
 					"type": "int"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
@@ -10293,7 +10651,7 @@
 					"type": "bigint"
 				}
 			],
-			"primary_key": "((user_id))",
+			"primary_key": "(user_id)",
 			"options": ""
 		},
 		{
