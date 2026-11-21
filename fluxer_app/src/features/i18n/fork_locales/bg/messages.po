@@ -1405,6 +1405,10 @@ msgstr "Премахване на подписано емоджи"
 msgid "Remove tag pair"
 msgstr "Премахване на двойката тагове"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Да се премахне ли тази отметка?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Преименуване на групата"

@@ -161,11 +161,12 @@ a message older than the file's lifetime the worker deletes it.
 
 Fork-owned: `state/MessageChangePersona.ts`, `state/InlineEditUploads.ts`,
 `utils/ExpressionDraftPersona.ts`,
-`utils/PlainPasteUtils.ts`, `utils/MarkdownPersonaMentionSegments.ts`, `commands/ForkMessagePageFit.ts`
-and the fork tests. Inside upstream's files, under `// Fork imports.`:
+`utils/PlainPasteUtils.ts`, `utils/MarkdownPersonaMentionSegments.ts`, `commands/ForkMessagePageFit.ts`,
+`commands/ForkBookmarkRemoval.tsx` and the fork tests. Inside upstream's files, under `// Fork imports.`:
 
 | File | Fork change |
 |---|---|
+| `components/popouts/SavedMessagesContent.tsx`, `components/pages/SavedMessagesPage.tsx` | the × (and a missing bookmark's remove) call `requestRemoveBookmark`: removing a bookmark asks first, as the pins list's × does, and Shift skips the question (tyne-chat/tyne#742). The message menu, the shortcut and the phone layout's bookmarks sheet do the same (`channel/AGENTS.md`) |
 | `useMessageSubmission.tsx`, `useTextareaSubmit.ts`, `useTextareaExpressionHandlers.ts` | persona blocks in both send callbacks; `matchEditMessage` around the edit calls; the draft kept on expression sends |
 | `MessageCommands.tsx` | `subprofile` on `SendMessageParams`; `SignalBarStore.affirmPersona` in `send`; `forward`'s `forwardAs` and its persona per send (tyne-chat/tyne#817); `edit`'s last parameter and response block; the page-fit check in `fetchMessages`; `editWithFiles` appended |
 | `MessageRequestUtils.ts`, `MessageSubmitUtils.ts`, `MessageRetryUtils.ts`, `MessageQueue.tsx` | `persona_id` in requests; `subprofile` carried through |
@@ -220,7 +221,7 @@ or rewrite upstream's code: an upstream fix there has to be carried over by hand
 - Vitest next to the code; one file: `pnpm --filter fluxer_app test src/features/messaging/<path>`.
   Before committing, the full list in `CHECKS.md`.
 - Upstream removed its messaging tests on 2026-10-21; every test here is the fork's: the
-  `*Persona.test.ts(x)` files, `ForkMessagePageFit`, `ReactionUsersStateMachine`,
+  `*Persona.test.ts(x)` files, `ForkMessagePageFit`, `ForkBookmarkRemoval`, `ReactionUsersStateMachine`,
   `MessageSubmitUtils`, `MessageRetryUtils`, `MessageGroupingUtils`, and the emoji, autocomplete,
   paste and parser tests. Several carry names upstream could take; name a new one
   `<File>Persona.test.ts`, or `Fork<Name>.test.ts` when it is not about personas.

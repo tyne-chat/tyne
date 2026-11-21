@@ -1405,6 +1405,10 @@ msgstr "o weka e sitelen pilin nimi"
 msgid "Remove tag pair"
 msgstr "o weka e nimi lili tu"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "sina wile ala wile weka e toki awen ni?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "o ante e nimi kulupu"

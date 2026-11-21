@@ -1405,6 +1405,10 @@ msgstr "Aláírási hangulatjel eltávolítása"
 msgid "Remove tag pair"
 msgstr "Címkepár eltávolítása"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Eltávolítod ezt az üzenetet a mentett üzenetek közül?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Csoport átnevezése"
