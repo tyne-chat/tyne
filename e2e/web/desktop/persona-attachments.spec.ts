@@ -88,11 +88,6 @@ test.describe('Image & Attachment Uploads with Persona Attribution', () => {
 		await expect(pill).toHaveAttribute('aria-label', /Matched by tag/i, {timeout: 5_000});
 
 		// 7. Submit message
-		const sendButton = page
-			.locator(
-				'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-			)
-			.first();
 		// The client shows the message before the server has accepted it, so the checks below
 		// would pass on a message whose upload failed. Wait for the server's answer first.
 		const messageResponse = page.waitForResponse(
@@ -100,11 +95,7 @@ test.describe('Image & Attachment Uploads with Persona Attribution', () => {
 				response.request().method() === 'POST' && /\/channels\/\d+\/messages$/.test(new URL(response.url()).pathname),
 			{timeout: 20_000},
 		);
-		if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		await page.keyboard.press('Enter');
 		expect((await messageResponse).status()).toBe(200);
 
 		// 8. Verify message appears in chat with attachment and persona attribution

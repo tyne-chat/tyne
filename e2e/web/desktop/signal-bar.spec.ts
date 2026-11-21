@@ -87,6 +87,17 @@ test.describe('Signal Bar', () => {
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-pressed', 'false');
 			await expect(signal(page, 'Done')).toHaveAttribute('aria-label', 'Done');
 
+			// Bob lights Done here and puts it out again. Alice sees that only after whatever Bob's
+			// windows sent before it, so a change to Reading that must not happen would have reached
+			// her by then: the sync point for checking that something did not change, instead of a
+			// sleep (tyne-chat/tyne#385). It takes the focus from Bob's composer.
+			const afterBobsEarlierChanges = async (from: Page) => {
+				await signal(from, 'Done').click();
+				await expect(signal(page, 'Done')).toHaveAttribute('aria-label', /^Done: /);
+				await signal(from, 'Done').click();
+				await expect(signal(page, 'Done')).toHaveAttribute('aria-label', 'Done');
+			};
+
 			// The signal follows what Bob does in this channel: typing a persona tag in the
 			// composer switches it to that persona without another click.
 			const bobComposer = bobPage
@@ -103,10 +114,11 @@ test.describe('Signal Bar', () => {
 			await bobPage.keyboard.press('Control+A');
 			await bobPage.keyboard.press('Backspace');
 			await expect(bobComposer).toHaveText('');
-			await bobPage.waitForTimeout(750);
+			await afterBobsEarlierChanges(bobPage);
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Alpha');
 
 			// ...until Bob types as someone else, here the account.
+			await bobComposer.click();
 			await bobPage.keyboard.type('just me');
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
 			await bobPage.keyboard.press('Control+A');
@@ -157,7 +169,7 @@ test.describe('Signal Bar', () => {
 					'aria-label',
 					/Bob-Alpha/,
 				);
-				await bobPage.waitForTimeout(750);
+				await afterBobsEarlierChanges(bobSecondWindow);
 				await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
 				await expect(signal(bobSecondWindow, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
 				await bobSecondWindow.close();
@@ -166,7 +178,7 @@ test.describe('Signal Bar', () => {
 				await openFromChannelList(here.name, seed.E2E_CHANNEL_ID);
 				await expect(signal(bobPage, 'Reading')).toHaveAttribute('aria-pressed', 'true', {timeout: 20_000});
 				await expect(bobPill).toHaveAttribute('aria-label', /Bob-Alpha/);
-				await bobPage.waitForTimeout(750);
+				await afterBobsEarlierChanges(bobPage);
 				await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
 
 				// Typing here as Bob-Alpha is what puts Bob-Alpha on the signal.
@@ -196,9 +208,11 @@ test.describe('Signal Bar', () => {
 			await bobPage.keyboard.press('Backspace');
 			await expect(bobComposer).toHaveText('');
 			await bobPage.keyboard.type('a');
-			await bobPage.waitForTimeout(750);
+			await afterBobsEarlierChanges(bobPage);
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Alpha');
 			// Text that is not the start of anyone's tag is Bob-Beta typing.
+			await bobComposer.click();
+			await bobPage.keyboard.press('End');
 			await bobPage.keyboard.type('h well');
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', 'Reading: Bob-Beta');
 			await bobPage.keyboard.press('Control+A');

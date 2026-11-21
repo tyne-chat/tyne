@@ -112,16 +112,7 @@ test.describe('Relational Persona Soft-Deletion & Historical Attribution', () =>
 			await expect(pill).toBeHidden();
 
 			// Submit message
-			const sendButton = bobPage
-				.locator(
-					'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-				)
-				.first();
-			if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-				await sendButton.click();
-			} else {
-				await bobPage.keyboard.press('Enter');
-			}
+			await bobPage.keyboard.press('Enter');
 
 			// Message is posted with root user attribution (Bob Historian), not the deleted persona
 			await expect(bobPage.getByText(`arch: ${newContent}`)).toBeVisible({timeout: 15_000});
