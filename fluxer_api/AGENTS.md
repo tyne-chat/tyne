@@ -18,7 +18,7 @@ are under `src/api/` unless they start with `src/`, `scripts/` or the repository
 | Route registration | `app/ControllerRegistry.ts`; the fork's controllers in `app/ForkControllerRegistry.ts`, which it calls once |
 | Services per request (`ctx.get('personaService')`) | `middleware/ServiceMiddleware.ts`; shared repositories in `middleware/ServiceSingletons.ts` (`getPersonaRepository()`) |
 | Configuration, logging | `Config.ts`, `Logger.ts` |
-| Tables | `Tables.ts` (the fork's in a block at the end) |
+| Tables | `Tables.ts`; the fork's in `ForkTables.ts`, which it re-exports |
 | Request validation, response checks | `Validator.ts`; `middleware/ResponseTypeMiddleware.ts`; the schemas are in `packages/schema` (its `AGENTS.md`) |
 | Rate-limit buckets | `rate_limit_configs/*RateLimitConfig.ts`, applied by `middleware/RateLimitMiddleware.ts` |
 | Error codes and messages | `packages/constants/src/ApiErrorCodes.ts`, `packages/errors/src/i18n/ErrorCodeMappings.ts`; error classes per domain (`persona/errors/PersonaErrors.ts`) |
@@ -45,11 +45,17 @@ A domain has controllers, services and repositories, with models that build resp
 
 **Where the fork's code hooks in:** a fork domain is its own folder; its controller goes in
 `app/ForkControllerRegistry.ts`, its service getter in `ServiceMiddleware.ts` (under
-`// Fork imports.`), its tables in `Tables.ts`'s fork block (the signal bar's two are an exception,
-declared in `SignalBarSettingsRepository.ts`), its buckets at the end of
+`// Fork imports.`), its tables in `ForkTables.ts` (the signal bar's two are an exception,
+declared in `SignalBarSettingsRepository.ts`) and in `tools/dev/cassandra_target_schema.json`, its
+buckets at the end of
 `UserRateLimitConfig.ts`'s object. A fork error code is added to `ApiErrorCodes.ts` and mapped in
 `ErrorCodeMappings.ts` to one of upstream's translated messages: fork codes have no messages of
 their own yet, so pick the closest and list the code in `fluxer_docs` (`http-api/errors.md`).
+
+Cassandra and Scylla create their tables from `tools/dev/cassandra_target_schema.json`; the Postgres
+store Tyne runs keeps rows as JSON and needs no schema, so a fork table or column left out of that
+file breaks only Scylla, where `fluxer_messages` reads them. `database/ForkCassandraSchemaParity.test.ts`
+checks the fork's tables and its columns on `messages` and `message_reactions` there (tyne-chat/tyne#329).
 
 ## Configuration and logging
 
