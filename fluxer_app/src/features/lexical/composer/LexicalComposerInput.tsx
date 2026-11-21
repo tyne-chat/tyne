@@ -560,7 +560,7 @@ const ComposerInner = ({
 					markdownParserFlags,
 				),
 			);
-			cleanups.push(registerComposerTimestampTransform(editor));
+			cleanups.push(registerComposerTimestampTransform(editor, markdownParserFlags));
 			cleanups.push(registerComposerCaretAnchors(editor));
 		}
 		const modeChanged = previousPlainTextRef.current !== plainText;

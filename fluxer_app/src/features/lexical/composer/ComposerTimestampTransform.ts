@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import {$isInsideMarkdownCode} from '@app/features/lexical/composer/ComposerMarkdownHighlight';
 import {
 	$captureSelectionOffsets,
 	$getComposerNodeDisplayStart,
@@ -9,17 +10,17 @@ import {$isComposerCaretAnchorNode} from '@app/features/lexical/composer/nodes/C
 import {$createComposerTimestampNode} from '@app/features/lexical/composer/nodes/ComposerTimestampNode';
 import {
 	type ComposerTimestampFormat,
-	normalizeTimestampFormat,
 	TIMESTAMP_COMBO_REGEX,
 	TIMESTAMP_SINGLE_REGEX,
+	timestampFormatFromWireStyle,
 } from '@app/features/lexical/composer/nodes/ComposerTimestampUtils';
 import {$isSyntaxMarkerNode} from '@app/features/lexical/composer/nodes/SyntaxMarkerNode';
 import {type LexicalEditor, TextNode} from 'lexical';
 
-export function registerComposerTimestampTransform(editor: LexicalEditor): () => void {
+export function registerComposerTimestampTransform(editor: LexicalEditor, parserFlags?: number): () => void {
 	return editor.registerNodeTransform(TextNode, (node) => {
 		if (!editor.isComposing()) {
-			$convertTimestampTokens(node);
+			$convertTimestampTokens(node, parserFlags);
 		}
 	});
 }
@@ -31,8 +32,8 @@ interface TimestampTokenMatch {
 	format: ComposerTimestampFormat;
 }
 
-function findNextTimestampToken(text: string): TimestampTokenMatch | null {
-	for (let i = 0; i < text.length; i++) {
+function findNextTimestampToken(text: string, startIndex: number): TimestampTokenMatch | null {
+	for (let i = startIndex; i < text.length; i++) {
 		if (text[i] !== '<' || text[i + 1] !== 't' || text[i + 2] !== ':') {
 			continue;
 		}
@@ -63,7 +64,7 @@ function findNextTimestampToken(text: string): TimestampTokenMatch | null {
 					start: i,
 					end: i + singleMatch[0].length,
 					epoch,
-					format: normalizeTimestampFormat(singleMatch[2]),
+					format: timestampFormatFromWireStyle(singleMatch[2]),
 				};
 			}
 		}
@@ -71,12 +72,39 @@ function findNextTimestampToken(text: string): TimestampTokenMatch | null {
 	return null;
 }
 
-function $convertTimestampTokens(node: TextNode): void {
+// The first token outside code. As for emoji shortcodes (ComposerEmojiShortcode.ts), text after an
+// unclosed backtick counts as code, and the code format is not applied yet while one is typed
+// (tyne-chat/tyne#388).
+function $findTimestampTokenOutsideCode(
+	node: TextNode,
+	text: string,
+	parserFlags?: number,
+): TimestampTokenMatch | null {
+	let searchFrom = 0;
+	let backticks = 0;
+	while (true) {
+		const match = findNextTimestampToken(text, searchFrom);
+		if (match == null) {
+			return null;
+		}
+		for (let index = searchFrom; index < match.start; index++) {
+			if (text[index] === '`') {
+				backticks += 1;
+			}
+		}
+		searchFrom = match.end;
+		if (backticks % 2 === 0 && !$isInsideMarkdownCode(node, match.start, match.end, parserFlags)) {
+			return match;
+		}
+	}
+}
+
+function $convertTimestampTokens(node: TextNode, parserFlags?: number): void {
 	if (!node.isAttached() || $isComposerCaretAnchorNode(node) || $isSyntaxMarkerNode(node) || node.hasFormat('code')) {
 		return;
 	}
 	const text = node.getTextContent();
-	const match = findNextTimestampToken(text);
+	const match = $findTimestampTokenOutsideCode(node, text, parserFlags);
 	if (match == null) {
 		return;
 	}
