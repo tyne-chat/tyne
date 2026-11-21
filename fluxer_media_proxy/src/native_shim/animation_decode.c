@@ -962,3 +962,29 @@ int fluxer_vips_read_animation_delays_ms(VipsImage *image, int n_pages,
     *out_delays = out;
     return FLUXER_NATIVE_STATUS_OK;
 }
+
+/* Fork: decodes the track of an animated AVIF that has no item metadata (no `meta` box), which
+ * fluxer_ffmpeg_decode_heif_sequence refuses. The file is demuxed as an MP4 upload is, after the
+ * same sample-table check; the caller makes sure no `meta` box with items is left in it
+ * (src/media_process/fork_animated_avif.rs, tyne-chat/tyne#854). */
+int fluxer_fork_ffmpeg_decode_avif_track(
+    const void *data,
+    size_t len,
+    int decoder_threads,
+    long long deadline_monotonic_ms,
+    VipsImage **out,
+    int max_frames,
+    size_t max_total_pixels,
+    int *out_frame_count
+) {
+    if (out_frame_count == NULL) return FLUXER_NATIVE_STATUS_CODEC_FAILURE;
+    *out_frame_count = 0;
+    if (out == NULL) return FLUXER_NATIVE_STATUS_CODEC_FAILURE;
+    *out = NULL;
+    int validation_status = fluxer_bmff_sample_tables_validate(data, len);
+    if (validation_status != FLUXER_NATIVE_STATUS_OK) return validation_status;
+    return ffmpeg_decode_animation_stack(
+        data, len, decoder_threads, deadline_monotonic_ms,
+        out, out_frame_count, max_frames, max_total_pixels,
+        1, "mov", NULL, 0, 2);
+}
