@@ -1405,6 +1405,10 @@ msgstr "Xóa biểu tượng cảm xúc đặc trưng"
 msgid "Remove tag pair"
 msgstr "Xóa cặp thẻ"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Bỏ lưu tin nhắn này?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Đổi tên nhóm"

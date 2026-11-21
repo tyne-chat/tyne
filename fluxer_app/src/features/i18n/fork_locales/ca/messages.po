@@ -1405,6 +1405,10 @@ msgstr "Elimina l’emoji distintiu"
 msgid "Remove tag pair"
 msgstr "Elimina el parell d’etiquetes"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Vols suprimir aquest marcador?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Canvia el nom del grup"

@@ -1405,6 +1405,10 @@ msgstr "हस्ताक्षर इमोजी हटाएं"
 msgid "Remove tag pair"
 msgstr "टैग जोड़ी हटाएँ"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "यह बुकमार्क हटाएँ?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "ग्रुप का नाम बदलें"

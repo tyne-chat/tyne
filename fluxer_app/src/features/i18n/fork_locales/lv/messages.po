@@ -1405,6 +1405,10 @@ msgstr "Noņemt raksturīgo emocijzīmi"
 msgid "Remove tag pair"
 msgstr "Noņemt birku pāri"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "Noņemt šo grāmatzīmi?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "Pārdēvēt grupu"
