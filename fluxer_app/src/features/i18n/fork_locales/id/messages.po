@@ -301,7 +301,7 @@ msgstr "Salinan {name}"
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
-msgstr "Salin stempel waktu\\"
+msgstr "Salin stempel waktu"
 
 #. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
@@ -397,7 +397,7 @@ msgstr "Hapus grup \"{name}\"? Persona di dalamnya tetap disimpan."
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
-msgstr "Hapus stempel waktu\\"
+msgstr "Hapus stempel waktu"
 
 #. Title of the confirmation before deleting the selected personas.
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
@@ -519,7 +519,7 @@ msgstr "Edit persona"
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
-msgstr "Edit stempel waktu\\"
+msgstr "Edit stempel waktu"
 
 #. Section heading in community emoji settings when non-animated and animated emojis are listed together.
 msgid "Emoji ({emojiCount})"

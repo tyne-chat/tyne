@@ -301,7 +301,7 @@ msgstr "{name} 的副本"
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
-msgstr "複製時間戳記\\"
+msgstr "複製時間戳記"
 
 #. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
@@ -397,7 +397,7 @@ msgstr "要刪除分組「{name}」嗎？其中的人格會保留。"
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
-msgstr "刪除時間戳記\\"
+msgstr "刪除時間戳記"
 
 #. Title of the confirmation before deleting the selected personas.
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
@@ -519,7 +519,7 @@ msgstr "編輯人格"
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
-msgstr "編輯時間戳記\\"
+msgstr "編輯時間戳記"
 
 #. Section heading in community emoji settings when non-animated and animated emojis are listed together.
 msgid "Emoji ({emojiCount})"
