@@ -187,6 +187,7 @@ interface GuildsLayoutSidebarStyle extends React.CSSProperties {
 	'--layout-sidebar-restored-width'?: string;
 	'--layout-sidebar-peek-offset'?: string;
 	'--layout-guild-list-width'?: string;
+	'--outline-frame-radius-native'?: string;
 }
 
 function resolveGuildsLayoutSidebarStyle(
@@ -201,6 +202,8 @@ function resolveGuildsLayoutSidebarStyle(
 	if (!leftSidebarVisible) {
 		style['--layout-guild-list-width'] = '0px';
 		style['--layout-sidebar-width'] = '0px';
+		// The content's corner by the collapsed sidebar is square, as at the other edge (tyne-chat/tyne#648).
+		style['--outline-frame-radius-native'] = '0px';
 	} else {
 		style['--layout-guild-list-width'] = '4.5rem';
 		style['--layout-sidebar-width'] = actualSidebarWidth;
