@@ -41,12 +41,12 @@ function createHarness({keepUnusedMs}: {keepUnusedMs?: number} = {}) {
 	const store = new ForkEmojiFramesStore(load, keepUnusedMs);
 	const acquire = vi.spyOn(store, 'acquire');
 	const shown: Array<Shown> = [];
-	// A player that puts a real canvas after the image, as the real one does, and draws nothing.
+	// A player that puts a real canvas before the image, as the real one does, and draws nothing.
 	const player = {
 		show: vi.fn(
 			(img: HTMLImageElement, frames: ForkEmojiFrames, listeners: ForkShownEmojiListeners = {}): ForkShownEmoji => {
 				const canvas = document.createElement('canvas');
-				img.after(canvas);
+				img.before(canvas);
 				const entry: Shown = {img, frames, canvas, hidden: false, restyled: 0, listeners};
 				shown.push(entry);
 				return {
@@ -192,7 +192,7 @@ describe('ForkSyncedEmojiImages', () => {
 		await harness.framesReady();
 		expect(harness.showing()).toHaveLength(1);
 		expect(harness.shown[0].img).toBe(img);
-		expect(img.nextSibling).toBe(harness.shown[0].canvas);
+		expect(img.previousSibling).toBe(harness.shown[0].canvas);
 		expect(img.getAttribute('src')).toBe(WINGS_L);
 	});
 
@@ -356,7 +356,7 @@ describe('ForkSyncedEmojiImages', () => {
 		harness.childrenChanged(from);
 		expect(from.querySelectorAll('canvas')).toHaveLength(0);
 		harness.setNear(img, true);
-		expect(img.nextSibling).toBe(harness.showing()[0].canvas);
+		expect(img.previousSibling).toBe(harness.showing()[0].canvas);
 	});
 
 	it('leaves an image alone for good where something else takes its canvas out of the page', async () => {
