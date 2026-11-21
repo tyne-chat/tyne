@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 
 .panel {
+	position: relative;
 	--signals-everywhere-column: 1.75rem;
 	/* As `--signal-size` on the bar. */
 	--signals-everywhere-tile: calc(var(--textarea-min-height, 3.625rem) - 1rem);
