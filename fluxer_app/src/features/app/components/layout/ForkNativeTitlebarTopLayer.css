@@ -1,0 +1,21 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+/* Fork: the title bar is shown as a manual popover so that its drag region wins over scrolled
+   content (ForkNativeTitlebarTopLayer.ts, tyne-chat/tyne#851). This undoes the browser's popover
+   defaults, which would centre it, give it a border and shrink it to its content; the rest is
+   upstream's .fluxer-native-titlebar rule. A single class's weight, so themes can still restyle it. */
+:where(.fluxer-native-titlebar):popover-open {
+	inset-block-end: auto;
+	width: auto;
+	margin: 0;
+	border: 0;
+	overflow: visible;
+	color: inherit;
+}
+
+/* The backdrop covers the whole window and inherits the title bar's `-webkit-app-region: drag`: shown,
+   it would make the whole window a drag area that swallows every click. With no box, it adds no region
+   at all (a `no-drag` backdrop would instead override every drag area in the page). */
+:where(.fluxer-native-titlebar):popover-open::backdrop {
+	display: none;
+}
