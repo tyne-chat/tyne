@@ -127,6 +127,10 @@ function getTimestampMarkdown(format: string, epoch: number): string {
 			return `<t:${epoch}:f>`;
 		case 'longDateTime':
 			return `<t:${epoch}:F>`;
+		case 'shortDateShortTime':
+			return `<t:${epoch}:s>`;
+		case 'shortDateMediumTime':
+			return `<t:${epoch}:S>`;
 		case 'relative':
 			return `<t:${epoch}:R>`;
 		default:
@@ -254,7 +258,10 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 	const [selectedTime, setSelectedTime] = useState(() => initialNow.toFormat('HH:mm'));
 	const [selectedSecond, setSelectedSecond] = useState(() => initialNow.second);
 	const [selectedTimeZone, setSelectedTimeZone] = useState(initialTimeZone);
-	const [selectedFormat, setSelectedFormat] = useState(() => initialFormat ?? 'combo');
+	// A bare `<t:N>` has no option of its own: the parser shows it as `f` (tyne-chat/tyne#386).
+	const [selectedFormat, setSelectedFormat] = useState(() =>
+		initialFormat === 'unstyled' ? 'shortDateTime' : (initialFormat ?? 'combo'),
+	);
 	const isCompact = useIsCompactLayout();
 	const isSingleColumn = useIsSingleColumnLayout();
 
@@ -342,6 +349,22 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 		const longDate = formatTimestampWithStyle(epoch, 'LongDate', locale, hour12, null, selectedTimeZone);
 		const shortDateTime = formatTimestampWithStyle(epoch, 'ShortDateTime', locale, hour12, null, selectedTimeZone);
 		const longDateTime = formatTimestampWithStyle(epoch, 'LongDateTime', locale, hour12, null, selectedTimeZone);
+		const shortDateShortTime = formatTimestampWithStyle(
+			epoch,
+			'ShortDateShortTime',
+			locale,
+			hour12,
+			null,
+			selectedTimeZone,
+		);
+		const shortDateMediumTime = formatTimestampWithStyle(
+			epoch,
+			'ShortDateMediumTime',
+			locale,
+			hour12,
+			null,
+			selectedTimeZone,
+		);
 		const relative = formatRelativePreview(epoch, locale);
 
 		return [
@@ -372,6 +395,14 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 			{
 				value: 'longDateTime',
 				name: longDateTime,
+			},
+			{
+				value: 'shortDateShortTime',
+				name: shortDateShortTime,
+			},
+			{
+				value: 'shortDateMediumTime',
+				name: shortDateMediumTime,
 			},
 			{
 				value: 'relative',

@@ -12,7 +12,11 @@ export type ComposerTimestampFormat =
 	| 'longDate'
 	| 'shortDateTime'
 	| 'longDateTime'
-	| 'relative';
+	| 'shortDateShortTime'
+	| 'shortDateMediumTime'
+	| 'relative'
+	// A bare `<t:N>`, kept as written; the parser shows it as `f` (tyne-chat/tyne#386).
+	| 'unstyled';
 
 const STYLE_TO_FORMAT: Record<string, ComposerTimestampFormat> = {
 	t: 'shortTime',
@@ -21,6 +25,8 @@ const STYLE_TO_FORMAT: Record<string, ComposerTimestampFormat> = {
 	D: 'longDate',
 	f: 'shortDateTime',
 	F: 'longDateTime',
+	s: 'shortDateShortTime',
+	S: 'shortDateMediumTime',
 	R: 'relative',
 	combo: 'combo',
 	default: 'shortDateTime',
@@ -30,7 +36,10 @@ const STYLE_TO_FORMAT: Record<string, ComposerTimestampFormat> = {
 	longDate: 'longDate',
 	shortDateTime: 'shortDateTime',
 	longDateTime: 'longDateTime',
+	shortDateShortTime: 'shortDateShortTime',
+	shortDateMediumTime: 'shortDateMediumTime',
 	relative: 'relative',
+	unstyled: 'unstyled',
 };
 
 const FORMAT_TO_STYLE: Record<ComposerTimestampFormat, TimestampStyle> = {
@@ -41,7 +50,10 @@ const FORMAT_TO_STYLE: Record<ComposerTimestampFormat, TimestampStyle> = {
 	longDate: TimestampStyle.LongDate,
 	shortDateTime: TimestampStyle.ShortDateTime,
 	longDateTime: TimestampStyle.LongDateTime,
+	shortDateShortTime: TimestampStyle.ShortDateShortTime,
+	shortDateMediumTime: TimestampStyle.ShortDateMediumTime,
 	relative: TimestampStyle.RelativeTime,
+	unstyled: TimestampStyle.ShortDateTime,
 };
 
 export function normalizeTimestampFormat(formatOrStyle?: string | null): ComposerTimestampFormat {
@@ -49,6 +61,11 @@ export function normalizeTimestampFormat(formatOrStyle?: string | null): Compose
 		return 'shortDateTime';
 	}
 	return STYLE_TO_FORMAT[formatOrStyle] ?? 'shortDateTime';
+}
+
+/** The format of a typed `<t:N:x>`, or of a bare `<t:N>` (no style letter). */
+export function timestampFormatFromWireStyle(style: string | undefined): ComposerTimestampFormat {
+	return style == null ? 'unstyled' : normalizeTimestampFormat(style);
 }
 
 export function getTimestampWire(epoch: number, format: ComposerTimestampFormat): string {
@@ -67,8 +84,14 @@ export function getTimestampWire(epoch: number, format: ComposerTimestampFormat)
 			return `<t:${epoch}:f>`;
 		case 'longDateTime':
 			return `<t:${epoch}:F>`;
+		case 'shortDateShortTime':
+			return `<t:${epoch}:s>`;
+		case 'shortDateMediumTime':
+			return `<t:${epoch}:S>`;
 		case 'relative':
 			return `<t:${epoch}:R>`;
+		case 'unstyled':
+			return `<t:${epoch}>`;
 	}
 }
 
@@ -98,7 +121,7 @@ export function parseTimestampWire(wire: string): {epoch: number; format: Compos
 	if (singleMatch != null && singleMatch[1] != null) {
 		const epoch = Number.parseInt(singleMatch[1], 10);
 		if (Number.isFinite(epoch)) {
-			const format = normalizeTimestampFormat(singleMatch[2]);
+			const format = timestampFormatFromWireStyle(singleMatch[2]);
 			return {epoch, format};
 		}
 	}
