@@ -35,10 +35,13 @@ import {createRoot, type Root} from 'react-dom/client';
 import {
 	PersonaCardCheckbox,
 	type PersonaSelection,
+	type PersonaSelectionFocus,
+	PersonaSelectionHeader,
 	PersonaVisibilityChips,
 	requestDelete,
 	requestVisibility,
 	usePersonaSelection,
+	usePersonaSelectionFocus,
 } from './PersonaBulkSelection';
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -219,5 +222,123 @@ describe('selecting many personas (tyne-chat/tyne#542)', () => {
 		);
 		const counts = Array.from(container.querySelectorAll('[data-flx="persona.bulk.chip"]')).map((el) => el.textContent);
 		expect(counts).toEqual(['All3', 'Public1', 'Unlisted2', 'Private0']);
+	});
+});
+
+describe('keyboard focus when selection mode starts or ends (tyne-chat/tyne#841)', () => {
+	let container: HTMLDivElement;
+	let root: Root;
+	let selection: PersonaSelection;
+	let focus: PersonaSelectionFocus;
+
+	// The settings tab's Select button and selection header, as the tab wires them.
+	const Harness = ({shownIds}: {shownIds: ReadonlyArray<string>}) => {
+		selection = usePersonaSelection([A, B, C]);
+		focus = usePersonaSelectionFocus(selection);
+		return (
+			<div data-flx="persona.bulk-test.focus-harness">
+				{!selection.selecting && (
+					<button
+						type="button"
+						ref={focus.selectButtonRef}
+						onClick={focus.startFromSelectButton}
+						data-flx="persona.bulk-test.select"
+					>
+						Select
+					</button>
+				)}
+				{selection.selecting && (
+					<PersonaSelectionHeader
+						selection={selection}
+						shownIds={shownIds}
+						containerRef={focus.headerRef}
+						data-flx="persona.bulk-test.selection-header"
+					/>
+				)}
+			</div>
+		);
+	};
+	const selectButton = () => container.querySelector<HTMLElement>('[data-flx="persona.bulk-test.select"]');
+	const selectAll = () => container.querySelector<HTMLElement>('button[role="checkbox"]');
+	const cancel = () => container.querySelector<HTMLElement>('[data-flx="persona.bulk.cancel"]');
+	const press = async (element: HTMLElement | null) => {
+		element!.focus();
+		await act(async () => element!.click());
+	};
+
+	beforeEach(() => {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+		root = createRoot(container);
+	});
+	afterEach(() => {
+		vi.useRealTimers();
+		act(() => root.unmount());
+		container.remove();
+	});
+
+	it('moves focus to "Select all" from Select, and back to Select on Cancel', async () => {
+		await act(async () => root.render(<Harness shownIds={[A.id, B.id]} data-flx="persona.bulk-test.harness" />));
+
+		await press(selectButton());
+		expect(selection.selecting).toBe(true);
+		expect(document.activeElement).toBe(selectAll());
+
+		await press(cancel());
+		expect(selection.selecting).toBe(false);
+		expect(document.activeElement).toBe(selectButton());
+	});
+
+	it('moves focus to Cancel when nothing is shown to select', async () => {
+		await act(async () => root.render(<Harness shownIds={[]} data-flx="persona.bulk-test.harness" />));
+
+		await press(selectButton());
+		expect(document.activeElement).toBe(cancel());
+	});
+
+	it('moves no focus when a deep link starts selecting, and back to Select when it ends', async () => {
+		const search = document.createElement('input');
+		document.body.appendChild(search);
+		await act(async () => root.render(<Harness shownIds={[A.id]} data-flx="persona.bulk-test.harness" />));
+		search.focus();
+
+		await act(async () => selection.start());
+		expect(document.activeElement).toBe(search);
+
+		await act(async () => selection.stop());
+		expect(document.activeElement).toBe(selectButton());
+		search.remove();
+	});
+
+	it('waits for a confirmation closing over the settings before moving focus back to Select', async () => {
+		vi.useFakeTimers({toFake: ['requestAnimationFrame', 'cancelAnimationFrame']});
+		await act(async () => root.render(<Harness shownIds={[A.id]} data-flx="persona.bulk-test.harness" />));
+		await press(selectButton());
+		container.setAttribute('inert', '');
+
+		await act(async () => selection.stop());
+		expect(document.activeElement).not.toBe(selectButton());
+		await act(async () => vi.advanceTimersToNextFrame());
+		expect(document.activeElement).not.toBe(selectButton());
+
+		container.removeAttribute('inert');
+		await act(async () => vi.advanceTimersToNextFrame());
+		expect(document.activeElement).toBe(selectButton());
+	});
+
+	it('leaves focus where the person moved it while the confirmation was closing', async () => {
+		vi.useFakeTimers({toFake: ['requestAnimationFrame', 'cancelAnimationFrame']});
+		const elsewhere = document.createElement('input');
+		document.body.appendChild(elsewhere);
+		await act(async () => root.render(<Harness shownIds={[A.id]} data-flx="persona.bulk-test.harness" />));
+		await press(selectButton());
+		container.setAttribute('inert', '');
+
+		await act(async () => selection.stop());
+		elsewhere.focus();
+		container.removeAttribute('inert');
+		await act(async () => vi.advanceTimersToNextFrame());
+		expect(document.activeElement).toBe(elsewhere);
+		elsewhere.remove();
 	});
 });
