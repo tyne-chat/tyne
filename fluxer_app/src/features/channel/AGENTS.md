@@ -163,7 +163,7 @@ search like that ✕, at every width, and moves focus to the message box.
   `channel_header/HeaderOverflow.tsx` and `HeaderOverflowLayout.ts`,
   `channel_search_results/SearchResultsCloseButton.tsx`,
   `message_search_bar/PersonaSearchSuggestions.ts` and `PersonasSection.tsx`,
-  `modals/TimestampModal.tsx`, `InlineEditControls.tsx`, `InlineEditFiles.tsx`, `useInlineEditCaret.ts`,
+  `modals/TimestampModal.tsx` and `modals/TimestampModalPreview.ts`, `InlineEditControls.tsx`, `InlineEditFiles.tsx`, `useInlineEditCaret.ts`,
   `DeleteAttachmentMenuGroup.tsx`, `emoji_picker/hooks/useForkSearchFirstResultSelection.ts`.
 - **Renamed and wrapped from outside:** `ChannelViewScaffold` (`ChannelViewScaffoldBase` in an
   `observer`), `EmojiPicker` (`EmojiPickerBase` inside the `EmojiPickerReactionContext` provider),
@@ -196,6 +196,10 @@ search like that ✕, at every width, and moves focus to the message box.
   narrow settings dialog takes the phone path; the editor registers as the level below Permissions),
   `QuickReactionStore.ts`.
 - **Copies to keep in step:** `usePresentableTypists` copies upstream's `usePresentableTypingUsers`;
+  `formatRelativeGap` (`modals/TimestampModalPreview.ts`) copies the wording of upstream's
+  `formatRelativeTime` (`messaging/utils/markdown/DateFormatter.ts`) for a gap from a moment of its
+  own, so a time typed as "in 10 minutes" reads as typed until Insert (tyne-chat/tyne#389); its test
+  compares the two;
   the display-tag icon address is worked out in `PersonaTag`, `MessagePersonaAccount` and
   `AutocompleteMention`.
 
@@ -229,7 +233,7 @@ that counts requests (root `AGENTS.md`, "Network calls").
 - **Here (fork):** `MessagePersonaAccount.test.tsx`, `MessageActionBarQuickReaction.test.tsx` (also
   `EmojiRenderer` pins), `MessageReactionsContextMenu.test.tsx`, `useCollapsedPanelBadges.test.ts`,
   `HeaderOverflowLayout.test.ts`,
-  `PersonaSearchSuggestions.test.ts`, `TimestampModal.test.tsx`,
+  `PersonaSearchSuggestions.test.ts`, `TimestampModal.test.tsx`, `TimestampModalPreview.test.ts`,
   `useInlineEditCaret.test.tsx`, `InlineEditFiles.test.tsx`, `InlineEditUploads.test.ts` (in
   `messaging`),
   `MobileTextareaPlusBottomSheet.test.tsx`, `ChannelOwnerPersona.test.ts`. Upstream's:
