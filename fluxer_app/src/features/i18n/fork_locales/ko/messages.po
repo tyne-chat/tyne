@@ -1405,6 +1405,10 @@ msgstr "시그니처 이모지 삭제"
 msgid "Remove tag pair"
 msgstr "태그 쌍 제거"
 
+#. Body of the confirmation shown before a bookmark (a saved message) is removed. Its title and button read "Remove bookmark".
+msgid "Remove this bookmark?"
+msgstr "이 북마크를 삭제할까요?"
+
 #. Menu item and dialog title for giving a group of personas a new name
 msgid "Rename group"
 msgstr "그룹 이름 바꾸기"

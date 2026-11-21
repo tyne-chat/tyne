@@ -20,6 +20,10 @@ import {BookmarkSimpleIcon, XIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import {useEffect} from 'react';
 
+// Fork imports.
+
+import {requestRemoveBookmark} from '@app/features/messaging/commands/ForkBookmarkRemoval';
+
 const BOOKMARKS_DESCRIPTOR = msg({
 	message: 'Bookmarks',
 	comment: 'Short label in the saved messages page. Keep it concise.',
@@ -60,7 +64,7 @@ export const SavedMessagesPage = observer(() => {
 		<button
 			type="button"
 			className={previewStyles.actionIconButton}
-			onClick={() => SavedMessageCommands.remove(i18n, message.id)}
+			onClick={(event) => requestRemoveBookmark(i18n, message.id, {message, shiftKey: event.shiftKey})}
 			aria-label={i18n._(REMOVE_BOOKMARK_DESCRIPTOR)}
 			data-flx="messaging.saved-messages-page.render-action-buttons.button.remove"
 		>
@@ -79,7 +83,9 @@ export const SavedMessagesPage = observer(() => {
 						<SavedMessageMissingCard
 							key={entry.id}
 							entryId={entry.id}
-							onRemove={() => SavedMessageCommands.remove(i18n, entry.id)}
+							onRemove={(event?: React.MouseEvent) =>
+								requestRemoveBookmark(i18n, entry.id, {shiftKey: event?.shiftKey})
+							}
 							data-flx="messaging.saved-messages-page.saved-message-missing-card"
 						/>
 					))}

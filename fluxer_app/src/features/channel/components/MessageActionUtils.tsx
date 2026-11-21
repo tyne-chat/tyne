@@ -57,6 +57,7 @@ import {msg} from '@lingui/core/macro';
 
 // Fork imports.
 
+import {requestRemoveBookmarkFromMessage} from '@app/features/messaging/commands/ForkBookmarkRemoval';
 import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
@@ -371,13 +372,14 @@ export function createMessageActionHandlers(
 		requestCopyMessageLink(message, i18n, sourceChannel);
 		onClose?.();
 	};
-	const handleSaveMessage = (isSaved: boolean) => () => {
+	const handleSaveMessage = (isSaved: boolean) => (event?: React.MouseEvent | React.KeyboardEvent) => {
 		if (isClientSystemMessage(message)) {
 			onClose?.();
 			return;
 		}
 		if (isSaved) {
-			SavedMessageCommands.remove(i18n, message.id);
+			requestRemoveBookmarkFromMessage(i18n, message, {shiftKey: Boolean(event?.shiftKey), onClose});
+			return;
 		} else {
 			void SavedMessageCommands.create(i18n, message.channelId, message.id);
 		}
@@ -708,7 +710,7 @@ export async function requestToggleBookmark(message: Message, i18n: I18n): Promi
 	}
 	await SavedMessageCommands.ensureAllLoaded();
 	if (SavedMessages.isSaved(message.id)) {
-		SavedMessageCommands.remove(i18n, message.id);
+		requestRemoveBookmarkFromMessage(i18n, message);
 		return;
 	}
 	void SavedMessageCommands.create(i18n, message.channelId, message.id);
