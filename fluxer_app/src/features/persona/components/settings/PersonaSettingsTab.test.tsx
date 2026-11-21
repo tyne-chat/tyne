@@ -222,6 +222,40 @@ describe('PersonaSettingsTab Component', () => {
 		expect(container.textContent).not.toContain('Persona Alpha');
 	});
 
+	it('keeps keyboard focus in the selection when Select and Cancel are pressed (tyne-chat/tyne#841)', async () => {
+		await act(async () => {
+			root.render(<PersonaSettingsTab data-flx="persona.settings.persona-settings-tab-test.persona-settings-tab--8" />);
+		});
+		const selectButton = () =>
+			container.querySelector<HTMLElement>('[data-flx="persona.settings.persona-settings-tab.button.select"]');
+
+		selectButton()!.focus();
+		await act(async () => selectButton()!.click());
+		const selectAll = container.querySelector('[data-flx="persona.bulk.selection-header"] button[role="checkbox"]');
+		expect(selectAll).not.toBeNull();
+		expect(document.activeElement).toBe(selectAll);
+
+		const cancel = container.querySelector<HTMLElement>('[data-flx="persona.bulk.cancel"]')!;
+		cancel.focus();
+		await act(async () => cancel.click());
+		expect(selectButton()).not.toBeNull();
+		expect(document.activeElement).toBe(selectButton());
+	});
+
+	it('moves no focus when the feature deep link starts selecting', async () => {
+		await act(async () => {
+			root.render(
+				<PersonaSettingsTab
+					initialSubtab="feature"
+					data-flx="persona.settings.persona-settings-tab-test.persona-settings-tab--9"
+				/>,
+			);
+		});
+
+		expect(container.querySelector('[data-flx="persona.bulk.selection-header"]')).not.toBeNull();
+		expect(document.activeElement).toBe(document.body);
+	});
+
 	it('opens PersonaEditModal on initialSubtab="new"', async () => {
 		await act(async () => {
 			root.render(

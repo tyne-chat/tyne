@@ -9,13 +9,14 @@ import {Checkbox} from '@app/features/ui/checkbox/Checkbox';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import * as ToastCommands from '@app/features/ui/commands/ToastCommands';
+import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import type {PersonaVisibility} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import type {I18n} from '@lingui/core';
 import {Trans, useLingui} from '@lingui/react/macro';
 import {EyeSlashIcon, GlobeSimpleIcon, LockSimpleIcon, TrashIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
-import {useCallback, useMemo, useState} from 'react';
+import {type RefObject, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {PersonaBulkGroupButtons} from './PersonaBulkGroupActions';
 import {PersonaBulkMentionButton} from './PersonaBulkMentionActions';
 import styles from './PersonaBulkSelection.module.css';
@@ -80,6 +81,64 @@ export function usePersonaSelection(personas: ReadonlyArray<ClientPersona>): Per
 	return {selecting, selected, start, stop, toggle, toggleAll};
 }
 
+// As many frames as upstream's modal state waits for an inert focus target (`Modal.ts`).
+const MAX_INERT_FOCUS_RETRY_FRAMES = 30;
+
+/**
+ * Focuses the target once nothing holds it inert: an action that asks first ends the selection
+ * while its confirmation is still closing over the settings. Gives up if focus moved meanwhile.
+ */
+function focusWhenInteractive(getTarget: () => HTMLElement | null | undefined, frame = 0): void {
+	const target = getTarget();
+	if (!target?.isConnected) return;
+	if (target.closest('[inert]') != null) {
+		if (frame < MAX_INERT_FOCUS_RETRY_FRAMES) {
+			requestAnimationFrame(() => focusWhenInteractive(getTarget, frame + 1));
+		}
+		return;
+	}
+	const active = target.ownerDocument.activeElement;
+	if (frame > 0 && active != null && active !== target.ownerDocument.body && active !== target) return;
+	target.focus();
+}
+
+export interface PersonaSelectionFocus {
+	selectButtonRef: RefObject<HTMLButtonElement | null>;
+	headerRef: RefObject<HTMLDivElement | null>;
+	/** What Select does: starts selecting and moves focus to "Select all". */
+	startFromSelectButton: () => void;
+}
+
+/**
+ * Keeps keyboard focus in place when selection mode starts or ends (tyne-chat/tyne#841): Select
+ * hides itself, and Cancel removes the header it sits in. Starting from Select moves focus to
+ * "Select all" (Cancel when nothing is shown); a deep link that starts selecting moves none. Ending,
+ * by Cancel or an action, moves it back to Select.
+ */
+export function usePersonaSelectionFocus(selection: PersonaSelection): PersonaSelectionFocus {
+	const selectButtonRef = useRef<HTMLButtonElement | null>(null);
+	const headerRef = useRef<HTMLDivElement | null>(null);
+	const focusHeaderOnStart = useRef(false);
+	const wasSelecting = useRef(selection.selecting);
+	const {selecting, start} = selection;
+	useEffect(() => {
+		if (selecting === wasSelecting.current) return;
+		wasSelecting.current = selecting;
+		if (!selecting) {
+			focusWhenInteractive(() => selectButtonRef.current);
+			return;
+		}
+		if (!focusHeaderOnStart.current) return;
+		focusHeaderOnStart.current = false;
+		focusWhenInteractive(() => headerRef.current?.querySelector<HTMLElement>('button:not([disabled])'));
+	}, [selecting]);
+	const startFromSelectButton = useCallback(() => {
+		focusHeaderOnStart.current = true;
+		start();
+	}, [start]);
+	return {selectButtonRef, headerRef, startFromSelectButton};
+}
+
 const FILTER_LABELS: Record<PersonaVisibilityFilter, typeof M.FILTER_ALL_DESCRIPTOR> = {
 	all: M.FILTER_ALL_DESCRIPTOR,
 	public: M.FILTER_PUBLIC_DESCRIPTOR,
@@ -109,19 +168,20 @@ export const PersonaVisibilityChips = observer(
 				data-flx="persona.settings.persona-bulk-selection.persona-visibility-chips.chips"
 			>
 				{(['all', ...VISIBILITIES] as const).map((filter) => (
-					<button
-						key={filter}
-						type="button"
-						aria-pressed={value === filter}
-						className={clsx(styles.chip, value === filter && styles.chipOn)}
-						onClick={() => onChange(filter)}
-						data-flx="persona.bulk.chip"
-					>
-						{i18n._(FILTER_LABELS[filter])}
-						<span className={styles.chipCount} data-flx="persona.bulk.chip-count">
-							{counts[filter]}
-						</span>
-					</button>
+					<FocusRing key={filter} offset={-2} data-flx="persona.bulk.chip-focus-ring">
+						<button
+							type="button"
+							aria-pressed={value === filter}
+							className={clsx(styles.chip, value === filter && styles.chipOn)}
+							onClick={() => onChange(filter)}
+							data-flx="persona.bulk.chip"
+						>
+							{i18n._(FILTER_LABELS[filter])}
+							<span className={styles.chipCount} data-flx="persona.bulk.chip-count">
+								{counts[filter]}
+							</span>
+						</button>
+					</FocusRing>
 				))}
 			</div>
 		);
@@ -130,12 +190,20 @@ export const PersonaVisibilityChips = observer(
 
 /** "Select all" for what the search and chip show, the count, and Cancel. */
 export const PersonaSelectionHeader = observer(
-	({selection, shownIds}: {selection: PersonaSelection; shownIds: ReadonlyArray<string>}) => {
+	({
+		selection,
+		shownIds,
+		containerRef,
+	}: {
+		selection: PersonaSelection;
+		shownIds: ReadonlyArray<string>;
+		containerRef?: RefObject<HTMLDivElement | null>;
+	}) => {
 		const {i18n} = useLingui();
 		const shownSelected = shownIds.filter((id) => selection.selected.has(id)).length;
 		const allShown = shownIds.length > 0 && shownSelected === shownIds.length;
 		return (
-			<div className={styles.selectionHeader} data-flx="persona.bulk.selection-header">
+			<div ref={containerRef} className={styles.selectionHeader} data-flx="persona.bulk.selection-header">
 				<Checkbox
 					checked={allShown}
 					disabled={shownIds.length === 0}
@@ -151,9 +219,11 @@ export const PersonaSelectionHeader = observer(
 				<span className={styles.selectedCount} aria-live="polite" data-flx="persona.bulk.selected-count">
 					{i18n._(M.SELECTED_COUNT_DESCRIPTOR, {count: selection.selected.size})}
 				</span>
-				<button type="button" className={styles.linkButton} onClick={selection.stop} data-flx="persona.bulk.cancel">
-					<Trans>Cancel</Trans>
-				</button>
+				<FocusRing offset={-2} data-flx="persona.bulk.cancel-focus-ring">
+					<button type="button" className={styles.linkButton} onClick={selection.stop} data-flx="persona.bulk.cancel">
+						<Trans>Cancel</Trans>
+					</button>
+				</FocusRing>
 			</div>
 		);
 	},
@@ -249,9 +319,16 @@ export const PersonaBulkActionBar = observer(
 					<Trans>Delete</Trans>
 				</Button>
 				<span className={styles.spacer} data-flx="persona.bulk.bar-spacer" />
-				<button type="button" className={styles.linkButton} onClick={selection.stop} data-flx="persona.bulk.bar-cancel">
-					<Trans>Cancel</Trans>
-				</button>
+				<FocusRing offset={-2} data-flx="persona.bulk.bar-cancel-focus-ring">
+					<button
+						type="button"
+						className={styles.linkButton}
+						onClick={selection.stop}
+						data-flx="persona.bulk.bar-cancel"
+					>
+						<Trans>Cancel</Trans>
+					</button>
+				</FocusRing>
 			</div>
 		);
 	},
