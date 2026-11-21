@@ -301,7 +301,7 @@ msgstr "สำเนาของ {name}"
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
-msgstr "คัดลอกการประทับเวลา\\"
+msgstr "คัดลอกการประทับเวลา"
 
 #. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
@@ -397,7 +397,7 @@ msgstr "ลบกลุ่ม \"{name}\" ใช่ไหม Persona ในกล
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
-msgstr "ลบการประทับเวลา\\"
+msgstr "ลบการประทับเวลา"
 
 #. Title of the confirmation before deleting the selected personas.
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
@@ -519,7 +519,7 @@ msgstr "แก้ไข Persona"
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
-msgstr "แก้ไขการประทับเวลา\\"
+msgstr "แก้ไขการประทับเวลา"
 
 #. Section heading in community emoji settings when non-animated and animated emojis are listed together.
 msgid "Emoji ({emojiCount})"

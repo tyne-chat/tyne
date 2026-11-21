@@ -301,7 +301,7 @@ msgstr "Αντίγραφο της persona {name}"
 
 #. Context menu action to copy a timestamp markdown tag in the message composer.
 msgid "Copy timestamp"
-msgstr "Αντιγραφή χρονικής σήμανσης\\"
+msgstr "Αντιγραφή χρονικής σήμανσης"
 
 #. Toast when downloading the persona export fails
 #. Toast when downloading the persona export fails
@@ -397,7 +397,7 @@ msgstr "Διαγραφή της ομάδας «{name}»; Οι persona που π�
 
 #. Context menu action to delete a timestamp from the message composer.
 msgid "Delete timestamp"
-msgstr "Διαγραφή χρονικής σήμανσης\\"
+msgstr "Διαγραφή χρονικής σήμανσης"
 
 #. Title of the confirmation before deleting the selected personas.
 msgid "Delete {count, plural, one {# persona} other {# personas}}?"
@@ -519,7 +519,7 @@ msgstr "Επεξεργασία persona"
 #. Context menu action to edit a timestamp in the message composer.
 #. Title of the timestamp modal when editing an existing timestamp.
 msgid "Edit timestamp"
-msgstr "Επεξεργασία χρονικής σήμανσης\\"
+msgstr "Επεξεργασία χρονικής σήμανσης"
 
 #. Section heading in community emoji settings when non-animated and animated emojis are listed together.
 msgid "Emoji ({emojiCount})"
