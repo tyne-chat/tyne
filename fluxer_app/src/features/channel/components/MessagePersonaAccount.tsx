@@ -46,9 +46,6 @@ export const MessagePersonaAccount = observer(
 		guild?: Guild;
 		member?: GuildMember;
 		className?: string;
-		isPreview?: boolean;
-		previewColor?: string;
-		previewName?: string;
 		/** The account's display tag icon: an image hash, see `personaTagIconUrls`. */
 		tagIcon?: string | null;
 		tagText?: string | null;
