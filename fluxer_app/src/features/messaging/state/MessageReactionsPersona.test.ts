@@ -107,11 +107,25 @@ describe('MessageReactions: persona reactors', () => {
 		MessageReactions.handleReactionAdd(MESSAGE, ALICE, FIRE, false, null);
 		MessageReactions.handleReactionAdd(MESSAGE, ALICE, FIRE, false, 'p-unknown');
 
-		expect(reactors().map(({id, personaId}) => ({id, personaId}))).toEqual([
-			{id: ALICE, personaId: null},
-			{id: ALICE, personaId: 'p-unknown'},
+		expect(reactors()).toEqual([
+			{id: ALICE, personaId: null, name: 'Alice'},
+			{id: ALICE, personaId: 'p-unknown', name: 'Alice'},
 		]);
 		expect(MessageReactions.getReactions(MESSAGE, FIRE)[1]?.subprofile).toBeNull();
+	});
+
+	it('keeps the account’s display name and details on a persona reactor (tyne-chat/tyne#497)', () => {
+		MessageReactions.handleReactionAdd(MESSAGE, ALICE, FIRE, false, 'p-fox', persona('p-fox', 'Fox'));
+
+		const [reactor] = MessageReactions.getReactions(MESSAGE, FIRE);
+		expect(reactor).toMatchObject({
+			id: ALICE,
+			username: 'alice',
+			discriminator: '0001',
+			globalName: 'Alice',
+			personaId: 'p-fox',
+			subprofile: expect.objectContaining({id: 'p-fox', name: 'Fox'}),
+		});
 	});
 
 	it("treats persona '0' as the account itself", () => {
