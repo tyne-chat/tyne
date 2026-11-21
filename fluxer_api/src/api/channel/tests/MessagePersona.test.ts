@@ -446,7 +446,7 @@ describe('Personal Notes Persona Integration', () => {
 		expect(refreshed?.useCount).toBeGreaterThanOrEqual(1);
 	});
 
-	it('updates persona_id on message edit and records usage', async () => {
+	it('switches the persona on message edit and returns the new subprofile', async () => {
 		const account = await createTestAccount(harness);
 		await ensureSessionStarted(harness, account.token);
 		const personalNotesChannelId = account.userId;
