@@ -3,14 +3,18 @@
 // Fork: draws animated custom emoji on the clocks of ForkSyncedEmojiClock.ts (tyne-chat/tyne#612).
 // Upstream's <img> stays where it is, with its `src`, alt text, classes and events, so everything
 // that is not pixels (copying, menus, tooltips, styles, layout) is upstream's. While an emoji is kept
-// in step, the <img> is invisible and a <canvas> put right after it in the page lies exactly over it;
-// the player draws the frame the clock gives on every such canvas in the same animation frame. A
-// whole frame always goes to the same rectangle, so nothing that stands still in the emoji moves
-// between frames.
+// in step, the <img> paints none of its picture and a <canvas> put right before it in the page lies
+// exactly under it; the player draws the frame the clock gives on every such canvas in the same
+// animation frame. A whole frame always goes to the same rectangle, so nothing that stands still in
+// the emoji moves between frames.
+//
+// The <img> still paints everything else, over the canvas: above all the browser's own tint when the
+// emoji is part of a text selection, in that browser's colours (tyne-chat/tyne#850; until then the
+// <img> was made fully transparent, which took the tint with it).
 //
 // The canvas is out of the flow (`position: absolute`), so it takes no room and changes no layout,
 // wherever upstream shows an emoji. It has no `left` or `top`: it starts where it would have been in
-// the flow, next to its <img>, and moves with it when the page around them is laid out again. The
+// the flow, just before its <img>, and moves with it when the page around them is laid out again. The
 // margins that bring it from there onto the <img> are measured, and checked again on every frame
 // drawn.
 //
@@ -25,10 +29,11 @@ import {
 } from '@app/features/expressions/utils/ForkSyncedEmojiClock';
 import type {ForkEmojiFrames} from '@app/features/expressions/utils/ForkSyncedEmojiFrames';
 
-// Set on upstream's <img> while its canvas shows the emoji; a rule in an adopted stylesheet makes
-// such an <img> invisible. Not an inline style, and with a value that is new on every page load:
-// upstream's reload cover (BootDomFrame) is a copy of the page's elements, shown over the next page
-// load, and a copied <img> has to stay visible there, next to its copied, empty canvas.
+// Set on upstream's <img> while its canvas shows the emoji; a rule in an adopted stylesheet
+// (`forkSyncedEmojiRules`) hides such an <img>'s picture. Not an inline style, and with a value that
+// is new on every page load: upstream's reload cover (BootDomFrame) is a copy of the page's elements,
+// shown over the next page load, and a copied <img> has to stay visible there, next to its copied,
+// empty canvas.
 export const FORK_EMOJI_SYNCED_ATTRIBUTE = 'data-fork-emoji-synced';
 export const FORK_EMOJI_CANVAS_ATTRIBUTE = 'data-fork-emoji-canvas';
 // Set on an image's parent where the canvas would otherwise not scroll with the image (see
@@ -48,9 +53,10 @@ const PLACEMENT_TOLERANCE = 0.05;
 // code does not understand: the image is given back to upstream.
 const MOVES_BEFORE_GIVING_UP = 4;
 // What the canvas is, whatever its classes say: inline-level before it is taken out of the flow, so
-// that it starts on the image's line, at its end; no box of its own beyond its pixels; out of reach
-// of the pointer and of text selection. It wears the image's classes (see `dress`), so upstream's
-// rules for the image's look reach it too; these pin down what those rules must not change.
+// that it starts next to the image (at its start, on its line, unless the line breaks between the
+// two); no box of its own beyond its pixels; out of reach of the pointer and of text selection. It
+// wears the image's classes (see `dress`), so upstream's rules for the image's look reach it too;
+// these pin down what those rules must not change.
 const CANVAS_STYLE = [
 	'display:inline-block',
 	'position:absolute',
@@ -110,7 +116,7 @@ interface PlayerInstance {
 	readonly anchor: Element | null;
 	// The frame on the canvas, or -1 when it has to be drawn again.
 	frame: number;
-	// Whether the canvas has shown a frame, and upstream's <img> is hidden for it.
+	// Whether the canvas has shown a frame, and the picture of upstream's <img> is hidden for it.
 	synced: boolean;
 	// Whether anyone could see the emoji. Only then is it drawn, and only then does it hold its clock.
 	visible: boolean;
@@ -130,9 +136,32 @@ export interface ForkSyncedEmojiPlayerEnvironment {
 	clearTimer(handle: unknown): void;
 	observeSize(callback: ResizeObserverCallback): Pick<ResizeObserver, 'observe' | 'unobserve'>;
 	devicePixelRatio(): number;
-	// Makes the images marked as synced invisible, and the parents marked as anchors positioned;
-	// false when the page cannot do that.
+	// Hides the pictures of the images marked as synced, and makes the parents marked as anchors
+	// positioned; false when the page cannot do that.
 	hideSyncedImages(): boolean;
+}
+
+// The rules behind `hideSyncedImages`, for the marks of one page load. A synced <img> paints nothing
+// of its own but the browser's selection tint, and paints it over its canvas:
+// - Its picture is moved out of its box, which a replaced element's picture is clipped to (as
+//   upstream's emoji picker hides one that is still loading). Opacity, `visibility`, a filter, a clip
+//   or a mask would hide the tint as well.
+// - Its background, border, shadow and outline are not painted: they would cover the canvas. The
+//   canvas wears the image's classes, so it paints the background under the frames instead.
+// - It is a stacking context, so it paints after the canvas before it (tree order), even where it is
+//   not positioned (upstream positions every <img>, in globals.css).
+export function forkSyncedEmojiRules(token: string): string {
+	return (
+		`img[${FORK_EMOJI_SYNCED_ATTRIBUTE}="${token}"] {` +
+		' object-position: -1000rem 0 !important;' +
+		' background: none !important;' +
+		' border-color: transparent !important;' +
+		' box-shadow: none !important;' +
+		' outline-color: transparent !important;' +
+		' isolation: isolate !important;' +
+		' }' +
+		`[${FORK_EMOJI_ANCHOR_ATTRIBUTE}="${token}"] { position: relative; }`
+	);
 }
 
 let syncedImagesHidden = false;
@@ -149,10 +178,7 @@ const BROWSER_ENVIRONMENT: ForkSyncedEmojiPlayerEnvironment = {
 		if (syncedImagesHidden) return true;
 		try {
 			const sheet = new CSSStyleSheet();
-			sheet.replaceSync(
-				`img[${FORK_EMOJI_SYNCED_ATTRIBUTE}="${SYNCED_IN_THIS_PAGE_LOAD}"] { opacity: 0 !important; }` +
-					`[${FORK_EMOJI_ANCHOR_ATTRIBUTE}="${SYNCED_IN_THIS_PAGE_LOAD}"] { position: relative; }`,
-			);
+			sheet.replaceSync(forkSyncedEmojiRules(SYNCED_IN_THIS_PAGE_LOAD));
 			document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
 			syncedImagesHidden = true;
 		} catch {}
@@ -233,8 +259,9 @@ export interface ForkShownEmoji {
 }
 
 // Upstream fades, dims and greys emoji through the image's classes (a status emoji that only shows
-// while its row is hovered, a reaction pill that is off). The image is invisible while its canvas
-// shows, so the canvas wears the same classes and the same rules style it, transitions included.
+// while its row is hovered, a reaction pill that is off). The image's picture is hidden while its
+// canvas shows, so the canvas wears the same classes and the same rules style it, transitions
+// included. The same rules still reach the image, and with it the selection tint it paints.
 function dress(img: HTMLImageElement, canvas: HTMLCanvasElement): void {
 	if (canvas.className !== img.className) canvas.className = img.className;
 	canvas.style.opacity = img.style.opacity;
@@ -255,7 +282,7 @@ export class ForkSyncedEmojiPlayer {
 
 	constructor(private readonly environment: ForkSyncedEmojiPlayerEnvironment = BROWSER_ENVIRONMENT) {}
 
-	// Shows `frames` in place of `img`, on a canvas put right after it, until `hide` is called; null
+	// Shows `frames` in place of `img`, on a canvas put right before it, until `hide` is called; null
 	// where that cannot be done, and the <img> is left alone. An emoji that can be seen holds its
 	// clock for as long as it is shown, so that one replacing another in the same moment does not
 	// restart it; only emoji near the viewport are shown.
@@ -285,7 +312,8 @@ export class ForkSyncedEmojiPlayer {
 			anchor.setAttribute(FORK_EMOJI_ANCHOR_ATTRIBUTE, SYNCED_IN_THIS_PAGE_LOAD);
 			this.anchors.set(anchor, (this.anchors.get(anchor) ?? 0) + 1);
 		}
-		img.after(canvas);
+		// Before the image, so that the image paints after it, its selection tint over the frames.
+		img.before(canvas);
 		const instance: PlayerInstance = {
 			img,
 			canvas,
