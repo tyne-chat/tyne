@@ -2005,8 +2005,9 @@ module.exports = {
 
 // Fork: the sentence macOS shows when it asks for a permission begins with the app's name, and
 // upstream's begin with "Fluxer". Only that first word is the app; "a Fluxer instance" further on
-// is the kind of server and stays.
-if (process.env.FLUXER_FORK_IDENTITY !== '0') {
+// is the kind of server and stays. Only the stable channel is Tyne (the overrides after CHANNELS):
+// canary and development keep upstream's name, so they keep its author and wording too.
+if (process.env.FLUXER_FORK_IDENTITY !== '0' && isStable) {
 	// The company Windows shows as the publisher of the executable (firewall and UAC prompts, file
 	// properties) comes from the package's author, which is upstream's company. The fork's builds are
 	// published by the fork. The copyright line keeps naming upstream, whose code most of this is.
