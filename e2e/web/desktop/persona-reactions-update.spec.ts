@@ -91,18 +91,20 @@ test.describe('Real-Time Persona Reaction Updates on Rename', () => {
 		);
 		await expect(tooltipTextContainer).toContainText('Astra Starlight', {timeout: 10_000});
 
-		// Click tooltip to open MessageReactionsModal
-		const tooltipClickArea = page.locator('[data-flx="messaging.reaction-tooltip.emoji-tooltip-content.click"]');
-		if (await tooltipClickArea.isVisible({timeout: 2_000}).catch(() => false)) {
-			await tooltipClickArea.click();
-			const reactorName = page
-				.locator('[data-flx="app.message-reactions-content.reactor-list-item.reactor-name"]')
-				.first();
-			await expect(reactorName).toHaveText('Astra Starlight', {timeout: 10_000});
+		// Click tooltip to open MessageReactionsModal. (ReactionTooltip's own data-flx is not passed on
+		// to the page, so the button is found by EmojiTooltipContent's.)
+		const tooltipClickArea = page.locator(
+			'[data-flx="ui.emoji-tooltip-content.emoji-tooltip-content.inner.click.button"]',
+		);
+		const reactorName = page
+			.locator('[data-flx="app.message-reactions-content.reactor-list-item.reactor-name"]')
+			.first();
+		await tooltipClickArea.click();
+		await expect(reactorName).toHaveText('Astra Starlight', {timeout: 10_000});
 
-			// Close modal by pressing Escape
-			await page.keyboard.press('Escape');
-		}
+		// Close modal by pressing Escape
+		await page.keyboard.press('Escape');
+		await expect(reactorName).toHaveCount(0);
 
 		// 9. Bob renames the persona from "Astra Starlight" to "Astra"
 		// This triggers the GUILD_PERSONAS_DIRTY gateway event to Alice!
@@ -113,7 +115,7 @@ test.describe('Real-Time Persona Reaction Updates on Rename', () => {
 		// 10. WITHOUT refreshing Alice's page, verify the reaction tooltip reflects the new name!
 		// Move mouse away and hover back to re-trigger tooltip
 		await page.mouse.move(0, 0);
-		await page.waitForTimeout(500);
+		await expect(tooltipTextContainer).toBeHidden();
 		await reactionButton.hover();
 
 		// The tooltip MUST now show "Astra" and NOT "Astra Starlight"
@@ -121,13 +123,8 @@ test.describe('Real-Time Persona Reaction Updates on Rename', () => {
 		await expect(tooltipTextContainer).not.toContainText('Starlight');
 
 		// Also verify in the MessageReactionsModal live
-		if (await tooltipClickArea.isVisible({timeout: 2_000}).catch(() => false)) {
-			await tooltipClickArea.click();
-			const reactorName = page
-				.locator('[data-flx="app.message-reactions-content.reactor-list-item.reactor-name"]')
-				.first();
-			await expect(reactorName).toHaveText('Astra', {timeout: 10_000});
-		}
+		await tooltipClickArea.click();
+		await expect(reactorName).toHaveText('Astra', {timeout: 10_000});
 	});
 
 	test('persona owner UI updates reaction persona name live on edit without page refresh', async ({page}) => {
@@ -200,7 +197,7 @@ test.describe('Real-Time Persona Reaction Updates on Rename', () => {
 
 		// 8. Re-hover and verify instant update without page refresh
 		await page.mouse.move(0, 0);
-		await page.waitForTimeout(500);
+		await expect(tooltipTextContainer).toBeHidden();
 		await reactionButton.hover();
 
 		await expect(tooltipTextContainer).toContainText('Zephyr', {timeout: 15_000});

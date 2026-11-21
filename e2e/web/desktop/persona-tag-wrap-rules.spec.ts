@@ -8,7 +8,6 @@ test.describe('Persona Wrap & Suffix Tag Proxying with Display Tag', () => {
 	test('bracket wrapping tags and suffix-only tags auto-proxy and display custom tag badge', async ({
 		page,
 		browser,
-		isMobile,
 	}) => {
 		const timestamp = Date.now().toString().slice(-6);
 
@@ -88,17 +87,6 @@ test.describe('Persona Wrap & Suffix Tag Proxying with Display Tag', () => {
 		await expect(composer).toBeVisible({timeout: 20_000});
 
 		const submitMessage = async () => {
-			if (isMobile) {
-				const sendBtn = page
-					.locator(
-						'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label="Send message"]',
-					)
-					.first();
-				if (await sendBtn.isVisible({timeout: 1_000}).catch(() => false)) {
-					await sendBtn.click();
-					return;
-				}
-			}
 			await composer.press('Enter');
 		};
 

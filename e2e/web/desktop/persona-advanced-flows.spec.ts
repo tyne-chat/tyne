@@ -71,23 +71,29 @@ test.describe('Persona Advanced Flows & Quick Commands', () => {
 		await composer.click();
 		await page.keyboard.type('\\\\');
 
-		const sendButton = page
-			.locator(
-				'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-			)
-			.first();
-		if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		await page.keyboard.press('Enter');
 
 		// 3. Verify latch is cleared (pill no longer shows Bob-Quick)
 		await expect(pill).not.toHaveAttribute('aria-label', /Bob-Quick/i, {timeout: 5_000});
 
-		// 4. Verify no message containing \\\\ was sent to the channel
-		await page.waitForTimeout(1_000);
-		expect(await page.locator('[data-flx*="message-content"]').filter({hasText: '\\\\'}).count()).toBe(0);
+		// 4. Verify no message containing \\ was sent to the channel. A message sent after it is on the
+		// server once the command's would be, and it goes out as Bob: the latch is gone there too.
+		const after = `after the quick command [${timestamp}]`;
+		await composer.click();
+		await page.keyboard.type(after);
+		await page.keyboard.press('Enter');
+		let stored: Array<any> = [];
+		await expect
+			.poll(
+				async () => {
+					stored = await client.getMessages(channelId, 10);
+					return stored.some((message) => message.content === after);
+				},
+				{timeout: 15_000},
+			)
+			.toBe(true);
+		expect(stored.filter((message) => message.content.includes('\\'))).toEqual([]);
+		expect(stored.find((message) => message.content === after).subprofile ?? null).toBeNull();
 	});
 
 	test('editing persona message to strip persona reverts author to root user', async ({page}) => {
@@ -224,16 +230,7 @@ test.describe('Persona Advanced Flows & Quick Commands', () => {
 		const sendMessage = async (text: string) => {
 			await composer.click();
 			await page.keyboard.type(text);
-			const sendBtn = page
-				.locator(
-					'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-				)
-				.first();
-			if (await sendBtn.isVisible({timeout: 1_500}).catch(() => false)) {
-				await sendBtn.click();
-			} else {
-				await page.keyboard.press('Enter');
-			}
+			await page.keyboard.press('Enter');
 		};
 
 		// 2. Send message with Beta's tag while Alpha is latched

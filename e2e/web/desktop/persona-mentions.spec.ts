@@ -105,16 +105,7 @@ test.describe('Persona Mentions & Lexical Autocomplete Flow', () => {
 		// 9. Add message text and send
 		await page.keyboard.type(` hello there! [${timestamp}]`);
 
-		const sendButton = page
-			.locator(
-				'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-			)
-			.first();
-		if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		await page.keyboard.press('Enter');
 
 		// 10. Verify message appears in chat with rendered persona mention
 		const messageContainer = page

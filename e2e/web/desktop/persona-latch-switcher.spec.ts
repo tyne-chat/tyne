@@ -92,16 +92,7 @@ test.describe('Composer Persona Latching and Search', () => {
 		await composer.click();
 		await page.keyboard.type(latchedMsg);
 
-		const sendButton = page
-			.locator(
-				'[data-flx="channel.textarea.textarea-buttons.textarea-button.submit"], button[aria-label*="Send message" i]',
-			)
-			.first();
-		if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		await page.keyboard.press('Enter');
 
 		// Verify message appears in chat as Bob-Beta
 		await expect(page.getByText(latchedMsg)).toBeVisible({timeout: 15_000});
@@ -126,11 +117,7 @@ test.describe('Composer Persona Latching and Search', () => {
 		await composer.click();
 		await page.keyboard.type(rootMsg);
 
-		if (await sendButton.isVisible({timeout: 2_000}).catch(() => false)) {
-			await sendButton.click();
-		} else {
-			await page.keyboard.press('Enter');
-		}
+		await page.keyboard.press('Enter');
 
 		await expect(page.getByText(rootMsg)).toBeVisible({timeout: 15_000});
 	});
