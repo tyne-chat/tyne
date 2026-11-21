@@ -18,6 +18,7 @@ import {
 	transitionReactionUsersSnapshot,
 } from '@app/features/messaging/state/ReactionUsersStateMachine';
 import {getReactionKey, type ReactionEmoji} from '@app/features/messaging/utils/ReactionUtils';
+import type {User} from '@app/features/user/models/User';
 import Users from '@app/features/user/state/Users';
 import type {MessageReaction} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import type {UserPartial} from '@fluxer/schema/src/domains/user/UserResponseSchemas';
@@ -25,7 +26,6 @@ import type {UserPartial} from '@fluxer/schema/src/domains/user/UserResponseSche
 // Fork imports.
 
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
-import {User} from '@app/features/user/models/User';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 export type {FetchStatus};
@@ -211,10 +211,9 @@ class MessageReactionsManager {
 			let reactorUser = user;
 			if (personaId && personaId !== '0') {
 				const persona = subprofile ?? PersonaStore.getKnownPersona(personaId);
-				reactorUser = new User({
-					...user,
+				reactorUser = user.withUpdates({
 					persona_id: personaId,
-					subprofile: persona ?? (user as any).subprofile ?? null,
+					subprofile: persona ?? user.subprofile ?? null,
 				} as any);
 			}
 			this.commitReactorEvent(messageId, emoji, this.getOrCreateReactorEntry(messageId, emoji), {
