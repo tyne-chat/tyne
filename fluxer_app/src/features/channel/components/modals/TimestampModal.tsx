@@ -3,7 +3,14 @@
 import Accessibility from '@app/features/accessibility/state/Accessibility';
 import * as Modal from '@app/features/app/components/dialogs/Modal';
 import styles from '@app/features/channel/components/modals/TimestampModal.module.css';
+import {
+	formatRelativeGap,
+	insertedEpoch,
+	resolveTimestampText,
+} from '@app/features/channel/components/modals/TimestampModalPreview';
 import {CANCEL_DESCRIPTOR} from '@app/features/i18n/utils/CommonMessageDescriptors';
+import {formatTimestamp} from '@app/features/messaging/utils/markdown/DateFormatter';
+import {TimestampStyle} from '@app/features/messaging/utils/markdown/parser/Enums';
 import {Button} from '@app/features/ui/button/Button';
 import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {Combobox, type ComboboxOption} from '@app/features/ui/components/form/FormCombobox';
@@ -11,6 +18,7 @@ import {SearchableTimeZonePicker} from '@app/features/ui/components/form/Searcha
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {RadioGroup, type RadioOption} from '@app/features/ui/radio_group/RadioGroup';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
+import {useNow} from '@app/features/ui/state/Tick';
 import {getAppRemScale} from '@app/features/ui/utils/AppZoomUtils';
 import Users from '@app/features/user/state/Users';
 import {shouldUse12HourFormat} from '@app/features/user/utils/DateFormatting';
@@ -20,7 +28,6 @@ import {isSupportedTimeZoneId} from '@fluxer/date_utils/src/TimeZoneUtils';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {LightningIcon} from '@phosphor-icons/react';
-import * as chrono from 'chrono-node';
 import {DateTime} from 'luxon';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
@@ -64,51 +71,6 @@ export interface TimestampModalProps {
 	initialFormat?: string;
 	onInsert: (markdown: string, meta?: {epoch: number; format: string}) => void;
 	onClosed?: () => void;
-}
-
-function formatRelativePreview(targetEpoch: number, locale: string): string {
-	const nowEpoch = Math.floor(Date.now() / 1000);
-	const rtf = new Intl.RelativeTimeFormat(locale, {numeric: 'auto'});
-	const diffSeconds = targetEpoch - nowEpoch;
-	const absSeconds = Math.abs(diffSeconds);
-	const direction = diffSeconds >= 0 ? 1 : -1;
-
-	// For very small differences (< 5 seconds), show "now"
-	if (absSeconds < 5) {
-		return rtf.format(0, 'second');
-	}
-
-	if (absSeconds < 60) {
-		return rtf.format(direction * absSeconds, 'second');
-	}
-
-	const absMinutes = Math.round(absSeconds / 60);
-	if (absMinutes < 60) {
-		return rtf.format(direction * absMinutes, 'minute');
-	}
-
-	const absHours = Math.round(absSeconds / 3600);
-	if (absHours < 24) {
-		return rtf.format(direction * absHours, 'hour');
-	}
-
-	const absDays = Math.round(absSeconds / 86400);
-	if (absDays < 7) {
-		return rtf.format(direction * absDays, 'day');
-	}
-
-	const absWeeks = Math.round(absDays / 7);
-	if (absDays < 30) {
-		return rtf.format(direction * absWeeks, 'week');
-	}
-
-	const absMonths = Math.round(absDays / 30);
-	if (absDays < 365) {
-		return rtf.format(direction * absMonths, 'month');
-	}
-
-	const years = Math.round(absDays / 365);
-	return rtf.format(direction * years, 'year');
 }
 
 function getTimestampMarkdown(format: string, epoch: number): string {
@@ -265,56 +227,27 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 	const isCompact = useIsCompactLayout();
 	const isSingleColumn = useIsSingleColumnLayout();
 
-	const handleNlpChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const text = e.target.value;
-			setNlpInput(text);
-			if (!text.trim()) {
-				return;
-			}
+	const handleNlpChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+		setNlpInput(e.target.value);
+	}, []);
 
-			try {
-				const nowInSelectedZone = DateTime.now().setZone(selectedTimeZone);
-				const ref = {
-					instant: new Date(),
-					timezone: nowInSelectedZone.offset,
-				};
-				const parsedResults = chrono.parse(text, ref, {forwardDate: true});
-				if (parsedResults.length > 0) {
-					const res = parsedResults[0];
-					const tags = res.tags();
-					const isRelative =
-						tags.has('result/relativeDate') ||
-						tags.has('result/relativeDateAndTime') ||
-						tags.has('casualReference/now');
-
-					let dt: DateTime;
-					if (isRelative || res.start.isCertain('timezoneOffset')) {
-						dt = DateTime.fromJSDate(res.date(), {zone: selectedTimeZone});
-					} else {
-						const year = res.start.get('year') ?? nowInSelectedZone.year;
-						const month = res.start.get('month') ?? nowInSelectedZone.month;
-						const day = res.start.get('day') ?? nowInSelectedZone.day;
-						const hour = res.start.get('hour') ?? 12;
-						const minute = res.start.get('minute') ?? 0;
-						const second = res.start.get('second') ?? 0;
-						const millisecond = res.start.get('millisecond') ?? 0;
-
-						dt = DateTime.fromObject({year, month, day, hour, minute, second, millisecond}, {zone: selectedTimeZone});
-					}
-
-					if (dt.isValid) {
-						setSelectedDate(dt.toFormat('yyyy-MM-dd'));
-						setSelectedTime(dt.toFormat('HH:mm'));
-						setSelectedSecond(dt.second);
-					}
-				}
-			} catch {
-				// Ignore parse errors as user is typing
-			}
-		},
-		[selectedTimeZone],
+	// Read every second while the dialog is open: a relative time counts down as in the composer, and
+	// the text is worked out again, so "in 10 minutes" stays ten minutes away until Insert
+	// (tyne-chat/tyne#389).
+	const tickSecond = useNow(true);
+	const resolvedText = useMemo(
+		() => resolveTimestampText(nlpInput, selectedTimeZone, Date.now()),
+		[nlpInput, selectedTimeZone, tickSecond],
 	);
+	// The pickers show what the text says now, and keep it once the text is cleared or stops parsing.
+	useEffect(() => {
+		if (resolvedText == null) {
+			return;
+		}
+		setSelectedDate(resolvedText.dateTime.toFormat('yyyy-MM-dd'));
+		setSelectedTime(resolvedText.dateTime.toFormat('HH:mm'));
+		setSelectedSecond(resolvedText.dateTime.second);
+	}, [resolvedText]);
 
 	const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		setSelectedDate(e.target.value);
@@ -332,15 +265,13 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 		setNlpInput('');
 	}, []);
 
-	const targetDateTime = useMemo(() => {
+	const pickedDateTime = useMemo(() => {
 		const iso = `${selectedDate}T${selectedTime}:${String(selectedSecond).padStart(2, '0')}`;
 		const parsed = DateTime.fromISO(iso, {zone: selectedTimeZone});
 		return parsed.isValid ? parsed : DateTime.now().setZone(selectedTimeZone);
 	}, [selectedDate, selectedTime, selectedSecond, selectedTimeZone]);
 
-	const epoch = useMemo(() => {
-		return targetDateTime.toUnixInteger();
-	}, [targetDateTime]);
+	const epoch = insertedEpoch(resolvedText?.dateTime ?? pickedDateTime);
 
 	const formatOptions = useMemo<ReadonlyArray<RadioOption<string>>>(() => {
 		const shortTime = formatTimestampWithStyle(epoch, 'ShortTime', locale, hour12, null, selectedTimeZone);
@@ -365,7 +296,12 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 			null,
 			selectedTimeZone,
 		);
-		const relative = formatRelativePreview(epoch, locale);
+		// A time typed relative to now reads as typed ("in 10 minutes"), from the moment it was worked
+		// out against; any other reads as the sent message and the composer pill show it, counting down
+		// (tyne-chat/tyne#389).
+		const relative = resolvedText?.relative
+			? formatRelativeGap(resolvedText.dateTime.toMillis() - resolvedText.anchorMs)
+			: formatTimestamp(epoch, TimestampStyle.RelativeTime, i18n);
 
 		return [
 			{
@@ -409,7 +345,7 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 				name: relative,
 			},
 		];
-	}, [epoch, locale, hour12, selectedTimeZone]);
+	}, [epoch, locale, hour12, selectedTimeZone, i18n, resolvedText, tickSecond]);
 
 	const comboboxFormatOptions = useMemo<ReadonlyArray<ComboboxOption<string>>>(() => {
 		return formatOptions.map((opt) => ({
@@ -427,11 +363,14 @@ export const TimestampModal = observer(({initialEpoch, initialFormat, onInsert, 
 			if (e) {
 				e.preventDefault();
 			}
-			const markdown = getTimestampMarkdown(selectedFormat, epoch);
-			onInsert(markdown, {epoch, format: selectedFormat});
+			// Worked out once more: "in 10 minutes" counts from Insert (tyne-chat/tyne#389).
+			const atInsert = resolveTimestampText(nlpInput, selectedTimeZone, Date.now());
+			const insertEpoch = atInsert ? insertedEpoch(atInsert.dateTime) : epoch;
+			const markdown = getTimestampMarkdown(selectedFormat, insertEpoch);
+			onInsert(markdown, {epoch: insertEpoch, format: selectedFormat});
 			ModalCommands.pop();
 		},
-		[selectedFormat, epoch, onInsert],
+		[selectedFormat, epoch, onInsert, nlpInput, selectedTimeZone],
 	);
 
 	const modalTitle =
