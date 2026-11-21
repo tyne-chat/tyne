@@ -98,6 +98,18 @@ interface EmojiContextMenuItemsProps {
 	messageId?: string;
 }
 
+/**
+ * The file name an emoji's image is saved or copied under (tyne-chat/tyne#395): its own name (a
+ * custom emoji sharing a name is listed as `name~1`; `uniqueName` keeps the name it has), and the
+ * extension of its file (a Unicode emoji's is an SVG).
+ */
+function emojiImageFileName(emoji: FlatEmoji, url: string): string {
+	const path = url.split(/[?#]/, 1)[0] ?? '';
+	const file = path.slice(path.lastIndexOf('/') + 1);
+	const extension = /\.([a-z0-9]+)$/i.exec(file)?.[1]?.toLowerCase() ?? (emoji.animated ? 'gif' : 'png');
+	return `${emoji.uniqueName}.${extension}`;
+}
+
 const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void, activePersona?: ClientPersona | null) => {
 	const {i18n} = useLingui();
 	const canFavorite = !emoji.id || Boolean(emoji.guildId && Guilds.getGuild(emoji.guildId));
@@ -134,7 +146,7 @@ const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void, activePersona?:
 	const handleCopyImage = useCallback(async () => {
 		if (!originalUrl) return;
 		const mediaType = emoji.animated ? 'gif' : 'image';
-		const suggestedFilename = `${emoji.name}.${emoji.animated ? 'gif' : 'png'}`;
+		const suggestedFilename = emojiImageFileName(emoji, originalUrl);
 		await copyMediaToClipboard({
 			i18n,
 			originalSrc: originalUrl,
@@ -142,15 +154,15 @@ const useEmojiHandlers = (emoji: FlatEmoji, onClose: () => void, activePersona?:
 			defaultName: suggestedFilename,
 		});
 		onClose();
-	}, [emoji.animated, emoji.name, i18n, onClose, originalUrl]);
+	}, [emoji, i18n, onClose, originalUrl]);
 
 	const handleDownloadImage = useCallback(() => {
 		if (!originalUrl) return;
 		const mediaType = emoji.animated ? 'gif' : 'image';
-		const suggestedFilename = `${emoji.name}.${emoji.animated ? 'gif' : 'png'}`;
+		const suggestedFilename = emojiImageFileName(emoji, originalUrl);
 		createDownloadHandler(originalUrl, mediaType, suggestedFilename)();
 		onClose();
-	}, [emoji.animated, emoji.name, onClose, originalUrl]);
+	}, [emoji, onClose, originalUrl]);
 
 	const handleCopyUrl = useCallback(async () => {
 		if (!originalUrl) return;
