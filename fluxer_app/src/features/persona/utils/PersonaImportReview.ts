@@ -18,6 +18,7 @@ import type {
 	PersonaImportPreviewEntry,
 	PersonaImportPreviewMember,
 	PersonaImportPreviewRequest,
+	PersonaImportPreviewResponse,
 	PersonaImportSourceKind,
 } from '@fluxer/schema/src/domains/persona/PersonaImportPlanSchemas';
 import {
@@ -250,11 +251,48 @@ export function summarize(
 	return summary;
 }
 
+/**
+ * Which side of the import a holder of a clashing tag is (tyne-chat/tyne#862): `new` a member of the file
+ * being added, `file` a persona the file's version is applied to, `tyne` a persona the import leaves as
+ * it is.
+ */
+export type ConflictSide = 'new' | 'file' | 'tyne';
+
+export interface ConflictHolder {
+	name: string;
+	side: ConflictSide;
+	/** The member whose place in the review shows this holder, when there is one. */
+	entryIndex?: number;
+	/** The persona, for a holder already in Tyne. */
+	personaId?: string;
+}
+
 export interface ReviewConflict {
 	/** The tag or emoji, as shown. */
 	label: string;
 	/** The names that would share it. */
 	names: Array<string>;
+	/** The same, with which side each is and where it is in the review. */
+	holders: Array<ConflictHolder>;
+}
+
+/**
+ * The account's personas the review checks against: those this page knows, with the live ones the
+ * preview names (current for sure), less any the server no longer has (tyne-chat/tyne#862: a page that
+ * missed persona events still lists personas deleted elsewhere). A server from before
+ * `live_persona_ids` sends none, and then nothing is left out.
+ */
+export function reviewLivePersonas<
+	T extends Pick<PersonaResponse, 'id'>,
+	P extends Pick<PersonaResponse, 'id' | 'deleted_at'>,
+>(
+	known: ReadonlyArray<T>,
+	preview: {personas: ReadonlyArray<P>; live_persona_ids?: PersonaImportPreviewResponse['live_persona_ids']},
+): Array<T | P> {
+	const byId = new Map<string, T | P>(known.map((p) => [p.id, p]));
+	for (const persona of preview.personas) if (!persona.deleted_at) byId.set(persona.id, persona);
+	const onServer = preview.live_persona_ids ? new Set(preview.live_persona_ids) : null;
+	return [...byId.values()].filter((persona) => !onServer || onServer.has(persona.id));
 }
 
 function tagLabel(tag: PersonaTag): string {
@@ -269,13 +307,15 @@ function emojiKey(emoji: SignatureEmoji): string {
 	return emoji.id ? `custom:${emoji.id}` : `unicode:${emoji.name}`;
 }
 
-/**
- * Choices that would put one tag (or signature emoji) on two personas once applied, which the server
- * would refuse: for example a linked persona taking the file's tags while a new member with one of
- * them is added. Restores never count: the server leaves off what another persona holds.
- */
 type LivePersona = Pick<PersonaResponse, 'id' | 'name' | 'persona_tags' | 'signature_emojis'>;
-type TagState = {name: string; tags: Array<PersonaTag>; emojis: Array<SignatureEmoji>};
+type TagState = {
+	name: string;
+	tags: Array<PersonaTag>;
+	emojis: Array<SignatureEmoji>;
+	side: ConflictSide;
+	entryIndex?: number;
+	personaId?: string;
+};
 
 /** Every persona's tags and emojis once the decisions are applied, keyed by persona id or `member:<index>`. */
 function tagStates(
@@ -291,6 +331,8 @@ function tagStates(
 			name: persona.name,
 			tags: persona.persona_tags ?? [],
 			emojis: persona.signature_emojis ?? [],
+			side: 'tyne',
+			personaId: persona.id,
 		});
 	}
 	for (const entry of entries) {
@@ -306,6 +348,9 @@ function tagStates(
 				name: member.preview.name,
 				tags: fileTags,
 				emojis: fromTyne ? fileEmojis : (current?.emojis ?? []),
+				side: 'file',
+				entryIndex: entry.index,
+				personaId: usedId,
 			});
 		} else if (decision.choice === 'add') {
 			const dropEmojis = new Set(droppedEmojis(entry, decision).map(emojiKey));
@@ -313,12 +358,20 @@ function tagStates(
 				name: decision.copy?.name.trim() || member.preview.name,
 				tags: addedTags(entry, decision, fileTags),
 				emojis: fileEmojis.filter((emoji) => !dropEmojis.has(emojiKey(emoji))),
+				side: 'new',
+				entryIndex: entry.index,
 			});
 		}
 	}
 	return tags;
 }
 
+/**
+ * Choices that would put one tag (or signature emoji) on two personas once applied, which the server
+ * would refuse: for example a linked persona taking the file's tags while a new member with one of
+ * them is added. Restores never count: the server leaves off what another persona holds. A clash is
+ * reported only when the import adds or changes one of its holders.
+ */
 export function findConflicts(
 	entries: ReadonlyArray<PersonaImportPreviewEntry>,
 	decisions: ReadonlyMap<number, ReviewDecision>,
@@ -327,23 +380,47 @@ export function findConflicts(
 	fromTyne: boolean,
 ): Array<ReviewConflict> {
 	const tags = tagStates(entries, decisions, members, livePersonas, fromTyne);
-	const owners = new Map<string, {label: string; names: Array<string>}>();
+	// Where a persona the import leaves as it is shows in the review: the member it is matched with,
+	// linked to or connected to, else one it might be, if any.
+	const entryOfPersona = new Map<string, number>();
+	const place = (id: string | undefined, index: number) => {
+		if (id && !entryOfPersona.has(id)) entryOfPersona.set(id, index);
+	};
+	for (const entry of entries) {
+		const decision = decisions.get(entry.index) ?? defaultDecision(entry);
+		place(entry.persona_id ?? undefined, entry.index);
+		if (decision.choice === 'link') place(decision.personaId, entry.index);
+		if (decision.choice === 'add') place(decision.copy?.connectTo, entry.index);
+	}
+	for (const entry of entries) for (const candidate of entry.candidates ?? []) place(candidate.persona_id, entry.index);
+	const holderOf = (state: TagState): ConflictHolder => {
+		const entryIndex = state.entryIndex ?? (state.personaId ? entryOfPersona.get(state.personaId) : undefined);
+		return {
+			name: state.name,
+			side: state.side,
+			...(entryIndex !== undefined ? {entryIndex} : {}),
+			...(state.personaId ? {personaId: state.personaId} : {}),
+		};
+	};
+	const owners = new Map<string, ReviewConflict>();
+	const hold = (key: string, label: string, state: TagState) => {
+		const owner = owners.get(key) ?? {label, names: [], holders: []};
+		owner.names.push(state.name);
+		owner.holders.push(holderOf(state));
+		owners.set(key, owner);
+	};
 	for (const state of tags.values()) {
 		for (const tag of state.tags) {
-			if (!(tag.prefix ?? '').trim() && !(tag.suffix ?? '').trim()) continue;
-			const key = `tag:${tagKey(tag)}`;
-			const owner = owners.get(key) ?? {label: tagLabel(tag), names: []};
-			owner.names.push(state.name);
-			owners.set(key, owner);
+			if (isEmptyTag(tag)) continue;
+			hold(`tag:${tagKey(tag)}`, tagLabel(tag), state);
 		}
-		for (const emoji of state.emojis) {
-			const key = `emoji:${emojiKey(emoji)}`;
-			const owner = owners.get(key) ?? {label: emoji.name, names: []};
-			owner.names.push(state.name);
-			owners.set(key, owner);
-		}
+		for (const emoji of state.emojis) hold(`emoji:${emojiKey(emoji)}`, emoji.name, state);
 	}
-	return [...owners.values()].filter((owner) => owner.names.length > 1);
+	// Only what the import can fix (tyne-chat/tyne#862): personas it leaves as they are sharing a tag are
+	// not its business, and the server checks only the tags it writes.
+	return [...owners.values()].filter(
+		(owner) => owner.holders.length > 1 && owner.holders.some((holder) => holder.side !== 'tyne'),
+	);
 }
 
 /**
@@ -496,6 +573,7 @@ export function keepBothDecision(
 			name: alsoKept.name,
 			tags: [...(alsoKept.persona_tags ?? [])],
 			emojis: [...(alsoKept.signature_emojis ?? [])],
+			side: 'tyne',
 		});
 	}
 	const held = (tag: PersonaTag) => others.some((state) => state.tags.some((t) => tagKey(t) === tagKey(tag)));
