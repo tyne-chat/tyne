@@ -84,18 +84,22 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 	const [sort, setSort] = useState<PersonaGallerySort>('name');
 	const [showHidden, setShowHidden] = useState(false);
 	const [sortSheetOpen, setSortSheetOpen] = useState(false);
-	const [openId, setOpenId] = useState<string | null>(() => PersonaGalleryNav.takePersonaRequest(user.id));
+	const [initialOpen] = useState(() => PersonaGalleryNav.takePersonaOpen(user.id));
+	const [openId, setOpenId] = useState<string | null>(initialOpen?.personaId ?? null);
+	// Expanded, the list has the whole profile window: upstream's header and tabs are hidden (by
+	// PersonaGallery.module.css, on the mark set here) and a slim bar names the account. Not
+	// remembered: every profile opens with its header (Chiara, 2026-11-07), except a persona's own
+	// profile, opened from its name or from the list, which opens expanded and can be folded back
+	// (tyne-chat/tyne#702). Phones have no expanded view.
+	const [expanded, setExpanded] = useState(() => !isMobile && Boolean(initialOpen?.expanded));
 	const pendingPersona = PersonaGalleryNav.pendingPersona(user.id);
 	useEffect(() => {
 		if (!pendingPersona) return;
-		const personaId = PersonaGalleryNav.takePersonaRequest(user.id);
-		if (personaId) setOpenId(personaId);
-	}, [pendingPersona, user.id]);
-
-	// Expanded, the list has the whole profile window: upstream's header and tabs are hidden (by
-	// PersonaGallery.module.css, on the mark set here) and a slim bar names the account. Not
-	// remembered: every profile opens with its header (Chiara, 2026-11-07).
-	const [expanded, setExpanded] = useState(false);
+		const request = PersonaGalleryNav.takePersonaOpen(user.id);
+		if (!request) return;
+		setOpenId(request.personaId);
+		if (request.expanded && !isMobile) setExpanded(true);
+	}, [pendingPersona, user.id, isMobile]);
 	const rootRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		if (!expanded) return;
@@ -321,7 +325,11 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 				</div>
 			);
 		}
-		const itemProps = {user, isOwn: directory.isOwn, onOpen: setOpenId};
+		const openFromList = (personaId: string) => {
+			setOpenId(personaId);
+			if (!isMobile) setExpanded(true);
+		};
+		const itemProps = {user, isOwn: directory.isOwn, onOpen: openFromList};
 		if (view === 'list') {
 			return (
 				<ul className={styles.rows} data-flx="persona.gallery.rows">

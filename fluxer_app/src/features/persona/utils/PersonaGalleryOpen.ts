@@ -9,7 +9,8 @@ import type {User} from '@app/features/user/models/User';
 /**
  * Shows an account's personas (tyne-chat/tyne#189), and one of them when `personaId` is given: on
  * phones in the Personas sheet, elsewhere in the full profile's Personas tab, which this opens. A
- * full profile already open for the account switches to the tab.
+ * full profile already open for the account switches to the tab. `expanded` opens that persona over
+ * the profile's header, as its own profile (tyne-chat/tyne#702); phones have no expanded view.
  */
 export function openPersonaGallery(
 	user: User,
@@ -17,9 +18,10 @@ export function openPersonaGallery(
 		guildId,
 		personaId = null,
 		profileOpen = false,
-	}: {guildId?: string; personaId?: string | null; profileOpen?: boolean} = {},
+		expanded = false,
+	}: {guildId?: string; personaId?: string | null; profileOpen?: boolean; expanded?: boolean} = {},
 ): void {
-	PersonaGalleryNav.request(user.id, personaId);
+	PersonaGalleryNav.request(user.id, personaId, {expanded});
 	if (MobileLayout.enabled) {
 		PersonaGallerySheetState.open(user);
 		return;
