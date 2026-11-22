@@ -25,7 +25,7 @@ import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 
 // Fork imports.
 
-import {forkCopyStoredCover} from '@app/api/channel/services/message/ForkAudioExtras';
+import {forkCopyStoredExtras} from '@app/api/channel/services/message/ForkAudioExtras';
 
 interface MessageOperationsHelpersDeps {
 	channelRepository: ChannelRepository;
@@ -238,8 +238,8 @@ export class MessageOperationsHelpers {
 		if (favoriteMeme.nsfw === true) {
 			flags |= MessageAttachmentFlags.CONTAINS_EXPLICIT_MEDIA;
 		}
-		// Fork: a saved audio file's cover comes with it (tyne-chat/tyne#873).
-		flags |= await forkCopyStoredCover(this.deps.storageService, sourceKey, destKey);
+		// Fork: a saved audio file's cover and waveform come with it (tyne-chat/tyne#873).
+		flags |= await forkCopyStoredExtras(this.deps.storageService, sourceKey, destKey);
 		return {
 			attachment_id: memeAttachmentId,
 			filename: favoriteMeme.filename,
