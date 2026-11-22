@@ -69,6 +69,13 @@ A handler that touches accounts, storage or windows checks its sender with
   `ForkIdentityConsistency.test.mjs` holds the app, packaging, workflow and release scripts to them.
 - **New upstream tables are not covered.** When upstream adds a `Record<BuildChannel, …>` table of
   names or IDs, Tyne ships Fluxer's value until the fork overrides it. Look for one after a rebase.
+- **Icons: upstream's files, Tyne's artwork.** `build_resources/icons-tyne/` has the files of
+  upstream's `icons-stable/` in their formats and sizes, written from Tyne's icon kit by the
+  maintainers' installer; only the artwork differs (the `.ico` files keep the kit's extra sizes).
+  When upstream adds or changes a file there, give `icons-tyne/` the same. The Windows taskbar badges
+  carry no logo and are packaged from `icons-stable/badges/` (the last block of the builder config):
+  a copy in `icons-tyne/` went stale when upstream changed their format, and Tyne showed no badge
+  from 2.1.3 on (tyne-chat/tyne#461, `ForkWindowsBadges.test.mjs`).
 - **The packages' scheme comes from the environment**: `FLUXER_FORK_LINK_SCHEME`, which the
   workflow sets, because upstream's `ChannelIsolation.test.mjs` expects stable to declare `fluxer`.
   A stable package built without it declares `fluxer://`, and on Linux the package is the only
