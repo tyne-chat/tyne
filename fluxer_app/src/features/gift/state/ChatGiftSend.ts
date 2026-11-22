@@ -9,7 +9,10 @@ import Permission from '@app/features/permissions/state/Permission';
 import AppStorage from '@app/features/platform/state/PersistentStorage';
 import Users from '@app/features/user/state/Users';
 import {Permissions} from '@fluxer/constants/src/ChannelConstants';
-import {fromTimestamp} from '@fluxer/snowflake/src/SnowflakeUtils';
+
+// Fork imports.
+
+import {newLocalMessageId} from '@app/features/messaging/utils/ForkLocalMessageId';
 
 const INTENT_STORAGE_KEY = 'Gifts:chatSendIntent';
 const INTENT_MAX_AGE_MS = 30 * 60 * 1000;
@@ -79,7 +82,7 @@ export async function deliverPurchasedChatGift(): Promise<boolean> {
 		if (!purchased || readIntent()?.startedAt !== intent.startedAt) return false;
 		AppStorage.removeItem(INTENT_STORAGE_KEY);
 		if (!canSendTo(intent.channelId)) return true;
-		const nonce = fromTimestamp(Date.now());
+		const nonce = newLocalMessageId();
 		if (!MessageCommands.reserveSend(intent.channelId, nonce)) return true;
 		const message = MessageSubmitUtils.createOptimisticMessage(
 			{

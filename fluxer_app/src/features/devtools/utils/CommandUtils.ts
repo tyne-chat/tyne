@@ -21,6 +21,10 @@ import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import type {I18n} from '@lingui/core';
 import {msg} from '@lingui/core/macro';
 
+// Fork imports.
+
+import {newLocalMessageId} from '@app/features/messaging/utils/ForkLocalMessageId';
+
 const USER_MENTION_REGEX = /<@!?(\d+)>/;
 const logger = new Logger('CommandUtils');
 const localCurrentUserNicknames = new Map<string, string | null>();
@@ -218,7 +222,7 @@ export function createSystemMessage(channelId: string, content: string): Message
 		system: true,
 		flags: 0,
 	});
-	const nonce = SnowflakeUtils.fromTimestamp(Date.now());
+	const nonce = newLocalMessageId();
 	return new Message({
 		id: nonce,
 		channel_id: channelId,

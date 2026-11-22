@@ -32,7 +32,6 @@ import Users from '@app/features/user/state/Users';
 import * as FormUtils from '@app/lib/forms';
 import {ChannelTypes, MessagePreviewContext} from '@fluxer/constants/src/ChannelConstants';
 import {publicThreadTypeFor, THREAD_NAME_MAX_LENGTH} from '@fluxer/constants/src/ThreadConstants';
-import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {useLingui} from '@lingui/react/macro';
 import {ChatsIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
@@ -42,6 +41,7 @@ const THREAD_NAME_PARSER_FLAGS = getParserFlagsForContext(MarkdownContext.STANDA
 
 // Fork: personas.
 
+import {newLocalMessageId} from '@app/features/messaging/utils/ForkLocalMessageId';
 import {resolveOutgoingPersona, startChannelAsPersona} from '@app/features/persona/utils/OutgoingPersona';
 import {consumeStarterPersonaCommand} from '@app/features/persona/utils/StarterPersonaCommand';
 
@@ -129,7 +129,7 @@ export const ThreadCreatePane = observer(({parent, messageId}: ThreadCreatePaneP
 			const {content, subprofile} = resolveOutgoingPersona(parent.id, typedContent, pendingAttachments, {
 				allowEmptyContent: pendingAttachments || stickers.length > 0 || favoriteMemeId !== undefined,
 			});
-			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
+			const nonce = newLocalMessageId();
 			const attachments = MessageSubmitUtils.createUploadingAttachments(
 				MessageSubmitUtils.claimMessageAttachments(draftKey, nonce, content),
 				{formatMultipleFileLabel: (count) => formatUploadingAttachmentSummary(i18n, count)},
