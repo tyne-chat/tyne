@@ -523,15 +523,57 @@ describe('PluralKitImportModal Component', () => {
 				expect(ModalCommands.push).toHaveBeenCalledTimes(1);
 				expect(differsToggle('Sun')).toBeDefined();
 
-				// "Stop importing" closes the import dialog by its own key (the confirmation closes itself).
+				// "Stop importing" (the secondary button) closes the import dialog by its own key (the
+				// confirmation closes itself).
 				const confirm = vi.mocked(ModalCommands.push).mock.results[0]?.value as React.ReactElement<{
 					title: string;
-					onPrimary: () => void;
+					secondaryText: string;
+					onSecondary: () => void;
 				}>;
 				expect(confirm.props.title).toBe('Stop this import?');
-				confirm.props.onPrimary();
+				expect(confirm.props.secondaryText).toBe('Stop importing');
+				confirm.props.onSecondary();
 				expect(ModalCommands.popWithKey).toHaveBeenCalledWith('import-modal-key');
 				expect(PersonaCommands.applyPersonaImport).not.toHaveBeenCalled();
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
+		it('makes Keep reviewing the primary, focused button of the close confirmation (tyne-chat/tyne#755)', async () => {
+			const fetchSpy = storingFetch();
+			const onClose = vi.fn();
+			try {
+				await act(async () => {
+					root.render(
+						<PluralKitImportModal
+							onClose={onClose}
+							data-flx="persona.plural-kit-import-modal-test.plural-kit-import-modal--close-primary"
+						/>,
+					);
+				});
+				await chooseFile(file(), 'Total Members2');
+				await act(async () => {
+					importButton()?.click();
+				});
+				await settled(() => expect(differsToggle('Sun')).toBeDefined());
+				vi.mocked(ModalCommands.push).mockClear();
+
+				await act(async () => {
+					document.querySelector<HTMLButtonElement>('[data-flx="app.modal.header.button.close"]')?.click();
+				});
+				const confirm = vi.mocked(ModalCommands.push).mock.results[0]?.value as React.ReactElement<{
+					primaryText: string;
+					primaryVariant?: string;
+					onPrimary: () => void;
+				}>;
+				// ConfirmModal focuses its primary button, so Escape then Space or Enter must land on the safe one.
+				expect(confirm.props.primaryText).toBe('Keep reviewing');
+				expect(confirm.props.primaryVariant).not.toBe('danger');
+				confirm.props.onPrimary();
+				expect(ModalCommands.popWithKey).not.toHaveBeenCalledWith('import-modal-key');
+				expect(onClose).not.toHaveBeenCalled();
+				expect(differsToggle('Sun')).toBeDefined();
 			} finally {
 				fetchSpy.mockRestore();
 			}
@@ -1064,6 +1106,153 @@ describe('PluralKitImportModal Component', () => {
 			expect(importButton()?.disabled).toBe(false);
 		});
 
+		describe('the clash box (tyne-chat/tyne#862)', () => {
+			const conflictsBox = () => document.body.querySelector('[data-flx="persona.persona-import-review.conflicts"]');
+			const holderButtons = () =>
+				Array.from(
+					document.body.querySelectorAll<HTMLButtonElement>('[data-flx="persona.persona-import-conflicts.holder"]'),
+				);
+			// The account has personas, so the backup step comes first.
+			const reviewAfterBackup = async (file: File, summary: string) => {
+				await review(file, summary);
+				await act(async () => {
+					Array.from(document.body.querySelectorAll('button'))
+						.find((b) => b.textContent?.trim() === 'Skip')
+						?.click();
+				});
+				await settled(() =>
+					expect(document.body.querySelector('[data-flx="persona.persona-import-review.ready.new"]')).not.toBeNull(),
+				);
+			};
+			const leenaFile = () => pkFile([{id: 'l1', name: 'Leena', proxy_tags: [{prefix: 'Lee:'}]}]);
+			const newLeena = (liveIds: Array<string> | undefined, untouched: number) =>
+				vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+					entries: [{index: 0, kind: 'new'}],
+					personas: [],
+					display_tag: {decision: 'none', current_text: null},
+					untouched,
+					needs_review: true,
+					...(liveIds ? {live_persona_ids: liveIds} : {}),
+				});
+			let scrolled: Array<Element>;
+			const originalScroll = Element.prototype.scrollIntoView;
+			beforeEach(() => {
+				scrolled = [];
+				Element.prototype.scrollIntoView = function (this: Element) {
+					scrolled.push(this);
+				};
+			});
+			afterEach(() => {
+				Element.prototype.scrollIntoView = originalScroll;
+			});
+
+			it("reports no clash with a persona the page remembers that the server's list lacks", async () => {
+				// Deleted elsewhere while this page missed the event: only the server's list knows.
+				PersonaStore.setPersonas([tyne('100000000000000071', 'Leena', [{prefix: 'Lee:'}])]);
+				newLeena(['100000000000000072'], 0);
+				await reviewAfterBackup(leenaFile(), 'Total Members1');
+				expect(conflictsBox()).toBeNull();
+				expect(importButton()?.disabled).toBe(false);
+			});
+
+			it('reports no clash between two personas the import leaves as they are', async () => {
+				PersonaStore.setPersonas([
+					tyne('100000000000000073', 'Leena', [{prefix: 'Lee:'}]),
+					tyne('100000000000000074', 'Lee', [{prefix: 'Lee:'}]),
+				]);
+				vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+					entries: [{index: 0, kind: 'new'}],
+					personas: [],
+					display_tag: {decision: 'none', current_text: null},
+					untouched: 2,
+					needs_review: true,
+					live_persona_ids: ['100000000000000073', '100000000000000074'],
+				});
+				await reviewAfterBackup(pkFile([{id: 'm1', name: 'Moth', proxy_tags: [{prefix: 'mo:'}]}]), 'Total Members1');
+				expect(conflictsBox()).toBeNull();
+				expect(importButton()?.disabled).toBe(false);
+			});
+
+			it('names both sides of a real clash, and shows each one in its folded list, focused', async () => {
+				PersonaStore.setPersonas([tyne('100000000000000075', 'Leena', [{prefix: 'Lee:'}])]);
+				newLeena(['100000000000000075'], 1);
+				await reviewAfterBackup(leenaFile(), 'Total Members1');
+				expect(conflictsBox()?.getAttribute('role')).toBe('alert');
+				expect(conflictsBox()?.textContent).toContain('Lee:text');
+				expect(holderButtons().map((button) => button.textContent)).toEqual([
+					`Leena (already in ${PRODUCT_NAME})`,
+					'Leena (new, from your file)',
+				]);
+				expect(importButton()?.disabled).toBe(true);
+				// Both lists are folded behind Show.
+				expect(document.body.querySelector('[data-import-entry="0"]')).toBeNull();
+				expect(document.body.querySelector('[data-import-persona="100000000000000075"]')).toBeNull();
+
+				await act(async () => {
+					holderButtons()[1]!.click();
+				});
+				const member = document.body.querySelector('[data-import-entry="0"]');
+				expect(member).not.toBeNull();
+				expect(scrolled).toEqual([member]);
+				expect(document.activeElement).toBe(member?.querySelector('input[type="checkbox"]'));
+
+				await act(async () => {
+					holderButtons()[0]!.click();
+				});
+				const persona = document.body.querySelector('[data-import-persona="100000000000000075"]');
+				expect(persona).not.toBeNull();
+				expect(scrolled).toEqual([member, persona]);
+				expect(document.activeElement).toBe(persona);
+
+				// Leaving the member out ends the clash.
+				await act(async () => {
+					document.body.querySelector<HTMLInputElement>('[data-import-entry="0"] input[type="checkbox"]')?.click();
+				});
+				expect(conflictsBox()).toBeNull();
+			});
+
+			it("opens a member's folded card from the box and focuses it", async () => {
+				vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
+					entries: [
+						{index: 0, kind: 'tag_in_use', clashes: [{tag: {prefix: 'ly:'}, held_by_persona_id: '100000000000000076'}]},
+					],
+					personas: [
+						tyne('100000000000000076', 'Lyra ✦', [{prefix: 'ly:'}]),
+						tyne('100000000000000077', 'Wren', [{prefix: 'wr:'}]),
+					],
+					display_tag: {decision: 'none', current_text: null},
+					untouched: 0,
+					needs_review: true,
+					live_persona_ids: ['100000000000000076', '100000000000000077'],
+				});
+				await review(pkFile([{id: 'l1', name: 'Lyra ✧', proxy_tags: [{prefix: 'ly:'}]}]), 'Total Members1');
+				const toggle = () =>
+					document.body.querySelector<HTMLButtonElement>('[data-flx="persona.persona-import-review.taken.toggle"]');
+				await settled(() => expect(toggle()).not.toBeNull());
+				await act(async () => {
+					toggle()!.click();
+				});
+				await act(async () => {
+					radios('import-0')[1]!.click();
+				});
+				await typeInto(document.body.querySelector('input[id^="import-tag-"]') as HTMLInputElement, 'wr:');
+				// Fold the card again, then find the member from the box.
+				await act(async () => {
+					toggle()!.click();
+				});
+				expect(toggle()?.getAttribute('aria-expanded')).toBe('false');
+				// Wren is on no list the review shows here, so it is named without a button.
+				expect(holderButtons().map((button) => button.textContent)).toEqual(['Lyra ✧ (new, from your file)']);
+				expect(conflictsBox()?.textContent).toContain(`Wren (already in ${PRODUCT_NAME})`);
+				await act(async () => {
+					holderButtons()[0]!.click();
+				});
+				expect(toggle()?.getAttribute('aria-expanded')).toBe('true');
+				expect(scrolled).toEqual([document.body.querySelector('[data-import-entry="0"]')]);
+				expect(document.activeElement).toBe(toggle());
+			});
+		});
+
 		it("uses the file's display tag when its box is chosen, with no backup step for an account without personas", async () => {
 			vi.mocked(PersonaCommands.previewPersonaImport).mockResolvedValueOnce({
 				entries: [{index: 0, kind: 'new'}],
@@ -1509,7 +1698,7 @@ describe('PluralKitImportModal Component', () => {
 					(status) => status.textContent,
 				);
 			expect(statuses()).toEqual(['No tag: added without one', 'Free']);
-			// Skip, then Keep again: it starts over from the suggestions.
+			// Skip, then Add as new again: it starts over from the suggestions.
 			await act(async () => {
 				radios('import-0')[0]!.click();
 			});
@@ -1641,10 +1830,11 @@ describe('PluralKitImportModal Component', () => {
 			});
 			const [skip, keep] = radios('import-0');
 			expect(skip?.checked).toBe(true);
+			expect(keep?.closest('label')?.textContent).toBe('Add as new');
 			await act(async () => {
 				keep!.click();
 			});
-			expect(toggle()?.textContent).toContain('Keeping');
+			expect(toggle()?.textContent).toContain('Adding as new');
 			await act(async () => {
 				importButton()?.click();
 			});
@@ -1707,11 +1897,12 @@ describe('PluralKitImportModal Component', () => {
 			expect(skip?.checked).toBe(true);
 			expect(document.body.querySelector('input[id^="import-tag-"]')).toBeNull();
 
-			// Keep: the name stays (no other persona has it) and the tag field starts on a free one.
+			// Add as new: the name stays (no other persona has it) and the tag field starts on a free one.
+			expect(keep?.closest('label')?.textContent).toBe('Add as new');
 			await act(async () => {
 				keep!.click();
 			});
-			expect(toggle()?.textContent).toContain('Keeping');
+			expect(toggle()?.textContent).toContain('Adding as new');
 			expect(document.body.querySelector<HTMLInputElement>('#import-copy-name-0')?.value).toBe('Lyra ✧');
 			const field = document.body.querySelector('input[type="text"][id^="import-tag-"]') as HTMLInputElement;
 			expect(field.value).toBe('lyr:');

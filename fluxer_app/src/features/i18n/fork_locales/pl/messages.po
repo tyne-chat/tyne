@@ -62,6 +62,11 @@ msgstr "Dodaj parę tagów ({0}/5)"
 msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
 msgstr "Dodaj alias ({0}/{PERSONA_ALIASES_MAX})"
 
+#. Option of the switch for a member whose tag is already taken, or that is none of the possible matches: import it as a new persona, with a name and tag of its own
+msgctxt "persona-import-switch"
+msgid "Add as new"
+msgstr "Dodaj jako nową"
+
 #. Button that adds a counter to a community command.
 msgid "Add counter"
 msgstr "Dodaj licznik"
@@ -85,6 +90,10 @@ msgstr "Dodane"
 #. What happens to the import file's version of a persona in the import review
 msgid "Added as a new persona"
 msgstr "Zostanie dodana jako nowa persona"
+
+#. Badge on a collapsed member in the import review: it is imported as a new persona, with a name and tag of its own
+msgid "Adding as new"
+msgstr "Dodawana jako nowa"
 
 #. Column heading in the restore confirmation over the signals each chat will have after restoring. Keep it short.
 msgid "After"
@@ -806,11 +815,6 @@ msgstr "Zamiast {tag}"
 msgid "Its script has a problem."
 msgstr "Jego skrypt ma problem."
 
-#. Option of the switch for a member whose tag is already taken: import it with a name and tag of its own
-msgctxt "persona-import-switch"
-msgid "Keep"
-msgstr "Zachowaj"
-
 #. Option of the three-way switch for a persona that differs from the import file: the file's version is added as another persona
 msgid "Keep both"
 msgstr "Zachowaj obie"
@@ -818,10 +822,6 @@ msgstr "Zachowaj obie"
 #. Button that goes back to the persona import review
 msgid "Keep reviewing"
 msgstr "Sprawdzaj dalej"
-
-#. Badge on a collapsed member in the import review: it is imported with a tag of its own
-msgid "Keeping"
-msgstr "Zachowany"
 
 #. Badge on a collapsed persona in the import review: the file's version is added next to the app's
 msgid "Keeping both"
@@ -2239,6 +2239,18 @@ msgstr "{label}: {names}"
 #. A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names
 msgid "{names} would all have {label}. Change one of the choices."
 msgstr "{names} miałyby wszystkie {label}. Zmień któryś z wyborów."
+
+#. A persona named in a clash in the import review: one the account already has, which the import leaves as it is. {name} is its name, {productName} the app name
+msgid "{name} (already in {productName})"
+msgstr "{name} (już jest w {productName})"
+
+#. A persona named in a clash in the import review: a member of the import file that the import adds. {name} is its name
+msgid "{name} (new, from your file)"
+msgstr "{name} (nowa, z twojego pliku)"
+
+#. A persona named in a clash in the import review: one the import changes to the import file's version. {name} is its name
+msgid "{name} (your file's version)"
+msgstr "{name} (wersja z twojego pliku)"
 
 #. Tooltip when sending as a latched persona
 msgid "{name} ({mode}) - Click to switch persona"
