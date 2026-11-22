@@ -24,7 +24,6 @@ import type {
 	MessageAttachment,
 	MessageStickerItem,
 } from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
-import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {useLingui} from '@lingui/react/macro';
 import {useCallback} from 'react';
 
@@ -32,6 +31,7 @@ import {useCallback} from 'react';
 
 import Drafts from '@app/features/messaging/state/MessagingDrafts';
 import {isDraftUsedUpByExpression} from '@app/features/messaging/utils/ExpressionDraftPersona';
+import {newLocalMessageId} from '@app/features/messaging/utils/ForkLocalMessageId';
 import {normalizeSubprofile, PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {resolveExpressionPersona, resolveOutgoingPersona} from '@app/features/persona/utils/OutgoingPersona';
 
@@ -150,7 +150,7 @@ export const useMessageSubmission = ({
 				return true;
 			}
 
-			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
+			const nonce = newLocalMessageId();
 			if (!MessageCommands.reserveSend(channel.id, nonce)) return false;
 			const messageReference = MessageSubmitUtils.prepareMessageReference(channel.id, referencedMessage);
 			RollingTypingSender.handleOwnMessageSent(channel.id);
@@ -251,7 +251,7 @@ export const useMessageSubmission = ({
 					})
 				: undefined;
 
-			const nonce = SnowflakeUtils.fromTimestamp(Date.now());
+			const nonce = newLocalMessageId();
 			if (!MessageCommands.reserveSend(channel.id, nonce)) return;
 			RollingTypingSender.handleOwnMessageSent(channel.id);
 			MessageCommands.stopReply(channel.id);
