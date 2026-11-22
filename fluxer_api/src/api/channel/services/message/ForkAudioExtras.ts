@@ -215,53 +215,72 @@ export function forkMayHaveCover(filename: string): boolean {
 	return getContentTypeFromFilename(filename).startsWith('audio/');
 }
 
-/** The cover key of an audio file stored like an attachment, `attachments/<channel>/<attachment>/<file>`. */
-function coverKeyOfStoredFile(storageKey: string): string | null {
+/**
+ * The ids an audio file stored like an attachment, `attachments/<channel>/<attachment>/<file>`, keeps
+ * its cover and waveform under; null for anything else.
+ */
+function storedAudioIds(storageKey: string): {channelId: bigint; attachmentId: bigint} | null {
 	const [prefix, channelId, attachmentId, ...name] = storageKey.split('/');
 	if (prefix !== 'attachments' || !/^\d{1,20}$/u.test(channelId ?? '') || !/^\d{1,20}$/u.test(attachmentId ?? '')) {
 		return null;
 	}
 	if (name.length === 0 || !forkMayHaveCover(name.join('/'))) return null;
-	return forkAttachmentCoverKey(BigInt(channelId!), BigInt(attachmentId!));
+	return {channelId: BigInt(channelId!), attachmentId: BigInt(attachmentId!)};
 }
 
+const STORED_EXTRAS = [
+	{keyOf: forkAttachmentCoverKey, flag: ForkMessageAttachmentFlags.HAS_COVER},
+	{keyOf: forkAttachmentWaveformKey, flag: 0},
+] as const;
+
 /**
- * Copies the cover of the audio file stored at `sourceKey` to the one stored at `destinationKey`,
- * when it has one: saving an audio attachment to saved media (which stores its copy like an
- * attachment of the user's own channel), and sending it from there. The stored copy of a WAV, AAC or
- * Ogg file has no cover inside it (see `fork_strip_av_metadata`), so the cover travels on its own.
- * Answers `HAS_COVER` when it copied one, else 0.
+ * Copies the cover and the stored waveform of the audio file stored at `sourceKey` to the one stored at
+ * `destinationKey`, those it has: saving an audio attachment to saved media (which stores its copy like
+ * an attachment of the user's own channel), and sending it from there. The stored copy of a WAV, AAC or
+ * Ogg file has no cover inside it (see `fork_strip_av_metadata`), so the cover travels on its own; the
+ * waveform object is what a link to the saved file shows. Answers `HAS_COVER` when it copied a cover,
+ * else 0.
  */
-export async function forkCopyStoredCover(
+export async function forkCopyStoredExtras(
 	storageService: IStorageService,
 	sourceKey: string,
 	destinationKey: string,
 ): Promise<number> {
-	const from = coverKeyOfStoredFile(sourceKey);
-	const to = coverKeyOfStoredFile(destinationKey);
+	const from = storedAudioIds(sourceKey);
+	const to = storedAudioIds(destinationKey);
 	if (!from || !to) return 0;
-	try {
-		await storageService.copyObject({
-			sourceBucket: Config.s3.buckets.cdn,
-			sourceKey: from,
-			destinationBucket: Config.s3.buckets.cdn,
-			destinationKey: to,
-		});
-		return ForkMessageAttachmentFlags.HAS_COVER;
-	} catch (error) {
-		if (!isStorageObjectMissing(error)) Logger.warn({error, from, to}, 'Audio cover not copied with the file');
-		return 0;
+	let flags = 0;
+	for (const {keyOf, flag} of STORED_EXTRAS) {
+		const source = keyOf(from.channelId, from.attachmentId);
+		const destination = keyOf(to.channelId, to.attachmentId);
+		try {
+			await storageService.copyObject({
+				sourceBucket: Config.s3.buckets.cdn,
+				sourceKey: source,
+				destinationBucket: Config.s3.buckets.cdn,
+				destinationKey: destination,
+			});
+			flags |= flag;
+		} catch (error) {
+			if (!isStorageObjectMissing(error)) {
+				Logger.warn({error, source, destination}, 'Audio cover or waveform not copied with the file');
+			}
+		}
 	}
+	return flags;
 }
 
-/** Deletes the cover copied with a saved media file (`forkCopyStoredCover`), if it has one. */
-export async function forkDeleteStoredCover(storageService: IStorageService, storageKey: string): Promise<void> {
-	const key = coverKeyOfStoredFile(storageKey);
-	if (!key) return;
-	try {
-		await storageService.deleteObject(Config.s3.buckets.cdn, key);
-	} catch (error) {
-		Logger.warn({error, key}, 'Saved audio cover not deleted');
+/** Deletes the cover and waveform copied with a saved media file (`forkCopyStoredExtras`), if any. */
+export async function forkDeleteStoredExtras(storageService: IStorageService, storageKey: string): Promise<void> {
+	const ids = storedAudioIds(storageKey);
+	if (!ids) return;
+	for (const {keyOf} of STORED_EXTRAS) {
+		const key = keyOf(ids.channelId, ids.attachmentId);
+		try {
+			await storageService.deleteObject(Config.s3.buckets.cdn, key);
+		} catch (error) {
+			Logger.warn({error, key}, 'Saved audio cover or waveform not deleted');
+		}
 	}
 }
 
