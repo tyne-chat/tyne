@@ -126,10 +126,11 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			UserProfileCommands.openUserProfile(user.id, guildId);
 		}, [user.id, guildId, onClose]);
 
-		// The persona's full profile is its page in the account's Personas tab (tyne-chat/tyne#108, #189).
+		// The persona's full profile is its page in the account's Personas tab (tyne-chat/tyne#108, #189),
+		// expanded over the account's header so it is not squeezed under it (tyne-chat/tyne#702).
 		const handleOpenFullProfile = useCallback(() => {
 			onClose?.();
-			openPersonaGallery(user, {guildId, personaId: subprofile.id});
+			openPersonaGallery(user, {guildId, personaId: subprofile.id, expanded: true});
 		}, [user, guildId, subprofile.id, onClose]);
 
 		const handleEditPersona = useCallback(() => {
