@@ -2022,3 +2022,15 @@ if (process.env.FLUXER_FORK_IDENTITY !== '0' && isStable) {
 		}
 	}
 }
+
+// Fork: the Windows taskbar badges carry no logo, so Tyne ships upstream's instead of a copy in
+// icons-tyne. Upstream regenerates them together with the code that reads them (WindowsBadge.ts);
+// Tyne's old copy stopped being readable when upstream's #3495 changed the format, and Tyne showed
+// no badge from 2.1.3 on (tyne-chat/tyne#461). ForkWindowsBadges.test.mjs checks the packaged ones.
+if (process.env.FLUXER_FORK_IDENTITY !== '0' && isStable) {
+	const badges = module.exports.extraResources.find((resource) => resource.to === 'badges');
+	if (!badges) {
+		throw new Error('The fork block expects an extraResources entry for the badges');
+	}
+	badges.from = 'build_resources/icons-stable/badges/';
+}
