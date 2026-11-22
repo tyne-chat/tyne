@@ -291,9 +291,9 @@ member.)
   here. Report it as `.github/SECURITY.md` says.
 - Find or open the issue before starting. Search open and closed issues first
   (`gh issue list --repo tyne-chat/tyne --state all --search "<words>"`). Otherwise open one: `bug`,
-  `enhancement`, or `task` (the Task form, with a priority) for tooling, docs, refactors and audit
-  follow-ups; add the `priority:*` and `platform:*` labels that apply. Skip this only for a change
-  too small to be worth a line in the history.
+  `enhancement`, or `task` (the Task form) for tooling, docs, refactors and audit follow-ups, with
+  the `priority:*` (`docs/issue-priorities.md`) and `platform:*` labels that apply. Skip this only
+  for a change too small to be worth a line in the history.
 - Start a bug's title with `[Upstream]` when upstream has it too (its code, changed by the fork or
   not, or a dependency at its version); not for fork-only or setup bugs. Look for its fix first.
 - Write the investigation on the issue as you go, not only in chat: the cause with file and line,
