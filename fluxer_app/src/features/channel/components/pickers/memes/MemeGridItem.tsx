@@ -8,7 +8,6 @@ import {
 	buildDeleteMemeConfirmation,
 	DELETE_SAVED_MEDIA_DESCRIPTOR,
 } from '@app/features/channel/components/pickers/memes/DeleteMemeConfirmation';
-import {formatDuration, getFileExtension} from '@app/features/channel/components/pickers/memes/MediaFormat';
 import {PickerThumbnail} from '@app/features/channel/components/pickers/shared/PickerThumbnail';
 import {usePooledVideo} from '@app/features/channel/components/pickers/shared/usePooledVideo';
 import MemesPicker from '@app/features/emoji/state/MemesPicker';
@@ -22,14 +21,17 @@ import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import FocusRing from '@app/features/ui/focus_ring/FocusRing';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
-import {getFormattingLocale} from '@app/features/user/utils/LocaleUtils';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
-import {MusicNoteIcon, PencilSimpleIcon, TrashIcon} from '@phosphor-icons/react';
+import {PencilSimpleIcon, TrashIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useRef, useState} from 'react';
+
+// Fork imports.
+
+import {ForkSavedAudioTile} from '@app/features/channel/components/pickers/memes/ForkSavedAudioTile';
 
 const SEND_SAVED_MEDIA_DESCRIPTOR = msg({
 	message: 'Send saved media {memeName}',
@@ -216,25 +218,13 @@ export const MemeGridItem = observer(
 							data-flx="channel.pickers.memes.meme-grid-item.picker-thumbnail"
 						/>
 					)}
+					{/* Fork: the cover or the waveform of a saved audio file (tyne-chat/tyne#879). */}
 					{isAudio && (
-						<div className={styles.audioCard} data-flx="channel.pickers.memes.meme-grid-item.audio-card">
-							<MusicNoteIcon className={styles.audioIcon} data-flx="channel.pickers.memes.meme-grid-item.audio-icon" />
-							<div className={styles.audioMeta} data-flx="channel.pickers.memes.meme-grid-item.audio-meta">
-								{meme.duration && (
-									<div className={styles.audioDuration} data-flx="channel.pickers.memes.meme-grid-item.audio-duration">
-										{formatDuration(meme.duration, getFormattingLocale())}
-									</div>
-								)}
-								<Tooltip text={meme.filename} data-flx="channel.pickers.memes.meme-grid-item.tooltip">
-									<div className={styles.audioFilename} data-flx="channel.pickers.memes.meme-grid-item.audio-filename">
-										{meme.filename}
-									</div>
-								</Tooltip>
-								<div className={styles.audioBadge} data-flx="channel.pickers.memes.meme-grid-item.audio-badge">
-									{getFileExtension(meme.filename, meme.contentType)}
-								</div>
-							</div>
-						</div>
+						<ForkSavedAudioTile
+							meme={meme}
+							memeUrl={memeUrl}
+							data-flx="channel.pickers.memes.meme-grid-item.fork-saved-audio-tile"
+						/>
 					)}
 				</div>
 				<div className={gifStyles.gridItemBackdrop} data-flx="channel.pickers.memes.meme-grid-item.div--3" />
