@@ -224,6 +224,11 @@ msgstr "{items} なしで戻りました: 現在は別のペルソナが使用�
 msgid "Can be set everywhere at once"
 msgstr "すべての場所で一度に設定できます"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "キャンセル"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "ペルソナを変更"
@@ -947,10 +952,6 @@ msgstr "詳細情報"
 msgid "Most used"
 msgstr "よく使う順"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "ゴミ箱に入れる"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "自分のみ"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "@ の入力時や検索時に見つけられるのは自分のアカウントだけです。"
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "<0>システム設定</0>を開き、<1>プライバシーとセキュリティ</1>を選びます。下にスクロールして<2>このまま開く</2>をクリックします。この操作は最初の一回だけです。"
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "このまま開く"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "開く"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "入力された内容"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "/{name} の後に入力する内容は1行に収めてください。"
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "macOS で Tyne が開かれなかったと表示されたら、<0>完了</0>をクリックします。"
-
 msgid "Where the signal bar appears"
 msgstr "シグナルバーを表示する場所"
 
@@ -2101,6 +2095,10 @@ msgstr "件"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "{count} 件をリンク"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "インターネットからダウンロードしたアプリケーションを開くかどうか、macOS で確認されます。<0>開く</0>をクリックします。確認されるのは最初の1回だけです。"
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{total} 件中 {shown} 件のペルソナ"
 msgid "— Today at 12:00 PM"
 msgstr "— 今日 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "「Tyne」は開かれませんでした"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "「Tyne」はブロックされました。"
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "「Tyne」はインターネットからダウンロードされたアプリケーションです。開いてもよろしいですか？"

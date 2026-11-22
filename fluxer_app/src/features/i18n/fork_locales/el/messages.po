@@ -224,6 +224,11 @@ msgstr "Επέστρεψε χωρίς {items}: τα έχει πλέον άλλη
 msgid "Can be set everywhere at once"
 msgstr "Μπορεί να οριστεί παντού με μία κίνηση"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "Ακύρωση"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Αλλαγή persona"
@@ -947,10 +952,6 @@ msgstr "Περισσότερες πληροφορίες"
 msgid "Most used"
 msgstr "Οι πιο χρησιμοποιημένες"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "Μετακίνηση στον Κάδο"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "Μόνο εσείς"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "Μόνο ο λογαριασμός σας τη βρίσκει όταν πληκτρολογείτε @ ή κάνετε αναζήτηση."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "Ανοίξτε τις <0>Ρυθμίσεις συστήματος</0> και μετά το <1>Απόρρητο και ασφάλεια</1>. Κάντε κύλιση προς τα κάτω και κάντε κλικ στο <2>Άνοιγμα ούτως ή άλλως</2>. Αυτό χρειάζεται μόνο μία φορά."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "Άνοιγμα ούτως ή άλλως"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "Άνοιγμα"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "Τι πληκτρολογούν"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "Ό,τι πληκτρολογείτε μετά την /{name} πρέπει να χωράει σε μία γραμμή."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "Όταν το macOS πει ότι το Tyne δεν άνοιξε, κάντε κλικ στο <0>Τέλος</0>."
-
 msgid "Where the signal bar appears"
 msgstr "Πού εμφανίζεται η γραμμή σημάτων"
 
@@ -2101,6 +2095,10 @@ msgstr "στοιχεία"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "συνδέσει {count}"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "Το macOS ρωτά αν θέλετε να ανοίξετε μια εφαρμογή που λήφθηκε από το Διαδίκτυο. Κάντε κλικ στο <0>Άνοιγμα</0>. Ρωτά μόνο μία φορά."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{shown} από {total} persona"
 msgid "— Today at 12:00 PM"
 msgstr "— Σήμερα στις 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "Το «Tyne» δεν άνοιξε"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "Το «Tyne» αποκλείστηκε."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "Το «Tyne» είναι μια εφαρμογή που λήφθηκε από το Διαδίκτυο. Είστε βέβαιοι ότι θέλετε να το ανοίξετε;"

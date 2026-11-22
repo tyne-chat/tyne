@@ -335,12 +335,6 @@
 	text-align: center;
 }
 
-.sketchRow {
-	flex-direction: row;
-	justify-content: space-between;
-	text-align: start;
-}
-
 .sketchTitle {
 	font-size: 0.9375rem;
 	font-weight: 600;
