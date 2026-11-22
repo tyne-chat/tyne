@@ -1965,6 +1965,10 @@ msgstr "{productName} वाला इस्तेमाल करें"
 msgid "Using the file's"
 msgstr "फ़ाइल वाला"
 
+#. Accessible label and tooltip of the cover art shown in an audio attachment player; activating it opens the cover large.
+msgid "View cover"
+msgstr "कवर देखें"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "अपने परसोना देखें"

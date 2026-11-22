@@ -45,6 +45,10 @@ import {normalizeFilename} from '@fluxer/schema/src/primitives/FileValidators';
 import {attachmentStorageKeyFromUrl} from '@pkgs/media_proxy_utils/src/AttachmentUrlSignature';
 import mime from 'mime';
 
+// Fork imports.
+
+import {forkCopyStoredCover, forkDeleteStoredCover} from '@app/api/channel/services/message/ForkAudioExtras';
+
 type MessageAttachmentCandidate = Message['attachments'][number];
 type MessageEmbedCandidate = Message['embeds'][number];
 type FavoriteMemeMedia = {
@@ -198,6 +202,8 @@ export class FavoriteMemeService {
 			});
 			throw InputValidationError.fromCode('media', ValidationErrorCodes.MEDIA_ALREADY_IN_FAVORITE_MEMES);
 		}
+		// Fork: a saved audio file keeps its cover (tyne-chat/tyne#873).
+		if (!media.isExternal) await forkCopyStoredCover(this.storageService, media.sourceKey, storageKey);
 		const favoriteMeme = await this.favoriteMemeRepository.create({
 			user_id: user.id,
 			meme_id: memeId,
@@ -463,6 +469,8 @@ export class FavoriteMemeService {
 		} catch (error) {
 			Logger.error({error, userId, memeId}, 'Failed to delete meme from storage');
 		}
+		// Fork: with its cover (tyne-chat/tyne#873).
+		await forkDeleteStoredCover(this.storageService, meme.storageKey);
 		await this.favoriteMemeRepository.delete(userId, memeId);
 		await this.apiContext.services.gateway.dispatchPresence({
 			userId,

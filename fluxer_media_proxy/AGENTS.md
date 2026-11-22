@@ -2,11 +2,12 @@
 
 `fluxer_media_proxy` is the Rust service (Axum, with native code on libvips and FFmpeg) that serves
 stored and signed external media under `/media/*`, transforms images, and answers the API's internal
-requests. It is upstream's. The fork adds five things: a size cap an internal caller can ask for on
+requests. It is upstream's. The fork adds six things: a size cap an internal caller can ask for on
 external fetches (persona avatar imports), a repair of MP3 uploads that Chromium cannot decode
 (tyne-chat/tyne#245), `?original=true`, which serves a stored image itself (tyne-chat/tyne#471),
-stickers scaled to fit instead of cropped to a square (tyne-chat/tyne#659), and the conversion of
-animated AVIF uploads to animated WebP (tyne-chat/tyne#854).
+stickers scaled to fit instead of cropped to a square (tyne-chat/tyne#659), the conversion of
+animated AVIF uploads to animated WebP (tyne-chat/tyne#854), and the audio player's cover and
+waveform, with a strip that no longer fails on an embedded cover (tyne-chat/tyne#873).
 
 ## Where things are
 
@@ -22,6 +23,7 @@ animated AVIF uploads to animated WebP (tyne-chat/tyne#854).
 | `?original=true` on avatars, banners and other image assets (fork) | `src/server/stored/fork_original_asset.rs`, one call in `serve_asset_image` (`src/server/stored/mod.rs`) |
 | Stickers scaled to fit, not cropped (fork) | `src/server/stored/fork_sticker_fit.rs`, one statement after upstream picks `resize_mode` in `serve_asset_image` |
 | Animated AVIF to animated WebP (fork) | `src/media_process/fork_animated_avif.rs` (fixtures in `fork_animated_avif_fixtures/`), route `src/server/routes/fork_animated_avif.rs` (`/_fork/animated_avif_to_webp`, one statement in `build_router`), `fluxer_fork_ffmpeg_decode_avif_track` at the end of `src/native_shim/animation_decode.c` |
+| Audio covers and waveforms, strip without the cover (fork) | `src/media_process/fork_audio_extras.rs` (`audio_extras`, `fork_strip_av_metadata`, one call in `src/server/media_operations/strip.rs`), `src/native_shim/fork_audio_extras.c`; route `src/server/routes/fork_audio_extras.rs` (`/_fork/audio_extras`, and `cover=1` and `waveform=1` through one statement in `serve_public_read`, `src/server/routes/dispatch.rs`) |
 | The API's side | `fluxer_api/src/api/infrastructure/MediaService.ts` (`stripObjectMetadata`), `fluxer_api/src/api/channel/services/message/AttachmentProcessingService.ts` |
 
 ## Uploads go through `/_strip`
@@ -105,6 +107,35 @@ repaired upload, and FFmpeg decodes it unchanged.
 - To check a file by hand, the backfill tool reports without writing:
   `cargo run -p fluxer-media-proxy --example fork_mp3_repair -- FILE...`; `--write` repairs in place.
 
+## Audio covers and waveforms
+
+The audio player shows an upload's embedded cover and draws its waveform (tyne-chat/tyne#873). When a
+message names an audio upload, the API (`fluxer_api/src/api/channel/services/message/ForkAudioExtras.ts`)
+asks `/_fork/audio_extras` for both, from the stored upload.
+
+- **Cover:** the attached picture (ID3 APIC, FLAC picture, MP4 `covr`, as FFmpeg exposes it), cleaned
+  of metadata as an image upload is. The API checks it for NSFW and against the hash list, stores it at
+  `attachment-covers/<channel>/<attachment>` and sets the fork flag `HAS_COVER` (`1 << 21`,
+  `packages/constants/src/ForkAttachmentConstants.ts`). `cover=1` on the attachment's own signed URL
+  serves it, so whoever can read the file can read its cover; resizing and format parameters apply to
+  the cover.
+- **Waveform:** the web app's voice-message waveform (`buildWaveformBytes`): up to 256 points, RMS of
+  the first channel, scaled to the loudest, square root, 0-255. It is computed in constant memory: the
+  stored file is spooled to disk and mapped (`spool_stored_media`), and the C code sums into 4096
+  buckets sized from the declared length, merging pairs if the file runs longer than it says. Audio
+  that declares more than `MAX_WAVEFORM_SECONDS` (6 hours, for the decoding time) gets none.
+- **Links:** a pasted link to an audio attachment is an embed, which has no waveform field. The API
+  also stores each audio attachment's waveform as raw bytes at
+  `attachment-waveforms/<channel>/<attachment>`, and `waveform=1` on the attachment's URL serves it
+  as stored (no other parameters apply). For a link embed the API only checks which of the two
+  objects exist and sets `HAS_COVER` and `HAS_WAVEFORM` on the embed's audio
+  (`fluxer_api/src/api/infrastructure/ForkLinkedAudioExtras.ts`); the apps load each once.
+- **Strip:** upstream's strip keeps the cleaned cover as a video stream. WAV, ADTS AAC and Ogg cannot
+  hold one, so FFmpeg refused to write them and the upload kept its metadata.
+  `fork_strip_av_metadata` strips again without the cover when that happens; a test pins upstream's
+  failure, so it fails the day upstream fixes it and the wrapper can go.
+- Every failure is "no cover, no waveform" for the API; the upload itself goes on.
+
 ## Keeping fork code out of upstream's way
 
 The general rules are in the root `AGENTS.md`. Here:
@@ -115,8 +146,8 @@ The general rules are in the root `AGENTS.md`. Here:
   `items_after_test_module` fails the check. Use what the type already offers instead (`AvContainer`
   keeps its fields private but derives `Eq`, so compare against `av_container("audio/mpeg")`), or a
   fork file.
-- A new C file means editing upstream's fixed-size `NATIVE_SHIM_SOURCES` list in `build.rs`; prefer
-  Rust where the work allows it.
+- A new C file goes in the fork's `FORK_NATIVE_SHIM_SOURCES` at the end of `build.rs`, never in
+  upstream's fixed-size `NATIVE_SHIM_SOURCES`. Still prefer Rust where the work allows it.
 - Tests of upstream modules go in fork-owned files (`fork_internal_tests.rs`, included with
   `#[path]` from a `// Fork:` block); a fork-owned module keeps its tests inside it.
 

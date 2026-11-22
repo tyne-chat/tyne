@@ -36,6 +36,7 @@ import {temporaryFile} from 'tempy';
 // Fork imports.
 
 import {forkConvertAnimatedAvifUpload} from '@app/api/channel/services/message/ForkAnimatedAvifConversion';
+import {forkAddAudioExtras} from '@app/api/channel/services/message/ForkAudioExtras';
 
 const ATTACHMENT_PROCESSING_CONCURRENCY = 2;
 const METADATA_PROBE_DEGRADED_CONTEXT = 'message_attachment';
@@ -367,6 +368,17 @@ export class AttachmentProcessingService {
 					ValidationErrorCodes.VOICE_MESSAGES_ATTACHMENT_MUST_BE_AUDIO,
 				);
 			}
+			// Fork: the audio player's cover and waveform (tyne-chat/tyne#873).
+			await forkAddAudioExtras({
+				attachment: processedAttachment,
+				channelId: message.channelId,
+				bucket: Config.s3.buckets.uploads,
+				key: sourceKey,
+				nsfwMode,
+				message,
+				mediaService: this.mediaService,
+				storageService: this.storageService,
+			});
 			return {
 				attachment: processedAttachment,
 				uploadKey,
@@ -476,6 +488,17 @@ export class AttachmentProcessingService {
 		} else {
 			await this.scanContentModerationWithLocalFile({localPath: null, bucket, key, message});
 		}
+		// Fork: saved audio gets the audio player's cover and waveform, as an upload does (tyne-chat/tyne#873).
+		await forkAddAudioExtras({
+			attachment,
+			channelId: message.channelId,
+			bucket,
+			key,
+			nsfwMode,
+			message,
+			mediaService: this.mediaService,
+			storageService: this.storageService,
+		});
 		return this.classifyStoredMedia({attachment, bucket, key, nsfwMode});
 	}
 

@@ -81,6 +81,11 @@ fn main() {
     for source in NATIVE_SHIM_SOURCES {
         shim.file(source);
     }
+    // Fork: the fork's native sources, listed at the end of this file.
+    for source in FORK_NATIVE_SHIM_SOURCES {
+        println!("cargo:rerun-if-changed={source}");
+        shim.file(source);
+    }
 
     let mut link_paths: Vec<PathBuf> = Vec::new();
     let mut link_files: Vec<PathBuf> = Vec::new();
@@ -181,3 +186,10 @@ fn main() {
         println!("cargo:rustc-link-lib={lib}");
     }
 }
+
+// Fork: native sources of the fork's own, compiled with upstream's (a list of their own, so that
+// upstream's count above never changes for them).
+const FORK_NATIVE_SHIM_SOURCES: [&str; 1] = [
+    // The audio player's cover and waveform (tyne-chat/tyne#873).
+    "src/native_shim/fork_audio_extras.c",
+];
