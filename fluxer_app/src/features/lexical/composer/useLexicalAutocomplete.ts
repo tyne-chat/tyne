@@ -118,6 +118,10 @@ import {
 } from '@app/features/channel/components/AutocompleteTypes';
 import {requestGuildCommands, useWithGuildCommands} from '@app/features/guild_commands/hooks/useWithGuildCommands';
 import {
+	canPickAutocompleteOptionInComposer,
+	filterAutocompleteMediaForComposer,
+} from '@app/features/lexical/composer/AutocompleteMediaDraftGate';
+import {
 	filterPersonaMentions,
 	useAutocompletePersonaSearch,
 } from '@app/features/lexical/composer/useAutocompletePersonaSearch';
@@ -658,8 +662,10 @@ export function useLexicalAutocomplete({
 				break;
 			}
 		}
+		options = filterAutocompleteMediaForComposer(options, handleRef.current, channel?.id ?? null);
 		return {type, options: filterAutocompleteMediaOptions(options, allowMediaOptions), query: autocompleteQuery};
 	}, [
+		handleRef,
 		allowMediaOptions,
 		autocompleteQuery,
 		autocompleteTrigger,
@@ -790,6 +796,7 @@ export function useLexicalAutocomplete({
 			if (handle == null) {
 				return;
 			}
+			if (!canPickAutocompleteOptionInComposer(option, handle, channel?.id ?? null)) return;
 			const slotContext = slotAutocompleteContextRef.current;
 			if (slotContext != null) {
 				const slotPayload = optionToSlotPayload(option, slotContext.optionType, channel);
