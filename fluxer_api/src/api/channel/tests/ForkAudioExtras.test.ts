@@ -250,12 +250,15 @@ describe('Audio attachments get a cover and a waveform (tyne-chat/tyne#873)', ()
 			name: 'Spell',
 		});
 		const savedCoverKey = forkAttachmentCoverKey(BigInt(meme.user_id), BigInt(meme.attachment_id));
-		return {requests, json, channelId, account, meme, savedCoverKey};
+		const savedWaveformKey = forkAttachmentWaveformKey(BigInt(meme.user_id), BigInt(meme.attachment_id));
+		return {requests, json, channelId, account, meme, savedCoverKey, savedWaveformKey};
 	}
 
 	it('gives audio sent from saved media its cover and waveform, the cover copied with the file', async () => {
-		const {requests, json, channelId, account, meme, savedCoverKey} = await saveToSavedMedia();
+		const {requests, json, channelId, account, meme, savedCoverKey, savedWaveformKey} = await saveToSavedMedia();
 		expect(await storedObject(savedCoverKey)).toEqual(COVER);
+		// A link to the saved file shows its waveform from this copy.
+		expect((await storedObject(savedWaveformKey))?.toString('base64')).toBe(WAVEFORM);
 
 		const sent = await createBuilder<MessageResponse>(harness, account.token)
 			.post(`/channels/${channelId}/messages`)
@@ -273,9 +276,10 @@ describe('Audio attachments get a cover and a waveform (tyne-chat/tyne#873)', ()
 		expect(await storedWaveform(channelId, attachment!.id)).toBe(WAVEFORM);
 	});
 
-	it("deletes a saved audio file's cover with it", async () => {
-		const {account, meme, savedCoverKey} = await saveToSavedMedia();
+	it("deletes a saved audio file's cover and waveform with it", async () => {
+		const {account, meme, savedCoverKey, savedWaveformKey} = await saveToSavedMedia();
 		expect(await storedObject(savedCoverKey)).not.toBeNull();
+		expect(await storedObject(savedWaveformKey)).not.toBeNull();
 
 		await createBuilder(harness, account.token)
 			.delete(`/users/@me/memes/${meme.id}`)
@@ -283,6 +287,7 @@ describe('Audio attachments get a cover and a waveform (tyne-chat/tyne#873)', ()
 			.execute();
 
 		expect(await storedObject(savedCoverKey)).toBeNull();
+		expect(await storedObject(savedWaveformKey)).toBeNull();
 	});
 });
 

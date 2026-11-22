@@ -61,7 +61,7 @@ import type Stripe from 'stripe';
 // Fork imports.
 
 import {createPersonaID, type PersonaID} from '@app/api/BrandedTypes';
-import {forkDeleteStoredCover} from '@app/api/channel/services/message/ForkAudioExtras';
+import {forkDeleteStoredExtras} from '@app/api/channel/services/message/ForkAudioExtras';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
 import {deletePersonaImagesOfUser} from '@app/api/persona/PersonaImageDeletion';
 import {forkUserDeletionCleanups} from '@app/api/user/services/ForkUserDeletionCleanups';
@@ -509,8 +509,8 @@ export async function processUserDeletion(
 	for (const meme of favoriteMemes) {
 		try {
 			await storageService.deleteObject(Config.s3.buckets.cdn, meme.storageKey);
-			// Fork: with its cover (tyne-chat/tyne#873).
-			await forkDeleteStoredCover(storageService, meme.storageKey);
+			// Fork: with its cover and waveform (tyne-chat/tyne#873).
+			await forkDeleteStoredExtras(storageService, meme.storageKey);
 			Logger.debug({userId, memeId: meme.id}, 'Deleted favorite meme');
 		} catch (error) {
 			Logger.error({error, userId, memeId: meme.id}, 'Failed to delete favorite meme');
