@@ -492,6 +492,10 @@ export class MessageDataRepository {
 			}),
 		);
 		await batch.execute(false);
+		// Fork: a message sent after the read that found the bucket empty may have indexed it before the write
+		// above took it out, and fluxer_messages lists only indexed buckets; look again (tyne-chat/tyne#881).
+		const forkRecheck = await this.fetchRowsForBucket(channelId, bucket, 1, {beforeBucket: null, afterBucket: null});
+		if (forkRecheck.rows.length > 0) await this.touchBucketWithMessages(channelId, bucket);
 	}
 
 	private async touchChannelHasMessages(channelId: ChannelID): Promise<void> {
