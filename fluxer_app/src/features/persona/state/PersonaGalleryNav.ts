@@ -6,6 +6,14 @@ interface PersonaGalleryRequest {
 	userId: string;
 	/** A persona to open in the gallery, or none for the gallery itself. */
 	personaId: string | null;
+	/** Open it expanded, over the profile's header: the persona's own profile (tyne-chat/tyne#702). */
+	expanded: boolean;
+}
+
+/** The persona the gallery is asked to open, and whether expanded. */
+export interface PersonaGalleryOpenRequest {
+	personaId: string;
+	expanded: boolean;
 }
 
 /**
@@ -21,9 +29,9 @@ class PersonaGalleryNavStore {
 		makeAutoObservable(this, {}, {autoBind: true});
 	}
 
-	request(userId: string, personaId: string | null = null): void {
-		this.tabRequest = {userId, personaId};
-		this.personaRequest = personaId ? {userId, personaId} : null;
+	request(userId: string, personaId: string | null = null, {expanded = false}: {expanded?: boolean} = {}): void {
+		this.tabRequest = {userId, personaId, expanded};
+		this.personaRequest = personaId ? {userId, personaId, expanded} : null;
 	}
 
 	hasTabRequest(userId: string): boolean {
@@ -41,9 +49,15 @@ class PersonaGalleryNavStore {
 	}
 
 	takePersonaRequest(userId: string): string | null {
-		const personaId = this.pendingPersona(userId);
-		if (personaId) this.personaRequest = null;
-		return personaId;
+		return this.takePersonaOpen(userId)?.personaId ?? null;
+	}
+
+	/** Takes the persona request with how to show it. */
+	takePersonaOpen(userId: string): PersonaGalleryOpenRequest | null {
+		const request = this.personaRequest;
+		if (request?.userId !== userId || !request.personaId) return null;
+		this.personaRequest = null;
+		return {personaId: request.personaId, expanded: request.expanded};
 	}
 }
 

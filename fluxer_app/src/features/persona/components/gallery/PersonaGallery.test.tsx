@@ -248,6 +248,82 @@ describe('PersonaGallery', () => {
 		act(() => modalReactRoot.unmount());
 		modalRoot.remove();
 	});
+	it('opens a persona asked for expanded, as its own profile, and folds back to the header (tyne-chat/tyne#702)', async () => {
+		const modalRoot = document.createElement('div');
+		modalRoot.setAttribute('data-flx', 'user.user-profile-modal.modal-root');
+		document.body.appendChild(modalRoot);
+		const modalContainer = document.createElement('div');
+		modalRoot.appendChild(modalContainer);
+		const modalReactRoot = createRoot(modalContainer);
+		PersonaGalleryNav.request(other.id, '200000000000000002', {expanded: true});
+		await act(async () => {
+			modalReactRoot.render(<PersonaGallery user={other} data-flx="persona.gallery-test.gallery" />);
+		});
+		const query = (flx: string) => modalContainer.querySelector(`[data-flx="${flx}"]`) as HTMLElement | null;
+
+		expect(query('persona.gallery.detail.name')?.textContent).toBe('Wren');
+		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		expect(query('persona.gallery.expanded-bar')).not.toBeNull();
+		await act(async () => query('persona.gallery.collapse')!.click());
+		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		expect(query('persona.gallery.detail.name')?.textContent).toBe('Wren');
+		act(() => modalReactRoot.unmount());
+
+		// Without the flag (the Personas pill, the tab) the persona opens under the profile's header.
+		const plainRoot = createRoot(modalContainer);
+		PersonaGalleryNav.request(other.id, '200000000000000002');
+		await act(async () => {
+			plainRoot.render(<PersonaGallery user={other} data-flx="persona.gallery-test.gallery" />);
+		});
+		expect(query('persona.gallery.detail.name')?.textContent).toBe('Wren');
+		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		expect(query('persona.gallery.expanded-bar')).toBeNull();
+
+		act(() => plainRoot.unmount());
+		modalRoot.remove();
+	});
+
+	it('does not expand on phones, where there is no expanded view', async () => {
+		PersonaGalleryNav.request(other.id, '200000000000000002', {expanded: true});
+		await act(async () => {
+			root.render(<PersonaGallery user={other} isMobile data-flx="persona.gallery-test.gallery" />);
+		});
+		expect(container.querySelector('[data-flx="persona.gallery.detail.name"]')?.textContent).toBe('Wren');
+		expect(container.querySelector('[data-flx="persona.gallery.expanded-bar"]')).toBeNull();
+		expect(container.querySelector('[data-flx="persona.gallery.detail-wrap"]')?.className).toBe('');
+	});
+
+	it('opens a persona picked from the list expanded, on computers only (tyne-chat/tyne#702)', async () => {
+		const modalRoot = document.createElement('div');
+		modalRoot.setAttribute('data-flx', 'user.user-profile-modal.modal-root');
+		document.body.appendChild(modalRoot);
+		const modalContainer = document.createElement('div');
+		modalRoot.appendChild(modalContainer);
+		const modalReactRoot = createRoot(modalContainer);
+		await act(async () => {
+			modalReactRoot.render(<PersonaGallery user={other} data-flx="persona.gallery-test.gallery" />);
+		});
+		const query = (flx: string) => modalContainer.querySelector(`[data-flx="${flx}"]`) as HTMLElement | null;
+		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		await act(async () => query('persona.gallery.card.button')!.click());
+		expect(query('persona.gallery.detail.name')).not.toBeNull();
+		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		// Back to the list keeps the whole window; Restore folds it.
+		await act(async () => query('persona.gallery.detail.back')!.click());
+		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		await act(async () => query('persona.gallery.collapse')!.click());
+		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		act(() => modalReactRoot.unmount());
+		modalRoot.remove();
+
+		await act(async () => {
+			root.render(<PersonaGallery user={other} isMobile data-flx="persona.gallery-test.gallery" />);
+		});
+		await act(async () => (container.querySelector('[data-flx="persona.gallery.card.button"]') as HTMLElement).click());
+		expect(container.querySelector('[data-flx="persona.gallery.detail.name"]')).not.toBeNull();
+		expect(container.querySelector('[data-flx="persona.gallery.expanded-bar"]')).toBeNull();
+	});
+
 	it('expands from an open persona too, and keeps it open', async () => {
 		const modalRoot = document.createElement('div');
 		modalRoot.setAttribute('data-flx', 'user.user-profile-modal.modal-root');
@@ -263,6 +339,9 @@ describe('PersonaGallery', () => {
 		// The button is last in the persona's nav row, after the arrows, in both states (tyne-chat/tyne#589).
 		const lastInNav = () => query('persona.gallery.detail.nav')?.lastElementChild ?? null;
 
+		// Picked from the list, it opens expanded (tyne-chat/tyne#702); fold it to start from the header.
+		expect(lastInNav()?.querySelector('[data-flx="persona.gallery.collapse"]')).not.toBeNull();
+		await act(async () => query('persona.gallery.collapse')!.click());
 		expect(lastInNav()?.querySelector('[data-flx="persona.gallery.expand"]')).not.toBeNull();
 		await act(async () => query('persona.gallery.expand')!.click());
 		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
