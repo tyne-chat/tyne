@@ -76,6 +76,10 @@ A handler that touches accounts, storage or windows checks its sender with
   carry no logo and are packaged from `icons-stable/badges/` (the last block of the builder config):
   a copy in `icons-tyne/` went stale when upstream changed their format, and Tyne showed no badge
   from 2.1.3 on (tyne-chat/tyne#461, `ForkWindowsBadges.test.mjs`).
+- **The macOS icon** is upstream's Icon Composer document with Tyne's plate colour and glyph
+  (`icons-tyne/AppIcon.icon/`). Its `_compiled/` folder (`Assets.car`, the Liquid Glass icon; the
+  `.icns` for older macOS) is compiled by `scripts/fork-compile-macos-icon.sh`, which needs Xcode 26,
+  through the workflow `fork-macos-icon.yaml`, and committed, as upstream's is (tyne-chat/tyne#868).
 - **The packages' scheme comes from the environment**: `FLUXER_FORK_LINK_SCHEME`, which the
   workflow sets, because upstream's `ChannelIsolation.test.mjs` expects stable to declare `fluxer`.
   A stable package built without it declares `fluxer://`, and on Linux the package is the only
@@ -215,7 +219,8 @@ A handler that touches accounts, storage or windows checks its sender with
 ## Where the fork hooks into upstream's files
 
 - **Fork-owned**: `src/main/Fork*.ts`, `src/common/ForkLinks.ts`, `ForkAppWindowPreload.ts`,
-  `ForkAppWindowContract.ts`, `scripts/fork-*`, `build_resources/icons-tyne/`, the workflow.
+  `ForkAppWindowContract.ts`, `scripts/fork-*`, `build_resources/icons-tyne/`, the workflows
+  (`fork-desktop-release*.yaml`, `fork-macos-icon.yaml`).
 - **Appended blocks** in `Window.ts`, `ShellDownloadFormats.ts` and the builder config; override
   blocks after the tables they change in `DesktopIdentity.ts`, `Constants.ts`, `UserDataPath.ts`,
   `DesktopTray.ts`; one-line hand-overs in `index.ts`, `DeepLinks.ts`, `DesktopRuntimeDiscovery.ts`,

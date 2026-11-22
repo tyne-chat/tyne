@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Fork: compiles Tyne's macOS app icon (fluxer_desktop/build_resources/icons-tyne/AppIcon.icon) with
+# Apple's actool, which needs macOS and Xcode 26, and keeps the result as an artifact,
+# "macos-icon-compiled", to commit in icons-tyne/_compiled/ (tyne-chat/tyne#868). Upstream commits
+# its compiled icons the same way. Run it by hand after the icon kit installer changes AppIcon.icon;
+# a push to a desktop-test/** branch that changes the icon runs it too.
+name: fork macOS icon
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['desktop-test/**']
+    paths:
+      - fluxer_desktop/build_resources/icons-tyne/AppIcon.icon/**
+      - fluxer_desktop/scripts/fork-compile-macos-icon.sh
+      - .github/workflows/fork-macos-icon.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    name: Compile the macOS icon
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - name: Check out the icon and the script
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            fluxer_desktop/build_resources/icons-tyne
+            fluxer_desktop/scripts
+            fluxer_desktop/electron-builder.config.cjs
+          sparse-checkout-cone-mode: false
+
+      - name: Compile
+        run: fluxer_desktop/scripts/fork-compile-macos-icon.sh
+
+      - name: Keep the compiled icon
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: macos-icon-compiled
+          path: fluxer_desktop/build_resources/icons-tyne/_compiled/
+          if-no-files-found: error
