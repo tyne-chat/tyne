@@ -732,8 +732,11 @@ export class ChannelMessages {
 		const possibleNonce = wire.nonce ?? null;
 		const previous = possibleNonce ? this.get(possibleNonce, true) : null;
 		const hasNonceMatch = previous != null && wire.author.id === previous.author.id && previous.id === possibleNonce;
+		// Fork (tyne-chat/tyne#701): only a pending copy of the same send (its own nonce is this one) is
+		// replaced; a confirmed message whose id happens to equal the nonce stays.
+		const forkIsPendingCopy = hasNonceMatch && previous.nonce === possibleNonce;
 		const decision = resolveChannelIncomingMessageDecision({
-			hasNonceMatch,
+			hasNonceMatch: forkIsPendingCopy,
 			isUploadPlaceholder: previous != null && isUploadPlaceholder(previous),
 			hasMoreAfter: this.hasMoreAfter,
 			afterBufferAtBoundary: this.afterBuffer.isBoundary,

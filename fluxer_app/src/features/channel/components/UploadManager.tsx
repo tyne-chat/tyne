@@ -21,13 +21,13 @@ import Modal from '@app/features/ui/state/Modal';
 import Users from '@app/features/user/state/Users';
 import {MessageStates, MessageTypes} from '@fluxer/constants/src/ChannelConstants';
 import {MAX_ATTACHMENTS_PER_MESSAGE} from '@fluxer/constants/src/LimitConstants';
-import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {newLocalMessageId} from '@app/features/messaging/utils/ForkLocalMessageId';
 import {isPlainPasteEvent} from '@app/features/messaging/utils/PlainPasteUtils';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
@@ -103,7 +103,7 @@ export const UploadManager = observer(({channel, canAttachFiles, canSendMessages
 					return;
 				}
 				const pendingAttachments = await CloudUpload.createAndStartUploads(channel.id, files);
-				const nonce = SnowflakeUtils.fromTimestamp(Date.now());
+				const nonce = newLocalMessageId();
 				const currentUser = Users.getCurrentUser();
 				if (!currentUser) return;
 				CloudUpload.claimAttachmentsForMessage(channel.id, nonce, pendingAttachments, {
