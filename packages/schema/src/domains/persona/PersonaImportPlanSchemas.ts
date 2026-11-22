@@ -149,6 +149,12 @@ export const PersonaImportPreviewResponseSchema = z.object({
 		current_text: z.string().nullish(),
 	}),
 	untouched: z.number().int().describe('Live personas no member of the file matched; they stay as they are'),
+	live_persona_ids: z
+		.array(SnowflakeStringType)
+		.optional()
+		.describe(
+			"The IDs of all the account's live (not deleted) personas, so the review can leave out any it remembers that are gone; missing from older servers",
+		),
 	needs_review: z.boolean().describe('Whether anything needs a decision; if not, the client can apply at once'),
 });
 export type PersonaImportPreviewResponse = z.infer<typeof PersonaImportPreviewResponseSchema>;

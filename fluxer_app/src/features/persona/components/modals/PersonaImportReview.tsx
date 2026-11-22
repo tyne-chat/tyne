@@ -8,11 +8,13 @@
 // instance (a stored hash) or from the export's zip in memory, never from a link in the file.
 
 import {PRODUCT_NAME} from '@app/features/app/config/ProductConstants';
+import {PersonaImportConflicts} from '@app/features/persona/components/modals/PersonaImportConflicts';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
 import {diffBios} from '@app/features/persona/utils/PersonaBioDiff';
 import type {PersonaImportSource} from '@app/features/persona/utils/PersonaImportFile';
 import {bundlePictureBytes} from '@app/features/persona/utils/PersonaImportImages';
 import {
+	type ConflictHolder,
 	defaultDecision,
 	heldTags,
 	keepBothDecision,
@@ -21,6 +23,7 @@ import {
 	type ReviewConflict,
 	type ReviewDecision,
 	type ReviewMember,
+	reviewLivePersonas,
 	reviewNeedCount,
 	samePictureFile,
 	sharedTags,
@@ -43,7 +46,7 @@ import {CaretDownIcon, CheckIcon, PlusIcon, ShieldCheckIcon} from '@phosphor-ico
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import styles from './PersonaImportReview.module.css';
 
 const FIELD_HEADING: Record<PersonaImportField, MessageDescriptor> = {
@@ -213,8 +216,9 @@ const SKIPPING_DESCRIPTOR = msg({
 	comment: 'Badge on a collapsed member in the import review: it is not imported',
 });
 const KEEPING_DESCRIPTOR = msg({
-	message: 'Keeping',
-	comment: 'Badge on a collapsed member in the import review: it is imported with a tag of its own',
+	message: 'Adding as new',
+	comment:
+		'Badge on a collapsed member in the import review: it is imported as a new persona, with a name and tag of its own',
 });
 const SWITCH_SKIP_DESCRIPTOR = msg({
 	context: 'persona-import-switch',
@@ -223,8 +227,9 @@ const SWITCH_SKIP_DESCRIPTOR = msg({
 });
 const SWITCH_KEEP_DESCRIPTOR = msg({
 	context: 'persona-import-switch',
-	message: 'Keep',
-	comment: 'Option of the switch for a member whose tag is already taken: import it with a name and tag of its own',
+	message: 'Add as new',
+	comment:
+		'Option of the switch for a member whose tag is already taken, or that is none of the possible matches: import it as a new persona, with a name and tag of its own',
 });
 const CANT_TELL_GROUP_DESCRIPTOR = msg({
 	message:
@@ -667,12 +672,9 @@ export const PersonaImportReview = observer(
 		});
 		const decisionOf = (entry: PersonaImportPreviewEntry) => decisions.get(entry.index) ?? defaultDecision(entry);
 		const decide = (entry: PersonaImportPreviewEntry, decision: ReviewDecision) => onDecide([[entry.index, decision]]);
-		// The account's personas, with the live ones the preview names: those are current for sure.
-		const allLive = useMemo(() => {
-			const byId = new Map(livePersonas.map((p) => [p.id, p]));
-			for (const persona of preview.personas) if (!persona.deleted_at) byId.set(persona.id, persona);
-			return [...byId.values()];
-		}, [livePersonas, preview.personas]);
+		// The account's personas, with the live ones the preview names (current for sure), less those the
+		// server no longer has.
+		const allLive = useMemo(() => reviewLivePersonas(livePersonas, preview), [livePersonas, preview]);
 		// The personas no member matched or might match: the server counts them as untouched.
 		const untouchedPersonas = useMemo(() => {
 			const matched = new Set(
@@ -700,9 +702,53 @@ export const PersonaImportReview = observer(
 			});
 		const needCount = reviewNeedCount(preview.entries);
 		const tagNeedsChoice = preview.display_tag.decision === 'ask';
+		const [openLines, setOpenLines] = useState<ReadonlySet<ReadyLine>>(() => new Set());
+		const toggleLine = (which: ReadyLine) =>
+			setOpenLines((current) => {
+				const next = new Set(current);
+				if (!next.delete(which)) next.add(which);
+				return next;
+			});
+		// A holder named in the clash box, shown: its section opened, then scrolled to and focused.
+		const reviewRef = useRef<HTMLDivElement | null>(null);
+		const [showing, setShowing] = useState<{selector: string} | null>(null);
+		const placeOf = (holder: ConflictHolder): {line?: ReadyLine; card?: number; selector: string} | null => {
+			const entry =
+				holder.entryIndex === undefined ? undefined : preview.entries.find((e) => e.index === holder.entryIndex);
+			if (entry && CARD_KINDS.has(entry.kind)) {
+				return {card: entry.index, selector: `[data-import-entry="${entry.index}"]`};
+			}
+			if (entry?.kind === 'new') return {line: 'new', selector: `[data-import-entry="${entry.index}"]`};
+			const personaId = holder.personaId ?? entry?.persona_id;
+			if (!personaId) return null;
+			const selector = `[data-import-persona="${personaId}"]`;
+			if (entry?.kind === 'probably_same' || entry?.kind === 'up_to_date') return {line: 'matched', selector};
+			if (preview.untouched > 0 && untouchedPersonas.some((persona) => persona.id === personaId)) {
+				return {line: 'untouched', selector};
+			}
+			return null;
+		};
+		const showHolder = (holder: ConflictHolder) => {
+			const place = placeOf(holder);
+			if (!place) return;
+			const {line, card} = place;
+			if (line) setOpenLines((current) => (current.has(line) ? current : new Set(current).add(line)));
+			if (card !== undefined) setOpenDiffers((open) => (open.has(card) ? open : new Set(open).add(card)));
+			setShowing({selector: place.selector});
+		};
+		useEffect(() => {
+			if (!showing) return;
+			setShowing(null);
+			const target = reviewRef.current?.querySelector<HTMLElement>(showing.selector);
+			if (!target) return;
+			target.scrollIntoView?.({block: 'center'});
+			// The card's own toggle or the member's checkbox; a row with neither takes the focus itself.
+			const focusable = target.querySelector<HTMLElement>('button, input') ?? target;
+			focusable.focus({preventScroll: true});
+		}, [showing]);
 
 		return (
-			<div className={styles.review} data-flx="persona.persona-import-review.review">
+			<div ref={reviewRef} className={styles.review} data-flx="persona.persona-import-review.review">
 				<p className={styles.intro} data-flx="persona.persona-import-review.intro">
 					{needCount > 0 ? i18n._(INTRO_MEMBERS_DESCRIPTOR, {productName}) : i18n._(INTRO_NONE_DESCRIPTOR)}
 				</p>
@@ -719,24 +765,17 @@ export const PersonaImportReview = observer(
 					personas={personas}
 					decisionOf={decisionOf}
 					decide={decide}
+					open={openLines}
+					onToggle={toggleLine}
 					data-flx="persona.persona-import-review.ready-lines"
 				/>
 
-				{conflicts.length > 0 && (
-					<div className={styles.conflicts} role="alert" data-flx="persona.persona-import-review.conflicts">
-						{conflicts.map((conflict) => {
-							const names = listFormat(i18n.locale, conflict.names);
-							const label = conflict.label;
-							return (
-								<div key={label} data-flx="persona.persona-import-review.conflict">
-									<Trans comment="A clash in the import review. {label} is a proxy tag or emoji, {names} a list of persona names">
-										{names} would all have {label}. Change one of the choices.
-									</Trans>
-								</div>
-							);
-						})}
-					</div>
-				)}
+				<PersonaImportConflicts
+					conflicts={conflicts}
+					canShow={(holder) => placeOf(holder) !== null}
+					onShow={showHolder}
+					data-flx="persona.persona-import-review.persona-import-conflicts"
+				/>
 
 				<div className={styles.items} data-flx="persona.persona-import-review.items">
 					{cantTell.length > 0 && (
@@ -889,6 +928,16 @@ export const PersonaImportReview = observer(
 	},
 );
 
+/** The members that need a choice, each a card that opens; the others are on the ready lines. */
+const CARD_KINDS: ReadonlySet<PersonaImportPreviewEntry['kind']> = new Set([
+	'cant_tell',
+	'tag_in_use',
+	'differs',
+	'deleted',
+]);
+
+type ReadyLine = 'new' | 'matched' | 'untouched';
+
 /** One line each for what needs no decision, each with its list behind Show. */
 function ReadyLines({
 	fresh,
@@ -902,6 +951,8 @@ function ReadyLines({
 	personas,
 	decisionOf,
 	decide,
+	open,
+	onToggle: toggle,
 }: {
 	fresh: ReadonlyArray<PersonaImportPreviewEntry>;
 	probable: ReadonlyArray<PersonaImportPreviewEntry>;
@@ -914,11 +965,12 @@ function ReadyLines({
 	personas: ReadonlyMap<string, PersonaResponse>;
 	decisionOf: (entry: PersonaImportPreviewEntry) => ReviewDecision;
 	decide: (entry: PersonaImportPreviewEntry, decision: ReviewDecision) => void;
+	/** Which lines show their list, kept by the review so its clash box can open one. */
+	open: ReadonlySet<ReadyLine>;
+	onToggle: (which: ReadyLine) => void;
 }) {
 	const {i18n} = useLingui();
 	const productName = PRODUCT_NAME;
-	type Line = 'new' | 'matched' | 'untouched';
-	const [open, setOpen] = useState<ReadonlySet<Line>>(() => new Set());
 	const adding = fresh.filter((entry) => decisionOf(entry).choice === 'add').length;
 	// Connected by name and tag, or linked already: one list of exact matches, always connected.
 	const collator = new Intl.Collator(i18n.locale, {sensitivity: 'base', numeric: true});
@@ -930,13 +982,7 @@ function ReadyLines({
 		...samePersonas.map((persona) => ({persona})),
 	].sort((a, b) => collator.compare(a.persona.name, b.persona.name));
 	if (fresh.length === 0 && probable.length === 0 && upToDate === 0 && untouched === 0) return null;
-	const toggle = (which: Line) =>
-		setOpen((current) => {
-			const next = new Set(current);
-			if (!next.delete(which)) next.add(which);
-			return next;
-		});
-	const showButton = (which: Line) => (
+	const showButton = (which: ReadyLine) => (
 		<button
 			type="button"
 			className={styles.readyToggle}
@@ -950,7 +996,13 @@ function ReadyLines({
 	const personaItems = (list: ReadonlyArray<PersonaResponse>) => (
 		<ul className={styles.readyList} data-flx="persona.persona-import-review.ready.persona-list">
 			{list.map((persona) => (
-				<li key={persona.id} className={styles.readyItem} data-flx="persona.persona-import-review.ready.persona-item">
+				<li
+					key={persona.id}
+					className={styles.readyItem}
+					tabIndex={-1}
+					data-import-persona={persona.id}
+					data-flx="persona.persona-import-review.ready.persona-item"
+				>
 					<span className={styles.readyItemLabel} data-flx="persona.persona-import-review.ready.persona-row">
 						<RowPicture
 							name={persona.name}
@@ -994,6 +1046,7 @@ function ReadyLines({
 									<li
 										key={entry.index}
 										className={styles.readyItem}
+										data-import-entry={entry.index}
 										data-flx="persona.persona-import-review.ready.new.item"
 									>
 										<label
@@ -1049,6 +1102,8 @@ function ReadyLines({
 								<li
 									key={row.persona.id}
 									className={styles.readyItem}
+									tabIndex={-1}
+									data-import-persona={row.persona.id}
 									data-flx="persona.persona-import-review.ready.matched.item"
 								>
 									<span className={styles.readyItemLabel} data-flx="persona.persona-import-review.ready.matched.row">
@@ -1167,7 +1222,7 @@ function DiffersItem({
 			/>
 		) : undefined;
 	return (
-		<li className={styles.differsRow} data-flx="persona.persona-import-review.differs">
+		<li className={styles.differsRow} data-import-entry={entry.index} data-flx="persona.persona-import-review.differs">
 			<h4 className={styles.differsHeading} data-flx="persona.persona-import-review.differs.heading">
 				<button
 					type="button"
@@ -1358,7 +1413,7 @@ function differencesFrom(member: ReviewMember, persona: PersonaResponse): Set<Pe
 
 /**
  * A member that might be one of the account's personas (tyne-chat/tyne#573): pick which one, or none;
- * a picked persona gets the three-way switch, none gets Skip / Keep. Nothing picked leaves it out.
+ * a picked persona gets the three-way switch, none gets Skip / Add as new. Nothing picked leaves it out.
  */
 function CantTellItem({
 	entry,
@@ -1448,7 +1503,11 @@ function CantTellItem({
 		) : undefined;
 	const pickGroup = `import-pick-${entry.index}`;
 	return (
-		<li className={styles.differsRow} data-flx="persona.persona-import-review.cant-tell">
+		<li
+			className={styles.differsRow}
+			data-import-entry={entry.index}
+			data-flx="persona.persona-import-review.cant-tell"
+		>
 			<h4 className={styles.differsHeading} data-flx="persona.persona-import-review.cant-tell.heading">
 				<button
 					type="button"
@@ -1688,7 +1747,7 @@ function SideHead({title, status, danger}: {title: string; status: string; dange
 	);
 }
 
-/** The name and tag fields of the file's version when it is added under its own (a Keep). */
+/** The name and tag fields of the file's version when it is added under its own (Add as new). */
 function CopyFields({
 	entry,
 	member,
@@ -1752,8 +1811,8 @@ const RowPicture = observer(({name, picture}: {name: string; picture: HeaderPict
 });
 
 /**
- * A member whose tag another persona (or member) has, as a collapsed row; opened, a Skip / Keep switch
- * over the file's version, beside the one that has the tag (tyne-chat/tyne#570). Keep adds it with a name
+ * A member whose tag another persona (or member) has, as a collapsed row; opened, a Skip / Add as new switch
+ * over the file's version, beside the one that has the tag (tyne-chat/tyne#570). Add as new adds it with a name
  * and tags of its own, linked to its member.
  */
 function TagTakenItem({
@@ -1811,7 +1870,7 @@ function TagTakenItem({
 		{id: 'keep', label: i18n._(SWITCH_KEEP_DESCRIPTOR)},
 	];
 	return (
-		<li className={styles.differsRow} data-flx="persona.persona-import-review.taken">
+		<li className={styles.differsRow} data-import-entry={entry.index} data-flx="persona.persona-import-review.taken">
 			<h4 className={styles.differsHeading} data-flx="persona.persona-import-review.taken.heading">
 				<button
 					type="button"
@@ -2060,7 +2119,7 @@ function DeletedItem({
 		) : undefined;
 	const comesBack = i18n._(STATUS_COMES_BACK_DESCRIPTOR);
 	return (
-		<li className={styles.differsRow} data-flx="persona.persona-import-review.deleted">
+		<li className={styles.differsRow} data-import-entry={entry.index} data-flx="persona.persona-import-review.deleted">
 			<h4 className={styles.differsHeading} data-flx="persona.persona-import-review.deleted.heading">
 				<button
 					type="button"

@@ -286,7 +286,11 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   card, name, tags, pronouns, bio with its line breaks; a changed bio marks the words the other lacks,
   `PersonaBioDiff`), except the display tag's. Every member starts on `defaultDecision`, which changes
   nothing; the footer says what Import will do; closing the open review asks first (#564).
-  `findConflicts` blocks two choices giving one tag to two personas; `suggestTag` suggests free tags
+  `findConflicts` blocks two choices giving one tag to two personas, but only where the import adds
+  or changes one of them, and against the personas the preview's `live_persona_ids` still lists (a
+  page that missed persona events remembers deleted ones, #862, `reviewLivePersonas`); the clash box
+  (`PersonaImportConflicts`) says which side each is, and each name opens its place in the review
+  and focuses it. `suggestTag` suggests free tags
   from typeable letters, then the old tag numbered. `applyPersonaImport` sends the actions, written
   whole or not at all; a failed picture is reported only where the choice used it. A link in the
   file is never shown; pictures stored for skipped members stay unused. The display tag is the file's

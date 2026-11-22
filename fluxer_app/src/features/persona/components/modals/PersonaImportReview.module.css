@@ -134,6 +134,26 @@
 	font-size: 0.875rem;
 }
 
+/* A persona named in a clash: shows it in the review (tyne-chat/tyne#862). */
+.conflictHolder {
+	display: inline;
+	padding: 0;
+	border: 0;
+	border-radius: 0.25rem;
+	background: none;
+	color: inherit;
+	font: inherit;
+	font-weight: 600;
+	text-align: inherit;
+	text-decoration: underline;
+	text-underline-offset: 0.125rem;
+	cursor: pointer;
+}
+
+.conflictHolder:hover {
+	color: var(--text-link);
+}
+
 /* Your file → the app: the column heads and every pair of cards share this grid. */
 .pair {
 	display: grid;

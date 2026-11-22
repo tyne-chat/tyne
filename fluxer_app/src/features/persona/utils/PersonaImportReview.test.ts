@@ -12,6 +12,7 @@ import {
 	parseTagInput,
 	picturesNeeded,
 	type ReviewDecision,
+	reviewLivePersonas,
 	reviewNeedCount,
 	samePictureFile,
 	suggestTag,
@@ -132,7 +133,14 @@ describe('clashes between choices', () => {
 		const live = [{id: 'p1', name: 'Wren', persona_tags: [{prefix: 'w:'}], signature_emojis: []}];
 		expect(findConflicts(entries, new Map(), members, live, false)).toEqual([]);
 		expect(findConflicts(entries, new Map([[0, {choice: 'use_file'}]]), members, live, false)).toEqual([
-			{label: 'x:text', names: ['Wren', 'Xan']},
+			{
+				label: 'x:text',
+				names: ['Wren', 'Xan'],
+				holders: [
+					{name: 'Wren', side: 'file', entryIndex: 0, personaId: 'p1'},
+					{name: 'Xan', side: 'new', entryIndex: 1},
+				],
+			},
 		]);
 	});
 
@@ -152,6 +160,52 @@ describe('clashes between choices', () => {
 			action: 'add',
 			drop_tags: [{prefix: 'ke:'}],
 		});
+	});
+});
+
+describe('clashes only the import can fix (tyne-chat/tyne#862)', () => {
+	const {members} = buildPreviewRequest(
+		pkSource([pkMember(0, {name: 'Leena', id: 'lllll', personaTags: [{prefix: 'Lee:'}]})]),
+		'42',
+		MEDIA,
+	);
+	const entries: Array<PersonaImportPreviewEntry> = [{index: 0, kind: 'new'}];
+	const leena = {id: 'p9', name: 'Leena', persona_tags: [{prefix: 'Lee:'}], signature_emojis: []};
+
+	it("ignores a persona the page remembers that the server's list of live personas lacks", () => {
+		// The page missed the deletion: its list still has Leena, the server's does not.
+		const live = reviewLivePersonas([leena], {personas: [], live_persona_ids: ['p1']});
+		expect(live).toEqual([]);
+		expect(findConflicts(entries, new Map(), members, live, false)).toEqual([]);
+		// Nor does it hold the tag the member's field would check.
+		expect(tagHolder({prefix: 'Lee:'}, 0, entries, new Map(), members, live, false)).toBeNull();
+	});
+
+	it("keeps every persona when the server sends no list (an older server), and the preview's own live ones", () => {
+		const fresh = {...leena, id: 'p2', name: 'Moss', persona_tags: [{prefix: 'mo:'}]};
+		const gone = {...leena, id: 'p3', name: 'Gone', deleted_at: '2026-11-20T00:00:00Z'};
+		expect(reviewLivePersonas([leena], {personas: [fresh, gone]}).map((p) => p.id)).toEqual(['p9', 'p2']);
+		expect(reviewLivePersonas([leena], {personas: [fresh], live_persona_ids: ['p2']}).map((p) => p.id)).toEqual(['p2']);
+	});
+
+	it('reports no clash between two personas the import leaves as they are', () => {
+		const live = [leena, {...leena, id: 'p8', name: 'Lee'}];
+		expect(findConflicts([], new Map(), [], live, false)).toEqual([]);
+		// The member is skipped, so the import touches neither persona.
+		expect(findConflicts(entries, new Map([[0, {choice: 'skip'}]]), members, live, false)).toEqual([]);
+	});
+
+	it('reports a clash between a new member and a persona already in Tyne, saying which is which', () => {
+		expect(findConflicts(entries, new Map(), members, [leena], false)).toEqual([
+			{
+				label: 'Lee:text',
+				names: ['Leena', 'Leena'],
+				holders: [
+					{name: 'Leena', side: 'tyne', personaId: 'p9'},
+					{name: 'Leena', side: 'new', entryIndex: 0},
+				],
+			},
+		]);
 	});
 });
 
@@ -367,7 +421,14 @@ describe('keeping both versions of a differing persona', () => {
 		if (decision.choice !== 'add') throw new Error('Keep both is an add');
 		const clashing = new Map<number, ReviewDecision>([[0, {...decision, replacements: [{prefix: 'wr:'}]}]]);
 		expect(findConflicts(entries, clashing, members, live, false)).toEqual([
-			{label: 'wr:text', names: ['Wren', 'Wren (3)']},
+			{
+				label: 'wr:text',
+				names: ['Wren', 'Wren (3)'],
+				holders: [
+					{name: 'Wren', side: 'tyne', entryIndex: 0, personaId: 'p1'},
+					{name: 'Wren (3)', side: 'new', entryIndex: 0},
+				],
+			},
 		]);
 	});
 
