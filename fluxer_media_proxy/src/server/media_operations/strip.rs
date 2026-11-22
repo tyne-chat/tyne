@@ -130,7 +130,9 @@ async fn strip_av(
                         }));
                     }
                 };
-                media_process::strip_av_metadata(
+                // Fork: retries without the cover when the container cannot hold it
+                // (tyne-chat/tyne#873).
+                media_process::fork_strip_av_metadata(
                     &data,
                     container,
                     output.path(),

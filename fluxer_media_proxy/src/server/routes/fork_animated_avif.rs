@@ -49,7 +49,7 @@ pub(in crate::server) fn with_routes(router: Router<Arc<AppState>>) -> Router<Ar
 }
 
 #[derive(Debug, Deserialize)]
-struct ConversionRequest {
+pub(super) struct ConversionRequest {
     #[serde(rename = "type")]
     typ: String,
     base64: Option<String>,
@@ -60,7 +60,7 @@ struct ConversionRequest {
 }
 
 impl ConversionRequest {
-    fn into_media_input(self) -> Result<MediaInput, MediaFailure> {
+    pub(super) fn into_media_input(self) -> Result<MediaInput, MediaFailure> {
         match self.typ.as_str() {
             "base64" => Ok(MediaInput::Base64 {
                 data: self.base64.ok_or(MediaFailure::MediaInputMissingField)?,
@@ -185,7 +185,7 @@ async fn convert_handler(
 
 /// The internal bearer check of `routes/internal.rs`, which keeps its own private. Compared in
 /// constant time, as there.
-fn internal_auth_matches(headers: &HeaderMap, secret: &str) -> bool {
+pub(super) fn internal_auth_matches(headers: &HeaderMap, secret: &str) -> bool {
     let Some(auth) = headers
         .get(header::AUTHORIZATION)
         .and_then(|value| value.to_str().ok())
@@ -202,7 +202,7 @@ fn internal_auth_matches(headers: &HeaderMap, secret: &str) -> bool {
 }
 
 /// The body limit of `routes/internal.rs`'s private `read_limited_body`.
-async fn read_body(request: Request<Body>) -> Result<Bytes, StatusCode> {
+pub(super) async fn read_body(request: Request<Body>) -> Result<Bytes, StatusCode> {
     let body = to_bytes(
         request.into_body(),
         constants::MAX_INTERNAL_REQUEST_BODY_BYTES + 1,

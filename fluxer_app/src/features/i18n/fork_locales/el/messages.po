@@ -1965,6 +1965,10 @@ msgstr "Χρήση του {productName}"
 msgid "Using the file's"
 msgstr "Από το αρχείο"
 
+#. Accessible label and tooltip of the cover art shown in an audio attachment player; activating it opens the cover large.
+msgid "View cover"
+msgstr "Προβολή εξωφύλλου"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Προβολή των persona σας"

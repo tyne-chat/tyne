@@ -1965,6 +1965,10 @@ msgstr "Fes servir la de {productName}"
 msgid "Using the file's"
 msgstr "Es fa servir la del fitxer"
 
+#. Accessible label and tooltip of the cover art shown in an audio attachment player; activating it opens the cover large.
+msgid "View cover"
+msgstr "Mostra la portada"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Veure les teves persones"

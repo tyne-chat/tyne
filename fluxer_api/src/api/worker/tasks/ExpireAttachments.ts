@@ -8,6 +8,14 @@ import {getExpiryBucket} from '@app/api/utils/AttachmentDecay';
 import {getWorkerDependencies} from '@app/api/worker/WorkerContext';
 import type {WorkerTaskHandler} from '@pkgs/worker/src/contracts/WorkerTask';
 
+// Fork imports.
+
+import {
+	forkAttachmentCoverKey,
+	forkAttachmentWaveformKey,
+	forkMayHaveCover,
+} from '@app/api/channel/services/message/ForkAudioExtras';
+
 const BUCKET_LOOKBACK_DAYS = 3;
 const FETCH_LIMIT = 200;
 
@@ -58,6 +66,16 @@ export async function processExpiredAttachments(now = new Date()): Promise<void>
 					cdnUrl,
 					reason: 'attachment-decay-expired',
 				});
+				// Fork: an audio attachment's cover and stored waveform go with it (tyne-chat/tyne#873).
+				if (forkMayHaveCover(metadata.filename)) {
+					for (const keyOf of [forkAttachmentCoverKey, forkAttachmentWaveformKey]) {
+						await assetDeletionQueue.queueDeletion({
+							s3Key: keyOf(metadata.channel_id, metadata.attachment_id),
+							cdnUrl: null,
+							reason: 'attachment-decay-expired',
+						});
+					}
+				}
 				await repo.deleteExpiryRecord({
 					expiry_bucket: row.expiry_bucket,
 					expires_at: row.expires_at,

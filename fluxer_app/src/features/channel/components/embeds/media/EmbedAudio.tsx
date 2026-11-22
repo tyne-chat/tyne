@@ -17,7 +17,6 @@ import {MediaContextMenu} from '@app/features/ui/action_menu/MediaContextMenu';
 import * as ContextMenuCommands from '@app/features/ui/commands/ContextMenuCommands';
 import MobileLayout from '@app/features/ui/state/MobileLayout';
 import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
-import {InlineAudioPlayer} from '@app/features/voice/components/media_player/components/InlineAudioPlayer';
 import type {MessageAttachment} from '@fluxer/schema/src/domains/message/MessageResponseSchemas';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
@@ -25,6 +24,11 @@ import {TrashIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {type FC, useCallback} from 'react';
+
+// Fork imports.
+
+import {forkAudioCardWidth} from '@app/features/channel/components/embeds/media/fork_audio/ForkAudioLayout';
+import {ForkAudioPlayer} from '@app/features/channel/components/embeds/media/fork_audio/ForkAudioPlayer';
 
 const DELETE_DESCRIPTOR = msg({
 	message: 'Delete',
@@ -134,6 +138,8 @@ const EmbedAudio: FC<EmbedAudioProps> = observer(
 					maxWidth: `min(100%, ${remFromPx(ATTACHMENT_CARD_WIDTH)})`,
 					minWidth: `min(${remFromPx(ATTACHMENT_CARD_WIDTH)}, 100%)`,
 				};
+		// Fork: the audio card is wider, to fit the cover beside the player (tyne-chat/tyne#873).
+		Object.assign(containerStyles, forkAudioCardWidth(isMobile));
 		const {showDeleteButton, showDownloadButton} = getMediaButtonVisibility(
 			canFavorite,
 			isPreview ? undefined : message,
@@ -155,7 +161,15 @@ const EmbedAudio: FC<EmbedAudioProps> = observer(
 						</button>
 					</Tooltip>
 				)}
-				<InlineAudioPlayer
+				{/* Fork: the audio player with cover art and a waveform (tyne-chat/tyne#873). */}
+				<ForkAudioPlayer
+					message={message}
+					messageId={messageId}
+					channelId={channelId}
+					attachmentId={attachmentId}
+					embedIndex={embedIndex}
+					snapshotIndex={snapshotIndex}
+					attachmentUrl={src}
 					src={effectiveSrc}
 					title={defaultName}
 					fileSize={fileSize}
