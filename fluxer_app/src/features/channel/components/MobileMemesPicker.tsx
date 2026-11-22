@@ -7,7 +7,6 @@ import {useShouldAnimate} from '@app/features/app/hooks/useShouldAnimate';
 import styles from '@app/features/channel/components/GifPicker.module.css';
 import memeStyles from '@app/features/channel/components/MemesPicker.module.css';
 import {buildDeleteMemeConfirmation} from '@app/features/channel/components/pickers/memes/DeleteMemeConfirmation';
-import {formatDuration, getFileExtension} from '@app/features/channel/components/pickers/memes/MediaFormat';
 import {type ContentType, MemesPickerHeader} from '@app/features/channel/components/pickers/memes/MemesPickerHeader';
 import {useFilteredMemes} from '@app/features/channel/components/pickers/memes/useFilteredMemes';
 import {PickerEmptyState} from '@app/features/channel/components/shared/PickerEmptyState';
@@ -29,17 +28,19 @@ import * as ModalCommands from '@app/features/ui/commands/ModalCommands';
 import {modal} from '@app/features/ui/commands/ModalCommands';
 import {Scroller, type ScrollerHandle} from '@app/features/ui/components/Scroller';
 import {MenuBottomSheet, type MenuItemType} from '@app/features/ui/menu_bottom_sheet/MenuBottomSheet';
-import {Tooltip} from '@app/features/ui/tooltip/Tooltip';
-import {getFormattingLocale} from '@app/features/user/utils/LocaleUtils';
 import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
-import {MusicNoteIcon, SmileySadIcon} from '@phosphor-icons/react';
+import {SmileySadIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {AnimatePresence} from 'framer-motion';
 
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+
+// Fork imports.
+
+import {ForkSavedAudioTile} from '@app/features/channel/components/pickers/memes/ForkSavedAudioTile';
 
 const NO_SAVED_MEDIA_DESCRIPTOR = msg({
 	message: 'No saved media',
@@ -368,28 +369,13 @@ const GridItem = observer(
 								data-flx="channel.mobile-memes-picker.grid-item.gif--2"
 							/>
 						)}
+						{/* Fork: the cover or the waveform of a saved audio file (tyne-chat/tyne#879). */}
 						{isAudio && (
-							<div className={memeStyles.audioCard} data-flx="channel.mobile-memes-picker.grid-item.div--2">
-								<MusicNoteIcon
-									className={memeStyles.audioIcon}
-									data-flx="channel.mobile-memes-picker.grid-item.music-note-icon"
-								/>
-								<div className={memeStyles.audioMeta} data-flx="channel.mobile-memes-picker.grid-item.div--3">
-									{duration && (
-										<div className={memeStyles.audioDuration} data-flx="channel.mobile-memes-picker.grid-item.div--4">
-											{formatDuration(duration, getFormattingLocale())}
-										</div>
-									)}
-									<Tooltip text={filename} data-flx="channel.mobile-memes-picker.grid-item.tooltip">
-										<div className={memeStyles.audioFilename} data-flx="channel.mobile-memes-picker.grid-item.div--5">
-											{filename}
-										</div>
-									</Tooltip>
-									<div className={memeStyles.audioBadge} data-flx="channel.mobile-memes-picker.grid-item.div--6">
-										{getFileExtension(filename, contentType)}
-									</div>
-								</div>
-							</div>
+							<ForkSavedAudioTile
+								meme={{filename, contentType, duration: duration ?? null}}
+								memeUrl={isVisible ? (memeUrl ?? '') : ''}
+								data-flx="channel.mobile-memes-picker.grid-item.fork-saved-audio-tile"
+							/>
 						)}
 					</div>
 				</div>
