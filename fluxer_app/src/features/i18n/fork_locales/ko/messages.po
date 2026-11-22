@@ -224,6 +224,11 @@ msgstr "{items} 없이 돌아왔어요: 이제 다른 페르소나가 사용하�
 msgid "Can be set everywhere at once"
 msgstr "모든 곳에 한 번에 설정할 수 있음"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "취소"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "페르소나 변경"
@@ -947,10 +952,6 @@ msgstr "추가 정보"
 msgid "Most used"
 msgstr "많이 사용한 순"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "휴지통으로 이동"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "나만"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "@를 입력하거나 검색할 때 내 계정에서만 찾을 수 있어요."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "<0>시스템 설정</0>을 열고 <1>개인정보 보호 및 보안</1>으로 이동하세요. 아래로 스크롤해 <2>그래도 열기</2>를 클릭하세요. 이 작업은 한 번만 하면 돼요."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "그래도 열기"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "열기"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "입력한 내용"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "/{name} 뒤에 입력하는 내용은 한 줄이어야 합니다."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "macOS에서 Tyne이 열리지 않았다고 표시되면 <0>완료</0>를 클릭하세요."
-
 msgid "Where the signal bar appears"
 msgstr "시그널 바가 표시되는 곳"
 
@@ -2101,6 +2095,10 @@ msgstr "개 항목"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "{count}개 연결"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "macOS가 인터넷에서 다운로드한 앱을 열지 묻습니다. <0>열기</0>를 클릭하세요. 한 번만 묻습니다."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "페르소나 {total}개 중 {shown}개"
 msgid "— Today at 12:00 PM"
 msgstr "— 오늘 오후 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "‘Tyne’이(가) 열리지 않음"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "‘Tyne’이(가) 차단되었습니다."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "‘Tyne’은(는) 인터넷에서 다운로드된 앱입니다. 정말로 여시겠습니까?"
