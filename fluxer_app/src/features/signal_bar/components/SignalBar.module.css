@@ -137,6 +137,7 @@
 
 .tooltipLabel {
 	font-weight: 600;
+	overflow-wrap: anywhere;
 }
 
 .caret {
