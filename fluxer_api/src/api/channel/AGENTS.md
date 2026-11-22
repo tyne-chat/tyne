@@ -134,6 +134,13 @@ Fork-owned: `controllers/ChannelPersonaMentionController.ts` (one line in `contr
   (`trackAttachmentsAddedByEdit` in `MessagePersistenceService.ts`, tyne-chat/tyne#289). Without the
   record, a read dates it from the message, and `ExpireAttachments` deletes it on a message older
   than the file's lifetime.
+- `AttachmentProcessingService.isExplicitStoredMedia` answers "not explicit" without asking the media
+  proxy when the proxy runs no NSFW classifier (`services/message/ForkNsfwClassifier.ts`,
+  tyne-chat/tyne#888). Forwards, crossposts and favourite media sent as a message probe stored files
+  only for that answer. The API reads the media proxy's own setting, `FLUXER_NSFW_SERVICE_ENDPOINT`:
+  given and empty means no classifier; not given, the API probes as upstream does. Deployments pass
+  the variable to the api and worker as well as to the media proxy. Tests:
+  `tests/ForkNsfwClassifierOff.test.ts`.
 - Smaller hand-overs: `MessageEditService.ts`, `MessagePersistenceService.ts`, `MessageRepository`,
   `MessageAuthorRepository.anonymizeMessage` (account deletion), typing, the thread files (imports
   under `// Fork: threads started as a persona.`, elsewhere `// Fork imports.`), and an `orderBy` in

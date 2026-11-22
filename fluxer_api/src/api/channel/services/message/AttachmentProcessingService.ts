@@ -37,6 +37,7 @@ import {temporaryFile} from 'tempy';
 
 import {forkConvertAnimatedAvifUpload} from '@app/api/channel/services/message/ForkAnimatedAvifConversion';
 import {forkAddAudioExtras} from '@app/api/channel/services/message/ForkAudioExtras';
+import {forkNsfwClassifierOff} from '@app/api/channel/services/message/ForkNsfwClassifier';
 
 const ATTACHMENT_PROCESSING_CONCURRENCY = 2;
 const METADATA_PROBE_DEGRADED_CONTEXT = 'message_attachment';
@@ -525,6 +526,8 @@ export class AttachmentProcessingService {
 		key: string;
 		nsfwMode: MediaProxyNsfwMode;
 	}): Promise<boolean> {
+		// Fork: without a classifier the probe can only answer "not explicit" (tyne-chat/tyne#888).
+		if (forkNsfwClassifierOff()) return false;
 		const {contentType, bucket, key, nsfwMode} = params;
 		if (!contentType || !isSupportedMediaContentType(contentType)) {
 			return false;
