@@ -749,6 +749,8 @@ export class PersonaService {
 			personas: all.filter((p) => plan.referencedIds.has(p.id.toString())).map((p) => p.toResponse()),
 			display_tag: {decision, current_text: currentText},
 			untouched: plan.untouched,
+			// The page's own list can hold personas gone from here (tyne-chat/tyne#862).
+			live_persona_ids: live.map((p) => p.id.toString()),
 			needs_review:
 				decision === 'ask' || plan.entries.some((entry) => entry.kind !== 'new' && entry.kind !== 'up_to_date'),
 		};

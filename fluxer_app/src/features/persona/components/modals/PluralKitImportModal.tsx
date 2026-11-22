@@ -44,6 +44,7 @@ import {
 	type ReviewDecision,
 	type ReviewMember,
 	type ReviewSummary,
+	reviewLivePersonas,
 	reviewNeedCount,
 	sourceKindOf,
 	summarize,
@@ -242,7 +243,7 @@ const STOP_IMPORT_BODY_DESCRIPTOR = msg({
 	message: 'Your choices for these members will be lost, and nothing is imported.',
 	comment: 'Text of the confirmation when the persona import review is closed before importing',
 });
-const STOP_IMPORT_PRIMARY_DESCRIPTOR = msg({
+const STOP_IMPORTING_DESCRIPTOR = msg({
 	message: 'Stop importing',
 	comment: 'Button that closes the persona import review without importing',
 });
@@ -309,12 +310,12 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 	const members = source?.system.members ?? [];
 	const namedCount = members.filter((member) => member.name !== null).length;
 
-	// The account's personas with the live ones the preview names, as the review checks tags against.
+	// The account's personas with the live ones the preview names, less those the server no longer has,
+	// as the review checks tags against.
 	const conflicts = useMemo(() => {
 		if (!preview || !source) return [];
-		const live = new Map(PersonaStore.personas.map((persona) => [persona.id, persona]));
-		for (const persona of preview.personas) if (!persona.deleted_at) live.set(persona.id, persona);
-		return findConflicts(preview.entries, decisions, reviewMembers, [...live.values()], source.kind === 'bundle');
+		const live = reviewLivePersonas(PersonaStore.personas, preview);
+		return findConflicts(preview.entries, decisions, reviewMembers, live, source.kind === 'bundle');
 	}, [preview, source, decisions, reviewMembers, PersonaStore.personas]);
 
 	const handleFileChosen = async (file: File) => {
@@ -598,6 +599,8 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 	const busy = step === 'checking' || step === 'importing';
 	// While the review is open, a click outside, Escape or the close button asks first: the review can
 	// hold many choices (tyne-chat/tyne#564). While importing, the dialog cannot be closed.
+	// "Keep reviewing" is the primary button because ConfirmModal focuses the primary one: with "Stop
+	// importing" there, Escape and then Space or Enter threw the review away (tyne-chat/tyne#755).
 	const requestClose = () => {
 		if (busy) return;
 		if (step !== 'review') {
@@ -609,10 +612,10 @@ export const PluralKitImportModal: React.FC<{onClose: () => void}> = observer(({
 				<ConfirmModal
 					title={i18n._(STOP_IMPORT_TITLE_DESCRIPTOR)}
 					description={i18n._(STOP_IMPORT_BODY_DESCRIPTOR)}
-					primaryText={i18n._(STOP_IMPORT_PRIMARY_DESCRIPTOR)}
-					primaryVariant="danger"
-					secondaryText={i18n._(KEEP_REVIEWING_DESCRIPTOR)}
-					onPrimary={() => {
+					primaryText={i18n._(KEEP_REVIEWING_DESCRIPTOR)}
+					onPrimary={() => {}}
+					secondaryText={i18n._(STOP_IMPORTING_DESCRIPTOR)}
+					onSecondary={() => {
 						if (ownModalKey != null) ModalCommands.popWithKey(ownModalKey);
 						else onClose();
 					}}
