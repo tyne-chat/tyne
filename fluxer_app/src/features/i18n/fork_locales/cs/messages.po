@@ -224,6 +224,11 @@ msgstr "Vrátila se bez {items}: teď je má jiná persona."
 msgid "Can be set everywhere at once"
 msgstr "Lze nastavit všude najednou"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "Zrušit"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Změnit personu"
@@ -947,10 +952,6 @@ msgstr "Další informace"
 msgid "Most used"
 msgstr "Nejpoužívanější"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "Přesunout do koše"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "Jen vy"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "Při psaní @ nebo hledání ji najde jen váš účet."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "Otevřete <0>Nastavení systému</0> a potom <1>Soukromí a zabezpečení</1>. Sjeďte dolů a klikněte na <2>Přesto otevřít</2>. Stačí to udělat jen jednou."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "Přesto otevřít"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "Otevřít"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "Co napíšou"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "Co napíšete za /{name}, se musí vejít na jeden řádek."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "Když macOS oznámí, že Tyne nebyl otevřen, klikněte na <0>Hotovo</0>."
-
 msgid "Where the signal bar appears"
 msgstr "Kde se lišta signálů zobrazuje"
 
@@ -2101,6 +2095,10 @@ msgstr "položek"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "propojí {count}"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "macOS se zeptá, zda otevřít aplikaci staženou z internetu. Klikněte na <0>Otevřít</0>. Zeptá se jen jednou."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{shown} z {total} person"
 msgid "— Today at 12:00 PM"
 msgstr "— Dnes ve 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "Aplikace „Tyne“ nebyla otevřena"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "Aplikace „Tyne“ byla zablokována."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "„Tyne“ je aplikace stažená z internetu. Opravdu ji chcete otevřít?"

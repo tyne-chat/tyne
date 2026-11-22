@@ -224,6 +224,11 @@ msgstr "A revenit fără {items}: acum le are altă persona."
 msgid "Can be set everywhere at once"
 msgstr "Poate fi setat peste tot deodată"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "Anulează"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Schimbă persona"
@@ -947,10 +952,6 @@ msgstr "Mai multe informații"
 msgid "Most used"
 msgstr "Cele mai folosite"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "Mută în coș"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "Doar tu"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "Doar contul tău o găsește când tastezi @ sau cauți."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "Deschide <0>Configurări sistem</0>, apoi <1>Confidențialitate și securitate</1>. Derulează în jos și dă clic pe <2>Deschide oricum</2>. Faci asta o singură dată."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "Deschide oricum"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "Deschide"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "Ce scriu"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "Ce scrii după /{name} trebuie să încapă pe un singur rând."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "Când macOS spune că Tyne nu a fost deschis, dă clic pe <0>Gata</0>."
-
 msgid "Where the signal bar appears"
 msgstr "Unde apare bara de semnale"
 
@@ -2101,6 +2095,10 @@ msgstr "elemente"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "conecta {count}"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "macOS întreabă dacă vrei să deschizi o aplicație descărcată de pe internet. Dă clic pe <0>Deschide</0>. Întreabă o singură dată."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{shown} din {total} personas"
 msgid "— Today at 12:00 PM"
 msgstr "— Astăzi la 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "„Tyne” nu a fost deschis"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "„Tyne” a fost blocat."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "„Tyne” este o aplicație descărcată de pe internet. Sigur doriți să o deschideți?"

@@ -224,6 +224,11 @@ msgstr "Đã trở lại nhưng không có {items}: một persona khác hiện �
 msgid "Can be set everywhere at once"
 msgstr "Có thể đặt ở mọi nơi cùng lúc"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "Hủy"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Đổi persona"
@@ -947,10 +952,6 @@ msgstr "Thông tin thêm"
 msgid "Most used"
 msgstr "Dùng nhiều nhất"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "Chuyển vào Thùng rác"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "Chỉ bạn"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "Chỉ tài khoản của bạn tìm thấy nó khi gõ @ hoặc tìm kiếm."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "Mở <0>Cài đặt hệ thống</0>, rồi đến <1>Quyền riêng tư & Bảo mật</1>. Cuộn xuống và nhấp vào <2>Vẫn mở</2>. Bạn chỉ cần làm việc này một lần."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "Vẫn mở"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "Mở"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "Nội dung họ gõ"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "Nội dung bạn gõ sau /{name} phải nằm trên một dòng."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "Khi macOS báo Tyne chưa được mở, hãy nhấp vào <0>Xong</0>."
-
 msgid "Where the signal bar appears"
 msgstr "Nơi hiển thị thanh tín hiệu"
 
@@ -2101,6 +2095,10 @@ msgstr "mục"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "liên kết {count}"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "macOS sẽ hỏi bạn có muốn mở ứng dụng được tải về từ internet không. Hãy nhấp vào <0>Mở</0>. macOS chỉ hỏi một lần."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{shown} / {total} persona"
 msgid "— Today at 12:00 PM"
 msgstr "— Hôm nay lúc 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "“Tyne” không được mở"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "“Tyne” đã bị chặn."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "“Tyne” là ứng dụng được tải về từ Internet. Bạn có chắc chắn muốn mở ứng dụng này không?"

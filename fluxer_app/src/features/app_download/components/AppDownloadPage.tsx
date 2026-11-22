@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 // Fork: the public `/download` page (tyne-chat/tyne#242). It guesses the visitor's platform, offers
-// that app first and shows how to install it, with the warnings Windows and macOS show for builds
-// that are not code-signed or notarized. The buttons are the app proxy's fixed links, which
+// that app first and shows how to install it: the SmartScreen warning Windows shows for a build that
+// is not code-signed, and the question macOS asks the first time a notarized app opens (every macOS
+// release is notarized since tyne-chat/tyne#867). The buttons are the app proxy's fixed links, which
 // redirect to the newest release's file; the page itself sends no request.
 //
 // `?get=<target>` (from the "Get the Tyne app" panel) starts that download once on arrival and
@@ -313,11 +314,11 @@ function MacSteps(): React.ReactElement {
 					</Trans>
 				</p>
 			</Step>
-			<Step number={2} warning data-flx="app-download.app-download-page.mac-steps.step--2">
+			<Step number={2} data-flx="app-download.app-download-page.mac-steps.step--2">
 				<p className={styles.stepText} data-flx="app-download.app-download-page.mac-steps.step-text--2">
-					<Trans comment="Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.">
-						When macOS says Tyne wasn't opened, click{' '}
-						<strong data-flx="app-download.app-download-page.mac-steps.strong--2">Done</strong>.
+					<Trans comment="Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.">
+						macOS asks whether to open an app downloaded from the internet. Click{' '}
+						<strong data-flx="app-download.app-download-page.mac-steps.strong--2">Open</strong>. It only asks once.
 					</Trans>
 				</p>
 				<div
@@ -326,49 +327,30 @@ function MacSteps(): React.ReactElement {
 					data-flx="app-download.app-download-page.mac-steps.sketch"
 				>
 					<span className={styles.sketchTitle} data-flx="app-download.app-download-page.mac-steps.sketch-title">
-						<Trans comment="Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.">
-							“Tyne” Not Opened
+						<Trans comment="macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.">
+							“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?
 						</Trans>
 					</span>
 					<span className={styles.sketchButtons} data-flx="app-download.app-download-page.mac-steps.sketch-buttons">
-						<span
-							className={clsx(styles.sketchButton, styles.sketchPrimary, styles.highlight)}
-							data-flx="app-download.app-download-page.mac-steps.sketch-button"
-						>
-							<Trans comment="Button in macOS' warning that an app was not opened: use macOS' own wording.">Done</Trans>
-						</span>
-						<span className={styles.sketchButton} data-flx="app-download.app-download-page.mac-steps.sketch-button--2">
-							<Trans comment="Button in macOS' warning that an app was not opened: use macOS' own wording.">
-								Move to Trash
+						<span className={styles.sketchButton} data-flx="app-download.app-download-page.mac-steps.sketch-button">
+							<Trans
+								context="macos-first-open-dialog"
+								comment="Button in macOS' question before opening a downloaded app: use macOS' own wording."
+							>
+								Cancel
 							</Trans>
 						</span>
-					</span>
-				</div>
-			</Step>
-			<Step number={3} warning data-flx="app-download.app-download-page.mac-steps.step--3">
-				<p className={styles.stepText} data-flx="app-download.app-download-page.mac-steps.step-text--3">
-					<Trans comment="Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.">
-						Open <strong data-flx="app-download.app-download-page.mac-steps.strong--3">System Settings</strong>, then{' '}
-						<strong data-flx="app-download.app-download-page.mac-steps.strong--4">Privacy & Security</strong>. Scroll
-						down and click <strong data-flx="app-download.app-download-page.mac-steps.strong--5">Open Anyway</strong>.
-						You only do this once.
-					</Trans>
-				</p>
-				<div
-					className={clsx(styles.sketch, styles.macSketch, styles.sketchRow)}
-					aria-hidden="true"
-					data-flx="app-download.app-download-page.mac-steps.sketch--2"
-				>
-					<span data-flx="app-download.app-download-page.mac-steps.span">
-						<Trans comment="Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.">
-							“Tyne” was blocked.
-						</Trans>
-					</span>
-					<span
-						className={clsx(styles.sketchButton, styles.highlight)}
-						data-flx="app-download.app-download-page.mac-steps.sketch-button--3"
-					>
-						<Trans comment="Button in macOS' Privacy & Security settings: use macOS' own wording.">Open Anyway</Trans>
+						<span
+							className={clsx(styles.sketchButton, styles.sketchPrimary, styles.highlight)}
+							data-flx="app-download.app-download-page.mac-steps.sketch-button--2"
+						>
+							<Trans
+								context="macos-first-open-dialog"
+								comment="Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above."
+							>
+								Open
+							</Trans>
+						</span>
 					</span>
 				</div>
 			</Step>

@@ -41,9 +41,9 @@ on:
         type: choice
         options: [all, windows, linux, macos]
       macos_signing:
-        description: "ad-hoc (the default since 2026-10-25, while Apple's notary service holds the team's submissions): publish the build's ad-hoc signed macOS files. developer-id: sign with the Developer ID and notarize."
+        description: "developer-id (the default since 2026-11-21, tyne-chat/tyne#867): sign with the Developer ID and notarize; if Apple's check fails, the release has no macOS files. ad-hoc: publish the build's ad-hoc signed macOS files, only if Apple's notary service is down (the download page's Mac steps assume a notarized app)."
         required: false
-        default: ad-hoc
+        default: developer-id
         type: choice
         options: [developer-id, ad-hoc]
   push:
