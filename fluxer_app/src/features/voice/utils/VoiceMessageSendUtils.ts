@@ -7,10 +7,10 @@ import {CloudUpload} from '@app/features/messaging/upload/CloudUpload';
 import {Logger} from '@app/features/platform/utils/AppLogger';
 import Users from '@app/features/user/state/Users';
 import {MessageFlags, MessageStates, MessageTypes} from '@fluxer/constants/src/ChannelConstants';
-import * as SnowflakeUtils from '@fluxer/snowflake/src/SnowflakeUtils';
 
 // Fork imports.
 
+import {newLocalMessageId} from '@app/features/messaging/utils/ForkLocalMessageId';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
@@ -31,7 +31,7 @@ export async function sendVoiceMessage(params: SendVoiceMessageParams): Promise<
 	uploaded.waveform = waveform;
 	uploaded.duration = duration;
 	uploaded.isVoiceMessage = true;
-	const nonce = SnowflakeUtils.fromTimestamp(Date.now());
+	const nonce = newLocalMessageId();
 	CloudUpload.claimAttachmentsForMessage(channelId, nonce, [uploaded], {
 		content: '',
 		flags: MessageFlags.VOICE_MESSAGE,
