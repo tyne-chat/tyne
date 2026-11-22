@@ -3,6 +3,10 @@
 import type {CaptureValue} from '@app/api/database/capture/CaptureCodec';
 import {CAPTURE_SUBJECT_PREFIX, type CaptureProcess, type CaptureScope} from '@app/api/database/capture/CaptureRecords';
 
+// Fork imports.
+
+import {TYNE_TABLES_LEFT_OUT} from '@app/api/database/capture/ForkCdcPolicy';
+
 export type CdcOutcome = 'applied' | 'unknown';
 
 interface CdcKey {
@@ -185,6 +189,7 @@ export const CDC_TABLES: ReadonlySet<string> = new Set([
 ]);
 
 export const CDC_SKIPPED: ReadonlySet<string> = new Set([
+	...TYNE_TABLES_LEFT_OUT,
 	'active_threads_by_guild',
 	'admin_api_keys_by_creator',
 	'admin_archives_by_requester',
