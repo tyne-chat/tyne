@@ -85,6 +85,15 @@ under `composer/` unless stated.
   `PersonaComposerPill` and the send strips the tag (`persona/AGENTS.md`). Match tags against the
   wire, never the display, which shows emoji as `:name:` and mentions as `@Name`.
 
+## Stickers, saved media and GIFs in the autocomplete (fork)
+
+Picking one sends it at once as a message of its own, and upstream then empties the composer. So
+`AutocompleteMediaDraftGate.ts` lists them (after `:`, `/sticker`, `/saved`, `/gif`) only while the
+text outside the query is blank or a lone persona tag the send uses up (messaging's
+`isDraftUsedUpByExpression`, tyne-chat/tyne#122), and `handleSelect` checks again, because the menu
+is rebuilt only when the text up to the caret changes: a pick after text was added does nothing
+(tyne-chat/tyne#770). Emoji are untouched; `LexicalRichInput` lists no media at all.
+
 ## Timestamps, caret anchors, shortcuts (fork)
 
 - **`ComposerTimestampNode`** is a plain `DecoratorNode`: the highlighter sets no `literal` or
@@ -128,14 +137,15 @@ under `composer/` unless stated.
 
 ## Where the fork's code sits
 
-Fork-owned: the timestamp and anchor files, `useAutocompletePersonaSearch.ts`, six tests. Inside
-upstream's files, each under `// Fork imports.`:
+Fork-owned: the timestamp and anchor files, `useAutocompletePersonaSearch.ts`,
+`AutocompleteMediaDraftGate.ts`, eight tests. Inside upstream's files, each under
+`// Fork imports.`:
 
 | File | Fork change |
 |---|---|
 | `LexicalComposerInput.tsx` (upstream's most changed) | theme key, two nodes, two `register*` calls, `insertTimestamp`, timestamp branches in the pointer handlers |
 | `LexicalRichInput.tsx` | `insertTimestamp` and `getEditor` on its handle |
-| `useLexicalAutocomplete.ts` | `buildRecentPersonaOptions`, persona merge in the `mention` case, `optionToSlotPayload`, `optionToPayload` |
+| `useLexicalAutocomplete.ts` | `buildRecentPersonaOptions`, persona merge in the `mention` case, `optionToSlotPayload`, `optionToPayload`, the media gate (one line each in the menu and `handleSelect`) |
 | `nodes/ComposerMentionPill.tsx`, `nodes/ComposerMentionNode.tsx` | persona branch (in the persona's colour), plain-mode name; `getPersonaId`, two props |
 | `ComposerSerialization.ts`, `composerOffsets.ts`, `ComposerInsertion.ts`, `ComposerHandle.ts` | persona form; timestamp and anchor cases; `timestamp` payload (built only by a test) |
 | `ComposerMarkdownHighlight.ts`, `ComposerBlockquote.ts`, `ComposerEmojiShortcode.ts`, `ComposerPlainText.ts` | anchor checks inside upstream's conditions |
@@ -169,9 +179,11 @@ Before adding one, answer the root `AGENTS.md`'s "Network calls".
   messages, private ones skipped, a pick's wire), `useAutocompletePersonaSearch.test.ts` (debounce,
   errors, ranking; mocks `http` with fake timers, the shape for counting requests),
   `ComposerTimestamp.test.ts`, `ComposerEmojiCaret.test.ts` (anchors),
-  `ComposerMarkdownShortcuts.test.ts`. Upstream: `useAutocompleteMemberSearch.test.tsx`. Two fork
-  names could collide with upstream's (`useLexicalAutocomplete`, `ComposerMarkdownShortcuts`); name
-  new ones `<File>Persona.test.ts` or similar.
+  `ComposerMarkdownShortcuts.test.ts`, `AutocompleteMediaDraftGate.test.ts` and
+  `useLexicalAutocompleteMediaDraft.test.tsx` (the media gate). Upstream:
+  `useAutocompleteMemberSearch.test.tsx`. Two fork names could collide with upstream's
+  (`useLexicalAutocomplete`, `ComposerMarkdownShortcuts`); name new ones `<File>Persona.test.ts` or
+  similar.
 - End to end: `e2e/web/desktop/persona-mentions.spec.ts`, `persona-mention-pipeline.spec.ts`,
   `channel-timestamp-pills.spec.ts`.
 - Not covered: request counts (pill, persona search), fetched personas reaching the menu, the pill
