@@ -6,7 +6,8 @@
 	bottom: 0;
 	inset-inline-start: 0;
 	width: 0.9375rem;
-	z-index: var(--z-index-elevated-3, 40);
+	/* Fork: see tyne-chat/tyne#401 (peek stacking). */
+	z-index: 40;
 	pointer-events: auto;
 	background: transparent;
 }
@@ -17,7 +18,8 @@
 	bottom: 0;
 	inset-inline-end: 0;
 	width: 0.5rem;
-	z-index: var(--z-index-elevated-3, 40);
+	/* Fork: see tyne-chat/tyne#401 (peek stacking). */
+	z-index: 40;
 	pointer-events: auto;
 	background: transparent;
 }
