@@ -224,6 +224,11 @@ msgstr "Kembali tanpa {items}: sekarang dimiliki persona lain."
 msgid "Can be set everywhere at once"
 msgstr "Bisa diatur di mana saja sekaligus"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "Batal"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Ganti persona"
@@ -947,10 +952,6 @@ msgstr "Info selengkapnya"
 msgid "Most used"
 msgstr "Paling sering dipakai"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "Pindahkan ke Tempat Sampah"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "Hanya kamu"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "Hanya akunmu yang menemukannya saat mengetik @ atau mencari."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "Buka <0>Pengaturan Sistem</0>, lalu <1>Privasi & Keamanan</1>. Gulir ke bawah dan klik <2>Tetap Buka</2>. Ini hanya perlu dilakukan sekali."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "Tetap Buka"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "Buka"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "Yang mereka ketik"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "Yang Anda ketik setelah /{name} harus muat dalam satu baris."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "Saat macOS memberi tahu bahwa Tyne tidak dibuka, klik <0>Selesai</0>."
-
 msgid "Where the signal bar appears"
 msgstr "Tempat bilah sinyal ditampilkan"
 
@@ -2101,6 +2095,10 @@ msgstr "item"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "menautkan {count}"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "macOS menanyakan apakah app yang diunduh dari internet akan dibuka. Klik <0>Buka</0>. Pertanyaan ini hanya muncul sekali."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{shown} dari {total} persona"
 msgid "— Today at 12:00 PM"
 msgstr "— Hari ini pukul 12.00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "“Tyne” Tidak Dibuka"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "“Tyne” diblokir."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "“Tyne” adalah app yang diunduh dari Internet. Anda yakin ingin membukanya?"
