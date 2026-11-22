@@ -7,7 +7,7 @@ import {schemaMetadata} from '@fluxer/schema/src/SchemaMetadata';
 import {z} from 'zod';
 
 export const MAX_SIGNAL_BAR_SIGNALS = 50;
-export const MAX_SIGNAL_LABEL_LENGTH = 32;
+export const MAX_SIGNAL_LABEL_LENGTH = 256;
 
 const SignalIdSchema = z
 	.string()
