@@ -39851,7 +39851,7 @@
 									"maxLength": 64,
 									"description": "Emoji name or Unicode character"
 								},
-								"label": {"anyOf": [{"type": "string", "maxLength": 32}, {"type": "null"}]},
+								"label": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
 								"everywhere": {
 									"description": "Whether the signal may be set everywhere at once; omit to keep the current setting",
 									"type": ["boolean", "null"]
@@ -49556,7 +49556,7 @@
 					},
 					"animated": {"type": "boolean", "description": "Whether the emoji is animated"},
 					"label": {
-						"anyOf": [{"type": "string", "maxLength": 32}, {"type": "null"}],
+						"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}],
 						"description": "Optional label shown instead of the emoji name"
 					},
 					"everywhere": {
