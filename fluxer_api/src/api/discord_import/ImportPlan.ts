@@ -31,6 +31,7 @@ import type {
 	GuildID,
 	MessageID,
 	PersonaID,
+	RoleID,
 	StickerID,
 	UserID,
 } from '@app/api/BrandedTypes';
@@ -150,6 +151,8 @@ interface PlanSnapshot {
 	timestamp: string;
 	edited_timestamp: string | null;
 	mention_user_ids: Array<string>;
+	/** Tyne roles it mentions; plans made before 2026-11-21 have none. */
+	mention_role_ids?: Array<string>;
 	attachments: Array<PlanAttachment>;
 	embeds: Array<PlanEmbed>;
 }
@@ -164,6 +167,12 @@ interface PlanMessage {
 	pinned_timestamp: string | null;
 	content: string | null;
 	mention_user_ids: Array<string>;
+	/**
+	 * Tyne roles the text mentions as real mentions (the review tool's Roles tab), so they highlight for the
+	 * role's members as on Tyne. Nothing is notified: the import never queues the send path's mention job.
+	 * Plans made before 2026-11-21 have none.
+	 */
+	mention_role_ids?: Array<string>;
 	mention_everyone: boolean;
 	/** A reply's target; for a "started a thread" notice, the thread (no message). */
 	reference: {message_id: string | null; channel_id: string; guild_id: string | null} | null;
@@ -371,6 +380,7 @@ const MESSAGE_FIELDS = [
 	'pinned_timestamp',
 	'mention_everyone',
 	'mention_users',
+	'mention_roles',
 	'embeds',
 	'sticker_items',
 	'message_reference',
@@ -432,7 +442,6 @@ async function writeDmThreadNotice(
 			webhook_name: null,
 			webhook_avatar_hash: null,
 			flags: 0,
-			mention_roles: null,
 			mention_channels: null,
 			attachments: null,
 			message_snapshots: null,
@@ -454,6 +463,7 @@ function messageFields(m: PlanMessage, channelId: ChannelID): MessageFields {
 		pinned_timestamp: m.pinned_timestamp ? new Date(m.pinned_timestamp) : null,
 		mention_everyone: m.mention_everyone,
 		mention_users: m.mention_user_ids.length ? new Set(m.mention_user_ids.map((u) => id<UserID>(u))) : null,
+		mention_roles: m.mention_role_ids?.length ? new Set(m.mention_role_ids.map((r) => id<RoleID>(r))) : null,
 		embeds: m.embeds.length ? m.embeds.map((e) => toEmbed(e, channelId)) : null,
 		sticker_items: m.sticker_items.length
 			? m.sticker_items.map((s) => ({sticker_id: id<StickerID>(s.sticker_id), name: s.name, animated: s.animated}))
@@ -471,6 +481,7 @@ function plannedSnapshot(s: PlanSnapshot | null | undefined, channelId: ChannelI
 		timestamp: new Date(s.timestamp),
 		edited_timestamp: s.edited_timestamp ? new Date(s.edited_timestamp) : null,
 		mention_users: new Set(s.mention_user_ids),
+		mention_roles: new Set(s.mention_role_ids ?? []),
 		embeds: s.embeds.map((e) => toEmbed(e, channelId)),
 		attachments: s.attachments.map((a) => ({id: a.attachment_id, filename: storedFilename(a)})),
 	});
@@ -484,6 +495,7 @@ function storedSnapshot(row: MessageRow): string {
 		timestamp: s.timestamp,
 		edited_timestamp: s.edited_timestamp,
 		mention_users: s.mention_users,
+		mention_roles: s.mention_roles,
 		embeds: s.embeds,
 		attachments: (s.attachments ?? []).map((a) => ({id: a.attachment_id, filename: a.filename})),
 	});
@@ -1204,7 +1216,7 @@ async function main(): Promise<void> {
 			timestamp: new Date(s.timestamp),
 			edited_timestamp: s.edited_timestamp ? new Date(s.edited_timestamp) : null,
 			mention_users: s.mention_user_ids.length ? new Set(s.mention_user_ids.map((u) => id<UserID>(u))) : null,
-			mention_roles: null,
+			mention_roles: s.mention_role_ids?.length ? new Set(s.mention_role_ids.map((r) => id<RoleID>(r))) : null,
 			mention_channels: null,
 			attachments: attachments.length ? attachments : null,
 			embeds: s.embeds.length ? s.embeds.map((e) => toEmbed(e, channelId)) : null,
@@ -1278,7 +1290,6 @@ async function main(): Promise<void> {
 						webhook_name: null,
 						webhook_avatar_hash: null,
 						flags: m.has_thread ? ServerMessageFlags.HAS_THREAD : 0,
-						mention_roles: null,
 						mention_channels: null,
 						attachments: attachments.length ? attachments : null,
 						message_snapshots: snapshots,
