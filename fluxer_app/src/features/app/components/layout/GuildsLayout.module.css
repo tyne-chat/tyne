@@ -175,7 +175,8 @@
 
 .userAreaWrapperPeeking {
 	width: calc(4.5rem + var(--layout-sidebar-restored-width, 20rem) + 0.0625rem);
-	z-index: var(--z-index-elevated-3, 45);
+	/* Fork: see tyne-chat/tyne#401 (peek stacking). */
+	z-index: 45;
 	animation: slideInLeft 100ms cubic-bezier(0, 0, 0.2, 1) forwards;
 }
 
@@ -195,7 +196,8 @@
 	background-color: var(--background-secondary);
 	border-inline-end: var(--outline-frame-border-width, 0.0625rem) solid var(--user-area-divider-color);
 	box-sizing: border-box;
-	z-index: var(--z-index-elevated-3, 41);
+	/* Fork: see tyne-chat/tyne#401 (peek stacking). */
+	z-index: 41;
 	animation: slideInLeft 100ms cubic-bezier(0, 0, 0.2, 1) forwards;
 	pointer-events: auto;
 }
