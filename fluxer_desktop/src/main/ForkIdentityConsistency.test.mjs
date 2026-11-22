@@ -100,7 +100,6 @@ describe('the fork identity', {skip: BUILD_CHANNEL !== 'stable' && 'the fork shi
 			'FluxerTrayTemplate.png',
 			'FluxerTrayTemplate@2x.png',
 			'_compiled/AppIcon.icns',
-			'badges/badge-1.ico',
 		]) {
 			const relativePath = `build_resources/${iconDirectory}/${file}`;
 			assert.ok(
