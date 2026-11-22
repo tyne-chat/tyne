@@ -108,6 +108,22 @@ describe('reviewed persona import', () => {
 		expect(await snapshot()).toEqual(before);
 	});
 
+	it("lists the ids of all the account's live personas, named by the file or not, and no deleted one", async () => {
+		// tyne-chat/tyne#862: the review leaves out any persona it remembers that is not on this list.
+		const [wren, pip] = await legacyImport([
+			{name: 'Wren', persona_tags: [{prefix: 'wr:'}], external_uuid: 'aaaaa'},
+			{name: 'Pip', persona_tags: [{prefix: 'pi:'}], external_uuid: 'ppppp'},
+		]);
+		const moss = await create({name: 'Moss', persona_tags: [{prefix: 'mo:'}]});
+		await remove(pip!.id);
+
+		const result = await preview([{name: 'Sorrel', persona_tags: [{prefix: 'so:'}], external_uuid: 'sssss'}]);
+
+		expect([...(result.live_persona_ids ?? [])].sort()).toEqual([wren!.id, moss.id].sort());
+		// Only the personas the entries name come in full; Moss and Wren are named by no entry.
+		expect(result.personas).toEqual([]);
+	});
+
 	it('links, restores, adds and uses the file, each doing only what it says', async () => {
 		const [wren, pip] = await legacyImport([
 			{name: 'Wren', bio: 'Old bio', visibility: 'unlisted', external_uuid: 'aaaaa'},
