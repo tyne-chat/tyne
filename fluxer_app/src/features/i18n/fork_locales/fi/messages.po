@@ -1965,6 +1965,10 @@ msgstr "Käytä {productName}-versiota"
 msgid "Using the file's"
 msgstr "Tiedoston versio"
 
+#. Accessible label and tooltip of the cover art shown in an audio attachment player; activating it opens the cover large.
+msgid "View cover"
+msgstr "Näytä kansikuva"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "Näytä persoonasi"

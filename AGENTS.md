@@ -105,17 +105,18 @@ Rules with a mechanical answer; follow them every time:
   error codes, the column order of a table's key), the fork never takes the next free value and
   never inserts into the middle: the day upstream takes that number, the two collide, often
   silently. Use a name where the format allows one. Otherwise take the value from a fork range,
-  declared in a `// Fork:` block that says so: protobuf fields from 2200 up, in the `// Fork fields.`
-  block at the top of the message (`accessibility.proto` has one); one-byte tags counting down from
-  255 (the persona mention in `packages/markdown_parser/rust/src/binary.rs`); flag bits from the
-  top; schema versions not at all. Fork values in an upstream enum go last, after a blank line and
-  `// Fork values.`, and an enum is never stored or sent by its position. A fork column never joins
-  an upstream table's key; the one exception, `persona_id` in `message_reactions`' key, stays the 7th
-  column for good (`MessageReactionsPersonaKey.test.ts`). A shipped number is permanent: moving it
-  needs a migration and a window in which old and new builds both work, and a number given up stays
-  reserved. (Until 2026-10-16 the fork kept three mobile settings at protobuf fields 66–68,
-  upstream's next numbers; upstream gave 66 to a bool a day later, and the old values had to be
-  stripped from stored settings, tyne-chat/tyne#125.)
+  declared in a `// Fork:` block that says so: protobuf fields from 2200 up, in the
+  `// Fork fields.` block at the top of the message (`accessibility.proto` has one); one-byte tags
+  counting down from 255 (the persona mention in `packages/markdown_parser/rust/src/binary.rs`);
+  flag bits from the middle, as upstream uses both ends (`ForkFlagBits.test.ts`); schema versions
+  not at all. Fork values in an upstream enum go last, after a blank line and `// Fork values.`, and
+  an enum is never stored or sent by its position. A fork column never joins an upstream table's
+  key; the one exception, `persona_id` in `message_reactions`' key, stays the 7th column for good
+  (`MessageReactionsPersonaKey.test.ts`). A shipped number is permanent: moving it needs a migration
+  and a window in which old and new builds both work, and a number given up stays reserved. (Until
+  2026-10-16 the fork kept three mobile settings at protobuf fields 66–68, upstream's next numbers;
+  upstream gave 66 to a bool a day later, and the old values had to be stripped from stored
+  settings, tyne-chat/tyne#125.)
 - **Strings:** fork catalogues only (see "Translations").
 - **Generated files:** never edited by hand (see "Generated code").
 - **Suppressions:** a fork `@ts-expect-error`, `eslint-disable` or `biome-ignore` says why, on its
