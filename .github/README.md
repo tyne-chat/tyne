@@ -49,12 +49,13 @@ documentation for building and self-hosting. Where they say Fluxer, the same ste
 ## Getting Tyne
 
 Desktop builds for Windows, macOS and Linux are on the
-[releases page](https://github.com/tyne-chat/tyne/releases). They are not code-signed, so your
-system will ask before running them.
+[releases page](https://github.com/tyne-chat/tyne/releases).
 
-- **Windows:** the first time you run the installer, Windows shows "Windows protected your PC".
-  Click **More info**, then **Run anyway**. Windows warns about any app from a publisher it does not
-  know yet; it does not mean the file is damaged.
+- **macOS:** the app is signed with Tyne's Developer ID and notarized by Apple. The first time you
+  open it, macOS asks whether to open an app downloaded from the internet; click **Open**.
+- **Windows:** the installer is not code-signed. The first time you run it, Windows shows "Windows
+  protected your PC". Click **More info**, then **Run anyway**. Windows warns about any app from a
+  publisher it does not know yet; it does not mean the file is damaged.
 - **Checking a download:** each release lists the SHA-256 of every file in `SHA256SUMS.txt`, signed
   in `SHA256SUMS.txt.sig`. Compare it with the file you downloaded, for example
   `sha256sum Tyne-Setup-2.1.31-win-x64.exe` on Linux, `shasum -a 256 <file>` on macOS, or

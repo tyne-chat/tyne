@@ -224,6 +224,11 @@ msgstr "Atgriezta bez {items}: tās tagad ir citai personai."
 msgid "Can be set everywhere at once"
 msgstr "Var iestatīt visur uzreiz"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "Atcelt"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Mainīt personu"
@@ -947,10 +952,6 @@ msgstr "Papildinformācija"
 msgid "Most used"
 msgstr "Visbiežāk lietotās"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "Pārvietot uz atkritni"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "Tikai jūs"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "To atrod tikai jūsu konts, rakstot @ vai meklējot."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "Atveriet <0>Sistēmas iestatījumi</0>, pēc tam <1>Privātums un drošība</1>. Ritiniet uz leju un noklikšķiniet uz <2>Tomēr atvērt</2>. Tas jādara tikai vienreiz."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "Tomēr atvērt"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "Atvērt"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "Ko lietotājs ieraksta"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "Tam, ko ierakstāt pēc /{name}, jāietilpst vienā rindā."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "Kad macOS paziņo, ka Tyne netika atvērta, noklikšķiniet uz <0>Gatavs</0>."
-
 msgid "Where the signal bar appears"
 msgstr "Kur tiek rādīta signālu josla"
 
@@ -2101,6 +2095,10 @@ msgstr "Vienumi"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "sasaistīs {count}"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "macOS jautā, vai atvērt no interneta lejupielādētu lietotni. Noklikšķiniet uz <0>Atvērt</0>. Tas jautā tikai vienreiz."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{shown} no {total} personām"
 msgid "— Today at 12:00 PM"
 msgstr "— Šodien plkst. 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "Lietotne „Tyne” netika atvērta"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "Lietotne „Tyne” tika bloķēta."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "„Tyne” ir no interneta lejupielādēta lietotne. Vai tiešām vēlaties to atvērt?"

@@ -224,6 +224,11 @@ msgstr "{items} के बिना वापस आया: अब ये कि
 msgid "Can be set everywhere at once"
 msgstr "एक साथ हर जगह सेट किया जा सकता है"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "रद्द करें"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "परसोना बदलें"
@@ -947,10 +952,6 @@ msgstr "अधिक जानकारी"
 msgid "Most used"
 msgstr "सबसे ज़्यादा इस्तेमाल किए गए"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "ट्रैश में ले जाएँ"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "सिर्फ़ आप"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "@ टाइप करते या खोजते समय सिर्फ़ आपका खाता इसे ढूँढता है।"
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "<0>सिस्टम सेटिंग्ज़</0> खोलें, फिर <1>गोपनीयता और सुरक्षा</1>। नीचे स्क्रॉल करें और <2>फिर भी खोलें</2> पर क्लिक करें। ऐसा सिर्फ़ एक बार करना होता है।"
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "फिर भी खोलें"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "खोलें"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "वे जो टाइप करते हैं"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "/{name} के बाद आप जो टाइप करें, वह एक पंक्ति में आना चाहिए।"
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "जब macOS बताए कि Tyne नहीं खुला, तो <0>हो गया</0> पर क्लिक करें।"
-
 msgid "Where the signal bar appears"
 msgstr "सिग्नल बार कहाँ दिखे"
 
@@ -2101,6 +2095,10 @@ msgstr "आइटम"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "{count} को लिंक करेगा"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "macOS पूछता है कि इंटरनेट से डाउनलोड की गई ऐप खोलनी है या नहीं। <0>खोलें</0> पर क्लिक करें। यह सिर्फ़ एक बार पूछता है।"
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{total} में से {shown} परसोना"
 msgid "— Today at 12:00 PM"
 msgstr "— आज दोपहर 12:00 बजे"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "“Tyne” नहीं खुला"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "“Tyne” को ब्लॉक किया गया।"
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "“Tyne” इंटरनेट से डाउनलोड की गई ऐप है। क्या आप वाकई इसे खोलना चाहते हैं?"

@@ -224,6 +224,11 @@ msgstr "Ha tornat sense {items}: ara són d’una altra persona."
 msgid "Can be set everywhere at once"
 msgstr "Es pot activar a tot arreu alhora"
 
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording.
+msgctxt "macos-first-open-dialog"
+msgid "Cancel"
+msgstr "Cancel·la"
+
 #. Generic action label that opens the persona picker.
 msgid "Change persona"
 msgstr "Canvia de persona"
@@ -947,10 +952,6 @@ msgstr "Més informació"
 msgid "Most used"
 msgstr "Més usades"
 
-#. Button in macOS' warning that an app was not opened: use macOS' own wording.
-msgid "Move to Trash"
-msgstr "Mou a la paperera"
-
 #. Sort choice in community emoji settings: emojis in alphabetical order.
 #. Sort order of the Personas list: alphabetical by name.
 msgid "Name (A–Z)"
@@ -1127,13 +1128,10 @@ msgstr "Només tu"
 msgid "Only your account finds it when typing @ or searching."
 msgstr "Només el teu compte la troba en escriure @ o en cercar."
 
-#. Install step on macOS. 'System Settings', 'Privacy & Security' and 'Open Anyway' are macOS' own names: use macOS' wording in this language.
-msgid "Open <0>System Settings</0>, then <1>Privacy & Security</1>. Scroll down and click <2>Open Anyway</2>. You only do this once."
-msgstr "Obre <0>Configuració del Sistema</0> i després <1>Privacitat i seguretat</1>. Desplaça’t cap avall i fes clic a <2>Obre igualment</2>. Només cal fer-ho una vegada."
-
-#. Button in macOS' Privacy & Security settings: use macOS' own wording.
-msgid "Open Anyway"
-msgstr "Obre igualment"
+#. Button in macOS' question before opening a downloaded app: use macOS' own wording, the same word as in the step above.
+msgctxt "macos-first-open-dialog"
+msgid "Open"
+msgstr "Obre"
 
 #. Last install step on a phone.
 #. Last install step on a phone.
@@ -1984,10 +1982,6 @@ msgstr "El que escriuen"
 msgid "What you type after /{name} has to fit on one line."
 msgstr "El que escriguis després de /{name} ha de cabre en una línia."
 
-#. Install step on macOS. 'Done' is the button of macOS' warning that an app was not opened: use macOS' own wording.
-msgid "When macOS says Tyne wasn't opened, click <0>Done</0>."
-msgstr "Quan el macOS digui que Tyne no s’ha obert, fes clic a <0>Fet</0>."
-
 msgid "Where the signal bar appears"
 msgstr "On apareix la barra de senyals"
 
@@ -2101,6 +2095,10 @@ msgstr "Elements"
 #. Part of the import summary "Import will link 17, add 7, skip 3"
 msgid "link {count}"
 msgstr "vincularà {count}"
+
+#. Install step on macOS. The first time a downloaded app opens, macOS asks whether to open it. 'Open' is the button of that question: use macOS' own wording.
+msgid "macOS asks whether to open an app downloaded from the internet. Click <0>Open</0>. It only asks once."
+msgstr "El macOS et pregunta si vols obrir una app baixada d’internet. Fes clic a <0>Obre</0>. Només ho pregunta una vegada."
 
 #. Label in the message reactions, on an emoji one of your personas reacted with: pressing it lists your account and personas so you can add or remove each one. Keep the tone plain.
 msgid "press to see your reactions"
@@ -2298,10 +2296,6 @@ msgstr "{shown} de {total} persones"
 msgid "— Today at 12:00 PM"
 msgstr "— Avui a les 12:00"
 
-#. Title of macOS' warning that an app was not opened, drawn on the download page: use macOS' own wording.
-msgid "“Tyne” Not Opened"
-msgstr "No s’ha obert «Tyne»"
-
-#. Text in macOS' Privacy & Security settings after an app was blocked: use macOS' own wording.
-msgid "“Tyne” was blocked."
-msgstr "S’ha bloquejat «Tyne»."
+#. macOS' question the first time a downloaded app opens, drawn on the download page: use macOS' own wording.
+msgid "“Tyne” is an app downloaded from the Internet. Are you sure you want to open it?"
+msgstr "«Tyne» és una app descarregada d’internet. Segur que la vols obrir?"
