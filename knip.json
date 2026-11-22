@@ -5,6 +5,7 @@
 	"ignore": ["e2e/**"],
 	"ignoreDependencies": ["@bufbuild/protoc-gen-es", "@tailwindcss/cli", "@types/events", "events", "tailwindcss"],
 	"ignoreFiles": [
+		"fluxer_app/src/features/voice/components/media_player/components/InlineAudioPlayer.tsx",
 		"fluxer_admin/src/styles/app.css",
 		"fluxer_admin/static/htmx.min.js",
 		"fluxer_app/inline_scripts/*.js",

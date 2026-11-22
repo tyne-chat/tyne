@@ -187,3 +187,11 @@ pub fn audio_duration_seconds(
         .or_else(|| positive(out.stream_seconds))
         .or_else(|| positive(out.format_seconds)))
 }
+
+// Fork: the container's parts, for the strip that retries without a cover
+// (media_process/fork_audio_extras.rs, tyne-chat/tyne#873).
+impl AvContainer {
+    pub(in crate::media_process) fn fork_parts(&self) -> (&'static CStr, &'static CStr, bool) {
+        (self.demuxer, self.muxer, self.faststart)
+    }
+}

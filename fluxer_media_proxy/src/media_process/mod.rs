@@ -212,3 +212,10 @@ pub use fork_animated_avif::{
     AnimatedAvifConversion, ConvertedAnimation, animated_avif_conversion_cost,
     convert_animated_avif_to_webp, is_animated_avif,
 };
+
+// Fork: an audio upload's cover and waveform for the audio player, and a strip that does not fail
+// on a cover the container cannot hold (tyne-chat/tyne#873).
+mod fork_audio_extras;
+pub use fork_audio_extras::{
+    AudioExtras, MAX_WAVEFORM_SECONDS, audio_extras, fork_strip_av_metadata,
+};

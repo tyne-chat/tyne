@@ -36,6 +36,10 @@ import type {GuildResponse} from '@fluxer/schema/src/domains/guild/GuildResponse
 import {snowflakeToDate} from '@fluxer/snowflake/src/Snowflake';
 import {seconds} from 'itty-time';
 
+// Fork imports.
+
+import {forkAttachmentExtraKeys, forkCopyAttachmentExtras} from '@app/api/channel/services/message/ForkAudioExtras';
+
 export const MESSAGE_NONCE_TTL = seconds('5 minutes');
 
 export interface ForwardMediaSelection {
@@ -199,6 +203,15 @@ async function cloneAttachments(
 		if (!copied) {
 			continue;
 		}
+		// Fork: an audio attachment's cover and stored waveform are copied with it (tyne-chat/tyne#873).
+		await forkCopyAttachmentExtras({
+			storageService,
+			attachment,
+			sourceChannelId,
+			destinationChannelId,
+			newAttachmentId,
+			copyKeys,
+		});
 		clonedAttachments.push({
 			attachment_id: newAttachmentId,
 			filename: attachment.filename,
@@ -453,6 +466,10 @@ export async function purgeMessageAttachments(
 		}
 		cdnKeys.add(embedKey);
 		cdnUrls.push(`${Config.endpoints.media}/${embedKey}`);
+	}
+	// Fork: an audio attachment's cover and stored waveform go with it (tyne-chat/tyne#873).
+	for (const extraKey of forkAttachmentExtraKeys(message.channelId, collectMessageAttachments(message))) {
+		cdnKeys.add(extraKey);
 	}
 	await Promise.all([...cdnKeys].map((cdnKey) => storageService.deleteObject(Config.s3.buckets.cdn, cdnKey)));
 	if (cdnUrls.length > 0) {

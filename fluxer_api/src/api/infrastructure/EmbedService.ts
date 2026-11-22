@@ -34,6 +34,10 @@ import type {
 } from '@fluxer/schema/src/domains/message/MessageRequestSchemas';
 import type {IWorkerService} from '@pkgs/worker/src/contracts/IWorkerService';
 
+// Fork imports.
+
+import {forkFlagLinkedAudioExtras} from '@app/api/infrastructure/ForkLinkedAudioExtras';
+
 interface ProcessedUrlEmbeds {
 	embeds: Array<Embed>;
 }
@@ -100,6 +104,8 @@ export class EmbedService {
 		options: UnfurlOptions = {},
 	): Promise<ProcessedUrlEmbeds> {
 		const result = await this.unfurlerService.unfurlWithCachePolicy(url, nsfwMode, options);
+		// Fork: a link to an audio attachment here gets its cover and waveform (tyne-chat/tyne#873).
+		await forkFlagLinkedAudioExtras(result.embeds);
 		return {
 			embeds: result.embeds.map((embedData) => new Embed(this.mapResponseEmbed(embedData))),
 		};
