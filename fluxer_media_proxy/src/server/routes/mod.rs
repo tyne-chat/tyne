@@ -7,3 +7,5 @@ pub(in crate::server) mod relay;
 
 // Fork: the API's converter for animated AVIF uploads (tyne-chat/tyne#854).
 pub(in crate::server) mod fork_animated_avif;
+// Fork: the audio player's cover and waveform (tyne-chat/tyne#873).
+pub(in crate::server) mod fork_audio_extras;

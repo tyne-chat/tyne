@@ -1965,6 +1965,10 @@ msgstr "使用 {productName} 中的"
 msgid "Using the file's"
 msgstr "使用檔案中的"
 
+#. Accessible label and tooltip of the cover art shown in an audio attachment player; activating it opens the cover large.
+msgid "View cover"
+msgstr "檢視封面"
+
 #. OAuth scope description shown on the consent screen for the personas.read scope.
 msgid "View your personas"
 msgstr "查看你的人格"

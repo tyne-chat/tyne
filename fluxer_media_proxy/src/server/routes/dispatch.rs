@@ -150,6 +150,8 @@ async fn serve_public_read(app: &Arc<AppState>, read: PublicRead<'_>) -> Respons
             checked = Some(verification);
         }
         let params = without_signature_parameters(params);
+        // Fork: `cover=1` and `waveform=1` serve the attachment's cover or waveform (tyne-chat/tyne#873).
+        let (key, params) = super::fork_audio_extras::extras_request(key, params);
         let mut response = stored::serve_attachment(app, method, &key, &params, headers).await;
         if let Some(verification) = checked {
             attachment_signature::limit_cache_lifetime(&mut response, verification);

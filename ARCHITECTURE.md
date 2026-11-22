@@ -308,6 +308,20 @@ start one: the API setting `TYNE_DM_THREADS`. Design: the mockups doc linked fro
   refused (`ANIMATION_TOO_LARGE_TO_CONVERT`) (`fluxer_api/src/api/channel/services/message/ForkAnimatedAvifConversion.ts`,
   `fluxer_media_proxy/src/media_process/fork_animated_avif.rs`; `fluxer_media_proxy/AGENTS.md`;
   tyne-chat/tyne#854).
+- Audio player: audio attachments play in the fork's player on every platform: the name (its
+  extension always shown), a waveform that is also the seek bar, and the embedded cover, which opens
+  in a viewer. At upload the API asks the media proxy (`POST /_fork/audio_extras`) for the cover and a
+  voice-message-style waveform. It checks the cover like an image upload, stores it at
+  `attachment-covers/<channel>/<attachment>` and flags the attachment `HAS_COVER` (`1 << 21`,
+  `packages/constants/src/ForkAttachmentConstants.ts`). `cover=1` on the attachment's signed URL
+  serves the cover. The waveform is also stored as an object, for pasted links to the file: a link
+  embed's audio gets the same flags (`infrastructure/ForkLinkedAudioExtras.ts`) and the apps load the
+  waveform once with `waveform=1`. Saved media sent again gets both, as an upload does. The strip
+  retries without the cover when the container cannot hold one (WAV, AAC, Ogg). Files:
+  `fluxer_api/src/api/channel/services/message/ForkAudioExtras.ts`,
+  `fluxer_media_proxy/src/media_process/fork_audio_extras.rs`, web
+  `features/channel/components/embeds/media/fork_audio/`, phone `attachment_audio_card_fork.dart`;
+  `fluxer_media_proxy/AGENTS.md`; tyne-chat/tyne#873.
 - Stored images: `?original=true` on an image asset makes the media proxy answer with the stored
   image itself rather than a resized copy (`fluxer_media_proxy/src/server/stored/fork_original_asset.rs`,
   called from `serve_asset_image`). The avatar and banner menus' "Copy URL" and "Open in browser"

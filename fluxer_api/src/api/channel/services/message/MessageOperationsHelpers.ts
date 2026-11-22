@@ -23,6 +23,10 @@ import {InputValidationError} from '@fluxer/errors/src/domains/core/InputValidat
 import {ThrottledError} from '@fluxer/errors/src/domains/core/ThrottledError';
 import type {ICacheService} from '@pkgs/cache/src/ICacheService';
 
+// Fork imports.
+
+import {forkCopyStoredCover} from '@app/api/channel/services/message/ForkAudioExtras';
+
 interface MessageOperationsHelpersDeps {
 	channelRepository: ChannelRepository;
 	cacheService: ICacheService;
@@ -234,6 +238,8 @@ export class MessageOperationsHelpers {
 		if (favoriteMeme.nsfw === true) {
 			flags |= MessageAttachmentFlags.CONTAINS_EXPLICIT_MEDIA;
 		}
+		// Fork: a saved audio file's cover comes with it (tyne-chat/tyne#873).
+		flags |= await forkCopyStoredCover(this.deps.storageService, sourceKey, destKey);
 		return {
 			attachment_id: memeAttachmentId,
 			filename: favoriteMeme.filename,
