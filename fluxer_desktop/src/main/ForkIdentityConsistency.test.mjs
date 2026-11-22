@@ -5,7 +5,8 @@
 // they disagree builds, installs and then cannot update itself. This holds them together.
 
 import assert from 'node:assert/strict';
-import {existsSync, readFileSync} from 'node:fs';
+import {existsSync, readdirSync, readFileSync} from 'node:fs';
+import path from 'node:path';
 import {describe, test} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
@@ -89,24 +90,22 @@ describe('the fork identity', {skip: BUILD_CHANNEL !== 'stable' && 'the fork shi
 		);
 	});
 
-	test('the icons the installer and the app are given exist', () => {
+	// Tyne's icon folder has every file of upstream's, with Tyne's artwork: a file upstream adds and
+	// Tyne lacks ships nothing (the macOS Liquid Glass icon, tyne-chat/tyne#868). The badges carry no
+	// logo and are packaged from upstream's folder (ForkWindowsBadges.test.mjs, tyne-chat/tyne#461).
+	test('the icons the installer and the app are given are upstream’s files, all of them', () => {
 		const iconDirectory = builderValue('iconDirectory');
 		assert.equal(vpkArgument('icon'), `build_resources/${iconDirectory}/icon.ico`);
-		for (const file of [
-			'icon.ico',
-			'icon.png',
-			'1024x1024.png',
-			'16x16.png',
-			'FluxerTrayTemplate.png',
-			'FluxerTrayTemplate@2x.png',
-			'_compiled/AppIcon.icns',
-		]) {
-			const relativePath = `build_resources/${iconDirectory}/${file}`;
-			assert.ok(
-				existsSync(fileURLToPath(new URL(`../../${relativePath}`, import.meta.url))),
-				`${relativePath} is missing`,
-			);
-		}
+		const upstreamIcons = fileURLToPath(new URL('../../build_resources/icons-stable/', import.meta.url));
+		const files = readdirSync(upstreamIcons, {recursive: true, withFileTypes: true})
+			.filter((entry) => entry.isFile())
+			.map((entry) => path.relative(upstreamIcons, path.join(entry.parentPath, entry.name)))
+			.filter((file) => !file.startsWith(`badges${path.sep}`));
+		assert.ok(files.includes('icon.ico') && files.includes(path.join('_compiled', 'Assets.car')));
+		const missing = files.filter(
+			(file) => !existsSync(fileURLToPath(new URL(`../../build_resources/${iconDirectory}/${file}`, import.meta.url))),
+		);
+		assert.deepEqual(missing, [], `build_resources/${iconDirectory} lacks upstream's ${missing.join(', ')}`);
 	});
 
 	// Upstream's name and marks policy: a fork with functional changes uses its own name and logo.
