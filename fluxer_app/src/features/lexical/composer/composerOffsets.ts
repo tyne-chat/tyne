@@ -318,7 +318,7 @@ export function $getTextUpToCursor(): string {
 	}
 	// Fork: masked, or with text after the caret, a finished mention before it reads as a half-typed
 	// `@name`: autocomplete opens and Enter picks from it instead of sending (tyne-chat/tyne#297).
-	return scanTextFromLayout(layout).slice(0, offset);
+	return forkAutocompleteScanText(layout).slice(0, offset);
 }
 
 export function $getComposerDisplayText(): string {
@@ -639,4 +639,21 @@ export function $wrapComposerSelection(prefix: string, suffix: string): void {
 
 export function $isComposerEmpty(): boolean {
 	return $buildDisplayLayout().text.length === 0;
+}
+
+// Fork: the text before the caret as the autocomplete reads it. Upstream's scan text masks every
+// finished mention, emoji and plain segment as `x` (tyne-chat/tyne#297); here an emoji reads as
+// U+FFFC instead, which every trigger treats as `x` but which lets a `:` straight after an emoji
+// start the emoji search (ForkEmojiTriggerAfterEmoji.ts, tyne-chat/tyne#650). Same length, so the
+// offsets stay the display's.
+const FORK_EMOJI_SCAN_MARK = '\uFFFC';
+
+function forkAutocompleteScanText(layout: DisplayLayout): string {
+	let scanText = scanTextFromLayout(layout);
+	for (const {node, start, end} of layout.leaves) {
+		if ($isComposerCustomEmojiNode(node) || $isComposerStandardEmojiNode(node)) {
+			scanText = scanText.slice(0, start) + FORK_EMOJI_SCAN_MARK.repeat(end - start) + scanText.slice(end);
+		}
+	}
+	return scanText;
 }

@@ -2,6 +2,10 @@
 
 import type {Command} from '@app/features/devtools/hooks/useCommands';
 
+// Fork imports.
+
+import {detectEmojiTriggerAfterEmoji} from '@app/features/messaging/utils/ForkEmojiTriggerAfterEmoji';
+
 const MENTION_REGEX = /(^|\s)@(\S*)$/;
 const CHANNEL_REGEX = /(^|\s)#(\S*)$/;
 const EMOJI_REGEX = /(^|\s):([a-z0-9_+~-]{2,})$/i;
@@ -84,6 +88,11 @@ export function detectAutocompleteTrigger(textUpToCursor: string): AutocompleteT
 			match: emojiMatch,
 			matchedText: q,
 		};
+	}
+	// Fork: a `:` straight after an emoji starts the emoji search too (tyne-chat/tyne#650).
+	const forkEmojiAfterEmoji = detectEmojiTriggerAfterEmoji(textUpToCursor);
+	if (forkEmojiAfterEmoji) {
+		return forkEmojiAfterEmoji;
 	}
 	const memeSearchMatch = textUpToCursor.match(MEME_SEARCH_REGEX);
 	if (memeSearchMatch) {
