@@ -13,7 +13,8 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
   label (32 characters). An instance admin picks a home community in the admin panel; its managers
   (Manage Community) edit the bar on the web. No home community, no bar.
 - The bar is off in every channel until switched on: in a community by its managers (a default, per
-  category, per channel); in a DM or group DM by anyone in it. Web only.
+  category, per channel), on the web only; in a DM or group DM by anyone in it, on the web and the
+  phone. Neither offers the switch in the system DM, where nobody writes.
 - Managers turn one person's signal off or reset a signal for everyone.
 - A signal stays lit while its owner is online and for 12 hours after they go offline
   (tyne-chat/tyne#89).
@@ -184,10 +185,10 @@ Where the clients differ today:
 | | Web | Mobile |
 |---|---|---|
 | Where | every composer, and above DM and community barriers | the open channel's composer, not while editing; none where a barrier replaces it |
-| Channel `GET` | on every mount, or earlier on hover or press (a preload the mount takes over) | once per channel per session |
+| Channel `GET` | on every mount, or earlier on hover or press (a preload the mount takes over) | on entering a chat, at most once per chat every 10 s whatever the answer; once more when an accepted write does not show within 2 s |
 | Managers | as the server | Manage Community, every DM, or a channel missing from the channel list |
 | Names | persona, else the community nickname | persona, else the copy's `global_name`, else `username` |
-| Configuration | editor, drag to reorder, channel tree, DM switch | none |
+| Configuration | editor, drag to reorder, channel tree, DM switch | DM switch (a DM's long-press menu, and More in its details) |
 | Retries | none | replays transient failures |
 
 ## Network calls inside the API
