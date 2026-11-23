@@ -12,6 +12,9 @@ const max_context_name_entries = 512
 
 pub type PreviewContext {
   PreviewContext(
+    // Fork: names of the personas the message mentions, which the native
+    // renderer looks up before the account's (push/fork_push_personas.gleam).
+    personas: Dict(Int, String),
     preserve_markdown: Bool,
     hide_spoilers: Bool,
     include_emoji_names: Bool,
@@ -29,14 +32,14 @@ type Names =
 @external(erlang, "fluxer_gateway@nif", "md_render_push_preview")
 fn render_nif(
   content: String,
-  context: #(Bool, Bool, Bool, Bool, Names, Names, Names),
+  context: #(Names, #(Bool, Bool, Bool, Bool, Names, Names, Names)),
 ) -> Result(String, Dynamic)
 
 pub fn preview(content: String, context: PreviewContext) -> String {
   case string.byte_size(content) <= max_content_bytes {
     False -> strip_to_safe(content)
     True ->
-      render_nif(content, native(context))
+      render_nif(content, #(bounded_names(context.personas), native(context)))
       |> result.lazy_unwrap(fn() { strip_to_safe(content) })
   }
 }

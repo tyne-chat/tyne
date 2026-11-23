@@ -38,6 +38,9 @@ impl PreviewError {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PreviewContext {
+    // Fork: names of the personas the message mentions (`<@user:persona>`),
+    // looked up before the account's (push/fork_push_personas.gleam).
+    pub personas: Vec<(u64, String)>,
     pub preserve_markdown: bool,
     pub hide_spoilers: bool,
     pub include_emoji_names: bool,
@@ -50,6 +53,7 @@ pub struct PreviewContext {
 impl Default for PreviewContext {
     fn default() -> Self {
         Self {
+            personas: Vec::new(),
             preserve_markdown: false,
             hide_spoilers: false,
             include_emoji_names: true,
@@ -63,7 +67,7 @@ impl Default for PreviewContext {
 
 impl PreviewContext {
     fn validate(&self) -> Result<(), PreviewError> {
-        let maps = [&self.users, &self.roles, &self.channels];
+        let maps = [&self.personas, &self.users, &self.roles, &self.channels];
         if maps
             .iter()
             .any(|names| names.len() > MAX_CONTEXT_NAME_ENTRIES)
@@ -83,8 +87,8 @@ impl PreviewContext {
 
     pub fn into_options(self) -> PlaintextOptions {
         PlaintextOptions {
-            // Fork: the persona names of the fork's plaintext options; the preview has none yet.
-            personas: Names::default(),
+            // Fork: the names of the personas the message mentions.
+            personas: Names::new(self.personas),
             preserve_markdown: self.preserve_markdown,
             hide_spoilers: self.hide_spoilers,
             include_emoji_names: self.include_emoji_names,

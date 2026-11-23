@@ -83,3 +83,20 @@ fn plaintext_names_a_mentioned_persona() {
         "**hi** @Alice @Bob the Fox @Ops #alerts [site](https://fluxer.app)"
     );
 }
+
+// The names are keyed by id (`Names`), as the API sends only numeric persona ids
+// (`mention_personas`): a mention by a persona's slug shows its account.
+#[test]
+fn plaintext_names_a_persona_only_by_its_id() {
+    let options = PlaintextOptions {
+        users: Names::new(vec![(1, "Alice".to_owned())]),
+        personas: Names::new(vec![(999, "Bob the Fox".to_owned())]),
+        ..PlaintextOptions::default()
+    };
+
+    let result =
+        parse_and_render_plaintext("<@1:bob_the_fox> <@1:999>", ParserFlags::ALL, "", &options)
+            .expect("plaintext");
+
+    assert_eq!(result, "@Alice @Bob the Fox");
+}
