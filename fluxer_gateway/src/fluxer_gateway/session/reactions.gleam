@@ -8,6 +8,9 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 
+// Fork imports.
+import fluxer_gateway/session/fork_reaction_persona
+
 pub fn interval_ms() -> Int {
   durations.session().reactions_interval_ms
 }
@@ -172,6 +175,8 @@ fn reaction_json(entry: Reaction) -> json.Json {
       None -> json.object([])
     }),
   ]
+  // Fork: the reaction's persona first (session/fork_reaction_persona.gleam).
+  let base = list.append(fork_reaction_persona.fields(entry.payload), base)
   case entry.facts.member_raw {
     Some(member) ->
       json.object(list.append(base, [#("member", raw_json.to_json(member))]))
@@ -183,5 +188,49 @@ fn raw_or_null(value: Option(RawJson)) -> json.Json {
   case value {
     Some(raw) -> raw_json.to_json(raw)
     None -> json.null()
+  }
+}
+
+// Fork: personas in the reaction buffer (session/fork_reaction_persona.gleam,
+// tyne-chat/tyne#120). Upstream's `cancel`, matching the persona as well: a
+// remove cancels only the buffered add of the same persona, and an account and
+// its personas never cancel each other's adds. `session/dispatch.gleam` calls
+// this instead of `cancel`.
+pub fn fork_cancel(
+  reactions: Reactions,
+  removal: ReactionFacts,
+  removal_payload: RawJson,
+) -> Result(Reactions, Nil) {
+  case reactions.count {
+    0 -> Error(Nil)
+    _ -> {
+      let persona = fork_reaction_persona.persona(removal_payload)
+      fork_remove_first(list.reverse(reactions.held), removal, persona, [])
+    }
+  }
+}
+
+fn fork_remove_first(
+  oldest_first: List(Reaction),
+  removal: ReactionFacts,
+  persona: Option(String),
+  seen: List(Reaction),
+) -> Result(Reactions, Nil) {
+  case oldest_first {
+    [] -> Error(Nil)
+    [entry, ..rest] ->
+      case
+        matches(entry, removal)
+        && fork_reaction_persona.persona(entry.payload) == persona
+      {
+        True -> {
+          let remaining = list.append(list.reverse(seen), rest)
+          Ok(Reactions(
+            held: list.reverse(remaining),
+            count: list.length(remaining),
+          ))
+        }
+        False -> fork_remove_first(rest, removal, persona, [entry, ..seen])
+      }
   }
 }
