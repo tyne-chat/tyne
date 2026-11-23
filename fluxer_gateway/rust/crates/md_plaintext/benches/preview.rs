@@ -46,6 +46,8 @@ fn context_json() -> String {
 
 fn native_context() -> PreviewContext {
     PreviewContext {
+        // Fork: no persona mentions in the benchmark.
+        personas: Vec::new(),
         preserve_markdown: false,
         hide_spoilers: false,
         include_emoji_names: true,

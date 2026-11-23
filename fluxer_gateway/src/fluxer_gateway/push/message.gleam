@@ -14,6 +14,9 @@ import gleam/result
 import gleam/set.{type Set}
 import gleam/string
 
+// Fork imports.
+import fluxer_gateway/push/fork_message.{type ForkMessage}
+
 const message_type_default = 0
 
 const message_type_reply = 19
@@ -88,6 +91,8 @@ pub type ThreadPush {
 
 pub type MessageData {
   MessageData(
+    // Fork: what the fork's push code reads (push/fork_message.gleam).
+    fork: ForkMessage,
     id: Option(Int),
     channel_id: Option(Int),
     kind: Int,
@@ -252,6 +257,7 @@ pub fn private_message(
 
 pub fn empty_data() -> MessageData {
   MessageData(
+    fork: fork_message.empty(),
     id: None,
     channel_id: None,
     kind: message_type_default,
@@ -280,6 +286,7 @@ pub fn decode_data(raw: Dynamic) -> Result(MessageData, Nil) {
 }
 
 fn data_decoder() -> Decoder(MessageData) {
+  use fork <- decode.then(fork_message.decoder())
   use id <- decode.then(snowflake_field("id"))
   use channel_id <- decode.then(snowflake_field("channel_id"))
   use kind <- decode.then(lenient("type", decode.int, message_type_default))
@@ -332,6 +339,7 @@ fn data_decoder() -> Decoder(MessageData) {
     Error(Nil),
   ))
   decode.success(MessageData(
+    fork:,
     id:,
     channel_id:,
     kind:,

@@ -16,6 +16,9 @@ import gleam/option.{type Option, None, Some}
 import gleam/set.{type Set}
 import gleam/string
 
+// Fork imports.
+import fluxer_gateway/push/fork_push_personas
+
 const max_mentions_for_push = 50
 
 const max_preview_bytes = 100
@@ -186,6 +189,7 @@ pub fn markdown_context(
 ) -> PreviewContext {
   let mentioned_roles = role_mention_ids(rendered_contents(data))
   PreviewContext(
+    personas: fork_push_personas.mention_names(data),
     preserve_markdown: True,
     hide_spoilers: True,
     include_emoji_names: True,
@@ -303,6 +307,8 @@ pub fn author_name(data: MessageData, context: PreviewContext) -> String {
     option.then(author.id, fn(user) {
       dict.get(nicknames, user) |> option.from_result
     })
+  // Fork: the persona the message was sent as comes first.
+  let nick = option.or(fork_push_personas.author_name(data), nick)
   first_present([nick, author.global_name, author.username, Some(fallback)])
   |> option.unwrap(fallback)
 }
