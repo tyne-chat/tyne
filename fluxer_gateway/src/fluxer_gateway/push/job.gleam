@@ -16,6 +16,7 @@ import gleam/result
 import gleam/string
 
 // Fork imports.
+import fluxer_gateway/fork/dm_thread_push
 import fluxer_gateway/push/fork_push_personas
 
 const subject_message = "push.job.message"
@@ -248,7 +249,7 @@ pub fn message_template(create: MessageCreate) -> Template {
         thread_fields(create.data, create.channel_name),
       )
     ],
-    channel: create.channel,
+    channel: dm_thread_push.read_channel(create),
     message: create.message,
   )
 }
@@ -365,6 +366,8 @@ fn notification(
       )),
     ),
   ]
+  // Fork: a DM thread's tags and fields (fork/dm_thread_push.gleam).
+  let common = dm_thread_push.notification(common, create.data, message_text)
   list.append(common, message_fields(create)) |> with_badge
 }
 

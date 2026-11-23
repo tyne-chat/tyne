@@ -10,23 +10,16 @@
 // - A new thread message is pushed to each follower as a message in the parent DM (so older apps open the DM),
 //   titled "Author (Thread)" in a 1:1 DM and "Author (Thread, Group)" in a named group DM (the API's
 //   fork_thread_context), with fork_thread_id and fork_thread_name, and tags of the thread
-//   (fork_dm_thread_push.erl). The job's channel and url stay the DM.
-// - A follower with a session that is online and not AFK holds DM pushes back (presence_update.erl's
-//   session_holds_push); they are sent when every session is AFK or offline. Reading the thread drops its held
-//   push. Reading only the parent DM should not (tyne-chat/tyne#905 plan, sections 2 and 6).
-// - While the push service does not answer, jobs wait in the gateway's outbox (push_outbox.erl) and a read
-//   truncates them; a read of the parent DM should leave a queued thread push alone.
+//   (fluxer_gateway's fork/dm_thread_push.gleam). The job's channel and url stay the DM.
+// - A follower with a session that is online and not AFK holds DM pushes back (upstream's presence push buffer,
+//   keyed by the thread for a thread message: fork/dm_thread_presence.gleam); they are sent when every session is
+//   AFK or offline. Reading the thread drops its held push; reading only the parent DM does not.
+// - While the push service does not answer, jobs wait in the gateway's outbox (push/outbox) and a read truncates
+//   them. A thread push is filed under the thread, so a read of the parent DM leaves it alone.
 //
-// KNOWN GAP ON THE ERLANG GATEWAY (found 2026-11-23 by running this spec): the two "survives reading the parent
-// DM" tests fail there and are marked fixme. The presence's hold is keyed by the thread, but the push outbox is
-// not: push_job_publisher:publish_message files every job under the message's channel_id, which for a DM-thread
-// push is the parent DM, and push_outbox keeps a read watermark per (user, channel). So reading the parent DM up
-// to a later message drops a held thread push when it is flushed (the outbox's truncation counter went up by one
-// and no job came), and drops a queued one outright. A read of the thread sets a watermark no thread push is filed
-// under, so a queued thread push also survives reading the thread (seen in a diagnostic run that day; not a test
-// here, as a queued push's absence has no reliable sentinel: the outbox retries each job on its own jittered
-// timer). The port is to key the outbox by fork_thread_id (plan, section 6); then these two tests pass and lose
-// the fixme.
+// The two "survives reading the parent DM" tests failed on the Erlang gateway, whose outbox filed a thread push
+// under the parent DM (tyne-chat/tyne#907), and were marked fixme until the port to the Gleam gateway keyed it by
+// the thread (tyne-chat/tyne#905).
 
 import {expect, test} from '@playwright/test';
 import {GatewayRecorder} from '../../api-helpers/gateway-recorder.js';
@@ -199,9 +192,7 @@ test.describe('gateway contract: threads in DMs (T7)', () => {
 		}
 	});
 
-	// Fixme: fails on the Erlang gateway, see "KNOWN GAP" at the top. Run of 2026-11-23: no push job for the thread
-	// message within 20 s of the session turning AFK; without the DM read the same flush sends it.
-	test.fixme('a push held back by an online session survives reading the parent DM and goes out when it turns AFK', async () => {
+	test('a push held back by an online session survives reading the parent DM and goes out when it turns AFK', async () => {
 		const author = await account('t7author');
 		const follower = await account('t7held');
 		const thread = await dmWithThread(author, follower);
@@ -275,9 +266,7 @@ test.describe('gateway contract: threads in DMs (T7)', () => {
 		}
 	});
 
-	// Fixme: fails on the Erlang gateway, see "KNOWN GAP" at the top. Run of 2026-11-23: no push job for the thread
-	// message within 45 s of the sink starting.
-	test.fixme('a thread push queued while the push service is down survives reading the parent DM', async () => {
+	test('a thread push queued while the push service is down survives reading the parent DM', async () => {
 		test.setTimeout(120_000);
 		const author = await account('t7author');
 		const follower = await account('t7queued');

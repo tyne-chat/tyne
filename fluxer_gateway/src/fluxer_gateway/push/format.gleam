@@ -17,6 +17,7 @@ import gleam/set.{type Set}
 import gleam/string
 
 // Fork imports.
+import fluxer_gateway/fork/dm_thread_push
 import fluxer_gateway/push/fork_push_personas
 
 const max_mentions_for_push = 50
@@ -397,6 +398,8 @@ pub fn title(
   guild_name: Option(String),
   channel_name: Option(String),
 ) -> String {
+  // Fork: "Author (Thread)" for a message in a DM thread.
+  use <- dm_thread_push.title(author_name, data, guild)
   case guild {
     0 ->
       case option.unwrap(data.channel_type, 1) {
