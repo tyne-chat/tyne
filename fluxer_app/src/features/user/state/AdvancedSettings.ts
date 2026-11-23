@@ -30,7 +30,7 @@ export function parseStoredBoolean(raw: string | null): boolean {
 
 class AdvancedSettings {
 	unreadBadgeCustomizationEnabled = readStoredBoolean(UNREAD_BADGE_CUSTOMIZATION_STORAGE_KEY);
-	keepAttachmentsOnEmptyMessageEdit = readStoredBoolean(KEEP_ATTACHMENTS_ON_EMPTY_MESSAGE_EDIT_STORAGE_KEY);
+	keepAttachmentsOnEmptyMessageEdit = forkReadKeepAttachmentsOnEmptyMessageEdit();
 	expressionCloneShortcutsEnabled = readStoredBoolean(EXPRESSION_CLONE_SHORTCUTS_STORAGE_KEY);
 	hideBlockedMessages = readStoredBoolean(HIDE_BLOCKED_MESSAGES_STORAGE_KEY);
 
@@ -47,7 +47,7 @@ class AdvancedSettings {
 		);
 		AppStorage.subscribe(
 			() => {
-				this.keepAttachmentsOnEmptyMessageEdit = readStoredBoolean(KEEP_ATTACHMENTS_ON_EMPTY_MESSAGE_EDIT_STORAGE_KEY);
+				this.keepAttachmentsOnEmptyMessageEdit = forkReadKeepAttachmentsOnEmptyMessageEdit();
 			},
 			{key: KEEP_ATTACHMENTS_ON_EMPTY_MESSAGE_EDIT_STORAGE_KEY, source: 'external'},
 		);
@@ -91,3 +91,11 @@ class AdvancedSettings {
 }
 
 export default new AdvancedSettings();
+
+// Fork: Tyne keeps a message's attachments when an edit clears its text unless this device chose otherwise
+// (tyne-chat/tyne#904); upstream's default is off. The setting is stored on the device only, so a device where
+// nobody set it reads on, and one where someone did keeps that choice.
+export function forkReadKeepAttachmentsOnEmptyMessageEdit(): boolean {
+	const raw = AppStorage.getItem(KEEP_ATTACHMENTS_ON_EMPTY_MESSAGE_EDIT_STORAGE_KEY);
+	return raw == null ? true : parseStoredBoolean(raw);
+}
