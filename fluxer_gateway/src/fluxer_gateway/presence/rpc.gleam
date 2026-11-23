@@ -29,6 +29,9 @@ import gleam/option.{None, Some}
 import gleam/result
 import gleam/string
 
+// Fork imports.
+import fluxer_gateway/fork/dm_thread_presence
+
 fn lookup_timeout_ms() -> Int {
   durations.presence().rpc_lookup_timeout_ms
 }
@@ -311,7 +314,7 @@ fn offline_dispatch(
           }
         Error(Nil) -> Nil
       }
-    _ -> Nil
+    _ -> dm_thread_presence.offline_dispatch(user, name, raw, offline_dispatch)
   }
 }
 
@@ -348,7 +351,7 @@ fn user_event(name: String, fields: Fields, data: RawJson) -> UserEvent {
         channel: snowflake_field(fields, "channel_id"),
         message: snowflake_field(fields, "message_id"),
       )
-    _, _ -> protocol.OtherEvent
+    _, _ -> dm_thread_presence.user_event(name, data, dm_message)
   }
 }
 
