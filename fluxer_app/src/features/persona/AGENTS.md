@@ -80,6 +80,12 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 - Editing (`matchEditMessage`): a leading `\` on a persona's message removes the persona, a tag
   switches to that persona, and anything else leaves the persona as it is (the request omits it).
   When the message's text already started with `\`, the backslash is text and removes nothing.
+  A tag or `\` with nothing after it counts as no text (`messaging/utils/ForkMessageEditRules.ts`,
+  tyne-chat/tyne#904): on a message with nothing else the edit is handled as an empty one (upstream
+  offers to delete the message), and on one with attachments or stickers it removes the text and
+  changes the persona, as upstream's "Keep attachments when clearing an edit" does. Tyne turns that
+  setting on where the device stored no choice (`forkReadKeepAttachmentsOnEmptyMessageEdit` in
+  `user/state/AdvancedSettings.ts`).
   "Change persona" on one's own message edits only the persona, also on a forward, whose content
   cannot be edited (the API's `isPersonaOnlyEdit`). The inline edit's selector
   (`channel/components/InlineEditControls.tsx`) keeps its pick in `MessageChangePersona` until Save;
