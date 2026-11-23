@@ -42,6 +42,7 @@ import {
 	type SignalBarSignal,
 	type SignalBarUpdateRequest,
 	type UserSignalRef,
+	type UserSignalsPersonaResponse,
 	type UserSignalsResponse,
 	type UserSignalsRestoreAction,
 	type UserSignalsRestoreResponse,
@@ -406,11 +407,39 @@ export class SignalBarService {
 		/** When a new entry counts as lit; a restore spaces its entries so their order survives. */
 		activatedAt: number = this.deps.now?.() ?? Date.now(),
 	): Promise<ChannelSignalEntry | null> {
+		const key = entryKey(channel.id.toString(), signalId, user.id.toString());
+		const existing = ChannelSignalEntrySchema.safeParse(await this.deps.cacheService.get<unknown>(key));
+		return this.storeEntry(channel, signalId, user, persona, existing.success ? existing.data : null, activatedAt);
+	}
+
+	/**
+	 * Re-points one of the user's lit entries to another persona, as `writeEntry` does, but never lights
+	 * one: an entry turned off meanwhile stays off. Null when it is gone or already shows that persona.
+	 */
+	private async repointEntry(
+		channel: Channel,
+		signalId: string,
+		user: User,
+		persona: ResolvedPersona,
+	): Promise<ChannelSignalEntry | null> {
+		const key = entryKey(channel.id.toString(), signalId, user.id.toString());
+		const existing = ChannelSignalEntrySchema.safeParse(await this.deps.cacheService.get<unknown>(key));
+		if (!existing.success) return null;
+		return this.storeEntry(channel, signalId, user, persona, existing.data, existing.data.activated_at);
+	}
+
+	private async storeEntry(
+		channel: Channel,
+		signalId: string,
+		user: User,
+		persona: ResolvedPersona,
+		existing: ChannelSignalEntry | null,
+		activatedAt: number,
+	): Promise<ChannelSignalEntry | null> {
 		const channelId = channel.id.toString();
 		const userKey = user.id.toString();
 		const key = entryKey(channelId, signalId, userKey);
-		const existing = ChannelSignalEntrySchema.safeParse(await this.deps.cacheService.get<unknown>(key));
-		if (existing.success && existing.data.persona_id === persona.personaId) {
+		if (existing && existing.persona_id === persona.personaId) {
 			await this.deps.cacheService.expire(key, ENTRY_TTL_SECONDS);
 			return null;
 		}
@@ -420,7 +449,7 @@ export class SignalBarService {
 			user: mapUserToPartialResponse(user),
 			persona_id: persona.personaId,
 			subprofile: persona.subprofile,
-			activated_at: existing.success ? existing.data.activated_at : activatedAt,
+			activated_at: existing ? existing.activated_at : activatedAt,
 		};
 		await this.deps.cacheService.set(key, entry, ENTRY_TTL_SECONDS);
 		await Promise.all([
@@ -675,6 +704,47 @@ export class SignalBarService {
 		}
 		await this.writeSnapshot(userKey, {kind: 'restore', signal_id: null}, replaced);
 		return this.getUserSignals(userId);
+	}
+
+	/**
+	 * Shows the user's lit signals in the listed chats as one persona (null or `'0'`: the account), as
+	 * re-lighting each with it would: in place, keeping `activated_at`, one `CHANNEL_SIGNAL_UPDATE` per
+	 * chat changed (tyne-chat/tyne#310). A chat the user cannot see or may no longer light in is left as
+	 * it is. Returns the chats changed, in the order asked for.
+	 */
+	async setPersona({
+		userId,
+		personaId,
+		channelIds,
+		authenticate,
+	}: {
+		userId: UserID;
+		personaId: string | null;
+		channelIds: ReadonlyArray<string>;
+		authenticate: SignalChatAuthenticator;
+	}): Promise<UserSignalsPersonaResponse> {
+		const persona = await this.resolvePersona(userId, personaId);
+		const user = await this.deps.findUser(userId);
+		if (!user) throw new MissingPermissionsError();
+		const config = await this.getConfig();
+		const current = await this.readUserChats(userId.toString(), config);
+		const changed: Array<string> = [];
+		for (const channelId of channelIds) {
+			const stale = (current.get(channelId) ?? []).filter((entry) => entry.persona_id !== persona.personaId);
+			// Nothing of the user's to move here: the chat is not even opened.
+			if (stale.length === 0) continue;
+			const authChannel = await authenticate(channelId);
+			if (!authChannel || !(await this.canLight(authChannel))) continue;
+			const added: Array<ChannelSignalEntry> = [];
+			for (const entry of stale) {
+				const repointed = await this.repointEntry(authChannel.channel, entry.signal_id, user, persona);
+				if (repointed) added.push(repointed);
+			}
+			if (added.length === 0) continue;
+			changed.push(channelId);
+			await this.dispatchChannelUpdate(authChannel.channel, config.version, added, []);
+		}
+		return {changed_channel_ids: changed};
 	}
 
 	private async removeEntries(

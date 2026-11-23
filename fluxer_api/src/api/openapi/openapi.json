@@ -28385,6 +28385,65 @@
 				}
 			}
 		},
+		"/users/@me/signals/persona": {
+			"put": {
+				"operationId": "set_my_signals_persona",
+				"summary": "Show my signals as a persona",
+				"tags": ["Signal Bar"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {"schema": {"$ref": "#/components/schemas/UserSignalsPersonaResponseSchema"}}
+						}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Moves the authenticated user's lit signals in the listed chats to one persona, or to the account with a null persona, as giving each again as that persona would: each keeps its place. Chats the user cannot see or may no longer signal in are left as they are. Returns the chats where a signal moved.",
+				"security": [{"sessionToken": []}],
+				"requestBody": {
+					"required": true,
+					"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UserSignalsPersonaRequestSchema"}}}
+				}
+			}
+		},
 		"/users/@me/signals/restore": {
 			"get": {
 				"operationId": "get_my_signals_restore",
@@ -33013,6 +33072,35 @@
 					}
 				},
 				"required": ["available", "created_at", "action", "chats"],
+				"additionalProperties": false
+			},
+			"UserSignalsPersonaRequestSchema": {
+				"type": "object",
+				"properties": {
+					"persona_id": {
+						"anyOf": [{"$ref": "#/components/schemas/SnowflakeStringType"}, {"type": "null"}],
+						"description": "The persona the signals are shown as from now on; null or \"0\" for the account itself"
+					},
+					"channel_ids": {
+						"minItems": 1,
+						"maxItems": 200,
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "The chats where the user's signals move to the persona, each listed once"
+					}
+				},
+				"required": ["persona_id", "channel_ids"]
+			},
+			"UserSignalsPersonaResponseSchema": {
+				"type": "object",
+				"properties": {
+					"changed_channel_ids": {
+						"type": "array",
+						"items": {"$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "The chats where a signal was moved to the persona, in the order they were asked for"
+					}
+				},
+				"required": ["changed_channel_ids"],
 				"additionalProperties": false
 			},
 			"UserSignalsUpdateRequestSchema": {
