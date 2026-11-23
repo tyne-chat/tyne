@@ -601,7 +601,8 @@ pub fn default_durations() -> Durations {
       ip_connections_owner_sweep_interval_ms: 60_000,
       limits_heartbeat_interval_ms: 41_250,
       limits_heartbeat_timeout_ms: 45_000,
-      limits_resume_timeout_ms: 60_000,
+      // Fork: 300 s (upstream 60 s), past the web client's 180 s resume.
+      limits_resume_timeout_ms: 300_000,
       rate_limit_connection_window_ms: 60_000,
       rate_limit_forum_unreads_window_ms: 5000,
       rate_limit_presence_window_ms: 20_000,
