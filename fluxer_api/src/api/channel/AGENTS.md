@@ -72,7 +72,7 @@ which cannot change its persona. The author's edit writes through
   `subprofile` (`null` for the account), walks `referenced_message`, and shows "Deleted Persona" when
   the author's account is deleted and "Unknown Persona" when the row is missing. It takes
   `persona_id` and `persona_mentions` off the response and turns the latter into `mention_personas`
-  (absent when empty). The gateway's `push/fork_push_personas.erl` and the clients read both fields.
+  (absent when empty). The gateway's `push/fork_message.gleam` and the clients read both fields.
 - **Typing:** `MessageReadStateService` puts the server's own `subprofile`
   (`resolveTypingSubprofile`) on `TYPING_START`.
 - **Threads:** `services/thread/ForkThreadOwnerPersona.ts` checks the persona before the thread
@@ -169,8 +169,8 @@ DM at pins, reactions and typing (`MessageInteractionService`), mention checks (
 persona mentions, the DM's sensitive-media settings (`MessageContentService`), hidden system DMs, bulk
 self-deletion and data harvests, and search hits (`searchableDmThreads` in `MessageSearchResponseMapper`).
 In a 1:1 DM, renaming or reopening a thread follows the DM's block rules (`assertDmThreadWriteAllowed`). A
-push carries `fork_thread_context` for its title; the gateway reads, buffers and tags a DM thread's pushes by
-the thread (`fork_dm_thread_push:read_channel_id`).
+push carries `fork_thread_context` for its title; the gateway reads, buffers, files in its outbox and tags a
+DM thread's pushes by the thread (`fork/dm_thread_push.gleam` `read_channel`).
 
 Upstream strips thread chips, "thread created" notices and starter messages from every channel without a
 guild. An app that knows DM threads sends the client feature `fork_dm_threads` (`DM_THREADS_CLIENT_FEATURE`)
@@ -203,7 +203,5 @@ and keeps them: `ForkDmThreadViewer.ts` marks its viewer in `viewerFromCtx`, and
 - Removing a reaction without `persona_id` deletes every row of that user for the emoji and sends
   one `MESSAGE_REACTION_REMOVE` without `persona_id`, the same event as removing only the account's
   (tyne-chat/tyne#123).
-- Reactions batched by the gateway (`MESSAGE_REACTION_ADD_MANY`) lose their persona
-  (tyne-chat/tyne#120).
 - The reaction users list pages by user id, so a page that ends inside one user's persona rows skips
   the rest of them (tyne-chat/tyne#328).

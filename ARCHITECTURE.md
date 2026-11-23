@@ -8,7 +8,7 @@ the same commit.
 
 Paths are from the repository root; `api/` means `fluxer_api/src/api/` and `features/` means
 `fluxer_app/src/features/`. In the flows, web paths are under `fluxer_app/src/features/` and
-gateway paths (`.erl`) under `fluxer_gateway/src/`. Upstream (Fluxer) renames and moves files often:
+gateway paths (`.gleam`) under `fluxer_gateway/src/fluxer_gateway/`. Upstream (Fluxer) renames and moves files often:
 trust a file name here less than a function or folder name, and check before relying on either.
 Checked against the code on 2026-10-18.
 
@@ -16,13 +16,14 @@ Checked against the code on 2026-10-18.
 
 Tyne is Fluxer (a chat server with a web and desktop app) plus the fork's features, chiefly
 personas. A TypeScript **API** owns writes and rules, and runs a **worker** from the same image for
-background jobs. An Erlang **gateway** holds the clients' WebSockets and each guild's live state
-(members, roles, permissions): the API asks it for permission checks and hands it events to fan out.
-Rust services behind **NATS** build message objects, look up users, issue IDs, unfurl links and
-search GIFs, and a Rust **media proxy** serves stored and external media. Nearly all data is rows in
-one **PostgreSQL** key/value table. The React and MobX **web app** also runs inside the Electron
-**desktop app**. The Flutter mobile app (tyne-chat/tyne-mobile) uses the same API, through a Dart
-SDK generated from this repository's OpenAPI spec, and the same gateway.
+background jobs. A **gateway** written in Gleam (on Erlang/OTP) holds the clients' WebSockets and
+each guild's live state (members, roles, permissions): the API asks it for permission checks and
+hands it events to fan out. Rust services behind **NATS** build message objects, look up users,
+issue IDs, unfurl links and search GIFs, and a Rust **media proxy** serves stored and external
+media. Nearly all data is rows in one **PostgreSQL** key/value table. The React and MobX **web app**
+also runs inside the Electron **desktop app**. The Flutter mobile app (tyne-chat/tyne-mobile) uses
+the same API, through a Dart SDK generated from this repository's OpenAPI spec, and the same
+gateway.
 
 ## Components
 
@@ -36,7 +37,7 @@ app. Upstream's self-hosting stack, compose file included, is embedded in `rexct
 |---|---|---|---|
 | API | `fluxer_api` (`src/AppEntrypoint.ts`, routes in `api/app/ControllerRegistry.ts`) | REST (Hono); `/internal/rpc` for the gateway and push | gateway over NATS `rpc.gateway.<method>` (`api/infrastructure/GatewayService.ts`); Rust services over `svc.<name>`; the media proxy over HTTP |
 | Worker | same image, `src/WorkerEntrypoint.ts` | jobs and cron (`api/worker/tasks/`) | JetStream `jobs.<task>` |
-| Gateway | `fluxer_gateway` (Erlang/OTP) | sessions, presence, guild state, calls, push fan-out | serves `rpc.gateway.*`; calls the API's `/internal/rpc`; sends `push.job.*` requests through a per-node outbox that retries for up to 300 s (`push/push_outbox.erl`) |
+| Gateway | `fluxer_gateway` (Gleam on Erlang/OTP, Rust NIFs) | sessions, presence, guild state, calls, push fan-out | serves `rpc.gateway.*`; calls the API's `/internal/rpc`; sends `push.job.*` requests through a per-node outbox that retries them (`push/outbox/`) |
 | Messages | `fluxer_messages` (Rust) | builds API message objects from stored rows; extracts mentions; deletes rows with neither author nor webhook (its only write) | `svc.messages`; calls `svc.users` and `rpc.gateway.guild.resolve_channel_mentions` |
 | Users, snowflakes, unfurl, gifs | `fluxer_users`, `fluxer_snowflakes`, `fluxer_unfurl`, `fluxer_gifs` | user partials, ID batches, link previews, GIF search | `svc.<name>` |
 | Push | `fluxer_push` (Rust) | APNs, FCM, Web Push; the same binary is the public push relay (`--mode relay`) | answers `push.job.*` requests in a queue group; reads devices and badge counts from the API's `/internal/rpc` |
@@ -106,32 +107,32 @@ and the mobile app builds it from its `fluxer` submodule.
    through `rpc.gateway.presence.dispatch` per recipient.
 6. **Gateway:** `guild.dispatch` hands the event to the guild process (loading the guild if it is
    not in memory) and returns before delivery. The guild process filters per session, encodes the
-   payload once, casts it to the sessions and queues push notifications (`guild/guild_dispatch*.erl`,
-   `push/push_outbox.erl`). Each session (`session/session_dispatch.erl`) numbers the event, keeps
+   payload once, sends it to the sessions and queues push notifications (`guild/dispatch.gleam`,
+   `guild/push/`, `push/outbox/`). Each session (`session/dispatch.gleam`) numbers the event, keeps
    it for replay and forwards the encoded JSON to its socket.
 7. **Web:** `gateway/transport/GatewaySocket.ts` → `gateway/events/EventRouter.ts` →
    `messaging/events/MessageCreate.ts` → `messaging/state/MessagingMessages.ts` → re-render.
 
 ### Connecting to the gateway
 
-1. The WebSocket opens at `/gateway` (`gateway/gateway_handler.erl`, HELLO). The protocol is
+1. The WebSocket opens at `/gateway` (`gateway/socket.gleam`, HELLO). The protocol is
    documented in `fluxer_docs/src/content/docs/gateway/`.
-2. IDENTIFY → `session_manager:start`, which fetches the session's data from the API
+2. IDENTIFY (`gateway/identify.gleam`) → the session manager (`session/manager/`), which fetches
+   the session's data from the API
    (`POST /internal/rpc` `{type: "session"}`, `api/rpc/RpcService.ts`): user, settings, read states,
    private channels, relationships, guild IDs. If the session cannot start yet (draining, at
    capacity, the API answering 429 or 5xx or not at all), the gateway holds the IDENTIFY without
    replying and retries every 1–2 s; a bad payload, token or shard closes the socket.
-3. The session joins the account's presence process (`session_connection_presence` →
-   `presence_session`) and each guild; a guild not in memory is loaded from the API.
+3. The session joins the account's presence process (`session/presence_link.gleam`) and each
+   guild (`session/guilds.gleam`); a guild not in memory is loaded from the API.
 4. READY goes out with the guilds inline once presence and every guild have answered, or after 5 s
    at most with the slow guilds marked unavailable (they follow as GUILD_CREATE). On the web,
    `gateway/events/GatewayReady.ts` handles it, and the fork's `ForkAccountReadyWork.ts` then fetches
    the personas over REST. A desktop account switch that resumes the session upstream's account
    engine kept warm gets no READY; `completePromotedResume` (`PooledGatewayConnection.ts`) runs the
    same work (tyne-chat/tyne#141).
-5. Heartbeat acks trim the replay buffer. RESUME (`gateway_handler_resume.erl`), accepted only on a
-   socket without a session (4005 otherwise), finds or rebuilds the session and replays what the
-   client missed. A session is kept for 300 s after its socket drops (the fork's value; upstream's
+5. Heartbeat acks trim the replay buffer. RESUME (`gateway/resume.gleam`, `session/server.gleam`)
+   finds the session and replays what the client missed. A session is kept for 300 s after its socket drops (the fork's value; upstream's
    is 60 s), but a client close with 1000 or 1001 ends it at once. Details:
    `fluxer_gateway/AGENTS.md`.
 
@@ -208,8 +209,9 @@ Several identities under one account. The pieces, end to end:
   the `user` and `subprofile` it was lit with.)
 - **Mentions:** `<@user:persona>`, a fork form in the shared parser (`packages/markdown_parser`).
   The messages service collects the pairs; the API stores them for search.
-- **Gateway:** event names in `fluxer_gateway/src/utils/event_atoms.erl`; persona names in push
-  notifications (`push/fork_push_personas.erl`).
+- **Gateway:** any event name passes (upstream's Gleam gateway has no table of names); personas in
+  the reaction buffer (`session/fork_reaction_persona.gleam`) and in push notifications
+  (`push/fork_push_personas.gleam`).
 - **Web** (`features/persona/`, guide in its `AGENTS.md`): `PersonaStore` (own personas, which
   persona is selected, tag matching), the composer pill and picker, `PersonaTag`, profiles, settings,
   import and export. About 50 upstream components call into it: message rendering, sending,
@@ -257,7 +259,8 @@ stand in for the guild where upstream's thread code needs one (thread tables sto
 event about a DM thread goes to each recipient wrapped as `FORK_DM_THREAD_EVENT`, and READY carries
 `fork_dm_threads`, so older apps never see them; REST keeps thread chips and starter messages in DMs
 only for apps that send the client feature `fork_dm_threads`. Pushes go through the gateway's DM path
-(`push/fork_dm_thread_push.erl`) with `fork_thread_id`; reading, buffering and their tags go by the thread.
+(`fork/dm_thread_presence.gleam`, `fork/dm_thread_push.gleam`) with `fork_thread_id`; reading, buffering,
+the outbox and their tags go by the thread.
 Web `features/threads/fork/`: the envelope, READY, an account's DM threads kept across a warm account switch
 on the desktop (`ForkDmThreadAccounts.ts`), the DM views and breadcrumb, and the marks of thread news (Threads
 button, chip, list, DM row). Who may
@@ -400,8 +403,8 @@ the folder. A new folder guide is added to this list in the same commit.
 - `fluxer_app/src/features/signal_bar/AGENTS.md`: the signal bar in the web app.
 - `fluxer_desktop/AGENTS.md`: the desktop app: its processes and IPC, Tyne's identity, extra
   windows, updates and releases, native add-ons.
-- `fluxer_gateway/AGENTS.md`: the Erlang gateway: its processes, how events reach sessions, resume,
-  passive sessions, and the fork's hooks.
+- `fluxer_gateway/AGENTS.md`: the Gleam gateway: where things are, how events reach sessions,
+  resume, passive sessions, upstream's handoff, Gleam traps, and the fork's hooks and tests.
 - `fluxer_media_proxy/AGENTS.md`: the media proxy: its routes, how uploads are stripped, the MP3
   repair, and where fork code goes in its crate.
 - `fluxer_messages/AGENTS.md`: the service that builds message objects and extracts mentions, and

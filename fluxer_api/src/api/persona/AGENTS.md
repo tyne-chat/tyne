@@ -187,13 +187,11 @@ groups others can see, and the PluralKit import and export of `groups` (the issu
 
 - `GUILD_PERSONAS_DIRTY` costs one gateway RPC per guild and per DM partner for every persona edit.
   Keep it off paths that run often.
-- **Adding an event:** add the name to `constants/Gateway.ts` and to the fork's own map,
-  `fluxer_gateway/src/utils/fork_event_atoms.erl` (the older persona events sit in upstream's
-  `event_atoms.erl`), document it in `fluxer_docs` (`gateway/events.md`;
-  nothing checks that since upstream dropped the docs verifier), and restart the gateway. Without the atom, a DM dispatch
-  (`rpc.gateway.presence.dispatch`) fails with `presence_dispatch_error`, and a guild dispatch is
-  logged and dropped: nobody receives the event. A community event also needs a decision on channel
-  scope and passive sessions: `fluxer_gateway/AGENTS.md`, "Event names".
+- **Adding an event:** add the name to `constants/Gateway.ts` and document it in `fluxer_docs`
+  (`gateway/events.md`; nothing checks that since upstream dropped the docs verifier). The gateway
+  takes any name of capitals, digits and underscores, so it needs no change, except that a
+  community event needs a decision on channel scope and passive sessions (`fork/events.gleam`,
+  `fluxer_gateway/AGENTS.md`, "How an event reaches a session").
 
 ## Import, export and images
 

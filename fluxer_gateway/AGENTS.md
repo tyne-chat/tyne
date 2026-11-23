@@ -1,209 +1,179 @@
 # The gateway
 
-The Erlang/OTP service that holds the clients' WebSockets, with a process per socket, gateway
-session, signed-in account (presence), loaded community (guild) and DM call. The API reaches it over
-NATS (`rpc.gateway.*`) to fan out events and ask about permissions and members; it calls the API
-over HTTP (`/internal/rpc`). The code is upstream's, and upstream changes it often. The fork adds
-event names, signal-bar routing, a longer resume hold and persona names in push notifications; the
-gateway stores no persona data. The protocol is documented in
+Upstream's realtime service, written in Gleam on Erlang/OTP since fluxerapp/fluxer#4254
+(2026-11-23; it replaced the Erlang gateway). It holds the clients' WebSockets, with a process per
+socket, gateway session, signed-in account (presence), loaded community (guild) and call. The API
+reaches it over NATS (`rpc.gateway.*`) to fan out events and ask about permissions and members; it
+calls the API over HTTP (`/internal/rpc`). Native code is in Rust NIFs (`rust/`, one library,
+`priv/gateway_nif.so`). The code is upstream's, and upstream changes it often. The fork adds signal
+routing, a longer resume hold, personas in the reaction buffer and in push notifications, and the
+pushes of DM threads; the gateway stores no persona data. The protocol is documented in
 `fluxer_docs/src/content/docs/gateway/`.
 
 ## Where things are
 
-Paths in this folder are under `src/` unless they start with `native/` or `test/`; other paths are
-from the repository root.
+Paths are under `src/fluxer_gateway/` unless they start with `test/`, `rust/` or `scripts/`.
 
 | Concern | Files |
 |---|---|
-| Start, roles, supervisor, settings (`FLUXER_*`, read once at boot) | `gateway/fluxer_gateway_app.erl`, `gateway/fluxer_gateway_sup.erl`, `gateway/fluxer_gateway_config.erl` |
-| The socket: opcodes, IDENTIFY, RESUME, heartbeats, limits | `gateway/gateway_handler*.erl` |
-| RPC from the API; requests to it | `gateway/gateway_nats_rpc_handler.erl`, `gateway/gateway_rpc_*.erl`; `gateway/rpc_client.erl` |
-| Sessions, READY, replay, resume; passive rules | `session/`; `session/session_passive.erl` (run by guild processes) |
-| Communities: state, fan-out, member list, voice | `guild/` |
-| Presence, events sent to an account | `presence/` |
-| DM calls; push notifications | `call/`; `push/` and the NIF `native/push_markdown_plaintext_nif` |
-| Event names, protocol constants | `utils/event_atoms.erl`, `utils/constants.erl` |
-
-## Processes
-
-- `fluxer_gateway_sup` (`one_for_one`) starts shared children, then those of the node's role,
-  `FLUXER_GATEWAY_ROLE`: `sessions`, `presence`, `guilds`, `calls`, `push` or `websocket`; unset
-  means `all`. With `FLUXER_GATEWAY_CLUSTER_ENABLED` off (the default), one node does everything
-  and is every key's "owner node".
-- Each kind has a registered manager under the supervisor (`session_manager`, `presence_manager`,
-  `guild_manager`, `call_manager`). The first three start and monitor their own `*_manager_shard`
-  gen_servers (one per CPU unless configured); a key (session, user or guild id) picks its shard by
-  rendezvous hashing, and in a cluster its node (`gateway/gateway_node_router.erl`).
-- Shards start and monitor one gen_server per entity: `session`, `presence` (per account), `guild`
-  (per loaded community); `call_manager` starts a `call` per active call.
-- The guild process holds the community's state (roles, channels, members, permissions, voice,
-  presence) and its connected sessions, and answers the API's permission queries. The session holds
-  its seq, replay buffer and guild connections. The presence process holds the account's status and
-  receives every event sent to the account.
-- The API's requests arrive on `rpc.gateway.<method>` (queue group `gateway`, up to 512 at once).
-  `gateway_rpc_router` routes them by prefix (`guild.`, `presence.`, `push.`, `call.`, `voice.`,
-  `process.`) to the method tables in `gateway_rpc_*.erl`; the reply is `{"ok": true, "result": …}`
-  or `{"ok": false, "error": …}`.
+| Start, supervisor, roles, drain, health and status ports | `app/` |
+| Settings (`FLUXER_*`, read once at boot; durations in code) | `config/settings.gleam`, `config/durations.gleam` |
+| The socket: opcodes, IDENTIFY, RESUME, heartbeats, limits | `gateway/` (`socket.gleam`, `identify.gleam`, `resume.gleam`, `limits.gleam`) |
+| RPC from the API (NATS, queue group `gateway`); requests to it | `rpc/`, the `rpc.gleam` of each area; `api/client.gleam` |
+| Sessions, READY, replay buffer, resume, the reaction buffer | `session/` (`server.gleam`, `dispatch.gleam`, `reactions.gleam`, `replay_buffer.gleam`) |
+| Communities: state, fan-out, passive rules, member list | `guild/` (`dispatch.gleam`, `dispatch/event.gleam`, `sessions/passive.gleam`) |
+| Account events, DM push hold | `presence/` (`rpc.gleam`, `state.gleam`, `push_buffer.gleam`, `push_hook.gleam`) |
+| Push jobs, outbox, read-state check | `push/` (`message.gleam`, `format.gleam`, `job.gleam`, `outbox/`, `read_state.gleam`) |
+| Cluster membership, handoff, bouncer | `cluster/`, `handoff/`, the `handoff/` folders of each area; `bouncer/` and `bouncer_proto/` are separate Gleam packages |
+| NIFs: push preview, permissions, member list, JSON scanning, zstd | `rust/crates/` (`md_plaintext` renders the push preview with `packages/markdown_parser`) |
+| The fork's code | `fork/` and the `fork_*.gleam` files listed under "The fork's code" |
 
 ## How an event reaches a session
 
-**Community events** (`guild.dispatch`, `guild.dispatch_many`):
+**Community events** (`guild.dispatch`): the guild process (`guild/dispatch.gleam`) normalizes the
+name (`event.normalize`: any name of capitals, digits and underscores; there is no table of known
+events), updates its state, picks the sessions by the event's scope (`event.scope`: channel-scoped
+events go to those that can view their `channel_id`, permission-gated ones to those with the
+permission, the rest to all), drops those the passive rules refuse (`sessions/passive.gleam`
+`should_receive`), encodes once and sends; push candidates follow (`guild/push/`).
 
-1. `gateway_rpc_guild_lifecycle` turns the name into an atom (next section), finds the guild
-   process, starting it if it is not loaded (`gateway_rpc_guild_infra:ensure_guild_pid/1`), casts
-   the event and replies `true`. The API's call returns before delivery; later failures are not
-   reported.
-2. `guild_dispatch:handle_dispatch/3` drops unknown names, skips events while the community is
-   unavailable, and applies the threads gate.
-3. `process_regular_dispatch/3` adds `guild_id` (and `member` to message, typing and reaction
-   events), updates the guild's state and picks sessions (`guild_dispatch_filter`): a channel-scoped
-   event (`is_channel_scoped_event/1`) goes to those that can view its `channel_id`, most others to
-   all.
-4. `guild_dispatch_send` drops the sessions `session_passive:should_receive_event/5` refuses,
-   encodes the payload to JSON once (`{pre_encoded, Binary}`) and casts it to the rest. Push
-   candidates follow (`guild_dispatch_push`).
+**Account events** (`presence.dispatch`, `presence/rpc.gleam` `dispatch`): sent as they are to every
+presence inbox of the account (`UserDispatch`), which passes them to its sessions with no passive
+filter. `user_event` reads the few the presence acts on (`USER_UPDATE`, `USER_SETTINGS_UPDATE`,
+`MESSAGE_CREATE` and `MESSAGE_ACK` of DMs); every other name is `OtherEvent`. With no session, or
+an owner node that cannot be reached, `offline_dispatch` turns a DM `MESSAGE_CREATE` into a push and
+drops the rest.
 
-**Account events** (`presence.dispatch`, one request per account): the presence process casts the
-map to each of the account's sessions (`presence_broadcast:dispatch_to_all_sessions/3`), with no
-passive filter. With no session there is no presence process and the event is dropped (a DM
-MESSAGE_CREATE becomes a push). A session with over 5,000 queued messages silently misses it
-(`shard_utils:safe_cast/2`).
-
-**In the session** (`session/session_dispatch.erl`): `ignored_events` and thread rules filter, the
-event gets the next seq, enters the replay buffer and goes to the socket. The frame's `t` is the
-atom in upper case.
-
-## Event names
-
-`event_atoms:normalize/1` (through `constants:dispatch_event_atom/1`) looks the name up in the maps
-of `utils/event_atoms.erl`, else tries an existing atom for the lower-cased name, else keeps the
-binary. Atoms are never freed, so nothing here may call `binary_to_atom` on outside data.
-
-- An unknown name on the community path: the RPC succeeds and the guild logs "guild dispatch dropped
-  unknown event"; the API sees no error. On the account path the RPC fails
-  (`presence_dispatch_error`).
-- The existing-atom fallback can make a missing entry work by accident. The map is the contract.
+**In the session** (`session/dispatch.gleam`): thread rules and `ignored_events` filter; with
+`DEBOUNCE_MESSAGE_REACTIONS`, reaction adds wait 650 ms in the reaction buffer and go out together
+(`MESSAGE_REACTION_ADD_MANY`); the event gets the next seq, enters the replay buffer and goes to the
+socket.
 
 **Adding an event:** the name in `fluxer_api/src/api/constants/Gateway.ts` and a section in
-`fluxer_docs/src/content/docs/gateway/events.md` (nothing checks it since upstream dropped the docs
-verifier); the
-entry in `event_atoms.erl`, the atom being the name in lower case; for a community event, whether it
-is channel-scoped (then it needs `channel_id`) and whether passive sessions get it
-(`bypasses_passive_filter/3` or `should_passive_receive/3`); a fork test; a gateway restart.
+`fluxer_docs/src/content/docs/gateway/events.md`; nothing in the gateway unless it is channel-scoped
+or reaches passive sessions (`fork/events.gleam`) or the presence acts on it.
 
 ## Connecting, READY and RESUME
 
-The outline is in `ARCHITECTURE.md` ("Connecting to the gateway"). The details that matter:
+The outline is in `ARCHITECTURE.md` ("Connecting to the gateway"). What matters here:
 
-- IDENTIFY asks the API once (`session_manager_shard_drain:fetch_rpc_data/2`). READY's base is the
-  answer with `guilds` emptied, so a field the API adds there reaches READY with no gateway change.
-- IDENTIFY can be held without a reply (rollout paused, draining, at capacity, API 429 or 5xx,
-  network error) and is retried every 1–2 s; over 300 a minute per IP it is ignored. A bad payload
-  (4002), token (4004) or shard (4010, 4011), a 101st session of the user (4008) or an unexpected
-  error (4000) closes the socket.
-- The session joins presence (`session_connection_presence` → `presence_session`) and each guild
-  (`session_connection_guild`); a guild answers with that user's GUILD_CREATE payload. READY goes
-  out once presence and every guild have answered, or after 5 s with the rest unavailable (they
-  follow as GUILD_CREATE). A bot gets READY at once.
-- **Kept for RESUME**, in the session process: `seq`, `ack_seq` (heartbeats trim the buffer),
-  `replay_floor`, the replay buffer (4,096 events or 16 MiB), guild connections with active flags
-  and subscriptions, status. READY, events over 2 MiB and those in
-  `session_dispatch:should_skip_replay_buffer/1` (member chunks and lists, GUILD_SYNC) are numbered
-  but not kept.
-- **Hold:** without a socket, `session_monitor:hold_session_for_resume/1` keeps the session for
-  `constants:resume_timeout/0` and shows it offline after 5 s. A client close with 1000 or 1001 ends
-  it at once (`gateway_handler:exit_on_client_close/1`): that client can never resume.
-- **RESUME** works only on a socket without a session (else 4005). A seq beyond the current one or
-  below `ack_seq` closes with 4007; an unknown session or a seq below `replay_floor` gets
-  INVALID_SESSION. Sessions live only in memory: after a gateway restart every client identifies
-  again.
-- A new session-state field must also go into `session_lifecycle:serialize_transfer_state/1` and
-  `session_init:extract_fields/1`, or moving a session between nodes drops it.
+- READY's base is the API's answer to the session request, so a field the API adds there (the
+  fork's `fork_dm_threads`) reaches READY with no gateway change.
+- **Kept for RESUME**, in the session process: seq, the replay buffer (4,096 events or its byte
+  cap), guild connections and status. A session without a socket is held for
+  `limits.resume_timeout_ms()`, **300 s in the fork** (upstream 60 s), and shown offline after 5 s.
+  A client close with 1000 or 1001 ends it at once.
+- RESUME of an unknown or expired session gets INVALID_SESSION. Sessions live only in memory; a
+  deploy moves them to the next node (upstream's handoff, below), a restart does not.
 
 ## Passive sessions
 
-- A user's session is passive in each community until its client sends Lazy Request (op 14) with
-  `active: true`, except in the IDENTIFY's `initial_guild_id`; bots never are. A community of 250
-  members or fewer counts as active for everyone (`session_passive:is_small_guild/1`).
-- A passive session in a larger community gets guild, role and channel updates, its own member
-  updates, messages that mention it or that it wrote, guild deletes, audit-log entries, and
-  PASSIVE_UPDATES every 30 s (`guild/guild_passive_sync.erl`). Turning active sends GUILD_SYNC.
-- It misses `GUILD_PERSONAS_DIRTY`, `CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE`, and
-  GUILD_SYNC does not make up for them (tyne-chat/tyne#313). Dev communities are small: test with `member_count` above
-  250, as `test/fork_session_passive_tests.erl` does.
+A user's session is passive in each community until its client sends Lazy Request (op 14) with
+`active: true`, except in the IDENTIFY's `initial_guild_id`; bots never are. A community of 250
+members or fewer counts as active for everyone (`guild/state.gleam` `is_small_guild`). A passive
+session gets guild, role and channel updates, its own member updates, messages that mention it or
+that it wrote, guild deletes, audit-log entries and PASSIVE_UPDATES, and with the fork
+`SIGNAL_BAR_UPDATE` and `GUILD_COMMANDS_UPDATE`. It misses `GUILD_PERSONAS_DIRTY`,
+`CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE` (tyne-chat/tyne#313). Dev communities are
+small: test above 250 members (`passive_test.big_guild()` in Gleam, the bulk-member route in E2E).
+
+## Deploys: upstream's handoff
+
+The fork's own handoff (tyne-chat/tyne#196) was dropped with the Erlang gateway
+(tyne-chat/tyne#905). Production runs upstream's membership mode (cluster on, peers by DNS or a
+static list, no bouncer): a new node joins, takes over sessions, presences and guilds by moving
+them, and the old node drains (`app/drain.gleam`, `session/manager/transfer.gleam`,
+`session/departure.gleam`, `guild/handoff/`). A moved guild is frozen and its sessions rejoin
+silently with a catch-up of up to 1,000 events. A new node is ready about 10 s after it starts.
+Known gap (inferred, not measured): a stopping node leaves the API's NATS queue group only when it
+stops, so requests in flight then time out after 5 s. Rehearse a change to drain, handoff or
+ownership with the maintainers' rehearsal before deploying it.
 
 ## Network calls
 
-The gateway's requests go to the API's `/internal/rpc`:
+The gateway's requests go to the API's `/internal/rpc` (`api/client.gleam`): one `session` request
+per IDENTIFY; several to load a community, on any start, `guild.dispatch` included (an API fan-out
+to every community, such as the fork's `SIGNAL_BAR_UPDATE`, loads them all; a community nobody joins
+stops 600 s after it empties); `get_read_state` for a DM push buffered longer than the outbox's age
+limit.
 
-- One `session` request per IDENTIFY, repeated every 1–2 s while the identify is held.
-- Loading a community: six requests plus one per 1,000 members
-  (`guild/guild_manager_shard_fetch.erl`), on any start, `guild.dispatch` included. The 30 s stop
-  of an empty guild is armed only when a session leaves
-  (`guild/guild_sessions_connect_cleanup.erl`), so a community loaded by a dispatch nobody joins
-  stays loaded (read in the code, not observed). An API fan-out to every community, such as the
-  fork's `SIGNAL_BAR_UPDATE`, loads them all (tyne-chat/tyne#314, #315).
+## Gleam traps
 
-## Erlang traps
-
-- **Clauses stay together.** A function's clauses must be contiguous and the first match wins; a
-  clause after the catch-all (`(_) -> false`) never runs. So fork clauses sit inside upstream's.
-- **An exception crashes the process**; nothing in a guild's dispatch path catches. When a guild
-  crashes, each of its sessions sends GUILD_DELETE `unavailable: true` and reconnects a second
-  later, which reloads the guild from the API; when a session crashes, its socket sends
-  INVALID_SESSION. Read payload fields with `maps:get/3` and a default; a channel-scoped event
-  without `channel_id` throws (`guild_dispatch_filter:extract_channel_id/2`).
-- **Never block a guild or session.** `gen_server:call` waits (5 s by default) and exits the caller
-  on timeout; two processes calling each other deadlock. Fan-out uses casts; slow work runs in
-  spawned workers. The watchdog kills a guild whose mailbox keeps growing past 50,000.
-- **Payloads are maps with binary keys**: `maps:get(<<"channel_id">>, Data, undefined)`.
-- **No reload in development:** the gateway is compiled when the orchestrator starts it
-  (`tools/dev/src/gateway.rs`); restart the orchestrator after an Erlang change.
-- **erlfmt** covers `src` and `test`: `rebar3 fmt` in `fluxer_gateway` rewrites in place; check
-  that only fork lines moved. Give every function a `-spec`, as upstream does.
+- **No comments, `case` arms in order.** Upstream's code has no comments; the first matching arm
+  wins, so a fork arm goes before the catch-all, and a hook is best placed in the catch-all
+  (`_ -> fork_module.f(...)`), as in `fork/events.gleam`.
+- **Opaque types** (`Reactions`, `Template`, `RawJson`) are readable only inside their module: a
+  fork change that needs their fields is an appended block in that module (`reactions.fork_cancel`).
+- **A record field changes every constructor.** Upstream builds `MessageData` and `PreviewContext`
+  with labels, so the fork's fields go first and every literal must name them (`fork:`,
+  `personas:`). Such a record crosses nodes (a `MessageCreate` is cast to its owner node), and
+  upstream's wire-epoch test (`test/fluxer_gateway/docs/wire_epoch_test.gleam`) hashes only
+  top-level message types: a change to the fork's fields needs a deploy that restarts the gateway,
+  or old and new nodes misread each other's casts.
+- **Import cycles do not compile.** `push/format.gleam` imports the fork's push modules, so those
+  must not import `format`.
+- **Settings:** an invalid `FLUXER_GATEWAY_*` value makes the gateway fall back to every default
+  (port 8771) and fail its health check; the log says `invalid_gateway_settings`. Durations are not
+  environment variables: the fork changes their defaults in `config/settings.gleam`.
+- **The NIF is built from `rust/` and `packages/markdown_parser/rust`;** `scripts/nif.sh` rebuilds
+  it only when `rust/` changed. After a change to the parser, run `scripts/nif.sh --force`.
+- **Formatting:** `gleam format` covers `src`, `test` and the bouncer packages; it sorts nothing
+  across the `// Fork imports.` line, so the fork's imports stay in their own group after
+  upstream's. Check that only fork lines moved.
+- **No reload in development:** the orchestrator builds the gateway when it starts
+  (`tools/dev/src/gateway.rs`, `scripts/gleam.sh build`); restart it after a change. The dev
+  container needs Gleam 1.19.2.
 
 ## The fork's code
 
 | Where | What | Kind |
 |---|---|---|
-| `push/fork_push_personas.erl` | the persona's name (title) and picture (icon) from `subprofile`, mentioned personas' names from `mention_personas` | fork-owned |
-| `push/push_notification_format.erl` | `fork_push_personas:author_name/1` first in `resolve_author_name/3`'s list; `<<"personas">>` in `build_markdown_context/4` | one line each |
-| `push/push_job_publisher.erl` | `<<"icon">>` calls `fork_push_personas:author_icon/2`, not `resolve_author_avatar_url/1` | one line replaced |
-| `push/push_markdown_plaintext.erl`, `native/push_markdown_plaintext_nif/src/lib.rs` | pass `personas` to the parser (`packages/markdown_parser/rust/src/plaintext.rs`) | 1 and 4 lines |
-| `utils/event_atoms.erl` | ten names: three signal-bar in `core_event_map/0`, `GUILD_PERSONAS_DIRTY` in `guild_event_map/0`, six `USER_PERSONA*` in `user_voice_event_map/0` | in upstream's maps |
-| `utils/constants.erl` | `resume_timeout() -> 300000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`); the docs say 300,000 ms | one value |
-| `guild/guild_dispatch_filter.erl` | `channel_signal_update`, `channel_signal_bar_update` are channel-scoped | two clauses |
-| `session/session_passive.erl` | `signal_bar_update` bypasses the passive filter | one clause |
-| `session/fork_reaction_buffer.erl` | personas in the reaction buffer: `MESSAGE_REACTION_ADD_MANY` entries keep `persona_id` and `subprofile`, and a remove cancels only the buffered add of the same persona (tyne-chat/tyne#120) | fork-owned |
-| `session/session_dispatch_voice.erl` | `build_reactions/1` passes each entry through `fork_reaction_buffer:with_persona/2`; `try_cancel_from_buffer/3` and `matches_reaction/5` compare `fork_reaction_buffer:reactor/1` (user and persona), not `user_id` | three lines replaced |
-| `utils/fork_event_atoms.erl`, `utils/event_atoms.erl` | `FORK_DM_THREAD_EVENT`, the envelope of every event about a thread in a DM (tyne-chat/tyne#699), and `USER_PERSONA_GROUPS_UPDATE` (tyne-chat/tyne#829); its map first in `known_event_map/0`. New fork events go here, not into upstream's maps | fork-owned; one line |
-| `push/fork_dm_thread_push.erl` | a DM-thread envelope's `push.message` is pushed as a message in the parent DM, titled "Author (Thread)", with `fork_thread_id` and `fork_thread_name` | fork-owned |
-| `presence/presence.erl`, `gateway/gateway_rpc_presence.erl`, `push/push_notification.erl`, `push/push_job_fields.erl` | hand the envelope's push message to upstream's DM push path (online, offline, unreachable), the title, the two fields | one clause each; one branch; one line |
+| `fork/events.gleam` | `CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE` are channel-scoped; `SIGNAL_BAR_UPDATE` and `GUILD_COMMANDS_UPDATE` reach passive sessions | fork-owned |
+| `guild/dispatch/event.gleam`, `guild/sessions/passive.gleam` | the catch-all arm of `is_channel_scoped` and of `bypasses` calls `fork/events.gleam` | one arm each |
+| `config/settings.gleam` | `limits_resume_timeout_ms: 300_000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`; mobile 55 s); `test/.../gateway/protocol_test.gleam` expects it | one value; one expectation |
+| `session/fork_reaction_persona.gleam` | personas in the reaction buffer: `MESSAGE_REACTION_ADD_MANY` entries keep `persona_id` and `subprofile`, and a remove cancels only the buffered add of the same persona (tyne-chat/tyne#120) | fork-owned |
+| `session/reactions.gleam`, `session/dispatch.gleam` | `reaction_json` puts the entry's persona fields first (one statement); `fork_cancel` appended (upstream's `cancel`, matching the persona too); `route` calls `fork_cancel` | one statement; appended block; one call |
+| `push/fork_message.gleam` | what the fork reads from a pushed message: the persona it was sent as (`subprofile`), the personas it mentions (`mention_personas`, at most 50), the DM thread (`fork_thread_*`) | fork-owned |
+| `push/message.gleam` | `MessageData`'s first field, `fork`, its decoder line and `empty_data` | four lines |
+| `push/fork_push_personas.gleam` | the persona's name first in the author name (title), its picture as the icon (a hash only: a URL or data URI falls back to the account's), mentioned personas' names for the preview | fork-owned |
+| `push/format.gleam`, `push/job.gleam` | `author_name` puts the persona first; `markdown_context` fills `personas`; the icon's author is `fork_push_personas.icon_author` | one line each |
+| `push/markdown.gleam`; `rust/crates/md_plaintext/` (`src/lib.rs`, `src/nifs.rs`, `benches/preview.rs`) | `PreviewContext.personas`, sent to the NIF as `{personas, upstream's context}` and passed to the parser (`packages/markdown_parser/rust/src/plaintext.rs`, `PlaintextOptions.personas`) | a field, the NIF's argument type and the call; in Rust a field, its default, `validate`'s list, `into_options`, two lines in the decoder, the benchmark's context |
+| `fork/dm_thread_presence.gleam` | `FORK_DM_THREAD_EVENT` {t, d, push} at the presence: a thread message with a `push` is a DM message held and read under the thread; a thread's `MESSAGE_ACK` is an ack of the thread; offline, `push.message` goes the way of a DM message; an envelope without `push` (the author, a muted follower) makes no push (tyne-chat/tyne#699) | fork-owned |
+| `presence/rpc.gleam` | the catch-all arms of `user_event` and `offline_dispatch` call it | one arm each |
+| `fork/dm_thread_push.gleam` | the push of a DM-thread message: titled "Author (Thread)" or "Author (Thread, Group)" (`fork_thread_context`), `fork_thread_id` and `fork_thread_name`, the thread's `tag` and `notification_tag` replacing the DM's (the push service refuses a key given twice); channel_id and url stay the DM; the outbox and the read-state check go by the thread (tyne-chat/tyne#907) | fork-owned |
+| `push/format.gleam`, `push/job.gleam`, `push/read_state.gleam` | `title` starts with `use <- dm_thread_push.title(...)`; `notification` passes `common` through `dm_thread_push.notification`; the template's channel and a stale entry's channel are `dm_thread_push.read_channel` | one line; one line; one line each |
 
-None of the lines in upstream's files has a `%% Fork:` marker. Keep the hand-overs when upstream
-changes these files: the `icon` line is the easiest to lose (no test checks a persona's icon through
-`push_job_publisher`). Going back to 60 s changes behaviour: ask a maintainer. The NIF crates are
-outside the root Cargo workspace, so the root `cargo fmt` and Clippy do not reach `lib.rs`. How the
-API sends the fork's events: `fluxer_api/src/api/persona/AGENTS.md` and
-`fluxer_api/src/api/signal_bar/AGENTS.md`.
-
-## Known gaps
-
-- DM reactions batched into `MESSAGE_REACTION_ADD_MANY` lose `persona_id` and `subprofile`
-  (`session_dispatch_voice:build_single_reaction/1`; tyne-chat/tyne#120).
+Every hook in upstream's files is marked with a `// Fork:` comment or a call into a `fork` module,
+and the fork's imports sit after upstream's under `// Fork imports.`. Keep the hooks when upstream
+changes these files; the icon and the outbox key are the easiest to lose. Going back to 60 s
+changes behaviour: ask a maintainer. How the API sends the fork's events:
+`fluxer_api/src/api/persona/AGENTS.md`, `fluxer_api/src/api/signal_bar/AGENTS.md` and
+`fluxer_api/src/api/channel/AGENTS.md` (DM threads).
 
 ## Tests
 
-- EUnit (`rebar3 as test eunit`, application not started): modules in `test/`, and `-ifdef(TEST)`
-  blocks in source modules for private functions. No shared fixtures; tests build maps and mock
-  with `meck`.
-- Fork tests: `test/fork_persona_event_atoms_tests.erl` (persona names),
-  `test/fork_session_passive_tests.erl` (signal-bar names, scoping, the passive rule at 300
-  members), `test/fork_push_personas_tests.erl` (preview, title, icon),
-  `test/fork_reaction_buffer_tests.erl` (personas in the reaction buffer). New ones go in
-  `test/fork_<subject>_tests.erl`, never in an upstream test module or inline block.
-- Not covered: the resume timeout's value, routing of the persona events, the `icon` line.
-- Checks: the four `gateway_*` steps in `CHECKS.md`, as upstream's CI
-  runs them; compiling builds both NIFs, so Cargo is needed. `make lint` (elvis) and
-  `make typecheck` (eqWAlizer) are not among them; run them after a larger change. One module:
-  `rebar3 as test eunit --module=<name>`.
+- Gleam tests (gleeunit, run one at a time under eunit with the settings reset between tests):
+  functions ending in `_test` in `test/fluxer_gateway/`, helpers in `test/support/` (a fake API,
+  fake sessions and sockets, guild fixtures, scenario harnesses). Upstream's tests use `assert` and
+  `let assert`. The fork's wait for a result or a later event, never a fixed time.
+- Fork tests, in fork-owned files next to upstream's: `fork/events_test.gleam`,
+  `guild/scenario/fork_signal_events_test.gleam` (a channel's signals only to its viewers; passive
+  sessions in a 300-member community), `gateway/fork_resume_test.gleam`,
+  `session/fork_reaction_persona_test.gleam` (the buffer, and a session that debounces reactions),
+  `push/fork_push_personas_test.gleam` (preview, title, icon through the job body),
+  `fork/dm_thread_push_test.gleam` (the envelope, the hold, the job body, the outbox key, the
+  read-state check). Rust: `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
+  `packages/markdown_parser/rust/tests/fork_persona_mentions.rs`, and the DM-thread job decoded by
+  the push service in `fluxer_push/src/fork_dm_thread_push.rs`. Never add a test to an upstream
+  test file; an upstream expectation the fork changes carries a `// Fork:` comment.
+- **Contract specs** (E2E, `e2e/web/gateway/`, helpers in `e2e/api-helpers/`): the fork's gateway
+  behaviour against a running stack through raw gateway clients and a push sink on NATS. Run them
+  after any change here and after a rebase that touched the gateway:
+  `./e2e/scripts/ci-run.sh --no-cleanup web/gateway/`, then `./e2e/scripts/down.sh`. The resume spec
+  waits 75 s.
+- **Checks** (as upstream's CI, `tools/ci/src/gateway.rs`): `gateway_fmt`, `gateway_rust_fmt`,
+  `gateway_clippy`, `gateway_compile` (warnings as errors), `gateway_rust_test`, `gateway_test`
+  (the whole suite, about 20 minutes; `FLUXER_TEST_ONLY=fork_,reactions` runs the files whose path
+  contains one of the words) and `gateway_bouncer_test` (`CHECKS.md`). They need Gleam 1.19.2,
+  Erlang/OTP 28 and Cargo; the `build` stage of `Dockerfile` has all three. The test run needs no
+  NATS: its connection errors in the log are expected.
