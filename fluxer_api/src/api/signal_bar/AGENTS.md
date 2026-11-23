@@ -63,8 +63,8 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
 
 Every route needs a login. Bearer tokens are refused (no `requireOAuth2ScopeForBearer`), whatever
 the `OpenAPI` block says; bots may call every route without `DefaultUserOnly`. Buckets
-(`UserRateLimitConfig.ts`): read 60 per 10 s, toggle 30 per 10 s, mutate 30 per minute, everywhere
-10 per minute; all count toward the global limit.
+(`UserRateLimitConfig.ts`): read 60 per 10 s, toggle 30 per 10 s (lighting, turning off, moving to a
+persona), mutate 30 per minute, everywhere 10 per minute; all count toward the global limit.
 
 | Route | Who | Effect |
 |---|---|---|
@@ -78,6 +78,7 @@ the `OpenAPI` block says; bots may call every route without `DefaultUserOnly`. B
 | `GET`, `PUT /guilds/:id/signal-bar/channels` | Manage Community; no bots | the community switches |
 | `GET /users/@me/signals` | anyone | `{chats: [{channel_id, signals, updated_at}], restore_available}`, newest first |
 | `PUT /users/@me/signals` | no bots; a signal ticked `everywhere` (else 403), or null | sets it everywhere, or turns all off; returns the summary |
+| `PUT /users/@me/signals/persona` | no bots; owns `persona_id` (null or `'0'`: the account) | moves the caller's signals in `channel_ids` (1 to 200, each once) to the persona where they may still light; returns `changed_channel_ids` |
 | `GET /users/@me/signals/restore` | anyone | per chat `{available, now, after}`, for the confirm dialog |
 | `POST /users/@me/signals/restore` | no bots | puts back the snapshot where the user may still light; returns the summary |
 
@@ -148,6 +149,12 @@ Lit signals live on the sweep: if the worker stops for 10 minutes, they expire w
   not deleted, else `UNKNOWN_PERSONA`); the persona guide lists it among the checks to change together.
 - Another persona replaces the entry in place, keeps `activated_at` (the order) and is sent under
   `added`. The same persona only renews the TTL and sends nothing.
+- `PUT /users/@me/signals/persona` (`setPersona`, tyne-chat/tyne#310) does that for all of the
+  caller's signals in each listed chat at once: the persona is checked once, a chat the user cannot
+  see or may no longer light in (`canLight`) is left as it is, and each chat changed gets one
+  `CHANNEL_SIGNAL_UPDATE` with the moved entries under `added`. It reads the signals from
+  `signalbar:user:<id>` (those still on the bar) and opens only chats where something would move.
+  `repointEntry` never lights: an entry turned off since it was read stays off.
 - A private persona's name and avatar show on its signals, as on its messages.
 - The server never re-points a signal itself; that is the clients' rule below.
 
@@ -175,6 +182,10 @@ rules shows wrong signals to everyone in the channel, not only to its user.
 - Re-point nothing in an unconfirmed channel; the next change after its answer does.
 - Lighting waits for the event; turning off may remove the entry first. After a failed write,
   refetch the channel once.
+- Re-point a channel's own signals with one `PUT /users/@me/signals/persona` naming that channel,
+  never one request per signal. After a failure, refetch the channel once, and do not send the same
+  persona for that channel again for 10 s: the refetch brings the old persona back, so the next
+  keystroke would otherwise send it again (tyne-chat/tyne#310).
 - Light as the persona the composer in that channel writes as. Re-point one's own signals only for
   something done in that channel (typing, a persona pick in its composer, a send), and not while a
   persona tag is half typed. Never because the selection changed elsewhere or on another device, or
@@ -200,6 +211,10 @@ Where the clients differ today:
 - `PUT /users/@me/signals` and `POST …/restore`: per chat one channel authentication, permission and
   switch reads, a few Valkey calls and one dispatch, in sequence; the preview authenticates every
   saved chat at once.
+- `PUT /users/@me/signals/persona`: one persona read, one user read, the bar, one read of the
+  account's index and its entries; then, only for listed chats with a signal to move, in sequence:
+  one channel authentication, the permission and switch reads, a read and a write per signal, and one
+  dispatch.
 - The sweep, each minute: one emoji read per custom-emoji signal; one presence RPC per account with
   signals and two Valkey calls per entry; one channel read and dispatch per channel with removals.
 
@@ -246,6 +261,9 @@ Where the clients differ today:
 - `tests/SignalBarEverywhere.test.ts`: set everywhere with personas and the open chat, the tick and
   its 403, turning off where the user cannot post, restore and swapping back, a change that changes
   nothing, a deleted persona.
+- `tests/SignalBarPersona.test.ts`: moving to a persona: every own signal moved in place with one
+  event per chat changed and none otherwise, null and `'0'`, the order of the answer, the persona
+  check, chats the user cannot see or post in, a signal turned off meanwhile, the limits, bots.
 - `tests/SignalBar.test.ts` (`createApiTestHarness`, in memory): home community, edit rights and
   stable ids, persona re-pointing, manager rights, group DMs, the 12-hour sweep with a fake clock
   (`createSweepService`), switches and inheritance, clearing, the 50 cap, emoji checks and pruning,

@@ -19,6 +19,8 @@ import {
 	GuildSignalBarSettingsSchema,
 	SignalBarResponseSchema,
 	SignalBarUpdateRequestSchema,
+	UserSignalsPersonaRequestSchema,
+	UserSignalsPersonaResponseSchema,
 	UserSignalsResponseSchema,
 	UserSignalsRestoreResponseSchema,
 	UserSignalsUpdateRequestSchema,
@@ -343,6 +345,35 @@ export function SignalBarController(app: HonoApp) {
 					signalId: body.signal_id,
 					openChannelId: body.channel_id ?? null,
 					personaId: body.persona_id ?? null,
+					authenticate: chatAuthenticator(ctx),
+				}),
+			);
+		},
+	);
+
+	app.put(
+		'/users/@me/signals/persona',
+		RateLimitMiddleware(RateLimitConfigs.SIGNAL_BAR_TOGGLE),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('json', UserSignalsPersonaRequestSchema),
+		OpenAPI({
+			operationId: 'set_my_signals_persona',
+			summary: 'Show my signals as a persona',
+			responseSchema: UserSignalsPersonaResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Signal Bar'],
+			description:
+				"Moves the authenticated user's lit signals in the listed chats to one persona, or to the account with a null persona, as giving each again as that persona would: each keeps its place. Chats the user cannot see or may no longer signal in are left as they are. Returns the chats where a signal moved.",
+		}),
+		async (ctx) => {
+			const body = ctx.req.valid('json');
+			return ctx.json(
+				await ctx.get('signalBarService').setPersona({
+					userId: ctx.get('user').id,
+					personaId: body.persona_id,
+					channelIds: body.channel_ids,
 					authenticate: chatAuthenticator(ctx),
 				}),
 			);
