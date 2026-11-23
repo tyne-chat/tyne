@@ -52,3 +52,16 @@ describe('the double-click rows in Advanced settings', () => {
 		}
 	});
 });
+
+describe('the "Add a space after emoji" row in Advanced settings', () => {
+	it('is listed, found by searching, and has a switch that a click on the row toggles', () => {
+		expect(filterAdvancedSettingItems('', new Set()).map((item) => item.id)).toContain(
+			'chat-settings-space-after-emoji',
+		);
+		expect(filterAdvancedSettingItems('space after emoji', new Set()).map((item) => item.id)).toContain(
+			'chat-settings-space-after-emoji',
+		);
+		expect(DIRECT_CONTROL_ITEM_IDS.has('chat-settings-space-after-emoji')).toBe(true);
+		expect(COMPACT_SWITCH_CONTROL_ITEM_IDS.has('chat-settings-space-after-emoji')).toBe(true);
+	});
+});

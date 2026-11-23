@@ -72,6 +72,7 @@ import {
 	ForkDoubleClickToEditControl,
 	ForkDoubleClickToReplyControl,
 } from '@app/features/user/components/modals/tabs/advanced_settings_tab/ForkMessageDoubleClickControl';
+import {ForkSpaceAfterEmojiControl} from '@app/features/user/components/modals/tabs/advanced_settings_tab/ForkSpaceAfterEmojiControl';
 
 export const DIRECT_CONTROL_ITEM_IDS = new Set([
 	'advanced-windows-fluxer-sans',
@@ -173,6 +174,10 @@ export const COMPACT_SWITCH_CONTROL_ITEM_IDS = new Set([
 
 export const AdvancedSettingControl = observer(({item}: {item: SearchableSettingItem}) => {
 	switch (item.id) {
+		case 'chat-settings-space-after-emoji':
+			return (
+				<ForkSpaceAfterEmojiControl data-flx="user.advanced-setting-direct-controls.advanced-setting-control.space-after-emoji-control" />
+			);
 		case 'chat-settings-double-click-edit':
 			return (
 				<ForkDoubleClickToEditControl data-flx="user.advanced-setting-direct-controls.advanced-setting-control.double-click-to-edit-control" />
@@ -407,7 +412,11 @@ export const AdvancedSettingControl = observer(({item}: {item: SearchableSetting
 });
 
 // Fork: the rows of ForkChatSettingsIndex.ts, each a switch that a click on the row toggles.
-for (const id of ['chat-settings-double-click-edit', 'chat-settings-double-click-reply']) {
+for (const id of [
+	'chat-settings-space-after-emoji',
+	'chat-settings-double-click-edit',
+	'chat-settings-double-click-reply',
+]) {
 	DIRECT_CONTROL_ITEM_IDS.add(id);
 	COMPACT_SWITCH_CONTROL_ITEM_IDS.add(id);
 }
