@@ -210,7 +210,7 @@ or rewrite upstream's code: an upstream fix there has to be carried over by hand
   for the same messages. Nothing re-asks by itself.
 - **Send:** one POST; with files, first a plan request and one PUT per file or part. A 429 costs at
   most two more. Sending as another persona re-points one's lit signals in the channel, one request
-  each (`SignalBarStore.affirmPersona`).
+  for all of them (`SignalBarStore.affirmPersona`).
 - **Edit:** one PATCH, at most five retries (network and gateway errors, and 429s unless the
   message was published). **Delete:** one. **Reaction:** one; a 429 is retried three times.
 - **Render:** `MentionRenderer` calls `PersonaStore.fetchPersona` for an unknown persona on every
