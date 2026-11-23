@@ -208,3 +208,23 @@ export const UserSignalsRestoreResponseSchema = z.object({
 	),
 });
 export type UserSignalsRestoreResponse = z.infer<typeof UserSignalsRestoreResponseSchema>;
+
+export const UserSignalsPersonaRequestSchema = z.object({
+	persona_id: SnowflakeStringType.nullable().describe(
+		'The persona the signals are shown as from now on; null or "0" for the account itself',
+	),
+	channel_ids: z
+		.array(SnowflakeStringType)
+		.min(1)
+		.max(MAX_USER_SIGNAL_CHATS)
+		.refine((ids) => new Set(ids).size === ids.length, {message: 'Channel IDs must be unique'})
+		.describe("The chats where the user's signals move to the persona, each listed once"),
+});
+export type UserSignalsPersonaRequest = z.infer<typeof UserSignalsPersonaRequestSchema>;
+
+export const UserSignalsPersonaResponseSchema = z.object({
+	changed_channel_ids: z
+		.array(SnowflakeStringType)
+		.describe('The chats where a signal was moved to the persona, in the order they were asked for'),
+});
+export type UserSignalsPersonaResponse = z.infer<typeof UserSignalsPersonaResponseSchema>;
