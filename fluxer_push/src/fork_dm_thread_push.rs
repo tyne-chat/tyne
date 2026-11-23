@@ -57,4 +57,40 @@ mod tests {
         merge_fields(&mut data, &fields(None, Some("")));
         assert_eq!(data, json!({"channel_id": "1"}));
     }
+
+    // The job the gateway builds for a message in a 1:1 DM thread, as
+    // fluxer_gateway/test/fluxer_gateway/fork/dm_thread_push_test.gleam (`thread_message_body`) pins it.
+    const GATEWAY_THREAD_JOB: &str = r#"{"channel_id":"1400000000000000100","config_version":0,"guild_id":"0","message_id":"1400000000000000701","notification":{"author_name":"Wren","badge":"http://localhost:8088/marketing/branding/symbol-white.svg","body":"hi","conversation_kind":"dm","fork_thread_id":"1400000000000000700","fork_thread_name":"Trip planning","icon":"http://localhost:8088/avatars/3.png","image_url":null,"notification_tag":"channel:1400000000000000700","tag":"channel:1400000000000000700:1400000000000000701","title":"Wren (Trip planning)","url":"/channels/@me/1400000000000000100/1400000000000000701"},"user_ids":["1400000000000000001"],"v":1}"#;
+
+    #[test]
+    fn decodes_the_job_the_gateway_builds_for_a_dm_thread_message() {
+        let job = crate::job::decode_message(GATEWAY_THREAD_JOB.as_bytes()).expect("job");
+        assert!(job.is_direct_message());
+        assert_eq!(job.channel_id, "1400000000000000100");
+        assert_eq!(job.notification.title, "Wren (Trip planning)");
+        assert_eq!(
+            job.notification.fork_thread_id.as_deref(),
+            Some("1400000000000000700")
+        );
+        assert_eq!(
+            job.notification.fork_thread_name.as_deref(),
+            Some("Trip planning")
+        );
+        assert_eq!(
+            job.notification.tag,
+            "channel:1400000000000000700:1400000000000000701"
+        );
+        assert_eq!(
+            job.notification.notification_tag,
+            "channel:1400000000000000700"
+        );
+    }
+
+    // Why the gateway replaces the DM's tags with the thread's instead of adding them: a key given
+    // twice is refused, and the push with it.
+    #[test]
+    fn refuses_a_job_with_a_tag_given_twice() {
+        let twice = GATEWAY_THREAD_JOB.replacen("\"tag\":", "\"tag\":\"channel:1:2\",\"tag\":", 1);
+        assert!(crate::job::decode_message(twice.as_bytes()).is_err());
+    }
 }

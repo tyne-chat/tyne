@@ -1,0 +1,21 @@
+# Fingerprints of the push records that cross gateway nodes (Waiting, MessageCreate and every record
+# they carry): path, type, fingerprint (test/fluxer_gateway/fork/wire_records_test.gleam).
+src/fluxer_gateway/push/server.gleam Waiting 1641080641
+src/fluxer_gateway/push/message.gleam MessageCreate 1550716828
+src/fluxer_gateway/push/message.gleam MessageData 680117280
+src/fluxer_gateway/push/message.gleam Author 4081451925
+src/fluxer_gateway/push/message.gleam Mention 583071029
+src/fluxer_gateway/push/message.gleam Media 3297846335
+src/fluxer_gateway/push/message.gleam EmbedField 3940925674
+src/fluxer_gateway/push/message.gleam Embed 2266141687
+src/fluxer_gateway/push/message.gleam Snapshot 3993017353
+src/fluxer_gateway/push/message.gleam MentionChannel 3106613391
+src/fluxer_gateway/push/message.gleam ThreadPush 3924295808
+src/fluxer_gateway/push/settings.gleam ThreadMember 3056349176
+src/fluxer_gateway/push/settings.gleam Mute 1836425045
+src/fluxer_gateway/push/message.gleam Prefilter 838834491
+src/fluxer_gateway/push/message.gleam LargeGuild 3254253696
+src/fluxer_gateway/push/fork_message.gleam ForkMessage 3205325020
+src/fluxer_gateway/push/fork_message.gleam Persona 2027364191
+src/fluxer_gateway/push/fork_message.gleam Thread 1897101028
+src/fluxer_gateway/push/markdown.gleam PreviewContext 3020396113

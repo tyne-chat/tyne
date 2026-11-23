@@ -9,7 +9,11 @@
 //   push's title, author name and icon (push/fork_push_personas.gleam).
 // - `mention_personas`: the personas it mentions (`mention_personas`, each a
 //   persona as the API returns it), by id, for the preview.
+// - `thread`: for the push copy of a message in a DM thread, the thread
+//   (`fork_thread_id`, `fork_thread_name`, `fork_thread_context`;
+//   fork/dm_thread_push.gleam).
 
+import fluxer_gateway/core/id
 import fluxer_gateway/util/decode as edge
 import gleam/dynamic/decode.{type Decoder}
 import gleam/list
@@ -20,15 +24,28 @@ import gleam/string
 const max_mention_personas = 50
 
 pub type ForkMessage {
-  ForkMessage(persona: Option(Persona), mention_personas: List(#(Int, String)))
+  ForkMessage(
+    persona: Option(Persona),
+    mention_personas: List(#(Int, String)),
+    thread: Option(Thread),
+  )
 }
 
 pub type Persona {
   Persona(name: String, avatar: Option(String))
 }
 
+pub type Thread {
+  Thread(
+    id: Int,
+    id_text: String,
+    name: Option(String),
+    context: Option(String),
+  )
+}
+
 pub fn empty() -> ForkMessage {
-  ForkMessage(persona: None, mention_personas: [])
+  ForkMessage(persona: None, mention_personas: [], thread: None)
 }
 
 pub fn decoder() -> Decoder(ForkMessage) {
@@ -44,7 +61,9 @@ pub fn decoder() -> Decoder(ForkMessage) {
       [],
     ),
   )
+  use thread <- decode.then(thread_decoder())
   decode.success(ForkMessage(
+    thread:,
     persona:,
     mention_personas: mention_personas
       |> option.values
@@ -64,6 +83,33 @@ fn persona_decoder() -> Decoder(Option(Persona)) {
   case name {
     "" -> decode.success(None)
     _ -> decode.success(Some(Persona(name:, avatar: nonempty(avatar))))
+  }
+}
+
+// A thread whose id is not a snowflake is treated as none.
+fn thread_decoder() -> Decoder(Option(Thread)) {
+  use id_text <- decode.then(lenient("fork_thread_id", decode.string, ""))
+  use name <- decode.then(lenient(
+    "fork_thread_name",
+    decode.map(decode.string, Some),
+    None,
+  ))
+  use context <- decode.then(lenient(
+    "fork_thread_context",
+    decode.map(decode.string, Some),
+    None,
+  ))
+  case id.parse(id_text) {
+    Ok(thread) ->
+      decode.success(
+        Some(Thread(
+          id: thread,
+          id_text:,
+          name: nonempty(name),
+          context: nonempty(context),
+        )),
+      )
+    Error(Nil) -> decode.success(None)
   }
 }
 
