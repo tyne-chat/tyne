@@ -154,11 +154,15 @@ jobs:
           components: clippy, rustfmt
           targets: wasm32-unknown-unknown, x86_64-pc-windows-msvc
 
+      # The gateway's Rust: the Erlang gateway's two NIF workspaces under native/, the Gleam gateway's
+      # one workspace in rust/ (tyne-chat/tyne#905). A tree has one or the other; rust-cache skips a
+      # workspace that is not there.
       - name: Cache cargo
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: |
             . -> target
+            fluxer_gateway/rust -> target
             fluxer_gateway/native/guild_member_list_oset_nif -> target
             fluxer_gateway/native/push_markdown_plaintext_nif -> target
           save-if: true
@@ -258,15 +262,21 @@ jobs:
       - name: Install cargo-deny
         run: cargo install cargo-deny --version 0.20.2 --locked
 
-      # Erlang/OTP and rebar3 as upstream's gateway job pins them, for the gateway's erlfmt,
-      # compile, Dialyzer and eunit steps in the gate.
-      - name: Set up Erlang
+      # Erlang/OTP with both gateways' tools (tyne-chat/tyne#905): Gleam as upstream's gateway job pins
+      # it (tests.yaml; keep it with GLEAM_VERSION in fluxer_gateway/Dockerfile), for the Gleam
+      # gateway's steps in the gate, and rebar3 for the Erlang gateway's erlfmt, compile, Dialyzer and
+      # eunit. A night can need both: the baseline runs on the branch before the rebase and the gate on
+      # the one after, and the gate's gateway step picks the steps by the tree (rebase/profiles.py).
+      - name: Set up Erlang and Gleam
         uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: '28'
           rebar3-version: '3.27.0'
+          gleam-version: '1.19.2'
 
+      # Only for an Erlang tree: its _build is git-ignored in both trees, but a Gleam tree has no use for it.
       - name: Cache rebar3 dependencies and the Dialyzer PLT
+        if: ${{ hashFiles('fluxer_gateway/rebar.config') != '' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -279,6 +289,25 @@ jobs:
             'fluxer_gateway/rebar.config') }}
           restore-keys: |
             rebar3-${{ runner.os }}-otp28-rebar3.27.0-
+
+      # The Gleam gateway's packages, as upstream's gateway job caches them. Restored only into a Gleam
+      # tree: in the Erlang one fluxer_gateway/build/ is not git-ignored, and files there would stand in
+      # the rebase's way. Saved after the pipeline (below), from the tree the night ends with.
+      - name: Restore Gleam packages
+        id: gleam-cache
+        if: ${{ hashFiles('fluxer_gateway/gleam.toml') != '' }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/gleam
+            fluxer_gateway/build/packages
+            fluxer_gateway/bouncer/build/packages
+            fluxer_gateway/bouncer_proto/build/packages
+          key: >-
+            gleam-${{ runner.os }}-1.19.2-${{ hashFiles('fluxer_gateway/manifest.toml',
+            'fluxer_gateway/bouncer/manifest.toml', 'fluxer_gateway/bouncer_proto/manifest.toml') }}
+          restore-keys: |
+            gleam-${{ runner.os }}-1.19.2-
 
       - name: Set up pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -430,6 +459,21 @@ jobs:
           if-no-files-found: ignore
           path: /tmp/rebase_result
           retention-days: 14
+
+      # Also after a failed night, as the native media dependencies are, so the next night does not
+      # download them again; the key is computed from the tree the night ends with.
+      - name: Save Gleam packages
+        if: ${{ always() && hashFiles('fluxer_gateway/gleam.toml') != '' && steps.gleam-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/gleam
+            fluxer_gateway/build/packages
+            fluxer_gateway/bouncer/build/packages
+            fluxer_gateway/bouncer_proto/build/packages
+          key: >-
+            gleam-${{ runner.os }}-1.19.2-${{ hashFiles('fluxer_gateway/manifest.toml',
+            'fluxer_gateway/bouncer/manifest.toml', 'fluxer_gateway/bouncer_proto/manifest.toml') }}
 
       - name: Upload E2E Test Report & Artifacts
         if: always()
