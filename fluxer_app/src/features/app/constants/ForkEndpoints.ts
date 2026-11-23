@@ -14,6 +14,7 @@ export const ForkEndpoints = {
 	INSTANCE_SIGNAL_BAR: '/instance/signal-bar',
 	USER_SIGNALS: '/users/@me/signals',
 	USER_SIGNALS_RESTORE: '/users/@me/signals/restore',
+	USER_SIGNALS_PERSONA: '/users/@me/signals/persona',
 	CHANNEL_PERSONA_MENTIONS: (channelId: string) => `/channels/${channelId}/persona-mentions`,
 	USER_PERSONAS: '/users/@me/personas',
 	USER_PERSONA: (personaId: string) => `/users/@me/personas/${personaId}`,

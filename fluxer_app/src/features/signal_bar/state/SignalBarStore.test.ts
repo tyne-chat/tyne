@@ -22,9 +22,16 @@ import {ForkEndpoints} from '@app/features/app/constants/ForkEndpoints';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import SessionManager from '@app/features/platform/state/AuthSession';
 import {http} from '@app/features/platform/transport/RestTransport';
-import SignalBarStore, {FRESH_CHANNEL_ANSWER_MS} from '@app/features/signal_bar/state/SignalBarStore';
+import SignalBarStore, {
+	FRESH_CHANNEL_ANSWER_MS,
+	REPOINT_COOLDOWN_MS,
+} from '@app/features/signal_bar/state/SignalBarStore';
 import {moveSignal} from '@app/features/signal_bar/utils/SignalUtils';
-import type {ChannelSignalEntry, SignalBarSignal} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
+import {
+	type ChannelSignalEntry,
+	MAX_SIGNAL_BAR_SIGNALS,
+	type SignalBarSignal,
+} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
 import {observable, runInAction} from 'mobx';
 
 function entry(signalId: string, userId: string, personaId: string | null = null): ChannelSignalEntry {
@@ -129,12 +136,16 @@ describe('SignalBarStore', () => {
 		expect(own?.subprofile?.name).toBe('Kitsune');
 		expect(other?.persona_id).toBeNull();
 		expect(putMock).toHaveBeenCalledTimes(1);
-		expect(putMock).toHaveBeenCalledWith('/channels/live/signals/a/@me', {body: {persona_id: '7'}});
+		expect(putMock).toHaveBeenCalledWith(ForkEndpoints.USER_SIGNALS_PERSONA, {
+			body: {persona_id: '7', channel_ids: ['live']},
+		});
 
 		// Typing on without a tag goes back to the account.
 		SignalBarStore.setComposerPersona('live', null, {value: 'hello', previousValue: 'hell', typingEnabled: true});
 		expect(SignalBarStore.getEntries('live', 'a')[0]?.persona_id).toBeNull();
-		expect(putMock).toHaveBeenLastCalledWith('/channels/live/signals/a/@me', {body: {}});
+		expect(putMock).toHaveBeenLastCalledWith(ForkEndpoints.USER_SIGNALS_PERSONA, {
+			body: {persona_id: null, channel_ids: ['live']},
+		});
 		SignalBarStore.clearComposerPersona('live');
 		putMock.mockRestore();
 	});
@@ -170,7 +181,9 @@ describe('SignalBarStore', () => {
 
 		// Signal b already names that persona, and the other account's signal is not ours to change.
 		expect(putMock).toHaveBeenCalledTimes(1);
-		expect(putMock).toHaveBeenCalledWith('/channels/here/signals/a/@me', {body: {persona_id: '7'}});
+		expect(putMock).toHaveBeenCalledWith(ForkEndpoints.USER_SIGNALS_PERSONA, {
+			body: {persona_id: '7', channel_ids: ['here']},
+		});
 		expect(SignalBarStore.getEntries('here', 'a').map((item) => item.persona_id)).toEqual(['7', null]);
 		expect(SignalBarStore.getEntries('elsewhere', 'a').map((item) => item.persona_id)).toEqual([null, null]);
 
@@ -688,6 +701,112 @@ describe('the requests SignalBarStore sends', () => {
 
 			expect(SignalBarStore.isEnabled('thread')).toBe(false);
 			expect(SignalBarStore.getEntries('thread', 'a')).toEqual([]);
+		});
+	});
+
+	// tyne-chat/tyne#310: one persona change sent one PUT per own lit signal, all at once, and a move
+	// the server refused was sent again at the next keystroke.
+	describe("moving the account's signals in a chat to another persona", () => {
+		const personaPuts = () => sent('PUT', ForkEndpoints.USER_SIGNALS_PERSONA);
+		const personaBodies = () =>
+			putMock.mock.calls
+				.filter(([path]) => path === ForkEndpoints.USER_SIGNALS_PERSONA)
+				.map(([, options]) => (options as {body: unknown}).body);
+		const own = (count: number, personaId: string | null = null) =>
+			Array.from({length: count}, (_, i) => entry(`s${i}`, '1', personaId));
+		const load = async (channelId: string, entries: Array<ChannelSignalEntry>) => {
+			void SignalBarStore.fetchChannel(channelId);
+			await channelGets(channelId).at(-1)?.answer(channelBody(3, entries));
+		};
+		const personasShown = (channelId: string) =>
+			SignalBarStore.getEntries(channelId, 's0')
+				.concat(SignalBarStore.getEntries(channelId, 's1'))
+				.filter((item) => item.user.id === '1')
+				.map((item) => item.persona_id);
+		let now: MockInstance<typeof Date.now>;
+
+		beforeEach(() => {
+			SessionManager.setUserId('1');
+			now = vi.spyOn(Date, 'now').mockReturnValue(5_000_000);
+		});
+
+		afterEach(() => {
+			now.mockRestore();
+		});
+
+		it('sends one request for all of them, however many there are, and shows the move at once', async () => {
+			await load('many', [...own(MAX_SIGNAL_BAR_SIGNALS), entry('s0', '2')]);
+
+			SignalBarStore.affirmPersona('many', {id: '7', name: 'Seven'});
+			// Typing on while it is on its way finds nothing left to move.
+			SignalBarStore.affirmPersona('many', {id: '7', name: 'Seven'});
+
+			expect(personaPuts()).toHaveLength(1);
+			expect(personaBodies()).toEqual([{persona_id: '7', channel_ids: ['many']}]);
+			expect(sent('PUT')).toHaveLength(1);
+			expect(personasShown('many')).toEqual(['7', '7']);
+			expect(SignalBarStore.getEntries('many', 's0').find((item) => item.user.id === '2')?.persona_id).toBeNull();
+
+			await personaPuts()[0]?.answer({changed_channel_ids: ['many']});
+			expect(requests).toHaveLength(2);
+		});
+
+		for (const [failure, chat, end] of [
+			['refuses', 'refused', (request: HeldRequest) => request.refuse(429)],
+			['cannot be reached for', 'unreached', (request: HeldRequest) => request.fail()],
+		] as const) {
+			it(`reloads the chat once when the server ${failure} the move, and does not ask again for 10 s`, async () => {
+				await load(chat, own(3));
+
+				SignalBarStore.affirmPersona(chat, {id: '7', name: 'Seven'});
+				expect(personaPuts()).toHaveLength(1);
+				await end(personaPuts()[0]!);
+				expect(channelGets(chat)).toHaveLength(2);
+				// The reload brings the server's persona back.
+				await channelGets(chat)[1]?.answer(channelBody(3, own(3)));
+				expect(personasShown(chat)).toEqual([null, null]);
+
+				for (const at of [5_000_001, 5_004_000, 5_000_000 + REPOINT_COOLDOWN_MS - 1]) {
+					now.mockReturnValue(at);
+					SignalBarStore.affirmPersona(chat, {id: '7', name: 'Seven'});
+				}
+				expect(personaPuts()).toHaveLength(1);
+				expect(channelGets(chat)).toHaveLength(2);
+				expect(personasShown(chat)).toEqual([null, null]);
+
+				now.mockReturnValue(5_000_000 + REPOINT_COOLDOWN_MS);
+				SignalBarStore.affirmPersona(chat, {id: '7', name: 'Seven'});
+				expect(personaPuts()).toHaveLength(2);
+				expect(personasShown(chat)).toEqual(['7', '7']);
+			});
+		}
+
+		it('sends a move to another persona at once, even right after a refusal', async () => {
+			await load('other', own(2));
+			SignalBarStore.affirmPersona('other', {id: '7', name: 'Seven'});
+			await personaPuts()[0]?.refuse(429);
+			await channelGets('other')[1]?.answer(channelBody(3, own(2)));
+
+			now.mockReturnValue(5_001_000);
+			SignalBarStore.affirmPersona('other', {id: '8', name: 'Eight'});
+			SignalBarStore.affirmPersona('other', {id: '8', name: 'Eight'});
+
+			expect(personaPuts()).toHaveLength(2);
+			expect(personaBodies()[1]).toEqual({persona_id: '8', channel_ids: ['other']});
+			expect(personasShown('other')).toEqual(['8', '8']);
+		});
+
+		it('sends nothing when nothing would move', async () => {
+			await load('settled', [...own(2, '7'), entry('s0', '2', '9')]);
+			await load('theirs', [entry('s0', '2'), entry('s1', '3')]);
+			const before = requests.length;
+
+			SignalBarStore.affirmPersona('settled', {id: '7', name: 'Seven'});
+			SignalBarStore.affirmPersona('theirs', {id: '7', name: 'Seven'});
+			SignalBarStore.affirmPersona('never-loaded', {id: '7', name: 'Seven'});
+
+			expect(requests).toHaveLength(before);
+			expect(personasShown('settled')).toEqual(['7', '7']);
 		});
 	});
 

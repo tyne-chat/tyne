@@ -45,6 +45,7 @@ rules every client follows and where the web and mobile clients differ are in th
 | `enabledByChannel` | whether the bar is on; an unknown channel counts as off |
 | `confirmedChannels` (private) | channels answered since the latest READY (`isConfirmed`); the others show their copy, unconfirmed |
 | `wantedSignals` (private) | clicks on unconfirmed channels, the state each asks for, waiting for the channel's answer |
+| `refusedRepoints` (private) | per channel, the last move to a persona that failed and when; `affirmPersona` does not send that move again for `REPOINT_COOLDOWN_MS` (10 s) |
 | `snapshot` | the device's last copy (`SignalBarSnapshot`: the bar, the 50 most recently loaded channels, the summary), persisted with `collapsed`; written by a `reaction` after every change, read at start and on an account switch (tyne-chat/tyne#645) |
 | `ownerId` (private) | the account the copy in memory belongs to |
 | `composerPersonas` | per channel, whom the mounted composer writes as (`null`: the account) |
@@ -92,14 +93,20 @@ rules every client follows and where the web and mobile clients differ are in th
   request for the channel on its way (the last one failed), the click sends one.
 - **Writes.** `activate` is not optimistic: the signal shows lit when the event arrives.
   `deactivate` and `removeUser` remove the entry first; `reset` and `setDmEnabled` wait for the event.
-  A failed write refetches the channel once. `saveSignals` shows the new list at once and, on failure,
-  restores its snapshot and refetches the bar. Every method catches and logs.
+  `affirmPersona` re-points first and sends one request for the channel (below). A failed write
+  refetches the channel once. `saveSignals` shows the new list at once and, on failure, restores its
+  snapshot and refetches the bar. Every method catches and logs.
 
 ## Signals and personas
 
 `affirmPersona(channelId, subprofile)` is the one place that re-points: the account's own lit entries
-in that channel whose persona differs change locally at once and get one PUT each. It does nothing in
-an unconfirmed channel: the next change after the channel's answer re-points. It is called for:
+in that channel whose persona differs change locally at once, and one
+`PUT /users/@me/signals/persona` with `{persona_id, channel_ids: [channelId]}` moves them all on the
+server (`sendPersona`, tyne-chat/tyne#310), however many there are. It names only that channel. After
+a failure the channel is refetched once, which brings the server's persona back, and the same
+persona is not sent for that channel again for 10 s (`REPOINT_COOLDOWN_MS`): the keystrokes meanwhile
+send nothing and move nothing. Another persona, or the same one after 10 s, is sent. It does nothing
+in an unconfirmed channel: the next change after the channel's answer re-points. It is called for:
 
 - **typing:** `useTextareaDraftAndTyping` calls `setComposerPersona` on every value change. That
   records the persona and affirms when `decideComposerTyping` answers `start`, the typing indicator's
@@ -173,7 +180,7 @@ The REST transport does not retry. After a 429 it answers the same method and pa
 | A click on an unconfirmed channel | nothing until the channel's answer, and 1 channel GET if none is on its way; then 1 PUT or DELETE only if the answer differs (or as it is after a failed answer) |
 | Opening a channel, thread or forum | 1 channel GET per mounted bar, every time (A → B → A is 3), also where the bar is off, since that is how the store learns it. Threads and forums answer 400 |
 | Hovering a channel or DM for 220 ms, or pressing it (upstream's `useChannelHoverPreload`) | 1 channel GET (`preloadChannel`), only with a bar, only for a chat not answered since READY, none while one is on its way. The bar mounting next takes it over (`loadForBar`): it waits for that request, or skips its own GET once if the preload answered less than 10 s ago. So opening it is still 1 GET, sent earlier; a hover without a click costs 1 |
-| Typing, a pill pick, a send | none, unless own lit signals in the channel name another persona: 1 PUT each, all at once |
+| Typing, a pill pick, a send | none, unless own lit signals in the channel name another persona: 1 `PUT /users/@me/signals/persona` for the channel, however many signals; none more while it is on its way. If it fails, 1 channel GET, and nothing for the same persona there for 10 s |
 | Clicking a signal; the managers' menu | 1 PUT or DELETE, and 1 channel GET if it fails |
 | Opening a DM's context menu | 1 channel GET; the item sends 1 PUT |
 | READY, for signals everywhere | 1 `GET /users/@me/signals` after the config, when the bar has signals; a bar mounting before it shares it |
@@ -183,7 +190,8 @@ The REST transport does not retry. After a 429 it answers the same method and pa
 | `SIGNAL_BAR_UPDATE` (one copy per community) | the first with a newer version starts 1 config GET; the rest share it |
 
 A failed `fetchConfig` or `fetchChannel` is logged and not retried. While `version` stays -1, each bar
-mount and each newer-version event tries the config again. No test counts these requests yet.
+mount and each newer-version event tries the config again. `state/SignalBarStore.test.ts` counts the
+store's requests ("the requests SignalBarStore sends").
 
 ## Rules and traps
 
@@ -196,10 +204,6 @@ mount and each newer-version event tries the config again. No test counts these 
 ## Known gaps
 
 - Threads and forum posts mount the bar and send a GET the API refuses: one logged 400 per open (tyne-chat/tyne#309).
-- `affirmPersona` has no batch route and no cooldown. With many own lit signals in a channel, a
-  persona change sends that many PUTs at once (the toggle bucket allows 30 per 10 s, and all count
-  toward the global limit). A re-point the server refuses is sent again at the next keystroke,
-  because the failure refetch puts the old persona back (tyne-chat/tyne#310).
 - Lit signals carry copies made when they were lit, and `rememberEntries` writes them over newer data
   in `Users` and `PersonaStore`: opening a channel can bring back an old name or avatar there
   (tyne-chat/tyne#311).
@@ -243,7 +247,9 @@ mount and each newer-version event tries the config again. No test counts these 
 - `state/SignalBarStore.test.ts`: entries, the persona rules (typing, other channels), version
   refetch, rollbacks, the enabled flag; after READY: the copy kept and unconfirmed, an older answer
   not confirming, clicks remembered and sent only when the answer differs or as they are after a
-  failure, no re-pointing while unconfirmed, another account's copy dropped.
+  failure, no re-pointing while unconfirmed, another account's copy dropped; moving to a persona:
+  one request for 50 signals, the reload and the 10 s wait after a refusal or a network failure (a
+  fake clock), another persona sent at once, nothing sent when nothing would move.
   `state/SignalBarSnapshot.test.tsx`: the device's copy (bar, 50 most recent chats, summary), another
   account starting empty, and the bar drawn from the copy before any request answers. `state/SignalBarCollapsedStorage.test.ts`: the caret is kept
   per account in app storage. `components/SignalBar.test.tsx`: rendering, badges, toggling,
@@ -252,7 +258,6 @@ mount and each newer-version event tries the config again. No test counts these 
   `user/components/settings_utils/GuildSettingsTabsSignalBar.test.ts`: no tab without a home community.
 - End to end: `e2e/web/desktop/signal-bar.spec.ts`: two accounts toggling in real time, the persona
   rules across channels and a second window, per-channel management.
-- Not covered: request counts and failure paths, threads and forums, rendering of
-  `SignalBarChannelTree` and `SignalBarDMMenuItem`.
+- Not covered: threads and forums, rendering of `SignalBarChannelTree` and `SignalBarDMMenuItem`.
 - After a change: `pnpm --filter fluxer_app test signal_bar SignalBar useTextareaDraftAndTyping`, the
   end-to-end spec, then the list in `CHECKS.md`.
