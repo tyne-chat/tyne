@@ -28,7 +28,6 @@ import Messages from '@app/features/messaging/state/MessagingMessages';
 import {
 	buildExistingAttachmentEditReferences,
 	canSubmitEmptyMessageEdit,
-	isAttachmentOnlyMessage,
 } from '@app/features/messaging/utils/MessageEditContentUtils';
 import {canSubmitMessage, hasVisibleMessageContent} from '@app/features/messaging/utils/MessageRequestUtils';
 import {
@@ -55,6 +54,8 @@ import {useCallback} from 'react';
 
 import {runForkGuildCommand} from '@app/features/guild_commands/commands/RunGuildCommand';
 import InlineEditUploads, {mobileEditSession} from '@app/features/messaging/state/InlineEditUploads';
+import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
+import {canRemoveText, hasNoTextToRemove, resolveEditText} from '@app/features/messaging/utils/ForkMessageEditRules';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
 const COULDN_T_RUN_THAT_COMMAND_DESCRIPTOR = msg({
@@ -545,12 +546,25 @@ export const useTextareaSubmit = ({
 				}
 				return;
 			}
-			if (!hasVisibleMessageContent(resolvedContent)) {
-				if (isAttachmentOnlyMessage(editingMessage)) {
+			// Fork: a persona tag with nothing after it counts as no text, and its persona goes with the edit
+			// (tyne-chat/tyne#904).
+			const editText = resolveEditText(resolvedContent, editingMessage);
+			if (!hasVisibleMessageContent(editText.text)) {
+				if (hasNoTextToRemove(editingMessage)) {
+					// Fork: with nothing to remove, a tag changes only the persona.
+					const channel = editText.subprofile === undefined ? null : Channels.getChannel(channelId);
+					if (channel && editText.subprofile !== undefined) {
+						const subprofile = editText.subprofile;
+						MessageCommands.confirmPublishedMessageEdit(i18n, editingMessage, () => {
+							finishMobileEdit();
+							void MessageChangePersona.changePersona(channel, editingMessage, subprofile);
+						});
+						return;
+					}
 					finishMobileEdit();
 					return;
 				}
-				if (canSubmitEmptyMessageEdit(editingMessage)) {
+				if (canRemoveText(editingMessage)) {
 					MessageCommands.confirmPublishedMessageEdit(i18n, editingMessage, () => {
 						finishMobileEdit();
 						void MessageCommands.edit(
@@ -560,6 +574,7 @@ export const useTextareaSubmit = ({
 							undefined,
 							editingMessage._allowedMentions,
 							buildExistingAttachmentEditReferences(editingMessage),
+							editText.subprofile,
 						);
 					});
 					return;

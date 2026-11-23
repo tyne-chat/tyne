@@ -35,7 +35,6 @@ import {buildMessageContentCopyText} from '@app/features/messaging/utils/Message
 import {
 	buildExistingAttachmentEditReferences,
 	canSubmitEmptyMessageEdit,
-	isAttachmentOnlyMessage,
 } from '@app/features/messaging/utils/MessageEditContentUtils';
 import {retryFailedMessage} from '@app/features/messaging/utils/MessageRetryUtils';
 import {NodeType} from '@app/features/messaging/utils/markdown/parser/Enums';
@@ -65,6 +64,7 @@ import {type MouseEvent, useCallback, useMemo} from 'react';
 import {GuildCommandChip} from '@app/features/guild_commands/components/GuildCommandChip';
 import InlineEditUploads from '@app/features/messaging/state/InlineEditUploads';
 import MessageChangePersona from '@app/features/messaging/state/MessageChangePersona';
+import {canRemoveText, hasNoTextToRemove, resolveEditText} from '@app/features/messaging/utils/ForkMessageEditRules';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {originalPosterTagAppliesToMessage} from '@app/features/persona/utils/OriginalPosterPersona';
@@ -234,9 +234,12 @@ export const UserMessage = observer(() => {
 			}
 			const content = dropTrailingEmptyBlockquoteLines(actualContent ?? '').trim();
 			const hasNewFiles = InlineEditUploads.hasFiles(message.id);
-			const pendingSubprofile = MessageChangePersona.resolveEditSubprofile(message.id, undefined);
-			if (!content && !hasNewFiles) {
-				if (isAttachmentOnlyMessage(message)) {
+			// Fork: a persona tag with nothing after it counts as no text, and its persona goes with the edit
+			// (tyne-chat/tyne#904).
+			const editText = resolveEditText(content, message);
+			const pendingSubprofile = MessageChangePersona.resolveEditSubprofile(message.id, editText.subprofile);
+			if (!editText.text && !hasNewFiles) {
+				if (hasNoTextToRemove(message)) {
 					if (pendingSubprofile !== undefined) {
 						MessageCommands.confirmPublishedMessageEdit(i18n, message, () => {
 							finishEditing();
@@ -247,7 +250,7 @@ export const UserMessage = observer(() => {
 					finishEditing();
 					return;
 				}
-				if (canSubmitEmptyMessageEdit(message)) {
+				if (canRemoveText(message)) {
 					MessageCommands.confirmPublishedMessageEdit(i18n, message, () => {
 						finishEditing();
 						void MessageCommands.edit(
