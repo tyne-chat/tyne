@@ -3,7 +3,7 @@
 // Fork: gateway contract T5 (tyne-chat/tyne#905). In a community of more than 250 members a session is passive
 // until its client sends Lazy Request (op 14), except in IDENTIFY's initial_guild_id. The fork lets two of its
 // community-wide events through to passive sessions, SIGNAL_BAR_UPDATE and GUILD_COMMANDS_UPDATE
-// (session_passive.erl's bypasses_passive_filter); upstream's new gateway drops them. An active session gets those
+// (fluxer_gateway's fork/events.gleam); upstream's gateway alone drops them. An active session gets those
 // two and the channel-scoped CHANNEL_SIGNAL_UPDATE and CHANNEL_SIGNAL_BAR_UPDATE.
 //
 // The passive session missing CHANNEL_SIGNAL_UPDATE and CHANNEL_SIGNAL_BAR_UPDATE is a known gap,

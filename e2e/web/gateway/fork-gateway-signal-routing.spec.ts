@@ -2,8 +2,8 @@
 
 // Fork: gateway contract T4 (tyne-chat/tyne#905). The signal bar's channel events, CHANNEL_SIGNAL_UPDATE and
 // CHANNEL_SIGNAL_BAR_UPDATE, reach only the members who can see the channel. The fork's gateway scopes them like
-// messages (guild_dispatch_filter.erl); upstream's new gateway sends unknown events community-wide, so without
-// the port a member would learn of signals in a private channel they cannot see. Both directions are pinned: a
+// messages (fluxer_gateway's fork/events.gleam); upstream's gateway sends events it does not know community-wide,
+// so without it a member would learn of signals in a private channel they cannot see. Both directions are pinned: a
 // member without access gets neither event for the private channel, a member with access gets both, and the
 // member without access still gets both for a channel they can see (so the absence is the scoping, not a
 // session that hears nothing).

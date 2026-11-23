@@ -4,12 +4,12 @@
 // becomes a push, the gateway names the persona: the title and `author_name` are the persona's name, the
 // icon is the persona's picture (stored under its account, so the address is built from the author's user
 // id and the persona's hash), and the preview names a mentioned persona. What a persona lacks comes from
-// its account. Upstream's new gateway drops `subprofile` and `mention_personas` from the message it builds
-// pushes from, so all of this is to be ported.
+// its account. Upstream's Gleam gateway drops `subprofile` and `mention_personas` from the message it builds
+// pushes from; the fork's push/fork_message.gleam and push/fork_push_personas.gleam put them back.
 //
 // The recipient never opens a session, so every message to them becomes a push job; the push sink answers
 // the jobs in place of the push service and keeps them. A job, as captured from the Erlang gateway on the
-// E2E stack (push_job_publisher.erl, push_job_fields.erl):
+// E2E stack (the Gleam gateway's push/job.gleam builds the same fields):
 //
 //   {v: 1, config_version: 0, guild_id ("0" for a DM), channel_id, message_id, user_ids: [...],
 //    notification: {title, body, icon, image_url, author_name, conversation_kind ("dm", "group_dm" or

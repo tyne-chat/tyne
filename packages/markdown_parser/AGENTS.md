@@ -13,7 +13,7 @@ places in two repositories. The fork adds two things: a user mention may name a 
 |---|---|---|
 | Web app, and the desktop app that bundles it | `pnpm --filter fluxer_app wasm:codegen` (`tools/ci/src/app_wasm.rs`) builds wasm32 into the gitignored `fluxer_app/pkgs/markdown_parser/markdown_parser.wasm`; `MarkdownParserWasm.ts` fetches it by URL and loads it in the background (until then a parse returns the text unparsed, and `isMarkdownParserReady()` says so) | the JSON tree, typed in `Nodes.ts`; messages and the Lexical composer |
 | `fluxer_messages` | path dependency | mentions, in `mention_extractor.rs` (`fluxer_messages/AGENTS.md`) |
-| Gateway push previews | `fluxer_gateway/native/push_markdown_plaintext_nif`, a path dependency with its own `Cargo.lock`, built by the gateway's compile step | `plaintext::parse_and_render_plaintext` |
+| Gateway push previews | `fluxer_gateway/rust/crates/md_plaintext` (in the gateway's NIF library, its own Cargo workspace and `Cargo.lock`), a path dependency built by the gateway's compile step (`scripts/nif.sh`, which rebuilds only when `fluxer_gateway/rust/` changed: `--force` after a change here) | `plaintext::parse_and_render_plaintext` with `Names` |
 | tyne-mobile | `packages/fluxer_markdown_native/hook/build.dart` compiles `fluxer/packages/markdown_parser/rust` from its `fluxer` submodule | the binary tree through the C ABI, read by `packages/fluxer_markdown_native/lib/src/decode_binary.dart` |
 
 ## Where things are
@@ -66,10 +66,12 @@ In `rust/src/`:
   The reader's arm is `_forkUserPersonaMentionKind`, in the fork block at the end of
   `decode_binary.dart`. `FORMAT_VERSION` stays 1. The kind was 7, upstream's next number, until
   tyne-chat/tyne#135.
-- **Plaintext** (`plaintext.rs`): `PlaintextOptions.personas` maps a persona id to a name. A mention
-  shows the persona's name, else the account's, else `@<id>`. The push NIF takes the map from the
-  gateway's context, which `fork_push_personas:mention_names` fills from the message's
-  `mention_personas` (`fluxer_gateway/src/push/`).
+- **Plaintext** (`plaintext.rs`): `PlaintextOptions.personas`, a `Names` like upstream's `users`
+  (the field first in the struct), maps a persona id to a name. A mention shows the persona's name,
+  else the account's, else `@<id>`. `Names` is keyed by number, so a slug mention shows the account.
+  The push NIF (`md_plaintext`) takes the map from the gateway's preview context, which
+  `fork_push_personas.mention_names` fills from the message's `mention_personas`, at most 50
+  (`fluxer_gateway/src/fluxer_gateway/push/`).
 - **Non-numeric persona ids** parse (`<@123:alice-pk>`; a test pins it), but the server's persona ids
   are snowflakes, and `fluxer_messages` records a pair only when both ids are non-zero numbers, so
   such a mention counts only as the account's for pings and search.
@@ -167,8 +169,9 @@ and `tests/fork_issue_shorthand_cases.json`. Inside upstream's files:
   `src/features/messaging/utils/markdown/PlaintextIssueShorthands.test.ts`.
 - **API:** `pnpm --filter fluxer_api test src/api/utils/ForkIssueShorthands.test.ts` (the shared
   cases and `extractURLs`).
-- **Gateway:** `fluxer_gateway/test/fork_push_personas_tests.erl` renders persona names through the
-  NIF (`gateway_eunit`).
+- **Gateway:** `fluxer_gateway/rust/crates/md_plaintext/tests/fork_persona_preview.rs`
+  (`gateway_rust_test`) and `fluxer_gateway/test/fluxer_gateway/push/fork_push_personas_test.gleam`,
+  which renders persona names through the NIF (`gateway_test`).
 - **Mobile,** after moving the pointer: `(cd packages/fluxer_markdown_native && dart test)` in
   tyne-mobile. `binary_envelope_test.dart` decodes a persona mention through the library built from
   the submodule, so it checks the writer and the reader together.
