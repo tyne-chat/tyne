@@ -58,6 +58,10 @@ msgstr "Añadir persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "Añadir par de etiquetas ({0}/5)"
 
+#. Short label for an advanced chat preference: choosing an emoji in the message box, from the picker or the : search, adds a space after it. Turned off, the next emoji or word touches it.
+msgid "Add a space after emoji"
+msgstr "Añadir un espacio después de los emojis"
+
 #. placeholder {0}: formData.aliases.length
 msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
 msgstr "Añadir alias ({0}/{PERSONA_ALIASES_MAX})"
@@ -1854,6 +1858,10 @@ msgstr "Desactivar barra de señales"
 msgid "Turn off signals"
 msgstr "Desactivar señales"
 
+#. Description of the advanced chat preference "Add a space after emoji".
+msgid "Turn off to put emoji right next to each other, for pictures made of several emoji."
+msgstr "Desactívalo para poner los emojis pegados entre sí, para imágenes formadas por varios emojis."
+
 #. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
 msgid "Turn off {name}"
 msgstr "Desactivar {name}"
@@ -2083,6 +2091,10 @@ msgstr "p. ej., ella"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "p. ej. mañana a las 15:00, en 2 horas, ahora"
+
+#. Search keyword in settings, for the switch that adds a space after a chosen emoji.
+msgid "emoji spacing"
+msgstr "espacio después de emoji"
 
 #. Which iPhone and iPad system versions the Tyne app needs.
 msgid "iOS 16 or newer"

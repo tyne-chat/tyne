@@ -19,6 +19,9 @@ message AccessibilitySettings {
   // anyone else's. Missing, edits read as on and replies as off (tyne-chat/tyne#611).
   optional bool message_double_click_edits = 2227;
   optional bool message_double_click_replies = 2228;
+  // Whether choosing an emoji in the message box adds a space after it. Missing, it reads as on,
+  // as before the setting existed (tyne-chat/tyne#650).
+  optional bool space_after_emoji = 2229;
 
   optional double saturation_factor = 1;
   bool always_underline_links = 2;
