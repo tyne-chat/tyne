@@ -27,7 +27,8 @@ or `GEMINI.md` to the repository: both tools read this file. **Before every comm
 - `fluxer_app/`: web client, React with MobX, built with Rspack. The desktop app ships its own build
   of it.
 - `fluxer_desktop/`: desktop app, with native Rust workspaces under `native/`.
-- `fluxer_gateway/`: Erlang/OTP gateway that holds the clients' WebSocket connections.
+- `fluxer_gateway/`: gateway that holds the clients' WebSocket connections, in Gleam on Erlang/OTP
+  with Rust NIFs.
 - `fluxer_messages/`: Rust service, reached over NATS, that builds message objects for responses and
   events from the stored rows and extracts mentions. The API writes messages and dispatches the
   events.
@@ -74,7 +75,7 @@ last resort.
 Rules with a mechanical answer; follow them every time:
 
 - **Tests** go in a fork-owned file next to upstream's (`ReactionStateMachinePersona.test.ts`,
-  `ForkEnvironmentOverrides.test.ts`, `fork_session_passive_tests.erl`,
+  `ForkEnvironmentOverrides.test.ts`, `fork_reaction_persona_test.gleam`,
   `tests/fork_binary_envelope.rs`). Never add a test or an assertion to an upstream test file. The
   exception is what upstream's own tests need to run against the fork's code: a fixture line for a
   fork type, or a `vi.mock` of a fork module that upstream's code now imports (a mock applies only
@@ -90,6 +91,10 @@ Rules with a mechanical answer; follow them every time:
   so remove that name from upstream's statement.
 - **Imports (Rust):** a name the fork needs goes in its own `use` in a `// Fork imports.` group
   below upstream's, never into upstream's `use` list.
+- **Imports (Gleam):** the fork's imports go after upstream's, under a `// Fork imports.` line; a
+  name from a module upstream already imports is used qualified (`module.name`), not added to
+  upstream's unqualified list. A hook in upstream's Gleam is a call into a fork module from a
+  `case` arm (best the catch-all) or a separate statement (`fluxer_gateway/AGENTS.md`).
 - **Formatting:** upstream formats every file (Biome) and so does the fork's check, upstream's files
   included. Place fork code so the formatter leaves upstream's lines alone: do not wrap upstream's
   code in an `observer()`, a provider or a new component (rename upstream's component and export the
@@ -313,7 +318,8 @@ The dev stack runs in the dev container defined in `.devcontainer/` (compose ser
 repository mounted at `/workspaces/fluxer`, user `vscode`); the dev orchestrator `fluxer-dev` runs in
 it. Frontend changes are hot-reloaded by Rspack, the API and worker by `tsx watch`, and the admin
 service by `cargo-watch`. Changes to other Rust services need `cargo build` and a restart of the
-orchestrator; gateway (Erlang) changes need the restart, which compiles them.
+orchestrator; gateway (Gleam) changes need the restart, which builds them (`scripts/gleam.sh build`;
+the dev container needs Gleam 1.19.2).
 
 Mobile layout follows the device, not the window (`ARCHITECTURE.md`).
 

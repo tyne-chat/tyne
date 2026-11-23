@@ -53,9 +53,11 @@ cargo deny --locked check -D warnings licenses bans sources
 # and report one that affects the fork as `.github/SECURITY.md` says.
 pnpm audit --prod
 tools/ci/check-cargo-lockfiles.sh
-# Gateway, Knip, synced catalogues, API docs, and a check of the admin, messages and media-proxy
-# crates. The gateway's eunit run covers the fork's own tests; upstream dropped its own and the CI step.
-(for s in gateway_fmt gateway_compile gateway_dialyzer knip; do tools/ci/run.sh ci --step $s || exit 1; done) && (cd fluxer_gateway && rebar3 as test eunit)
+# Gateway (upstream's seven steps, as its CI runs them: Gleam and Rust formatting, Clippy, the build
+# with warnings as errors, the Rust tests, the Gleam tests with the fork's, and the bouncer's tests;
+# Gleam 1.19.2, Erlang/OTP 28 and Cargo, fluxer_gateway/AGENTS.md "Tests"), Knip, synced catalogues,
+# API docs, and a check of the admin, messages and media-proxy crates.
+(for s in gateway_fmt gateway_rust_fmt gateway_clippy gateway_compile gateway_rust_test gateway_test gateway_bouncer_test knip; do tools/ci/run.sh ci --step $s || exit 1; done)
 pnpm i18n:compile && git diff --exit-code -- packages/errors/src/i18n/weblate fluxer_api/pkgs/email/src/email_i18n fluxer_api/src/api/content_i18n/weblate
 pnpm --filter fluxer_docs build
 cargo check -p fluxer_admin -p fluxer-messages -p fluxer-media-proxy

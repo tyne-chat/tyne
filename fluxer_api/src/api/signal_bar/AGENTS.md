@@ -33,7 +33,7 @@ guides: `fluxer_app/src/features/signal_bar/AGENTS.md` (web, desktop) and tyne-c
 | Shapes, limits, `resolveSignalBarEnabled` (the web imports it too) | `packages/schema/src/domains/signal_bar/SignalBarSchemas.ts` |
 | The sweep | `worker/tasks/SweepSignalBar.ts`, scheduled in `worker/WorkerMain.ts` |
 | Home community | `signal_bar_guild_id` in the instance policy (`instance/InstanceConfigRepository.ts`); the admin panel's `signal_bar_form` in `fluxer_admin` |
-| Delivery | `fluxer_gateway`: `event_atoms.erl`, `guild_dispatch_filter.erl`, `session_passive.erl` |
+| Delivery | `fluxer_gateway`: `fork/events.gleam` (channel scoping, passive sessions) |
 | Public docs | `fluxer_docs` (`http-api/signal-bar.mdx`, `gateway/events.md`) |
 
 ## What is stored where
@@ -127,8 +127,9 @@ persona), mutate 30 per minute, everywhere 10 per minute; all count toward the g
 
 - Passive sessions (in communities over 250 members) miss the two channel events (tyne-chat/tyne#313).
 - Nothing is sent when the home community changes, a re-light keeps the persona, or an entry expires.
-- A new event needs its name in `constants/Gateway.ts` and `event_atoms.erl`, and a decision in
-  `guild_dispatch_filter.erl` and `session_passive.erl`.
+- A new event needs its name in `constants/Gateway.ts`, and a decision in the gateway's
+  `fork/events.gleam`: whether it is channel-scoped (then it carries `channel_id`) and whether
+  passive sessions get it. The gateway takes any event name.
 
 ## Lifetime: the sweep
 
@@ -250,8 +251,8 @@ Where the clients differ today:
 - One line each, no marker: the cron in `WorkerMain.ts`, the task in `WorkerLaneConfig.ts`, three
   event names mid-union in `constants/Gateway.ts`. The buckets sit in the fork's block at the end of
   `UserRateLimitConfig.ts`, with the server commands' ones.
-- Gateway: three atoms in `event_atoms.erl`, two `is_channel_scoped_event` clauses, one
-  `bypasses_passive_filter` clause. An Erlang function's clauses must stay together.
+- Gateway: the fork-owned `fork/events.gleam`, called from the catch-all arm of upstream's
+  `is_channel_scoped` and of the passive rule's `bypasses`.
 - Home community: `signal_bar_guild_id` among the fork's other policy fields in
   `InstanceConfigRepository.ts`, `InstanceConfigAdminController.ts`, `AdminSchemas.ts` (a `// Fork:`
   `register` line), `InstanceSchemas.ts`, `instance_bootstrap/src/Discovery.ts` and `fluxer_admin`.
@@ -269,9 +270,10 @@ Where the clients differ today:
   (`createSweepService`), switches and inheritance, clearing, the 50 cap, emoji checks and pruning,
   failed presence checks, paged fan-out, the worker task. Helpers: `setHomeGuild`,
   `enableEverywhere`, `setBar`.
-- Elsewhere: the schema package's `SignalBarSchemas.test.ts`,
-  `fluxer_gateway/test/fork_session_passive_tests.erl`, the `fork_tests` module at the end of
-  `fluxer_admin/src/routes/system_actions.rs`, `e2e/web/desktop/signal-bar.spec.ts`.
+- Elsewhere: the schema package's `SignalBarSchemas.test.ts`, the gateway's
+  `fork/events_test.gleam` and `guild/scenario/fork_signal_events_test.gleam`, the E2E contract
+  specs `e2e/web/gateway/fork-gateway-{signal-routing,passive}.spec.ts`, the `fork_tests` module at
+  the end of `fluxer_admin/src/routes/system_actions.rs`, `e2e/web/desktop/signal-bar.spec.ts`.
 - Not covered: blocked DMs, voice channels, lost access, concurrent bar writes, index expiry.
-- After a change: `pnpm --filter fluxer_api test src/api/signal_bar` and the gateway eunit step, then
-  the full list in `CHECKS.md`.
+- After a change: `pnpm --filter fluxer_api test src/api/signal_bar` and the gateway's Gleam tests,
+  then the full list in `CHECKS.md`.

@@ -222,8 +222,9 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   current persona whatever the setting.
 - `ReactionCommands` sends the persona in the body when adding, and in the query when removing, where
   `'0'` means the account. Several personas of one account may each react to the same message.
-- Open: tyne-chat/tyne#120 (`MESSAGE_REACTION_ADD_MANY` drops the persona), #123 (removing a
-  reaction without `persona_id` on the server).
+- Open: tyne-chat/tyne#123 (removing a reaction without `persona_id` on the server).
+  `MESSAGE_REACTION_ADD_MANY` keeps each reaction's persona (tyne-chat/tyne#120, the gateway's
+  `session/fork_reaction_persona.gleam` and `messaging/events/MessageReactionAddMany.ts`).
 - **Pinned emojis** (`emoji/state/EmojiPins.ts`): the account's pins come first, then the active
   persona's, in the picker's frequently used row and the quick reactions. Both live in the account's
   synced preferences (the fork's `emoji_pins` field, read and written by the mobile app too), the
