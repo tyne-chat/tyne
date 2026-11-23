@@ -16,7 +16,7 @@ rules every client follows and where the web and mobile clients differ are in th
 | Managers' right-click menu | `components/SignalContextMenu.tsx` |
 | Signals everywhere: the globe, its panel, the restore dialog | `components/SignalsEverywhereButton.tsx`, `SignalsEverywherePanel.tsx`, `SignalsRestoreModal.tsx`; shared rows and icons in `SignalChatParts.tsx` |
 | The profile popout's "Signals" row | `components/UserAreaSignalsRow.tsx`, in upstream's `UserAreaPopout.tsx` |
-| DM switch | `components/SignalBarDMMenuItem.tsx`, in `DMContextMenu` and `GroupDMContextMenu` |
+| DM switch | `components/SignalBarDMMenuItem.tsx`, in `DMContextMenu` and `GroupDMContextMenu`; never in the system DM, where nobody writes |
 | Community settings tab | `components/GuildSignalBarTab.tsx`: `SignalBarEditor.tsx`, `SignalBarChannelTree.tsx` |
 | Channel tree model | `utils/SignalBarTree.ts` |
 | Labels, emoji addresses, names, `moveSignal` | `utils/SignalUtils.ts` |

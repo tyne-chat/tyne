@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type {Channel} from '@app/features/channel/models/Channel';
+import {isSystemDmChannel} from '@app/features/channel/utils/ChannelUtils';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
 import {MenuItem} from '@app/features/ui/action_menu/MenuItem';
 import {msg} from '@lingui/core/macro';
@@ -22,14 +23,17 @@ interface SignalBarDMMenuItemProps {
 	onClose: () => void;
 }
 
-/** Shown to everyone in a one-on-one or group DM. */
+/**
+ * Shown to everyone in a one-on-one or group DM, but never in the system DM: nobody writes there, so it
+ * has no signal bar (tyne-chat/tyne#743).
+ */
 export const SignalBarDMMenuItem = observer(({channel, onClose}: SignalBarDMMenuItemProps) => {
 	const {i18n} = useLingui();
-	const hasSignals = SignalBarStore.signals.length > 0;
+	const shown = SignalBarStore.signals.length > 0 && !isSystemDmChannel(channel);
 	useEffect(() => {
-		if (hasSignals) void SignalBarStore.fetchChannel(channel.id);
-	}, [channel.id, hasSignals]);
-	if (!hasSignals) return null;
+		if (shown) void SignalBarStore.fetchChannel(channel.id);
+	}, [channel.id, shown]);
+	if (!shown) return null;
 	const enabled = SignalBarStore.isEnabled(channel.id);
 	return (
 		<MenuItem

@@ -26,6 +26,8 @@ import type {Channel} from '@app/features/channel/models/Channel';
 import {http} from '@app/features/platform/transport/RestTransport';
 import {SignalBarDMMenuItem} from '@app/features/signal_bar/components/SignalBarDMMenuItem';
 import SignalBarStore from '@app/features/signal_bar/state/SignalBarStore';
+import {FLUXERBOT_ID} from '@fluxer/constants/src/AppConstants';
+import {ChannelTypes} from '@fluxer/constants/src/ChannelConstants';
 import type {SignalBarSignal} from '@fluxer/schema/src/domains/signal_bar/SignalBarSchemas';
 import {runInAction} from 'mobx';
 import {act} from 'react';
@@ -42,8 +44,15 @@ const READING: SignalBarSignal = {
 	everywhere: false,
 };
 
-function dm(id: string): Channel {
-	return {id, guildId: null, ownerId: null, isGroupDM: () => false} as unknown as Channel;
+function dm(id: string, recipientId = 'friend'): Channel {
+	return {
+		id,
+		type: ChannelTypes.DM,
+		recipientIds: [recipientId],
+		guildId: null,
+		ownerId: null,
+		isGroupDM: () => false,
+	} as unknown as Channel;
 }
 
 describe('the signal bar switch in a DM menu', () => {
@@ -53,11 +62,11 @@ describe('the signal bar switch in a DM menu', () => {
 	const putMock = vi.spyOn(http, 'put');
 	const onClose = vi.fn();
 
-	const open = async (channelId: string) => {
+	const open = async (channelId: string, recipientId?: string) => {
 		await act(async () => {
 			root.render(
 				<SignalBarDMMenuItem
-					channel={dm(channelId)}
+					channel={dm(channelId, recipientId)}
 					onClose={onClose}
 					data-flx="signal-bar.signal-bar-dm-menu-item-test.signal-bar-dm-menu-item"
 				/>,
@@ -96,6 +105,13 @@ describe('the signal bar switch in a DM menu', () => {
 			SignalBarStore.signals = [];
 		});
 		await open('dm-2');
+
+		expect(getMock).not.toHaveBeenCalled();
+		expect(container.innerHTML).toBe('');
+	});
+
+	it('sends nothing and shows nothing in the system DM', async () => {
+		await open('dm-system', FLUXERBOT_ID);
 
 		expect(getMock).not.toHaveBeenCalled();
 		expect(container.innerHTML).toBe('');
