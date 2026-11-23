@@ -58,6 +58,10 @@ msgstr "เพิ่ม Persona"
 msgid "Add Tag Pair ({0}/5)"
 msgstr "เพิ่มคู่แท็ก ({0}/5)"
 
+#. Short label for an advanced chat preference: choosing an emoji in the message box, from the picker or the : search, adds a space after it. Turned off, the next emoji or word touches it.
+msgid "Add a space after emoji"
+msgstr "เว้นวรรคหลังอีโมจิ"
+
 #. placeholder {0}: formData.aliases.length
 msgid "Add alias ({0}/{PERSONA_ALIASES_MAX})"
 msgstr "เพิ่มชื่อแฝง ({0}/{PERSONA_ALIASES_MAX})"
@@ -1854,6 +1858,10 @@ msgstr "ปิดแถบสัญญาณ"
 msgid "Turn off signals"
 msgstr "ปิดสัญญาณ"
 
+#. Description of the advanced chat preference "Add a space after emoji".
+msgid "Turn off to put emoji right next to each other, for pictures made of several emoji."
+msgstr "ปิดเพื่อวางอีโมจิติดกัน สำหรับภาพที่ประกอบจากอีโมจิหลายตัว"
+
 #. Signal bar right-click menu action, for moderators, that turns one person's signal off. {name} is the persona or account name the signal is currently shown as.
 msgid "Turn off {name}"
 msgstr "ปิด {name}"
@@ -2083,6 +2091,10 @@ msgstr "เช่น เธอ"
 #. Placeholder text for natural language timestamp input.
 msgid "e.g. tomorrow at 3pm, in 2 hours, now"
 msgstr "เช่น พรุ่งนี้ 15:00 น., ในอีก 2 ชั่วโมง, ตอนนี้"
+
+#. Search keyword in settings, for the switch that adds a space after a chosen emoji.
+msgid "emoji spacing"
+msgstr "ระยะห่างอีโมจิ"
 
 #. Which iPhone and iPad system versions the Tyne app needs.
 msgid "iOS 16 or newer"

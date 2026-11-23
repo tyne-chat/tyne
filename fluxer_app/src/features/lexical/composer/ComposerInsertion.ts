@@ -14,6 +14,7 @@ import {type MentionSegment, TextareaSegmentManager} from '@app/features/messagi
 
 // Fork imports.
 
+import {emojiInsertSpacing} from '@app/features/lexical/composer/ForkEmojiComposerSpacing';
 import {getTimestampWire, normalizeTimestampFormat} from '@app/features/lexical/composer/nodes/ComposerTimestampUtils';
 
 interface ComposerReplacementPlan {
@@ -160,6 +161,8 @@ export function applyComposerReplacement(
 	spacing: ComposerInsertSpacing,
 	limit: ComposerReplacementLimit = {},
 ): boolean {
+	// Fork: no space after an emoji when "Add a space after emoji" is off (tyne-chat/tyne#650).
+	spacing = emojiInsertSpacing(payload, spacing);
 	const plan = createComposerReplacementPlan(
 		handle.getDisplayValue(),
 		handle.getSegments(),
