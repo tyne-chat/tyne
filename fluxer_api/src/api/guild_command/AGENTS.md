@@ -63,7 +63,7 @@ and 2, tyne-chat/tyne#269 and #270: basic templates and scripts; counters are ph
 `MessageResponseDataService.ts` (one call in `hydratePersonas`), `MessageEditService.ts` (one line),
 `constants/Gateway.ts`, `ChannelConstants.ts` (the bits, `DEFAULT_PERMISSIONS`,
 `ElevatedPermissions`), `MessageResponseSchemas.ts` (the field), the worker's registry, lanes and
-cron, and in the gateway `event_atoms.erl` and `session_passive.erl`. The shared registries
+cron, and in the gateway `fork/events.gleam` (`GUILD_COMMANDS_UPDATE` reaches passive sessions). The shared registries
 (`ForkControllerRegistry.ts`, `ForkTables.ts`, `ServiceMiddleware.ts`, `HonoEnv.ts`,
 `ForkServiceSingletons.ts`) take one entry each.
 
@@ -74,5 +74,5 @@ personas, input, the backfill), `tests/GuildCommandUses.test.ts` (query counts, 
 `tests/GuildCommandTemplateEngine.test.ts` (the engine's limits and semantics),
 `tests/GuildCommandCounters.test.ts` (scopes, persona or account, refusals, set and reset),
 `tests/GuildCommandScriptGuide.test.ts` (every example and claim in `docs/server-command-scripts.md`), and
-`fluxer_gateway/test/fork_session_passive_tests.erl`. After a change:
+`fluxer_gateway/test/fluxer_gateway/guild/scenario/fork_signal_events_test.gleam`. After a change:
 `pnpm --filter fluxer_api test src/api/guild_command`, then `CHECKS.md`.
