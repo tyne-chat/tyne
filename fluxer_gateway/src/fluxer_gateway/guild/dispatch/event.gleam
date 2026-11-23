@@ -12,6 +12,9 @@ import gleam/result
 import gleam/set.{type Set}
 import gleam/string
 
+// Fork imports.
+import fluxer_gateway/fork/events as fork_events
+
 const max_mention_roles = 100
 
 pub type Placement {
@@ -90,7 +93,7 @@ fn is_channel_scoped(event: String) -> Bool {
     | "TYPING_START"
     | "CHANNEL_PINS_UPDATE"
     | "WEBHOOKS_UPDATE" -> True
-    _ -> False
+    _ -> fork_events.is_channel_scoped(event)
   }
 }
 
