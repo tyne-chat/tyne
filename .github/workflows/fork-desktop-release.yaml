@@ -8,8 +8,8 @@
 #
 # - Run by hand with a version and release notes to publish a release tagged desktop-v<version>.
 #   Windows and Linux are published as soon as they are built; the macOS build is added to the
-#   same release when it is done, however long it waits for a runner (build-macos and
-#   publish-macos below, retried by fork-desktop-release-retry.yaml).
+#   same release when it is done, however long it waits for a runner (build-macos or
+#   build-macos-own, and publish-macos below, retried by fork-desktop-release-retry.yaml).
 # - A push to a desktop-test/** branch builds every platform and keeps the files as workflow
 #   artifacts only. Nothing is published, so installed apps never see those builds.
 name: fork desktop release
@@ -91,8 +91,10 @@ jobs:
   # The renderer's WebAssembly parts only compile with a clang that targets wasm32, which the
   # Linux runner has and the Windows and macOS runners do not. As upstream does, build it once
   # here and hand it to every platform build.
+  # Not needed for a macOS-only run on a Mac of our own: build-macos-own builds its renderer there.
   renderer:
     name: Build renderer
+    if: ${{ inputs.platform != 'macos' || !vars.TYNE_MACOS_RUNNER }}
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     defaults:
@@ -171,8 +173,8 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-  # Windows and Linux. macOS is the same steps in build-macos, a job of its own, so a release does
-  # not wait for GitHub's often-busy macOS runners.
+  # Windows and Linux. macOS is the same steps in build-macos (or build-macos-own on a Mac of our
+  # own), a job of its own, so a release does not wait for the macOS build.
   build:
     name: Build ${{ matrix.platform }} (${{ matrix.arch }})
     if: ${{ inputs.platform != 'macos' }}
@@ -207,11 +209,13 @@ jobs:
           persist-credentials: false
           path: source
 
+      # Fork: on a Mac of our own the job builds the renderer too (below), which needs the wasm target.
       - name: Set up Rust toolchain
         id: rust
         uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master on 2026-10-22
         with:
           toolchain: "1.98.1"
+          targets: ${{ runner.environment == 'self-hosted' && 'wasm32-unknown-unknown' || '' }}
 
       # Fork: the build fetches its crates from crates.io part-way through, once for each native
       # add-on. A runner that could not resolve the registry for a few seconds failed the Windows
@@ -298,7 +302,21 @@ jobs:
         working-directory: ${{ env.WORKDIR }}/fluxer_desktop
         run: ${{ env.CI_TOOL }} --step update_version
 
+      # Fork: on a Mac of our own (build-macos-own), build the renderer here with the renderer job's
+      # steps instead of waiting for that job and downloading its artifact: GitHub's artifact
+      # storage reaches that Mac at about 2 MB/s, so the 500 MB download took over five minutes
+      # (tyne-chat/tyne#892).
+      - name: Build renderer (own Mac)
+        if: runner.environment == 'self-hosted'
+        working-directory: ${{ env.WORKDIR }}/fluxer_desktop
+        run: ${{ env.CI_TOOL }} --step build_shared_assets
+
+      - name: Prepare renderer (own Mac)
+        if: runner.environment == 'self-hosted'
+        run: ${{ env.CI_TOOL }} --step prepare_shared_assets
+
       - name: Download renderer artifact
+        if: runner.environment != 'self-hosted'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: fork-renderer-assets
@@ -419,16 +437,53 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      # Fork: on a Mac of our own, also leave the build in a folder the signing runner there reads,
+      # so sign-macos need not download the artifact again (tyne-chat/tyne#892). Only this runner's
+      # account can write the folder; the artifact above stays for the jobs on GitHub's runners.
+      - name: Hand the build to this Mac's signing runner
+        if: runner.environment == 'self-hosted' && matrix.platform == 'macos'
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          handoff=/Users/Shared/tyne-handoff-desktop
+          if [ -d "$handoff" ] && [ -w "$handoff" ]; then
+            find "$handoff" -mindepth 1 -maxdepth 1 ! -name "$RUN_ID" -exec rm -rf {} +
+            rm -rf "${handoff:?}/$RUN_ID"
+            mkdir "$handoff/$RUN_ID"
+            cp -R source/fluxer_desktop/release_assets/. "$handoff/$RUN_ID/"
+            ls -l "$handoff/$RUN_ID"
+          else
+            echo "::notice::No handoff folder on this runner; the signing job downloads the artifact."
+          fi
+
   # The macOS build: the build job's steps (YAML anchors), on its own so the release does not wait
-  # for it. The runner is the repository variable TYNE_MACOS_RUNNER when set (a JSON label list
-  # for a Mac of the maintainers', e.g. ["cherry-build"]), else GitHub's macos-15. On a Mac of our
-  # own it must be a runner apart from the signing job's (below; tyne-chat/tyne#892).
-  # The retry workflow recognises this job by its name: keep "Build macos (".
+  # for it, on GitHub's macos-15. The retry workflow recognises this job by its name: keep
+  # "Build macos (".
   build-macos:
     name: Build ${{ matrix.platform }} (${{ matrix.arch }})
-    if: ${{ inputs.platform != 'windows' && inputs.platform != 'linux' }}
+    if: ${{ inputs.platform != 'windows' && inputs.platform != 'linux' && !vars.TYNE_MACOS_RUNNER }}
     needs: renderer
-    runs-on: ${{ vars.TYNE_MACOS_RUNNER && fromJSON(vars.TYNE_MACOS_RUNNER) || 'macos-15' }}
+    runs-on: macos-15
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        include:
+          - platform: macos
+            node_platform: darwin
+            arch: arm64
+    defaults: *build-defaults
+    env: *build-env
+    steps: *build-steps
+
+  # Fork: the same build on a Mac of the maintainers', when the repository variable
+  # TYNE_MACOS_RUNNER names it (a JSON label list, e.g. ["cherry-build"]). It builds the renderer
+  # itself, so it neither waits for the renderer job nor downloads its artifact, and it hands its
+  # files to the signing runner on the same Mac. It must be a runner apart from the signing
+  # job's (tyne-chat/tyne#892). Same name as build-macos, for the retry workflow.
+  build-macos-own:
+    name: Build ${{ matrix.platform }} (${{ matrix.arch }})
+    if: ${{ inputs.platform != 'windows' && inputs.platform != 'linux' && vars.TYNE_MACOS_RUNNER }}
+    runs-on: ${{ fromJSON(vars.TYNE_MACOS_RUNNER) }}
     timeout-minutes: 120
     strategy:
       matrix:
@@ -451,8 +506,8 @@ jobs:
   # separate macOS account (tyne-chat/tyne#892).
   sign-macos:
     name: Sign and notarize macOS
-    if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') && inputs.macos_signing != 'ad-hoc' }}
-    needs: build-macos
+    if: ${{ !cancelled() && (needs.build-macos.result == 'success' || needs.build-macos-own.result == 'success') && github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') && inputs.macos_signing != 'ad-hoc' }}
+    needs: [build-macos, build-macos-own]
     runs-on: ${{ vars.TYNE_MACOS_SIGN_RUNNER && fromJSON(vars.TYNE_MACOS_SIGN_RUNNER) || 'macos-15' }}
     # Two notarizations of up to two hours each (scripts/fork-sign-macos.sh).
     timeout-minutes: 300
@@ -469,7 +524,26 @@ jobs:
             fluxer_desktop/build_resources/entitlements.mac.inherit.plist
           sparse-checkout-cone-mode: false
 
+      # Fork: when the build ran on the same Mac (build-macos-own), take its files from the folder
+      # it left them in instead of downloading the artifact (tyne-chat/tyne#892).
+      - name: Take the macOS build from this Mac
+        id: local
+        if: runner.environment == 'self-hosted'
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          from="/Users/Shared/tyne-handoff-desktop/$RUN_ID"
+          if [ -d "$from" ] && ls "$from"/*.dmg >/dev/null 2>&1; then
+            rm -rf release_assets && mkdir release_assets
+            cp -R "$from"/. release_assets/
+            ls -l release_assets
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No build of this run on this Mac; downloading the artifact."
+          fi
+
       - name: Download macOS build
+        if: steps.local.outputs.found != 'true'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: fork-desktop-macos-arm64
@@ -530,8 +604,8 @@ jobs:
   # whatever became of the macOS signing: a slow notarization must not keep this from being tested.
   check-release-signing:
     name: Sign checksums (test run, nothing published)
-    if: ${{ !cancelled() && (needs.build.result == 'success' || needs.build-macos.result == 'success') && github.event_name == 'workflow_dispatch' && !inputs.publish && github.ref == 'refs/heads/tyne' }}
-    needs: [build, build-macos, sign-macos, test-macos]
+    if: ${{ !cancelled() && (needs.build.result == 'success' || needs.build-macos.result == 'success' || needs.build-macos-own.result == 'success') && github.event_name == 'workflow_dispatch' && !inputs.publish && github.ref == 'refs/heads/tyne' }}
+    needs: [build, build-macos, build-macos-own, sign-macos, test-macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: desktop-release
@@ -680,8 +754,8 @@ jobs:
   # update check in that moment fails its signature check and the next one succeeds.
   publish-macos:
     name: Add the macOS build to the release
-    if: ${{ !cancelled() && needs.publish.result == 'success' && needs.build-macos.result == 'success' && (inputs.macos_signing == 'ad-hoc' || (needs.sign-macos.result == 'success' && needs.test-macos.result == 'success')) }}
-    needs: [publish, build-macos, sign-macos, test-macos]
+    if: ${{ !cancelled() && needs.publish.result == 'success' && (needs.build-macos.result == 'success' || needs.build-macos-own.result == 'success') && (inputs.macos_signing == 'ad-hoc' || (needs.sign-macos.result == 'success' && needs.test-macos.result == 'success')) }}
+    needs: [publish, build-macos, build-macos-own, sign-macos, test-macos]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
