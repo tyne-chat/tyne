@@ -251,7 +251,7 @@ interface Plan {
 		thread?: PlanThread | null;
 		/** A Discord channel going to a new channel in the archive community: created first (ImportNewChannel). */
 		new_channel?: PlanNewChannel | null;
-		/** A Discord channel going to a one-to-one DM not on Tyne yet: created after the placeholders (ImportNewDm). */
+		/** A Discord channel going to a DM or group DM not on Tyne yet: created after the placeholders (ImportNewDm). */
 		new_dm?: PlanNewDm | null;
 	};
 	operator_user_id: string;
