@@ -232,7 +232,7 @@ Switches one signal off for everyone in the channel. Requires `MANAGE_GUILD` in 
 
 <RouteHeader method="PUT" path="/v1/channels/{channel_id}/signals/{signal_id}/@me" bot />
 
-Switches a signal on in the channel for the caller, or changes the persona the caller gives it as. An account has at most one entry per signal in a channel. Requires `SEND_MESSAGES` in a community channel, and a member in timeout is refused. A signal that is not on the bar is refused with 404 `UNKNOWN_EMOJI`, and a channel where the bar is off with 403.
+Switches a signal on in the channel for the caller, or changes the persona the caller gives it as. An account has at most one entry per signal in a channel. Requires `SEND_MESSAGES` in a community channel, and a member in timeout is refused. A signal that is not on the bar is refused with 404 `UNKNOWN_EMOJI`, and a channel where the bar is off with 403. To move all of the caller's signals in a chat to another persona, [Show my signals as a persona](#show-my-signals-as-a-persona) takes one request instead of one per signal.
 
 ### Path parameters
 
@@ -433,6 +433,29 @@ Sets one signal in every chat where the caller has a signal on, and in `channel_
 ### Rate limit
 
 10 requests per minute for each authenticated user, on the `signal_bar:everywhere` bucket.
+
+## Show my signals as a persona
+
+<RouteHeader method="PUT" path="/v1/users/@me/signals/persona" />
+
+Moves the caller's signals in each chat of `channel_ids` to `persona_id`, as [Give a signal](#give-a-signal) does when a signal is given again as another persona: each keeps its place, and each chat where a signal moved is sent one [Channel Signal Update](/gateway/events/#channel-signal-update) with the moved entries under `added`. Signals already given as that persona are left as they are. A chat the caller cannot see, or where they may no longer give signals, is left as it is. A persona the caller does not own, or one that was deleted, is refused with 404 `UNKNOWN_PERSONA`.
+
+### JSON body
+
+| Field | Type | Description |
+| --- | --- | --- |
+| persona_id | ?snowflake | The persona to give the signals as, or null (or `0`) for the account |
+| channel_ids | array[snowflake] | The chats, 1 to 200, each listed once |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | object | `changed_channel_ids`, an array of snowflakes: the chats where a signal moved, in the order of `channel_ids` |
+
+### Rate limit
+
+30 requests per 10 seconds for each authenticated user, on the `signal_bar:toggle` bucket.
 
 ## Preview restoring my signals
 
