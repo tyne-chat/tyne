@@ -19,6 +19,9 @@ import gleam/option.{None, Some}
 import gleam/order
 import gleam/result
 
+// Fork imports.
+import fluxer_gateway/fork/dm_thread_push
+
 fn fetch_timeout_ms() -> Int {
   durations.push().read_state_fetch_timeout_ms
 }
@@ -94,7 +97,7 @@ pub fn handle_buffered(
           [
             Stale(
               user,
-              entry.create.channel,
+              dm_thread_push.read_channel(entry.create),
               entry.create.message,
               entry.create,
             ),
