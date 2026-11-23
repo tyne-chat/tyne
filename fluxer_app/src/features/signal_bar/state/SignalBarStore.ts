@@ -21,6 +21,8 @@ import type {
 	SignalBarSignal,
 	SignalBarUpdateRequest,
 	UserSignalChat,
+	UserSignalsPersonaRequest,
+	UserSignalsPersonaResponse,
 	UserSignalsResponse,
 	UserSignalsRestoreResponse,
 	UserSignalsUpdateRequest,
@@ -36,6 +38,8 @@ const MY_CHATS_RETRY_MS = 60_000;
 export const SNAPSHOT_CHANNELS = 50;
 /** A bar mounting does not ask again for a chat a preload answered this recently. */
 export const FRESH_CHANNEL_ANSWER_MS = 10_000;
+/** After the server refuses moving a chat's signals to a persona, that move is not asked for again this long. */
+export const REPOINT_COOLDOWN_MS = 10_000;
 
 /** One chat in the device's copy. */
 export interface SignalBarSnapshotChannel {
@@ -142,6 +146,8 @@ class SignalBarStore {
 	private readonly wantedSignals = new Map<string, Map<string, WantedSignal>>();
 	/** The bar's version in the copy the store was seeded from, while `version` is still -1. */
 	private seededVersion = -1;
+	/** By chat, a move to a persona the server refused, and when: `affirmPersona` waits before asking again. */
+	private readonly refusedRepoints = new Map<string, {personaId: string | null; at: number}>();
 
 	constructor() {
 		makeAutoObservable<
@@ -156,6 +162,7 @@ class SignalBarStore {
 			| 'preloadedAt'
 			| 'wantedSignals'
 			| 'seededVersion'
+			| 'refusedRepoints'
 			| 'buildSnapshot'
 		>(
 			this,
@@ -170,6 +177,7 @@ class SignalBarStore {
 				preloadedAt: false,
 				wantedSignals: false,
 				seededVersion: false,
+				refusedRepoints: false,
 				buildSnapshot: false,
 				snapshot: observableRef,
 			},
@@ -267,6 +275,7 @@ class SignalBarStore {
 		this.preloadingChannels.clear();
 		this.preloadedAt.clear();
 		this.wantedSignals.clear();
+		this.refusedRepoints.clear();
 		this.forgetMyChats();
 		this.ownerId = null;
 	}
@@ -324,6 +333,10 @@ class SignalBarStore {
 		const personaId = subprofile?.id ?? null;
 		const stale = entries.filter((entry) => entry.user.id === userId && (entry.persona_id ?? null) !== personaId);
 		if (stale.length === 0) return;
+		// The server refused this very move a moment ago: the next keystroke does not ask again.
+		const refused = this.refusedRepoints.get(channelId);
+		const refusedAgo = refused ? Date.now() - refused.at : Number.POSITIVE_INFINITY;
+		if (refused?.personaId === personaId && refusedAgo >= 0 && refusedAgo < REPOINT_COOLDOWN_MS) return;
 		this.entriesByChannel.set(
 			channelId,
 			entries.map((entry) =>
@@ -332,9 +345,27 @@ class SignalBarStore {
 					: entry,
 			),
 		);
-		for (const entry of stale) {
-			void this.activate(channelId, entry.signal_id, personaId);
+		void this.sendPersona(channelId, personaId);
+	}
+
+	/**
+	 * One request moves every own signal in the chat to the persona (tyne-chat/tyne#310). After a
+	 * failure the chat is loaded once, which brings the server's persona back, and the move is not
+	 * asked for again for `REPOINT_COOLDOWN_MS`.
+	 */
+	private async sendPersona(channelId: string, personaId: string | null): Promise<void> {
+		const body: UserSignalsPersonaRequest = {persona_id: personaId, channel_ids: [channelId]};
+		try {
+			const res = await http.put<UserSignalsPersonaResponse>(ForkEndpoints.USER_SIGNALS_PERSONA, {body});
+			if (res.ok) {
+				this.refusedRepoints.delete(channelId);
+				return;
+			}
+		} catch (err) {
+			logger.error('Error moving signals to a persona', err);
 		}
+		this.refusedRepoints.set(channelId, {personaId, at: Date.now()});
+		void this.fetchChannel(channelId);
 	}
 
 	/** Whether the bar is switched on in a channel. Unknown channels count as off. */
