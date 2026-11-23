@@ -10,7 +10,6 @@ fn shard() -> MessagesShard<InMemoryTransport> {
     MessagesShard {
         storage: MessagesStorage::Deletions(DeletedMessageKeys::default()),
         transport: InMemoryTransport::new(),
-        capture_mode: CaptureMode::Off,
     }
 }
 
