@@ -421,7 +421,8 @@ jobs:
 
   # The macOS build: the build job's steps (YAML anchors), on its own so the release does not wait
   # for it. The runner is the repository variable TYNE_MACOS_RUNNER when set (a JSON label list
-  # for a Mac of the maintainers', e.g. ["self-hosted","macOS","ARM64"]), else GitHub's macos-15.
+  # for a Mac of the maintainers', e.g. ["cherry-build"]), else GitHub's macos-15. On a Mac of our
+  # own it must be a runner apart from the signing job's (below; tyne-chat/tyne#892).
   # The retry workflow recognises this job by its name: keep "Build macos (".
   build-macos:
     name: Build ${{ matrix.platform }} (${{ matrix.arch }})
@@ -444,11 +445,15 @@ jobs:
   # desktop-release environment, which runs from tyne only, and this job runs only Apple's tools
   # (scripts/fork-sign-macos.sh) and GitHub's own actions: no dependency installs. Test builds from
   # desktop-test/** branches keep the ad-hoc signed files; a release needs this job.
+  # Its runner is TYNE_MACOS_SIGN_RUNNER when set, else GitHub's macos-15, never the build's
+  # TYNE_MACOS_RUNNER: GitHub gives each job a fresh machine, and that is what keeps the build's
+  # dependencies away from the signing identity. On a Mac of our own the signing runner is a
+  # separate macOS account (tyne-chat/tyne#892).
   sign-macos:
     name: Sign and notarize macOS
     if: ${{ github.ref == 'refs/heads/tyne' && (inputs.platform == 'all' || inputs.platform == 'macos') && inputs.macos_signing != 'ad-hoc' }}
     needs: build-macos
-    runs-on: ${{ vars.TYNE_MACOS_RUNNER && fromJSON(vars.TYNE_MACOS_RUNNER) || 'macos-15' }}
+    runs-on: ${{ vars.TYNE_MACOS_SIGN_RUNNER && fromJSON(vars.TYNE_MACOS_SIGN_RUNNER) || 'macos-15' }}
     # Two notarizations of up to two hours each (scripts/fork-sign-macos.sh).
     timeout-minutes: 300
     environment: desktop-release
