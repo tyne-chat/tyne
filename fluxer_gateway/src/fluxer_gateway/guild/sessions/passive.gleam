@@ -12,6 +12,9 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/set
 
+// Fork imports.
+import fluxer_gateway/fork/events as fork_events
+
 pub fn should_receive(
   found: Entry,
   event_name: String,
@@ -47,7 +50,7 @@ fn bypasses(event_name: String, facts: EventFacts, found: Entry) -> Bool {
     | "CHANNEL_UPDATE_BULK"
     | "CHANNEL_DELETE" -> True
     "GUILD_MEMBER_UPDATE" -> facts.user == Some(entry.user_int(found))
-    _ -> False
+    _ -> fork_events.bypasses_passive(event_name)
   }
 }
 
