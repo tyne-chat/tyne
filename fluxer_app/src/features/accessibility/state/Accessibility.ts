@@ -585,6 +585,8 @@ export interface AccessibilitySettings {
 	// Fork: the two halves of messageDoubleClickActions (ForkMessageDoubleClick.ts, tyne-chat/tyne#611).
 	messageDoubleClickEdits: boolean;
 	messageDoubleClickReplies: boolean;
+	// Fork: whether choosing an emoji adds a space after it (ForkEmojiComposerSpacing.ts, tyne-chat/tyne#650).
+	spaceAfterEmoji: boolean;
 	saturationFactor: number;
 	alwaysUnderlineLinks: boolean;
 	dimStrikethroughText: boolean;
@@ -698,6 +700,8 @@ class Accessibility {
 	// Fork: until set, upstream's switch alone edits and does not reply (tyne-chat/tyne#611).
 	messageDoubleClickEdits = true;
 	messageDoubleClickReplies = false;
+	// Fork: tyne-chat/tyne#650.
+	spaceAfterEmoji = true;
 	saturationFactor = 1;
 	alwaysUnderlineLinks = false;
 	dimStrikethroughText = true;
@@ -819,6 +823,7 @@ class Accessibility {
 			persist: [
 				'messageDoubleClickEdits',
 				'messageDoubleClickReplies',
+				'spaceAfterEmoji',
 				'saturationFactor',
 				'alwaysUnderlineLinks',
 				'dimStrikethroughText',
@@ -885,6 +890,7 @@ class Accessibility {
 			toMessage: (s) => ({
 				messageDoubleClickEdits: s.messageDoubleClickEdits,
 				messageDoubleClickReplies: s.messageDoubleClickReplies,
+				spaceAfterEmoji: s.spaceAfterEmoji,
 				saturationFactor: s.saturationFactor,
 				alwaysUnderlineLinks: s.alwaysUnderlineLinks,
 				dimStrikethroughText: s.dimStrikethroughText,
@@ -957,6 +963,9 @@ class Accessibility {
 				// upstream's switch alone, which edits and does not reply, in every window alike.
 				s.messageDoubleClickEdits = m.messageDoubleClickEdits ?? true;
 				s.messageDoubleClickReplies = m.messageDoubleClickReplies ?? false;
+				// Fork: a record without it (saved before it existed, or by an older client) adds the space,
+				// as before (tyne-chat/tyne#650).
+				s.spaceAfterEmoji = m.spaceAfterEmoji ?? true;
 				if (m.saturationFactor !== undefined) s.saturationFactor = m.saturationFactor;
 				s.alwaysUnderlineLinks = m.alwaysUnderlineLinks;
 				if (m.dimStrikethroughText !== undefined) s.dimStrikethroughText = m.dimStrikethroughText;
@@ -1284,6 +1293,8 @@ class Accessibility {
 			this.messageDoubleClickEdits = validated.messageDoubleClickEdits;
 		if (validated.messageDoubleClickReplies !== undefined)
 			this.messageDoubleClickReplies = validated.messageDoubleClickReplies;
+		// Fork: tyne-chat/tyne#650.
+		if (validated.spaceAfterEmoji !== undefined) this.spaceAfterEmoji = validated.spaceAfterEmoji;
 		if (validated.saturationFactor !== undefined) this.saturationFactor = validated.saturationFactor;
 		if (validated.alwaysUnderlineLinks !== undefined) this.alwaysUnderlineLinks = validated.alwaysUnderlineLinks;
 		if (validated.dimStrikethroughText !== undefined) this.dimStrikethroughText = validated.dimStrikethroughText;
@@ -1419,6 +1430,7 @@ class Accessibility {
 		return {
 			messageDoubleClickEdits: data.messageDoubleClickEdits ?? this.messageDoubleClickEdits,
 			messageDoubleClickReplies: data.messageDoubleClickReplies ?? this.messageDoubleClickReplies,
+			spaceAfterEmoji: data.spaceAfterEmoji ?? this.spaceAfterEmoji,
 			saturationFactor: Math.max(0, Math.min(1, data.saturationFactor ?? this.saturationFactor)),
 			alwaysUnderlineLinks: data.alwaysUnderlineLinks ?? this.alwaysUnderlineLinks,
 			dimStrikethroughText: data.dimStrikethroughText ?? this.dimStrikethroughText,

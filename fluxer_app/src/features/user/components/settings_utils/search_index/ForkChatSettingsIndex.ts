@@ -6,6 +6,8 @@
 //
 // Upstream's "Double-click a message to edit or reply" is one switch for both actions; here it is a
 // row for each (tyne-chat/tyne#611), and an appended block in ChatSettingsIndex.ts hides upstream's.
+//
+// "Add a space after emoji" turns off the space upstream puts after a chosen emoji (tyne-chat/tyne#650).
 
 import type {SearchableSettingDescriptor} from '@app/features/user/components/settings_utils/search_index/SearchIndexTypes';
 import {DOUBLE_CLICK_DESCRIPTOR} from '@app/features/user/components/settings_utils/section_registry/SharedDescriptors';
@@ -22,7 +24,31 @@ export const DOUBLE_CLICK_TO_REPLY_DESCRIPTOR = msg({
 		"Short label for an advanced chat preference: double-clicking someone else's message starts a reply to it. Off by default, so that double-clicking a word selects it.",
 });
 
+export const ADD_A_SPACE_AFTER_EMOJI_DESCRIPTOR = msg({
+	message: 'Add a space after emoji',
+	comment:
+		'Short label for an advanced chat preference: choosing an emoji in the message box, from the picker or the : search, adds a space after it. Turned off, the next emoji or word touches it.',
+});
+const SPACE_AFTER_EMOJI_KEYWORD_DESCRIPTOR = msg({
+	message: 'emoji spacing',
+	comment: 'Search keyword in settings, for the switch that adds a space after a chosen emoji.',
+});
+const ADD_A_SPACE_AFTER_EMOJI_DESCRIPTION_DESCRIPTOR = msg({
+	message: 'Turn off to put emoji right next to each other, for pictures made of several emoji.',
+	comment: 'Description of the advanced chat preference "Add a space after emoji".',
+});
+
 export const forkChatSettingsIndex: Array<SearchableSettingDescriptor> = [
+	{
+		id: 'chat-settings-space-after-emoji',
+		tabType: 'chat_settings',
+		sectionId: 'input',
+		label: ADD_A_SPACE_AFTER_EMOJI_DESCRIPTOR,
+		keywords: [SPACE_AFTER_EMOJI_KEYWORD_DESCRIPTOR],
+		description: ADD_A_SPACE_AFTER_EMOJI_DESCRIPTION_DESCRIPTOR,
+		audience: 'advanced',
+		tags: ['chat'],
+	},
 	{
 		id: 'chat-settings-double-click-edit',
 		tabType: 'chat_settings',
