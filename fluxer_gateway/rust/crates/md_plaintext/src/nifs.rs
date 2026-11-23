@@ -20,6 +20,8 @@ fn bad_input<'a>(env: Env<'a>, reason: &str) -> Term<'a> {
 }
 
 fn decode_context(term: Term<'_>) -> Option<PreviewContext> {
+    // Fork: `{personas, upstream's context}`, as push/markdown.gleam sends it.
+    let (personas, term) = term.decode::<(Names, Term<'_>)>().ok()?;
     let (
         preserve_markdown,
         hide_spoilers,
@@ -32,6 +34,7 @@ fn decode_context(term: Term<'_>) -> Option<PreviewContext> {
         .decode::<(bool, bool, bool, bool, Names, Names, Names)>()
         .ok()?;
     Some(PreviewContext {
+        personas,
         preserve_markdown,
         hide_spoilers,
         include_emoji_names,

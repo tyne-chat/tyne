@@ -15,6 +15,9 @@ import gleam/order
 import gleam/result
 import gleam/string
 
+// Fork imports.
+import fluxer_gateway/push/fork_push_personas
+
 const subject_message = "push.job.message"
 
 const subject_clear = "push.job.clear"
@@ -369,6 +372,8 @@ fn message_fields(create: MessageCreate) -> List(#(String, Json)) {
   let data = create.data
   let author_name = format.author_name(data, create.markdown)
   let preview = format.preview(data, create.markdown)
+  // Fork: the persona's picture when the message was sent as one.
+  let icon_author = fork_push_personas.icon_author(data)
   let image = case image_url.extract(data) {
     Some(url) -> json.string(url)
     None -> json.null()
@@ -389,7 +394,7 @@ fn message_fields(create: MessageCreate) -> List(#(String, Json)) {
       #(
         "icon",
         json.string(
-          format.author_avatar_url(data.author, message.id_text(data, _)),
+          format.author_avatar_url(icon_author, message.id_text(data, _)),
         ),
       ),
       #("image_url", image),
