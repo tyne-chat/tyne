@@ -21,7 +21,8 @@ pub fn limits_test() {
   assert limits.max_payload_size() == 16_384
   assert limits.heartbeat_interval_ms() == 41_250
   assert limits.heartbeat_timeout_ms() == 45_000
-  assert limits.resume_timeout_ms() == 60_000
+  // Fork: a dropped session is kept 300 s, not 60 s (settings.gleam).
+  assert limits.resume_timeout_ms() == 300_000
 }
 
 pub fn envelope_test() {
