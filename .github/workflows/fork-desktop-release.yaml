@@ -592,6 +592,9 @@ jobs:
   # files of an earlier run.
   test-macos:
     name: Open the signed macOS app
+    # Fork: sign-macos needs build-macos and build-macos-own, one of which is always skipped, and a
+    # skipped job anywhere above skips a job without its own condition.
+    if: ${{ !cancelled() && needs.sign-macos.result == 'success' }}
     needs: sign-macos
     permissions:
       actions: read
