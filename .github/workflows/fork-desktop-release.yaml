@@ -499,6 +499,20 @@ jobs:
           retention-days: 14
           overwrite: true
 
+      # On the maintainers' Mac, leave the signed disk image where an agent there installs it for
+      # trying out at once (tyne-chat/tyne#895). Only this runner's account can write the folder.
+      - name: Hand the signed build to the Mac's test install
+        if: runner.environment == 'self-hosted'
+        run: |
+          drop=/Users/Shared/tyne-desktop-builds
+          if [ -d "$drop" ] && [ -w "$drop" ]; then
+            rm -f "$drop"/*.dmg
+            cp release_assets/*.dmg "$drop/"
+            ls -l "$drop"
+          else
+            echo "::notice::No test install folder on this runner; skipped."
+          fi
+
   # Downloads the signed DMG as a user would, has Gatekeeper judge it, installs the app and checks
   # that it starts and keeps running. Its own workflow, so it can also be run by hand on the signed
   # files of an earlier run.
