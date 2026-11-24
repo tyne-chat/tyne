@@ -98,6 +98,12 @@ closes these gaps (tyne-chat/tyne#905):
   events that reached it (DM messages and reactions, persona updates to DM partners) found no
   presence and became pushes at most. On such a miss, `fork/presence_elsewhere.gleam` asks every
   other node that runs presences.
+- Upstream's presence route counts a draining node, so presences never left it: they died when it
+  stopped (lookups failed, the API answered 502), and the sessions, already on the new node,
+  started them again there one by one, so events in between reached only some sessions. A
+  leaving node owns no presences (`fork/presence_route.gleam`), the route is rebuilt at most every
+  second (upstream 10 s), and the stop waits up to 5 s for the node's presences to move
+  (`fork/presence_drain.gleam`).
 
 Known gap (inferred, not measured): a stopping node leaves the API's NATS queue group only when it
 stops, so requests in flight then time out after 5 s. Rehearse a change to drain, handoff or
@@ -146,6 +152,9 @@ limit.
 | `rpc/server.gleam` | `execute_joined` pipes the answer of a decoded request through `guild_elsewhere.answer` | one pipe |
 | `fork/presence_elsewhere.gleam` | a presence lookup that misses on the owner, the previous owner and this node asks every other node that runs presences (tyne-chat/tyne#905) | fork-owned |
 | `presence/manager.gleam` | the empty arm of `lookup_everywhere` calls it | one arm |
+| `fork/presence_route.gleam`, `fork/presence_drain.gleam` | a leaving node owns no presences, unless no other node runs them; the stop asks the presences still on the node to move and waits up to 5 s until none is left (tyne-chat/tyne#905) | fork-owned |
+| `presence/route.gleam`, `app/drain.gleam` | `presence_nodes` filters its list through `presence_route.without_leaving`; `run_membership` calls `presence_drain.await_moved()` once its handoff has settled | one line each |
+| `config/settings.gleam` | `route_rebuild_interval_ms: 1000` (upstream 10,000), so the presence route follows a join or a drain before a deploy stops the old node | one value |
 | `fork/events.gleam` | `CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE` are channel-scoped; `SIGNAL_BAR_UPDATE` and `GUILD_COMMANDS_UPDATE` reach passive sessions | fork-owned |
 | `guild/dispatch/event.gleam`, `guild/sessions/passive.gleam` | the catch-all arm of `is_channel_scoped` and of `bypasses` calls `fork/events.gleam` | one arm each |
 | `config/settings.gleam` | `limits_resume_timeout_ms: 300_000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`; mobile 55 s); `test/.../gateway/protocol_test.gleam` expects it | one value; one expectation |
@@ -164,7 +173,8 @@ limit.
 Every hook in upstream's files is marked with a `// Fork:` comment or a call into a `fork` module,
 and the fork's imports sit after upstream's under `// Fork imports.`. Keep the hooks when upstream
 changes these files; the icon and the outbox key are the easiest to lose. Going back to 60 s
-changes behaviour: ask a maintainer. How the API sends the fork's events:
+changes behaviour: ask a maintainer. So does upstream's 10 s presence route interval: a deploy's
+old node would stop before its presences move. How the API sends the fork's events:
 `fluxer_api/src/api/persona/AGENTS.md`, `fluxer_api/src/api/signal_bar/AGENTS.md` and
 `fluxer_api/src/api/channel/AGENTS.md` (DM threads).
 
@@ -181,7 +191,10 @@ changes behaviour: ask a maintainer. How the API sends the fork's events:
   `push/fork_push_personas_test.gleam` (preview, title, icon through the job body),
   `fork/dm_thread_push_test.gleam` (the envelope, the hold, the job body, the outbox key, the
   read-state check), `fork/guild_elsewhere_test.gleam` (a community that runs here answers a
-  `guild_not_found`; other answers stay). Rust: `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
+  `guild_not_found`; other answers stay), `fork/handover_scenario_test.gleam` with
+  `support/fork_handover_peer.gleam` (two real nodes: one joins while presences and a community are
+  still on the other, both find every presence and answer for the community, and the drain moves
+  every presence before the stop). Rust: `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
   `packages/markdown_parser/rust/tests/fork_persona_mentions.rs`, and the DM-thread job decoded by
   the push service in `fluxer_push/src/fork_dm_thread_push.rs`. Never add a test to an upstream
   test file; an upstream expectation the fork changes carries a `// Fork:` comment.

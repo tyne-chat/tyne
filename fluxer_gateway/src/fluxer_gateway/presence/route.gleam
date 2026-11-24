@@ -15,6 +15,9 @@ import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 
+// Fork imports.
+import fluxer_gateway/fork/presence_route
+
 pub const shard_count = 16
 
 pub const lane_count = 32
@@ -325,6 +328,7 @@ pub fn presence_nodes() -> List(Atom) {
     True -> [self_atom(), ..known]
     False -> known
   }
+  let with_self = presence_route.without_leaving(with_self)
   list.sort(with_self, fn(a, b) {
     string.compare(atom.to_string(a), atom.to_string(b))
   })

@@ -20,6 +20,9 @@ import gleam/int
 import gleam/result
 import logging
 
+// Fork imports.
+import fluxer_gateway/fork/presence_drain
+
 fn frame_flush_ms() -> Int {
   durations.app().drain_frame_flush_ms
 }
@@ -282,6 +285,7 @@ fn run_membership() -> Nil {
   }
   handoff.redrain()
   let settled = settle("shutdown")
+  presence_drain.await_moved()
   let _ = drain_report.settle(left(), settled, True)
   handoff.reconnect_sockets()
   logging.log(logging.Info, "Gateway shutdown drain: notified clients")
