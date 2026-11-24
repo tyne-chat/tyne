@@ -84,7 +84,7 @@ The fork's own handoff (tyne-chat/tyne#196) was dropped with the Erlang gateway
 static list, no bouncer): a new node joins, takes over sessions, presences and guilds by moving
 them, and the old node drains (`app/drain.gleam`, `session/manager/transfer.gleam`,
 `session/departure.gleam`, `guild/handoff/`). A moved guild is frozen and its sessions rejoin
-silently with a catch-up of up to 1,000 events. A new node is ready about 10 s after it starts.
+silently with a catch-up of up to 1,000 events. A new node is ready 10 to 12 s after it starts.
 Upstream's handover lost account events and answered 403 in the maintainers' rehearsal; the fork
 closes these gaps (tyne-chat/tyne#905):
 
@@ -104,6 +104,10 @@ closes these gaps (tyne-chat/tyne#905):
   leaving node owns no presences (`fork/presence_route.gleam`), the route is rebuilt at most every
   second (upstream 10 s), and the stop waits up to 5 s for the node's presences to move
   (`fork/presence_drain.gleam`).
+- A node subscribed to the API's requests as it started, so one starting beside a running node got
+  requests in its first second, before it knew its cluster or while it was joining, and answered
+  some with `timeout` (504). It now subscribes only once it has joined (`fork/rpc_join_gate.gleam`)
+  and turns ready up to 2 s later.
 
 Known gap (inferred, not measured): a stopping node leaves the API's NATS queue group only when it
 stops, so requests in flight then time out after 5 s. Rehearse a change to drain, handoff or
@@ -149,7 +153,8 @@ limit.
 | Where | What | Kind |
 |---|---|---|
 | `fork/guild_elsewhere.gleam` | a community RPC answered `guild_not_found` is answered again where the community runs, this node or a peer (upstream's `execute_owned` there), while it moves between nodes; any other answer stays (tyne-chat/tyne#905) | fork-owned |
-| `rpc/server.gleam` | `execute_joined` pipes the answer of a decoded request through `guild_elsewhere.answer` | one pipe |
+| `rpc/server.gleam` | `execute_joined` pipes the answer of a decoded request through `guild_elsewhere.answer`; `subscribe` starts with `use <- rpc_join_gate.once_joined(...)` | one pipe; one line |
+| `fork/rpc_join_gate.gleam` | a clustered node subscribes to the API's queue group only once it has joined; until then the subscription waits for the server's retry (`server_subscribe_retry_ms`, 2 s) (tyne-chat/tyne#905) | fork-owned |
 | `fork/presence_elsewhere.gleam` | a presence lookup that misses on the owner, the previous owner and this node asks every other node that runs presences (tyne-chat/tyne#905) | fork-owned |
 | `presence/manager.gleam` | the empty arm of `lookup_everywhere` calls it | one arm |
 | `fork/presence_route.gleam`, `fork/presence_drain.gleam` | a leaving node owns no presences, unless no other node runs them; the stop asks the presences still on the node to move and waits up to 5 s until none is left (tyne-chat/tyne#905) | fork-owned |
@@ -194,7 +199,7 @@ old node would stop before its presences move. How the API sends the fork's even
   `guild_not_found`; other answers stay), `fork/handover_scenario_test.gleam` with
   `support/fork_handover_peer.gleam` (two real nodes: one joins while presences and a community are
   still on the other, both find every presence and answer for the community, and the drain moves
-  every presence before the stop). Rust: `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
+  every presence before the stop), `fork/rpc_join_gate_test.gleam`. Rust: `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
   `packages/markdown_parser/rust/tests/fork_persona_mentions.rs`, and the DM-thread job decoded by
   the push service in `fluxer_push/src/fork_dm_thread_push.rs`. Never add a test to an upstream
   test file; an upstream expectation the fork changes carries a `// Fork:` comment.
