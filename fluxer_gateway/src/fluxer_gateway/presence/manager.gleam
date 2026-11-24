@@ -37,6 +37,9 @@ import gleam/otp/static_supervisor
 import gleam/otp/supervision.{type ChildSpecification}
 import gleam/result
 
+// Fork imports.
+import fluxer_gateway/fork/presence_elsewhere
+
 fn init_timeout_ms() -> Int {
   durations.presence().manager_init_timeout_ms
 }
@@ -487,7 +490,9 @@ fn lookup_everywhere(
     stale_holders(user, target)
     |> list.filter_map(lookup_on(_, user, timeout_ms))
   case list.unique(list.append(primary, stale)) {
-    [] -> Error(NotFound)
+    [] ->
+      presence_elsewhere.lookup(user, target, timeout_ms)
+      |> result.replace_error(NotFound)
     found -> Ok(found)
   }
 }

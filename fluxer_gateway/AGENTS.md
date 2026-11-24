@@ -92,6 +92,12 @@ closes these gaps (tyne-chat/tyne#905):
   Until it arrives, upstream's owner answered `guild_not_found`, which the API turns into 403 on
   channel reads, message sends and reactions. `fork/guild_elsewhere.gleam` asks such a request
   again on the node the community still runs on.
+- A node that has just joined built its first presence route from itself alone, so it named
+  itself the owner of presences still on the old node, until its route was rebuilt and then, for
+  the presences it now owns, until they moved; its previous route named only itself. Account
+  events that reached it (DM messages and reactions, persona updates to DM partners) found no
+  presence and became pushes at most. On such a miss, `fork/presence_elsewhere.gleam` asks every
+  other node that runs presences.
 
 Known gap (inferred, not measured): a stopping node leaves the API's NATS queue group only when it
 stops, so requests in flight then time out after 5 s. Rehearse a change to drain, handoff or
@@ -138,6 +144,8 @@ limit.
 |---|---|---|
 | `fork/guild_elsewhere.gleam` | a community RPC answered `guild_not_found` is answered again where the community runs, this node or a peer (upstream's `execute_owned` there), while it moves between nodes; any other answer stays (tyne-chat/tyne#905) | fork-owned |
 | `rpc/server.gleam` | `execute_joined` pipes the answer of a decoded request through `guild_elsewhere.answer` | one pipe |
+| `fork/presence_elsewhere.gleam` | a presence lookup that misses on the owner, the previous owner and this node asks every other node that runs presences (tyne-chat/tyne#905) | fork-owned |
+| `presence/manager.gleam` | the empty arm of `lookup_everywhere` calls it | one arm |
 | `fork/events.gleam` | `CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE` are channel-scoped; `SIGNAL_BAR_UPDATE` and `GUILD_COMMANDS_UPDATE` reach passive sessions | fork-owned |
 | `guild/dispatch/event.gleam`, `guild/sessions/passive.gleam` | the catch-all arm of `is_channel_scoped` and of `bypasses` calls `fork/events.gleam` | one arm each |
 | `config/settings.gleam` | `limits_resume_timeout_ms: 300_000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`; mobile 55 s); `test/.../gateway/protocol_test.gleam` expects it | one value; one expectation |
