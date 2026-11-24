@@ -8,28 +8,25 @@
 // turns into 403 Access Denied on channel reads, message sends and reactions.
 // `rpc/server.gleam` (`execute_joined`) hands every answer here; one that is
 // `guild_not_found` is asked again on the node the community still runs on,
-// this one or a peer, through upstream's `execute_owned`, which every gateway
-// version has. Any other answer, a community that runs nowhere and a peer that
-// cannot be asked keep upstream's answer.
+// this one or a peer (fork/guild_whereabouts.gleam), through upstream's
+// `execute_owned`, which every gateway version has. Any other answer, a
+// community that runs nowhere and a peer that cannot be asked keep upstream's
+// answer. `guild.get_user_permissions_batch` answers without the moving
+// community instead of failing, so it has its own fix,
+// fork/permissions_elsewhere.gleam.
 
-import fluxer_gateway/cluster/router
 import fluxer_gateway/core/id.{type GuildId}
 import fluxer_gateway/core/node.{type Node}
 import fluxer_gateway/core/raw_json
+import fluxer_gateway/fork/guild_whereabouts
 import fluxer_gateway/guild/manager/registry
-import fluxer_gateway/guild/manager/shard
 import fluxer_gateway/guild/remote
 import fluxer_gateway/guild/rpc as guild_rpc
 import fluxer_gateway/guild/rpc/infra
 import fluxer_gateway/rpc/reply
 import gleam/bit_array
 import gleam/dynamic/decode
-import gleam/erlang/atom.{type Atom}
-import gleam/erlang/process.{type Pid}
-import gleam/list
 import gleam/result
-
-const lookup_timeout_ms = 1000
 
 pub fn answer(
   body: String,
@@ -67,36 +64,12 @@ fn again(
   case registry.lookup(guild) {
     Ok(_) -> encode(guild_rpc.handle_owned(method, raw_json.wrap(payload)))
     Error(Nil) ->
-      case running_on(guild) {
+      case guild_whereabouts.peer_running(guild) {
         Ok(peer) -> ask(peer, method, payload) |> result.unwrap(body)
         Error(Nil) -> body
       }
   }
 }
-
-fn running_on(guild: GuildId) -> Result(Node, Nil) {
-  let self = node.self()
-  let peers =
-    router.reachable_with(node.Guilds)
-    |> list.append(router.expected_with(node.Guilds))
-    |> list.unique
-    |> list.filter(fn(peer) { peer != self })
-  case peers {
-    [] -> Error(Nil)
-    _ ->
-      shard.running_on(guild, peers, lookup_timeout_ms)
-      |> result.map(fn(handle) { node.from_atom(pid_node(handle.pid)) })
-      |> result.try(fn(found) {
-        case found == self {
-          True -> Error(Nil)
-          False -> Ok(found)
-        }
-      })
-  }
-}
-
-@external(erlang, "erlang", "node")
-fn pid_node(pid: Pid) -> Atom
 
 fn ask(peer: Node, method: String, payload: BitArray) -> Result(String, Nil) {
   remote.call(

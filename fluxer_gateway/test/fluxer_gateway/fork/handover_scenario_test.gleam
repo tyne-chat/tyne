@@ -5,8 +5,9 @@
 // community, a new node joins and owns part of them before they have moved,
 // then the old node drains and stops. Both nodes must find every presence
 // (fork/presence_elsewhere.gleam) and answer for the community
-// (fork/guild_elsewhere.gleam) all along, and the old node must hand its
-// presences over before it stops (fork/presence_route.gleam,
+// (fork/guild_elsewhere.gleam), its permissions in a batch included
+// (fork/permissions_elsewhere.gleam), all along, and the old node must hand
+// its presences over before it stops (fork/presence_route.gleam,
 // fork/presence_drain.gleam). Helpers on the peers:
 // support/fork_handover_peer.gleam, with upstream's support/presence_nodes
 // and support/session_peer.
@@ -115,6 +116,54 @@ fn community_name(peer: Peer, guild: Int) -> Result(String, String) {
   }
 }
 
+// `guild.get_user_permissions`, one community: `guild_elsewhere` covers it.
+fn permissions(peer: Peer, guild: Int, user: Int) -> Result(String, String) {
+  let body =
+    execute(
+      peer,
+      "guild.get_user_permissions",
+      json.object([
+        #("guild_id", json.string(int.to_string(guild))),
+        #("user_id", json.string(int.to_string(user))),
+        #("channel_id", json.string("0")),
+      ]),
+    )
+  case json.parse(body, decode.at(["result", "permissions"], decode.string)) {
+    Ok(bits) -> Ok(bits)
+    Error(_) -> Error(body)
+  }
+}
+
+// `guild.get_user_permissions_batch`, which `GET /users/@me/guilds` asks:
+// the communities it answers for and their permissions.
+fn permissions_batch(
+  peer: Peer,
+  guild: Int,
+  user: Int,
+) -> Result(List(#(String, String)), String) {
+  let body =
+    execute(
+      peer,
+      "guild.get_user_permissions_batch",
+      json.object([
+        #("guild_ids", json.array([int.to_string(guild)], json.string)),
+        #("user_id", json.string(int.to_string(user))),
+        #("channel_id", json.string("0")),
+      ]),
+    )
+  let row = {
+    use found <- decode.field("guild_id", decode.string)
+    use bits <- decode.field("permissions", decode.string)
+    decode.success(#(found, bits))
+  }
+  case
+    json.parse(body, decode.at(["result", "permissions"], decode.list(row)))
+  {
+    Ok(rows) -> Ok(rows)
+    Error(_) -> Error(body)
+  }
+}
+
 fn owned_by(wanted: String, among: List(String)) -> fixture.Guild {
   let found = fixture.new(1) |> fixture.with_text(10)
   let nodes = list.map(among, fn(name) { node.from_atom(atom.create(name)) })
@@ -154,9 +203,13 @@ pub fn a_joining_node_and_the_old_nodes_drain_lose_nothing_test() {
       ]),
       decode.int,
     )
-  let community = owned_by(new, both)
+  let member = 7_905_100_000_000_001
+  let community = owned_by(new, both) |> fixture.with_member(member, [])
   fixture.publish(api, community)
   assert community_name(peer_old, community.id) == Ok("Scenario")
+  let assert Ok(bits) = permissions(peer_old, community.id, member)
+  let listed = Ok([#(int.to_string(community.id), bits)])
+  assert permissions_batch(peer_old, community.id, member) == listed
 
   // The new node joins. Until its presences and the community move, which the
   // test holds back, it owns some that still run on the old node.
@@ -174,6 +227,9 @@ pub fn a_joining_node_and_the_old_nodes_drain_lose_nothing_test() {
   assert found(peer_old, users) == users
   assert community_name(peer_new, community.id) == Ok("Scenario")
   assert community_name(peer_old, community.id) == Ok("Scenario")
+  assert permissions(peer_new, community.id, member) == Ok(bits)
+  assert permissions_batch(peer_new, community.id, member) == listed
+  assert permissions_batch(peer_old, community.id, member) == listed
 
   // The old node drains and stops: its presences move first.
   let _ = on(peer_old, "support@session_peer", "drain_start", [])
@@ -184,5 +240,6 @@ pub fn a_joining_node_and_the_old_nodes_drain_lose_nothing_test() {
   peers.stop(peer_old)
   assert found(peer_new, users) == users
   assert community_name(peer_new, community.id) == Ok("Scenario")
+  assert permissions_batch(peer_new, community.id, member) == listed
   peers.stop(peer_new)
 }
