@@ -23,6 +23,9 @@ import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
 
+// Fork imports.
+import fluxer_gateway/fork/permissions_elsewhere
+
 fn batch_timeout_ms() -> Int {
   durations.guild().permissions_batch_timeout_ms
 }
@@ -176,6 +179,7 @@ fn one(
     router.Remote(owner) -> remote_bits(owner, guild, user, channel)
     router.OwnerUnavailable(_) -> Error(Nil)
   }
+  |> permissions_elsewhere.bits(guild, user, channel, owned_bits)
   |> result.map(fn(bits) { GuildBits(guild:, bits:) })
 }
 
