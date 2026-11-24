@@ -84,7 +84,7 @@ The fork's own handoff (tyne-chat/tyne#196) was dropped with the Erlang gateway
 static list, no bouncer): a new node joins, takes over sessions, presences and guilds by moving
 them, and the old node drains (`app/drain.gleam`, `session/manager/transfer.gleam`,
 `session/departure.gleam`, `guild/handoff/`). A moved guild is frozen and its sessions rejoin
-silently with a catch-up of up to 1,000 events. A new node is ready about 10 s after it starts.
+silently with a catch-up of up to 1,000 events. A new node is ready 10 to 12 s after it starts.
 Upstream's handover lost account events and answered 403 in the maintainers' rehearsal; the fork
 closes these gaps (tyne-chat/tyne#905):
 
@@ -119,6 +119,13 @@ closes these gaps (tyne-chat/tyne#905):
   announces its drain (one loop, ended by an undrain), and the stop waits up to 5 s for any left
   that has somewhere to go (`fork/presence_drain.gleam`). Both ask with
   upstream's `MoveTo` and `MoveRetry`, so a presence in backoff after a refused move moves at once.
+- A node subscribed to the API's requests as it started, so one starting beside a running node got
+  requests in its first second, before it knew its cluster or while it was joining, and answered
+  some with `timeout` (504). It now subscribes only once it has joined (`fork/rpc_join_gate.gleam`;
+  a bouncer worker once its bouncer links have) and turns ready up to 2 s later.
+- In bouncer mode, which production does not run, none of these changes anything (upstream's
+  leases decide there who may serve what), except the join gate, which also holds a bouncer worker
+  until its bouncer links have joined.
 
 Known gap (inferred, not measured): a stopping node leaves the API's NATS queue group only when it
 stops, so requests in flight then time out after 5 s. Rehearse a change to drain, handoff or
@@ -172,6 +179,8 @@ limit.
 |---|---|---|
 | `fork/guild_elsewhere.gleam`, `fork/guild_here.gleam`, `fork/guild_whereabouts.gleam`, `fork/isolated.gleam` | the owner of a community that runs on a peer, not here, runs its requests (not dispatches or starts) on that peer (`guild_here.run` and `voice`) while it moves between nodes; `guild_whereabouts` asks the peers' manager shards where it runs, in a process of its own (`isolated`, also used by `presence_elsewhere`) (tyne-chat/tyne#905) | fork-owned |
 | `guild/rpc.gleam` | `handle_local` and `voice_owned` start with `use <- guild_elsewhere.where_it_runs(...)` and `use <- guild_elsewhere.voice_where_it_runs(...)` | one line each |
+| `rpc/server.gleam` | `subscribe` starts with `use <- rpc_join_gate.once_joined(...)` | one line |
+| `fork/rpc_join_gate.gleam` | a clustered node (or a bouncer worker) subscribes to the API's queue group only once it has joined; until then the subscription waits for the server's retry (`server_subscribe_retry_ms`, 2 s), logged every 30 s (tyne-chat/tyne#905) | fork-owned |
 | `fork/presence_elsewhere.gleam` | a presence lookup that misses on the owner, the previous owner and this node, and a session about to start a presence, ask every other node that runs presences, at once (tyne-chat/tyne#905) | fork-owned |
 | `presence/manager.gleam` | the empty arm of `lookup_everywhere` calls `presence_elsewhere.find`; `start_or_lookup_timed` tries `presence_elsewhere.first` before it starts one | one arm; one `lazy_or` |
 | `fork/presence_route.gleam`, `fork/presence_drain.gleam` | a leaving node owns no presences in the route table, unless no other node runs them; its presences start moving when the drain starts, and the stop asks those still on the node to move and waits up to 5 s until none is left (tyne-chat/tyne#905) | fork-owned |
@@ -216,7 +225,8 @@ old node would stop before its presences move. How the API sends the fork's even
   `fork/handover_scenario_test.gleam` with `support/fork_handover_peer.gleam` (two real nodes: one
   joins while presences and a community are still on the other, both find every presence and answer
   for the community, and the drain moves every presence before the stop),
-  `fork/presence_route_test.gleam` (a lone or bouncer node keeps its presences). Rust:
+  `fork/presence_route_test.gleam` (a lone or bouncer node keeps its presences),
+  `fork/rpc_join_gate_test.gleam` (bouncer workers too). Rust:
   `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
   `packages/markdown_parser/rust/tests/fork_persona_mentions.rs`, and the DM-thread job decoded by
   the push service in `fluxer_push/src/fork_dm_thread_push.rs`. Never add a test to an upstream test
