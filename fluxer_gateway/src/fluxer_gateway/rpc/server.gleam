@@ -38,6 +38,9 @@ import gleam/result
 import gleam/string
 import logging
 
+// Fork imports.
+import fluxer_gateway/fork/guild_elsewhere
+
 fn init_timeout_ms() -> Int {
   durations.rpc().server_init_timeout_ms
 }
@@ -488,7 +491,9 @@ fn relay_to(
 pub fn execute_joined(method: String, payload: BitArray) -> String {
   case route_raw(method, payload) {
     Ok(outcome) -> respond(outcome, method)
-    Error(Nil) -> execute_decoded(method, payload)
+    Error(Nil) ->
+      execute_decoded(method, payload)
+      |> guild_elsewhere.answer(method, payload, guild_route)
   }
 }
 

@@ -6,8 +6,8 @@ socket, gateway session, signed-in account (presence), loaded community (guild) 
 reaches it over NATS (`rpc.gateway.*`) to fan out events and ask about permissions and members; it
 calls the API over HTTP (`/internal/rpc`). Native code is in Rust NIFs (`rust/`, one library,
 `priv/gateway_nif.so`). The code is upstream's, and upstream changes it often. The fork adds signal
-routing, a longer resume hold, personas in the reaction buffer and in push notifications, and the
-pushes of DM threads; the gateway stores no persona data. The protocol is documented in
+routing, a longer resume hold, personas in the reaction buffer and in push notifications, the
+pushes of DM threads, and fixes to upstream's handover (below); the gateway stores no persona data. The protocol is documented in
 `fluxer_docs/src/content/docs/gateway/`.
 
 ## Where things are
@@ -85,6 +85,14 @@ static list, no bouncer): a new node joins, takes over sessions, presences and g
 them, and the old node drains (`app/drain.gleam`, `session/manager/transfer.gleam`,
 `session/departure.gleam`, `guild/handoff/`). A moved guild is frozen and its sessions rejoin
 silently with a catch-up of up to 1,000 events. A new node is ready about 10 s after it starts.
+Upstream's handover lost account events and answered 403 in the maintainers' rehearsal; the fork
+closes these gaps (tyne-chat/tyne#905):
+
+- A community's owner changes at once, but the community moves to it later, one after another.
+  Until it arrives, upstream's owner answered `guild_not_found`, which the API turns into 403 on
+  channel reads, message sends and reactions. `fork/guild_elsewhere.gleam` asks such a request
+  again on the node the community still runs on.
+
 Known gap (inferred, not measured): a stopping node leaves the API's NATS queue group only when it
 stops, so requests in flight then time out after 5 s. Rehearse a change to drain, handoff or
 ownership with the maintainers' rehearsal before deploying it.
@@ -128,6 +136,8 @@ limit.
 
 | Where | What | Kind |
 |---|---|---|
+| `fork/guild_elsewhere.gleam` | a community RPC answered `guild_not_found` is answered again where the community runs, this node or a peer (upstream's `execute_owned` there), while it moves between nodes; any other answer stays (tyne-chat/tyne#905) | fork-owned |
+| `rpc/server.gleam` | `execute_joined` pipes the answer of a decoded request through `guild_elsewhere.answer` | one pipe |
 | `fork/events.gleam` | `CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE` are channel-scoped; `SIGNAL_BAR_UPDATE` and `GUILD_COMMANDS_UPDATE` reach passive sessions | fork-owned |
 | `guild/dispatch/event.gleam`, `guild/sessions/passive.gleam` | the catch-all arm of `is_channel_scoped` and of `bypasses` calls `fork/events.gleam` | one arm each |
 | `config/settings.gleam` | `limits_resume_timeout_ms: 300_000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`; mobile 55 s); `test/.../gateway/protocol_test.gleam` expects it | one value; one expectation |
@@ -162,7 +172,8 @@ changes behaviour: ask a maintainer. How the API sends the fork's events:
   `session/fork_reaction_persona_test.gleam` (the buffer, and a session that debounces reactions),
   `push/fork_push_personas_test.gleam` (preview, title, icon through the job body),
   `fork/dm_thread_push_test.gleam` (the envelope, the hold, the job body, the outbox key, the
-  read-state check). Rust: `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
+  read-state check), `fork/guild_elsewhere_test.gleam` (a community that runs here answers a
+  `guild_not_found`; other answers stay). Rust: `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
   `packages/markdown_parser/rust/tests/fork_persona_mentions.rs`, and the DM-thread job decoded by
   the push service in `fluxer_push/src/fork_dm_thread_push.rs`. Never add a test to an upstream
   test file; an upstream expectation the fork changes carries a `// Fork:` comment.
