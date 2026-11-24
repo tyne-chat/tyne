@@ -5,8 +5,9 @@
 // community, a new node joins and owns part of them before they have moved,
 // then the old node drains and stops. Both nodes must find every presence
 // (fork/presence_elsewhere.gleam) and answer for the community
-// (fork/guild_elsewhere.gleam) all along, and the old node must hand its
-// presences over before it stops (fork/presence_route.gleam,
+// (fork/guild_elsewhere.gleam), its permissions in a batch included
+// (fork/permissions_elsewhere.gleam), all along, and the old node must hand
+// its presences over before it stops (fork/presence_route.gleam,
 // fork/presence_drain.gleam). Helpers on the peers:
 // support/fork_handover_peer.gleam, with upstream's support/presence_nodes
 // and support/session_peer.
@@ -84,6 +85,12 @@ fn found(peer: Peer, users: List(Int)) -> List(Int) {
   ints(on(peer, "support@fork_handover_peer", "found", [arg(users)]))
 }
 
+fn runs(peer: Peer, guild: Int) -> Bool {
+  let found = on(peer, "support@fork_handover_peer", "runs", [arg(guild)])
+  let assert Ok(value) = decode.run(found, decode.bool) as string.inspect(found)
+  value
+}
+
 fn serving(peer: Peer) -> List(String) {
   strings(on(peer, "support@session_peer", "serving", []))
 }
@@ -113,6 +120,69 @@ fn community_name(peer: Peer, guild: Int) -> Result(String, String) {
     Ok(name) -> Ok(name)
     Error(_) -> Error(body)
   }
+}
+
+// `guild.get_user_permissions`, one community: `guild_elsewhere` covers it.
+fn permissions(peer: Peer, guild: Int, user: Int) -> Result(String, String) {
+  let body =
+    execute(
+      peer,
+      "guild.get_user_permissions",
+      json.object([
+        #("guild_id", json.string(int.to_string(guild))),
+        #("user_id", json.string(int.to_string(user))),
+        #("channel_id", json.string("0")),
+      ]),
+    )
+  case json.parse(body, decode.at(["result", "permissions"], decode.string)) {
+    Ok(bits) -> Ok(bits)
+    Error(_) -> Error(body)
+  }
+}
+
+// `guild.get_user_permissions_batch`, which `GET /users/@me/guilds` asks:
+// the communities it answers for and their permissions.
+fn permissions_batch(
+  peer: Peer,
+  guild: Int,
+  user: Int,
+) -> Result(List(#(String, String)), String) {
+  let body =
+    execute(
+      peer,
+      "guild.get_user_permissions_batch",
+      json.object([
+        #("guild_ids", json.array([int.to_string(guild)], json.string)),
+        #("user_id", json.string(int.to_string(user))),
+        #("channel_id", json.string("0")),
+      ]),
+    )
+  let row = {
+    use found <- decode.field("guild_id", decode.string)
+    use bits <- decode.field("permissions", decode.string)
+    decode.success(#(found, bits))
+  }
+  case
+    json.parse(body, decode.at(["result", "permissions"], decode.list(row)))
+  {
+    Ok(rows) -> Ok(rows)
+    Error(_) -> Error(body)
+  }
+}
+
+// The body of a community request, which must answer, the same on both
+// nodes while the community runs on the old one (fork/guild_elsewhere.gleam).
+fn asked(
+  peer: Peer,
+  method: String,
+  guild: Int,
+  fields: List(#(String, json.Json)),
+) -> String {
+  execute(
+    peer,
+    method,
+    json.object([#("guild_id", json.string(int.to_string(guild))), ..fields]),
+  )
 }
 
 fn owned_by(wanted: String, among: List(String)) -> fixture.Guild {
@@ -154,9 +224,16 @@ pub fn a_joining_node_and_the_old_nodes_drain_lose_nothing_test() {
       ]),
       decode.int,
     )
-  let community = owned_by(new, both)
+  let member = 7_905_100_000_000_001
+  let community = owned_by(new, both) |> fixture.with_member(member, [])
   fixture.publish(api, community)
   assert community_name(peer_old, community.id) == Ok("Scenario")
+  let other = owned_by(new, both)
+  fixture.publish(api, other)
+  assert community_name(peer_old, other.id) == Ok("Scenario")
+  let assert Ok(bits) = permissions(peer_old, community.id, member)
+  let listed = Ok([#(int.to_string(community.id), bits)])
+  assert permissions_batch(peer_old, community.id, member) == listed
 
   // The new node joins. Until its presences and the community move, which the
   // test holds back, it owns some that still run on the old node.
@@ -174,9 +251,56 @@ pub fn a_joining_node_and_the_old_nodes_drain_lose_nothing_test() {
   assert found(peer_old, users) == users
   assert community_name(peer_new, community.id) == Ok("Scenario")
   assert community_name(peer_old, community.id) == Ok("Scenario")
+  assert permissions(peer_new, community.id, member) == Ok(bits)
+  assert permissions_batch(peer_new, community.id, member) == listed
+  assert permissions_batch(peer_old, community.id, member) == listed
+  // Requests whose handlers read the read model and turn a miss into their
+  // own answer, and a voice request, answer on the new owner as on the node
+  // the community runs on.
+  let user = [#("user_id", json.string(int.to_string(member)))]
+  list.each(
+    [
+      #("guild.get_viewable_channels", user),
+      #("guild.resolve_channel_mentions", [
+        #("channel_ids", json.array(["10"], json.string)),
+      ]),
+      #("guild.get_member", user),
+      #("guild.get_voice_state", user),
+    ],
+    fn(request) {
+      let #(method, fields) = request
+      let on_old = asked(peer_old, method, community.id, fields)
+      assert string.starts_with(on_old, "{\"ok\":true") as on_old
+      assert asked(peer_new, method, community.id, fields) == on_old as method
+    },
+  )
+  // A stop sent to the new owner stops the community where it runs and
+  // answers as a stop does (a second community, so the first keeps running).
+  assert runs(peer_old, other.id)
+  let stopped = asked(peer_new, "guild.stop", other.id, [])
+  assert string.starts_with(stopped, "{\"ok\":true") as stopped
+  assert !runs(peer_old, other.id)
+  assert !runs(peer_new, other.id)
+  // A second session of each user, started on the new node, joins the
+  // presence on the old node instead of starting another one there.
+  let assert Ok(24) =
+    decode.run(
+      on(peer_new, "support@presence_nodes", "start_sessions", [
+        arg(users),
+        arg(2),
+      ]),
+      decode.int,
+    )
+  assert hosted(peer_new, users) == []
+  assert hosted(peer_old, users) == users
+  assert found(peer_new, users) == users
 
-  // The old node drains and stops: its presences move first.
+  // The old node drains and stops: its presences move first. They move as the
+  // drain starts (fork/presence_drain.gleam `begin`), before the stop, since
+  // the test holds back upstream's presence manager (`hold_presence_moves`).
   let _ = on(peer_old, "support@session_peer", "drain_start", [])
+  assert peers.wait_until(15_000, fn() { hosted(peer_old, users) == [] })
+  assert found(peer_new, users) == users
   let _ = on(peer_old, "support@session_peer", "prep_stop", [])
   assert hosted(peer_old, users) == []
   assert hosted(peer_new, users) == users
@@ -184,5 +308,6 @@ pub fn a_joining_node_and_the_old_nodes_drain_lose_nothing_test() {
   peers.stop(peer_old)
   assert found(peer_new, users) == users
   assert community_name(peer_new, community.id) == Ok("Scenario")
+  assert permissions_batch(peer_new, community.id, member) == listed
   peers.stop(peer_new)
 }
