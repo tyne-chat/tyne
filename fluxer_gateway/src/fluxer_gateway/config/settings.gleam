@@ -749,7 +749,9 @@ pub fn default_durations() -> Durations {
       registry_lost_owner_grace_ms: 15_000,
       registry_sweep_interval_ms: 60_000,
       route_handoff_window_ms: 120_000,
-      route_rebuild_interval_ms: 10_000,
+      // Fork: 1 s (upstream 10 s), so presences follow a node that joins or
+      // drains before a deploy stops the old node (fork/presence_route.gleam).
+      route_rebuild_interval_ms: 1000,
       route_unreachable_retry_ms: 1000,
       rpc_lookup_timeout_ms: 2000,
       server_expiry_jitter_ms: 5000,

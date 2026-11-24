@@ -15,6 +15,9 @@ import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 
+// Fork imports.
+import fluxer_gateway/fork/presence_route
+
 pub const shard_count = 16
 
 pub const lane_count = 32
@@ -444,6 +447,7 @@ fn run_builder() -> Nil {
 
 fn rebuild() -> Nil {
   let nodes = presence_nodes()
+  let nodes = presence_route.without_leaving(nodes)
   case current_nodes() == Some(nodes) {
     True -> Nil
     False -> build(nodes)
