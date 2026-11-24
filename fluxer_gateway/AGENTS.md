@@ -100,6 +100,16 @@ closes these gaps (tyne-chat/tyne#905):
   passed back; if the community has left the peer by the time the request runs there, the peer says
   so and the owner runs it. Dispatches and starts are not forwarded: upstream's handle path waits
   for an arriving community in step with the move. `fork/guild_whereabouts.gleam` finds the peer.
+- A node that has just joined built its first presence route from itself alone, so it named
+  itself the owner of presences still on the old node, until its route was rebuilt and then, for
+  the presences it now owns, until they moved; its previous route named only itself. Account
+  events that reached it (DM messages and reactions, persona updates to DM partners) found no
+  presence and became pushes at most, and a session that started there (new, or handed over by the
+  old node) started a second presence beside the old one. `fork/presence_elsewhere.gleam` asks
+  every other node that runs presences, at once, on such a miss and before a session starts one;
+  after a miss it asks the owner once more (the presence may have arrived in between). A peer that
+  is slow or busy makes the lookup fail rather than count the user as offline; one whose presence
+  manager is not running (stopping, or not connected) holds none.
 
 Known gap (inferred, not measured): a stopping node leaves the API's NATS queue group only when it
 stops, so requests in flight then time out after 5 s. Rehearse a change to drain, handoff or
@@ -153,6 +163,8 @@ limit.
 |---|---|---|
 | `fork/guild_elsewhere.gleam`, `fork/guild_here.gleam`, `fork/guild_whereabouts.gleam`, `fork/isolated.gleam` | the owner of a community that runs on a peer, not here, runs its requests (not dispatches or starts) on that peer (`guild_here.run` and `voice`) while it moves between nodes; `guild_whereabouts` asks the peers' manager shards where it runs, in a process of its own (`isolated`, also used by `presence_elsewhere`) (tyne-chat/tyne#905) | fork-owned |
 | `guild/rpc.gleam` | `handle_local` and `voice_owned` start with `use <- guild_elsewhere.where_it_runs(...)` and `use <- guild_elsewhere.voice_where_it_runs(...)` | one line each |
+| `fork/presence_elsewhere.gleam` | a presence lookup that misses on the owner, the previous owner and this node, and a session about to start a presence, ask every other node that runs presences, at once (tyne-chat/tyne#905) | fork-owned |
+| `presence/manager.gleam` | the empty arm of `lookup_everywhere` calls `presence_elsewhere.find`; `start_or_lookup_timed` tries `presence_elsewhere.first` before it starts one | one arm; one `lazy_or` |
 | `fork/events.gleam` | `CHANNEL_SIGNAL_UPDATE` and `CHANNEL_SIGNAL_BAR_UPDATE` are channel-scoped; `SIGNAL_BAR_UPDATE` and `GUILD_COMMANDS_UPDATE` reach passive sessions | fork-owned |
 | `guild/dispatch/event.gleam`, `guild/sessions/passive.gleam` | the catch-all arm of `is_channel_scoped` and of `bypasses` calls `fork/events.gleam` | one arm each |
 | `config/settings.gleam` | `limits_resume_timeout_ms: 300_000` (upstream 60,000), beyond the web client's 180 s resume window (`ResumeWindow` in `GatewaySocket.ts`; mobile 55 s); `test/.../gateway/protocol_test.gleam` expects it | one value; one expectation |
