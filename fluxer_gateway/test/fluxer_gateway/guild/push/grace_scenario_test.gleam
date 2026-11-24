@@ -17,6 +17,9 @@ import support/guild_session as fake
 import support/push_throttle
 import support/wait
 
+// Fork imports.
+import support/fork_guild_push_routed
+
 const author = 1
 
 const channel = 10
@@ -123,8 +126,12 @@ pub fn a_hold_released_on_the_rebuilt_guild_is_pushed_test() {
   use <- with_short_grace
   use api <- guild_api.with_api_for(20_000)
   let #(user, found, handle, member) = engaged_member(api)
+  // Fork: the stop must not overtake the push's routing
+  // (support/fork_guild_push_routed.gleam).
+  let routed = fork_guild_push_routed.mark()
   fixture.dispatch(handle, "MESSAGE_CREATE", mention(user, 900_002))
   fixture.sync(handle)
+  fork_guild_push_routed.wait(routed)
   fixture.stop(found)
   let rebuilt = fixture.started(api, found)
   assert rebuilt.pid != handle.pid
