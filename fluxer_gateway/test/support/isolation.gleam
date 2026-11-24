@@ -15,6 +15,9 @@ import gleam/result
 import gleam/set.{type Set}
 import support/api_breaker
 
+// Fork imports.
+import support/fork_push_settle
+
 pub opaque type Snapshot {
   Snapshot(
     settings: Settings,
@@ -178,6 +181,9 @@ fn restore(snapshot: Snapshot) -> Nil {
   push_metrics.open_drain()
   stop_strays(snapshot)
   restart_children(snapshot)
+  // Fork: wait for push work the last test left running, before the breaker
+  // reset (support/fork_push_settle.gleam, tyne-chat/tyne#916).
+  fork_push_settle.settle()
   let _ = api_breaker.reset()
   throttle.reset()
 }
