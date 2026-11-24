@@ -38,6 +38,9 @@ import gleam/result
 import gleam/string
 import logging
 
+// Fork imports.
+import fluxer_gateway/fork/rpc_join_gate
+
 fn init_timeout_ms() -> Int {
   durations.rpc().server_init_timeout_ms
 }
@@ -279,6 +282,7 @@ fn is_call_timeout(crash: Dynamic) -> Bool {
 }
 
 fn subscribe(state: State) -> State {
+  use <- rpc_join_gate.once_joined(fn() { arm_retry(state) })
   let missing =
     list.filter(state.subjects, fn(subject) {
       !list.contains(state.subscribed, subject)
