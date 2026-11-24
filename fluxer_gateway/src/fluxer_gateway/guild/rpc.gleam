@@ -21,6 +21,9 @@ import gleam/erlang/process
 import gleam/json.{type Json}
 import gleam/result
 
+// Fork imports.
+import fluxer_gateway/fork/guild_elsewhere
+
 pub fn handle_owned(method: String, raw: RawJson) -> #(Bool, BitArray) {
   case rpc_params.of_object(raw) {
     Ok(params) -> encoded(handle_local(method, params))
@@ -36,6 +39,7 @@ pub fn encoded(answer: Result(Json, RpcError)) -> #(Bool, BitArray) {
 }
 
 pub fn handle_local(method: String, params: Params) -> Result(Json, RpcError) {
+  use <- guild_elsewhere.where_it_runs(method, params)
   case method {
     "guild.dispatch" -> infra.dispatch(params)
     "guild.dispatch_many" -> infra.dispatch_many(params)
@@ -130,6 +134,7 @@ pub fn voice_owned_encoded(guild: GuildId, call: RpcCall) -> #(Bool, BitArray) {
 }
 
 fn voice_owned(guild: GuildId, call: RpcCall) -> Result(Json, RpcError) {
+  use <- guild_elsewhere.voice_where_it_runs(guild, call)
   use found <- result.try(infra.handle(guild))
   let reply = process.new_subject()
   process.send(
