@@ -100,6 +100,9 @@ closes these gaps (tyne-chat/tyne#905):
   passed back; if the community has left the peer by the time the request runs there, the peer says
   so and the owner runs it. Dispatches and starts are not forwarded: upstream's handle path waits
   for an arriving community in step with the move. `fork/guild_whereabouts.gleam` finds the peer.
+- `guild.get_user_permissions_batch` (`GET /users/@me/guilds`) asks each community's owner and
+  leaves out the ones it cannot answer for, which during a move were the moving ones.
+  `fork/permissions_elsewhere.gleam` asks again where the community runs (upstream's `owned_bits`).
 - A node that has just joined built its first presence route from itself alone, so it named
   itself the owner of presences still on the old node, until its route was rebuilt and then, for
   the presences it now owns, until they moved; its previous route named only itself. Account
@@ -179,6 +182,8 @@ limit.
 |---|---|---|
 | `fork/guild_elsewhere.gleam`, `fork/guild_here.gleam`, `fork/guild_whereabouts.gleam`, `fork/isolated.gleam` | the owner of a community that runs on a peer, not here, runs its requests (not dispatches or starts) on that peer (`guild_here.run` and `voice`) while it moves between nodes; `guild_whereabouts` asks the peers' manager shards where it runs, in a process of its own (`isolated`, also used by `presence_elsewhere`) (tyne-chat/tyne#905) | fork-owned |
 | `guild/rpc.gleam` | `handle_local` and `voice_owned` start with `use <- guild_elsewhere.where_it_runs(...)` and `use <- guild_elsewhere.voice_where_it_runs(...)` | one line each |
+| `fork/permissions_elsewhere.gleam` | a community the permissions batch left out is asked again where it runs (upstream's `owned_bits`) (tyne-chat/tyne#905) | fork-owned |
+| `guild/rpc/permissions.gleam` | `one` pipes each community's bits through `permissions_elsewhere.bits` | one pipe |
 | `rpc/server.gleam` | `subscribe` starts with `use <- rpc_join_gate.once_joined(...)` | one line |
 | `fork/rpc_join_gate.gleam` | a clustered node (or a bouncer worker) subscribes to the API's queue group only once it has joined; until then the subscription waits for the server's retry (`server_subscribe_retry_ms`, 2 s), logged every 30 s (tyne-chat/tyne#905) | fork-owned |
 | `fork/presence_elsewhere.gleam` | a presence lookup that misses on the owner, the previous owner and this node, and a session about to start a presence, ask every other node that runs presences, at once (tyne-chat/tyne#905) | fork-owned |
@@ -223,10 +228,12 @@ old node would stop before its presences move. How the API sends the fork's even
   `fork/dm_thread_push_test.gleam` (the envelope, the hold, the job body, the outbox key, the
   read-state check), `fork/guild_elsewhere_test.gleam` (on one node every request runs here),
   `fork/handover_scenario_test.gleam` with `support/fork_handover_peer.gleam` (two real nodes: one
-  joins while presences and a community are still on the other, both find every presence and answer
-  for the community, and the drain moves every presence before the stop),
+  joins while presences and a community are still on the other; both find every presence, a second
+  session started on the new node joins the old presence, both answer for the community, its
+  channels, members, mentions, voice and the permissions batch, and the drain moves every presence
+  before the stop), `fork/rpc_join_gate_test.gleam` (bouncer workers too),
   `fork/presence_route_test.gleam` (a lone or bouncer node keeps its presences),
-  `fork/rpc_join_gate_test.gleam` (bouncer workers too). Rust:
+  `fork/wire_records_test.gleam` (the cross-node push records, above). Rust:
   `rust/crates/md_plaintext/tests/fork_persona_preview.rs`,
   `packages/markdown_parser/rust/tests/fork_persona_mentions.rs`, and the DM-thread job decoded by
   the push service in `fluxer_push/src/fork_dm_thread_push.rs`. Never add a test to an upstream test

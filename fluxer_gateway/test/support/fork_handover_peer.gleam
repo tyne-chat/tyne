@@ -4,6 +4,8 @@
 // peer nodes (tyne-chat/tyne#905).
 
 import fluxer_gateway/config/settings
+import fluxer_gateway/core/id
+import fluxer_gateway/guild/manager/registry
 import fluxer_gateway/presence/manager
 import fluxer_gateway/rpc/server
 import gleam/list
@@ -42,4 +44,16 @@ pub fn found(users: List(Int)) -> List(Int) {
       _ -> False
     }
   })
+}
+
+// Whether this node runs the community.
+pub fn runs(guild: Int) -> Bool {
+  case id.guild_id(guild) {
+    Ok(found) ->
+      case registry.lookup(found) {
+        Ok(_) -> True
+        Error(Nil) -> False
+      }
+    Error(_) -> False
+  }
 }
