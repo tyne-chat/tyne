@@ -57,6 +57,10 @@ Every change to a persona, to the settings or to a channel selection is sent to 
 
 An account can sort its personas into groups, as PluralKit sorts members, and a persona can be in any number of groups. Groups are private: only the owner can list them, and changes to them are sent only to the owner's sessions, as [User Persona Groups Update](/gateway/events/#user-persona-groups-update). A group ID that is not the caller's returns 404 `UNKNOWN_PERSONA_GROUP`.
 
+## Blocked personas
+
+A user can block one persona of another account without blocking the account or its other personas. Clients treat a blocked persona's messages as they treat a blocked user's: collapsed, or hidden by the setting that hides blocked messages. Nothing else changes: the persona still appears everywhere else, and its owner is not told. The list is private: only the user who blocked can read it, and changes to it are sent only to that user's sessions, as [User Persona Blocks Update](/gateway/events/#user-persona-blocks-update). An account can block up to 1000 personas; one more is refused with 400 `PERSONA_BLOCK_LIMIT_REACHED`.
+
 ## Persona object
 
 One of the caller's own personas, with every setting the owner can change.
@@ -762,6 +766,68 @@ Deletes one of the caller's groups. The personas in it are not changed.
 | Status | Body | Condition |
 | --- | --- | --- |
 | 204 | empty | The group was deleted |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## List blocked personas
+
+<RouteHeader method="GET" path="/v1/users/@me/personas/blocks" oauth2="personas.read" />
+
+Lists the personas the caller has [blocked](#blocked-personas), the oldest block first.
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[object] | The blocked personas, each with `user_id` (snowflake, the account the persona belongs to) and `persona_id` (snowflake) |
+
+### Rate limit
+
+100 requests per 10 seconds for each authenticated user, on the `user:persona:read` bucket.
+
+## Block a persona
+
+<RouteHeader method="PUT" path="/v1/users/@me/personas/blocks/{user_id}/{persona_id}" oauth2="personas.write" />
+
+[Blocks](#blocked-personas) another account's persona, a deleted one too. Blocking one already blocked changes nothing. One's own persona is refused with 400 `CANNOT_BLOCK_OWN_PERSONA`, and a persona that does not exist with 404 `UNKNOWN_PERSONA`.
+
+### Path parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| user_id | snowflake | The account the persona belongs to |
+| persona_id | snowflake | The ID of the persona |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[object] | Every blocked persona, as [List blocked personas](#list-blocked-personas) returns them |
+
+### Rate limit
+
+30 requests per minute for each authenticated user, on the `user:persona:mutate` bucket.
+
+## Unblock a persona
+
+<RouteHeader method="DELETE" path="/v1/users/@me/personas/blocks/{user_id}/{persona_id}" oauth2="personas.write" />
+
+Unblocks a persona. Unblocking one that is not blocked changes nothing.
+
+### Path parameters
+
+| Name | Type | Description |
+| --- | --- | --- |
+| user_id | snowflake | The account the persona belongs to |
+| persona_id | snowflake | The ID of the persona |
+
+### Response
+
+| Status | Body | Condition |
+| --- | --- | --- |
+| 200 | array[object] | Every blocked persona left |
 
 ### Rate limit
 
