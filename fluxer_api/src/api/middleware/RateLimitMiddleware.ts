@@ -15,10 +15,7 @@ import {createMiddleware} from 'hono/factory';
 
 // Fork imports.
 
-import {
-	forkLogGlobalRateLimitRevocation,
-	forkRecordRateLimitedRequest,
-} from '@app/api/middleware/ForkRateLimitDiagnostics';
+import {forkLogGlobalRateLimitFlood, forkRecordRateLimitedRequest} from '@app/api/middleware/ForkRateLimitDiagnostics';
 
 type AccountType = 'user' | 'bot' | 'webhook';
 
@@ -195,7 +192,7 @@ export function RateLimitMiddleware(
 			const globalLimit = getGlobalRateLimit(ctx);
 			const globalResult = await rateLimitService.checkGlobalLimit(clientId, globalLimit);
 			if (!globalResult.allowed) {
-				forkLogGlobalRateLimitRevocation(ctx, globalResult);
+				forkLogGlobalRateLimitFlood(ctx, globalResult);
 				throw new RateLimitError({
 					global: true,
 					retryAfter: getRetryAfterSeconds(globalResult),

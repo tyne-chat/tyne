@@ -209,7 +209,7 @@ export function forkBuildGlobalRateLimitReport(
 }
 
 /** Logs what the user had been requesting when the global limit refuses their request. */
-export function forkLogGlobalRateLimitRevocation(ctx: Context<HonoEnv>, result: RateLimitResult): void {
+export function forkLogGlobalRateLimitFlood(ctx: Context<HonoEnv>, result: RateLimitResult): void {
 	try {
 		const report = forkBuildGlobalRateLimitReport(ctx, result);
 		if (!report) return;

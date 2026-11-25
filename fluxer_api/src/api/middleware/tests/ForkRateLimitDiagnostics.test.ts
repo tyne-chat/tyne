@@ -227,6 +227,8 @@ describe('RateLimitMiddleware with the fork diagnostics', () => {
 			String(message).startsWith('Fork: global rate limit'),
 		);
 		expect(reports).toHaveLength(1);
+		// tyne-tools' prod_logs.py and prod_alerts.py find flood reports by this exact message.
+		expect(reports[0][1]).toBe('Fork: global rate limit exceeded');
 		expect(reports[0][0]).toMatchObject({
 			userId: USER_ID.toString(),
 			route: 'GET /channels/:channel_id/messages',
