@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import {getTableMetadata} from '@app/api/database/CassandraMetaRegistry';
 import {keyFromColumns} from '@app/api/database/PostgresKvQueryExecutor';
 import {MessageReactions} from '@app/api/Tables';
 import {describe, expect, it} from 'vitest';
@@ -16,10 +15,8 @@ const STORED_KEY = ['channel_id', 'bucket', 'message_id', 'emoji_id', 'emoji_nam
 
 describe('message_reactions key layout', () => {
 	it('keeps the key columns in the order stored rows were written in', () => {
-		expect(MessageReactions).toBeDefined();
-		const table = getTableMetadata('message_reactions');
-		expect(table?.primaryKey).toEqual(STORED_KEY);
-		expect(table?.partitionKey).toEqual(['channel_id', 'bucket']);
+		expect(MessageReactions.primaryKey).toEqual(STORED_KEY);
+		expect(MessageReactions.partitionKey).toEqual(['channel_id', 'bucket']);
 	});
 
 	it('writes the persona as the 7th part of a stored key', () => {
