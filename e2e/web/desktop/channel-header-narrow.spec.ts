@@ -90,9 +90,14 @@ test.describe('Channel header in a narrow window', () => {
 		await pins.press('Enter');
 		const popout = page.locator('[data-flx="channel.channel-pins-popout.container"]');
 		await expect(popout).toBeVisible();
-		const [popoutBox, moreBox] = [await popout.boundingBox(), await moreButton(page).boundingBox()];
-		// The popout keeps its own small offset from the edge of what it is anchored to.
-		expect(Math.abs(popoutBox!.x + popoutBox!.width - (moreBox!.x + moreBox!.width))).toBeLessThan(12);
+		// The popout opens with a 250 ms scale animation and keeps a small offset from its anchor edge.
+		await expect
+			.poll(async () => {
+				const [popoutBox, moreBox] = [await popout.boundingBox(), await moreButton(page).boundingBox()];
+				if (!popoutBox || !moreBox) return Number.POSITIVE_INFINITY;
+				return Math.abs(popoutBox.x + popoutBox.width - (moreBox.x + moreBox.width));
+			})
+			.toBeLessThan(12);
 		await page.keyboard.press('Escape');
 		await expect(popout).toHaveCount(0);
 		await expect(moreButton(page)).toBeFocused();
