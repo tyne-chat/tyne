@@ -259,6 +259,9 @@ export const useMessageActionMenuData = (
 		ModalCommands.pushWithKey(messageDebugModal, `message-debug-${message.id}`);
 	}, [message, onClose, i18n]);
 	const reactions = useMessageReactionsSnapshot(message.id);
+	// Fork: keep "Change persona" reactive when personas load after the menu opens, without relying on
+	// useMessagePermissions returning a new object every render (tyne-chat/tyne#937).
+	const hasPersonas = PersonaStore.personas.length > 0;
 	const groups = useMemo(() => {
 		const reactionActions: Array<MenuItemType> = [];
 		const interactionActions: Array<MenuItemType> = [];
@@ -352,12 +355,7 @@ export const useMessageActionMenuData = (
 				});
 			}
 			// Fork: also for a forward, whose sender is the one thing about it that can change (tyne-chat/tyne#817).
-			if (
-				message.isCurrentUserAuthor() &&
-				message.isUserMessage() &&
-				supportsInteractiveActions &&
-				PersonaStore.personas.length
-			) {
+			if (message.isCurrentUserAuthor() && message.isUserMessage() && supportsInteractiveActions && hasPersonas) {
 				interactionActions.push({
 					id: messageActionMenuItemIds.changePersona,
 					icon: <ChangePersonasIcon size={20} data-flx="channel.message-action-menu.groups.change-personas-icon" />,
@@ -508,6 +506,8 @@ export const useMessageActionMenuData = (
 		}
 		return groups;
 	}, [
+		// Fork: recompute when personas load after the menu opens (tyne-chat/tyne#937).
+		hasPersonas,
 		message,
 		handlers,
 		isSaved,
