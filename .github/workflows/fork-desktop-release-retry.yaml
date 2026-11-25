@@ -9,8 +9,9 @@
 # all. That can take many hours: before this job reaches its own time limit it starts the next
 # retry run for the same release run and stops.
 #
-# It retries only when every failed job is the macOS build and that job was never given a
-# runner. Any other failure is left for a person.
+# It retries only when every failed job is the macOS build or the macOS launch test (which runs on
+# GitHub's macos-15, tyne-chat/tyne#928) and that job was never given a runner. Any other failure
+# is left for a person.
 #
 # - Starts by itself when a run of fork-desktop-release.yaml on tyne fails.
 # - Run by hand with a run id to retry a run that failed earlier:
@@ -85,7 +86,8 @@ jobs:
             fi
             while IFS=$'\t' read -r job_id name; do
               case "$name" in
-                "Build macos ("*) ;;
+                # The launch test runs on GitHub's macos-15 too (tyne-chat/tyne#928).
+                "Build macos ("* | "Open the signed macOS app"*) ;;
                 *) echo "'$name' failed"; return ;;
               esac
               dropped=$(gh api "repos/$GH_REPO/check-runs/$job_id/annotations" \
@@ -120,7 +122,7 @@ jobs:
               echo "Handed the retries of run $RUN_ID to a new retry run, before this one times out."
               exit 0
             fi
-            echo "Only the macOS build failed, for want of a runner. Retrying in $WAIT_MINUTES minutes."
+            echo "Only macOS jobs failed, for want of a runner. Retrying in $WAIT_MINUTES minutes."
             sleep $((WAIT_MINUTES * 60))
             # Someone may have rerun it meanwhile: then start over with that attempt.
             now=$(gh run view "$RUN_ID" --json attempt,status --jq '"\(.attempt) \(.status)"')
