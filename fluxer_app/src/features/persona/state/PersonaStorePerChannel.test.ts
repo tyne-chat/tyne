@@ -172,4 +172,57 @@ describe('PersonaStore with a persona remembered per channel', () => {
 		await store.setActivePersonaScope('global');
 		expect(store.activePersonaScope).toBe('channel');
 	});
+
+	it('does not overwrite a channel pick or unlatch made while fetchChannelStates is in flight', async () => {
+		perChannel();
+		store.setChannelStates([{channel_id: 'cleared', persona_id: alice}]);
+		let resolveGet!: (value: unknown) => void;
+		http.get.mockReturnValueOnce(
+			new Promise((resolve) => {
+				resolveGet = resolve;
+			}),
+		);
+
+		const pendingFetch = store.fetchChannelStates();
+		await store.setActivePersona(bob, true, undefined, 'picked');
+		await store.unlatch(false, 'cleared');
+
+		resolveGet({
+			ok: true,
+			status: 200,
+			body: {
+				states: [
+					{channel_id: 'cleared', persona_id: alice},
+					{channel_id: 'other', persona_id: alice},
+				],
+			},
+		});
+		await pendingFetch;
+
+		expect(store.latchedPersonaFor('picked')?.id).toBe(bob);
+		expect(store.latchedPersonaFor('cleared')).toBeNull();
+		expect(store.latchedPersonaFor('other')?.id).toBe(alice);
+	});
+
+	it('ignores a stale fetchChannelStates response that resolves after reset()', async () => {
+		let resolveGet!: (value: unknown) => void;
+		http.get.mockReturnValueOnce(
+			new Promise((resolve) => {
+				resolveGet = resolve;
+			}),
+		);
+
+		const pendingFetch = store.fetchChannelStates();
+		store.reset();
+		perChannel();
+
+		resolveGet({
+			ok: true,
+			status: 200,
+			body: {states: [{channel_id: 'one', persona_id: alice}]},
+		});
+		await pendingFetch;
+
+		expect(store.latchedPersonaFor('one')).toBeNull();
+	});
 });

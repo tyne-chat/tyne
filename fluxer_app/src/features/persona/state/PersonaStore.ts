@@ -47,6 +47,20 @@ const ACTIVE_PERSONA_CLEARED_ROOT_DESCRIPTOR = msg`Active persona cleared (sendi
 
 export type ActivePersonaMode = 'manual' | 'last';
 
+export interface PersonaSettingsFetchSnapshot {
+	resetRevision: number;
+	settingsRevision: number;
+}
+
+type PersonaSettingField =
+	| 'active_persona_mode'
+	| 'active_persona_scope'
+	| 'multi_persona_reactions'
+	| 'active_persona_id'
+	| 'is_latched'
+	| 'display_tag_text'
+	| 'display_tag_icon';
+
 /** A persona of this account, as the server sends it. */
 export type ClientPersona = PersonaResponse;
 
@@ -149,12 +163,30 @@ export class PersonaStoreClass {
 	private _knownPersonas = new Map<string, MessageSubprofileResponse>();
 	/** The account each known persona belongs to, where it is known, so an account's edits can be fetched. */
 	private _knownPersonaOwners = new Map<string, string>();
+	/** Monotonic counters so a READY GET that resolves after a local change or reset cannot overwrite it (tyne-chat/tyne#938). */
+	private _resetRevision = 0;
+	private _settingsRevision = 0;
+	private readonly _settingRevisions = new Map<PersonaSettingField, number>();
+	private _channelStatesRevision = 0;
+	private readonly _channelRevisions = new Map<string, number>();
 
 	constructor() {
-		makeAutoObservable(this);
+		makeAutoObservable<
+			PersonaStoreClass,
+			'_resetRevision' | '_settingsRevision' | '_settingRevisions' | '_channelStatesRevision' | '_channelRevisions'
+		>(this, {
+			_resetRevision: false,
+			_settingsRevision: false,
+			_settingRevisions: false,
+			_channelStatesRevision: false,
+			_channelRevisions: false,
+		});
 	}
 
 	reset(): void {
+		this._resetRevision += 1;
+		this._settingRevisions.clear();
+		this._channelRevisions.clear();
 		runInAction(() => {
 			this._personas = [];
 			this._displayTagText = '';
@@ -361,30 +393,78 @@ export class PersonaStoreClass {
 		return this._displayTagIcon && this._displayTagIcon.length > 0 ? this._displayTagIcon : null;
 	}
 
-	updateSettings(settings: Partial<PersonaSettingsResponse>): void {
+	private markSettingsChanged(...fields: Array<PersonaSettingField>): void {
+		this._settingsRevision += 1;
+		for (const field of fields) {
+			this._settingRevisions.set(field, this._settingsRevision);
+		}
+	}
+
+	snapshotSettingsRevision(): PersonaSettingsFetchSnapshot {
+		return {resetRevision: this._resetRevision, settingsRevision: this._settingsRevision};
+	}
+
+	applyFetchedSettings(settings: Partial<PersonaSettingsResponse>, snapshot: PersonaSettingsFetchSnapshot): void {
+		if (this._resetRevision !== snapshot.resetRevision) return;
+		const fresh = (field: PersonaSettingField) => (this._settingRevisions.get(field) ?? 0) <= snapshot.settingsRevision;
 		runInAction(() => {
-			if (settings.active_persona_mode !== undefined) {
+			if (settings.active_persona_mode !== undefined && fresh('active_persona_mode')) {
 				this._activePersonaMode = settings.active_persona_mode;
 			}
-			if (settings.active_persona_scope !== undefined) {
+			if (settings.active_persona_scope !== undefined && fresh('active_persona_scope')) {
 				this._activePersonaScope = settings.active_persona_scope;
 			}
-			if (settings.multi_persona_reactions !== undefined) {
+			if (settings.multi_persona_reactions !== undefined && fresh('multi_persona_reactions')) {
 				this._multiPersonaReactions = settings.multi_persona_reactions;
 			}
-			if (settings.active_persona_id !== undefined) {
+			if (settings.active_persona_id !== undefined && fresh('active_persona_id')) {
 				this._activePersonaId = settings.active_persona_id;
 			}
-			if (settings.is_latched !== undefined) {
+			if (settings.is_latched !== undefined && fresh('is_latched')) {
 				this._isPersonaLatched = settings.is_latched;
 			}
-			if (settings.display_tag_text !== undefined) {
+			if (settings.display_tag_text !== undefined && fresh('display_tag_text')) {
 				this._displayTagText = settings.display_tag_text ?? '';
 			}
-			if (settings.display_tag_icon !== undefined) {
+			if (settings.display_tag_icon !== undefined && fresh('display_tag_icon')) {
 				this._displayTagIcon = settings.display_tag_icon ?? null;
 			}
 		});
+	}
+
+	updateSettings(settings: Partial<PersonaSettingsResponse>): void {
+		const changed: Array<PersonaSettingField> = [];
+		runInAction(() => {
+			if (settings.active_persona_mode !== undefined) {
+				this._activePersonaMode = settings.active_persona_mode;
+				changed.push('active_persona_mode');
+			}
+			if (settings.active_persona_scope !== undefined) {
+				this._activePersonaScope = settings.active_persona_scope;
+				changed.push('active_persona_scope');
+			}
+			if (settings.multi_persona_reactions !== undefined) {
+				this._multiPersonaReactions = settings.multi_persona_reactions;
+				changed.push('multi_persona_reactions');
+			}
+			if (settings.active_persona_id !== undefined) {
+				this._activePersonaId = settings.active_persona_id;
+				changed.push('active_persona_id');
+			}
+			if (settings.is_latched !== undefined) {
+				this._isPersonaLatched = settings.is_latched;
+				changed.push('is_latched');
+			}
+			if (settings.display_tag_text !== undefined) {
+				this._displayTagText = settings.display_tag_text ?? '';
+				changed.push('display_tag_text');
+			}
+			if (settings.display_tag_icon !== undefined) {
+				this._displayTagIcon = settings.display_tag_icon ?? null;
+				changed.push('display_tag_icon');
+			}
+		});
+		if (changed.length > 0) this.markSettingsChanged(...changed);
 	}
 
 	async setDisplayTag(text: string, icon?: string | null): Promise<void> {
@@ -395,6 +475,9 @@ export class PersonaStoreClass {
 		if (icon !== undefined) {
 			newIcon = icon ? icon.trim() : null;
 		}
+		this.markSettingsChanged(
+			...(icon !== undefined ? (['display_tag_text', 'display_tag_icon'] as const) : (['display_tag_text'] as const)),
+		);
 		runInAction(() => {
 			this._displayTagText = newText;
 			this._displayTagIcon = newIcon;
@@ -460,6 +543,7 @@ export class PersonaStoreClass {
 			}
 		}
 
+		this.markSettingsChanged('active_persona_mode', 'active_persona_id', 'is_latched');
 		runInAction(() => {
 			this._activePersonaMode = mode;
 			this._activePersonaId = targetId;
@@ -505,6 +589,11 @@ export class PersonaStoreClass {
 		const newMode = mode ?? this._activePersonaMode;
 		const newLatched = Boolean(id && latch);
 
+		this.markSettingsChanged(
+			'active_persona_id',
+			'is_latched',
+			...(mode !== undefined ? (['active_persona_mode'] as const) : []),
+		);
 		runInAction(() => {
 			this._activePersonaId = id;
 			this._isPersonaLatched = newLatched;
@@ -540,6 +629,7 @@ export class PersonaStoreClass {
 
 		const newMode = this._activePersonaMode;
 
+		this.markSettingsChanged('active_persona_id', 'is_latched');
 		runInAction(() => {
 			this._isPersonaLatched = false;
 			this._activePersonaId = null;
@@ -567,6 +657,7 @@ export class PersonaStoreClass {
 	async setActivePersonaScope(scope: ActivePersonaScope): Promise<void> {
 		const previous = this._activePersonaScope;
 		if (previous === scope) return;
+		this.markSettingsChanged('active_persona_scope');
 		runInAction(() => {
 			this._activePersonaScope = scope;
 		});
@@ -587,6 +678,7 @@ export class PersonaStoreClass {
 	async setMultiPersonaReactions(enabled: boolean): Promise<void> {
 		const previous = this._multiPersonaReactions;
 		if (previous === enabled) return;
+		this.markSettingsChanged('multi_persona_reactions');
 		runInAction(() => {
 			this._multiPersonaReactions = enabled;
 		});
@@ -609,8 +701,27 @@ export class PersonaStoreClass {
 		});
 	}
 
+	private applyFetchedChannelStates(states: ReadonlyArray<PersonaChannelState>, snapshotRevision: number): void {
+		const incoming = new Map<string, string>();
+		for (const state of states) {
+			if (state.persona_id) incoming.set(state.channel_id, state.persona_id);
+		}
+		runInAction(() => {
+			for (const channelId of [...this._channelPersonaIds.keys()]) {
+				if ((this._channelRevisions.get(channelId) ?? 0) > snapshotRevision) continue;
+				if (!incoming.has(channelId)) this._channelPersonaIds.delete(channelId);
+			}
+			for (const [channelId, personaId] of incoming) {
+				if ((this._channelRevisions.get(channelId) ?? 0) > snapshotRevision) continue;
+				this._channelPersonaIds.set(channelId, personaId);
+			}
+		});
+	}
+
 	/** Another session of this account selected a persona in a channel, or the server cleared one. */
 	handleChannelStateUpdate(state: PersonaChannelState): void {
+		this._channelStatesRevision += 1;
+		this._channelRevisions.set(state.channel_id, this._channelStatesRevision);
 		runInAction(() => {
 			if (state.persona_id) {
 				this._channelPersonaIds.set(state.channel_id, state.persona_id);
@@ -632,9 +743,14 @@ export class PersonaStoreClass {
 	}
 
 	async fetchChannelStates(): Promise<void> {
+		const resetRevision = this._resetRevision;
+		const snapshotRevision = this._channelStatesRevision;
 		try {
 			const res = await http.get<PersonaChannelStatesResponse>(ForkEndpoints.USER_PERSONA_CHANNEL_STATES);
-			if (res.ok && Array.isArray(res.body?.states)) this.setChannelStates(res.body.states);
+			if (res.ok && Array.isArray(res.body?.states)) {
+				if (this._resetRevision !== resetRevision) return;
+				this.applyFetchedChannelStates(res.body.states, snapshotRevision);
+			}
 		} catch {
 			// The selections stay as they are; the next load or event corrects them.
 		}

@@ -194,6 +194,71 @@ describe('PersonaCommands', () => {
 			const result = await PersonaCommands.fetchPersonaSettings();
 			expect(result).toBeNull();
 		});
+
+		it('does not overwrite a local persona pick made while the GET was in flight', async () => {
+			let resolveGet!: (value: unknown) => void;
+			vi.mocked(http.get).mockReturnValueOnce(
+				new Promise((resolve) => {
+					resolveGet = resolve;
+				}) as any,
+			);
+			vi.mocked(http.patch).mockResolvedValueOnce({ok: true, status: 200, body: {}} as any);
+			PersonaStore.upsertPersona({id: 'p-picked', name: 'Picked'} as any);
+
+			const pendingFetch = PersonaCommands.fetchPersonaSettings();
+			await PersonaStore.setActivePersona('p-picked', true);
+
+			resolveGet({
+				ok: true,
+				status: 200,
+				body: {
+					active_persona_mode: 'last',
+					active_persona_scope: 'global',
+					active_persona_id: null,
+					is_latched: false,
+					display_tag_text: 'SYS',
+					display_tag_icon: null,
+					multi_persona_reactions: true,
+				},
+			});
+			await pendingFetch;
+
+			expect(PersonaStore.activePersonaId).toBe('p-picked');
+			expect(PersonaStore.isPersonaLatched).toBe(true);
+			// Fields not changed locally still hydrate from the GET.
+			expect(PersonaStore.displayTagText).toBe('SYS');
+			expect(PersonaStore.activePersonaMode).toBe('last');
+		});
+
+		it('ignores a stale settings response that resolves after reset()', async () => {
+			let resolveGet!: (value: unknown) => void;
+			vi.mocked(http.get).mockReturnValueOnce(
+				new Promise((resolve) => {
+					resolveGet = resolve;
+				}) as any,
+			);
+
+			const pendingFetch = PersonaCommands.fetchPersonaSettings();
+			PersonaStore.reset();
+
+			resolveGet({
+				ok: true,
+				status: 200,
+				body: {
+					active_persona_mode: 'last',
+					active_persona_scope: 'channel',
+					active_persona_id: 'old-account-persona',
+					is_latched: true,
+					display_tag_text: 'OLD',
+				},
+			});
+			await pendingFetch;
+
+			expect(PersonaStore.activePersonaId).toBeNull();
+			expect(PersonaStore.isPersonaLatched).toBe(false);
+			expect(PersonaStore.displayTagText).toBe('');
+			expect(PersonaStore.activePersonaScope).toBe('global');
+		});
 	});
 
 	describe('createPersona', () => {

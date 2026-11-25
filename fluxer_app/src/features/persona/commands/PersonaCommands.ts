@@ -48,10 +48,11 @@ const PERSONA_PROFILE_TTL_MS = 60 * 1000;
 AccountScopedWork.registerCancellation(() => personaProfileCache.clear());
 
 export async function fetchPersonaSettings(): Promise<PersonaSettingsResponse | null> {
+	const snapshot = PersonaStore.snapshotSettingsRevision();
 	try {
 		const res = await http.get<PersonaSettingsResponse>(ForkEndpoints.USER_PERSONA_SETTINGS);
 		if (res.ok && res.body) {
-			PersonaStore.updateSettings(res.body);
+			PersonaStore.applyFetchedSettings(res.body, snapshot);
 			return res.body;
 		}
 		return null;
