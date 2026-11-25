@@ -47,7 +47,7 @@ Weigh two things:
 - Layouts that break at narrow widths or high zoom on common screens (#232).
 - Desktop window and update annoyances that have a workaround (#234, #507, #544).
 - Emoji beyond the basics: sequenced emoji (#651), categories (#815).
-- Request floods that could sign someone out, found in the code but not yet seen (#310, #503).
+- Request floods over the global rate limit, found in the code but not yet seen (#310, #503).
 
 **P3: nice to have, rare or cosmetic.**
 

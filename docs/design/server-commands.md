@@ -707,7 +707,8 @@ At the end of `rate_limit_configs/UserRateLimitConfig.ts` (the signal bar's buck
 | `guild_commands:preview` | 30 per 10 s | `exemptFromGlobal`, like `USER_GROUP_DM_CREATE` (127-130) |
 
 The preview is exempt because the script editor sends it while typing (debounced); going over the
-global limit revokes the session.
+global limit refuses all of the user's requests for a while (and revoked the session before
+fluxerapp/fluxer#4295).
 
 ### Error codes
 

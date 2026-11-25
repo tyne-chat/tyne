@@ -236,15 +236,12 @@ tyne-chat/tyne#636). `fork-px-lint.mjs` enforces it; the few `px` upstream keeps
 
 ## Network calls: count the requests
 
-The server ends sessions over request floods. Upstream's API allows each user 50 requests per second
-(a leaky bucket shared by all of the user's sessions; `getGlobalRateLimit` in
-`fluxer_api/src/api/middleware/RateLimitMiddleware.ts`, 1,200 for accounts flagged
-`HIGH_GLOBAL_RATE_LIMIT`). The request that goes over it does not just get a 429: the session that
-sent it is revoked and the app returns to the login screen. A burst of requests is a sign-out, not a
-performance issue. Only routes whose bucket is not `exemptFromGlobal` count, and the session revoked
-is the one whose request went over, not always the device that sent the burst. The dev stack runs
-with rate limits off (`FLUXER_DISABLE_RATE_LIMITS`), so a flood signs nobody out there: count the
-requests in a test.
+Upstream's API allows each user 50 requests per second over all their devices
+(`getGlobalRateLimit` in `fluxer_api/src/api/middleware/RateLimitMiddleware.ts`; 1,200 with
+`HIGH_GLOBAL_RATE_LIMIT`; `exemptFromGlobal` routes do not count). Over it, a global 429 makes the
+apps hold or fail all their requests for the retry window: messages stop loading and sending.
+Before fluxerapp/fluxer#4295 (rebased 2026-11-25) it also ended the session. The dev stack
+has rate limits off (`FLUXER_DISABLE_RATE_LIMITS`): count the requests in a test.
 
 Before adding a network call to code that runs once per channel, message, member or other list
 item, inside a loop, from a component's render or a widget's `build`, or from a provider or store
@@ -259,10 +256,9 @@ many places watch, answer in the change's description:
    fetched elsewhere.
 
 Such a change needs a test that counts the requests, with the data missing and with the request
-failing. (On 2026-09-28 a fork commit fetched the user's own member once per channel, unshared and
-retried on every build; on a fast phone it sent 65 identical requests in half a second, and a user
-was signed out again and again until 2026-10-17, tyne-chat/tyne#114. READY already brings the
-member.)
+failing. (In tyne-chat/tyne#114 a fork commit fetched the user's own member once per channel, unshared and
+retried on every build: 65 identical requests in half a second on a fast phone signed a user out
+again and again for three weeks. READY already brings the member.)
 
 ## Reviews and fixes
 
