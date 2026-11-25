@@ -56,7 +56,14 @@ test.describe('Server commands', () => {
 
 	/** A command with no input: the first Enter picks it from the list, the second sends it. */
 	const sendBare = async (page: Page, name: string) => {
-		await send(page, `/${name}`);
+		await composer(page).click();
+		await page.keyboard.type(`/${name}`);
+		await expect(composer(page)).toHaveText(`/${name}`);
+		// The list loads the community's commands when `/` is typed, so on a fresh page the row comes
+		// after a request. An Enter before the row is there sends `/name` at once, and the run empties
+		// the box before the check below can see it (tyne-chat/tyne#918).
+		await expect(page.locator('[role="listbox"] [role="option"]', {hasText: `/${name}`})).toBeVisible();
+		await page.keyboard.press('Enter');
 		await expect(composer(page)).toHaveText(`/${name}`);
 		await page.keyboard.press('Enter');
 	};
