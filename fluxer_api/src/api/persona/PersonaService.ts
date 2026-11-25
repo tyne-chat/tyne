@@ -18,6 +18,7 @@ import type {
 	SignatureEmoji,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {MAX_SIGNATURE_EMOJIS_PER_PERSONA} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import {PERSONA_BLOCKS_MAX, type PersonaBlockResponse} from '@fluxer/schema/src/domains/persona/PersonaBlockSchemas';
 import {PERSONA_GROUPS_MAX, type PersonaGroupResponse} from '@fluxer/schema/src/domains/persona/PersonaGroupSchemas';
 import type {
 	PersonaImportAction,
@@ -47,8 +48,10 @@ import type {UserChannelRepository} from '../user/repositories/UserChannelReposi
 import type {UserAccountLookupService} from '../user/services/UserAccountLookupService';
 import {isProfileSubstringExempt} from '../user/UserHelpers';
 import {
+	CannotBlockOwnPersonaError,
 	DuplicatePersonaTagError,
 	DuplicateSignatureEmojiError,
+	PersonaBlockLimitReachedError,
 	PersonaGroupLimitReachedError,
 	PersonaGroupNotFoundError,
 	PersonaImportConflictError,
@@ -64,6 +67,7 @@ import type {
 	PersonaImportStep,
 	UpdatePersonaParams,
 } from './IPersonaRepository';
+import {loadPersonaBlocks, removePersonaBlock, storePersonaBlock, toPersonaBlockResponse} from './PersonaBlockStore';
 import {
 	forgetPersonaChannelState,
 	forgetPersonaChannelStatesOfPersona,
@@ -1537,6 +1541,58 @@ export class PersonaService {
 		return groups;
 	}
 
+	// Personas the account has blocked (tyne-chat/tyne#921). The server only keeps the list: the
+	// clients collapse or hide the blocked personas' messages, as they do a blocked account's. Like
+	// the groups, every change goes to the account's own sessions alone, as the whole list.
+
+	async getPersonaBlocks(userId: UserID): Promise<Array<PersonaBlockResponse>> {
+		return (await loadPersonaBlocks(userId)).map(toPersonaBlockResponse);
+	}
+
+	/**
+	 * Blocks another account's persona, deleted or not (its old messages still show it). Blocking one
+	 * already blocked changes nothing. Returns the whole list.
+	 */
+	async blockPersona(userId: UserID, targetUserId: UserID, personaId: PersonaID): Promise<Array<PersonaBlockResponse>> {
+		if (targetUserId.toString() === userId.toString()) throw new CannotBlockOwnPersonaError();
+		const found = await this.deps.personaRepository.findByUserAndPersonaIds([{userId: targetUserId, personaId}]);
+		if (found.size === 0) throw new PersonaNotFoundError();
+		const blocks = await loadPersonaBlocks(userId);
+		const already = blocks.some(
+			(row) =>
+				row.target_user_id.toString() === targetUserId.toString() &&
+				row.target_persona_id.toString() === personaId.toString(),
+		);
+		if (!already) {
+			// Two requests at the same moment can both pass this and end one over the limit; that is all.
+			if (blocks.length >= PERSONA_BLOCKS_MAX) throw new PersonaBlockLimitReachedError(PERSONA_BLOCKS_MAX);
+			await storePersonaBlock({
+				user_id: userId,
+				target_user_id: targetUserId,
+				target_persona_id: personaId,
+				created_at: new Date(),
+			});
+		}
+		return this.dispatchBlocksToOwnSessions(userId);
+	}
+
+	/** Unblocks a persona. Unblocking one that is not blocked changes nothing. Returns the whole list. */
+	async unblockPersona(
+		userId: UserID,
+		targetUserId: UserID,
+		personaId: PersonaID,
+	): Promise<Array<PersonaBlockResponse>> {
+		await removePersonaBlock(userId, targetUserId, personaId);
+		return this.dispatchBlocksToOwnSessions(userId);
+	}
+
+	/** After a write: the list read again, sent to the account's own sessions, and returned. */
+	private async dispatchBlocksToOwnSessions(userId: UserID): Promise<Array<PersonaBlockResponse>> {
+		const blocks = (await loadPersonaBlocks(userId)).map(toPersonaBlockResponse);
+		await this.dispatchToUser(userId, 'USER_PERSONA_BLOCKS_UPDATE', {blocks});
+		return blocks;
+	}
+
 	private async dispatchToUser(
 		userId: UserID,
 		event:
@@ -1546,7 +1602,8 @@ export class PersonaService {
 			| 'USER_PERSONAS_UPDATE'
 			| 'USER_PERSONA_SETTINGS_UPDATE'
 			| 'USER_PERSONA_CHANNEL_STATE_UPDATE'
-			| 'USER_PERSONA_GROUPS_UPDATE',
+			| 'USER_PERSONA_GROUPS_UPDATE'
+			| 'USER_PERSONA_BLOCKS_UPDATE',
 		data: unknown,
 	): Promise<void> {
 		if (!this.deps.gatewayService) return;

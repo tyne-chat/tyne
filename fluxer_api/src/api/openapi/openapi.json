@@ -25536,6 +25536,201 @@
 				}
 			}
 		},
+		"/users/@me/personas/blocks": {
+			"get": {
+				"operationId": "list_my_persona_blocks",
+				"summary": "List blocked personas",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBlockListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Lists the personas the authenticated user has blocked, the oldest block first. Clients treat a blocked persona's messages as they treat a blocked user's. Only the user who blocked can see the list.",
+				"security": [{"oauth2Token": ["personas.read"]}, {"sessionToken": []}]
+			}
+		},
+		"/users/@me/personas/blocks/{user_id}/{persona_id}": {
+			"put": {
+				"operationId": "block_persona",
+				"summary": "Block a persona",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBlockListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Blocks another user's persona, without blocking the user or their other personas. Blocking one already blocked changes nothing. Up to 1000 blocked personas. Returns every blocked persona.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"description": "The ID of the account the persona belongs to",
+							"$ref": "#/components/schemas/SnowflakeStringType"
+						},
+						"description": "The ID of the account the persona belongs to"
+					},
+					{
+						"name": "persona_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the persona", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "The ID of the persona"
+					}
+				]
+			},
+			"delete": {
+				"operationId": "unblock_persona",
+				"summary": "Unblock a persona",
+				"tags": ["Personas"],
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/PersonaBlockListResponseSchema"}}}
+					},
+					"400": {
+						"description": "Bad Request - The request was malformed or contained invalid data",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"401": {
+						"description": "Unauthorized - Authentication is required or the token is invalid",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"403": {
+						"description": "Forbidden - You do not have permission to perform this action",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					},
+					"429": {
+						"description": "Too Many Requests - You are being rate limited",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ThrottledError"}}},
+						"headers": {
+							"Retry-After": {
+								"description": "Number of seconds to wait before retrying (only on 429)",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Limit": {
+								"description": "The number of requests that can be made in the current window",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Remaining": {
+								"description": "The number of remaining requests that can be made",
+								"schema": {"type": "integer"}
+							},
+							"X-RateLimit-Reset": {
+								"description": "Unix timestamp when the rate limit resets",
+								"schema": {"type": "integer"}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - An unexpected error occurred",
+						"content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+					}
+				},
+				"description": "Unblocks a persona. Unblocking one that is not blocked changes nothing. Returns every blocked persona.",
+				"security": [{"oauth2Token": ["personas.write"]}, {"sessionToken": []}],
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"description": "The ID of the account the persona belongs to",
+							"$ref": "#/components/schemas/SnowflakeStringType"
+						},
+						"description": "The ID of the account the persona belongs to"
+					},
+					{
+						"name": "persona_id",
+						"in": "path",
+						"required": true,
+						"schema": {"description": "The ID of the persona", "$ref": "#/components/schemas/SnowflakeStringType"},
+						"description": "The ID of the persona"
+					}
+				]
+			}
+		},
 		"/users/@me/personas/bulk-delete": {
 			"post": {
 				"operationId": "delete_personas",
@@ -34435,6 +34630,11 @@
 					}
 				},
 				"required": ["persona_ids"]
+			},
+			"PersonaBlockListResponseSchema": {
+				"type": "array",
+				"items": {"$ref": "#/components/schemas/PersonaBlockResponseSchema"},
+				"description": "The blocked personas, the oldest block first"
 			},
 			"PersonaBannerUploadRequest": {
 				"type": "object",
@@ -52176,6 +52376,21 @@
 					"suffix": {"type": "string", "minLength": 1, "maxLength": 32}
 				}
 			},
+			"PersonaBlockResponseSchema": {
+				"type": "object",
+				"properties": {
+					"user_id": {
+						"description": "The ID of the account the blocked persona belongs to",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					},
+					"persona_id": {
+						"description": "The ID of the blocked persona",
+						"$ref": "#/components/schemas/SnowflakeStringType"
+					}
+				},
+				"required": ["user_id", "persona_id"],
+				"additionalProperties": false
+			},
 			"SignatureEmojiSchema": {
 				"type": "object",
 				"properties": {
@@ -53590,6 +53805,8 @@
 					"UNKNOWN_PERSONA_GROUP",
 					"PERSONA_GROUP_LIMIT_REACHED",
 					"ANIMATION_TOO_LARGE_TO_CONVERT",
+					"CANNOT_BLOCK_OWN_PERSONA",
+					"PERSONA_BLOCK_LIMIT_REACHED",
 					"UNKNOWN_REPORT",
 					"UNKNOWN_ROLE",
 					"UNKNOWN_STICKER",
@@ -54003,6 +54220,8 @@
 					"Not found.",
 					"You can't have more than {limit} connections.",
 					"Invalid form body.",
+					"Invalid form body.",
+					"You can't have more than {limit} connections.",
 					"Unknown report.",
 					"Role wasn't found.",
 					"Unknown sticker.",

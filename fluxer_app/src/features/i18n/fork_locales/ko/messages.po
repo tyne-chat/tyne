@@ -210,6 +210,14 @@ msgstr "배너 이미지를 다운로드하지 못했어요: {error}. 페르소�
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "배너 이미지를 다운로드하지 못했어요: {error}. 페르소나는 기존 배너를 유지했어요."
 
+#. Title of the destructive confirmation modal for blocking one persona (one identity of another account) without blocking the account. Short command title.
+msgid "Block persona"
+msgstr "페르소나 차단"
+
+#. Body of the confirmation modal for blocking one persona. {personaName} is the persona, {ownerName} the account it belongs to. Messages from a blocked persona are folded into a "N blocked messages" row.
+msgid "Block {personaName}? Their messages will be collapsed, like a blocked user's. {ownerName}'s other personas won't be affected."
+msgstr "{personaName}을(를) 차단할까요? 차단한 사용자처럼 이 페르소나의 메시지가 접힙니다. {ownerName}의 다른 페르소나에는 영향이 없습니다."
+
 #. Option of the switch on a deleted persona in the import review: it is restored
 msgctxt "persona-import-switch"
 msgid "Bring back"
@@ -330,6 +338,10 @@ msgstr "페르소나를 내보내지 못했어요."
 msgid "Could not load what Restore would change. Try again."
 msgstr "복원으로 바뀔 내용을 불러오지 못했어요. 다시 시도해 주세요."
 
+#. Error toast when blocking a persona fails.
+msgid "Couldn't block the persona. Try again."
+msgstr "페르소나를 차단하지 못했습니다. 다시 시도해 주세요."
+
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
 msgstr "명령을 불러올 수 없습니다."
@@ -341,6 +353,10 @@ msgstr "/{name}을(를) 실행할 수 없습니다: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name}을(를) 저장할 수 없습니다: {detail}"
+
+#. Error toast when unblocking a persona fails.
+msgid "Couldn't unblock the persona. Try again."
+msgstr "페르소나 차단을 해제하지 못했습니다. 다시 시도해 주세요."
 
 #. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
 msgid "Couldn’t change the groups. Try again."
@@ -1889,6 +1905,14 @@ msgstr "Ubuntu, Debian, Linux Mint"
 #. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
 msgid "Ubuntu, Fedora and more"
 msgstr "Ubuntu, Fedora 등"
+
+#. Title of the confirmation modal for unblocking a persona that was blocked. Short command title.
+msgid "Unblock persona"
+msgstr "페르소나 차단 해제"
+
+#. Body of the confirmation modal for unblocking a persona. {personaName} is the persona.
+msgid "Unblock {personaName}?"
+msgstr "{personaName}의 차단을 해제할까요?"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.

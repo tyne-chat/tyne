@@ -210,6 +210,14 @@ msgstr "ดาวน์โหลดรูปแบนเนอร์ไม่ส
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "ดาวน์โหลดรูปแบนเนอร์ไม่สำเร็จ: {error} Persona ยังคงใช้แบนเนอร์เดิม"
 
+#. Title of the destructive confirmation modal for blocking one persona (one identity of another account) without blocking the account. Short command title.
+msgid "Block persona"
+msgstr "บล็อก Persona"
+
+#. Body of the confirmation modal for blocking one persona. {personaName} is the persona, {ownerName} the account it belongs to. Messages from a blocked persona are folded into a "N blocked messages" row.
+msgid "Block {personaName}? Their messages will be collapsed, like a blocked user's. {ownerName}'s other personas won't be affected."
+msgstr "บล็อก {personaName} ไหม ข้อความของ Persona นี้จะถูกยุบไว้ เหมือนผู้ใช้ที่ถูกบล็อก Persona อื่นของ {ownerName} จะไม่ได้รับผลกระทบ"
+
 #. Option of the switch on a deleted persona in the import review: it is restored
 msgctxt "persona-import-switch"
 msgid "Bring back"
@@ -330,6 +338,10 @@ msgstr "ส่งออก Persona ของคุณไม่สำเร็จ
 msgid "Could not load what Restore would change. Try again."
 msgstr "โหลดสิ่งที่การกู้คืนจะเปลี่ยนไม่ได้ ลองอีกครั้ง"
 
+#. Error toast when blocking a persona fails.
+msgid "Couldn't block the persona. Try again."
+msgstr "บล็อก Persona ไม่สำเร็จ ลองอีกครั้ง"
+
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
 msgstr "ไม่สามารถโหลดคำสั่งได้"
@@ -341,6 +353,10 @@ msgstr "ไม่สามารถเรียกใช้ /{name} ได้: {
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "ไม่สามารถบันทึก /{name} ได้: {detail}"
+
+#. Error toast when unblocking a persona fails.
+msgid "Couldn't unblock the persona. Try again."
+msgstr "เลิกบล็อก Persona ไม่สำเร็จ ลองอีกครั้ง"
 
 #. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
 msgid "Couldn’t change the groups. Try again."
@@ -1889,6 +1905,14 @@ msgstr "Ubuntu, Debian, Linux Mint"
 #. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
 msgid "Ubuntu, Fedora and more"
 msgstr "Ubuntu, Fedora และอื่นๆ"
+
+#. Title of the confirmation modal for unblocking a persona that was blocked. Short command title.
+msgid "Unblock persona"
+msgstr "เลิกบล็อก Persona"
+
+#. Body of the confirmation modal for unblocking a persona. {personaName} is the persona.
+msgid "Unblock {personaName}?"
+msgstr "เลิกบล็อก {personaName} ไหม"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.

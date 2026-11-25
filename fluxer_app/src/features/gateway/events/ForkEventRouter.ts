@@ -4,6 +4,7 @@ import type {GatewayHandlerRegistry} from '@app/features/gateway/events/EventRou
 import {handleGuildCommandsUpdate} from '@app/features/guild_commands/events/GuildCommandsEvents';
 import {
 	handleGuildPersonasDirty,
+	handleUserPersonaBlocksUpdate,
 	handleUserPersonaChannelStateUpdate,
 	handleUserPersonaCreate,
 	handleUserPersonaDelete,
@@ -31,6 +32,7 @@ export function registerForkGatewayHandlers(registry: GatewayHandlerRegistry): v
 	registry.set('USER_PERSONA_SETTINGS_UPDATE', handleUserPersonaSettingsUpdate as GatewayEventHandler);
 	registry.set('USER_PERSONA_CHANNEL_STATE_UPDATE', handleUserPersonaChannelStateUpdate as GatewayEventHandler);
 	registry.set('USER_PERSONA_GROUPS_UPDATE', handleUserPersonaGroupsUpdate as GatewayEventHandler);
+	registry.set('USER_PERSONA_BLOCKS_UPDATE', handleUserPersonaBlocksUpdate as GatewayEventHandler);
 	registry.set('GUILD_PERSONAS_DIRTY', handleGuildPersonasDirty as GatewayEventHandler);
 	registry.set('CHANNEL_SIGNAL_UPDATE', handleChannelSignalUpdate as GatewayEventHandler);
 	registry.set('SIGNAL_BAR_UPDATE', handleSignalBarUpdate as GatewayEventHandler);

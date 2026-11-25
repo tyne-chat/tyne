@@ -9,6 +9,7 @@ export const TYNE_TABLES_LEFT_OUT: ReadonlyArray<string> = [
 	'guild_command_uses',
 	'guild_commands',
 	'guild_signal_bar_settings',
+	'persona_blocks',
 	'persona_channel_states',
 	'persona_groups',
 	'persona_image_sources',

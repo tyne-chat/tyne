@@ -210,6 +210,14 @@ msgstr "Imazhi i banerit nuk u shkarkua: {error}. Persona u importua pa baner."
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "Imazhi i banerit nuk u shkarkua: {error}. Persona e mbajti banerin që kishte."
 
+#. Title of the destructive confirmation modal for blocking one persona (one identity of another account) without blocking the account. Short command title.
+msgid "Block persona"
+msgstr "Blloko personën"
+
+#. Body of the confirmation modal for blocking one persona. {personaName} is the persona, {ownerName} the account it belongs to. Messages from a blocked persona are folded into a "N blocked messages" row.
+msgid "Block {personaName}? Their messages will be collapsed, like a blocked user's. {ownerName}'s other personas won't be affected."
+msgstr "Ta bllokosh {personaName}? Mesazhet e saj do të palosen, si ato të një përdoruesi të bllokuar. Personat e tjera të {ownerName} nuk preken."
+
 #. Option of the switch on a deleted persona in the import review: it is restored
 msgctxt "persona-import-switch"
 msgid "Bring back"
@@ -330,6 +338,10 @@ msgstr "Personat e tua nuk u eksportuan."
 msgid "Could not load what Restore would change. Try again."
 msgstr "Nuk u ngarkua dot se çfarë do të ndryshonte “Rikthe”. Provo sërish."
 
+#. Error toast when blocking a persona fails.
+msgid "Couldn't block the persona. Try again."
+msgstr "Persona nuk u bllokua dot. Provo sërish."
+
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
 msgstr "Komandat nuk u ngarkuan."
@@ -341,6 +353,10 @@ msgstr "/{name} nuk u ekzekutua: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "/{name} nuk u ruajt: {detail}"
+
+#. Error toast when unblocking a persona fails.
+msgid "Couldn't unblock the persona. Try again."
+msgstr "Persona nuk u zhbllokua dot. Provo sërish."
 
 #. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
 msgid "Couldn’t change the groups. Try again."
@@ -1889,6 +1905,14 @@ msgstr "Ubuntu, Debian, Linux Mint"
 #. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
 msgid "Ubuntu, Fedora and more"
 msgstr "Ubuntu, Fedora e të tjera"
+
+#. Title of the confirmation modal for unblocking a persona that was blocked. Short command title.
+msgid "Unblock persona"
+msgstr "Zhblloko personën"
+
+#. Body of the confirmation modal for unblocking a persona. {personaName} is the persona.
+msgid "Unblock {personaName}?"
+msgstr "Ta zhbllokosh {personaName}?"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.

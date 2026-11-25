@@ -14,7 +14,6 @@ import type {ReactionEmoji} from '@app/features/messaging/utils/ReactionUtils';
 import SelectedChannel from '@app/features/navigation/state/SelectedChannel';
 import SelectedGuild from '@app/features/navigation/state/SelectedGuild';
 import {AccountScopedWork} from '@app/features/platform/state/AccountScopedWork';
-import Relationships from '@app/features/relationship/state/Relationships';
 import Dimension from '@app/features/ui/state/Dimension';
 import Users from '@app/features/user/state/Users';
 import {FAVORITES_GUILD_ID, ME} from '@fluxer/constants/src/AppConstants';
@@ -29,6 +28,7 @@ import {makeAutoObservable, reaction, runInAction} from 'mobx';
 
 // Fork imports.
 
+import {isMessageAuthorBlocked} from '@app/features/persona/utils/MessageAuthorBlocked';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 
 const STALE_WINDOW_REFETCH_INTERVAL_MS = 10_000;
@@ -1430,8 +1430,8 @@ class Messages {
 		let hasChanges = false;
 		ChannelMessages.forEach((messages) => {
 			const next = messages.patchMatching(
-				(message) => message.blocked !== Relationships.isBlocked(message.author.id),
-				(message) => message.withUpdates({blocked: Relationships.isBlocked(message.author.id)}),
+				(message) => message.blocked !== isMessageAuthorBlocked(message),
+				(message) => message.withUpdates({blocked: isMessageAuthorBlocked(message)}),
 			);
 			if (next !== null) {
 				this.commitMessages(next);

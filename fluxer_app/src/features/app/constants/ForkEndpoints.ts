@@ -29,6 +29,8 @@ export const ForkEndpoints = {
 	USER_PERSONA_GROUPS: '/users/@me/personas/groups',
 	USER_PERSONA_GROUP_MEMBERS: '/users/@me/personas/groups/members',
 	USER_PERSONA_GROUP: (groupId: string) => `/users/@me/personas/groups/${groupId}`,
+	USER_PERSONA_BLOCKS: '/users/@me/personas/blocks',
+	USER_PERSONA_BLOCK: (userId: string, personaId: string) => `/users/@me/personas/blocks/${userId}/${personaId}`,
 	USER_IMPORTED_CONVERSATION: (userId: string) => `/users/@me/imported-conversations/${userId}`,
 	USER_PUBLIC_PERSONAS: (userId: string) => `/users/${userId}/personas`,
 	USER_PUBLIC_PERSONA: (userId: string, personaId: string) => `/users/${userId}/personas/${personaId}`,

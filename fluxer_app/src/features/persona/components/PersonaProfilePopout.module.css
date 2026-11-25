@@ -79,3 +79,15 @@
 	width: 1rem;
 	height: 1rem;
 }
+
+/* Message and Block share the footer's row, half each (tyne-chat/tyne#921). */
+.footerActions {
+	display: flex;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.footerActions > * {
+	flex: 1 1 0;
+	min-width: 0;
+}

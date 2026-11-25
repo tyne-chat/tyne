@@ -2,6 +2,7 @@
 
 import type {UserID} from '@app/api/BrandedTypes';
 import type {IPersonaRepository} from '@app/api/persona/IPersonaRepository';
+import {forgetPersonaBlocksOfUser} from '@app/api/persona/PersonaBlockStore';
 import {forgetPersonaChannelStatesOfUser} from '@app/api/persona/PersonaChannelStateStore';
 import {forgetPersonaGroupsOfUser} from '@app/api/persona/PersonaGroupStore';
 import {forgetPersonaImageSourcesOfUser} from '@app/api/persona/PersonaImageSourceStore';
@@ -18,6 +19,7 @@ export function forkUserDeletionCleanups(
 		forgetThreadOwnerPersonasOfUser(userId),
 		forgetPersonaChannelStatesOfUser(userId),
 		forgetPersonaGroupsOfUser(userId),
+		forgetPersonaBlocksOfUser(userId),
 		forgetPersonaImageSourcesOfUser(userId),
 	];
 }

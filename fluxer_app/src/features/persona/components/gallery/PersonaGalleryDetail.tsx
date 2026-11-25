@@ -7,6 +7,7 @@ import {MarkdownContext} from '@app/features/messaging/components/markdown/rende
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import {galleryBannerUrl, galleryPersonaColor} from '@app/features/persona/components/gallery/PersonaGalleryImages';
 import {PersonaAvatar} from '@app/features/persona/components/PersonaAvatar';
+import {PersonaBlockButton} from '@app/features/persona/components/PersonaBlockButton';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 import {
@@ -24,6 +25,7 @@ import {Spinner} from '@app/features/ui/components/Spinner';
 import type {User} from '@app/features/user/models/User';
 import {getFormattedShortDate} from '@app/features/user/utils/DateFormatting';
 import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
+import * as NicknameUtils from '@app/features/user/utils/NicknameUtils';
 import type {PublicPersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {Trans, useLingui} from '@lingui/react/macro';
 import {CaretLeftIcon, CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
@@ -290,15 +292,26 @@ export const PersonaGalleryDetail = observer(
 									</Button>
 								) : (
 									!isImportedPlaceholder(user) && (
-										<Button
-											small
-											fitContent
-											leftIcon={<ChatTeardropIcon size={16} data-flx="persona.gallery.detail.message-icon" />}
-											onClick={handleMessage}
-											data-flx="persona.gallery.detail.message"
-										>
-											<Trans>Message</Trans>
-										</Button>
+										<>
+											<Button
+												small
+												fitContent
+												leftIcon={<ChatTeardropIcon size={16} data-flx="persona.gallery.detail.message-icon" />}
+												onClick={handleMessage}
+												data-flx="persona.gallery.detail.message"
+											>
+												<Trans>Message</Trans>
+											</Button>
+											{/* Block this persona alone, beside Message (tyne-chat/tyne#921). */}
+											<PersonaBlockButton
+												userId={user.id}
+												personaId={persona.id}
+												personaName={persona.name}
+												ownerName={NicknameUtils.getNickname(user, null)}
+												fitContent={true}
+												data-flx="persona.gallery.detail.block"
+											/>
+										</>
 									)
 								)}
 							</div>

@@ -9,6 +9,7 @@ import type {GuildMember} from '@app/features/member/models/GuildMember';
 import GuildMembers from '@app/features/member/state/GuildMembers';
 import {SafeMarkdown} from '@app/features/messaging/components/markdown';
 import {MarkdownContext} from '@app/features/messaging/components/markdown/renderers/RendererTypes';
+import {PersonaBlockButton} from '@app/features/persona/components/PersonaBlockButton';
 import {PersonaNameExtras, PersonasPill} from '@app/features/persona/components/PersonasPill';
 import pillStyles from '@app/features/persona/components/PersonasPill.module.css';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
@@ -370,20 +371,33 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 									</Button>
 								) : (
 									!isImportedPlaceholder(user) && (
-										<Button
-											small={true}
-											fitContainer={true}
-											leftIcon={
-												<ChatTeardropIcon
-													className={popoutStyles.iconSmall}
-													data-flx="persona.persona-profile-popout.chat-teardrop-icon"
-												/>
-											}
-											onClick={handleMessage}
-											data-flx="persona.persona-profile-popout.button.message"
-										>
-											<Trans>Message</Trans>
-										</Button>
+										<div className={styles.footerActions} data-flx="persona.persona-profile-popout.footer-actions">
+											<Button
+												small={true}
+												fitContainer={true}
+												leftIcon={
+													<ChatTeardropIcon
+														className={popoutStyles.iconSmall}
+														data-flx="persona.persona-profile-popout.chat-teardrop-icon"
+													/>
+												}
+												onClick={handleMessage}
+												data-flx="persona.persona-profile-popout.button.message"
+											>
+												<Trans>Message</Trans>
+											</Button>
+											{/* Block this persona alone, beside Message (tyne-chat/tyne#921). */}
+											<PersonaBlockButton
+												userId={user.id}
+												personaId={subprofile.id}
+												personaName={subprofile.name}
+												ownerName={NicknameUtils.getNickname(user, guildId ?? null)}
+												onBeforeConfirm={onClose}
+												fitContainer={true}
+												iconClassName={popoutStyles.iconSmall}
+												data-flx="persona.persona-profile-popout.button.block"
+											/>
+										</div>
 									)
 								)}
 							</ProfileCardFooter>

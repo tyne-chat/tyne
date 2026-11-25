@@ -13,7 +13,7 @@ and follow the placement rules in the root `AGENTS.md`.
 |---|---|
 | Routes, OAuth scopes | `PersonaController.ts` (registered in the fork block of `app/ControllerRegistry.ts`) |
 | Rules, settings, events | `PersonaService.ts` |
-| Rows | `PersonaRepository.ts` (behind `IPersonaRepository.ts`), plus `PersonaChannelStateStore.ts`, `ThreadOwnerPersonaStore.ts`, `PersonaImageSourceStore.ts`, `PersonaGroupStore.ts` |
+| Rows | `PersonaRepository.ts` (behind `IPersonaRepository.ts`), plus `PersonaChannelStateStore.ts`, `ThreadOwnerPersonaStore.ts`, `PersonaImageSourceStore.ts`, `PersonaGroupStore.ts`, `PersonaBlockStore.ts` |
 | New persona IDs | `PersonaIdGenerator.ts` |
 | The three response shapes | `models/Persona.ts` (outside this folder) |
 | Which persona a request names, and whether the caller owns it | `PersonaOwnership.ts` |
@@ -114,6 +114,17 @@ and follow the placement rules in the root `AGENTS.md`.
   every other column from a read made earlier, so two concurrent edits can revert each other. An
   `upsertAll` row with columns missing becomes a partial update; use that for new counters.
 
+## Blocked personas
+
+A user can block one persona of another account (tyne-chat/tyne#921) without blocking the account.
+The server only keeps the list (`PersonaBlockStore.ts`, one row per block, so two blocks at the same
+moment cannot undo each other) and tells the user's own sessions; nothing else on the server reads
+it. The clients collapse the blocked persona's messages, or hide them with the setting that hides
+blocked accounts' messages, exactly as for a blocked account, and change nothing else: the persona
+still shows in lists, mentions, reactions and typing, and its owner is not told. One's own persona is
+refused, and so is an id that names no persona; a deleted persona can be blocked, since its old
+messages still show it. Up to 1000 per account (`PERSONA_BLOCKS_MAX`).
+
 ## Data
 
 The tables are declared in the `// Fork: this fork's tables` block at the end of `api/Tables.ts`,
@@ -127,6 +138,7 @@ single Postgres key/value table.
 | `persona_channel_states` | (user_id, channel_id) | the per-channel selection; no row means the account |
 | `thread_owner_personas`, `thread_owner_personas_by_user` | thread_id; (user_id, thread_id) | which persona started a thread; the by-user row is written first, so account deletion finds it |
 | `persona_image_sources` | (user_id, persona_id) | the PluralKit link an image came from, and the hash it produced; only the export reads it |
+| `persona_blocks` | (user_id, target_user_id, target_persona_id) | another account's persona the user blocked (tyne-chat/tyne#921), with when; only the user who blocked reads it |
 | `persona_groups` | (user_id, group_id) | a group of the account's personas (tyne-chat/tyne#829): its name and its members as a JSON list of persona ids, in the order they were added |
 
 The persona columns on upstream's tables (`persona_id` and `mention_personas` on `messages`,
@@ -151,7 +163,8 @@ groups others can see, and the PluralKit import and export of `groups` (the issu
 
 - `@me` routes: list and create, `/:persona_id`, `/import`, `/import/preview`, `/import/apply`,
   `/deleted`, `/deleted/:persona_id/restore`, `/visibility`, `/mentions`, `/bulk-delete`, `/settings`,
-  `/channel-states[/:channel_id]`, `/groups`, `/groups/members`, `/groups/:group_id`, `/export`,
+  `/channel-states[/:channel_id]`, `/groups`, `/groups/members`, `/groups/:group_id`,
+  `/blocks`, `/blocks/:user_id/:persona_id` (PUT blocks, DELETE unblocks), `/export`,
   `/import-image`. Restore lives under `/deleted` because the
   OpenAPI check refuses `/{persona_id}/restore` as ambiguous with `/channel-states/{channel_id}`.
 - `/visibility` and `/mentions` (PATCH) and `/bulk-delete` (POST) change or delete many personas in one write
@@ -183,6 +196,7 @@ groups others can see, and the PluralKit import and export of `groups` (the issu
 | `USER_PERSONA_SETTINGS_UPDATE` | own sessions | a settings save |
 | `USER_PERSONA_CHANNEL_STATE_UPDATE` | own sessions only, on purpose | a per-channel selection |
 | `USER_PERSONA_GROUPS_UPDATE` | own sessions only, on purpose | every change to the groups (the whole list) |
+| `USER_PERSONA_BLOCKS_UPDATE` | own sessions only, on purpose | every block and unblock (the whole list) |
 | `GUILD_PERSONAS_DIRTY` | every guild the account is in, plus each DM and group-DM recipient | create (public, or offered to everyone in suggestions, only), every update and delete, a bulk import, a display-tag change; carries the persona only when it is public or unlisted |
 
 - `GUILD_PERSONAS_DIRTY` costs one gateway RPC per guild and per DM partner for every persona edit.
