@@ -14,10 +14,12 @@ import {
 	type GuildCommandUseRow,
 } from '@app/api/database/types/GuildCommandTypes';
 import {
+	PERSONA_BLOCK_COLUMNS,
 	PERSONA_CHANNEL_STATE_COLUMNS,
 	PERSONA_COLUMNS,
 	PERSONA_GROUP_COLUMNS,
 	PERSONA_IMAGE_SOURCE_COLUMNS,
+	type PersonaBlockRow,
 	type PersonaChannelStateRow,
 	type PersonaGroupRow,
 	type PersonaImageSourceRow,
@@ -69,6 +71,16 @@ export const PersonaGroups = defineTable<PersonaGroupRow, 'user_id' | 'group_id'
 	name: 'persona_groups',
 	columns: PERSONA_GROUP_COLUMNS,
 	primaryKey: ['user_id', 'group_id'],
+	partitionKey: ['user_id'],
+});
+export const PersonaBlocks = defineTable<
+	PersonaBlockRow,
+	'user_id' | 'target_user_id' | 'target_persona_id',
+	'user_id'
+>({
+	name: 'persona_blocks',
+	columns: PERSONA_BLOCK_COLUMNS,
+	primaryKey: ['user_id', 'target_user_id', 'target_persona_id'],
 	partitionKey: ['user_id'],
 });
 export const GuildCommands = defineTable<GuildCommandRow, 'guild_id' | 'command_id', 'guild_id'>({

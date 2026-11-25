@@ -6,6 +6,7 @@
 // the switch to be released and run them then.
 
 import GuildCommandsStore from '@app/features/guild_commands/state/GuildCommandsStore';
+import * as PersonaBlockCommands from '@app/features/persona/commands/PersonaBlockCommands';
 import * as PersonaCommands from '@app/features/persona/commands/PersonaCommands';
 import * as PersonaGroupCommands from '@app/features/persona/commands/PersonaGroupCommands';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
@@ -20,6 +21,7 @@ function runForkAccountReadyWork(): void {
 	void PersonaCommands.fetchPersonaSettings();
 	void PersonaStore.fetchChannelStates();
 	void PersonaGroupCommands.fetchPersonaGroups();
+	void PersonaBlockCommands.fetchPersonaBlocks();
 }
 
 // Upstream's promoted resume (completePromotedResume in PooledGatewayConnection.ts): on the desktop,

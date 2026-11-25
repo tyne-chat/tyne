@@ -8680,6 +8680,29 @@
 			"options": ""
 		},
 		{
+			"name": "persona_blocks",
+			"columns": [
+				{
+					"name": "user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "target_user_id",
+					"type": "bigint"
+				},
+				{
+					"name": "target_persona_id",
+					"type": "bigint"
+				},
+				{
+					"name": "created_at",
+					"type": "timestamp"
+				}
+			],
+			"primary_key": "((user_id), target_user_id, target_persona_id)",
+			"options": ""
+		},
+		{
 			"name": "guild_commands",
 			"columns": [
 				{

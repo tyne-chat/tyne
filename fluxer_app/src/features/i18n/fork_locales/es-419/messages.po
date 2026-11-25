@@ -210,6 +210,14 @@ msgstr "No se pudo descargar la imagen del banner: {error}. La persona se import
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "No se pudo descargar la imagen del banner: {error}. La persona conservó el banner que tenía."
 
+#. Title of the destructive confirmation modal for blocking one persona (one identity of another account) without blocking the account. Short command title.
+msgid "Block persona"
+msgstr "Bloquear persona"
+
+#. Body of the confirmation modal for blocking one persona. {personaName} is the persona, {ownerName} the account it belongs to. Messages from a blocked persona are folded into a "N blocked messages" row.
+msgid "Block {personaName}? Their messages will be collapsed, like a blocked user's. {ownerName}'s other personas won't be affected."
+msgstr "¿Bloquear a {personaName}? Sus mensajes se contraerán, como los de un usuario bloqueado. Las demás personas de {ownerName} no se verán afectadas."
+
 #. Option of the switch on a deleted persona in the import review: it is restored
 msgctxt "persona-import-switch"
 msgid "Bring back"
@@ -330,6 +338,10 @@ msgstr "No se pudieron exportar tus personas."
 msgid "Could not load what Restore would change. Try again."
 msgstr "No se pudo cargar lo que cambiaría “Restaurar”. Inténtalo de nuevo."
 
+#. Error toast when blocking a persona fails.
+msgid "Couldn't block the persona. Try again."
+msgstr "No se pudo bloquear la persona. Inténtalo de nuevo."
+
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
 msgstr "No se pudieron cargar los comandos."
@@ -341,6 +353,10 @@ msgstr "No se pudo ejecutar /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "No se pudo guardar /{name}: {detail}"
+
+#. Error toast when unblocking a persona fails.
+msgid "Couldn't unblock the persona. Try again."
+msgstr "No se pudo desbloquear la persona. Inténtalo de nuevo."
 
 #. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
 msgid "Couldn’t change the groups. Try again."
@@ -1889,6 +1905,14 @@ msgstr "Ubuntu, Debian, Linux Mint"
 #. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
 msgid "Ubuntu, Fedora and more"
 msgstr "Ubuntu, Fedora y más"
+
+#. Title of the confirmation modal for unblocking a persona that was blocked. Short command title.
+msgid "Unblock persona"
+msgstr "Desbloquear persona"
+
+#. Body of the confirmation modal for unblocking a persona. {personaName} is the persona.
+msgid "Unblock {personaName}?"
+msgstr "¿Desbloquear a {personaName}?"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.

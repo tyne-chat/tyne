@@ -23,4 +23,6 @@ export const ForkErrorCodeToI18nKey = {
 	[APIErrorCodes.PERSONA_GROUP_LIMIT_REACHED]: 'connections.limit_reached',
 	// No upstream message says an animation is too long or too large to process.
 	[APIErrorCodes.ANIMATION_TOO_LARGE_TO_CONVERT]: 'admin_and_system.invalid_form_body',
+	[APIErrorCodes.CANNOT_BLOCK_OWN_PERSONA]: 'admin_and_system.invalid_form_body',
+	[APIErrorCodes.PERSONA_BLOCK_LIMIT_REACHED]: 'connections.limit_reached',
 } as const;

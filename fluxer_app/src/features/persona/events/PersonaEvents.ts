@@ -13,7 +13,9 @@ import type {
 	PersonaResponse,
 	PersonaSettingsResponse,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
+import type {PersonaBlocksUpdateEvent} from '@fluxer/schema/src/domains/persona/PersonaBlockSchemas';
 import type {PersonaGroupsUpdateEvent} from '@fluxer/schema/src/domains/persona/PersonaGroupSchemas';
+import {applyPersonaBlocks} from '../commands/PersonaBlockCommands';
 import {forgetPersonaProfilesOf} from '../commands/PersonaCommands';
 import {PersonaDirectory} from '../state/PersonaDirectory';
 import {PersonaGroups} from '../state/PersonaGroups';
@@ -87,6 +89,14 @@ export function handleUserPersonaSettingsUpdate(
 			});
 		}
 	}
+}
+
+/** The account blocked or unblocked a persona (tyne-chat/tyne#921): the event carries the whole list. */
+export function handleUserPersonaBlocksUpdate(
+	data: Partial<PersonaBlocksUpdateEvent> | undefined,
+	_context: GatewayHandlerContext,
+): void {
+	if (Array.isArray(data?.blocks)) applyPersonaBlocks(data.blocks);
 }
 
 /** The account's persona groups changed (tyne-chat/tyne#829): the event carries the whole list. */

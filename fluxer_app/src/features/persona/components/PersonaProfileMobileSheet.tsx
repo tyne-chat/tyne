@@ -12,8 +12,14 @@ import {MarkdownContext} from '@app/features/messaging/components/markdown/rende
 import {PersonaNameExtras, PersonasPill} from '@app/features/persona/components/PersonasPill';
 import pillStyles from '@app/features/persona/components/PersonasPill.module.css';
 import {PersonaTag} from '@app/features/persona/components/PersonaTag';
+import {PersonaBlocks} from '@app/features/persona/state/PersonaBlocks';
 import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobile';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
+import {
+	BLOCK_PERSONA_ACTION_DESCRIPTOR,
+	togglePersonaBlock,
+	UNBLOCK_PERSONA_ACTION_DESCRIPTOR,
+} from '@app/features/persona/utils/PersonaBlockActions';
 import {personaColor} from '@app/features/persona/utils/PersonaColor';
 import {usePersonaProfile} from '@app/features/persona/utils/usePersonaProfile';
 import {remFromPx} from '@app/features/theme/layout/RemFromPx';
@@ -40,7 +46,7 @@ import {DEFAULT_ACCENT_COLOR} from '@fluxer/constants/src/AppConstants';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {msg} from '@lingui/core/macro';
 import {Trans, useLingui} from '@lingui/react/macro';
-import {CaretRightIcon, ChatTeardropIcon, PencilIcon} from '@phosphor-icons/react';
+import {CaretRightIcon, ChatTeardropIcon, PencilIcon, ProhibitIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
@@ -425,6 +431,49 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 													</span>
 												</button>
 											)
+										)}
+										{/* Block this persona alone, beside Message (tyne-chat/tyne#921). */}
+										{!isCurrentUser && !isImportedPlaceholder(user) && (
+											<button
+												type="button"
+												onClick={() => {
+													const isBlocked = PersonaBlocks.isBlocked(user.id, subprofile.id);
+													onClose();
+													togglePersonaBlock(
+														i18n,
+														{
+															userId: user.id,
+															personaId: subprofile.id,
+															personaName: subprofile.name,
+															ownerName: NicknameUtils.getNickname(user, null),
+														},
+														isBlocked,
+													);
+												}}
+												className={styles.actionCard}
+												aria-pressed={PersonaBlocks.isBlocked(user.id, subprofile.id)}
+												data-flx="persona.persona-profile-mobile-sheet.action-card.block"
+											>
+												<div
+													className={styles.actionIconContainer}
+													data-flx="persona.persona-profile-mobile-sheet.action-card.block-icon-container"
+												>
+													<ProhibitIcon
+														className={styles.actionIcon}
+														data-flx="persona.persona-profile-mobile-sheet.action-card.block-icon"
+													/>
+												</div>
+												<span
+													className={styles.actionLabel}
+													data-flx="persona.persona-profile-mobile-sheet.action-card.block-label"
+												>
+													{i18n._(
+														PersonaBlocks.isBlocked(user.id, subprofile.id)
+															? UNBLOCK_PERSONA_ACTION_DESCRIPTOR
+															: BLOCK_PERSONA_ACTION_DESCRIPTOR,
+													)}
+												</span>
+											</button>
 										)}
 										{/* A placeholder's persona: Open DM for its imported conversation (tyne-chat/tyne#696). */}
 										{!isCurrentUser && isImportedPlaceholder(user) && (

@@ -27,6 +27,10 @@ import {
 	UserIdPersonaIdParam,
 } from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {
+	PersonaBlockListResponseSchema,
+	PersonaBlockParam,
+} from '@fluxer/schema/src/domains/persona/PersonaBlockSchemas';
+import {
 	PersonaGroupCreateRequestSchema,
 	PersonaGroupIdParam,
 	PersonaGroupListResponseSchema,
@@ -480,6 +484,83 @@ export function PersonaController(app: HonoApp) {
 				.get('personaService')
 				.setChannelState(user.id, channelId, persona_id === null ? null : createPersonaID(BigInt(persona_id)));
 			return ctx.json(state);
+		},
+	);
+
+	// Personas the account has blocked (tyne-chat/tyne#921), before the `:persona_id` routes.
+	app.get(
+		'/users/@me/personas/blocks',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_READ),
+		requireOAuth2ScopeForBearer('personas.read'),
+		LoginRequired,
+		DefaultUserOnly,
+		OpenAPI({
+			operationId: 'list_my_persona_blocks',
+			summary: 'List blocked personas',
+			responseSchema: PersonaBlockListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				"Lists the personas the authenticated user has blocked, the oldest block first. Clients treat a blocked persona's messages as they treat a blocked user's. Only the user who blocked can see the list.",
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			return ctx.json(await ctx.get('personaService').getPersonaBlocks(user.id));
+		},
+	);
+
+	app.put(
+		'/users/@me/personas/blocks/:user_id/:persona_id',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', PersonaBlockParam),
+		OpenAPI({
+			operationId: 'block_persona',
+			summary: 'Block a persona',
+			responseSchema: PersonaBlockListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				"Blocks another user's persona, without blocking the user or their other personas. Blocking one already blocked changes nothing. Up to 1000 blocked personas. Returns every blocked persona.",
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {user_id, persona_id} = ctx.req.valid('param');
+			const blocks = await ctx
+				.get('personaService')
+				.blockPersona(user.id, createUserID(BigInt(user_id)), createPersonaID(BigInt(persona_id)));
+			return ctx.json(blocks);
+		},
+	);
+
+	app.delete(
+		'/users/@me/personas/blocks/:user_id/:persona_id',
+		RateLimitMiddleware(RateLimitConfigs.USER_PERSONA_MUTATE),
+		requireOAuth2ScopeForBearer('personas.write'),
+		LoginRequired,
+		DefaultUserOnly,
+		Validator('param', PersonaBlockParam),
+		OpenAPI({
+			operationId: 'unblock_persona',
+			summary: 'Unblock a persona',
+			responseSchema: PersonaBlockListResponseSchema,
+			statusCode: 200,
+			security: ['bearerToken', 'sessionToken'],
+			tags: ['Personas'],
+			description:
+				'Unblocks a persona. Unblocking one that is not blocked changes nothing. Returns every blocked persona.',
+		}),
+		async (ctx) => {
+			const user = ctx.get('user');
+			const {user_id, persona_id} = ctx.req.valid('param');
+			const blocks = await ctx
+				.get('personaService')
+				.unblockPersona(user.id, createUserID(BigInt(user_id)), createPersonaID(BigInt(persona_id)));
+			return ctx.json(blocks);
 		},
 	);
 

@@ -33,6 +33,7 @@ import type {
 
 // Fork imports.
 
+import {PersonaBlocks} from '@app/features/persona/state/PersonaBlocks';
 import {rememberMentionedPersonas} from '@app/features/persona/utils/MentionedPersonas';
 import type {MessageGuildCommandResponse} from '@fluxer/schema/src/domains/guild_command/MessageGuildCommandSchemas';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
@@ -258,6 +259,11 @@ export class Message {
 		// Fork: the personas the message mentions, kept as upstream keeps the users it mentions above.
 		if (!options?.skipUserCache) {
 			rememberMentionedPersonas(message.content, message.mention_personas);
+		}
+		// Fork: a message sent as a blocked persona counts as blocked, as one from a blocked account
+		// does (tyne-chat/tyne#921). An explicit value (a copy with updates) is kept, as above.
+		if (message.blocked == null && PersonaBlocks.isBlocked(message.author.id, message.subprofile?.id)) {
+			this.blocked = true;
 		}
 	}
 

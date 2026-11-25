@@ -31,6 +31,7 @@ import type {
 } from '@fluxer/schema/src/domains/persona/PersonaSchemas';
 import {msg} from '@lingui/core/macro';
 import {makeAutoObservable, observable, runInAction} from 'mobx';
+import {PersonaBlocks} from './PersonaBlocks';
 import {PersonaGroups} from './PersonaGroups';
 import {PersonaLookupBatcher, type PersonaLookupPair} from './PersonaLookupBatcher';
 
@@ -169,6 +170,7 @@ export class PersonaStoreClass {
 		});
 		personaLookups.reset();
 		PersonaGroups.reset();
+		PersonaBlocks.reset();
 	}
 
 	get personas(): ReadonlyArray<ClientPersona> {

@@ -210,6 +210,14 @@ msgstr "A borítókép letöltése nem sikerült: {error}. A persona borítóké
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "A borítókép letöltése nem sikerült: {error}. A persona megtartotta a korábbi borítóképét."
 
+#. Title of the destructive confirmation modal for blocking one persona (one identity of another account) without blocking the account. Short command title.
+msgid "Block persona"
+msgstr "Persona letiltása"
+
+#. Body of the confirmation modal for blocking one persona. {personaName} is the persona, {ownerName} the account it belongs to. Messages from a blocked persona are folded into a "N blocked messages" row.
+msgid "Block {personaName}? Their messages will be collapsed, like a blocked user's. {ownerName}'s other personas won't be affected."
+msgstr "Letiltod: {personaName}? Az üzenetei össze lesznek csukva, mint egy letiltott felhasználóéi. {ownerName} többi personáját ez nem érinti."
+
 #. Option of the switch on a deleted persona in the import review: it is restored
 msgctxt "persona-import-switch"
 msgid "Bring back"
@@ -330,6 +338,10 @@ msgstr "Nem sikerült exportálni a personáidat."
 msgid "Could not load what Restore would change. Try again."
 msgstr "Nem sikerült betölteni, mit változtatna a Visszaállítás. Próbáld újra."
 
+#. Error toast when blocking a persona fails.
+msgid "Couldn't block the persona. Try again."
+msgstr "Nem sikerült letiltani a personát. Próbáld újra."
+
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
 msgstr "Nem sikerült betölteni a parancsokat."
@@ -341,6 +353,10 @@ msgstr "Nem sikerült futtatni: /{name}: {detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "Nem sikerült menteni: /{name}: {detail}"
+
+#. Error toast when unblocking a persona fails.
+msgid "Couldn't unblock the persona. Try again."
+msgstr "Nem sikerült feloldani a persona letiltását. Próbáld újra."
 
 #. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
 msgid "Couldn’t change the groups. Try again."
@@ -1889,6 +1905,14 @@ msgstr "Ubuntu, Debian, Linux Mint"
 #. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
 msgid "Ubuntu, Fedora and more"
 msgstr "Ubuntu, Fedora és mások"
+
+#. Title of the confirmation modal for unblocking a persona that was blocked. Short command title.
+msgid "Unblock persona"
+msgstr "Persona letiltásának feloldása"
+
+#. Body of the confirmation modal for unblocking a persona. {personaName} is the persona.
+msgid "Unblock {personaName}?"
+msgstr "Feloldod {personaName} letiltását?"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.

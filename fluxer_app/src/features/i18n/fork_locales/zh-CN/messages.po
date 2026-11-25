@@ -210,6 +210,14 @@ msgstr "横幅图片下载失败：{error}。已导入不带横幅的人格。"
 msgid "Banner image failed to download: {error}. The persona kept the banner it had."
 msgstr "横幅图片下载失败：{error}。该人格保留了原来的横幅。"
 
+#. Title of the destructive confirmation modal for blocking one persona (one identity of another account) without blocking the account. Short command title.
+msgid "Block persona"
+msgstr "屏蔽人格"
+
+#. Body of the confirmation modal for blocking one persona. {personaName} is the persona, {ownerName} the account it belongs to. Messages from a blocked persona are folded into a "N blocked messages" row.
+msgid "Block {personaName}? Their messages will be collapsed, like a blocked user's. {ownerName}'s other personas won't be affected."
+msgstr "要屏蔽{personaName}吗？其消息将像已屏蔽用户的消息一样被折叠。{ownerName}的其他人格不受影响。"
+
 #. Option of the switch on a deleted persona in the import review: it is restored
 msgctxt "persona-import-switch"
 msgid "Bring back"
@@ -330,6 +338,10 @@ msgstr "无法导出你的人格。"
 msgid "Could not load what Restore would change. Try again."
 msgstr "无法加载“恢复”将更改的内容。请重试。"
 
+#. Error toast when blocking a persona fails.
+msgid "Couldn't block the persona. Try again."
+msgstr "无法屏蔽该人格。请重试。"
+
 #. Shown when the Commands tab fails to load.
 msgid "Couldn't load the commands."
 msgstr "无法加载命令。"
@@ -341,6 +353,10 @@ msgstr "无法运行 /{name}：{detail}"
 #. Toast when saving a command fails. Preserve {name} and {detail}.
 msgid "Couldn't save /{name}: {detail}"
 msgstr "无法保存 /{name}：{detail}"
+
+#. Error toast when unblocking a persona fails.
+msgid "Couldn't unblock the persona. Try again."
+msgstr "无法解除屏蔽该人格。请重试。"
 
 #. Toast when making, renaming or deleting a group of personas, or changing who is in it, failed
 msgid "Couldn’t change the groups. Try again."
@@ -1889,6 +1905,14 @@ msgstr "Ubuntu、Debian、Linux Mint"
 #. Under "Linux" in the list of platforms: Linux distributions the Tyne app installs on.
 msgid "Ubuntu, Fedora and more"
 msgstr "Ubuntu、Fedora 等"
+
+#. Title of the confirmation modal for unblocking a persona that was blocked. Short command title.
+msgid "Unblock persona"
+msgstr "解除屏蔽人格"
+
+#. Body of the confirmation modal for unblocking a persona. {personaName} is the persona.
+msgid "Unblock {personaName}?"
+msgstr "要解除屏蔽{personaName}吗？"
 
 #. Badge on one’s own persona in the Personas list: others do not see it in the list.
 #. Chip above the persona list: unlisted personas.

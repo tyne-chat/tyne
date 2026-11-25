@@ -96,3 +96,18 @@ export class PersonaGroupLimitReachedError extends BadRequestError {
 		});
 	}
 }
+
+export class CannotBlockOwnPersonaError extends BadRequestError {
+	constructor() {
+		super({code: APIErrorCodes.CANNOT_BLOCK_OWN_PERSONA, message: "You can't block your own persona"});
+	}
+}
+
+export class PersonaBlockLimitReachedError extends BadRequestError {
+	constructor(max: number) {
+		super({
+			code: APIErrorCodes.PERSONA_BLOCK_LIMIT_REACHED,
+			message: `You can block at most ${max} personas`,
+		});
+	}
+}

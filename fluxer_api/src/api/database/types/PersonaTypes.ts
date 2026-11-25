@@ -158,3 +158,22 @@ export const PERSONA_GROUP_COLUMNS = [
 	'persona_ids',
 	'updated_at',
 ] as const satisfies ReadonlyArray<keyof PersonaGroupRow>;
+
+/**
+ * One persona the account has blocked (tyne-chat/tyne#921): its messages are collapsed or hidden for
+ * the account, as a blocked account's are. Only the account that blocked sees the row.
+ */
+export interface PersonaBlockRow {
+	user_id: UserID;
+	/** The account the blocked persona belongs to. */
+	target_user_id: UserID;
+	target_persona_id: PersonaID;
+	created_at: Date;
+}
+
+export const PERSONA_BLOCK_COLUMNS = [
+	'user_id',
+	'target_user_id',
+	'target_persona_id',
+	'created_at',
+] as const satisfies ReadonlyArray<keyof PersonaBlockRow>;

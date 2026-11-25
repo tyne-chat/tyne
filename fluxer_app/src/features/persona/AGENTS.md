@@ -28,6 +28,7 @@ side is `fluxer_api/src/api/persona/`, which has its own `AGENTS.md`.
 | Settings, import, export | `components/settings/PersonaSettingsTab.tsx`, `components/modals/PluralKitImportModal.tsx`, `PersonaEditModal.tsx`, `utils/PersonaImportFile.ts` |
 | Import review and its decisions | `components/modals/PersonaImportReview.tsx`, `utils/PersonaImportReview.ts` (pure), `utils/PersonaImportImages.ts` |
 | Deleted personas, Restore | `components/settings/DeletedPersonasSection.tsx` |
+| Blocked personas (tyne-chat/tyne#921) | `state/PersonaBlocks.ts`, `commands/PersonaBlockCommands.ts`, `utils/MessageAuthorBlocked.ts`, `utils/PersonaBlockActions.tsx` (confirmations), `components/PersonaBlockButton.tsx` |
 | Persona groups (tyne-chat/tyne#829) | `state/PersonaGroups.ts`, `state/PersonaGroupFolds.ts`, `commands/PersonaGroupCommands.ts`, `utils/PersonaGroupSections.ts` (pure), `components/settings/PersonaGroupSection.tsx`, `PersonaBulkGroupActions.tsx`, `components/modals/PersonaGroupNameModal.tsx`, `PersonaGroupsField.tsx` |
 | Tag matching | `packages/schema/src/domains/persona/PersonaMatcher.ts` (`matchPersona`) |
 
@@ -235,7 +236,7 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
 ## Loading, resets and events
 
 - After READY, `ForkAccountReadyWork` fetches the personas, the settings, the channel
-  selections and the persona groups (4 GETs). A desktop account switch that resumes a session the account engine kept warm
+  selections, the persona groups and the blocked personas (5 GETs). A desktop account switch that resumes a session the account engine kept warm
   gets no READY: upstream's `completePromotedResume` calls `handleForkPromotedResume` instead. While `AccountScopedWork` is suspended (signing in, switching accounts) it
   waits, because upstream aborts requests made then.
 - The store is emptied on the `AccountScopedWork` cancellation, on logout, and on a READY with a new
@@ -323,6 +324,20 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   same persona (`restorePersona`), and the toast names any tag it came back without.
 - `exportPersonas` downloads the server's zip, which this import reads back.
 
+## Blocked personas
+
+Blocking one persona of another account (tyne-chat/tyne#921) changes one thing: its messages are
+blocked as a blocked account's are. `MessagingMessage` marks a new message blocked when its persona is
+(a fork statement after the constructor's fork block), and upstream's `handleRelationshipUpdate`
+re-marks the loaded messages with `isMessageAuthorBlocked` (the account or the persona), which
+`applyPersonaBlocks` calls after every new list (the reply to a block or unblock, the event, the
+load after READY). From there upstream does the rest: the "N blocked messages" row and "Hide messages
+from blocked users". Nothing else reads the list: notifications, mentions, read states, reactions and
+typing still treat the persona as before, on purpose. Block or Unblock sits beside Message on the
+profile popout (half the row each), the gallery's detail and the phone sheet, with confirmations
+mirroring an account's (Shift skips them). A message whose persona is changed by an edit keeps the
+blocked mark it had until the next list or relationship change.
+
 ## Where persona code hooks into upstream
 
 About 50 upstream files import from this folder: mostly in `channel` (message rendering, the
@@ -351,8 +366,10 @@ The signal bar follows the composer's persona through `SignalBarStore.affirmPers
   elsewhere.
 - End to end: `e2e/web/*/persona-*.spec.ts` (26 specs).
 - Request counts: `state/PersonaLookupBatcher.test.ts`, `events/PersonaRefresh.test.ts`.
-- `gateway/events/ForkAccountReadyWork.test.ts`: the work after a promoted resume, its 4 requests and
-  its wait for a switch. `commands/PersonaGroupCommands.test.ts` counts the groups' requests.
+- `gateway/events/ForkAccountReadyWork.test.ts`: the work after a promoted resume, its 5 requests and
+  its wait for a switch. `commands/PersonaGroupCommands.test.ts` counts the groups' requests,
+  `commands/PersonaBlockCommands.test.ts` the blocks', and `messaging/models/MessagingMessagePersonaBlock.test.ts`
+  checks the blocked mark.
 - Not covered: the call from `completePromotedResume`, and request counts for the mention fetch
   (root `AGENTS.md`, "Network calls").
 - Before committing, run the full list in `CHECKS.md`: a persona change needs all of it.
