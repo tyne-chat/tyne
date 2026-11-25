@@ -15,6 +15,9 @@ import gleeunit/should
 import support/session_fake_guild as fake_guild
 import support/session_harness.{Frame} as h
 
+// Fork imports.
+import support/fork_session_cap_freed
+
 pub fn identify_reaches_ready_test() {
   let user = h.unique_user()
   use <- h.with_api(h.session_api(h.session_data(user, False, [])))
@@ -91,6 +94,10 @@ pub fn session_cap_is_freed_by_ended_and_crashed_sessions_test() {
     1000,
   )
   |> should.be_true
+  // Fork: the killed session's lease is freed by its shard's own DOWN, which
+  // can come after `registry.lookup` sees `process.is_alive == False`
+  // (support/fork_session_cap_freed.gleam).
+  fork_session_cap_freed.wait(user, 99)
   let #(third, _, _) = h.ready_session("tok-cap")
   h.terminate(third)
 }
