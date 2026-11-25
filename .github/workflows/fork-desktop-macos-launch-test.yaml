@@ -43,8 +43,29 @@ jobs:
             fluxer_desktop/scripts/fork-test-macos-launch-cherry.sh
           sparse-checkout-cone-mode: false
 
+      # Fork: on cherry the signing job left the signed disk image in a folder this account can read
+      # (tyne-chat/tyne#928): take it from there rather than from GitHub's artifact storage, which
+      # that network reaches only slowly. A rerun on an earlier run's files, or a folder the nightly
+      # cleanup emptied, downloads the artifact. The test checks the signature either way.
+      - name: Take the signed macOS build from this Mac
+        id: local
+        if: runner.environment == 'self-hosted'
+        env:
+          RUN_ID: ${{ inputs.run_id || github.run_id }}
+        run: |
+          from="/Users/Shared/tyne-handoff-signed/$RUN_ID"
+          if ls "$from"/Tyne-*-mac-arm64.dmg >/dev/null 2>&1; then
+            mkdir -p release_assets
+            cp "$from"/Tyne-*-mac-arm64.dmg release_assets/
+            ls -l release_assets
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No signed build of run $RUN_ID on this Mac; downloading the artifact."
+          fi
+
       # Called from the release workflow, github.run_id is that run's.
       - name: Download the signed macOS build
+        if: steps.local.outputs.found != 'true'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: fork-desktop-macos-arm64

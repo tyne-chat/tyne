@@ -573,6 +573,26 @@ jobs:
           retention-days: 14
           overwrite: true
 
+      # Fork: on a Mac of our own, also leave the signed disk image for the launch test there, so it
+      # need not download the artifact again: GitHub's artifact storage reaches that network only
+      # slowly (tyne-chat/tyne#928). Only this runner's account can write the folder; the artifact
+      # above stays for a launch test on GitHub's Mac and for reruns.
+      - name: Hand the signed build to this Mac's launch test
+        if: runner.environment == 'self-hosted'
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          handoff=/Users/Shared/tyne-handoff-signed
+          if [ -d "$handoff" ] && [ -w "$handoff" ]; then
+            find "$handoff" -mindepth 1 -maxdepth 1 ! -name "$RUN_ID" -exec rm -rf {} +
+            rm -rf "${handoff:?}/$RUN_ID"
+            mkdir "$handoff/$RUN_ID"
+            cp release_assets/*.dmg "$handoff/$RUN_ID/"
+            ls -l "$handoff/$RUN_ID"
+          else
+            echo "::notice::No handoff folder for the launch test on this runner; it downloads the artifact."
+          fi
+
       # On the maintainers' Mac, leave the signed disk image where an agent there installs it for
       # trying out at once (tyne-chat/tyne#895). Only this runner's account can write the folder.
       - name: Hand the signed build to the Mac's test install
