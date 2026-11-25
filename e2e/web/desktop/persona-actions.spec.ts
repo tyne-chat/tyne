@@ -84,7 +84,7 @@ test.describe('Persona Message Lifecycle & Real-Time Actions', () => {
 		// 7. Alice's UI should update live via WebSocket
 		await expect(page.getByText(updatedText)).toBeVisible({timeout: 15_000});
 		// Old text should no longer be present
-		expect(await page.getByText(initialText).count()).toBe(0);
+		await expect(page.getByText(initialText)).toHaveCount(0);
 		// Persona author attribution MUST still be Bob-Alpha
 		await expect(page.getByText('Bob-Alpha')).toBeVisible({timeout: 10_000});
 		// Edited indicator should appear
