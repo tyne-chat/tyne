@@ -26,10 +26,33 @@ const SCHEMA = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'tools/dev/cassan
 // ForkTables.ts (fluxer_api/AGENTS.md).
 const SIGNAL_BAR_TABLES = ['guild_signal_bar_settings', 'dm_signal_bar_settings'];
 
-function declared(name: string) {
-	const meta = getTableMetadata(name) as
-		| {columns: ReadonlyArray<string>; primaryKey: ReadonlyArray<string>; partitionKey: ReadonlyArray<string>}
-		| undefined;
+interface Declared {
+	name: string;
+	columns: ReadonlyArray<string>;
+	primaryKey: ReadonlyArray<string>;
+	partitionKey: ReadonlyArray<string>;
+}
+
+function isTable(value: unknown): value is Declared {
+	const table = value as Partial<Declared> | null;
+	return (
+		typeof table === 'object' &&
+		table !== null &&
+		typeof table.name === 'string' &&
+		Array.isArray(table.columns) &&
+		Array.isArray(table.primaryKey) &&
+		Array.isArray(table.partitionKey)
+	);
+}
+
+// The tables are checked as their own definitions declare them, not as the table registry holds
+// them by name: the `api` project shares one module registry between the files a worker runs, and
+// upstream's tests register stand-in tables under real names there. Until upstream's #4291,
+// CdcWriteCapture.test.ts registered a `messages` keyed (channel_id, message_id), and in a run where
+// it came first, the registry handed this file that key (tyne-chat/tyne#902). The signal bar's two
+// tables are not exported, so they are read from the registry; only the fork uses their names.
+function registered(name: string): Declared {
+	const meta = getTableMetadata(name);
 	if (!meta) throw new Error(`${name} is not declared`);
 	return meta;
 }
@@ -57,13 +80,11 @@ function keyOf(primaryKey: string): {partition: Array<string>; whole: Array<stri
 	return {partition: whole.slice(0, 1), whole};
 }
 
-const forkTableNames = [
-	...Object.values(ForkTables).flatMap((value) => {
-		const name = (value as {name?: unknown}).name;
-		return typeof name === 'string' ? [name] : [];
-	}),
-	...SIGNAL_BAR_TABLES,
+const forkTables: Array<Declared> = [
+	...Object.values(ForkTables).filter(isTable),
+	...SIGNAL_BAR_TABLES.map(registered),
 ];
+const forkTableNames = forkTables.map((table) => table.name);
 
 describe('the fork in the Cassandra target schema', () => {
 	it('finds the fork tables to check', () => {
@@ -73,9 +94,8 @@ describe('the fork in the Cassandra target schema', () => {
 		expect(forkTableNames.length).toBeGreaterThanOrEqual(14);
 	});
 
-	it.each(forkTableNames)('has the fork table %s with its columns and key', (name) => {
-		const table = declared(name);
-		const schema = inSchema(name);
+	it.each(forkTables)('has the fork table $name with its columns and key', (table) => {
+		const schema = inSchema(table.name);
 		expect(new Set(schema.columns.map((column) => column.name))).toEqual(new Set(table.columns));
 		const key = keyOf(schema.primary_key);
 		expect(key.whole).toEqual([...table.primaryKey]);
@@ -83,11 +103,10 @@ describe('the fork in the Cassandra target schema', () => {
 	});
 
 	it.each([Messages, MessageReactions])("has the fork's columns and key on $name", (table) => {
-		const meta = declared(table.name);
 		const schema = inSchema(table.name);
 		const columns = new Set(schema.columns.map((column) => column.name));
-		for (const column of meta.columns) expect(columns, column).toContain(column);
-		expect(keyOf(schema.primary_key).whole).toEqual([...meta.primaryKey]);
+		for (const column of table.columns) expect(columns, column).toContain(column);
+		expect(keyOf(schema.primary_key).whole).toEqual([...table.primaryKey]);
 	});
 
 	it('keeps the persona columns typed as upstream types ids', () => {
