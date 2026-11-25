@@ -107,6 +107,7 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `BOT_USER_GENERATION_FAILED` | Bot user generation failed |
 | `BOT_USER_NOT_FOUND` | Bot user wasn't found |
 | `CALL_ALREADY_EXISTS` | A call is already in progress in this channel |
+| `CANNOT_BLOCK_OWN_PERSONA` | You can't block your own persona |
 | `CANNOT_BLOCK_SYSTEM_USER` | You can't block the system user |
 | `CANNOT_EDIT_OTHER_USER_MESSAGE` | You can't edit another user's message |
 | `CANNOT_EXECUTE_ON_DM` | This action can't be performed in a DM |
@@ -291,6 +292,7 @@ These are the values of the top-level `code`, and the [OpenAPI document](/http-a
 | `PASSWORD_REQUIRED_TO_CLAIM` | Set a password to keep this account |
 | `PASSWORD_SIGN_IN_REQUIRED` | Sign in to this account with its password |
 | `PERSONAL_NOTES_DISABLED` | Personal notes are turned off on this instance |
+| `PERSONA_BLOCK_LIMIT_REACHED` | You can block at most 1000 personas |
 | `PERSONA_GROUP_LIMIT_REACHED` | You can have at most 250 persona groups |
 | `PERSONA_LIMIT_REACHED` | Maximum number of personas reached (250) |
 | `PERSONA_TAG_LIMIT_REACHED` | A persona can have at most 5 tags |

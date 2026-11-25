@@ -1086,6 +1086,16 @@ The current user's persona groups changed: one was made, renamed or deleted, or 
 
 A persona group object has `id` (snowflake), `name` (string) and `persona_ids` (array of snowflakes, in the order they were added). A deleted persona stays in its groups, so that restoring it puts it back; a client shows only the live ones. `groups` is always the complete set, and a client replaces what it stores with it.
 
+### <span id="user-persona-blocks-update"></span>USER_PERSONA_BLOCKS_UPDATE
+
+The current user blocked or unblocked a persona. Only the current user's sessions receive it.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| blocks | array[persona block object] | Every persona the account has blocked, the oldest block first |
+
+A persona block object has `user_id` (snowflake, the account the persona belongs to) and `persona_id` (snowflake). Clients treat a blocked persona's messages as they treat a blocked user's; nothing else about the persona or its account changes. `blocks` is always the complete set, and a client replaces what it stores with it.
+
 ### <span id="guild-personas-dirty"></span>GUILD_PERSONAS_DIRTY
 
 Another account changed its personas or its display tag. A client that caches that account's personas refreshes them.
