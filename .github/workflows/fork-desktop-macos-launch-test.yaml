@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Fork: opens the signed macOS build as someone who downloaded it, on one of GitHub's Apple silicon
-# runners (scripts/fork-test-macos-launch.sh, tyne-chat/tyne#202). The desktop release workflow
+# runners (scripts/fork-test-macos-launch.sh, tyne-chat/tyne#202), or, when the repository variable
+# TYNE_MACOS_LAUNCH_RUNNER names one (["cherry-launch"]), in a throwaway VM on the Mac mini cherry
+# (scripts/fork-test-macos-launch-cherry.sh, tyne-chat/tyne#928). The desktop release workflow
 # calls it after signing, and a release is published only if it passes. To test the signed files
 # of an earlier release run again without rebuilding them (for example after changing the test):
 #
@@ -27,7 +29,8 @@ permissions:
 jobs:
   open:
     name: Open the signed macOS app
-    runs-on: macos-15
+    # A clean Mac is the point: GitHub's are fresh per job, cherry's VM is a fresh clone per run.
+    runs-on: ${{ vars.TYNE_MACOS_LAUNCH_RUNNER && fromJSON(vars.TYNE_MACOS_LAUNCH_RUNNER) || 'macos-15' }}
     timeout-minutes: 20
     steps:
       - name: Checkout the launch test
@@ -35,7 +38,9 @@ jobs:
         with:
           persist-credentials: false
           path: source
-          sparse-checkout: fluxer_desktop/scripts/fork-test-macos-launch.sh
+          sparse-checkout: |
+            fluxer_desktop/scripts/fork-test-macos-launch.sh
+            fluxer_desktop/scripts/fork-test-macos-launch-cherry.sh
           sparse-checkout-cone-mode: false
 
       # Called from the release workflow, github.run_id is that run's.
@@ -56,4 +61,8 @@ jobs:
             ls -la release_assets
             exit 1
           fi
-          source/fluxer_desktop/scripts/fork-test-macos-launch.sh "${dmgs[0]}"
+          if [ "$RUNNER_ENVIRONMENT" = self-hosted ]; then
+            source/fluxer_desktop/scripts/fork-test-macos-launch-cherry.sh "${dmgs[0]}"
+          else
+            source/fluxer_desktop/scripts/fork-test-macos-launch.sh "${dmgs[0]}"
+          fi
