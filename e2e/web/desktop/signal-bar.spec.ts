@@ -148,6 +148,7 @@ test.describe('Signal Bar', () => {
 				await bobPill.click();
 				const sheet = bobPage.locator('[data-flx="persona.picker-sheet"]');
 				await sheet.getByText(name).first().click();
+				await expect(sheet).toHaveCount(0);
 			};
 			// A second window of Bob's stays open on this channel the whole time. It learns of
 			// the switch at once, and must not pass it on to the signal either.
@@ -230,6 +231,10 @@ test.describe('Signal Bar', () => {
 			await signal(bobPage, 'Reading').click();
 			await expect(signal(page, 'Reading')).toHaveAttribute('aria-label', /^Reading: Bob Multi/);
 			await signal(bobPage, 'Reading').click({button: 'right'});
+			// Give any synchronous or animation-frame menu mount a chance to appear before asserting absence.
+			await bobPage.evaluate(
+				() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+			);
 			await expect(bobPage.getByText('Reset signal for everyone')).toHaveCount(0);
 
 			// Alice manages the community, so she can turn Bob's signal off...

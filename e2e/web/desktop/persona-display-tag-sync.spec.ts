@@ -82,6 +82,11 @@ test.describe('Account Display Tag Settings Live Sync', () => {
 		const messageText = `Testing display tag banner sync [${timestamp}]`;
 		await composer.click();
 		await page.keyboard.type(`ba: ${messageText}`);
+		await expect(page.locator('[data-flx="persona.composer-pill"] button').first()).toHaveAttribute(
+			'aria-label',
+			/Matched by tag/i,
+			{timeout: 15_000},
+		);
 
 		await page.keyboard.press('Enter');
 

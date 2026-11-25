@@ -89,11 +89,13 @@ test.describe('Persona Wrap & Suffix Tag Proxying with Display Tag', () => {
 		const submitMessage = async () => {
 			await composer.press('Enter');
 		};
+		const pill = page.locator('[data-flx="persona.composer-pill"] button').first();
 
 		// Test 1: Send bracket wrapped message: [Inside brackets message]
 		const bracketBody = `Inside brackets message [${timestamp}]`;
 		await composer.click();
 		await composer.fill(`[${bracketBody}]`);
+		await expect(pill).toHaveAttribute('aria-label', /Matched by tag/i, {timeout: 15_000});
 		await submitMessage();
 
 		// Verify Bob's view: message body has brackets stripped and persona is Bob-Bracket
@@ -110,6 +112,7 @@ test.describe('Persona Wrap & Suffix Tag Proxying with Display Tag', () => {
 		const suffixBody = `Suffix message [${timestamp}]`;
 		await composer.click();
 		await composer.fill(`${suffixBody} -s`);
+		await expect(pill).toHaveAttribute('aria-label', /Matched by tag/i, {timeout: 15_000});
 		await submitMessage();
 
 		// Verify Bob's view: -s is stripped and persona is Bob-Suffix

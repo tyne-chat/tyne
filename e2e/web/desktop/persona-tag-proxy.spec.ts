@@ -98,12 +98,7 @@ test.describe('In-App Composer Tag Auto-Proxying', () => {
 		// 7. Verify message renders in chat as Bob-Alpha with tag stripped
 		await expect(page.getByText(messageBody)).toBeVisible({timeout: 15_000});
 		// The raw prefix tag "a:" should not be displayed as part of the message body in the chat log
-		expect(
-			await page
-				.locator('[class*="messageContent"]')
-				.filter({hasText: `a: ${messageBody}`})
-				.count(),
-		).toBe(0);
+		await expect(page.locator('[data-flx*="message-content"]').filter({hasText: `a: ${messageBody}`})).toHaveCount(0);
 
 		// Persona display name should be visible
 		await expect(page.getByText('Bob-Alpha')).toBeVisible({timeout: 10_000});

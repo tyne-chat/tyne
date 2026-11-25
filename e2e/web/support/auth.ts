@@ -46,7 +46,12 @@ export async function openUserSettings(page: Page): Promise<void> {
 
 	// If on mobile inside a channel view, tap back button first to reveal mobile nav
 	const backBtn = page.locator('button[aria-label*="Back" i], [data-flx*="back-button"]').first();
-	if (await backBtn.isVisible({timeout: 1_000}).catch(() => false)) {
+	if (
+		await backBtn.waitFor({state: 'visible', timeout: 1_000}).then(
+			() => true,
+			() => false,
+		)
+	) {
 		await backBtn.click();
 	}
 
@@ -55,7 +60,12 @@ export async function openUserSettings(page: Page): Promise<void> {
 		.locator('[data-flx*="mobile-bottom-nav.nav-button"], [data-flx*="mobile-bottom-nav"] button, button')
 		.filter({hasText: /You/i})
 		.first();
-	if (await youBtn.isVisible({timeout: 3_000}).catch(() => false)) {
+	if (
+		await youBtn.waitFor({state: 'visible', timeout: 3_000}).then(
+			() => true,
+			() => false,
+		)
+	) {
 		await youBtn.click();
 		const mobileSettingsBtn = page
 			.locator('[data-flx="app.you-page.settings-button"], button[aria-label*="Settings" i]')

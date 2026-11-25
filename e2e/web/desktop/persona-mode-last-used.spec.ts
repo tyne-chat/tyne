@@ -86,6 +86,12 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 			.first();
 		await expect(composer).toBeVisible({timeout: 20_000});
 
+		// Wait for both Bob's personas and his "Last used" mode setting to finish loading.
+		const pill = page.locator('[data-flx="persona.composer-pill"]');
+		await expect(pill).toBeVisible({timeout: 15_000});
+		const pillButton = pill.locator('button');
+		await expect(pillButton).toHaveAttribute('aria-label', /Last used/i, {timeout: 15_000});
+
 		const submitMessage = async () => {
 			await composer.press('Enter');
 		};
@@ -94,6 +100,7 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 		const firstText = `Hello from Alpha [${timestamp}]`;
 		await composer.click();
 		await composer.fill(`a: ${firstText}`);
+		await expect(pillButton).toHaveAttribute('aria-label', /Matched by tag/i, {timeout: 10_000});
 		await submitMessage();
 
 		// Verify message sent with Bob-Alpha persona attribution
@@ -101,9 +108,6 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 		await expect(page.getByText('Bob-Alpha', {exact: true})).toBeVisible({timeout: 10_000});
 
 		// 8. Verify the composer pill now shows Bob-Alpha as latched
-		const pill = page.locator('[data-flx="persona.composer-pill"]');
-		await expect(pill).toBeVisible({timeout: 10_000});
-		const pillButton = pill.locator('button');
 		await expect(pillButton).toHaveAttribute('aria-label', /Bob-Alpha/i, {timeout: 10_000});
 
 		// 9. Send second message UNTAGGED (should automatically use Bob-Alpha due to Last Used mode)
@@ -113,9 +117,17 @@ test.describe('Active Persona Mode: Last Used Flow', () => {
 		await submitMessage();
 
 		await expect(page.getByText(secondText)).toBeVisible({timeout: 15_000});
-		// Verify Bob-Alpha is the author of second message
-		const bobAlphaHeaders = page.locator('[data-flx*="message-username"]').getByText('Bob-Alpha');
-		await expect(bobAlphaHeaders.first()).toBeVisible({timeout: 10_000});
+		// Verify Bob-Alpha is the author of the second message (not just the first)
+		await expect
+			.poll(
+				async () => {
+					const messages = await bobClient.getMessages(channelId, 10);
+					return messages.find((m) => m.content === secondText)?.subprofile?.name ?? null;
+				},
+				{timeout: 10_000},
+			)
+			.toBe('Bob-Alpha');
+		await expect(page.locator('[data-flx*="message-username"]').getByText('Bob LastTester')).toHaveCount(0);
 
 		// 10. Send escaped message with leading backslash to revert to root account
 		const thirdText = `Escaped message back to root [${timestamp}]`;

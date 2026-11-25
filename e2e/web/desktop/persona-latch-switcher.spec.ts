@@ -55,7 +55,16 @@ test.describe('Composer Persona Latching and Search', () => {
 
 		// 3. Bob logs into web app
 		await loginAs(page, bobEmail, bobPassword);
-		await page.goto(`/channels/${guildId}/${channelId}`);
+		const channelPath = `/channels/${guildId}/${channelId}`;
+		const settingsLoaded = page.waitForResponse(
+			(r) =>
+				r.url().endsWith('/users/@me/personas/settings') &&
+				r.request().method() === 'GET' &&
+				r.ok() &&
+				page.url().includes(channelPath),
+		);
+		await page.goto(channelPath);
+		await settingsLoaded;
 
 		const composer = page
 			.locator(
@@ -79,13 +88,14 @@ test.describe('Composer Persona Latching and Search', () => {
 		const betaOption = page.locator('[class*="personaName"]').filter({hasText: 'Bob-Beta'}).first();
 		await expect(betaOption).toBeVisible({timeout: 5_000});
 		// Bob-Alpha should be filtered out
-		expect(await page.locator('[class*="personaName"]').filter({hasText: 'Bob-Alpha'}).count()).toBe(0);
+		await expect(page.locator('[class*="personaName"]').filter({hasText: 'Bob-Alpha'})).toHaveCount(0);
 
 		// 5. Select Bob-Beta to latch
 		await betaOption.click();
 
 		// Verify pill indicates latched state (has locked class or badge)
 		await expect(pill).toHaveAttribute('aria-label', /Bob-Beta/i, {timeout: 5_000});
+		await expect(page.locator('[data-flx="persona.picker-sheet"]')).toHaveCount(0);
 
 		// 6. Send an untagged message while latched
 		const latchedMsg = `Sending while latched as Beta [${timestamp}]`;
@@ -111,6 +121,7 @@ test.describe('Composer Persona Latching and Search', () => {
 
 		// Verify pill is unlatched
 		await expect(pill).not.toHaveAttribute('aria-label', /Bob-Beta/i, {timeout: 5_000});
+		await expect(page.locator('[data-flx="persona.picker-sheet"]')).toHaveCount(0);
 
 		// 8. Send message as root account
 		const rootMsg = `Sending as root account [${timestamp}]`;

@@ -76,6 +76,11 @@ test.describe('Personal Notes Persona Integration', () => {
 		const noteText = `Secret note from persona [${timestamp}]`;
 		await composer.click();
 		await composer.fill(`n: ${noteText}`);
+		await expect(page.locator('[data-flx="persona.composer-pill"] button').first()).toHaveAttribute(
+			'aria-label',
+			/Matched by tag/i,
+			{timeout: 15_000},
+		);
 		await submitMessage();
 
 		// Verify message appears in personal notes with Notes-Persona attribution

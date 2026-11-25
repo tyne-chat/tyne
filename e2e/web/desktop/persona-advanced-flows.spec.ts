@@ -46,7 +46,16 @@ test.describe('Persona Advanced Flows & Quick Commands', () => {
 		}
 
 		await loginAs(page, bobEmail, bobPassword);
-		await page.goto(`/channels/${guildId}/${channelId}`);
+		const channelPath = `/channels/${guildId}/${channelId}`;
+		const settingsLoaded = page.waitForResponse(
+			(r) =>
+				r.url().endsWith('/users/@me/personas/settings') &&
+				r.request().method() === 'GET' &&
+				r.ok() &&
+				page.url().includes(channelPath),
+		);
+		await page.goto(channelPath);
+		await settingsLoaded;
 
 		const composer = page
 			.locator(
@@ -66,6 +75,7 @@ test.describe('Persona Advanced Flows & Quick Commands', () => {
 
 		// Verify latched
 		await expect(pill).toHaveAttribute('aria-label', /Bob-Quick/i, {timeout: 5_000});
+		await expect(page.locator('[data-flx="persona.picker-sheet"]')).toHaveCount(0);
 
 		// 2. Type \\ into composer and submit
 		await composer.click();
@@ -206,7 +216,16 @@ test.describe('Persona Advanced Flows & Quick Commands', () => {
 		}
 
 		await loginAs(page, bobEmail, bobPassword);
-		await page.goto(`/channels/${guildId}/${channelId}`);
+		const channelPath = `/channels/${guildId}/${channelId}`;
+		const settingsLoaded = page.waitForResponse(
+			(r) =>
+				r.url().endsWith('/users/@me/personas/settings') &&
+				r.request().method() === 'GET' &&
+				r.ok() &&
+				page.url().includes(channelPath),
+		);
+		await page.goto(channelPath);
+		await settingsLoaded;
 
 		const composer = page
 			.locator(
@@ -226,6 +245,7 @@ test.describe('Persona Advanced Flows & Quick Commands', () => {
 
 		// Verify pill is latched to Bob-Alpha
 		await expect(pill).toHaveAttribute('aria-label', /Bob-Alpha/i, {timeout: 5_000});
+		await expect(page.locator('[data-flx="persona.picker-sheet"]')).toHaveCount(0);
 
 		const sendMessage = async (text: string) => {
 			await composer.click();
