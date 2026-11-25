@@ -66,6 +66,8 @@ test.describe('In-Chat Context Menu "Change Persona" Flow', () => {
 		const messageLocator = page.locator('[data-flx*="message-content"]').filter({hasText: messageContent}).first();
 		await expect(messageLocator).toBeVisible({timeout: 20_000});
 		await expect(page.getByText(bobAlpha.name)).toBeVisible({timeout: 10_000});
+		// Wait for Bob's personas to load so "Change persona" is ready before right-clicking.
+		await expect(page.locator('[data-flx="persona.composer-pill"]')).toBeVisible({timeout: 15_000});
 
 		// 5. Right-click the message to open MessageContextMenu
 		await messageLocator.click({button: 'right'});
