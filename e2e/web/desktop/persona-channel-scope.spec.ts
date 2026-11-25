@@ -71,6 +71,7 @@ test.describe('Persona remembered per channel', () => {
 		const sheet = page.locator('[data-flx="persona.picker-sheet"]');
 		await expect(sheet.locator('[data-flx="persona.picker-sheet.scope-note"]')).toBeVisible();
 		await sheet.getByText(name).first().click();
+		await expect(sheet).toHaveCount(0);
 	};
 
 	const open = async (page: Page, name: string, channelId: string) => {
@@ -88,7 +89,22 @@ test.describe('Persona remembered per channel', () => {
 		const otherPath = `/channels/${seed.E2E_GUILD_ID}/${otherChannelId}`;
 
 		await loginAs(page, seed.E2E_BOB_EMAIL, seed.E2E_BOB_PASSWORD);
+		const settingsLoaded = page.waitForResponse(
+			(r) =>
+				r.url().endsWith('/users/@me/personas/settings') &&
+				r.request().method() === 'GET' &&
+				r.ok() &&
+				page.url().includes(herePath),
+		);
+		const channelStatesLoaded = page.waitForResponse(
+			(r) =>
+				r.url().endsWith('/users/@me/personas/channel-states') &&
+				r.request().method() === 'GET' &&
+				r.ok() &&
+				page.url().includes(herePath),
+		);
 		await page.goto(herePath);
+		await Promise.all([settingsLoaded, channelStatesLoaded]);
 		await expect(pill(page)).toBeVisible({timeout: 20_000});
 
 		// Every channel starts as the account.
