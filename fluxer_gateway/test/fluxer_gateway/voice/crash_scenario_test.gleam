@@ -30,6 +30,9 @@ import support/voice_ids
 import support/voice_session as fake
 import support/wait
 
+// Fork imports.
+import support/fork_dm_crash_dropped
+
 @external(erlang, "sys", "get_state")
 fn get_state(pid: process.Pid) -> Dynamic
 
@@ -185,6 +188,10 @@ pub fn dm_call_crash_frees_the_per_channel_connection_limit_test() {
   assert list.length(dm_entries(one)) == 5
   process.kill(call_pid(6103))
   assert api.eventually(fn() { call_gone(6103) })
+  // Fork: the DM server learns of the crash from its own DOWN, which can
+  // come after the manager stops finding the call
+  // (support/fork_dm_crash_dropped.gleam).
+  fork_dm_crash_dropped.wait(one)
   create_call(6103, [1, 2])
   let again = dm_join(one, 6103, 6)
   assert call_connections(6103) == [again]
