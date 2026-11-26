@@ -119,6 +119,7 @@ export const ComposerMentionPill = observer(({mentionType, mentionId, display, .
 				}
 			}
 			if (!persona && mentionId) {
+				// render-fetch-ignore: batched and 60s-cooldown guarded by PersonaLookupBatcher
 				void PersonaStore.fetchPersona(mentionId, resolvedPersonaId);
 			}
 			const label = persona?.name ? `@${persona.name}` : display;

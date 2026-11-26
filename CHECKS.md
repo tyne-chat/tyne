@@ -37,7 +37,7 @@ pnpm --filter fluxer_app test
 # @media, matchMedia and innerWidth never see the zoom: a layout that must follow it uses an @container
 # query in rem or scales its threshold with getAppRemScale(). A size computed in script is in screen px:
 # never cap a box in one unit around content capped in the other. Check UI changes at 150% zoom.
-(cd fluxer_app && node scripts/fork-px-lint.mjs --upstream upstream/main)
+(cd fluxer_app && node scripts/fork-px-lint.mjs --upstream upstream/main && node scripts/fork-render-fetch-lint.mjs --upstream upstream/main)
 # Upstream's lint job (Biome, ESLint with no warnings, data-flx attributes), plus Biome warnings on
 # files the fork added, committed or not.
 pnpm exec biome ci . && pnpm exec eslint . --max-warnings 0 && pnpm --filter fluxer_app theming:data-flx:check && pnpm exec biome ci --error-on-warnings --files-ignore-unknown=true --no-errors-on-unmatched $(git diff --name-only --no-renames --diff-filter=A $(git merge-base upstream/main HEAD)) $(git ls-files --others --exclude-standard)

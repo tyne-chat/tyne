@@ -174,6 +174,7 @@ export const MentionRenderer = observer(function MentionRenderer({
 					}
 				}
 				if (!persona && kind.id) {
+					// render-fetch-ignore: batched and 60s-cooldown guarded by PersonaLookupBatcher
 					void PersonaStore.fetchPersona(kind.id, kind.personaId);
 				}
 				const personaName = persona?.name || kind.personaId;
