@@ -17,6 +17,7 @@ import type {IPersonaRepository} from '../IPersonaRepository';
 import {
 	calculatePersonaFrecencyScore,
 	calculatePersonaMatchScore,
+	coarsePersonaUseCountTier,
 	MAX_PERSONAS_PER_USER,
 	PersonaService,
 } from '../PersonaService';
@@ -317,16 +318,16 @@ describe('PersonaService', () => {
 			expect(names).not.toContain('Other Private');
 		});
 
-		it('sorts prefix matches ahead of substring matches and sorts by useCount on ties', async () => {
-			const substringMatch = makeMockPersona(otherUserId, 10n as PersonaID, 'The Cat Alice', {
+		it('sorts prefix matches ahead of substring matches and sorts caller own personas by useCount on ties', async () => {
+			const substringMatch = makeMockPersona(userId, 10n as PersonaID, 'The Cat Alice', {
 				visibility: 'public',
 				use_count: 50,
 			});
-			const prefixLowUse = makeMockPersona(otherUserId, 11n as PersonaID, 'Alice Early', {
+			const prefixLowUse = makeMockPersona(userId, 11n as PersonaID, 'Alice Early', {
 				visibility: 'public',
 				use_count: 1,
 			});
-			const prefixHighUse = makeMockPersona(otherUserId, 12n as PersonaID, 'Alice Prime', {
+			const prefixHighUse = makeMockPersona(userId, 12n as PersonaID, 'Alice Prime', {
 				visibility: 'public',
 				use_count: 100,
 			});
@@ -335,7 +336,7 @@ describe('PersonaService', () => {
 
 			const results = await service.getChannelPersonaMentions({
 				callerUserId: userId,
-				candidateUserIds: [otherUserId],
+				candidateUserIds: [userId],
 				query: 'ali',
 				userMap,
 			});
@@ -343,14 +344,14 @@ describe('PersonaService', () => {
 			expect(results.map((r) => r.name)).toEqual(['Alice Prime', 'Alice Early', 'The Cat Alice']);
 		});
 
-		it('boosts recently active personas ahead of older personas with higher usage counts', async () => {
+		it('boosts caller own recently active personas ahead of older own personas with higher usage counts', async () => {
 			const now = Date.now();
-			const olderFrequent = makeMockPersona(otherUserId, 15n as PersonaID, 'Bob Old', {
+			const olderFrequent = makeMockPersona(userId, 15n as PersonaID, 'Alice Old', {
 				visibility: 'public',
 				use_count: 500,
 				last_used_at_ms: BigInt(now - 14 * 24 * 60 * 60 * 1000), // 14 days ago
 			});
-			const recentRare = makeMockPersona(otherUserId, 16n as PersonaID, 'Bob Recent', {
+			const recentRare = makeMockPersona(userId, 16n as PersonaID, 'Alice Recent', {
 				visibility: 'public',
 				use_count: 2,
 				last_used_at_ms: BigInt(now - 5 * 60 * 1000), // 5 minutes ago
@@ -360,14 +361,172 @@ describe('PersonaService', () => {
 
 			const results = await service.getChannelPersonaMentions({
 				callerUserId: userId,
+				candidateUserIds: [userId],
+				query: 'alice',
+				userMap,
+			});
+
+			expect(results.map((r) => r.name)).toEqual(['Alice Recent', 'Alice Old']);
+			expect(results[0].use_count).toBe(2);
+			expect(results[0].last_used_at_ms).toBeDefined();
+		});
+
+		it('returns coarse usage tiers without recency for other accounts and strips bio and banner_hash for everyone', async () => {
+			const now = Date.now();
+			const ownLastUsed = BigInt(now - 60_000);
+			const otherLastUsed = BigInt(now - 30_000);
+
+			const ownPersona = makeMockPersona(userId, 17n as PersonaID, 'Mine', {
+				visibility: 'public',
+				bio: 'Own bio',
+				banner_hash: 'a_11111111',
+				pronouns: 'they/them',
+				use_count: 7,
+				last_used_at_ms: ownLastUsed,
+			});
+			const otherUnused = makeMockPersona(otherUserId, 18n as PersonaID, 'Bob Unused', {
+				visibility: 'public',
+				bio: 'Bob unused bio',
+				banner_hash: 'b_22222222',
+				pronouns: 'he/him',
+				use_count: 0,
+				last_used_at_ms: null,
+			});
+			const otherLowUse = makeMockPersona(otherUserId, 19n as PersonaID, 'Bob Few', {
+				visibility: 'public',
+				bio: 'Bob few bio',
+				banner_hash: 'b_22222223',
+				pronouns: 'he/they',
+				use_count: 5,
+				last_used_at_ms: otherLastUsed,
+			});
+			const otherUnlisted = makeMockPersona(otherUserId, 20n as PersonaID, 'Bob Unlisted', {
+				visibility: 'unlisted',
+				bio: 'Bob unlisted bio',
+				banner_hash: 'c_33333333',
+				pronouns: 'she/her',
+				use_count: 42,
+				last_used_at_ms: otherLastUsed,
+			});
+			const otherPrivateEveryone = makeMockPersona(otherUserId, 21n as PersonaID, 'Bob Private', {
+				visibility: 'private',
+				mentionable_by: 'everyone',
+				bio: 'Bob private bio',
+				banner_hash: 'd_44444444',
+				pronouns: 'it/its',
+				use_count: 250,
+				last_used_at_ms: otherLastUsed,
+			});
+
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValueOnce([
+				ownPersona,
+				otherUnused,
+				otherLowUse,
+				otherUnlisted,
+				otherPrivateEveryone,
+			]);
+
+			const results = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [userId, otherUserId],
+				userMap,
+			});
+
+			expect(results.find((r) => r.name === 'Mine')).toMatchObject({
+				use_count: 7,
+				last_used_at_ms: ownLastUsed.toString(),
+				bio: null,
+				banner_hash: null,
+				pronouns: 'they/them',
+			});
+			expect(results.find((r) => r.name === 'Bob Unused')).toMatchObject({
+				use_count: 0,
+				last_used_at_ms: null,
+				bio: null,
+				banner_hash: null,
+				pronouns: 'he/him',
+			});
+			expect(results.find((r) => r.name === 'Bob Few')).toMatchObject({
+				use_count: 1,
+				last_used_at_ms: null,
+				bio: null,
+				banner_hash: null,
+				pronouns: 'he/they',
+			});
+			expect(results.find((r) => r.name === 'Bob Unlisted')).toMatchObject({
+				use_count: 3,
+				last_used_at_ms: null,
+				bio: null,
+				banner_hash: null,
+				pronouns: 'she/her',
+			});
+			expect(results.find((r) => r.name === 'Bob Private')).toMatchObject({
+				use_count: 10,
+				last_used_at_ms: null,
+				bio: null,
+				banner_hash: null,
+				pronouns: null,
+			});
+		});
+
+		it('sorts other accounts personas by match strength, coarse tier, then alphabetically regardless of recency or within-tier counts', async () => {
+			const now = Date.now();
+			const commonIdle = makeMockPersona(otherUserId, 22n as PersonaID, 'Bob Common', {
+				visibility: 'public',
+				use_count: 100,
+				last_used_at_ms: null,
+			});
+			const rareRecent = makeMockPersona(otherUserId, 23n as PersonaID, 'Bob Alpha', {
+				visibility: 'public',
+				use_count: 2,
+				last_used_at_ms: BigInt(now - 5_000),
+			});
+			const midTierBeta = makeMockPersona(otherUserId, 24n as PersonaID, 'Bob Beta', {
+				visibility: 'public',
+				use_count: 10,
+				last_used_at_ms: null,
+			});
+			const midTierZetaHot = makeMockPersona(otherUserId, 25n as PersonaID, 'Bob Zeta', {
+				visibility: 'public',
+				use_count: 99,
+				last_used_at_ms: BigInt(now - 5_000),
+			});
+			const substringMatch = makeMockPersona(otherUserId, 26n as PersonaID, 'The Bob Substring', {
+				visibility: 'public',
+				use_count: 500,
+				last_used_at_ms: BigInt(now - 1_000),
+			});
+
+			vi.mocked(mockRepo.findByUserIds).mockResolvedValue([
+				substringMatch,
+				rareRecent,
+				midTierZetaHot,
+				midTierBeta,
+				commonIdle,
+			]);
+
+			const allResults = await service.getChannelPersonaMentions({
+				callerUserId: userId,
 				candidateUserIds: [otherUserId],
 				query: 'bob',
 				userMap,
 			});
+			expect(allResults.map((r) => r.name)).toEqual([
+				'Bob Common',
+				'Bob Beta',
+				'Bob Zeta',
+				'Bob Alpha',
+				'The Bob Substring',
+			]);
 
-			expect(results.map((r) => r.name)).toEqual(['Bob Recent', 'Bob Old']);
-			expect(results[0].use_count).toBe(2);
-			expect(results[0].last_used_at_ms).toBeDefined();
+			const limited = await service.getChannelPersonaMentions({
+				callerUserId: userId,
+				candidateUserIds: [otherUserId],
+				query: 'bob',
+				limit: 2,
+				userMap,
+			});
+			expect(limited.map((r) => r.name)).toEqual(['Bob Common', 'Bob Beta']);
 		});
 
 		it('matches by owner username, nickname, or display tag', async () => {
@@ -964,6 +1123,23 @@ describe('PersonaService', () => {
 			// >= 720h (800h ago) -> +0
 			const boost0 = calculatePersonaFrecencyScore(0, now - 800 * hour, now);
 			expect(boost0).toBe(0);
+		});
+
+		it('quantizes usage counts into 4 coarse tiers capped below local in-channel recency boosts', () => {
+			expect(coarsePersonaUseCountTier(-5)).toBe(0);
+			expect(coarsePersonaUseCountTier(0)).toBe(0);
+			expect(coarsePersonaUseCountTier(Number.NaN)).toBe(0);
+			expect(coarsePersonaUseCountTier(1)).toBe(1);
+			expect(coarsePersonaUseCountTier(9)).toBe(1);
+			expect(coarsePersonaUseCountTier(10)).toBe(3);
+			expect(coarsePersonaUseCountTier(99)).toBe(3);
+			expect(coarsePersonaUseCountTier(100)).toBe(10);
+			expect(coarsePersonaUseCountTier(5000)).toBe(10);
+
+			const now = 1000000000000;
+			const maxTierWithoutRecency = calculatePersonaFrecencyScore(coarsePersonaUseCountTier(5000), null, now);
+			const recentChannelSpeaker = calculatePersonaFrecencyScore(0, now - 48 * 3600 * 1000, now);
+			expect(maxTierWithoutRecency).toBeLessThan(recentChannelSpeaker);
 		});
 
 		it('calculates persona match score with exact tiers', () => {

@@ -362,6 +362,7 @@ export const ChannelPersonaMentionItemSchema = z.object({
 		.optional()
 		.describe('Other names to find the persona by when searching or mentioning. Never shown'),
 	avatar_hash: PersonaAssetHashType.nullish().describe('Avatar asset hash'),
+	// Always null in mention suggestions (kept nullable for compatibility with shipped clients).
 	banner_hash: PersonaAssetHashType.nullish().describe('Banner asset hash'),
 	display_tag_text: z.string().nullish().describe('Optional display tag text'),
 	display_tag_icon: PersonaAssetHashType.nullish().describe(
@@ -374,9 +375,15 @@ export const ChannelPersonaMentionItemSchema = z.object({
 		.int()
 		.nullish()
 		.describe('Color taken from the avatar, shown for the persona when it has no accent color'),
+	// Always null in mention suggestions (kept nullable for compatibility with shipped clients).
 	bio: z.string().nullish().describe('Optional persona bio'),
 	visibility: PersonaVisibilitySchema.describe('Visibility setting'),
+	// Exact lifetime count for the caller's own personas; quantized 4-tier ranking weight
+	// (0, 1, 3, 10 for 0, 1-9, 10-99, 100+ uses) for other accounts' personas
+	// (coarsePersonaUseCountTier in PersonaService.ts), capped at 10 so it stays below local
+	// in-channel recency boosts.
 	use_count: z.number().int().optional().default(0).describe('Usage counter for frecency ranking'),
+	// Populated only for the caller's own personas; always null for other accounts' personas.
 	last_used_at_ms: z.string().nullish().describe('Timestamp in ms when the persona was last used'),
 	owner_user_id: SnowflakeStringType.describe('User ID of the persona owner'),
 	owner_username: z.string().describe('Username of the persona owner'),

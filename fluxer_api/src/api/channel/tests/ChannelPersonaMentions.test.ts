@@ -3,8 +3,10 @@
 import type {ChannelPersonaMentionItem, PersonaResponse} from '@fluxer/schema/src/domains/persona/PersonaApiSchemas';
 import {afterEach, beforeEach, describe, expect, test} from 'vitest';
 import {createTestAccount, type TestAccount} from '../../auth/tests/AuthTestUtils';
+import {createPersonaID, createUserID} from '../../BrandedTypes';
 import {Config} from '../../Config';
 import {createChannel, createDmChannel, createGuild} from '../../channel/tests/ChannelTestUtils';
+import {getPersonaRepository} from '../../middleware/ForkServiceSingletons';
 import {type ApiTestHarness, createApiTestHarness} from '../../test/ApiTestHarness';
 import {HTTP_STATUS} from '../../test/TestConstants';
 import {createBuilder} from '../../test/TestRequestBuilder';
@@ -17,6 +19,8 @@ async function createPersona(
 		visibility: 'public' | 'unlisted' | 'private';
 		color?: number | null;
 		avatar_color?: number | null;
+		bio?: string | null;
+		banner_hash?: string | null;
 	},
 ): Promise<PersonaResponse> {
 	return createBuilder<PersonaResponse>(harness, token)
@@ -215,5 +219,73 @@ describe('Channel Persona Mentions and Privacy Filtering', () => {
 		expect(accent?.avatar_color ?? null).toBeNull();
 		expect(avatar?.color ?? null).toBeNull();
 		expect(avatar?.avatar_color).toBe(0x8f1e1e);
+	});
+
+	test('returns coarse usage tiers without recency for other members and drops bio and banner_hash', async () => {
+		const zeta = await createPersona(harness, userB.token, {
+			name: 'Zeta',
+			visibility: 'public',
+			bio: 'Zeta bio',
+			banner_hash: '1badc0de',
+		});
+		const beta = await createPersona(harness, userB.token, {
+			name: 'Beta',
+			visibility: 'unlisted',
+			bio: 'Beta bio',
+			banner_hash: '2badc0de',
+		});
+		await createPersona(harness, userB.token, {
+			name: 'Alpha',
+			visibility: 'public',
+			bio: 'Alpha bio',
+			banner_hash: '3badc0de',
+		});
+		const mine = await createPersona(harness, userA.token, {
+			name: 'Mine',
+			visibility: 'public',
+			bio: 'Mine bio',
+			banner_hash: 'a_0badc0de',
+		});
+
+		const repo = getPersonaRepository();
+		await repo.recordUsage(createUserID(BigInt(userB.userId)), createPersonaID(BigInt(beta.id)));
+		await repo.recordUsage(createUserID(BigInt(userB.userId)), createPersonaID(BigInt(zeta.id)));
+		await repo.recordUsage(createUserID(BigInt(userB.userId)), createPersonaID(BigInt(zeta.id)));
+		await repo.recordUsage(createUserID(BigInt(userB.userId)), createPersonaID(BigInt(zeta.id)));
+		await repo.recordUsage(createUserID(BigInt(userA.userId)), createPersonaID(BigInt(mine.id)));
+
+		const asUserA = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userA.token)
+			.get(`/channels/${channelId}/persona-mentions`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const mineForA = asUserA.find((r) => r.name === 'Mine');
+		const alphaForA = asUserA.find((r) => r.name === 'Alpha');
+		const betaForA = asUserA.find((r) => r.name === 'Beta');
+		const zetaForA = asUserA.find((r) => r.name === 'Zeta');
+		expect(mineForA).toMatchObject({use_count: 1, bio: null, banner_hash: null});
+		expect(mineForA?.last_used_at_ms).toMatch(/^\d+$/);
+		expect(alphaForA).toMatchObject({use_count: 0, last_used_at_ms: null, bio: null, banner_hash: null});
+		expect(betaForA).toMatchObject({use_count: 1, last_used_at_ms: null, bio: null, banner_hash: null});
+		expect(zetaForA).toMatchObject({use_count: 1, last_used_at_ms: null, bio: null, banner_hash: null});
+		// Used tier (Beta, Zeta -> 1) sorts ahead of unused (Alpha -> 0); ties within a tier sort
+		// alphabetically regardless of Beta (1x) vs Zeta (3x, later timestamp).
+		const userBOrderForA = asUserA.filter((r) => r.owner_user_id === userB.userId).map((r) => r.name);
+		expect(userBOrderForA).toEqual(['Beta', 'Zeta', 'Alpha']);
+
+		const asUserB = await createBuilder<Array<ChannelPersonaMentionItem>>(harness, userB.token)
+			.get(`/channels/${channelId}/persona-mentions`)
+			.expect(HTTP_STATUS.OK)
+			.execute();
+
+		const zetaForB = asUserB.find((r) => r.name === 'Zeta');
+		const betaForB = asUserB.find((r) => r.name === 'Beta');
+		const mineForB = asUserB.find((r) => r.name === 'Mine');
+		expect(zetaForB).toMatchObject({use_count: 3, bio: null, banner_hash: null});
+		expect(zetaForB?.last_used_at_ms).toMatch(/^\d+$/);
+		expect(betaForB).toMatchObject({use_count: 1, bio: null, banner_hash: null});
+		expect(mineForB).toMatchObject({use_count: 1, last_used_at_ms: null, bio: null, banner_hash: null});
+		const userBOrderForB = asUserB.filter((r) => r.owner_user_id === userB.userId).map((r) => r.name);
+		expect(userBOrderForB).toEqual(['Zeta', 'Beta', 'Alpha']);
 	});
 });

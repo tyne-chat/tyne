@@ -82,8 +82,15 @@ and follow the placement rules in the root `AGENTS.md`.
   from before, and every persona until its owner picks a value) follows visibility through
   `effectiveMentionableBy` in `@fluxer/schema` (private: `self`, otherwise `everyone`), so "make
   private" keeps hiding an untouched persona; `Persona.storedMentionableBy` is what is stored and
-  written back, `mentionableBy` the effective value. A private persona offered to everyone reaches
-  others' suggestions without its bio, banner and pronouns. Clients take other accounts' personas
+  written back, `mentionableBy` the effective value. Mention suggestions always carry `bio: null`
+  and `banner_hash: null` (clients do not show them there), and a private persona offered to
+  everyone also hides `pronouns` from anyone other than its owner. Full usage counters
+  (`use_count`, `last_used_at_ms`) and recency ranking apply only to the caller's own personas;
+  other accounts' personas always carry `last_used_at_ms: null` and a quantized 4-tier ranking
+  weight in `use_count` (`coarsePersonaUseCountTier`: `0` → `0`, `1–9` → `1`, `10–99` → `3`, `100+`
+  → `10`), used for both server sorting/`limit` truncation and client ranking among personas without
+  local in-channel message recency — keeping common variants above rare ones without exposing exact
+  counts, timestamps, or fine-grained cross-user ordering. Clients take other accounts' personas
   only from the route, never from messages they have loaded, so the setting applies in one place.
 - **Knowing a persona's ID entitles anyone signed in to what a message from it shows**, whatever
   its visibility: `POST /personas/lookup` takes up to 100 `{user_id, persona_id}` pairs and returns

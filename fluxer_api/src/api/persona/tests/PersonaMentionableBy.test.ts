@@ -105,7 +105,7 @@ describe('persona mention setting', () => {
 			const [seenByMember] = await suggested(members[0], systemChannel.id);
 			expect(seenByMember).toMatchObject({name: 'Quiet', bio: null, pronouns: null, banner_hash: null});
 			const [seenByOwner] = await suggested(owner, systemChannel.id);
-			expect(seenByOwner).toMatchObject({name: 'Quiet', bio: 'A bio', pronouns: 'they/them'});
+			expect(seenByOwner).toMatchObject({name: 'Quiet', bio: null, banner_hash: null, pronouns: 'they/them'});
 		});
 	});
 

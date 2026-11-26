@@ -131,6 +131,24 @@ export function calculatePersonaFrecencyScore(
 	return countScore + recencyBoost;
 }
 
+/**
+ * Quantizes another account's lifetime usage count into 4 coarse ranking tiers:
+ * `0` -> `0`, `1–9` -> `1`, `10–99` -> `3`, `100+` -> `10` (clamping negative or `NaN` values to `0`).
+ *
+ * Returned in `ChannelPersonaMentionItem.use_count` alongside `last_used_at_ms: null` for other
+ * accounts' personas so shipped clients rank common personas ahead of rarely used variants without
+ * exposing exact usage counts, timestamps, or fine-grained cross-user ordering. The ceiling of `10`
+ * keeps the frecency count term (`~20.8`) below local in-channel recency boosts (`+35` for `<72h`
+ * up to `+120` for `<15m`), so recent speakers in the channel still rank first.
+ */
+export function coarsePersonaUseCountTier(useCount: number): number {
+	const safeCount = Math.max(0, useCount || 0);
+	if (safeCount >= 100) return 10;
+	if (safeCount >= 10) return 3;
+	if (safeCount >= 1) return 1;
+	return 0;
+}
+
 export function calculatePersonaMatchScore(
 	personaName: string,
 	query: string,
@@ -1341,7 +1359,9 @@ export class PersonaService {
 			return nameMatch || Boolean(tagMatch) || Boolean(ownerUserMatch) || Boolean(ownerNickMatch);
 		});
 
-		// Sort: match strength tier first, then frecency (recency + frequency), then alphabetical
+		// Sort: match strength tier first, then full frecency (recency + frequency) for the caller's
+		// own personas and coarse usage tier only (no recency, no exact counts) for other accounts'
+		// personas, then alphabetical.
 		const now = Date.now();
 		matched.sort((a, b) => {
 			const aOwner = userMap.get(a.userId);
@@ -1369,8 +1389,14 @@ export class PersonaService {
 			if (aMatch !== bMatch) {
 				return bMatch - aMatch;
 			}
-			const aFrecency = calculatePersonaFrecencyScore(a.useCount, a.lastUsedAtMs, now);
-			const bFrecency = calculatePersonaFrecencyScore(b.useCount, b.lastUsedAtMs, now);
+			const aFrecency =
+				a.userId === callerUserId
+					? calculatePersonaFrecencyScore(a.useCount, a.lastUsedAtMs, now)
+					: calculatePersonaFrecencyScore(coarsePersonaUseCountTier(a.useCount), null, now);
+			const bFrecency =
+				b.userId === callerUserId
+					? calculatePersonaFrecencyScore(b.useCount, b.lastUsedAtMs, now)
+					: calculatePersonaFrecencyScore(coarsePersonaUseCountTier(b.useCount), null, now);
 			if (Math.abs(bFrecency - aFrecency) > 0.001) {
 				return bFrecency - aFrecency;
 			}
@@ -1381,23 +1407,24 @@ export class PersonaService {
 		return results.map((persona) => {
 			const owner = userMap.get(persona.userId);
 			const userSettings = settingsMap.get(persona.userId.toString());
+			const isOwn = persona.userId === callerUserId;
 			// A private persona offered to everyone keeps its profile to its owner, as Private promises.
-			const profileHidden = persona.visibility === 'private' && persona.userId !== callerUserId;
+			const profileHidden = persona.visibility === 'private' && !isOwn;
 			return {
 				id: persona.id.toString(),
 				name: persona.name,
 				aliases: persona.aliases,
 				avatar_hash: persona.avatarHash,
-				banner_hash: profileHidden ? null : persona.bannerHash,
+				banner_hash: null,
 				display_tag_text: userSettings?.display_tag_text ?? null,
 				display_tag_icon: userSettings?.display_tag_icon ?? null,
 				pronouns: profileHidden ? null : persona.pronouns,
 				color: persona.color,
 				avatar_color: persona.avatarColor,
-				bio: profileHidden ? null : persona.bio,
+				bio: null,
 				visibility: persona.visibility,
-				use_count: persona.useCount,
-				last_used_at_ms: persona.lastUsedAtMs ? persona.lastUsedAtMs.toString() : null,
+				use_count: isOwn ? persona.useCount : coarsePersonaUseCountTier(persona.useCount),
+				last_used_at_ms: isOwn && persona.lastUsedAtMs ? persona.lastUsedAtMs.toString() : null,
 				owner_user_id: persona.userId.toString(),
 				owner_username: owner?.username ?? 'unknown',
 				owner_discriminator: owner?.discriminator ?? null,
