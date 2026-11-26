@@ -34,3 +34,5 @@ pub fn parse_markdown_json(
 
 // Fork: issue shorthands (`tyne/101`) in the trees the apps display.
 pub mod fork_issue_links;
+// Fork: inline formatting across blank lines (tyne-chat/tyne#641).
+pub(crate) mod fork_multiline_formatting;

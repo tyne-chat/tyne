@@ -410,7 +410,8 @@ the folder. A new folder guide is added to this list in the same commit.
 - `fluxer_messages/AGENTS.md`: the service that builds message objects and extracts mentions, and
   the persona fields it passes on.
 - `packages/markdown_parser/AGENTS.md`: the markdown parser shared by the web app, the server and the
-  mobile app, its two output formats, the persona mention and the issue shorthands.
+  mobile app, its two output formats, the persona mention, issue shorthands and multiline
+  formatting across blank lines.
 - `packages/schema/AGENTS.md`: the shared Zod schemas behind the OpenAPI spec and the Dart SDK, and
   the synced-preferences protobuf.
 

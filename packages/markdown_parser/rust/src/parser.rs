@@ -169,7 +169,19 @@ impl RuntimeState<'_> {
         let mut text = self.lines[self.current_line].text.clone();
         let base_offset = self.lines[self.current_line].offset;
         let mut consumed = 1usize;
+        // Fork: byte offsets dropped from whitespace-only blank lines bridged into this run.
+        let mut fork_dropped_bytes = Vec::new();
         while self.current_line + consumed < self.lines.len() {
+            // Fork: keep blank lines inside an inline run when another inline line follows, so
+            // inline formatting spans paragraphs as on Discord (tyne-chat/tyne#641).
+            if crate::fork_multiline_formatting::consume_blank_lines_before_inline(
+                self,
+                &mut text,
+                &mut consumed,
+                &mut fork_dropped_bytes,
+            ) {
+                continue;
+            }
             let next_line = &self.lines[self.current_line + consumed].text;
             let trimmed_next = trim_start(next_line);
             if crate::block::is_block_start(trimmed_next, self.parser.flags())
@@ -202,7 +214,11 @@ impl RuntimeState<'_> {
                 text.push('\n');
             }
         }
-        let inline_nodes = crate::inline::parse_inline(self.parser, &text, base_offset)?;
+        let inline_nodes = self.parser.fork_parse_inline_with_dropped_bytes(
+            &text,
+            base_offset,
+            &fork_dropped_bytes,
+        )?;
         for node in inline_nodes {
             ast.push(node);
             self.parser.node_count += 1;
@@ -212,5 +228,24 @@ impl RuntimeState<'_> {
         }
         self.current_line += consumed - 1;
         Ok(())
+    }
+}
+
+// Fork: adjust `emoji_context` when bridging whitespace-only blank lines (tyne-chat/tyne#641).
+impl MarkdownParser {
+    pub(crate) fn fork_parse_inline_with_dropped_bytes(
+        &mut self,
+        text: &str,
+        base_offset: usize,
+        dropped_bytes: &[usize],
+    ) -> Result<Vec<Node>, ParseError> {
+        if dropped_bytes.is_empty() {
+            return crate::inline::parse_inline(self, text, base_offset);
+        }
+        let original = Arc::clone(&self.emoji_context);
+        self.emoji_context = Arc::new(original.without_bytes_at(dropped_bytes));
+        let result = crate::inline::parse_inline(self, text, base_offset);
+        self.emoji_context = original;
+        result
     }
 }

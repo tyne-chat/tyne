@@ -4,8 +4,9 @@ One Rust crate, `fluxer_markdown_parser` in `rust/`, that parses Fluxer's Discor
 (mentions, timestamps, custom emoji, spoilers, alerts, tables) into a node tree. It is upstream's,
 and pure: text, flags and an emoji context go in, nodes come out. The web app, the messages service,
 the gateway's push previews and the mobile app all run it, so a change to its output reaches four
-places in two repositories. The fork adds two things: a user mention may name a persona,
-`<@user:persona>`, and issue shorthands (`tyne/101`) become links in the trees the apps display.
+places in two repositories. The fork adds three things: a user mention may name a persona,
+`<@user:persona>`, issue shorthands (`tyne/101`) become links in the trees the apps display, and
+inline formatting spans blank lines between paragraphs (`**line 1\n\nline 2**`).
 
 ## Who runs it
 
@@ -100,6 +101,23 @@ In `rust/src/`:
   Both matchers are tested against `tests/fork_issue_shorthand_cases.json`: change the rule in both
   and add the case there.
 
+## Multiline formatting across blank lines (the fork)
+
+- **What:** inline formatting (`**...**`, `*...*`, `***...***`, `__...__`, `_..._`, `~~...~~` and
+  mid-line `||...||`) spans blank lines between consecutive inline paragraphs, as on Discord
+  (tyne-chat/tyne#641). Inline code still stops at line breaks, and block elements (headings,
+  lists, blockquotes, alerts, fenced/midline code blocks, tables, subtext, block spoilers) still
+  break inline runs.
+- **Where:** `src/fork_multiline_formatting.rs` (`consume_blank_lines_before_inline`), called at
+  the top of `RuntimeState::parse_inline_line`'s loop in `parser.rs`. When blank lines are followed
+  by another inline line (not EOF or a block start), they are appended as `\n` (dropping
+  whitespace on whitespace-only blank lines, matching upstream's outer loop and the web/mobile
+  composer aligners) and any dropped byte offsets adjust `EmojiContext` through
+  `MarkdownParser::fork_parse_inline_with_dropped_bytes` at the end of `parser.rs`.
+- **Formats:** existing formatting nodes only (`Strong`, `Emphasis`, `Underline`, `Strikethrough`,
+  `Spoiler`), so JSON, binary, renderers and composer highlighters need no schema changes; mobile
+  picks it up when its `fluxer` submodule pointer advances.
+
 ## Changing the output
 
 What changes together:
@@ -133,11 +151,15 @@ upstream changes `MentionKind::User`, keep the writer's and the reader's 255 arm
 
 ## Where the fork's code sits
 
-Fork-owned: `src/fork_issue_links.rs`, `tests/fork_binary_envelope.rs`, `tests/fork_issue_links.rs`
-and `tests/fork_issue_shorthand_cases.json`. Inside upstream's files:
+Fork-owned: `src/fork_issue_links.rs`, `src/fork_multiline_formatting.rs`,
+`tests/fork_binary_envelope.rs`, `tests/fork_issue_links.rs`,
+`tests/fork_issue_shorthand_cases.json` and `tests/fork_multiline_formatting.rs`. Inside upstream's
+files:
 
-- `lib.rs` and `native.rs`: one line each handing the tree to `fork_issue_links`, and the module
-  declared in a `// Fork:` block at the end of `lib.rs`.
+- `lib.rs` and `native.rs`: one line each handing the tree to `fork_issue_links`, and the fork
+  modules declared in a `// Fork:` block at the end of `lib.rs`.
+- `parser.rs`: `consume_blank_lines_before_inline` hook in `parse_inline_line`, plus an appended
+  `// Fork:` `impl MarkdownParser` block for `fork_parse_inline_with_dropped_bytes`.
 
 - `links.rs`: `parse_mention`'s three-line user branch rewritten as about thirty, the largest edit,
   in a file upstream changes often. An id with a colon never passes `is_digit_only`, so the fork's
@@ -157,7 +179,9 @@ and `tests/fork_issue_shorthand_cases.json`. Inside upstream's files:
 
 - **Crate:** `tests/binary_envelope.rs` (upstream's golden bytes), `tests/fork_binary_envelope.rs`
   (golden bytes for kinds 0 and 255: it pins the fork's kind), `tests/fork_issue_links.rs` (issue
-  shorthands, against the shared cases and through both entry points), `tests/fixtures.rs`,
+  shorthands, against the shared cases and through both entry points),
+  `tests/fork_multiline_formatting.rs` (inline formatting across blank lines, block boundaries and
+  emoji offsets), `tests/fixtures.rs`,
   `tests/code_blocks.rs`, `tests/native_abi.rs` (the C ABI), and unit tests in `links.rs` and
   `plaintext.rs`. Also a criterion bench (`benches/parser.rs`) and a fuzz target in `fuzz/`, which
   is outside the workspace with its own lockfile. New fork tests go in `tests/fork_*.rs`.
@@ -165,8 +189,9 @@ and `tests/fork_issue_shorthand_cases.json`. Inside upstream's files:
   member of the root Cargo workspace, so the checks in `CHECKS.md` (`cargo fmt`, Clippy,
   `cargo test --workspace`) cover it, and the gateway steps build the NIF.
 - **Web:** `pnpm --filter fluxer_app wasm:codegen`, then `pnpm --filter fluxer_app test
-  src/features/messaging/utils/markdown/parser/MarkdownParserWasm.test.ts` (persona cases) and
-  `src/features/messaging/utils/markdown/PlaintextIssueShorthands.test.ts`.
+  src/features/messaging/utils/markdown/parser/MarkdownParserWasm.test.ts` (persona cases),
+  `src/features/messaging/utils/markdown/PlaintextIssueShorthands.test.ts` and
+  `src/features/lexical/composer/ForkMarkdownSpansMultiline.test.ts`.
 - **API:** `pnpm --filter fluxer_api test src/api/utils/ForkIssueShorthands.test.ts` (the shared
   cases and `extractURLs`).
 - **Gateway:** `fluxer_gateway/rust/crates/md_plaintext/tests/fork_persona_preview.rs`
