@@ -180,13 +180,19 @@ account's own profile window the display tag is not a button (`inProfile`, tyne-
   keys and a swipe on phones. Clicking a name in a persona's popout opens it there too
   (`PersonaGalleryNav` carries the request to the profile window); a persona the list does not hold
   (an unlisted one) is fetched on its own, and the tab then stays for it.
-- **Expand** (not on phones, not remembered; from the list or one persona's page): an attribute on the profile window hides upstream's
-  banner, name block and tabs by their `data-flx` names (`utils/PersonaGalleryExpand.ts`, whose test
-  fails if upstream renames one), and a slim bar takes their place. Expand turns into Restore in the
-  same place, last in the toolbar or the persona's row (#589); Escape folds it back unless a menu or
-  popout is open. A persona opened from its name in its popout (`openPersonaGallery(...,
-  {expanded: true})`) or picked from the gallery's list opens expanded, on computers (#702); the
-  gallery itself, opened from the Personas pill or tab, starts with the header.
+- **Expand & sticky toolbar** (not on phones, not remembered; from the list or one persona's page):
+  an attribute on the profile window hides upstream's banner, name block and tabs by their `data-flx`
+  names (`utils/PersonaGalleryExpand.ts`, whose test fails if upstream renames one) and clears the
+  body margin, while a slim sticky bar takes their place. On the list view (not a single persona's
+  detail card), Expand also marks `data-persona-gallery-full-window` so the modal drops its narrow
+  portrait box and fills the client viewport (#825). The compact search, sort, view and Expand/Restore
+  toolbar stays sticky (`position: sticky`) in both normal and expanded views, and typing a search or
+  changing sort scrolls the list back to the top. Expand turns into Restore in the same place, last in
+  the toolbar or the persona's row (#589); Escape folds it back unless a menu or popout is open. A
+  persona opened from its name in its popout (`openPersonaGallery(..., {expanded: true})`) or picked
+  from the gallery's list opens expanded (header hidden, keeping profile-card width) on computers
+  (#702), and clicking Back to the list fills the window; the gallery itself, opened from the Personas
+  pill or tab, starts with the header.
 - **Upstream hooks:** `ProfileBody.tsx` (the tab), `UserProfileModalShared.ts` (`ProfileTab`),
   `UserProfileModalUserInfo.tsx`, `ProfileCardUserInfo.tsx` (`personaNameExtras`, under the name),
   `UserProfilePopout.tsx`, `UserAreaPopout.tsx` (one's own avatar at the bottom left),

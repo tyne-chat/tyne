@@ -225,6 +225,7 @@ describe('PersonaGallery', () => {
 		expand.focus();
 		await act(async () => expand.click());
 		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		expect(modalRoot.getAttribute('data-persona-gallery-full-window')).toBe('true');
 		expect(query('persona.gallery.expanded-bar')?.textContent).toContain('bob');
 		expect(query('persona.gallery.expand')).toBeNull();
 		// Restore takes Expand's place, last in the toolbar, and the slim bar has no button
@@ -237,12 +238,15 @@ describe('PersonaGallery', () => {
 
 		await act(async () => collapse.click());
 		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		expect(modalRoot.hasAttribute('data-persona-gallery-full-window')).toBe(false);
 
 		await act(async () => query('persona.gallery.expand')!.click());
+		expect(modalRoot.getAttribute('data-persona-gallery-full-window')).toBe('true');
 		await act(async () => {
 			window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));
 		});
 		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		expect(modalRoot.hasAttribute('data-persona-gallery-full-window')).toBe(false);
 		expect(query('persona.gallery.expanded-bar')).toBeNull();
 
 		act(() => modalReactRoot.unmount());
@@ -263,6 +267,8 @@ describe('PersonaGallery', () => {
 
 		expect(query('persona.gallery.detail.name')?.textContent).toBe('Wren');
 		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		// Single-persona detail keeps the profile card's width; full-window is for the list (tyne-chat/tyne#825).
+		expect(modalRoot.hasAttribute('data-persona-gallery-full-window')).toBe(false);
 		expect(query('persona.gallery.expanded-bar')).not.toBeNull();
 		await act(async () => query('persona.gallery.collapse')!.click());
 		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
@@ -308,11 +314,14 @@ describe('PersonaGallery', () => {
 		await act(async () => query('persona.gallery.card.button')!.click());
 		expect(query('persona.gallery.detail.name')).not.toBeNull();
 		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
-		// Back to the list keeps the whole window; Restore folds it.
+		expect(modalRoot.hasAttribute('data-persona-gallery-full-window')).toBe(false);
+		// Back to the list keeps expanded and fills the whole client window; Restore folds it.
 		await act(async () => query('persona.gallery.detail.back')!.click());
 		expect(modalRoot.getAttribute('data-persona-gallery-expanded')).toBe('true');
+		expect(modalRoot.getAttribute('data-persona-gallery-full-window')).toBe('true');
 		await act(async () => query('persona.gallery.collapse')!.click());
 		expect(modalRoot.hasAttribute('data-persona-gallery-expanded')).toBe(false);
+		expect(modalRoot.hasAttribute('data-persona-gallery-full-window')).toBe(false);
 		act(() => modalReactRoot.unmount());
 		modalRoot.remove();
 
@@ -405,5 +414,34 @@ describe('PersonaGallery', () => {
 		await rightClick('[data-flx="persona.gallery.detail.avatar"]');
 		await rightClick('[data-flx="persona.gallery.detail.banner"]');
 		expect(opened()).toEqual(['avatar', 'banner']);
+	});
+
+	it('scrolls the enclosing scroller back to the top when searching from further down the list (tyne-chat/tyne#825)', async () => {
+		const scroller = document.createElement('div');
+		scroller.setAttribute('data-fluxer-scroll-container', 'true');
+		document.body.appendChild(scroller);
+		const mount = document.createElement('div');
+		scroller.appendChild(mount);
+		const scrollerRoot = createRoot(mount);
+		await act(async () => {
+			scrollerRoot.render(<PersonaGallery user={other} data-flx="persona.gallery-test.gallery" />);
+		});
+
+		scroller.scrollTop = 420;
+		const input = mount.querySelector('input[type="text"]') as HTMLInputElement;
+		await act(async () => {
+			const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+			setter.call(input, 'wren');
+			input.dispatchEvent(new Event('input', {bubbles: true}));
+		});
+		expect(scroller.scrollTop).toBe(0);
+
+		scroller.scrollTop = 200;
+		const clear = mount.querySelector('[data-flx="persona.gallery.clear-search"]') as HTMLElement;
+		await act(async () => clear.click());
+		expect(scroller.scrollTop).toBe(0);
+
+		act(() => scrollerRoot.unmount());
+		scroller.remove();
 	});
 });

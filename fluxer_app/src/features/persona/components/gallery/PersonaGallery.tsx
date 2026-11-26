@@ -12,6 +12,7 @@ import {personaAvatarUrls} from '@app/features/persona/utils/PersonaAvatarUrls';
 import * as BulkMessages from '@app/features/persona/utils/PersonaBulkMessages';
 import {
 	PERSONA_GALLERY_EXPANDED_ATTRIBUTE,
+	PERSONA_GALLERY_FULL_WINDOW_ATTRIBUTE,
 	PROFILE_MODAL_ROOT_SELECTOR,
 } from '@app/features/persona/utils/PersonaGalleryExpand';
 import {
@@ -101,6 +102,11 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 		if (request.expanded && !isMobile) setExpanded(true);
 	}, [pendingPersona, user.id, isMobile]);
 	const rootRef = useRef<HTMLDivElement>(null);
+	const isFullWindow = expanded && openId === null;
+	const scrollListToTop = () => {
+		const scroller = rootRef.current?.closest('[data-fluxer-scroll-container="true"]');
+		if (scroller && scroller.scrollTop > 0) scroller.scrollTop = 0;
+	};
 	useEffect(() => {
 		if (!expanded) return;
 		const modalRoot = rootRef.current?.closest(PROFILE_MODAL_ROOT_SELECTOR) ?? null;
@@ -120,6 +126,16 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 			window.removeEventListener('keydown', handleKeyDown, {capture: true});
 		};
 	}, [expanded]);
+	// On the list view (not a single persona's profile card), Expand fills the client viewport so
+	// large banner galleries are not trapped in the narrow profile box (tyne-chat/tyne#825).
+	useEffect(() => {
+		if (!isFullWindow) return;
+		const modalRoot = rootRef.current?.closest(PROFILE_MODAL_ROOT_SELECTOR) ?? null;
+		modalRoot?.setAttribute(PERSONA_GALLERY_FULL_WINDOW_ATTRIBUTE, 'true');
+		return () => {
+			modalRoot?.removeAttribute(PERSONA_GALLERY_FULL_WINDOW_ATTRIBUTE);
+		};
+	}, [isFullWindow]);
 	const expandedBar =
 		expanded && !isMobile ? (
 			<div className={styles.expandedBar} data-flx="persona.gallery.expanded-bar">
@@ -146,9 +162,9 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 				data-flx={expanded ? 'persona.gallery.collapse' : 'persona.gallery.expand'}
 			>
 				{expanded ? (
-					<ArrowsInSimpleIcon size={18} weight="bold" data-flx="persona.gallery.collapse-icon" />
+					<ArrowsInSimpleIcon size={16} weight="bold" data-flx="persona.gallery.collapse-icon" />
 				) : (
-					<ArrowsOutSimpleIcon size={18} weight="bold" data-flx="persona.gallery.expand-icon" />
+					<ArrowsOutSimpleIcon size={16} weight="bold" data-flx="persona.gallery.expand-icon" />
 				)}
 			</button>
 		</Tooltip>
@@ -225,6 +241,7 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 					onChange={(value) => {
 						setSort(value);
 						setSortSheetOpen(false);
+						scrollListToTop();
 					}}
 					options={sortOptions}
 					data-flx="persona.gallery.sort-panel.radio-group"
@@ -235,11 +252,11 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 	const sortButton = (
 		<Button
 			variant="secondary"
-			small
+			compact
 			fitContent
-			leftIcon={<SortAscendingIcon size={16} weight="bold" data-flx="persona.gallery.sort-icon" />}
+			leftIcon={<SortAscendingIcon size={15} weight="bold" data-flx="persona.gallery.sort-icon" />}
 			rightIcon={<CaretDownIcon size={12} weight="bold" data-flx="persona.gallery.sort-caret" />}
-			className={forumStyles.filterPill}
+			className={clsx(forumStyles.filterPill, styles.sortButton)}
 			aria-haspopup="menu"
 			aria-label={`${i18n._(M.SORT_PERSONAS_DESCRIPTOR)}: ${sortLabel}`}
 			onClick={isMobile ? () => setSortSheetOpen(true) : undefined}
@@ -392,7 +409,10 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 					<Input
 						type="text"
 						value={query}
-						onChange={(e) => setQuery(e.target.value)}
+						onChange={(e) => {
+							setQuery(e.target.value);
+							scrollListToTop();
+						}}
 						placeholder={
 							directory.isOwn
 								? i18n._(M.SEARCH_OWN_PERSONAS_DESCRIPTOR)
@@ -403,12 +423,15 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 								? i18n._(M.SEARCH_OWN_PERSONAS_DESCRIPTOR)
 								: i18n._(M.SEARCH_PERSONAS_OF_DESCRIPTOR, {name: user.displayName})
 						}
-						leftIcon={<MagnifyingGlassIcon size={16} weight="bold" data-flx="persona.gallery.search-icon" />}
+						leftIcon={<MagnifyingGlassIcon size={15} weight="bold" data-flx="persona.gallery.search-icon" />}
 						rightElement={
 							query ? (
 								<button
 									type="button"
-									onClick={() => setQuery('')}
+									onClick={() => {
+										setQuery('');
+										scrollListToTop();
+									}}
 									className={styles.clearSearch}
 									aria-label={i18n._(CLEAR_SEARCH_DESCRIPTOR)}
 									data-flx="persona.gallery.clear-search"
@@ -417,7 +440,7 @@ export const PersonaGallery = observer(({user, onClose, isMobile = false}: Perso
 								</button>
 							) : undefined
 						}
-						className={styles.search}
+						className={clsx(styles.search, query && styles.searchWithClear)}
 						data-flx="persona.gallery.search"
 					/>
 				</div>
@@ -509,7 +532,7 @@ const PersonaViewSwitch = ({
 						onClick={() => onChange(option)}
 						data-flx="persona.gallery.view-switch.button"
 					>
-						<Icon size={18} weight="bold" data-flx="persona.gallery.view-switch.icon" />
+						<Icon size={16} weight="bold" data-flx="persona.gallery.view-switch.icon" />
 					</button>
 				</Tooltip>
 			))}
