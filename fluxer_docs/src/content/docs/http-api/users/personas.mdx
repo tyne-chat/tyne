@@ -194,15 +194,15 @@ A persona that can be mentioned in a channel, with its owner.
 | name | string | The persona display name |
 | aliases? | array[string] | Other names to find the persona by when searching or mentioning; never shown (up to 10, 100 characters each) |
 | avatar_hash? | ?string | Avatar asset hash |
-| banner_hash? | ?string | Banner asset hash |
+| banner_hash? | ?string | Always null in mention suggestions |
 | display_tag_text? | ?string | Optional display tag text |
 | display_tag_icon? | ?string | Optional display tag icon |
 | pronouns? | ?string | Optional pronouns |
 | color? | ?integer | Optional accent color integer |
-| bio? | ?string | Optional persona bio |
+| bio? | ?string | Always null in mention suggestions |
 | visibility | string | Visibility setting |
-| use_count | integer | Usage counter for frecency ranking |
-| last_used_at_ms? | ?string | Timestamp in ms when the persona was last used |
+| use_count | integer | Exact usage count for the caller's own personas; coarse ranking weight (0, 1, 3, or 10 for 0, 1-9, 10-99, or 100+ uses) for other accounts' personas |
+| last_used_at_ms? | ?string | Timestamp in ms when the persona was last used for the caller's own personas; always null for other accounts' personas |
 | owner_user_id | snowflake | User ID of the persona owner |
 | owner_username | string | Username of the persona owner |
 | owner_discriminator? | ?string | Discriminator of the persona owner |
@@ -293,7 +293,7 @@ The stored image. Pass `hash` as the `avatar_hash` or `banner_hash` of a [person
 
 <RouteHeader method="GET" path="/v1/channels/{channel_id}/persona-mentions" />
 
-Returns the personas that can be mentioned in a channel the caller can see, by their [mention setting](#mention-setting): the caller's own personas unless set to `nobody`, and those of the community's other members or the direct message's other recipients set to `everyone`. The best matches for `q` come first, then the most used.
+Returns the personas that can be mentioned in a channel the caller can see, by their [mention setting](#mention-setting): the caller's own personas unless set to `nobody`, and those of the community's other members or the direct message's other recipients set to `everyone`. The best matches for `q` come first, then frecency for the caller's own personas and coarse usage tier for other accounts' personas, then alphabetical.
 
 ### Path parameters
 
