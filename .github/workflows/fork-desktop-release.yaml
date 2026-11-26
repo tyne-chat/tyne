@@ -532,9 +532,12 @@ jobs:
         env:
           RUN_ID: ${{ github.run_id }}
         run: |
+          # This Mac keeps the working folder between jobs: start without an earlier run's files,
+          # whichever way this run's arrive.
+          rm -rf release_assets
           from="/Users/Shared/tyne-handoff-desktop/$RUN_ID"
           if [ -d "$from" ] && ls "$from"/*.dmg >/dev/null 2>&1; then
-            rm -rf release_assets && mkdir release_assets
+            mkdir release_assets
             cp -R "$from"/. release_assets/
             ls -l release_assets
             echo "found=true" >> "$GITHUB_OUTPUT"

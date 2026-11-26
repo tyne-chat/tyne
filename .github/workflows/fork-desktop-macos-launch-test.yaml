@@ -43,6 +43,11 @@ jobs:
             fluxer_desktop/scripts/fork-test-macos-launch-cherry.sh
           sparse-checkout-cone-mode: false
 
+      # A runner of our own keeps its working folder between jobs (GitHub's are fresh), so files of
+      # an earlier run must not sit next to this run's (2.1.38's first run found 2.1.37's DMG too).
+      - name: Clear files from an earlier run
+        run: rm -rf release_assets
+
       # Fork: on cherry the signing job left the signed disk image in a folder this account can read
       # (tyne-chat/tyne#928): take it from there rather than from GitHub's artifact storage, which
       # that network reaches only slowly. A rerun on an earlier run's files, or a folder the nightly
