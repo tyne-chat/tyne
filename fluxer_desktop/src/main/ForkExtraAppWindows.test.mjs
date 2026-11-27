@@ -15,7 +15,7 @@ import {installElectronStub} from './ForkLocalAppTestSupport.test.mjs';
 
 const WINDOW_MODULE_URL = new URL('./Window.ts', import.meta.url).href;
 const {FORK_APP_WINDOW_CHANNELS} = await import('@fluxer/desktop_ipc/src/ForkAppWindowContract');
-const {DESKTOP_APP_URL} = await import('@electron/common/Constants');
+const {DESKTOP_APP_URL, DESKTOP_FIRST_CONTENT_PAINTED_CHANNEL} = await import('@electron/common/Constants');
 const {FORK_EXTRA_APP_WINDOWS_MAX, FORK_WINDOW_SESSION_FILE_NAME} = await import('./ForkWindowSession.ts');
 
 const SESSION_SAVE_DELAY_MS = 500;
@@ -79,6 +79,12 @@ function createWorld() {
 			// As Electron does once the reload commits; upstream's reloadMainWindowForUpdate waits for it.
 			queueMicrotask(() => this.emit('did-navigate'));
 		}
+		getZoomFactor() {
+			return 1;
+		}
+		executeJavaScript() {
+			return Promise.resolve();
+		}
 		isDestroyed() {
 			return false;
 		}
@@ -99,11 +105,18 @@ function createWorld() {
 			this.minimized = false;
 			this.maximized = false;
 			this.destroyed = false;
+			this.opacityCalls = [];
 			this.webContents = lenient(new FakeWebContents());
 			world.registry.contents.set(this.webContents.id, this.webContents);
 		}
 		getNormalBounds() {
 			return {...this.bounds};
+		}
+		getContentBounds() {
+			return {...this.bounds};
+		}
+		setOpacity(opacity) {
+			this.opacityCalls.push(opacity);
 		}
 		getBounds() {
 			return {...this.bounds};
@@ -402,6 +415,50 @@ describe('extra app windows (Window.ts)', () => {
 			assert.equal(extra.webContents.reloads, 1);
 			assert.equal(main.webContents.reloads, 0);
 		});
+	});
+
+	test('revealing a maximized window clears the repaint deadline timer once repainted', async () => {
+		const originalPlatformDescriptor = Object.getOwnPropertyDescriptor(process, 'platform');
+		const originalSetTimeout = globalThis.setTimeout;
+		const originalClearTimeout = globalThis.clearTimeout;
+		const activeRevealTimers = new Set();
+
+		fs.writeFileSync(
+			path.join(world.userData, 'window-state.json'),
+			JSON.stringify({x: 100, y: 100, width: 1280, height: 800, isMaximized: true}),
+		);
+
+		try {
+			Object.defineProperty(process, 'platform', {value: 'win32', configurable: true});
+			globalThis.setTimeout = (fn, delay, ...args) => {
+				const handle = originalSetTimeout(fn, delay, ...args);
+				if (delay === 250) {
+					activeRevealTimers.add(handle);
+				}
+				return handle;
+			};
+			globalThis.clearTimeout = (handle) => {
+				activeRevealTimers.delete(handle);
+				return originalClearTimeout(handle);
+			};
+
+			const main = windowModule.createWindow();
+			main.emit('ready-to-show');
+			await Promise.resolve();
+			world.ipcMain.emit(DESKTOP_FIRST_CONTENT_PAINTED_CHANNEL, ipcEventFrom(main));
+			await Promise.resolve();
+			await Promise.resolve();
+			await Promise.resolve();
+
+			assert.deepEqual(main.opacityCalls, [0, 1]);
+			assert.equal(activeRevealTimers.size, 0, 'MAXIMIZED_REVEAL_REPAINT_TIMEOUT_MS timer must be cleared');
+		} finally {
+			globalThis.setTimeout = originalSetTimeout;
+			globalThis.clearTimeout = originalClearTimeout;
+			if (originalPlatformDescriptor) {
+				Object.defineProperty(process, 'platform', originalPlatformDescriptor);
+			}
+		}
 	});
 });
 

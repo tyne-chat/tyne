@@ -62,12 +62,18 @@ export type DiscoveryApplicationPatchRequest = z.infer<typeof DiscoveryApplicati
 
 export const DiscoverySearchQuery = z.object({
 	query: z.string().max(100).optional().describe('Search query'),
-	category: z.coerce.number().int().min(0).max(DISCOVERY_CATEGORY_MAX).optional().describe('Filter by category'),
+	category: z.preprocess(
+		rejectEmptyQueryNumber,
+		z.coerce.number().int().min(0).max(DISCOVERY_CATEGORY_MAX).optional().describe('Filter by category'),
+	),
 	language: DiscoveryLanguageSchema.optional().describe('Filter by primary community language'),
 	tag: z.string().max(DISCOVERY_TAG_MAX_LENGTH).optional().describe('Filter by a specific custom tag'),
 	sort_by: z.enum(['member_count', 'online_count', 'relevance']).optional().describe('Sort order'),
 	limit: z.coerce.number().int().min(1).max(48).optional().default(24).describe('Number of results to return'),
-	offset: z.coerce.number().int().min(0).optional().default(0).describe('Pagination offset'),
+	offset: z.preprocess(
+		rejectEmptyQueryNumber,
+		z.coerce.number().int().min(0).optional().default(0).describe('Pagination offset'),
+	),
 });
 
 export type DiscoverySearchQuery = z.infer<typeof DiscoverySearchQuery>;
@@ -232,7 +238,10 @@ export type DiscoveryCategoryIdParam = z.infer<typeof DiscoveryCategoryIdParam>;
 
 export const DiscoveryAdminCategoryListingQuery = z.object({
 	limit: z.coerce.number().int().min(1).max(100).optional().default(50).describe('Number of listings to return'),
-	offset: z.coerce.number().int().min(0).max(10000).optional().default(0).describe('Pagination offset'),
+	offset: z.preprocess(
+		rejectEmptyQueryNumber,
+		z.coerce.number().int().min(0).max(10000).optional().default(0).describe('Pagination offset'),
+	),
 });
 
 export type DiscoveryAdminCategoryListingQuery = z.infer<typeof DiscoveryAdminCategoryListingQuery>;
@@ -258,3 +267,14 @@ export type DiscoveryAdminListingBulkCategoryResponse = z.infer<typeof Discovery
 
 export const DiscoveryAdminPendingApplicationListResponse = z.array(DiscoveryAdminPendingApplicationResponse);
 export const DiscoveryAdminListedGuildListResponse = z.array(DiscoveryAdminListedGuildResponse);
+
+// Fork: reject empty strings, null (from convertEmptyValuesToNull), booleans, and non-scalar values before z.coerce.number() turns them into 0 or 1.
+function rejectEmptyQueryNumber(value: unknown): unknown {
+	if (value === undefined || typeof value === 'number') {
+		return value;
+	}
+	if (typeof value === 'string' && value.trim().length > 0) {
+		return value;
+	}
+	return Number.NaN;
+}

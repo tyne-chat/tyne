@@ -300,7 +300,8 @@ function checkZodSchemas(source, ast, lines, ignored, report) {
 						const hasPositiveMin =
 							/\.positive\s*\(\s*\)/.test(propSrc) ||
 							[...propSrc.matchAll(/\.min\s*\(\s*([+-]?\d+)/g)].some((m) => Number(m[1]) >= 1);
-						if (!hasPositiveMin) {
+						const hasEmptyGuard = /\bz\.preprocess\s*\(/.test(propSrc);
+						if (!hasPositiveMin && !hasEmptyGuard) {
 							report(
 								'zod-schema-trap',
 								line,

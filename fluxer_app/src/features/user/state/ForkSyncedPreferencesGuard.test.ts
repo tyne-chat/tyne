@@ -179,4 +179,56 @@ describe('SyncedPreferences protobuf fork range and web preservation guards', ()
 			spy.mockRestore();
 		}
 	});
+
+	it('preserves upstream mobile AccessibilitySettings fields (#33, #64, #67) across web applyMessage -> toMessage round-trips', async () => {
+		vi.resetModules();
+		const syncedFieldMod = await import('@app/features/user/state/SyncedField');
+		let captured: SyncedFieldConfig<Record<string, unknown>, 'accessibility', AccessibilitySettings> | null = null;
+		const spy = vi.spyOn(syncedFieldMod, 'makeSyncedField').mockImplementation(async (_store, config) => {
+			if (config.field === 'accessibility') {
+				captured = config as unknown as SyncedFieldConfig<
+					Record<string, unknown>,
+					'accessibility',
+					AccessibilitySettings
+				>;
+			}
+		});
+		try {
+			const Accessibility = (await import('@app/features/accessibility/state/Accessibility')).default;
+			expect(captured).not.toBeNull();
+
+			const mobileFields = [
+				'showSelectedChannelTypingIndicator',
+				'mobileSplashZoomAnimation',
+				'announceCallJoinsAndLeaves',
+			] as const;
+
+			for (const boolVal of [false, true]) {
+				const store = Object.create(Object.getPrototypeOf(Accessibility)) as Record<string, unknown>;
+				Object.assign(store, Accessibility);
+				const incoming = create(AccessibilitySettingsSchema, {
+					showSelectedChannelTypingIndicator: boolVal,
+					mobileSplashZoomAnimation: boolVal,
+					announceCallJoinsAndLeaves: boolVal,
+				});
+				captured!.applyMessage(store, incoming);
+				const msg = captured!.toMessage(store);
+				const roundTripped = create(AccessibilitySettingsSchema, msg);
+				for (const fieldName of mobileFields) {
+					expect(roundTripped[fieldName], `field ${fieldName} for ${String(boolVal)}`).toBe(boolVal);
+				}
+			}
+
+			// When unset on server, web must leave them undefined rather than writing default false
+			const unsetStore = Object.create(Object.getPrototypeOf(Accessibility)) as Record<string, unknown>;
+			Object.assign(unsetStore, Accessibility);
+			captured!.applyMessage(unsetStore, create(AccessibilitySettingsSchema, {}));
+			const unsetMsg = captured!.toMessage(unsetStore);
+			for (const fieldName of mobileFields) {
+				expect((unsetMsg as Record<string, unknown>)[fieldName], `unset ${fieldName}`).toBeUndefined();
+			}
+		} finally {
+			spy.mockRestore();
+		}
+	});
 });

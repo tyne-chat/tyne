@@ -2,6 +2,14 @@
 	"version": 1,
 	"entries": [
 		{
+			"linter": "backend-desktop",
+			"rule": "rust-async-blocking-fs",
+			"file": "fluxer_media_proxy/src/storage/local.rs",
+			"enclosing": "open_local_object",
+			"symbol": "std::fs::File",
+			"reason": "std::fs::File::open and metadata() run inside blocking(move || ...) (tokio::task::spawn_blocking), not on the async executor thread; tokio::fs::File::from_std only wraps the already-opened handle."
+		},
+		{
 			"linter": "web-safety",
 			"rule": "mobx-stale-memo",
 			"file": "fluxer_app/src/features/channel/components/emoji_picker/hooks/useEmojiCategories.ts",

@@ -775,10 +775,14 @@ function revealMaximizedAfterRepaint(window: BrowserWindow, maximize: () => void
 		})`,
 		true,
 	);
-	const deadline = new Promise<void>((resolve) => setTimeout(resolve, MAXIMIZED_REVEAL_REPAINT_TIMEOUT_MS));
+	let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+	const deadline = new Promise<void>((resolve) => {
+		deadlineTimer = setTimeout(resolve, MAXIMIZED_REVEAL_REPAINT_TIMEOUT_MS);
+	});
 	void Promise.race([repainted, deadline])
 		.catch(() => {})
 		.finally(() => {
+			if (deadlineTimer !== undefined) clearTimeout(deadlineTimer);
 			if (!window.isDestroyed()) window.setOpacity(1);
 		});
 }

@@ -239,4 +239,20 @@ describe('fork-backend-desktop-lint', () => {
 			"fluxer_desktop/src/main/ExampleGuards.ts:12:2: [desktop-ipc-sender] `ipcMain.handle('unguarded-custom')` lacks renderer sender validation",
 		]);
 	});
+
+	it('allows z.coerce.number().min(0) when wrapped in z.preprocess while flagging unguarded coerce', () => {
+		const problems = lint(
+			'packages/schema/src/domains/guild/ExampleSchemas.ts',
+			[
+				'export const QuerySchema = z.object({',
+				'\tsafeOffset: z.preprocess(rejectEmptyQueryNumber, z.coerce.number().int().min(0).optional()),',
+				'\tbadOffset: z.coerce.number().int().min(0).optional(),',
+				'});',
+			].join('\n'),
+			'all',
+		);
+		expect(problems).toEqual([
+			'packages/schema/src/domains/guild/ExampleSchemas.ts:3:13: [zod-schema-trap] `z.coerce.number()` without `min(>=1)` in `QuerySchema` turns empty `?k=` (null) into 0 (use `createQueryIntegerType` or positive `min`; tyne-chat/tyne#200)',
+		]);
+	});
 });

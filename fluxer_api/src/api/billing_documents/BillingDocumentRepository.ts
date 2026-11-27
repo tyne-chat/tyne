@@ -22,6 +22,10 @@ import type {
 } from '@app/api/database/types/BillingDocumentTypes';
 import {stockholmDate} from '@pkgs/email/src/billing_documents/BillingDocumentContent';
 
+// Fork imports.
+
+import {BatchBuilder} from '@app/api/database/CassandraQueryExecution';
+
 const HEAD_NUMBER = 0n;
 const RECENT_CLAIM_SCAN = 200;
 const MAX_CLAIM_ATTEMPTS = 100;
@@ -197,22 +201,30 @@ export class BillingDocumentRepository {
 		if (!stored) {
 			throw new Error(`Billing document ${row.document_id} could not be stored`);
 		}
+		// Fork: batch user and month index writes atomically (tyne-chat/tyne#948).
+		const batch = new BatchBuilder();
+		let hasIndexWrites = false;
 		if (stored.user_id != null) {
-			await upsertOne(
+			batch.addPrepared(
 				BillingDocumentsByUser.upsertAll({
 					user_id: stored.user_id,
 					issued_at: stored.issued_at,
 					document_id: stored.document_id,
 				}),
 			);
+			hasIndexWrites = true;
 		}
 		if (indexMonth) {
-			await upsertOne(
+			batch.addPrepared(
 				BillingDocumentsByMonth.upsertAll({
 					month: stockholmDate(stored.issued_at.toISOString()).slice(0, 7),
 					document_id: stored.document_id,
 				}),
 			);
+			hasIndexWrites = true;
+		}
+		if (hasIndexWrites) {
+			await batch.execute();
 		}
 		return stored;
 	}

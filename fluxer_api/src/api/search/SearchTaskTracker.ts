@@ -32,13 +32,20 @@ export async function drainSearchTasks(): Promise<void> {
 		if (remainingMs <= 0) {
 			throw new Error(`Timed out waiting for pending search tasks (${pendingTasks.size} remaining)`);
 		}
-		await Promise.race([
-			Promise.allSettled(snapshot),
-			new Promise<void>((_resolve, reject) => {
-				setTimeout(() => {
-					reject(new Error(`Timed out waiting for pending search tasks (${pendingTasks.size} remaining)`));
-				}, remainingMs);
-			}),
-		]);
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		try {
+			await Promise.race([
+				Promise.allSettled(snapshot),
+				new Promise<void>((_resolve, reject) => {
+					timer = setTimeout(() => {
+						reject(new Error(`Timed out waiting for pending search tasks (${pendingTasks.size} remaining)`));
+					}, remainingMs);
+				}),
+			]);
+		} finally {
+			if (timer !== undefined) {
+				clearTimeout(timer);
+			}
+		}
 	}
 }

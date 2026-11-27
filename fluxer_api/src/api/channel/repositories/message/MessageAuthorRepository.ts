@@ -3,7 +3,7 @@
 import type {ChannelID, MessageID, UserID} from '@app/api/BrandedTypes';
 import {createChannelID, createMessageID} from '@app/api/BrandedTypes';
 import type {MessageDataRepository} from '@app/api/channel/repositories/message/MessageDataRepository';
-import {deleteOneOrMany, fetchMany, upsertOne} from '@app/api/database/CassandraQueryExecution';
+import {fetchMany} from '@app/api/database/CassandraQueryExecution';
 import {Db} from '@app/api/database/CassandraTypes';
 import {Messages, MessagesByAuthorV2} from '@app/api/Tables';
 import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
@@ -11,6 +11,7 @@ import * as BucketUtils from '@fluxer/snowflake/src/SnowflakeBuckets';
 // Fork imports.
 
 import type {PersonaID} from '@app/api/BrandedTypes';
+import {BatchBuilder} from '@app/api/database/CassandraQueryExecution';
 
 function listMessagesByAuthorQuery(limit: number, usePagination: boolean) {
 	return MessagesByAuthorV2.select({
@@ -66,15 +67,17 @@ export class MessageAuthorRepository {
 		const bucket = BucketUtils.makeBucket(messageId);
 		const message = await this.messageDataRepo.getMessage(channelId, messageId);
 		if (!message) return;
+		// Fork: batch primary and author-index updates atomically to prevent index desync.
+		const batch = new BatchBuilder();
 		if (message.authorId != null) {
-			await deleteOneOrMany(
+			batch.addPrepared(
 				MessagesByAuthorV2.deleteByPk({
 					author_id: message.authorId,
 					message_id: messageId,
 				}),
 			);
 		}
-		await upsertOne(
+		batch.addPrepared(
 			MessagesByAuthorV2.upsertAll({
 				author_id: newAuthorId,
 				channel_id: channelId,
@@ -92,7 +95,7 @@ export class MessageAuthorRepository {
 				patch.persona_id = Db.clear();
 			}
 		}
-		await upsertOne(
+		batch.addPrepared(
 			Messages.patchByPk(
 				{
 					channel_id: channelId,
@@ -102,5 +105,6 @@ export class MessageAuthorRepository {
 				patch,
 			),
 		);
+		await batch.execute();
 	}
 }

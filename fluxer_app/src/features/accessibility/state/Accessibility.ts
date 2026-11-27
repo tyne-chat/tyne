@@ -589,6 +589,10 @@ export interface AccessibilitySettings {
 	spaceAfterEmoji: boolean;
 	// Fork: mobile-authored image alt-text toggle preserved across web round-trips (tyne-chat/tyne#145).
 	showAltTextOnImages?: boolean;
+	// Fork: mobile-authored upstream fields preserved across web round-trips (tyne-chat/tyne#948).
+	showSelectedChannelTypingIndicator?: boolean;
+	mobileSplashZoomAnimation?: boolean;
+	announceCallJoinsAndLeaves?: boolean;
 	saturationFactor: number;
 	alwaysUnderlineLinks: boolean;
 	dimStrikethroughText: boolean;
@@ -706,6 +710,10 @@ class Accessibility {
 	spaceAfterEmoji = true;
 	// Fork: tyne-chat/tyne#145.
 	showAltTextOnImages?: boolean = undefined;
+	// Fork: tyne-chat/tyne#948.
+	showSelectedChannelTypingIndicator?: boolean = undefined;
+	mobileSplashZoomAnimation?: boolean = undefined;
+	announceCallJoinsAndLeaves?: boolean = undefined;
 	saturationFactor = 1;
 	alwaysUnderlineLinks = false;
 	dimStrikethroughText = true;
@@ -829,6 +837,9 @@ class Accessibility {
 				'messageDoubleClickReplies',
 				'spaceAfterEmoji',
 				'showAltTextOnImages',
+				'showSelectedChannelTypingIndicator',
+				'mobileSplashZoomAnimation',
+				'announceCallJoinsAndLeaves',
 				'saturationFactor',
 				'alwaysUnderlineLinks',
 				'dimStrikethroughText',
@@ -897,6 +908,9 @@ class Accessibility {
 				messageDoubleClickReplies: s.messageDoubleClickReplies,
 				spaceAfterEmoji: s.spaceAfterEmoji,
 				showAltTextOnImages: s.showAltTextOnImages,
+				showSelectedChannelTypingIndicator: s.showSelectedChannelTypingIndicator,
+				mobileSplashZoomAnimation: s.mobileSplashZoomAnimation,
+				announceCallJoinsAndLeaves: s.announceCallJoinsAndLeaves,
 				saturationFactor: s.saturationFactor,
 				alwaysUnderlineLinks: s.alwaysUnderlineLinks,
 				dimStrikethroughText: s.dimStrikethroughText,
@@ -974,6 +988,11 @@ class Accessibility {
 				s.spaceAfterEmoji = m.spaceAfterEmoji ?? true;
 				// Fork: preserve mobile-authored showAltTextOnImages across web sync (tyne-chat/tyne#145).
 				if (m.showAltTextOnImages !== undefined) s.showAltTextOnImages = m.showAltTextOnImages;
+				// Fork: preserve upstream mobile-authored fields across web sync (tyne-chat/tyne#948).
+				if (m.showSelectedChannelTypingIndicator !== undefined)
+					s.showSelectedChannelTypingIndicator = m.showSelectedChannelTypingIndicator;
+				if (m.mobileSplashZoomAnimation !== undefined) s.mobileSplashZoomAnimation = m.mobileSplashZoomAnimation;
+				if (m.announceCallJoinsAndLeaves !== undefined) s.announceCallJoinsAndLeaves = m.announceCallJoinsAndLeaves;
 				if (m.saturationFactor !== undefined) s.saturationFactor = m.saturationFactor;
 				s.alwaysUnderlineLinks = m.alwaysUnderlineLinks;
 				if (m.dimStrikethroughText !== undefined) s.dimStrikethroughText = m.dimStrikethroughText;
@@ -1305,6 +1324,13 @@ class Accessibility {
 		if (validated.spaceAfterEmoji !== undefined) this.spaceAfterEmoji = validated.spaceAfterEmoji;
 		// Fork: tyne-chat/tyne#145.
 		if (validated.showAltTextOnImages !== undefined) this.showAltTextOnImages = validated.showAltTextOnImages;
+		// Fork: tyne-chat/tyne#948.
+		if (validated.showSelectedChannelTypingIndicator !== undefined)
+			this.showSelectedChannelTypingIndicator = validated.showSelectedChannelTypingIndicator;
+		if (validated.mobileSplashZoomAnimation !== undefined)
+			this.mobileSplashZoomAnimation = validated.mobileSplashZoomAnimation;
+		if (validated.announceCallJoinsAndLeaves !== undefined)
+			this.announceCallJoinsAndLeaves = validated.announceCallJoinsAndLeaves;
 		if (validated.saturationFactor !== undefined) this.saturationFactor = validated.saturationFactor;
 		if (validated.alwaysUnderlineLinks !== undefined) this.alwaysUnderlineLinks = validated.alwaysUnderlineLinks;
 		if (validated.dimStrikethroughText !== undefined) this.dimStrikethroughText = validated.dimStrikethroughText;
@@ -1442,6 +1468,16 @@ class Accessibility {
 			messageDoubleClickReplies: data.messageDoubleClickReplies ?? this.messageDoubleClickReplies,
 			spaceAfterEmoji: data.spaceAfterEmoji ?? this.spaceAfterEmoji,
 			showAltTextOnImages: data.showAltTextOnImages !== undefined ? data.showAltTextOnImages : this.showAltTextOnImages,
+			showSelectedChannelTypingIndicator:
+				data.showSelectedChannelTypingIndicator !== undefined
+					? data.showSelectedChannelTypingIndicator
+					: this.showSelectedChannelTypingIndicator,
+			mobileSplashZoomAnimation:
+				data.mobileSplashZoomAnimation !== undefined ? data.mobileSplashZoomAnimation : this.mobileSplashZoomAnimation,
+			announceCallJoinsAndLeaves:
+				data.announceCallJoinsAndLeaves !== undefined
+					? data.announceCallJoinsAndLeaves
+					: this.announceCallJoinsAndLeaves,
 			saturationFactor: Math.max(0, Math.min(1, data.saturationFactor ?? this.saturationFactor)),
 			alwaysUnderlineLinks: data.alwaysUnderlineLinks ?? this.alwaysUnderlineLinks,
 			dimStrikethroughText: data.dimStrikethroughText ?? this.dimStrikethroughText,

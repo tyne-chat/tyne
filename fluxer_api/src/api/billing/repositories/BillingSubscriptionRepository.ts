@@ -8,10 +8,14 @@ import {
 	type StripeSubscriptionPayload,
 } from '@app/api/billing/mappers/StripeToBillingMapper';
 import {hydrateByRefs, upsertVersionedMirrorRow} from '@app/api/billing/repositories/BillingRepoHelpers';
-import {fetchOne, upsertOne} from '@app/api/database/CassandraQueryExecution';
+import {fetchOne} from '@app/api/database/CassandraQueryExecution';
 import type {BillingSubscriptionRow} from '@app/api/database/types/BillingTypes';
 import {BILLING_SUBSCRIPTION_COLUMNS} from '@app/api/database/types/BillingTypes';
 import {BillingSubscriptions, BillingSubscriptionsByCustomer, BillingSubscriptionsByUser} from '@app/api/Tables';
+
+// Fork imports.
+
+import {BatchBuilder} from '@app/api/database/CassandraQueryExecution';
 
 const FETCH_BY_ID = BillingSubscriptions.selectCql({
 	where: BillingSubscriptions.where.eq('provider_id'),
@@ -63,8 +67,11 @@ export class BillingSubscriptionRepository {
 			primary,
 		);
 		const index = mapBillingSubscriptionIndexRows(result.row);
-		await upsertOne(BillingSubscriptionsByCustomer.upsertAll(index.byCustomer));
-		if (index.byUser) await upsertOne(BillingSubscriptionsByUser.upsertAll(index.byUser));
+		// Fork: batch customer and user index writes atomically (tyne-chat/tyne#948).
+		const batch = new BatchBuilder();
+		batch.addPrepared(BillingSubscriptionsByCustomer.upsertAll(index.byCustomer));
+		if (index.byUser) batch.addPrepared(BillingSubscriptionsByUser.upsertAll(index.byUser));
+		await batch.execute();
 		return result;
 	}
 }

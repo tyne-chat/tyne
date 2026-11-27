@@ -114,6 +114,10 @@ import {isObjectLike as isRecord} from '@fluxer/record_utils/src/RecordGuards';
 import {app, BrowserWindow, clipboard, dialog, ipcMain, powerMonitor, shell, systemPreferences} from 'electron';
 import log from 'electron-log';
 
+// Fork imports.
+
+import {getAppWindows} from '@electron/main/Window';
+
 interface TrayRuntimeStateUpdate {
 	voiceConnected?: boolean;
 	voiceChannelLabel?: string | null;
@@ -228,11 +232,10 @@ export function registerIpcHandlers(): void {
 		signalRendererLaunchConfirmed();
 	});
 	observeDesktopUpdateState((state) => {
-		const mainWindow = getMainWindow();
-		if (mainWindow == null || mainWindow.isDestroyed()) {
-			return;
+		for (const window of getAppWindows()) {
+			if (window.isDestroyed()) continue;
+			window.webContents.send(DESKTOP_UPDATE_EVENTS.stateChanged, state);
 		}
-		mainWindow.webContents.send(DESKTOP_UPDATE_EVENTS.stateChanged, state);
 	});
 	ipcMain.handle('get-desktop-info', () => getDesktopInfo());
 	ipcMain.handle('get-gpu-info', () => getGpuInfo());
@@ -545,9 +548,10 @@ export function registerIpcHandlers(): void {
 	ipcMain.handle('get-accessibility-support-enabled', (): boolean => app.accessibilitySupportEnabled);
 	ipcMain.handle('system-locale-get', (): string => app.getSystemLocale());
 	app.on('accessibility-support-changed', (_event, accessibilitySupportEnabled) => {
-		const mainWindow = getMainWindow();
-		if (!mainWindow || mainWindow.isDestroyed()) return;
-		mainWindow.webContents.send('accessibility-support-changed', Boolean(accessibilitySupportEnabled));
+		for (const window of getAppWindows()) {
+			if (window.isDestroyed()) continue;
+			window.webContents.send('accessibility-support-changed', Boolean(accessibilitySupportEnabled));
+		}
 	});
 	registerPasskeyHandlers();
 	registerLinuxAppearanceHandlers();
