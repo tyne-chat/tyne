@@ -175,6 +175,10 @@ import {msg, plural} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {useCallback, useMemo} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const logger = new Logger('VoiceParticipantMenuData');
 
 const ENTRANCE_SOUND_SUBMENU_DESCRIPTOR = msg({
@@ -346,7 +350,7 @@ export function useVoiceParticipantMenuData(options: VoiceParticipantMenuDataOpt
 	}, [guildId, user.id, allVoiceStates]);
 	const hasMultipleConnections = userVoiceStates.length > 1;
 	const userVoiceState = guildId ? VoiceRuntime.getVoiceState(guildId, user.id) : null;
-	const voiceChannels = useMemo(() => {
+	const voiceChannels = useMobxMemo(() => {
 		if (!guildId) return [];
 		const channels = Channels.getGuildChannels(guildId);
 		return channels

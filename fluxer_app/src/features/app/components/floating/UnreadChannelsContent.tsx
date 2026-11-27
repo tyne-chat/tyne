@@ -58,6 +58,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const MENTIONS_DESCRIPTOR = msg({
 	message: '{channelHeading}, {mentionCount, plural, one {# mention} other {# mentions}}',
 	comment:
@@ -723,7 +727,7 @@ export const UnreadChannelsContent = observer(function UnreadChannelsContent() {
 		return messages;
 	}, [channelPreviews]);
 	const onCopySelectedMessages = useMessageSelectionCopyForMessages<HTMLDivElement>(selectionCopyMessages);
-	const groupedChannels = useMemo(() => {
+	const groupedChannels = useMobxMemo(() => {
 		const groups: Array<{key: string; label: string; channels: Array<Channel>}> = [];
 		const groupIndex = new Map<string, number>();
 		const directMessagesLabel = i18n._(DIRECT_MESSAGES_DESCRIPTOR);

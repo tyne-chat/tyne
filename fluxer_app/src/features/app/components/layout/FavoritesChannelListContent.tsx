@@ -62,10 +62,14 @@ import {CaretDownIcon, PlusIcon, UserPlusIcon} from '@phosphor-icons/react';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import type {ConnectableElement} from 'react-dnd';
 import {useDrag, useDragLayer, useDrop} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 const DIRECT_MESSAGE_ABBREVIATION_DESCRIPTOR = msg({
 	message: 'DM',
@@ -676,7 +680,7 @@ export const FavoritesChannelListContent = observer(() => {
 	const favorites = Favorites.sortedChannels;
 	const categories = Favorites.sortedCategories;
 	const hideMutedChannels = Favorites.hideMutedChannels;
-	const channelGroups = useMemo(() => {
+	const channelGroups = useMobxMemo(() => {
 		const groups: Array<FavoriteChannelGroup> = [];
 		const categoryMap = new Map<string | null, FavoriteChannelGroup>();
 		categoryMap.set(null, {category: null, channels: []});

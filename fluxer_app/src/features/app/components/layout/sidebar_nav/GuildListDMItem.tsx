@@ -53,6 +53,7 @@ import {useCallback, useMemo, useRef, useState} from 'react';
 
 // Fork imports.
 
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 import {parentThreadNews} from '@app/features/threads/fork/ForkThreadNews';
 
 const SELECTED_DESCRIPTOR = msg({
@@ -144,7 +145,7 @@ const ResolvedDMListItem = observer(function ResolvedDMListItem({
 	const streamingUserSortSnapshotRef = useRef(createVoiceParticipantSortSnapshot());
 	const dmChannelVoiceStates =
 		hasActiveCall || voiceCallActive ? VoiceRuntime.getAllVoiceStatesInChannel(ME, channel.id) : null;
-	const voiceSummary = useMemo<DMVoiceSummary>(() => {
+	const voiceSummary = useMobxMemo<DMVoiceSummary>(() => {
 		if (!dmChannelVoiceStates) {
 			return {
 				voiceUsers: [],

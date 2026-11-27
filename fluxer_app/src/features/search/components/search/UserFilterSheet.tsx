@@ -20,7 +20,11 @@ import {clsx} from 'clsx';
 import {matchSorter} from 'match-sorter';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useState} from 'react';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 const FILTER_BY_USER_DESCRIPTOR = msg({
 	message: 'Filter by user',
@@ -49,7 +53,7 @@ export const UserFilterSheet: React.FC<UserFilterSheetProps> = observer(
 				setSearchTerm('');
 			}
 		}, [isOpen]);
-		const availableUsers = useMemo((): Array<User> => {
+		const availableUsers = useMobxMemo((): Array<User> => {
 			if (channel.guildId) {
 				const members = GuildMembers.getMembers(channel.guildId);
 				return members.map((m) => m.user);
@@ -67,7 +71,7 @@ export const UserFilterSheet: React.FC<UserFilterSheetProps> = observer(
 			}
 			return Array.from(usersById.values());
 		}, [channel.guildId, channel.recipientIds]);
-		const filteredUsers = useMemo(() => {
+		const filteredUsers = useMobxMemo(() => {
 			if (!searchTerm.trim()) {
 				return availableUsers.slice(0, 50);
 			}

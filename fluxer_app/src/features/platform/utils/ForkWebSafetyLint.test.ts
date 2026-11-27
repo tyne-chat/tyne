@@ -255,4 +255,37 @@ describe('fork-web-safety-lint', () => {
 		const loaded = ReviewedLintCatalog.fromJsonString(fs.readFileSync(diskPath, 'utf8'), diskPath);
 		expect(loaded.entries.length).toBeGreaterThanOrEqual(1);
 	});
+
+	it('treats useMobxMemo as safe for mobx-stale-memo while still enforcing missing-observer', () => {
+		expect(
+			lint(
+				[
+					"import {observer} from 'mobx-react-lite';",
+					"import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';",
+					"import GuildMembers from '@app/features/guild/state/GuildMembers';",
+					'export const Good = observer(({ids}: {ids: string[]}) => {',
+					'\tconst items = useMobxMemo(() => ids.map((id) => GuildMembers.getMembers(id)), [ids]);',
+					'\treturn <div>{items.length}</div>;',
+					'});',
+				].join('\n'),
+				'src/Example.tsx',
+			),
+		).toEqual([]);
+
+		expect(
+			lint(
+				[
+					"import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';",
+					"import GuildMembers from '@app/features/guild/state/GuildMembers';",
+					'export function Unobserved({ids}: {ids: string[]}) {',
+					'\tconst items = useMobxMemo(() => ids.map((id) => GuildMembers.getMembers(id)), [ids]);',
+					'\treturn <div>{items.length}</div>;',
+					'}',
+				].join('\n'),
+				'src/Example.tsx',
+			),
+		).toEqual([
+			'src/Example.tsx:4:50: [missing-observer] component `Unobserved` reads `GuildMembers.getMembers` during render without `observer()` (never re-renders on store changes)',
+		]);
+	});
 });

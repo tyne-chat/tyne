@@ -29,7 +29,11 @@ import {fromTimestamp} from '@fluxer/snowflake/src/SnowflakeUtils';
 import {useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useMemo, useRef, useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 const logger = new Logger('InviteMenuItems');
 
@@ -51,7 +55,7 @@ export const InviteToCommunityMenuItem: React.FC<InviteToCommunityMenuItemProps>
 	const {i18n} = useLingui();
 	const sendingRef = useRef(false);
 	const [sendingGuildId, setSendingGuildId] = useState<string | null>(null);
-	const candidates = useMemo(() => {
+	const candidates = useMobxMemo(() => {
 		return Guilds.getGuilds()
 			.filter((guild) => !GuildMembers.getMember(guild.id, user.id))
 			.map((guild): InviteCandidate | null => {

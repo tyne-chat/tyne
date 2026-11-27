@@ -41,6 +41,7 @@ import {useCallback, useEffect, useMemo} from 'react';
 
 // Fork imports.
 
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
 
 const logger = new Logger('DMWelcomeSection');
@@ -59,7 +60,7 @@ export const DMWelcomeSection: React.FC<DMWelcomeSectionProps> = observer(functi
 	useEffect(() => UserProfile.retainProfile(userId), [userId]);
 	const mobileLayout = MobileLayout;
 	const profileMutualGuilds = useMemo(() => profile?.mutualGuilds ?? [], [profile?.mutualGuilds]);
-	const mutualGuildRecords = useMemo(() => {
+	const mutualGuildRecords = useMobxMemo(() => {
 		return profileMutualGuilds
 			.map((mutualGuild) => Guilds.getGuild(mutualGuild.id))
 			.filter((guild): guild is Guild => guild !== undefined);

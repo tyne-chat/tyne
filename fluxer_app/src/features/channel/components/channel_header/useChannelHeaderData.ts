@@ -35,12 +35,8 @@ export const useChannelHeaderData = (channel?: Channel): ChannelHeaderData => {
 	const isPersonalNotes = channel?.type === ChannelTypes.DM_PERSONAL_NOTES;
 	const isGuildChannel = Boolean(channel?.guildId);
 	const isVoiceChannel = Boolean(channel?.isVoice());
-	const recipient = useMemo<User | null>(() => {
-		if (!isDM || !channel?.recipientIds?.length) {
-			return null;
-		}
-		return Users.getUser(channel.recipientIds[0]) ?? null;
-	}, [channel, isDM]);
+	const recipient: User | null =
+		isDM && channel?.recipientIds?.length ? (Users.getUser(channel.recipientIds[0]) ?? null) : null;
 	const directMessageName = isDM && recipient && channel ? NicknameUtils.getNickname(recipient, null, channel.id) : '';
 	const groupDMName = useMemo(() => {
 		if (!isGroupDM || !channel) {

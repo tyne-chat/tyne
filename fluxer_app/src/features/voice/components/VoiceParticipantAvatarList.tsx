@@ -36,6 +36,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useLayoutEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const VOICE_PARTICIPANTS_DESCRIPTOR = msg({
 	message: 'Voice participants',
 	comment: 'Aria label on the voice participants avatar list container.',
@@ -209,7 +213,7 @@ export function useVoiceParticipantAvatarEntries({
 		voiceEngineV2Model !== null && selectVoiceEngineV2AppEffectiveSelfMuteForVoiceStatePayload(voiceEngineV2Model);
 	const localSelfDeaf = LocalVoiceState.getSelfDeaf();
 	const sortSnapshotRef = useRef(createVoiceParticipantSortSnapshot());
-	return useMemo(() => {
+	return useMobxMemo(() => {
 		if (!channelId) return [];
 		const nextEntries: Array<VoiceParticipantAvatarEntry> = [];
 		for (const [connectionId, voiceState] of Object.entries(

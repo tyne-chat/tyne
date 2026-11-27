@@ -4,13 +4,17 @@ import type {ContentType} from '@app/features/channel/components/pickers/memes/M
 import MemesPicker from '@app/features/emoji/state/MemesPicker';
 import type {FavoriteMeme} from '@app/features/expressions/models/FavoriteMeme';
 import {matchSorter} from 'match-sorter';
-import {useMemo} from 'react';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 export function useFilteredMemes(
 	favoriteMemes: ReadonlyArray<FavoriteMeme>,
 	selectedFilter: ContentType,
 	searchTerm: string,
 ) {
-	return useMemo(() => {
+	return useMobxMemo(() => {
 		let memes = filterMemesByContentType(favoriteMemes, selectedFilter);
 		if (searchTerm) {
 			const sortedByMatch = matchSorter(memes, searchTerm, {

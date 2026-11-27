@@ -30,6 +30,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 // Fork imports.
 
 import {SettingsNarrowStartOnList} from '@app/features/app/components/dialogs/shared/SettingsNarrowNav';
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 interface GuildSettingsModalProps {
 	guildId: string;
@@ -42,7 +43,7 @@ export const GuildSettingsModal: React.FC<GuildSettingsModalProps> = observer(
 		const guild = Guilds.getGuild(guildId);
 		const [selectedTab, setSelectedTab] = useState<GuildSettingsTabType>(initialTabProp ?? 'overview');
 		const discoveryEnabled = RuntimeConfig.discoveryEnabled;
-		const availableTabs = useMemo(() => {
+		const availableTabs = useMobxMemo(() => {
 			const guildSettingsTabs = getGuildSettingsTabs(i18n, guildId);
 			if (!guild) return guildSettingsTabs;
 			return guildSettingsTabs.filter((tab) => {

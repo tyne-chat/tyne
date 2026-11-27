@@ -22,6 +22,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const REMOVE_DESCRIPTOR = msg({
 	message: 'Remove {displayName}',
 	comment: 'ARIA label for removing a selected friend from a recipient picker. {displayName} is the friend name.',
@@ -75,7 +79,7 @@ export const FriendSelector: React.FC<FriendSelectorProps> = observer(
 			}
 		};
 		const relationships = Relationships.getRelationships();
-		const friendUsers = useMemo(() => {
+		const friendUsers = useMobxMemo(() => {
 			const collator = getCachedCollator(i18n.locale || undefined);
 			const friends = relationships.filter(
 				(relationship) => relationship.type === RelationshipTypes.FRIEND && !excludeUserIds.includes(relationship.id),

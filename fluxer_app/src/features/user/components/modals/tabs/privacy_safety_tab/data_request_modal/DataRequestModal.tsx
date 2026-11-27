@@ -46,6 +46,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 type DataRequestVariant = 'export' | 'delete';
 type DeletionNotice = 'dm' | 'email' | 'none';
 type ScopeValue = 'everything' | 'custom' | 'selected' | 'inaccessible_only';
@@ -443,7 +447,7 @@ export const DataRequestModal: React.FC<DataRequestModalProps> = observer(({vari
 	}, [showKinds, showCommunities, showWhen]);
 	const currentStepIndex = Math.max(0, visibleSteps.indexOf(step));
 	const isLastStep = step === 'confirm';
-	const guildList = useMemo(
+	const guildList = useMobxMemo(
 		() =>
 			Guilds.getGuilds()
 				.slice()

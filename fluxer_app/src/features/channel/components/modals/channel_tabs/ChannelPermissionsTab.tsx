@@ -129,10 +129,7 @@ const ChannelPermissionsTab: React.FC<{channelId: string}> = observer(({channelI
 		if (!guild || !currentUser || !channel) return 0n;
 		return withImplicitThreadBits(PermissionUtils.computePermissions(currentUser.id, channel.toJSON()));
 	}, [guild, currentUser, channel]);
-	const currentUserMember = useMemo(() => {
-		if (!guild || !currentUser) return null;
-		return GuildMembers.getMember(guild.id, currentUser.id);
-	}, [guild, currentUser]);
+	const currentUserMember = guild && currentUser ? GuildMembers.getMember(guild.id, currentUser.id) : null;
 	const wouldRemoveOwnPermission = useCallback(
 		(permission: bigint, overwriteId: string, overwriteType: 0 | 1): boolean => {
 			if (!guild || !currentUser || !channel || !currentUserMember) return false;

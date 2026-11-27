@@ -182,10 +182,7 @@ const GuildRolesTab: React.FC<{guildId: string}> = observer(({guildId}) => {
 		if (!guild) return false;
 		return Object.values(guild.roles).some((role) => role.hoistPosition !== null);
 	}, [guild]);
-	const currentUserMember = useMemo(() => {
-		if (!guild || !currentUser) return null;
-		return GuildMembers.getMember(guild.id, currentUser.id);
-	}, [guild, currentUser]);
+	const currentUserMember = guild && currentUser ? GuildMembers.getMember(guild.id, currentUser.id) : null;
 	const currentUserHighestRole = useMemo(() => {
 		if (!guild || !currentUserMember) return null;
 		const memberRoles = Object.values(guild.roles).filter((role) => currentUserMember.roles.has(role.id));

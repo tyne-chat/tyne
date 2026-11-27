@@ -88,6 +88,7 @@ import {useMemo} from 'react';
 
 // Fork imports.
 
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 import {buildOpenInNewWindowMenuItem} from '@app/features/ui/action_menu/items/ForkOpenInNewWindowMenuItem';
 
 const COMMUNITY_DEBUG_DESCRIPTOR = msg({
@@ -305,7 +306,7 @@ export function useGuildMenuData(guild: Guild, options: UseGuildMenuDataOptions)
 		[channels, deleteMyMessagesInGuild, guild, i18n.locale, leaveGuild, onClose],
 	);
 	const discoveryEnabled = RuntimeConfig.discoveryEnabled;
-	const availableSettingsTabs = useMemo(() => {
+	const availableSettingsTabs = useMobxMemo(() => {
 		const allTabs = getGuildSettingsTabs(i18n, guild.id);
 		return allTabs.filter((tab) => {
 			if (tab.permission) {
@@ -323,6 +324,7 @@ export function useGuildMenuData(guild: Guild, options: UseGuildMenuDataOptions)
 			return true;
 		});
 	}, [discoveryEnabled, guild.features, guild.id, i18n.locale]);
+	const hasAgreedToMatureGuild = hasCurrentGuildMatureContentGate && GuildMatureContentAgree.hasAgreedToGuild(guild.id);
 	const groups = useMemo(() => {
 		if (guild.visiting) {
 			return [
@@ -497,7 +499,7 @@ export function useGuildMenuData(guild: Guild, options: UseGuildMenuDataOptions)
 					onClick: handlers.handleDebugGuild,
 				},
 			];
-			if (hasCurrentGuildMatureContentGate && GuildMatureContentAgree.hasAgreedToGuild(guild.id)) {
+			if (hasAgreedToMatureGuild) {
 				debugItems.push({
 					icon: (
 						<DebugChannelIcon size={20} data-flx="ui.action-menu.items.guild-menu-data.groups.debug-channel-icon--2" />
@@ -518,6 +520,7 @@ export function useGuildMenuData(guild: Guild, options: UseGuildMenuDataOptions)
 		menuGroups.push({items: utilityItems});
 		return menuGroups;
 	}, [
+		hasAgreedToMatureGuild,
 		hasGuildUnread,
 		canInvite,
 		canAccessGuildSettings,

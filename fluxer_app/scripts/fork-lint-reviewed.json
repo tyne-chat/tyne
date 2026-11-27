@@ -97,6 +97,69 @@
 			"enclosing": "captureVisibleImageSources",
 			"target": "window.innerHeight",
 			"reason": "Checked in source (tyne-chat/tyne#947): pre-boot splash image helper compares physical CSS pixel DOMRect bounds against viewport height before app zoom applies."
+		},
+		{
+			"linter": "web-safety",
+			"rule": "mobx-stale-memo",
+			"file": "fluxer_app/src/features/app/components/dialogs/shared/RecipientList.tsx",
+			"enclosing": "useRecipientItems",
+			"symbol": "Users.getUser",
+			"target": "useMemo",
+			"reason": "Checked in source (tyne-chat/tyne#948): useRecipientItems reads Users.usersList as usersSnapshot and lists usersSnapshot in its dependency array."
+		},
+		{
+			"linter": "web-safety",
+			"rule": "mobx-stale-memo",
+			"file": "fluxer_app/src/features/ui/action_menu/items/ChannelMenuData.tsx",
+			"enclosing": "useChannelMenuData",
+			"symbol": "ReadStates.hasUnread",
+			"target": "useMemo",
+			"reason": "Checked in source (tyne-chat/tyne#948): initialHasUnread intentionally snapshots unread state per channel.id for preserveInitialMarkAsReadVisibility so Mark as Read stays visible while the menu is open."
+		},
+		{
+			"linter": "web-safety",
+			"rule": "mobx-stale-memo",
+			"file": "fluxer_app/src/features/ui/action_menu/items/DMMenuData.tsx",
+			"enclosing": "useDMMenuData",
+			"symbol": "ReadStates.hasUnread",
+			"target": "useMemo",
+			"reason": "Checked in source (tyne-chat/tyne#948): initialHasUnread intentionally snapshots unread state per channel.id for preserveInitialMarkAsReadVisibility so Mark as Read stays visible while the menu is open."
+		},
+		{
+			"linter": "web-safety",
+			"rule": "mobx-stale-memo",
+			"file": "fluxer_app/src/features/ui/action_menu/items/GuildMenuData.tsx",
+			"enclosing": "useGuildMenuData",
+			"symbol": "Channels.getGuildChannels",
+			"target": "useMemo",
+			"reason": "Checked in source (tyne-chat/tyne#948): initialHasGuildUnread intentionally snapshots guild unread state per guild.id for preserveInitialMarkAsReadVisibility so Mark as Read stays visible while the menu is open."
+		},
+		{
+			"linter": "web-safety",
+			"rule": "mobx-stale-memo",
+			"file": "fluxer_app/src/features/ui/action_menu/items/GuildMenuData.tsx",
+			"enclosing": "useGuildMenuData",
+			"symbol": "ReadStates.hasUnread",
+			"target": "useMemo",
+			"reason": "Checked in source (tyne-chat/tyne#948): initialHasGuildUnread intentionally snapshots guild unread state per guild.id for preserveInitialMarkAsReadVisibility so Mark as Read stays visible while the menu is open."
+		},
+		{
+			"linter": "web-safety",
+			"rule": "mobx-stale-memo",
+			"file": "fluxer_app/src/features/user/components/modals/tabs/AccessibilityTab.tsx",
+			"enclosing": "AccessibilityTabPreview",
+			"symbol": "Users.getCurrentUser",
+			"target": "useMemo",
+			"reason": "Checked in source (tyne-chat/tyne#948): fakeData constructs a static preview fixture (fakeChannel registered/deleted in Channels by useEffect with a fixed tabOpenedAt timestamp)."
+		},
+		{
+			"linter": "web-safety",
+			"rule": "mobx-stale-memo",
+			"file": "fluxer_app/src/features/user/components/modals/tabs/component_gallery_tab/MarkdownTab.tsx",
+			"enclosing": "MarkdownTab",
+			"symbol": "Users.getCurrentUser",
+			"target": "useMemo",
+			"reason": "Checked in source (tyne-chat/tyne#948): developer component-gallery static markdown preview fixture with fakeChannel and fixed tabOpenedAt timestamp."
 		}
 	]
 }

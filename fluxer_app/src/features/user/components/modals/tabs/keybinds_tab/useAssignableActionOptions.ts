@@ -8,8 +8,8 @@ import {useMemo} from 'react';
 
 export const useAssignableActionOptions = (currentAction?: KeybindCommand | null): ReadonlyArray<ActionOption> => {
 	const {i18n} = useLingui();
+	const defaults = Keybind.getDefaults();
 	return useMemo(() => {
-		const defaults = Keybind.getDefaults();
 		return buildAssignableActionOptions(i18n, defaults, currentAction);
-	}, [currentAction, i18n.locale]);
+	}, [defaults, currentAction, i18n.locale]);
 };

@@ -384,7 +384,8 @@ const RegionalFormatSelector = observer(function RegionalFormatSelector() {
 	const regionalFormat = UserSettings.regionalFormat;
 	const value = regionalFormat ?? REGIONAL_FORMAT_LANGUAGE;
 	const languageLocale = resolveFormattingLocale(LocaleUtils.getCurrentLocale());
-	const systemLocale = resolveFormattingLocale(SystemLocale.locale);
+	const rawSystemLocale = SystemLocale.locale;
+	const systemLocale = resolveFormattingLocale(rawSystemLocale);
 	const options = useMemo<ReadonlyArray<RegionalFormatSelectOption>>(() => {
 		const displayLocale = resolveFormattingLocale(i18n.locale);
 		const displayNames = new Intl.DisplayNames([displayLocale], {type: 'language'});
@@ -421,11 +422,11 @@ const RegionalFormatSelector = observer(function RegionalFormatSelector() {
 				label: systemFormat,
 				name: systemFormat,
 				sample: getRegionalFormatSample(systemLocale),
-				searchText: normalizeLanguageSearchText(`${systemFormat} ${SystemLocale.locale}`),
+				searchText: normalizeLanguageSearchText(`${systemFormat} ${rawSystemLocale}`),
 			},
 			...regions,
 		];
-	}, [i18n, i18n.locale, languageLocale, regionalFormat, systemLocale]);
+	}, [rawSystemLocale, i18n, i18n.locale, languageLocale, regionalFormat, systemLocale]);
 	const renderRegionalFormat = useCallback(
 		(option: RegionalFormatSelectOption, selected: boolean, compact = false) => (
 			<div

@@ -25,6 +25,10 @@ import {MagnifyingGlassIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import React, {useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const ADD_FAVORITE_CHANNELS_DESCRIPTOR = msg({
 	message: 'Add favorite channels',
 	comment: 'Modal or page title for the add-favorite-channels flow.',
@@ -79,7 +83,7 @@ export const AddFavoriteChannelModal = observer(({categoryId}: {categoryId?: str
 		[guilds, i18n.locale],
 	);
 	const selectedGuild = selectedGuildId ? Guilds.getGuild(selectedGuildId) : null;
-	const channels = useMemo(() => {
+	const channels = useMobxMemo(() => {
 		if (!selectedGuild) return [];
 		const guildChannels = Channels.getGuildChannels(selectedGuild.id);
 		const result: Array<ChannelWithCategory> = [];

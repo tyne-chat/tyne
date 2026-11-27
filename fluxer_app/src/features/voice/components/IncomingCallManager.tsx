@@ -34,6 +34,10 @@ import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 interface PopoutModel {
 	channelId: string;
 	initiatorUserId: string | null;
@@ -121,7 +125,7 @@ export const IncomingCallManager: React.FC = observer(function IncomingCallManag
 	);
 	const isVoiceConnected = VoiceRuntime.connected;
 	const isVoiceConnecting = VoiceRuntime.connecting;
-	const {incomingCallIds, popoutModels, hasRingingCalls} = useMemo(() => {
+	const {incomingCallIds, popoutModels, hasRingingCalls} = useMobxMemo(() => {
 		const nextIds: Array<string> = [];
 		const seenIds = new Set<string>();
 		const models: Array<PopoutModel> = [];
@@ -240,7 +244,7 @@ export const IncomingCallManager: React.FC = observer(function IncomingCallManag
 		},
 		[windowSize],
 	);
-	const renderedCalls = useMemo(() => {
+	const renderedCalls = useMobxMemo(() => {
 		const modelsById = new Map(popoutModels.map((m) => [m.channelId, m]));
 		const activeCallId = managerModel.callQueue.find((channelId) => modelsById.has(channelId));
 		if (!activeCallId) return [];

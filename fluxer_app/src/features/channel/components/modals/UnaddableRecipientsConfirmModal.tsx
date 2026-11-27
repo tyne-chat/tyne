@@ -6,7 +6,10 @@ import Users from '@app/features/user/state/Users';
 import {msg} from '@lingui/core/macro';
 import {Plural, Trans, useLingui} from '@lingui/react/macro';
 import {observer} from 'mobx-react-lite';
-import {useMemo} from 'react';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 const USER_NOT_FOUND_DESCRIPTOR = msg({
 	message: 'User not found',
@@ -67,7 +70,7 @@ export const UnaddableRecipientsConfirmModal = observer(
 	({unaddableRecipients, addableCount, onConfirm}: UnaddableRecipientsConfirmModalProps) => {
 		const {i18n} = useLingui();
 		const reasonLabel = useReasonLabel();
-		const rows = useMemo(
+		const rows = useMobxMemo(
 			() =>
 				unaddableRecipients.map(({userId, reason}) => {
 					const user = Users.getUser(userId);

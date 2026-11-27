@@ -18,6 +18,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useMemo} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const MOVE_DEVICE_TO_DESCRIPTOR = msg({
 	message: 'Move device to…',
 	comment: 'Submenu label that moves a single device into another voice channel.',
@@ -48,7 +52,7 @@ export const MoveToChannelSubmenu: React.FC<MoveToChannelSubmenuProps> = observe
 		const userVoiceState = VoiceRuntime.getVoiceState(guildId, userId);
 		const currentUser = Users.currentUser;
 		const isSelf = currentUser?.id === userId;
-		const voiceChannels = useMemo(() => {
+		const voiceChannels = useMobxMemo(() => {
 			return channels.filter((channel) => {
 				if (channel.type !== ChannelTypes.GUILD_VOICE) {
 					return false;

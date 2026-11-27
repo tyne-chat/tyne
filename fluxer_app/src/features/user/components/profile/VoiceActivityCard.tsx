@@ -180,8 +180,8 @@ export const VoiceActivityCard: React.FC<VoiceActivityCardProps> = observer(({ac
 		}
 	}, [isConnectedToChannel, canJoin, guildId, channelId, onNavigate, startJoinConnection]);
 	const avatarSortSnapshotRef = useRef(createVoiceParticipantSortSnapshot());
+	const ownerUser = Users.getUser(voiceState.user_id);
 	const avatarStackUsers = useMemo(() => {
-		const ownerUser = Users.getUser(voiceState.user_id);
 		const userMap = new Map<string, User>();
 		if (ownerUser) {
 			userMap.set(ownerUser.id, ownerUser);
@@ -196,7 +196,7 @@ export const VoiceActivityCard: React.FC<VoiceActivityCardProps> = observer(({ac
 			guildId,
 			channelId,
 		});
-	}, [voiceState.user_id, participantUsers, guildId, channelId]);
+	}, [ownerUser, voiceState.user_id, participantUsers, guildId, channelId]);
 	const participantLabel = useMemo(() => {
 		if (avatarStackUsers.length === 0) {
 			return i18n._(PARTICIPANTS_DESCRIPTOR);

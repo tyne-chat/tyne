@@ -13,6 +13,10 @@ import VoiceRuntime, {useVoiceRuntimeVersion} from '@app/features/voice/engine/V
 import {ME} from '@fluxer/constants/src/AppConstants';
 import {useMemo} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 export interface UserVoiceActivity {
 	voiceState: VoiceState;
 	connectionId: string;
@@ -66,7 +70,7 @@ function collectParticipantUsers(channelStates: Readonly<Record<string, Normaliz
 function useUserVoiceActivities(userId: string): ReadonlyArray<UserVoiceActivity> {
 	useVoiceRuntimeVersion();
 	const allVoiceStates = VoiceRuntime.getAllVoiceStates();
-	return useMemo(() => {
+	return useMobxMemo(() => {
 		const activities: Array<UserVoiceActivity> = [];
 		for (const guildKey in allVoiceStates) {
 			const guildStates = allVoiceStates[guildKey];

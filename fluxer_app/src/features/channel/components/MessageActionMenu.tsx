@@ -211,13 +211,10 @@ export const useMessageActionMenuData = (
 	);
 	const developerMode = UserSettings.developerMode;
 	const effectiveContent = useMemo(() => getEffectiveContent(message), [message]);
-	const canManageMessages = useMemo(
-		() =>
-			permissions != null &&
-			!permissions.isDM &&
-			Permission.can(Permissions.MANAGE_MESSAGES, {channelId: message.channelId}),
-		[permissions, message.channelId],
-	);
+	const canManageMessages =
+		permissions != null &&
+		!permissions.isDM &&
+		Permission.can(Permissions.MANAGE_MESSAGES, {channelId: message.channelId});
 	const [isSpeaking, setIsSpeaking] = useState(TtsUtils.isSpeaking());
 	const [voiceReady, setVoiceReady] = useState(TtsUtils.hasVoices());
 	const supportsInteractiveActions = !isClientSystemMessage(message);

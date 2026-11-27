@@ -385,12 +385,13 @@ export const UserAreaPopout = observer(() => {
 		TextCopyCommands.copy(i18n, currentUser.tag);
 	}, [currentUser, i18n]);
 	const profileBadges = useOwnProfileBadges(currentUser?.id ?? null);
+	const cachedProfile = currentUser ? UserProfile.getProfile(currentUser.id) : undefined;
 	const profile = useMemo(() => {
 		if (!currentUser) {
 			return null;
 		}
-		return UserProfile.getProfile(currentUser.id) ?? createMockProfile(currentUser, {profileBadges});
-	}, [currentUserId, currentUser, profileBadges]);
+		return cachedProfile ?? createMockProfile(currentUser, {profileBadges});
+	}, [cachedProfile, currentUserId, currentUser, profileBadges]);
 	const profileData = useMemo(() => profile?.getEffectiveProfile() ?? null, [profile]);
 	const profileContext = useMemo<ProfileDisplayUtils.ProfileDisplayContext | null>(() => {
 		if (!currentUser || !profile) {

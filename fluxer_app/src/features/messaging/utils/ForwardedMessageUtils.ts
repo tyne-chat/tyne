@@ -24,21 +24,12 @@ interface ForwardedMessageContext {
 export function useForwardedMessageContext(message: Message): ForwardedMessageContext {
 	const {i18n} = useLingui();
 	const reference = message.messageReference;
-	const sourceChannel = useMemo(() => {
-		if (!reference) return null;
-		return Channels.getChannel(reference.channel_id) ?? null;
-	}, [reference?.channel_id]);
-	const sourceGuild = useMemo(() => {
-		if (!sourceChannel || !reference?.guild_id) return null;
-		return Guilds.getGuild(reference.guild_id) ?? null;
-	}, [reference?.guild_id, sourceChannel?.guildId]);
-	const sourceUser = useMemo(() => {
-		if (!sourceChannel) return null;
-		if (sourceChannel.type === ChannelTypes.DM && sourceChannel.recipientIds.length > 0) {
-			return Users.getUser(sourceChannel.recipientIds[0]) ?? null;
-		}
-		return null;
-	}, [sourceChannel?.id, sourceChannel?.type, sourceChannel?.recipientIds]);
+	const sourceChannel = reference ? (Channels.getChannel(reference.channel_id) ?? null) : null;
+	const sourceGuild = sourceChannel && reference?.guild_id ? (Guilds.getGuild(reference.guild_id) ?? null) : null;
+	const sourceUser =
+		sourceChannel && sourceChannel.type === ChannelTypes.DM && sourceChannel.recipientIds.length > 0
+			? (Users.getUser(sourceChannel.recipientIds[0]) ?? null)
+			: null;
 	const displayName = useMemo(() => {
 		if (!sourceChannel) return null;
 		if (
@@ -50,13 +41,8 @@ export function useForwardedMessageContext(message: Message): ForwardedMessageCo
 		}
 		return sourceChannel.name || null;
 	}, [sourceChannel?.id, sourceChannel?.type, sourceChannel?.name, i18n.locale]);
-	const hasAccessToSource = useMemo(() => {
-		if (!sourceChannel) return false;
-		if (sourceChannel.guildId) {
-			return Permission.can(0n, {channelId: sourceChannel.id});
-		}
-		return true;
-	}, [sourceChannel?.id]);
+	const hasAccessToSource =
+		sourceChannel !== null && (!sourceChannel.guildId || Permission.can(0n, {channelId: sourceChannel.id}));
 	return {
 		sourceChannel,
 		sourceGuild,

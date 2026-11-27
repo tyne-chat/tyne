@@ -23,7 +23,11 @@ import {useLingui} from '@lingui/react/macro';
 import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 const NO_FRIENDS_YET_DESCRIPTOR = msg({
 	message: 'No friends yet',
@@ -60,7 +64,7 @@ interface FriendsListContentProps {
 
 const useFriendGroups = (friendIds: Array<string>, searchQuery: string) => {
 	const {i18n} = useLingui();
-	return useMemo(() => {
+	return useMobxMemo(() => {
 		const locale = i18n.locale || undefined;
 		const collator = getCachedCollator(locale);
 		const filtered = friendIds.filter((userId) => {

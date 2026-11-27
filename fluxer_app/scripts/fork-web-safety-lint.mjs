@@ -441,7 +441,13 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 			let hookCall = null;
 			if (parent?.type === 'CallExpression' && parent.arguments[0] === node) {
 				const hname = identName(parent.callee);
-				if (hname === 'useMemo' || hname === 'useEffect' || hname === 'useLayoutEffect' || hname === 'useCallback') {
+				if (
+					hname === 'useMemo' ||
+					hname === 'useMobxMemo' ||
+					hname === 'useEffect' ||
+					hname === 'useLayoutEffect' ||
+					hname === 'useCallback'
+				) {
 					hookCall = {hook: hname, call: parent};
 				}
 			}
@@ -461,7 +467,8 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 			const runsInRender =
 				isTopComp ||
 				isRenderPhaseHook ||
-				(Boolean(parentFn?.runsInRender) && (hookCall?.hook === 'useMemo' || isIife || isSyncCollectionCallback));
+				(Boolean(parentFn?.runsInRender) &&
+					(hookCall?.hook === 'useMemo' || hookCall?.hook === 'useMobxMemo' || isIife || isSyncCollectionCallback));
 			const runsInMemo =
 				hookCall?.hook === 'useMemo' || (Boolean(parentFn?.runsInMemo) && (isIife || isSyncCollectionCallback));
 

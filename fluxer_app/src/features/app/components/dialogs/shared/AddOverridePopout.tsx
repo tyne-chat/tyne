@@ -25,6 +25,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const SEARCH_ROLES_OR_MEMBERS_DESCRIPTOR = msg({
 	message: 'Search roles or members…',
 	comment: 'Short label in the settings dialog add override popout.',
@@ -104,7 +108,7 @@ export const AddOverridePopout: React.FC<AddOverridePopoutProps> = observer(func
 			.filter((role) => !existingOverwriteIds.has(role.id))
 			.sort((a, b) => b.position - a.position);
 	}, [guild, existingOverwriteIds]);
-	const members = useMemo(() => {
+	const members = useMobxMemo(() => {
 		if (!guild) return [];
 		return selectOverrideMembers({
 			cachedMembers: GuildMembers.getMembers(guildId),

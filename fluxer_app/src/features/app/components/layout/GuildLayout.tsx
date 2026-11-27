@@ -372,6 +372,9 @@ export const GuildLayout = observer(({children}: {children: React.ReactNode}) =>
 		}
 		return null;
 	}, [guild, channels]);
+	const canManageGuild = channel?.guildId
+		? Permission.can(Permissions.MANAGE_GUILD, {guildId: channel.guildId})
+		: false;
 	const shouldShowInvitesDisabled = useMemo(() => {
 		if (!selectedChannelId) return false;
 		if (!channel?.guildId) return false;
@@ -381,11 +384,11 @@ export const GuildLayout = observer(({children}: {children: React.ReactNode}) =>
 		const hasInvitesDisabled = guild.features.has(GuildFeatures.INVITES_DISABLED);
 		if (!hasInvitesDisabled) return false;
 		const canInvite = InviteUtils.canInviteToChannel(selectedChannelId, channel.guildId);
-		const canManageGuild = Permission.can(Permissions.MANAGE_GUILD, {guildId: channel.guildId});
 		if (!canInvite && !canManageGuild) return false;
 		if (invitesDisabledDismissed && !nagbarState.forceInvitesDisabled) return false;
 		return true;
 	}, [
+		canManageGuild,
 		selectedChannelId,
 		channel,
 		guild,

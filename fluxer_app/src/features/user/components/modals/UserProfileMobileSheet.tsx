@@ -137,7 +137,7 @@ export const UserProfileMobileSheet: React.FC = observer(function UserProfileMob
 	const displayUser = user ?? fallbackUser;
 	const fallbackProfile = useMemo(() => (fallbackUser ? createMockProfile(fallbackUser) : null), [fallbackUser]);
 	const mockProfile = useMemo(() => (user ? createMockProfile(user) : null), [user]);
-	const initialProfile = useMemo(() => (userId ? UserProfile.getProfile(userId, guildId) : null), [userId, guildId]);
+	const initialProfile = userId ? UserProfile.getProfile(userId, guildId) : null;
 	const [profile, setProfile] = useState<Profile | null>(initialProfile);
 	const [isProfileLoading, setIsProfileLoading] = useState(() => !initialProfile);
 	const profileMatchesContext = profile?.userId === userId && (profile?.guildId ?? null) === (guildId ?? null);

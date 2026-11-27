@@ -57,6 +57,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 // Fork imports.
 
 import {Routes} from '@app/app/Routes';
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 import {openRouteInNewWindowOnMiddleClick} from '@app/features/platform/utils/ForkAppWindows';
 import {DmThreadsMark} from '@app/features/threads/fork/ForkThreadNewsMarks';
 import {isImportedPlaceholder} from '@app/features/user/utils/ForkImportedUser';
@@ -180,7 +181,7 @@ const ResolvedDMListItem = observer(function ResolvedDMListItem({
 	// Fork: a placeholder from the Discord import is as out of reach as the system user (tyne-chat/tyne#687).
 	const restrictRecipientActions = (recipient?.system ?? false) || isImportedPlaceholder(recipient);
 	const relationshipType = recipient ? Relationships.getRelationship(recipient.id)?.type : undefined;
-	const inviteCandidates = useMemo<Array<InviteCandidate>>(() => {
+	const inviteCandidates = useMobxMemo<Array<InviteCandidate>>(() => {
 		if (!recipient || restrictRecipientActions || recipient.bot) return [];
 		return Guilds.getGuilds()
 			.filter((guild) => !GuildMembers.getMember(guild.id, recipient.id))

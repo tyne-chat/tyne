@@ -143,6 +143,7 @@ import {useCallback, useMemo} from 'react';
 
 // Fork imports.
 
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 import {
 	buildOpenInNewWindowMenuItem,
 	channelWindowRoute,
@@ -213,7 +214,7 @@ export function useDMMenuData(
 	// Fork: a placeholder from the Discord import is as out of reach as the system user (tyne-chat/tyne#687).
 	const restrictRecipientActions = isRecipientSystem || isImportedPlaceholder(recipient);
 	const hasActiveDirectCall = recipient ? hasActiveDirectCallWithUser(recipient.id) : false;
-	const invitableCommunities = useMemo(() => {
+	const invitableCommunities = useMobxMemo(() => {
 		if (!recipient || isRecipientBot) return [];
 		return Guilds.getGuilds()
 			.filter((guild) => !GuildMembers.getMember(guild.id, recipient.id))
@@ -474,6 +475,7 @@ export function useDMMenuData(
 			)),
 		);
 	}, [channel, onClose]);
+	const showFavorites = Accessibility.showFavorites;
 	const groups = useMemo(() => {
 		const menuGroups: Array<MenuGroupType> = [];
 		if (showMarkAsReadItem) {
@@ -487,7 +489,7 @@ export function useDMMenuData(
 				],
 			});
 		}
-		if (Accessibility.showFavorites) {
+		if (showFavorites) {
 			menuGroups.push({
 				items: [
 					{
@@ -712,6 +714,7 @@ export function useDMMenuData(
 		menuGroups.push({items: copyItems});
 		return menuGroups;
 	}, [
+		showFavorites,
 		showMarkAsReadItem,
 		isFavorited,
 		recipient,

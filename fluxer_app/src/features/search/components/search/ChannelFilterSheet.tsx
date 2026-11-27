@@ -19,6 +19,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const FILTER_BY_CHANNEL_DESCRIPTOR = msg({
 	message: 'Filter by channel',
 	comment: 'Title of the mobile in: (channel) filter sheet in message search. Title Case.',
@@ -46,7 +50,7 @@ export const ChannelFilterSheet: React.FC<ChannelFilterSheetProps> = observer(
 				setSearchTerm('');
 			}
 		}, [isOpen]);
-		const availableChannels = useMemo((): Array<Channel> => {
+		const availableChannels = useMobxMemo((): Array<Channel> => {
 			return Channels.getGuildChannels(guildId).filter((c) => GUILD_TEXT_BASED_CHANNEL_TYPES.has(c.type));
 		}, [guildId]);
 		const filteredChannels = useMemo(() => {

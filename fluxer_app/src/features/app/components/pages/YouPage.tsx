@@ -59,10 +59,11 @@ export const YouPage = observer(({onAvatarClick}: YouPageProps) => {
 	};
 	const profileBadges = useOwnProfileBadges(user?.id ?? null);
 	const profile = useMemo(() => (user ? createMockProfile(user, {profileBadges}) : null), [user, profileBadges]);
+	const rawCustomStatus = user ? Presence.getCustomStatus(user.id) : null;
 	const normalizedCustomStatus = useMemo(() => {
 		if (!user) return null;
-		return normalizeCustomStatus(Presence.getCustomStatus(user.id));
-	}, [user]);
+		return normalizeCustomStatus(rawCustomStatus);
+	}, [rawCustomStatus, user]);
 	const hasCustomStatus = Boolean(normalizedCustomStatus);
 	const userId = user?.id;
 	const userBanner = user?.banner;

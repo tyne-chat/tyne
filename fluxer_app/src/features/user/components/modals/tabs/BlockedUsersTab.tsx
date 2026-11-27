@@ -24,7 +24,11 @@ import {Trans, useLingui} from '@lingui/react/macro';
 import {CopyIcon, DotsThreeVerticalIcon, IdentificationCardIcon, ProhibitIcon, UserIcon} from '@phosphor-icons/react';
 import {observer} from 'mobx-react-lite';
 import type React from 'react';
-import {useCallback, useMemo} from 'react';
+import {useCallback} from 'react';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 const VIEW_S_PROFILE_DESCRIPTOR = msg({
 	message: "View {userName}'s profile",
@@ -40,7 +44,7 @@ const MORE_ACTIONS_FOR_DESCRIPTOR = msg({
 export const BlockedUsersContent: React.FC = observer(() => {
 	const {i18n} = useLingui();
 	const relationships = Relationships.getRelationships();
-	const blockedUsers = useMemo(() => {
+	const blockedUsers = useMobxMemo(() => {
 		return [...relationships]
 			.filter((rel) => rel.type === RelationshipTypes.BLOCKED)
 			.sort((a, b) => {

@@ -41,6 +41,10 @@ import {clsx} from 'clsx';
 import {observer} from 'mobx-react-lite';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
+
 const UNKNOWN_COMMUNITY_DESCRIPTOR = msg({
 	message: 'Unknown community',
 	comment: 'Short label in the recent mentions content popout. Keep it concise.',
@@ -223,7 +227,7 @@ export const RecentMentionsContent = observer(
 		const {isOpen: isFilterMenuOpen, withTracking} = useContextMenuTrigger();
 		const accessibleMentions = MentionFeed.getAccessibleMentions();
 		const onCopySelectedMessages = useMessageSelectionCopyForMessages<HTMLDivElement>(accessibleMentions);
-		const groupedMentions = useMemo(() => {
+		const groupedMentions = useMobxMemo(() => {
 			const groups: Array<MentionGroup> = [];
 			const groupIdx = new Map<string, number>();
 			const directMessagesLabel = i18n._(DIRECT_MESSAGES_DESCRIPTOR);

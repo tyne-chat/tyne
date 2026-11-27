@@ -10,7 +10,10 @@ import VoiceRuntime from '@app/features/voice/engine/VoiceRuntime';
 import type {UserVoiceActivity} from '@app/features/voice/hooks/useUserVoiceActivities';
 import {ME} from '@fluxer/constants/src/AppConstants';
 import {RelationshipTypes} from '@fluxer/constants/src/UserConstants';
-import {useMemo} from 'react';
+
+// Fork imports.
+
+import {useMobxMemo} from '@app/features/platform/hooks/useMobxMemo';
 
 function collectParticipantUsers(channelStates: Readonly<Record<string, NormalizedVoiceState>>): {
 	participantUserIds: Array<string>;
@@ -37,7 +40,7 @@ export function useActiveFriendVoiceStates(): ReadonlyArray<UserVoiceActivity> {
 	const allVoiceStates = VoiceRuntime.getAllVoiceStates();
 	const currentUser = Users.getCurrentUser();
 	const currentUserId = currentUser?.id ?? null;
-	return useMemo(() => {
+	return useMobxMemo(() => {
 		const friendIds = new Set<string>();
 		for (const rel of relationships) {
 			if (rel.type === RelationshipTypes.FRIEND && rel.friendSharesVoiceActivity) {
