@@ -40,7 +40,8 @@ pnpm --filter fluxer_app test
 # Structural safety checks across the fork's lines (web MobX/effect/storage/zoom, render fetches,
 # API/schema/Cassandra/desktop IPC/Rust/Gleam rules; fork-px-lint covers CSS/style px units).
 # Reviewed upstream `--all` exceptions live in `fluxer_app/scripts/fork-lint-reviewed.json`
-# (`--check-reviewed`, `--include-reviewed`), never inline in untouched upstream files.
+# (`--check-reviewed`, `--include-reviewed`), never inline in untouched upstream files. Changes to a
+# `fork-*-lint.mjs` script must also pass `--all`, `--check-reviewed`, and its Vitest tests.
 (cd fluxer_app && node scripts/fork-px-lint.mjs --upstream upstream/main && node scripts/fork-render-fetch-lint.mjs --upstream upstream/main && node scripts/fork-web-safety-lint.mjs --upstream upstream/main && node scripts/fork-backend-desktop-lint.mjs --upstream upstream/main)
 # Upstream's lint job (Biome, ESLint with no warnings, data-flx attributes), plus Biome warnings on
 # files the fork added, committed or not.

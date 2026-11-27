@@ -61,116 +61,57 @@ message or reaction comes from a persona, so the row is not a full description w
 
 ## Keep fork changes out of upstream's way
 
-The fork is rebased onto upstream every night, and upstream moves fast: it renames, prunes and
-restructures whole areas in a day. Every fork line that sits inside an upstream line is a conflict
-waiting for that day. Before editing a file upstream owns, find where the change can live so that
-upstream can rewrite its side without touching ours, and say in one line where it is going and why
-it cannot be a fork-owned file or an appended block.
+`tyne` is rebased onto `upstream` every night. Before editing an upstream-owned file, state in
+one line where the change goes and why it cannot live in a fork-owned file or an appended block.
 
-**Prefer, in this order:** (1) a new fork-owned file; (2) a block appended to the end of an upstream
-file, under a comment saying it is the fork's; (3) one small call or one added line in upstream's
-code that hands over to fork code elsewhere. Rewriting or reordering upstream's own lines is the
-last resort.
+**Prefer, in order:** (1) a new fork-owned file; (2) a block appended at the end under a fork
+comment; (3) one small hook/call in upstream's code handing over to fork code elsewhere. Rewriting
+or reordering upstream lines is last resort.
 
-Rules with a mechanical answer; follow them every time:
+Mechanical rules (enforced where possible by the placement/safety lints):
 
-- **Tests** go in a fork-owned file next to upstream's (`ReactionStateMachinePersona.test.ts`,
+- **Tests:** fork tests go in fork-owned files next to upstream's (`ReactionStateMachinePersona.test.ts`,
   `ForkEnvironmentOverrides.test.ts`, `fork_reaction_persona_test.gleam`,
-  `tests/fork_binary_envelope.rs`). Never add a test or an assertion to an upstream test file. The
-  exception is what upstream's own tests need to run against the fork's code: a fixture line for a
-  fork type, or a `vi.mock` of a fork module that upstream's code now imports (a mock applies only
-  to its own file, and in the API's test project not reliably even there: `fluxer_api/AGENTS.md`),
-  under a `// Fork:` comment saying why.
-- **Upstream test expectations** that hard-code upstream's hosts, or upstream's behaviour where the
-  fork deliberately differs, may be changed in place with a `// Fork:` comment saying why, after
-  asking a maintainer. Everything else in the test stays as upstream has it.
-- **Imports (TypeScript):** leave upstream's import statements exactly as upstream writes them. Fork
-  imports go below them: a blank line, `// Fork imports.`, a blank line, then the imports. A name we
-  need from a module upstream already imports gets its own line there. The one exception: an
-  upstream import the fork's changes leave unused is a compiler error (TS6133, `noUnusedLocals`),
-  so remove that name from upstream's statement.
-- **Imports (Rust):** a name the fork needs goes in its own `use` in a `// Fork imports.` group
-  below upstream's, never into upstream's `use` list.
-- **Imports (Gleam):** the fork's imports go after upstream's, under a `// Fork imports.` line; a
-  name from a module upstream already imports is used qualified (`module.name`), not added to
-  upstream's unqualified list. A hook in upstream's Gleam is a call into a fork module from a
-  `case` arm (best the catch-all) or a separate statement (`fluxer_gateway/AGENTS.md`).
-- **Formatting:** upstream formats every file (Biome) and so does the fork's check, upstream's files
-  included. Place fork code so the formatter leaves upstream's lines alone: do not wrap upstream's
-  code in an `observer()`, a provider or a new component (rename upstream's component and export the
-  wrapped one, or put a small fork component in the place of one upstream call); do not lengthen
-  upstream's one-line signature past the line limit (collect the fork's parameters in a `...fork`
-  rest parameter); no comments inside upstream's expressions; add fork behaviour as a separate
-  statement. To format an upstream file, run
-  `pnpm exec biome check --write --linter-enabled=false <file>` and check that only fork lines moved.
-- **Lists and objects:** fork entries go first in upstream's lists, objects and argument lists,
-  not last where upstream appends; where the order shows or matters, spread in a fork list.
-- **Numbers upstream hands out:** where upstream numbers things in sequence or by position (protobuf
-  fields, schema and migration versions, enum values and binary tags, bit flags, opcodes, numeric
-  error codes, the column order of a table's key), the fork never takes the next free value and
-  never inserts into the middle: the day upstream takes that number, the two collide, often
-  silently. Use a name where the format allows one. Otherwise take the value from a fork range,
-  declared in a `// Fork:` block that says so: protobuf fields from 2200 up, in the
-  `// Fork fields.` block at the top of the message (`accessibility.proto` has one); one-byte tags
-  counting down from 255 (the persona mention in `packages/markdown_parser/rust/src/binary.rs`);
-  flag bits from the middle, as upstream uses both ends (`ForkFlagBits.test.ts`); schema versions
-  not at all. Fork values in an upstream enum go last, after a blank line and `// Fork values.`, and
-  an enum is never stored or sent by its position. A fork column never joins an upstream table's
-  key; the one exception, `persona_id` in `message_reactions`' key, stays the 7th column for good
-  (`MessageReactionsPersonaKey.test.ts`). A shipped number is permanent: moving it needs a migration
-  and a window in which old and new builds both work, and a number given up stays reserved. (Until
-  2026-10-16 the fork kept three mobile settings at protobuf fields 66–68, upstream's next numbers;
-  upstream gave 66 to a bool a day later, and the old values had to be stripped from stored
-  settings, tyne-chat/tyne#125.)
-- **Strings:** fork catalogues only (see "Translations").
-- **Generated files:** never edited by hand (see "Generated code").
-- **Suppressions:** a fork `@ts-expect-error`, `eslint-disable` or `biome-ignore` says why, on its
-  line or the one above.
-- **Data:** fork-owned tables next to `Personas` (the one exception, a message's or reaction's
-  persona, is under "Personas").
+  `tests/fork_binary_envelope.rs`); never add tests or assertions to upstream test files. Necessary
+  compile fixtures, `vi.mock`s (`fluxer_api/AGENTS.md`), or maintainer-approved host/behaviour
+  expectation changes carry `// Fork: <why>`.
+- **Imports (TS, Rust, Gleam):** leave upstream imports untouched; put fork imports below after a
+  blank line and `// Fork imports.`. Remove upstream names only when fork changes leave them unused
+  and the compiler fails (`TS6133`, Rust/Gleam warnings). In Gleam, use already-imported upstream
+  modules qualified (`module.name`), never duplicate imports (`fluxer_gateway/AGENTS.md`).
+- **Formatting (Biome):** place fork code so `pnpm exec biome check --write --linter-enabled=false <file>`
+  moves only fork lines (no wrapping upstream components in `observer()`/providers — rename/wrap
+  or swap one call; no lengthening upstream one-line signatures past the line limit — use `...fork`;
+  no comments inside upstream expressions; add fork behaviour as a separate statement).
+- **Lists and objects:** fork entries go first in upstream lists, objects and argument lists (spread
+  a fork list where order shows/matters).
+- **Numbers upstream hands out:** never take upstream's next sequential/positional value or insert
+  into the middle. Use names where supported; otherwise declare a fork range in a `// Fork:` block:
+  protobuf fields `>= 2200` in `// Fork fields.` at message top (`accessibility.proto`); 1-byte
+  tags counting down from `255` (`packages/markdown_parser/rust/src/binary.rs`); flag bits from the
+  middle (`ForkFlagBits.test.ts`); enum values last after `// Fork values.` (never stored/sent by
+  position); no fork schema versions; no fork columns in upstream primary keys (`persona_id` stays
+  7th in `message_reactions`, `MessageReactionsPersonaKey.test.ts`). Shipped numbers are permanent
+  and retired ones stay reserved (`tyne-chat/tyne#125`).
+- **Suppressions:** every fork `@ts-expect-error`, `eslint-disable`, `biome-ignore`, `*-ignore:` or
+  `px-ok:` explains why on its line or the line above; reviewed upstream `--all` findings live in
+  `fluxer_app/scripts/fork-lint-reviewed.json` (`--check-reviewed`), never inline in untouched
+  upstream files.
+- **Strings, generated files, data:** fork catalogues only ("Translations"); never hand-edit
+  generated files ("Generated code"); fork-only data in fork tables next to `Personas` ("Personas").
 
-When upstream ships its own version of something the fork did, the behaviour decides which to keep:
+When upstream ships its own version: if identical or a clear superset, take upstream's, delete ours
+and say so; if taking upstream's changes user-visible behaviour, stop and ask a maintainer
+(keeping ours working meanwhile if small). Also check whether a partially folded fork commit left
+unneeded code behind (`tyne-chat/tyne#114`).
 
-- Same behaviour, or plainly a superset of ours: take upstream's, delete ours, and say so. Two
-  answers to one problem is the most expensive kind of conflict.
-- Taking upstream's would change what people see or lose something ours does (timing, defaults, a
-  case it does not cover): that is a maintainer's decision. Stop and ask, describing both
-  behaviours; the nightly pipeline escalates instead. Keep the fork's behaviour working meanwhile if
-  that needs no large rewrite. (On 2026-10-10 upstream's AFK timeout handling was taken over the
-  fork's without asking; that should have been a question.)
-- Look at the whole fork commit, not only the part upstream replaced. When upstream makes a change
-  the fork already carries, git folds the fork's copy into upstream's without a conflict and the
-  rest of the commit stays behind unnoticed. After each nightly rebase a check opens a `task` issue
-  listing fork commits that were dropped, lost a file, or lost at least half their changed lines;
-  for each, decide whether the rest is still needed and drop it if not. (On 2026-10-01 a rebase
-  folded a fork fix into upstream's #898; the commit's leftover member-fetch fallback signed a user
-  out over and over until 2026-10-17, tyne-chat/tyne#114.)
-
-Before proposing a commit, check where its tests and imports went. During a rebase conflict, resolve
-towards this shape, not just towards "compiles": if fork lines sit inside upstream's, move them out
-as part of the resolution and list those moves in the summary.
-
-**Keep each spot in few commits.** A rebase stops once for every fork commit that touched a spot
-upstream changed. So a fix to code an earlier fork commit wrote is a `fixup!` commit for it
-(`git commit --fixup=<commit>`), folded in at the next tidy-up, not a new fix commit (never with
-`--autosquash`: a clean merge can still break a commit); undoing a fork
-edit to an upstream file goes into the commit that made it; after a rebase by hand, each adaptation
-is folded into the commit it adapts. A fold must leave every commit it passes through working: a
-fix that uses something a later commit added, or removes something the commits in between still
-use, stays a commit with a subject of its own. All fork changes to `fluxer_docs/` are in one commit,
-`docs: Tyne's additions to the API documentation`; add to it with a fixup. (tyne-chat/tyne#220:
-folding such fixes anyway broke the type check of earlier commits, so the tidy-up of 2026-10-25
-was redone to fold only those that leave every commit working.)
-
-Do not go overboard. This is about where a change goes, not about plug-in layers upstream does not
-have. If keeping something separate needs more than a small hook, or makes the code harder to follow
-than a plain edit, make the plain edit; if it would take real architecture, ask a maintainer first.
-A few honest conflicts a month are cheaper than an architecture nobody asked for.
-
-Why this is written down: on 2026-10-10 one day of upstream work (dead code removed across 1,391
-files, interfaces collapsed across 426) stopped the rebase about twenty times, and roughly a third of
-the conflicted files were there only because of test and import placement. The nightly rebase agent
-does not read this file; its prompt repeats these rules, so change both together.
+During conflicts, resolve towards this placement and list any moves. Keep each spot in few commits:
+fix earlier fork commits with `git commit --fixup=<commit>` (never `--autosquash`: verify every
+intermediate commit still builds, `tyne-chat/tyne#220`), undo edits in the commit that made them,
+and keep all `fluxer_docs/` changes in `docs: Tyne's additions to the API documentation`. Do not
+over-architect: prefer a plain edit over an unasked plugin layer, and ask before adding real
+architecture. Because the nightly rebase agent does not read this file, keep its placement prompt in
+sync when changing these rules.
 
 ## Generated code
 
@@ -200,89 +141,54 @@ what a generated file's input is, stop and ask.
 
 ## Translations
 
-Every new user-facing string is translated into every supported language, and upstream's catalogues
-are never edited: fork strings live in fork catalogues, so upstream's files stay byte-identical and
-cannot conflict.
+Every user-facing string (toasts, placeholders and error fallbacks included) belongs in `msg`,
+`<Trans>` or `i18n._` and in the fork catalogues; never edit `fluxer_app/src/features/i18n/locales/*/messages.po`
+or run `lingui:extract`, `i18n:auto` or `i18n:refresh`.
 
-- Never write user-facing text as a plain string, not even a toast, an error fallback, a tooltip or
-  a placeholder "for now": wrap it in `msg`, `<Trans>` or `i18n._` and translate it in the same
-  change. Untranslated strings that slipped in are the reason for `fork-string-lint.mjs` (below).
-- Do not touch `fluxer_app/src/features/i18n/locales/*/messages.po`, and never commit the result of
-  `pnpm --filter fluxer_app lingui:extract`.
-- After adding or editing strings (`msg()` or `<Trans>`), run `node scripts/fork-i18n.mjs sync` in
-  `fluxer_app`, then translate every empty `msgstr` in
-  `src/features/i18n/fork_locales/*/messages.po`. No empty or raw English values in other locales;
-  words that really are identical go in `fork_locales/reviewed-unchanged.json`. Tyne's own terms:
-  `fork_locales/GLOSSARY.md`, for both apps. Details in `fork_locales/README.md`.
-- `node scripts/fork-i18n.mjs check --upstream upstream/main` (in `fluxer_app`; with `--upstream` it
-  also fails if upstream's catalogues were edited) and `pnpm --filter fluxer_app lingui:compile` must
-  pass.
-- `node scripts/fork-string-lint.mjs --upstream upstream/main` (in `fluxer_app`) must pass too. It
-  reports string literals on the fork's lines in places people read them (JSX text, props such as
-  `title` or `placeholder`, toasts, system messages), which `fork-i18n.mjs` cannot see because they
-  never reach a catalogue. A literal that really is not translated (a brand name, a debug page) gets
-  `// i18n-ignore: <reason>` on its line or the line above. It follows no variables: text built in
-  one place and shown in another still needs your eye. The dev server recompiles only when upstream's catalogues change: after editing the fork's,
-  run `lingui:compile` yourself.
-- Never run `i18n:auto` or `i18n:refresh` in `fluxer_app`: they rewrite upstream's catalogues and can
-  send the strings to an outside translation service.
-- The mobile app has its own fork catalogues; keep the wording aligned where a string exists in both.
+- In `fluxer_app/`, run `node scripts/fork-i18n.mjs sync`, translate every empty `msgstr` in
+  `src/features/i18n/fork_locales/*/messages.po` (`reviewed-unchanged.json`, `GLOSSARY.md`,
+  `fork_locales/README.md`, matching mobile wording), and run `pnpm --filter fluxer_app lingui:compile`
+  (needed manually for dev-server reloads).
+- `node scripts/fork-i18n.mjs check --upstream upstream/main` and
+  `node scripts/fork-string-lint.mjs --upstream upstream/main` must pass (literal exceptions need
+  `// i18n-ignore: <reason>`; also inspect cross-file string variables manually).
 
 ## Sizes in the web app
 
-Write sizes as upstream does: in `rem`, hairlines, shadows and radii included. The desktop app zooms by
-the root font size, which `px` ignores (a `px` cap hid the bottom of the autocomplete above 100%,
-tyne-chat/tyne#636). `fork-px-lint.mjs` enforces it; the few `px` upstream keeps are in `CHECKS.md`.
+Use `rem` (16px = 1rem, `remFromPx(n)`, `var(--radius-full)`), not `px`, which ignores desktop zoom
+(`tyne-chat/tyne#636`). Enforced by `fork-px-lint.mjs`; upstream `px` exceptions are in `CHECKS.md`.
 
 ## Network calls: count the requests
 
-Upstream's API allows each user 50 requests per second over all their devices
-(`getGlobalRateLimit` in `fluxer_api/src/api/middleware/RateLimitMiddleware.ts`; 1,200 with
-`HIGH_GLOBAL_RATE_LIMIT`; `exemptFromGlobal` routes do not count). Over it, a global 429 makes the
-apps hold or fail all their requests for the retry window: messages stop loading and sending.
-Before fluxerapp/fluxer#4295 (rebased 2026-11-25) it also ended the session. The dev stack
-has rate limits off (`FLUXER_DISABLE_RATE_LIMITS`): count the requests in a test.
+Upstream's API allows 50 req/s per user across devices (`getGlobalRateLimit` in
+`RateLimitMiddleware.ts`; 1,200 with `HIGH_GLOBAL_RATE_LIMIT`; `exemptFromGlobal` excluded). Global
+429s fail all app requests; the dev stack disables them (`FLUXER_DISABLE_RATE_LIMITS`), so count
+requests in tests. Before adding a network call inside per-item/loop/render/build/shared-store code
+(`fork-render-fetch-lint.mjs` also checks render/effect fetches), state in the change description:
 
-Before adding a network call to code that runs once per channel, message, member or other list
-item, inside a loop, from a component's render or a widget's `build`, or from a provider or store
-many places watch, answer in the change's description:
+1. Max requests for one user action (~200 channels / hundreds of messages; share overlapping calls).
+2. Failure handling (`429`/`401`/offline): wait/cool down or give up until state changes — never retry per render.
+3. Whether `READY`, gateway events or another fetch already brings the data.
 
-1. How many requests does one user action (opening the app, opening a channel, scrolling) send, at
-   the largest realistic size (about 200 channels in a server, hundreds of messages)? Calls that
-   overlap must share one request.
-2. What happens when the request fails (429, 401, offline)? A failure must not be retried on the
-   next render or by the next caller: wait (a cooldown) or give up until something changes.
-3. Is the call needed at all? Usually the data is already on its way (READY, a gateway event) or is
-   fetched elsewhere.
-
-Such a change needs a test that counts the requests, with the data missing and with the request
-failing. (In tyne-chat/tyne#114 a fork commit fetched the user's own member once per channel, unshared and
-retried on every build: 65 identical requests in half a second on a fast phone signed a user out
-again and again for three weeks. READY already brings the member.)
+Add a request-counting test covering missing data and failing requests (`tyne-chat/tyne#114`).
 
 ## Reviews and fixes
 
-- A review is never only of the diff's lines. For a new network call, loop or per-render trigger,
-  follow its callers and say how many requests one user action sends and what happens when a request
-  fails, even when asked to be brief ("one, and it gives up" is a fine answer). "No infinite loop"
-  has to hold when the request fails, not only when it succeeds. (The fetch behind
-  tyne-chat/tyne#114 passed a brief review that checked only the case where it succeeds.)
-- Keep a confirmed fix apart from hardening against a cause nobody has shown. The fix goes in its own
-  commit; extra fallbacks need evidence that their cause happens (a log line, a query, a repro).
-- When a theory of a bug is not verified, say so when handing it on, so it is not implemented as
-  fact.
-- Do not blame the environment (CI, a phone, production) until a theory explains every symptom.
-  Look past the last normal log line for evidence that contradicts the obvious reading (what was
-  still running at the end, timestamps, a later step's output): a contradiction moves the question.
-  When a command passes on its own but fails under the tool that runs it (an orchestrator, a test
-  runner, a wrapper script), suspect how that tool starts it or reads its output, and reproduce
-  through the tool, not around it (tyne-chat/tyne#194).
-- When a bug hits some users and not others, compare what is stored for them (account and
-  per-server settings, roles, who owns the server, app version) with an unaffected user's, and look
-  for anything unusual before reading more code. Test and maintainer accounts rarely have unusual
-  settings, and a server's owner skips permission checks. (In tyne-chat/tyne#193 the affected users
-  were the only accounts with a reply mention preference set, which made the app drop their own
-  guild member in READY; reading the code had missed it for two days.)
+- **Follow callers, not only diffs:** for any network call, loop or per-render trigger, state max
+  requests per action and failure behaviour (including error non-looping).
+- **Turn bug classes into AST lint rules, as routine as regression tests.** When fixing a bug,
+  reviewing a failure or auditing code, check if the bug class has an AST-detectable shape (or
+  propose one on the issue). Implement or tighten a rule in the matching AST linter
+  (`fluxer_app/scripts/fork-*-lint.mjs`; mobile `tool/fork_*_lint.dart`): verify it fires on the
+  real unfixed code (`git show <fix>^:<file>` for past bugs) and clears with the fix, add positive
+  and negative unit tests, sweep `--all` (proving real siblings with failing-first regression tests,
+  recording verified upstream semantic exceptions by AST symbol in `fork-lint-reviewed.json` with
+  `--check-reviewed`, and tightening precision when suppressions share a safe structural pattern),
+  and condense any prose rule it replaces here to one line.
+- **Verify facts before hardening or reporting:** separate a confirmed fix from unverified extra
+  fallbacks, label unverified theories explicitly, never blame the environment before reproducing
+  through the failing wrapper/orchestrator (`tyne-chat/tyne#194`), and for user-specific bugs
+  compare stored account/server settings and roles before reading more code (`tyne-chat/tyne#193`).
 
 ## Issues
 
