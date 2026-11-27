@@ -83,11 +83,7 @@ export const PersonaProfilePopout: React.FC<PersonaProfilePopoutProps> = observe
 			return AvatarUtils.getPersonaBannerURL({userId: user.id, banner: rawBanner});
 		}, [user.id, rawBanner]);
 
-		const resolvedGuildMember = useMemo(() => {
-			if (guildMember) return guildMember;
-			if (guildId) return GuildMembers.getMember(guildId, user.id);
-			return null;
-		}, [guildMember, guildId, user.id]);
+		const resolvedGuildMember = guildMember ?? (guildId ? GuildMembers.getMember(guildId, user.id) : null);
 
 		const hasCustomPersonaAvatar = Boolean(subprofile.avatar || profile?.avatar_hash);
 

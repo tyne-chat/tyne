@@ -28,3 +28,11 @@ pub fn the_hold_outlasts_what_the_apps_try_test() {
   assert hold > web_resume_window_ms
   assert hold > mobile_resume_window_ms
 }
+
+// Fork: draining nodes hand off presences before stopping, so presence routes must rebuild every 1 s
+// instead of upstream's 10 s (fluxer_gateway/AGENTS.md, tyne-chat/tyne#905).
+pub fn presence_route_rebuilds_every_second_for_drain_test() {
+  assert settings.default_durations().presence.route_rebuild_interval_ms == 1000
+  assert settings.defaults().durations.presence.route_rebuild_interval_ms
+    == 1000
+}

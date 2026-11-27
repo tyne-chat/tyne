@@ -477,6 +477,7 @@ export const PersonaEditModal: React.FC<PersonaEditModalProps> = observer(({pers
 	const tagIcon = PersonaStore.displayTagIcon;
 
 	const initialFormState = useMemo<PersonaFormState>(() => {
+		// web-safety-ignore: initial form copy snapshot is intentionally computed once per copyOf target.
 		if (copyOf) return copyFormState(copyOf, PersonaStore.personas);
 		if (!persona) return emptyFormState();
 		return {

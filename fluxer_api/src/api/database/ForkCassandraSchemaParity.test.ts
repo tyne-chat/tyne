@@ -122,3 +122,42 @@ describe('the fork in the Cassandra target schema', () => {
 		expect(SCHEMA.user_types.map((type) => type.name)).not.toContain('message_subprofile');
 	});
 });
+
+describe('fluxer_messages Scylla queries match cassandra_target_schema.json', () => {
+	const shardSrc = fs.readFileSync(path.join(REPO_ROOT, 'fluxer_messages/src/shard_impl.rs'), 'utf8');
+
+	it('keeps every column in MESSAGE_COLUMNS aligned with messages schema and includes persona_id', () => {
+		const match = /const\s+MESSAGE_COLUMNS:\s*&str\s*=\s*"([\s\S]*?)";/.exec(shardSrc);
+		expect(match, 'MESSAGE_COLUMNS constant in shard_impl.rs').not.toBeNull();
+		const rawCols = match![1].replace(/\\\n/g, ' ');
+		const cols = rawCols
+			.split(',')
+			.map((c) => c.trim())
+			.filter(Boolean);
+		const schemaCols = new Set(inSchema('messages').columns.map((entry) => entry.name));
+		for (const col of cols) {
+			expect(schemaCols, `MESSAGE_COLUMNS entry '${col}' missing from messages schema`).toContain(col);
+		}
+		expect(cols).toContain('persona_id');
+	});
+
+	it('keeps message_reactions Scylla SELECT queries aligned with schema and includes persona_id', () => {
+		const reactionSelects = [...shardSrc.matchAll(/"SELECT\s+([^"]+?)\s+FROM\s+message_reactions\s+WHERE\s+([^"]+)"/g)];
+		expect(reactionSelects.length).toBeGreaterThanOrEqual(2);
+		const schemaCols = new Set(inSchema('message_reactions').columns.map((entry) => entry.name));
+		for (const [, selectList, whereClause] of reactionSelects) {
+			const selectedCols = selectList
+				.split(',')
+				.map((c) => c.trim())
+				.filter(Boolean);
+			for (const col of selectedCols) {
+				expect(schemaCols, `message_reactions SELECT column '${col}' missing from schema`).toContain(col);
+			}
+			expect(selectedCols).toContain('persona_id');
+			const whereCols = [...whereClause.matchAll(/\b([a-z_][a-z0-9_]*)\s*(?:=|IN)\b/g)].map((m) => m[1]);
+			for (const col of whereCols) {
+				expect(schemaCols, `message_reactions WHERE column '${col}' missing from schema`).toContain(col);
+			}
+		}
+	});
+});

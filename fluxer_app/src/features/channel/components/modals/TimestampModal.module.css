@@ -72,6 +72,7 @@
 }
 
 /* Phones: 16px inputs, so iOS does not zoom in on focus. */
+/* px-ok: viewport layout breakpoint for mobile modal input zoom prevention */
 @media (max-width: 480px) {
 	.nlpInput,
 	.nativeInput {

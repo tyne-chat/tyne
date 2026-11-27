@@ -127,11 +127,7 @@ const PersonaProfileMobileSheetContent: React.FC<PersonaProfileMobileSheetConten
 			kind: 'gif',
 		});
 
-		const resolvedGuildMember = useMemo(() => {
-			if (guildMember) return guildMember;
-			if (guildId) return GuildMembers.getMember(guildId, user.id);
-			return null;
-		}, [guildMember, guildId, user.id]);
+		const resolvedGuildMember = guildMember ?? (guildId ? GuildMembers.getMember(guildId, user.id) : null);
 
 		const hasCustomPersonaAvatar = Boolean(subprofile.avatar || profile?.avatar_hash);
 

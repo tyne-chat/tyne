@@ -2400,7 +2400,7 @@ function VersionDetails({
 }
 
 /** The display tag, when the file's differs: two cards with the name line each would give. */
-function DisplayTagItem({
+const DisplayTagItem = observer(function DisplayTagItem({
 	fileTagText,
 	currentText,
 	choice,
@@ -2492,4 +2492,4 @@ function DisplayTagItem({
 			</div>
 		</section>
 	);
-}
+});

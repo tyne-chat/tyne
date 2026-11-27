@@ -20,6 +20,12 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+import {
+	extractReviewedCliArgs,
+	finishReviewedCheckOrNotes,
+	loadReviewedCatalogOrExit,
+	normalizeRepoRelPath,
+} from './fork-lint-reviewed.mjs';
 
 const APP_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE_RE = /^src\/.*\.(css|ts|tsx|js|jsx|mjs)$/;
@@ -233,9 +239,22 @@ function cssCodeLines(lines) {
  * @param {'all' | Set<number>} [lines]
  * @returns {Array<string>}
  */
-export function lintSource(file, source, lines = 'all') {
+export function lintSource(file, source, lines = 'all', options = {}) {
 	if (GENERATED_RE.test(source.slice(0, 500))) return [];
+	const reviewed = options.reviewed ?? null;
+	const repoFile = normalizeRepoRelPath(file);
 	const sourceLines = source.split('\n');
+	const isReviewed = (line, problem) =>
+		Boolean(
+			reviewed?.matches({
+				linter: 'px',
+				rule: 'px-lint',
+				file: repoFile,
+				enclosing: '',
+				target: problem,
+				sourceLine: (sourceLines[line - 1] ?? '').trim(),
+			}),
+		);
 	const reported = (line) =>
 		(lines === 'all' || lines.has(line)) &&
 		!IGNORE_RE.test(sourceLines[line - 1]) &&
@@ -254,7 +273,9 @@ export function lintSource(file, source, lines = 'all') {
 			depth += opens - closes;
 			if (markedRuleDepth !== null && depth <= markedRuleDepth) markedRuleDepth = null;
 			if (inMarkedRule || !reported(index + 1)) return;
-			for (const problem of cssProblems(code)) problems.push(`${file}:${index + 1}: ${problem}`);
+			for (const problem of cssProblems(code)) {
+				if (!isReviewed(index + 1, problem)) problems.push(`${file}:${index + 1}: ${problem}`);
+			}
 		});
 		return problems;
 	}
@@ -272,24 +293,25 @@ export function lintSource(file, source, lines = 'all') {
 	};
 	for (const {offset, problem} of scriptProblems(source)) {
 		const line = lineOf(offset);
-		if (reported(line)) problems.push(`${file}:${line}: ${problem}`);
+		if (reported(line) && !isReviewed(line, problem)) problems.push(`${file}:${line}: ${problem}`);
 	}
 	return problems;
 }
 
-function optionValue(name, fallback) {
-	const index = process.argv.indexOf(name);
-	return index === -1 ? fallback : process.argv[index + 1];
+function optionValue(args, name, fallback) {
+	const index = args.indexOf(name);
+	return index === -1 ? fallback : args[index + 1];
 }
 
 function main() {
-	const all = process.argv.includes('--all');
-	const upstream = optionValue('--upstream', 'upstream/main');
+	const {reviewedPath, includeReviewed, checkReviewed, restArgs} = extractReviewedCliArgs(process.argv.slice(2));
+	const all = restArgs.includes('--all') || checkReviewed;
+	const upstream = optionValue(restArgs, '--upstream', 'upstream/main');
 	// Files given on the command line, as paths relative to fluxer_app (./src/…, or absolute, works too).
-	const given = process.argv
-		.slice(2)
+	const given = restArgs
 		.filter((arg, i, args) => !arg.startsWith('--') && args[i - 1] !== '--upstream')
 		.map((file) => path.relative(APP_DIR, path.resolve(file)));
+	const catalog = loadReviewedCatalogOrExit(reviewedPath, {includeReviewed, checkReviewed});
 	let targets;
 	if (all) {
 		const files = given.length > 0 ? given : git('ls-files', '--', 'src').split('\n').filter(Boolean);
@@ -301,9 +323,17 @@ function main() {
 	const problems = [];
 	for (const [file, lines] of [...targets].sort(([a], [b]) => a.localeCompare(b))) {
 		if (SOURCE_RE.test(file) && !SKIPPED_RE.test(file) && fs.existsSync(path.join(APP_DIR, file))) {
-			problems.push(...lintSource(file, fs.readFileSync(path.join(APP_DIR, file), 'utf8'), lines));
+			problems.push(...lintSource(file, fs.readFileSync(path.join(APP_DIR, file), 'utf8'), lines, {reviewed: catalog}));
 		}
 	}
+	finishReviewedCheckOrNotes({
+		linter: 'px',
+		catalog,
+		reviewedPath,
+		checkReviewed,
+		reportAllSummary: all,
+		allFilesScanned: given.length === 0,
+	});
 	for (const problem of problems) console.log(problem);
 	if (problems.length > 0) {
 		console.error(

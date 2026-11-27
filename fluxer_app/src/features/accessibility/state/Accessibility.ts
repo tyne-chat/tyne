@@ -587,6 +587,8 @@ export interface AccessibilitySettings {
 	messageDoubleClickReplies: boolean;
 	// Fork: whether choosing an emoji adds a space after it (ForkEmojiComposerSpacing.ts, tyne-chat/tyne#650).
 	spaceAfterEmoji: boolean;
+	// Fork: mobile-authored image alt-text toggle preserved across web round-trips (tyne-chat/tyne#145).
+	showAltTextOnImages?: boolean;
 	saturationFactor: number;
 	alwaysUnderlineLinks: boolean;
 	dimStrikethroughText: boolean;
@@ -702,6 +704,8 @@ class Accessibility {
 	messageDoubleClickReplies = false;
 	// Fork: tyne-chat/tyne#650.
 	spaceAfterEmoji = true;
+	// Fork: tyne-chat/tyne#145.
+	showAltTextOnImages?: boolean = undefined;
 	saturationFactor = 1;
 	alwaysUnderlineLinks = false;
 	dimStrikethroughText = true;
@@ -824,6 +828,7 @@ class Accessibility {
 				'messageDoubleClickEdits',
 				'messageDoubleClickReplies',
 				'spaceAfterEmoji',
+				'showAltTextOnImages',
 				'saturationFactor',
 				'alwaysUnderlineLinks',
 				'dimStrikethroughText',
@@ -891,6 +896,7 @@ class Accessibility {
 				messageDoubleClickEdits: s.messageDoubleClickEdits,
 				messageDoubleClickReplies: s.messageDoubleClickReplies,
 				spaceAfterEmoji: s.spaceAfterEmoji,
+				showAltTextOnImages: s.showAltTextOnImages,
 				saturationFactor: s.saturationFactor,
 				alwaysUnderlineLinks: s.alwaysUnderlineLinks,
 				dimStrikethroughText: s.dimStrikethroughText,
@@ -966,6 +972,8 @@ class Accessibility {
 				// Fork: a record without it (saved before it existed, or by an older client) adds the space,
 				// as before (tyne-chat/tyne#650).
 				s.spaceAfterEmoji = m.spaceAfterEmoji ?? true;
+				// Fork: preserve mobile-authored showAltTextOnImages across web sync (tyne-chat/tyne#145).
+				if (m.showAltTextOnImages !== undefined) s.showAltTextOnImages = m.showAltTextOnImages;
 				if (m.saturationFactor !== undefined) s.saturationFactor = m.saturationFactor;
 				s.alwaysUnderlineLinks = m.alwaysUnderlineLinks;
 				if (m.dimStrikethroughText !== undefined) s.dimStrikethroughText = m.dimStrikethroughText;
@@ -1295,6 +1303,8 @@ class Accessibility {
 			this.messageDoubleClickReplies = validated.messageDoubleClickReplies;
 		// Fork: tyne-chat/tyne#650.
 		if (validated.spaceAfterEmoji !== undefined) this.spaceAfterEmoji = validated.spaceAfterEmoji;
+		// Fork: tyne-chat/tyne#145.
+		if (validated.showAltTextOnImages !== undefined) this.showAltTextOnImages = validated.showAltTextOnImages;
 		if (validated.saturationFactor !== undefined) this.saturationFactor = validated.saturationFactor;
 		if (validated.alwaysUnderlineLinks !== undefined) this.alwaysUnderlineLinks = validated.alwaysUnderlineLinks;
 		if (validated.dimStrikethroughText !== undefined) this.dimStrikethroughText = validated.dimStrikethroughText;
@@ -1431,6 +1441,7 @@ class Accessibility {
 			messageDoubleClickEdits: data.messageDoubleClickEdits ?? this.messageDoubleClickEdits,
 			messageDoubleClickReplies: data.messageDoubleClickReplies ?? this.messageDoubleClickReplies,
 			spaceAfterEmoji: data.spaceAfterEmoji ?? this.spaceAfterEmoji,
+			showAltTextOnImages: data.showAltTextOnImages !== undefined ? data.showAltTextOnImages : this.showAltTextOnImages,
 			saturationFactor: Math.max(0, Math.min(1, data.saturationFactor ?? this.saturationFactor)),
 			alwaysUnderlineLinks: data.alwaysUnderlineLinks ?? this.alwaysUnderlineLinks,
 			dimStrikethroughText: data.dimStrikethroughText ?? this.dimStrikethroughText,

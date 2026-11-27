@@ -251,10 +251,7 @@ export const GuildCommandsTab = observer(function GuildCommandsTab({guildId}: {g
 	const canManage = Permission.can(Permissions.MANAGE_COMMANDS, {guildId});
 
 	// A text channel of the community: the preview renders in it, and emoji resolve as in a message there.
-	const previewChannel = useMemo(
-		() => Channels.getGuildChannels(guildId).find((channel) => channel.type === 0) ?? null,
-		[guildId],
-	);
+	const previewChannel = Channels.getGuildChannels(guildId).find((channel) => channel.type === 0) ?? null;
 
 	const load = useCallback(async () => {
 		try {

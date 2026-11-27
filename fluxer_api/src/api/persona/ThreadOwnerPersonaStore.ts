@@ -10,11 +10,11 @@
 
 import type {ChannelID, PersonaID, UserID} from '@app/api/BrandedTypes';
 import {
-	deleteOneOrMany,
+	BatchBuilder,
+	executeGroupedBatches,
 	fetchMany,
 	fetchManyInChunks,
 	fetchOne,
-	upsertOne,
 } from '@app/api/database/CassandraQueryExecution';
 import type {ThreadOwnerPersonaRow} from '@app/api/database/types/PersonaTypes';
 import {Logger} from '@app/api/Logger';
@@ -35,9 +35,10 @@ export async function storeThreadOwnerPersona(
 ): Promise<void> {
 	const row: ThreadOwnerPersonaRow = {thread_id: threadId, user_id: userId, persona_id: personaId};
 	try {
-		// The by-user row goes first: a crash in between leaves a row that account deletion still finds.
-		await upsertOne(ThreadOwnerPersonasByUser.upsertAll(row));
-		await upsertOne(ThreadOwnerPersonas.upsertAll(row));
+		const batch = new BatchBuilder();
+		batch.addPrepared(ThreadOwnerPersonasByUser.upsertAll(row));
+		batch.addPrepared(ThreadOwnerPersonas.upsertAll(row));
+		await batch.execute();
 	} catch (error) {
 		Logger.warn({error, threadId: threadId.toString()}, 'Failed to record the persona a thread was started as');
 	}
@@ -68,14 +69,19 @@ export async function loadThreadOwnerPersonaIds(threadIds: Array<ChannelID>): Pr
 export async function forgetThreadOwnerPersona(threadId: ChannelID): Promise<void> {
 	const row = await fetchOne<ThreadOwnerPersonaRow>(FETCH_ONE.bind({thread_id: threadId}));
 	if (!row) return;
-	await deleteOneOrMany(ThreadOwnerPersonas.deleteByPk({thread_id: threadId}));
-	await deleteOneOrMany(ThreadOwnerPersonasByUser.deleteByPk({user_id: row.user_id, thread_id: threadId}));
+	const batch = new BatchBuilder();
+	batch.addPrepared(ThreadOwnerPersonas.deleteByPk({thread_id: threadId}));
+	batch.addPrepared(ThreadOwnerPersonasByUser.deleteByPk({user_id: row.user_id, thread_id: threadId}));
+	await batch.execute();
 }
 
 export async function forgetThreadOwnerPersonasOfUser(userId: UserID): Promise<void> {
 	const rows = await fetchMany<ThreadOwnerPersonaRow>(FETCH_BY_USER.bind({user_id: userId}));
-	for (const row of rows) {
-		await deleteOneOrMany(ThreadOwnerPersonas.deleteByPk({thread_id: row.thread_id}));
-	}
-	await deleteOneOrMany(ThreadOwnerPersonasByUser.deletePartition({user_id: userId}));
+	if (rows.length === 0) return;
+	await executeGroupedBatches(
+		rows.map((row) => [
+			ThreadOwnerPersonas.deleteByPk({thread_id: row.thread_id}),
+			ThreadOwnerPersonasByUser.deleteByPk({user_id: userId, thread_id: row.thread_id}),
+		]),
+	);
 }

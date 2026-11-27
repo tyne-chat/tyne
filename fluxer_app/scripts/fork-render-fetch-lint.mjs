@@ -20,6 +20,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {parse} from '@babel/parser';
+import {
+	enclosingAstSymbol,
+	extractReviewedCliArgs,
+	finishReviewedCheckOrNotes,
+	loadReviewedCatalogOrExit,
+	normalizeRepoRelPath,
+} from './fork-lint-reviewed.mjs';
 
 const APP_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE_RE = /^src\/.*\.(ts|tsx|js|jsx|mjs)$/;
@@ -143,10 +150,14 @@ function isImmediatelyInvoked(fnNode, parent) {
  * @param {string} file
  * @param {string} source
  * @param {'all' | Set<number>} [lines]
+ * @param {{reviewed?: import('./fork-lint-reviewed.mjs').ReviewedLintCatalog | null | undefined}} [options]
  * @returns {Array<string>}
  */
-export function lintRenderFetchSource(file, source, lines = 'all') {
+export function lintRenderFetchSource(file, source, lines = 'all', options = {}) {
 	if (GENERATED_RE.test(source.slice(0, 500))) return [];
+	const reviewed = options.reviewed ?? null;
+	const repoFile = normalizeRepoRelPath(file);
+	const sourceLines = source.split('\n');
 	let ast;
 	try {
 		ast = parse(source, {sourceType: 'module', plugins: ['typescript', 'jsx', 'decorators'], errorRecovery: true});
@@ -195,6 +206,20 @@ export function lintRenderFetchSource(file, source, lines = 'all') {
 				const line = node.loc?.start.line;
 				if (desc && line && (lines === 'all' || lines.has(line)) && !ignored.has(line)) {
 					const col = (node.loc?.start.column ?? 0) + 1;
+					const rule = mode === 'render' ? 'render-fetch' : 'effect-no-deps-fetch';
+					const sourceLine = (sourceLines[line - 1] ?? '').trim();
+					if (
+						reviewed?.matches({
+							linter: 'render-fetch',
+							rule,
+							file: repoFile,
+							enclosing: enclosingAstSymbol(ancestors),
+							target: desc,
+							sourceLine,
+						})
+					) {
+						return;
+					}
 					if (mode === 'render') {
 						problems.push(
 							`${file}:${line}:${col}: [render-fetch] network call \`${desc}\` inside React render/hook body (move into useEffect with deps or an event handler; tyne-chat/tyne#114)`,
@@ -226,15 +251,17 @@ export function lintRenderFetchSource(file, source, lines = 'all') {
 	return problems;
 }
 
-function optionValue(name, fallback) {
-	const index = process.argv.indexOf(name);
-	return index === -1 ? fallback : process.argv[index + 1];
+function optionValue(args, name, fallback) {
+	const index = args.indexOf(name);
+	return index === -1 ? fallback : args[index + 1];
 }
 
 function main() {
-	const all = process.argv.includes('--all');
-	const upstream = optionValue('--upstream', 'upstream/main');
-	const given = process.argv.slice(2).filter((arg, i, args) => !arg.startsWith('--') && args[i - 1] !== '--upstream');
+	const {reviewedPath, includeReviewed, checkReviewed, restArgs} = extractReviewedCliArgs(process.argv.slice(2));
+	const all = restArgs.includes('--all') || checkReviewed;
+	const upstream = optionValue(restArgs, '--upstream', 'upstream/main');
+	const given = restArgs.filter((arg, i, args) => !arg.startsWith('--') && args[i - 1] !== '--upstream');
+	const catalog = loadReviewedCatalogOrExit(reviewedPath, {includeReviewed, checkReviewed});
 	let targets;
 	if (all) {
 		const files = given.length > 0 ? given : git('ls-files', '--', 'src').split('\n');
@@ -246,14 +273,24 @@ function main() {
 	const problems = [];
 	for (const [file, lines] of [...targets].sort(([a], [b]) => a.localeCompare(b))) {
 		if (SOURCE_RE.test(file) && !SKIPPED_RE.test(file) && fs.existsSync(path.join(APP_DIR, file))) {
-			problems.push(...lintRenderFetchSource(file, fs.readFileSync(path.join(APP_DIR, file), 'utf8'), lines));
+			problems.push(
+				...lintRenderFetchSource(file, fs.readFileSync(path.join(APP_DIR, file), 'utf8'), lines, {reviewed: catalog}),
+			);
 		}
 	}
+	finishReviewedCheckOrNotes({
+		linter: 'render-fetch',
+		catalog,
+		reviewedPath,
+		checkReviewed,
+		reportAllSummary: all,
+		allFilesScanned: given.length === 0,
+	});
 	for (const problem of problems) console.log(problem);
 	if (problems.length > 0) {
 		console.error(
 			`\n${problems.length} React render/effect network-call violation(s). Move fetches into a guarded ` +
-				'useEffect(..., [deps]) or event handler, or mark with `// render-fetch-ignore: <reason>`.',
+				'useEffect(..., [deps]) or event handler, mark fork lines with `// render-fetch-ignore: <reason>`, or record reviewed upstream entries in `fluxer_app/scripts/fork-lint-reviewed.json`.',
 		);
 		process.exit(1);
 	}

@@ -25,6 +25,7 @@ import {makeAutoObservable, untracked} from 'mobx';
 // Fork imports.
 
 import EmojiPins from '@app/features/emoji/state/EmojiPins';
+import {getPersonaEmojiUsage, trackPersonaEmojiUsage} from '@app/features/emoji/state/ForkPersonaEmojiUsage';
 import UnicodeEmojis from '@app/features/expressions/utils/UnicodeEmojis';
 import {PersonaStore} from '@app/features/persona/state/PersonaStore';
 
@@ -82,20 +83,9 @@ class EmojiPicker {
 	private ranking: UsageRanking = EMPTY_USAGE_RANKING;
 	private rankingDirty = true;
 	private rankingVersion = 0;
-	private personaUsageMap: Record<string, Record<string, UsageEntry>> = {};
-	private personaUsageLoaded = false;
 
 	constructor() {
-		makeAutoObservable<
-			EmojiPicker,
-			| '_favoriteSet'
-			| '_collapsedSet'
-			| 'ranking'
-			| 'rankingDirty'
-			| 'rankingVersion'
-			| 'personaUsageMap'
-			| 'personaUsageLoaded'
-		>(
+		makeAutoObservable<EmojiPicker, '_favoriteSet' | '_collapsedSet' | 'ranking' | 'rankingDirty' | 'rankingVersion'>(
 			this,
 			{
 				_favoriteSet: false,
@@ -103,8 +93,6 @@ class EmojiPicker {
 				ranking: false,
 				rankingDirty: false,
 				rankingVersion: false,
-				personaUsageMap: false,
-				personaUsageLoaded: false,
 			},
 			{autoBind: true},
 		);
@@ -157,27 +145,8 @@ class EmojiPicker {
 		return this.ranking;
 	}
 
-	private loadPersonaUsage(): void {
-		if (this.personaUsageLoaded || typeof window === 'undefined') return;
-		this.personaUsageLoaded = true;
-		try {
-			const raw = window.localStorage.getItem('fluxer_persona_emoji_usage');
-			if (raw) {
-				this.personaUsageMap = JSON.parse(raw);
-			}
-		} catch {}
-	}
-
-	private savePersonaUsage(): void {
-		if (typeof window === 'undefined') return;
-		try {
-			window.localStorage.setItem('fluxer_persona_emoji_usage', JSON.stringify(this.personaUsageMap));
-		} catch {}
-	}
-
 	getPersonaUsage(personaId: string): Record<string, UsageEntry> | undefined {
-		this.loadPersonaUsage();
-		return this.personaUsageMap[personaId];
+		return getPersonaEmojiUsage(personaId);
 	}
 
 	trackEmojiUsage(emojiKey: string, personaId?: string | null): void {
@@ -193,11 +162,7 @@ class EmojiPicker {
 		this.rankingDirty = true;
 
 		if (personaId) {
-			this.loadPersonaUsage();
-			const pMap = this.personaUsageMap[personaId] ?? {};
-			pMap[emojiKey] = bumpUsageEntry(pMap[emojiKey], now);
-			this.personaUsageMap[personaId] = pMap;
-			this.savePersonaUsage();
+			trackPersonaEmojiUsage(personaId, emojiKey, now);
 		}
 	}
 
