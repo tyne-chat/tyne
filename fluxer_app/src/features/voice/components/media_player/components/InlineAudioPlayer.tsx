@@ -33,6 +33,10 @@ import {AnimatePresence, motion} from 'framer-motion';
 import type React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 const AUDIO_PLAYER_DESCRIPTOR = msg({
 	message: 'Audio player',
 	comment: 'Aria label for the inline audio attachment player container.',
@@ -68,7 +72,7 @@ function splitFilename(filename: string): {name: string; extension: string} {
 	};
 }
 
-export function InlineAudioPlayer({
+function InlineAudioPlayerBase({
 	src,
 	title = 'Audio',
 	fileSize,
@@ -476,3 +480,5 @@ export function InlineAudioPlayer({
 		</div>
 	);
 }
+
+export const InlineAudioPlayer = observer(InlineAudioPlayerBase);

@@ -42,6 +42,10 @@ import type React from 'react';
 import {useCallback, useEffect, useId, useMemo, useState} from 'react';
 import {type Path, useForm, useWatch} from 'react-hook-form';
 
+// Fork imports.
+
+import {useRef} from 'react';
+
 const NO_CHANGES_TO_SAVE_DESCRIPTOR = msg({
 	message: 'No changes to save',
 	comment: 'Empty-state text in the application detail.',
@@ -125,6 +129,13 @@ export const ApplicationDetail: React.FC<ApplicationDetailProps> = observer(
 		const [isRotating, setIsRotating] = useState<'client' | 'bot' | null>(null);
 		const clientSecretInputId = useId();
 		const botTokenInputId = useId();
+		const idCopiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+		useEffect(
+			() => () => {
+				if (idCopiedTimerRef.current !== null) clearTimeout(idCopiedTimerRef.current);
+			},
+			[],
+		);
 		const form = useForm<ApplicationDetailFormValues>({
 			defaultValues: {
 				name: '',
@@ -390,7 +401,11 @@ export const ApplicationDetail: React.FC<ApplicationDetailProps> = observer(
 			try {
 				await writeClipboardText(application.id);
 				setIdCopied(true);
-				setTimeout(() => setIdCopied(false), 2000);
+				if (idCopiedTimerRef.current !== null) clearTimeout(idCopiedTimerRef.current);
+				idCopiedTimerRef.current = setTimeout(() => {
+					idCopiedTimerRef.current = null;
+					setIdCopied(false);
+				}, 2000);
 			} catch (err) {
 				logger.error('Failed to copy ID', err);
 			}

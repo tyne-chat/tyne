@@ -10,6 +10,10 @@ import {AnimatePresence, type HTMLMotionProps, motion} from 'framer-motion';
 import type React from 'react';
 import {useCallback, useMemo} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 type TooltipSurfaceStyle = React.CSSProperties & {
 	'--hover-floating-tooltip-left': string;
 	'--hover-floating-tooltip-top': string;
@@ -26,7 +30,7 @@ interface HoverFloatingTooltipSurfaceProps
 	'data-flx': string;
 }
 
-export function HoverFloatingTooltipSurface({
+function HoverFloatingTooltipSurfaceBase({
 	tooltip,
 	className,
 	children,
@@ -81,3 +85,5 @@ export function HoverFloatingTooltipSurface({
 		</FloatingPortal>
 	);
 }
+
+export const HoverFloatingTooltipSurface = observer(HoverFloatingTooltipSurfaceBase);

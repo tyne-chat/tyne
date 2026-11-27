@@ -26,6 +26,7 @@ export const MessageThreadChip = observer(({message}: {message: Message}) => {
 	if (!ThreadGuilds.anyActive) return null;
 	const thread = ChannelThreads.getThread(message.id);
 	if (!thread || thread.parentId !== message.channelId || !ThreadGuilds.isActive(thread.guildId)) return null;
+	if (thread.lastMessageId) void Messages.version;
 	const lastMessage = thread.lastMessageId ? Messages.getMessage(thread.id, thread.lastMessageId) : undefined;
 	let preview: string | null = null;
 	if (lastMessage) {

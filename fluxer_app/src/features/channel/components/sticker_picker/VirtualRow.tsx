@@ -121,7 +121,7 @@ const StickerButton: React.FC<StickerButtonProps> = React.memo(
 
 StickerButton.displayName = 'StickerButton';
 
-const VirtualRowRendererBase: React.FC<VirtualRowRendererProps> = React.memo(
+const VirtualRowRendererBase: React.FC<VirtualRowRendererProps> = observer(
 	({
 		row,
 		handleHover,

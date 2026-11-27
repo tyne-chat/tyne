@@ -26,10 +26,11 @@ import React, {useCallback, useState} from 'react';
 import {PersonaProfilePopout} from '@app/features/persona/components/PersonaProfilePopout';
 import PersonaProfileMobile from '@app/features/persona/state/PersonaProfileMobile';
 import type {MessageSubprofileResponse} from '@fluxer/schema/src/domains/persona/PersonaSchemas';
+import {observer} from 'mobx-react-lite';
 
 type PreloadableChildProps = React.HTMLAttributes<HTMLElement> & React.RefAttributes<HTMLElement>;
 
-export const PreloadableUserPopout = React.forwardRef<
+const PreloadableUserPopoutBase = React.forwardRef<
 	HTMLElement,
 	{
 		user: User;
@@ -300,3 +301,5 @@ export const PreloadableUserPopout = React.forwardRef<
 		);
 	},
 );
+
+export const PreloadableUserPopout = observer(PreloadableUserPopoutBase);

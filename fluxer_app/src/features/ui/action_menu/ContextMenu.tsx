@@ -380,7 +380,7 @@ interface MenuItemProps {
 	hint?: React.ReactNode;
 }
 
-export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(
+const MenuItemBase = React.forwardRef<HTMLDivElement, MenuItemProps>(
 	(
 		{label, disabled, onSelect, icon, danger, className, children, closeOnSelect = true, shortcut, hint},
 		forwardedRef,
@@ -461,6 +461,8 @@ export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(
 		);
 	},
 );
+
+export const MenuItem = observer(MenuItemBase);
 
 MenuItem.displayName = 'MenuItem';
 

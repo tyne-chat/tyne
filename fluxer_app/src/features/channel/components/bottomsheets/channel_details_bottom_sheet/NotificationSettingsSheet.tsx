@@ -22,6 +22,10 @@ import {useLingui} from '@lingui/react/macro';
 import type React from 'react';
 import {useMemo} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 interface NotificationSettingsSheetProps {
 	isOpen: boolean;
 	onClose: () => void;
@@ -31,7 +35,7 @@ interface NotificationSettingsSheetProps {
 	onOpenGuildSettings: () => void;
 }
 
-export const NotificationSettingsSheet: React.FC<NotificationSettingsSheetProps> = ({
+const NotificationSettingsSheetBase: React.FC<NotificationSettingsSheetProps> = ({
 	isOpen,
 	onClose,
 	channel,
@@ -40,19 +44,19 @@ export const NotificationSettingsSheet: React.FC<NotificationSettingsSheetProps>
 	onOpenGuildSettings,
 }) => {
 	const {i18n} = useLingui();
+	const channelNotifications = UserGuildSettings.getChannelOverride(guildId, channel.id)?.message_notifications;
+	const categoryDefaultLevel = guildId
+		? UserGuildSettings.resolveEffectiveMessageNotifications({
+				id: channel.parentId ?? '',
+				guildId: channel.guildId,
+				type: ChannelTypes.GUILD_CATEGORY,
+			})
+		: MessageNotifications.ALL_MESSAGES;
 	const groups = useMemo((): Array<MenuGroupType> => {
 		const categoryId = channel.parentId;
 		const hasCategory = categoryId != null;
-		const channelNotifications = UserGuildSettings.getChannelOverride(guildId, channel.id)?.message_notifications;
 		const currentNotificationLevel = channelNotifications ?? MessageNotifications.INHERIT;
 		const communityNotificationSettingsLabel = i18n._(COMMUNITY_NOTIFICATION_SETTINGS_DESCRIPTOR);
-		const categoryDefaultLevel = guildId
-			? UserGuildSettings.resolveEffectiveMessageNotifications({
-					id: channel.parentId ?? '',
-					guildId: channel.guildId,
-					type: ChannelTypes.GUILD_CATEGORY,
-				})
-			: MessageNotifications.ALL_MESSAGES;
 		const defaultSubtext = getNotificationSettingsLabel(categoryDefaultLevel) ?? undefined;
 		return [
 			{
@@ -93,7 +97,16 @@ export const NotificationSettingsSheet: React.FC<NotificationSettingsSheetProps>
 				] as Array<MenuItemType>,
 			},
 		];
-	}, [guildId, channel.id, channel.parentId, onChangeLevel, onOpenGuildSettings, i18n.locale]);
+	}, [
+		channelNotifications,
+		categoryDefaultLevel,
+		guildId,
+		channel.id,
+		channel.parentId,
+		onChangeLevel,
+		onOpenGuildSettings,
+		i18n.locale,
+	]);
 	return (
 		<MenuBottomSheet
 			isOpen={isOpen}
@@ -104,3 +117,5 @@ export const NotificationSettingsSheet: React.FC<NotificationSettingsSheetProps>
 		/>
 	);
 };
+
+export const NotificationSettingsSheet = observer(NotificationSettingsSheetBase);

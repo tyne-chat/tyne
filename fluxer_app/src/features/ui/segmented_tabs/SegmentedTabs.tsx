@@ -8,6 +8,10 @@ import {motion} from 'framer-motion';
 import type React from 'react';
 import {useRef} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 export interface SegmentedTab<T extends string = string> {
 	id: T;
 	label: string;
@@ -23,7 +27,7 @@ interface SegmentedTabsProps<T extends string = string> {
 	semantics?: 'tabs' | 'radio';
 }
 
-export function SegmentedTabs<T extends string = string>({
+function SegmentedTabsBase<T extends string = string>({
 	tabs,
 	selectedTab,
 	onTabChange,
@@ -113,3 +117,5 @@ export function SegmentedTabs<T extends string = string>({
 		</div>
 	);
 }
+
+export const SegmentedTabs = observer(SegmentedTabsBase) as typeof SegmentedTabsBase;

@@ -21,6 +21,10 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import React, {useCallback, useEffect, useId, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 const AVATAR_DESCRIPTOR = msg({
 	message: 'Avatar',
 	comment: 'Accessible label for an avatar image.',
@@ -113,7 +117,7 @@ interface BaseAvatarProps {
 	[themeAttr: `data-flx-${string}`]: string | undefined;
 }
 
-export const BaseAvatar = React.forwardRef<HTMLDivElement, BaseAvatarProps>(
+const BaseAvatarBase = React.forwardRef<HTMLDivElement, BaseAvatarProps>(
 	(
 		{
 			size,
@@ -437,6 +441,8 @@ export const BaseAvatar = React.forwardRef<HTMLDivElement, BaseAvatarProps>(
 		);
 	},
 );
+
+export const BaseAvatar = observer(BaseAvatarBase);
 
 BaseAvatar.displayName = 'BaseAvatar';
 

@@ -47,6 +47,10 @@ import type React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 
+// Fork imports.
+
+import {useRef} from 'react';
+
 const GIFT_URL_DESCRIPTOR = msg({
 	message: 'Gift URL',
 	comment: 'Short label in the gift inventory tab. Keep it concise.',
@@ -121,6 +125,13 @@ const GiftCard: React.FC<GiftCardProps> = observer(({gift, isExpanded, onToggle,
 	const currentUser = Users.currentUser;
 	const [copied, setCopied] = useState(false);
 	const [redeeming, setRedeeming] = useState(false);
+	const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(
+		() => () => {
+			if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
+		},
+		[],
+	);
 	const giftUrl = `${RuntimeConfig.giftEndpoint}/${gift.code}`;
 	const isLifetime = currentUser?.isPremium() && currentUser.premiumType === UserPremiumTypes.LIFETIME;
 	const isRedeemed = !!gift.redeemed_at;
@@ -131,7 +142,11 @@ const GiftCard: React.FC<GiftCardProps> = observer(({gift, isExpanded, onToggle,
 			await TextCopyCommands.copy(i18n, giftUrl, true);
 			setCopied(true);
 			ToastCommands.createToast({type: 'success', children: <Trans>Gift URL copied to clipboard!</Trans>});
-			setTimeout(() => setCopied(false), 2000);
+			if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
+			copiedTimerRef.current = setTimeout(() => {
+				copiedTimerRef.current = null;
+				setCopied(false);
+			}, 2000);
 		} catch (error) {
 			logger.error('Failed to copy gift URL', error);
 			showGenericErrorModal({

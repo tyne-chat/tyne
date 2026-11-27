@@ -95,7 +95,7 @@ interface VisibleFloatingUnreadEdge {
 	readonly edge: MeasuredFloatingUnreadTarget;
 }
 
-const FloatingUnreadPill = ({label, severity, direction, onClick}: FloatingUnreadPillProps) => {
+const FloatingUnreadPillBase = ({label, severity, direction, onClick}: FloatingUnreadPillProps) => {
 	const prefersReducedMotion = Accessibility.useReducedMotion;
 	let directionOffset: 10 | -10;
 	if (direction === Edge.TOP) {
@@ -151,6 +151,8 @@ const FloatingUnreadPill = ({label, severity, direction, onClick}: FloatingUnrea
 		</FocusRing>
 	);
 };
+
+const FloatingUnreadPill = observer(FloatingUnreadPillBase);
 
 export interface FloatingUnreadIndicatorsProps {
 	readonly label: string;

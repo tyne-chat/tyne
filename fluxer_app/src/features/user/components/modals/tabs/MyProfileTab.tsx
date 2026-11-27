@@ -711,11 +711,20 @@ const MyProfileTabComponent = observer(function MyProfileTabComponent({
 			isSubmitting: form.formState.isSubmitting,
 		});
 	}, [handleReset, handleSave, form.formState.isSubmitting]);
+	const ariaAnnouncementTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(
+		() => () => {
+			if (ariaAnnouncementTimerRef.current !== null) clearTimeout(ariaAnnouncementTimerRef.current);
+		},
+		[],
+	);
 	useEffect(() => {
 		if (flashTrigger > lastFlashTrigger) {
 			setLastFlashTrigger(flashTrigger);
 			setAriaAnnouncement(i18n._(WARNING_YOU_HAVE_UNSAVED_CHANGES_PLEASE_SAVE_YOUR_DESCRIPTOR));
-			setTimeout(() => {
+			if (ariaAnnouncementTimerRef.current !== null) clearTimeout(ariaAnnouncementTimerRef.current);
+			ariaAnnouncementTimerRef.current = setTimeout(() => {
+				ariaAnnouncementTimerRef.current = null;
 				setAriaAnnouncement('');
 			}, 1000);
 		}

@@ -153,6 +153,7 @@ const ResolvedDMListItem = observer(function ResolvedDMListItem({
 	} | null>(null);
 
 	const currentUser = Users.getCurrentUser();
+	void Messages.version;
 	const lastMessage = Messages.getCachedMessages(channel.id)?.newest();
 	const leaveGroup = useLeaveGroup();
 	const {keyboardModeEnabled} = KeyboardMode;

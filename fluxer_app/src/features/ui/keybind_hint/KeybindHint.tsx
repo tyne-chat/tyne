@@ -135,7 +135,7 @@ export interface KeybindHintProps {
 	combo?: KeyCombo;
 }
 
-export const KeybindHint = ({action, combo}: KeybindHintProps) => {
+const KeybindHintBase = ({action, combo}: KeybindHintProps) => {
 	const {i18n} = useLingui();
 	const resolvedCombo = combo ?? (action ? Keybind.getByAction(action).combo : null);
 	if (!resolvedCombo || (!resolvedCombo.key && !resolvedCombo.code)) {
@@ -159,6 +159,8 @@ export const KeybindHint = ({action, combo}: KeybindHintProps) => {
 		</span>
 	);
 };
+
+export const KeybindHint = observer(KeybindHintBase);
 
 export interface TooltipWithKeybindProps {
 	label: string;

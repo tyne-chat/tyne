@@ -23,6 +23,10 @@ import {AnimatePresence, motion} from 'framer-motion';
 import type React from 'react';
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 export type {ScrollIndicatorSeverity};
 
 const SCROLL_TARGET_PADDING_PX = 12;
@@ -229,7 +233,7 @@ interface FloatingScrollIndicatorProps {
 	onClick: () => void;
 }
 
-const FloatingScrollIndicator = ({label, severity, onClick}: FloatingScrollIndicatorProps) => {
+const FloatingScrollIndicatorBase = ({label, severity, onClick}: FloatingScrollIndicatorProps) => {
 	const prefersReducedMotion = Accessibility.useReducedMotion;
 	return (
 		<FocusRing offset={-2} data-flx="app.scroll-indicator-overlay.floating-scroll-indicator.focus-ring">
@@ -255,6 +259,8 @@ const FloatingScrollIndicator = ({label, severity, onClick}: FloatingScrollIndic
 		</FocusRing>
 	);
 };
+
+const FloatingScrollIndicator = observer(FloatingScrollIndicatorBase);
 
 interface ScrollIndicatorOverlayProps {
 	getScrollContainer: () => HTMLElement | null;

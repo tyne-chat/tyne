@@ -17,6 +17,10 @@ import {useCallback, useMemo, useState} from 'react';
 import type {ControllerRenderProps, FieldValues, Path, UseFormReturn} from 'react-hook-form';
 import {Controller} from 'react-hook-form';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 const HOW_THIS_WORKS_DESCRIPTOR = msg({
 	message: 'How this works',
 	comment: 'Short label in the message history threshold content. Keep it concise.',
@@ -125,7 +129,7 @@ const MessageHistoryThresholdDescription: React.FC = () => {
 		</div>
 	);
 };
-export const MessageHistoryThresholdAccordion: React.FC = () => {
+const MessageHistoryThresholdAccordionBase: React.FC = () => {
 	const {i18n} = useLingui();
 	const [isOpen, setIsOpen] = useState(false);
 	const toggle = useCallback(() => setIsOpen((current) => !current), []);
@@ -175,6 +179,8 @@ export const MessageHistoryThresholdAccordion: React.FC = () => {
 		</div>
 	);
 };
+
+export const MessageHistoryThresholdAccordion = observer(MessageHistoryThresholdAccordionBase);
 
 function buildMessageHistoryThresholdValidator(
 	i18n: I18n,

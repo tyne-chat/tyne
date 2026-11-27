@@ -97,7 +97,7 @@ interface SensitiveContentChoiceRowProps {
 	dataFlx: string;
 }
 
-const SensitiveContentChoiceRow: React.FC<SensitiveContentChoiceRowProps> = ({
+const SensitiveContentChoiceRowBase: React.FC<SensitiveContentChoiceRowProps> = ({
 	label,
 	description,
 	value,
@@ -196,6 +196,8 @@ const SensitiveContentChoiceRow: React.FC<SensitiveContentChoiceRowProps> = ({
 		</div>
 	);
 };
+
+const SensitiveContentChoiceRow = observer(SensitiveContentChoiceRowBase);
 
 export const SensitiveContentTabContent: React.FC = observer(() => {
 	const {i18n} = useLingui();

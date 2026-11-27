@@ -165,6 +165,15 @@ export function useMessageSearchAutocomplete({
 	const searchContextRef = useRef<SearchContext | null>(null);
 	const [memberSearchResults, setMemberSearchResults] = useState<Array<User>>([]);
 	const memberFetchDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const selectFilterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const selectFilterSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(
+		() => () => {
+			if (selectFilterTimerRef.current !== null) clearTimeout(selectFilterTimerRef.current);
+			if (selectFilterSearchTimerRef.current !== null) clearTimeout(selectFilterSearchTimerRef.current);
+		},
+		[],
+	);
 	const memberFetchQueryRef = useRef<string>('');
 	const personaSuggestions = useSearchPersonaSuggestions({autocompleteType, currentFilter, value, inputRef, channel});
 	const filterOptions = useMemo(() => [...getSearchFilterOptions(i18n)], [i18n.locale]);
@@ -992,10 +1001,16 @@ export function useMessageSearchAutocomplete({
 			filterInput.setSelectionRange(replacement.newCursorPosition, replacement.newCursorPosition);
 		}
 		if (!requiresValue) {
-			setTimeout(() => {
+			if (selectFilterTimerRef.current !== null) clearTimeout(selectFilterTimerRef.current);
+			if (selectFilterSearchTimerRef.current !== null) clearTimeout(selectFilterSearchTimerRef.current);
+			selectFilterTimerRef.current = setTimeout(() => {
+				selectFilterTimerRef.current = null;
 				SearchHistory.add(replacement.newText, historyKey, hintsRef.current);
 				setSuppressAutoOpen(true);
-				setTimeout(() => onSearch(), 0);
+				selectFilterSearchTimerRef.current = setTimeout(() => {
+					selectFilterSearchTimerRef.current = null;
+					onSearch();
+				}, 0);
 				setAutocompleteType(null);
 				setCurrentFilter(null);
 			}, 10);

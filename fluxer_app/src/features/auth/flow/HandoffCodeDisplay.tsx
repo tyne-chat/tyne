@@ -59,15 +59,30 @@ export function HandoffCodeDisplay({
 }: HandoffCodeDisplayProps) {
 	const {i18n} = useLingui();
 	const [copied, setCopied] = useState(false);
+	const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(
+		() => () => {
+			if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
+		},
+		[],
+	);
 	const remaining = useCountdown(expiresAt);
 	const isExpired = remaining != null && remaining <= 0;
 	const handleCopyCode = useCallback(async () => {
 		if (!code) return;
 		await TextCopyCommands.copy(i18n, code);
 		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+		if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current);
+		copiedTimerRef.current = setTimeout(() => {
+			copiedTimerRef.current = null;
+			setCopied(false);
+		}, 2000);
 	}, [code]);
 	const handleRetry = useCallback(() => {
+		if (copiedTimerRef.current !== null) {
+			clearTimeout(copiedTimerRef.current);
+			copiedTimerRef.current = null;
+		}
 		setCopied(false);
 		onRetry?.();
 	}, [onRetry]);

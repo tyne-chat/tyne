@@ -18,6 +18,10 @@ import {AnimatePresence, motion, useIsPresent} from 'framer-motion';
 import type React from 'react';
 import {useCallback, useContext, useEffect, useId, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 const STAGE_FADE_SECONDS = 0.16;
 const INTERACTIVE_SELECTOR = 'button, a, input, textarea, select, label, [data-switcher-card]';
 
@@ -38,7 +42,7 @@ interface AccountSwitcherOverlayProps {
 	readonly children: React.ReactNode;
 }
 
-export function AccountSwitcherOverlay({
+function AccountSwitcherOverlayBase({
 	viewKey,
 	labelledBy,
 	isBusy,
@@ -185,3 +189,5 @@ export function AccountSwitcherOverlay({
 		</FloatingPortal>
 	);
 }
+
+export const AccountSwitcherOverlay = observer(AccountSwitcherOverlayBase);

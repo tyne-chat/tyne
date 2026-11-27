@@ -8,7 +8,12 @@ import {remFromPx} from '@app/features/theme/layout/RemFromPx';
 import {getCollapsedCaretAngle} from '@app/features/ui/icons/DirectionalIcons';
 import {CaretDownIcon, ClockIcon, StarIcon} from '@phosphor-icons/react';
 import type React from 'react';
-export function PickerCategoryHeaderRow({
+
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
+function PickerCategoryHeaderRowBase({
 	row,
 	isCollapsed,
 	onToggle: handleToggleCategory,
@@ -108,3 +113,5 @@ export function PickerCategoryHeaderRow({
 		</button>
 	);
 }
+
+export const PickerCategoryHeaderRow = observer(PickerCategoryHeaderRowBase);

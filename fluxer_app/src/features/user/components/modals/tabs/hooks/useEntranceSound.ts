@@ -32,6 +32,10 @@ import {msg} from '@lingui/core/macro';
 import {useLingui} from '@lingui/react/macro';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
+// Fork imports.
+
+import {useRef} from 'react';
+
 const ENTRANCE_SOUND_TOO_LARGE_DESCRIPTOR = msg({
 	message: 'Entrance sound files must be {limit} or less.',
 	comment: 'Error modal body shown when an entrance sound upload exceeds the client-side size limit.',
@@ -114,6 +118,13 @@ function validationErrorMessage(
 function useEntranceSoundImpl(selectedScope: EntranceSoundScope): UseEntranceSoundReturn {
 	const {i18n} = useLingui();
 	const [isPreviewing, setIsPreviewing] = useState(false);
+	const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	useEffect(
+		() => () => {
+			if (previewTimerRef.current !== null) clearTimeout(previewTimerRef.current);
+		},
+		[],
+	);
 	const hasEntranceSounds = useMemo(
 		() =>
 			isLimitToggleEnabled(
@@ -260,7 +271,11 @@ function useEntranceSoundImpl(selectedScope: EntranceSoundScope): UseEntranceSou
 				const buffer = await EntranceSoundPlaybackEngine.fetchBuffer(sound.url, sound.hash);
 				if (buffer) {
 					EntranceSoundPlaybackEngine.playPreview(buffer);
-					setTimeout(() => setIsPreviewing(false), sound.durationMs + 50);
+					if (previewTimerRef.current !== null) clearTimeout(previewTimerRef.current);
+					previewTimerRef.current = setTimeout(() => {
+						previewTimerRef.current = null;
+						setIsPreviewing(false);
+					}, sound.durationMs + 50);
 				} else {
 					setIsPreviewing(false);
 				}

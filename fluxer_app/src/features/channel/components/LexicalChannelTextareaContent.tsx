@@ -343,6 +343,7 @@ export const LexicalChannelTextareaContent = observer(
 		const mobileLayout = MobileLayout;
 		const replyingMessage = enableReply ? MessageReply.getReplyingMessage(channel.id) : null;
 		const referencedMessage = enableReply ? MessageReply.getReferencedMessage(channel.id) : null;
+		if (editingMobileMessageId) void Messages.version;
 		const editingMessage = editingMobileMessageId ? Messages.getMessage(channel.id, editingMobileMessageId) : null;
 		const editingMessageForComposer = editingMessage === undefined ? null : editingMessage;
 		const isEditingMessageOnMobile = editingMessageForComposer !== null && mobileLayout.enabled;

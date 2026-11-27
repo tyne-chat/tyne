@@ -41,7 +41,7 @@ interface VirtualRowRendererProps {
 	emojiRefs: React.RefObject<Map<string, HTMLButtonElement>>;
 }
 
-const VirtualRowRenderer: React.FC<VirtualRowRendererProps> = React.memo(
+const VirtualRowRenderer: React.FC<VirtualRowRendererProps> = observer(
 	({
 		row,
 		handleHover,

@@ -41,6 +41,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 // Fork imports.
 
 import {ForkSavedAudioTile} from '@app/features/channel/components/pickers/memes/ForkSavedAudioTile';
+import {getAppRemScale} from '@app/features/ui/utils/AppZoomUtils';
 
 const NO_SAVED_MEDIA_DESCRIPTOR = msg({
 	message: 'No saved media',
@@ -108,7 +109,10 @@ export const MobileMemesPicker = observer(({onClose}: MobileMemesPickerProps = {
 	const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 	useSearchInputAutofocus(searchInputRef);
 	const getMaxWidth = useCallback(() => {
-		return window.innerWidth <= 768 ? Math.floor((window.innerWidth - 32) / 2) : 227;
+		const scale = getAppRemScale();
+		return window.innerWidth <= 768 * scale
+			? Math.floor((window.innerWidth - 32 * scale) / 2)
+			: Math.round(227 * scale);
 	}, []);
 	const getColumnWidth = useCallback(() => {
 		return getMaxWidth();
@@ -386,7 +390,10 @@ const GridItem = observer(
 const SkeletonView = observer(() => {
 	const generateSkeletonItems = useMemo(() => {
 		const getMaxWidth = () => {
-			return window.innerWidth <= 768 ? Math.floor((window.innerWidth - 32) / 2) : 227;
+			const scale = getAppRemScale();
+			return window.innerWidth <= 768 * scale
+				? Math.floor((window.innerWidth - 32 * scale) / 2)
+				: Math.round(227 * scale);
 		};
 		const maxWidth = getMaxWidth();
 		const minHeight = 100;

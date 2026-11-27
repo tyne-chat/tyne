@@ -28,6 +28,10 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 
+// Fork imports.
+
+import {getAppRemScale} from '@app/features/ui/utils/AppZoomUtils';
+
 export type ChannelSearchSortMode = 'newest' | 'oldest' | 'relevant';
 
 const DEFAULT_MAX_VISIBLE_PAGES = 7;
@@ -119,8 +123,9 @@ const getChannelGuild = (channel: Channel): Guild | null => {
 	return Guilds.getGuild(channel.guildId) ?? null;
 };
 export const getAdaptiveVisiblePageCount = (): number => {
-	if (window.innerWidth <= 420) return 3;
-	if (window.innerWidth <= 640) return 5;
+	const scale = getAppRemScale();
+	if (window.innerWidth <= 420 * scale) return 3;
+	if (window.innerWidth <= 640 * scale) return 5;
 	return DEFAULT_MAX_VISIBLE_PAGES;
 };
 export const getSortModeOptions = (i18n: I18n): Array<{mode: ChannelSearchSortMode; label: string}> => [

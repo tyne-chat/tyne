@@ -21,6 +21,10 @@ import {clsx} from 'clsx';
 import {AnimatePresence, motion} from 'framer-motion';
 import React, {useMemo} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 const SEND_MESSAGE_DESCRIPTOR = msg({
 	message: 'Send message',
 	comment: 'Button or menu action label in the channel and chat textarea buttons. Keep it concise.',
@@ -62,7 +66,7 @@ interface TextareaButtonsProps {
 	onSubmit: () => void;
 }
 
-export const TextareaButtons = React.forwardRef<HTMLDivElement, TextareaButtonsProps>(
+const TextareaButtonsBase = React.forwardRef<HTMLDivElement, TextareaButtonsProps>(
 	(
 		{
 			disabled,
@@ -242,5 +246,7 @@ export const TextareaButtons = React.forwardRef<HTMLDivElement, TextareaButtonsP
 		);
 	},
 );
+
+export const TextareaButtons = observer(TextareaButtonsBase);
 
 TextareaButtons.displayName = 'TextareaButtons';

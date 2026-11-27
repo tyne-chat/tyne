@@ -25,6 +25,10 @@ import type React from 'react';
 import {forwardRef, useMemo} from 'react';
 import invariant from 'tiny-invariant';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 const GuildListItemIcon = createAnimeFlxElement('flx-app-guild-list-item-icon');
 
 interface GuildListItemMotion {
@@ -170,7 +174,13 @@ function CombinePreviewIcon({guild}: {readonly guild: Guild}) {
 	);
 }
 
-function CombinePreview({targetGuild, sourceGuildId}: {readonly targetGuild: Guild; readonly sourceGuildId: string}) {
+function CombinePreviewBase({
+	targetGuild,
+	sourceGuildId,
+}: {
+	readonly targetGuild: Guild;
+	readonly sourceGuildId: string;
+}) {
 	const sourceGuild = Guilds.getGuild(sourceGuildId);
 	invariant(sourceGuild, `guild combine preview source guild missing for guild=${sourceGuildId}`);
 	const iconGuilds = [targetGuild, sourceGuild];
@@ -202,6 +212,8 @@ function CombinePreview({targetGuild, sourceGuildId}: {readonly targetGuild: Gui
 		</flx-app-combine-preview>
 	);
 }
+
+const CombinePreview = observer(CombinePreviewBase);
 
 function resolveDropIndicator(dragAndDrop: GuildListItemDragAndDrop | null): GuildItemReorderIndicator | null {
 	if (dragAndDrop == null) {
@@ -263,10 +275,10 @@ type GuildListItemPresentationDomProps = Omit<
 	'onClick' | 'onAuxClick' | 'onContextMenu' | 'onKeyDown'
 >;
 
-export const GuildListItemPresentation = forwardRef<
+const GuildListItemPresentationBase = forwardRef<
 	HTMLElement,
 	GuildListItemPresentationProps & GuildListItemPresentationDomProps
->(function GuildListItemPresentation(
+>(function GuildListItemPresentationBase(
 	{
 		backgroundImage,
 		canManageGuild,
@@ -384,3 +396,5 @@ export const GuildListItemPresentation = forwardRef<
 		</LongPressable>
 	);
 });
+
+export const GuildListItemPresentation = observer(GuildListItemPresentationBase);

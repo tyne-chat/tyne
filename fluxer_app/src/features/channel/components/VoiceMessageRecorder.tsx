@@ -44,6 +44,10 @@ import {AnimatePresence, motion} from 'framer-motion';
 import type React from 'react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 const RECORDING_FAILED_PLEASE_TRY_AGAIN_DESCRIPTOR = msg({
 	message: 'Recording failed. Try again.',
 	comment: 'Error toast shown when the voice message recording fails (encoder error, etc).',
@@ -136,7 +140,7 @@ interface VoiceMessageRecorderProps {
 	tooltipAnchorRef?: React.RefObject<HTMLElement | null>;
 }
 
-export default function VoiceMessageRecorder({channelId, disabled, tooltipAnchorRef}: VoiceMessageRecorderProps) {
+function VoiceMessageRecorderBase({channelId, disabled, tooltipAnchorRef}: VoiceMessageRecorderProps) {
 	const {i18n} = useLingui();
 	const portalHost = usePortalHost();
 	const [isRecording, setIsRecording] = useState(false);
@@ -726,3 +730,5 @@ export default function VoiceMessageRecorder({channelId, disabled, tooltipAnchor
 		</>
 	);
 }
+
+export default observer(VoiceMessageRecorderBase);

@@ -60,6 +60,10 @@ import {useLingui} from '@lingui/react/macro';
 import type React from 'react';
 import {useMemo} from 'react';
 
+// Fork imports.
+
+import {observer} from 'mobx-react-lite';
+
 interface MoreOptionsSheetProps {
 	isOpen: boolean;
 	onClose: () => void;
@@ -94,7 +98,7 @@ interface MoreOptionsSheetProps {
 	onCopyChannelId: () => void;
 }
 
-export const MoreOptionsSheet: React.FC<MoreOptionsSheetProps> = ({
+const MoreOptionsSheetBase: React.FC<MoreOptionsSheetProps> = ({
 	isOpen,
 	onClose,
 	title,
@@ -129,9 +133,15 @@ export const MoreOptionsSheet: React.FC<MoreOptionsSheetProps> = ({
 }) => {
 	const {i18n} = useLingui();
 	const dmPickerAvailable = RuntimeConfig.dmPickerAvailable;
+	const hasUnread = ReadStates.hasUnread(channel.id);
+	const canManageChannels =
+		isGuildChannel &&
+		Permission.can(Permissions.MANAGE_CHANNELS, {
+			channelId: channel.id,
+			guildId: channel.guildId,
+		});
 	const groups = useMemo(() => {
 		const out: Array<MenuGroupType> = [];
-		const hasUnread = ReadStates.hasUnread(channel.id);
 		const commonItems: Array<MenuItemType> = [];
 		if (showFavorites && !isPersonalNotes) {
 			commonItems.push({
@@ -245,10 +255,6 @@ export const MoreOptionsSheet: React.FC<MoreOptionsSheetProps> = ({
 			out.push({items: groupItems});
 		}
 		if (isGuildChannel) {
-			const canManageChannels = Permission.can(Permissions.MANAGE_CHANNELS, {
-				channelId: channel.id,
-				guildId: channel.guildId,
-			});
 			if (canManageChannels) {
 				const managerItems: Array<MenuItemType> = [
 					{
@@ -348,6 +354,8 @@ export const MoreOptionsSheet: React.FC<MoreOptionsSheetProps> = ({
 		recipient,
 		showFavorites,
 		isFavorited,
+		hasUnread,
+		canManageChannels,
 		isPersonalNotes,
 		isDM,
 		isGroupDM,
@@ -386,3 +394,5 @@ export const MoreOptionsSheet: React.FC<MoreOptionsSheetProps> = ({
 		/>
 	);
 };
+
+export const MoreOptionsSheet = observer(MoreOptionsSheetBase);
