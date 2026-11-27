@@ -53,6 +53,10 @@ class RecordingMeilisearchClient implements MeilisearchClient {
 	private nextTaskUid = 1;
 
 	async request<TResponse>(method: string, path: string, body?: unknown): Promise<TResponse> {
+		// The index list upstream's adapter reads first since its d0ab1c56e7, as upstream's own fake answers it.
+		if (method === 'GET' && path.startsWith('/indexes?')) {
+			return {results: [{uid: MEILISEARCH_INDEX_DEFINITIONS.messages.uid}]} as TResponse;
+		}
 		if (method === 'GET' && path.startsWith('/indexes/')) {
 			return {uid: path.slice('/indexes/'.length)} as TResponse;
 		}
