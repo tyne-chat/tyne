@@ -169,6 +169,29 @@ describe('fork-backend-desktop-lint', () => {
 		]);
 	});
 
+	it('allows std::fs inside blocking(move || ...) and spawn_blocking closures while flagging async eager args', () => {
+		const problems = lint(
+			'fluxer_media_proxy/src/example.rs',
+			[
+				'async fn ok_blocking(root: PathBuf) {',
+				'    let _ = blocking(move || {',
+				'        let f = std::fs::File::open(&root);',
+				'        std::fs::read(&root)',
+				'    }).await;',
+				'}',
+				'async fn ok_spawn_blocking(p: PathBuf) {',
+				'    let _ = tokio::task::spawn_blocking(move || std::fs::read(&p)).await;',
+				'}',
+				'async fn bad_eager_arg(p: PathBuf) {',
+				'    let _ = blocking(std::fs::read(&p)).await;',
+				'}',
+			].join('\n'),
+		);
+		expect(problems).toEqual([
+			'fluxer_media_proxy/src/example.rs:11:22: [rust-async-blocking-fs] blocking `std::fs::read` inside `async fn bad_eager_arg` (use `tokio::fs` or `spawn_blocking`)',
+		]);
+	});
+
 	it('flags gleam-fork-test-sleep inside fork *_test() while allowing mock helper functions', () => {
 		const problems = lint(
 			'fluxer_gateway/test/fluxer_gateway/fork/example_test.gleam',

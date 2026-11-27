@@ -196,12 +196,225 @@ function isLineEnabled(lines, line) {
 	return Boolean(line && (lines === 'all' || lines.has(line)));
 }
 
-function isDepsTrackingStore(depsNode, depsSrc, storeIdent) {
-	if (REACTIVITY_DEP_RE.test(depsSrc)) return true;
+function unwrapTsExpr(node) {
+	let cur = node;
+	while (
+		cur &&
+		(cur.type === 'TSAsExpression' ||
+			cur.type === 'TSTypeAssertion' ||
+			cur.type === 'TSNonNullExpression' ||
+			cur.type === 'TSSatisfiesExpression')
+	) {
+		cur = cur.expression;
+	}
+	return cur;
+}
+
+function nodeInside(container, node) {
+	return Boolean(
+		container &&
+			node &&
+			typeof container.start === 'number' &&
+			typeof node.start === 'number' &&
+			node.start >= container.start &&
+			node.end <= container.end,
+	);
+}
+
+function patternBindsIdentifier(pat, targetName) {
+	if (!pat) return false;
+	if (pat.type === 'Identifier') return pat.name === targetName;
+	if (pat.type === 'AssignmentPattern') return patternBindsIdentifier(pat.left, targetName);
+	if (pat.type === 'RestElement') return patternBindsIdentifier(pat.argument, targetName);
+	if (pat.type === 'ArrayPattern') {
+		return pat.elements.some((el) => el && patternBindsIdentifier(el, targetName));
+	}
+	if (pat.type === 'ObjectPattern') {
+		return pat.properties.some((prop) =>
+			prop.type === 'RestElement'
+				? patternBindsIdentifier(prop.argument, targetName)
+				: patternBindsIdentifier(prop.value, targetName),
+		);
+	}
+	return false;
+}
+
+function nodeInBindingTarget(pat, targetNode) {
+	if (!pat) return false;
+	if (pat === targetNode) return pat.type === 'Identifier';
+	if (pat.type === 'AssignmentPattern') return nodeInBindingTarget(pat.left, targetNode);
+	if (pat.type === 'RestElement') return nodeInBindingTarget(pat.argument, targetNode);
+	if (pat.type === 'ArrayPattern') {
+		return pat.elements.some((el) => el && nodeInBindingTarget(el, targetNode));
+	}
+	if (pat.type === 'ObjectPattern') {
+		return pat.properties.some((prop) =>
+			prop.type === 'RestElement'
+				? nodeInBindingTarget(prop.argument, targetNode)
+				: nodeInBindingTarget(prop.value, targetNode),
+		);
+	}
+	return false;
+}
+
+function isLexicallyShadowed(ancestors, node, name) {
+	for (let i = ancestors.length - 1; i >= 0; i--) {
+		const anc = ancestors[i];
+		if (isFnNode(anc) && nodeInside(anc.body, node) && anc.params.some((p) => patternBindsIdentifier(p, name))) {
+			return true;
+		}
+		if (anc.type === 'CatchClause' && nodeInside(anc.body, node) && patternBindsIdentifier(anc.param, name)) {
+			return true;
+		}
+		if (anc.type === 'BlockStatement' || anc.type === 'Program') {
+			for (const stmt of anc.body ?? []) {
+				const declStmt =
+					stmt.type === 'ExportNamedDeclaration' && stmt.declaration?.type === 'VariableDeclaration'
+						? stmt.declaration
+						: stmt;
+				if (declStmt.type === 'VariableDeclaration') {
+					for (const decl of declStmt.declarations) {
+						if (patternBindsIdentifier(decl.id, name) && !nodeInside(decl.init, node)) {
+							return true;
+						}
+					}
+				} else if (stmt.type === 'FunctionDeclaration' && stmt.id?.name === name) {
+					return true;
+				}
+			}
+		}
+		if (
+			(anc.type === 'ForStatement' && anc.init?.type === 'VariableDeclaration') ||
+			((anc.type === 'ForInStatement' || anc.type === 'ForOfStatement') && anc.left?.type === 'VariableDeclaration')
+		) {
+			const varDecl = anc.type === 'ForStatement' ? anc.init : anc.left;
+			for (const decl of varDecl.declarations) {
+				if (patternBindsIdentifier(decl.id, name) && !nodeInside(decl.init, node)) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+const DOM_RECT_EDGE_RE = /^(?:top|bottom|left|right|x|y|width|height)$/;
+const DOM_RECT_TYPE_RE = /^(?:DOMRect|DOMRectReadOnly)$/;
+const SNAPSHOT_PROP_RE = /(?:List|Map|Set|Version|Snapshot|All|ById)$/;
+
+function isDomRectTypeAnnotation(typeAnnotation) {
+	const tsType = typeAnnotation?.typeAnnotation;
+	return (
+		tsType?.type === 'TSTypeReference' &&
+		tsType.typeName?.type === 'Identifier' &&
+		DOM_RECT_TYPE_RE.test(tsType.typeName.name)
+	);
+}
+
+function isGetBoundingClientRectCall(expr) {
+	const unwrapped = unwrapTsExpr(expr);
+	return (
+		(unwrapped?.type === 'CallExpression' || unwrapped?.type === 'OptionalCallExpression') &&
+		identName(unwrapped.callee) === 'getBoundingClientRect'
+	);
+}
+
+function isDomRectVarInScope(ancestors, rectName) {
+	for (let i = ancestors.length - 1; i >= 0; i--) {
+		const anc = ancestors[i];
+		if (isFnNode(anc)) {
+			for (const rawParam of anc.params) {
+				const param = rawParam?.type === 'AssignmentPattern' ? rawParam.left : rawParam;
+				if (param?.type === 'Identifier' && param.name === rectName && isDomRectTypeAnnotation(param.typeAnnotation)) {
+					return true;
+				}
+			}
+		}
+		if (anc.type === 'BlockStatement' || anc.type === 'Program') {
+			for (const stmt of anc.body ?? []) {
+				if (stmt.type !== 'VariableDeclaration') continue;
+				for (const decl of stmt.declarations) {
+					if (
+						decl.id?.type === 'Identifier' &&
+						decl.id.name === rectName &&
+						(isDomRectTypeAnnotation(decl.id.typeAnnotation) || isGetBoundingClientRectCall(decl.init))
+					) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+function isDomRectEdgeExpr(expr, ancestors) {
+	const unwrapped = unwrapTsExpr(expr);
+	if (
+		!unwrapped ||
+		(unwrapped.type !== 'MemberExpression' && unwrapped.type !== 'OptionalMemberExpression') ||
+		unwrapped.computed ||
+		unwrapped.property?.type !== 'Identifier' ||
+		!DOM_RECT_EDGE_RE.test(unwrapped.property.name)
+	) {
+		return false;
+	}
+	if (isGetBoundingClientRectCall(unwrapped.object)) return true;
+	return unwrapped.object?.type === 'Identifier' && isDomRectVarInScope(ancestors, unwrapped.object.name);
+}
+
+function isPhysicalDeviceCheck(expr) {
+	if (!expr) return false;
+	if (
+		(expr.type === 'MemberExpression' || expr.type === 'OptionalMemberExpression') &&
+		!expr.computed &&
+		expr.object?.type === 'Identifier' &&
+		expr.object.name === 'Platform' &&
+		expr.property?.type === 'Identifier' &&
+		(expr.property.name === 'isMobileDevice' || expr.property.name === 'isTabletDevice')
+	) {
+		return true;
+	}
+	if (expr.type === 'LogicalExpression') {
+		if (expr.operator === '&&') {
+			return isPhysicalDeviceCheck(expr.left) || isPhysicalDeviceCheck(expr.right);
+		}
+		if (expr.operator === '||') {
+			return isPhysicalDeviceCheck(expr.left) && isPhysicalDeviceCheck(expr.right);
+		}
+	}
+	return false;
+}
+
+function isInsidePhysicalDeviceGuard(ancestors, node) {
+	for (let i = ancestors.length - 1; i >= 0; i--) {
+		const anc = ancestors[i];
+		if (isFnNode(anc)) break;
+		const child = i + 1 < ancestors.length ? ancestors[i + 1] : node;
+		if (
+			(anc.type === 'IfStatement' || anc.type === 'ConditionalExpression') &&
+			anc.consequent === child &&
+			isPhysicalDeviceCheck(anc.test)
+		) {
+			return true;
+		}
+		if (
+			anc.type === 'LogicalExpression' &&
+			anc.operator === '&&' &&
+			anc.right === child &&
+			isPhysicalDeviceCheck(anc.left)
+		) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function depsHasIdentifier(depsNode, targetIdent) {
 	let found = false;
 	const scan = (n) => {
 		if (!n || typeof n.type !== 'string' || found) return;
-		if (n.type === 'Identifier' && n.name === storeIdent) {
+		if (n.type === 'Identifier' && n.name === targetIdent) {
 			found = true;
 			return;
 		}
@@ -214,6 +427,11 @@ function isDepsTrackingStore(depsNode, depsSrc, storeIdent) {
 	};
 	scan(depsNode);
 	return found;
+}
+
+function isDepsTrackingStore(depsNode, depsSrc, storeIdent) {
+	if (REACTIVITY_DEP_RE.test(depsSrc)) return true;
+	return depsHasIdentifier(depsNode, storeIdent);
 }
 
 /**
@@ -355,21 +573,30 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 			isLineEnabled(lines, line) &&
 			!ignored.has(line)
 		) {
+			const isGlobalMemberProp =
+				(parent?.type === 'MemberExpression' || parent?.type === 'OptionalMemberExpression') &&
+				parent.property === node &&
+				!parent.computed &&
+				parent.object.type === 'Identifier' &&
+				(parent.object.name === 'window' || parent.object.name === 'globalThis');
 			const isNonGlobalProp =
 				(parent?.type === 'MemberExpression' || parent?.type === 'OptionalMemberExpression') &&
 				parent.property === node &&
 				!parent.computed &&
-				!(
-					parent.object.type === 'Identifier' &&
-					(parent.object.name === 'window' || parent.object.name === 'globalThis')
-				);
+				!isGlobalMemberProp;
 			const isObjKey = parent?.type === 'ObjectProperty' && parent.key === node && !parent.computed;
 			const isParamOrBinding =
 				parent?.type === 'VariableDeclarator' && parent.id === node
 					? true
-					: isFnNode(parent) && parent.params.includes(node);
+					: ancestors.some(
+							(a) =>
+								(a.type === 'VariableDeclarator' && nodeInBindingTarget(a.id, node)) ||
+								(isFnNode(a) && a.params.some((p) => nodeInBindingTarget(p, node))) ||
+								(a.type === 'CatchClause' && nodeInBindingTarget(a.param, node)),
+						);
 			const isTypePos = ancestors.some((a) => a.type.startsWith('TS'));
-			if (!isNonGlobalProp && !isObjKey && !isParamOrBinding && !isTypePos) {
+			const isShadowedRef = !isGlobalMemberProp && isLexicallyShadowed(ancestors, node, node.name);
+			if (!isNonGlobalProp && !isObjKey && !isParamOrBinding && !isTypePos && !isShadowedRef) {
 				pushProblem(
 					'raw-web-storage',
 					line,
@@ -396,13 +623,16 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 				parent?.type === 'BinaryExpression' &&
 				(parent.operator === '<' || parent.operator === '<=' || parent.operator === '>' || parent.operator === '>=')
 			) {
-				pushProblem(
-					'zoom-blind-viewport',
-					line,
-					col,
-					`\`window.${node.property.name}\` comparison without \`getAppRemScale()\` ignores desktop zoom (tyne-chat/tyne#639)`,
-					{enclosing: enclosingAstSymbol(ancestors), target: `window.${node.property.name}`},
-				);
+				const otherOperand = parent.left === node ? parent.right : parent.left;
+				if (!isDomRectEdgeExpr(otherOperand, ancestors) && !isInsidePhysicalDeviceGuard(ancestors, node)) {
+					pushProblem(
+						'zoom-blind-viewport',
+						line,
+						col,
+						`\`window.${node.property.name}\` comparison without \`getAppRemScale()\` ignores desktop zoom (tyne-chat/tyne#639)`,
+						{enclosing: enclosingAstSymbol(ancestors), target: `window.${node.property.name}`},
+					);
+				}
 			} else if (
 				(node.type === 'CallExpression' || node.type === 'OptionalCallExpression') &&
 				identName(node.callee) === 'matchMedia' &&
@@ -483,6 +713,7 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 				hasJSX: false,
 				renderStoreReads: [],
 				memoStoreReads: [],
+				storeSnapshotBindings: [],
 				readsMessagesGet: null,
 				readsMessagesVersion: false,
 				// Concise arrow `useEffect(() => reaction(...), [deps])` returns the disposer directly.
@@ -497,6 +728,45 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 		const curComp = compStack.at(-1);
 		if (curComp && (node.type === 'JSXElement' || node.type === 'JSXFragment')) {
 			curComp.hasJSX = true;
+		}
+
+		if (curFn && node.type === 'VariableDeclarator' && node.id?.type === 'Identifier' && node.init) {
+			const initUnwrapped = unwrapTsExpr(node.init);
+			let initMember = null;
+			if (
+				initUnwrapped &&
+				(initUnwrapped.type === 'MemberExpression' || initUnwrapped.type === 'OptionalMemberExpression')
+			) {
+				initMember = initUnwrapped;
+			} else if (
+				(initUnwrapped?.type === 'CallExpression' || initUnwrapped?.type === 'OptionalCallExpression') &&
+				initUnwrapped.arguments.length === 0
+			) {
+				initMember = unwrapTsExpr(initUnwrapped.callee);
+			}
+			if (
+				initMember &&
+				(initMember.type === 'MemberExpression' || initMember.type === 'OptionalMemberExpression') &&
+				initMember.object?.type === 'Identifier' &&
+				initMember.property?.type === 'Identifier' &&
+				mobxImports.has(initMember.object.name) &&
+				SNAPSHOT_PROP_RE.test(initMember.property.name)
+			) {
+				let block = curFn.node.body;
+				for (let i = ancestors.length - 1; i >= 0; i--) {
+					const a = ancestors[i];
+					if (a.type === 'BlockStatement' || a.type === 'Program') {
+						block = a;
+						break;
+					}
+				}
+				curFn.storeSnapshotBindings.push({
+					name: node.id.name,
+					store: initMember.object.name,
+					blockStart: block?.start ?? curFn.node.start,
+					blockEnd: block?.end ?? curFn.node.end,
+				});
+			}
 		}
 
 		// Track MobX store reads and MessagingMessages reads
@@ -527,10 +797,18 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 						curComp.renderStoreReads.push({store: obj, prop, line, col, enclosing});
 					}
 					if (curFn.runsInMemo) {
+						const overrideArg =
+							prop === 'getFrecentEmojis' &&
+							(parent?.type === 'CallExpression' || parent?.type === 'OptionalCallExpression') &&
+							parent.callee === node &&
+							parent.arguments.length >= 3
+								? unwrapTsExpr(parent.arguments[2])
+								: null;
+						const overrideDepIdent = overrideArg?.type === 'Identifier' ? overrideArg.name : undefined;
 						// Record against nearest enclosing useMemo fn
 						for (let i = fnStack.length - 1; i >= 0; i--) {
 							if (fnStack[i].hookCall?.hook === 'useMemo') {
-								fnStack[i].memoStoreReads.push({store: obj, prop, line, col, enclosing});
+								fnStack[i].memoStoreReads.push({store: obj, prop, line, col, enclosing, overrideDepIdent});
 								break;
 							}
 						}
@@ -643,10 +921,30 @@ export function lintWebSafetySource(file, source, lines = 'all', options = {}) {
 				const depsNode = popped.hookCall.call.arguments[1];
 				const depsSrc = source.slice(depsNode.start, depsNode.end);
 				for (const read of popped.memoStoreReads) {
+					let trackedBySnapshot = false;
+					for (const fn of fnStack) {
+						for (const binding of fn.storeSnapshotBindings) {
+							if (
+								binding.store === read.store &&
+								popped.node.start >= binding.blockStart &&
+								popped.node.end <= binding.blockEnd &&
+								depsHasIdentifier(depsNode, binding.name)
+							) {
+								trackedBySnapshot = true;
+								break;
+							}
+						}
+						if (trackedBySnapshot) break;
+					}
+					const trackedByOverrideArg = Boolean(
+						read.overrideDepIdent && depsHasIdentifier(depsNode, read.overrideDepIdent),
+					);
 					if (
 						isLineEnabled(lines, read.line) &&
 						!ignored.has(read.line) &&
-						!isDepsTrackingStore(depsNode, depsSrc, read.store)
+						!isDepsTrackingStore(depsNode, depsSrc, read.store) &&
+						!trackedBySnapshot &&
+						!trackedByOverrideArg
 					) {
 						pushProblem(
 							'mobx-stale-memo',

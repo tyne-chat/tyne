@@ -14,6 +14,7 @@ const TEST_STORES = new Set([
 	'@app/features/guild/state/GuildMembers',
 	'@app/features/accessibility/state/Accessibility',
 	'@app/features/app/state/RuntimeConfig',
+	'@app/features/emoji/state/EmojiPicker',
 ]);
 
 const lint = (
@@ -286,6 +287,81 @@ describe('fork-web-safety-lint', () => {
 			),
 		).toEqual([
 			'src/Example.tsx:4:50: [missing-observer] component `Unobserved` reads `GuildMembers.getMembers` during render without `observer()` (never re-renders on store changes)',
+		]);
+	});
+
+	it('ignores shadowed localStorage/sessionStorage variables while still flagging unshadowed globals and self-initializers', () => {
+		const problems = lint(
+			[
+				'export function migrate(localStorage: Record<string, string>) {',
+				'\tconst copy = {...localStorage};',
+				'\tconst sessionStorage = getProtectedSessionStorage();',
+				'\tif (copy.a) sessionStorage.getItem("k");',
+				'\twindow.localStorage.getItem("stillGlobal");',
+				'}',
+				'export function selfInit() {',
+				'\tconst localStorage = localStorage;',
+				'\treturn localStorage;',
+				'}',
+				'export function unshadowed() {',
+				'\treturn sessionStorage.getItem("raw");',
+				'}',
+			].join('\n'),
+			'src/features/app/domain_migration/Example.ts',
+		);
+		expect(problems).toEqual([
+			'src/features/app/domain_migration/Example.ts:5:9: [raw-web-storage] direct `localStorage` usage fails in production builds where storage is stripped (use AppStorage / makePersistent; tyne-chat/tyne#140)',
+			'src/features/app/domain_migration/Example.ts:8:23: [raw-web-storage] direct `localStorage` usage fails in production builds where storage is stripped (use AppStorage / makePersistent; tyne-chat/tyne#140)',
+			'src/features/app/domain_migration/Example.ts:12:9: [raw-web-storage] direct `sessionStorage` usage fails in production builds where storage is stripped (use AppStorage / makePersistent; tyne-chat/tyne#140)',
+		]);
+	});
+
+	it('allows DOMRect viewport bounds and explicit Platform tablet/mobile guards while flagging negated or unguarded breakpoints', () => {
+		const problems = lint(
+			[
+				'export function rectBounds(rect: DOMRect, el: HTMLElement) {',
+				'\tconst measured = el.getBoundingClientRect();',
+				'\treturn rect.top < window.innerHeight && rect.left < window.innerWidth && measured.top >= window.innerHeight;',
+				'}',
+				'export function mobileLayout() {',
+				'\tif (Platform.isTabletDevice) {',
+				'\t\treturn window.innerWidth < 768;',
+				'\t}',
+				'\tif (!Platform.isMobileDevice) {',
+				'\t\treturn window.innerWidth < 768;',
+				'\t}',
+				'\treturn window.innerHeight < 600;',
+				'}',
+			].join('\n'),
+			'src/features/boot_state/Example.ts',
+		);
+		expect(problems).toEqual([
+			'src/features/boot_state/Example.ts:10:10: [zoom-blind-viewport] `window.innerWidth` comparison without `getAppRemScale()` ignores desktop zoom (tyne-chat/tyne#639)',
+			'src/features/boot_state/Example.ts:12:9: [zoom-blind-viewport] `window.innerHeight` comparison without `getAppRemScale()` ignores desktop zoom (tyne-chat/tyne#639)',
+		]);
+	});
+
+	it('tracks enclosing store snapshot bindings and explicit 3rd-arg EmojiPicker.getFrecentEmojis deps in useMemo', () => {
+		const problems = lint(
+			[
+				"import {observer} from 'mobx-react-lite';",
+				"import {useMemo} from 'react';",
+				"import Users from '@app/features/user/state/Users';",
+				"import EmojiPicker from '@app/features/emoji/state/EmojiPicker';",
+				'export const List = observer(({ids, allEmojis, pinnedRanking}: {ids: string[]; allEmojis: any[]; pinnedRanking: any}) => {',
+				'\tconst usersSnapshot = Users.usersList;',
+				'\tconst resolved = useMemo(() => ids.map((id) => Users.getUser(id)), [ids, usersSnapshot]);',
+				'\tconst missingSnapshotDep = useMemo(() => ids.map((id) => Users.getUser(id)), [ids]);',
+				'\tconst frecentWithOverride = useMemo(() => EmojiPicker.getFrecentEmojis(allEmojis, 42, pinnedRanking), [allEmojis, pinnedRanking]);',
+				'\tconst frecentTwoArgs = useMemo(() => EmojiPicker.getFrecentEmojis(allEmojis, 42), [allEmojis]);',
+				'\treturn <div>{resolved.length}{missingSnapshotDep.length}{frecentWithOverride.length}{frecentTwoArgs.length}</div>;',
+				'});',
+			].join('\n'),
+			'src/Example.tsx',
+		);
+		expect(problems).toEqual([
+			'src/Example.tsx:8:59: [mobx-stale-memo] `useMemo` reads `Users.getUser` without listing `Users` or a reactive dep in its dependency array (breaks MobX updates once memoized; tyne-chat/tyne#937)',
+			'src/Example.tsx:10:39: [mobx-stale-memo] `useMemo` reads `EmojiPicker.getFrecentEmojis` without listing `EmojiPicker` or a reactive dep in its dependency array (breaks MobX updates once memoized; tyne-chat/tyne#937)',
 		]);
 	});
 });

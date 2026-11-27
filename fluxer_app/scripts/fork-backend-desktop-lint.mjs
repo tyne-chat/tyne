@@ -897,7 +897,22 @@ function checkRustAsyncBlockingFs(file, source, lines, ignored, report) {
 			p++;
 		}
 		const fnBody = masked.slice(bodyStart, p);
+		const blockingClosureRanges = [];
+		for (const bm of fnBody.matchAll(/\b(?:spawn_blocking|blocking)\s*\(\s*(?:move\s*)?\|/g)) {
+			const openParen = fnBody.indexOf('(', bm.index);
+			let parenDepth = 1;
+			let q = openParen + 1;
+			while (q < fnBody.length && parenDepth > 0) {
+				if (fnBody[q] === '(') parenDepth++;
+				else if (fnBody[q] === ')') parenDepth--;
+				q++;
+			}
+			blockingClosureRanges.push([openParen, q]);
+		}
 		for (const fsMatch of fnBody.matchAll(/\bstd::fs::([A-Za-z_][A-Za-z0-9_]*)/g)) {
+			if (blockingClosureRanges.some(([start, end]) => fsMatch.index >= start && fsMatch.index < end)) {
+				continue;
+			}
 			const absOffset = bodyStart + fsMatch.index;
 			const line = masked.slice(0, absOffset).split('\n').length;
 			const lastNl = masked.lastIndexOf('\n', absOffset);

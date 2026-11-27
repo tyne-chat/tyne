@@ -2,23 +2,6 @@
 	"version": 1,
 	"entries": [
 		{
-			"linter": "backend-desktop",
-			"rule": "rust-async-blocking-fs",
-			"file": "fluxer_media_proxy/src/storage/local.rs",
-			"enclosing": "open_local_object",
-			"symbol": "std::fs::File",
-			"reason": "std::fs::File::open and metadata() run inside blocking(move || ...) (tokio::task::spawn_blocking), not on the async executor thread; tokio::fs::File::from_std only wraps the already-opened handle."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "mobx-stale-memo",
-			"file": "fluxer_app/src/features/channel/components/emoji_picker/hooks/useEmojiCategories.ts",
-			"enclosing": "useEmojiCategories",
-			"symbol": "EmojiPicker.getFrecentEmojis",
-			"target": "useMemo",
-			"reason": "Checked in source (tyne-chat/tyne#947): useEmojiCategories already invalidates this memo on pinnedRanking and effectivePersona.id."
-		},
-		{
 			"linter": "web-safety",
 			"rule": "messages-untracked-read",
 			"file": "fluxer_app/src/features/lexical/composer/nodes/ComposerMentionPill.tsx",
@@ -33,79 +16,6 @@
 			"enclosing": "MentionRenderer",
 			"symbol": "Messages.getCachedMessages()",
 			"reason": "Checked in source (tyne-chat/tyne#947): best-effort synchronous cache fallback when message subprofile is omitted."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "zoom-blind-viewport",
-			"file": "fluxer_app/src/features/ui/state/MobileLayout.ts",
-			"enclosing": "getInitialMobileEnabled",
-			"target": "window.innerWidth",
-			"reason": "Checked in source (tyne-chat/tyne#947, ARCHITECTURE.md): mobile layout intentionally follows physical device viewport width on tablets rather than desktop zoom."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "raw-web-storage",
-			"file": "fluxer_app/src/features/app/domain_migration/DomainMigrationAppStorage.ts",
-			"enclosing": "collectExportableAppStorage",
-			"symbol": "localStorage",
-			"reason": "Checked in source (tyne-chat/tyne#947): localStorage parameter in collectExportableAppStorage is an in-memory map of exported entries passed from the caller, not global window.localStorage."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "raw-web-storage",
-			"file": "fluxer_app/src/features/app/domain_migration/DomainMigrationPreMount.ts",
-			"enclosing": "exportFromSource",
-			"symbol": "sessionStorage",
-			"reason": "Checked in source (tyne-chat/tyne#947): local variable sessionStorage returned by getProtectedSessionStorage() during pre-mount domain migration handoff."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "raw-web-storage",
-			"file": "fluxer_app/src/features/app/domain_migration/DomainMigrationPreMount.ts",
-			"enclosing": "completeOnSource",
-			"symbol": "sessionStorage",
-			"reason": "Checked in source (tyne-chat/tyne#947): local variable sessionStorage returned by getProtectedSessionStorage() during pre-mount domain migration completion."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "raw-web-storage",
-			"file": "fluxer_app/src/features/app/domain_migration/DomainMigrationPreMount.ts",
-			"enclosing": "failOnSource",
-			"symbol": "sessionStorage",
-			"reason": "Checked in source (tyne-chat/tyne#947): local variable sessionStorage returned by getProtectedSessionStorage() during pre-mount domain migration failure cleanup."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "zoom-blind-viewport",
-			"file": "fluxer_app/src/features/boot_state/BootRevealSignal.tsx",
-			"enclosing": "intersectsViewport",
-			"target": "window.innerHeight",
-			"reason": "Checked in source (tyne-chat/tyne#947): pre-boot splash helper compares physical CSS pixel DOMRect bounds against viewport height before app zoom applies."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "zoom-blind-viewport",
-			"file": "fluxer_app/src/features/boot_state/BootRevealSignal.tsx",
-			"enclosing": "intersectsViewport",
-			"target": "window.innerWidth",
-			"reason": "Checked in source (tyne-chat/tyne#947): pre-boot splash helper compares physical CSS pixel DOMRect bounds against viewport width before app zoom applies."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "zoom-blind-viewport",
-			"file": "fluxer_app/src/features/boot_state/BootViewport.ts",
-			"enclosing": "captureVisibleImageSources",
-			"target": "window.innerHeight",
-			"reason": "Checked in source (tyne-chat/tyne#947): pre-boot splash image helper compares physical CSS pixel DOMRect bounds against viewport height before app zoom applies."
-		},
-		{
-			"linter": "web-safety",
-			"rule": "mobx-stale-memo",
-			"file": "fluxer_app/src/features/app/components/dialogs/shared/RecipientList.tsx",
-			"enclosing": "useRecipientItems",
-			"symbol": "Users.getUser",
-			"target": "useMemo",
-			"reason": "Checked in source (tyne-chat/tyne#948): useRecipientItems reads Users.usersList as usersSnapshot and lists usersSnapshot in its dependency array."
 		},
 		{
 			"linter": "web-safety",
