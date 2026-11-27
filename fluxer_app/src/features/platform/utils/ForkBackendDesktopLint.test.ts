@@ -11,7 +11,8 @@ const lint = (
 	source: string,
 	lines: 'all' | Set<number> = 'all',
 	reviewed?: ReviewedLintCatalog,
-): Array<string> => lintBackendDesktopFile(relFile, source, lines, {reviewed});
+	forkGuardedIpcChannels?: Set<string>,
+): Array<string> => lintBackendDesktopFile(relFile, source, lines, {reviewed, forkGuardedIpcChannels});
 
 describe('fork-backend-desktop-lint', () => {
 	it('flags non-atomic-index-write across base and *By* index tables without BatchBuilder', () => {
@@ -210,5 +211,32 @@ describe('fork-backend-desktop-lint', () => {
 			"fluxer_desktop/src/main/ExampleIpc.ts:5:2: [desktop-ipc-sender] `ipcMain.handle('unreviewed-channel')` lacks renderer sender validation",
 		]);
 		expect(catalog.unmatchedEntries('backend-desktop')).toEqual([]);
+	});
+
+	it('recognizes 2-hop IPC sender helpers, webContents equality, read-only identifiers, and ForkPrivilegedIpcGuard coverage', () => {
+		const problems = lint(
+			'fluxer_desktop/src/main/ExampleGuards.ts',
+			[
+				'function innerCheck(event: Electron.IpcMainEvent) {',
+				'\treturn isPrivilegedRendererDocumentSender(event);',
+				'}',
+				'function middleCheck(event: Electron.IpcMainEvent) {',
+				'\treturn innerCheck(event);',
+				'}',
+				'export function reg(harvestWindow: BrowserWindow) {',
+				"\tipcMain.on('two-hop', (event) => { if (!middleCheck(event)) return; });",
+				"\tipcMain.handle('harvest', (event) => { if (event.sender !== harvestWindow.webContents) throw new Error(); });",
+				'\tipcMain.on(DESKTOP_CAPABILITY_MANIFEST_CHANNEL, () => {});',
+				"\tipcMain.handle('guarded-by-fork', () => {});",
+				"\tipcMain.handle('unguarded-custom', () => {});",
+				'}',
+			].join('\n'),
+			'all',
+			undefined,
+			new Set(['guarded-by-fork']),
+		);
+		expect(problems).toEqual([
+			"fluxer_desktop/src/main/ExampleGuards.ts:12:2: [desktop-ipc-sender] `ipcMain.handle('unguarded-custom')` lacks renderer sender validation",
+		]);
 	});
 });

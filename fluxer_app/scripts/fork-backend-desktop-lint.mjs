@@ -70,8 +70,13 @@ const READONLY_SAFE_IPC_CHANNELS = new Set([
 	'streaming-priority-get-diagnostics',
 ]);
 
+const READONLY_SAFE_IPC_IDENTIFIERS = new Set([
+	'DESKTOP_CAPABILITY_MANIFEST_CHANNEL',
+	'ACCOUNT_ENGINE_CHANNELS.isAvailable',
+]);
+
 const IPC_SENDER_GUARD_RE =
-	/\b(requirePrivilegedRendererDocumentSender|isPrivilegedRendererDocumentSender|requireMainAppDocument|rendererDocuments\.|ensureClient|appWindowForIpcSender|isSplashSender|isTopFrameOfCreatedWindow|isTrustedOrigin|senderFrame|BrowserWindow\.fromWebContents|pending\.senderId|resolutions\.|transactions\.|isMainWindowWebContents|requireTrustedRenderer|validateIpcSender)\b/;
+	/\b(requirePrivilegedRendererDocumentSender|isPrivilegedRendererDocumentSender|requireMainAppDocument|rendererDocuments\.|ensureClient|appWindowForIpcSender|isSplashSender|isTopFrameOfCreatedWindow|isTrustedOrigin|senderFrame|BrowserWindow\.fromWebContents|pending\.senderId|resolutions\.|transactions\.|isMainWindowWebContents|requireTrustedRenderer|validateIpcSender)\b|event\.sender\s*[!=]==\s*[A-Za-z0-9_.]+\.webContents/;
 
 const ISOLATED_API_TEST_FILES = new Set([
 	'fluxer_api/src/api/operator_pass/OperatorPassFulfilmentService.test.ts',
@@ -408,7 +413,58 @@ function collectSameFileFunctions(ast, source) {
 	return fns;
 }
 
-function checkDesktopIpcSender(source, ast, lines, ignored, report) {
+function hasSenderGuardWithHops(initialSrc, fileFns, maxHops = 2) {
+	if (IPC_SENDER_GUARD_RE.test(initialSrc)) return true;
+	const visited = new Set();
+	let frontier = [initialSrc];
+	for (let hop = 0; hop < maxHops && frontier.length > 0; hop++) {
+		const nextFrontier = [];
+		for (const body of frontier) {
+			for (const match of body.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g)) {
+				const fn = match[1];
+				if (visited.has(fn) || !fileFns.has(fn)) continue;
+				visited.add(fn);
+				const fnSrc = fileFns.get(fn);
+				if (IPC_SENDER_GUARD_RE.test(fnSrc)) return true;
+				nextFrontier.push(fnSrc);
+			}
+		}
+		frontier = nextFrontier;
+	}
+	return false;
+}
+
+export function loadForkGuardedDesktopIpcChannels(repoRoot = REPO_ROOT) {
+	const guarded = new Set();
+	const guardFile = path.join(repoRoot, 'fluxer_desktop/src/main/ForkPrivilegedIpcGuard.ts');
+	const indexFile = path.join(repoRoot, 'fluxer_desktop/src/main/index.ts');
+	if (!fs.existsSync(guardFile) || !fs.existsSync(indexFile)) return guarded;
+	const indexSrc = fs.readFileSync(indexFile, 'utf8');
+	const startupIdx = indexSrc.indexOf('initializeMainWindowStartup');
+	if (startupIdx === -1 || !indexSrc.slice(startupIdx).includes('installForkPrivilegedIpcGuard(')) {
+		return guarded;
+	}
+	const guardSrc = fs.readFileSync(guardFile, 'utf8');
+	const guardAst = parse(guardSrc, {sourceType: 'module', plugins: ['typescript'], errorRecovery: true});
+	walkAst(guardAst.program, (node) => {
+		if (
+			node.type === 'VariableDeclarator' &&
+			node.id?.type === 'Identifier' &&
+			node.id.name === 'FORK_GUARDED_IPC_CHANNELS' &&
+			node.init?.type === 'NewExpression' &&
+			node.init.arguments[0]?.type === 'ArrayExpression'
+		) {
+			for (const el of node.init.arguments[0].elements) {
+				if (!el) continue;
+				if (el.type === 'StringLiteral') guarded.add(el.value);
+				else guarded.add(guardSrc.slice(el.start, el.end));
+			}
+		}
+	});
+	return guarded;
+}
+
+function checkDesktopIpcSender(source, ast, lines, ignored, report, forkGuardedIpcChannels) {
 	const fileFns = collectSameFileFunctions(ast, source);
 	walkAst(ast.program, (node, ancestors) => {
 		if (
@@ -430,6 +486,14 @@ function checkDesktopIpcSender(source, ast, lines, ignored, report) {
 		if (!handlerNode) return;
 		if (channelNode?.type === 'StringLiteral' && READONLY_SAFE_IPC_CHANNELS.has(channelNode.value)) return;
 		const chLabel = channelNode ? source.slice(channelNode.start, channelNode.end) : '<unknown>';
+		if (READONLY_SAFE_IPC_IDENTIFIERS.has(chLabel)) return;
+		if (
+			forkGuardedIpcChannels &&
+			((channelNode?.type === 'StringLiteral' && forkGuardedIpcChannels.has(channelNode.value)) ||
+				forkGuardedIpcChannels.has(chLabel))
+		) {
+			return;
+		}
 
 		let handlerSrc = '';
 		if (handlerNode.type === 'Identifier') {
@@ -451,11 +515,7 @@ function checkDesktopIpcSender(source, ast, lines, ignored, report) {
 			handlerSrc = source.slice(handlerNode.start, handlerNode.end);
 		}
 		if (!handlerSrc) return;
-		if (IPC_SENDER_GUARD_RE.test(handlerSrc)) return;
-
-		// Follow 1-hop same-file function calls like `helper(event, ...)`
-		const calledIdents = [...handlerSrc.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g)].map((m) => m[1]);
-		if (calledIdents.some((fn) => fileFns.has(fn) && IPC_SENDER_GUARD_RE.test(fileFns.get(fn)))) return;
+		if (hasSenderGuardWithHops(handlerSrc, fileFns)) return;
 
 		report(
 			'desktop-ipc-sender',
@@ -927,7 +987,7 @@ function checkGleamForkTestSleep(file, source, lines, ignored, report) {
  * @param {string} relFile Path relative to repository root (e.g. `fluxer_api/src/...`)
  * @param {string} source
  * @param {'all' | Set<number>} [lines]
- * @param {{rules?: Set<string>; reviewed?: import('./fork-lint-reviewed.mjs').ReviewedLintCatalog | null | undefined}} [options]
+ * @param {{rules?: Set<string>; reviewed?: import('./fork-lint-reviewed.mjs').ReviewedLintCatalog | null | undefined; forkGuardedIpcChannels?: Set<string>}} [options]
  * @returns {Array<string>}
  */
 export function lintBackendDesktopFile(relFile, source, lines = 'all', options = {}) {
@@ -1005,7 +1065,7 @@ export function lintBackendDesktopFile(relFile, source, lines = 'all', options =
 		}
 		if (file.startsWith('fluxer_desktop/src/main/')) {
 			if (activeRules.has('desktop-ipc-sender')) {
-				checkDesktopIpcSender(source, ast, lines, ignored, report);
+				checkDesktopIpcSender(source, ast, lines, ignored, report, options.forkGuardedIpcChannels);
 			}
 			if (activeRules.has('desktop-window-safety')) {
 				checkDesktopWindowSafety(file, source, ast, lines, ignored, report);
@@ -1058,23 +1118,26 @@ function main() {
 		(arg, i, args) => !arg.startsWith('--') && args[i - 1] !== '--upstream' && args[i - 1] !== '--rule',
 	);
 	const catalog = loadReviewedCatalogOrExit(reviewedPath, {includeReviewed, checkReviewed});
+	const forkGuardedIpcChannels = loadForkGuardedDesktopIpcChannels();
 
 	let targets;
 	if (all) {
+		const scopes = [
+			'fluxer_api/src',
+			'packages/schema/src/domains',
+			'fluxer_desktop/src',
+			'fluxer_gateway/test',
+			'*.rs',
+		];
 		const files =
 			given.length > 0
 				? given.map(normalizeCliPath)
-				: git(
-						'ls-files',
-						'--',
-						'fluxer_api/src',
-						'packages/schema/src/domains',
-						'fluxer_desktop/src',
-						'fluxer_gateway/test',
-						'*.rs',
-					)
-						.split('\n')
-						.filter(Boolean);
+				: [
+						...new Set([
+							...git('ls-files', '--', ...scopes).split('\n'),
+							...git('ls-files', '--others', '--exclude-standard', '--', ...scopes).split('\n'),
+						]),
+					].filter(Boolean);
 		targets = new Map(files.map((file) => [file, 'all']));
 	} else {
 		const changes = forkChanges(upstream);
@@ -1088,7 +1151,13 @@ function main() {
 	for (const [file, lines] of [...targets].sort(([a], [b]) => a.localeCompare(b))) {
 		const abs = path.join(REPO_ROOT, file);
 		if (fs.existsSync(abs)) {
-			problems.push(...lintBackendDesktopFile(file, fs.readFileSync(abs, 'utf8'), lines, {rules, reviewed: catalog}));
+			problems.push(
+				...lintBackendDesktopFile(file, fs.readFileSync(abs, 'utf8'), lines, {
+					rules,
+					reviewed: catalog,
+					forkGuardedIpcChannels,
+				}),
+			);
 		}
 	}
 

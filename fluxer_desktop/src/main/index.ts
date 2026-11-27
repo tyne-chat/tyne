@@ -136,6 +136,7 @@ import log from 'electron-log';
 
 // Fork imports.
 
+import {installForkPrivilegedIpcGuard} from '@electron/main/ForkPrivilegedIpcGuard';
 import {armForkShellUpdate} from '@electron/main/ForkShellUpdate';
 import {isForkExtraAppWindowContents, recordAppWindowRoute} from '@electron/main/Window';
 
@@ -438,6 +439,8 @@ export function prepareMainProcess(): boolean {
 }
 
 export function initializeMainWindowStartup(): void {
+	// Fork: wrap mutating and stateful upstream IPC handlers before main-app registration.
+	installForkPrivilegedIpcGuard();
 	ipcMain.on(DESKTOP_CAPABILITY_MANIFEST_CHANNEL, (event) => {
 		void syncAnswersReady
 			.then(() => {

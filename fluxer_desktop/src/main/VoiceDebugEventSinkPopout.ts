@@ -460,3 +460,8 @@ export function registerVoiceDebugEventSinkPopoutIpcHandlers(): void {
 		setVoiceDebugEventSinkStatsHtml(statsHtml);
 	});
 }
+
+// Fork: allow the debug popout's own top-level document to pin/unpin itself without trusting foreign frames.
+export function isVoiceDebugEventSinkPopoutContents(contents: Electron.WebContents): boolean {
+	return getEventSinkWindow()?.webContents === contents;
+}

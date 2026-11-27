@@ -2,14 +2,6 @@
 	"version": 1,
 	"entries": [
 		{
-			"linter": "backend-desktop",
-			"rule": "desktop-ipc-sender",
-			"file": "fluxer_desktop/src/main/index.ts",
-			"enclosing": "initializeMainWindowStartup",
-			"target": "DESKTOP_LAST_ROUTE_CHANNEL",
-			"reason": "Checked in source (tyne-chat/tyne#947): upstream IPC handler carrying one-line fork recordAppWindowRoute hook; tracked under the upstream desktop IPC sender audit without modifying upstream lines."
-		},
-		{
 			"linter": "web-safety",
 			"rule": "mobx-stale-memo",
 			"file": "fluxer_app/src/features/channel/components/emoji_picker/hooks/useEmojiCategories.ts",
