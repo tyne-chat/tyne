@@ -2,7 +2,6 @@
 
 import {
 	emptyMap,
-	getEmojiKey,
 	mapToReactions,
 	type ReactionMap,
 	transitionReactionMap,
@@ -30,7 +29,10 @@ const applyRemove = (
 	isCurrentUser: boolean,
 	personaId?: string | null,
 ) => transitionReactionMap(map, {type: 'reaction.remove', emoji, userId, isCurrentUser, personaId});
-const getRecord = (map: ReactionMap, emoji: ReactionEmoji) => map.get(getEmojiKey(emoji));
+// The state machine keys its map privately (upstream stopped exporting getEmojiKey), so find the record by its emoji.
+const sameEmoji = (a: ReactionEmoji, b: ReactionEmoji) => a.name === b.name && (a.id ?? null) === (b.id ?? null);
+const getRecord = (map: ReactionMap, emoji: ReactionEmoji) =>
+	[...map.values()].find((record) => sameEmoji(record.emoji, emoji));
 const hydrate = (map: ReactionMap, reactions: ReadonlyArray<MessageReaction>, currentUserId?: string | null) =>
 	transitionReactionMap(map, {type: 'reaction.hydrate', reactions, currentUserId}, currentUserId);
 
