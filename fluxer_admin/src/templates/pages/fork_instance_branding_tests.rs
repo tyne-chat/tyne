@@ -4,33 +4,17 @@
 
 use super::*;
 use crate::api::types::AppBrandingConfigResponse;
-use crate::config::ProxyConfig;
+use fluxer_common::config::EnvMap;
 
-/// The admin's configuration as the form needs it: served under `/admin`, nothing else set.
+/// The admin's configuration as the form needs it: served under `/admin`, the rest at upstream's
+/// defaults. Built through `AdminConfig::from_env`, as upstream's own config tests build it, so a
+/// field upstream adds to the config does not break this test (tyne-chat/tyne#959).
 fn admin_config() -> AdminConfig {
-    AdminConfig {
-        host: String::new(),
-        port: 0,
-        secret_key_base: String::new(),
-        base_path: "/admin".to_owned(),
-        api_endpoint: String::new(),
-        api_public_endpoint: String::new(),
-        media_endpoint: String::new(),
-        static_cdn_endpoint: String::new(),
-        reports_bucket_origins: Vec::new(),
-        admin_endpoint: String::new(),
-        web_app_endpoint: String::new(),
-        oauth_client_id: String::new(),
-        oauth_client_secret: String::new(),
-        oauth_redirect_uri: String::new(),
-        build_version: String::new(),
-        self_hosted: false,
-        proxy: ProxyConfig {
-            trust_client_ip_header: false,
-            client_ip_header_name: String::new(),
-        },
-        sso: None,
-    }
+    AdminConfig::from_env(&EnvMap::from_pairs([
+        ("FLUXER_ADMIN_SECRET_KEY_BASE", "secret"),
+        ("FLUXER_ADMIN_BASE_PATH", "/admin"),
+    ]))
+    .expect("upstream's defaults and these two settings make a valid admin configuration")
 }
 
 fn branding_form(desktop_app_prompt_enabled: bool) -> String {
