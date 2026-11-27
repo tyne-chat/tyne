@@ -70,6 +70,112 @@
 			"symbol": "Users.getCurrentUser",
 			"target": "useMemo",
 			"reason": "Checked in source (tyne-chat/tyne#948): developer component-gallery static markdown preview fixture with fakeChannel and fixed tabOpenedAt timestamp."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/app/components/setup/SetupWizardWelcomeRotation.ts",
+			"target": "*",
+			"reason": "Checked in source (tyne-chat/tyne#953): intentional multi-language Welcome rotation table across 37 locales."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/voice/diagnostics/VoiceDebugStatsHtml.tsx",
+			"target": "*",
+			"reason": "Checked in source (tyne-chat/tyne#953): developer-only WebRTC/voice debug diagnostics HTML export, intentionally untranslated."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/user/components/modals/tabs/component_gallery_tab/index.tsx",
+			"target": "*",
+			"reason": "Checked in source (tyne-chat/tyne#953): developer-only UI component gallery preview fixture, intentionally untranslated."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/user/components/modals/tabs/component_gallery_tab/IndicatorsTab.tsx",
+			"target": "*",
+			"reason": "Checked in source (tyne-chat/tyne#953): developer-only UI component gallery preview fixture, intentionally untranslated."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/user/components/modals/tabs/component_gallery_tab/MarkdownTab.tsx",
+			"target": "*",
+			"reason": "Checked in source (tyne-chat/tyne#953): developer-only UI component gallery preview fixture, intentionally untranslated."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/devtools/utils/CommandUtils.ts",
+			"enclosing": "executeCommand",
+			"target": "createSystemMessage()",
+			"reason": "Checked in source (tyne-chat/tyne#953): untouched upstream devtools slash-command fallback system message (fork_locales holds fork-only strings)."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/voice/engine/v2/VoiceEngineV2AppControllerHost.ts",
+			"enclosing": "VoiceEngineV2AppControllerHost.runAndWait",
+			"target": "variable description",
+			"symbol": "voice engine v2 command",
+			"reason": "Checked in source (tyne-chat/tyne#953): internal voice engine v2 command timeout/telemetry label, never shown in UI."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/channel/components/embeds/AltTextBadge.tsx",
+			"enclosing": "AltTextBadge",
+			"target": "JSX text",
+			"symbol": "ALT",
+			"reason": "Checked in source (tyne-chat/tyne#953): compact visual ALT acronym badge paired with translated aria-label and AltTextTooltip."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/channel/components/embeds/attachments/AttachmentGridItem.tsx",
+			"enclosing": "AttachmentGridItem",
+			"target": "JSX text",
+			"symbol": "GIF",
+			"reason": "Checked in source (tyne-chat/tyne#953): standard uppercase media format acronym badge (GIF)."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/channel/components/embeds/media/GifIndicator.tsx",
+			"enclosing": "GifIndicator",
+			"target": "JSX text",
+			"symbol": "GIF",
+			"reason": "Checked in source (tyne-chat/tyne#953): standard uppercase media format acronym badge (GIF)."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/channel/components/MobileMemesPicker.tsx",
+			"enclosing": "GifIndicator",
+			"target": "JSX text",
+			"symbol": "GIF",
+			"reason": "Checked in source (tyne-chat/tyne#953): standard uppercase media format acronym badge (GIF)."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/channel/components/pickers/memes/MemeGridItem.tsx",
+			"enclosing": "GifIndicator",
+			"target": "JSX text",
+			"symbol": "GIF",
+			"reason": "Checked in source (tyne-chat/tyne#953): standard uppercase media format acronym badge (GIF)."
+		},
+		{
+			"linter": "string",
+			"rule": "string-lint",
+			"file": "fluxer_app/src/features/theme_settings/components/TokenRow.tsx",
+			"enclosing": "TextControl",
+			"target": "JSX text",
+			"symbol": "Aa",
+			"reason": "Checked in source (tyne-chat/tyne#953): aria-hidden typographic Aa font-family specimen glyph."
 		}
 	]
 }

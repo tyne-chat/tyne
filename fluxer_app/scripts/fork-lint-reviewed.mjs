@@ -202,6 +202,9 @@ export class ReviewedLintEntry {
 		const code = optionalNonEmptyString(raw, 'code', index);
 
 		const allowedRules = VALID_RULE_NAMES[linter];
+		if (target === '*' && linter !== 'string') {
+			throw new Error(`Entry #${index} (\`${file}\`): wildcard \`target: "*"\` is only supported for \`string\`.`);
+		}
 		if (MULTI_RULE_LINTERS.has(linter)) {
 			if (!rule || !allowedRules.has(rule)) {
 				throw new Error(
@@ -260,7 +263,7 @@ export class ReviewedLintEntry {
 				return false;
 			}
 		}
-		if (this.target !== undefined && (candidate.target ?? '') !== this.target) {
+		if (this.target !== undefined && this.target !== '*' && (candidate.target ?? '') !== this.target) {
 			return false;
 		}
 		if (this.code !== undefined && !candidate.sourceLine.includes(this.code)) {
@@ -481,4 +484,46 @@ export function finishReviewedCheckOrNotes({
 			);
 		}
 	}
+}
+
+/**
+ * Evaluates reviewed catalog match and staleness stats across multiple linters without exiting.
+ * @param {ReviewedLintCatalog | null} catalog
+ * @param {Iterable<string>} linters
+ * @param {Map<string, Set<string>> | null} [rulesByLinter]
+ * @returns {{
+ *   byLinter: Map<string, {entryCount: number; suppressed: number; staleEntries: Array<ReviewedLintEntry>}>;
+ *   totalSuppressed: number;
+ *   allStaleEntries: Array<ReviewedLintEntry>;
+ * }}
+ */
+export function evaluateReviewedForLinters(catalog, linters, rulesByLinter = null) {
+	const byLinter = new Map();
+	const allStaleEntries = [];
+	let totalSuppressed = 0;
+
+	if (!catalog) {
+		return {byLinter, totalSuppressed, allStaleEntries};
+	}
+
+	for (const linter of linters) {
+		const rules = rulesByLinter?.get(linter) ?? null;
+		const entryCount = catalog.entryCountFor(linter, rules);
+		const suppressed = catalog.suppressedCount(linter);
+		const staleEntries = catalog.unmatchedEntries(linter, rules);
+		byLinter.set(linter, {entryCount, suppressed, staleEntries});
+		totalSuppressed += suppressed;
+		allStaleEntries.push(...staleEntries);
+	}
+
+	return {byLinter, totalSuppressed, allStaleEntries};
+}
+
+/**
+ * Resolves whether the catalog file for `reviewedPath` exists on disk.
+ * @param {string} reviewedPath
+ * @returns {boolean}
+ */
+export function reviewedCatalogExists(reviewedPath = DEFAULT_REVIEWED_LINT_PATH) {
+	return resolveCatalogPath(reviewedPath).exists;
 }

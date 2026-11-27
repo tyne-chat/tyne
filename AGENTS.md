@@ -150,13 +150,14 @@ or run `lingui:extract`, `i18n:auto` or `i18n:refresh`.
   `fork_locales/README.md`, matching mobile wording), and run `pnpm --filter fluxer_app lingui:compile`
   (needed manually for dev-server reloads).
 - `node scripts/fork-i18n.mjs check --upstream upstream/main` and
-  `node scripts/fork-string-lint.mjs --upstream upstream/main` must pass (literal exceptions need
-  `// i18n-ignore: <reason>`; also inspect cross-file string variables manually).
+  `node scripts/fork-lint.mjs --linter string --upstream upstream/main` must pass (literal exceptions
+  need `// i18n-ignore: <reason>`; also inspect cross-file string variables manually).
 
 ## Sizes in the web app
 
 Use `rem` (16px = 1rem, `remFromPx(n)`, `var(--radius-full)`), not `px`, which ignores desktop zoom
-(`tyne-chat/tyne#636`). Enforced by `fork-px-lint.mjs`; upstream `px` exceptions are in `CHECKS.md`.
+(`tyne-chat/tyne#636`). Enforced by `fork-lint.mjs` (`--linter px`); upstream `px` exceptions are
+in `CHECKS.md`.
 
 ## Network calls: count the requests
 
@@ -164,7 +165,7 @@ Upstream's API allows 50 req/s per user across devices (`getGlobalRateLimit` in
 `RateLimitMiddleware.ts`; 1,200 with `HIGH_GLOBAL_RATE_LIMIT`; `exemptFromGlobal` excluded). Global
 429s fail all app requests; the dev stack disables them (`FLUXER_DISABLE_RATE_LIMITS`), so count
 requests in tests. Before adding a network call inside per-item/loop/render/build/shared-store code
-(`fork-render-fetch-lint.mjs` also checks render/effect fetches), state in the change description:
+(`fork-lint.mjs --linter render-fetch` also checks render/effect fetches), state in the change description:
 
 1. Max requests for one user action (~200 channels / hundreds of messages; share overlapping calls).
 2. Failure handling (`429`/`401`/offline): wait/cool down or give up until state changes — never retry per render.
@@ -178,13 +179,14 @@ Add a request-counting test covering missing data and failing requests (`tyne-ch
   requests per action and failure behaviour (including error non-looping).
 - **Turn bug classes into AST lint rules, as routine as regression tests.** When fixing a bug,
   reviewing a failure or auditing code, check if the bug class has an AST-detectable shape (or
-  propose one on the issue). Implement or tighten a rule in the matching AST linter
-  (`fluxer_app/scripts/fork-*-lint.mjs`; mobile `tool/fork_*_lint.dart`): verify it fires on the
-  real unfixed code (`git show <fix>^:<file>` for past bugs) and clears with the fix, add positive
-  and negative unit tests, sweep `--all` (proving real siblings with failing-first regression tests,
-  recording verified upstream semantic exceptions by AST symbol in `fork-lint-reviewed.json` with
-  `--check-reviewed`, and tightening precision when suppressions share a safe structural pattern),
-  and condense any prose rule it replaces here to one line.
+  propose one on the issue). Add or tighten a pass in the unified single-parse pipeline
+  (`fluxer_app/scripts/fork-lint.mjs` + `scripts/fork-lint/`; mobile `tool/fork_lint.dart` +
+  `tool/fork_lint/`) reusing its shared IRs: verify it fires on the real unfixed code
+  (`git show <fix>^:<file>` for past bugs) and clears with the fix, add positive and negative unit
+  tests, sweep `--all` (proving real siblings with failing-first regression tests, recording verified
+  upstream semantic exceptions by AST symbol in `fork-lint-reviewed.json` with `--check-reviewed`,
+  and tightening precision when suppressions share a safe structural pattern), and condense any
+  prose rule it replaces here to one line.
 - **Verify facts before hardening or reporting:** separate a confirmed fix from unverified extra
   fallbacks, label unverified theories explicitly, never blame the environment before reproducing
   through the failing wrapper/orchestrator (`tyne-chat/tyne#194`), and for user-specific bugs

@@ -138,4 +138,47 @@ describe('fork-string-lint', () => {
 			),
 		).toEqual([]);
 	});
+
+	it('exempts HTTP statusText, constant identity maps, technical tokens, deadline/publication metadata, and local log-only vars', () => {
+		expect(
+			lint(
+				[
+					"const resp = {status: 429, statusText: 'Too Many Requests'};",
+					"const NodeType = {Text: 'Text', Heading: 'Heading'};",
+					'const mentions = <><span>@everyone</span><span>@here</span></>;',
+					'const emailInput = <input placeholder="username.bsky.social" />;',
+					'const hostInput = <input placeholder="example.com" />;',
+					`const urlInput = <input placeholder={\`\${origin}/channels/...\`} />;`,
+					"runWithResponseDeadline({timeoutMilliseconds: 1000, description: 'Load model', signal: null, operation: () => fetch('/x')});",
+					'function buildDenied(kind: string) {',
+					"\tconst label = kind === 'camera' ? 'Camera' : 'Microphone';",
+					`\treturn new Error(\`\${label} permission denied\`);`,
+					'}',
+					'function logSwitch(kind: string) {',
+					"\tconst label = kind === 'display' ? 'screen share' : 'device share';",
+					`\tlogger.debug(\`Cancelled \${label} switch\`);`,
+					'}',
+				].join('\n'),
+			),
+		).toEqual([]);
+	});
+
+	it('still flags non-enum object literals, local UI vars, and uppercase UI badges', () => {
+		expect(
+			lint(
+				[
+					"const card = {type: 'Text', children: 'Heading'};",
+					'function Banner() {',
+					"\tconst label = 'Camera';",
+					'\treturn <span>{label}</span>;',
+					'}',
+					'const badge = <span>NEW</span>;',
+				].join('\n'),
+			),
+		).toEqual([
+			'src/Example.tsx:1:39: key children: "Heading"',
+			'src/Example.tsx:3:16: variable label: "Camera"',
+			'src/Example.tsx:6:21: JSX text: "NEW"',
+		]);
+	});
 });

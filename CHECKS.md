@@ -26,9 +26,10 @@ pnpm --filter fluxer_api test
 pnpm --filter fluxer_api typecheck
 pnpm --filter fluxer_desktop typecheck && pnpm --filter fluxer_desktop test
 pnpm --filter fluxer_app test
-# Fork catalogues, and no hard-coded user-facing strings in the fork's code (fork-string-lint.mjs).
-(cd fluxer_app && node scripts/fork-i18n.mjs check --upstream upstream/main && node scripts/fork-string-lint.mjs --upstream upstream/main) && pnpm --filter fluxer_app lingui:compile
-# Sizes as upstream writes them (fork-px-lint.mjs). The desktop app zooms by the root font size
+# Fork catalogues (`fork-i18n.mjs`) and unified single-parse AST/IR safety lints (`fork-lint.mjs`:
+# string, px, render-fetch, web-safety, backend-desktop over shared TsModuleIR/CssStylesheetIR/
+# MaskedBracedIR; legacy `fork-*-lint.mjs` wrappers delegate to the same pipeline).
+# Sizes as upstream writes them (`px` pass): the desktop app zooms by the root font size
 # (--custom-zoom): rem follows it, px does not. So rem throughout: 1px is 0.0625rem, shadows, outlines
 # and radii too, a pill var(--radius-full), remFromPx(n) in style objects. px only where upstream keeps
 # it (0px, @media queries, Floating UI options, IntersectionObserver margins) or a size is about device
@@ -37,12 +38,12 @@ pnpm --filter fluxer_app test
 # @media, matchMedia and innerWidth never see the zoom: a layout that must follow it uses an @container
 # query in rem or scales its threshold with getAppRemScale(). A size computed in script is in screen px:
 # never cap a box in one unit around content capped in the other. Check UI changes at 150% zoom.
-# Structural safety checks across the fork's lines (web MobX/effect/storage/zoom, render fetches,
-# API/schema/Cassandra/desktop IPC/Rust/Gleam rules; fork-px-lint covers CSS/style px units).
 # Reviewed upstream `--all` exceptions live in `fluxer_app/scripts/fork-lint-reviewed.json`
-# (`--check-reviewed`, `--include-reviewed`), never inline in untouched upstream files. Changes to a
-# `fork-*-lint.mjs` script must also pass `--all`, `--check-reviewed`, and its Vitest tests.
-(cd fluxer_app && node scripts/fork-px-lint.mjs --upstream upstream/main && node scripts/fork-render-fetch-lint.mjs --upstream upstream/main && node scripts/fork-web-safety-lint.mjs --upstream upstream/main && node scripts/fork-backend-desktop-lint.mjs --upstream upstream/main)
+# (`--check-reviewed`, `--include-reviewed`), never inline in untouched upstream files. Changes under
+# `fluxer_app/scripts/fork-lint*` must also pass
+# `node scripts/fork-lint.mjs --linter render-fetch,web-safety,backend-desktop,string --all --check-reviewed`
+# and their Vitest tests.
+(cd fluxer_app && node scripts/fork-i18n.mjs check --upstream upstream/main && node scripts/fork-lint.mjs --upstream upstream/main) && pnpm --filter fluxer_app lingui:compile
 # Upstream's lint job (Biome, ESLint with no warnings, data-flx attributes), plus Biome warnings on
 # files the fork added, committed or not.
 pnpm exec biome ci . && pnpm exec eslint . --max-warnings 0 && pnpm --filter fluxer_app theming:data-flx:check && pnpm exec biome ci --error-on-warnings --files-ignore-unknown=true --no-errors-on-unmatched $(git diff --name-only --no-renames --diff-filter=A $(git merge-base upstream/main HEAD)) $(git ls-files --others --exclude-standard)
