@@ -161,7 +161,32 @@ fi
 # ------------------------------------------------------------------------------
 echo "📦 Ensuring E2E runner workspace dependencies are installed..."
 cd "$E2E_DIR"
-CI=true pnpm install --frozen-lockfile
+if command -v pnpm >/dev/null 2>&1; then
+  CI=true pnpm install --frozen-lockfile
+elif docker image inspect fluxer-dev-workspace >/dev/null 2>&1; then
+  echo "  ℹ️  Host 'pnpm' not on PATH; installing via fluxer-dev-workspace container..."
+  PNPM_STORE_DIR="/tmp/pnpm-store"
+  PNPM_STORE_ARGS=()
+  if docker volume inspect fluxer-dev_pnpm-store >/dev/null 2>&1; then
+    PNPM_STORE_DIR="/pnpm-store"
+    PNPM_STORE_ARGS=(-v "fluxer-dev_pnpm-store:/pnpm-store")
+  fi
+  docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -e CI=true \
+    -e "pnpm_config_store_dir=$PNPM_STORE_DIR" \
+    "${PNPM_STORE_ARGS[@]}" \
+    -v "$E2E_DIR:/e2e" \
+    -w /e2e \
+    fluxer-dev-workspace \
+    pnpm install --frozen-lockfile --store-dir="$PNPM_STORE_DIR"
+elif command -v npx >/dev/null 2>&1; then
+  echo "  ℹ️  Host 'pnpm' not on PATH; falling back to npx pnpm@11.27.0..."
+  CI=true npx --yes pnpm@11.27.0 install --frozen-lockfile
+else
+  echo "❌ 'pnpm' is not on PATH and neither 'fluxer-dev-workspace' nor 'npx' is available."
+  exit 1
+fi
 
 # ------------------------------------------------------------------------------
 # 3. Execute E2E Suite via run-all.sh
