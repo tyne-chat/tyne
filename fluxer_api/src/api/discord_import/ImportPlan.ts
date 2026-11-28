@@ -64,6 +64,7 @@ import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
 import {applyEmojiFates, type PlanEmojiFate} from '@app/api/discord_import/ImportEmojiFates';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
 import {moveEmojiRow, moveStickerRow} from '@app/api/discord_import/ImportExpressionMoves';
+import {fitFilename} from '@app/api/discord_import/ImportFilenames';
 import {canonical, changedSince, mergeFields, mergeSets, same} from '@app/api/discord_import/ImportMerge';
 import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
 import {createNewDm, markNewDmRead, type PlanNewDm} from '@app/api/discord_import/ImportNewDm';
@@ -513,7 +514,7 @@ function rowFields(row: MessageRow): MessageFields {
 }
 
 function storedFilename(a: PlanAttachment): string {
-	return normalizeFilename(a.filename) || 'file';
+	return fitFilename(normalizeFilename(a.filename) || 'file');
 }
 
 function attachmentKey(channelId: ChannelID, a: PlanAttachment): string {
