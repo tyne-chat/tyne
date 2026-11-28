@@ -68,6 +68,7 @@ import {fitFilename} from '@app/api/discord_import/ImportFilenames';
 import {canonical, changedSince, mergeFields, mergeSets, same} from '@app/api/discord_import/ImportMerge';
 import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
 import {createNewDm, markNewDmRead, type PlanNewDm} from '@app/api/discord_import/ImportNewDm';
+import {PersonaTagHolders} from '@app/api/discord_import/ImportPersonaTags';
 import {applyPictures, type PicturesResult, type PlanPicture} from '@app/api/discord_import/ImportPictures';
 import {ensureActiveGuildTainted} from '@app/api/experiment/ChannelThreadsGate';
 import {mediaProxyMetadataPolicy} from '@app/api/infrastructure/IMediaService';
@@ -835,6 +836,24 @@ async function main(): Promise<void> {
 
 	const personaTags = (tags: PlanPersona['tags']): Array<PersonaTag> =>
 		tags.map((t) => ({...(t.prefix ? {prefix: t.prefix} : {}), ...(t.suffix ? {suffix: t.suffix} : {})}));
+	// No tag on two live personas of one owner (tyne-chat/tyne#962): the one that has it keeps it.
+	const tagHolders = new PersonaTagHolders(async (userId) =>
+		(await deps.personaRepository.findByUserId(id<UserID>(userId))).map((persona) => ({
+			id: persona.id.toString(),
+			tags: persona.personaTags,
+			deleted: persona.isDeleted,
+		})),
+	);
+	const freeTags = async (p: PlanPersona, tags: Array<PersonaTag>): Promise<Array<PersonaTag>> => {
+		const {kept, dropped} = await tagHolders.free(p.user_id, p.persona_id, tags);
+		if (dropped.length) {
+			keep('persona tag another persona holds', dropped.length);
+			console.log(
+				`${dryRun ? 'would leave' : 'left'} ${dropped.map((t) => `${t.prefix ?? ''}text${t.suffix ?? ''}`).join(', ')} off ${p.name}: another persona of the owner holds it`,
+			);
+		}
+		return kept;
+	};
 	for (const p of plan.personas) {
 		const userId = id<UserID>(p.user_id);
 		const personaId = id<PersonaID>(p.persona_id);
@@ -846,13 +865,16 @@ async function main(): Promise<void> {
 				continue;
 			}
 			const avatarHash = p.avatar ? await uploadAvatar(userId, p.avatar) : null;
+			// A deleted one keeps its tags: it gives up any that are taken if it is ever restored.
+			const tags = p.deleted ? personaTags(p.tags) : await freeTags(p, personaTags(p.tags));
+			await tagHolders.record(p.user_id, p.persona_id, tags, p.deleted);
 			if (!dryRun) {
 				await deps.personaRepository.create({
 					user_id: userId,
 					persona_id: personaId,
 					name: p.name,
 					avatar_hash: avatarHash,
-					persona_tags: personaTags(p.tags),
+					persona_tags: tags,
 					visibility: 'unlisted',
 				});
 				if (p.deleted) await deps.personaRepository.delete(userId, personaId);
@@ -882,6 +904,13 @@ async function main(): Promise<void> {
 				ledger.hashes.persona[p.persona_id] = params.avatar_hash;
 			} else keep('persona avatar');
 		}
+		// Live once written (restored, or live and given new tags): no tag another live persona holds.
+		const live = merge.patch.deleted === false || (!found.isDeleted && merge.patch.deleted !== true);
+		if (live && (params.persona_tags !== undefined || merge.patch.deleted === false)) {
+			const tags = await freeTags(p, params.persona_tags ?? found.personaTags);
+			if (params.persona_tags !== undefined || tags.length !== found.personaTags.length) params.persona_tags = tags;
+		}
+		await tagHolders.record(p.user_id, p.persona_id, params.persona_tags ?? found.personaTags, !live);
 		if (!Object.keys(params).length && merge.patch.deleted === undefined) continue;
 		if (!dryRun) {
 			if (merge.patch.deleted === false) {
