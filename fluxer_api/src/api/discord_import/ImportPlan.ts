@@ -64,7 +64,7 @@ import {EMPTY_USER_ROW, type UserRow} from '@app/api/database/types/UserTypes';
 import {applyEmojiFates, type PlanEmojiFate} from '@app/api/discord_import/ImportEmojiFates';
 import {sendExpressionLists} from '@app/api/discord_import/ImportExpressionLists';
 import {moveEmojiRow, moveStickerRow} from '@app/api/discord_import/ImportExpressionMoves';
-import {canonical, changedSince, mergeFields, mergeSets} from '@app/api/discord_import/ImportMerge';
+import {canonical, changedSince, mergeFields, mergeSets, same} from '@app/api/discord_import/ImportMerge';
 import {createNewChannel, type PlanNewChannel} from '@app/api/discord_import/ImportNewChannel';
 import {createNewDm, markNewDmRead, type PlanNewDm} from '@app/api/discord_import/ImportNewDm';
 import {applyPictures, type PicturesResult, type PlanPicture} from '@app/api/discord_import/ImportPictures';
@@ -296,6 +296,8 @@ interface Ledger {
 	reactions: number;
 	storage_keys: Array<string>;
 	skipped_existing: number;
+	/** Messages an earlier import wrote that the plan has exactly as then: not read back from Tyne, nothing to do. */
+	unchanged?: number;
 	copied_media: number;
 	/** Objects an earlier import wrote that this run brought up to date. */
 	updated: Record<Kind, Array<string>>;
@@ -708,6 +710,7 @@ async function main(): Promise<void> {
 		reactions: 0,
 		storage_keys: [],
 		skipped_existing: 0,
+		unchanged: 0,
 		copied_media: 0,
 		updated: {message: [], placeholder: [], persona: [], emoji: [], sticker: []},
 		removed: {message: []},
@@ -1264,8 +1267,16 @@ async function main(): Promise<void> {
 			save();
 			console.log(`${n} of ${plan.messages.length} messages`);
 		}
-		const row = await fetchMessage(bucket, messageId);
 		const prev = previous.messages?.[m.message_id];
+		// Planned exactly as an earlier import wrote it: the three-way comparison below would find nothing to bring up
+		// to date (every field, file, reaction, forward and command as the base) and keep whatever people changed on
+		// Tyne, so it is not read back from Tyne at all. A re-import then reads and writes only what changed
+		// (tyne-chat/tyne#608: one decision changed in a 147,565-message channel).
+		if (prev && same(prev, m)) {
+			ledger.unchanged = (ledger.unchanged ?? 0) + 1;
+			continue;
+		}
+		const row = await fetchMessage(bucket, messageId);
 		if (!row && prev) {
 			keep('message deleted on Tyne');
 			continue;
@@ -1507,7 +1518,7 @@ async function main(): Promise<void> {
 			`${count('placeholder')} placeholders, ${count('persona')} personas, ${count('emoji')} emoji, ` +
 			`${count('sticker')} stickers; removed ${ledger.removed.message.length} messages; ` +
 			`emoji renamed, moved or archived ${fates.done.length}, copied ${fates.copied.length}; ` +
-			`skipped ${ledger.skipped_existing} already there; kept from Tyne: ${JSON.stringify(ledger.kept)}`,
+			`skipped ${ledger.skipped_existing} already there, ${ledger.unchanged ?? 0} messages unchanged; kept from Tyne: ${JSON.stringify(ledger.kept)}`,
 	);
 	await jetStream.drain();
 	process.exit(0);

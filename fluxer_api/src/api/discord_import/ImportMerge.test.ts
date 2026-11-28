@@ -87,3 +87,48 @@ describe('mergeSets', () => {
 		expect(mergeSets(new Set(), new Set(['c']), new Set(['c']))).toEqual({add: [], remove: []});
 	});
 });
+
+// A re-import skips a planned message that is exactly what an earlier import wrote (ImportPlan.ts): the review tool
+// records it with its keys sorted, and a plan made again lists the same message in its own order.
+describe('an unchanged planned message', () => {
+	const planned = () => ({
+		discord_id: '1300000000000000001',
+		message_id: '1235168840912990210',
+		type: 0,
+		author_id: '6001',
+		persona_id: null,
+		content: 'hello <:wave:1235168840912990209>',
+		mention_user_ids: [],
+		mention_role_ids: [],
+		attachments: [{attachment_id: '9', path: 'lounge_Files/a.png', filename: 'a.png', size: 10}],
+		embeds: [],
+		reactions: [{emoji: {id: '1235168840912990209', name: 'wave'}, users: [{user_id: '6002', persona_id: null}]}],
+		reference: null,
+		command: null,
+	});
+	// As the review tool stores it (json.dumps with sort_keys), read back.
+	const sortKeys = (v: unknown): unknown => {
+		if (Array.isArray(v)) return v.map(sortKeys);
+		if (!v || typeof v !== 'object') return v;
+		const out: Record<string, unknown> = {};
+		for (const k of Object.keys(v).sort()) out[k] = sortKeys((v as Record<string, unknown>)[k]);
+		return out;
+	};
+	const recorded = JSON.parse(JSON.stringify(sortKeys(planned())));
+
+	it('is the same as its record, whatever the order of its keys', () => {
+		expect(Object.keys(recorded)).not.toEqual(Object.keys(planned()));
+		expect(same(recorded, planned())).toBe(true);
+	});
+
+	it('is not the same once anything in it changed', () => {
+		expect(same(recorded, {...planned(), content: 'hello :wave:'})).toBe(false);
+		expect(same(recorded, {...planned(), persona_id: '7001'})).toBe(false);
+		expect(
+			same(recorded, {...planned(), attachments: [{...planned().attachments[0], path: 'lounge_Files/b.png'}]}),
+		).toBe(false);
+		const reacted = planned();
+		reacted.reactions[0].users.push({user_id: '6001', persona_id: null});
+		expect(same(recorded, reacted)).toBe(false);
+	});
+});
