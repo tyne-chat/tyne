@@ -79,6 +79,10 @@ import {observer} from 'mobx-react-lite';
 import type React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 
+// Fork imports.
+
+import {useForkDmThreadLink} from '@app/features/threads/fork/ForkDmThreadLinks';
+
 const LINK_CONTENT_OPTION_OVERRIDES: Partial<MarkdownRenderOptions> = {disableEmojiInteractions: true};
 
 const MESSAGE_LINK_DESCRIPTOR = msg({
@@ -753,6 +757,8 @@ export const LinkRenderer = observer(function LinkRenderer({
 		if (!uncachedGuildId || !uncachedChannelId) return;
 		void loadThreadsForMessages([{channel_id: uncachedChannelId, guild_id: uncachedGuildId}]);
 	}, [uncachedGuildId, uncachedChannelId]);
+	// Fork: an @me link may be to a DM thread the app has not loaded (tyne-chat/tyne#963).
+	useForkDmThreadLink(jumpTarget, jumpChannel);
 	const settingsTarget = isAppProtocolUrl(url) ? parseUserSettingsDeepLink(url) : null;
 	const appPage = settingsTarget ? null : parseAppPageLink(url);
 	const isInlineReplyContext = isRestrictedInlineContext(options.context);
